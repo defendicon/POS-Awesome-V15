@@ -20,3 +20,10 @@ bench_start.log
 frontend/build_log_*.txt
 dist-electron/
 nul
+.env
+.env.local
+.env.*.local
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+frontend/playwright/.auth/

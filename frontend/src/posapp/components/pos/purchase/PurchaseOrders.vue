@@ -18,6 +18,7 @@
 							color="white"
 							@click="resetForm"
 							:title="__('Clear All')"
+							:aria-label="__('Clear all purchase order items')"
 						></v-btn>
 					</v-card-title>
 

@@ -26,11 +26,20 @@
 			hide-default-footer
 			:single-expand="true"
 			:header-props="dynamicHeaderProps"
-			:no-data-text="__('No items in cart')"
 			@update:expanded="handleExpandedUpdate"
 			:search="itemSearch"
 			:custom-filter="customItemFilter"
 		>
+			<template #no-data>
+				<div class="posa-cart-empty-state">
+					<div class="posa-cart-empty-state__icon-wrap">
+						<v-icon :icon="emptyStateIcon" size="42" class="posa-cart-empty-state__icon" />
+					</div>
+					<div class="posa-cart-empty-state__title">{{ emptyStateTitle }}</div>
+					<div class="posa-cart-empty-state__subtitle">{{ emptyStateSubtitle }}</div>
+				</div>
+			</template>
+
 			<template v-slot:item="{ item, toggleExpand, internalItem }">
 				<CartItemRow
 					:item="item"
@@ -202,6 +211,16 @@ const nameEdit = useItemsTableNameEdit();
 // Computed
 const items = computed(() => invoiceStore.items);
 const invoice_doc = computed(() => invoiceStore.invoiceDoc || {});
+const hasItemSearch = computed(() => !!props.itemSearch?.trim());
+const emptyStateIcon = computed(() => (hasItemSearch.value ? "mdi-cart-search" : "mdi-cart-outline"));
+const emptyStateTitle = computed(() =>
+	hasItemSearch.value ? __("No matching items in cart") : __("No items in cart"),
+);
+const emptyStateSubtitle = computed(() =>
+	hasItemSearch.value
+		? __("Try a different search term or clear the cart search.")
+		: __("Add items from the selector to start building this sale."),
+);
 
 const memoizedIsNegative = computed(() => {
 	return (value: any) => {

@@ -1,5 +1,5 @@
 <template>
-	<v-app class="container1" :class="rtlClasses">
+	<v-app class="container1 posapp pos-theme-root" :class="rtlClasses">
 		<AppLoadingOverlay :visible="globalLoading" />
 		<UpdatePrompt />
 		<v-main class="main-content">
@@ -630,24 +630,31 @@ const adjust_frappe_sidebar_offset = () => {
 
 <style scoped>
 .container1 {
-	/* Use dynamic viewport units for better mobile support */
+	width: 100%;
+	max-width: 100%;
+	min-height: 100dvh;
 	height: 100dvh;
-	max-height: 100dvh;
 	overflow: hidden;
 	padding-inline-start: var(--posa-desk-sidebar-width, 0px);
 	box-sizing: border-box;
 }
 
 .main-content {
-	/* Fill the available height of the container */
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	min-height: 0;
 	height: 100%;
 	display: flex;
 	flex-direction: column;
 }
 
 .page-content {
-	flex: 1;
-	overflow: hidden;
+	flex: 1 1 auto;
+	min-width: 0;
+	min-height: 0;
+	overflow: auto;
+	overscroll-behavior: contain;
 	padding-top: 8px;
 }
 
@@ -655,14 +662,15 @@ const adjust_frappe_sidebar_offset = () => {
 :deep(.v-main__wrap) {
 	display: flex;
 	flex-direction: column;
+	width: 100%;
 	min-height: 100%;
 	height: 100%;
+	min-width: 0;
 }
 
 @media (max-width: 768px) {
 	.container1 {
 		height: auto;
-		max-height: none;
 		min-height: 100dvh;
 		overflow-y: auto;
 		overflow-x: hidden;

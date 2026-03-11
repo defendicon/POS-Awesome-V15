@@ -1,6 +1,6 @@
 <template>
 	<div class="status-section-enhanced mx-1">
-		<v-btn icon :title="statusText" class="status-btn-enhanced" :color="statusColor">
+		<v-btn icon :title="statusText" :aria-label="statusText" class="status-btn-enhanced" :color="statusColor">
 			<v-icon :color="statusColor">{{ statusIcon }}</v-icon>
 		</v-btn>
 		<div class="status-info-always-visible">
@@ -188,15 +188,15 @@ const connectivityLabel = computed(() => {
 }
 
 .status-btn-enhanced {
-	background: rgba(25, 118, 210, 0.1) !important;
-	border: 1px solid rgba(25, 118, 210, 0.3);
+	background: var(--pos-hover-bg) !important;
+	border: 1px solid var(--pos-border);
 	transition: all 0.3s ease;
 	padding: 4px;
 	/* Reduced padding */
 }
 
 .status-btn-enhanced:hover {
-	background: rgba(25, 118, 210, 0.2) !important;
+	background: var(--pos-focus-bg) !important;
 	transform: scale(1.05);
 }
 

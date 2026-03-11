@@ -1,50 +1,104 @@
 <template>
 	<v-row justify="center">
-		<v-dialog v-model="ordersDialog" max-width="900px">
-			<!-- <template v-slot:activator="{ on, attrs }">
-              <v-btn color="primary" theme="dark" v-bind="attrs" v-on="on">Open Dialog</v-btn>
-            </template>-->
-			<v-card>
-				<v-card-title>
-					<span class="text-h5 text-primary">{{ __("Select Sales Orders") }}</span>
+		<v-dialog
+			v-model="ordersDialog"
+			:max-width="ordersDialogMaxWidth"
+			:fullscreen="isCompactOrders"
+			:width="ordersDialogWidth"
+			scrollable
+			content-class="sales-orders-dialog-content"
+			:theme="isDarkTheme ? 'dark' : 'light'"
+		>
+			<v-card class="sales-orders-card pos-themed-card" :theme="isDarkTheme ? 'dark' : 'light'">
+				<v-card-title class="sales-orders-card__title">
+					<div class="sales-orders-card__title-copy">
+						<span class="text-h5 text-primary">{{ __("Select Sales Orders") }}</span>
+						<span class="sales-orders-card__subtitle">
+							{{ __("Find a sales order quickly and load it into the current sale.") }}
+						</span>
+					</div>
+					<v-btn
+						icon="mdi-close"
+						variant="text"
+						color="medium-emphasis"
+						:aria-label="__('Close sales orders dialog')"
+						@click="close_dialog"
+					/>
 				</v-card-title>
-				<v-card-text class="pa-0">
-					<v-container>
+				<v-card-text class="sales-orders-card__body">
+					<v-container class="sales-orders-card__content">
 						<v-row class="mb-4">
-							<v-text-field
-								color="primary"
-								:label="frappe._('Order ID')"
-								hide-details
-								v-model="order_name"
-								density="compact"
-								clearable
-								class="mx-4 pos-themed-input"
-							></v-text-field>
-							<v-btn
-								variant="text"
-								class="ml-2"
-								color="primary"
-								theme="dark"
-								:loading="isLoading"
-								:disabled="isLoading || isSubmitting"
-								@click="search_orders"
-								>{{ __("Search") }}</v-btn
-							>
+							<v-col cols="12" sm="8">
+								<v-text-field
+									color="primary"
+									:label="frappe._('Order ID')"
+									hide-details
+									v-model="order_name"
+									density="compact"
+									clearable
+									class="pos-themed-input"
+								></v-text-field>
+							</v-col>
+							<v-col cols="12" sm="4">
+								<v-btn
+									block
+									variant="text"
+									color="primary"
+									:loading="isLoading"
+									:disabled="isLoading || isSubmitting"
+									@click="search_orders"
+								>
+									{{ __("Search") }}
+								</v-btn>
+							</v-col>
 						</v-row>
 						<v-row v-if="errorMessage">
 							<v-col cols="12" class="pt-0">
-								<v-alert type="error" density="compact" border="start" class="mx-4">
+								<v-alert type="error" density="compact" border="start">
 									{{ errorMessage }}
 								</v-alert>
 							</v-col>
 						</v-row>
 						<v-row no-gutters>
 							<v-col cols="12" class="pa-1">
+								<div v-if="isCompactOrders" class="sales-orders-list">
+									<button
+										v-for="item in dialog_data"
+										:key="item.name"
+										type="button"
+										class="sales-orders-item"
+										:class="{ 'sales-orders-item--selected': isSelectedOrder(item) }"
+										@click="selectOrder(item)"
+									>
+										<div class="sales-orders-item__top">
+											<div class="sales-orders-item__identity">
+												<strong>{{ item.customer_name || __("Walk-in Customer") }}</strong>
+												<span>{{ item.name }}</span>
+											</div>
+											<div class="sales-orders-item__amount">
+												{{ currencySymbol(item.currency) }}
+												{{ formatCurrency(item.grand_total) }}
+											</div>
+										</div>
+										<div class="sales-orders-item__meta">
+											<span>{{ item.transaction_date }}</span>
+											<v-chip
+												v-if="isSelectedOrder(item)"
+												size="small"
+												color="primary"
+												variant="flat"
+											>
+												{{ __("Selected") }}
+											</v-chip>
+										</div>
+									</button>
+								</div>
 								<v-data-table
+									v-else
 									:headers="headers"
 									:items="dialog_data"
 									item-key="name"
-									class="elevation-1"
+									class="elevation-1 sales-orders-table"
 									show-select
 									v-model="selected"
 									return-object
@@ -62,18 +116,18 @@
 						</v-row>
 					</v-container>
 				</v-card-text>
-				<v-card-actions>
-					<v-spacer></v-spacer>
-					<v-btn color="error" theme="dark" @click="close_dialog">Close</v-btn>
+				<v-card-actions class="sales-orders-card__footer">
+					<v-btn color="error" variant="tonal" @click="close_dialog">
+						{{ __("Close") }}
+					</v-btn>
 					<v-btn
-						v-if="selected.length"
 						color="success"
-						theme="dark"
 						:loading="isSubmitting"
-						:disabled="isSubmitting"
+						:disabled="isSubmitting || selected.length === 0"
 						@click="submit_dialog"
-						>Select</v-btn
 					>
+						{{ __("Select") }}
+					</v-btn>
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
@@ -81,18 +135,39 @@
 </template>
 
 <script>
+import { computed } from "vue";
 import format from "../../../format";
 import { useUIStore } from "../../../stores/uiStore.js";
 import { useInvoiceStore } from "../../../stores/invoiceStore.js";
 import { storeToRefs } from "pinia";
+import { useResponsive } from "../../../composables/core/useResponsive";
+import { useTheme } from "../../../composables/core/useTheme";
 export default {
 	// props: ["draftsDialog"],
 	mixins: [format],
 	setup() {
 		const uiStore = useUIStore();
 		const invoiceStore = useInvoiceStore();
+		const responsive = useResponsive();
+		const theme = useTheme();
+		const isCompactOrders = computed(() => responsive.windowWidth.value < 1100);
+		const ordersDialogWidth = computed(() =>
+			responsive.windowWidth.value < 600 ? "100vw" : "min(980px, 96vw)",
+		);
+		const ordersDialogMaxWidth = computed(() =>
+			responsive.windowWidth.value < 1100 ? "100vw" : "980px",
+		);
 		const { ordersDialog, ordersData } = storeToRefs(uiStore);
-		return { uiStore, invoiceStore, ordersDialog, ordersData };
+		return {
+			uiStore,
+			invoiceStore,
+			ordersDialog,
+			ordersData,
+			isCompactOrders,
+			ordersDialogWidth,
+			ordersDialogMaxWidth,
+			isDarkTheme: theme.isDark,
+		};
 	},
 	mounted() {
 		this.$watch(
@@ -148,6 +223,12 @@ export default {
 	}),
 	computed: {},
 	methods: {
+		isSelectedOrder(item) {
+			return Array.isArray(this.selected) && this.selected.some((entry) => entry?.name === item?.name);
+		},
+		selectOrder(item) {
+			this.selected = item ? [item] : [];
+		},
 		close_dialog() {
 			this.uiStore.closeOrders();
 		},
@@ -256,6 +337,11 @@ export default {
 		// Watcher handled via store storeToRefs
 	},
 	watch: {
+		ordersDialog(value) {
+			if (!value) {
+				this.clearSelected();
+			}
+		},
 		ordersData: {
 			handler(data) {
 				this.clearSelected();
@@ -273,3 +359,166 @@ export default {
 	// },
 };
 </script>
+
+<style scoped>
+.sales-orders-dialog-content {
+	background: transparent !important;
+}
+
+.sales-orders-card {
+	display: flex;
+	flex-direction: column;
+	max-height: min(92vh, 980px);
+	background: var(--pos-surface-raised) !important;
+	color: var(--pos-text-primary) !important;
+	border: 1px solid var(--pos-border);
+}
+
+.sales-orders-card__title {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 20px 20px 12px;
+	border-bottom: 1px solid var(--pos-border);
+}
+
+.sales-orders-card__title-copy {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.sales-orders-card__subtitle {
+	font-size: 0.95rem;
+	color: var(--pos-text-muted);
+}
+
+.sales-orders-card__body {
+	flex: 1;
+	padding: 0;
+	overflow: auto;
+}
+
+.sales-orders-card__content {
+	padding: 0 16px 16px;
+}
+
+.sales-orders-list {
+	display: grid;
+	gap: 12px;
+}
+
+.sales-orders-item {
+	width: 100%;
+	border: 1px solid rgba(var(--v-theme-primary), 0.16);
+	border-radius: 18px;
+	background: var(--pos-surface);
+	color: var(--pos-text-primary);
+	padding: 16px;
+	text-align: left;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sales-orders-item--selected {
+	border-color: rgba(var(--v-theme-primary), 0.6);
+	box-shadow: 0 0 0 1px rgba(var(--v-theme-primary), 0.3);
+}
+
+.sales-orders-item__top {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.sales-orders-item__identity {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.sales-orders-item__identity strong {
+	font-size: 1rem;
+}
+
+.sales-orders-item__identity span {
+	font-size: 0.88rem;
+	color: var(--pos-text-muted);
+}
+
+.sales-orders-item__amount {
+	font-weight: 700;
+	font-size: 1rem;
+	text-align: right;
+}
+
+.sales-orders-item__meta {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	font-size: 0.88rem;
+	color: var(--pos-text-muted);
+}
+
+.sales-orders-card__footer {
+	position: sticky;
+	bottom: 0;
+	z-index: 2;
+	display: flex;
+	justify-content: flex-end;
+	gap: 12px;
+	padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+	background: color-mix(in srgb, var(--pos-surface-raised) 92%, transparent);
+	backdrop-filter: blur(10px);
+	border-top: 1px solid var(--pos-border);
+}
+
+.sales-orders-table :deep(.v-table),
+.sales-orders-table :deep(.v-table__wrapper),
+.sales-orders-table :deep(table),
+.sales-orders-table :deep(thead),
+.sales-orders-table :deep(tbody),
+.sales-orders-table :deep(tr),
+.sales-orders-table :deep(td),
+.sales-orders-table :deep(th) {
+	background: var(--pos-surface) !important;
+	color: var(--pos-text-primary) !important;
+}
+
+.sales-orders-table :deep(th) {
+	background: var(--pos-table-header-bg) !important;
+}
+
+.sales-orders-table :deep(tbody tr:hover) {
+	background: var(--pos-table-row-hover) !important;
+}
+
+@media (max-width: 959px) {
+	.sales-orders-card {
+		max-height: 100vh;
+		border-radius: 0;
+	}
+
+	.sales-orders-card__title {
+		padding: 18px 16px 10px;
+	}
+
+	.sales-orders-card__content {
+		padding: 0 12px 12px;
+	}
+
+	.sales-orders-card__footer {
+		padding-inline: 16px;
+		justify-content: stretch;
+	}
+
+	.sales-orders-card__footer :deep(.v-btn) {
+		flex: 1;
+	}
+}
+</style>

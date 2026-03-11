@@ -1,6 +1,6 @@
 <template>
 	<v-dialog v-model="dialogOpen" max-width="650" persistent>
-		<v-card class="about-dialog-card-improved">
+		<v-card class="about-dialog-card-improved pos-themed-card">
 			<v-card-title class="about-header-improved pa-5">
 				<div class="header-content-improved">
 					<div class="header-icon-wrapper-improved">
@@ -33,10 +33,11 @@
 					size="default"
 					@click="close"
 					class="close-btn-improved"
+					:aria-label="__('Close about dialog')"
 				></v-btn>
 			</v-card-title>
 
-			<v-card-text class="pa-0 white-background">
+			<v-card-text class="pa-0 dialog-body-background">
 				<div class="content-container-improved">
 					<!-- Loading State -->
 					<div v-if="loadingAppInfo" class="empty-state-improved text-center">
@@ -166,16 +167,17 @@ function loadAppInfo() {
 .about-dialog-card-improved {
 	border-radius: 16px !important;
 	overflow: hidden;
-	background: white;
-	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+	background: var(--pos-card-bg);
+	color: var(--pos-text-primary);
+	box-shadow: 0 4px 20px var(--pos-shadow) !important;
 	max-height: 90vh;
 }
 
 /* Improved Header with Better Spacing */
 .about-header-improved {
-	background: white;
-	color: #1a1a1a;
-	border-bottom: 1px solid #f0f0f0;
+	background: var(--pos-card-bg);
+	color: var(--pos-text-primary);
+	border-bottom: 1px solid var(--pos-border);
 	position: relative;
 	min-height: auto !important;
 }
@@ -219,7 +221,7 @@ function loadAppInfo() {
 .header-title-improved {
 	margin: 0 0 4px 0;
 	font-weight: 600;
-	color: #1a1a1a;
+	color: var(--pos-text-primary);
 	font-size: 1.25rem;
 	line-height: 1.2;
 }
@@ -227,7 +229,7 @@ function loadAppInfo() {
 .header-subtitle-improved {
 	margin: 0;
 	font-size: 14px;
-	color: #666;
+	color: var(--pos-text-secondary);
 	font-weight: 400;
 	line-height: 1.2;
 }
@@ -247,11 +249,11 @@ function loadAppInfo() {
 	position: absolute;
 	top: 12px;
 	right: 12px;
-	color: #666 !important;
+	color: var(--pos-text-secondary) !important;
 }
 
-.white-background {
-	background: white;
+.dialog-body-background {
+	background: var(--pos-card-bg);
 }
 
 /* Improved Content */
@@ -273,7 +275,7 @@ function loadAppInfo() {
 .apps-header-improved {
 	margin-bottom: 16px;
 	padding-bottom: 12px;
-	border-bottom: 1px solid #f0f0f0;
+	border-bottom: 1px solid var(--pos-border);
 }
 
 .apps-grid-improved {
@@ -289,17 +291,17 @@ function loadAppInfo() {
 	align-items: center;
 	gap: 12px;
 	padding: 12px 16px;
-	background: #f8f9fa;
+	background: var(--pos-surface-muted);
 	border-radius: 10px;
-	border: 1px solid #e9ecef;
+	border: 1px solid var(--pos-border);
 	transition: all 0.2s ease;
 }
 
 .app-item-improved:hover {
-	background: #e3f2fd;
-	border-color: #1976d2;
+	background: color-mix(in srgb, var(--pos-primary) 14%, var(--pos-surface));
+	border-color: var(--pos-primary);
 	transform: translateY(-1px);
-	box-shadow: 0 2px 8px rgba(25, 118, 210, 0.15);
+	box-shadow: 0 2px 8px var(--pos-shadow);
 }
 
 .app-icon-improved {
@@ -321,7 +323,7 @@ function loadAppInfo() {
 .app-name-improved {
 	font-weight: 500;
 	font-size: 14px;
-	color: #1a1a1a;
+	color: var(--pos-text-primary);
 	line-height: 1.3;
 	white-space: nowrap;
 	overflow: hidden;
@@ -330,7 +332,7 @@ function loadAppInfo() {
 
 .app-version-improved {
 	font-size: 12px;
-	color: #666;
+	color: var(--pos-text-secondary);
 	font-weight: 400;
 	line-height: 1.3;
 	margin-top: 2px;
@@ -338,8 +340,8 @@ function loadAppInfo() {
 
 /* Improved Footer */
 .dialog-actions-improved {
-	background: #f8f9fa;
-	border-top: 1px solid #f0f0f0;
+	background: var(--pos-surface-muted);
+	border-top: 1px solid var(--pos-border);
 	min-height: auto !important;
 }
 
@@ -350,7 +352,7 @@ function loadAppInfo() {
 
 .footer-text-improved {
 	font-size: 13px;
-	color: #666;
+	color: var(--pos-text-secondary);
 	display: flex;
 	align-items: center;
 	gap: 6px;
@@ -395,18 +397,18 @@ function loadAppInfo() {
 
 .content-container-improved::-webkit-scrollbar-track,
 .apps-grid-improved::-webkit-scrollbar-track {
-	background: #f1f1f1;
+	background: var(--pos-surface-muted);
 	border-radius: 3px;
 }
 
 .content-container-improved::-webkit-scrollbar-thumb,
 .apps-grid-improved::-webkit-scrollbar-thumb {
-	background: #c1c1c1;
+	background: var(--pos-border);
 	border-radius: 3px;
 }
 
 .content-container-improved::-webkit-scrollbar-thumb:hover,
 .apps-grid-improved::-webkit-scrollbar-thumb:hover {
-	background: #a8a8a8;
+	background: var(--pos-text-secondary);
 }
 </style>

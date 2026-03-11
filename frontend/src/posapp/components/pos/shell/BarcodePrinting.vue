@@ -23,6 +23,7 @@
 							color="white"
 							@click="clearAll"
 							:title="__('Clear All')"
+							:aria-label="__('Clear all barcode items')"
 						></v-btn>
 					</v-card-title>
 
@@ -140,6 +141,7 @@
 										variant="flat"
 										class="pos-table__qty-btn pos-table__qty-btn--minus minus-btn qty-control-btn"
 										@click="decrementQty(item)"
+										:aria-label="__('Decrease quantity')"
 									>
 										<v-icon size="small">mdi-minus</v-icon>
 									</v-btn>
@@ -149,6 +151,7 @@
 										@click="openQtyEdit(item)"
 										tabindex="0"
 										role="button"
+										:aria-label="__('Edit quantity')"
 									>
 										{{ item.qty }}
 									</div>
@@ -171,6 +174,7 @@
 										variant="flat"
 										class="pos-table__qty-btn pos-table__qty-btn--plus plus-btn qty-control-btn"
 										@click="incrementQty(item)"
+										:aria-label="__('Increase quantity')"
 									>
 										<v-icon size="small">mdi-plus</v-icon>
 									</v-btn>
@@ -203,6 +207,7 @@
 									variant="text"
 									color="error"
 									@click="removeItem(item)"
+									:aria-label="__('Remove barcode item')"
 								></v-btn>
 							</template>
 						</v-data-table>

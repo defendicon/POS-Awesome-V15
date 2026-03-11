@@ -1,6 +1,6 @@
 <template>
 	<v-row v-if="invoice_doc" class="payment-summary-grid" dense>
-		<v-col cols="7">
+		<v-col cols="12" sm="7">
 			<v-text-field
 				variant="solo"
 				color="primary"
@@ -14,7 +14,7 @@
 				@click="$emit('show-paid-amount')"
 			></v-text-field>
 		</v-col>
-		<v-col cols="5">
+		<v-col cols="12" sm="5">
 			<v-text-field
 				variant="solo"
 				color="primary"
@@ -30,7 +30,7 @@
 		</v-col>
 
 		<!-- Paid Change (if applicable) -->
-		<v-col cols="7" v-if="invoice_doc && change_due > 0 && !invoice_doc.is_return">
+		<v-col cols="12" sm="7" v-if="invoice_doc && change_due > 0 && !invoice_doc.is_return">
 			<v-text-field
 				variant="solo"
 				color="primary"
@@ -47,7 +47,7 @@
 		</v-col>
 
 		<!-- Credit Change (if applicable) -->
-		<v-col cols="5" v-if="invoice_doc && change_due > 0 && !invoice_doc.is_return">
+		<v-col cols="12" sm="5" v-if="invoice_doc && change_due > 0 && !invoice_doc.is_return">
 			<v-text-field
 				variant="solo"
 				color="primary"

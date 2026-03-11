@@ -10,7 +10,7 @@
 			:style="{
 				height: invoiceHeight || 'var(--container-height)',
 				maxHeight: invoiceHeight || 'var(--container-height)',
-				resize: 'vertical',
+				resize: canResizeInvoicePanel() ? 'vertical' : 'none',
 				overflow: 'auto',
 			}"
 			:class="[
@@ -515,6 +515,7 @@ export default {
 		},
 
 		focusAdditionalDiscountField() {
+			this.eventBus?.emit?.("focus_additional_discount");
 			this.$refs.invoiceSummary?.focusAdditionalDiscountField?.();
 		},
 
@@ -1059,13 +1060,23 @@ export default {
 	display: flex;
 	flex-direction: column;
 	gap: var(--dynamic-sm);
+	flex: 1 1 auto;
 	min-height: 0;
+	overflow: auto;
+}
+
+@media (max-width: 1099px) {
+	.invoice-shell {
+		padding-bottom: calc(var(--bottom-safe-space) + var(--dynamic-xs));
+	}
 }
 
 .invoice-main-card {
 	display: flex;
 	flex-direction: column;
-	overflow: hidden !important;
+	flex: 0 0 auto;
+	overflow: auto !important;
+	min-width: 0;
 }
 
 /* Style for selected checkbox button */
@@ -1132,7 +1143,7 @@ export default {
 	gap: var(--dynamic-sm);
 	flex: 1 1 auto;
 	min-height: 0;
-	overflow: hidden;
+	overflow: visible;
 }
 
 .invoice-status-alert {
@@ -1146,7 +1157,7 @@ export default {
 	gap: var(--dynamic-sm);
 	flex: 1 1 auto;
 	min-height: 0;
-	overflow: hidden;
+	overflow: visible;
 	align-items: stretch;
 }
 
@@ -1190,9 +1201,9 @@ export default {
 	padding-bottom: var(--dynamic-xs);
 	display: flex;
 	flex-direction: column;
-	flex: 1 1 auto;
-	min-height: 0;
-	overflow: hidden;
+	flex: 0 0 auto;
+	min-height: 320px;
+	overflow: visible;
 }
 
 /* Responsive breakpoints */
@@ -1241,10 +1252,10 @@ export default {
 
 	.items-table-wrapper {
 		/* Adjust for smaller padding on tablets */
-		margin-left: calc(-1 * var(--dynamic-xs));
-		margin-right: calc(-1 * var(--dynamic-xs));
-		width: calc(100% + 2 * var(--dynamic-xs));
-		max-width: calc(100% + 2 * var(--dynamic-xs));
+		margin-left: 0;
+		margin-right: 0;
+		width: 100%;
+		max-width: 100%;
 		min-height: 280px;
 	}
 
@@ -1280,10 +1291,10 @@ export default {
 
 	.items-table-wrapper {
 		/* Adjust for smallest screens */
-		margin-left: calc(-1 * var(--dynamic-xs));
-		margin-right: calc(-1 * var(--dynamic-xs));
-		width: calc(100% + 2 * var(--dynamic-xs));
-		max-width: calc(100% + 2 * var(--dynamic-xs));
+		margin-left: 0;
+		margin-right: 0;
+		width: 100%;
+		max-width: 100%;
 		min-height: 240px;
 	}
 
@@ -1321,16 +1332,14 @@ export default {
 .items-table-wrapper {
 	position: relative;
 	margin-top: var(--dynamic-sm);
-	/* Override parent padding to make table full-width */
-	margin-left: calc(-1 * var(--dynamic-sm));
-	margin-right: calc(-1 * var(--dynamic-sm));
-	width: calc(100% + 2 * var(--dynamic-sm));
-	max-width: calc(100% + 2 * var(--dynamic-sm));
+	width: 100%;
+	max-width: 100%;
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
-	flex: 1 1 auto;
-	min-height: 0;
+	flex: 0 0 auto;
+	min-height: 320px;
+	min-width: 0;
 }
 
 :deep(.items-table-wrapper .column-selector-container) {
@@ -1341,10 +1350,18 @@ export default {
 }
 
 :deep(.items-table-wrapper .posa-items-table-container) {
-	flex: 1 1 auto;
-	min-height: 0;
-	height: 100% !important;
-	max-height: 100% !important;
+	flex: 0 0 auto;
+	min-height: 320px;
+	height: auto !important;
+	max-height: none !important;
+	overflow: visible !important;
+}
+
+:deep(.items-table-wrapper .posa-cart-table),
+:deep(.items-table-wrapper .v-data-table__wrapper),
+:deep(.items-table-wrapper .v-table__wrapper) {
+	height: auto !important;
+	max-height: none !important;
 }
 
 /* New styles for improved column switches */

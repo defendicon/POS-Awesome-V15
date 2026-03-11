@@ -13,11 +13,22 @@ export function useInvoiceUI() {
 		return window.innerHeight || 768;
 	};
 
+	const getViewportWidth = () => {
+		if (typeof window === "undefined") {
+			return 1366;
+		}
+		return window.innerWidth || 1366;
+	};
+
+	const canResizeInvoicePanel = () => {
+		return getViewportWidth() >= 1280 && getViewportHeight() >= 860;
+	};
+
 	const getMaxInvoiceHeightPx = () => {
 		const viewportHeight = getViewportHeight();
-		if (viewportHeight <= 800) return Math.round(viewportHeight * 0.48);
-		if (viewportHeight <= 900) return Math.round(viewportHeight * 0.56);
-		return Math.round(viewportHeight * 0.68);
+		if (viewportHeight <= 800) return Math.round(viewportHeight * 0.58);
+		if (viewportHeight <= 960) return Math.round(viewportHeight * 0.64);
+		return Math.round(viewportHeight * 0.72);
 	};
 
 	const getDefaultInvoiceHeight = () => {
@@ -57,6 +68,10 @@ export function useInvoiceUI() {
 	const saveInvoiceHeight = (element: HTMLElement | null) => {
 		if (element) {
 			const defaultHeight = getDefaultInvoiceHeight();
+			if (!canResizeInvoicePanel()) {
+				invoiceHeight.value = clampInvoiceHeight(defaultHeight, defaultHeight);
+				return;
+			}
 			invoiceHeight.value = clampInvoiceHeight(
 				`${element.clientHeight}px`,
 				defaultHeight,
@@ -75,6 +90,10 @@ export function useInvoiceUI() {
 	const loadInvoiceHeight = () => {
 		const defaultHeight = getDefaultInvoiceHeight();
 		try {
+			if (!canResizeInvoicePanel()) {
+				invoiceHeight.value = clampInvoiceHeight(defaultHeight, defaultHeight);
+				return;
+			}
 			const saved = localStorage.getItem("posawesome_invoice_height");
 			invoiceHeight.value = clampInvoiceHeight(
 				saved || defaultHeight,
@@ -127,6 +146,7 @@ export function useInvoiceUI() {
 
 	return {
 		invoiceHeight,
+		canResizeInvoicePanel,
 		saveInvoiceHeight,
 		loadInvoiceHeight,
 		confirm_payment_dialog,

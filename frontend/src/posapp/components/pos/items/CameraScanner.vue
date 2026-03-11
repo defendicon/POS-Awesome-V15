@@ -23,6 +23,7 @@
 					variant="text"
 					size="large"
 					:title="__('Close Scanner')"
+					:aria-label="__('Close scanner dialog')"
 				></v-btn>
 			</v-card-title>
 

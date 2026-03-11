@@ -18,6 +18,7 @@
 			density="comfortable"
 			class="header-close-btn"
 			:title="__('Close')"
+			:aria-label="__('Close closing shift dialog')"
 			@click="$emit('close')"
 		></v-btn>
 	</v-card-title>

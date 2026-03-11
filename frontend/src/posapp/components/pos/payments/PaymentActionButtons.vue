@@ -1,7 +1,7 @@
 <template>
 	<v-card flat :class="['cards mb-0 mt-3 pa-0', { compact }]">
 		<v-row align="start" no-gutters>
-			<v-col cols="6">
+			<v-col cols="12" sm="6">
 				<v-btn
 					ref="submitButton"
 					block
@@ -17,7 +17,7 @@
 					{{ __("Submit") }}
 				</v-btn>
 			</v-col>
-			<v-col cols="6" class="pl-1">
+			<v-col cols="12" sm="6" class="payment-action-col">
 				<v-btn
 					block
 					size="large"
@@ -77,6 +77,7 @@ const __ = window.__;
 		background-color 0.18s ease,
 		transform 0.18s ease !important;
 	color: #ffffff !important;
+	min-height: 48px !important;
 }
 
 .payment-submit-btn {
@@ -120,6 +121,10 @@ const __ = window.__;
 	background-color: rgba(var(--v-theme-error), 0.9) !important;
 }
 
+.payment-action-col {
+	padding-left: 4px;
+}
+
 .payment-footer-btn:active {
 	transform: translateY(0);
 }
@@ -133,6 +138,11 @@ const __ = window.__;
 @media (max-width: 768px) {
 	.cards {
 		margin-top: 0 !important;
+	}
+
+	.payment-action-col {
+		padding-left: 0;
+		padding-top: 6px;
 	}
 
 	.payment-footer-btn {

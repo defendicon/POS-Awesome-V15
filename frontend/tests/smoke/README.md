@@ -8,6 +8,12 @@ This suite is a production-safety smoke gate for global runtime errors.
 yarn test:smoke
 ```
 
+## Local Secrets
+
+Copy `frontend/.env.example` to `frontend/.env.local` and fill in local values.
+
+`frontend/.env.local` is ignored by git and is auto-loaded by `frontend/playwright.config.ts`.
+
 ## Environment Variables
 
 - `POSA_SMOKE_BASE_URL`: Frappe site URL (default: `http://127.0.0.1:8000`)

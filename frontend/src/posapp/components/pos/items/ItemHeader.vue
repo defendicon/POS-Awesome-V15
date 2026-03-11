@@ -3,8 +3,8 @@
 		<v-row class="items">
 			<v-col
 				class="pb-0"
-				cols="12"
-				:md="posProfile.posa_input_qty ? 9 : 12"
+				:cols="posProfile.posa_input_qty ? 8 : 12"
+				:sm="posProfile.posa_input_qty ? 9 : 12"
 			>
 				<v-text-field
 					density="compact"
@@ -12,8 +12,8 @@
 					autofocus
 					variant="solo"
 					color="primary"
-					:label="frappe._('Search Items')"
-					hint="Search by item code, serial number, batch no or barcode"
+					class="pos-themed-input"
+					:label="frappe._('Search, scan or browse item')"
 					hide-details
 					:model-value="searchInput"
 					@update:model-value="
@@ -41,6 +41,11 @@
 							variant="text"
 							:disabled="scannerLocked"
 							@click="$emit('start-camera')"
+							:aria-label="
+								scannerLocked
+									? __('Camera scanner is locked until the current error is acknowledged')
+									: __('Scan with camera')
+							"
 							:title="
 								scannerLocked
 									? __('Acknowledge the error to resume scanning')
@@ -48,19 +53,30 @@
 							"
 						>
 						</v-btn>
+						<v-btn
+							icon="mdi-tune-vertical"
+							size="small"
+							color="primary"
+							variant="text"
+							@click.stop="toolsOpen = !toolsOpen"
+							:aria-label="toolsOpen ? __('Hide search tools') : __('Show search tools')"
+						>
+						</v-btn>
 					</template>
 				</v-text-field>
 			</v-col>
-			<v-col cols="12" md="3" class="pb-0" v-if="posProfile.posa_input_qty">
+			<v-col cols="4" sm="3" class="pb-0" v-if="posProfile.posa_input_qty">
 				<v-text-field
 					density="compact"
 					variant="solo"
 					color="primary"
+					class="pos-themed-input"
 					:label="frappe._('QTY')"
 					hide-details
 					:model-value="qtyInput"
 					@update:model-value="$emit('update:qtyInput', $event)"
 					type="text"
+					inputmode="decimal"
 					@keydown.enter="$emit('enter')"
 					@keydown.esc="$emit('esc')"
 					@focus="$emit('clear-qty')"
@@ -68,8 +84,10 @@
 					@blur="$emit('blur-qty')"
 				></v-text-field>
 			</v-col>
-			<v-col cols="12" class="dynamic-margin-xs">
-				<div class="settings-container">
+		</v-row>
+		<v-expand-transition>
+			<div v-if="toolsOpen" class="tools-panel">
+				<div class="tools-panel__actions">
 					<v-btn
 						v-if="context === 'purchase'"
 						density="compact"
@@ -91,20 +109,6 @@
 					>
 						{{ __("Settings") }}
 					</v-btn>
-					<v-spacer></v-spacer>
-					<span
-						v-if="syncStatus"
-						class="text-caption text-info font-weight-bold sync-status-label mx-2"
-					>
-						{{ syncStatus }}
-					</span>
-					<span
-						v-if="enableBackgroundSync && !syncStatus"
-						class="text-caption text-medium-emphasis last-sync-label"
-					>
-						{{ __("Last sync:") }} {{ lastSyncTime }}
-					</span>
-					<v-spacer></v-spacer>
 					<v-btn
 						density="compact"
 						variant="text"
@@ -116,8 +120,22 @@
 						{{ __("Reload Items") }}
 					</v-btn>
 				</div>
-			</v-col>
-		</v-row>
+				<div class="tools-panel__meta">
+					<span
+						v-if="syncStatus"
+						class="text-caption text-info font-weight-bold sync-status-label"
+					>
+						{{ syncStatus }}
+					</span>
+					<span
+						v-else-if="enableBackgroundSync"
+						class="text-caption text-medium-emphasis last-sync-label"
+					>
+						{{ __("Last sync:") }} {{ lastSyncTime }}
+					</span>
+				</div>
+			</div>
+		</v-expand-transition>
 	</div>
 </template>
 
@@ -154,6 +172,7 @@ defineEmits([
 ]);
 
 const debounce_search = ref(null);
+const toolsOpen = ref(false);
 
 defineExpose({
 	debounce_search,
@@ -165,9 +184,9 @@ defineExpose({
 	position: sticky;
 	top: 0;
 	z-index: 5;
-	background: rgb(var(--v-theme-surface));
+	background: var(--pos-surface);
 	padding: 12px 12px 0 12px;
-	border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+	border-bottom: 1px solid var(--pos-border);
 	margin-bottom: 0;
 }
 
@@ -175,10 +194,26 @@ defineExpose({
 	margin: 0;
 }
 
-.settings-container {
+.tools-panel {
+	margin-top: 8px;
+	padding: 10px 12px;
+	border-radius: 16px;
+	background: var(--pos-surface-muted);
+	border: 1px solid var(--pos-border);
+}
+
+.tools-panel__actions {
 	display: flex;
 	align-items: center;
-	padding: 4px 0;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.tools-panel__meta {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	padding-top: 6px;
 }
 
 .settings-btn {
@@ -186,6 +221,7 @@ defineExpose({
 	letter-spacing: normal !important;
 	font-weight: 500 !important;
 	background-color: transparent !important;
+	min-height: 40px !important;
 }
 
 .last-sync-label {
@@ -195,5 +231,25 @@ defineExpose({
 
 .dynamic-margin-xs {
 	margin-top: 4px;
+}
+
+:deep(.sticky-header .v-field) {
+	border-radius: 16px;
+}
+
+@media (max-width: 768px) {
+	.sticky-header {
+		top: 0;
+		z-index: 13;
+		padding: 12px 12px 2px;
+	}
+
+	.tools-panel {
+		padding: 8px 10px;
+	}
+
+	.tools-panel__meta {
+		justify-content: flex-start;
+	}
 }
 </style>

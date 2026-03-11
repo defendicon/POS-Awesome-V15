@@ -277,7 +277,7 @@ const onDragEnd = (event) => {
 	flex-wrap: wrap;
 	gap: var(--pos-space-1);
 	font-weight: 700;
-	color: rgb(var(--v-theme-primary));
+	color: var(--pos-primary);
 	font-size: 1.05rem;
 }
 
@@ -288,17 +288,13 @@ const onDragEnd = (event) => {
 
 .last-rate-chip {
 	font-size: 0.75rem;
-	color: rgb(var(--v-theme-secondary));
-	background: rgba(var(--v-theme-on-surface), 0.08);
+	color: var(--pos-secondary);
+	background: var(--pos-hover-bg);
 	padding: 4px 8px;
 	border-radius: var(--pos-radius-xs);
 	display: inline-flex;
 	align-items: center;
 	width: fit-content;
-}
-
-.v-theme--dark .last-rate-chip {
-	color: rgba(var(--v-theme-on-surface), 0.75);
 }
 
 .last-rate-value {
@@ -316,7 +312,7 @@ const onDragEnd = (event) => {
 	gap: 6px;
 	padding: 6px 8px;
 	border-radius: var(--pos-radius-xs);
-	background: rgba(var(--v-theme-on-surface), 0.06);
+	background: var(--pos-hover-bg);
 	white-space: nowrap;
 }
 

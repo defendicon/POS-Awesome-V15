@@ -60,6 +60,41 @@ export const useItemsSelectorFocus = ({
 		}
 	};
 
+	const hasExplicitFocusTrapMarker = (element: Element | null) => {
+		let current: Element | null = element;
+		while (current) {
+			if (
+				current.getAttribute?.("data-posa-focus-trap") === "true" ||
+				current.getAttribute?.("data-focus-trap") === "true" ||
+				current.getAttribute?.("data-focus-guard") === "true"
+			) {
+				return true;
+			}
+			current = current.parentElement;
+		}
+		return false;
+	};
+
+	const releaseBlockedFocus = (target?: Element | null) => {
+		if (typeof document === "undefined") {
+			return;
+		}
+		const active = document.activeElement;
+		if (
+			!(active instanceof HTMLElement) ||
+			active === document.body ||
+			active === target
+		) {
+			return;
+		}
+		if (
+			isElementHiddenFromInteraction(active) ||
+			hasExplicitFocusTrapMarker(active)
+		) {
+			active.blur();
+		}
+	};
+
 	const scheduleFocusAttempt = (attempt: number) => {
 		if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
 			window.requestAnimationFrame(() => {
@@ -94,6 +129,7 @@ export const useItemsSelectorFocus = ({
 					document.activeElement !== input &&
 					attempt < 3
 				) {
+					releaseBlockedFocus(input instanceof Element ? input : null);
 					scheduleFocusAttempt(attempt);
 				}
 			}

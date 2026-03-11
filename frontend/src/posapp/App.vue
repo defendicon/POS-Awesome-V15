@@ -2,14 +2,14 @@
 	<template v-if="standaloneCustomerDisplayMode">
 		<CustomerDisplayLayout>
 			<transition name="fade-page" mode="out-in">
-				<CustomerDisplay class="mx-4 md-4" />
+				<CustomerDisplay class="app-route-view" />
 			</transition>
 		</CustomerDisplayLayout>
 	</template>
 	<router-view v-else v-slot="{ Component, route }">
 		<component :is="layoutComponent" :key="layoutName">
 			<transition name="fade-page" mode="out-in">
-				<component :is="Component" class="mx-4 md-4" />
+				<component :is="Component" class="app-route-view" />
 			</transition>
 		</component>
 	</router-view>
@@ -64,5 +64,11 @@ const layoutName = computed(() => route.meta.layout || "default");
 .fade-page-leave-to {
 	opacity: 0;
 	transform: translateY(5px);
+}
+
+.app-route-view {
+	width: 100%;
+	min-width: 0;
+	min-height: 0;
 }
 </style>

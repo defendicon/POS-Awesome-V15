@@ -3,8 +3,16 @@ import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 export function useResponsive() {
 	const windowWidth = ref(window.innerWidth);
 	const windowHeight = ref(window.innerHeight);
-	const baseWidth = ref(window.innerWidth);
-	const baseHeight = ref(window.innerHeight);
+	const baseWidth = ref(1440);
+	const baseHeight = ref(900);
+
+	const isPhone = computed(() => windowWidth.value < 768);
+	const isTablet = computed(
+		() => windowWidth.value >= 768 && windowWidth.value < 1100,
+	);
+	const isDesktop = computed(() => windowWidth.value >= 1100);
+	const isCompact = computed(() => windowWidth.value < 1100);
+	const isShortViewport = computed(() => windowHeight.value < 760);
 
 	const widthScale = computed(() => windowWidth.value / baseWidth.value);
 	const heightScale = computed(() => windowHeight.value / baseHeight.value);
@@ -32,25 +40,31 @@ export function useResponsive() {
 
 	const responsiveStyles = computed(() => {
 		let cardHeightVh;
-		if (windowWidth.value <= 480) {
-			cardHeightVh = Math.round(45 * heightScale.value);
-		} else if (windowWidth.value <= 768) {
-			cardHeightVh = Math.round(55 * heightScale.value);
+		if (isPhone.value) {
+			cardHeightVh = isShortViewport.value ? 56 : 62;
+		} else if (isTablet.value) {
+			cardHeightVh = isShortViewport.value ? 58 : 64;
 		} else {
 			cardHeightVh = Math.round(60 * heightScale.value);
 		}
 
-		cardHeightVh = Math.max(30, Math.min(cardHeightVh, 70));
-		let containerHeightVh = 68;
-		if (windowHeight.value <= 800) {
-			containerHeightVh = 48;
-		} else if (windowHeight.value <= 900) {
-			containerHeightVh = 56;
+		cardHeightVh = Math.max(42, Math.min(cardHeightVh, 72));
+		let containerHeightVh = 70;
+		if (isPhone.value) {
+			containerHeightVh = isShortViewport.value ? 66 : 74;
+		} else if (isTablet.value) {
+			containerHeightVh = isShortViewport.value ? 64 : 72;
+		} else if (windowHeight.value <= 800) {
+			containerHeightVh = 58;
+		} else if (windowHeight.value <= 960) {
+			containerHeightVh = 64;
 		}
 
-		// Keep small-width layouts usable while still protecting short-height screens.
-		if (windowWidth.value <= 768) {
-			containerHeightVh = Math.min(containerHeightVh, 55);
+		let bottomSafeSpace = 24;
+		if (windowWidth.value < 600) {
+			bottomSafeSpace = isShortViewport.value ? 176 : 196;
+		} else if (windowWidth.value < 1100) {
+			bottomSafeSpace = isShortViewport.value ? 112 : 132;
 		}
 
 		return {
@@ -61,6 +75,8 @@ export function useResponsive() {
 			"--dynamic-xl": `${dynamicSpacing.value.xl}px`,
 			"--container-height": `${containerHeightVh}vh`,
 			"--card-height": `${cardHeightVh}vh`,
+			"--bottom-safe-space": `${bottomSafeSpace}px`,
+			"--viewport-height": `${windowHeight.value}px`,
 			"--font-scale": averageScale.value.toFixed(2),
 		};
 	});
@@ -98,6 +114,11 @@ export function useResponsive() {
 		windowHeight,
 		baseWidth,
 		baseHeight,
+		isPhone,
+		isTablet,
+		isDesktop,
+		isCompact,
+		isShortViewport,
 		widthScale,
 		heightScale,
 		averageScale,

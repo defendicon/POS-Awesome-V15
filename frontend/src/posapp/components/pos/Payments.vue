@@ -1,4 +1,4 @@
-<!-- eslint-disable vue/multi-word-component-names -->
+﻿<!-- eslint-disable vue/multi-word-component-names -->
 <template>
 	<div :class="['payment-shell', { 'payment-shell--dialog': dialogMode }]">
 		<v-card
@@ -588,38 +588,60 @@ const releaseActiveFocus = () => {
 	}
 };
 
+const triggerSearchFocusRecovery = () => {
+	nextTick(() => {
+		uiStore.triggerItemSearchFocus();
+		if (eventBus && typeof eventBus.emit === "function") {
+			eventBus.emit("focus_item_search");
+		}
+	});
+};
+
 const queueSearchRefocusRecovery = () => {
 	if (typeof window === "undefined") {
+		triggerSearchFocusRecovery();
 		return;
 	}
 
-	let recovered = false;
 	let fallbackTimer = null;
+	let cleanupTimer = null;
 	const recover = () => {
-		if (recovered) return;
-		recovered = true;
+		triggerSearchFocusRecovery();
+	};
+
+	const cleanup = () => {
+		window.removeEventListener("focus", onWindowFocus);
 		if (fallbackTimer) {
 			clearTimeout(fallbackTimer);
 			fallbackTimer = null;
 		}
-		nextTick(() => {
-			uiStore.triggerItemSearchFocus();
-			if (eventBus && typeof eventBus.emit === "function") {
-				eventBus.emit("focus_item_search");
-			}
-		});
+		if (cleanupTimer) {
+			clearTimeout(cleanupTimer);
+			cleanupTimer = null;
+		}
 	};
 
 	const onWindowFocus = () => {
-		window.removeEventListener("focus", onWindowFocus);
 		recover();
+		cleanup();
 	};
 
-	window.addEventListener("focus", onWindowFocus, { once: true });
+	window.addEventListener("focus", onWindowFocus);
+	if (fallbackTimer) {
+		clearTimeout(fallbackTimer);
+		fallbackTimer = null;
+	}
 	fallbackTimer = setTimeout(() => {
-		window.removeEventListener("focus", onWindowFocus);
 		recover();
+		cleanup();
 	}, 900);
+	if (cleanupTimer) {
+		clearTimeout(cleanupTimer);
+		cleanupTimer = null;
+	}
+	cleanupTimer = setTimeout(() => {
+		cleanup();
+	}, 10000);
 };
 
 const back_to_invoice = () => {
@@ -1417,7 +1439,7 @@ onBeforeUnmount(() => {
 }
 
 .payment-shell--dialog {
-	height: calc(100vh - 48px);
+	height: calc(100dvh - 48px);
 	display: flex;
 	flex-direction: column;
 	gap: var(--pos-space-2);
@@ -1543,6 +1565,11 @@ onBeforeUnmount(() => {
 
 .payment-footer {
 	flex: 0 0 auto;
+	position: sticky;
+	bottom: 0;
+	z-index: 8;
+	padding-top: 8px;
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0), var(--pos-surface) 30%);
 }
 
 .payment-footer--dialog {
@@ -1665,8 +1692,11 @@ onBeforeUnmount(() => {
 	}
 
 	.payment-footer {
-		position: static;
+		position: sticky;
 		margin-top: 0;
+		padding-bottom: calc(env(safe-area-inset-bottom) + 4px);
 	}
+
 }
 </style>
+
