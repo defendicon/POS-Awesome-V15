@@ -321,33 +321,8 @@ const peakPercent = computed(() => Math.round(Math.min(peakLag.value, 100)));
 	background: #1976d2;
 }
 
-/* Fix tooltip background and text color in light mode */
-:deep(.v-tooltip .v-overlay__content),
-:deep(.v-overlay__content) {
-	background: #e3f2fd !important;
-	color: #1a237e !important;
-	box-shadow: 0 4px 16px rgba(25, 118, 210, 0.1) !important;
-	border: 1px solid #90caf9 !important;
-}
-
 .cpu-tooltip-title,
 .cpu-tooltip-action {
-	color: #1a237e !important;
-}
-
-:deep([data-theme="dark"]) .v-tooltip .v-overlay__content,
-:deep(.v-theme--dark) .v-tooltip .v-overlay__content,
-:deep([data-theme="dark"]) .v-overlay__content,
-:deep(.v-theme--dark) .v-overlay__content {
-	background: #26344d !important;
-	color: #fff !important;
-	border: 1px solid #1976d2 !important;
-}
-
-:deep([data-theme="dark"]) .cpu-tooltip-title,
-:deep(.v-theme--dark) .cpu-tooltip-title,
-:deep([data-theme="dark"]) .cpu-tooltip-action,
-:deep(.v-theme--dark) .cpu-tooltip-action {
-	color: #fff !important;
+	color: var(--pos-primary) !important;
 }
 </style>

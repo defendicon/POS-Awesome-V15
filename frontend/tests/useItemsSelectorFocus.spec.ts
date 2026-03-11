@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { describe, expect, it, vi } from "vitest";
 
 import { useItemsSelectorFocus } from "../src/posapp/composables/pos/items/useItemsSelectorFocus";
@@ -89,5 +91,57 @@ describe("useItemsSelectorFocus", () => {
 		focusApi.startCameraScanning();
 
 		expect(startScanning).toHaveBeenCalledTimes(1);
+	});
+
+	it("releases stale focus traps before retrying the search input", () => {
+		const originalRaf = window.requestAnimationFrame;
+		window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+			cb(0);
+			return 1;
+		}) as typeof window.requestAnimationFrame;
+
+		const trappedButton = document.createElement("button");
+		const searchInput = document.createElement("input");
+		document.body.appendChild(trappedButton);
+		document.body.appendChild(searchInput);
+
+		const nativeSearchFocus = searchInput.focus.bind(searchInput);
+		let trapReleased = false;
+
+		trappedButton.focus();
+		const trappedBlurSpy = vi.spyOn(trappedButton, "blur").mockImplementation(() => {
+			trapReleased = true;
+			HTMLElement.prototype.blur.call(trappedButton);
+		});
+		vi.spyOn(searchInput, "focus").mockImplementation(() => {
+			if (trapReleased) {
+				nativeSearchFocus();
+			}
+		});
+
+		const vm = createVm({
+			$refs: {
+				itemHeader: {
+					debounce_search: {
+						value: searchInput,
+					},
+				},
+			},
+		});
+		const focusApi = useItemsSelectorFocus({
+			getVM: () => vm,
+			scannerInput: {},
+			itemSelection: { handleSearchKeydown: vi.fn(() => false) },
+		});
+
+		focusApi.focusItemSearch();
+
+		expect(trappedBlurSpy).toHaveBeenCalled();
+		expect(document.activeElement).toBe(searchInput);
+
+		trappedBlurSpy.mockRestore();
+		searchInput.remove();
+		trappedButton.remove();
+		window.requestAnimationFrame = originalRaf;
 	});
 });

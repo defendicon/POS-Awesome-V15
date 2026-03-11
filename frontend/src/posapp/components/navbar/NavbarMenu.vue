@@ -1,6 +1,6 @@
 <template>
 	<v-menu
-		:min-width="isMobile ? 280 : 240"
+		:min-width="isMobile ? 240 : 220"
 		:close-on-content-click="true"
 		:location="isMobile ? 'bottom end' : 'bottom end'"
 		:offset="[0, 4]"
@@ -15,6 +15,8 @@
 					'menu-btn-compact pos-themed-button',
 					isMobile ? 'mobile-menu-btn' : 'desktop-menu-btn',
 				]"
+				:aria-label="__('Open actions menu')"
+				:title="__('Open actions menu')"
 			>
 				<template v-if="isMobile">
 					<v-icon class="pos-text-primary">mdi-dots-vertical</v-icon>
@@ -311,7 +313,7 @@
 
 	<!-- Language Selection Dialog -->
 	<v-dialog v-model="showLanguageDialog" max-width="400" persistent>
-		<v-card>
+		<v-card class="pos-themed-card">
 			<v-card-title class="text-h6 d-flex align-center">
 				<v-icon start color="primary" class="mr-2">mdi-translate</v-icon>
 				{{ __("Select Language") }}
@@ -702,12 +704,12 @@ export default {
 	letter-spacing: 0.5px;
 	box-shadow: none;
 	transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-	background: rgba(25, 118, 210, 0.08) !important;
-	border: 1px solid rgba(25, 118, 210, 0.12);
+	background: var(--pos-hover-bg) !important;
+	border: 1px solid var(--pos-border);
 	backdrop-filter: blur(8px);
 	min-width: 90px;
 	height: 36px;
-	color: #1976d2 !important;
+	color: var(--pos-primary) !important;
 }
 
 /* Mobile Menu Button Styles */
@@ -719,13 +721,13 @@ export default {
 	max-width: 36px !important;
 	width: 36px !important;
 	height: 36px !important;
-	background: rgba(25, 118, 210, 0.08) !important;
-	border: 1px solid rgba(25, 118, 210, 0.12) !important;
+	background: var(--pos-hover-bg) !important;
+	border: 1px solid var(--pos-border) !important;
 }
 
 .mobile-menu-btn:hover {
-	background: rgba(25, 118, 210, 0.12) !important;
-	border-color: rgba(25, 118, 210, 0.2) !important;
+	background: var(--pos-focus-bg) !important;
+	border-color: var(--pos-primary) !important;
 	transform: translateY(-1px);
 }
 
@@ -736,27 +738,27 @@ export default {
 
 /* Elite menu button text and icon colors */
 .menu-btn-compact .v-btn__content {
-	color: #1976d2 !important;
+	color: var(--pos-primary) !important;
 	font-weight: 500;
 }
 
 .menu-btn-compact .pos-text-primary,
 .menu-btn-compact .v-icon {
-	color: #1976d2 !important;
+	color: var(--pos-primary) !important;
 	transition: color 0.25s ease;
 }
 
 .menu-btn-compact:hover {
 	transform: translateY(-1px);
-	box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
-	background: rgba(25, 118, 210, 0.12) !important;
-	border-color: rgba(25, 118, 210, 0.2);
+	box-shadow: 0 4px 12px var(--pos-shadow);
+	background: var(--pos-focus-bg) !important;
+	border-color: var(--pos-primary);
 }
 
 .menu-btn-compact:hover .v-btn__content,
 .menu-btn-compact:hover .pos-text-primary,
 .menu-btn-compact:hover .v-icon {
-	color: #1565c0 !important;
+	color: var(--pos-primary-variant) !important;
 }
 
 /* Elite Menu Card - Glass Morphism Design */
@@ -770,8 +772,8 @@ export default {
 		0 8px 16px rgba(0, 0, 0, 0.04),
 		0 0 0 1px rgba(255, 255, 255, 0.3) inset;
 	backdrop-filter: blur(20px) saturate(1.2);
-	min-width: 260px;
-	max-width: 280px;
+	min-width: min(260px, calc(100vw - 24px));
+	max-width: min(280px, calc(100vw - 24px));
 	margin-top: 2px;
 	display: flex;
 	flex-direction: column;
@@ -800,7 +802,7 @@ export default {
 .menu-header-text-compact {
 	font-size: 14px;
 	font-weight: 500;
-	color: #1976d2;
+	color: var(--pos-primary);
 	letter-spacing: 0.5px;
 	opacity: 0.9;
 }
@@ -808,7 +810,7 @@ export default {
 /* Compact Menu List */
 .menu-list-compact {
 	padding: 8px 6px 12px;
-	background: #ffffff;
+	background: var(--pos-card-bg);
 }
 
 /* Compact Menu Items */
@@ -907,7 +909,7 @@ export default {
 .menu-item-title-compact {
 	font-weight: 600;
 	font-size: 14px;
-	color: #212121;
+	color: var(--pos-text-primary);
 	line-height: 1.2;
 	margin-bottom: 1px;
 }
@@ -923,7 +925,7 @@ export default {
 .menu-section-divider-compact {
 	margin: 8px 10px;
 	opacity: 0.12;
-	border-color: #1976d2;
+	border-color: var(--pos-border);
 }
 
 /* Compact Hover Effects */
@@ -968,8 +970,8 @@ export default {
 /* Compact Responsive Design */
 @media (max-width: 768px) {
 	.menu-card-compact {
-		min-width: 280px;
-		max-width: 320px;
+		min-width: min(280px, calc(100vw - 20px));
+		max-width: min(320px, calc(100vw - 20px));
 		border-radius: 14px;
 		min-height: 300px;
 	}
@@ -1000,8 +1002,8 @@ export default {
 
 @media (max-width: 480px) {
 	.menu-card-compact {
-		min-width: 260px;
-		max-width: 300px;
+		min-width: min(260px, calc(100vw - 16px));
+		max-width: min(300px, calc(100vw - 16px));
 	}
 
 	.menu-item-compact {

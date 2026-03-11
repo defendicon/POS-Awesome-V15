@@ -1,5 +1,5 @@
 <template>
-	<v-app class="customer-display-layout">
+	<v-app class="customer-display-layout posapp pos-theme-root">
 		<v-main class="customer-display-main">
 			<slot />
 		</v-main>
@@ -11,7 +11,10 @@
 <style scoped>
 .customer-display-layout {
 	height: 100dvh;
-	background: radial-gradient(circle at top, #1f2937 0%, #111827 55%, #030712 100%);
+	background:
+		radial-gradient(circle at top, color-mix(in srgb, var(--pos-primary) 22%, transparent) 0%, transparent 42%),
+		linear-gradient(180deg, var(--pos-bg-secondary) 0%, var(--pos-bg-primary) 100%);
+	color: var(--pos-text-primary);
 }
 
 .customer-display-main {

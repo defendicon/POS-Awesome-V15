@@ -277,6 +277,56 @@ export async function change_price_list_rate(
 		}
 	};
 
+	const resolvePriceList = () => {
+		if (typeof context.get_price_list === "function") {
+			return context.get_price_list();
+		}
+		if (typeof context.get_effective_price_list === "function") {
+			return context.get_effective_price_list();
+		}
+		return (
+			context.selected_price_list ||
+			context.customer_info?.customer_price_list ||
+			context.customer_info?.customer_group_price_list ||
+			context.pos_profile?.selling_price_list ||
+			""
+		);
+	};
+
+	const persistRate = async (nextRate: number) => {
+		if (isOffline() || !frappe?.call) {
+			return;
+		}
+
+		const itemCode = item.item_code || item.name;
+		const priceList = resolvePriceList();
+		if (!itemCode || !priceList) {
+			return;
+		}
+
+		try {
+			await frappe.call({
+				method: "posawesome.posawesome.api.items.update_price_list_rate",
+				args: {
+					item_code: itemCode,
+					price_list: priceList,
+					rate: nextRate,
+					uom: item.uom || item.stock_uom || undefined,
+				},
+			});
+			item._price_list_rate_persisted = true;
+		} catch (error: any) {
+			console.error("Failed to persist price list rate:", error);
+			context.toastStore?.show?.({
+				title: __("Price list rate updated locally only"),
+				message:
+					error?.message ||
+					__("Unable to save the rate to the backend price list"),
+				color: "warning",
+			});
+		}
+	};
+
 	const currentRate = parseRate(item.price_list_rate ?? item.rate ?? 0) ?? 0;
 	let prompted: unknown = null;
 
@@ -304,4 +354,5 @@ export async function change_price_list_rate(
 	}
 
 	applyRate(nextRate);
+	await persistRate(nextRate);
 }

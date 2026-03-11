@@ -13,6 +13,7 @@
 					icon="mdi-close"
 					variant="text"
 					density="compact"
+					:aria-label="__('Close packing list dialog')"
 					@click="$emit('update:modelValue', false)"
 				></v-btn>
 			</v-card-title>

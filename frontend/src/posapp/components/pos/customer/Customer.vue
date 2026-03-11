@@ -30,7 +30,7 @@
 			>
 				<!-- Edit icon (left) -->
 				<template #prepend-inner>
-					<v-tooltip text="Edit customer">
+					<v-tooltip :text="__('Edit customer')" content-class="posa-theme-tooltip">
 						<template #activator="{ props }">
 							<v-icon
 								v-bind="props"
@@ -42,7 +42,7 @@
 							</v-icon>
 						</template>
 					</v-tooltip>
-					<v-tooltip text="Reload Customers">
+					<v-tooltip :text="__('Reload customers')" content-class="posa-theme-tooltip">
 						<template #activator="{ props }">
 							<v-icon
 								v-bind="props"
@@ -62,7 +62,7 @@
 					<span v-if="isCustomerSearchLocked" class="customer-load-percent">
 						{{ customerLoadPercent }}%
 					</span>
-					<v-tooltip text="Add new customer">
+					<v-tooltip :text="__('Add new customer')" content-class="posa-theme-tooltip">
 						<template #activator="{ props }">
 							<v-icon
 								v-bind="props"
@@ -189,6 +189,17 @@
 	opacity: 0.3 !important;
 	pointer-events: none;
 	cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+	.customer-input-wrapper {
+		padding-right: 0;
+	}
+
+	.customer-load-percent {
+		min-width: 34px;
+		margin-right: 4px;
+	}
 }
 </style>
 

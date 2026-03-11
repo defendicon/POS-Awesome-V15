@@ -25,6 +25,7 @@
 					class="pos-table__editor-btn uom-arrow"
 					@click.stop="changeUom(item, -1)"
 					:disabled="!item.item_uoms || item.item_uoms.length <= 1"
+					:aria-label="__('Previous unit of measure')"
 				>
 					<v-icon size="small">mdi-chevron-left</v-icon>
 				</v-btn>
@@ -48,6 +49,7 @@
 					class="pos-table__editor-btn uom-arrow"
 					@click.stop="changeUom(item, 1)"
 					:disabled="!item.item_uoms || item.item_uoms.length <= 1"
+					:aria-label="__('Next unit of measure')"
 				>
 					<v-icon size="small">mdi-chevron-right</v-icon>
 				</v-btn>
@@ -61,6 +63,7 @@
 					variant="flat"
 					class="pos-table__qty-btn minus-btn qty-control-btn"
 					@click.stop="$emit('update-qty', { item, value: item.qty - 1 })"
+					:aria-label="__('Decrease quantity')"
 				>
 					<v-icon size="small">mdi-minus</v-icon>
 				</v-btn>
@@ -89,6 +92,7 @@
 					variant="flat"
 					class="pos-table__qty-btn plus-btn qty-control-btn"
 					@click.stop="$emit('update-qty', { item, value: item.qty + 1 })"
+					:aria-label="__('Increase quantity')"
 				>
 					<v-icon size="small">mdi-plus</v-icon>
 				</v-btn>
@@ -149,6 +153,7 @@
 				color="error"
 				size="small"
 				@click="$emit('remove-item', item)"
+				:aria-label="__('Remove item')"
 			></v-btn>
 		</template>
 

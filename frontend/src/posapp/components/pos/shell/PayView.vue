@@ -4,7 +4,7 @@
 			<v-col md="8" cols="12" class="pb-2 pr-0">
 				<v-card
 					class="main mx-auto mt-3 p-3 pb-16 overflow-y-auto pos-themed-card"
-					style="max-height: 94vh; height: 94vh"
+					style="max-height: calc(100dvh - 32px); height: calc(100dvh - 32px)"
 				>
 					<Customer></Customer>
 					<v-divider></v-divider>
@@ -72,7 +72,7 @@
 			<v-col md="4" cols="12" class="pb-3">
 				<v-card
 					class="invoices mx-auto mt-3 p-3 pos-themed-card"
-					style="max-height: 94vh; height: 94vh"
+					style="max-height: calc(100dvh - 32px); height: calc(100dvh - 32px)"
 				>
 					<PayTotalsSidebar
 						v-model:exchange-rate="exchangeRate"

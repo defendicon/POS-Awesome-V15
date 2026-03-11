@@ -60,6 +60,21 @@ export const useItemsSelectorFocus = ({
 		}
 	};
 
+	const releaseBlockedFocus = (target?: Element | null) => {
+		if (typeof document === "undefined") {
+			return;
+		}
+		const active = document.activeElement;
+		if (
+			!(active instanceof HTMLElement) ||
+			active === document.body ||
+			active === target
+		) {
+			return;
+		}
+		active.blur();
+	};
+
 	const scheduleFocusAttempt = (attempt: number) => {
 		if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
 			window.requestAnimationFrame(() => {
@@ -94,6 +109,7 @@ export const useItemsSelectorFocus = ({
 					document.activeElement !== input &&
 					attempt < 3
 				) {
+					releaseBlockedFocus(input instanceof Element ? input : null);
 					scheduleFocusAttempt(attempt);
 				}
 			}

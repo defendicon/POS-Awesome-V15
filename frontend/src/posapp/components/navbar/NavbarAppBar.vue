@@ -380,8 +380,9 @@ export default {
 	gap: 12px;
 	flex-direction: row;
 	/* Default to normal row */
-	flex-shrink: 0;
-	min-width: max-content;
+	flex: 1 1 auto;
+	min-width: 0;
+	max-width: 100%;
 }
 
 .pos-navbar-title-compact {
@@ -406,6 +407,7 @@ export default {
 	gap: 8px;
 	flex-direction: row;
 	/* Default to normal row */
+	min-width: 0;
 }
 
 .rtl-actions-section {
@@ -423,6 +425,7 @@ export default {
 	justify-content: center;
 	gap: 8px;
 	flex-shrink: 0;
+	min-width: 0;
 }
 
 .mobile-primary-actions {
@@ -521,6 +524,11 @@ export default {
 	.mobile-navbar .pos-navbar-actions-section {
 		gap: 4px;
 	}
+	.pos-navbar-title-compact {
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
 }
 
 @media (max-width: 600px) {
@@ -538,11 +546,13 @@ export default {
 	border-bottom: none !important;
 	transition: color 0.3s ease;
 	white-space: nowrap;
-	overflow: visible !important;
+	overflow: hidden !important;
+	text-overflow: ellipsis;
 	display: flex;
 	align-items: center;
-	min-width: max-content;
-	flex-shrink: 0;
+	min-width: 0;
+	max-width: 100%;
+	flex: 1 1 auto;
 	/* Use same blue as Menu button - matching gradient blue */
 	color: #1976d2 !important;
 }
@@ -573,6 +583,8 @@ export default {
 	margin-right: 2px;
 	display: inline-block;
 	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .pos-navbar-title-bold {
@@ -580,6 +592,8 @@ export default {
 	letter-spacing: 0.25px;
 	display: inline-block;
 	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 /* RTL Title Spacing */

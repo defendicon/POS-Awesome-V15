@@ -1,5 +1,5 @@
 <template>
-	<div :style="responsiveStyles">
+	<div class="items-selector-shell" :style="responsiveStyles">
 		<ScanErrorDialog
 			v-model="scanErrorDialog"
 			:message="scanErrorMessage"
@@ -9,16 +9,11 @@
 		/>
 		<v-card
 			:class="[
-				'selection mx-auto my-0 py-0 mt-3 pos-card dynamic-card resizable pos-themed-card',
+				'selection selection-card mx-auto my-0 py-0 mt-3 pos-card dynamic-card resizable pos-themed-card',
+				{ 'selection-card--phone': isPhone },
 				rtlClasses,
 			]"
-			:style="{
-				height: responsiveStyles['--container-height'],
-				maxHeight: responsiveStyles['--container-height'],
-				resize: 'vertical',
-				overflow: 'auto',
-				position: 'relative',
-			}"
+			:style="selectorCardStyle"
 		>
 			<v-progress-linear
 				:active="isLoadingOrSyncing"
@@ -31,9 +26,6 @@
 			<!-- Add dynamic-padding wrapper like Invoice component -->
 			<div class="dynamic-padding">
 				<v-card flat class="selector-section-card selector-header-card pos-themed-card">
-					<div class="section-card-heading">
-						<h3 class="section-card-heading__title">{{ __("Item Search") }}</h3>
-					</div>
 					<ItemHeader
 						v-model:search-input="search_input"
 						v-model:qty-input="debounce_qty"
@@ -79,9 +71,6 @@
 				/>
 
 				<v-card flat class="selector-section-card selector-results-card pos-themed-card">
-					<div class="section-card-heading section-card-heading--with-padding">
-						<h3 class="section-card-heading__title">{{ __("Available Items") }}</h3>
-					</div>
 					<v-row class="items">
 						<v-col cols="12" class="pt-0 mt-0">
 							<ItemsSelectorCards
@@ -153,6 +142,7 @@
 			:active-price-list="active_price_list"
 			:offers-count="offersCount"
 			:coupons-count="couponsCount"
+			:reserve-bottom-dock-space="context === 'pos' && responsive.windowWidth.value < 1100"
 			@open-offers="uiStore.setActiveView('offers')"
 			@open-coupons="uiStore.setActiveView('coupons')"
 		/>
@@ -184,6 +174,7 @@ import {
 	reactive,
 	inject,
 	type Ref,
+	type CSSProperties,
 } from "vue";
 import { storeToRefs } from "pinia";
 import * as _ from "lodash";
@@ -1014,6 +1005,21 @@ const {
 } = scannerInput;
 const { responsiveStyles } = responsive;
 const { rtlClasses } = rtl;
+const isPhone = computed(() => responsive.isPhone.value);
+const canResizeSelectorPanel = computed(
+	() => responsive.windowWidth.value >= 1280 && responsive.windowHeight.value >= 860,
+);
+const phoneSelectorHeight = "calc(var(--viewport-height) - var(--bottom-safe-space) - 24px)";
+const selectorCardStyle = computed<CSSProperties>(() => ({
+	height: isPhone.value ? phoneSelectorHeight : responsiveStyles.value["--container-height"],
+	maxHeight: isPhone.value ? phoneSelectorHeight : responsiveStyles.value["--container-height"],
+	minHeight: isPhone.value
+		? "calc(var(--viewport-height) * 0.46)"
+		: responsiveStyles.value["--container-height"],
+	resize: canResizeSelectorPanel.value ? "vertical" : "none",
+	overflow: "auto",
+	position: "relative",
+}));
 
 // Proxy functions for template
 const esc_event = () => clearSearch();
@@ -1196,12 +1202,21 @@ defineExpose({
 
 <style scoped>
 /* "dynamic-card" no longer composes from pos-card; the pos-card class is added directly in the template */
+.items-selector-shell {
+	min-height: 0;
+	min-width: 0;
+}
+
 .dynamic-padding {
 	/* Equal spacing on all sides for consistent alignment */
 	padding: var(--dynamic-sm);
 	display: flex;
 	flex-direction: column;
 	gap: var(--dynamic-sm);
+}
+
+.selection-card {
+	border-radius: 22px;
 }
 
 .selector-section-card {
@@ -1238,6 +1253,7 @@ defineExpose({
 .selector-results-card {
 	padding: var(--dynamic-xs);
 	overflow: hidden;
+	min-width: 0;
 }
 
 .dynamic-scroll {
@@ -1347,6 +1363,16 @@ defineExpose({
 	.dynamic-padding {
 		/* Reduce spacing uniformly on smaller screens */
 		padding: var(--dynamic-xs);
+	}
+
+	.selection-card {
+		margin-top: var(--dynamic-xs) !important;
+	}
+
+	.selector-header-card {
+		top: max(4px, env(safe-area-inset-top));
+		z-index: 12;
+		box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
 	}
 
 	.items-card-grid {

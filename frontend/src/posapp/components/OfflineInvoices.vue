@@ -53,6 +53,7 @@
 								color="error"
 								class="header-close-btn"
 								@click="dialog = false"
+								:aria-label="__('Close offline invoices dialog')"
 							>
 								<v-tooltip activator="parent" location="bottom">
 									{{ __("Close Dialog") }}
@@ -141,6 +142,7 @@
 										variant="text"
 										@click="removeInvoice(index)"
 										class="delete-btn"
+										:aria-label="__('Delete offline invoice')"
 									>
 										<v-icon size="18">mdi-delete-outline</v-icon>
 										<v-tooltip activator="parent" location="top">

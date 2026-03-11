@@ -25,7 +25,7 @@
 			{{ __("Columns") }}
 		</v-btn>
 		<v-dialog v-model="showColumnSelector" max-width="500px" transition="dialog-bottom-transition">
-			<v-card>
+			<v-card class="pos-themed-card">
 				<v-card-title class="text-h6 pa-4 d-flex align-center">
 					<span>{{ __("Select Columns to Display") }}</span>
 					<v-spacer></v-spacer>
@@ -33,6 +33,7 @@
 						icon="mdi-close"
 						variant="text"
 						density="compact"
+						:aria-label="__('Close column selector')"
 						@click="showColumnSelector = false"
 					></v-btn>
 				</v-card-title>

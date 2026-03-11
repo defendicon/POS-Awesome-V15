@@ -1,6 +1,6 @@
 <template>
 	<v-row dense>
-		<v-col cols="6">
+		<v-col cols="12" sm="6">
 			<v-btn
 				block
 				color="accent"
@@ -13,7 +13,7 @@
 				{{ __("Save & Clear") }}
 			</v-btn>
 		</v-col>
-		<v-col cols="6">
+		<v-col cols="12" sm="6">
 			<v-btn
 				block
 				color="warning"
@@ -26,7 +26,7 @@
 				{{ __("Load Drafts") }}
 			</v-btn>
 		</v-col>
-		<v-col cols="6" v-if="pos_profile.custom_allow_select_sales_order == 1">
+		<v-col cols="12" sm="6" v-if="pos_profile.custom_allow_select_sales_order == 1">
 			<v-btn
 				block
 				color="info"
@@ -39,7 +39,7 @@
 				{{ __("Select S.O") }}
 			</v-btn>
 		</v-col>
-		<v-col cols="6">
+		<v-col cols="12" sm="6">
 			<v-btn
 				block
 				color="deep-purple"
@@ -52,7 +52,7 @@
 				{{ __("Invoice Mgmt") }}
 			</v-btn>
 		</v-col>
-		<v-col cols="6">
+		<v-col cols="12" sm="6">
 			<v-btn
 				block
 				color="error"
@@ -66,7 +66,7 @@
 			</v-btn>
 		</v-col>
 
-		<v-col cols="6" v-if="pos_profile.posa_allow_return == 1">
+		<v-col cols="12" sm="6" v-if="pos_profile.posa_allow_return == 1">
 			<v-btn
 				block
 				color="secondary"
@@ -79,7 +79,7 @@
 				{{ __("Sales Return") }}
 			</v-btn>
 		</v-col>
-		<v-col cols="6" v-if="pos_profile.posa_allow_print_draft_invoices">
+		<v-col cols="12" sm="6" v-if="pos_profile.posa_allow_print_draft_invoices">
 			<v-btn
 				block
 				color="primary"
@@ -92,7 +92,7 @@
 				{{ __("Print Draft") }}
 			</v-btn>
 		</v-col>
-		<v-col cols="6" v-if="showCustomerDisplayButton">
+		<v-col cols="12" sm="6" v-if="showCustomerDisplayButton">
 			<v-btn
 				block
 				color="indigo"
@@ -175,6 +175,8 @@ const showCustomerDisplayButton = computed(() =>
 	transition: all 0.2s ease !important;
 	position: relative;
 	overflow: hidden;
+	min-height: 46px !important;
+	text-transform: none !important;
 }
 
 .summary-btn :deep(.v-btn__content) {
@@ -210,12 +212,12 @@ const showCustomerDisplayButton = computed(() =>
 	.summary-btn {
 		font-size: 0.8rem !important;
 		padding: 4px 8px !important;
-		min-height: 38px !important;
+		min-height: 42px !important;
 	}
 
 	.pay-btn {
 		font-size: 0.95rem !important;
-		min-height: 42px !important;
+		min-height: 48px !important;
 	}
 }
 

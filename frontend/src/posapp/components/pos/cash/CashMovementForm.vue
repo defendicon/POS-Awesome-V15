@@ -2,7 +2,7 @@
 	<v-card class="pa-4 pos-themed-card">
 		<div class="d-flex flex-wrap align-center justify-space-between ga-3 mb-1">
 			<div class="text-h6">{{ __("Cash Movement") }}</div>
-			<div style="min-width: 190px; max-width: 220px; width: 100%;">
+			<div class="cash-movement-form__posting-date">
 				<v-text-field
 					v-model="postingDate"
 					type="date"
@@ -503,3 +503,10 @@ watch(
 	},
 );
 </script>
+
+<style scoped>
+.cash-movement-form__posting-date {
+	width: min(220px, 100%);
+	min-width: 0;
+}
+</style>
