@@ -295,6 +295,7 @@ const {
 
 const { selectedCustomer, customerInfo } = storeToRefs(customersStore);
 const { activeView, paymentDialogOpen } = storeToRefs(uiStore);
+const { invoiceType } = storeToRefs(invoiceStore);
 
 // State
 const is_return = ref(false);
@@ -304,7 +305,6 @@ const redeem_customer_credit = ref(false);
 const pos_profile = ref("");
 const stock_settings = ref("");
 const pos_settings = ref({});
-const invoiceType = ref("Invoice");
 const is_cashback = ref(true);
 const paid_change = ref(0);
 const credit_change = ref(0);
@@ -1098,6 +1098,28 @@ watch(
 	{ immediate: true },
 );
 
+watch(
+	invoiceType,
+	(data) => {
+		if (invoice_doc.value && data !== "Order") {
+			invoice_doc.value.posa_delivery_date = null;
+			invoice_doc.value.posa_notes = null;
+			invoice_doc.value.posa_authorization_code = null;
+			invoice_doc.value.shipping_address_name = null;
+		} else if (invoice_doc.value && data === "Order") {
+			new_delivery_date.value = formatDateDisplay(frappe.datetime.now_date());
+			update_delivery_date();
+		}
+		if (invoice_doc.value && data === "Return") {
+			invoice_doc.value.is_return = 1;
+			ensureReturnPaymentsAreNegative();
+			is_credit_return.value = false;
+			return_valid_upto_date.value = null;
+		}
+	},
+	{ immediate: true },
+);
+
 watch(diff_payment, (newVal) => {
 	if (is_user_editing_paid_change.value) return;
 
@@ -1357,24 +1379,6 @@ onMounted(() => {
 				}
 			}
 		});
-		eventBus.on("update_invoice_type", (data) => {
-			invoiceType.value = data;
-			if (invoice_doc.value && data !== "Order") {
-				invoice_doc.value.posa_delivery_date = null;
-				invoice_doc.value.posa_notes = null;
-				invoice_doc.value.posa_authorization_code = null;
-				invoice_doc.value.shipping_address_name = null;
-			} else if (invoice_doc.value && data === "Order") {
-				new_delivery_date.value = formatDateDisplay(frappe.datetime.now_date());
-				update_delivery_date();
-			}
-			if (invoice_doc.value && data === "Return") {
-				invoice_doc.value.is_return = 1;
-				ensureReturnPaymentsAreNegative();
-				is_credit_return.value = false;
-				return_valid_upto_date.value = null;
-			}
-		});
 		eventBus.on("set_pos_settings", (data) => {
 			pos_settings.value = data || {};
 			if (invoice_doc.value && !invoice_doc.value.is_return) {
@@ -1404,7 +1408,6 @@ onBeforeUnmount(() => {
 	eventBus.off("send_invoice_doc_payment");
 	eventBus.off("register_pos_profile");
 	eventBus.off("add_the_new_address");
-	eventBus.off("update_invoice_type");
 	eventBus.off("set_pos_settings");
 	eventBus.off("set_mpesa_payment");
 	eventBus.off("queue_submit_payment_shortcut", queueShortcutSubmit);
