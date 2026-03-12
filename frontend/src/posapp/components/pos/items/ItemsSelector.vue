@@ -248,6 +248,8 @@ const uiStore = useUIStore();
 const invoiceStore = useInvoiceStore();
 const { selectedCustomer } = storeToRefs(customersStore);
 const { posProfile: uiPosProfile, searchFocusTrigger, activeView } = storeToRefs(uiStore);
+const { deferStockValidationToPayment: invoiceTypeDefersStockValidation } =
+	storeToRefs(invoiceStore);
 
 const __ = (window as any).__;
 
@@ -319,7 +321,6 @@ const item_group = computed({
 		itemsIntegration.item_group.value = normalized;
 	},
 });
-const current_invoice_type = ref("Invoice");
 const virtualScrollBuffer = ref(200);
 const localStorageAvailable = ref(true);
 
@@ -372,7 +373,7 @@ const isReturnInvoice = computed(() => {
 });
 
 const blockSaleBeyondAvailableQty = computed(() => {
-	if (["Order", "Quotation"].includes(current_invoice_type.value)) {
+	if (props.context === "purchase" || invoiceTypeDefersStockValidation.value) {
 		return false;
 	}
 	return parseBooleanSetting(
@@ -381,7 +382,7 @@ const blockSaleBeyondAvailableQty = computed(() => {
 });
 
 const deferStockValidationToPayment = computed(() =>
-	["Order", "Quotation"].includes(current_invoice_type.value),
+	props.context === "purchase" || invoiceTypeDefersStockValidation.value,
 );
 const forceCustomerPriceList = computed(() =>
 	parseBooleanSetting(pos_profile.value?.posa_force_price_from_customer_price_list),
@@ -883,7 +884,6 @@ onMounted(async () => {
 		eventBus.on("update_customer_price_list", (priceList) => {
 			syncSelectorPriceList(priceList);
 		});
-		eventBus.on("update_invoice_type", handleInvoiceTypeUpdate);
 		eventBus.on("focus_item_search", requestItemSearchFocus);
 		eventBus.on("remote_stock_adjustment", handleRemoteStockAdjustment);
 	}
@@ -955,7 +955,6 @@ onBeforeUnmount(() => {
 	if (eventBus) {
 		eventBus.off("update_currency");
 		eventBus.off("update_customer_price_list");
-		eventBus.off("update_invoice_type", handleInvoiceTypeUpdate);
 		eventBus.off("focus_item_search", requestItemSearchFocus);
 		eventBus.off("remote_stock_adjustment", handleRemoteStockAdjustment);
 	}
@@ -1101,11 +1100,6 @@ const onScannerOpened = () => {
 const onScannerClosed = () => {
 	scannerInput.cameraScannerActive.value = false;
 	newItemDialogAwaitingScan.value = false;
-};
-
-const handleInvoiceTypeUpdate = (type: unknown) => {
-	const normalized = typeof type === "string" ? type : "";
-	current_invoice_type.value = normalized || "Invoice";
 };
 
 const getItemRowClass = (item) => ({

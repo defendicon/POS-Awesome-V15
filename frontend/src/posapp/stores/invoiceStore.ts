@@ -40,6 +40,7 @@ const cloneItem = <T>(item: T): T => ({ ...item });
 
 export const useInvoiceStore = defineStore("invoice", () => {
 	const invoiceDoc = ref<InvoiceDoc | null>(null);
+	const invoiceType = ref("Invoice");
 	// Normalized state: keys array + items map
 	const itemOrder = ref<string[]>([]);
 	const itemsData = reactive(new Map<string, CartItem>());
@@ -131,6 +132,17 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	const deliveryCharges = ref<DeliveryCharge[]>([]);
 	const deliveryChargesRate = ref(0);
 	const selectedDeliveryCharge = ref("");
+	const deferStockValidationToPayment = computed(() =>
+		invoiceType.value === "Order" || invoiceType.value === "Quotation",
+	);
+
+	const setInvoiceType = (value: string) => {
+		invoiceType.value = typeof value === "string" && value ? value : "Invoice";
+	};
+
+	const resetInvoiceType = () => {
+		invoiceType.value = "Invoice";
+	};
 
 	const setPostingDate = (date: string) => {
 		postingDate.value = date;
@@ -358,6 +370,8 @@ export const useInvoiceStore = defineStore("invoice", () => {
 
 	return {
 		invoiceDoc,
+		invoiceType,
+		deferStockValidationToPayment,
 		items,
 		itemOrder,
 		itemsData, // Expose raw map if needed
@@ -369,6 +383,8 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		itemsCount,
 		itemsMap,
 		setInvoiceDoc,
+		setInvoiceType,
+		resetInvoiceType,
 		mergeInvoiceDoc,
 		touch,
 		setItems,
