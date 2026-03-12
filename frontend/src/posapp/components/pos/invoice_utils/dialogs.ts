@@ -125,6 +125,12 @@ export async function show_payment(context: any) {
 			context.uiStore.closePaymentDialog?.();
 			context.uiStore.setActiveView("payment");
 		}
+
+		if (typeof context.$nextTick === "function") {
+			await context.$nextTick();
+		}
+		await new Promise((resolve) => setTimeout(resolve, 0));
+
 		context.eventBus.emit("show_payment", "true");
 		context.eventBus.emit("send_invoice_doc_payment", invoice_doc);
 	} catch (error: any) {
