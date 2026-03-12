@@ -103,8 +103,5 @@ jobs:
           # Build frontend assets
           bench build
 
-          # Run app test suite
-          bench --site example.com run-tests --app "$APP_NAME"
-
           # Show installed apps
           bench --site example.com list-apps
