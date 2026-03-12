@@ -649,11 +649,6 @@
   resolved "https://registry.npmjs.org/@socket.io/component-emitter/-/component-emitter-3.1.2.tgz"
   integrity sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==
 
-"@techstark/opencv-js@^4.11.0-release.1":
-  version "4.11.0-release.1"
-  resolved "https://registry.npmjs.org/@techstark/opencv-js/-/opencv-js-4.11.0-release.1.tgz"
-  integrity sha512-d5h8cMiSbbnme5+I1ta4++EJ3mkca1zkVNh0A4+5ASJYOmO5OhVPRX3oPnNzs9I3KyGVX7QeFU8gVoI7I0w8RQ==
-
 "@types/dom-webcodecs@^0.1.11":
   version "0.1.16"
   resolved "https://registry.npmjs.org/@types/dom-webcodecs/-/dom-webcodecs-0.1.16.tgz"

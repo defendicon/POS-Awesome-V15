@@ -35,6 +35,27 @@ interface OpenCVWorkerManagerOptions {
 	logger?: Pick<Console, "log" | "warn" | "error">;
 }
 
+function resolveWorkerUrl() {
+	const baseUrl = "/assets/posawesome/dist/js/posapp/workers/opencvWorker.js";
+	if (typeof window === "undefined") {
+		return baseUrl;
+	}
+
+	try {
+		const enabled =
+			window.localStorage?.getItem("posawesome_debug_opencv") === "1";
+		if (!enabled) {
+			return baseUrl;
+		}
+
+		const url = new URL(baseUrl, window.location.origin);
+		url.searchParams.set("debug_opencv", "1");
+		return url.toString();
+	} catch (_error) {
+		return baseUrl;
+	}
+}
+
 /**
  * OpenCV Worker Manager class for handling Web Worker communication.
  */
@@ -53,8 +74,7 @@ export class OpenCVWorkerManager {
 	constructor(options: OpenCVWorkerManagerOptions = {}) {
 		this.createWorker =
 			options.createWorker ??
-			(() =>
-				new Worker("/assets/posawesome/dist/js/posapp/workers/opencvWorker.js"));
+			(() => new Worker(resolveWorkerUrl()));
 		this.messageTimeoutMs = options.messageTimeoutMs ?? 10000;
 		this.initTimeoutMs = options.initTimeoutMs ?? 45000;
 		this.logger = options.logger ?? console;

@@ -38,7 +38,11 @@ export default defineConfig({
 					dest: "posapp",
 				},
 				{
-					src: "src/libs/*",
+					src: "src/libs/dexie.min.js",
+					dest: "libs",
+				},
+				{
+					src: "src/libs/opencv.js",
 					dest: "libs",
 				},
 				{

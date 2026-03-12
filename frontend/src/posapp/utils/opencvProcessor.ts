@@ -1,4 +1,24 @@
 import opencvWorkerManager from "./opencvWorkerManager.ts";
+import { isDebugFlagEnabled } from "./debug";
+
+const runtimeConsole = globalThis.console;
+const isOpenCvDebugEnabled = () => isDebugFlagEnabled("posawesome_debug_opencv");
+const debugLog = (...args: unknown[]) => {
+    if (isOpenCvDebugEnabled()) {
+        runtimeConsole.log(...args);
+    }
+};
+const debugWarn = (...args: unknown[]) => {
+    if (isOpenCvDebugEnabled()) {
+        runtimeConsole.warn(...args);
+    }
+};
+const console = {
+    ...runtimeConsole,
+    log: (...args: unknown[]) => debugLog(...args),
+    warn: (...args: unknown[]) => debugWarn(...args),
+    error: (...args: unknown[]) => runtimeConsole.error(...args),
+};
 
 /**
  * Interface for image quality assessment results.

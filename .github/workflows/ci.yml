@@ -56,7 +56,7 @@ jobs:
           cd frontend
           yarn install --frozen-lockfile
           yarn type-check
-          yarn vitest run tests/cashMovement.spec.ts tests/offlineCashMovements.spec.ts tests/loaderPathNormalization.spec.ts tests/offlineKeyMapParity.spec.ts
+          yarn vitest run --reporter=dot
 
       - name: Install Frappe Bench CLI
         run: |
@@ -102,6 +102,9 @@ jobs:
 
           # Build frontend assets
           bench build
+
+          # Run app test suite
+          bench --site example.com run-tests --app "$APP_NAME"
 
           # Show installed apps
           bench --site example.com list-apps

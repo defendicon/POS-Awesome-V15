@@ -139,6 +139,9 @@ frappe.PosApp.posapp = class {
 
 	unmount() {
 		if (this.app) {
+			const socketStore = useSocketStore();
+			socketStore.dispose();
+
 			// Clean up router to prevent global navigation interference
 			if (this.router) {
 				// Remove all route guards and listeners

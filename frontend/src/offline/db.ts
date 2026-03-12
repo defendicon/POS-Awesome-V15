@@ -1,9 +1,19 @@
 import Dexie from "dexie/dist/dexie.mjs";
 
 type AnyRecord = Record<string, any>;
+type DbAvailabilityState = {
+	supported: boolean;
+	initFailed: boolean;
+	reason: string | null;
+};
 
 // --- Dexie initialization ---------------------------------------------------
 export const db = new Dexie("posawesome_offline");
+export const dbAvailability: DbAvailabilityState = {
+	supported: typeof indexedDB !== "undefined",
+	initFailed: false,
+	reason: null,
+};
 
 const BASE_SCHEMA = {
 	keyval: "&key",
@@ -132,6 +142,12 @@ export const memory: AnyRecord = {
 
 export const initPromise = new Promise<void>((resolve) => {
 	const init = async () => {
+		if (!dbAvailability.supported) {
+			dbAvailability.reason = "indexeddb-unavailable";
+			resolve();
+			return;
+		}
+
 		try {
 			await db.open();
 			for (const key of Object.keys(memory)) {
@@ -164,7 +180,10 @@ export const initPromise = new Promise<void>((resolve) => {
 				}
 			}
 		} catch (e) {
-			console.error("Failed to initialize offline DB", e);
+			dbAvailability.initFailed = true;
+			dbAvailability.reason =
+				e instanceof Error ? e.name || e.message : "db-init-failed";
+			console.warn("Offline DB unavailable; continuing with in-memory cache only");
 		} finally {
 			resolve();
 		}
@@ -314,6 +333,10 @@ export async function forceClearAllCache() {
 }
 
 export async function checkDbHealth() {
+	if (!dbAvailability.supported) {
+		return false;
+	}
+
 	try {
 		if (!db.isOpen()) {
 			await db.open();

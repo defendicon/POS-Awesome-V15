@@ -2,6 +2,22 @@
 let cv = null;
 let initialized = false;
 let barcodeDetector = null;
+const DEBUG_OPENCV = /(?:\?|&)debug_opencv=1(?:&|$)/.test(self.location?.search || "");
+const runtimeConsole = self.console;
+const console = {
+	...runtimeConsole,
+	log: (...args) => {
+		if (DEBUG_OPENCV) {
+			runtimeConsole.log(...args);
+		}
+	},
+	warn: (...args) => {
+		if (DEBUG_OPENCV) {
+			runtimeConsole.warn(...args);
+		}
+	},
+	error: (...args) => runtimeConsole.error(...args),
+};
 
 // Load OpenCV.js from local bundle
 async function initializeOpenCV() {
