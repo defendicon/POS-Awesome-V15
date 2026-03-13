@@ -76,6 +76,7 @@
 				>
 					<PayTotalsSidebar
 						v-model:exchange-rate="exchangeRate"
+						v-model:auto-allocate-payment-amount="autoAllocatePaymentAmount"
 						:pos-profile="pos_profile"
 						:total-selected-invoices="total_selected_invoices"
 						:selected-invoices-count="selected_invoices.length"
@@ -178,6 +179,7 @@ export default {
 		const company = ref("");
 		const pos_profile_search = ref("");
 		const currency_filter = ref("ALL");
+		const autoAllocatePaymentAmount = ref(true);
 		const exchangeRate = ref(null);
 		const companyCurrency = ref(null);
 		const exchangeRateLoading = ref(false);
@@ -446,6 +448,8 @@ export default {
 			get_unallocated_payments,
 			get_draft_mpesa_payments_register,
 			set_mpesa_search_params,
+			autoAllocatePaymentAmount,
+			autoReconcile,
 		});
 
 		const fetchCompanyCurrency = async () => {
@@ -727,6 +731,7 @@ export default {
 			company,
 			pos_profile_search,
 			currency_filter,
+			autoAllocatePaymentAmount,
 			exchangeRate,
 			companyCurrency,
 			exchangeRateLoading,

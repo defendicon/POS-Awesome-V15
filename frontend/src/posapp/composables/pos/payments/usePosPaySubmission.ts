@@ -12,6 +12,7 @@ type PosPaySubmissionArgs = {
 	posOpeningShift: Ref<any>;
 	exchangeRate: Ref<number>;
 	invoiceTotalCurrency: Ref<string>;
+	autoAllocatePaymentAmount: Ref<boolean>;
 	payment_methods: Ref<any[]>;
 	selected_invoices: Ref<any[]>;
 	selected_payments: Ref<any[]>;
@@ -26,6 +27,10 @@ type PosPaySubmissionArgs = {
 	get_unallocated_payments: () => void;
 	get_draft_mpesa_payments_register: () => void;
 	set_mpesa_search_params: () => void;
+	autoReconcile: (
+		_posProfileSearch?: string | null,
+		_options?: { suppressToast?: boolean },
+	) => Promise<any>;
 };
 
 export function usePosPaySubmission({
@@ -35,6 +40,7 @@ export function usePosPaySubmission({
 	posOpeningShift,
 	exchangeRate,
 	invoiceTotalCurrency,
+	autoAllocatePaymentAmount,
 	payment_methods,
 	selected_invoices,
 	selected_payments,
@@ -49,6 +55,7 @@ export function usePosPaySubmission({
 	get_unallocated_payments,
 	get_draft_mpesa_payments_register,
 	set_mpesa_search_params,
+	autoReconcile,
 }: PosPaySubmissionArgs) {
 	const isSubmitting = ref(false);
 
@@ -124,6 +131,7 @@ export function usePosPaySubmission({
 				selected_mpesa_payments: selected_mpesa_payments.value,
 				total_selected_payments: flt(total_selected_payments.value),
 				total_payment_methods: flt(total_payment_methods.value),
+				auto_allocate_payment_amount: !!autoAllocatePaymentAmount.value,
 				total_selected_mpesa_payments: flt(
 					total_selected_mpesa_payments.value,
 				),
@@ -162,6 +170,20 @@ export function usePosPaySubmission({
 			}
 
 			frappe.utils.play_sound("submit");
+
+			if (autoAllocatePaymentAmount.value) {
+				const autoReconcileResult = await autoReconcile(
+					posProfile.value?.name || null,
+					{ suppressToast: true },
+				);
+				const autoReconcileSummary =
+					autoReconcileResult?.summary ||
+					__("Auto reconciliation completed after payment submit.");
+				eventBus.emit("show_message", {
+					title: `${__("Payment submitted.")} ${autoReconcileSummary}`,
+					color: autoReconcileResult?.total_allocated ? "success" : "info",
+				});
+			}
 
 			if (printAfter) {
 				const payment_name =

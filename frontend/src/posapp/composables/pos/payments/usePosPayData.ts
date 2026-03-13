@@ -14,6 +14,10 @@ type PosPayDataArgs = {
 	formatCurrency: (_value: number) => string;
 };
 
+type AutoReconcileOptions = {
+	suppressToast?: boolean;
+};
+
 export function usePosPayData({
 	posProfile,
 	company,
@@ -201,7 +205,10 @@ export function usePosPayData({
 		}
 	}
 
-	async function autoReconcile(posProfileSearch: string | null = null) {
+	async function autoReconcile(
+		posProfileSearch: string | null = null,
+		options: AutoReconcileOptions = {},
+	) {
 		if (!posProfile.value.posa_allow_reconcile_payments) return;
 		if (!customerName.value) {
 			frappe.msgprint(__("Please select a customer before reconciling."));
@@ -253,7 +260,7 @@ export function usePosPayData({
 			await get_outstanding_invoices(posProfileSearch);
 			await get_unallocated_payments();
 
-			if (auto_reconcile_summary.value) {
+			if (auto_reconcile_summary.value && !options.suppressToast) {
 				eventBus.emit("show_message", {
 					title: auto_reconcile_summary.value,
 					color: total_allocated ? "success" : "info",
@@ -272,11 +279,13 @@ export function usePosPayData({
 					indicator: "orange",
 				});
 			}
+			return result;
 		} catch (error: any) {
 			console.error("Auto reconciliation failed", error);
 			frappe.msgprint(
 				error?.message || __("Failed to auto reconcile payments."),
 			);
+			return null;
 		} finally {
 			auto_reconcile_loading.value = false;
 		}

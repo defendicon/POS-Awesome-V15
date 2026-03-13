@@ -54,6 +54,64 @@ def _coerce_bool(value, default=False):
     return default
 
 
+def _get_customer_payments_made_as_outstanding(
+    customer,
+    company,
+    currency=None,
+    include_all_currencies=False,
+):
+    """Expose customer pay-type advances on the outstanding side for reconciliation."""
+
+    filters = {
+        "party": customer,
+        "company": company,
+        "docstatus": 1,
+        "party_type": "Customer",
+        "payment_type": "Pay",
+        "unallocated_amount": [">", 0],
+    }
+    if currency and not include_all_currencies:
+        filters["paid_to_account_currency"] = currency
+
+    customer_payments = frappe.get_list(
+        "Payment Entry",
+        filters=filters,
+        fields=[
+            "name",
+            "party_name as customer_name",
+            "posting_date",
+            "paid_amount",
+            "received_amount",
+            "unallocated_amount",
+            "mode_of_payment",
+            "paid_to_account_currency as currency",
+            "paid_to as account",
+        ],
+        order_by="posting_date desc, name desc",
+    )
+
+    return [
+        frappe._dict(
+            {
+                "voucher_no": row.get("name"),
+                "voucher_type": "Payment Entry",
+                "outstanding_amount": flt(row.get("unallocated_amount")),
+                "invoice_amount": flt(row.get("paid_amount") or row.get("received_amount")),
+                "due_date": row.get("posting_date"),
+                "posting_date": row.get("posting_date"),
+                "currency": row.get("currency") or currency,
+                "pos_profile": None,
+                "customer": customer,
+                "customer_name": row.get("customer_name"),
+                "mode_of_payment": row.get("mode_of_payment"),
+                "account": row.get("account"),
+            }
+        )
+        for row in customer_payments
+        if flt(row.get("unallocated_amount")) > 0
+    ]
+
+
 @frappe.whitelist()
 def get_outstanding_invoices(customer=None, company=None, currency=None, pos_profile=None,
                              include_all_currencies=False, page_start=0, page_length=None):
@@ -137,6 +195,18 @@ def get_outstanding_invoices(customer=None, company=None, currency=None, pos_pro
                     }
                 )
             )
+
+        existing_keys = {(row.get("voucher_type"), row.get("voucher_no")) for row in normalized_rows}
+        for payment_row in _get_customer_payments_made_as_outstanding(
+            customer=customer,
+            company=company,
+            currency=currency,
+            include_all_currencies=include_all_currencies,
+        ):
+            key = (payment_row.get("voucher_type"), payment_row.get("voucher_no"))
+            if key not in existing_keys:
+                normalized_rows.append(payment_row)
+                existing_keys.add(key)
 
         normalized_rows = sorted(
             normalized_rows,

@@ -7,7 +7,6 @@ from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation impo
 from erpnext.accounts.utils import reconcile_against_document
 from posawesome.posawesome.api.m_pesa import submit_mpesa_payment
 from posawesome.posawesome.api.payment_processing.creation import create_payment_entry
-from posawesome.posawesome.api.payment_processing.data import get_outstanding_invoices
 
 @frappe.whitelist()
 def process_pos_payment(payload):
@@ -70,29 +69,6 @@ def process_pos_payment(payload):
             )
 
     add_remaining_invoices(data.selected_invoices)
-
-    should_auto_fetch_invoices = (
-        allow_reconcile_payments
-        and len(remaining_invoices) == 0
-        and (
-            (len(data.payment_methods) > 0 and flt(data.total_payment_methods) > 0)
-            or (len(data.selected_payments) > 0 and flt(data.total_selected_payments) > 0)
-            or (
-                len(data.selected_mpesa_payments) > 0
-                and flt(data.total_selected_mpesa_payments) > 0
-            )
-        )
-    )
-
-    if should_auto_fetch_invoices:
-        auto_invoices = get_outstanding_invoices(
-            customer=customer,
-            company=company,
-            currency=currency,
-            pos_profile=data.pos_profile_name,
-            include_all_currencies=False,
-        )
-        add_remaining_invoices(auto_invoices)
 
     new_payments_entry = []
     all_payments_entry = []
