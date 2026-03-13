@@ -176,6 +176,12 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		selectedDeliveryCharge.value = val;
 	};
 
+	const resetDeliveryCharges = () => {
+		deliveryCharges.value = [];
+		deliveryChargesRate.value = 0;
+		selectedDeliveryCharge.value = "";
+	};
+
 	const setItems = (list: any[]) => {
 		itemsData.clear();
 		const order: string[] = [];
@@ -329,8 +335,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 			discountAmount.value = 0;
 			additionalDiscount.value = 0;
 			additionalDiscountPercentage.value = 0;
-			deliveryChargesRate.value = 0;
-			selectedDeliveryCharge.value = "";
+			resetDeliveryCharges();
 		}
 
 		touch();
@@ -422,6 +427,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		setDeliveryCharges,
 		setDeliveryChargesRate,
 		setSelectedDeliveryCharge,
+		resetDeliveryCharges,
 	};
 });
 

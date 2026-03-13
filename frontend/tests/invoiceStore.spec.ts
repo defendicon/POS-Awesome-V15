@@ -39,4 +39,18 @@ describe("invoiceStore invoice type state", () => {
 		expect(store.invoiceType).toBe("Invoice");
 		expect(store.deferStockValidationToPayment).toBe(false);
 	});
+
+	it("clears delivery charge stickies when the invoice is cleared", () => {
+		const store = useInvoiceStore();
+
+		store.setDeliveryCharges([{ name: "Home Delivery", rate: 250 } as any]);
+		store.setDeliveryChargesRate(250);
+		store.setSelectedDeliveryCharge("Home Delivery");
+
+		store.clear();
+
+		expect(store.deliveryCharges).toEqual([]);
+		expect(store.deliveryChargesRate).toBe(0);
+		expect(store.selectedDeliveryCharge).toBe("");
+	});
 });
