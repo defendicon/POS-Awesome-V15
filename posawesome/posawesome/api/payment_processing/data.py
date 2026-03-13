@@ -2,10 +2,47 @@ import frappe
 from frappe import _
 from frappe.utils import nowdate, getdate, flt, cint
 from erpnext.accounts.party import get_party_account
-from erpnext.accounts.utils import get_outstanding_invoices as get_erpnext_outstanding_invoices
 from erpnext.controllers.accounts_controller import get_advance_payment_entries_for_regional
 
 MAX_OUTSTANDING_PAGE_LENGTH = 500
+
+
+def _get_open_sales_invoices(
+    customer,
+    company,
+    currency=None,
+    pos_profile=None,
+    include_all_currencies=False,
+):
+    filters = {
+        "customer": customer,
+        "company": company,
+        "docstatus": 1,
+        "outstanding_amount": (">", 0),
+    }
+    if currency and not include_all_currencies:
+        filters["currency"] = currency
+    if pos_profile:
+        filters["pos_profile"] = pos_profile
+
+    return frappe.get_list(
+        "Sales Invoice",
+        filters=filters,
+        fields=[
+            "name",
+            "posting_date",
+            "due_date",
+            "outstanding_amount",
+            "rounded_total",
+            "base_rounded_total",
+            "grand_total",
+            "base_grand_total",
+            "currency",
+            "pos_profile",
+            "customer_name",
+        ],
+        order_by="posting_date desc, name desc",
+    )
 
 
 def _coerce_text_filter(value, field_label):
@@ -136,62 +173,41 @@ def get_outstanding_invoices(customer=None, company=None, currency=None, pos_pro
         if page_length:
             page_length = min(page_length, MAX_OUTSTANDING_PAGE_LENGTH)
 
-        party_account = get_party_account("Customer", customer, company)
         customer_name = frappe.get_cached_value("Customer", customer, "customer_name")
 
-        outstanding_invoices = get_erpnext_outstanding_invoices(
-            "Customer",
-            customer,
-            [party_account],
-        )
-
-        sales_invoice_meta = {}
-        sales_invoice_names = [
-            row.get("voucher_no")
-            for row in outstanding_invoices
-            if row.get("voucher_type") == "Sales Invoice"
-        ]
-        if sales_invoice_names:
-            sales_invoice_meta = {
-                row.get("name"): row
-                for row in frappe.get_list(
-                    "Sales Invoice",
-                    filters={"name": ("in", sales_invoice_names)},
-                    fields=["name", "pos_profile", "currency", "customer_name"],
-                )
-            }
-
         normalized_rows = []
-        for invoice in outstanding_invoices:
+        for invoice in _get_open_sales_invoices(
+            customer=customer,
+            company=company,
+            currency=currency,
+            pos_profile=pos_profile,
+            include_all_currencies=include_all_currencies,
+        ):
             outstanding_amount = flt(invoice.get("outstanding_amount"))
             if outstanding_amount <= 0:
                 continue
 
-            voucher_type = invoice.get("voucher_type")
-            voucher_no = invoice.get("voucher_no")
-            meta = sales_invoice_meta.get(voucher_no) if voucher_type == "Sales Invoice" else {}
-
-            row_currency = invoice.get("currency") or (meta or {}).get("currency")
-            if currency and not include_all_currencies and row_currency != currency:
-                continue
-
-            row_pos_profile = (meta or {}).get("pos_profile")
-            if pos_profile and voucher_type == "Sales Invoice" and row_pos_profile != pos_profile:
-                continue
+            row_currency = invoice.get("currency") or currency
 
             normalized_rows.append(
                 frappe._dict(
                     {
-                        "voucher_no": voucher_no,
-                        "voucher_type": voucher_type,
+                        "voucher_no": invoice.get("name"),
+                        "voucher_type": "Sales Invoice",
                         "outstanding_amount": outstanding_amount,
-                        "invoice_amount": flt(invoice.get("invoice_amount")) or outstanding_amount,
+                        "invoice_amount": flt(
+                            invoice.get("rounded_total")
+                            or invoice.get("base_rounded_total")
+                            or invoice.get("grand_total")
+                            or invoice.get("base_grand_total")
+                            or outstanding_amount
+                        ),
                         "due_date": invoice.get("due_date") or invoice.get("posting_date"),
                         "posting_date": invoice.get("posting_date"),
                         "currency": row_currency,
-                        "pos_profile": row_pos_profile,
+                        "pos_profile": invoice.get("pos_profile"),
                         "customer": customer,
-                        "customer_name": (meta or {}).get("customer_name") or customer_name,
+                        "customer_name": invoice.get("customer_name") or customer_name,
                     }
                 )
             )

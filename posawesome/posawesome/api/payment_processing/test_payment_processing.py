@@ -239,6 +239,90 @@ class TestPosPaymentProcessing(unittest.TestCase):
         self.assertEqual(rows[0].get("voucher_type"), "Payment Entry")
         self.assertEqual(rows[0].get("voucher_no"), "ACC-PAY-2025-00484")
 
+    @patch(
+        "posawesome.posawesome.api.payment_processing.data._get_customer_payments_made_as_outstanding"
+    )
+    @patch(
+        "posawesome.posawesome.api.payment_processing.data.get_erpnext_outstanding_invoices",
+        side_effect=AssertionError("legacy outstanding helper should not be called"),
+        create=True,
+    )
+    @patch("posawesome.posawesome.api.payment_processing.data.get_party_account")
+    @patch("posawesome.posawesome.api.payment_processing.data.frappe")
+    def test_get_outstanding_invoices_queries_only_open_sales_invoices(
+        self,
+        mock_frappe,
+        mock_get_party_account,
+        mock_legacy_helper,
+        mock_payments_as_outstanding,
+    ):
+        mock_frappe._dict.side_effect = lambda value: AttrDict(value)
+        mock_frappe.get_cached_value.return_value = "Customer 727"
+        mock_get_party_account.return_value = "Debtors - TC"
+        mock_payments_as_outstanding.return_value = [
+            AttrDict(
+                {
+                    "voucher_no": "ACC-PAY-2026-0001",
+                    "voucher_type": "Payment Entry",
+                    "outstanding_amount": 30,
+                    "invoice_amount": 30,
+                    "due_date": "2026-03-11",
+                    "posting_date": "2026-03-11",
+                    "currency": "USD",
+                    "pos_profile": None,
+                    "customer": "Customer 727",
+                    "customer_name": "Customer 727",
+                }
+            )
+        ]
+
+        def fake_get_list(doctype, filters=None, fields=None, order_by=None, **kwargs):
+            self.assertEqual(doctype, "Sales Invoice")
+            self.assertEqual(filters["customer"], "Customer 727")
+            self.assertEqual(filters["company"], "Test Company")
+            self.assertEqual(filters["docstatus"], 1)
+            self.assertEqual(filters["outstanding_amount"], (">", 0))
+            self.assertEqual(filters["currency"], "USD")
+            self.assertEqual(filters["pos_profile"], "Main POS")
+            self.assertIn("outstanding_amount", fields)
+            self.assertEqual(order_by, "posting_date desc, name desc")
+            return [
+                AttrDict(
+                    {
+                        "name": "SINV-OPEN-0001",
+                        "posting_date": "2026-03-12",
+                        "due_date": "2026-03-15",
+                        "outstanding_amount": 125,
+                        "base_rounded_total": 125,
+                        "grand_total": 125,
+                        "currency": "USD",
+                        "pos_profile": "Main POS",
+                        "customer_name": "Customer 727",
+                    }
+                )
+            ]
+
+        mock_frappe.get_list.side_effect = fake_get_list
+
+        rows = self.data.get_outstanding_invoices(
+            customer="Customer 727",
+            company="Test Company",
+            currency="USD",
+            pos_profile="Main POS",
+            include_all_currencies=False,
+        )
+
+        self.assertEqual(
+            [(row.get("voucher_type"), row.get("voucher_no")) for row in rows],
+            [
+                ("Sales Invoice", "SINV-OPEN-0001"),
+                ("Payment Entry", "ACC-PAY-2026-0001"),
+            ],
+        )
+        self.assertEqual(rows[0].get("outstanding_amount"), 125)
+        self.assertEqual(rows[0].get("customer_name"), "Customer 727")
+        mock_legacy_helper.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()
