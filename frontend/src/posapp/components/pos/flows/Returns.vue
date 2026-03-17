@@ -167,21 +167,16 @@
 					<!-- Action buttons -->
 					<v-row class="mt-2 mb-2 returns-actions">
 						<v-col cols="12" sm="4" md="auto">
-							<v-btn
-							block
-							variant="text"
-							color="primary"
-							@click="search_invoices"
-						>
-							<v-icon start>mdi-magnify</v-icon>
-							{{ __("Search") }}
-						</v-btn>
+							<v-btn block variant="text" color="primary" @click="search_invoices">
+								<v-icon start>mdi-magnify</v-icon>
+								{{ __("Search") }}
+							</v-btn>
 						</v-col>
 						<v-col cols="12" sm="4" md="auto">
-						<v-btn block variant="text" color="warning" @click="clear_search">
-							<v-icon start>mdi-refresh</v-icon>
-							{{ __("Clear") }}
-						</v-btn>
+							<v-btn block variant="text" color="warning" @click="clear_search">
+								<v-icon start>mdi-refresh</v-icon>
+								{{ __("Clear") }}
+							</v-btn>
 						</v-col>
 						<v-col
 							cols="12"
@@ -189,14 +184,9 @@
 							md="auto"
 							v-if="pos_profile.posa_allow_return_without_invoice == 1"
 						>
-						<v-btn
-							block
-							variant="text"
-							color="secondary"
-							@click="return_without_invoice"
-						>
-							{{ __("Return without Invoice") }}
-						</v-btn>
+							<v-btn block variant="text" color="secondary" @click="return_without_invoice">
+								{{ __("Return without Invoice") }}
+							</v-btn>
 						</v-col>
 					</v-row>
 
@@ -221,11 +211,15 @@
 											<span>{{ item.name }}</span>
 										</div>
 										<div class="returns-result-card__amount">
-											{{ currencySymbol(item.currency) }}{{ formatCurrency(item.grand_total) }}
+											{{ currencySymbol(item.currency)
+											}}{{ formatCurrency(item.grand_total) }}
 										</div>
 									</div>
 									<div class="returns-result-card__meta">
-										<span>{{ __("Date") }}: {{ formatDateDisplay(item.posting_date) }}</span>
+										<span
+											>{{ __("Date") }}:
+											{{ formatDateDisplay(item.posting_date) }}</span
+										>
 										<span v-if="item.posa_return_valid_upto">
 											{{ __("Valid until") }}:
 											{{ formatDateDisplay(item.posa_return_valid_upto) }}
@@ -320,11 +314,7 @@
 					<v-btn color="error" variant="tonal" @click="close_dialog">
 						{{ __("Close") }}
 					</v-btn>
-					<v-btn
-						v-if="selected.length"
-						color="success"
-						@click="submit_dialog"
-					>
+					<v-btn v-if="selected.length" color="success" @click="submit_dialog">
 						{{ __("Select") }}
 					</v-btn>
 				</v-card-actions>

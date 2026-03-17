@@ -210,9 +210,7 @@ export default {
 			);
 			const toRemove = [];
 			this.pos_offers.forEach((pos_offer) => {
-				const offer = incoming.find(
-					(offer) => this.getOfferId(offer) === this.getOfferId(pos_offer),
-				);
+				const offer = incoming.find((offer) => this.getOfferId(offer) === this.getOfferId(pos_offer));
 				if (!offer) {
 					toRemove.push(this.getOfferId(pos_offer));
 				}
@@ -275,12 +273,8 @@ export default {
 			});
 		},
 		removeOffers(offers_id_list) {
-			const normalized = new Set(
-				(offers_id_list || []).map((id) => this.normalizeOfferRowId(id)),
-			);
-			this.pos_offers = this.pos_offers.filter(
-				(offer) => !normalized.has(this.getOfferId(offer)),
-			);
+			const normalized = new Set((offers_id_list || []).map((id) => this.normalizeOfferRowId(id)));
+			this.pos_offers = this.pos_offers.filter((offer) => !normalized.has(this.getOfferId(offer)));
 		},
 		handelOffers() {
 			const applyedOffers = this.pos_offers.filter((offer) => offer.offer_applied);

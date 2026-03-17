@@ -47,7 +47,9 @@
 									>
 										<div class="drafts-dialog-item__top">
 											<div class="drafts-dialog-item__identity">
-												<strong>{{ item.customer_name || __("Walk-in Customer") }}</strong>
+												<strong>{{
+													item.customer_name || __("Walk-in Customer")
+												}}</strong>
 												<span>{{ item.name }}</span>
 											</div>
 											<div class="drafts-dialog-item__amount">
@@ -78,7 +80,9 @@
 									item-value="name"
 									:class="[
 										'elevation-1 drafts-dialog-table',
-										isDarkTheme ? 'drafts-dialog-table--dark' : 'drafts-dialog-table--light',
+										isDarkTheme
+											? 'drafts-dialog-table--dark'
+											: 'drafts-dialog-table--light',
 									]"
 									:theme="isDarkTheme ? 'dark' : 'light'"
 									show-select
@@ -372,7 +376,10 @@ export default {
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
-	transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+	transition:
+		border-color 0.2s ease,
+		box-shadow 0.2s ease,
+		transform 0.2s ease;
 }
 
 .drafts-dialog-item--selected {

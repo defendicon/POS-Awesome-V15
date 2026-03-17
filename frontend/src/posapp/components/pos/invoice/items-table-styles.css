@@ -96,7 +96,11 @@
 	text-align: center;
 	color: var(--pos-text-primary);
 	background:
-		radial-gradient(circle at top, color-mix(in srgb, var(--pos-primary) 10%, transparent), transparent 55%),
+		radial-gradient(
+			circle at top,
+			color-mix(in srgb, var(--pos-primary) 10%, transparent),
+			transparent 55%
+		),
 		linear-gradient(180deg, var(--pos-surface-raised) 0%, var(--pos-surface-muted) 100%);
 }
 

@@ -16,10 +16,8 @@
 					variant="tonal"
 					class="summary-field summary-field--alert"
 				>
-					{{ __("Prorated return discount") }}:
-					{{ formatRatio(return_discount_meta.ratio) }} -
-					{{ __("Original") }}:
-					{{ formatCurrency(return_discount_meta.original_discount) }},
+					{{ __("Prorated return discount") }}: {{ formatRatio(return_discount_meta.ratio) }} -
+					{{ __("Original") }}: {{ formatCurrency(return_discount_meta.original_discount) }},
 					{{ __("Applied") }}:
 					{{ formatCurrency(return_discount_meta.prorated_discount) }}
 				</v-alert>
@@ -31,9 +29,13 @@
 							{{ currencySymbol(displayCurrency) }}{{ formatCurrency(subtotal) }}
 						</strong>
 						<div class="summary-hero__meta">
-							<span>{{ formatFloat(total_qty, hide_qty_decimals ? 0 : undefined) }} {{ __("qty") }}</span>
+							<span
+								>{{ formatFloat(total_qty, hide_qty_decimals ? 0 : undefined) }}
+								{{ __("qty") }}</span
+							>
 							<span>
-								{{ currencySymbol(displayCurrency) }}{{ formatCurrency(total_items_discount_amount) }}
+								{{ currencySymbol(displayCurrency)
+								}}{{ formatCurrency(total_items_discount_amount) }}
 								{{ __("discount") }}
 							</span>
 						</div>

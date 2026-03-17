@@ -38,7 +38,9 @@
 							<span class="commit-hash" v-if="commit.commit_short">
 								{{ commit.commit_short }}
 							</span>
-							<span class="commit-message">{{ commit.commit_message || commit.commit_hash }}</span>
+							<span class="commit-message">{{
+								commit.commit_message || commit.commit_hash
+							}}</span>
 							<span class="commit-date" v-if="commit.commit_date">
 								{{ commit.commit_date }}
 							</span>
@@ -48,12 +50,7 @@
 			</v-card-text>
 			<v-card-actions class="update-actions">
 				<v-spacer></v-spacer>
-				<v-btn
-					variant="flat"
-					color="primary"
-					:loading="updateStore.reloading"
-					@click="reloadNow"
-				>
+				<v-btn variant="flat" color="primary" :loading="updateStore.reloading" @click="reloadNow">
 					{{ __("Reload Now") }}
 				</v-btn>
 				<v-btn variant="elevated" color="primary" @click="dismiss">

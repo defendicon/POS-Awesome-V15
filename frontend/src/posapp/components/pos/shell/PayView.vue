@@ -1,9 +1,6 @@
 <template>
 	<div fluid :class="rtlClasses">
-		<AppLoadingOverlay
-			:visible="isPaymentRouteLocked"
-			:message="paymentsLoadingMessage"
-		/>
+		<AppLoadingOverlay :visible="isPaymentRouteLocked" :message="paymentsLoadingMessage" />
 		<v-row v-show="!dialog">
 			<v-col md="8" cols="12" class="pb-2 pr-0">
 				<v-card
@@ -450,9 +447,7 @@ export default {
 				isCustomerBackgroundLoading: !!isCustomerBackgroundLoading.value,
 			}),
 		);
-		const paymentsLoadingMessage = computed(() =>
-			buildPaymentRouteLoadingMessage(loadProgress.value),
-		);
+		const paymentsLoadingMessage = computed(() => buildPaymentRouteLoadingMessage(loadProgress.value));
 
 		const { isSubmitting, processPayment } = usePosPaySubmission({
 			customerName: customer_name,
@@ -563,8 +558,7 @@ export default {
 			pos_profile.value = data.pos_profile;
 			pos_opening_shift.value = data.pos_opening_shift;
 			company.value = data.company?.name || data.pos_profile?.company || "";
-			companyCurrency.value =
-				data.company?.default_currency || data.pos_profile?.currency || null;
+			companyCurrency.value = data.company?.default_currency || data.pos_profile?.currency || null;
 			uiStore.setRegisterData(data);
 			proxy?.eventBus?.emit("payments_register_pos_profile", data);
 			set_payment_methods();
@@ -604,10 +598,7 @@ export default {
 				console.error("Error checking opening entry", e);
 				const cached =
 					cachedOpening ||
-					getValidCachedOpeningForCurrentUser(
-						getOpeningStorage(),
-						frappe?.session?.user,
-					);
+					getValidCachedOpeningForCurrentUser(getOpeningStorage(), frappe?.session?.user);
 				if (cached) {
 					await applyOpeningData(cached);
 					return;
@@ -739,10 +730,9 @@ export default {
 			isPaymentRouteLocked,
 			(locked) => {
 				if (locked) return;
-				void syncCustomerPaymentContext(
-					selectedCustomer.value || customer_name.value || "",
-					{ forceReload: true },
-				);
+				void syncCustomerPaymentContext(selectedCustomer.value || customer_name.value || "", {
+					forceReload: true,
+				});
 			},
 			{ immediate: true },
 		);

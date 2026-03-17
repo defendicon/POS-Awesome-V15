@@ -21,3 +21,7 @@
 ## 2025-05-23 - [N+1 in Search API]
 **Learning:** The `search_invoices_for_return` API was performing an O(N) `frappe.get_doc` for every invoice in the results page (100 items), plus nested O(M) `frappe.get_doc` for every return linked to those invoices. This made the Returns search extremely slow (seconds latency).
 **Action:** Replaced `frappe.get_doc` loops with bulk `frappe.get_all` queries and manual Python-side assembly (Eager Loading). This reduced DB queries from ~200+ per request to ~5 constant queries, regardless of page size.
+
+## 2024-05-23 - [O(N^2) in server pricing rules update]
+**Learning:** During the processing of server pricing rules in `_applyServerPricingRules`, `updates.forEach` used an O(N) `context.items.find(...)` inside the loop to locate the correct item to update. For large carts receiving many pricing updates, this resulted in an O(N²) bottleneck blocking the main thread.
+**Action:** Replace `Array.find` within such update loops with a pre-built O(1) lookup Map, mapping row IDs and item codes to the items before executing the update loop.

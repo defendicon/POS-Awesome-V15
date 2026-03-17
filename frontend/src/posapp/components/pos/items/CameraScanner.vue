@@ -566,9 +566,7 @@ const onError = (error) => {
 			"Camera started but the video stream did not load in time. Please try again.",
 		);
 	} else if (error.name === "InsecureContextError") {
-		errorMessage.value = __(
-			"Secure context (HTTPS or localhost) is required for camera access.",
-		);
+		errorMessage.value = __("Secure context (HTTPS or localhost) is required for camera access.");
 	} else if (error.name === "NotSupportedError") {
 		errorMessage.value = __(
 			"Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.",
@@ -660,9 +658,10 @@ const toggleOpenCVProcessing = async () => {
 	if (typeof frappe !== "undefined" && frappe.show_alert) {
 		frappe.show_alert(
 			{
-				message: openCVEnabled.value && openCVReady.value
-					? __("OpenCV image processing enabled - Enhanced barcode detection")
-					: __("OpenCV processing disabled"),
+				message:
+					openCVEnabled.value && openCVReady.value
+						? __("OpenCV image processing enabled - Enhanced barcode detection")
+						: __("OpenCV processing disabled"),
 				indicator: openCVEnabled.value && openCVReady.value ? "green" : "blue",
 			},
 			3,

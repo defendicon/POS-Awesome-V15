@@ -225,9 +225,7 @@
 				<v-card-text class="pt-4">
 					<div class="text-subtitle-1 mb-2">{{ pendingAddItem.item_name }}</div>
 					<div
-						v-if="
-							pendingAddItem && shouldShowScaleGramsInput(pendingAddItem)
-						"
+						v-if="pendingAddItem && shouldShowScaleGramsInput(pendingAddItem)"
 						class="text-caption text-medium-emphasis mb-2"
 					>
 						{{ __("Scale barcode detected. Quantity here is the number of labels to print.") }}
@@ -476,7 +474,8 @@ export default {
 		},
 		getScaleRequiredLength(settings = this.scaleBarcodeSettings || {}) {
 			const toNum = (v) => Number(v) || 0;
-			const itemEnd = toNum(settings.item_code_starting_digit) + toNum(settings.item_code_total_digits) - 1;
+			const itemEnd =
+				toNum(settings.item_code_starting_digit) + toNum(settings.item_code_total_digits) - 1;
 			const weightEnd =
 				toNum(settings.weight_starting_digit) +
 				toNum(settings.weight_total_digits) +
@@ -516,8 +515,7 @@ export default {
 					method: "posawesome.posawesome.api.items.parse_scale_barcode",
 					args: { barcode: "" },
 				});
-				const settings =
-					(res && res.message && res.message.settings) || (res && res.message) || null;
+				const settings = (res && res.message && res.message.settings) || (res && res.message) || null;
 				if (settings && typeof settings === "object") {
 					this.scaleBarcodeSettings = settings;
 				}
@@ -568,9 +566,7 @@ export default {
 				item._scale_qty = Number((normalizedGrams / 1000).toFixed(3));
 				if (!silent) {
 					this.toastStore.show({
-						title: __(
-							"Scale barcode settings are not configured. Using item barcode only.",
-						),
+						title: __("Scale barcode settings are not configured. Using item barcode only."),
 						color: "warning",
 					});
 				}
@@ -759,8 +755,7 @@ export default {
 		},
 		extractScaleScannedBarcode(item) {
 			if (!this.isScaleBarcodePayload(item)) return "";
-			const scanned =
-				item._scanned_scale_barcode || item._scanned_barcode || item.barcode || "";
+			const scanned = item._scanned_scale_barcode || item._scanned_barcode || item.barcode || "";
 			return String(scanned || "").trim();
 		},
 		getPrintableItems({ notify = true } = {}) {
@@ -858,7 +853,10 @@ export default {
 
 			// 2. Resolve barcode from item_barcode/UOM mapping when available
 			if (!scannedScaleBarcode && itemBarcodes.length > 0) {
-				const resolved = this.resolveBarcodeForUom({ item_barcode: itemBarcodes, barcode }, defaultUom);
+				const resolved = this.resolveBarcodeForUom(
+					{ item_barcode: itemBarcodes, barcode },
+					defaultUom,
+				);
 				if (resolved) {
 					barcode = resolved;
 				}
@@ -885,7 +883,9 @@ export default {
 
 						const details = res.message && res.message[0];
 						if (details) {
-							itemBarcodes = Array.isArray(details.item_barcode) ? details.item_barcode : itemBarcodes;
+							itemBarcodes = Array.isArray(details.item_barcode)
+								? details.item_barcode
+								: itemBarcodes;
 							itemUoms = Array.isArray(details.item_uoms) ? details.item_uoms : itemUoms;
 							if (!itemUoms.length && itemBarcodes.length > 0) {
 								const barcodeUoms = itemBarcodes
@@ -942,8 +942,7 @@ export default {
 						const currentUom = String(defaultUom || "").trim();
 						const scopedRows = currentUom
 							? itemBarcodes.filter(
-									(row) =>
-										String(row?.posa_uom || row?.uom || "").trim() === currentUom,
+									(row) => String(row?.posa_uom || row?.uom || "").trim() === currentUom,
 								)
 							: itemBarcodes;
 						const matched =
@@ -1110,9 +1109,7 @@ export default {
 		resolveBarcodeForUom(item, uom) {
 			const barcodeRows = Array.isArray(item.item_barcode) ? item.item_barcode : [];
 			if (uom && barcodeRows.length > 0) {
-				const matched = barcodeRows.find(
-					(row) => row?.barcode && (row.posa_uom || row.uom) === uom,
-				);
+				const matched = barcodeRows.find((row) => row?.barcode && (row.posa_uom || row.uom) === uom);
 				if (matched?.barcode) return matched.barcode;
 			}
 			if (item.barcode) return item.barcode;

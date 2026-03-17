@@ -198,11 +198,7 @@
 <script setup>
 import { ref, watch } from "vue";
 import { formatUtils } from "../format";
-import {
-	getOfflineInvoices,
-	deleteOfflineInvoice,
-	getPendingOfflineInvoiceCount,
-} from "../../offline/index";
+import { getOfflineInvoices, deleteOfflineInvoice, getPendingOfflineInvoiceCount } from "../../offline/index";
 
 defineOptions({
 	name: "OfflineInvoicesDialog",

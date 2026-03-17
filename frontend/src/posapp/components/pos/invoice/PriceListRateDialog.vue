@@ -1,10 +1,5 @@
 <template>
-	<v-dialog
-		v-model="dialog"
-		max-width="420"
-		transition="dialog-bottom-transition"
-		:retain-focus="false"
-	>
+	<v-dialog v-model="dialog" max-width="420" transition="dialog-bottom-transition" :retain-focus="false">
 		<v-card class="pos-themed-card">
 			<v-card-title class="text-h6">
 				{{ __("Update Price List Rate") }}
@@ -76,8 +71,7 @@ watch(
 		rateInput.value = props.initialRate != null ? String(props.initialRate) : "";
 		nextTick(() => {
 			setTimeout(() => {
-				const inputEl =
-					rateInputRef.value?.$el?.querySelector?.("input") || null;
+				const inputEl = rateInputRef.value?.$el?.querySelector?.("input") || null;
 				inputEl?.focus?.();
 				inputEl?.select?.();
 			}, 60);
@@ -96,4 +90,3 @@ const handleSubmit = () => {
 	emit("update:modelValue", false);
 };
 </script>
-

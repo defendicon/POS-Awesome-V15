@@ -798,16 +798,22 @@ export async function _applyServerPricingRules(context: any, ctx: any = {}) {
 		}
 	});
 
+	// Build a lookup map for faster (O(1)) updates processing
+	// This avoids an O(N^2) search when processing many server updates
+	const itemsLookup = new Map();
+	context.items.forEach((line) => {
+		if (line && !line.is_free_item) {
+			if (line.posa_row_id && !itemsLookup.has(line.posa_row_id)) itemsLookup.set(line.posa_row_id, line);
+			if (line.name && !itemsLookup.has(line.name)) itemsLookup.set(line.name, line);
+			if (line.item_code && !line.auto_free_source && !itemsLookup.has(line.item_code)) {
+				itemsLookup.set(line.item_code, line);
+			}
+		}
+	});
+
 	updates.forEach((update) => {
 		const targetId = update.row_id;
-		const item = context.items.find(
-			(line) =>
-				line &&
-				!line.is_free_item &&
-				(line.posa_row_id === targetId ||
-					line.name === targetId ||
-					(line.item_code === targetId && !line.auto_free_source)),
-		);
+		const item = itemsLookup.get(targetId);
 		if (!item) {
 			return;
 		}

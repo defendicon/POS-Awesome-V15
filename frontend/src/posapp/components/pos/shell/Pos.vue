@@ -70,7 +70,11 @@
 				<PosCoupons></PosCoupons>
 			</v-col>
 			<v-col
-				v-if="(!useCompactPosSwitcher || compactPanel === 'selector') && activeView === 'payment' && !usePaymentDialog"
+				v-if="
+					(!useCompactPosSwitcher || compactPanel === 'selector') &&
+					activeView === 'payment' &&
+					!usePaymentDialog
+				"
 				:xl="useCompactPosSwitcher ? 12 : 5"
 				:lg="useCompactPosSwitcher ? 12 : 5"
 				:md="useCompactPosSwitcher ? 12 : 5"
@@ -256,9 +260,7 @@ export default {
 		const useCompactPosSwitcher = computed(() => responsive.windowWidth.value < 1100);
 		const compactPanel = ref("selector");
 		const isPhone = computed(() => responsive.isPhone.value);
-		const showBottomDock = computed(
-			() => !dialog.value && responsive.windowWidth.value < 1100,
-		);
+		const showBottomDock = computed(() => !dialog.value && responsive.windowWidth.value < 1100);
 		const bottomDockHeight = ref(0);
 		let mobileDockObserver = null;
 		const isEditingAdditionalDiscount = ref(false);
@@ -275,16 +277,13 @@ export default {
 			const numericValue = Number(rawValue);
 			return Number.isFinite(numericValue) ? numericValue : fallbackTotal;
 		});
-		const activeCurrency = computed(
-			() => invoiceDoc.value?.currency || posProfile.value?.currency || "",
-		);
+		const activeCurrency = computed(() => invoiceDoc.value?.currency || posProfile.value?.currency || "");
 		const formatCompactNumber = (value) =>
 			new Intl.NumberFormat(undefined, {
 				maximumFractionDigits: value % 1 === 0 ? 0 : 2,
 			}).format(Number(value || 0));
 		const getCurrencySymbol = (currency) => {
-			const resolver =
-				window.get_currency_symbol || globalThis.get_currency_symbol;
+			const resolver = window.get_currency_symbol || globalThis.get_currency_symbol;
 			if (typeof resolver === "function") {
 				return resolver(currency || activeCurrency.value || "") || "";
 			}
@@ -313,9 +312,7 @@ export default {
 			}
 			return value;
 		};
-		const additionalDiscountDisplay = ref(
-			normalizeDiscountDisplay(additionalDiscount.value),
-		);
+		const additionalDiscountDisplay = ref(normalizeDiscountDisplay(additionalDiscount.value));
 		const additionalDiscountPercentageDisplay = ref(
 			normalizeDiscountDisplay(additionalDiscountPercentage.value),
 		);
@@ -328,8 +325,7 @@ export default {
 
 		watch(additionalDiscountPercentage, (value) => {
 			if (!isEditingAdditionalDiscountPercentage.value) {
-				additionalDiscountPercentageDisplay.value =
-					normalizeDiscountDisplay(value);
+				additionalDiscountPercentageDisplay.value = normalizeDiscountDisplay(value);
 			}
 		});
 
@@ -393,8 +389,7 @@ export default {
 			}
 			showPaymentPanel();
 		};
-		const isSelectorViewActive = (view) =>
-			compactPanel.value === "selector" && activeView.value === view;
+		const isSelectorViewActive = (view) => compactPanel.value === "selector" && activeView.value === view;
 		const getFallbackBottomSpace = () => {
 			const rawValue = responsive.responsiveStyles.value["--bottom-safe-space"];
 			const parsed = Number.parseFloat(String(rawValue || "0"));

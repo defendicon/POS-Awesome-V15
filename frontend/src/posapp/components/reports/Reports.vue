@@ -68,12 +68,7 @@
 				</div>
 			</div>
 
-			<v-alert
-				v-if="!isDashboardEnabledOnServer"
-				type="warning"
-				variant="tonal"
-				class="mb-4"
-			>
+			<v-alert v-if="!isDashboardEnabledOnServer" type="warning" variant="tonal" class="mb-4">
 				{{ disabledReasonText }}
 			</v-alert>
 
@@ -84,7 +79,12 @@
 			<template v-if="canRenderDashboard">
 				<div class="dashboard-tabs mb-3">
 					<div class="dashboard-tabs--desktop">
-						<v-tabs v-model="activeDashboardTab" color="primary" class="dashboard-tab-bar" density="comfortable">
+						<v-tabs
+							v-model="activeDashboardTab"
+							color="primary"
+							class="dashboard-tab-bar"
+							density="comfortable"
+						>
 							<v-tab value="sales">{{ __("Sales") }}</v-tab>
 							<v-tab value="staff">{{ __("Staff") }}</v-tab>
 							<v-tab value="customers">{{ __("Customers") }}</v-tab>
@@ -127,7 +127,9 @@
 					<v-col cols="12">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Monthly Sales Summary") }}</h2>
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">
+									{{ __("Monthly Sales Summary") }}
+								</h2>
 								<div class="dashboard-chip-row">
 									<v-chip size="small" color="info" variant="tonal">
 										{{ __("Month") }}: {{ monthlySummaryRangeLabel }}
@@ -146,7 +148,11 @@
 								</div>
 							</div>
 							<div class="summary-grid">
-								<div v-for="metric in monthlySummaryMetrics" :key="metric.key" class="summary-metric">
+								<div
+									v-for="metric in monthlySummaryMetrics"
+									:key="metric.key"
+									class="summary-metric"
+								>
 									<div class="summary-metric__label">{{ metric.label }}</div>
 									<div class="summary-metric__value" :class="metric.valueClass">
 										{{ metric.value }}
@@ -171,11 +177,13 @@
 					</v-col>
 				</v-row>
 
-<v-row v-show="activeDashboardTab === 'sales'" class="dashboard-grid mb-2">
+				<v-row v-show="activeDashboardTab === 'sales'" class="dashboard-grid mb-2">
 					<v-col cols="12">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Daily Sales Summary") }}</h2>
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">
+									{{ __("Daily Sales Summary") }}
+								</h2>
 								<div class="dashboard-chip-row">
 									<v-chip size="small" color="info" variant="tonal">
 										{{ __("Date") }}: {{ dailySummaryRangeLabel }}
@@ -194,7 +202,11 @@
 								</div>
 							</div>
 							<div class="summary-grid">
-								<div v-for="metric in dailySummaryMetrics" :key="metric.key" class="summary-metric">
+								<div
+									v-for="metric in dailySummaryMetrics"
+									:key="metric.key"
+									class="summary-metric"
+								>
 									<div class="summary-metric__label">{{ metric.label }}</div>
 									<div class="summary-metric__value" :class="metric.valueClass">
 										{{ metric.value }}
@@ -219,11 +231,13 @@
 					</v-col>
 				</v-row>
 
-<v-row v-show="activeDashboardTab === 'sales'" class="dashboard-grid mb-2">
+				<v-row v-show="activeDashboardTab === 'sales'" class="dashboard-grid mb-2">
 					<v-col cols="12">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Sales Trend Report") }}</h2>
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">
+									{{ __("Sales Trend Report") }}
+								</h2>
 								<div class="dashboard-chip-row">
 									<v-chip size="small" color="info" variant="tonal">
 										{{ salesTrendRangeLabel }}
@@ -250,112 +264,170 @@
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Day-wise (MTD)") }}</div>
 									<div v-if="salesTrendDayPoints.length" class="list-stack trend-list">
-										<div v-for="point in salesTrendDayPoints" :key="`day-${point.date}`" class="insight-row">
+										<div
+											v-for="point in salesTrendDayPoints"
+											:key="`day-${point.date}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ formatDate(point.date) }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(point.sales || 0)) }}</div>
+												<div class="insight-row__title">
+													{{ formatDate(point.date) }}
+												</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(point.sales || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Invoices") }}: {{ formatQuantity(Number(point.invoice_count || 0)) }}
+												{{ __("Invoices") }}:
+												{{ formatQuantity(Number(point.invoice_count || 0)) }}
 											</div>
 											<v-progress-linear
-												:model-value="trendProgress(Number(point.sales || 0), salesTrendDayMax)"
+												:model-value="
+													trendProgress(Number(point.sales || 0), salesTrendDayMax)
+												"
 												color="primary"
 												height="5"
 												rounded
 											/>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No day-wise sales trend found.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No day-wise sales trend found.") }}
+									</div>
 								</div>
 
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Week-wise") }}</div>
 									<div v-if="salesTrendWeekPoints.length" class="list-stack trend-list">
-										<div v-for="point in salesTrendWeekPoints" :key="`week-${point.label}`" class="insight-row">
+										<div
+											v-for="point in salesTrendWeekPoints"
+											:key="`week-${point.label}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
 												<div class="insight-row__title">{{ point.label || "-" }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(point.sales || 0)) }}</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(point.sales || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ formatDate(point.week_start) }} - {{ formatDate(point.week_end) }}
+												{{ formatDate(point.week_start) }} -
+												{{ formatDate(point.week_end) }}
 											</div>
 											<v-progress-linear
-												:model-value="trendProgress(Number(point.sales || 0), salesTrendWeekMax)"
+												:model-value="
+													trendProgress(Number(point.sales || 0), salesTrendWeekMax)
+												"
 												color="info"
 												height="5"
 												rounded
 											/>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No week-wise sales trend found.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No week-wise sales trend found.") }}
+									</div>
 								</div>
 
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Month-wise") }}</div>
 									<div v-if="salesTrendMonthPoints.length" class="list-stack trend-list">
-										<div v-for="point in salesTrendMonthPoints" :key="`month-${point.month}`" class="insight-row">
+										<div
+											v-for="point in salesTrendMonthPoints"
+											:key="`month-${point.month}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ point.label || point.month || "-" }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(point.sales || 0)) }}</div>
+												<div class="insight-row__title">
+													{{ point.label || point.month || "-" }}
+												</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(point.sales || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Invoices") }}: {{ formatQuantity(Number(point.invoice_count || 0)) }}
+												{{ __("Invoices") }}:
+												{{ formatQuantity(Number(point.invoice_count || 0)) }}
 											</div>
 											<v-progress-linear
-												:model-value="trendProgress(Number(point.sales || 0), salesTrendMonthMax)"
+												:model-value="
+													trendProgress(
+														Number(point.sales || 0),
+														salesTrendMonthMax,
+													)
+												"
 												color="success"
 												height="5"
 												rounded
 											/>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No month-wise sales trend found.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No month-wise sales trend found.") }}
+									</div>
 								</div>
 
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Hourly (Today)") }}</div>
 									<div v-if="salesTrendHourPoints.length" class="list-stack trend-list">
-										<div v-for="point in salesTrendHourPoints" :key="`hour-${point.hour}`" class="insight-row">
+										<div
+											v-for="point in salesTrendHourPoints"
+											:key="`hour-${point.hour}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
 												<div class="insight-row__title">{{ point.label || "-" }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(point.sales || 0)) }}</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(point.sales || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Invoices") }}: {{ formatQuantity(Number(point.invoice_count || 0)) }}
+												{{ __("Invoices") }}:
+												{{ formatQuantity(Number(point.invoice_count || 0)) }}
 											</div>
 											<v-progress-linear
-												:model-value="trendProgress(Number(point.sales || 0), salesTrendHourMax)"
+												:model-value="
+													trendProgress(Number(point.sales || 0), salesTrendHourMax)
+												"
 												color="warning"
 												height="5"
 												rounded
 											/>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No hourly sales trend found for today.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No hourly sales trend found for today.") }}
+									</div>
 								</div>
 							</div>
 						</v-card>
 					</v-col>
 				</v-row>
 
-<v-row v-show="activeDashboardTab === 'sales'" class="dashboard-grid mb-2">
+				<v-row v-show="activeDashboardTab === 'sales'" class="dashboard-grid mb-2">
 					<v-col cols="12">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Discount / Void / Return Report") }}</h2>
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">
+									{{ __("Discount / Void / Return Report") }}
+								</h2>
 								<div class="dashboard-chip-row">
 									<v-chip size="small" color="info" variant="tonal">
 										{{ discountVoidReturnRangeLabel }}
 									</v-chip>
 									<v-chip size="small" color="warning" variant="tonal">
-										{{ __("Discount") }}: {{ formatMoney(Number(discountVoidReturnTotals.discount_amount || 0)) }}
+										{{ __("Discount") }}:
+										{{
+											formatMoney(Number(discountVoidReturnTotals.discount_amount || 0))
+										}}
 									</v-chip>
 									<v-chip size="small" color="primary" variant="tonal">
-										{{ __("Returns") }}: {{ formatMoney(Number(discountVoidReturnTotals.return_amount || 0)) }}
+										{{ __("Returns") }}:
+										{{ formatMoney(Number(discountVoidReturnTotals.return_amount || 0)) }}
 									</v-chip>
 									<v-chip size="small" color="error" variant="tonal">
-										{{ __("Voids") }}: {{ formatMoney(Number(discountVoidReturnTotals.void_amount || 0)) }}
+										{{ __("Voids") }}:
+										{{ formatMoney(Number(discountVoidReturnTotals.void_amount || 0)) }}
 									</v-chip>
 								</div>
 							</div>
@@ -364,13 +436,21 @@
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Discounted Invoices") }}</div>
 									<div class="summary-metric__value">
-										{{ formatQuantity(Number(discountVoidReturnTotals.discounted_invoice_count || 0)) }}
+										{{
+											formatQuantity(
+												Number(
+													discountVoidReturnTotals.discounted_invoice_count || 0,
+												),
+											)
+										}}
 									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Return Count") }}</div>
 									<div class="summary-metric__value">
-										{{ formatQuantity(Number(discountVoidReturnTotals.return_count || 0)) }}
+										{{
+											formatQuantity(Number(discountVoidReturnTotals.return_count || 0))
+										}}
 									</div>
 								</div>
 								<div class="summary-metric">
@@ -382,7 +462,9 @@
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Discount Amount") }}</div>
 									<div class="summary-metric__value">
-										{{ formatMoney(Number(discountVoidReturnTotals.discount_amount || 0)) }}
+										{{
+											formatMoney(Number(discountVoidReturnTotals.discount_amount || 0))
+										}}
 									</div>
 								</div>
 								<div class="summary-metric">
@@ -403,17 +485,31 @@
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Cashier-wise") }}</div>
 									<div v-if="discountCashierRows.length" class="list-stack trend-list">
-										<div v-for="row in discountCashierRows" :key="`dvr-cashier-${row.cashier}`" class="insight-row">
+										<div
+											v-for="row in discountCashierRows"
+											:key="`dvr-cashier-${row.cashier}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ row.cashier || __("Unknown") }}</div>
+												<div class="insight-row__title">
+													{{ row.cashier || __("Unknown") }}
+												</div>
 												<div class="insight-row__value">
-													{{ formatMoney(Number(row.void_amount || 0) + Number(row.return_amount || 0)) }}
+													{{
+														formatMoney(
+															Number(row.void_amount || 0) +
+																Number(row.return_amount || 0),
+														)
+													}}
 												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Discount") }}: {{ formatMoney(Number(row.discount_amount || 0)) }} .
-												{{ __("Returns") }}: {{ formatQuantity(Number(row.return_count || 0)) }} .
-												{{ __("Voids") }}: {{ formatQuantity(Number(row.void_count || 0)) }}
+												{{ __("Discount") }}:
+												{{ formatMoney(Number(row.discount_amount || 0)) }} .
+												{{ __("Returns") }}:
+												{{ formatQuantity(Number(row.return_count || 0)) }} .
+												{{ __("Voids") }}:
+												{{ formatQuantity(Number(row.void_count || 0)) }}
 											</div>
 											<v-progress-linear
 												:model-value="
@@ -430,7 +526,9 @@
 											/>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No cashier-wise discount/void/return activity.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No cashier-wise discount/void/return activity.") }}
+									</div>
 								</div>
 
 								<div class="trend-panel">
@@ -442,39 +540,66 @@
 											class="insight-row"
 										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ row.item_name || row.item_code || "-" }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(row.return_amount || 0)) }}</div>
+												<div class="insight-row__title">
+													{{ row.item_name || row.item_code || "-" }}
+												</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(row.return_amount || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ row.item_code || "-" }} .
-												{{ __("Qty") }}: {{ formatQuantity(Number(row.return_qty || 0)) }} {{ row.stock_uom || "" }} .
-												{{ __("Invoices") }}: {{ formatQuantity(Number(row.return_invoice_count || 0)) }}
+												{{ row.item_code || "-" }} . {{ __("Qty") }}:
+												{{ formatQuantity(Number(row.return_qty || 0)) }}
+												{{ row.stock_uom || "" }} . {{ __("Invoices") }}:
+												{{ formatQuantity(Number(row.return_invoice_count || 0)) }}
 											</div>
 											<v-progress-linear
-												:model-value="trendProgress(Number(row.return_amount || 0), discountReturnItemMax)"
+												:model-value="
+													trendProgress(
+														Number(row.return_amount || 0),
+														discountReturnItemMax,
+													)
+												"
 												color="primary"
 												height="5"
 												rounded
 											/>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No return item trend found.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No return item trend found.") }}
+									</div>
 								</div>
 
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Last 14 Days Activity") }}</div>
 									<div v-if="discountDayRows.length" class="list-stack trend-list">
-										<div v-for="row in discountDayRows" :key="`dvr-day-${row.date}`" class="insight-row">
+										<div
+											v-for="row in discountDayRows"
+											:key="`dvr-day-${row.date}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ formatDate(row.date) }}</div>
+												<div class="insight-row__title">
+													{{ formatDate(row.date) }}
+												</div>
 												<div class="insight-row__value">
-													{{ formatMoney(Number(row.discount_amount || 0) + Number(row.return_amount || 0) + Number(row.void_amount || 0)) }}
+													{{
+														formatMoney(
+															Number(row.discount_amount || 0) +
+																Number(row.return_amount || 0) +
+																Number(row.void_amount || 0),
+														)
+													}}
 												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Discount") }}: {{ formatMoney(Number(row.discount_amount || 0)) }} .
-												{{ __("Returns") }}: {{ formatQuantity(Number(row.return_count || 0)) }} .
-												{{ __("Voids") }}: {{ formatQuantity(Number(row.void_count || 0)) }}
+												{{ __("Discount") }}:
+												{{ formatMoney(Number(row.discount_amount || 0)) }} .
+												{{ __("Returns") }}:
+												{{ formatQuantity(Number(row.return_count || 0)) }} .
+												{{ __("Voids") }}:
+												{{ formatQuantity(Number(row.void_count || 0)) }}
 											</div>
 											<v-progress-linear
 												:model-value="
@@ -491,30 +616,41 @@
 											/>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No day-wise discount/void/return trend.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No day-wise discount/void/return trend.") }}
+									</div>
 								</div>
 							</div>
 						</v-card>
 					</v-col>
 				</v-row>
 
-<v-row v-show="activeDashboardTab === 'sales'" class="dashboard-grid mb-2">
+				<v-row v-show="activeDashboardTab === 'sales'" class="dashboard-grid mb-2">
 					<v-col cols="12">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Payment Method Report") }}</h2>
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">
+									{{ __("Payment Method Report") }}
+								</h2>
 								<div class="dashboard-chip-row">
 									<v-chip size="small" color="info" variant="tonal">
 										{{ paymentReportRangeLabel }}
 									</v-chip>
 									<v-chip size="small" color="success" variant="tonal">
-										{{ __("Collected") }}: {{ formatMoney(Number(paymentReportTotals.collected_amount || 0)) }}
+										{{ __("Collected") }}:
+										{{ formatMoney(Number(paymentReportTotals.collected_amount || 0)) }}
 									</v-chip>
 									<v-chip size="small" color="warning" variant="tonal">
-										{{ __("Pending") }}: {{ formatMoney(Number(paymentReportTotals.pending_amount || 0)) }}
+										{{ __("Pending") }}:
+										{{ formatMoney(Number(paymentReportTotals.pending_amount || 0)) }}
 									</v-chip>
 									<v-chip size="small" color="primary" variant="tonal">
-										{{ __("Split Invoices") }}: {{ formatQuantity(Number(paymentReportTotals.split_invoice_count || 0)) }}
+										{{ __("Split Invoices") }}:
+										{{
+											formatQuantity(
+												Number(paymentReportTotals.split_invoice_count || 0),
+											)
+										}}
 									</v-chip>
 								</div>
 							</div>
@@ -522,24 +658,38 @@
 							<div class="summary-grid">
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Invoices") }}</div>
-									<div class="summary-metric__value">{{ formatQuantity(Number(paymentReportTotals.invoice_count || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatQuantity(Number(paymentReportTotals.invoice_count || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Pending Invoices") }}</div>
 									<div class="summary-metric__value summary-metric__value--danger">
-										{{ formatQuantity(Number(paymentReportTotals.pending_invoice_count || 0)) }}
+										{{
+											formatQuantity(
+												Number(paymentReportTotals.pending_invoice_count || 0),
+											)
+										}}
 									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Partial") }}</div>
 									<div class="summary-metric__value">
-										{{ formatQuantity(Number(paymentReportTotals.partial_invoice_count || 0)) }}
+										{{
+											formatQuantity(
+												Number(paymentReportTotals.partial_invoice_count || 0),
+											)
+										}}
 									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Unpaid") }}</div>
 									<div class="summary-metric__value summary-metric__value--danger">
-										{{ formatQuantity(Number(paymentReportTotals.unpaid_invoice_count || 0)) }}
+										{{
+											formatQuantity(
+												Number(paymentReportTotals.unpaid_invoice_count || 0),
+											)
+										}}
 									</div>
 								</div>
 								<div class="summary-metric">
@@ -558,39 +708,65 @@
 
 							<div class="trend-grid trend-grid--two">
 								<div class="trend-panel">
-									<div class="summary-metric__label">{{ __("Method-wise Collections") }}</div>
+									<div class="summary-metric__label">
+										{{ __("Method-wise Collections") }}
+									</div>
 									<div v-if="paymentMethodRows.length" class="list-stack trend-list">
-										<div v-for="row in paymentMethodRows" :key="`pay-method-${row.mode_of_payment}`" class="insight-row">
+										<div
+											v-for="row in paymentMethodRows"
+											:key="`pay-method-${row.mode_of_payment}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ row.mode_of_payment }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(row.amount || 0)) }}</div>
+												<div class="insight-row__title">
+													{{ row.mode_of_payment }}
+												</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(row.amount || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
 												{{ __("Category") }}: {{ row.category || "-" }} .
-												{{ __("Invoices") }}: {{ formatQuantity(Number(row.invoice_count || 0)) }} .
+												{{ __("Invoices") }}:
+												{{ formatQuantity(Number(row.invoice_count || 0)) }} .
 												{{ __("Share") }}: {{ formatPercent(row.share_pct, 1) }}
 											</div>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No payment collection data found.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No payment collection data found.") }}
+									</div>
 								</div>
 
 								<div class="trend-panel">
-									<div class="summary-metric__label">{{ __("Last 14 Days (Paid vs Pending)") }}</div>
+									<div class="summary-metric__label">
+										{{ __("Last 14 Days (Paid vs Pending)") }}
+									</div>
 									<div v-if="paymentDayRows.length" class="list-stack trend-list">
-										<div v-for="row in paymentDayRows" :key="`pay-day-${row.date}`" class="insight-row">
+										<div
+											v-for="row in paymentDayRows"
+											:key="`pay-day-${row.date}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ formatDate(row.date) }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(row.paid_amount || 0)) }}</div>
+												<div class="insight-row__title">
+													{{ formatDate(row.date) }}
+												</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(row.paid_amount || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Pending") }}: {{ formatMoney(Number(row.pending_amount || 0)) }} .
-												{{ __("Invoices") }}: {{ formatQuantity(Number(row.invoice_count || 0)) }}
+												{{ __("Pending") }}:
+												{{ formatMoney(Number(row.pending_amount || 0)) }} .
+												{{ __("Invoices") }}:
+												{{ formatQuantity(Number(row.invoice_count || 0)) }}
 											</div>
 											<v-progress-linear
 												:model-value="
 													trendProgress(
-														Number(row.paid_amount || 0) + Number(row.pending_amount || 0),
+														Number(row.paid_amount || 0) +
+															Number(row.pending_amount || 0),
 														paymentDayMax,
 													)
 												"
@@ -600,7 +776,9 @@
 											/>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No day-wise payment data found.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No day-wise payment data found.") }}
+									</div>
 								</div>
 							</div>
 						</v-card>
@@ -611,19 +789,24 @@
 					<v-col cols="12">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Staff / Cashier Performance Report") }}</h2>
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">
+									{{ __("Staff / Cashier Performance Report") }}
+								</h2>
 								<div class="dashboard-chip-row">
 									<v-chip size="small" color="info" variant="tonal">
 										{{ staffReportRangeLabel }}
 									</v-chip>
 									<v-chip size="small" color="success" variant="tonal">
-										{{ __("Sales") }}: {{ formatMoney(Number(staffSummary.sales_amount || 0)) }}
+										{{ __("Sales") }}:
+										{{ formatMoney(Number(staffSummary.sales_amount || 0)) }}
 									</v-chip>
 									<v-chip size="small" color="warning" variant="tonal">
-										{{ __("Discounts") }}: {{ formatMoney(Number(staffSummary.discount_amount || 0)) }}
+										{{ __("Discounts") }}:
+										{{ formatMoney(Number(staffSummary.discount_amount || 0)) }}
 									</v-chip>
 									<v-chip size="small" color="error" variant="tonal">
-										{{ __("Voids") }}: {{ formatQuantity(Number(staffSummary.void_count || 0)) }}
+										{{ __("Voids") }}:
+										{{ formatQuantity(Number(staffSummary.void_count || 0)) }}
 									</v-chip>
 								</div>
 							</div>
@@ -631,23 +814,33 @@
 							<div class="summary-grid">
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Cashiers") }}</div>
-									<div class="summary-metric__value">{{ formatQuantity(Number(staffSummary.cashier_count || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatQuantity(Number(staffSummary.cashier_count || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Invoices") }}</div>
-									<div class="summary-metric__value">{{ formatQuantity(Number(staffSummary.invoice_count || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatQuantity(Number(staffSummary.invoice_count || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Items Sold") }}</div>
-									<div class="summary-metric__value">{{ formatQuantity(Number(staffSummary.items_sold || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatQuantity(Number(staffSummary.items_sold || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Avg Bill") }}</div>
-									<div class="summary-metric__value">{{ formatMoney(Number(staffSummary.average_bill || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatMoney(Number(staffSummary.average_bill || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Returns") }}</div>
-									<div class="summary-metric__value">{{ formatQuantity(Number(staffSummary.return_count || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatQuantity(Number(staffSummary.return_count || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Voids") }}</div>
@@ -661,56 +854,104 @@
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Top Sales by Cashier") }}</div>
 									<div v-if="staffCashierRows.length" class="list-stack trend-list">
-										<div v-for="row in staffCashierRows" :key="`staff-sales-${row.cashier}`" class="insight-row">
+										<div
+											v-for="row in staffCashierRows"
+											:key="`staff-sales-${row.cashier}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ row.cashier || __("Unknown") }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(row.sales_amount || 0)) }}</div>
+												<div class="insight-row__title">
+													{{ row.cashier || __("Unknown") }}
+												</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(row.sales_amount || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Invoices") }}: {{ formatQuantity(Number(row.invoice_count || 0)) }} .
-												{{ __("Items") }}: {{ formatQuantity(Number(row.items_sold || 0)) }} .
-												{{ __("Avg Bill") }}: {{ formatMoney(Number(row.average_bill || 0)) }}
+												{{ __("Invoices") }}:
+												{{ formatQuantity(Number(row.invoice_count || 0)) }} .
+												{{ __("Items") }}:
+												{{ formatQuantity(Number(row.items_sold || 0)) }} .
+												{{ __("Avg Bill") }}:
+												{{ formatMoney(Number(row.average_bill || 0)) }}
 											</div>
 											<v-progress-linear
-												:model-value="trendProgress(Number(row.sales_amount || 0), staffSalesMax)"
+												:model-value="
+													trendProgress(
+														Number(row.sales_amount || 0),
+														staffSalesMax,
+													)
+												"
 												color="success"
 												height="5"
 												rounded
 											/>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No staff sales activity found.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No staff sales activity found.") }}
+									</div>
 								</div>
 
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Most Active Cashiers") }}</div>
 									<div v-if="staffInvoiceRows.length" class="list-stack trend-list">
-										<div v-for="row in staffInvoiceRows" :key="`staff-inv-${row.cashier}`" class="insight-row">
+										<div
+											v-for="row in staffInvoiceRows"
+											:key="`staff-inv-${row.cashier}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ row.cashier || __("Unknown") }}</div>
-												<div class="insight-row__value">{{ formatQuantity(Number(row.invoice_count || 0)) }}</div>
+												<div class="insight-row__title">
+													{{ row.cashier || __("Unknown") }}
+												</div>
+												<div class="insight-row__value">
+													{{ formatQuantity(Number(row.invoice_count || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Sales") }}: {{ formatMoney(Number(row.sales_amount || 0)) }} .
-												{{ __("Items/Invoice") }}: {{ Number(row.items_per_invoice || 0).toFixed(2) }}
+												{{ __("Sales") }}:
+												{{ formatMoney(Number(row.sales_amount || 0)) }} .
+												{{ __("Items/Invoice") }}:
+												{{ Number(row.items_per_invoice || 0).toFixed(2) }}
 											</div>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No invoice activity found.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No invoice activity found.") }}
+									</div>
 								</div>
 
 								<div class="trend-panel">
-									<div class="summary-metric__label">{{ __("Returns / Voids / Discounts") }}</div>
+									<div class="summary-metric__label">
+										{{ __("Returns / Voids / Discounts") }}
+									</div>
 									<div v-if="staffRiskRows.length" class="list-stack trend-list">
-										<div v-for="row in staffRiskRows" :key="`staff-risk-${row.cashier}`" class="insight-row">
+										<div
+											v-for="row in staffRiskRows"
+											:key="`staff-risk-${row.cashier}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ row.cashier || __("Unknown") }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(row.void_amount || 0) + Number(row.return_amount || 0)) }}</div>
+												<div class="insight-row__title">
+													{{ row.cashier || __("Unknown") }}
+												</div>
+												<div class="insight-row__value">
+													{{
+														formatMoney(
+															Number(row.void_amount || 0) +
+																Number(row.return_amount || 0),
+														)
+													}}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Returns") }}: {{ formatQuantity(Number(row.return_count || 0)) }} .
-												{{ __("Voids") }}: {{ formatQuantity(Number(row.void_count || 0)) }} .
-												{{ __("Discount") }}: {{ formatMoney(Number(row.discount_amount || 0)) }}
+												{{ __("Returns") }}:
+												{{ formatQuantity(Number(row.return_count || 0)) }} .
+												{{ __("Voids") }}:
+												{{ formatQuantity(Number(row.void_count || 0)) }} .
+												{{ __("Discount") }}:
+												{{ formatMoney(Number(row.discount_amount || 0)) }}
 											</div>
 										</div>
 									</div>
@@ -725,16 +966,20 @@
 					<v-col cols="12">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Customer Report") }}</h2>
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">
+									{{ __("Customer Report") }}
+								</h2>
 								<div class="dashboard-chip-row">
 									<v-chip size="small" color="info" variant="tonal">
 										{{ customerReportRangeLabel }}
 									</v-chip>
 									<v-chip size="small" color="primary" variant="tonal">
-										{{ __("Repeat Rate") }}: {{ formatPercent(customerSummary.repeat_customer_rate_pct, 1) }}
+										{{ __("Repeat Rate") }}:
+										{{ formatPercent(customerSummary.repeat_customer_rate_pct, 1) }}
 									</v-chip>
 									<v-chip size="small" color="success" variant="tonal">
-										{{ __("Sales") }}: {{ formatMoney(Number(customerSummary.sales_amount || 0)) }}
+										{{ __("Sales") }}:
+										{{ formatMoney(Number(customerSummary.sales_amount || 0)) }}
 									</v-chip>
 								</div>
 							</div>
@@ -742,23 +987,37 @@
 							<div class="summary-grid">
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Customers") }}</div>
-									<div class="summary-metric__value">{{ formatQuantity(Number(customerSummary.customer_count || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatQuantity(Number(customerSummary.customer_count || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Repeat Customers") }}</div>
-									<div class="summary-metric__value">{{ formatQuantity(Number(customerSummary.repeat_customer_count || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{
+											formatQuantity(Number(customerSummary.repeat_customer_count || 0))
+										}}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Invoices") }}</div>
-									<div class="summary-metric__value">{{ formatQuantity(Number(customerSummary.invoice_count || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatQuantity(Number(customerSummary.invoice_count || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Average Basket") }}</div>
-									<div class="summary-metric__value">{{ formatMoney(Number(customerSummary.average_basket_size || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatMoney(Number(customerSummary.average_basket_size || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
-									<div class="summary-metric__label">{{ __("Avg Purchase Frequency") }}</div>
-									<div class="summary-metric__value">{{ formatDays(customerSummary.average_purchase_frequency_days) }}</div>
+									<div class="summary-metric__label">
+										{{ __("Avg Purchase Frequency") }}
+									</div>
+									<div class="summary-metric__value">
+										{{ formatDays(customerSummary.average_purchase_frequency_days) }}
+									</div>
 								</div>
 							</div>
 
@@ -766,61 +1025,105 @@
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Top Customers") }}</div>
 									<div v-if="topCustomerRows.length" class="list-stack trend-list">
-										<div v-for="row in topCustomerRows" :key="`cust-top-${row.customer}`" class="insight-row">
+										<div
+											v-for="row in topCustomerRows"
+											:key="`cust-top-${row.customer}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ row.customer_name || row.customer || "-" }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(row.sales_amount || 0)) }}</div>
+												<div class="insight-row__title">
+													{{ row.customer_name || row.customer || "-" }}
+												</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(row.sales_amount || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ row.customer || "-" }} .
-												{{ __("Invoices") }}: {{ formatQuantity(Number(row.invoice_count || 0)) }} .
-												{{ __("Avg Bill") }}: {{ formatMoney(Number(row.average_basket_size || 0)) }}
+												{{ row.customer || "-" }} . {{ __("Invoices") }}:
+												{{ formatQuantity(Number(row.invoice_count || 0)) }} .
+												{{ __("Avg Bill") }}:
+												{{ formatMoney(Number(row.average_basket_size || 0)) }}
 											</div>
 											<v-progress-linear
-												:model-value="trendProgress(Number(row.sales_amount || 0), customerSalesMax)"
+												:model-value="
+													trendProgress(
+														Number(row.sales_amount || 0),
+														customerSalesMax,
+													)
+												"
 												color="primary"
 												height="5"
 												rounded
 											/>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No customer sales data found.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No customer sales data found.") }}
+									</div>
 								</div>
 
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Repeat Customers") }}</div>
 									<div v-if="repeatCustomerRows.length" class="list-stack trend-list">
-										<div v-for="row in repeatCustomerRows" :key="`cust-repeat-${row.customer}`" class="insight-row">
+										<div
+											v-for="row in repeatCustomerRows"
+											:key="`cust-repeat-${row.customer}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ row.customer_name || row.customer || "-" }}</div>
-												<div class="insight-row__value">{{ formatQuantity(Number(row.invoice_count || 0)) }}</div>
+												<div class="insight-row__title">
+													{{ row.customer_name || row.customer || "-" }}
+												</div>
+												<div class="insight-row__value">
+													{{ formatQuantity(Number(row.invoice_count || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Sales") }}: {{ formatMoney(Number(row.sales_amount || 0)) }} .
-												{{ __("Frequency") }}: {{ formatDays(row.purchase_frequency_days) }} .
-												{{ __("Last") }}: {{ formatDate(row.last_purchase_date || undefined) }}
+												{{ __("Sales") }}:
+												{{ formatMoney(Number(row.sales_amount || 0)) }} .
+												{{ __("Frequency") }}:
+												{{ formatDays(row.purchase_frequency_days) }} .
+												{{ __("Last") }}:
+												{{ formatDate(row.last_purchase_date || undefined) }}
 											</div>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No repeat customers in this period.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No repeat customers in this period.") }}
+									</div>
 								</div>
 
 								<div class="trend-panel">
-									<div class="summary-metric__label">{{ __("Recently Active Customers") }}</div>
+									<div class="summary-metric__label">
+										{{ __("Recently Active Customers") }}
+									</div>
 									<div v-if="recentCustomerRows.length" class="list-stack trend-list">
-										<div v-for="row in recentCustomerRows" :key="`cust-recent-${row.customer}`" class="insight-row">
+										<div
+											v-for="row in recentCustomerRows"
+											:key="`cust-recent-${row.customer}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ row.customer_name || row.customer || "-" }}</div>
-												<div class="insight-row__value">{{ formatDate(row.last_purchase_date || undefined) }}</div>
+												<div class="insight-row__title">
+													{{ row.customer_name || row.customer || "-" }}
+												</div>
+												<div class="insight-row__value">
+													{{ formatDate(row.last_purchase_date || undefined) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Invoices") }}: {{ formatQuantity(Number(row.invoice_count || 0)) }} .
-												{{ __("Sales") }}: {{ formatMoney(Number(row.sales_amount || 0)) }} .
-												{{ __("Returns") }}: {{ formatQuantity(Number(row.return_count || 0)) }}
+												{{ __("Invoices") }}:
+												{{ formatQuantity(Number(row.invoice_count || 0)) }} .
+												{{ __("Sales") }}:
+												{{ formatMoney(Number(row.sales_amount || 0)) }} .
+												{{ __("Returns") }}:
+												{{ formatQuantity(Number(row.return_count || 0)) }}
 											</div>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No recent customer activity found.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No recent customer activity found.") }}
+									</div>
 								</div>
 							</div>
 						</v-card>
@@ -831,7 +1134,9 @@
 					<v-col cols="12">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Profitability Report") }}</h2>
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">
+									{{ __("Profitability Report") }}
+								</h2>
 								<div class="dashboard-chip-row">
 									<v-chip size="small" color="info" variant="tonal">
 										{{ profitabilityRangeLabel }}
@@ -848,15 +1153,26 @@
 							<div class="summary-grid">
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Revenue") }}</div>
-									<div class="summary-metric__value">{{ formatMoney(Number(profitabilitySummary.revenue || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatMoney(Number(profitabilitySummary.revenue || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("COGS") }}</div>
-									<div class="summary-metric__value">{{ formatMoney(Number(profitabilitySummary.cogs || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatMoney(Number(profitabilitySummary.cogs || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Gross Profit") }}</div>
-									<div class="summary-metric__value" :class="Number(profitabilitySummary.gross_profit || 0) < 0 ? 'summary-metric__value--danger' : ''">
+									<div
+										class="summary-metric__value"
+										:class="
+											Number(profitabilitySummary.gross_profit || 0) < 0
+												? 'summary-metric__value--danger'
+												: ''
+										"
+									>
 										{{ formatMoney(Number(profitabilitySummary.gross_profit || 0)) }}
 									</div>
 								</div>
@@ -868,79 +1184,141 @@
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Invoices") }}</div>
-									<div class="summary-metric__value">{{ formatQuantity(Number(profitabilitySummary.invoice_count || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatQuantity(Number(profitabilitySummary.invoice_count || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Avg Invoice Profit") }}</div>
-									<div class="summary-metric__value">{{ formatMoney(Number(profitabilitySummary.average_invoice_profit || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{
+											formatMoney(
+												Number(profitabilitySummary.average_invoice_profit || 0),
+											)
+										}}
+									</div>
 								</div>
 							</div>
 
 							<div class="trend-grid">
 								<div class="trend-panel">
-									<div class="summary-metric__label">{{ __("Item-wise Profitability") }}</div>
+									<div class="summary-metric__label">
+										{{ __("Item-wise Profitability") }}
+									</div>
 									<div v-if="profitabilityItemRows.length" class="list-stack trend-list">
-										<div v-for="row in profitabilityItemRows" :key="`profit-item-${row.item_code}`" class="insight-row">
+										<div
+											v-for="row in profitabilityItemRows"
+											:key="`profit-item-${row.item_code}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ row.item_name || row.item_code || "-" }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(row.gross_profit || 0)) }}</div>
+												<div class="insight-row__title">
+													{{ row.item_name || row.item_code || "-" }}
+												</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(row.gross_profit || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Revenue") }}: {{ formatMoney(Number(row.revenue || 0)) }} .
+												{{ __("Revenue") }}:
+												{{ formatMoney(Number(row.revenue || 0)) }} .
 												{{ __("COGS") }}: {{ formatMoney(Number(row.cogs || 0)) }} .
-												{{ __("Margin") }}: {{ formatPercent(row.gross_margin_pct, 1) }}
+												{{ __("Margin") }}:
+												{{ formatPercent(row.gross_margin_pct, 1) }}
 											</div>
 											<v-progress-linear
-												:model-value="trendProgress(Number(row.gross_profit || 0), profitabilityItemMax)"
+												:model-value="
+													trendProgress(
+														Number(row.gross_profit || 0),
+														profitabilityItemMax,
+													)
+												"
 												color="success"
 												height="5"
 												rounded
 											/>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No item profitability data found.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No item profitability data found.") }}
+									</div>
 								</div>
 
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Category-wise Margin") }}</div>
-									<div v-if="profitabilityCategoryRows.length" class="list-stack trend-list">
-										<div v-for="row in profitabilityCategoryRows" :key="`profit-cat-${row.category || row.label}`" class="insight-row">
+									<div
+										v-if="profitabilityCategoryRows.length"
+										class="list-stack trend-list"
+									>
+										<div
+											v-for="row in profitabilityCategoryRows"
+											:key="`profit-cat-${row.category || row.label}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ row.label || row.category || "-" }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(row.gross_profit || 0)) }}</div>
+												<div class="insight-row__title">
+													{{ row.label || row.category || "-" }}
+												</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(row.gross_profit || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Revenue") }}: {{ formatMoney(Number(row.revenue || 0)) }} .
-												{{ __("Margin") }}: {{ formatPercent(row.gross_margin_pct, 1) }} .
-												{{ __("Items") }}: {{ formatQuantity(Number(row.item_count || 0)) }}
+												{{ __("Revenue") }}:
+												{{ formatMoney(Number(row.revenue || 0)) }} .
+												{{ __("Margin") }}:
+												{{ formatPercent(row.gross_margin_pct, 1) }} .
+												{{ __("Items") }}:
+												{{ formatQuantity(Number(row.item_count || 0)) }}
 											</div>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No category profitability data found.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No category profitability data found.") }}
+									</div>
 								</div>
 
 								<div class="trend-panel">
-									<div class="summary-metric__label">{{ __("Last 14 Days Gross Profit") }}</div>
+									<div class="summary-metric__label">
+										{{ __("Last 14 Days Gross Profit") }}
+									</div>
 									<div v-if="profitabilityDayRows.length" class="list-stack trend-list">
-										<div v-for="row in profitabilityDayRows" :key="`profit-day-${row.date}`" class="insight-row">
+										<div
+											v-for="row in profitabilityDayRows"
+											:key="`profit-day-${row.date}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ formatDate(row.date) }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(row.gross_profit || 0)) }}</div>
+												<div class="insight-row__title">
+													{{ formatDate(row.date) }}
+												</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(row.gross_profit || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Revenue") }}: {{ formatMoney(Number(row.revenue || 0)) }} .
+												{{ __("Revenue") }}:
+												{{ formatMoney(Number(row.revenue || 0)) }} .
 												{{ __("COGS") }}: {{ formatMoney(Number(row.cogs || 0)) }} .
-												{{ __("Invoices") }}: {{ formatQuantity(Number(row.invoice_count || 0)) }}
+												{{ __("Invoices") }}:
+												{{ formatQuantity(Number(row.invoice_count || 0)) }}
 											</div>
 											<v-progress-linear
-												:model-value="trendProgress(Number(row.gross_profit || 0), profitabilityDayMax)"
+												:model-value="
+													trendProgress(
+														Number(row.gross_profit || 0),
+														profitabilityDayMax,
+													)
+												"
 												color="primary"
 												height="5"
 												rounded
 											/>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No day-wise profitability trend found.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No day-wise profitability trend found.") }}
+									</div>
 								</div>
 							</div>
 						</v-card>
@@ -951,7 +1329,9 @@
 					<v-col cols="12">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Tax / Charges Report") }}</h2>
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">
+									{{ __("Tax / Charges Report") }}
+								</h2>
 								<div class="dashboard-chip-row">
 									<v-chip size="small" color="info" variant="tonal">
 										{{ taxChargesRangeLabel }}
@@ -968,39 +1348,63 @@
 							<div class="summary-grid">
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Invoices") }}</div>
-									<div class="summary-metric__value">{{ formatQuantity(Number(taxChargesTotals.invoice_count || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatQuantity(Number(taxChargesTotals.invoice_count || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Returns") }}</div>
-									<div class="summary-metric__value">{{ formatQuantity(Number(taxChargesTotals.return_invoice_count || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{
+											formatQuantity(Number(taxChargesTotals.return_invoice_count || 0))
+										}}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Taxable Amount") }}</div>
-									<div class="summary-metric__value">{{ formatMoney(Number(taxChargesTotals.taxable_amount || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatMoney(Number(taxChargesTotals.taxable_amount || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Tax") }}</div>
-									<div class="summary-metric__value">{{ formatMoney(Number(taxChargesTotals.tax_amount || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatMoney(Number(taxChargesTotals.tax_amount || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Service Charges") }}</div>
-									<div class="summary-metric__value">{{ formatMoney(Number(taxChargesTotals.service_charge_amount || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatMoney(Number(taxChargesTotals.service_charge_amount || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Fees") }}</div>
-									<div class="summary-metric__value">{{ formatMoney(Number(taxChargesTotals.fee_amount || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatMoney(Number(taxChargesTotals.fee_amount || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Round Off") }}</div>
-									<div class="summary-metric__value">{{ formatMoney(Number(taxChargesTotals.round_off_amount || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatMoney(Number(taxChargesTotals.round_off_amount || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Invoice Adjustments") }}</div>
-									<div class="summary-metric__value">{{ formatMoney(Number(taxChargesTotals.invoice_adjustment_amount || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{
+											formatMoney(
+												Number(taxChargesTotals.invoice_adjustment_amount || 0),
+											)
+										}}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Total Charges") }}</div>
-									<div class="summary-metric__value">{{ formatMoney(Number(taxChargesTotals.total_charge_amount || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatMoney(Number(taxChargesTotals.total_charge_amount || 0)) }}
+									</div>
 								</div>
 							</div>
 
@@ -1008,48 +1412,77 @@
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Tax Heads") }}</div>
 									<div v-if="taxHeadRows.length" class="list-stack trend-list">
-										<div v-for="row in taxHeadRows" :key="`tax-head-${row.label}`" class="insight-row">
+										<div
+											v-for="row in taxHeadRows"
+											:key="`tax-head-${row.label}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
 												<div class="insight-row__title">{{ row.label || "-" }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(row.amount || 0)) }}</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(row.amount || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Invoices") }}: {{ formatQuantity(Number(row.invoice_count || 0)) }} .
+												{{ __("Invoices") }}:
+												{{ formatQuantity(Number(row.invoice_count || 0)) }} .
 												{{ __("Share") }}: {{ formatPercent(row.share_pct, 1) }}
 											</div>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No tax head breakdown found.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No tax head breakdown found.") }}
+									</div>
 								</div>
 
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Charge Heads") }}</div>
 									<div v-if="chargeHeadRows.length" class="list-stack trend-list">
-										<div v-for="row in chargeHeadRows" :key="`charge-head-${row.label}`" class="insight-row">
+										<div
+											v-for="row in chargeHeadRows"
+											:key="`charge-head-${row.label}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
 												<div class="insight-row__title">{{ row.label || "-" }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(row.amount || 0)) }}</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(row.amount || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
 												{{ __("Category") }}: {{ row.category || "-" }} .
-												{{ __("Invoices") }}: {{ formatQuantity(Number(row.invoice_count || 0)) }} .
+												{{ __("Invoices") }}:
+												{{ formatQuantity(Number(row.invoice_count || 0)) }} .
 												{{ __("Share") }}: {{ formatPercent(row.share_pct, 1) }}
 											</div>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No charge head breakdown found.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No charge head breakdown found.") }}
+									</div>
 								</div>
 
 								<div class="trend-panel">
-									<div class="summary-metric__label">{{ __("Last 14 Days Tax/Charges") }}</div>
+									<div class="summary-metric__label">
+										{{ __("Last 14 Days Tax/Charges") }}
+									</div>
 									<div v-if="taxChargesDayRows.length" class="list-stack trend-list">
-										<div v-for="row in taxChargesDayRows" :key="`tax-day-${row.date}`" class="insight-row">
+										<div
+											v-for="row in taxChargesDayRows"
+											:key="`tax-day-${row.date}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ formatDate(row.date) }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(row.total_charge_amount || 0)) }}</div>
+												<div class="insight-row__title">
+													{{ formatDate(row.date) }}
+												</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(row.total_charge_amount || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Tax") }}: {{ formatMoney(Number(row.tax_amount || 0)) }} .
+												{{ __("Tax") }}:
+												{{ formatMoney(Number(row.tax_amount || 0)) }} .
 												{{ __("Charges") }}:
 												{{
 													formatMoney(
@@ -1057,18 +1490,26 @@
 															Number(row.fee_amount || 0) +
 															Number(row.other_charge_amount || 0),
 													)
-												}} .
-												{{ __("Invoices") }}: {{ formatQuantity(Number(row.invoice_count || 0)) }}
+												}}
+												. {{ __("Invoices") }}:
+												{{ formatQuantity(Number(row.invoice_count || 0)) }}
 											</div>
 											<v-progress-linear
-												:model-value="trendProgress(Number(row.total_charge_amount || 0), taxDayMax)"
+												:model-value="
+													trendProgress(
+														Number(row.total_charge_amount || 0),
+														taxDayMax,
+													)
+												"
 												color="warning"
 												height="5"
 												rounded
 											/>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No day-wise tax/charges trend found.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No day-wise tax/charges trend found.") }}
+									</div>
 								</div>
 							</div>
 						</v-card>
@@ -1079,19 +1520,24 @@
 					<v-col cols="12">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Branch / Location-wise Report") }}</h2>
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">
+									{{ __("Branch / Location-wise Report") }}
+								</h2>
 								<div class="dashboard-chip-row">
 									<v-chip size="small" color="info" variant="tonal">
 										{{ branchReportRangeLabel }}
 									</v-chip>
 									<v-chip size="small" color="primary" variant="tonal">
-										{{ __("Locations") }}: {{ formatQuantity(Number(branchSummary.location_count || 0)) }}
+										{{ __("Locations") }}:
+										{{ formatQuantity(Number(branchSummary.location_count || 0)) }}
 									</v-chip>
 									<v-chip size="small" color="success" variant="tonal">
-										{{ __("Sales") }}: {{ formatMoney(Number(branchSummary.total_sales || 0)) }}
+										{{ __("Sales") }}:
+										{{ formatMoney(Number(branchSummary.total_sales || 0)) }}
 									</v-chip>
 									<v-chip size="small" color="warning" variant="tonal">
-										{{ __("Profit") }}: {{ formatMoney(Number(branchSummary.total_profit || 0)) }}
+										{{ __("Profit") }}:
+										{{ formatMoney(Number(branchSummary.total_profit || 0)) }}
 									</v-chip>
 								</div>
 							</div>
@@ -1099,11 +1545,15 @@
 							<div class="summary-grid">
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Total Invoices") }}</div>
-									<div class="summary-metric__value">{{ formatQuantity(Number(branchSummary.total_invoices || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatQuantity(Number(branchSummary.total_invoices || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Total Stock Qty") }}</div>
-									<div class="summary-metric__value">{{ formatQuantity(Number(branchSummary.total_stock_qty || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatQuantity(Number(branchSummary.total_stock_qty || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Low Stock Total") }}</div>
@@ -1113,7 +1563,9 @@
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Cashiers") }}</div>
-									<div class="summary-metric__value">{{ formatQuantity(Number(branchSummary.cashier_count || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatQuantity(Number(branchSummary.cashier_count || 0)) }}
+									</div>
 								</div>
 							</div>
 
@@ -1121,30 +1573,48 @@
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Location Performance") }}</div>
 									<div v-if="branchRows.length" class="list-stack trend-list">
-										<div v-for="row in branchRows" :key="`branch-row-${row.profile}`" class="insight-row">
+										<div
+											v-for="row in branchRows"
+											:key="`branch-row-${row.profile}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
 												<div class="insight-row__title">{{ row.profile || "-" }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(row.sales_amount || 0)) }}</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(row.sales_amount || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
 												{{ __("Warehouse") }}: {{ row.warehouse || "-" }} .
-												{{ __("Invoices") }}: {{ formatQuantity(Number(row.invoice_count || 0)) }} .
-												{{ __("Avg Bill") }}: {{ formatMoney(Number(row.average_bill || 0)) }}
+												{{ __("Invoices") }}:
+												{{ formatQuantity(Number(row.invoice_count || 0)) }} .
+												{{ __("Avg Bill") }}:
+												{{ formatMoney(Number(row.average_bill || 0)) }}
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Profit") }}: {{ formatMoney(Number(row.profit_amount || 0)) }} .
-												{{ __("Stock") }}: {{ formatQuantity(Number(row.stock_qty || 0)) }} .
-												{{ __("Low Stock") }}: {{ formatQuantity(Number(row.low_stock_count || 0)) }}
+												{{ __("Profit") }}:
+												{{ formatMoney(Number(row.profit_amount || 0)) }} .
+												{{ __("Stock") }}:
+												{{ formatQuantity(Number(row.stock_qty || 0)) }} .
+												{{ __("Low Stock") }}:
+												{{ formatQuantity(Number(row.low_stock_count || 0)) }}
 											</div>
 											<v-progress-linear
-												:model-value="trendProgress(Number(row.sales_amount || 0), branchSalesMax)"
+												:model-value="
+													trendProgress(
+														Number(row.sales_amount || 0),
+														branchSalesMax,
+													)
+												"
 												color="primary"
 												height="5"
 												rounded
 											/>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No branch/location data found.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No branch/location data found.") }}
+									</div>
 								</div>
 
 								<div class="trend-panel">
@@ -1156,8 +1626,12 @@
 											class="insight-row"
 										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ location.profile || "-" }}</div>
-												<div class="insight-row__value">{{ location.warehouse || "-" }}</div>
+												<div class="insight-row__title">
+													{{ location.profile || "-" }}
+												</div>
+												<div class="insight-row__value">
+													{{ location.warehouse || "-" }}
+												</div>
 											</div>
 											<div
 												v-for="item in location.items || []"
@@ -1167,12 +1641,17 @@
 												{{ item.item_name || item.item_code || "-" }}:
 												{{ formatMoney(Number(item.sales_amount || 0)) }}
 											</div>
-											<div v-if="!(location.items || []).length" class="insight-row__meta">
+											<div
+												v-if="!(location.items || []).length"
+												class="insight-row__meta"
+											>
 												{{ __("No top items found for this location.") }}
 											</div>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No location-wise top item data found.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No location-wise top item data found.") }}
+									</div>
 								</div>
 							</div>
 						</v-card>
@@ -1183,7 +1662,9 @@
 					<v-col cols="12">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Item / Product Sales Report") }}</h2>
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">
+									{{ __("Item / Product Sales Report") }}
+								</h2>
 								<div class="dashboard-chip-row">
 									<v-chip size="small" color="info" variant="tonal">
 										{{ itemSalesRangeLabel }}
@@ -1201,7 +1682,11 @@
 							</div>
 
 							<div v-if="itemSalesItems.length" class="list-stack">
-								<div v-for="item in itemSalesItems" :key="`item-sales-${item.item_code}`" class="insight-row">
+								<div
+									v-for="item in itemSalesItems"
+									:key="`item-sales-${item.item_code}`"
+									class="insight-row"
+								>
 									<div class="insight-row__top">
 										<div class="insight-row__title">
 											{{ item.item_name || item.item_code }}
@@ -1211,24 +1696,32 @@
 										</div>
 									</div>
 									<div class="insight-row__meta">
-										{{ item.item_code }} .
-										{{ __("Qty") }}: {{ formatQuantity(Number(item.sold_qty || 0)) }} {{ item.stock_uom || "" }}
+										{{ item.item_code }} . {{ __("Qty") }}:
+										{{ formatQuantity(Number(item.sold_qty || 0)) }}
+										{{ item.stock_uom || "" }}
 									</div>
 									<div class="insight-row__meta">
-										{{ __("Margin") }}: {{ formatMoney(Number(item.estimated_margin || 0)) }}
-										({{ formatPercent(item.estimated_margin_pct, 1) }}) .
-										{{ __("Discount") }}: {{ formatMoney(Number(item.discount_amount || 0)) }}
-										({{ formatPercent(item.discount_frequency_pct, 1) }})
+										{{ __("Margin") }}:
+										{{ formatMoney(Number(item.estimated_margin || 0)) }} ({{
+											formatPercent(item.estimated_margin_pct, 1)
+										}}) . {{ __("Discount") }}:
+										{{ formatMoney(Number(item.discount_amount || 0)) }} ({{
+											formatPercent(item.discount_frequency_pct, 1)
+										}})
 									</div>
 									<v-progress-linear
-										:model-value="trendProgress(Number(item.sales_amount || 0), itemSalesMaxSales)"
+										:model-value="
+											trendProgress(Number(item.sales_amount || 0), itemSalesMaxSales)
+										"
 										color="primary"
 										height="5"
 										rounded
 									/>
 								</div>
 							</div>
-							<div v-else class="empty-state">{{ __("No item sales data found for this period.") }}</div>
+							<div v-else class="empty-state">
+								{{ __("No item sales data found for this period.") }}
+							</div>
 						</v-card>
 					</v-col>
 				</v-row>
@@ -1237,7 +1730,9 @@
 					<v-col cols="12">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Category / Brand / Variant Report") }}</h2>
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">
+									{{ __("Category / Brand / Variant Report") }}
+								</h2>
 								<div class="dashboard-chip-row">
 									<v-chip size="small" color="info" variant="tonal">
 										{{ categoryVariantRangeLabel }}
@@ -1258,16 +1753,28 @@
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Category-wise") }}</div>
 									<div v-if="categorySalesPoints.length" class="list-stack trend-list">
-										<div v-for="row in categorySalesPoints" :key="`cat-${row.category || row.label}`" class="insight-row">
+										<div
+											v-for="row in categorySalesPoints"
+											:key="`cat-${row.category || row.label}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
 												<div class="insight-row__title">{{ row.label || "-" }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(row.sales_amount || 0)) }}</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(row.sales_amount || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Items") }}: {{ formatQuantity(Number(row.item_count || 0)) }}
+												{{ __("Items") }}:
+												{{ formatQuantity(Number(row.item_count || 0)) }}
 											</div>
 											<v-progress-linear
-												:model-value="trendProgress(Number(row.sales_amount || 0), categorySalesMax)"
+												:model-value="
+													trendProgress(
+														Number(row.sales_amount || 0),
+														categorySalesMax,
+													)
+												"
 												color="primary"
 												height="5"
 												rounded
@@ -1280,16 +1787,28 @@
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Brand-wise") }}</div>
 									<div v-if="brandSalesPoints.length" class="list-stack trend-list">
-										<div v-for="row in brandSalesPoints" :key="`brand-${row.brand || row.label}`" class="insight-row">
+										<div
+											v-for="row in brandSalesPoints"
+											:key="`brand-${row.brand || row.label}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
 												<div class="insight-row__title">{{ row.label || "-" }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(row.sales_amount || 0)) }}</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(row.sales_amount || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Items") }}: {{ formatQuantity(Number(row.item_count || 0)) }}
+												{{ __("Items") }}:
+												{{ formatQuantity(Number(row.item_count || 0)) }}
 											</div>
 											<v-progress-linear
-												:model-value="trendProgress(Number(row.sales_amount || 0), brandSalesMax)"
+												:model-value="
+													trendProgress(
+														Number(row.sales_amount || 0),
+														brandSalesMax,
+													)
+												"
 												color="success"
 												height="5"
 												rounded
@@ -1302,16 +1821,28 @@
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Variant-wise") }}</div>
 									<div v-if="variantSalesPoints.length" class="list-stack trend-list">
-										<div v-for="row in variantSalesPoints" :key="`variant-${row.variant_of || row.label}`" class="insight-row">
+										<div
+											v-for="row in variantSalesPoints"
+											:key="`variant-${row.variant_of || row.label}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
 												<div class="insight-row__title">{{ row.label || "-" }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(row.sales_amount || 0)) }}</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(row.sales_amount || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Variants") }}: {{ formatQuantity(Number(row.variant_item_count || 0)) }}
+												{{ __("Variants") }}:
+												{{ formatQuantity(Number(row.variant_item_count || 0)) }}
 											</div>
 											<v-progress-linear
-												:model-value="trendProgress(Number(row.sales_amount || 0), variantSalesMax)"
+												:model-value="
+													trendProgress(
+														Number(row.sales_amount || 0),
+														variantSalesMax,
+													)
+												"
 												color="warning"
 												height="5"
 												rounded
@@ -1322,7 +1853,9 @@
 								</div>
 
 								<div class="trend-panel">
-									<div class="summary-metric__label">{{ __("Attributes (Size/Color)") }}</div>
+									<div class="summary-metric__label">
+										{{ __("Attributes (Size/Color)") }}
+									</div>
 									<div v-if="attributeSalesPoints.length" class="list-stack trend-list">
 										<div
 											v-for="row in attributeSalesPoints"
@@ -1331,13 +1864,21 @@
 										>
 											<div class="insight-row__top">
 												<div class="insight-row__title">{{ row.label || "-" }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(row.sales_amount || 0)) }}</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(row.sales_amount || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Items") }}: {{ formatQuantity(Number(row.item_count || 0)) }}
+												{{ __("Items") }}:
+												{{ formatQuantity(Number(row.item_count || 0)) }}
 											</div>
 											<v-progress-linear
-												:model-value="trendProgress(Number(row.sales_amount || 0), attributeSalesMax)"
+												:model-value="
+													trendProgress(
+														Number(row.sales_amount || 0),
+														attributeSalesMax,
+													)
+												"
 												color="info"
 												height="5"
 												rounded
@@ -1355,13 +1896,16 @@
 					<v-col cols="12">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Inventory Status Report") }}</h2>
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">
+									{{ __("Inventory Status Report") }}
+								</h2>
 								<div class="dashboard-chip-row">
 									<v-chip size="small" color="info" variant="tonal">
 										{{ inventoryStatusRangeLabel }}
 									</v-chip>
 									<v-chip size="small" color="warning" variant="tonal">
-										{{ __("Low Stock Threshold") }}: {{ inventoryStatusReport.threshold || lowStockThreshold }}
+										{{ __("Low Stock Threshold") }}:
+										{{ inventoryStatusReport.threshold || lowStockThreshold }}
 									</v-chip>
 								</div>
 							</div>
@@ -1369,40 +1913,68 @@
 							<div class="summary-grid">
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Total Items") }}</div>
-									<div class="summary-metric__value">{{ formatQuantity(Number(inventoryStatusSummary.total_items || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{ formatQuantity(Number(inventoryStatusSummary.total_items || 0)) }}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Total Stock Qty") }}</div>
-									<div class="summary-metric__value">{{ formatQuantity(Number(inventoryStatusSummary.total_stock_qty || 0)) }}</div>
+									<div class="summary-metric__value">
+										{{
+											formatQuantity(
+												Number(inventoryStatusSummary.total_stock_qty || 0),
+											)
+										}}
+									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Low Stock") }}</div>
 									<div class="summary-metric__value summary-metric__value--danger">
-										{{ formatQuantity(Number(inventoryStatusSummary.low_stock_count || 0)) }}
+										{{
+											formatQuantity(
+												Number(inventoryStatusSummary.low_stock_count || 0),
+											)
+										}}
 									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Out of Stock") }}</div>
 									<div class="summary-metric__value summary-metric__value--danger">
-										{{ formatQuantity(Number(inventoryStatusSummary.out_of_stock_count || 0)) }}
+										{{
+											formatQuantity(
+												Number(inventoryStatusSummary.out_of_stock_count || 0),
+											)
+										}}
 									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Negative Stock") }}</div>
 									<div class="summary-metric__value summary-metric__value--danger">
-										{{ formatQuantity(Number(inventoryStatusSummary.negative_stock_count || 0)) }}
+										{{
+											formatQuantity(
+												Number(inventoryStatusSummary.negative_stock_count || 0),
+											)
+										}}
 									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Slow Moving") }}</div>
 									<div class="summary-metric__value">
-										{{ formatQuantity(Number(inventoryStatusSummary.slow_moving_count || 0)) }}
+										{{
+											formatQuantity(
+												Number(inventoryStatusSummary.slow_moving_count || 0),
+											)
+										}}
 									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Dead Stock") }}</div>
 									<div class="summary-metric__value">
-										{{ formatQuantity(Number(inventoryStatusSummary.dead_stock_count || 0)) }}
+										{{
+											formatQuantity(
+												Number(inventoryStatusSummary.dead_stock_count || 0),
+											)
+										}}
 									</div>
 								</div>
 							</div>
@@ -1410,15 +1982,31 @@
 							<div class="trend-grid">
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Low Stock Items") }}</div>
-									<div v-if="inventoryStatusLowStockItems.length" class="list-stack trend-list">
-										<div v-for="row in inventoryStatusLowStockItems" :key="`inv-low-${row.item_code}`" class="insight-row">
+									<div
+										v-if="inventoryStatusLowStockItems.length"
+										class="list-stack trend-list"
+									>
+										<div
+											v-for="row in inventoryStatusLowStockItems"
+											:key="`inv-low-${row.item_code}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ row.item_name || row.item_code }}</div>
-												<div class="insight-row__value">{{ formatQuantity(Number(row.actual_qty || 0)) }}</div>
+												<div class="insight-row__title">
+													{{ row.item_name || row.item_code }}
+												</div>
+												<div class="insight-row__value">
+													{{ formatQuantity(Number(row.actual_qty || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">{{ row.item_code }}</div>
 											<v-progress-linear
-												:model-value="trendProgress(Number(row.actual_qty || 0), inventoryStatusLowMax)"
+												:model-value="
+													trendProgress(
+														Number(row.actual_qty || 0),
+														inventoryStatusLowMax,
+													)
+												"
 												color="warning"
 												height="5"
 												rounded
@@ -1430,10 +2018,19 @@
 
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Out of Stock Items") }}</div>
-									<div v-if="inventoryStatusOutOfStockItems.length" class="list-stack trend-list">
-										<div v-for="row in inventoryStatusOutOfStockItems" :key="`inv-out-${row.item_code}`" class="insight-row">
+									<div
+										v-if="inventoryStatusOutOfStockItems.length"
+										class="list-stack trend-list"
+									>
+										<div
+											v-for="row in inventoryStatusOutOfStockItems"
+											:key="`inv-out-${row.item_code}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ row.item_name || row.item_code }}</div>
+												<div class="insight-row__title">
+													{{ row.item_name || row.item_code }}
+												</div>
 												<v-chip size="x-small" color="error" variant="flat">0</v-chip>
 											</div>
 											<div class="insight-row__meta">{{ row.item_code }}</div>
@@ -1444,17 +2041,31 @@
 
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Negative Stock Items") }}</div>
-									<div v-if="inventoryStatusNegativeItems.length" class="list-stack trend-list">
-										<div v-for="row in inventoryStatusNegativeItems" :key="`inv-neg-${row.item_code}`" class="insight-row">
+									<div
+										v-if="inventoryStatusNegativeItems.length"
+										class="list-stack trend-list"
+									>
+										<div
+											v-for="row in inventoryStatusNegativeItems"
+											:key="`inv-neg-${row.item_code}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ row.item_name || row.item_code }}</div>
+												<div class="insight-row__title">
+													{{ row.item_name || row.item_code }}
+												</div>
 												<div class="insight-row__value summary-metric__value--danger">
 													{{ formatQuantity(Number(row.actual_qty || 0)) }}
 												</div>
 											</div>
 											<div class="insight-row__meta">{{ row.item_code }}</div>
 											<v-progress-linear
-												:model-value="trendProgress(Number(row.actual_qty || 0), inventoryStatusNegativeMax)"
+												:model-value="
+													trendProgress(
+														Number(row.actual_qty || 0),
+														inventoryStatusNegativeMax,
+													)
+												"
 												color="error"
 												height="5"
 												rounded
@@ -1466,18 +2077,36 @@
 
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Slow Moving Items") }}</div>
-									<div v-if="inventoryStatusSlowMovingItems.length" class="list-stack trend-list">
-										<div v-for="row in inventoryStatusSlowMovingItems" :key="`inv-slow-${row.item_code}`" class="insight-row">
+									<div
+										v-if="inventoryStatusSlowMovingItems.length"
+										class="list-stack trend-list"
+									>
+										<div
+											v-for="row in inventoryStatusSlowMovingItems"
+											:key="`inv-slow-${row.item_code}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ row.item_name || row.item_code }}</div>
-												<div class="insight-row__value">{{ formatDays(row.stock_cover_days) }}</div>
+												<div class="insight-row__title">
+													{{ row.item_name || row.item_code }}
+												</div>
+												<div class="insight-row__value">
+													{{ formatDays(row.stock_cover_days) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Stock") }}: {{ formatQuantity(Number(row.actual_qty || 0)) }} .
-												{{ __("Sold") }}: {{ formatQuantity(Number(row.sold_qty || 0)) }}
+												{{ __("Stock") }}:
+												{{ formatQuantity(Number(row.actual_qty || 0)) }} .
+												{{ __("Sold") }}:
+												{{ formatQuantity(Number(row.sold_qty || 0)) }}
 											</div>
 											<v-progress-linear
-												:model-value="trendProgress(Number(row.stock_cover_days || 0), inventoryStatusSlowMax)"
+												:model-value="
+													trendProgress(
+														Number(row.stock_cover_days || 0),
+														inventoryStatusSlowMax,
+													)
+												"
 												color="info"
 												height="5"
 												rounded
@@ -1489,15 +2118,31 @@
 
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Dead Stock Items") }}</div>
-									<div v-if="inventoryStatusDeadStockItems.length" class="list-stack trend-list">
-										<div v-for="row in inventoryStatusDeadStockItems" :key="`inv-dead-${row.item_code}`" class="insight-row">
+									<div
+										v-if="inventoryStatusDeadStockItems.length"
+										class="list-stack trend-list"
+									>
+										<div
+											v-for="row in inventoryStatusDeadStockItems"
+											:key="`inv-dead-${row.item_code}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ row.item_name || row.item_code }}</div>
-												<div class="insight-row__value">{{ formatQuantity(Number(row.actual_qty || 0)) }}</div>
+												<div class="insight-row__title">
+													{{ row.item_name || row.item_code }}
+												</div>
+												<div class="insight-row__value">
+													{{ formatQuantity(Number(row.actual_qty || 0)) }}
+												</div>
 											</div>
 											<div class="insight-row__meta">{{ row.item_code }}</div>
 											<v-progress-linear
-												:model-value="trendProgress(Number(row.actual_qty || 0), inventoryStatusDeadMax)"
+												:model-value="
+													trendProgress(
+														Number(row.actual_qty || 0),
+														inventoryStatusDeadMax,
+													)
+												"
 												color="secondary"
 												height="5"
 												rounded
@@ -1515,7 +2160,9 @@
 					<v-col cols="12">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Stock Movement Report") }}</h2>
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">
+									{{ __("Stock Movement Report") }}
+								</h2>
 								<v-chip size="small" color="info" variant="tonal">
 									{{ stockMovementRangeLabel }}
 								</v-chip>
@@ -1558,31 +2205,50 @@
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Day-wise Movement") }}</div>
 									<div v-if="stockMovementDaySimple.length" class="list-stack trend-list">
-										<div v-for="row in stockMovementDaySimple" :key="`move-day-${row.date}`" class="insight-row">
+										<div
+											v-for="row in stockMovementDaySimple"
+											:key="`move-day-${row.date}`"
+											class="insight-row"
+										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ formatDate(row.date) }}</div>
+												<div class="insight-row__title">
+													{{ formatDate(row.date) }}
+												</div>
 												<div class="insight-row__value">
-													{{ __("Net") }}: {{ formatSignedQuantity(Number(row.net || 0)) }}
+													{{ __("Net") }}:
+													{{ formatSignedQuantity(Number(row.net || 0)) }}
 												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("In") }}: {{ formatQuantity(Number(row.incoming || 0)) }} .
-												{{ __("Out") }}: {{ formatQuantity(Number(row.outgoing || 0)) }} .
-												{{ __("Entries") }}: {{ formatQuantity(Number(row.movement_count || 0)) }}
+												{{ __("In") }}:
+												{{ formatQuantity(Number(row.incoming || 0)) }} .
+												{{ __("Out") }}:
+												{{ formatQuantity(Number(row.outgoing || 0)) }} .
+												{{ __("Entries") }}:
+												{{ formatQuantity(Number(row.movement_count || 0)) }}
 											</div>
 											<v-progress-linear
-												:model-value="trendProgress(Number(row.incoming || 0) + Number(row.outgoing || 0), stockMovementDayMax)"
+												:model-value="
+													trendProgress(
+														Number(row.incoming || 0) + Number(row.outgoing || 0),
+														stockMovementDayMax,
+													)
+												"
 												color="primary"
 												height="5"
 												rounded
 											/>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No stock movement for this period.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No stock movement for this period.") }}
+									</div>
 								</div>
 
 								<div class="trend-panel">
-									<div class="summary-metric__label">{{ __("Recent Movement Entries") }}</div>
+									<div class="summary-metric__label">
+										{{ __("Recent Movement Entries") }}
+									</div>
 									<div v-if="stockMovementRecent.length" class="list-stack trend-list">
 										<div
 											v-for="row in stockMovementRecent"
@@ -1590,21 +2256,27 @@
 											class="insight-row"
 										>
 											<div class="insight-row__top">
-												<div class="insight-row__title">{{ row.item_name || row.item_code || "-" }}</div>
+												<div class="insight-row__title">
+													{{ row.item_name || row.item_code || "-" }}
+												</div>
 												<div class="insight-row__value">
 													{{ formatSignedQuantity(Number(row.qty || 0)) }}
 												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ formatDate(row.posting_date) }} . {{ formatMovementCategory(row.category) }} .
+												{{ formatDate(row.posting_date) }} .
+												{{ formatMovementCategory(row.category) }} .
 												{{ row.direction || "-" }}
 											</div>
 											<div class="insight-row__meta">
-												{{ row.warehouse || "-" }} . {{ row.voucher_type || "-" }} {{ row.voucher_no || "-" }}
+												{{ row.warehouse || "-" }} . {{ row.voucher_type || "-" }}
+												{{ row.voucher_no || "-" }}
 											</div>
 										</div>
 									</div>
-									<div v-else class="empty-state">{{ __("No recent stock entries found.") }}</div>
+									<div v-else class="empty-state">
+										{{ __("No recent stock entries found.") }}
+									</div>
 								</div>
 							</div>
 						</v-card>
@@ -1615,7 +2287,9 @@
 					<v-col cols="12" lg="6">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Fast Moving Items") }}</h2>
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">
+									{{ __("Fast Moving Items") }}
+								</h2>
 								<div class="dashboard-chip-row">
 									<v-chip size="small" color="info" variant="tonal">
 										{{ __("Age Bracket") }}: {{ fastMovingRangeLabel }}
@@ -1656,7 +2330,11 @@
 							</div>
 
 							<div v-else-if="fastMovingItems.length" class="list-stack">
-								<div v-for="item in fastMovingItems" :key="item.item_code" class="insight-row">
+								<div
+									v-for="item in fastMovingItems"
+									:key="item.item_code"
+									class="insight-row"
+								>
 									<div class="insight-row__top">
 										<div class="insight-row__title">
 											{{ item.item_name || item.item_code }}
@@ -1674,7 +2352,10 @@
 									/>
 								</div>
 							</div>
-							<div v-if="!loading && fastMovingItems.length && fastMovingTotalPages > 1" class="pagination-row">
+							<div
+								v-if="!loading && fastMovingItems.length && fastMovingTotalPages > 1"
+								class="pagination-row"
+							>
 								<v-pagination
 									v-model="fastMovingPage"
 									:length="fastMovingTotalPages"
@@ -1692,7 +2373,9 @@
 					<v-col cols="12" lg="6">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Low Stock Alerts") }}</h2>
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">
+									{{ __("Low Stock Alerts") }}
+								</h2>
 								<v-chip size="small" color="warning" variant="tonal">
 									{{ __("Threshold") }}: {{ lowStockThreshold }}
 								</v-chip>
@@ -1728,12 +2411,20 @@
 							</div>
 
 							<div v-else-if="filteredLowStockItems.length" class="list-stack">
-								<div v-for="item in filteredLowStockItems" :key="`${item.item_code}-${item.warehouse}`" class="insight-row">
+								<div
+									v-for="item in filteredLowStockItems"
+									:key="`${item.item_code}-${item.warehouse}`"
+									class="insight-row"
+								>
 									<div class="insight-row__top">
 										<div class="insight-row__title">
 											{{ item.item_name || item.item_code }}
 										</div>
-										<v-chip size="x-small" :color="stockChipColor(item.actual_qty)" variant="flat">
+										<v-chip
+											size="x-small"
+											:color="stockChipColor(item.actual_qty)"
+											variant="flat"
+										>
 											{{ formatQuantity(item.actual_qty) }} {{ item.stock_uom || "" }}
 										</v-chip>
 									</div>
@@ -1754,47 +2445,68 @@
 					<v-col cols="12">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Reorder / Purchase Suggestions") }}</h2>
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">
+									{{ __("Reorder / Purchase Suggestions") }}
+								</h2>
 								<div class="dashboard-chip-row">
 									<v-chip size="small" color="info" variant="tonal">
 										{{ reorderRangeLabel }}
 									</v-chip>
 									<v-chip size="small" color="error" variant="tonal">
-										{{ __("Critical") }}: {{ formatQuantity(Number(reorderSummary.critical_count || 0)) }}
+										{{ __("Critical") }}:
+										{{ formatQuantity(Number(reorderSummary.critical_count || 0)) }}
 									</v-chip>
 									<v-chip size="small" color="warning" variant="tonal">
-										{{ __("High") }}: {{ formatQuantity(Number(reorderSummary.high_count || 0)) }}
+										{{ __("High") }}:
+										{{ formatQuantity(Number(reorderSummary.high_count || 0)) }}
 									</v-chip>
 									<v-chip size="small" color="success" variant="tonal">
-										{{ __("Suggested Qty") }}: {{ formatQuantity(Number(reorderSummary.total_suggested_qty || 0)) }}
+										{{ __("Suggested Qty") }}:
+										{{ formatQuantity(Number(reorderSummary.total_suggested_qty || 0)) }}
 									</v-chip>
 									<v-chip size="small" color="primary" variant="tonal">
-										{{ __("Est. Purchase") }}: {{ formatMoney(Number(reorderSummary.estimated_purchase_value || 0)) }}
+										{{ __("Est. Purchase") }}:
+										{{
+											formatMoney(Number(reorderSummary.estimated_purchase_value || 0))
+										}}
 									</v-chip>
 								</div>
 							</div>
 
 							<div v-if="reorderSuggestions.length" class="list-stack">
-								<div v-for="row in reorderSuggestions" :key="`reorder-${row.item_code}`" class="insight-row">
+								<div
+									v-for="row in reorderSuggestions"
+									:key="`reorder-${row.item_code}`"
+									class="insight-row"
+								>
 									<div class="insight-row__top">
-										<div class="insight-row__title">{{ row.item_name || row.item_code }}</div>
-										<v-chip size="x-small" :color="urgencyColor(row.urgency)" variant="flat">
+										<div class="insight-row__title">
+											{{ row.item_name || row.item_code }}
+										</div>
+										<v-chip
+											size="x-small"
+											:color="urgencyColor(row.urgency)"
+											variant="flat"
+										>
 											{{ urgencyLabel(row.urgency) }}
 										</v-chip>
 									</div>
 									<div class="insight-row__meta">
-										{{ row.item_code }} .
-										{{ __("Current") }}: {{ formatQuantity(Number(row.current_qty || 0)) }} .
-										{{ __("Suggested") }}: {{ formatQuantity(Number(row.suggested_qty || 0)) }}
+										{{ row.item_code }} . {{ __("Current") }}:
+										{{ formatQuantity(Number(row.current_qty || 0)) }} .
+										{{ __("Suggested") }}:
+										{{ formatQuantity(Number(row.suggested_qty || 0)) }}
 									</div>
 									<div class="insight-row__meta">
-										{{ __("Daily Sales") }}: {{ formatQuantity(Number(row.avg_daily_sales || 0)) }} .
+										{{ __("Daily Sales") }}:
+										{{ formatQuantity(Number(row.avg_daily_sales || 0)) }} .
 										{{ __("Lead Time") }}: {{ formatDays(row.lead_time_days) }} .
 										{{ __("Cover") }}: {{ formatDays(row.stock_cover_days) }}
 									</div>
 									<div class="insight-row__meta">
 										{{ __("Supplier") }}: {{ row.supplier || __("Not Set") }} .
-										{{ __("Est. Value") }}: {{ formatMoney(Number(row.estimated_purchase_value || 0)) }}
+										{{ __("Est. Value") }}:
+										{{ formatMoney(Number(row.estimated_purchase_value || 0)) }}
 									</div>
 								</div>
 							</div>
@@ -1809,7 +2521,9 @@
 					<v-col cols="12">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Supplier Purchase Summary") }}</h2>
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">
+									{{ __("Supplier Purchase Summary") }}
+								</h2>
 								<div class="dashboard-chip-row">
 									<v-chip size="small" color="info" variant="tonal">
 										{{ monthRangeLabel }}
@@ -1838,19 +2552,29 @@
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Suppliers") }}</div>
 									<div class="summary-metric__value">
-										{{ formatQuantity(Number(supplierOverviewSummary.supplier_count || 0)) }}
+										{{
+											formatQuantity(
+												Number(supplierOverviewSummary.supplier_count || 0),
+											)
+										}}
 									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Purchase Invoices") }}</div>
 									<div class="summary-metric__value">
-										{{ formatQuantity(Number(supplierOverviewSummary.purchase_count || 0)) }}
+										{{
+											formatQuantity(
+												Number(supplierOverviewSummary.purchase_count || 0),
+											)
+										}}
 									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Purchase Amount") }}</div>
 									<div class="summary-metric__value">
-										{{ formatMoney(Number(supplierOverviewSummary.purchase_amount || 0)) }}
+										{{
+											formatMoney(Number(supplierOverviewSummary.purchase_amount || 0))
+										}}
 									</div>
 								</div>
 								<div class="summary-metric">
@@ -1868,13 +2592,22 @@
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Avg Invoice Value") }}</div>
 									<div class="summary-metric__value">
-										{{ formatMoney(Number(supplierOverviewSummary.avg_invoice_value || 0)) }}
+										{{
+											formatMoney(
+												Number(supplierOverviewSummary.avg_invoice_value || 0),
+											)
+										}}
 									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Pending Ratio") }}</div>
 									<div class="summary-metric__value">
-										{{ formatPercent(Number(supplierOverviewSummary.pending_ratio_pct || 0), 1) }}
+										{{
+											formatPercent(
+												Number(supplierOverviewSummary.pending_ratio_pct || 0),
+												1,
+											)
+										}}
 									</div>
 								</div>
 							</div>
@@ -1888,8 +2621,13 @@
 							<div v-else-if="filteredSupplierSummary.length" class="list-stack">
 								<div class="trend-grid">
 									<div class="trend-panel">
-										<div class="summary-metric__label">{{ __("Top Suppliers by Spend") }}</div>
-										<div v-if="filteredSupplierSummary.length" class="list-stack trend-list">
+										<div class="summary-metric__label">
+											{{ __("Top Suppliers by Spend") }}
+										</div>
+										<div
+											v-if="filteredSupplierSummary.length"
+											class="list-stack trend-list"
+										>
 											<div
 												v-for="supplier in filteredSupplierSummary"
 												:key="`supplier-top-${supplier.supplier}`"
@@ -1900,27 +2638,43 @@
 														{{ supplier.supplier_name || supplier.supplier }}
 													</div>
 													<div class="insight-row__value">
-														{{ formatMoney(Number(supplier.purchase_amount || 0)) }}
+														{{
+															formatMoney(Number(supplier.purchase_amount || 0))
+														}}
 													</div>
 												</div>
 												<div class="insight-row__meta">
-													{{ __("Invoices") }}: {{ formatQuantity(Number(supplier.purchase_count || 0)) }} .
-													{{ __("Share") }}: {{ formatPercent(supplier.share_pct, 1) }}
+													{{ __("Invoices") }}:
+													{{
+														formatQuantity(Number(supplier.purchase_count || 0))
+													}}
+													. {{ __("Share") }}:
+													{{ formatPercent(supplier.share_pct, 1) }}
 												</div>
 												<v-progress-linear
-													:model-value="trendProgress(Number(supplier.purchase_amount || 0), supplierPurchaseMax)"
+													:model-value="
+														trendProgress(
+															Number(supplier.purchase_amount || 0),
+															supplierPurchaseMax,
+														)
+													"
 													color="primary"
 													height="5"
 													rounded
 												/>
 											</div>
 										</div>
-										<div v-else class="empty-state">{{ __("No suppliers found for this period.") }}</div>
+										<div v-else class="empty-state">
+											{{ __("No suppliers found for this period.") }}
+										</div>
 									</div>
 
 									<div class="trend-panel">
 										<div class="summary-metric__label">{{ __("Pending Exposure") }}</div>
-										<div v-if="filteredSupplierRiskRows.length" class="list-stack trend-list">
+										<div
+											v-if="filteredSupplierRiskRows.length"
+											class="list-stack trend-list"
+										>
 											<div
 												v-for="supplier in filteredSupplierRiskRows"
 												:key="`supplier-risk-${supplier.supplier}`"
@@ -1931,52 +2685,86 @@
 														{{ supplier.supplier_name || supplier.supplier }}
 													</div>
 													<div class="insight-row__value">
-														{{ formatMoney(Number(supplier.pending_amount || 0)) }}
+														{{
+															formatMoney(Number(supplier.pending_amount || 0))
+														}}
 													</div>
 												</div>
 												<div class="insight-row__meta">
-													{{ __("Pending Ratio") }}: {{ formatPercent(supplier.pending_ratio_pct, 1) }} .
-													{{ __("Total Purchase") }}: {{ formatMoney(Number(supplier.purchase_amount || 0)) }}
+													{{ __("Pending Ratio") }}:
+													{{ formatPercent(supplier.pending_ratio_pct, 1) }} .
+													{{ __("Total Purchase") }}:
+													{{ formatMoney(Number(supplier.purchase_amount || 0)) }}
 												</div>
 												<v-progress-linear
-													:model-value="trendProgress(Number(supplier.pending_amount || 0), supplierPendingMax)"
+													:model-value="
+														trendProgress(
+															Number(supplier.pending_amount || 0),
+															supplierPendingMax,
+														)
+													"
 													color="error"
 													height="5"
 													rounded
 												/>
 											</div>
 										</div>
-										<div v-else class="empty-state">{{ __("No pending balances in this period.") }}</div>
+										<div v-else class="empty-state">
+											{{ __("No pending balances in this period.") }}
+										</div>
 									</div>
 
 									<div class="trend-panel">
-										<div class="summary-metric__label">{{ __("Last 14 Days Purchases") }}</div>
+										<div class="summary-metric__label">
+											{{ __("Last 14 Days Purchases") }}
+										</div>
 										<div v-if="supplierDayRows.length" class="list-stack trend-list">
-											<div v-for="day in supplierDayRows" :key="`supplier-day-${day.date}`" class="insight-row">
+											<div
+												v-for="day in supplierDayRows"
+												:key="`supplier-day-${day.date}`"
+												class="insight-row"
+											>
 												<div class="insight-row__top">
-													<div class="insight-row__title">{{ formatDate(day.date) }}</div>
+													<div class="insight-row__title">
+														{{ formatDate(day.date) }}
+													</div>
 													<div class="insight-row__value">
 														{{ formatMoney(Number(day.purchase_amount || 0)) }}
 													</div>
 												</div>
 												<div class="insight-row__meta">
-													{{ __("Invoices") }}: {{ formatQuantity(Number(day.purchase_count || 0)) }} .
-													{{ __("Pending") }}: {{ formatMoney(Number(day.pending_amount || 0)) }}
+													{{ __("Invoices") }}:
+													{{ formatQuantity(Number(day.purchase_count || 0)) }} .
+													{{ __("Pending") }}:
+													{{ formatMoney(Number(day.pending_amount || 0)) }}
 												</div>
 												<v-progress-linear
-													:model-value="trendProgress(Number(day.purchase_amount || 0), supplierDayMax)"
+													:model-value="
+														trendProgress(
+															Number(day.purchase_amount || 0),
+															supplierDayMax,
+														)
+													"
 													color="success"
 													height="5"
 													rounded
 												/>
 											</div>
 										</div>
-										<div v-else class="empty-state">{{ __("No day-wise purchase data found.") }}</div>
+										<div v-else class="empty-state">
+											{{ __("No day-wise purchase data found.") }}
+										</div>
 									</div>
 								</div>
 
-								<div class="summary-metric__label mt-2">{{ __("Detailed Supplier Breakdown") }}</div>
-								<div v-for="supplier in filteredSupplierSummary" :key="supplier.supplier" class="supplier-row">
+								<div class="summary-metric__label mt-2">
+									{{ __("Detailed Supplier Breakdown") }}
+								</div>
+								<div
+									v-for="supplier in filteredSupplierSummary"
+									:key="supplier.supplier"
+									class="supplier-row"
+								>
 									<div class="supplier-row__headline">
 										<div class="supplier-row__name">
 											{{ supplier.supplier_name || supplier.supplier }}
@@ -1986,14 +2774,19 @@
 										</div>
 									</div>
 									<div class="supplier-row__meta">
-										{{ __("Invoices") }}: {{ formatQuantity(Number(supplier.purchase_count || 0)) }} .
-										{{ __("Avg Invoice") }}: {{ formatMoney(Number(supplier.avg_invoice_value || 0)) }} .
+										{{ __("Invoices") }}:
+										{{ formatQuantity(Number(supplier.purchase_count || 0)) }} .
+										{{ __("Avg Invoice") }}:
+										{{ formatMoney(Number(supplier.avg_invoice_value || 0)) }} .
 										{{ __("Last") }}: {{ formatDate(supplier.last_purchase_date) }}
 									</div>
 									<div class="supplier-row__meta">
-										{{ __("Paid") }}: {{ formatMoney(Number(supplier.paid_amount || 0)) }} .
-										{{ __("Pending") }}: {{ formatMoney(Number(supplier.pending_amount || 0)) }} .
-										{{ __("Pending Ratio") }}: {{ formatPercent(supplier.pending_ratio_pct, 1) }}
+										{{ __("Paid") }}:
+										{{ formatMoney(Number(supplier.paid_amount || 0)) }} .
+										{{ __("Pending") }}:
+										{{ formatMoney(Number(supplier.pending_amount || 0)) }} .
+										{{ __("Pending Ratio") }}:
+										{{ formatPercent(supplier.pending_ratio_pct, 1) }}
 									</div>
 								</div>
 							</div>
@@ -2400,18 +3193,16 @@ const dashboardData = ref<DashboardResponse>(createEmptyDashboard());
 
 const __ = (value: string) => (window.__ ? window.__(value) : value);
 const DASHBOARD_LOG_PREFIX = "[AwesomeDashboard]";
-const dashboardTabItems = computed<Array<{ value: DashboardTab; label: string; icon: string }>>(
-	() => [
-		{ value: "sales", label: __("Sales"), icon: "mdi-point-of-sale" },
-		{ value: "staff", label: __("Staff"), icon: "mdi-account-group-outline" },
-		{ value: "customers", label: __("Customers"), icon: "mdi-account-heart-outline" },
-		{ value: "finance", label: __("Finance"), icon: "mdi-finance" },
-		{ value: "branches", label: __("Branches"), icon: "mdi-storefront-outline" },
-		{ value: "products", label: __("Products"), icon: "mdi-package-variant-closed" },
-		{ value: "inventory", label: __("Inventory"), icon: "mdi-warehouse" },
-		{ value: "procurement", label: __("Procurement"), icon: "mdi-truck-delivery-outline" },
-	],
-);
+const dashboardTabItems = computed<Array<{ value: DashboardTab; label: string; icon: string }>>(() => [
+	{ value: "sales", label: __("Sales"), icon: "mdi-point-of-sale" },
+	{ value: "staff", label: __("Staff"), icon: "mdi-account-group-outline" },
+	{ value: "customers", label: __("Customers"), icon: "mdi-account-heart-outline" },
+	{ value: "finance", label: __("Finance"), icon: "mdi-finance" },
+	{ value: "branches", label: __("Branches"), icon: "mdi-storefront-outline" },
+	{ value: "products", label: __("Products"), icon: "mdi-package-variant-closed" },
+	{ value: "inventory", label: __("Inventory"), icon: "mdi-warehouse" },
+	{ value: "procurement", label: __("Procurement"), icon: "mdi-truck-delivery-outline" },
+]);
 
 const posProfile = computed(() => uiStore.posProfile || {});
 const profileName = computed(() => String((posProfile.value as any)?.name || "").trim());
@@ -2433,9 +3224,7 @@ const dashboardScopeItems = computed(() => {
 		{ label: __("Current Profile"), value: "current" as const },
 		{ label: __("Specific Profile"), value: "specific" as const },
 	];
-	return allowAllProfiles.value
-		? items
-		: items.filter((item) => item.value === "current");
+	return allowAllProfiles.value ? items : items.filter((item) => item.value === "current");
 });
 
 const profileFilterItems = computed(() =>
@@ -2456,9 +3245,7 @@ const disabledReasonText = computed(() => {
 	}
 	return __("Awesome Dashboard is unavailable for the selected scope.");
 });
-const selectedProfilesCount = computed(
-	() => Number(dashboardData.value.selected_profiles?.length || 0),
-);
+const selectedProfilesCount = computed(() => Number(dashboardData.value.selected_profiles?.length || 0));
 const scopeDisplayLabel = computed(() => {
 	const current = dashboardData.value.scope || dashboardScope.value;
 	if (current === "specific") {
@@ -2609,17 +3396,25 @@ function summaryMetrics(summary: SalesSummaryPayload) {
 			key: "cash_variance",
 			label: __("Expected vs Actual"),
 			value: formatMoney(variance),
-			valueClass: variance > 0 ? "summary-metric__value--success" : variance < 0 ? "summary-metric__value--danger" : "",
+			valueClass:
+				variance > 0
+					? "summary-metric__value--success"
+					: variance < 0
+						? "summary-metric__value--danger"
+						: "",
 		},
 	];
 }
 
 const dailySummaryRangeLabel = computed(() =>
-	summaryRangeLabel(dailySummary.value, dashboardData.value.date_context?.today ? formatDate(dashboardData.value.date_context.today) : __("Today")),
+	summaryRangeLabel(
+		dailySummary.value,
+		dashboardData.value.date_context?.today
+			? formatDate(dashboardData.value.date_context.today)
+			: __("Today"),
+	),
 );
-const monthlySummaryRangeLabel = computed(() =>
-	summaryRangeLabel(monthlySummary.value, __("Current Month")),
-);
+const monthlySummaryRangeLabel = computed(() => summaryRangeLabel(monthlySummary.value, __("Current Month")));
 const dailyPaymentMethods = computed(() => summaryPaymentMethods(dailySummary.value));
 const monthlyPaymentMethods = computed(() => summaryPaymentMethods(monthlySummary.value));
 const dailySummaryMetrics = computed(() => summaryMetrics(dailySummary.value));
@@ -2967,8 +3762,7 @@ const bestHourLabel = computed(() => {
 	if (!bestHour) {
 		return __("N/A");
 	}
-	const label =
-		bestHour.label || `${String(Number(bestHour.hour || 0)).padStart(2, "0")}:00`;
+	const label = bestHour.label || `${String(Number(bestHour.hour || 0)).padStart(2, "0")}:00`;
 	return `${label} . ${formatMoney(Number(bestHour.sales || 0))}`;
 });
 const trendGrowthChips = computed(() => {
@@ -3315,9 +4109,7 @@ const fastMovingPagination = computed(() => {
 const fastMovingTotalCount = computed(() =>
 	Number(fastMovingPagination.value.total_count || fastMovingItems.value.length || 0),
 );
-const fastMovingTotalPages = computed(() =>
-	Number(fastMovingPagination.value.total_pages || 0),
-);
+const fastMovingTotalPages = computed(() => Number(fastMovingPagination.value.total_pages || 0));
 const fastMovingPageSizeItems = computed(() =>
 	[10, 20, 30, 50].map((size) => ({
 		label: String(size),
@@ -3328,15 +4120,9 @@ const lowStockItems = computed<LowStockItem[]>(
 	() => dashboardData.value.inventory_insights.low_stock_items || [],
 );
 const supplierOverview = computed(() => dashboardData.value.supplier_overview);
-const supplierOverviewSummary = computed<SupplierOverviewSummary>(
-	() => supplierOverview.value.summary || {},
-);
-const supplierSummary = computed<SupplierSummaryRow[]>(
-	() => supplierOverview.value.purchase_summary || [],
-);
-const supplierRiskRows = computed<SupplierSummaryRow[]>(
-	() => supplierOverview.value.risk_suppliers || [],
-);
+const supplierOverviewSummary = computed<SupplierOverviewSummary>(() => supplierOverview.value.summary || {});
+const supplierSummary = computed<SupplierSummaryRow[]>(() => supplierOverview.value.purchase_summary || []);
+const supplierRiskRows = computed<SupplierSummaryRow[]>(() => supplierOverview.value.risk_suppliers || []);
 const supplierDayRows = computed<SupplierDayRow[]>(() =>
 	[...(supplierOverview.value.day_wise || [])]
 		.sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")))
@@ -3349,7 +4135,9 @@ const lowStockWarehouseItems = computed(() => {
 	return [{ label: __("All Warehouses"), value: "" }, ...values.map((value) => ({ label: value, value }))];
 });
 const filteredLowStockItems = computed<LowStockItem[]>(() => {
-	const searchText = String(lowStockSearch.value || "").trim().toLowerCase();
+	const searchText = String(lowStockSearch.value || "")
+		.trim()
+		.toLowerCase();
 	const warehouse = String(lowStockWarehouseFilter.value || "").trim();
 	return lowStockItems.value.filter((item) => {
 		if (warehouse && String(item.warehouse || "").trim() !== warehouse) {
@@ -3359,33 +4147,51 @@ const filteredLowStockItems = computed<LowStockItem[]>(() => {
 			return true;
 		}
 		return (
-			String(item.item_code || "").toLowerCase().includes(searchText) ||
-			String(item.item_name || "").toLowerCase().includes(searchText) ||
-			String(item.warehouse || "").toLowerCase().includes(searchText)
+			String(item.item_code || "")
+				.toLowerCase()
+				.includes(searchText) ||
+			String(item.item_name || "")
+				.toLowerCase()
+				.includes(searchText) ||
+			String(item.warehouse || "")
+				.toLowerCase()
+				.includes(searchText)
 		);
 	});
 });
 const filteredSupplierSummary = computed<SupplierSummaryRow[]>(() => {
-	const searchText = String(supplierSearch.value || "").trim().toLowerCase();
+	const searchText = String(supplierSearch.value || "")
+		.trim()
+		.toLowerCase();
 	if (!searchText) {
 		return supplierSummary.value;
 	}
 	return supplierSummary.value.filter((supplier) => {
 		return (
-			String(supplier.supplier || "").toLowerCase().includes(searchText) ||
-			String(supplier.supplier_name || "").toLowerCase().includes(searchText)
+			String(supplier.supplier || "")
+				.toLowerCase()
+				.includes(searchText) ||
+			String(supplier.supplier_name || "")
+				.toLowerCase()
+				.includes(searchText)
 		);
 	});
 });
 const filteredSupplierRiskRows = computed<SupplierSummaryRow[]>(() => {
-	const searchText = String(supplierSearch.value || "").trim().toLowerCase();
+	const searchText = String(supplierSearch.value || "")
+		.trim()
+		.toLowerCase();
 	if (!searchText) {
 		return supplierRiskRows.value;
 	}
 	return supplierRiskRows.value.filter((supplier) => {
 		return (
-			String(supplier.supplier || "").toLowerCase().includes(searchText) ||
-			String(supplier.supplier_name || "").toLowerCase().includes(searchText)
+			String(supplier.supplier || "")
+				.toLowerCase()
+				.includes(searchText) ||
+			String(supplier.supplier_name || "")
+				.toLowerCase()
+				.includes(searchText)
 		);
 	});
 });
@@ -3433,8 +4239,8 @@ const maxFastMovingQty = computed(() => {
 	return maxValue > 0 ? maxValue : 1;
 });
 
-const lowStockThreshold = computed(
-	() => Number(dashboardData.value.inventory_insights.low_stock_threshold || 10),
+const lowStockThreshold = computed(() =>
+	Number(dashboardData.value.inventory_insights.low_stock_threshold || 10),
 );
 
 const monthRangeLabel = computed(() => {
@@ -3482,7 +4288,10 @@ function formatMoney(value: number) {
 		minimumFractionDigits: 2,
 		maximumFractionDigits: 2,
 	}).format(amount);
-	const symbol = typeof get_currency_symbol === "function" && currency.value ? get_currency_symbol(currency.value) : "";
+	const symbol =
+		typeof get_currency_symbol === "function" && currency.value
+			? get_currency_symbol(currency.value)
+			: "";
 	return symbol ? `${symbol} ${formatted}` : formatted;
 }
 
@@ -3524,7 +4333,9 @@ function formatDays(value?: number | null) {
 }
 
 function formatMovementCategory(category?: string) {
-	const normalized = String(category || "").trim().toLowerCase();
+	const normalized = String(category || "")
+		.trim()
+		.toLowerCase();
 	if (normalized === "sale") {
 		return __("Sale");
 	}
@@ -3541,7 +4352,9 @@ function formatMovementCategory(category?: string) {
 }
 
 function urgencyLabel(value?: string) {
-	const normalized = String(value || "").trim().toLowerCase();
+	const normalized = String(value || "")
+		.trim()
+		.toLowerCase();
 	if (normalized === "critical") {
 		return __("Critical");
 	}
@@ -3558,7 +4371,9 @@ function urgencyLabel(value?: string) {
 }
 
 function urgencyColor(value?: string) {
-	const normalized = String(value || "").trim().toLowerCase();
+	const normalized = String(value || "")
+		.trim()
+		.toLowerCase();
 	if (normalized === "critical") {
 		return "error";
 	}
@@ -3732,7 +4547,10 @@ function logDashboardResponse(response: DashboardResponse) {
 	console.info("category_report_count", response.category_brand_variant_report?.category_wise?.length || 0);
 	console.info("inventory_status_total_items", response.inventory_status_report?.summary?.total_items || 0);
 	console.info("stock_movement_count", response.stock_movement_report?.summary?.movement_count || 0);
-	console.info("reorder_suggestion_count", response.reorder_purchase_suggestions?.summary?.suggestion_count || 0);
+	console.info(
+		"reorder_suggestion_count",
+		response.reorder_purchase_suggestions?.summary?.suggestion_count || 0,
+	);
 	console.info("fast_moving_pagination", response.inventory_insights?.fast_moving_pagination || null);
 	console.groupEnd();
 }
@@ -3999,7 +4817,9 @@ onMounted(() => {
 	border-radius: 10px;
 	color: var(--pos-text-secondary);
 	min-height: 40px;
-	transition: background-color 0.18s ease, color 0.18s ease;
+	transition:
+		background-color 0.18s ease,
+		color 0.18s ease;
 }
 
 .dashboard-tab-bar :deep(.v-tab:hover) {
@@ -4370,4 +5190,3 @@ onMounted(() => {
 	}
 }
 </style>
-

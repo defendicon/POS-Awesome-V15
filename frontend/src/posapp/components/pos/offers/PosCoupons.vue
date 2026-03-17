@@ -118,7 +118,9 @@ export default {
 		},
 		add_coupon(new_coupon, options = {}) {
 			const silentDuplicate = !!options.silentDuplicate;
-			const normalizedCoupon = String(new_coupon || "").trim().toUpperCase();
+			const normalizedCoupon = String(new_coupon || "")
+				.trim()
+				.toUpperCase();
 			if (!this.customer || !normalizedCoupon) {
 				this.toastStore.show({
 					title: __("Select a customer to use coupon"),
@@ -128,7 +130,10 @@ export default {
 			}
 			const coupons = this.posa_coupons || [];
 			const exist = coupons.find(
-				(el) => String(el.coupon_code || "").trim().toUpperCase() == normalizedCoupon,
+				(el) =>
+					String(el.coupon_code || "")
+						.trim()
+						.toUpperCase() == normalizedCoupon,
 			);
 			if (exist) {
 				if (!silentDuplicate) {

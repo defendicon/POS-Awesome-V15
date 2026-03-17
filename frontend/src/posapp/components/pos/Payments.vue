@@ -14,10 +14,7 @@
 				location="top"
 				color="info"
 			></v-progress-linear>
-			<div
-				ref="paymentContainer"
-				class="overflow-y-auto payment-scroll"
-			>
+			<div ref="paymentContainer" class="overflow-y-auto payment-scroll">
 				<div :class="['payment-sections', { 'payment-sections--dialog': dialogMode }]">
 					<section class="payment-section payment-section--summary">
 						<div class="payment-section__header">
@@ -171,36 +168,37 @@
 							@update:redeem-customer-credit="redeem_customer_credit = $event"
 							@get-available-credit="get_available_credit"
 						/>
-					<PaymentCustomerCreditDetails
-						:invoice-doc="invoice_doc"
-						:available-customer-credit="available_customer_credit"
-						:redeem-customer-credit="redeem_customer_credit"
+						<PaymentCustomerCreditDetails
+							:invoice-doc="invoice_doc"
+							:available-customer-credit="available_customer_credit"
+							:redeem-customer-credit="redeem_customer_credit"
 							:customer-credit-dict="customer_credit_dict"
 							:credit-source-label="creditSourceLabel"
 							:format-currency="formatCurrency"
 							:currency-symbol="currencySymbol"
-						@set-formatted-currency="
-							(data) => setFormatedCurrency(data.target, data.field, null, false, data.value)
-						"
-					/>
-				</section>
+							@set-formatted-currency="
+								(data) =>
+									setFormatedCurrency(data.target, data.field, null, false, data.value)
+							"
+						/>
+					</section>
 
-				<section class="payment-section payment-section--meta">
-					<div class="payment-section__header">
-						<h3 class="payment-section__title">{{ __("Sales Person and Print") }}</h3>
-					</div>
-					<PaymentSelectionFields
-						:sales-persons="sales_persons"
-						:sales-person="sales_person"
-						:readonly="readonly"
-						:print-formats="print_formats"
-						:print-format="print_format"
-						@update:sales-person="sales_person = $event"
-						@update:print-format="print_format = $event"
-					/>
-				</section>
+					<section class="payment-section payment-section--meta">
+						<div class="payment-section__header">
+							<h3 class="payment-section__title">{{ __("Sales Person and Print") }}</h3>
+						</div>
+						<PaymentSelectionFields
+							:sales-persons="sales_persons"
+							:sales-person="sales_person"
+							:readonly="readonly"
+							:print-formats="print_formats"
+							:print-format="print_format"
+							@update:sales-person="sales_person = $event"
+							@update:print-format="print_format = $event"
+						/>
+					</section>
+				</div>
 			</div>
-		</div>
 		</v-card>
 
 		<div :class="['payment-footer', { 'payment-footer--dialog': dialogMode }]">
@@ -677,9 +675,7 @@ const finishSubmissionNavigation = (clearInvoice = false) => {
 };
 
 const buildProfilePaymentLines = () => {
-	const profilePayments = Array.isArray(pos_profile.value?.payments)
-		? pos_profile.value.payments
-		: [];
+	const profilePayments = Array.isArray(pos_profile.value?.payments) ? pos_profile.value.payments : [];
 
 	return profilePayments
 		.filter((payment) => payment?.mode_of_payment)
@@ -689,10 +685,7 @@ const buildProfilePaymentLines = () => {
 			base_amount: 0,
 			account: payment.account,
 			type: payment.type,
-			default:
-				payment.default === 1 || payment.default === true || index === 0
-					? 1
-					: 0,
+			default: payment.default === 1 || payment.default === true || index === 0 ? 1 : 0,
 		}));
 };
 
@@ -741,10 +734,7 @@ const syncPreferredPaymentToCurrentTotal = (doc = invoice_doc.value) => {
 
 	preferredPayment.amount = normalizedTotal;
 	if (preferredPayment.base_amount !== undefined) {
-		preferredPayment.base_amount = flt(
-			normalizedTotal * conversionRate,
-			currency_precision.value,
-		);
+		preferredPayment.base_amount = flt(normalizedTotal * conversionRate, currency_precision.value);
 	}
 
 	return preferredPayment;
@@ -821,18 +811,16 @@ const handleWriteOffAmountUpdate = (value) => {
 	let nextAmount = flt(value || 0, currency_precision.value);
 	const profileCap = writeOffProfileLimit.value;
 	const diffCap = Math.max(diff_payment.value || 0, 0);
-	const maxAmount =
-		profileCap && profileCap > 0 ? Math.min(diffCap, profileCap) : diffCap;
+	const maxAmount = profileCap && profileCap > 0 ? Math.min(diffCap, profileCap) : diffCap;
 
 	if (nextAmount < 0) {
 		nextAmount = 0;
 	}
 	if (profileCap && profileCap > 0 && nextAmount > profileCap) {
 		toastStore.show({
-			title: __(
-				"Write off amount cannot exceed the POS profile maximum of {0}",
-				[formatCurrency(profileCap)],
-			),
+			title: __("Write off amount cannot exceed the POS profile maximum of {0}", [
+				formatCurrency(profileCap),
+			]),
 			color: "error",
 		});
 		nextAmount = maxAmount;
@@ -1525,11 +1513,7 @@ onBeforeUnmount(() => {
 }
 
 .payment-section--summary {
-	background: linear-gradient(
-		180deg,
-		rgba(var(--v-theme-primary), 0.08) 0%,
-		var(--pos-surface-muted) 100%
-	);
+	background: linear-gradient(180deg, rgba(var(--v-theme-primary), 0.08) 0%, var(--pos-surface-muted) 100%);
 }
 
 .payment-section__header {
@@ -1699,7 +1683,5 @@ onBeforeUnmount(() => {
 		margin-top: 0;
 		padding-bottom: calc(env(safe-area-inset-bottom) + 4px);
 	}
-
 }
 </style>
-

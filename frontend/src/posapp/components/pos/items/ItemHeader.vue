@@ -121,10 +121,7 @@
 					</v-btn>
 				</div>
 				<div class="tools-panel__meta">
-					<span
-						v-if="syncStatus"
-						class="text-caption text-info font-weight-bold sync-status-label"
-					>
+					<span v-if="syncStatus" class="text-caption text-info font-weight-bold sync-status-label">
 						{{ syncStatus }}
 					</span>
 					<span

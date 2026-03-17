@@ -72,7 +72,9 @@
 									>
 										<div class="sales-orders-item__top">
 											<div class="sales-orders-item__identity">
-												<strong>{{ item.customer_name || __("Walk-in Customer") }}</strong>
+												<strong>{{
+													item.customer_name || __("Walk-in Customer")
+												}}</strong>
 												<span>{{ item.name }}</span>
 											</div>
 											<div class="sales-orders-item__amount">
@@ -420,7 +422,9 @@ export default {
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
-	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+	transition:
+		border-color 0.2s ease,
+		box-shadow 0.2s ease;
 }
 
 .sales-orders-item--selected {

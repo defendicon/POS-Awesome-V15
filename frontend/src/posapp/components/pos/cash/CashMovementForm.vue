@@ -110,7 +110,11 @@
 					hide-no-data
 					variant="outlined"
 					density="compact"
-					:label="targetAccountLocked ? __('Back Office Cash Account') : __('Back Office Cash Account (Optional Override)')"
+					:label="
+						targetAccountLocked
+							? __('Back Office Cash Account')
+							: __('Back Office Cash Account (Optional Override)')
+					"
 					:disabled="submitting || !enabled || targetAccountLocked"
 				/>
 			</v-col>

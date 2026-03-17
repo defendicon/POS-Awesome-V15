@@ -14,7 +14,9 @@
 					</v-col>
 					<v-col
 						cols="12"
-						v-if="posProfile.posa_allow_write_off_change && diffPayment > 0 && !invoiceDoc.is_return"
+						v-if="
+							posProfile.posa_allow_write_off_change && diffPayment > 0 && !invoiceDoc.is_return
+						"
 					>
 						<v-switch
 							:model-value="isWriteOffChange"
@@ -124,7 +126,9 @@
 
 				<div v-else-if="invoiceDoc.is_return && isCreditReturn" class="payment-options-panel__note">
 					<h4>{{ $frappe._("Credit Return Active") }}</h4>
-					<p>{{ $frappe._("This return will be settled as customer credit instead of cashback.") }}</p>
+					<p>
+						{{ $frappe._("This return will be settled as customer credit instead of cashback.") }}
+					</p>
 				</div>
 
 				<div v-else-if="invoiceDoc.is_return && isCashback" class="payment-options-panel__note">

@@ -1,6 +1,12 @@
 <template>
 	<div class="status-section-enhanced mx-1">
-		<v-btn icon :title="statusText" :aria-label="statusText" class="status-btn-enhanced" :color="statusColor">
+		<v-btn
+			icon
+			:title="statusText"
+			:aria-label="statusText"
+			class="status-btn-enhanced"
+			:color="statusColor"
+		>
 			<v-icon :color="statusColor">{{ statusIcon }}</v-icon>
 		</v-btn>
 		<div class="status-info-always-visible">

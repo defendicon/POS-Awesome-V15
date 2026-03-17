@@ -1,10 +1,5 @@
 <template>
-	<v-dialog
-		v-model="dialog"
-		max-width="400"
-		transition="dialog-bottom-transition"
-		:retain-focus="false"
-	>
+	<v-dialog v-model="dialog" max-width="400" transition="dialog-bottom-transition" :retain-focus="false">
 		<v-card>
 			<v-card-title class="text-h6">
 				{{ __("Open Payments?") }}
