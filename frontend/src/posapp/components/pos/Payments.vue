@@ -250,7 +250,11 @@ import { usePaymentMethods } from "../../composables/pos/payments/usePaymentMeth
 import { useInvoiceDetails } from "../../composables/pos/invoice/useInvoiceDetails";
 import { useFormat } from "../../format";
 import { isOffline } from "../../../offline/index";
-import { initializePaymentLinesForDialog } from "../../utils/paymentInitialization";
+import {
+	initializePaymentLinesForDialog,
+	rebalancePreferredPaymentLine,
+	resolvePreferredPaymentLine,
+} from "../../utils/paymentInitialization";
 
 // Components
 import PaymentSummary from "./payments/PaymentSummary.vue";
@@ -706,11 +710,7 @@ const syncPreferredPaymentToCurrentTotal = (doc = invoice_doc.value) => {
 		return null;
 	}
 
-	const preferredPayment =
-		payments.find((payment) => payment.default === 1 || payment.default === true) ||
-		payments.find((payment) => isCashLikePayment(payment)) ||
-		payments[0];
-
+	const preferredPayment = resolvePreferredPaymentLine(doc, isCashLikePayment);
 	if (!preferredPayment) {
 		return null;
 	}
@@ -748,6 +748,26 @@ const syncPreferredPaymentToCurrentTotal = (doc = invoice_doc.value) => {
 	}
 
 	return preferredPayment;
+};
+
+const rebalancePreferredPaymentCoverage = () => {
+	const doc = invoice_doc.value;
+	if (
+		!doc ||
+		doc.is_return ||
+		is_credit_sale.value ||
+		!Array.isArray(doc.payments) ||
+		!doc.payments.length
+	) {
+		return null;
+	}
+
+	return rebalancePreferredPaymentLine(doc, {
+		precision: currency_precision.value,
+		isCashLikePayment,
+		loyaltyAmount: invoice_doc.value?.loyalty_amount || loyalty_amount.value,
+		redeemedCustomerCredit: redeemed_customer_credit.value,
+	});
 };
 
 const ensurePaymentLinesInitialized = (doc = invoice_doc.value) => {
@@ -1188,26 +1208,12 @@ watch(loyalty_amount, (value) => {
 			baseAmount / (customer_info.value.conversion_factor || 1),
 		);
 
-		if (!is_credit_sale.value && invoice_doc.value.payments) {
-			const default_payment = invoice_doc.value.payments.find((p) => p.default === 1);
-			if (default_payment) {
-				const invoice_total = invoice_doc.value.rounded_total || invoice_doc.value.grand_total;
-				const other_payments = invoice_doc.value.payments.reduce((sum, p) => {
-					if (p !== default_payment) {
-						return sum + flt(p.amount);
-					}
-					return sum;
-				}, 0);
-				const loyalty = flt(invoice_doc.value.loyalty_amount);
-				const credit = flt(redeemed_customer_credit.value);
-
-				let new_amount = invoice_total - loyalty - credit - other_payments;
-				if (new_amount < 0) new_amount = 0;
-
-				default_payment.amount = flt(new_amount, currency_precision.value);
-			}
-		}
+		rebalancePreferredPaymentCoverage();
 	}
+});
+
+watch(redeemed_customer_credit, () => {
+	rebalancePreferredPaymentCoverage();
 });
 
 watch(sales_person, (newVal) => {
