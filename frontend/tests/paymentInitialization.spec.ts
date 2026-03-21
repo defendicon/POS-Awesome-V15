@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import {
+import * as paymentInitialization from "../src/posapp/utils/paymentInitialization";
+
+const {
 	initializePaymentLinesForDialog,
 	resolvePreferredPaymentLine,
-} from "../src/posapp/utils/paymentInitialization";
+} = paymentInitialization;
 
 describe("paymentInitialization", () => {
 	const isCashLikePayment = (payment: any) =>
@@ -59,5 +61,41 @@ describe("paymentInitialization", () => {
 
 		expect(doc.payments[0].amount).toBe(-80);
 		expect(doc.payments[0].base_amount).toBe(-80);
+	});
+
+	it("reduces the preferred payment amount when customer credit is redeemed", () => {
+		const doc: any = {
+			rounded_total: 2700,
+			conversion_rate: 1,
+			payments: [
+				{
+					mode_of_payment: "Credit Card",
+					type: "Bank",
+					amount: 2700,
+					base_amount: 2700,
+					default: 1,
+				},
+				{
+					mode_of_payment: "Cash",
+					type: "Cash",
+					amount: 0,
+					base_amount: 0,
+				},
+			],
+		};
+
+		const payment = paymentInitialization.rebalancePreferredPaymentLine?.(
+			doc,
+			{
+				precision: 2,
+				isCashLikePayment,
+				redeemedCustomerCredit: 900,
+			},
+		);
+
+		expect(payment).toBe(doc.payments[0]);
+		expect(doc.payments[0].amount).toBe(1800);
+		expect(doc.payments[0].base_amount).toBe(1800);
+		expect(doc.payments[1].amount).toBe(0);
 	});
 });

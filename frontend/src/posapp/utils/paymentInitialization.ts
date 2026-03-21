@@ -14,9 +14,21 @@ export type PaymentInitDoc = {
 	is_return?: number | boolean;
 };
 
+export type PreferredPaymentRebalanceOptions = {
+	precision?: number;
+	isCashLikePayment: (_payment: PaymentLine) => boolean;
+	loyaltyAmount?: number;
+	redeemedCustomerCredit?: number;
+};
+
 const toNumber = (value: unknown): number => {
 	const parsed = Number(value);
 	return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const roundToPrecision = (value: number, precision = 2): number => {
+	const factor = Math.pow(10, Math.max(precision, 0));
+	return Math.round((value + Number.EPSILON) * factor) / factor;
 };
 
 const hasMeaningfulAmount = (
@@ -107,6 +119,60 @@ export const initializePaymentLinesForDialog = (
 	preferredPayment.amount = normalizedTotal;
 	if (preferredPayment.base_amount !== undefined) {
 		preferredPayment.base_amount = normalizedTotal * conversionRate;
+	}
+
+	return preferredPayment;
+};
+
+export const rebalancePreferredPaymentLine = (
+	doc: PaymentInitDoc | null | undefined,
+	options: PreferredPaymentRebalanceOptions,
+): PaymentLine | null => {
+	if (!doc || !Array.isArray(doc.payments) || !doc.payments.length) {
+		return null;
+	}
+
+	const payments = doc.payments.filter((payment) => !!payment?.mode_of_payment);
+	if (!payments.length) {
+		return null;
+	}
+
+	const preferredPayment = resolvePreferredPaymentLine(
+		doc,
+		options.isCashLikePayment,
+	);
+	if (!preferredPayment) {
+		return null;
+	}
+
+	const precision = options.precision ?? 2;
+	const invoiceTotal = toNumber(doc.rounded_total || doc.grand_total);
+	const conversionRate = toNumber(doc.conversion_rate) || 1;
+	const coveredAmount =
+		toNumber(options.loyaltyAmount) +
+		toNumber(options.redeemedCustomerCredit);
+	const otherPaymentsTotal = payments.reduce((sum, payment) => {
+		if (payment === preferredPayment) {
+			return sum;
+		}
+		return sum + toNumber(payment.amount);
+	}, 0);
+
+	let nextAmount = invoiceTotal - coveredAmount - otherPaymentsTotal;
+	if (doc.is_return) {
+		nextAmount = -Math.abs(nextAmount);
+	} else {
+		nextAmount = Math.max(nextAmount, 0);
+	}
+
+	const normalizedAmount = roundToPrecision(nextAmount, precision);
+	preferredPayment.amount = normalizedAmount;
+
+	if (preferredPayment.base_amount !== undefined) {
+		preferredPayment.base_amount = roundToPrecision(
+			normalizedAmount * conversionRate,
+			precision,
+		);
 	}
 
 	return preferredPayment;
