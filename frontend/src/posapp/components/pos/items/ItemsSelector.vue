@@ -195,6 +195,7 @@ import ItemsSelectorCards from "./ItemsSelectorCards.vue";
 import ItemsSelectorTable from "./ItemsSelectorTable.vue";
 import NewItemDialog from "./NewItemDialog.vue";
 import ScanErrorDialog from "./ScanErrorDialog.vue";
+import { resetNewItemDialogState } from "./newItemDialogState";
 
 import { useResponsive } from "../../../composables/core/useResponsive";
 import { useRtl } from "../../../composables/core/useRtl";
@@ -710,8 +711,7 @@ const handleRemoteStockAdjustment = (payload: unknown) => {
 
 // 7. Lifecycle Hooks
 const openNewItemDialog = () => {
-	newItemDialogScannedBarcode.value = "";
-	newItemDialogAwaitingScan.value = false;
+	resetNewItemDialogState(newItemDialogScannedBarcode, newItemDialogAwaitingScan);
 	newItemDialog.value = true;
 };
 
@@ -1114,8 +1114,7 @@ const getItemRowProps = (item) => ({
 
 const handleItemCreated = (_item) => {
 	newItemDialog.value = false;
-	newItemDialogScannedBarcode.value = "";
-	newItemDialogAwaitingScan.value = false;
+	resetNewItemDialogState(newItemDialogScannedBarcode, newItemDialogAwaitingScan);
 	itemsIntegration.get_items(true);
 };
 
@@ -1135,11 +1134,7 @@ defineExpose({
 	format_currency,
 	format_number,
 	currencySymbol,
-	openNewItemDialog: () => {
-		newItemDialogScannedBarcode.value = "";
-		newItemDialogAwaitingScan.value = false;
-		newItemDialog.value = true;
-	},
+	openNewItemDialog,
 	clearSearch,
 	onDragStart,
 	onDragEnd,
