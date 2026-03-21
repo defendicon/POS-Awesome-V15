@@ -2,10 +2,47 @@ import frappe
 from frappe import _
 from frappe.utils import nowdate, getdate, flt, cint
 from erpnext.accounts.party import get_party_account
-from erpnext.accounts.utils import get_outstanding_invoices as get_erpnext_outstanding_invoices
 from erpnext.controllers.accounts_controller import get_advance_payment_entries_for_regional
 
 MAX_OUTSTANDING_PAGE_LENGTH = 500
+
+
+def _get_open_sales_invoices(
+    customer,
+    company,
+    currency=None,
+    pos_profile=None,
+    include_all_currencies=False,
+):
+    filters = {
+        "customer": customer,
+        "company": company,
+        "docstatus": 1,
+        "outstanding_amount": (">", 0),
+    }
+    if currency and not include_all_currencies:
+        filters["currency"] = currency
+    if pos_profile:
+        filters["pos_profile"] = pos_profile
+
+    return frappe.get_list(
+        "Sales Invoice",
+        filters=filters,
+        fields=[
+            "name",
+            "posting_date",
+            "due_date",
+            "outstanding_amount",
+            "rounded_total",
+            "base_rounded_total",
+            "grand_total",
+            "base_grand_total",
+            "currency",
+            "pos_profile",
+            "customer_name",
+        ],
+        order_by="posting_date desc, name desc",
+    )
 
 
 def _coerce_text_filter(value, field_label):
@@ -54,6 +91,64 @@ def _coerce_bool(value, default=False):
     return default
 
 
+def _get_customer_payments_made_as_outstanding(
+    customer,
+    company,
+    currency=None,
+    include_all_currencies=False,
+):
+    """Expose customer pay-type advances on the outstanding side for reconciliation."""
+
+    filters = {
+        "party": customer,
+        "company": company,
+        "docstatus": 1,
+        "party_type": "Customer",
+        "payment_type": "Pay",
+        "unallocated_amount": [">", 0],
+    }
+    if currency and not include_all_currencies:
+        filters["paid_to_account_currency"] = currency
+
+    customer_payments = frappe.get_list(
+        "Payment Entry",
+        filters=filters,
+        fields=[
+            "name",
+            "party_name as customer_name",
+            "posting_date",
+            "paid_amount",
+            "received_amount",
+            "unallocated_amount",
+            "mode_of_payment",
+            "paid_to_account_currency as currency",
+            "paid_to as account",
+        ],
+        order_by="posting_date desc, name desc",
+    )
+
+    return [
+        frappe._dict(
+            {
+                "voucher_no": row.get("name"),
+                "voucher_type": "Payment Entry",
+                "outstanding_amount": flt(row.get("unallocated_amount")),
+                "invoice_amount": flt(row.get("paid_amount") or row.get("received_amount")),
+                "due_date": row.get("posting_date"),
+                "posting_date": row.get("posting_date"),
+                "currency": row.get("currency") or currency,
+                "pos_profile": None,
+                "customer": customer,
+                "customer_name": row.get("customer_name"),
+                "mode_of_payment": row.get("mode_of_payment"),
+                "account": row.get("account"),
+            }
+        )
+        for row in customer_payments
+        if flt(row.get("unallocated_amount")) > 0
+    ]
+
+
 @frappe.whitelist()
 def get_outstanding_invoices(customer=None, company=None, currency=None, pos_profile=None,
                              include_all_currencies=False, page_start=0, page_length=None):
@@ -78,62 +173,41 @@ def get_outstanding_invoices(customer=None, company=None, currency=None, pos_pro
         if page_length:
             page_length = min(page_length, MAX_OUTSTANDING_PAGE_LENGTH)
 
-        party_account = get_party_account("Customer", customer, company)
         customer_name = frappe.get_cached_value("Customer", customer, "customer_name")
 
-        outstanding_invoices = get_erpnext_outstanding_invoices(
-            "Customer",
-            customer,
-            [party_account],
-        )
-
-        sales_invoice_meta = {}
-        sales_invoice_names = [
-            row.get("voucher_no")
-            for row in outstanding_invoices
-            if row.get("voucher_type") == "Sales Invoice"
-        ]
-        if sales_invoice_names:
-            sales_invoice_meta = {
-                row.get("name"): row
-                for row in frappe.get_list(
-                    "Sales Invoice",
-                    filters={"name": ("in", sales_invoice_names)},
-                    fields=["name", "pos_profile", "currency", "customer_name"],
-                )
-            }
-
         normalized_rows = []
-        for invoice in outstanding_invoices:
+        for invoice in _get_open_sales_invoices(
+            customer=customer,
+            company=company,
+            currency=currency,
+            pos_profile=pos_profile,
+            include_all_currencies=include_all_currencies,
+        ):
             outstanding_amount = flt(invoice.get("outstanding_amount"))
             if outstanding_amount <= 0:
                 continue
 
-            voucher_type = invoice.get("voucher_type")
-            voucher_no = invoice.get("voucher_no")
-            meta = sales_invoice_meta.get(voucher_no) if voucher_type == "Sales Invoice" else {}
-
-            row_currency = invoice.get("currency") or (meta or {}).get("currency")
-            if currency and not include_all_currencies and row_currency != currency:
-                continue
-
-            row_pos_profile = (meta or {}).get("pos_profile")
-            if pos_profile and voucher_type == "Sales Invoice" and row_pos_profile != pos_profile:
-                continue
+            row_currency = invoice.get("currency") or currency
 
             normalized_rows.append(
                 frappe._dict(
                     {
-                        "voucher_no": voucher_no,
-                        "voucher_type": voucher_type,
+                        "voucher_no": invoice.get("name"),
+                        "voucher_type": "Sales Invoice",
                         "outstanding_amount": outstanding_amount,
-                        "invoice_amount": flt(invoice.get("invoice_amount")) or outstanding_amount,
+                        "invoice_amount": flt(
+                            invoice.get("rounded_total")
+                            or invoice.get("base_rounded_total")
+                            or invoice.get("grand_total")
+                            or invoice.get("base_grand_total")
+                            or outstanding_amount
+                        ),
                         "due_date": invoice.get("due_date") or invoice.get("posting_date"),
                         "posting_date": invoice.get("posting_date"),
                         "currency": row_currency,
-                        "pos_profile": row_pos_profile,
+                        "pos_profile": invoice.get("pos_profile"),
                         "customer": customer,
-                        "customer_name": (meta or {}).get("customer_name") or customer_name,
+                        "customer_name": invoice.get("customer_name") or customer_name,
                     }
                 )
             )
@@ -410,6 +484,39 @@ def get_unallocated_payments(
                 "remarks": note.remarks,
             }
         )
+
+    for payment_row in _get_customer_payments_made_as_outstanding(
+        customer=customer,
+        company=company,
+        currency=currency,
+        include_all_currencies=include_all_currencies,
+    ):
+        key = (payment_row.get("voucher_type"), payment_row.get("voucher_no"))
+        if key in existing_keys:
+            continue
+
+        unallocated_payment.append(
+            {
+                "name": payment_row.get("voucher_no"),
+                "paid_amount": flt(
+                    payment_row.get("invoice_amount")
+                    or payment_row.get("outstanding_amount")
+                ),
+                "received_amount": flt(
+                    payment_row.get("invoice_amount")
+                    or payment_row.get("outstanding_amount")
+                ),
+                "customer_name": payment_row.get("customer_name") or customer_name,
+                "posting_date": payment_row.get("posting_date"),
+                "unallocated_amount": flt(payment_row.get("outstanding_amount")),
+                "mode_of_payment": payment_row.get("mode_of_payment"),
+                "currency": payment_row.get("currency") or currency,
+                "account": payment_row.get("account") or party_account,
+                "voucher_type": payment_row.get("voucher_type") or "Payment Entry",
+                "is_credit_note": 0,
+            }
+        )
+        existing_keys.add(key)
 
     unallocated_payment = sorted(
         unallocated_payment,

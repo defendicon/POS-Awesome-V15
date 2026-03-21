@@ -14,7 +14,29 @@ vi.mock("../src/posapp/stores/toastStore", () => ({
 
 import { useScanProcessor } from "../src/posapp/composables/pos/items/useScanProcessor";
 
-const makeContext = () => {
+const createScannableItem = (overrides: Record<string, any> = {}) => ({
+	item_code: "ITEM-SCAN",
+	item_name: "Scannable Item",
+	available_qty: 5,
+	actual_qty: 5,
+	qty: 1,
+	rate: 10,
+	price_list_rate: 10,
+	base_rate: 10,
+	base_price_list_rate: 10,
+	is_stock_item: 1,
+	allow_negative_stock: 0,
+	has_serial_no: 0,
+	has_batch_no: 0,
+	...overrides,
+});
+
+const makeContext = (
+	options: {
+		deferStockValidationToPayment?: boolean;
+		allowNegativeStock?: boolean;
+	} = {},
+) => {
 	const addItem = vi.fn(async () => {});
 
 	return {
@@ -62,12 +84,17 @@ const makeContext = () => {
 		float_precision: computed(() => 2),
 		hide_qty_decimals: computed(() => false),
 		blockSaleBeyondAvailableQty: computed(() => false),
+		deferStockValidationToPayment: computed(
+			() => options.deferStockValidationToPayment ?? false,
+		),
 		currency_precision: computed(() => 2),
 		exchange_rate: computed(() => 1),
 		format_currency: (value: number) => String(value),
 		ratePrecision: () => 2,
 		customer: ref(null),
-		stock_settings: ref({ allow_negative_stock: 1 }),
+		stock_settings: ref({
+			allow_negative_stock: options.allowNegativeStock === false ? 0 : 1,
+		}),
 		search_from_scanner_ref: ref(false),
 		addItem,
 	};
@@ -168,5 +195,51 @@ describe("useScanProcessor serial scan handling", () => {
 		const addedItem = ctx.itemAddition.addItem.mock.calls[0][0];
 		expect(addedItem.item_code).toBe("ITEM-SERVER");
 		expect(addedItem.to_set_serial_no).toBe("SER-SERVER-002");
+	});
+
+	it("blocks scanned items with insufficient stock for invoice flow", async () => {
+		const ctx = makeContext({
+			deferStockValidationToPayment: false,
+			allowNegativeStock: false,
+		});
+		const { addScannedItemToInvoice } = useScanProcessor(ctx as any);
+
+		await addScannedItemToInvoice(
+			createScannableItem({ available_qty: 0, actual_qty: 0 }),
+			"ITEM-SCAN",
+		);
+
+		expect(ctx.itemAddition.addItem).not.toHaveBeenCalled();
+		expect(ctx.scannerInput.scanErrorDialog.value).toBe(true);
+		expect(ctx.scannerInput.scanErrorCode.value).toBe("ITEM-SCAN");
+		expect(ctx.scannerInput.scanErrorDetails.value).toContain(
+			"Adjust the quantity",
+		);
+	});
+
+	it("allows scanned items with insufficient stock for order flow when stock validation is deferred", async () => {
+		const ctx = makeContext({ deferStockValidationToPayment: true });
+		const { addScannedItemToInvoice } = useScanProcessor(ctx as any);
+
+		await addScannedItemToInvoice(
+			createScannableItem({ available_qty: 0, actual_qty: 0 }),
+			"ITEM-SCAN",
+		);
+
+		expect(ctx.itemAddition.addItem).toHaveBeenCalledTimes(1);
+		expect(ctx.scannerInput.scanErrorDialog.value).toBe(false);
+	});
+
+	it("allows scanned items with insufficient stock for quotation flow when stock validation is deferred", async () => {
+		const ctx = makeContext({ deferStockValidationToPayment: true });
+		const { addScannedItemToInvoice } = useScanProcessor(ctx as any);
+
+		await addScannedItemToInvoice(
+			createScannableItem({ available_qty: 0, actual_qty: 0 }),
+			"ITEM-SCAN",
+		);
+
+		expect(ctx.itemAddition.addItem).toHaveBeenCalledTimes(1);
+		expect(ctx.scannerInput.scanErrorDialog.value).toBe(false);
 	});
 });

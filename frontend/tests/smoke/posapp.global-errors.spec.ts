@@ -27,8 +27,8 @@ async function loginIfCredentialsProvided(page: Page) {
 	const passInput = page.locator(
 		'input[name="login_password"], input#login_password',
 	);
-	const loginButton = page.locator(
-		'button:has-text("Login"), button:has-text("Log In")',
+	const loginButton = page.locator("button.btn-login").or(
+		page.locator('button:has-text("Login"), button:has-text("Log In")'),
 	);
 
 	if ((await userInput.count()) === 0 || (await passInput.count()) === 0) {
@@ -37,8 +37,10 @@ async function loginIfCredentialsProvided(page: Page) {
 
 	await userInput.first().fill(username);
 	await passInput.first().fill(password);
-	await loginButton.first().click();
-	await page.waitForLoadState("networkidle");
+	await Promise.all([
+		page.waitForURL(/\/app(\/|$)/, { timeout: 60000 }),
+		loginButton.first().click(),
+	]);
 }
 
 test("POS app smoke route has no uncaught global errors", async ({ page }) => {
@@ -62,7 +64,7 @@ test("POS app smoke route has no uncaught global errors", async ({ page }) => {
 	});
 
 	await loginIfCredentialsProvided(page);
-	await page.goto(POS_PATH, { waitUntil: "networkidle" });
+	await page.goto(POS_PATH, { waitUntil: "domcontentloaded" });
 
 	await expect(page).toHaveURL(new RegExp("/app/(posapp|point-of-sale)"));
 	await expect(page.locator(".main-section").first()).toBeVisible();

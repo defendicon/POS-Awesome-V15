@@ -14,6 +14,7 @@
 						<v-col cols="12">
 							<v-text-field
 								v-model="form.item_code"
+								data-test="new-item-code"
 								:label="frappe._('Item Code')"
 								density="compact"
 								variant="outlined"
@@ -24,6 +25,7 @@
 						<v-col cols="12">
 							<v-text-field
 								v-model="form.item_name"
+								data-test="new-item-name"
 								:label="frappe._('Item Name')"
 								density="compact"
 								variant="outlined"
@@ -32,8 +34,31 @@
 							></v-text-field>
 						</v-col>
 						<v-col cols="12">
+							<div class="d-flex flex-wrap align-center ga-2">
+								<v-text-field
+									v-model="form.barcode"
+									data-test="new-item-barcode"
+									:label="frappe._('Barcode')"
+									density="compact"
+									variant="outlined"
+									class="pos-themed-input flex-grow-1"
+								></v-text-field>
+								<v-btn
+									v-if="cameraEnabled"
+									data-test="new-item-camera-scan"
+									color="secondary"
+									variant="tonal"
+									class="mb-4"
+									@click="emit('request-camera-scan')"
+								>
+									{{ __("Scan with Camera") }}
+								</v-btn>
+							</div>
+						</v-col>
+						<v-col cols="12">
 							<v-select
 								v-model="form.item_group"
+								data-test="new-item-group"
 								:items="itemsGroup.filter((g) => g !== 'ALL')"
 								:label="frappe._('Item Group')"
 								density="compact"
@@ -45,6 +70,7 @@
 						<v-col cols="6">
 							<v-autocomplete
 								v-model="form.stock_uom"
+								data-test="new-item-stock-uom"
 								:items="uomList"
 								:label="frappe._('Stock UOM')"
 								density="compact"
@@ -56,6 +82,7 @@
 						<v-col cols="6">
 							<v-text-field
 								v-model="form.standard_rate"
+								data-test="new-item-standard-rate"
 								:label="frappe._('Standard Rate')"
 								type="number"
 								density="compact"
@@ -71,7 +98,13 @@
 				<v-btn color="error" variant="text" @click="close">
 					{{ __("Cancel") }}
 				</v-btn>
-				<v-btn color="primary" variant="tonal" @click="submit" :loading="loading">
+				<v-btn
+					data-test="new-item-submit"
+					color="primary"
+					variant="tonal"
+					@click="submit"
+					:loading="loading"
+				>
 					{{ __("Create") }}
 				</v-btn>
 			</v-card-actions>
@@ -92,9 +125,17 @@ const props = defineProps({
 		type: Array,
 		default: () => [],
 	},
+	cameraEnabled: {
+		type: Boolean,
+		default: false,
+	},
+	scannedBarcode: {
+		type: String,
+		default: "",
+	},
 });
 
-const emit = defineEmits(["update:modelValue", "item-created"]);
+const emit = defineEmits(["update:modelValue", "item-created", "request-camera-scan"]);
 
 const loading = ref(false);
 const formRef = ref(null);
@@ -103,6 +144,7 @@ const uomList = ref([]);
 const form = reactive({
 	item_code: "",
 	item_name: "",
+	barcode: "",
 	item_group: "",
 	stock_uom: "Nos",
 	standard_rate: 0,
@@ -111,6 +153,7 @@ const form = reactive({
 const resetForm = () => {
 	form.item_code = "";
 	form.item_name = "";
+	form.barcode = (props.scannedBarcode || "").trim();
 	// Auto-select a sensible item group
 	form.item_group =
 		props.itemsGroup.length > 1 && props.itemsGroup[1] !== "ALL"
@@ -127,6 +170,16 @@ watch(
 	(val) => {
 		if (val) {
 			resetForm();
+		}
+	},
+);
+
+watch(
+	() => props.scannedBarcode,
+	(barcode) => {
+		const normalizedBarcode = (barcode || "").trim();
+		if (normalizedBarcode) {
+			form.barcode = normalizedBarcode;
 		}
 	},
 );
@@ -163,6 +216,7 @@ const submit = async () => {
 		const res = await itemService.createItem({
 			item_code: form.item_code,
 			item_name: form.item_name,
+			barcode: form.barcode,
 			item_group: form.item_group,
 			stock_uom: form.stock_uom,
 			standard_rate: form.standard_rate,

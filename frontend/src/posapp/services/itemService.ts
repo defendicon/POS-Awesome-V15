@@ -43,12 +43,22 @@ const itemService = {
   },
 
   createItem(itemData: Partial<Item>): Promise<Item> {
+    const doc: Record<string, unknown> = {
+      doctype: "Item",
+      is_stock_item: 1,
+      ...itemData,
+    };
+    const normalizedBarcode =
+      typeof doc.barcode === "string" ? doc.barcode.trim() : "";
+
+    if (normalizedBarcode) {
+      doc.barcodes = [{ barcode: normalizedBarcode }];
+    }
+
+    delete doc.barcode;
+
     return api.call("frappe.client.insert", {
-      doc: {
-        doctype: "Item",
-        is_stock_item: 1,
-        ...itemData,
-      },
+      doc,
     });
   }
 };

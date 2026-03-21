@@ -303,9 +303,12 @@ export default {
 
 		const { activeView } = storeToRefs(uiStore);
 		const { selectedCustomer, refreshToken: customerRefreshToken } = storeToRefs(customersStore);
-		const { items, packedItems: packed_items, invoiceDoc: invoice_doc } = storeToRefs(invoiceStore);
-
-		const invoiceType = ref("Invoice");
+		const {
+			items,
+			packedItems: packed_items,
+			invoiceDoc: invoice_doc,
+			invoiceType,
+		} = storeToRefs(invoiceStore);
 		const itemsTableRef = ref(null);
 		const currencyState = useInvoiceCurrency({}, {});
 		const itemActions = useInvoiceItems(invoiceType);

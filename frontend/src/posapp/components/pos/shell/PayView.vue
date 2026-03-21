@@ -1,5 +1,9 @@
 <template>
 	<div fluid :class="rtlClasses">
+		<AppLoadingOverlay
+			:visible="isPaymentRouteLocked"
+			:message="paymentsLoadingMessage"
+		/>
 		<v-row v-show="!dialog">
 			<v-col md="8" cols="12" class="pb-2 pr-0">
 				<v-card
@@ -76,6 +80,7 @@
 				>
 					<PayTotalsSidebar
 						v-model:exchange-rate="exchangeRate"
+						v-model:auto-allocate-payment-amount="autoAllocatePaymentAmount"
 						:pos-profile="pos_profile"
 						:total-selected-invoices="total_selected_invoices"
 						:selected-invoices-count="selected_invoices.length"
@@ -150,6 +155,11 @@ import PayUnallocatedTable from "../../pos_pay/PayUnallocatedTable.vue";
 import PayMpesaSection from "../../pos_pay/PayMpesaSection.vue";
 import PayTotalsSidebar from "../../pos_pay/PayTotalsSidebar.vue";
 import PayActionButtons from "../../pos_pay/PayActionButtons.vue";
+import AppLoadingOverlay from "../../ui/LoadingOverlay.vue";
+import {
+	buildPaymentRouteLoadingMessage,
+	isPaymentRouteLocked as resolvePaymentRouteLocked,
+} from "../../../utils/paymentRouteReadiness";
 
 export default {
 	mixins: [format],
@@ -160,6 +170,7 @@ export default {
 		PayMpesaSection,
 		PayTotalsSidebar,
 		PayActionButtons,
+		AppLoadingOverlay,
 	},
 	setup() {
 		const { proxy } = getCurrentInstance();
@@ -167,7 +178,14 @@ export default {
 		const uiStore = useUIStore();
 		const toastStore = useToastStore();
 		const { rtlStyles, rtlClasses } = useRtl();
-		const { selectedCustomer, refreshToken } = storeToRefs(customersStore);
+		const {
+			selectedCustomer,
+			refreshToken,
+			loadingCustomers,
+			isCustomerBackgroundLoading,
+			customersLoaded,
+			loadProgress,
+		} = storeToRefs(customersStore);
 		const { paymentRouteTarget } = storeToRefs(uiStore);
 
 		// Core Data & State
@@ -178,6 +196,7 @@ export default {
 		const company = ref("");
 		const pos_profile_search = ref("");
 		const currency_filter = ref("ALL");
+		const autoAllocatePaymentAmount = ref(true);
 		const exchangeRate = ref(null);
 		const companyCurrency = ref(null);
 		const exchangeRateLoading = ref(false);
@@ -280,6 +299,7 @@ export default {
 			toggleInvoiceSelection,
 			isInvoiceSelected,
 			clearSelections,
+			resetPaymentMethodAmounts,
 		} = usePosPaySelection({
 			outstanding_invoices,
 			unallocated_payments,
@@ -423,6 +443,16 @@ export default {
 				(m) => getPaymentMethodCurrency(m.mode_of_payment) === target,
 			);
 		});
+		const isPaymentRouteLocked = computed(() =>
+			resolvePaymentRouteLocked({
+				customersLoaded: !!customersLoaded.value,
+				loadingCustomers: !!loadingCustomers.value,
+				isCustomerBackgroundLoading: !!isCustomerBackgroundLoading.value,
+			}),
+		);
+		const paymentsLoadingMessage = computed(() =>
+			buildPaymentRouteLoadingMessage(loadProgress.value),
+		);
 
 		const { isSubmitting, processPayment } = usePosPaySubmission({
 			customerName: customer_name,
@@ -440,12 +470,15 @@ export default {
 			total_selected_mpesa_payments,
 			total_payment_methods,
 			clearSelections,
+			resetPaymentMethodAmounts,
 			load_print_page,
 			eventBus: proxy?.eventBus,
 			get_outstanding_invoices: refreshOutstandingInvoices,
 			get_unallocated_payments,
 			get_draft_mpesa_payments_register,
 			set_mpesa_search_params,
+			autoAllocatePaymentAmount,
+			autoReconcile,
 		});
 
 		const fetchCompanyCurrency = async () => {
@@ -609,6 +642,39 @@ export default {
 		function refreshOutstandingInvoices() {
 			return get_outstanding_invoices(pos_profile_search.value || null);
 		}
+		async function syncCustomerPaymentContext(normalized, { forceReload = false } = {}) {
+			if (!normalized) {
+				customer_name.value = "";
+				clearSelections();
+				outstanding_invoices.value = [];
+				unallocated_payments.value = [];
+				mpesa_payments.value = [];
+				exchangeRate.value = null;
+				return;
+			}
+			if (normalized === customer_name.value && !forceReload) {
+				if (
+					company.value &&
+					!outstanding_invoices.value.length &&
+					!unallocated_payments.value.length
+				) {
+					refreshOutstandingInvoices();
+					get_unallocated_payments();
+					get_draft_mpesa_payments_register(payment_methods_list.value);
+				}
+				return;
+			}
+			clearSelections();
+			outstanding_invoices.value = [];
+			unallocated_payments.value = [];
+			mpesa_payments.value = [];
+			customer_name.value = normalized;
+			if (!companyCurrency.value) await fetchCompanyCurrency();
+			fetch_customer_details();
+			refreshOutstandingInvoices();
+			get_unallocated_payments();
+			get_draft_mpesa_payments_register(payment_methods_list.value);
+		}
 
 		function applyPaymentRouteTarget() {
 			const target = paymentRouteTarget.value;
@@ -656,48 +722,35 @@ export default {
 			selectedCustomer,
 			async (val) => {
 				const normalized = val || "";
-				if (!normalized) {
-					customer_name.value = "";
-					clearSelections();
-					outstanding_invoices.value = [];
-					unallocated_payments.value = [];
-					mpesa_payments.value = [];
-					exchangeRate.value = null;
+				if (isPaymentRouteLocked.value) {
 					return;
 				}
-				if (normalized === customer_name.value) {
-					if (
-						company.value &&
-						!outstanding_invoices.value.length &&
-						!unallocated_payments.value.length
-					) {
-						refreshOutstandingInvoices();
-						get_unallocated_payments();
-						get_draft_mpesa_payments_register(payment_methods_list.value);
-					}
-					return;
-				}
-				clearSelections();
-				outstanding_invoices.value = [];
-				unallocated_payments.value = [];
-				mpesa_payments.value = [];
-				customer_name.value = normalized;
-				if (!companyCurrency.value) await fetchCompanyCurrency();
-				fetch_customer_details();
-				refreshOutstandingInvoices();
-				get_unallocated_payments();
-				get_draft_mpesa_payments_register(payment_methods_list.value);
+				await syncCustomerPaymentContext(normalized);
 			},
 			{ immediate: true },
 		);
 
 		watch(refreshToken, () => {
+			if (isPaymentRouteLocked.value) return;
 			if (customer_name.value) fetch_customer_details();
 		});
 
 		watch(
+			isPaymentRouteLocked,
+			(locked) => {
+				if (locked) return;
+				void syncCustomerPaymentContext(
+					selectedCustomer.value || customer_name.value || "",
+					{ forceReload: true },
+				);
+			},
+			{ immediate: true },
+		);
+
+		watch(
 			() => pos_profile.value?.posa_allow_reconcile_payments,
 			(enabled) => {
+				if (isPaymentRouteLocked.value) return;
 				if (!enabled || !customer_name.value || !company.value) return;
 				if (!unallocated_payments.value.length) {
 					get_unallocated_payments();
@@ -707,6 +760,7 @@ export default {
 		);
 
 		watch(company, (newCompany, oldCompany) => {
+			if (isPaymentRouteLocked.value) return;
 			if (!newCompany || newCompany === oldCompany || !customer_name.value) return;
 			refreshOutstandingInvoices();
 			get_unallocated_payments();
@@ -727,6 +781,7 @@ export default {
 			company,
 			pos_profile_search,
 			currency_filter,
+			autoAllocatePaymentAmount,
 			exchangeRate,
 			companyCurrency,
 			exchangeRateLoading,
@@ -781,6 +836,8 @@ export default {
 			outstanding_by_currency,
 			filtered_outstanding_invoices,
 			filtered_payment_methods,
+			isPaymentRouteLocked,
+			paymentsLoadingMessage,
 			getPaymentMethodCurrency,
 			fetchCompanyCurrency,
 			fetchExchangeRate,

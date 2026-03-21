@@ -94,6 +94,15 @@ export function usePosPaySelection({
 		selected_mpesa_payments.value = [];
 	}
 
+	function resetPaymentMethodAmounts() {
+		payment_methods.value = payment_methods.value.map((method: any) => ({
+			...method,
+			amount: 0,
+			base_amount:
+				method?.base_amount !== undefined ? 0 : method?.base_amount,
+		}));
+	}
+
 	return {
 		selected_invoices,
 		selected_payments,
@@ -107,5 +116,6 @@ export function usePosPaySelection({
 		toggleInvoiceSelection,
 		isInvoiceSelected,
 		clearSelections,
+		resetPaymentMethodAmounts,
 	};
 }

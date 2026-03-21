@@ -471,6 +471,25 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 		}
 	}
 
+	function restoreReturnPayments() {
+		const doc = unref(invoiceDoc);
+		if (!doc?.payments) {
+			return;
+		}
+
+		doc.payments.forEach((payment: any) => {
+			if (payment.amount < 0) {
+				payment.amount = Math.abs(payment.amount);
+			}
+			if (
+				payment.base_amount !== undefined &&
+				payment.base_amount < 0
+			) {
+				payment.base_amount = Math.abs(payment.base_amount);
+			}
+		});
+	}
+
 	const submitInvoice = async (
 		print: boolean,
 		callbacks: SubmissionCallbacks = {},
@@ -861,6 +880,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 	return {
 		validateDueDate,
 		ensureReturnPaymentsAreNegative,
+		restoreReturnPayments,
 		validateSubmission,
 		submitInvoice,
 		extractSubmissionErrorMessage,

@@ -42,7 +42,17 @@ def get_items_details(pos_profile, items_data, price_list=None, customer=None):
 @frappe.whitelist()
 def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=None):
     from erpnext.stock.get_item_details import get_item_details
-    item = json.loads(item)
+
+    def normalize_mapping(value):
+        if isinstance(value, str):
+            value = json.loads(value)
+        if isinstance(value, dict) and not isinstance(value, frappe._dict):
+            value = frappe._dict(value)
+        return value
+
+    item = normalize_mapping(item)
+    doc = normalize_mapping(doc) if doc is not None else doc
+    
     today = nowdate()
     item_code = item.get("item_code")
     batch_no_data = []

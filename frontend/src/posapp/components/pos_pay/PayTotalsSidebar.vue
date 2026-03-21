@@ -152,6 +152,29 @@
                 ></v-text-field>
             </v-col>
         </v-row>
+
+        <v-row class="mt-2">
+            <v-col cols="12">
+                <v-switch
+                    :model-value="internalAutoAllocatePaymentAmount"
+                    color="primary"
+                    hide-details
+                    inset
+                    :label="__('Auto Allocate Payment Amount')"
+                    data-test="auto-allocate-payment-toggle"
+                    @update:model-value="
+                        emit('update:autoAllocatePaymentAmount', Boolean($event))
+                    "
+                />
+                <small class="text-caption text-medium-emphasis">
+                    {{
+                        __(
+                            "Unselected payments stay unallocated first, then auto reconcile after submit.",
+                        )
+                    }}
+                </small>
+            </v-col>
+        </v-row>
     </div>
 </template>
 
@@ -175,15 +198,28 @@ const props = defineProps({
     exchangeRateError: String,
     requiresExchangeRate: Boolean,
     totalOfDiff: Number,
+    autoAllocatePaymentAmount: {
+        type: Boolean,
+        default: true,
+    },
     currencySymbol: Function,
     formatCurrency: Function,
     getPaymentMethodCurrency: Function
 });
 
-const emit = defineEmits(['update:exchangeRate', 'validate-exchange-rate', 'fetch-exchange-rate']);
+const emit = defineEmits([
+    'update:exchangeRate',
+    'update:autoAllocatePaymentAmount',
+    'validate-exchange-rate',
+    'fetch-exchange-rate'
+]);
 
 const internalExchangeRate = computed({
     get: () => props.exchangeRate,
     set: (val) => emit('update:exchangeRate', val)
 });
+
+const internalAutoAllocatePaymentAmount = computed(
+    () => props.autoAllocatePaymentAmount ?? true,
+);
 </script>
