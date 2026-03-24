@@ -92,6 +92,12 @@ describe("invoiceShortcuts", () => {
 			print: true,
 		});
 		expect(vm.show_payment).toHaveBeenCalledTimes(1);
+		expect(vm.show_payment.mock.invocationCallOrder[0]).toBeLessThan(
+			vm.eventBus.emit.mock.invocationCallOrder.find(
+				(_: number, index: number) =>
+					vm.eventBus.emit.mock.calls[index]?.[0] === "queue_submit_payment_shortcut",
+			) ?? Number.MAX_SAFE_INTEGER,
+		);
 		expect(event.defaultPrevented).toBe(true);
 	});
 });

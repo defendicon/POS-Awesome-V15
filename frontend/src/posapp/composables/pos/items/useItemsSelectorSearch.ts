@@ -135,6 +135,17 @@ export const useItemsSelectorSearch = ({
 		}
 	};
 
+	const getHighlightedIndex = (selection: any): number => {
+		const value = selection?.highlightedIndex;
+		if (typeof value === "number") {
+			return value;
+		}
+		if (value && typeof value.value === "number") {
+			return value.value;
+		}
+		return -1;
+	};
+
 	const get_search = (first_search: string) => {
 		if (!first_search) return "";
 		const prefix = scannerInput.getScaleBarcodePrefix();
@@ -389,7 +400,7 @@ export const useItemsSelectorSearch = ({
 			return;
 		}
 
-		if ((itemSelection || vm.itemSelection).highlightedIndex >= 0) {
+		if (getHighlightedIndex(itemSelection || vm.itemSelection) >= 0) {
 			if (event && typeof event.preventDefault === "function") {
 				event.preventDefault();
 			}

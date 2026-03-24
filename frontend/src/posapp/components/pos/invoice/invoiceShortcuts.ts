@@ -310,11 +310,11 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 					await this.flushBackgroundUpdates?.();
 					this.triggerBackgroundFlush?.flush?.();
 					this.schedulePricingRuleApplication?.flush?.();
+					showCompactPanel(this.eventBus, "selector");
+					await this.show_payment?.();
 					this.eventBus.emit("queue_submit_payment_shortcut", {
 						print: shouldPrint,
 					});
-					showCompactPanel(this.eventBus, "selector");
-					await this.show_payment?.();
 				} finally {
 					this.shortcutSubmitInFlight = false;
 				}
