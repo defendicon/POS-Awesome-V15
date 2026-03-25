@@ -184,6 +184,28 @@ def _save_draft_with_latest_timestamp(invoice_doc, retries=2):
             invoice_doc = latest_doc
 
 
+def _resolve_payment_amounts(payment, conversion_rate=1):
+    rate = flt(conversion_rate) or 1
+    amount = payment.get("amount")
+    base_amount = payment.get("base_amount")
+
+    if amount in (None, "") and base_amount not in (None, ""):
+        amount = flt(flt(base_amount) / rate, payment.precision("amount"))
+
+    if base_amount in (None, "") and amount not in (None, ""):
+        base_amount = flt(flt(amount) * rate, payment.precision("base_amount"))
+
+    if amount in (None, ""):
+        amount = 0
+
+    if base_amount in (None, ""):
+        base_amount = flt(flt(amount) * rate, payment.precision("base_amount"))
+
+    amount = flt(amount, payment.precision("amount"))
+    base_amount = flt(base_amount, payment.precision("base_amount"))
+    return amount, base_amount
+
+
 @frappe.whitelist()
 def update_invoice(data):
     currency_cache = {}
@@ -353,7 +375,7 @@ def update_invoice(data):
 
         # Update payment amounts
         for payment in invoice_doc.payments:
-            payment.base_amount = flt(payment.amount * conversion_rate, payment.precision("base_amount"))
+            payment.amount, payment.base_amount = _resolve_payment_amounts(payment, conversion_rate)
 
         # Update invoice level amounts
         invoice_doc.base_total = flt(invoice_doc.total * conversion_rate, invoice_doc.precision("base_total"))
@@ -387,12 +409,12 @@ def update_invoice(data):
     # For return invoices, payments should be negative amounts
     if invoice_doc.is_return:
         for payment in invoice_doc.payments:
-            normalized_amount = -abs(flt(payment.amount))
-            payment.amount = normalized_amount
-            if payment.base_amount is not None:
-                payment.base_amount = -abs(flt(payment.base_amount))
-            else:
-                payment.base_amount = normalized_amount
+            resolved_amount, resolved_base_amount = _resolve_payment_amounts(
+                payment,
+                invoice_doc.get("conversion_rate") or conversion_rate,
+            )
+            payment.amount = -abs(resolved_amount)
+            payment.base_amount = -abs(resolved_base_amount)
 
         invoice_doc.paid_amount = flt(sum(p.amount for p in invoice_doc.payments))
         invoice_doc.base_paid_amount = flt(sum(p.base_amount for p in invoice_doc.payments))
