@@ -1,5 +1,11 @@
 ﻿<template>
-	<v-dialog v-model="visible" max-width="460" persistent>
+	<v-dialog
+		v-model="visible"
+		@update:model-value="handleDialogModelUpdate"
+		max-width="460"
+		:scrim="false"
+		:retain-focus="false"
+	>
 		<v-card class="pos-update-dialog pos-themed-card">
 			<v-card-title class="d-flex align-start">
 				<div class="update-icon">
@@ -96,6 +102,12 @@ const commits = computed(() => updateStore.formattedAvailableCommits);
 function dismiss() {
 	updateStore.dismissUpdate();
 	visible.value = false;
+}
+
+function handleDialogModelUpdate(nextVisible: boolean) {
+	if (!nextVisible && updateStore.shouldPrompt) {
+		dismiss();
+	}
 }
 
 function reloadNow() {

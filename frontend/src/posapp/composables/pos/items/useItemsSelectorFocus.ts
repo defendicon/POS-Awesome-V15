@@ -1,3 +1,5 @@
+import { isRef } from "vue";
+
 type FocusDependencies = {
 	getVM?: () => any;
 	scannerInput?: any;
@@ -9,7 +11,15 @@ export const useItemsSelectorFocus = ({
 	scannerInput,
 	itemSelection,
 }: FocusDependencies) => {
+	const MAX_FOCUS_RETRIES = 8;
 	const getVm = (): any => (typeof getVM === "function" ? getVM() : null);
+	const isFocusableLike = (value: unknown) =>
+		Boolean(
+			value &&
+				(typeof (value as { focus?: unknown }).focus === "function" ||
+					(value as { $el?: unknown }).$el ||
+					value instanceof Element),
+		);
 
 	const getSearchInputField = () => {
 		const vm = getVm();
@@ -17,7 +27,18 @@ export const useItemsSelectorFocus = ({
 		// Benchmark: use exposed ref to avoid DOM querying for focus/blur actions.
 		const header = vm.$refs.itemHeader;
 		const inputRef = header?.debounce_search;
-		return inputRef?.value ?? inputRef ?? null;
+		if (isRef(inputRef)) {
+			return inputRef.value ?? null;
+		}
+		if (
+			inputRef &&
+			typeof inputRef === "object" &&
+			"value" in inputRef &&
+			isFocusableLike((inputRef as { value?: unknown }).value)
+		) {
+			return (inputRef as { value?: unknown }).value ?? null;
+		}
+		return inputRef ?? null;
 	};
 
 	const getFocusableTarget = () => {
@@ -107,6 +128,19 @@ export const useItemsSelectorFocus = ({
 		}, 16);
 	};
 
+	const isFocusTargetInteractable = (target: unknown) => {
+		if (!target) {
+			return false;
+		}
+		if (!(target instanceof HTMLElement)) {
+			return true;
+		}
+		if (isElementHiddenFromInteraction(target)) {
+			return false;
+		}
+		return !target.hasAttribute("disabled");
+	};
+
 	const focusItemSearch = (attempt = 0) => {
 		const vm = getVm();
 		if (!vm || vm.cameraScannerActive) {
@@ -122,16 +156,24 @@ export const useItemsSelectorFocus = ({
 			}
 			releaseInaccessibleFocus();
 			const input = getFocusableTarget();
-			if (input && typeof input.focus === "function") {
-				input.focus();
-				if (
-					typeof document !== "undefined" &&
-					document.activeElement !== input &&
-					attempt < 3
-				) {
-					releaseBlockedFocus(input instanceof Element ? input : null);
+			if (!input || typeof input.focus !== "function") {
+				return;
+			}
+			const target = input instanceof Element ? input : null;
+			if (!isFocusTargetInteractable(input)) {
+				if (attempt < MAX_FOCUS_RETRIES) {
 					scheduleFocusAttempt(attempt);
 				}
+				return;
+			}
+			input.focus();
+			if (
+				typeof document !== "undefined" &&
+				document.activeElement !== input &&
+				attempt < MAX_FOCUS_RETRIES
+			) {
+				releaseBlockedFocus(target);
+				scheduleFocusAttempt(attempt);
 			}
 		});
 	};

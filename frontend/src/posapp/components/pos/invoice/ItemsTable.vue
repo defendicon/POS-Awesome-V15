@@ -141,6 +141,7 @@ import { useItemsTableMerge } from "../../../composables/pos/items/useItemsTable
 import { useItemsTableNameEdit } from "../../../composables/pos/items/useItemsTableNameEdit";
 import { useFormatters } from "../../../composables/core/useFormatters";
 import { useRtl } from "../../../composables/core/useRtl";
+import { focusCartItemField, type CartShortcutField } from "../../../utils/cartFieldFocus";
 import "./items-table-styles.css";
 
 // Global declarations for Frappe
@@ -337,6 +338,10 @@ const handleRowClick = (event: any, item: any, toggleExpand: any, internalItem: 
 	}
 };
 
+const focusItemField = (index: number, field: CartShortcutField) => {
+	return focusCartItemField(tableContainer.value, index, field);
+};
+
 const isItemExpanded = (itemId: any) => {
 	return props.expanded?.includes(itemId);
 };
@@ -359,6 +364,10 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
 	merge.clearMergeCache();
+});
+
+defineExpose({
+	focusItemField,
 });
 </script>
 

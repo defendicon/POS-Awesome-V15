@@ -238,6 +238,64 @@ class TestUpdateInvoiceReturnPayments(unittest.TestCase):
         self.assertEqual(result["paid_amount"], -125)
         self.assertEqual(result["base_paid_amount"], -125)
 
+    def test_return_invoice_derives_missing_amount_from_base_amount(self):
+        invoice_doc = FakeDoc(
+            doctype="Sales Invoice",
+            name=None,
+            pos_profile="Main POS",
+            company="Test Company",
+            currency="USD",
+            posting_date="2026-03-21",
+            is_return=1,
+            return_against=None,
+            items=[],
+            payments=[
+                FakeDoc(
+                    amount=None,
+                    base_amount=125,
+                )
+            ],
+            taxes=[],
+            flags=types.SimpleNamespace(ignore_pricing_rule=False, ignore_permissions=False),
+            paid_amount=0,
+            base_paid_amount=0,
+            conversion_rate=1,
+            plc_conversion_rate=1,
+            price_list_currency="USD",
+        )
+
+        self.creation.frappe.get_doc = lambda data: invoice_doc
+        self.creation.frappe.get_cached_value = lambda *args, **kwargs: 0
+        self.creation._save_draft_with_latest_timestamp = lambda doc: doc
+
+        result = self.creation.update_invoice(
+            json.dumps(
+                {
+                    "doctype": "Sales Invoice",
+                    "pos_profile": "Main POS",
+                    "company": "Test Company",
+                    "currency": "USD",
+                    "posting_date": "2026-03-21",
+                    "is_return": 1,
+                    "items": [],
+                    "payments": [{"amount": None, "base_amount": 125}],
+                }
+            )
+        )
+
+        self.assertEqual(invoice_doc.payments[0].amount, -125)
+        self.assertEqual(invoice_doc.payments[0].base_amount, -125)
+        self.assertEqual(result["paid_amount"], -125)
+        self.assertEqual(result["base_paid_amount"], -125)
+
+    def test_resolve_payment_amounts_recomputes_base_amount_from_server_rate(self):
+        payment = FakeDoc(amount=12.34, base_amount=999)
+
+        amount, base_amount = self.creation._resolve_payment_amounts(payment, conversion_rate=2)
+
+        self.assertEqual(amount, 12.34)
+        self.assertEqual(base_amount, 24.68)
+
 
 if __name__ == "__main__":
     unittest.main()

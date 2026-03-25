@@ -3,6 +3,10 @@ import { isOffline } from "../../../../offline/index";
 declare const __: (_text: string, _args?: any[]) => string;
 declare const frappe: any;
 
+const showCompactPanel = (context: any, panel: "selector" | "invoice") => {
+	context?.eventBus?.emit?.("set_compact_panel", panel);
+};
+
 export async function show_payment(context: any) {
 	if (context._suppressClosePaymentsTimer) {
 		clearTimeout(context._suppressClosePaymentsTimer);
@@ -125,6 +129,7 @@ export async function show_payment(context: any) {
 			context.uiStore.closePaymentDialog?.();
 			context.uiStore.setActiveView("payment");
 		}
+		showCompactPanel(context, "selector");
 
 		if (typeof context.$nextTick === "function") {
 			await context.$nextTick();
@@ -219,6 +224,7 @@ export function close_payments(context: any) {
 	} else if (context.uiStore?.setActiveView) {
 		context.uiStore.setActiveView("items");
 	}
+	showCompactPanel(context, "invoice");
 
 	context.eventBus.emit("show_payment", "false");
 }

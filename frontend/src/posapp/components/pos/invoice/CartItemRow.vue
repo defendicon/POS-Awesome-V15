@@ -496,6 +496,10 @@ function openQtyEdit() {
 function openUomEdit() {
 	if (disableUomEdit.value) return;
 	isEditingUom.value = true;
+	nextTick(() => {
+		const target = uomSelect.value?.$el?.querySelector?.("input") || uomSelect.value;
+		target?.focus?.();
+	});
 }
 
 function closeQtyEdit() {

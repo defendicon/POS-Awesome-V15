@@ -227,6 +227,11 @@ import { useUIStore } from "../../../stores/uiStore";
 import { useInvoiceStore } from "../../../stores/invoiceStore";
 
 import { parseBooleanSetting } from "../../../utils/stock";
+import {
+	buildSelectorRowProps,
+	createItemHighlightMatcher,
+} from "../../../utils/itemSelectorHighlightBindings";
+import { createItemSearchFocusClearGuard } from "../../../utils/itemSearchFocusClearGuard";
 
 const props = defineProps({
 	context: {
@@ -248,7 +253,12 @@ const toastStore = useToastStore();
 const uiStore = useUIStore();
 const invoiceStore = useInvoiceStore();
 const { selectedCustomer } = storeToRefs(customersStore);
-const { posProfile: uiPosProfile, searchFocusTrigger, activeView } = storeToRefs(uiStore);
+const {
+	posProfile: uiPosProfile,
+	searchFocusTrigger,
+	triggerTopItemSelection,
+	activeView,
+} = storeToRefs(uiStore);
 const { deferStockValidationToPayment: invoiceTypeDefersStockValidation } =
 	storeToRefs(invoiceStore);
 
@@ -941,6 +951,9 @@ onMounted(async () => {
 	);
 
 	window.addEventListener("resize", checkItemContainerOverflow);
+	if (props.context === "pos") {
+		document.addEventListener("keydown", handleGlobalTypeToSearchKeydown, true);
+	}
 	nextTick(() => {
 		checkItemContainerOverflow();
 		scheduleCardMetricsUpdate();
@@ -958,6 +971,10 @@ onBeforeUnmount(() => {
 		eventBus.off("focus_item_search", requestItemSearchFocus);
 		eventBus.off("remote_stock_adjustment", handleRemoteStockAdjustment);
 	}
+	if (props.context === "pos") {
+		document.removeEventListener("keydown", handleGlobalTypeToSearchKeydown, true);
+	}
+	itemSearchFocusClearGuard.dispose();
 	window.removeEventListener("resize", checkItemContainerOverflow);
 });
 
@@ -969,6 +986,13 @@ watch(search_input, (val) => {
 
 watch(searchFocusTrigger, () => {
 	requestItemSearchFocus();
+});
+
+watch(triggerTopItemSelection, () => {
+	if (activeView.value !== "items") {
+		uiStore.setActiveView("items");
+	}
+	itemSelection.selectTopItem();
 });
 
 watch(activeView, (view) => {
@@ -1001,7 +1025,7 @@ const headers = computed(() => itemDisplay.headers.value);
 const memoizedFormatCurrency = computed(() => itemDisplay.memoizedFormatCurrency.value);
 const memoizedFormatNumber = computed(() => itemDisplay.memoizedFormatNumber.value);
 
-const isItemHighlighted = (index) => itemSelection.highlightedIndex.value === index;
+const isItemHighlighted = createItemHighlightMatcher(itemSelection);
 const isNegative = (val) => val < 0;
 
 const {
@@ -1030,6 +1054,56 @@ const selectorCardStyle = computed<CSSProperties>(() => ({
 	overflow: "auto",
 	position: "relative",
 }));
+const itemSearchFocusClearGuard = createItemSearchFocusClearGuard();
+
+const SEARCH_TRIGGER_KEY_PATTERN = /^[A-Za-z0-9\-._/\\]$/;
+
+const isEditableElement = (element: Element | null | undefined) => {
+	if (!(element instanceof HTMLElement)) {
+		return false;
+	}
+	const contentEditable = element.getAttribute("contenteditable");
+	if (
+		element.isContentEditable ||
+		(typeof element.contentEditable === "string" &&
+			element.contentEditable.toLowerCase() !== "inherit") ||
+		(contentEditable !== null && contentEditable.toLowerCase() !== "false")
+	) {
+		return true;
+	}
+	const tagName = element.tagName;
+	if (tagName === "INPUT" || tagName === "TEXTAREA" || tagName === "SELECT") {
+		return true;
+	}
+	return Boolean(
+		element.closest(
+			"input, textarea, select, [contenteditable='true'], [contenteditable=''], [contenteditable='plaintext-only']",
+		),
+	);
+};
+
+const isTypeToSearchKey = (event: KeyboardEvent) => {
+	if (!event || event.defaultPrevented || event.repeat) {
+		return false;
+	}
+	if (event.ctrlKey || event.metaKey || event.altKey) {
+		return false;
+	}
+	return SEARCH_TRIGGER_KEY_PATTERN.test(event.key || "");
+};
+
+const hasVisibleDialog = () => {
+	if (typeof document === "undefined") {
+		return false;
+	}
+	const dialogs = document.querySelectorAll("[role='dialog']");
+	return Array.from(dialogs).some((dialog) => {
+		if (!(dialog instanceof HTMLElement)) {
+			return false;
+		}
+		return Boolean(dialog.offsetWidth || dialog.offsetHeight || dialog.getClientRects().length);
+	});
+};
 
 // Proxy functions for template
 const esc_event = () => clearSearch();
@@ -1047,6 +1121,20 @@ const searchItems = (term) => itemsIntegration.searchItems(term);
 const get_items = (force = false) => itemsIntegration.get_items(force);
 const loadVisibleItems = (reset = false) => itemsLoader.loadVisibleItems(reset);
 const verifyServerItemCount = () => {};
+const prepareSearchInjection = () => {
+	clearSearch();
+	itemSearchFocusClearGuard.armPreserveNextFocusClear();
+};
+const appendSearchCharacter = (character: string) => {
+	const nextValue = `${String(search_input.value || "")}${character}`;
+	handleSearchInput(nextValue);
+};
+const revealItemSearchView = () => {
+	eventBus?.emit?.("set_compact_panel", "selector");
+	if (activeView.value !== "items") {
+		uiStore.setActiveView("items");
+	}
+};
 const requestItemSearchFocus = () => {
 	if (activeView.value !== "items") {
 		return;
@@ -1055,7 +1143,45 @@ const requestItemSearchFocus = () => {
 		itemsSelectorFocus.focusItemSearch();
 	});
 };
+const requestForegroundItemSearchFocus = () => {
+	revealItemSearchView();
+	uiStore.triggerItemSearchFocus();
+	eventBus?.emit?.("focus_item_search");
+};
+scannerInput.setInputHandlers?.({
+	get: () => String(search_input.value || ""),
+	set: (value: string) => {
+		prepareSearchInjection();
+		handleSearchInput(String(value ?? ""));
+	},
+	clear: clearSearch,
+	focus: requestForegroundItemSearchFocus,
+});
+const handleGlobalTypeToSearchKeydown = (event: KeyboardEvent) => {
+	if (!isTypeToSearchKey(event)) {
+		return;
+	}
+	if (
+		props.context !== "pos" ||
+		activeView.value === "payment" ||
+		scannerInput.cameraScannerActive.value ||
+		hasVisibleDialog() ||
+		isEditableElement(document.activeElement)
+	) {
+		return;
+	}
+	event.preventDefault();
+	event.stopPropagation();
+	prepareSearchInjection();
+	revealItemSearchView();
+	requestForegroundItemSearchFocus();
+	appendSearchCharacter(event.key);
+};
 const handleItemSearchFocus = () => {
+	if (!itemSearchFocusClearGuard.shouldClearSearchOnFocus()) {
+		requestItemSearchFocus();
+		return;
+	}
 	clearSearch();
 	requestItemSearchFocus();
 };
@@ -1085,6 +1211,7 @@ const onBarcodeScanned = async (code: string) => {
 		return;
 	}
 
+	requestForegroundItemSearchFocus();
 	if (onBarcodeScannedFromScannerInput) {
 		onBarcodeScannedFromScannerInput(code);
 	}
@@ -1102,15 +1229,9 @@ const onScannerClosed = () => {
 	newItemDialogAwaitingScan.value = false;
 };
 
-const getItemRowClass = (item) => ({
-	"pos-item-row": true,
-	highlighted: isItemHighlighted(items.value.indexOf(item)),
-});
+const getItemRowClass = (item) => itemSelection.getItemRowClass(item);
 
-const getItemRowProps = (item) => ({
-	"data-item-code": item.item_code,
-	draggable: true,
-});
+const getItemRowProps = (item) => buildSelectorRowProps(itemSelection, item);
 
 const handleItemCreated = (_item) => {
 	newItemDialog.value = false;

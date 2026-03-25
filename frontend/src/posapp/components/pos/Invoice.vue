@@ -290,6 +290,11 @@ import { useInvoiceOffers } from "../../composables/pos/invoice/useInvoiceOffers
 import { useInvoiceUI } from "../../composables/pos/invoice/useInvoiceUI";
 import { useInvoicePrinting } from "../../composables/pos/invoice/useInvoicePrinting";
 import { useInvoiceStock } from "../../composables/pos/invoice/useInvoiceStock";
+import {
+	createInvoiceShortcutListeners,
+	registerInvoiceShortcutListener,
+	unregisterInvoiceShortcutListener,
+} from "../../utils/invoiceShortcutListener";
 
 export default {
 	name: "POSInvoice",
@@ -1026,15 +1031,23 @@ export default {
 		);
 		this._shortcutHandlers = this._shortcutHandlers || {};
 
-		this._shortcutHandlers.handleInvoiceShortcut = this.handleInvoiceShortcut.bind(this);
-		document.addEventListener("keydown", this._shortcutHandlers.handleInvoiceShortcut);
+		this._shortcutHandlers.handleInvoiceShortcut = createInvoiceShortcutListeners(
+			this.handleInvoiceShortcut.bind(this),
+		);
+		registerInvoiceShortcutListener(
+			document,
+			this._shortcutHandlers.handleInvoiceShortcut,
+		);
 	},
 	unmounted() {
 		if (!this._shortcutHandlers) {
 			return;
 		}
 
-		document.removeEventListener("keydown", this._shortcutHandlers.handleInvoiceShortcut);
+		unregisterInvoiceShortcutListener(
+			document,
+			this._shortcutHandlers.handleInvoiceShortcut,
+		);
 
 		this._shortcutHandlers = {};
 	},

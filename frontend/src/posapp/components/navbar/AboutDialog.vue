@@ -15,16 +15,27 @@
 							<v-icon start size="14">mdi-application-outline</v-icon>
 							{{ appInfo.length }} {{ __("Apps") }}
 						</v-chip>
-						<v-chip
-							v-if="formattedBuildVersion"
-							size="small"
-							color="secondary"
-							variant="tonal"
-							class="status-chip-improved"
-						>
-							<v-icon start size="14">mdi-counter</v-icon>
-							{{ __("Build Time:") }} {{ formattedBuildVersion }}
-						</v-chip>
+						<div class="build-meta-improved">
+							<v-chip
+								v-if="formattedBuildVersion"
+								size="small"
+								color="secondary"
+								variant="tonal"
+								class="status-chip-improved"
+							>
+								<v-icon start size="14">mdi-counter</v-icon>
+								{{ __("Build Time:") }} {{ formattedBuildVersion }}
+							</v-chip>
+							<v-chip
+								size="small"
+								color="secondary"
+								variant="tonal"
+								class="status-chip-improved"
+							>
+								<v-icon start size="14">mdi-package-variant-closed</v-icon>
+								{{ __("Deployed Bundle:") }} {{ deployedBundleVersion }}
+							</v-chip>
+						</div>
 					</div>
 				</div>
 				<v-btn
@@ -117,6 +128,9 @@ const buildVersion = ref(BUILD_VERSION);
 
 const formattedBuildVersion = computed(() =>
 	buildVersion.value ? formatBuildVersion(buildVersion.value) : null,
+);
+const deployedBundleVersion = computed(() =>
+	buildVersion.value ? String(buildVersion.value) : __("Unavailable"),
 );
 
 watch(
@@ -237,6 +251,14 @@ function loadAppInfo() {
 .header-stats-improved {
 	display: flex;
 	gap: 8px;
+	align-items: flex-end;
+}
+
+.build-meta-improved {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 4px;
 }
 
 .status-chip-improved {

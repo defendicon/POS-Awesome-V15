@@ -39,6 +39,32 @@ describe("useItemsSelectorFocus", () => {
 		expect(vm._focusSpy).toHaveBeenCalledTimes(1);
 	});
 
+	it("focuses the nested DOM input when the exposed field instance has its own value property", () => {
+		const nestedInput = document.createElement("input");
+		const nestedFocusSpy = vi.spyOn(nestedInput, "focus");
+		const vm = createVm({
+			$refs: {
+				itemHeader: {
+					debounce_search: {
+						value: "",
+						$el: {
+							querySelector: vi.fn(() => nestedInput),
+						},
+					},
+				},
+			},
+		});
+		const focusApi = useItemsSelectorFocus({
+			getVM: () => vm,
+			scannerInput: {},
+			itemSelection: { handleSearchKeydown: vi.fn(() => false) },
+		});
+
+		focusApi.focusItemSearch();
+
+		expect(nestedFocusSpy).toHaveBeenCalledTimes(1);
+	});
+
 	it("skips focusing while camera scanning is active", () => {
 		const vm = createVm({ cameraScannerActive: true });
 		const focusApi = useItemsSelectorFocus({
@@ -142,6 +168,61 @@ describe("useItemsSelectorFocus", () => {
 		trappedBlurSpy.mockRestore();
 		searchInput.remove();
 		trappedButton.remove();
+		window.requestAnimationFrame = originalRaf;
+	});
+
+	it("keeps retrying until the selector search input becomes visible", () => {
+		const originalRaf = window.requestAnimationFrame;
+		const animationFrames: FrameRequestCallback[] = [];
+		window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+			animationFrames.push(cb);
+			return animationFrames.length;
+		}) as typeof window.requestAnimationFrame;
+
+		const container = document.createElement("div");
+		container.style.display = "none";
+		const searchInput = document.createElement("input");
+		container.appendChild(searchInput);
+		document.body.appendChild(container);
+
+		const nativeFocus = searchInput.focus.bind(searchInput);
+		vi.spyOn(searchInput, "focus").mockImplementation(() => {
+			if (container.style.display !== "none") {
+				nativeFocus();
+			}
+		});
+
+		const vm = createVm({
+			$refs: {
+				itemHeader: {
+					debounce_search: {
+						value: searchInput,
+					},
+				},
+			},
+		});
+		const focusApi = useItemsSelectorFocus({
+			getVM: () => vm,
+			scannerInput: {},
+			itemSelection: { handleSearchKeydown: vi.fn(() => false) },
+		});
+
+		focusApi.focusItemSearch();
+
+		let frame = 0;
+		while (animationFrames.length) {
+			frame += 1;
+			if (frame === 4) {
+				container.style.display = "block";
+			}
+			const callback = animationFrames.shift();
+			callback?.(frame);
+		}
+
+		expect(document.activeElement).toBe(searchInput);
+
+		searchInput.remove();
+		container.remove();
 		window.requestAnimationFrame = originalRaf;
 	});
 });

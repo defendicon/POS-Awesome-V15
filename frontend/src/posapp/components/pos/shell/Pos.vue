@@ -461,6 +461,7 @@ export default {
 					shift.submit_closing_pos(data);
 				});
 				eventBus.on("focus_additional_discount", focusAdditionalDiscountField);
+				eventBus.on("set_compact_panel", setCompactPanel);
 			}
 			nextTick(() => {
 				updateBottomDockHeight();
@@ -478,6 +479,7 @@ export default {
 			if (eventBus) {
 				eventBus.off("submit_closing_pos");
 				eventBus.off("focus_additional_discount", focusAdditionalDiscountField);
+				eventBus.off("set_compact_panel", setCompactPanel);
 			}
 		});
 

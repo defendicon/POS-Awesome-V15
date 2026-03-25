@@ -18,6 +18,12 @@ const isLetter = (event: KeyboardEvent, letter: string) => {
 		keyValue === normalized || event.code === `Key${letter.toUpperCase()}`
 	);
 };
+const showCompactPanel = (
+	eventBus: { emit: (_event: string, _payload?: unknown) => void } | undefined,
+	panel: "selector" | "invoice",
+) => {
+	eventBus?.emit?.("set_compact_panel", panel);
+};
 
 type ShortcutField = "qty" | "uom" | "rate";
 
@@ -35,6 +41,13 @@ interface InvoiceShortcutsVm {
 		toggleItemSettings: () => void;
 	};
 	$refs: {
+		actionToolbar?: {
+			focusSearch?: () => void;
+		};
+		customerSection?: {
+			openNewCustomer?: () => void;
+			selectFirstCustomer?: () => void;
+		};
 		customerComponent?: {
 			openNewCustomer?: () => void;
 			selectFirstCustomer?: () => void;
@@ -44,6 +57,9 @@ interface InvoiceShortcutsVm {
 		itemSearchField?: {
 			focus?: () => void;
 			$el?: { querySelector?: (_s: string) => { focus?: () => void } };
+		};
+		itemsTableRef?: {
+			focusItemField?: (_index: number, _field: ShortcutField) => void;
 		};
 		itemsTable?: {
 			focusItemField?: (_index: number, _field: ShortcutField) => void;
@@ -98,7 +114,8 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 
 			if (key === "F6") {
 				consumeEvent(event);
-				this.$refs.customerComponent?.openNewCustomer?.();
+				this.$refs.customerSection?.openNewCustomer?.() ||
+					this.$refs.customerComponent?.openNewCustomer?.();
 				return;
 			}
 
@@ -126,6 +143,7 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 				if (typeof this.close_payments === "function") {
 					this.close_payments();
 				} else {
+					showCompactPanel(this.eventBus, "invoice");
 					this.uiStore.setActiveView("items");
 				}
 				return;
@@ -139,25 +157,33 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 
 			if (isDigit(event, 3)) {
 				consumeEvent(event);
+				showCompactPanel(this.eventBus, "selector");
+				this.uiStore.setActiveView("items");
 				this.uiStore.triggerItemSearchFocus();
+				this.eventBus.emit("focus_item_search");
 				return;
 			}
 
 			if (isDigit(event, 4)) {
 				consumeEvent(event);
+				showCompactPanel(this.eventBus, "selector");
+				this.uiStore.setActiveView("items");
 				this.uiStore.selectTopItem();
 				return;
 			}
 
 			if (isDigit(event, 5)) {
 				consumeEvent(event);
+				showCompactPanel(this.eventBus, "invoice");
 				this.focusCustomerSearchField?.();
 				return;
 			}
 
 			if (isDigit(event, 6)) {
 				consumeEvent(event);
-				this.$refs.customerComponent?.selectFirstCustomer?.();
+				showCompactPanel(this.eventBus, "invoice");
+				this.$refs.customerSection?.selectFirstCustomer?.() ||
+					this.$refs.customerComponent?.selectFirstCustomer?.();
 				return;
 			}
 
@@ -175,18 +201,21 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 
 			if (isDigit(event, 9)) {
 				consumeEvent(event);
+				showCompactPanel(this.eventBus, "invoice");
 				this.$refs.deliveryChargesComponent?.focusDeliveryCharges?.();
 				return;
 			}
 
 			if (isBackquote(event)) {
 				consumeEvent(event);
+				showCompactPanel(this.eventBus, "invoice");
 				this.$refs.postingDateComponent?.focusPostingDate?.();
 				return;
 			}
 
 			if (key === "PageUp") {
 				consumeEvent(event);
+				showCompactPanel(this.eventBus, "selector");
 				this.show_payment?.();
 				return;
 			}
@@ -200,30 +229,35 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 
 			if (isLetter(event, "q")) {
 				consumeEvent(event);
+				showCompactPanel(this.eventBus, "invoice");
 				this.focusItemTableField("qty");
 				return;
 			}
 
 			if (isLetter(event, "a")) {
 				consumeEvent(event);
+				showCompactPanel(this.eventBus, "invoice");
 				this.focusAdditionalDiscountField?.();
 				return;
 			}
 
 			if (isLetter(event, "u")) {
 				consumeEvent(event);
+				showCompactPanel(this.eventBus, "invoice");
 				this.focusItemTableField("uom");
 				return;
 			}
 
 			if (isLetter(event, "r")) {
 				consumeEvent(event);
+				showCompactPanel(this.eventBus, "invoice");
 				this.focusItemTableField("rate");
 				return;
 			}
 
 			if (isLetter(event, "e")) {
 				consumeEvent(event);
+				showCompactPanel(this.eventBus, "invoice");
 				const firstItem = this.items?.[0];
 				if (firstItem) {
 					this.remove_item?.(firstItem);
@@ -233,6 +267,11 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 
 			if (isLetter(event, "f")) {
 				consumeEvent(event);
+				showCompactPanel(this.eventBus, "invoice");
+				if (this.$refs.actionToolbar?.focusSearch) {
+					this.$refs.actionToolbar.focusSearch();
+					return;
+				}
 				const input = this.$refs.itemSearchField;
 				if (input?.focus) {
 					input.focus();
@@ -250,6 +289,7 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 
 			if (isLetter(event, "m")) {
 				consumeEvent(event);
+				showCompactPanel(this.eventBus, "selector");
 				this.uiStore.toggleItemSettings();
 				return;
 			}
@@ -262,6 +302,7 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 
 			if (isLetter(event, "d")) {
 				consumeEvent(event);
+				showCompactPanel(this.eventBus, "selector");
 				this.show_payment?.();
 				return;
 			}
@@ -288,10 +329,11 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 					await this.flushBackgroundUpdates?.();
 					this.triggerBackgroundFlush?.flush?.();
 					this.schedulePricingRuleApplication?.flush?.();
+					showCompactPanel(this.eventBus, "selector");
+					await this.show_payment?.();
 					this.eventBus.emit("queue_submit_payment_shortcut", {
 						print: shouldPrint,
 					});
-					await this.show_payment?.();
 				} finally {
 					this.shortcutSubmitInFlight = false;
 				}
@@ -315,7 +357,8 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 				index = 0;
 			}
 			this.shortcutCycle[field] = (index + 1) % count;
-			this.$refs.itemsTable?.focusItemField?.(index, field);
+			this.$refs.itemsTableRef?.focusItemField?.(index, field) ||
+				this.$refs.itemsTable?.focusItemField?.(index, field);
 		},
 	};
 
