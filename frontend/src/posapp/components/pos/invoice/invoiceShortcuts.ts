@@ -41,6 +41,9 @@ interface InvoiceShortcutsVm {
 		toggleItemSettings: () => void;
 	};
 	$refs: {
+		actionToolbar?: {
+			focusSearch?: () => void;
+		};
 		customerSection?: {
 			openNewCustomer?: () => void;
 			selectFirstCustomer?: () => void;
@@ -265,6 +268,10 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 			if (isLetter(event, "f")) {
 				consumeEvent(event);
 				showCompactPanel(this.eventBus, "invoice");
+				if (this.$refs.actionToolbar?.focusSearch) {
+					this.$refs.actionToolbar.focusSearch();
+					return;
+				}
 				const input = this.$refs.itemSearchField;
 				if (input?.focus) {
 					input.focus();

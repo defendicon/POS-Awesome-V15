@@ -89,6 +89,25 @@ describe("invoiceShortcuts", () => {
 		expect(event.defaultPrevented).toBe(true);
 	});
 
+	it("switches compact layout to the invoice and focuses the invoice item search field", async () => {
+		const focusSearch = vi.fn();
+		const vm = {
+			...createVm(),
+			$refs: {
+				actionToolbar: {
+					focusSearch,
+				},
+			},
+		};
+		const event = createAltEvent("f", "KeyF");
+
+		await (invoiceShortcuts as any).handleInvoiceShortcut.call(vm, event);
+
+		expect(vm.eventBus.emit).toHaveBeenCalledWith("set_compact_panel", "invoice");
+		expect(focusSearch).toHaveBeenCalledTimes(1);
+		expect(event.defaultPrevented).toBe(true);
+	});
+
 	it("switches compact layout to payments before queueing submit and print", async () => {
 		const vm = {
 			...createVm(),
