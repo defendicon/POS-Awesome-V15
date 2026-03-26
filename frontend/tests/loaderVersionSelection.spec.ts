@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { describe, expect, it } from "vitest";
 import * as loaderUtils from "../src/loader-utils";
 
@@ -103,5 +105,26 @@ describe("loader build version selection", () => {
 			"posawesome_update_last_check",
 		]);
 		expect(sessionRemovals).toEqual(["posawesome_update_snooze_until"]);
+	});
+
+	it("renders and updates a classic boot overlay without importing app modules", () => {
+		document.body.innerHTML = "";
+		const ensureClassicBootOverlay = (loaderUtils as any)
+			.ensureClassicBootOverlay;
+
+		expect(typeof ensureClassicBootOverlay).toBe("function");
+
+		const overlay = ensureClassicBootOverlay();
+		overlay.update({
+			title: "Refreshing outdated assets",
+			detail: "Removing stale files before startup",
+			progress: 42,
+		});
+
+		const root = document.querySelector("[data-posa-classic-boot-overlay]");
+		expect(root).not.toBeNull();
+		expect(root?.textContent).toContain("Refreshing outdated assets");
+		expect(root?.textContent).toContain("Removing stale files before startup");
+		expect(root?.textContent).toContain("42%");
 	});
 });

@@ -105,6 +105,12 @@ frappe.PosApp.posapp = class {
 		installGlobalErrorHandlers(this.app);
 
 		this.app.mount(this.$el[0]);
+		try {
+			const classicBootOverlay = (window as any).__posaClassicBootOverlay;
+			if (classicBootOverlay && typeof classicBootOverlay.hide === "function") {
+				classicBootOverlay.hide();
+			}
+		} catch {}
 		clearChunkRecoveryState();
 
 		// Initialize socket listeners

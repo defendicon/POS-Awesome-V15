@@ -1,14 +1,10 @@
 declare const __BUILD_VERSION__: string;
 import {
 	clearPosAssetRecoveryTargets,
+	ensureClassicBootOverlay,
 	resolvePreferredBundleTarget,
 	resolvePosAppNormalizedPath,
 } from "./loader-utils";
-import {
-	markBootStageLoaded,
-	setBootStageDetail,
-	setBootStageProgress,
-} from "./posapp/utils/loading";
 
 const POSAPP_BASE_PATH = "/app/posapp";
 const VERSION_ENDPOINT = "/assets/posawesome/dist/js/version.json";
@@ -93,19 +89,28 @@ function recoverByReloadingPosApp() {
 
 async function importPosAwesomeBundle() {
 	const initialVersion = __BUILD_VERSION__;
-	setBootStageProgress("check_version", 20);
+	const classicBootOverlay = ensureClassicBootOverlay();
+	classicBootOverlay.update({
+		title: "Checking app version",
+		detail: "Comparing cached assets with the latest build",
+		progress: 12,
+	});
 	const preferredTarget = await resolvePreferredBundleTarget(
 		initialVersion,
 		fetchLatestBuildVersion,
 	);
-	markBootStageLoaded("check_version");
+	classicBootOverlay.update({
+		title: "Checking app version",
+		detail: "Build version verified",
+		progress: 24,
+	});
 
 	if (preferredTarget.shouldRefreshAssets) {
-		setBootStageProgress("refresh_assets", 25);
-		setBootStageDetail(
-			"refresh_assets",
-			"Removing stale assets before loading the latest build",
-		);
+		classicBootOverlay.update({
+			title: "Refreshing outdated assets",
+			detail: "Removing stale files before startup",
+			progress: 42,
+		});
 		await clearPosAssetRecoveryTargets({
 			cacheStorage:
 				typeof caches !== "undefined" ? (caches as unknown as any) : undefined,
@@ -116,19 +121,30 @@ async function importPosAwesomeBundle() {
 			sessionStorageLike:
 				typeof window !== "undefined" ? window.sessionStorage : undefined,
 		});
-		markBootStageLoaded("refresh_assets");
+		classicBootOverlay.update({
+			title: "Refreshing outdated assets",
+			detail: "Latest assets prepared for startup",
+			progress: 58,
+		});
 	} else {
-		markBootStageLoaded(
-			"refresh_assets",
-			"Assets are already up to date",
-		);
+		classicBootOverlay.update({
+			title: "Preparing startup",
+			detail: "Assets are already up to date",
+			progress: 38,
+		});
 	}
 	try {
+		classicBootOverlay.update({
+			title: "Loading POS bundle",
+			detail: "Starting the latest POS application files",
+			progress: 72,
+		});
 		return await import(
 			/* @vite-ignore */
 			getBundlePath(preferredTarget.version)
 		);
 	} catch (firstError) {
+		classicBootOverlay.hide();
 		if (preferredTarget.version !== initialVersion) {
 			if (isDynamicImportFailure(firstError)) {
 				recoverByReloadingPosApp();
@@ -139,6 +155,11 @@ async function importPosAwesomeBundle() {
 		const latestVersion = await fetchLatestBuildVersion();
 		if (latestVersion && latestVersion !== initialVersion) {
 			try {
+				classicBootOverlay.update({
+					title: "Retrying with latest build",
+					detail: "Loading updated POS bundle after version refresh",
+					progress: 82,
+				});
 				return await import(
 					/* @vite-ignore */
 					getBundlePath(latestVersion)
@@ -160,6 +181,7 @@ async function importPosAwesomeBundle() {
 
 if (typeof window !== "undefined" && !normalizePosAppPath()) {
 	window.__posawesomeBundlePromise = importPosAwesomeBundle().catch((error) => {
+		ensureClassicBootOverlay().hide();
 		console.error("POS Awesome bundle failed to load", error);
 		throw error;
 	});
