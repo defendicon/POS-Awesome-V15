@@ -84,6 +84,7 @@ import {
 	setupNetworkListeners as initNetworkListeners,
 	checkNetworkConnectivity as utilsCheckNetworkConnectivity,
 } from "../composables/core/useNetwork";
+import { evaluateBootFinalizeState } from "../utils/bootReadiness";
 import { useRtl } from "../composables/core/useRtl";
 import authService from "../services/authService.js";
 import { getValidCachedOpeningForCurrentUser } from "../utils/openingCache";
@@ -165,20 +166,24 @@ const loadingActive = computed(() => loadingState.active);
 const loadingMessage = computed(() => loadingState.message);
 
 function maybeFinalizeBootLoading() {
-	const profileReady = loadingState.stages.load_profile >= 100;
-	const itemsReady = itemsLoaded.value || itemsLoadProgress.value >= 100;
-	const customersReady =
-		customersLoaded.value ||
-		loadProgress.value >= 100 ||
-		manualOffline.value ||
-		!navigator.onLine ||
-		isOffline();
+	const { profileReady, shouldFinalize } = evaluateBootFinalizeState({
+		profileStage: loadingState.stages.load_profile,
+		itemsLoaded: itemsLoaded.value,
+		itemsProgress: itemsLoadProgress.value,
+		itemsStage: loadingState.stages.load_items,
+		customersLoaded: customersLoaded.value,
+		customersProgress: loadProgress.value,
+		customersStage: loadingState.stages.load_customers,
+		manualOffline: manualOffline.value,
+		navigatorOnline: navigator.onLine,
+		offlineMode: isOffline(),
+	});
 
 	if (!profileReady) {
 		return;
 	}
 
-	if (itemsReady && customersReady) {
+	if (shouldFinalize) {
 		markBootStageLoaded("finalize", __("POS workspace is ready"));
 		return;
 	}

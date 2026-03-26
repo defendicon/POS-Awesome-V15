@@ -100,19 +100,56 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 		}
 	};
 
-	const waitForPosApp = (timeoutMs = 15000) => {
+	const waitForPosApp = (timeoutMs = 30000) => {
 		return new Promise((resolve, reject) => {
 			const startedAt = Date.now();
-			const interval = setInterval(() => {
+			let awaitingBundle = false;
+
+			const finishWithError = (error) => {
+				clearInterval(interval);
+				reject(error);
+			};
+
+			const interval = setInterval(async () => {
 				if (frappe.PosApp && frappe.PosApp.posapp) {
 					clearInterval(interval);
 					resolve();
 					return;
 				}
 
+				const bundlePromise =
+					typeof window !== "undefined"
+						? window.__posawesomeBundlePromise
+						: null;
+				if (
+					!awaitingBundle &&
+					bundlePromise &&
+					typeof bundlePromise.then === "function"
+				) {
+					awaitingBundle = true;
+					try {
+						await bundlePromise;
+					} catch (bundleError) {
+						finishWithError(bundleError);
+						return;
+					}
+
+					if (frappe.PosApp && frappe.PosApp.posapp) {
+						clearInterval(interval);
+						resolve();
+						return;
+					}
+				}
+
 				if (Date.now() - startedAt >= timeoutMs) {
 					clearInterval(interval);
-					reject(new Error("Timed out waiting for frappe.PosApp.posapp"));
+					reject(
+						new Error(
+							awaitingBundle
+								? "Timed out waiting for frappe.PosApp.posapp after POS bundle load"
+								: "Timed out waiting for POS bundle bootstrap",
+						),
+					);
 				}
 			}, 100);
 		});
