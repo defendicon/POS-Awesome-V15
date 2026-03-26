@@ -47,12 +47,18 @@ export function resetChunkRecoveryState() {
 }
 
 export function scheduleChunkRecoveryStateReset() {
+	scheduleAfterStableBoot(() => {
+		resetRecoveryState();
+	});
+}
+
+export function scheduleAfterStableBoot(task: () => void | Promise<void>) {
 	if (typeof window === "undefined") {
 		return;
 	}
 
 	window.setTimeout(() => {
-		resetRecoveryState();
+		void task();
 	}, CHUNK_RECOVERY_STABLE_DELAY_MS);
 }
 
