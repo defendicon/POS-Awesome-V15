@@ -8,6 +8,8 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 	const pageRef = (wrapper && wrapper.page) || page;
 	const BOOT_RETRY_KEY = "posa_boot_retry_once";
 	const BOOT_CACHE_RECOVERY_KEY = "posa_boot_cache_recovery_once";
+	const VERSION_ENDPOINT = "/assets/posawesome/dist/js/version.json";
+	const DIRECT_BUNDLE_FALLBACK_KEY = "posa_boot_direct_bundle_once";
 	const detectBootFailureCode = (error) => {
 		const message =
 			(error && error.message ? String(error.message) : String(error || ""))
@@ -37,9 +39,62 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 		try {
 			window.sessionStorage.removeItem(BOOT_RETRY_KEY);
 			window.sessionStorage.removeItem(BOOT_CACHE_RECOVERY_KEY);
+			window.sessionStorage.removeItem(DIRECT_BUNDLE_FALLBACK_KEY);
 		} catch (err) {
 			console.warn("Unable to clear boot recovery state", err);
 		}
+	};
+
+	const fetchLatestBuildVersion = async () => {
+		try {
+			const response = await fetch(`${VERSION_ENDPOINT}?t=${Date.now()}`, {
+				cache: "no-store",
+			});
+			if (!response.ok) {
+				return null;
+			}
+			const payload = await response.json();
+			const version = payload && (payload.version || payload.buildVersion);
+			return typeof version === "string" && version.trim() ? version.trim() : null;
+		} catch (err) {
+			console.warn("Unable to fetch latest POS build version", err);
+			return null;
+		}
+	};
+
+	const getDirectBundleUrl = async () => {
+		const version = await fetchLatestBuildVersion();
+		const suffix = version ? `?v=${encodeURIComponent(version)}` : `?t=${Date.now()}`;
+		return `/assets/posawesome/dist/js/posawesome.js${suffix}`;
+	};
+
+	const attemptDirectBundleBootstrap = async () => {
+		if (frappe.PosApp && frappe.PosApp.posapp) {
+			return true;
+		}
+
+		let alreadyAttempted = false;
+		try {
+			alreadyAttempted =
+				window.sessionStorage.getItem(DIRECT_BUNDLE_FALLBACK_KEY) === "1";
+		} catch (err) {
+			console.warn("Unable to read direct bundle bootstrap state", err);
+		}
+
+		if (alreadyAttempted) {
+			return false;
+		}
+
+		try {
+			window.sessionStorage.setItem(DIRECT_BUNDLE_FALLBACK_KEY, "1");
+		} catch (err) {
+			console.warn("Unable to persist direct bundle bootstrap state", err);
+		}
+
+		const bundleUrl = await getDirectBundleUrl();
+		console.warn("Attempting direct POS bundle bootstrap", bundleUrl);
+		await import(bundleUrl);
+		return Boolean(frappe.PosApp && frappe.PosApp.posapp);
 	};
 
 	const performAssetRecovery = async () => {
@@ -104,6 +159,7 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 		return new Promise((resolve, reject) => {
 			const startedAt = Date.now();
 			let awaitingBundle = false;
+			let directBootstrapTriggered = false;
 
 			const finishWithError = (error) => {
 				clearInterval(interval);
@@ -137,6 +193,24 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 					if (frappe.PosApp && frappe.PosApp.posapp) {
 						clearInterval(interval);
 						resolve();
+						return;
+					}
+				}
+
+				if (
+					!directBootstrapTriggered &&
+					(!bundlePromise || typeof bundlePromise.then !== "function")
+				) {
+					directBootstrapTriggered = true;
+					try {
+						const directLoaded = await attemptDirectBundleBootstrap();
+						if (directLoaded) {
+							clearInterval(interval);
+							resolve();
+							return;
+						}
+					} catch (directError) {
+						finishWithError(directError);
 						return;
 					}
 				}

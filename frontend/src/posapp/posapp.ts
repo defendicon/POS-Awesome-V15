@@ -30,6 +30,7 @@ import {
 	isDynamicImportFailure,
 	recoverFromChunkLoadError,
 } from "./utils/chunkLoadRecovery";
+import { markBootStageLoaded } from "./utils/loading";
 import "../sw-updater"; // Initialize service worker auto-updater
 import App from "./App.vue";
 // @ts-ignore
@@ -105,6 +106,14 @@ frappe.PosApp.posapp = class {
 		installGlobalErrorHandlers(this.app);
 
 		this.app.mount(this.$el[0]);
+		this.router
+			.isReady()
+			.then(() => {
+				markBootStageLoaded("finalize", __("POS workspace is ready"));
+			})
+			.catch((error: any) => {
+				console.warn("POS router readiness failed", error);
+			});
 		try {
 			const classicBootOverlay = (window as any).__posaClassicBootOverlay;
 			if (classicBootOverlay && typeof classicBootOverlay.hide === "function") {
