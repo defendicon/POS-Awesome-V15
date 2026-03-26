@@ -3,9 +3,9 @@ import { start, stop } from "../composables/core/useLoading";
 import { recoverFromChunkLoadError } from "../utils/chunkLoadRecovery";
 
 const routes = [
-	{ path: "/", redirect: "/pos" },
 	{
-		path: "/pos",
+		path: "/",
+		alias: "/pos",
 		component: () => import("../components/pos/shell/Pos.vue"),
 		meta: { title: "POS", layout: "default" },
 	},
@@ -53,7 +53,7 @@ const routes = [
 	},
 	{
 		path: "/:pathMatch(.*)*",
-		redirect: "/pos",
+		redirect: "/",
 	},
 ];
 
@@ -83,4 +83,5 @@ const createPosAppRouter = () => {
 };
 
 export { createPosAppRouter };
+export { routes };
 export default createPosAppRouter;
