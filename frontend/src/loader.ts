@@ -2,6 +2,7 @@ declare const __BUILD_VERSION__: string;
 import {
 	clearPosAssetRecoveryTargets,
 	ensureClassicBootOverlay,
+	isPosAppPath,
 	resolvePreferredBundleTarget,
 	resolvePosAppNormalizedPath,
 } from "./loader-utils";
@@ -179,7 +180,12 @@ async function importPosAwesomeBundle() {
 	}
 }
 
-if (typeof window !== "undefined" && !normalizePosAppPath()) {
+if (
+	typeof window !== "undefined" &&
+	window.location &&
+	isPosAppPath(window.location.pathname, POSAPP_BASE_PATH) &&
+	!normalizePosAppPath()
+) {
 	window.__posawesomeBundlePromise = importPosAwesomeBundle().catch((error) => {
 		ensureClassicBootOverlay().hide();
 		console.error("POS Awesome bundle failed to load", error);

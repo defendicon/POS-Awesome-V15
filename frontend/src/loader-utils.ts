@@ -60,6 +60,25 @@ export function resolvePosAppNormalizedPath(
 	return normalizedBasePath;
 }
 
+export function isPosAppPath(
+	pathname: string,
+	basePath = DEFAULT_POSAPP_BASE_PATH,
+): boolean {
+	if (!pathname || !basePath) {
+		return false;
+	}
+
+	const normalizedBasePath =
+		basePath.length > 1 ? basePath.replace(/\/+$/, "") : basePath;
+	const normalizedPath = pathname.toLowerCase();
+	const normalizedBase = normalizedBasePath.toLowerCase();
+
+	return (
+		normalizedPath === normalizedBase ||
+		normalizedPath.startsWith(`${normalizedBase}/`)
+	);
+}
+
 export async function pickPreferredBundleVersion(
 	embeddedBuildVersion: string,
 	fetchLatestBuildVersion: BuildVersionFetcher,

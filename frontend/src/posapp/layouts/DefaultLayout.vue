@@ -164,6 +164,28 @@ const loadingProgress = computed(() => loadingState.progress);
 const loadingActive = computed(() => loadingState.active);
 const loadingMessage = computed(() => loadingState.message);
 
+function maybeFinalizeBootLoading() {
+	const profileReady = loadingState.stages.load_profile >= 100;
+	const itemsReady = itemsLoaded.value || itemsLoadProgress.value >= 100;
+	const customersReady =
+		customersLoaded.value ||
+		loadProgress.value >= 100 ||
+		manualOffline.value ||
+		!navigator.onLine ||
+		isOffline();
+
+	if (!profileReady) {
+		return;
+	}
+
+	if (itemsReady && customersReady) {
+		markBootStageLoaded("finalize", __("POS workspace is ready"));
+		return;
+	}
+
+	setBootStageProgress("finalize", 55, __("Connecting startup services"));
+}
+
 // Watchers
 watch(networkOnline, (newVal, oldVal) => {
 	if (newVal && !oldVal) {
@@ -613,28 +635,6 @@ const refreshTaxInclusiveSetting = async () => {
 
 const handleUpdateAfterDelete = () => {
 	// Handle update after delete
-};
-
-const maybeFinalizeBootLoading = () => {
-	const profileReady = loadingState.stages.load_profile >= 100;
-	const itemsReady = itemsLoaded.value || itemsLoadProgress.value >= 100;
-	const customersReady =
-		customersLoaded.value ||
-		loadProgress.value >= 100 ||
-		manualOffline.value ||
-		!navigator.onLine ||
-		isOffline();
-
-	if (!profileReady) {
-		return;
-	}
-
-	if (itemsReady && customersReady) {
-		markBootStageLoaded("finalize", __("POS workspace is ready"));
-		return;
-	}
-
-	setBootStageProgress("finalize", 55, __("Connecting startup services"));
 };
 
 const remove_frappe_nav = () => {
