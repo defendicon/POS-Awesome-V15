@@ -48,7 +48,14 @@ import AppLoadingOverlay from "../components/ui/LoadingOverlay.vue";
 import UpdatePrompt from "../components/ui/UpdatePrompt.vue";
 import { useLoading } from "../composables/core/useLoading.js";
 import { usePosShift } from "../composables/pos/shared/usePosShift";
-import { loadingState, initLoadingSources, setSourceProgress, markSourceLoaded } from "../utils/loading.js";
+import {
+	loadingState,
+	initLoadingSources,
+	markBootStageLoaded,
+	markSourceLoaded,
+	setBootStageProgress,
+	setSourceProgress,
+} from "../utils/loading.js";
 import { useCustomersStore } from "../stores/customersStore.js";
 import { useSyncStore } from "../stores/syncStore.js";
 import { useToastStore } from "../stores/toastStore.js";
@@ -177,6 +184,7 @@ watch(
 	loadProgress,
 	(progress) => {
 		setSourceProgress("customers", progress);
+		maybeFinalizeBootLoading();
 	},
 	{ immediate: true },
 );
@@ -187,6 +195,7 @@ watch(
 		if (loaded) {
 			markSourceLoaded("customers");
 		}
+		maybeFinalizeBootLoading();
 	},
 	{ immediate: true },
 );
@@ -195,6 +204,7 @@ watch(
 	itemsLoadProgress,
 	(progress) => {
 		setSourceProgress("items", progress);
+		maybeFinalizeBootLoading();
 	},
 	{ immediate: true },
 );
@@ -205,6 +215,7 @@ watch(
 		if (loaded) {
 			markSourceLoaded("items");
 		}
+		maybeFinalizeBootLoading();
 	},
 	{ immediate: true },
 );
@@ -212,6 +223,8 @@ watch(
 // Lifecycle Hooks
 onMounted(() => {
 	pollForFrappeNav();
+	setBootStageProgress("load_profile", 10, __("Opening POS workspace"));
+	setBootStageProgress("finalize", 10, __("Preparing startup services"));
 
 	window.addEventListener("resize", adjust_frappe_sidebar_offset);
 	// initLoadingSources move to setup to catch early store readiness
@@ -316,7 +329,9 @@ const setupNetworkListeners = () => {
 };
 
 const initializeData = async () => {
+	setBootStageProgress("load_profile", 20, __("Checking local register data"));
 	await initPromise;
+	setBootStageProgress("load_profile", 35, __("Checking offline storage health"));
 	await memoryInitPromise;
 	checkDbHealth().catch(() => {});
 	// Offline-first bootstrap: hydrate register state from IndexedDB before server checks.
@@ -330,6 +345,7 @@ const initializeData = async () => {
 			await refreshTaxInclusiveSetting();
 		}
 	}
+	setBootStageProgress("load_profile", 70, __("Preparing register configuration"));
 
 	if (queueHealthCheck()) {
 		alert("Offline queue is too large. Old entries will be purged.");
@@ -358,7 +374,7 @@ const initializeData = async () => {
 		window.serverOnline = false;
 	}
 
-	markSourceLoaded("init");
+	markBootStageLoaded("load_profile", __("POS profile is ready"));
 
 	// Trigger initial customer load only when POS profile is already available
 	if (
@@ -369,7 +385,14 @@ const initializeData = async () => {
 	) {
 		customersStore.setPosProfile(posProfile.value);
 		customersStore.get_customer_names();
+	} else {
+		markBootStageLoaded(
+			"load_customers",
+			__("Customer sync will continue when connectivity is available"),
+		);
 	}
+
+	maybeFinalizeBootLoading();
 };
 
 const setupEventListeners = () => {
@@ -382,11 +405,18 @@ const setupEventListeners = () => {
 				if (newProfile && newProfile.name) {
 					// Update customers store with profile
 					customersStore.setPosProfile(newProfile);
+					markBootStageLoaded("load_profile", __("POS profile is ready"));
 
 					if (navigator.onLine && !getIsManualOffline()) {
 						refreshTaxInclusiveSetting();
 						customersStore.get_customer_names();
+					} else {
+						markBootStageLoaded(
+							"load_customers",
+							__("Customer sync will continue when connectivity is available"),
+						);
 					}
+					maybeFinalizeBootLoading();
 				}
 			},
 			{ deep: true, immediate: true },
@@ -583,6 +613,28 @@ const refreshTaxInclusiveSetting = async () => {
 
 const handleUpdateAfterDelete = () => {
 	// Handle update after delete
+};
+
+const maybeFinalizeBootLoading = () => {
+	const profileReady = loadingState.stages.load_profile >= 100;
+	const itemsReady = itemsLoaded.value || itemsLoadProgress.value >= 100;
+	const customersReady =
+		customersLoaded.value ||
+		loadProgress.value >= 100 ||
+		manualOffline.value ||
+		!navigator.onLine ||
+		isOffline();
+
+	if (!profileReady) {
+		return;
+	}
+
+	if (itemsReady && customersReady) {
+		markBootStageLoaded("finalize", __("POS workspace is ready"));
+		return;
+	}
+
+	setBootStageProgress("finalize", 55, __("Connecting startup services"));
 };
 
 const remove_frappe_nav = () => {

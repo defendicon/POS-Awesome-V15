@@ -1,5 +1,14 @@
 declare const __BUILD_VERSION__: string;
-import { resolvePosAppNormalizedPath } from "./loader-utils";
+import {
+	clearPosAssetRecoveryTargets,
+	resolvePreferredBundleTarget,
+	resolvePosAppNormalizedPath,
+} from "./loader-utils";
+import {
+	markBootStageLoaded,
+	setBootStageDetail,
+	setBootStageProgress,
+} from "./posapp/utils/loading";
 
 const POSAPP_BASE_PATH = "/app/posapp";
 const VERSION_ENDPOINT = "/assets/posawesome/dist/js/version.json";
@@ -84,9 +93,49 @@ function recoverByReloadingPosApp() {
 
 async function importPosAwesomeBundle() {
 	const initialVersion = __BUILD_VERSION__;
+	setBootStageProgress("check_version", 20);
+	const preferredTarget = await resolvePreferredBundleTarget(
+		initialVersion,
+		fetchLatestBuildVersion,
+	);
+	markBootStageLoaded("check_version");
+
+	if (preferredTarget.shouldRefreshAssets) {
+		setBootStageProgress("refresh_assets", 25);
+		setBootStageDetail(
+			"refresh_assets",
+			"Removing stale assets before loading the latest build",
+		);
+		await clearPosAssetRecoveryTargets({
+			cacheStorage:
+				typeof caches !== "undefined" ? (caches as unknown as any) : undefined,
+			navigatorLike:
+				typeof navigator !== "undefined" ? (navigator as unknown as any) : undefined,
+			localStorageLike:
+				typeof window !== "undefined" ? window.localStorage : undefined,
+			sessionStorageLike:
+				typeof window !== "undefined" ? window.sessionStorage : undefined,
+		});
+		markBootStageLoaded("refresh_assets");
+	} else {
+		markBootStageLoaded(
+			"refresh_assets",
+			"Assets are already up to date",
+		);
+	}
 	try {
-		return await import(/* @vite-ignore */ getBundlePath(initialVersion));
+		return await import(
+			/* @vite-ignore */
+			getBundlePath(preferredTarget.version)
+		);
 	} catch (firstError) {
+		if (preferredTarget.version !== initialVersion) {
+			if (isDynamicImportFailure(firstError)) {
+				recoverByReloadingPosApp();
+			}
+			throw firstError;
+		}
+
 		const latestVersion = await fetchLatestBuildVersion();
 		if (latestVersion && latestVersion !== initialVersion) {
 			try {

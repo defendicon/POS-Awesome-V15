@@ -4,21 +4,151 @@ import {
 	stop as stopGlobalLoading,
 } from "../composables/core/useLoading";
 
-/**
- * Interface representing the global loading state.
- */
+export type BootStageId =
+	| "check_version"
+	| "refresh_assets"
+	| "load_profile"
+	| "load_items"
+	| "load_customers"
+	| "finalize";
+
 export interface LoadingState {
 	active: boolean;
 	progress: number;
 	sources: Record<string, number>;
 	message: string;
+	detail: string;
 	sourceMessages: Record<string, string>;
+	currentStage: BootStageId | null;
+	stages: Record<BootStageId, number>;
 }
 
-// Internal tracking variables
+export const BOOT_STAGE_WEIGHTS: Record<BootStageId, number> = {
+	check_version: 10,
+	refresh_assets: 15,
+	load_profile: 20,
+	load_items: 35,
+	load_customers: 15,
+	finalize: 5,
+};
+
+const SOURCE_STAGE_MAP: Partial<Record<string, BootStageId>> = {
+	init: "load_profile",
+	items: "load_items",
+	customers: "load_customers",
+};
+
 let sourceCount = 0;
 let completedSum = 0;
 let isCompleting = false;
+let globalOverlayActive = false;
+
+function translate(text: string): string {
+	const translator =
+		typeof globalThis !== "undefined" &&
+		typeof (globalThis as any).__ === "function"
+			? (globalThis as any).__
+			: (value: string) => value;
+	return translator(text);
+}
+
+function createDefaultSourceMessages(): Record<string, string> {
+	return {
+		init: translate("Loading POS profile"),
+		items: translate("Loading product catalog"),
+		customers: translate("Loading customers"),
+	};
+}
+
+function createBootStageState(): Record<BootStageId, number> {
+	return {
+		check_version: 0,
+		refresh_assets: 0,
+		load_profile: 0,
+		load_items: 0,
+		load_customers: 0,
+		finalize: 0,
+	};
+}
+
+function getStageTitle(stage: BootStageId): string {
+	switch (stage) {
+		case "check_version":
+			return translate("Checking app version");
+		case "refresh_assets":
+			return translate("Refreshing outdated assets");
+		case "load_profile":
+			return translate("Loading POS profile");
+		case "load_items":
+			return translate("Loading product catalog");
+		case "load_customers":
+			return translate("Loading customers");
+		case "finalize":
+			return translate("Finalizing workspace");
+	}
+}
+
+function getStageDetail(stage: BootStageId): string {
+	switch (stage) {
+		case "check_version":
+			return translate("Comparing cached assets with the latest build");
+		case "refresh_assets":
+			return translate("Clearing stale POS assets before startup");
+		case "load_profile":
+			return translate("Fetching register and profile data");
+		case "load_items":
+			return translate("Preparing searchable inventory for checkout");
+		case "load_customers":
+			return translate("Preparing customer lookup data");
+		case "finalize":
+			return translate("Applying final startup checks");
+	}
+}
+
+function startOverlaySession() {
+	if (globalOverlayActive) {
+		return;
+	}
+	startGlobalLoading();
+	globalOverlayActive = true;
+}
+
+function stopOverlaySession() {
+	if (!globalOverlayActive) {
+		return;
+	}
+	stopGlobalLoading();
+	globalOverlayActive = false;
+}
+
+function requestFrame(callback: FrameRequestCallback) {
+	if (typeof requestAnimationFrame === "function") {
+		return requestAnimationFrame(callback);
+	}
+	return setTimeout(() => callback(Date.now()), 16);
+}
+
+function activateLoading() {
+	loadingState.active = true;
+	startOverlaySession();
+}
+
+function calculateWeightedProgress() {
+	return Math.round(
+		Object.entries(BOOT_STAGE_WEIGHTS).reduce((total, [stage, weight]) => {
+			return (
+				total +
+				(((loadingState.stages[stage as BootStageId] || 0) * weight) / 100)
+			);
+		}, 0),
+	);
+}
+
+function setLoadingTexts(stage: BootStageId, detail?: string) {
+	loadingState.currentStage = stage;
+	loadingState.message = getStageTitle(stage);
+	loadingState.detail = detail || getStageDetail(stage);
+}
 
 /**
  * Reactive loading state used by the UI.
@@ -27,12 +157,11 @@ export const loadingState = reactive<LoadingState>({
 	active: false,
 	progress: 0,
 	sources: {},
-	message: __("Loading app data..."),
-	sourceMessages: {
-		init: __("Initializing application..."),
-		items: __("Loading product catalog..."),
-		customers: __("Loading customer database..."),
-	},
+	message: translate("Loading app data..."),
+	detail: translate("Preparing POS workspace"),
+	sourceMessages: createDefaultSourceMessages(),
+	currentStage: null,
+	stages: createBootStageState(),
 });
 
 /**
@@ -40,25 +169,63 @@ export const loadingState = reactive<LoadingState>({
  * @param list List of source names to track
  */
 export function initLoadingSources(list: string[]): void {
-	// Reset state
-	loadingState.sources = {};
-	sourceCount = list.length;
-	completedSum = 0;
-	isCompleting = false;
-
-	// Validate input
-	if (!list || list.length === 0) {
+	if (!Array.isArray(list) || list.length === 0) {
 		console.warn("No loading sources provided");
 		return;
 	}
 
+	activateLoading();
+	sourceCount = list.length;
+	completedSum = 0;
+	isCompleting = false;
+	loadingState.sourceMessages = {
+		...createDefaultSourceMessages(),
+		...loadingState.sourceMessages,
+	};
+
 	list.forEach((name) => {
-		loadingState.sources[name] = 0;
+		if (!(name in loadingState.sources)) {
+			loadingState.sources[name] = 0;
+		}
 	});
 
-	loadingState.progress = 0;
-	loadingState.active = true;
-	startGlobalLoading();
+	if (!loadingState.currentStage) {
+		setLoadingTexts("load_profile");
+	}
+}
+
+export function setBootStageProgress(
+	stage: BootStageId,
+	value: number,
+	detail?: string,
+): void {
+	activateLoading();
+
+	const clampedValue = Math.max(0, Math.min(100, value));
+	const oldValue = loadingState.stages[stage] || 0;
+	const nextValue = Math.max(oldValue, clampedValue);
+	loadingState.stages[stage] = nextValue;
+	setLoadingTexts(stage, detail);
+	loadingState.progress = calculateWeightedProgress();
+
+	if (loadingState.progress >= 100 && !isCompleting) {
+		completeLoading();
+	}
+}
+
+export function markBootStageLoaded(
+	stage: BootStageId,
+	detail?: string,
+): void {
+	setBootStageProgress(stage, 100, detail);
+}
+
+export function setBootStageDetail(
+	stage: BootStageId,
+	detail: string,
+): void {
+	activateLoading();
+	setLoadingTexts(stage, detail);
 }
 
 /**
@@ -67,36 +234,38 @@ export function initLoadingSources(list: string[]): void {
  * @param value Progress value (0-100)
  */
 export function setSourceProgress(name: string, value: number): void {
-	// Safety checks
-	if (!(name in loadingState.sources) || isCompleting || sourceCount === 0)
+	if (isCompleting || sourceCount === 0) {
 		return;
+	}
 
-	// Clamp value between 0 and 100 and prevent regressions
+	if (!(name in loadingState.sources)) {
+		loadingState.sources[name] = 0;
+	}
+
 	const clampedValue = Math.max(0, Math.min(100, value));
 	const oldValue = loadingState.sources[name] || 0;
 	const newValue = Math.max(oldValue, clampedValue);
 
 	loadingState.sources[name] = newValue;
 
-	// Update message only if it changed
 	const newMessage =
-		loadingState.sourceMessages[name] || __(`Loading ${name}...`);
-	if (loadingState.message !== newMessage) {
+		loadingState.sourceMessages[name] || translate(`Loading ${name}...`);
+	const mappedStage = SOURCE_STAGE_MAP[name];
+	if (mappedStage) {
+		setBootStageProgress(mappedStage, newValue);
+	} else if (loadingState.message !== newMessage) {
 		loadingState.message = newMessage;
 	}
 
-	// Only update totals when progress increases
 	if (newValue > oldValue) {
 		completedSum += newValue - oldValue;
-		const newProgress = Math.round(completedSum / sourceCount);
-
-		// Only animate if progress actually changed
-		if (newProgress !== loadingState.progress && newProgress <= 100) {
-			animateProgress(loadingState.progress, newProgress);
-		}
-
-		if (newProgress >= 100 && !isCompleting) {
-			completeLoading();
+		const sourceProgress = Math.round(completedSum / sourceCount);
+		const nextProgress = Math.max(
+			loadingState.progress,
+			Math.min(100, sourceProgress),
+		);
+		if (nextProgress !== loadingState.progress) {
+			animateProgress(loadingState.progress, nextProgress);
 		}
 	}
 }
@@ -107,49 +276,57 @@ export function setSourceProgress(name: string, value: number): void {
 function animateProgress(from: number, to: number): void {
 	if (from === to) return;
 
-	const startTime = performance.now();
+	const startTime =
+		typeof performance !== "undefined" && typeof performance.now === "function"
+			? performance.now()
+			: Date.now();
 	const duration = 300;
+	let frameCount = 0;
 
 	function updateProgress(currentTime: number) {
-		const elapsed = currentTime - startTime;
+		frameCount += 1;
+		const elapsed = Math.max(0, currentTime - startTime);
 		const progress = Math.min(elapsed / duration, 1);
+		const eased = 1 - Math.pow(1 - progress, 3);
+		const stagedProgress = calculateWeightedProgress();
+		loadingState.progress = Math.round(
+			Math.max(stagedProgress, from + (to - from) * eased),
+		);
 
-		// Use easing function for smoother animation
-		const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-		loadingState.progress = Math.round(from + (to - from) * eased);
-
-		if (progress < 1) {
-			requestAnimationFrame(updateProgress);
+		if (progress < 1 && frameCount < 20) {
+			requestFrame(updateProgress);
 		} else {
-			loadingState.progress = to;
+			loadingState.progress = Math.max(stagedProgress, to);
 		}
 	}
 
-	requestAnimationFrame(updateProgress);
+	requestFrame(updateProgress);
 }
 
 /**
  * Finalizes the loading process.
  */
 function completeLoading(): void {
-	// Prevent multiple completion calls
 	if (isCompleting) return;
 	isCompleting = true;
 
 	loadingState.progress = 100;
-	loadingState.message = __("Setup complete!");
+	loadingState.message = translate("Setup complete!");
+	loadingState.detail = translate("POS is ready");
 
-	// Brief completion phase, then show ready
 	setTimeout(() => {
-		if (!loadingState.active) return; // Check if still active
-		loadingState.message = __("Ready!");
+		if (!loadingState.active) return;
+		loadingState.message = translate("Ready!");
+		loadingState.detail = translate("You can start using POS now");
 
-		// Hide after showing ready message
 		setTimeout(() => {
 			loadingState.active = false;
-			loadingState.message = __("Loading app data...");
-			stopGlobalLoading();
-			// Reset for next use
+			loadingState.message = translate("Loading app data...");
+			loadingState.detail = translate("Preparing POS workspace");
+			loadingState.currentStage = null;
+			loadingState.sources = {};
+			loadingState.stages = createBootStageState();
+			stopOverlaySession();
 			sourceCount = 0;
 			completedSum = 0;
 			isCompleting = false;
@@ -170,12 +347,16 @@ export function markSourceLoaded(name: string): void {
 export function resetLoadingState(): void {
 	loadingState.active = false;
 	loadingState.progress = 0;
-	loadingState.message = __("Loading app data...");
+	loadingState.message = translate("Loading app data...");
+	loadingState.detail = translate("Preparing POS workspace");
 	loadingState.sources = {};
+	loadingState.sourceMessages = createDefaultSourceMessages();
+	loadingState.currentStage = null;
+	loadingState.stages = createBootStageState();
 	sourceCount = 0;
 	completedSum = 0;
 	isCompleting = false;
-	stopGlobalLoading();
+	stopOverlaySession();
 }
 
 /**
@@ -186,6 +367,8 @@ export function getLoadingStatus() {
 		active: loadingState.active,
 		progress: loadingState.progress,
 		sources: { ...loadingState.sources },
+		stage: loadingState.currentStage,
+		stages: { ...loadingState.stages },
 		sourceCount,
 		completedSum,
 		isCompleting,
