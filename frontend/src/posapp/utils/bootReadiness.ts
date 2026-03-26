@@ -36,6 +36,6 @@ export function evaluateBootFinalizeState(
 		profileReady,
 		itemsReady,
 		customersReady,
-		shouldFinalize: profileReady && itemsReady && customersReady,
+		shouldFinalize: profileReady && itemsReady,
 	};
 }
