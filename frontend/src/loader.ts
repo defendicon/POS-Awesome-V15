@@ -1,6 +1,5 @@
 declare const __BUILD_VERSION__: string;
 import { resolvePosAppNormalizedPath } from "./loader-utils";
-import { recordPendingBundleActivation } from "./posapp/utils/bundleVersionActivation";
 
 const POSAPP_BASE_PATH = "/app/posapp";
 const VERSION_ENDPOINT = "/assets/posawesome/dist/js/version.json";
@@ -8,6 +7,17 @@ const LOADER_RECOVERY_KEY = "posa_loader_chunk_recovery_once";
 
 const getBundlePath = (version: string) =>
 	`/assets/posawesome/dist/js/posawesome.js?v=${encodeURIComponent(version)}`;
+
+function recordPendingBundleActivation(version: string) {
+	if (
+		typeof window === "undefined" ||
+		!window.sessionStorage ||
+		!version
+	) {
+		return;
+	}
+	window.sessionStorage.setItem("posa_pending_bundle_activation", version);
+}
 
 declare global {
 	interface Window {
