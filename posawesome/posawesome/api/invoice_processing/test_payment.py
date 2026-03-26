@@ -1,0 +1,221 @@
+import importlib.util
+import pathlib
+import sys
+import types
+import unittest
+
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[4]
+
+
+class FakePaymentEntry:
+    def __init__(self):
+        self.references = []
+        self.flags = types.SimpleNamespace(ignore_permissions=False)
+        self.saved = False
+        self.submitted = False
+
+    def append(self, fieldname, value):
+        target = getattr(self, fieldname)
+        target.append(dict(value))
+        return target[-1]
+
+    def setup_party_account_field(self):
+        return None
+
+    def set_missing_values(self):
+        return None
+
+    def set_amounts(self):
+        return None
+
+    def save(self):
+        self.saved = True
+        return self
+
+    def submit(self):
+        self.submitted = True
+        return self
+
+
+def _install_stubs():
+    frappe_module = types.ModuleType("frappe")
+    frappe_utils = types.ModuleType("frappe.utils")
+    sales_invoice_module = types.ModuleType(
+        "erpnext.accounts.doctype.sales_invoice.sales_invoice"
+    )
+    payment_utils_module = types.ModuleType(
+        "posawesome.posawesome.api.payment_processing.utils"
+    )
+
+    created_entries = []
+
+    class _FrappeDict(dict):
+        pass
+
+    frappe_utils.cint = lambda value: int(value or 0)
+    frappe_utils.flt = lambda value, precision=None: round(
+        float(value or 0), precision or 2
+    )
+    frappe_utils.getdate = lambda value: value
+    frappe_utils.nowdate = lambda: "2026-03-26"
+
+    frappe_module._ = lambda text: text
+    frappe_module._dict = _FrappeDict
+    frappe_module.throw = lambda message: (_ for _ in ()).throw(Exception(message))
+    frappe_module.flags = types.SimpleNamespace(ignore_account_permission=False)
+    frappe_module.db = types.SimpleNamespace(
+        get_value=lambda *args, **kwargs: "Cash",
+    )
+
+    def _new_doc(doctype):
+        if doctype != "Payment Entry":
+            raise AssertionError(f"Unexpected doctype: {doctype}")
+        entry = FakePaymentEntry()
+        created_entries.append(entry)
+        return entry
+
+    frappe_module.new_doc = _new_doc
+
+    sales_invoice_module.get_bank_cash_account = (
+        lambda *_args, **_kwargs: {"account": "Cash"}
+    )
+    payment_utils_module.get_party_account = (
+        lambda *_args, **_kwargs: "Debtors - TC"
+    )
+    payment_utils_module.get_bank_cash_account = (
+        lambda *_args, **_kwargs: {"account": "Cash"}
+    )
+
+    sys.modules["frappe"] = frappe_module
+    sys.modules["frappe.utils"] = frappe_utils
+    sys.modules[
+        "erpnext.accounts.doctype.sales_invoice.sales_invoice"
+    ] = sales_invoice_module
+    sys.modules[
+        "posawesome.posawesome.api.payment_processing.utils"
+    ] = payment_utils_module
+
+    return created_entries
+
+
+def _install_package_stubs():
+    package_paths = {
+        "posawesome": REPO_ROOT / "posawesome",
+        "posawesome.posawesome": REPO_ROOT / "posawesome" / "posawesome",
+        "posawesome.posawesome.api": REPO_ROOT / "posawesome" / "posawesome" / "api",
+        "posawesome.posawesome.api.invoice_processing": (
+            REPO_ROOT / "posawesome" / "posawesome" / "api" / "invoice_processing"
+        ),
+    }
+    for name, path in package_paths.items():
+        module = types.ModuleType(name)
+        module.__path__ = [str(path)]
+        sys.modules[name] = module
+
+
+def _load_module():
+    module_name = "posawesome.posawesome.api.invoice_processing.payment"
+    file_path = (
+        REPO_ROOT
+        / "posawesome"
+        / "posawesome"
+        / "api"
+        / "invoice_processing"
+        / "payment.py"
+    )
+    spec = importlib.util.spec_from_file_location(module_name, file_path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+class FakeInvoiceDoc:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+    def get(self, key, default=None):
+        return getattr(self, key, default)
+
+
+class TestCreateChangePaymentEntries(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.created_entries = _install_stubs()
+        _install_package_stubs()
+        cls.module = _load_module()
+
+    def setUp(self):
+        self.created_entries.clear()
+
+    def test_paid_change_entry_is_created_without_invoice_allocation(self):
+        invoice_doc = FakeInvoiceDoc(
+            docstatus=1,
+            doctype="Sales Invoice",
+            name="SINV-0001",
+            customer="CUST-0001",
+            company="Test Company",
+            debit_to="Debtors - TC",
+            posting_date="2026-03-26",
+            posa_pos_opening_shift="POS-OPEN-0001",
+            payments=[
+                {
+                    "amount": 10,
+                    "type": "Bank",
+                    "mode_of_payment": "Card",
+                    "account": "Card - TC",
+                }
+            ],
+        )
+
+        self.module._create_change_payment_entries(
+            invoice_doc,
+            {"paid_change": 4, "credit_change": 0},
+            pos_profile="Main POS",
+            cash_account={"account": "Cash"},
+        )
+
+        self.assertEqual(len(self.created_entries), 1)
+        entry = self.created_entries[0]
+        self.assertEqual(entry.payment_type, "Pay")
+        self.assertEqual(entry.paid_amount, 4)
+        self.assertEqual(entry.received_amount, 4)
+        self.assertEqual(entry.references, [])
+
+    def test_credit_change_entry_is_created_without_invoice_allocation(self):
+        invoice_doc = FakeInvoiceDoc(
+            docstatus=1,
+            doctype="Sales Invoice",
+            name="SINV-0002",
+            customer="CUST-0001",
+            company="Test Company",
+            debit_to="Debtors - TC",
+            posting_date="2026-03-26",
+            posa_pos_opening_shift="POS-OPEN-0001",
+            payments=[
+                {
+                    "amount": 100,
+                    "type": "Bank",
+                    "mode_of_payment": "Card",
+                    "account": "Card - TC",
+                }
+            ],
+        )
+
+        self.module._create_change_payment_entries(
+            invoice_doc,
+            {"paid_change": 0, "credit_change": 4},
+            pos_profile="Main POS",
+            cash_account={"account": "Cash"},
+        )
+
+        self.assertEqual(len(self.created_entries), 1)
+        entry = self.created_entries[0]
+        self.assertEqual(entry.payment_type, "Receive")
+        self.assertEqual(entry.paid_amount, 4)
+        self.assertEqual(entry.received_amount, 4)
+        self.assertEqual(entry.references, [])
+
+
+if __name__ == "__main__":
+    unittest.main()
