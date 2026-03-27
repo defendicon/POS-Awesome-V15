@@ -13,6 +13,7 @@ class FakePaymentEntry:
         self.flags = types.SimpleNamespace(ignore_permissions=False)
         self.saved = False
         self.submitted = False
+        self.name = None
 
     def append(self, fieldname, value):
         target = getattr(self, fieldname)
@@ -29,6 +30,8 @@ class FakePaymentEntry:
         return None
 
     def save(self):
+        if not self.name:
+            self.name = f"ACC-PAY-TEST-{id(self)}"
         self.saved = True
         return self
 
@@ -43,11 +46,13 @@ def _install_stubs():
     sales_invoice_module = types.ModuleType(
         "erpnext.accounts.doctype.sales_invoice.sales_invoice"
     )
+    accounts_utils_module = types.ModuleType("erpnext.accounts.utils")
     payment_utils_module = types.ModuleType(
         "posawesome.posawesome.api.payment_processing.utils"
     )
 
     created_entries = []
+    reconcile_calls = []
 
     class _FrappeDict(dict):
         pass
@@ -74,10 +79,34 @@ def _install_stubs():
         created_entries.append(entry)
         return entry
 
+    def _get_doc(doctype, name):
+        if doctype != "Payment Entry":
+            raise AssertionError(f"Unexpected doctype lookup: {doctype}")
+        return types.SimpleNamespace(
+            doctype="Payment Entry",
+            name=name,
+            party_type="Customer",
+            party="CUST-0001",
+            paid_to="Debtors - TC",
+            unallocated_amount=410,
+            cost_center="Main - TC",
+        )
+
     frappe_module.new_doc = _new_doc
+    frappe_module.get_doc = _get_doc
+    frappe_module.scrub = lambda value: str(value or "").strip().lower().replace(" ", "_")
 
     sales_invoice_module.get_bank_cash_account = (
         lambda *_args, **_kwargs: {"account": "Cash"}
+    )
+    accounts_utils_module.reconcile_against_document = (
+        lambda args, *extra, **kwargs: reconcile_calls.append(
+            {
+                "args": [dict(row) for row in args],
+                "extra": extra,
+                "kwargs": kwargs,
+            }
+        )
     )
     payment_utils_module.get_party_account = (
         lambda *_args, **_kwargs: "Debtors - TC"
@@ -91,11 +120,12 @@ def _install_stubs():
     sys.modules[
         "erpnext.accounts.doctype.sales_invoice.sales_invoice"
     ] = sales_invoice_module
+    sys.modules["erpnext.accounts.utils"] = accounts_utils_module
     sys.modules[
         "posawesome.posawesome.api.payment_processing.utils"
     ] = payment_utils_module
 
-    return created_entries
+    return created_entries, reconcile_calls
 
 
 def _install_package_stubs():
@@ -141,12 +171,13 @@ class FakeInvoiceDoc:
 class TestCreateChangePaymentEntries(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.created_entries = _install_stubs()
+        cls.created_entries, cls.reconcile_calls = _install_stubs()
         _install_package_stubs()
         cls.module = _load_module()
 
     def setUp(self):
         self.created_entries.clear()
+        self.reconcile_calls.clear()
 
     def test_paid_change_entry_is_created_without_invoice_allocation(self):
         invoice_doc = FakeInvoiceDoc(
@@ -182,7 +213,7 @@ class TestCreateChangePaymentEntries(unittest.TestCase):
         self.assertEqual(entry.received_amount, 4)
         self.assertEqual(entry.references, [])
 
-    def test_paid_change_entry_links_to_source_receive_payment_entry(self):
+    def test_paid_change_entry_reconciles_against_source_receive_payment_entry(self):
         invoice_doc = FakeInvoiceDoc(
             docstatus=1,
             doctype="Sales Invoice",
@@ -224,14 +255,18 @@ class TestCreateChangePaymentEntries(unittest.TestCase):
         entry = self.created_entries[0]
         self.assertEqual(entry.payment_type, "Pay")
         self.assertEqual(entry.references, [])
-        self.assertIn(
-            "ACC-PAY-RECEIVE-0001",
-            entry.remarks,
-        )
-        self.assertIn(
-            "410",
-            entry.remarks,
-        )
+        self.assertEqual(len(self.reconcile_calls), 1)
+        reconcile_args = self.reconcile_calls[0]["args"]
+        self.assertEqual(len(reconcile_args), 1)
+        self.assertEqual(reconcile_args[0]["voucher_type"], "Payment Entry")
+        self.assertEqual(reconcile_args[0]["voucher_no"], "ACC-PAY-RECEIVE-0001")
+        self.assertEqual(reconcile_args[0]["against_voucher_type"], "Payment Entry")
+        self.assertEqual(reconcile_args[0]["against_voucher"], entry.name)
+        self.assertEqual(reconcile_args[0]["allocated_amount"], 410)
+        self.assertEqual(reconcile_args[0]["account"], "Debtors - TC")
+        self.assertEqual(reconcile_args[0]["party_type"], "Customer")
+        self.assertEqual(reconcile_args[0]["party"], "CUST-0001")
+        self.assertEqual(reconcile_args[0]["dr_or_cr"], "credit_in_account_currency")
 
     def test_credit_change_entry_is_created_without_invoice_allocation(self):
         invoice_doc = FakeInvoiceDoc(

@@ -6,6 +6,7 @@ from frappe.utils import (
     getdate,
     nowdate,
 )
+from erpnext.accounts.utils import reconcile_against_document
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 from posawesome.posawesome.api.payment_processing.utils import get_party_account
 from posawesome.posawesome.api.payment_processing.utils import get_bank_cash_account as get_bank_account_processing
@@ -76,6 +77,13 @@ def _create_change_payment_entries(invoice_doc, data, pos_profile=None, cash_acc
     def _normalized_text(value):
         return str(value or "").strip().lower()
 
+    def _doc_value(doc, key, default=None):
+        if hasattr(doc, "get"):
+            value = doc.get(key, default)
+            if value is not None:
+                return value
+        return getattr(doc, key, default)
+
     def _get_matching_receive_payment_entry(required_amount):
         if required_amount <= 0:
             return None
@@ -99,6 +107,51 @@ def _create_change_payment_entries(invoice_doc, data, pos_profile=None, cash_acc
                 fallback_candidate = row
 
         return fallback_candidate
+
+    def _reconcile_change_against_receive_payment_entry(source_payment_entry_name, change_payment_entry):
+        if not source_payment_entry_name or not change_payment_entry:
+            return
+
+        source_payment_entry = frappe.get_doc("Payment Entry", source_payment_entry_name)
+        source_unallocated_amount = flt(_doc_value(source_payment_entry, "unallocated_amount"))
+        change_unallocated_amount = flt(_doc_value(change_payment_entry, "unallocated_amount")) or flt(
+            _doc_value(change_payment_entry, "paid_amount")
+        )
+        allocated_amount = min(source_unallocated_amount, change_unallocated_amount)
+
+        if allocated_amount <= 0:
+            return
+
+        dr_or_cr = (
+            "credit_in_account_currency"
+            if _doc_value(source_payment_entry, "party_type") == "Customer"
+            else "debit_in_account_currency"
+        )
+
+        reconcile_against_document(
+            [
+                frappe._dict(
+                    {
+                        "voucher_type": "Payment Entry",
+                        "voucher_no": _doc_value(source_payment_entry, "name"),
+                        "voucher_detail_no": None,
+                        "against_voucher_type": "Payment Entry",
+                        "against_voucher": _doc_value(change_payment_entry, "name"),
+                        "account": _doc_value(source_payment_entry, "paid_to") or party_account,
+                        "exchange_rate": 1,
+                        "party_type": _doc_value(source_payment_entry, "party_type") or "Customer",
+                        "party": _doc_value(source_payment_entry, "party") or invoice_doc.get("customer"),
+                        "is_advance": 0,
+                        "dr_or_cr": dr_or_cr,
+                        "unreconciled_amount": source_unallocated_amount,
+                        "unadjusted_amount": source_unallocated_amount,
+                        "allocated_amount": allocated_amount,
+                        "difference_amount": 0,
+                        "cost_center": _doc_value(source_payment_entry, "cost_center"),
+                    }
+                )
+            ]
+        )
 
     def _using_only_configured_cash_mode():
         """Return True when every paid row matches the configured cash mode and account."""
@@ -189,14 +242,6 @@ def _create_change_payment_entries(invoice_doc, data, pos_profile=None, cash_acc
             change_payment_entry.reference_no = reference_no
             change_payment_entry.reference_date = posting_date
 
-        if source_receive_payment_entry:
-            change_payment_entry.remarks = _(
-                "Change against Receive Payment Entry {0} for amount {1}"
-            ).format(
-                source_receive_payment_entry.get("name"),
-                paid_change_amount,
-            )
-
         change_payment_entry.setup_party_account_field()
         change_payment_entry.set_missing_values()
         change_payment_entry.set_amounts()
@@ -205,3 +250,9 @@ def _create_change_payment_entries(invoice_doc, data, pos_profile=None, cash_acc
         frappe.flags.ignore_account_permission = True
         change_payment_entry.save()
         change_payment_entry.submit()
+
+        if source_receive_payment_entry:
+            _reconcile_change_against_receive_payment_entry(
+                source_receive_payment_entry.get("name"),
+                change_payment_entry,
+            )
