@@ -223,15 +223,14 @@ class TestCreateChangePaymentEntries(unittest.TestCase):
         self.assertEqual(len(self.created_entries), 1)
         entry = self.created_entries[0]
         self.assertEqual(entry.payment_type, "Pay")
-        self.assertEqual(
-            entry.references,
-            [
-                {
-                    "reference_doctype": "Payment Entry",
-                    "reference_name": "ACC-PAY-RECEIVE-0001",
-                    "allocated_amount": 410,
-                }
-            ],
+        self.assertEqual(entry.references, [])
+        self.assertIn(
+            "ACC-PAY-RECEIVE-0001",
+            entry.remarks,
+        )
+        self.assertIn(
+            "410",
+            entry.remarks,
         )
 
     def test_credit_change_entry_is_created_without_invoice_allocation(self):

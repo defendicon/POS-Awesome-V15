@@ -190,13 +190,11 @@ def _create_change_payment_entries(invoice_doc, data, pos_profile=None, cash_acc
             change_payment_entry.reference_date = posting_date
 
         if source_receive_payment_entry:
-            change_payment_entry.append(
-                "references",
-                {
-                    "reference_doctype": "Payment Entry",
-                    "reference_name": source_receive_payment_entry.get("name"),
-                    "allocated_amount": paid_change_amount,
-                },
+            change_payment_entry.remarks = _(
+                "Change against Receive Payment Entry {0} for amount {1}"
+            ).format(
+                source_receive_payment_entry.get("name"),
+                paid_change_amount,
             )
 
         change_payment_entry.setup_party_account_field()
