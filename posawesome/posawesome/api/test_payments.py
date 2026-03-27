@@ -127,7 +127,7 @@ class TestRedeemingCustomerCredit(unittest.TestCase):
     def setUp(self):
         self.created_docs.clear()
 
-    def test_advance_credit_overpayment_only_allocates_remaining_outstanding(self):
+    def test_advance_credit_overpayment_keeps_full_received_amount_and_allocates_only_due(self):
         invoice_doc = types.SimpleNamespace(
             customer="CUST-0001",
             debit_to="Debtors - TC",
@@ -166,8 +166,8 @@ class TestRedeemingCustomerCredit(unittest.TestCase):
 
         self.assertEqual(len(self.created_docs), 1)
         payment_entry = self.created_docs[0]
-        self.assertEqual(payment_entry.paid_amount, 6)
-        self.assertEqual(payment_entry.received_amount, 6)
+        self.assertEqual(payment_entry.paid_amount, 10)
+        self.assertEqual(payment_entry.received_amount, 10)
         self.assertEqual(len(payment_entry.references), 1)
         self.assertEqual(payment_entry.references[0]["allocated_amount"], 6)
 

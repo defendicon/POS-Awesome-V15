@@ -283,15 +283,13 @@ def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, c
 
     remaining_total_cash = flt(total_cash)
 
-    if is_payment_entry and remaining_total_cash > 0:
+    if is_payment_entry:
         for payment in payments:
             payment_amount = flt(_row_value(payment, "amount", 0))
             if payment_amount <= 0:
                 continue
 
             applied_amount = min(payment_amount, remaining_total_cash)
-            if applied_amount <= 0:
-                break
 
             payment_entry_doc = frappe.get_doc(
                 {
@@ -300,8 +298,8 @@ def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, c
                     "payment_type": "Receive",
                     "party_type": "Customer",
                     "party": invoice_doc.customer,
-                    "paid_amount": applied_amount,
-                    "received_amount": applied_amount,
+                    "paid_amount": payment_amount,
+                    "received_amount": payment_amount,
                     "paid_from": invoice_doc.debit_to,
                     "paid_to": _row_value(payment, "account"),
                     "company": invoice_doc.company,
@@ -311,21 +309,23 @@ def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, c
                 }
             )
 
-            payment_reference = {
-                "allocated_amount": applied_amount,
-                "due_date": data.get("due_date"),
-                "reference_doctype": "Sales Invoice",
-                "reference_name": invoice_doc.name,
-            }
+            if applied_amount > 0:
+                payment_reference = {
+                    "allocated_amount": applied_amount,
+                    "due_date": data.get("due_date"),
+                    "reference_doctype": "Sales Invoice",
+                    "reference_name": invoice_doc.name,
+                }
 
-            ref_row = payment_entry_doc.append("references", {})
-            ref_row.update(payment_reference)
-            ensure_child_doctype(payment_entry_doc, "references", "Payment Entry Reference")
+                ref_row = payment_entry_doc.append("references", {})
+                ref_row.update(payment_reference)
+                ensure_child_doctype(payment_entry_doc, "references", "Payment Entry Reference")
             payment_entry_doc.flags.ignore_permissions = True
             frappe.flags.ignore_account_permission = True
             payment_entry_doc.save()
             payment_entry_doc.submit()
-            remaining_total_cash = flt(remaining_total_cash - applied_amount)
+            if applied_amount > 0:
+                remaining_total_cash = flt(remaining_total_cash - applied_amount)
 
 
 @frappe.whitelist()
