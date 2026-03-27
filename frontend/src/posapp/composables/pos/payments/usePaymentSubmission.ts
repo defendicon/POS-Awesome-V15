@@ -777,15 +777,31 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			}
 
 			if (!waitForInvoiceProcessing) {
-				stores?.toastStore?.show({
-					title:
-						type === "Order" && profile?.posa_create_only_sales_order
-							? __("Sales Order {0} is Submitted", [r.message.name])
-							: type === "Quotation"
-								? __("Quotation {0} is Submitted", [r.message.name])
-								: __("Invoice {0} is Submitted", [r.message.name]),
-					color: "success",
-				});
+				const submittedTitle =
+					type === "Order" && profile?.posa_create_only_sales_order
+						? __("Sales Order {0} is Submitted", [r.message.name])
+						: type === "Quotation"
+							? __("Quotation {0} is Submitted", [r.message.name])
+							: __("Invoice {0} is Submitted", [r.message.name]);
+				stores?.toastStore?.show(
+					hasPostSubmitPaymentWork
+						? {
+								key: `invoice-processing::${responseInvoiceName}`,
+								title: __("Invoice Submitted"),
+								summary: submittedTitle,
+								detail: __("Processing payment entries for Invoice {0}", [
+									responseInvoiceName,
+								]),
+								color: "info",
+								timeout: -1,
+								loading: true,
+						  }
+						: {
+								key: `invoice-processing::${responseInvoiceName}`,
+								title: submittedTitle,
+								color: "success",
+						  },
+				);
 			}
 
 			if (frappe?.utils?.play_sound) {

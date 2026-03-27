@@ -177,10 +177,67 @@ describe("usePaymentSubmission", () => {
 		expect(onPrint).toHaveBeenCalledWith(
 			invoiceDoc.value,
 			expect.objectContaining({
-				name: "ACC-SINV-0002",
+			name: "ACC-SINV-0002",
 				doctype: "Sales Invoice",
 				waitForInvoiceProcessing: false,
 				waitForPostSubmitPayments: true,
+			}),
+		);
+	});
+
+	it("shows a merged processing toast instead of a plain success toast when post-submit payments are pending", async () => {
+		const invoiceService =
+			(await import("../src/posapp/services/invoiceService")).default;
+		(invoiceService.submitInvoice as any).mockResolvedValue({
+			name: "ACC-SINV-0003",
+			doctype: "Sales Invoice",
+			docstatus: 1,
+		});
+
+		const invoiceDoc = ref<any>({
+			name: "ACC-SINV-0003",
+			doctype: "Sales Invoice",
+			is_return: 0,
+			items: [],
+			payments: [{ mode_of_payment: "Cash", amount: 690, type: "Cash" }],
+			rounded_total: 690,
+			grand_total: 690,
+		});
+		const toastShow = vi.fn();
+
+		const { submitInvoice } = usePaymentSubmission({
+			invoiceDoc,
+			posProfile: ref({
+				posa_allow_submissions_in_background_job: 1,
+				create_pos_invoice_instead_of_sales_invoice: 0,
+			}),
+			stockSettings: ref({}),
+			invoiceType: ref("Invoice"),
+			formatFloat: (value) => Number(value || 0),
+			stores: {
+				toastStore: { show: toastShow },
+				uiStore: { setLastInvoice: vi.fn(), setLastStockAdjustment: vi.fn() },
+				customersStore: { setSelectedCustomer: vi.fn() },
+				invoiceStore: { invoiceDoc: invoiceDoc.value },
+			},
+			isCashback: ref(true),
+			paidChange: ref(10),
+			creditChange: ref(0),
+			redeemedCustomerCredit: ref(100),
+			customerCreditDict: ref([]),
+			diff_payment: ref(-10),
+		});
+
+		await submitInvoice(false, {
+			onFinishNavigation: vi.fn(),
+			onScheduleBackgroundCheck: vi.fn(),
+		});
+
+		expect(toastShow).toHaveBeenCalledWith(
+			expect.objectContaining({
+				key: "invoice-processing::ACC-SINV-0003",
+				title: "Invoice Submitted",
+				loading: true,
 			}),
 		);
 	});

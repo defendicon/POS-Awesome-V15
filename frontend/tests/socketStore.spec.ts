@@ -34,13 +34,20 @@ describe("socketStore", () => {
 
 		const waitPromise = socketStore.waitForPostSubmitPayments("ACC-SINV-0001", 1000);
 
+		handlers.pos_invoice_processed({
+			invoice: "ACC-SINV-0001",
+			doctype: "Sales Invoice",
+			has_post_submit_payment_work: true,
+		});
+
+		expect(toastStore.text).toContain("Invoice Submitted");
+		expect(toastStore.loading).toBe(true);
+		expect(toastStore.text).toContain("Processing payment entries");
+
 		handlers.pos_post_submit_payments_started({
 			invoice: "ACC-SINV-0001",
 			doctype: "Sales Invoice",
 		});
-
-		expect(toastStore.loading).toBe(true);
-		expect(toastStore.text).toContain("Payment Entry In Progress");
 
 		handlers.pos_post_submit_payments_completed({
 			invoice: "ACC-SINV-0001",
@@ -52,6 +59,7 @@ describe("socketStore", () => {
 			doctype: "Sales Invoice",
 		});
 		expect(toastStore.loading).toBe(false);
-		expect(toastStore.text).toContain("Payment Entry Completed");
+		expect(toastStore.text).toContain("Invoice Submitted");
+		expect(toastStore.text).toContain("Payment entries processed");
 	});
 });

@@ -139,21 +139,34 @@ export const useSocketStore = defineStore("socket", () => {
     frappe.realtime.on("pos_invoice_processed", (data: InvoiceProcessingPayload) => {
       const invoice = data.invoice || data.name;
       if (!invoice) return;
+      const hasPostSubmitPaymentWork = Boolean(data.has_post_submit_payment_work);
 
       const state: InvoiceProcessingState = {
         status: "processed",
         doctype: data.doctype,
-        hasPostSubmitPaymentWork: Boolean(data.has_post_submit_payment_work),
+        hasPostSubmitPaymentWork,
         updatedAt: Date.now(),
       };
       processedInvoices.value[invoice] = state;
       resolveWaiters(invoiceWaiters, invoice, state);
 
-      toastStore.show({
-        title: __("Invoice Submitted"),
-        detail: __("Invoice {0} processed successfully", [invoice]),
-        color: "success",
-      });
+      if (hasPostSubmitPaymentWork) {
+        toastStore.show({
+          key: `invoice-processing::${invoice}`,
+          title: __("Invoice Submitted"),
+          detail: __("Processing payment entries for Invoice {0}", [invoice]),
+          color: "info",
+          timeout: -1,
+          loading: true,
+        });
+      } else {
+        toastStore.show({
+          key: `invoice-processing::${invoice}`,
+          title: __("Invoice Submitted"),
+          detail: __("Invoice {0} processed successfully", [invoice]),
+          color: "success",
+        });
+      }
     });
 
     frappe.realtime.on("pos_post_submit_payments_started", (data: InvoiceProcessingPayload) => {
@@ -167,8 +180,8 @@ export const useSocketStore = defineStore("socket", () => {
       };
 
       toastStore.show({
-        key: `post-submit-payments::${invoice}`,
-        title: __("Payment Entry In Progress"),
+        key: `invoice-processing::${invoice}`,
+        title: __("Invoice Submitted"),
         detail: __("Processing payment entries for Invoice {0}", [invoice]),
         color: "info",
         timeout: -1,
@@ -189,8 +202,8 @@ export const useSocketStore = defineStore("socket", () => {
       resolveWaiters(paymentWaiters, invoice, state);
 
       toastStore.show({
-        key: `post-submit-payments::${invoice}`,
-        title: __("Payment Entry Completed"),
+        key: `invoice-processing::${invoice}`,
+        title: __("Invoice Submitted"),
         detail: __("Payment entries processed for Invoice {0}", [invoice]),
         color: "success",
         timeout: 4000,
@@ -212,8 +225,8 @@ export const useSocketStore = defineStore("socket", () => {
       resolveWaiters(paymentWaiters, invoice, new Error(message), true);
 
       toastStore.show({
-        key: `post-submit-payments::${invoice}`,
-        title: __("Payment Entry Failed"),
+        key: `invoice-processing::${invoice}`,
+        title: __("Invoice Submitted"),
         detail: message,
         color: "error",
         timeout: 8000,
