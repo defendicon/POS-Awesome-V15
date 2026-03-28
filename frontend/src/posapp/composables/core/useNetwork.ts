@@ -7,7 +7,9 @@ type NetworkVm = {
 	serverConnecting: boolean;
 	internetReachable: boolean;
 	isIpHost?: boolean;
-	checkNetworkConnectivity: () => Promise<void>;
+	checkNetworkConnectivity: (
+		_options?: { forceImmediate?: boolean },
+	) => Promise<void>;
 	checkFrappePing: () => Promise<boolean>;
 	checkCurrentOrigin: (
 		_protocol: string,
@@ -51,14 +53,16 @@ function getPersistedStatus() {
 }
 
 // Manual retry function (to be called from UI)
-export function manualNetworkRetry(vm: NetworkVm) {
+export async function manualNetworkRetry(vm: NetworkVm) {
 	if (typeof vm.checkNetworkConnectivity === "function") {
 		vm.serverConnecting = true;
 		vm.$forceUpdate();
-		vm.checkNetworkConnectivity().then(() => {
+		try {
+			await vm.checkNetworkConnectivity({ forceImmediate: true });
+		} finally {
 			vm.serverConnecting = false;
 			vm.$forceUpdate();
-		});
+		}
 	}
 }
 
@@ -144,7 +148,10 @@ export function setupNetworkListeners(this: NetworkVm) {
 	scheduleNextCheck(this);
 }
 
-export async function checkNetworkConnectivity(this: NetworkVm) {
+export async function checkNetworkConnectivity(
+	this: NetworkVm,
+	options: { forceImmediate?: boolean } = {},
+) {
 	try {
 		let isConnected = false;
 		let isInternetReachable = false;
@@ -201,7 +208,7 @@ export async function checkNetworkConnectivity(this: NetworkVm) {
 		if (isConnected) {
 			consecutiveSuccesses++;
 			consecutiveFailures = 0;
-			if (consecutiveSuccesses >= SUCCESS_THRESHOLD) {
+			if (options.forceImmediate || consecutiveSuccesses >= SUCCESS_THRESHOLD) {
 				if (!this.networkOnline || !this.serverOnline) {
 					this.networkOnline = isConnected;
 					this.internetReachable = isInternetReachable;
@@ -215,7 +222,7 @@ export async function checkNetworkConnectivity(this: NetworkVm) {
 		} else {
 			consecutiveFailures++;
 			consecutiveSuccesses = 0;
-			if (consecutiveFailures >= FAILURE_THRESHOLD) {
+			if (options.forceImmediate || consecutiveFailures >= FAILURE_THRESHOLD) {
 				if (this.networkOnline || this.serverOnline) {
 					this.networkOnline = isConnected;
 					this.internetReachable = isInternetReachable;
@@ -233,7 +240,7 @@ export async function checkNetworkConnectivity(this: NetworkVm) {
 		console.warn("Network connectivity check failed:", resolvedError);
 		consecutiveFailures++;
 		consecutiveSuccesses = 0;
-		if (consecutiveFailures >= FAILURE_THRESHOLD) {
+		if (options.forceImmediate || consecutiveFailures >= FAILURE_THRESHOLD) {
 			this.networkOnline = navigator.onLine;
 			this.internetReachable = false;
 			this.serverOnline = false;

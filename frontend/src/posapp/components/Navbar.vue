@@ -18,6 +18,7 @@
 					:server-online="serverOnline"
 					:server-connecting="serverConnecting"
 					:is-ip-host="isIpHost"
+					@retry-status="$emit('retry-status')"
 				/>
 			</template>
 
@@ -618,6 +619,7 @@ export default {
 		"change-page",
 		"close-shift",
 		"sync-invoices",
+		"retry-status",
 		"open-customer-display",
 		"toggle-offline",
 		"toggle-theme",

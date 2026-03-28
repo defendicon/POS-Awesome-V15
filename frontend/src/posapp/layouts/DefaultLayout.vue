@@ -25,6 +25,7 @@
 				@print-last-invoice="handlePrintLastInvoice"
 				@sync-invoices="handleSyncInvoices"
 				@toggle-offline="handleToggleOffline"
+				@retry-status="handleRetryStatus"
 				@toggle-theme="handleToggleTheme"
 				@logout="handleLogout"
 				@open-customer-display="handleOpenCustomerDisplay"
@@ -76,6 +77,7 @@ import {
 import {
 	setupNetworkListeners as initNetworkListeners,
 	checkNetworkConnectivity as utilsCheckNetworkConnectivity,
+	manualNetworkRetry,
 } from "../composables/core/useNetwork";
 import { useRtl } from "../composables/core/useRtl";
 import authService from "../services/authService.js";
@@ -306,8 +308,8 @@ const networkProxy = {
 		isIpHost.value = Boolean(value);
 	},
 	$forceUpdate: () => {},
-	checkNetworkConnectivity: async () => {
-		await utilsCheckNetworkConnectivity.call(networkProxy);
+	checkNetworkConnectivity: async (options = {}) => {
+		await utilsCheckNetworkConnectivity.call(networkProxy, options);
 	},
 };
 
@@ -515,6 +517,20 @@ const handleToggleOffline = () => {
 		// Optimistically set online if browser is online
 		networkOnline.value = navigator.onLine;
 	}
+};
+
+const handleRetryStatus = async () => {
+	if (getIsManualOffline()) {
+		toastStore.show({
+			title: __("Manual offline mode is enabled"),
+			detail: __("Disable offline mode first to recheck live connectivity."),
+			color: "warning",
+		});
+		return;
+	}
+
+	networkOnline.value = navigator.onLine;
+	manualNetworkRetry(networkProxy);
 };
 
 const handleToggleTheme = () => {

@@ -1,6 +1,18 @@
 <template>
 	<div class="status-section-enhanced mx-1">
-		<v-btn icon :title="statusText" :aria-label="statusText" class="status-btn-enhanced" :color="statusColor">
+		<v-btn
+			icon
+			:title="statusText"
+			:aria-label="statusText"
+			:class="['status-btn-enhanced', { 'status-btn-enhanced--checking': props.serverConnecting }]"
+			:color="statusColor"
+			@click="emit('retry-status')"
+		>
+			<span
+				v-if="props.serverConnecting"
+				data-test="status-checking-indicator"
+				class="status-checking-indicator"
+			/>
 			<v-icon :color="statusColor">{{ statusIcon }}</v-icon>
 		</v-btn>
 		<div class="status-info-always-visible">
@@ -12,6 +24,9 @@
 				}"
 			>
 				{{ connectivityLabel }}
+			</div>
+			<div v-if="props.serverConnecting" class="status-subtitle-inline">
+				{{ __("Rechecking connection") }}
 			</div>
 		</div>
 	</div>
@@ -37,6 +52,9 @@ const props = withDefaults(defineProps<Props>(), {
 	serverConnecting: false,
 	isIpHost: false,
 });
+const emit = defineEmits<{
+	(e: "retry-status"): void;
+}>();
 
 // @ts-ignore
 const __ = (window as any).__ || ((text: string) => text);
@@ -160,7 +178,7 @@ const connectivityLabel = computed(() => {
 	 * @returns {string}
 	 */
 	if (props.serverConnecting) {
-		return __("Connecting");
+		return __("Checking...");
 	}
 
 	if (!props.networkOnline) {
@@ -192,12 +210,27 @@ const connectivityLabel = computed(() => {
 	border: 1px solid var(--pos-border);
 	transition: all 0.3s ease;
 	padding: 4px;
+	position: relative;
 	/* Reduced padding */
 }
 
 .status-btn-enhanced:hover {
 	background: var(--pos-focus-bg) !important;
 	transform: scale(1.05);
+}
+
+.status-btn-enhanced--checking {
+	box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.18);
+}
+
+.status-checking-indicator {
+	position: absolute;
+	inset: 3px;
+	border: 2px solid rgba(255, 152, 0, 0.35);
+	border-top-color: rgba(255, 152, 0, 0.95);
+	border-radius: 999px;
+	animation: status-spin 0.9s linear infinite;
+	pointer-events: none;
 }
 
 .status-info-always-visible {
@@ -222,7 +255,23 @@ const connectivityLabel = computed(() => {
 	color: #f44336;
 }
 
+.status-subtitle-inline {
+	font-size: 11px;
+	line-height: 1.15;
+	color: rgba(255, 152, 0, 0.92);
+	letter-spacing: 0.01em;
+}
+
 .status-section-enhanced .status-info-always-visible {
 	min-width: unset;
+}
+
+@keyframes status-spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
 }
 </style>
