@@ -252,6 +252,45 @@ def _sanitize_delivery_dates(payload):
             item["posa_delivery_date"] = _safe_date_string(item.get("posa_delivery_date"))
 
 
+def _build_fresh_invoice_payload(data, doctype):
+    fresh_data = dict(data or {})
+    fresh_data["doctype"] = doctype
+
+    for fieldname in (
+        "name",
+        "docstatus",
+        "status",
+        "amended_from",
+        "amendment_date",
+        "submitted_by",
+        "creation",
+        "owner",
+        "modified",
+        "modified_by",
+        "_liked_by",
+        "__last_sync_on",
+    ):
+        fresh_data.pop(fieldname, None)
+
+    return fresh_data
+
+
+def _get_mutable_invoice_doc(data, doctype):
+    invoice_name = (data or {}).get("name")
+    if not invoice_name:
+        return frappe.get_doc(data)
+
+    if not frappe.db.exists(doctype, invoice_name):
+        return frappe.get_doc(_build_fresh_invoice_payload(data, doctype))
+
+    invoice_doc = frappe.get_doc(doctype, invoice_name)
+    if cint(invoice_doc.docstatus) != 0:
+        return frappe.get_doc(_build_fresh_invoice_payload(data, doctype))
+
+    invoice_doc.update(data)
+    return invoice_doc
+
+
 def _save_draft_with_latest_timestamp(invoice_doc, retries=2):
     attempts = 0
 
@@ -319,11 +358,7 @@ def update_invoice(data):
 
     return_validity_enabled, default_validity_days = _get_return_validity_settings(pos_profile)
 
-    if data.get("name"):
-        invoice_doc = frappe.get_doc(doctype, data.get("name"))
-        invoice_doc.update(data)
-    else:
-        invoice_doc = frappe.get_doc(data)
+    invoice_doc = _get_mutable_invoice_doc(data, doctype)
 
     # Set currency from data before set_missing_values
     # Validate return items if this is a return invoice
@@ -541,6 +576,12 @@ def submit_invoice(invoice, data, submit_in_background=False):
         doctype = "POS Invoice"
 
     invoice_name = invoice.get("name")
+    if invoice_name and frappe.db.exists(doctype, invoice_name):
+        existing_doc = frappe.get_doc(doctype, invoice_name)
+        if cint(existing_doc.docstatus) != 0:
+            invoice = _build_fresh_invoice_payload(invoice, doctype)
+            invoice_name = None
+
     if not invoice_name or not frappe.db.exists(doctype, invoice_name):
         created = update_invoice(json.dumps(invoice))
         invoice_name = created.get("name")

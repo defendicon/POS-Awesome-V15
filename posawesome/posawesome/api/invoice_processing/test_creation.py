@@ -315,6 +315,116 @@ class TestUpdateInvoiceReturnPayments(unittest.TestCase):
         self.assertEqual(base_amount, 24.68)
 
 
+class TestStaleNamedInvoiceHandling(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.frappe, cls.enqueue_calls = _install_framework_stubs()
+        _install_dependency_stubs()
+        _install_package_stubs()
+        cls.creation = _load_module()
+
+    def setUp(self):
+        self.enqueue_calls.clear()
+        self.frappe._publish_realtime_calls.clear()
+
+    def _build_invoice_doc(self, **overrides):
+        base = {
+            "doctype": "Sales Invoice",
+            "name": None,
+            "pos_profile": "Main POS",
+            "company": "Test Company",
+            "currency": "USD",
+            "posting_date": "2026-03-21",
+            "is_return": 0,
+            "return_against": None,
+            "items": [],
+            "payments": [],
+            "taxes": [],
+            "flags": types.SimpleNamespace(ignore_pricing_rule=False, ignore_permissions=False),
+            "paid_amount": 0,
+            "base_paid_amount": 0,
+            "conversion_rate": 1,
+            "plc_conversion_rate": 1,
+            "price_list_currency": "USD",
+            "total": 0,
+            "net_total": 0,
+            "grand_total": 0,
+            "rounded_total": 0,
+            "docstatus": 0,
+        }
+        base.update(overrides)
+        return FakeDoc(**base)
+
+    def test_update_invoice_creates_new_draft_when_named_doc_is_submitted(self):
+        submitted_doc = self._build_invoice_doc(name="SINV-OLD", docstatus=1)
+        fresh_doc = self._build_invoice_doc()
+        created_payloads = []
+
+        def fake_get_doc(*args):
+            if len(args) == 2:
+                return submitted_doc
+            payload = dict(args[0])
+            created_payloads.append(payload)
+            return fresh_doc
+
+        self.creation.frappe.db.exists = lambda doctype, name: name == "SINV-OLD"
+        self.creation.frappe.get_doc = fake_get_doc
+        self.creation.frappe.get_cached_value = lambda *args, **kwargs: 0
+        self.creation._save_draft_with_latest_timestamp = lambda doc: doc
+
+        result = self.creation.update_invoice(
+            json.dumps(
+                {
+                    "doctype": "Sales Invoice",
+                    "name": "SINV-OLD",
+                    "pos_profile": "Main POS",
+                    "company": "Test Company",
+                    "currency": "USD",
+                    "posting_date": "2026-03-21",
+                    "items": [],
+                    "payments": [],
+                }
+            )
+        )
+
+        self.assertEqual(len(created_payloads), 1)
+        self.assertNotIn("name", created_payloads[0])
+        self.assertEqual(result["docstatus"], 0)
+
+    def test_update_invoice_creates_new_draft_when_named_doc_is_missing(self):
+        fresh_doc = self._build_invoice_doc()
+        created_payloads = []
+
+        def fake_get_doc(*args):
+            payload = dict(args[0])
+            created_payloads.append(payload)
+            return fresh_doc
+
+        self.creation.frappe.db.exists = lambda doctype, name: False
+        self.creation.frappe.get_doc = fake_get_doc
+        self.creation.frappe.get_cached_value = lambda *args, **kwargs: 0
+        self.creation._save_draft_with_latest_timestamp = lambda doc: doc
+
+        result = self.creation.update_invoice(
+            json.dumps(
+                {
+                    "doctype": "Sales Invoice",
+                    "name": "SINV-MISSING",
+                    "pos_profile": "Main POS",
+                    "company": "Test Company",
+                    "currency": "USD",
+                    "posting_date": "2026-03-21",
+                    "items": [],
+                    "payments": [],
+                }
+            )
+        )
+
+        self.assertEqual(len(created_payloads), 1)
+        self.assertNotIn("name", created_payloads[0])
+        self.assertEqual(result["docstatus"], 0)
+
+
 class TestPostSubmitPaymentProcessing(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
