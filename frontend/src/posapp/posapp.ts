@@ -29,7 +29,10 @@ import {
 	clearChunkRecoveryState,
 	isDynamicImportFailure,
 	recoverFromChunkLoadError,
+	scheduleAfterStableBoot,
+	scheduleChunkRecoveryStateReset,
 } from "./utils/chunkLoadRecovery";
+import { finalizePendingBundleActivation } from "./utils/bundleVersionActivation";
 import "../sw-updater"; // Initialize service worker auto-updater
 import App from "./App.vue";
 // @ts-ignore
@@ -106,6 +109,12 @@ frappe.PosApp.posapp = class {
 
 		this.app.mount(this.$el[0]);
 		clearChunkRecoveryState();
+		void this.router.isReady().finally(() => {
+			scheduleChunkRecoveryStateReset();
+			scheduleAfterStableBoot(() => {
+				void finalizePendingBundleActivation();
+			});
+		});
 
 		// Initialize socket listeners
 		const socketStore = useSocketStore();

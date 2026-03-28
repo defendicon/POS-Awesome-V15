@@ -32,6 +32,56 @@ function resolveOrderDeliveryDate(context: any, sourceDoc: any): string | null {
 	);
 }
 
+function clearStalePartyFieldsForCustomerChange(
+	doc: any,
+	previousDoc: any,
+	customerChanged: boolean,
+	customerDetails: any = {},
+) {
+	if (!customerChanged || !doc || !previousDoc) {
+		return;
+	}
+
+	const nextValues: Record<string, any> = {
+		customer_name: customerDetails?.customer_name || doc.customer_name || null,
+		customer_address: customerDetails?.customer_address || null,
+		shipping_address_name: customerDetails?.shipping_address || null,
+		contact_person: customerDetails?.contact_person || null,
+		territory: customerDetails?.territory || null,
+	};
+
+	const customerDependentFields = [
+		"customer_name",
+		"customer_address",
+		"address_display",
+		"shipping_address_name",
+		"contact_person",
+		"contact_display",
+		"contact_mobile",
+		"contact_email",
+		"territory",
+	];
+
+	customerDependentFields.forEach((fieldname) => {
+		const nextValue =
+			Object.prototype.hasOwnProperty.call(nextValues, fieldname)
+				? nextValues[fieldname]
+				: undefined;
+		if (nextValue !== undefined && nextValue !== null && nextValue !== "") {
+			doc[fieldname] = nextValue;
+			return;
+		}
+
+		if (
+			doc[fieldname] !== undefined &&
+			doc[fieldname] !== null &&
+			doc[fieldname] === previousDoc[fieldname]
+		) {
+			doc[fieldname] = null;
+		}
+	});
+}
+
 /**
  * Document Utils
  * Handles creation of backend-compatible invoice documents from current state.
@@ -64,6 +114,7 @@ function resolveOrderDeliveryDate(context: any, sourceDoc: any): string | null {
 export function get_invoice_doc(context: any) {
 	let doc: any = {};
 	const sourceDoc = context.invoice_doc || {};
+	const previousCustomer = sourceDoc.customer || null;
 
 	if (sourceDoc.name) {
 		doc = { ...sourceDoc };
@@ -131,10 +182,27 @@ export function get_invoice_doc(context: any) {
 			: {};
 	const resolvedCustomer =
 		context.customer || customerDetails.customer || doc.customer || null;
+	const matchingCustomerDetails =
+		customerDetails?.customer &&
+		resolvedCustomer &&
+		customerDetails.customer === resolvedCustomer
+			? customerDetails
+			: {};
+	const customerChanged =
+		Boolean(previousCustomer && resolvedCustomer && previousCustomer !== resolvedCustomer);
 	doc.customer = resolvedCustomer;
-	if (!doc.customer_name && customerDetails.customer_name) {
-		doc.customer_name = customerDetails.customer_name;
+	if (customerChanged) {
+		doc.customer_name = matchingCustomerDetails.customer_name || resolvedCustomer;
 	}
+	if (!doc.customer_name && matchingCustomerDetails.customer_name) {
+		doc.customer_name = matchingCustomerDetails.customer_name;
+	}
+	clearStalePartyFieldsForCustomerChange(
+		doc,
+		sourceDoc,
+		customerChanged,
+		matchingCustomerDetails,
+	);
 	if (doc.doctype === "Quotation") {
 		doc.quotation_to = doc.quotation_to || "Customer";
 		if (resolvedCustomer) {

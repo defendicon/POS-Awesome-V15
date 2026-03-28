@@ -12,10 +12,15 @@ export async function fetch_customer_details(context: any) {
 				? context.customer.trim()
 				: "";
 		if (!customer) return;
+		const requestedCustomer = customer;
 
 		context.customer_info = {};
 		const cachedCustomer = await getStoredCustomer(customer);
-		if (cachedCustomer) {
+		if (
+			cachedCustomer &&
+			typeof context.customer === "string" &&
+			context.customer.trim() === requestedCustomer
+		) {
 			context.customer_info = cachedCustomer;
 		}
 
@@ -24,7 +29,11 @@ export async function fetch_customer_details(context: any) {
 			args: { customer },
 		});
 
-		if (r?.message) {
+		if (
+			r?.message &&
+			typeof context.customer === "string" &&
+			context.customer.trim() === requestedCustomer
+		) {
 			context.customer_info = r.message;
 			const resolvedPriceList =
 				context.customer_info.customer_price_list ||
@@ -83,12 +92,31 @@ export function sync_invoice_customer_details(
 	context: any,
 	details: any = null,
 ) {
-	if (!details) {
-		details = context.customer_info;
-	}
-	if (!details) return;
-
 	if (context.invoice_doc) {
+		const activeCustomer =
+			typeof context.customer === "string" ? context.customer.trim() : "";
+		context.invoice_doc.customer = activeCustomer || details?.customer || null;
+		if (!details) {
+			details =
+				context.customer_info?.customer === activeCustomer
+					? context.customer_info
+					: null;
+		}
+		if (!details) {
+			context.invoice_doc.customer_name = activeCustomer || null;
+			context.invoice_doc.customer_address = null;
+			context.invoice_doc.shipping_address_name = null;
+			context.invoice_doc.contact_person = null;
+			context.invoice_doc.territory = null;
+			context.invoice_doc.customer = activeCustomer || null;
+			return;
+		}
+		if (details?.customer_name) {
+			context.invoice_doc.customer_name = details.customer_name;
+		} else if (activeCustomer) {
+			context.invoice_doc.customer_name = activeCustomer;
+		}
+		if (!details) return;
 		if (details.customer_address)
 			context.invoice_doc.customer_address = details.customer_address;
 		if (details.territory)

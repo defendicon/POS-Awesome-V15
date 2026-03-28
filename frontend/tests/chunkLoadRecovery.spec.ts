@@ -1,8 +1,24 @@
-import { describe, expect, it } from "vitest";
+// @vitest-environment jsdom
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { isDynamicImportFailure } from "../src/posapp/utils/chunkLoadRecovery";
+import {
+	clearChunkRecoveryState,
+	isDynamicImportFailure,
+	recoverFromChunkLoadError,
+	scheduleAfterStableBoot,
+} from "../src/posapp/utils/chunkLoadRecovery";
 
 describe("chunk load recovery helpers", () => {
+	beforeEach(() => {
+		window.sessionStorage.clear();
+		window.localStorage.clear();
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+		vi.restoreAllMocks();
+	});
+
 	it("detects dynamic import failures", () => {
 		expect(
 			isDynamicImportFailure(
@@ -19,6 +35,39 @@ describe("chunk load recovery helpers", () => {
 	it("ignores non-chunk errors", () => {
 		expect(isDynamicImportFailure(new Error("Network timeout"))).toBe(
 			false,
+		);
+	});
+
+	it("preserves retry history when clearing transient progress between reloads", async () => {
+		const chunkError = new TypeError(
+			"Failed to fetch dynamically imported module: /assets/chunk.js",
+		);
+
+		await recoverFromChunkLoadError(chunkError, "first-load");
+		expect(
+			window.sessionStorage.getItem("posa_chunk_reload_once"),
+		).toBe("1");
+
+		clearChunkRecoveryState();
+
+		await recoverFromChunkLoadError(chunkError, "after-reload");
+
+		expect(
+			window.sessionStorage.getItem("posa_chunk_cache_recovery_once"),
+		).toBe("1");
+	});
+
+	it("swallows rejected stable-boot tasks to avoid unhandled rejections", async () => {
+		vi.useFakeTimers();
+		const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+		scheduleAfterStableBoot(() => Promise.reject(new Error("boom")));
+
+		await vi.runAllTimersAsync();
+
+		expect(warnSpy).toHaveBeenCalledWith(
+			"Chunk recovery: stable boot task failed",
+			expect.any(Error),
 		);
 	});
 });

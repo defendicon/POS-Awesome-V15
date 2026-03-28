@@ -21,6 +21,41 @@ export interface PaymentPrintingOptions {
 export function usePaymentPrinting(options: PaymentPrintingOptions) {
 	const { invoiceDoc, posProfile, invoiceType, printFormat } = options;
 
+	const resolvePrintContext = (input: { doc?: any; doctype?: string } = {}) => {
+		const doc = input.doc || unref(invoiceDoc);
+		const profile = unref(posProfile);
+		const type = unref(invoiceType);
+		const pFormatOverride = unref(printFormat);
+		const print_format =
+			pFormatOverride ||
+			profile.print_format_for_online ||
+			profile.print_format;
+		const letter_head = profile.letter_head || 0;
+		let doctype: string;
+
+		if (input.doctype) {
+			doctype = input.doctype;
+		} else if (input.doc?.doctype) {
+			doctype = input.doc.doctype;
+		} else if (type === "Quotation") {
+			doctype = "Quotation";
+		} else if (type === "Order" && profile.posa_create_only_sales_order) {
+			doctype = "Sales Order";
+		} else if (profile.create_pos_invoice_instead_of_sales_invoice) {
+			doctype = "POS Invoice";
+		} else {
+			doctype = "Sales Invoice";
+		}
+
+		return {
+			doc,
+			profile,
+			doctype,
+			print_format,
+			letter_head,
+		};
+	};
+
 	const openOfflineInvoicePreview = async (
 		invoice: any,
 		{ debugPrint = false, printFormatStr = "" } = {},
@@ -55,30 +90,9 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 		win.print();
 	};
 
-	const loadPrintPage = async () => {
-		const doc = unref(invoiceDoc);
-		const profile = unref(posProfile);
-		const type = unref(invoiceType);
-
-		const pFormatOverride = unref(printFormat);
-		const print_format =
-			pFormatOverride ||
-			profile.print_format_for_online ||
-			profile.print_format;
-
-		const letter_head = profile.letter_head || 0;
-		let doctype: string;
+	const loadPrintPage = async (input: { doc?: any; doctype?: string } = {}) => {
+		const { doc, profile, doctype, print_format, letter_head } = resolvePrintContext(input);
 		const debugPrint = isDebugPrintEnabled();
-
-		if (type === "Quotation") {
-			doctype = "Quotation";
-		} else if (type === "Order" && profile.posa_create_only_sales_order) {
-			doctype = "Sales Order";
-		} else if (profile.create_pos_invoice_instead_of_sales_invoice) {
-			doctype = "POS Invoice";
-		} else {
-			doctype = "Sales Invoice";
-		}
 
 		let url =
 			frappe.urllib.get_base_url() +

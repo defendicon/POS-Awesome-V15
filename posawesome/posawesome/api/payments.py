@@ -215,6 +215,15 @@ def get_amount(ref_doc, payment_account=None):
 def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments):
     # redeeming customer credit with journal voucher
     today = nowdate()
+    created_receive_payment_entries = []
+
+    def _row_value(row, key, default=None):
+        if hasattr(row, "get"):
+            value = row.get(key, default)
+            if value is not None:
+                return value
+        return getattr(row, key, default)
+
     if data.get("redeemed_customer_credit"):
         cost_center = frappe.get_value("POS Profile", invoice_doc.pos_profile, "cost_center")
         if not cost_center:
@@ -273,10 +282,16 @@ def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, c
                     frappe.log_error(frappe.get_traceback(), "POSAwesome JV Error")
                     frappe.throw(_("Unable to create Journal Entry for customer credit."))
 
-    if is_payment_entry and total_cash > 0:
+    remaining_total_cash = flt(total_cash)
+
+    if is_payment_entry:
         for payment in payments:
-            if not payment.amount:
+            payment_amount = flt(_row_value(payment, "amount", 0))
+            if payment_amount <= 0:
                 continue
+
+            applied_amount = min(payment_amount, remaining_total_cash)
+
             payment_entry_doc = frappe.get_doc(
                 {
                     "doctype": "Payment Entry",
@@ -284,31 +299,49 @@ def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, c
                     "payment_type": "Receive",
                     "party_type": "Customer",
                     "party": invoice_doc.customer,
-                    "paid_amount": payment.amount,
-                    "received_amount": payment.amount,
+                    "paid_amount": payment_amount,
+                    "received_amount": payment_amount,
                     "paid_from": invoice_doc.debit_to,
-                    "paid_to": payment.account,
+                    "paid_to": _row_value(payment, "account"),
                     "company": invoice_doc.company,
-                    "mode_of_payment": payment.mode_of_payment,
+                    "mode_of_payment": _row_value(payment, "mode_of_payment"),
                     "reference_no": invoice_doc.posa_pos_opening_shift,
                     "reference_date": today,
                 }
             )
 
-            payment_reference = {
-                "allocated_amount": payment.amount,
-                "due_date": data.get("due_date"),
-                "reference_doctype": "Sales Invoice",
-                "reference_name": invoice_doc.name,
-            }
+            if applied_amount > 0:
+                payment_reference = {
+                    "allocated_amount": applied_amount,
+                    "due_date": data.get("due_date"),
+                    "reference_doctype": "Sales Invoice",
+                    "reference_name": invoice_doc.name,
+                }
 
-            ref_row = payment_entry_doc.append("references", {})
-            ref_row.update(payment_reference)
-            ensure_child_doctype(payment_entry_doc, "references", "Payment Entry Reference")
+                ref_row = payment_entry_doc.append("references", {})
+                ref_row.update(payment_reference)
+                ensure_child_doctype(payment_entry_doc, "references", "Payment Entry Reference")
             payment_entry_doc.flags.ignore_permissions = True
             frappe.flags.ignore_account_permission = True
             payment_entry_doc.save()
             payment_entry_doc.submit()
+            created_receive_payment_entries.append(
+                {
+                    "name": payment_entry_doc.name,
+                    "mode_of_payment": _row_value(payment, "mode_of_payment"),
+                    "account": _row_value(payment, "account"),
+                    "paid_amount": payment_amount,
+                    "allocated_amount": applied_amount,
+                    "unallocated_amount": flt(payment_amount - applied_amount),
+                }
+            )
+            if applied_amount > 0:
+                remaining_total_cash = flt(remaining_total_cash - applied_amount)
+
+    if isinstance(data, dict):
+        data["created_receive_payment_entries"] = created_receive_payment_entries
+
+    return created_receive_payment_entries
 
 
 @frappe.whitelist()
@@ -371,6 +404,7 @@ def get_available_credit(customer, company):
         "Payment Entry",
         {
             "unallocated_amount": [">", 0],
+            "payment_type": "Receive",
             "party_type": "Customer",
             "party": customer,
             "company": company,
@@ -379,11 +413,38 @@ def get_available_credit(customer, company):
         ["name", "unallocated_amount"],
     )
 
+    outstanding_payments = frappe.get_all(
+        "Payment Entry",
+        {
+            "unallocated_amount": [">", 0],
+            "payment_type": "Pay",
+            "party_type": "Customer",
+            "party": customer,
+            "company": company,
+            "docstatus": 1,
+        },
+        ["name", "unallocated_amount"],
+    )
+
+    remaining_pay_outflow = sum(flt(row.unallocated_amount) for row in outstanding_payments)
+
+    # Net customer "Pay" outflows against available "Receive" advances in the
+    # same iteration order returned by frappe.get_all. This preserves the
+    # existing FIFO-style behavior by list order without imposing a new sort.
     for row in advances:
+        available_credit = flt(row.unallocated_amount)
+        if remaining_pay_outflow > 0:
+            applied_outflow = min(available_credit, remaining_pay_outflow)
+            available_credit = flt(available_credit - applied_outflow)
+            remaining_pay_outflow = flt(remaining_pay_outflow - applied_outflow)
+
+        if available_credit <= 0:
+            continue
+
         row = {
             "type": "Advance",
             "credit_origin": row.name,
-            "total_credit": row.unallocated_amount,
+            "total_credit": available_credit,
             "credit_to_redeem": 0,
             "source_type": "Payment Entry",
         }

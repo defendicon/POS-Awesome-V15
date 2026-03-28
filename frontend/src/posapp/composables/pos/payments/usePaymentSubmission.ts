@@ -37,9 +37,23 @@ export interface PaymentSubmissionOptions {
 
 export interface SubmissionCallbacks {
 	onSuccess?: (_message: any) => void;
-	onPrint?: (_doc: any) => void;
+	onPrint?: (
+		_doc: any,
+		_options?: {
+			name?: string;
+			doctype?: string;
+			waitForPostSubmitPayments?: boolean;
+			waitForInvoiceProcessing?: boolean;
+		},
+	) => void;
 	onFinishNavigation?: (_success: boolean) => void;
-	onScheduleBackgroundCheck?: (_name: string, _doctype: string) => void;
+	onScheduleBackgroundCheck?: (_payload: {
+		name?: string;
+		doctype?: string;
+		print?: boolean;
+		waitForPostSubmitPayments?: boolean;
+		waitForInvoiceProcessing?: boolean;
+	}) => void;
 }
 
 export function usePaymentSubmission(options: PaymentSubmissionOptions) {
@@ -611,6 +625,13 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			customer_credit_dict: unref(customerCreditDict),
 			is_cashback: unref(isCashback),
 		};
+		const hasPostSubmitPaymentWork =
+			Boolean(profile?.posa_allow_submissions_in_background_job) &&
+			(
+				formatFloat(unref(redeemedCustomerCredit) || 0, prec) > 0 ||
+				pChange > 0 ||
+				cChange > 0
+			);
 
 		if (isOffline()) {
 			try {
@@ -686,6 +707,15 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				docstatus === 1 ||
 				status === 1 ||
 				(docstatus === undefined && status === undefined);
+			const waitForInvoiceProcessing =
+				Boolean(profile?.posa_allow_submissions_in_background_job) &&
+				!wasSubmitted;
+			const submittedDoctype =
+				r.message?.doctype ||
+				doc?.doctype ||
+				(profile?.create_pos_invoice_instead_of_sales_invoice
+					? "POS Invoice"
+					: "Sales Invoice");
 
 			if (!wasSubmitted && backgroundReason) {
 				const failedInfo = {
@@ -705,10 +735,13 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				if (profile?.posa_allow_submissions_in_background_job) {
 					if (onFinishNavigation) onFinishNavigation(true);
 					if (onScheduleBackgroundCheck) {
-						onScheduleBackgroundCheck(
-							responseInvoiceName,
-							r.message?.doctype,
-						);
+						onScheduleBackgroundCheck({
+							name: responseInvoiceName,
+							doctype: r.message?.doctype,
+							print,
+							waitForPostSubmitPayments: false,
+							waitForInvoiceProcessing: true,
+						});
 					}
 					// Return special status indicating background failure handled
 					return {
@@ -723,8 +756,18 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			}
 
 			// Success
-			if (print && onPrint) {
-				onPrint(doc);
+			if (
+				print &&
+				onPrint &&
+				!waitForInvoiceProcessing &&
+				!hasPostSubmitPaymentWork
+			) {
+				onPrint(doc, {
+					name: responseInvoiceName,
+					doctype: submittedDoctype,
+					waitForPostSubmitPayments: hasPostSubmitPaymentWork,
+					waitForInvoiceProcessing,
+				});
 			}
 
 			// Reset local state vars
@@ -738,15 +781,33 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				stores.uiStore.setLastInvoice(doc.name);
 			}
 
-			stores?.toastStore?.show({
-				title:
+			if (!waitForInvoiceProcessing) {
+				const submittedTitle =
 					type === "Order" && profile?.posa_create_only_sales_order
 						? __("Sales Order {0} is Submitted", [r.message.name])
 						: type === "Quotation"
 							? __("Quotation {0} is Submitted", [r.message.name])
-							: __("Invoice {0} is Submitted", [r.message.name]),
-				color: "success",
-			});
+							: __("Invoice {0} is Submitted", [r.message.name]);
+				stores?.toastStore?.show(
+					hasPostSubmitPaymentWork
+						? {
+								key: `invoice-processing::${responseInvoiceName}`,
+								title: __("Invoice Submitted"),
+								summary: submittedTitle,
+								detail: __("Processing payment entries for Invoice {0}", [
+									responseInvoiceName,
+								]),
+								color: "info",
+								timeout: -1,
+								loading: true,
+						  }
+						: {
+								key: `invoice-processing::${responseInvoiceName}`,
+								title: submittedTitle,
+								color: "success",
+						  },
+				);
+			}
 
 			if (frappe?.utils?.play_sound) {
 				frappe.utils.play_sound("submit");
@@ -777,11 +838,17 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				);
 			}
 
-			if (onScheduleBackgroundCheck) {
-				onScheduleBackgroundCheck(
-					responseInvoiceName,
-					r.message?.doctype,
-				);
+			if (
+				onScheduleBackgroundCheck &&
+				(waitForInvoiceProcessing || hasPostSubmitPaymentWork)
+			) {
+				onScheduleBackgroundCheck({
+					name: responseInvoiceName,
+					doctype: submittedDoctype,
+					print,
+					waitForPostSubmitPayments: hasPostSubmitPaymentWork,
+					waitForInvoiceProcessing,
+				});
 			}
 
 			if (onSuccess) {
@@ -869,7 +936,13 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			if (profile?.posa_allow_submissions_in_background_job) {
 				if (onFinishNavigation) onFinishNavigation(true);
 				if (onScheduleBackgroundCheck) {
-					onScheduleBackgroundCheck(doc?.name, doc?.doctype);
+					onScheduleBackgroundCheck({
+						name: doc?.name,
+						doctype: doc?.doctype,
+						print,
+						waitForPostSubmitPayments: false,
+						waitForInvoiceProcessing: true,
+					});
 				}
 			}
 

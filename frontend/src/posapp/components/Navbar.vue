@@ -18,6 +18,7 @@
 					:server-online="serverOnline"
 					:server-connecting="serverConnecting"
 					:is-ip-host="isIpHost"
+					@retry-status="$emit('retry-status')"
 				/>
 			</template>
 
@@ -105,7 +106,16 @@
 			:location="isRtl ? 'top left' : 'top right'"
 			@update:modelValue="(val) => !val && toastStore.onSnackbarClosed()"
 		>
-			{{ text }}
+			<div class="d-flex align-center ga-3">
+				<v-progress-circular
+					v-if="toastLoading"
+					indeterminate
+					size="18"
+					width="2"
+					color="white"
+				/>
+				<span>{{ text }}</span>
+			</div>
 			<template v-slot:actions>
 				<v-btn class="pos-themed-button" variant="text" @click="visible = false">
 					{{ __("Close") }}
@@ -145,7 +155,7 @@ export default {
 		const toastStore = useToastStore();
 		const uiStore = useUIStore();
 		// Extract reactive refs
-		const { visible, text, color, timeout, history, unreadCount } = storeToRefs(toastStore);
+		const { visible, text, color, timeout, loading: toastLoading, history, unreadCount } = storeToRefs(toastStore);
 		const { isFrozen, freezeTitle, freezeMessage } = storeToRefs(uiStore);
 
 		return {
@@ -158,6 +168,7 @@ export default {
 			text,
 			color,
 			timeout,
+			toastLoading,
 			history,
 			unreadCount,
 			isFrozen,
@@ -608,6 +619,7 @@ export default {
 		"change-page",
 		"close-shift",
 		"sync-invoices",
+		"retry-status",
 		"open-customer-display",
 		"toggle-offline",
 		"toggle-theme",

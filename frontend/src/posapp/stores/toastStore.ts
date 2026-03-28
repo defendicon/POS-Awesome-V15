@@ -13,10 +13,11 @@ export interface NotificationData {
 	text?: string;
 	count?: number;
 	key?: string;
+	loading?: boolean;
 }
 
 export interface Notification extends Required<
-	Pick<NotificationData, "title" | "color" | "timeout" | "count" | "key">
+	Pick<NotificationData, "title" | "color" | "timeout" | "count" | "key" | "loading">
 > {
 	summary: string;
 	latestDetail: string;
@@ -36,6 +37,7 @@ export const useToastStore = defineStore("toast", () => {
 	const text = ref("");
 	const color = ref("success");
 	const timeout = ref(DEFAULT_SNACK_TIMEOUT);
+	const loading = ref(false);
 
 	// Queue State
 	const queue = ref<Notification[]>([]);
@@ -90,6 +92,7 @@ export const useToastStore = defineStore("toast", () => {
 		text.value = formatNotificationMessage(next);
 		color.value = next.color;
 		timeout.value = next.timeout;
+		loading.value = next.loading;
 		visible.value = true;
 	}
 
@@ -137,7 +140,7 @@ export const useToastStore = defineStore("toast", () => {
 				: data.message || "";
 		const color = data.color || "success";
 		const timeout =
-			typeof data.timeout === "number" && data.timeout >= 0
+			typeof data.timeout === "number"
 				? data.timeout
 				: DEFAULT_SNACK_TIMEOUT;
 		const summary =
@@ -150,9 +153,10 @@ export const useToastStore = defineStore("toast", () => {
 			Number.isFinite(data.count) && (data.count ?? 0) > 0
 				? Math.floor(data.count!)
 				: 1;
+		const loading = Boolean(data.loading);
 
 		// Key generation logic
-		const baseKey = `${color}::${summary || title}`;
+		const baseKey = data.key || `${color}::${summary || title}`;
 
 		return {
 			title,
@@ -160,6 +164,7 @@ export const useToastStore = defineStore("toast", () => {
 			timeout,
 			count,
 			key: baseKey,
+			loading,
 			summary,
 			latestDetail: detail,
 		};
@@ -170,8 +175,24 @@ export const useToastStore = defineStore("toast", () => {
 	}
 
 	function mergeNotifications(target: Notification, incoming: Notification) {
-		target.count += incoming.count;
-		target.timeout = Math.max(target.timeout, incoming.timeout);
+		const isStateTransition =
+			target.title !== incoming.title ||
+			target.color !== incoming.color ||
+			target.loading !== incoming.loading ||
+			target.summary !== incoming.summary;
+
+		target.title = incoming.title || target.title;
+		target.color = incoming.color || target.color;
+		target.timeout = incoming.timeout;
+		target.loading = incoming.loading;
+		target.summary = incoming.summary || target.summary;
+
+		if (isStateTransition) {
+			target.count = incoming.count;
+		} else {
+			target.count += incoming.count;
+		}
+
 		if (incoming.latestDetail) {
 			target.latestDetail = incoming.latestDetail;
 		}
@@ -196,7 +217,9 @@ export const useToastStore = defineStore("toast", () => {
 	function updateActiveState() {
 		if (currentNotification.value) {
 			text.value = formatNotificationMessage(currentNotification.value);
+			color.value = currentNotification.value.color;
 			timeout.value = currentNotification.value.timeout;
+			loading.value = currentNotification.value.loading;
 		}
 	}
 
@@ -205,6 +228,7 @@ export const useToastStore = defineStore("toast", () => {
 		text,
 		color,
 		timeout,
+		loading,
 		history,
 		unreadCount,
 		show,

@@ -240,6 +240,7 @@ import { useCustomersStore } from "../../stores/customersStore.js";
 import { useUIStore } from "../../stores/uiStore.js";
 import { useToastStore } from "../../stores/toastStore.js";
 import { useSyncStore } from "../../stores/syncStore.ts";
+import { useSocketStore } from "../../stores/socketStore";
 
 // Composables
 import { usePaymentCalculations } from "../../composables/pos/payments/usePaymentCalculations";
@@ -279,12 +280,14 @@ const props = defineProps({
 const { proxy } = getCurrentInstance();
 const eventBus = proxy.eventBus;
 const __ = window.__;
+const frappe = window.frappe;
 
 const invoiceStore = useInvoiceStore();
 const customersStore = useCustomersStore();
 const uiStore = useUIStore();
 const toastStore = useToastStore();
 const syncStore = useSyncStore();
+const socketStore = useSocketStore();
 
 // Destructure format utilities
 const {
@@ -340,6 +343,21 @@ const invoice_doc = computed({
 
 const displayCurrency = computed(() => (invoice_doc.value ? invoice_doc.value.currency : ""));
 const isPaymentOpen = computed(() => activeView.value === "payment" || paymentDialogOpen.value);
+const netInvoiceSettlementAmount = computed(() => {
+	if (!invoice_doc.value) return 0;
+
+	const invoiceTotal = flt(
+		invoice_doc.value.rounded_total || invoice_doc.value.grand_total,
+		currency_precision.value,
+	);
+	const coveredAmount = flt(
+		(invoice_doc.value?.loyalty_amount || loyalty_amount.value || 0) +
+			(redeemed_customer_credit.value || 0),
+		currency_precision.value,
+	);
+
+	return Math.max(invoiceTotal - coveredAmount, 0);
+});
 
 const validatePayment = computed(() => {
 	const profile = pos_profile.value;
@@ -462,6 +480,7 @@ const {
 	invoiceDoc: computed(() => invoiceStore.invoiceDoc),
 	posProfile: pos_profile,
 	diffPayment: diff_payment,
+	getNetInvoiceAmount: () => netInvoiceSettlementAmount.value,
 	formatFloat: (val) => flt(val, currency_precision.value),
 	stores: {
 		toastStore,
@@ -469,13 +488,23 @@ const {
 	},
 	eventBus: eventBus,
 	onSubmit: (args, submitPrint) => {
-		submitInvoiceWrapper(null, {
-			onPrint: (doc) => {
+		submitInvoiceWrapper(submitPrint, {
+			onPrint: (doc, printOptions = {}) => {
 				if (submitPrint) {
-					if (isOffline()) {
+					if (printOptions.waitForPostSubmitPayments || printOptions.waitForInvoiceProcessing) {
+						void runDeferredPrintWorkflow({
+							name: printOptions.name || doc?.name,
+							doctype: printOptions.doctype,
+							waitForPostSubmitPayments: Boolean(printOptions.waitForPostSubmitPayments),
+							waitForInvoiceProcessing: Boolean(printOptions.waitForInvoiceProcessing),
+						});
+					} else if (isOffline()) {
 						printOfflineInvoice(doc);
 					} else {
-						loadPrintPage();
+						loadPrintPage({
+							doc,
+							doctype: printOptions.doctype,
+						});
 					}
 				}
 			},
@@ -726,7 +755,7 @@ const syncPreferredPaymentToCurrentTotal = (doc = invoice_doc.value) => {
 		return preferredPayment;
 	}
 
-	const total = flt(doc.rounded_total || doc.grand_total, currency_precision.value);
+	const total = netInvoiceSettlementAmount.value;
 	const normalizedTotal = doc.is_return ? -Math.abs(total) : Math.abs(total);
 	const conversionRate = flt(doc.conversion_rate || 1, currency_precision.value);
 
@@ -957,21 +986,112 @@ const clearBackgroundStatusCheck = () => {
 	}
 };
 
-const scheduleBackgroundStatusCheck = (invoiceName, doctype) => {
+const resolveSubmittedDoctype = (doctype) => {
+	if (doctype) return doctype;
+	if (invoice_doc.value?.doctype) return invoice_doc.value.doctype;
+	return pos_profile.value?.create_pos_invoice_instead_of_sales_invoice
+		? "POS Invoice"
+		: "Sales Invoice";
+};
+
+const fetchSubmittedInvoiceDoc = async (invoiceName, doctype) => {
+	const resolvedDoctype = resolveSubmittedDoctype(doctype);
+	return frappe.db.get_doc(resolvedDoctype, invoiceName);
+};
+
+const waitForInvoiceSubmission = async (invoiceName, doctype) => {
+	try {
+		return await socketStore.waitForInvoiceProcessed(invoiceName, 45000);
+	} catch (error) {
+		const result = await frappe.call({
+			method: "frappe.client.get_value",
+			args: {
+				doctype: resolveSubmittedDoctype(doctype),
+				filters: { name: invoiceName },
+				fieldname: ["docstatus"],
+			},
+		});
+		if (result?.message?.docstatus === 1) {
+			return {
+				status: "processed",
+				doctype: resolveSubmittedDoctype(doctype),
+			};
+		}
+		throw error;
+	}
+};
+
+const runDeferredPrintWorkflow = async ({
+	name,
+	doctype,
+	waitForPostSubmitPayments = false,
+	waitForInvoiceProcessing = false,
+}) => {
+	if (!name) return;
+
+	let resolvedDoctype = resolveSubmittedDoctype(doctype);
+
+	try {
+		if (waitForInvoiceProcessing) {
+			const processedState = await waitForInvoiceSubmission(name, resolvedDoctype);
+			resolvedDoctype = processedState?.doctype || resolvedDoctype;
+		}
+
+		if (waitForPostSubmitPayments) {
+			await socketStore.waitForPostSubmitPayments(name, 45000);
+		}
+
+		const freshDoc = await fetchSubmittedInvoiceDoc(name, resolvedDoctype);
+
+		if (isOffline()) {
+			await printOfflineInvoice(freshDoc);
+			return;
+		}
+
+		await loadPrintPage({ doc: freshDoc, doctype: resolvedDoctype });
+	} catch (error) {
+		console.error("Deferred print failed", error);
+		toastStore.show({
+			title: __("Unable to print submitted invoice"),
+			color: "error",
+			detail: error?.message || __("Background processing did not finish in time."),
+		});
+	}
+};
+
+const scheduleBackgroundStatusCheck = ({
+	name,
+	doctype,
+	print = false,
+	waitForPostSubmitPayments = false,
+	waitForInvoiceProcessing = false,
+} = {}) => {
 	clearBackgroundStatusCheck();
-	if (!pos_profile.value?.posa_allow_submissions_in_background_job) {
+
+	if (!name) {
 		return;
 	}
-	if (!invoiceName) {
+
+	if (print && (waitForInvoiceProcessing || waitForPostSubmitPayments)) {
+		void runDeferredPrintWorkflow({
+			name,
+			doctype,
+			waitForPostSubmitPayments,
+			waitForInvoiceProcessing,
+		});
+	}
+
+	if (waitForInvoiceProcessing) {
 		return;
 	}
+
 	backgroundStatusCheck.value = setTimeout(async () => {
 		try {
 			const result = await frappe.call({
 				method: "frappe.client.get_value",
 				args: {
-					doctype: doctype || invoice_doc.value?.doctype || "Sales Invoice",
-					filters: { name: invoiceName },
+					doctype: resolveSubmittedDoctype(doctype),
+					filters: { name },
 					fieldname: ["docstatus"],
 				},
 			});
@@ -982,12 +1102,12 @@ const scheduleBackgroundStatusCheck = (invoiceName, doctype) => {
 			const reason = __("Invoice is still in draft after background submission.");
 			if (eventBus && typeof eventBus.emit === "function") {
 				eventBus.emit("invoice_submission_failed", {
-					invoice: invoiceName,
+					invoice: name,
 					reason,
 				});
 			}
 			toastStore.show({
-				title: __("Error submitting invoice: {0}", [invoiceName]),
+				title: __("Error submitting invoice: {0}", [name]),
 				color: "error",
 				detail: reason,
 			});
@@ -1016,12 +1136,29 @@ const submitInvoiceWrapper = async (print, callbackOverrides = {}, options = {})
 	try {
 		await validateSubmission(options.paymentReceived || false);
 		await submitInvoice(print, {
-			onPrint: (doc) => {
+			onPrint: (doc, printOptions = {}) => {
 				if (print) {
-					if (isOffline()) {
+					if (
+						printOptions.waitForPostSubmitPayments ||
+						printOptions.waitForInvoiceProcessing
+					) {
+						void runDeferredPrintWorkflow({
+							name: printOptions.name || doc?.name,
+							doctype: printOptions.doctype,
+							waitForPostSubmitPayments: Boolean(
+								printOptions.waitForPostSubmitPayments,
+							),
+							waitForInvoiceProcessing: Boolean(
+								printOptions.waitForInvoiceProcessing,
+							),
+						});
+					} else if (isOffline()) {
 						printOfflineInvoice(doc);
 					} else {
-						loadPrintPage();
+						loadPrintPage({
+							doc,
+							doctype: printOptions.doctype,
+						});
 					}
 				}
 			},
@@ -1036,8 +1173,8 @@ const submitInvoiceWrapper = async (print, callbackOverrides = {}, options = {})
 			onFinishNavigation: (clearInvoice) => {
 				finishSubmissionNavigation(clearInvoice);
 			},
-			onScheduleBackgroundCheck: (name, doctype) => {
-				scheduleBackgroundStatusCheck(name, doctype);
+			onScheduleBackgroundCheck: (payload) => {
+				scheduleBackgroundStatusCheck(payload);
 			},
 			...callbackOverrides,
 		});

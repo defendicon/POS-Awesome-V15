@@ -8,6 +8,19 @@ const LOADER_RECOVERY_KEY = "posa_loader_chunk_recovery_once";
 const getBundlePath = (version: string) =>
 	`/assets/posawesome/dist/js/posawesome.js?v=${encodeURIComponent(version)}`;
 
+function recordPendingBundleActivation(version: string) {
+	if (
+		typeof window === "undefined" ||
+		!window.sessionStorage ||
+		!version
+	) {
+		return;
+	}
+	try {
+		window.sessionStorage.setItem("posa_pending_bundle_activation", version);
+	} catch {}
+}
+
 declare global {
 	interface Window {
 		__posawesomeBundlePromise?: Promise<unknown>;
@@ -90,10 +103,12 @@ async function importPosAwesomeBundle() {
 		const latestVersion = await fetchLatestBuildVersion();
 		if (latestVersion && latestVersion !== initialVersion) {
 			try {
-				return await import(
+				const reloadedBundle = await import(
 					/* @vite-ignore */
 					getBundlePath(latestVersion)
 				);
+				recordPendingBundleActivation(latestVersion);
+				return reloadedBundle;
 			} catch (retryError) {
 				if (isDynamicImportFailure(retryError)) {
 					recoverByReloadingPosApp();

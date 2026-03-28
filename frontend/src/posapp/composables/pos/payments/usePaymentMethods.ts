@@ -9,6 +9,7 @@ export interface PaymentMethodsOptions {
 	invoiceDoc: Ref<any>;
 	posProfile: Ref<any>;
 	diffPayment?: ComputedRef<number>;
+	getNetInvoiceAmount?: () => number;
 	formatFloat?: (_val: any) => number;
 	stores: {
 		toastStore: any;
@@ -42,6 +43,17 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 
 	const flt = (v: any) =>
 		formatFloat ? formatFloat(v) : parseFloat(String(v)) || 0;
+
+	const getInvoiceSettlementAmount = () => {
+		const doc = unref(invoiceDoc);
+		if (!doc) return 0;
+
+		if (typeof options.getNetInvoiceAmount === "function") {
+			return flt(options.getNetInvoiceAmount());
+		}
+
+		return flt(doc.rounded_total || doc.grand_total);
+	};
 
 	// Get M-Pesa payment modes from backend
 	const get_mpesa_modes = () => {
@@ -111,7 +123,7 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 		if (!doc) return;
 
 		// Auto-subtract from other payments if we have an excess
-		const invoice_total = doc.rounded_total || doc.grand_total;
+		const invoice_total = getInvoiceSettlementAmount();
 
 		// Calculate current total paid
 		const current_total_paid = doc.payments.reduce(
@@ -171,7 +183,7 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 		const current_payment_amount = flt(payment.amount);
 		const other_payments = current_total_paid - current_payment_amount;
 
-		const invoice_total = flt(doc.rounded_total || doc.grand_total);
+		const invoice_total = flt(getInvoiceSettlementAmount());
 		const amount_to_pay = invoice_total - other_payments;
 
 		if (amount_to_pay <= 0) return [];
@@ -205,7 +217,7 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 			options.setRedeemCustomerCredit(true);
 		}
 
-		const invoiceAmount = doc.rounded_total || doc.grand_total;
+		const invoiceAmount = getInvoiceSettlementAmount();
 		let amount =
 			payment.unallocated_amount > invoiceAmount
 				? invoiceAmount
@@ -228,7 +240,7 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 	// Set full amount for a payment mode
 	const set_full_amount = (payment: any, isReturn = false) => {
 		const doc = unref(invoiceDoc);
-		const invoiceAmount = doc.rounded_total || doc.grand_total;
+		const invoiceAmount = getInvoiceSettlementAmount();
 		// Reset other payments
 		doc.payments.forEach((p: any) => {
 			if (p.mode_of_payment !== payment.mode_of_payment) {
@@ -247,7 +259,7 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 
 	const set_rest_amount = (payment: any, isReturn = false) => {
 		const doc = unref(invoiceDoc);
-		const invoiceAmount = doc.rounded_total || doc.grand_total;
+		const invoiceAmount = getInvoiceSettlementAmount();
 		const currentPaid = doc.payments.reduce(
 			(acc: number, p: any) => acc + flt(p.amount),
 			0,
