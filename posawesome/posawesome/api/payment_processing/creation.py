@@ -13,10 +13,13 @@ from posawesome.posawesome.api.payment_processing.utils import (
 
 def create_payment_entry(
     company,
-    customer,
     amount,
     currency,
     mode_of_payment,
+    customer=None,
+    party=None,
+    party_type="Customer",
+    payment_type="Receive",
     exchange_rate=None,
     reference_date=None,
     reference_no=None,
@@ -25,7 +28,7 @@ def create_payment_entry(
     submit=0,
 ):
     date = nowdate() if not posting_date else posting_date
-    party_type = "Customer"
+    party = party or customer
 
     # Cache commonly used values
     company_doc = frappe.get_cached_doc("Company", company)
@@ -33,7 +36,7 @@ def create_payment_entry(
     letter_head = company_doc.default_letter_head
 
     # Get party account and currency in one call
-    party_account = get_party_account(party_type, customer, company)
+    party_account = get_party_account(party_type, party, company)
     party_account_currency = get_account_currency(party_account)
 
     if party_account_currency != currency:
@@ -42,8 +45,6 @@ def create_payment_entry(
                 "Currency is not correct, party account currency is {party_account_currency} and transaction currency is {currency}"
             ).format(party_account_currency=party_account_currency, currency=currency)
         )
-    payment_type = "Receive"
-
     # Get bank details in one call
     bank = get_bank_cash_account(company, mode_of_payment)
 
@@ -66,7 +67,7 @@ def create_payment_entry(
     pe.posting_date = date
     pe.mode_of_payment = mode_of_payment
     pe.party_type = party_type
-    pe.party = customer
+    pe.party = party
     pe.paid_from = party_account if payment_type == "Receive" else bank.account
     pe.paid_to = party_account if payment_type == "Pay" else bank.account
     pe.paid_from_account_currency = (

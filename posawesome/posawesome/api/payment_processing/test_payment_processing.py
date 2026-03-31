@@ -263,6 +263,63 @@ class TestPosPaymentProcessing(unittest.TestCase):
             "2026-03-29",
         )
 
+    @patch("posawesome.posawesome.api.payment_processing.processor.create_payment_entry")
+    @patch("posawesome.posawesome.api.payment_processing.processor.frappe")
+    def test_process_pos_payment_passes_supplier_pay_context_to_creation(
+        self,
+        mock_frappe,
+        mock_create_payment_entry,
+    ):
+        fake_payment_entry = FakePaymentEntry(paid_amount=250)
+        mock_create_payment_entry.return_value = fake_payment_entry
+        mock_frappe._dict.side_effect = lambda value: AttrDict(value)
+        mock_frappe.log_error = Mock()
+        mock_frappe.msgprint = Mock()
+
+        payload = {
+            "customer": "Supp-001",
+            "party": "Supp-001",
+            "party_type": "Supplier",
+            "payment_type": "Pay",
+            "company": "Test Company",
+            "currency": "USD",
+            "pos_profile_name": "Main POS",
+            "pos_opening_shift_name": "POS-OPEN-0001",
+            "posting_date": "2026-03-30",
+            "selected_invoices": [],
+            "selected_payments": [],
+            "selected_mpesa_payments": [],
+            "payment_methods": [{"mode_of_payment": "Bank", "amount": 250}],
+            "total_selected_invoices": 0,
+            "total_selected_payments": 0,
+            "total_selected_mpesa_payments": 0,
+            "total_payment_methods": 250,
+            "exchange_rate": None,
+            "pos_profile": {
+                "posa_use_pos_awesome_payments": 1,
+                "posa_allow_make_new_payments": 1,
+                "posa_allow_reconcile_payments": 0,
+                "posa_allow_mpesa_reconcile_payments": 0,
+                "cost_center": "Main - TC",
+            },
+        }
+
+        self.processor.process_pos_payment(json.dumps(payload))
+
+        mock_create_payment_entry.assert_called_once()
+        self.assertEqual(
+            mock_create_payment_entry.call_args.kwargs["party_type"],
+            "Supplier",
+        )
+        self.assertEqual(
+            mock_create_payment_entry.call_args.kwargs["payment_type"],
+            "Pay",
+        )
+        self.assertEqual(
+            mock_create_payment_entry.call_args.kwargs["party"],
+            "Supp-001",
+        )
+
     @patch(
         "posawesome.posawesome.api.payment_processing.data.get_advance_payment_entries_for_regional"
     )
@@ -359,6 +416,165 @@ class TestPosPaymentProcessing(unittest.TestCase):
         self.assertEqual(rows[0].get("outstanding_amount"), 125)
         self.assertEqual(rows[0].get("customer_name"), "Customer 727")
         mock_legacy_helper.assert_not_called()
+
+    @patch("posawesome.posawesome.api.payment_processing.data.frappe")
+    def test_get_outstanding_invoices_queries_purchase_invoices_for_supplier_mode(
+        self,
+        mock_frappe,
+    ):
+        mock_frappe._dict.side_effect = lambda value: AttrDict(value)
+        mock_frappe.get_cached_value.return_value = "Supplier ABC"
+
+        def fake_get_list(doctype, filters=None, fields=None, order_by=None, **kwargs):
+            self.assertEqual(doctype, "Purchase Invoice")
+            self.assertEqual(filters["supplier"], "SUPP-0001")
+            self.assertEqual(filters["company"], "Test Company")
+            self.assertEqual(filters["docstatus"], 1)
+            self.assertEqual(filters["outstanding_amount"], (">", 0))
+            self.assertEqual(filters["currency"], "USD")
+            self.assertIn("outstanding_amount", fields)
+            self.assertEqual(order_by, "posting_date desc, name desc")
+            return [
+                AttrDict(
+                    {
+                        "name": "PINV-OPEN-0001",
+                        "posting_date": "2026-03-18",
+                        "due_date": "2026-03-22",
+                        "outstanding_amount": 340,
+                        "rounded_total": 340,
+                        "grand_total": 340,
+                        "currency": "USD",
+                        "supplier_name": "Supplier ABC",
+                    }
+                )
+            ]
+
+        mock_frappe.get_list.side_effect = fake_get_list
+
+        rows = self.data.get_outstanding_invoices(
+            customer="SUPP-0001",
+            company="Test Company",
+            currency="USD",
+            include_all_currencies=False,
+            party_type="Supplier",
+        )
+
+        self.assertEqual(
+            [(row.get("voucher_type"), row.get("voucher_no")) for row in rows],
+            [("Purchase Invoice", "PINV-OPEN-0001")],
+        )
+        self.assertEqual(rows[0].get("customer_name"), "Supplier ABC")
+        self.assertEqual(rows[0].get("party_name"), "Supplier ABC")
+        self.assertEqual(rows[0].get("party_type"), "Supplier")
+
+    @patch("posawesome.posawesome.api.payment_processing.data.get_party_account")
+    @patch("posawesome.posawesome.api.payment_processing.data.frappe")
+    def test_get_unallocated_payments_queries_supplier_payments_in_supplier_mode(
+        self,
+        mock_frappe,
+        mock_get_party_account,
+    ):
+        mock_frappe._dict.side_effect = lambda value: AttrDict(value)
+        mock_frappe.get_cached_value.return_value = "Supplier ABC"
+        mock_get_party_account.return_value = "Creditors - TC"
+
+        def fake_get_list(doctype, filters=None, fields=None, order_by=None, **kwargs):
+            self.assertEqual(doctype, "Payment Entry")
+            self.assertEqual(filters["party"], "SUPP-0001")
+            self.assertEqual(filters["company"], "Test Company")
+            self.assertEqual(filters["party_type"], "Supplier")
+            self.assertEqual(filters["payment_type"], "Pay")
+            self.assertEqual(filters["paid_to_account_currency"], "USD")
+            self.assertEqual(order_by, "posting_date asc")
+            return [
+                AttrDict(
+                    {
+                        "name": "ACC-PAY-0009",
+                        "paid_amount": 150,
+                        "customer_name": "Supplier ABC",
+                        "received_amount": 150,
+                        "posting_date": "2026-03-16",
+                        "unallocated_amount": 150,
+                        "mode_of_payment": "Bank",
+                        "currency": "USD",
+                        "account": "Creditors - TC",
+                    }
+                )
+            ]
+
+        mock_frappe.get_list.side_effect = fake_get_list
+
+        rows = self.data.get_unallocated_payments(
+            customer="SUPP-0001",
+            company="Test Company",
+            currency="USD",
+            include_all_currencies=False,
+            party_type="Supplier",
+        )
+
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0].get("voucher_type"), "Payment Entry")
+        self.assertEqual(rows[0].get("customer_name"), "Supplier ABC")
+        self.assertEqual(rows[0].get("party_name"), "Supplier ABC")
+        self.assertEqual(rows[0].get("party_type"), "Supplier")
+
+    @patch("posawesome.posawesome.api.payment_processing.reconciliation.reconcile_against_document")
+    @patch("posawesome.posawesome.api.payment_processing.reconciliation.frappe")
+    @patch("posawesome.posawesome.api.payment_processing.reconciliation.get_unallocated_payments")
+    @patch("posawesome.posawesome.api.payment_processing.reconciliation.get_outstanding_invoices")
+    def test_auto_reconcile_customer_invoices_uses_supplier_semantics_when_requested(
+        self,
+        mock_get_outstanding_invoices,
+        mock_get_unallocated_payments,
+        mock_frappe,
+        mock_reconcile_against_document,
+    ):
+        mock_frappe._dict.side_effect = lambda value: AttrDict(value)
+        mock_frappe.get_doc.return_value = AttrDict(
+            {
+                "paid_to": "Creditors - TC",
+                "cost_center": "Main - TC",
+                "get": lambda key, default=None: {
+                    "unallocated_amount": 200,
+                }.get(key, default),
+            }
+        )
+
+        mock_get_outstanding_invoices.return_value = [
+            AttrDict(
+                {
+                    "voucher_no": "PINV-0001",
+                    "voucher_type": "Purchase Invoice",
+                    "posting_date": "2026-03-10",
+                    "outstanding_amount": 200,
+                }
+            )
+        ]
+        mock_get_unallocated_payments.return_value = [
+            AttrDict(
+                {
+                    "name": "ACC-PAY-0010",
+                    "voucher_type": "Payment Entry",
+                    "posting_date": "2026-03-11",
+                    "unallocated_amount": 200,
+                    "account": "Creditors - TC",
+                }
+            )
+        ]
+
+        result = self.reconciliation.auto_reconcile_customer_invoices(
+            customer="SUPP-0001",
+            company="Test Company",
+            currency="USD",
+            party_type="Supplier",
+        )
+
+        self.assertEqual(result["total_allocated"], 200)
+        mock_reconcile_against_document.assert_called_once()
+        reconcile_row = mock_reconcile_against_document.call_args.args[0][0]
+        self.assertEqual(reconcile_row["party_type"], "Supplier")
+        self.assertEqual(reconcile_row["dr_or_cr"], "debit_in_account_currency")
+        self.assertEqual(reconcile_row["against_voucher_type"], "Purchase Invoice")
 
 
 if __name__ == "__main__":

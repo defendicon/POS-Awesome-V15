@@ -312,7 +312,7 @@ frappe.pages["posapp"].on_page_unload = function (wrapper) {
 	}
 
 	// Only unmount if this specific page's app instance exists
-	// This prevents interference when navigating within ERPNext outside POS
+	// This prevents interference when navigating outside POS
 	if (wrapper && wrapper.page && wrapper.page.$PosApp && typeof wrapper.page.$PosApp.unmount === "function") {
 		wrapper.page.$PosApp.unmount();
 		wrapper.page.$PosApp = null;

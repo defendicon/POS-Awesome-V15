@@ -21,9 +21,13 @@ def process_pos_payment(payload):
         "POS Payment Debug",
     )
 
+    party = data.get("party") or data.get("customer")
+    party_type = data.get("party_type") or "Customer"
+    payment_type = data.get("payment_type") or "Receive"
+
     # validate data
-    if not data.customer:
-        frappe.throw(_("Customer is required"))
+    if not party:
+        frappe.throw(_("Party is required"))
     if not data.company:
         frappe.throw(_("Company is required"))
     if not data.currency:
@@ -35,7 +39,7 @@ def process_pos_payment(payload):
 
     company = data.company
     currency = data.currency
-    customer = data.customer
+    customer = party
     pos_opening_shift_name = data.pos_opening_shift_name
     allow_make_new_payments = data.pos_profile.get("posa_allow_make_new_payments")
     allow_reconcile_payments = data.pos_profile.get("posa_allow_reconcile_payments")
@@ -293,10 +297,13 @@ def process_pos_payment(payload):
                 mode_of_payment = payment_method.get("mode_of_payment")
                 payment_entry = create_payment_entry(
                     company=company,
-                    customer=customer,
                     currency=currency,
                     amount=amount,
                     mode_of_payment=mode_of_payment,
+                    customer=customer,
+                    party=party,
+                    party_type=party_type,
+                    payment_type=payment_type,
                     exchange_rate=data.get("exchange_rate"),
                     posting_date=posting_date,
                     reference_no=pos_opening_shift_name,

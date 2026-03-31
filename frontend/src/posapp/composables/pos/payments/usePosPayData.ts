@@ -9,6 +9,8 @@ type PosPayDataArgs = {
 	posProfile: Ref<any>;
 	company: Ref<any>;
 	customerName: Ref<string>;
+	partyType?: Ref<string>;
+	paymentType?: Ref<string>;
 	eventBus: { emit: (_event: string, _payload?: unknown) => void };
 	currencySymbol: (_currency: string) => string;
 	formatCurrency: (_value: number) => string;
@@ -22,6 +24,8 @@ export function usePosPayData({
 	posProfile,
 	company,
 	customerName,
+	partyType,
+	paymentType,
 	eventBus,
 	currencySymbol,
 	formatCurrency,
@@ -47,12 +51,17 @@ export function usePosPayData({
 	async function get_outstanding_invoices(
 		posProfileSearch?: string | null,
 	) {
+		const resolvedPartyType = partyType?.value || "Customer";
 		invoices_loading.value = true;
 		const requestToken = ++outstandingReqToken.value;
 		const requestCustomer = customerName.value;
 		const requestCompany = company.value;
 
-		if (!customerName.value || !company.value) {
+		if (
+			!customerName.value ||
+			!company.value ||
+			resolvedPartyType === "Employee"
+		) {
 			outstanding_invoices.value = [];
 			invoices_loading.value = false;
 			return;
@@ -74,6 +83,8 @@ export function usePosPayData({
 				"posawesome.posawesome.api.payment_entry.get_outstanding_invoices",
 				{
 					customer: customerName.value,
+					party: customerName.value,
+					party_type: resolvedPartyType,
 					company: company.value,
 					currency: posProfile.value.currency,
 					pos_profile: resolvedPosProfile,
@@ -106,13 +117,19 @@ export function usePosPayData({
 	}
 
 	async function get_unallocated_payments() {
+		const resolvedPartyType = partyType?.value || "Customer";
 		if (!posProfile.value.posa_allow_reconcile_payments) return;
 		unallocated_payments_loading.value = true;
 		const requestToken = ++unallocatedReqToken.value;
 		const requestCustomer = customerName.value;
 		const requestCompany = company.value;
 
-		if (!customerName.value || !company.value || isOffline()) {
+		if (
+			!customerName.value ||
+			!company.value ||
+			isOffline() ||
+			resolvedPartyType === "Employee"
+		) {
 			unallocated_payments.value = [];
 			unallocated_payments_loading.value = false;
 			return;
@@ -123,6 +140,8 @@ export function usePosPayData({
 				"posawesome.posawesome.api.payment_entry.get_unallocated_payments",
 				{
 					customer: customerName.value,
+					party: customerName.value,
+					party_type: resolvedPartyType,
 					company: company.value,
 					currency: posProfile.value?.currency || null,
 					include_all_currencies: true,
@@ -159,7 +178,15 @@ export function usePosPayData({
 	async function get_draft_mpesa_payments_register(
 		paymentMethodsList: unknown[] = [],
 	) {
+		const resolvedPartyType = partyType?.value || "Customer";
 		if (!posProfile.value.posa_allow_mpesa_reconcile_payments) return;
+		if (
+			resolvedPartyType !== "Customer" ||
+			(paymentType?.value || "Receive") !== "Receive"
+		) {
+			mpesa_payments.value = [];
+			return;
+		}
 		mpesa_payments_loading.value = true;
 		const requestToken = ++mpesaReqToken.value;
 		const requestCompany = company.value;
@@ -209,9 +236,10 @@ export function usePosPayData({
 		posProfileSearch: string | null = null,
 		options: AutoReconcileOptions = {},
 	) {
+		const resolvedPartyType = partyType?.value || "Customer";
 		if (!posProfile.value.posa_allow_reconcile_payments) return;
 		if (!customerName.value) {
-			frappe.msgprint(__("Please select a customer before reconciling."));
+			frappe.msgprint(__("Please select a party before reconciling."));
 			return;
 		}
 		if (!company.value) {
@@ -228,6 +256,7 @@ export function usePosPayData({
 				method: "posawesome.posawesome.api.payment_entry.auto_reconcile_customer_invoices",
 				args: {
 					customer: customerName.value,
+					party_type: resolvedPartyType,
 					company: company.value,
 					currency: posProfile.value.currency,
 					pos_profile: posProfileSearch || null,
@@ -292,6 +321,12 @@ export function usePosPayData({
 	}
 
 	async function fetch_customer_details() {
+		if ((partyType?.value || "Customer") !== "Customer") {
+			customer_info.value = "";
+			mpesa_search_name.value = "";
+			mpesa_search_mobile.value = "";
+			return;
+		}
 		const customer =
 			typeof customerName.value === "string"
 				? customerName.value.trim()

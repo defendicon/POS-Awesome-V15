@@ -273,4 +273,52 @@ describe("usePosPaySubmission", () => {
 		const callConfig = (globalThis as any).frappe.call.mock.calls[0][0];
 		expect(callConfig.args.payload.posting_date).toBe("2026-03-29");
 	});
+
+	it("includes generic payment and party fields for supplier pay mode", async () => {
+		(globalThis as any).frappe.call.mockImplementation(({ callback }: any) => {
+			callback({
+				message: {
+					new_payments_entry: [{ name: "ACC-PAY-0006" }],
+				},
+			});
+		});
+
+		const { processPayment } = usePosPaySubmission({
+			customerName: ref("Supp-001"),
+			partyName: ref("Supp-001"),
+			partyType: ref("Supplier"),
+			paymentType: ref("Pay"),
+			company: ref("Test Company"),
+			posProfile: ref({ name: "Main POS" }),
+			posOpeningShift: ref({ name: "POS-OPEN-0001" }),
+			postingDate: ref("2026-03-30"),
+			exchangeRate: ref(1),
+			invoiceTotalCurrency: ref("USD"),
+			autoAllocatePaymentAmount: ref(false),
+			payment_methods: ref([{ mode_of_payment: "Bank", amount: 250 }]),
+			selected_invoices: ref([]),
+			selected_payments: ref([]),
+			selected_mpesa_payments: ref([]),
+			total_selected_invoices: ref(0),
+			total_selected_payments: ref(0),
+			total_selected_mpesa_payments: ref(0),
+			total_payment_methods: ref(250),
+			clearSelections: vi.fn(),
+			resetPaymentMethodAmounts: vi.fn(),
+			load_print_page: vi.fn(),
+			eventBus: { emit: vi.fn() },
+			get_outstanding_invoices: vi.fn(),
+			get_unallocated_payments: vi.fn(),
+			get_draft_mpesa_payments_register: vi.fn(),
+			set_mpesa_search_params: vi.fn(),
+			autoReconcile: vi.fn(),
+		} as any);
+
+		await processPayment();
+
+		const callConfig = (globalThis as any).frappe.call.mock.calls[0][0];
+		expect(callConfig.args.payload.payment_type).toBe("Pay");
+		expect(callConfig.args.payload.party_type).toBe("Supplier");
+		expect(callConfig.args.payload.party).toBe("Supp-001");
+	});
 });

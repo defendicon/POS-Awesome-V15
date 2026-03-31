@@ -4,7 +4,7 @@
 		<v-row>
 			<v-col md="7" cols="12">
 				<p>
-					<strong>{{ __("Invoices") }}</strong>
+					<strong>{{ resolvedSectionTitle }}</strong>
 					<span v-if="totalOutstanding" class="text-primary"
 						>{{ __("- Total Outstanding") }} :
 						{{ currencySymbol(posProfile.currency) }}
@@ -88,10 +88,7 @@
 			</v-col>
 		</v-row>
 
-		<v-row
-			v-if="posProfile.posa_allow_reconcile_payments && invoices.length && customerName"
-			class="mb-2"
-		>
+		<v-row v-if="posProfile.posa_allow_reconcile_payments && invoices.length && partyName" class="mb-2">
 			<v-col md="4" cols="12" class="pb-1">
 				<v-btn
 					block
@@ -148,6 +145,8 @@
 <script setup>
 import { computed } from "vue";
 
+const __ = (text) => (window.__ ? window.__(text) : text);
+
 const props = defineProps({
 	invoices: Array,
 	filteredInvoices: Array,
@@ -163,7 +162,8 @@ const props = defineProps({
 	loading: Boolean,
 	autoReconcileLoading: Boolean,
 	autoReconcileSummary: String,
-	customerName: String,
+	partyName: String,
+	sectionTitle: String,
 	isInvoiceSelected: Function,
 	itemClass: Function,
 	currencySymbol: Function,
@@ -206,6 +206,8 @@ const normalizedPosProfiles = computed(() =>
 		})
 		.filter(Boolean),
 );
+
+const resolvedSectionTitle = computed(() => props.sectionTitle || __("Invoices"));
 
 const invoiceRowProps = ({ item }) => {
 	if (!props.itemClass) {

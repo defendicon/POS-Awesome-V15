@@ -4,7 +4,7 @@
 		<v-row>
 			<v-col md="7" cols="12">
 				<p>
-					<strong>{{ __("Payments") }}</strong>
+					<strong>{{ resolvedSectionTitle }}</strong>
 					<span v-if="totalUnallocated" class="text-primary">
 						{{ __("- Total Unallocated") }} :
 						{{ currencySymbol(posProfile.currency) }}
@@ -66,6 +66,8 @@
 <script setup>
 import { computed } from "vue";
 
+const __ = (text) => (window.__ ? window.__(text) : text);
+
 const props = defineProps({
 	payments: Array,
 	selectedPayments: Array,
@@ -74,6 +76,7 @@ const props = defineProps({
 	totalSelected: Number,
 	loading: Boolean,
 	headers: Array,
+	sectionTitle: String,
 	currencySymbol: Function,
 	formatCurrency: Function,
 	paymentRowClass: Function,
@@ -85,6 +88,8 @@ const internalSelectedPayments = computed({
 	get: () => props.selectedPayments,
 	set: (val) => emit("update:selectedPayments", val),
 });
+
+const resolvedSectionTitle = computed(() => props.sectionTitle || __("Payments"));
 
 const paymentRowProps = ({ item }) => {
 	if (!props.paymentRowClass) {
