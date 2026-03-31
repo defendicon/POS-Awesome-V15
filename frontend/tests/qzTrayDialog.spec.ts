@@ -8,11 +8,26 @@ import QzTrayDialog from "../src/posapp/components/navbar/QzTrayDialog.vue";
 import * as qzTrayService from "../src/posapp/services/qzTray";
 
 const toastShow = vi.hoisted(() => vi.fn());
+const uiStoreState = vi.hoisted(() => ({
+	posProfile: {
+		value: {
+			name: "Main POS",
+			posa_qz_printer_name: "",
+		},
+	},
+	setPosProfile: vi.fn((profile: Record<string, any>) => {
+		uiStoreState.posProfile.value = profile;
+	}),
+}));
 
 vi.mock("../src/posapp/stores/toastStore", () => ({
 	useToastStore: () => ({
 		show: toastShow,
 	}),
+}));
+
+vi.mock("../src/posapp/stores/uiStore", () => ({
+	useUIStore: () => uiStoreState,
 }));
 
 vi.mock("../src/posapp/services/qzTray", async () => {
@@ -130,12 +145,25 @@ describe("QzTrayDialog", () => {
 	beforeEach(() => {
 		(globalThis as any).__ = (value: string) => value;
 		toastShow.mockReset();
+		uiStoreState.posProfile.value = {
+			name: "Main POS",
+			posa_qz_printer_name: "",
+		};
+		uiStoreState.setPosProfile.mockClear();
 		qzTrayService.qzConnected.value = true;
 		qzTrayService.qzConnecting.value = false;
 		qzTrayService.qzReconnectPaused.value = false;
 		qzTrayService.qzPrinters.value = ["Counter Printer"];
 		qzTrayService.selectedQzPrinter.value = "Counter Printer";
 		vi.mocked(qzTrayService.setSelectedQzPrinter).mockClear();
+		(globalThis as any).frappe = {
+			call: vi.fn(async () => ({
+				message: {
+					name: "Main POS",
+					posa_qz_printer_name: "Counter Printer",
+				},
+			})),
+		};
 		Object.assign(globalThis.navigator, {
 			clipboard: {
 				writeText: vi.fn(async () => undefined),
@@ -143,13 +171,22 @@ describe("QzTrayDialog", () => {
 		});
 	});
 
-	it("copies the selected printer name so it can be pasted into the POS Profile default field", async () => {
+	it("saves the selected printer as the POS Profile default", async () => {
 		const wrapper = mountDialog();
 		await flushPromises();
 
-		await wrapper.get('[data-test="qz-copy-printer-name"]').trigger("click");
+		await wrapper.get('[data-test="qz-save-profile-printer"]').trigger("click");
 
-		expect(globalThis.navigator.clipboard.writeText).toHaveBeenCalledWith("Counter Printer");
+		expect((globalThis as any).frappe.call).toHaveBeenCalledWith({
+			method: "frappe.client.set_value",
+			args: {
+				doctype: "POS Profile",
+				name: "Main POS",
+				fieldname: "posa_qz_printer_name",
+				value: "Counter Printer",
+			},
+		});
+		expect(uiStoreState.posProfile.value.posa_qz_printer_name).toBe("Counter Printer");
 		expect(toastShow).toHaveBeenCalledWith(
 			expect.objectContaining({
 				color: "success",

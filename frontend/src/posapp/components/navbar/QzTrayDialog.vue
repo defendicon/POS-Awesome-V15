@@ -51,16 +51,21 @@
 				/>
 				<div class="d-flex flex-wrap align-center justify-space-between ga-2 mt-3">
 					<div class="text-caption text-medium-emphasis">
-						{{ __("Copy the selected printer name to save it in POS Profile > QZ Tray Printer Name.") }}
+						{{
+							__(
+								"Save the selected printer as the POS Profile default so it shows automatically on this setup.",
+							)
+						}}
 					</div>
 					<v-btn
-						data-test="qz-copy-printer-name"
+						data-test="qz-save-profile-printer"
 						color="primary"
 						variant="tonal"
-						:disabled="!selectedPrinter"
-						@click="handleCopyPrinterName"
+						:loading="savingProfilePrinter"
+						:disabled="!selectedPrinter || !profileName"
+						@click="handleSaveProfilePrinter"
 					>
-						{{ __("Copy Printer Name") }}
+						{{ __("Save as POS Profile Default") }}
 					</v-btn>
 				</div>
 
@@ -105,6 +110,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useToastStore } from "../../stores/toastStore";
+import { useUIStore } from "../../stores/uiStore";
 import {
 	checkQzCertificateOnce,
 	connectQzTray,
@@ -133,8 +139,10 @@ const emit = defineEmits<{
 }>();
 
 const toastStore = useToastStore();
+const uiStore = useUIStore();
 const loadingPrinters = ref(false);
 const certificateLoading = ref(false);
+const savingProfilePrinter = ref(false);
 
 const dialogModel = computed({
 	get: () => props.modelValue,
@@ -152,6 +160,20 @@ const printerOptions = computed(() =>
 		value: printer,
 	})),
 );
+
+const currentProfile = computed(() => {
+	const profile =
+		uiStore?.posProfile && typeof uiStore.posProfile === "object" && "value" in uiStore.posProfile
+			? uiStore.posProfile.value
+			: uiStore?.posProfile;
+
+	return profile && typeof profile === "object" ? profile : null;
+});
+
+const profileName = computed(() => {
+	const name = currentProfile.value?.name;
+	return typeof name === "string" ? name.trim() : "";
+});
 
 const certAlertType = computed(() => {
 	if (qzCertStatus.value === "trusted") return "success";
@@ -259,24 +281,41 @@ async function refreshPrinters(showNotification = true) {
 	}
 }
 
-async function handleCopyPrinterName() {
+async function handleSaveProfilePrinter() {
 	if (!selectedPrinter.value) {
-		notify("Select a printer before copying its name.", "warning");
+		notify("Select a printer before saving it to the POS Profile.", "warning");
 		return;
 	}
-
-	const clipboard = typeof navigator !== "undefined" ? navigator.clipboard : null;
-	if (!clipboard?.writeText) {
-		notify("Clipboard access is not available in this browser.", "warning");
+	if (!profileName.value) {
+		notify("POS Profile is not loaded yet. Try again in a moment.", "warning");
 		return;
 	}
 
 	try {
-		await clipboard.writeText(selectedPrinter.value);
-		notify("Printer name copied. Paste it into POS Profile > QZ Tray Printer Name.", "success");
+		savingProfilePrinter.value = true;
+		const response = await frappe.call({
+			method: "frappe.client.set_value",
+			args: {
+				doctype: "POS Profile",
+				name: profileName.value,
+				fieldname: "posa_qz_printer_name",
+				value: selectedPrinter.value,
+			},
+		});
+		const updatedProfile = {
+			...(currentProfile.value || {}),
+			...(response?.message && typeof response.message === "object" ? response.message : {}),
+			posa_qz_printer_name: selectedPrinter.value,
+		};
+		if (typeof uiStore?.setPosProfile === "function") {
+			uiStore.setPosProfile(updatedProfile as any);
+		}
+		notify("Selected printer saved as the POS Profile default.", "success");
 	} catch (error: any) {
-		console.error("Failed to copy QZ printer name", error);
-		notify(error?.message || "Failed to copy printer name.", "error");
+		console.error("Failed to save QZ profile printer", error);
+		notify(error?.message || "Failed to save POS Profile printer.", "error");
+	} finally {
+		savingProfilePrinter.value = false;
 	}
 }
 
