@@ -17,10 +17,20 @@
 								v-model="paymentEntryType"
 								mandatory
 								density="comfortable"
-								class="pay-mode-toggle"
+								class="pay-mode-toggle pay-mode-toggle--entry"
 							>
-								<v-btn value="Receive">{{ __("Receive") }}</v-btn>
-								<v-btn value="Pay">{{ __("Pay") }}</v-btn>
+								<v-btn
+									value="Receive"
+									class="pay-mode-btn pay-mode-btn--receive"
+								>
+									{{ __("Receive") }}
+								</v-btn>
+								<v-btn
+									value="Pay"
+									class="pay-mode-btn pay-mode-btn--pay"
+								>
+									{{ __("Pay") }}
+								</v-btn>
 							</v-btn-toggle>
 						</div>
 
@@ -30,12 +40,20 @@
 								v-model="partyType"
 								mandatory
 								density="comfortable"
-								class="pay-mode-toggle"
+								class="pay-mode-toggle pay-mode-toggle--party"
 							>
 								<v-btn
 									v-for="option in allowedPartyTypes"
 									:key="option"
 									:value="option"
+									:class="[
+										'pay-mode-btn',
+										option === 'Customer'
+											? 'pay-mode-btn--customer'
+											: option === 'Supplier'
+												? 'pay-mode-btn--supplier'
+												: 'pay-mode-btn--employee',
+									]"
 								>
 									{{ __(option) }}
 								</v-btn>
@@ -1180,6 +1198,101 @@ export default {
 .pay-mode-toggle {
 	width: fit-content;
 	max-width: 100%;
+	gap: 8px;
+	flex-wrap: wrap;
+	background: transparent !important;
+}
+
+.pay-mode-btn {
+	--v-theme-overlay-multiplier: 0 !important;
+	min-height: 44px;
+	border-radius: 999px !important;
+	padding-inline: 18px !important;
+	font-weight: 700;
+	letter-spacing: 0.01em;
+	text-transform: none;
+	border: 1px solid transparent !important;
+	transition:
+		background-color 0.18s ease,
+		color 0.18s ease,
+		box-shadow 0.18s ease,
+		transform 0.18s ease !important;
+}
+
+.pay-mode-btn:hover,
+.pay-mode-btn:focus,
+.pay-mode-btn:focus-visible {
+	transform: translateY(-1px);
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12) !important;
+}
+
+.pay-mode-btn:active {
+	transform: translateY(0);
+}
+
+.pay-mode-btn .v-btn__overlay,
+.pay-mode-btn .v-btn__underlay {
+	opacity: 0 !important;
+	background: transparent !important;
+}
+
+.pay-mode-btn--receive {
+	background: rgba(var(--v-theme-success), 0.14) !important;
+	color: rgb(var(--v-theme-success)) !important;
+	border-color: rgba(var(--v-theme-success), 0.24) !important;
+}
+
+.pay-mode-btn--receive.v-btn--selected {
+	background: rgb(var(--v-theme-success)) !important;
+	color: #ffffff !important;
+}
+
+.pay-mode-btn--pay {
+	background: rgba(var(--v-theme-warning), 0.16) !important;
+	color: rgb(var(--v-theme-warning)) !important;
+	border-color: rgba(var(--v-theme-warning), 0.28) !important;
+}
+
+.pay-mode-btn--pay.v-btn--selected {
+	background: rgb(var(--v-theme-warning)) !important;
+	color: #1f1300 !important;
+}
+
+.pay-mode-btn--customer {
+	background: rgba(var(--v-theme-primary), 0.14) !important;
+	color: rgb(var(--v-theme-primary)) !important;
+	border-color: rgba(var(--v-theme-primary), 0.24) !important;
+}
+
+.pay-mode-btn--customer.v-btn--selected {
+	background: rgb(var(--v-theme-primary)) !important;
+	color: #ffffff !important;
+}
+
+.pay-mode-btn--supplier {
+	background: rgba(var(--v-theme-secondary), 0.14) !important;
+	color: rgb(var(--v-theme-secondary)) !important;
+	border-color: rgba(var(--v-theme-secondary), 0.24) !important;
+}
+
+.pay-mode-btn--supplier.v-btn--selected {
+	background: rgb(var(--v-theme-secondary)) !important;
+	color: #ffffff !important;
+}
+
+.pay-mode-btn--employee {
+	background: rgba(var(--v-theme-info), 0.14) !important;
+	color: rgb(var(--v-theme-info)) !important;
+	border-color: rgba(var(--v-theme-info), 0.24) !important;
+}
+
+.pay-mode-btn--employee.v-btn--selected {
+	background: rgb(var(--v-theme-info)) !important;
+	color: #ffffff !important;
+}
+
+[data-theme="dark"] .pay-mode-btn--pay.v-btn--selected {
+	color: #ffffff !important;
 }
 
 .pay-customer-row {
