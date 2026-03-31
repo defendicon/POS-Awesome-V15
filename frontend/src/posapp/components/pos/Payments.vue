@@ -256,6 +256,7 @@ import {
 	rebalancePreferredPaymentLine,
 	resolvePreferredPaymentLine,
 } from "../../utils/paymentInitialization";
+import { resolvePaymentPrintFormatDoctypes } from "../../utils/paymentPrintDoctype";
 import { resolvePaymentPrintFormat } from "../../utils/paymentPrintFormat";
 
 // Components
@@ -589,16 +590,34 @@ const { ensureReturnPaymentsAreNegative, restoreReturnPayments, validateSubmissi
 
 // Methods
 
-const get_print_formats = () => {
-	frappe.call({
-		method: "posawesome.posawesome.api.print_formats.get_print_formats",
-		args: { doctype: "Sales Invoice" },
-		callback: (r) => {
-			const formats = r.message || [];
-			print_formats.value = formats.map((pf) => (typeof pf === "object" && pf.name ? pf.name : pf));
-			set_print_format();
-		},
+const get_print_formats = async () => {
+	const doctypes = resolvePaymentPrintFormatDoctypes({
+		profile: pos_profile.value,
+		invoiceType: invoiceType.value,
 	});
+
+	try {
+		const responses = await Promise.all(
+			doctypes.map((doctype) =>
+				frappe.call({
+					method: "posawesome.posawesome.api.print_formats.get_print_formats",
+					args: { doctype },
+				}),
+			),
+		);
+
+		const mergedFormats = responses
+			.flatMap((response) => response?.message || [])
+			.map((pf) => (typeof pf === "object" && pf.name ? pf.name : pf))
+			.filter(Boolean);
+
+		print_formats.value = Array.from(new Set(mergedFormats));
+		set_print_format();
+	} catch (error) {
+		console.error("Failed to fetch payment print formats", error);
+		print_formats.value = [];
+		set_print_format();
+	}
 };
 
 const set_print_format = () => {
@@ -1256,6 +1275,7 @@ watch(
 watch(
 	invoiceType,
 	(data) => {
+		get_print_formats();
 		if (invoice_doc.value && data !== "Order") {
 			invoice_doc.value.posa_delivery_date = null;
 			invoice_doc.value.posa_notes = null;

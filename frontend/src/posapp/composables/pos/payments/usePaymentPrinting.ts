@@ -8,6 +8,7 @@ import {
 } from "../../../plugins/print";
 import { printDocumentViaQz } from "../../../services/qzTray";
 import { isOffline } from "../../../../offline/index";
+import { resolvePaymentPrintDoctype } from "../../../utils/paymentPrintDoctype";
 
 declare const frappe: any;
 
@@ -31,21 +32,11 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 			profile.print_format_for_online ||
 			profile.print_format;
 		const letter_head = profile.letter_head || 0;
-		let doctype: string;
-
-		if (input.doctype) {
-			doctype = input.doctype;
-		} else if (input.doc?.doctype) {
-			doctype = input.doc.doctype;
-		} else if (type === "Quotation") {
-			doctype = "Quotation";
-		} else if (type === "Order" && profile.posa_create_only_sales_order) {
-			doctype = "Sales Order";
-		} else if (profile.create_pos_invoice_instead_of_sales_invoice) {
-			doctype = "POS Invoice";
-		} else {
-			doctype = "Sales Invoice";
-		}
+		const doctype = resolvePaymentPrintDoctype({
+			profile,
+			invoiceType: type,
+			explicitDoctype: input.doctype || input.doc?.doctype,
+		});
 
 		return {
 			doc,
