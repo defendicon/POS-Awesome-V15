@@ -306,7 +306,7 @@ export default {
 		const toastStore = useToastStore();
 		const { isOnline } = useOnlineStatus();
 
-		const { activeView } = storeToRefs(uiStore);
+		const { activeView, posProfile: livePosProfile } = storeToRefs(uiStore);
 		const { selectedCustomer, refreshToken: customerRefreshToken } = storeToRefs(customersStore);
 		const {
 			items,
@@ -322,7 +322,7 @@ export default {
 		// New composables
 		const uiLogic = useInvoiceUI();
 		const printingLogic = useInvoicePrinting(
-			ref(uiStore.posProfile),
+			livePosProfile,
 			(name) => uiStore.loadPrintPage(name), // Assuming this exists or passed via mixin/store
 			itemActions.save_and_clear_invoice, // Need to verify if this is available
 			invoice_doc,

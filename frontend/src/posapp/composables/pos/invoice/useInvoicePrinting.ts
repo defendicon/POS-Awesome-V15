@@ -1,4 +1,6 @@
+import { unref } from "vue";
 import { useToastStore } from "../../../stores/toastStore";
+import { parseBooleanSetting } from "../../../utils/stock";
 
 declare const __: (_text: string, _args?: any[]) => string;
 
@@ -11,7 +13,8 @@ export function useInvoicePrinting(
 	const toastStore = useToastStore();
 
 	const print_draft_invoice = async () => {
-		if (!pos_profile.value.posa_allow_print_draft_invoices) {
+		const profile = unref(pos_profile);
+		if (!parseBooleanSetting(profile?.posa_allow_print_draft_invoices)) {
 			toastStore.show({
 				title: __("You are not allowed to print draft invoices"),
 				color: "error",
