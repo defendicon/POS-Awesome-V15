@@ -49,6 +49,20 @@
 					clearable
 					:disabled="loadingPrinters"
 				/>
+				<div class="d-flex flex-wrap align-center justify-space-between ga-2 mt-3">
+					<div class="text-caption text-medium-emphasis">
+						{{ __("Copy the selected printer name to save it in POS Profile > QZ Tray Printer Name.") }}
+					</div>
+					<v-btn
+						data-test="qz-copy-printer-name"
+						color="primary"
+						variant="tonal"
+						:disabled="!selectedPrinter"
+						@click="handleCopyPrinterName"
+					>
+						{{ __("Copy Printer Name") }}
+					</v-btn>
+				</div>
 
 				<v-alert v-if="!selectedPrinter" type="warning" variant="tonal" density="compact" class="mt-3">
 					{{ __("Select a printer to use QZ silent printing.") }}
@@ -242,6 +256,27 @@ async function refreshPrinters(showNotification = true) {
 		);
 	} finally {
 		loadingPrinters.value = false;
+	}
+}
+
+async function handleCopyPrinterName() {
+	if (!selectedPrinter.value) {
+		notify("Select a printer before copying its name.", "warning");
+		return;
+	}
+
+	const clipboard = typeof navigator !== "undefined" ? navigator.clipboard : null;
+	if (!clipboard?.writeText) {
+		notify("Clipboard access is not available in this browser.", "warning");
+		return;
+	}
+
+	try {
+		await clipboard.writeText(selectedPrinter.value);
+		notify("Printer name copied. Paste it into POS Profile > QZ Tray Printer Name.", "success");
+	} catch (error: any) {
+		console.error("Failed to copy QZ printer name", error);
+		notify(error?.message || "Failed to copy printer name.", "error");
 	}
 }
 
