@@ -372,11 +372,11 @@ export default {
 					const info = await fetchSupplierInfo(val);
 					if (info?.buying_price_list) {
 						await itemsStore.updatePriceList(info.buying_price_list);
-						eventBus?.emit?.("update_buying_price_list", {
-							price_list: info.buying_price_list,
-							supplier: val,
-						});
 					}
+					eventBus?.emit?.("update_buying_price_list", {
+						price_list: info?.buying_price_list || null,
+						supplier: val,
+					});
 				} else {
 					supplierCurrency.value = pos_profile.value.currency;
 					eventBus?.emit?.("update_buying_price_list", null);
