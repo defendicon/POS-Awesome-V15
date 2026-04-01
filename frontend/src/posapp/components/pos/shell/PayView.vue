@@ -642,6 +642,8 @@ export default {
 		async function syncCustomerPaymentContext(normalized, { forceReload = false } = {}) {
 			if (!normalized) {
 				customer_name.value = "";
+				referenceNo.value = "";
+				referenceDate.value = "";
 				clearSelections();
 				outstanding_invoices.value = [];
 				unallocated_payments.value = [];
