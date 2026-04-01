@@ -911,12 +911,13 @@ onMounted(async () => {
 			syncSelectorPriceList(priceList);
 		});
 		eventBus.on("update_buying_price_list", (data) => {
-			if (data && typeof data === "object" && data.price_list) {
-				syncSelectorPriceList(data.price_list);
+			if (data && typeof data === "object") {
+				if (data.price_list) syncSelectorPriceList(data.price_list);
 				selectedSupplier.value = data.supplier || null;
 				scheduleLastBuyingRateRefresh();
-			} else if (data && typeof data === "string") {
+			} else if (typeof data === "string") {
 				syncSelectorPriceList(data);
+				selectedSupplier.value = null;
 				scheduleLastBuyingRateRefresh();
 			} else {
 				selectedSupplier.value = null;
