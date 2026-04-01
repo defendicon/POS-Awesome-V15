@@ -38,7 +38,9 @@ export function useLastBuyingRate(context: UseLastBuyingRateContext = {}) {
 	const lastBuyingRateCache = new Map<string, LastBuyingRatesMap>();
 	const lastBuyingRateLoading = ref(false);
 
-	let scheduler: ReturnType<typeof debounce> | null = null;
+	const scheduler = debounce(() => {
+		fetchLastBuyingRates();
+	}, 500);
 
 	const getLastBuyingRate = (item: any): LastBuyingRate | null => {
 		if (!item?.item_code) return null;
@@ -77,11 +79,13 @@ export function useLastBuyingRate(context: UseLastBuyingRateContext = {}) {
 
 		lastBuyingRateLoading.value = true;
 		try {
+			const profile = unwrapValue(pos_profile);
 			const { message } = await frappe.call({
 				method: "posawesome.posawesome.api.purchase_orders.get_last_buying_rate",
 				args: {
 					supplier: supplierVal,
 					item_codes: JSON.stringify(itemCodes),
+					company: profile?.company || null,
 				},
 			});
 
@@ -96,12 +100,6 @@ export function useLastBuyingRate(context: UseLastBuyingRateContext = {}) {
 	};
 
 	const scheduleLastBuyingRateRefresh = () => {
-		if (scheduler) scheduler();
-		if (!scheduler) {
-			scheduler = debounce(() => {
-				fetchLastBuyingRates();
-			}, 500);
-		}
 		scheduler();
 	};
 
