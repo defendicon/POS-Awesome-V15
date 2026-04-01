@@ -1,9 +1,6 @@
 <template>
 	<div fluid :class="rtlClasses">
-		<AppLoadingOverlay
-			:visible="isPaymentRouteLocked"
-			:message="paymentsLoadingMessage"
-		/>
+		<AppLoadingOverlay :visible="isPaymentRouteLocked" :message="paymentsLoadingMessage" />
 		<v-row v-show="!dialog">
 			<v-col md="8" cols="12" class="pb-2 pr-0">
 				<v-card
@@ -81,6 +78,8 @@
 					<PayTotalsSidebar
 						v-model:exchange-rate="exchangeRate"
 						v-model:auto-allocate-payment-amount="autoAllocatePaymentAmount"
+						v-model:reference-no="referenceNo"
+						v-model:reference-date="referenceDate"
 						:pos-profile="pos_profile"
 						:total-selected-invoices="total_selected_invoices"
 						:selected-invoices-count="selected_invoices.length"
@@ -199,6 +198,8 @@ export default {
 		const autoAllocatePaymentAmount = ref(true);
 		const exchangeRate = ref(null);
 		const companyCurrency = ref(null);
+		const referenceNo = ref("");
+		const referenceDate = ref("");
 		const exchangeRateLoading = ref(false);
 		const exchangeRateError = ref(null);
 		const payment_method_currencies = ref({});
@@ -450,9 +451,7 @@ export default {
 				isCustomerBackgroundLoading: !!isCustomerBackgroundLoading.value,
 			}),
 		);
-		const paymentsLoadingMessage = computed(() =>
-			buildPaymentRouteLoadingMessage(loadProgress.value),
-		);
+		const paymentsLoadingMessage = computed(() => buildPaymentRouteLoadingMessage(loadProgress.value));
 
 		const { isSubmitting, processPayment } = usePosPaySubmission({
 			customerName: customer_name,
@@ -461,6 +460,8 @@ export default {
 			posOpeningShift: pos_opening_shift,
 			exchangeRate,
 			invoiceTotalCurrency,
+			referenceNo,
+			referenceDate,
 			payment_methods,
 			selected_invoices,
 			selected_payments,
@@ -563,8 +564,7 @@ export default {
 			pos_profile.value = data.pos_profile;
 			pos_opening_shift.value = data.pos_opening_shift;
 			company.value = data.company?.name || data.pos_profile?.company || "";
-			companyCurrency.value =
-				data.company?.default_currency || data.pos_profile?.currency || null;
+			companyCurrency.value = data.company?.default_currency || data.pos_profile?.currency || null;
 			uiStore.setRegisterData(data);
 			proxy?.eventBus?.emit("payments_register_pos_profile", data);
 			set_payment_methods();
@@ -604,10 +604,7 @@ export default {
 				console.error("Error checking opening entry", e);
 				const cached =
 					cachedOpening ||
-					getValidCachedOpeningForCurrentUser(
-						getOpeningStorage(),
-						frappe?.session?.user,
-					);
+					getValidCachedOpeningForCurrentUser(getOpeningStorage(), frappe?.session?.user);
 				if (cached) {
 					await applyOpeningData(cached);
 					return;
@@ -739,10 +736,9 @@ export default {
 			isPaymentRouteLocked,
 			(locked) => {
 				if (locked) return;
-				void syncCustomerPaymentContext(
-					selectedCustomer.value || customer_name.value || "",
-					{ forceReload: true },
-				);
+				void syncCustomerPaymentContext(selectedCustomer.value || customer_name.value || "", {
+					forceReload: true,
+				});
 			},
 			{ immediate: true },
 		);
@@ -784,6 +780,8 @@ export default {
 			autoAllocatePaymentAmount,
 			exchangeRate,
 			companyCurrency,
+			referenceNo,
+			referenceDate,
 			exchangeRateLoading,
 			exchangeRateError,
 			payment_method_currencies,

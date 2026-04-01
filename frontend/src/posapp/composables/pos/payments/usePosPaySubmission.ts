@@ -12,6 +12,8 @@ type PosPaySubmissionArgs = {
 	posOpeningShift: Ref<any>;
 	exchangeRate: Ref<number>;
 	invoiceTotalCurrency: Ref<string>;
+	referenceNo: Ref<string>;
+	referenceDate: Ref<string>;
 	autoAllocatePaymentAmount: Ref<boolean>;
 	payment_methods: Ref<any[]>;
 	selected_invoices: Ref<any[]>;
@@ -41,6 +43,8 @@ export function usePosPaySubmission({
 	posOpeningShift,
 	exchangeRate,
 	invoiceTotalCurrency,
+	referenceNo,
+	referenceDate,
 	autoAllocatePaymentAmount,
 	payment_methods,
 	selected_invoices,
@@ -125,6 +129,8 @@ export function usePosPaySubmission({
 				pos_opening_shift_name: posOpeningShift.value.name,
 				pos_profile_name: posProfile.value.name,
 				pos_profile: posProfile.value,
+				reference_no: referenceNo?.value || null,
+				reference_date: referenceDate?.value || null,
 				payment_methods: payment_methods.value.filter(
 					(m: any) => flt(m.amount) > 0,
 				),
@@ -183,7 +189,9 @@ export function usePosPaySubmission({
 					__("Auto reconciliation completed after payment submit.");
 				eventBus.emit("show_message", {
 					title: `${__("Payment submitted.")} ${autoReconcileSummary}`,
-					color: autoReconcileResult?.total_allocated ? "success" : "info",
+					color: autoReconcileResult?.total_allocated
+						? "success"
+						: "info",
 				});
 			}
 
