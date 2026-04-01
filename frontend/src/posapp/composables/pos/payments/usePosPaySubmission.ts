@@ -76,6 +76,8 @@ export function usePosPaySubmission({
 		const finalizeSubmission = () => {
 			clearSelections();
 			resetPaymentMethodAmounts();
+			referenceNo.value = "";
+			referenceDate.value = "";
 			customerName.value = customer;
 			get_outstanding_invoices();
 			get_unallocated_payments();
@@ -129,8 +131,8 @@ export function usePosPaySubmission({
 				pos_opening_shift_name: posOpeningShift.value.name,
 				pos_profile_name: posProfile.value.name,
 				pos_profile: posProfile.value,
-				reference_no: referenceNo?.value || null,
-				reference_date: referenceDate?.value || null,
+				reference_no: referenceNo?.value?.trim() || null,
+				reference_date: referenceDate?.value?.trim() || null,
 				payment_methods: payment_methods.value.filter(
 					(m: any) => flt(m.amount) > 0,
 				),
