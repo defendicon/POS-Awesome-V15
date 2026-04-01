@@ -82,25 +82,25 @@
 								:item-group="item_group"
 								:is-overflowing="isOverflowing"
 								:card-slot-height="cardSlotHeight"
-								:card-columns="cardColumns"
-								:card-slot-width="cardSlotWidth"
-								:card-column-width="cardColumnWidth"
-								:card-row-height="cardRowHeight"
-								:virtual-scroll-buffer="virtualScrollBuffer"
-								:pos-profile="pos_profile"
-								:context="context"
-								:selected-currency="selected_currency"
-								:hide-qty-decimals="hide_qty_decimals"
-								:get-last-invoice-rate="getLastInvoiceRate"
-								:is-item-highlighted="isItemHighlighted"
-								:currency-symbol="currencySymbol"
-								:format-currency="memoizedFormatCurrency"
-								:format-number="memoizedFormatNumber"
-								:rate-precision="ratePrecision"
-								:is-negative="isNegative"
-								:no-items-title="__('No items found')"
-								:no-items-subtitle="__('Try adjusting your search or filters')"
-								:clear-search-label="__('Clear Search')"
+							:card-columns="cardColumns"
+							:card-slot-width="cardSlotWidth"
+							:card-column-width="cardColumnWidth"
+							:card-row-height="cardRowHeight"
+							:virtual-scroll-buffer="virtualScrollBuffer"
+							:pos-profile="pos_profile"
+							:context="context"
+							:selected-currency="selected_currency"
+							:hide-qty-decimals="hide_qty_decimals"
+							:get-last-invoice-rate="getLastRateForContext"
+							:is-item-highlighted="isItemHighlighted"
+							:currency-symbol="currencySymbol"
+							:format-currency="memoizedFormatCurrency"
+							:format-number="memoizedFormatNumber"
+							:rate-precision="ratePrecision"
+							:is-negative="isNegative"
+							:no-items-title="__('No items found')"
+							:no-items-subtitle="__('Try adjusting your search or filters')"
+							:clear-search-label="__('Clear Search')"
 								@select-item="select_item"
 								@dragstart="onDragStart"
 								@dragend="onDragEnd"
@@ -117,15 +117,15 @@
 								:pos-profile="pos_profile"
 								:selected-currency="selected_currency"
 								:hide-qty-decimals="hide_qty_decimals"
-								:currency-symbol="currencySymbol"
-								:format-currency="memoizedFormatCurrency"
-								:format-number="memoizedFormatNumber"
-								:rate-precision="ratePrecision"
-								:get-last-invoice-rate="getLastInvoiceRate"
-								:is-negative="isNegative"
-								:item-class="getItemRowClass"
-								:row-props="getItemRowProps"
-								:no-data-text="__('No items found')"
+							:currency-symbol="currencySymbol"
+							:format-currency="memoizedFormatCurrency"
+							:format-number="memoizedFormatNumber"
+							:rate-precision="ratePrecision"
+							:get-last-invoice-rate="getLastRateForContext"
+							:is-negative="isNegative"
+							:item-class="getItemRowClass"
+							:row-props="getItemRowProps"
+							:no-data-text="__('No items found')"
 								@row-click="click_item_row"
 								@list-scroll="onListScroll"
 							/>
@@ -210,6 +210,7 @@ import { useItemAddition } from "../../../composables/pos/items/useItemAddition"
 import { useItemSelection } from "../../../composables/pos/items/useItemSelection";
 import { useItemSelectorLayout } from "../../../composables/pos/items/useItemSelectorLayout";
 import { useLastInvoiceRate } from "../../../composables/pos/items/useLastInvoiceRate";
+import { useLastBuyingRate } from "../../../composables/pos/items/useLastBuyingRate";
 import { useItemSync } from "../../../composables/pos/items/useItemSync";
 import { useItemStorageSafety } from "../../../composables/pos/items/useItemStorageSafety";
 import { useItemsSelectorSearch } from "../../../composables/pos/items/useItemsSelectorSearch";
@@ -521,6 +522,21 @@ const { getLastInvoiceRate, scheduleLastInvoiceRateRefresh, clearLastInvoiceRate
 	show_last_invoice_rate: () => show_last_invoice_rate.value,
 	autoRefresh: true,
 });
+
+const selectedSupplier = ref<string | null>(null);
+const { getLastBuyingRate, scheduleLastBuyingRateRefresh, clearLastBuyingRateCache } = useLastBuyingRate({
+	pos_profile: () => pos_profile.value,
+	supplier: () => selectedSupplier.value,
+	displayedItems: () => displayedItems.value,
+	show_last_buying_rate: () => true,
+});
+
+const getLastRateForContext = (item: any) => {
+	if (props.context === "purchase") {
+		return getLastBuyingRate(item);
+	}
+	return getLastInvoiceRate(item);
+};
 
 const {
 	isOverflowing,
@@ -894,6 +910,18 @@ onMounted(async () => {
 		eventBus.on("update_customer_price_list", (priceList) => {
 			syncSelectorPriceList(priceList);
 		});
+		eventBus.on("update_buying_price_list", (data) => {
+			if (data && typeof data === "object" && data.price_list) {
+				syncSelectorPriceList(data.price_list);
+				selectedSupplier.value = data.supplier || null;
+				scheduleLastBuyingRateRefresh();
+			} else if (data && typeof data === "string") {
+				syncSelectorPriceList(data);
+				scheduleLastBuyingRateRefresh();
+			} else {
+				selectedSupplier.value = null;
+			}
+		});
 		eventBus.on("focus_item_search", requestItemSearchFocus);
 		eventBus.on("remote_stock_adjustment", handleRemoteStockAdjustment);
 	}
@@ -968,6 +996,7 @@ onBeforeUnmount(() => {
 	if (eventBus) {
 		eventBus.off("update_currency");
 		eventBus.off("update_customer_price_list");
+		eventBus.off("update_buying_price_list");
 		eventBus.off("focus_item_search", requestItemSearchFocus);
 		eventBus.off("remote_stock_adjustment", handleRemoteStockAdjustment);
 	}
@@ -1297,6 +1326,7 @@ defineExpose({
 	virtualScrollBuffer,
 	selected_currency,
 	getLastInvoiceRate,
+	getLastRateForContext,
 	isItemHighlighted,
 	isNegative,
 	headerProps,

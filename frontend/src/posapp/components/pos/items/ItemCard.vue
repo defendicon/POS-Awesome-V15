@@ -100,7 +100,14 @@ const props = defineProps({
 const emit = defineEmits(["click", "dragstart", "dragend"]);
 
 const primaryCurrency = computed(() => {
-	if (props.context === "purchase") return props.posProfile.currency;
+	if (props.context === "purchase") {
+		return (
+			props.item.original_currency ||
+			props.item.currency ||
+			props.item.price_list_currency ||
+			props.posProfile.currency
+		);
+	}
 	return (
 		props.item.original_currency ||
 		props.item.currency ||
@@ -111,7 +118,7 @@ const primaryCurrency = computed(() => {
 
 const primaryRate = computed(() => {
 	if (props.context === "purchase") {
-		return props.item.rate || props.item.standard_rate || 0;
+		return props.item.original_rate ?? props.item.rate ?? props.item.standard_rate ?? 0;
 	}
 	return props.item.original_rate ?? props.item.rate ?? 0;
 });

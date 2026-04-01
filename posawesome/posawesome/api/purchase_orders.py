@@ -83,13 +83,123 @@ def _resolve_buying_price_list():
     buying_price_list = frappe.db.get_single_value("Buying Settings", "buying_price_list")
     if not buying_price_list:
         buying_price_list = frappe.db.get_value("Price List", {"buying": 1}, "name")
-    
+
     if not buying_price_list:
         # Fallback to standard default if exists
         if frappe.db.exists("Price List", "Standard Buying"):
             buying_price_list = "Standard Buying"
-            
+
     return buying_price_list
+
+
+def _resolve_supplier_buying_price_list(supplier):
+    """Resolve buying price list for a specific supplier.
+
+    Checks Supplier-level default_price_list first, then falls back
+    to the generic buying price list from Buying Settings.
+    """
+    if not supplier:
+        return _resolve_buying_price_list()
+
+    supplier_price_list = frappe.db.get_value("Supplier", supplier, "default_price_list")
+    if supplier_price_list:
+        is_buying = frappe.db.get_value("Price List", supplier_price_list, "buying")
+        if is_buying:
+            return supplier_price_list
+
+    return _resolve_buying_price_list()
+
+
+@frappe.whitelist()
+def get_supplier_info(supplier):
+    """Get supplier details including the effective buying price list."""
+    supplier = _resolve_supplier(supplier)
+    if not supplier:
+        frappe.throw(_("Supplier not found."))
+
+    supplier_doc = frappe.get_doc("Supplier", supplier)
+    buying_price_list = _resolve_supplier_buying_price_list(supplier)
+    price_list_currency = None
+    if buying_price_list:
+        price_list_currency = frappe.db.get_value("Price List", buying_price_list, "currency")
+
+    return {
+        "supplier": supplier,
+        "supplier_name": supplier_doc.supplier_name,
+        "supplier_group": supplier_doc.supplier_group,
+        "default_currency": supplier_doc.default_currency,
+        "buying_price_list": buying_price_list,
+        "price_list_currency": price_list_currency,
+    }
+
+
+@frappe.whitelist()
+def get_last_buying_rate(supplier, item_codes):
+    """Get the last buying rate for items from the price list and recent Purchase Invoices."""
+    if isinstance(item_codes, str):
+        try:
+            item_codes = json.loads(item_codes)
+        except Exception:
+            item_codes = [item_codes]
+
+    if not item_codes or not supplier:
+        return {}
+
+    result = {}
+    buying_price_list = _resolve_supplier_buying_price_list(supplier)
+
+    # Get rates from the buying price list
+    price_list_rates = frappe.get_all(
+        "Item Price",
+        filters={
+            "price_list": buying_price_list,
+            "item_code": ["in", item_codes],
+            "buying": 1,
+        },
+        fields=["item_code", "price_list_rate", "uom", "currency"],
+    )
+    for row in price_list_rates:
+        code = row.get("item_code")
+        if code and code not in result:
+            price_list_currency = row.get("currency")
+            if not price_list_currency and buying_price_list:
+                price_list_currency = frappe.db.get_value(
+                    "Price List", buying_price_list, "currency"
+                )
+            result[code] = {
+                "rate": row.get("price_list_rate", 0),
+                "currency": price_list_currency,
+                "uom": row.get("uom"),
+                "source": "price_list",
+            }
+
+    # Get last buying rate from recent Purchase Invoices for this supplier
+    if supplier:
+        last_pi_items = frappe.db.sql(
+            """
+            SELECT pii.item_code, pii.rate, pii.uom, pi.currency
+            FROM `tabPurchase Invoice Item` pii
+            JOIN `tabPurchase Invoice` pi ON pi.name = pii.parent
+            WHERE pi.supplier = %s
+              AND pi.docstatus = 1
+              AND pii.item_code IN %s
+            ORDER BY pi.posting_date DESC, pi.creation DESC
+            LIMIT 50
+            """,
+            (supplier, tuple(item_codes)),
+            as_dict=True,
+        )
+        for row in last_pi_items:
+            code = row.get("item_code")
+            if code and code not in result:
+                result[code] = {
+                    "rate": row.get("rate", 0),
+                    "currency": row.get("currency"),
+                    "uom": row.get("uom"),
+                    "source": "last_invoice",
+                }
+
+    return result
 
 
 def _upsert_item_price(item_code, price_list, rate, uom=None, buying=False, selling=False):
@@ -249,7 +359,7 @@ def search_suppliers(search_text=None, limit=20):
         "Supplier",
         filters=filters,
         or_filters=or_filters,
-        fields=["name", "supplier_name", "supplier_group", "supplier_type", "default_currency"],
+        fields=["name", "supplier_name", "supplier_group", "supplier_type", "default_currency", "default_price_list"],
         order_by="supplier_name asc",
         limit_page_length=limit,
     )
@@ -462,8 +572,8 @@ def create_purchase_order(data):
         # Fallback to company currency if supplier has no default
         supplier_currency = frappe.get_value("Company", company, "default_currency")
 
-    # Validate price list currency matches (RECOMMENDED)
-    buying_price_list = _resolve_buying_price_list()
+    # Resolve buying price list: prefer supplier-specific, then payload override, then default
+    buying_price_list = payload.get("buying_price_list") or _resolve_supplier_buying_price_list(supplier)
     price_list_currency = frappe.get_value("Price List", buying_price_list, "currency")
 
     # If currencies don't match, try to find a matching one
