@@ -45,6 +45,8 @@ def process_pos_payment(payload):
     allow_reconcile_payments = data.pos_profile.get("posa_allow_reconcile_payments")
     allow_mpesa_reconcile_payments = data.pos_profile.get("posa_allow_mpesa_reconcile_payments")
     posting_date = data.get("posting_date") or nowdate()
+    reference_no = data.get("reference_no") or pos_opening_shift_name
+    reference_date = data.get("reference_date") or posting_date
 
     # prepare invoice list once so allocations can update remaining amounts
     remaining_invoices = []
@@ -306,8 +308,8 @@ def process_pos_payment(payload):
                     payment_type=payment_type,
                     exchange_rate=data.get("exchange_rate"),
                     posting_date=posting_date,
-                    reference_no=pos_opening_shift_name,
-                    reference_date=posting_date,
+                    reference_no=reference_no,
+                    reference_date=reference_date,
                     cost_center=data.pos_profile.get("cost_center"),
                     submit=0,
                 )

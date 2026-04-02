@@ -14,6 +14,8 @@ type PosPaySubmissionArgs = {
 	posProfile: Ref<any>;
 	posOpeningShift: Ref<any>;
 	postingDate?: Ref<string | null>;
+	referenceNo?: Ref<string>;
+	referenceDate?: Ref<string>;
 	exchangeRate: Ref<number>;
 	invoiceTotalCurrency: Ref<string>;
 	autoAllocatePaymentAmount: Ref<boolean>;
@@ -47,6 +49,8 @@ export function usePosPaySubmission({
 	posProfile,
 	posOpeningShift,
 	postingDate,
+	referenceNo,
+	referenceDate,
 	exchangeRate,
 	invoiceTotalCurrency,
 	autoAllocatePaymentAmount,
@@ -126,6 +130,10 @@ export function usePosPaySubmission({
 						acc + flt(invoice?.outstanding_amount || 0),
 					0,
 				);
+			const resolvedReferenceNo =
+				String(referenceNo?.value ?? "").trim() || posOpeningShift.value.name;
+			const resolvedReferenceDate =
+				referenceDate?.value || postingDate?.value || null;
 
 			const payload = {
 				customer: party,
@@ -135,6 +143,8 @@ export function usePosPaySubmission({
 				company: company.value,
 				currency: invoiceTotalCurrency.value,
 				posting_date: postingDate?.value || null,
+				reference_no: resolvedReferenceNo,
+				reference_date: resolvedReferenceDate,
 				exchange_rate: exchangeRate.value || null,
 				pos_opening_shift_name: posOpeningShift.value.name,
 				pos_profile_name: posProfile.value.name,

@@ -48,14 +48,32 @@ const VTextFieldStub = defineComponent({
 			type: [String, Number],
 			default: "",
 		},
+		label: {
+			type: String,
+			default: "",
+		},
+		type: {
+			type: String,
+			default: "text",
+		},
 	},
-	setup(props, { attrs }) {
+	emits: ["update:modelValue", "update:model-value"],
+	setup(props, { attrs, emit }) {
 		return () =>
-			h("input", {
-				value: props.modelValue,
-				"data-test": attrs["data-test"],
-				readonly: true,
-			});
+			h("label", {}, [
+				h("input", {
+					value: props.modelValue,
+					type: props.type,
+					"data-test": attrs["data-test"],
+					readonly: attrs.readonly === "" || attrs.readonly === true,
+					onInput: (event: Event) => {
+						const value = (event.target as HTMLInputElement).value;
+						emit("update:modelValue", value);
+						emit("update:model-value", value);
+					},
+				}),
+				props.label,
+			]);
 	},
 });
 
@@ -113,5 +131,23 @@ describe("PayTotalsSidebar", () => {
 		expect(wrapper.text()).toContain(
 			"Unselected payments stay unallocated first, then auto reconcile after submit.",
 		);
+	});
+
+	it("renders reference fields under the auto allocate toggle and emits edits", async () => {
+		const wrapper = mountSidebar({
+			referenceNo: "",
+			referenceDate: "",
+		});
+
+		const referenceNoInput = wrapper.get('input[data-test="reference-no-input"]');
+		const referenceDateInput = wrapper.get('input[data-test="reference-date-input"]');
+
+		await referenceNoInput.setValue("MANUAL-REF-009");
+		await referenceDateInput.setValue("2026-04-02");
+
+		expect(wrapper.text()).toContain("Reference Number");
+		expect(wrapper.text()).toContain("Reference Date");
+		expect((referenceNoInput.element as HTMLInputElement).value).toBe("MANUAL-REF-009");
+		expect((referenceDateInput.element as HTMLInputElement).value).toBe("2026-04-02");
 	});
 });

@@ -175,6 +175,34 @@
                 </small>
             </v-col>
         </v-row>
+
+        <v-row class="mt-2">
+            <v-col cols="12">
+                <v-text-field
+                    :model-value="referenceNo"
+                    class="p-0 m-0 pos-themed-input"
+                    density="compact"
+                    color="primary"
+                    :label="__('Reference Number')"
+                    data-test="reference-no-input"
+                    flat
+                    @update:model-value="emit('update:referenceNo', $event ?? '')"
+                ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+                <v-text-field
+                    :model-value="referenceDate"
+                    class="p-0 m-0 pos-themed-input"
+                    density="compact"
+                    color="primary"
+                    :label="__('Reference Date')"
+                    data-test="reference-date-input"
+                    type="date"
+                    flat
+                    @update:model-value="emit('update:referenceDate', $event ?? '')"
+                ></v-text-field>
+            </v-col>
+        </v-row>
     </div>
 </template>
 
@@ -202,6 +230,14 @@ const props = defineProps({
         type: Boolean,
         default: true,
     },
+    referenceNo: {
+        type: String,
+        default: "",
+    },
+    referenceDate: {
+        type: String,
+        default: "",
+    },
     currencySymbol: Function,
     formatCurrency: Function,
     getPaymentMethodCurrency: Function
@@ -210,6 +246,8 @@ const props = defineProps({
 const emit = defineEmits([
     'update:exchangeRate',
     'update:autoAllocatePaymentAmount',
+    'update:referenceNo',
+    'update:referenceDate',
     'validate-exchange-rate',
     'fetch-exchange-rate'
 ]);

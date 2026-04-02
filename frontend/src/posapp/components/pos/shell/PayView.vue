@@ -165,6 +165,8 @@
 					<PayTotalsSidebar
 						v-model:exchange-rate="exchangeRate"
 						v-model:auto-allocate-payment-amount="autoAllocatePaymentAmount"
+						v-model:reference-no="referenceNo"
+						v-model:reference-date="referenceDate"
 						:pos-profile="pos_profile"
 						:total-selected-invoices="total_selected_invoices"
 						:selected-invoices-count="selected_invoices.length"
@@ -307,6 +309,8 @@ export default {
 		const pos_profile_search = ref("");
 		const currency_filter = ref("ALL");
 		const autoAllocatePaymentAmount = ref(true);
+		const referenceNo = ref("");
+		const referenceDate = ref("");
 		const exchangeRate = ref(null);
 		const companyCurrency = ref(null);
 		const exchangeRateLoading = ref(false);
@@ -611,6 +615,8 @@ export default {
 			posProfile: pos_profile,
 			posOpeningShift: pos_opening_shift,
 			postingDate,
+			referenceNo,
+			referenceDate,
 			exchangeRate,
 			invoiceTotalCurrency,
 			payment_methods,
@@ -1084,6 +1090,8 @@ export default {
 			pos_profile_search,
 			currency_filter,
 			autoAllocatePaymentAmount,
+			referenceNo,
+			referenceDate,
 			exchangeRate,
 			companyCurrency,
 			exchangeRateLoading,

@@ -27,3 +27,4 @@ frontend/.env
 frontend/.env.local
 frontend/.env.*.local
 frontend/playwright/.auth/
+__tmp_erpnext_v15/
