@@ -269,7 +269,7 @@ export function useBatchSerial() {
 				const baseCurrency =
 					context.price_list_currency || context.pos_profile.currency;
 				if (context.selected_currency !== baseCurrency) {
-					item.batch_price = context.flt(
+					item.batch_price = window.flt(
 						batch_to_use.batch_price / context.exchange_rate,
 						context.currency_precision,
 					);
@@ -295,11 +295,11 @@ export function useBatchSerial() {
 				item.base_discount_amount = 0;
 
 				// Calculate final amounts
-				item.amount = context.flt(
+				item.amount = window.flt(
 					item.qty * item.rate,
 					context.currency_precision,
 				);
-				item.base_amount = context.flt(
+				item.base_amount = window.flt(
 					item.qty * item.base_rate,
 					context.currency_precision,
 				);
