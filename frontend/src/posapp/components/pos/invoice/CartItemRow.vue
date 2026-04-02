@@ -1,5 +1,10 @@
 <template>
 	<tr class="posa-cart-item-row" v-memo="memoDeps">
+		<!-- SL Column -->
+		<td class="text-center" :data-column-key="'sl'">
+			<div>{{ index + 1 }}</div>
+		</td>
+
 		<!-- Item Name Column -->
 		<td class="text-start" :data-column-key="'item_name'">
 			<div class="d-flex align-center">
@@ -358,6 +363,10 @@ const props = defineProps({
 		type: Object,
 		required: true,
 	},
+	index: {
+        type: Number,
+        required: true
+    },
 	posProfile: {
 		type: Object,
 		required: true,

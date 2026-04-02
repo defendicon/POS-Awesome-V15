@@ -40,9 +40,10 @@
 				</div>
 			</template>
 
-			<template v-slot:item="{ item, toggleExpand, internalItem }">
+			<template v-slot:item="{ item, index, toggleExpand, internalItem }">
 				<CartItemRow
 					:item="item"
+					:index="index"
 					:posProfile="pos_profile"
 					:isReturnInvoice="isReturnInvoice"
 					:invoiceType="invoiceType"
