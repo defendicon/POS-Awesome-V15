@@ -136,17 +136,12 @@ export function useBatchSerial() {
         existing_items.forEach((element) => {
             if (!element.batch_no || !element.qty) return;
             let qtyToAllocate = Number(element.qty) || 0;
-            if (element.qty < 0) return; // Don't subtract returns from availability? Or should we add them?
-            // Usually returns add back to stock. But simple logic: if qty > 0, it consumes stock.
-            // Returns (negative qty) technically free up stock, but for auto-selection we care about "taking" stock.
+            if (element.qty < 0) return;
 
             normalized_batch_data.forEach((batch) => {
                 if (qtyToAllocate <= 0) return;
                 if (batch.batch_no !== element.batch_no) return;
                 const available = Math.max(batch.remaining_qty, 0);
-                // If available <= 0, we can still "use" it to show negative/overused?
-                // But here we want to calculate what's LEFT.
-                // If allocation exceeds available, it just eats it all.
                 const deduction = Math.min(available, qtyToAllocate);
                 batch.used_qty += deduction;
                 batch.remaining_qty -= deduction;
@@ -217,6 +212,10 @@ export function useBatchSerial() {
         update = true,
         context: any,
     ) => {
+        // Local helper to handle fallback cleanly and improve testability
+        const flt = (val: number, precision: number) =>
+            (context.flt || window.flt)(val, precision);
+
         const normalized_batch_data: any[] = getBatchAvailability(
             item,
             context,
@@ -267,11 +266,16 @@ export function useBatchSerial() {
 
                 // Convert batch price to selected currency if needed
                 const baseCurrency =
-                    context.price_list_currency || context.pos_profile.currency;
-                if (context.selected_currency !== baseCurrency) {
-                    item.batch_price = (context.flt || window.flt)(
-                        batch_to_use.batch_price / context.exchange_rate,
-                        context.currency_precision,
+                    context.price_list_currency || context.pos_profile?.currency;
+                
+                // Safety guard to prevent NaN or Infinity
+                const exchangeRate = Number(context.exchange_rate) || 1;
+                const precision = context.currency_precision || 2;
+
+                if (context.selected_currency !== baseCurrency && exchangeRate !== 1) {
+                    item.batch_price = flt(
+                        batch_to_use.batch_price / exchangeRate,
+                        precision,
                     );
                 } else {
                     item.batch_price = batch_to_use.batch_price;
@@ -281,7 +285,7 @@ export function useBatchSerial() {
                 item.base_price_list_rate = item.base_batch_price;
                 item.base_rate = item.base_batch_price;
 
-                if (context.selected_currency !== baseCurrency) {
+                if (context.selected_currency !== baseCurrency && exchangeRate !== 1) {
                     item.price_list_rate = item.batch_price;
                     item.rate = item.batch_price;
                 } else {
@@ -295,14 +299,8 @@ export function useBatchSerial() {
                 item.base_discount_amount = 0;
 
                 // Calculate final amounts
-                item.amount = (context.flt || window.flt)(
-                    item.qty * item.rate,
-                    context.currency_precision,
-                );
-                item.base_amount = (context.flt || window.flt)(
-                    item.qty * item.base_rate,
-                    context.currency_precision,
-                );
+                item.amount = flt(item.qty * item.rate, precision);
+                item.base_amount = flt(item.qty * item.base_rate, precision);
             } else if (update && context.update_item_detail) {
                 item.batch_price = null;
                 item.base_batch_price = null;
