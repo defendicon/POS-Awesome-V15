@@ -74,16 +74,48 @@
 						{{ formatCurrency(item.rate, selectedCurrency, ratePrecision(item.rate)) }}
 					</div>
 				</div>
-				<div v-else class="text-primary">
-					{{ currencySymbol(posProfile.currency) }}
+			<div v-else>
+				<div class="text-primary">
+					{{
+						currencySymbol(
+							item.original_currency ||
+								item.currency ||
+								item.price_list_currency ||
+								posProfile.currency,
+						)
+					}}
 					{{
 						formatCurrency(
-							item.rate || item.standard_rate || 0,
-							posProfile.currency,
-							ratePrecision(item.rate || item.standard_rate || 0),
+							item.original_rate ?? item.rate ?? item.standard_rate ?? 0,
+							item.original_currency ||
+								item.currency ||
+								item.price_list_currency ||
+								posProfile.currency,
+							ratePrecision(item.original_rate ?? item.rate ?? item.standard_rate ?? 0),
 						)
 					}}
 				</div>
+				<div
+					v-if="getLastInvoiceRate(item)"
+					class="text-caption d-flex align-center last-rate-inline"
+				>
+					<v-icon size="14" class="mr-1" color="secondary">mdi-history</v-icon>
+					<span class="mr-1">{{ __("Last") }}:</span>
+					<span class="font-weight-medium">
+						{{ currencySymbol(getLastInvoiceRate(item).currency || posProfile.currency) }}
+						{{
+							formatCurrency(
+								getLastInvoiceRate(item).rate,
+								getLastInvoiceRate(item).currency || posProfile.currency,
+								ratePrecision(getLastInvoiceRate(item).rate || 0),
+							)
+						}}
+						<span v-if="getLastInvoiceRate(item).uom" class="last-rate-uom">
+							/{{ getLastInvoiceRate(item).uom }}
+						</span>
+					</span>
+				</div>
+			</div>
 			</template>
 			<template v-slot:item.actual_qty="{ item }">
 				<span class="golden--text" :class="{ 'negative-number': isNegative(item.actual_qty) }">

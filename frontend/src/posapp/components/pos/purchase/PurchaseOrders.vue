@@ -47,7 +47,7 @@
 						<PurchaseItemsTable
 							:headers="itemHeaders"
 							:items="purchaseItems"
-							:currencySymbol="currencySymbol(supplierCurrency)"
+							:currencySymbol="currencySymbol(priceListCurrency || supplierCurrency)"
 							:totalAmount="totalAmount"
 							:receiveNow="receiveNow"
 							:formatCurrency="formatCurrency"
@@ -112,7 +112,7 @@ import PurchasePaymentDialog from "./PurchasePaymentDialog.vue";
 import SupplierDialog from "../dialogs/purchase/SupplierDialog.vue";
 import PurchaseHeader from "./PurchaseHeader.vue";
 import PurchaseItemsTable from "./PurchaseItemsTable.vue";
-import { ref, watch, onMounted, onBeforeUnmount } from "vue";
+import { ref, watch, onMounted, onBeforeUnmount, inject } from "vue";
 
 export default {
 	mixins: [format],
@@ -127,6 +127,7 @@ export default {
 		const uiStore = useUIStore();
 		const toastStore = useToastStore();
 		const itemsStore = useItemsStore();
+		const eventBus = inject("eventBus");
 
 		const pos_profile = ref({});
 		const receiveNow = ref(false);
@@ -139,10 +140,13 @@ export default {
 			scheduleDate,
 			createInvoice,
 			supplierCurrency,
+			supplierPriceList,
+			priceListCurrency,
 			totalAmount,
 			submitLoading,
 			errorMessage,
 			onAddItem,
+			fetchSupplierInfo,
 			updateItemUom,
 			updateItemQty,
 			updateItemRate,
@@ -362,12 +366,19 @@ export default {
 				},
 				{ immediate: true },
 			);
-			watch(supplier, (val) => {
+			watch(supplier, async (val) => {
 				if (val) {
-					const s = supplierOptions.value.find((o) => o.name === val);
-					supplierCurrency.value = s?.default_currency || pos_profile.value.currency;
+					const info = await fetchSupplierInfo(val);
+					if (info?.buying_price_list) {
+						await itemsStore.updatePriceList(info.buying_price_list);
+					}
+					eventBus?.emit?.("update_buying_price_list", {
+						price_list: info?.buying_price_list || null,
+						supplier: val,
+					});
 				} else {
 					supplierCurrency.value = pos_profile.value.currency;
+					eventBus?.emit?.("update_buying_price_list", null);
 				}
 			});
 
@@ -385,6 +396,7 @@ export default {
 		});
 
 		onBeforeUnmount(() => {
+			eventBus?.emit?.("update_buying_price_list", null);
 			if (pos_profile.value?.selling_price_list)
 				itemsStore.updatePriceList(pos_profile.value.selling_price_list);
 		});
@@ -399,10 +411,13 @@ export default {
 			scheduleDate,
 			createInvoice,
 			supplierCurrency,
+			supplierPriceList,
+			priceListCurrency,
 			totalAmount,
 			submitLoading,
 			errorMessage,
 			onAddItem,
+			fetchSupplierInfo,
 			updateItemUom,
 			updateItemQty,
 			updateItemRate,

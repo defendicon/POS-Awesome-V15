@@ -42,6 +42,8 @@ export function usePurchaseOrder(options: {
 	const scheduleDate = ref<string | null>(null);
 	const createInvoice = ref(false);
 	const supplierCurrency = ref<string | null>(null);
+	const supplierPriceList = ref<string | null>(null);
+	const priceListCurrency = ref<string | null>(null);
 	const submitLoading = ref(false);
 	const errorMessage = ref("");
 
@@ -54,6 +56,30 @@ export function usePurchaseOrder(options: {
 
 	const generateLineId = () => {
 		return `po_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+	};
+
+	const fetchSupplierInfo = async (supplierName: string) => {
+		if (!supplierName) {
+			supplierPriceList.value = null;
+			priceListCurrency.value = null;
+			return null;
+		}
+		try {
+			const { message } = await frappe.call({
+				method: "posawesome.posawesome.api.purchase_orders.get_supplier_info",
+				args: { supplier: supplierName },
+			});
+			if (message) {
+				supplierPriceList.value = message.buying_price_list || null;
+				priceListCurrency.value = message.price_list_currency || null;
+				supplierCurrency.value =
+					message.default_currency || posProfile.value?.currency || null;
+			}
+			return message;
+		} catch (e) {
+			console.error("Failed to fetch supplier info", e);
+			return null;
+		}
 	};
 
 	const onAddItem = async (item: any) => {
@@ -91,6 +117,26 @@ export function usePurchaseOrder(options: {
 				const uomData = item.item_uoms.find((u: any) => u.uom === uom);
 				if (uomData) {
 					conversion_factor = uomData.conversion_factor;
+				}
+			}
+
+			// Try fetching price from the active buying price list
+			const activePriceList = supplierPriceList.value || itemsStore.activePriceList;
+			if (activePriceList) {
+				try {
+					const { message } = await frappe.call({
+						method: "posawesome.posawesome.api.items.get_price_for_uom",
+						args: {
+							item_code: item.item_code,
+							price_list: activePriceList,
+							uom: uom,
+						},
+					});
+					if (message !== undefined && message !== null && message > 0) {
+						rate = message;
+					}
+				} catch (e) {
+					console.warn("Failed to fetch buying price for item", e);
 				}
 			}
 
@@ -132,7 +178,7 @@ export function usePurchaseOrder(options: {
 
 		let priceFound = false;
 		try {
-			const priceList = itemsStore.activePriceList;
+			const priceList = supplierPriceList.value || itemsStore.activePriceList;
 			if (priceList) {
 				const { message } = await frappe.call({
 					method: "posawesome.posawesome.api.items.get_price_for_uom",
@@ -185,6 +231,8 @@ export function usePurchaseOrder(options: {
 
 	const resetForm = () => {
 		supplier.value = null;
+		supplierPriceList.value = null;
+		priceListCurrency.value = null;
 		purchaseItems.value = [];
 		errorMessage.value = "";
 		submitLoading.value = false;
@@ -207,10 +255,13 @@ export function usePurchaseOrder(options: {
 		scheduleDate,
 		createInvoice,
 		supplierCurrency,
+		supplierPriceList,
+		priceListCurrency,
 		totalAmount,
 		submitLoading,
 		errorMessage,
 		onAddItem,
+		fetchSupplierInfo,
 		updateItemUom,
 		updateItemQty,
 		updateItemRate,

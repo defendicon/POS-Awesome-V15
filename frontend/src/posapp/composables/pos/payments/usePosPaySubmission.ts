@@ -16,6 +16,8 @@ type PosPaySubmissionArgs = {
 	postingDate?: Ref<string | null>;
 	exchangeRate: Ref<number>;
 	invoiceTotalCurrency: Ref<string>;
+	referenceNo: Ref<string>;
+	referenceDate: Ref<string>;
 	autoAllocatePaymentAmount: Ref<boolean>;
 	payment_methods: Ref<any[]>;
 	selected_invoices: Ref<any[]>;
@@ -49,6 +51,8 @@ export function usePosPaySubmission({
 	postingDate,
 	exchangeRate,
 	invoiceTotalCurrency,
+	referenceNo,
+	referenceDate,
 	autoAllocatePaymentAmount,
 	payment_methods,
 	selected_invoices,
@@ -82,6 +86,8 @@ export function usePosPaySubmission({
 		const finalizeSubmission = () => {
 			clearSelections();
 			resetPaymentMethodAmounts();
+			referenceNo.value = "";
+			referenceDate.value = "";
 			customerName.value = party;
 			get_outstanding_invoices();
 			get_unallocated_payments();
@@ -127,19 +133,21 @@ export function usePosPaySubmission({
 					0,
 				);
 
-			const payload = {
-				customer: party,
-				party,
-				party_type: resolvedPartyType,
-				payment_type: resolvedPaymentType,
-				company: company.value,
-				currency: invoiceTotalCurrency.value,
-				posting_date: postingDate?.value || null,
-				exchange_rate: exchangeRate.value || null,
-				pos_opening_shift_name: posOpeningShift.value.name,
-				pos_profile_name: posProfile.value.name,
-				pos_profile: posProfile.value,
-				payment_methods: payment_methods.value.filter(
+		const payload = {
+			customer: party,
+			party,
+			party_type: resolvedPartyType,
+			payment_type: resolvedPaymentType,
+			company: company.value,
+			currency: invoiceTotalCurrency.value,
+			posting_date: postingDate?.value || null,
+			exchange_rate: exchangeRate.value || null,
+			reference_no: referenceNo?.value?.trim() || null,
+			reference_date: referenceDate?.value?.trim() || null,
+			pos_opening_shift_name: posOpeningShift.value.name,
+			pos_profile_name: posProfile.value.name,
+			pos_profile: posProfile.value,
+			payment_methods: payment_methods.value.filter(
 					(m: any) => flt(m.amount) > 0,
 				),
 				selected_invoices: selectedInvoicesForPayload,

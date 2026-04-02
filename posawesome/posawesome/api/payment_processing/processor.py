@@ -306,8 +306,8 @@ def process_pos_payment(payload):
                     payment_type=payment_type,
                     exchange_rate=data.get("exchange_rate"),
                     posting_date=posting_date,
-                    reference_no=pos_opening_shift_name,
-                    reference_date=posting_date,
+                    reference_no=data.get("reference_no") or pos_opening_shift_name,
+                    reference_date=data.get("reference_date") or posting_date,
                     cost_center=data.pos_profile.get("cost_center"),
                     submit=0,
                 )
