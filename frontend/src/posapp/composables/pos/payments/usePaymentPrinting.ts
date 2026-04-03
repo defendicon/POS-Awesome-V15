@@ -166,6 +166,8 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 						printFormat: print_format || "Standard",
 						letterhead: profile.letter_head || null,
 						noLetterhead: letter_head,
+						printerName: profile.custom_pos_printer || null,
+						
 					});
 					return;
 				} catch (error) {

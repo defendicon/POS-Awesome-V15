@@ -17,6 +17,7 @@ export interface QzPrintDocumentOptions extends QzPrintHtmlOptions {
 	printFormat?: string;
 	letterhead?: string | null;
 	noLetterhead?: string | number | null;
+	
 }
 
 const PRINTER_STORAGE_KEY = "posa_qz_printer_name";
@@ -325,42 +326,54 @@ export async function printHtmlViaQz(html: string, options: QzPrintHtmlOptions =
 		}
 	}
 
-	let printer = options.printerName || selectedQzPrinter.value || getSavedPrinterName();
-	if (!printer) {
-		const printers = await findQzPrinters();
-		const firstPrinter = printers[0];
-		if (firstPrinter) {
-			printer = firstPrinter;
-			setSelectedQzPrinter(firstPrinter);
-		}
-	}
+	//let printer = options.printerName || selectedQzPrinter.value || getSavedPrinterName();
+	let printer = options.printerName;
+	console.log("Requested printer:-------------------", printer);
+	// if (!printer) {
+	// 	const printers = await findQzPrinters();
+	// 	const firstPrinter = printers[0];
+	// 	if (firstPrinter) {
+	// 		printer = firstPrinter;
+	// 		setSelectedQzPrinter(firstPrinter);
+	// 	}
+	// }
 
 	if (!printer) {
 		throw new Error("No QZ printer selected.");
 	}
 
 	const config = qz.configs.create(printer, {
-		size: {
-			width: options.widthMm || 80,
-			height: null,
-		},
-		units: "mm",
-		orientation: options.orientation || "portrait",
-		margins: { top: 0, right: 0, bottom: 0, left: 0 },
-		colorType: "grayscale",
-		interpolation: "nearest-neighbor",
+		// size: {
+		// 	width: options.widthMm || 80,
+		// 	height: null,
+		// },
+		// units: "mm",
+		// orientation: options.orientation || "portrait",
+		// margins: { top: 0, right: 0, bottom: 0, left: 0 },
+		// colorType: "grayscale",
+		// interpolation: "nearest-neighbor",
 	});
+
+	//const config = qz.configs.create(printer, { forceRaw: true });
 
 	const data = [
 		{
-			type: "pixel",
-			format: "html",
+			type: "raw",
+			format: "command",
 			flavor: "plain",
 			data: html,
 		},
 	];
 
+	// var data = [ 
+	// 			'\x10' + '\x14' + '\x01' + '\x00' + '\x05',             // Line break after top image
+	// 			html,
+									
+	// 		];
+
 	await qz.print(config, data);
+	console.log("Print job sent to QZ Tray ------------", config);
+	console.log("Print job data ------------", data);
 }
 
 export async function printDocumentViaQz(options: QzPrintDocumentOptions) {
@@ -390,5 +403,6 @@ export async function printDocumentViaQz(options: QzPrintDocumentOptions) {
 		throw new Error("Unable to load print HTML from server.");
 	}
 
-	await printHtmlViaQz(buildPrintHtml(html, style), options);
+	await printHtmlViaQz(html, options);
+	console.log("Document print job sent to QZ Tray", options, printFormat);
 }

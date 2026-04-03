@@ -119,7 +119,7 @@
 						</div>
 					</v-list-item>
 
-					<v-list-item
+					<!-- <v-list-item
 						v-if="isEnabledSetting(posProfile.posa_silent_print)"
 						@click="showQzTrayDialog = true"
 						class="menu-item-compact primary-action"
@@ -137,7 +137,7 @@
 								__("Connect printer and manage certificate")
 							}}</v-list-item-subtitle>
 						</div>
-					</v-list-item>
+					</v-list-item> -->
 
 					<v-list-item @click="$emit('sync-invoices')" class="menu-item-compact info-action">
 						<template v-slot:prepend>

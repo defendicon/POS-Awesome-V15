@@ -47,6 +47,7 @@ export function useLastInvoicePrinting() {
 			posProfile.posa_open_print_in_new_tab,
 		);
 		const useSilentPrint = parseBooleanSetting(posProfile.posa_silent_print);
+		console.log("useSilentPrint:-----------------", useSilentPrint);
 		const basePrintUrl = frappe.urllib.get_base_url() + "/printview";
 
 		let url =
@@ -136,6 +137,7 @@ export function useLastInvoicePrinting() {
 					printFormat: pf || "Standard",
 					letterhead: letter_head || null,
 					noLetterhead: letter_head ? "0" : "1",
+					printerName: posProfile.custom_pos_printer || null,
 				});
 				return;
 			} catch (error) {

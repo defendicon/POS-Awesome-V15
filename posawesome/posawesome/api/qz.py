@@ -18,11 +18,13 @@ def _qz_dir() -> str:
 
 
 def _cert_path() -> str:
-    return os.path.join(_qz_dir(), "digital-certificate.crt")
+    return frappe.get_site_path("public", "files", "qz-certificate.txt")
+    #return os.path.join(_qz_dir(), "digital-certificate.crt")
 
 
 def _key_path() -> str:
-    return os.path.join(_qz_dir(), "private-key.pem")
+    return frappe.get_site_path("private", "files", "qz-private-key.pem")
+    # return os.path.join(_qz_dir(), "private-key.pem")
 
 
 def _read_text(path: str) -> str:

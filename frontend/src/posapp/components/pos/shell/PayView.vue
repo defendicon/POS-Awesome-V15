@@ -326,6 +326,7 @@ export default {
 							name: payment_name,
 							printFormat: "Standard",
 							noLetterhead: 1,
+							printerName: unref(pos_profile.value?.custom_pos_printer || null),
 						});
 						return;
 					} catch (error) {
