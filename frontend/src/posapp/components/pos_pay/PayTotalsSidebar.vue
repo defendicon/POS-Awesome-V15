@@ -153,6 +153,31 @@
             </v-col>
         </v-row>
 
+        <v-divider></v-divider>
+        <h4 class="text-primary">{{ __("Transaction ID") }}</h4>
+        <v-row>
+            <v-col md="6" cols="12">
+                <v-text-field
+                    density="compact"
+                    variant="outlined"
+                    hide-details
+                    class="pos-themed-input"
+                    v-model="internalReferenceNo"
+                    :label="__('Cheque/Reference No')"
+                ></v-text-field>
+            </v-col>
+            <v-col md="6" cols="12">
+                <v-text-field
+                    density="compact"
+                    variant="outlined"
+                    hide-details
+                    type="date"
+                    class="pos-themed-input"
+                    v-model="internalReferenceDate"
+                    :label="__('Cheque/Reference Date')"
+                ></v-text-field>
+            </v-col>
+        </v-row>
         <v-row class="mt-2">
             <v-col cols="12">
                 <v-switch
@@ -204,12 +229,16 @@ const props = defineProps({
     },
     currencySymbol: Function,
     formatCurrency: Function,
-    getPaymentMethodCurrency: Function
+    getPaymentMethodCurrency: Function,
+    referenceNo: String,
+    referenceDate: String,
 });
 
 const emit = defineEmits([
     'update:exchangeRate',
     'update:autoAllocatePaymentAmount',
+    'update:referenceNo',
+    'update:referenceDate',
     'validate-exchange-rate',
     'fetch-exchange-rate'
 ]);
@@ -222,4 +251,14 @@ const internalExchangeRate = computed({
 const internalAutoAllocatePaymentAmount = computed(
     () => props.autoAllocatePaymentAmount ?? true,
 );
+
+const internalReferenceNo = computed({
+    get: () => props.referenceNo,
+    set: (val) => emit('update:referenceNo', val),
+});
+
+const internalReferenceDate = computed({
+    get: () => props.referenceDate,
+    set: (val) => emit('update:referenceDate', val),
+});
 </script>

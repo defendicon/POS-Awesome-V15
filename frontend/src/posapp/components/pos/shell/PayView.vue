@@ -165,6 +165,8 @@
 					<PayTotalsSidebar
 						v-model:exchange-rate="exchangeRate"
 						v-model:auto-allocate-payment-amount="autoAllocatePaymentAmount"
+						v-model:reference-no="referenceNo"
+						v-model:reference-date="referenceDate"
 						:pos-profile="pos_profile"
 						:total-selected-invoices="total_selected_invoices"
 						:selected-invoices-count="selected_invoices.length"
@@ -309,6 +311,8 @@ export default {
 		const autoAllocatePaymentAmount = ref(true);
 		const exchangeRate = ref(null);
 		const companyCurrency = ref(null);
+		const referenceNo = ref("");
+		const referenceDate = ref("");
 		const exchangeRateLoading = ref(false);
 		const exchangeRateError = ref(null);
 		const payment_method_currencies = ref({});
@@ -613,6 +617,8 @@ export default {
 			postingDate,
 			exchangeRate,
 			invoiceTotalCurrency,
+			referenceNo,
+			referenceDate,
 			payment_methods,
 			selected_invoices,
 			selected_payments,
@@ -876,6 +882,8 @@ export default {
 		async function syncCustomerPaymentContext(normalized, { forceReload = false } = {}) {
 			if (!normalized) {
 				customer_name.value = "";
+				referenceNo.value = "";
+				referenceDate.value = "";
 				clearSelections();
 				outstanding_invoices.value = [];
 				unallocated_payments.value = [];
@@ -1086,6 +1094,8 @@ export default {
 			autoAllocatePaymentAmount,
 			exchangeRate,
 			companyCurrency,
+			referenceNo,
+			referenceDate,
 			exchangeRateLoading,
 			exchangeRateError,
 			payment_method_currencies,
