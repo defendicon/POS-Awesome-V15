@@ -15,6 +15,12 @@ class FakeChildRow(dict):
             super().update(kwargs)
         return self
 
+    def __getattr__(self, item):
+        try:
+            return self[item]
+        except KeyError as exc:
+            raise AttributeError(item) from exc
+
 
 class FakePaymentEntry:
     def __init__(self):
@@ -78,7 +84,9 @@ def _install_stubs():
     )
 
     frappe_module._ = lambda text: text
-    frappe_module._dict = lambda payload=None, **kwargs: dict(payload or {}, **kwargs)
+    frappe_module._dict = lambda payload=None, **kwargs: FakeChildRow(
+        dict(payload or {}, **kwargs)
+    )
     frappe_module.throw = lambda message: (_ for _ in ()).throw(Exception(message))
     frappe_module.whitelist = lambda *args, **kwargs: (lambda fn: fn)
     frappe_module.flags = types.SimpleNamespace(ignore_account_permission=False)
@@ -128,15 +136,20 @@ def _install_stubs():
         return doc
 
     frappe_module.get_doc = _get_doc
-    accounts_utils.reconcile_against_document = (
-        lambda args, *extra, **kwargs: reconcile_calls.append(
+    def _reconcile_against_document(args, *extra, **kwargs):
+        for row in args:
+            # Mirror ERPNext's attribute-style access contract.
+            _ = row.voucher_type
+            _ = row.voucher_no
+        reconcile_calls.append(
             {
                 "args": args,
                 "extra": extra,
                 "kwargs": kwargs,
             }
         )
-    )
+
+    accounts_utils.reconcile_against_document = _reconcile_against_document
 
     accounts_party.get_party_bank_account = lambda *args, **kwargs: None
     payment_request_module.get_dummy_message = lambda *_args, **_kwargs: ""

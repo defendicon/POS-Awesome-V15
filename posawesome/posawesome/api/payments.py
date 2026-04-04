@@ -689,26 +689,28 @@ def repair_overpayment_change_allocations(
 
         reconcile_against_document(
             [
-                {
-                    "voucher_type": "Payment Entry",
-                    "voucher_no": _row_value(payment_doc, "name"),
-                    "voucher_detail_no": None,
-                    "against_voucher_type": "Sales Invoice",
-                    "against_voucher": invoice_name,
-                    "account": _row_value(payment_doc, "paid_from"),
-                    "party_type": "Customer",
-                    "party": invoice_customer,
-                    "dr_or_cr": "credit_in_account_currency",
-                    "unreconciled_amount": amount_to_allocate,
-                    "unadjusted_amount": amount_to_allocate,
-                    "allocated_amount": amount_to_allocate,
-                    "grand_total": amount_to_allocate,
-                    "outstanding_amount": amount_to_allocate,
-                    "exchange_rate": 1,
-                    "is_advance": 0,
-                    "difference_amount": 0,
-                    "cost_center": _row_value(payment_doc, "cost_center"),
-                }
+                frappe._dict(
+                    {
+                        "voucher_type": "Payment Entry",
+                        "voucher_no": _row_value(payment_doc, "name"),
+                        "voucher_detail_no": None,
+                        "against_voucher_type": "Sales Invoice",
+                        "against_voucher": invoice_name,
+                        "account": _row_value(payment_doc, "paid_from"),
+                        "party_type": "Customer",
+                        "party": invoice_customer,
+                        "dr_or_cr": "credit_in_account_currency",
+                        "unreconciled_amount": amount_to_allocate,
+                        "unadjusted_amount": amount_to_allocate,
+                        "allocated_amount": amount_to_allocate,
+                        "grand_total": amount_to_allocate,
+                        "outstanding_amount": amount_to_allocate,
+                        "exchange_rate": 1,
+                        "is_advance": 0,
+                        "difference_amount": 0,
+                        "cost_center": _row_value(payment_doc, "cost_center"),
+                    }
+                )
             ]
         )
 
