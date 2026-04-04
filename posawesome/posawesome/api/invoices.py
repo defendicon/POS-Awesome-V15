@@ -45,7 +45,15 @@ from posawesome.posawesome.api.invoice_processing.data import (
 from posawesome.posawesome.api.utils import log_perf_event
 
 @frappe.whitelist()
-def get_draft_invoices(pos_opening_shift, doctype="Sales Invoice", limit_page_length=0):
+def get_draft_invoices(
+    pos_opening_shift=None,
+    doctype="Sales Invoice",
+    limit_page_length=0,
+    company=None,
+    pos_profile=None,
+    cashier=None,
+    is_supervisor=0,
+):
     started_at = time.perf_counter()
     try:
         limit_page_length = int(limit_page_length or 0)
@@ -54,10 +62,18 @@ def get_draft_invoices(pos_opening_shift, doctype="Sales Invoice", limit_page_le
     if limit_page_length < 0:
         limit_page_length = 0
 
+    supervisor_scope = int(is_supervisor or 0)
     filters = {
-        "posa_pos_opening_shift": pos_opening_shift,
         "docstatus": 0,
     }
+    if supervisor_scope and company:
+        filters["company"] = company
+        if pos_profile:
+            filters["pos_profile"] = pos_profile
+        if cashier:
+            filters["owner"] = cashier
+    else:
+        filters["posa_pos_opening_shift"] = pos_opening_shift
     if frappe.db.has_column(doctype, "posa_is_printed"):
         filters["posa_is_printed"] = 0
 
@@ -72,6 +88,9 @@ def get_draft_invoices(pos_opening_shift, doctype="Sales Invoice", limit_page_le
             "posting_time",
             "grand_total",
             "currency",
+            "pos_profile",
+            "owner",
+            "modified_by",
         ],
         limit_page_length=limit_page_length,
         order_by="modified desc",

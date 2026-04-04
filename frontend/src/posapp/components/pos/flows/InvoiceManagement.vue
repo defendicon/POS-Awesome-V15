@@ -794,6 +794,7 @@ import { useToastStore } from "../../../stores/toastStore";
 import { useUIStore } from "../../../stores/uiStore";
 import { useInvoiceStore } from "../../../stores/invoiceStore";
 import { useCustomersStore } from "../../../stores/customersStore";
+import { useEmployeeStore } from "../../../stores/employeeStore";
 import { appendDebugPrintParam, isDebugPrintEnabled, silentPrint, watchPrintWindow } from "../../../plugins/print";
 import { printDocumentViaQz } from "../../../services/qzTray";
 import { isOffline } from "../../../../offline/index";
@@ -806,6 +807,7 @@ export default {
 		const uiStore = useUIStore();
 		const invoiceStore = useInvoiceStore();
 		const customersStore = useCustomersStore();
+		const employeeStore = useEmployeeStore();
 		const toastStore = useToastStore();
 		const router = useRouter();
 		const theme = useTheme();
@@ -819,10 +821,12 @@ export default {
 			responsive.windowWidth.value < 1100 ? "100vw" : "1420px",
 		);
 		const { invoiceManagementDialog, invoiceManagementTargetTab, posProfile, posOpeningShift } = storeToRefs(uiStore);
+		const { currentCashier } = storeToRefs(employeeStore);
 		return {
 			uiStore,
 			invoiceStore,
 			customersStore,
+			employeeStore,
 			toastStore,
 			router,
 			eventBus,
@@ -830,6 +834,7 @@ export default {
 			invoiceManagementTargetTab,
 			posProfile,
 			posOpeningShift,
+			currentCashier,
 			isDarkTheme: theme.isDark,
 			isOffline,
 			isCompactInvoiceManagement,
@@ -1059,12 +1064,58 @@ export default {
 			const needle = String(search || "").trim().toLowerCase();
 			return items.filter((item) => {
 				if (needle) {
-					const haystack = [item.name, item.customer, item.customer_name, item.return_against, item.status].filter(Boolean).map((entry) => String(entry).toLowerCase());
+					const haystack = [
+						item.name,
+						item.customer,
+						item.customer_name,
+						item.return_against,
+						item.status,
+						item.pos_profile,
+						item.owner,
+						item.modified_by,
+						item.custom_created_by_name,
+						item.custom_submitted_by_name,
+					].filter(Boolean).map((entry) => String(entry).toLowerCase());
 					if (!haystack.some((entry) => entry.includes(needle))) return false;
 				}
 				if (status && status !== "All" && String(item.status || "") !== status) return false;
 				return this.inRange(item.posting_date, this.normalizeDate(fromDate), this.normalizeDate(toDate));
 			});
+		},
+		isSupervisorScope() {
+			return Boolean(this.currentCashier?.is_supervisor && this.posProfile?.company);
+		},
+		buildInvoiceFilters(baseFilters = {}) {
+			const filters = { ...baseFilters, docstatus: 1 };
+			if (this.isSupervisorScope()) {
+				filters.company = this.posProfile.company;
+				delete filters.pos_profile;
+				delete filters.posa_pos_opening_shift;
+				return filters;
+			}
+			filters.pos_profile = this.posProfile?.name;
+			if (this.posOpeningShift?.name) {
+				filters.posa_pos_opening_shift = this.posOpeningShift.name;
+			}
+			return filters;
+		},
+		getInvoiceListFields(extraFields = []) {
+			return [
+				"name",
+				"customer",
+				"customer_name",
+				"posting_date",
+				"posting_time",
+				"grand_total",
+				"paid_amount",
+				"outstanding_amount",
+				"status",
+				"currency",
+				"pos_profile",
+				"owner",
+				"modified_by",
+				...extraFields,
+			];
 		},
 		sortInvoicesByLatest(items) {
 			return [...items].sort((left, right) => this.invoiceSortValue(right) - this.invoiceSortValue(left));
@@ -1204,21 +1255,16 @@ export default {
 			if (!this.posProfile?.name) return void (this.unpaidInvoices = []);
 			this.loading = true;
 			try {
-				const filters = {
-					pos_profile: this.posProfile.name,
-					docstatus: 1,
+				const filters = this.buildInvoiceFilters({
 					is_return: 0,
 					outstanding_amount: [">", 0],
-				};
-				if (this.posOpeningShift?.name) {
-					filters.posa_pos_opening_shift = this.posOpeningShift.name;
-				}
+				});
 				const { message } = await frappe.call({
 					method: "frappe.client.get_list",
 					args: {
 						doctype: this.currentInvoiceDoctype,
 						filters,
-						fields: ["name", "customer", "customer_name", "posting_date", "posting_time", "due_date", "grand_total", "paid_amount", "outstanding_amount", "status", "currency"],
+						fields: this.getInvoiceListFields(["due_date"]),
 						order_by: "posting_date desc, posting_time desc, modified desc",
 						limit_page_length: 0,
 					},
@@ -1235,19 +1281,13 @@ export default {
 			if (!this.posProfile?.name) return void (this.historyInvoices = []);
 			this.loading = true;
 			try {
-				const filters = {
-					pos_profile: this.posProfile.name,
-					docstatus: 1,
-				};
-				if (this.posOpeningShift?.name) {
-					filters.posa_pos_opening_shift = this.posOpeningShift.name;
-				}
+				const filters = this.buildInvoiceFilters();
 				const { message } = await frappe.call({
 					method: "frappe.client.get_list",
 					args: {
 						doctype: this.currentInvoiceDoctype,
 						filters,
-						fields: ["name", "customer", "customer_name", "posting_date", "posting_time", "grand_total", "paid_amount", "change_amount", "outstanding_amount", "status", "is_return", "return_against", "currency"],
+						fields: this.getInvoiceListFields(["change_amount", "is_return", "return_against"]),
 						order_by: "posting_date desc, posting_time desc, modified desc",
 						limit_page_length: 0,
 					},
@@ -1261,7 +1301,7 @@ export default {
 			}
 		},
 		async loadDrafts() {
-			if (!this.posOpeningShift?.name) return void (this.draftInvoices = []);
+			if (!this.posOpeningShift?.name && !this.isSupervisorScope()) return void (this.draftInvoices = []);
 			this.loading = true;
 			try {
 				const { message } = await frappe.call({
@@ -1270,6 +1310,10 @@ export default {
 						pos_opening_shift: this.posOpeningShift.name,
 						doctype: this.currentInvoiceDoctype,
 						limit_page_length: 0,
+						company: this.isSupervisorScope() ? this.posProfile?.company : null,
+						pos_profile: null,
+						cashier: null,
+						is_supervisor: this.isSupervisorScope() ? 1 : 0,
 					},
 				});
 				this.draftInvoices = Array.isArray(message) ? message.map((entry) => ({ ...entry, doctype: entry.doctype || this.currentInvoiceDoctype })) : [];
