@@ -120,6 +120,7 @@ import { useInvoiceStore } from "../../../stores/invoiceStore";
 import { storeToRefs } from "pinia";
 import { useTheme } from "../../../composables/core/useTheme";
 import { useResponsive } from "../../../composables/core/useResponsive";
+import { fetchDraftInvoiceDoc } from "../../../utils/draftInvoices";
 
 export default {
 	// props: ["draftsDialog"],
@@ -203,19 +204,11 @@ export default {
 		async submit_dialog() {
 			if (this.selected.length > 0) {
 				const selectedDraft = this.selected[0];
-				const doctype =
-					selectedDraft?.doctype ||
-					(this.uiStore.posProfile?.create_pos_invoice_instead_of_sales_invoice
-						? "POS Invoice"
-						: "Sales Invoice");
 
 				try {
-					const { message } = await frappe.call({
-						method: "posawesome.posawesome.api.invoices.get_draft_invoice_doc",
-						args: {
-							invoice_name: selectedDraft.name,
-							doctype,
-						},
+					const message = await fetchDraftInvoiceDoc({
+						draft: selectedDraft,
+						posProfile: this.uiStore.posProfile,
 					});
 					if (message) {
 						this.invoiceStore.triggerLoadInvoice(message);

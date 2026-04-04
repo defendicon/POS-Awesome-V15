@@ -86,6 +86,15 @@
 			</v-col>
 
 			<v-col cols="12" :md="useCompactSaleDock ? 12 : 5" class="invoice-summary-actions">
+				<ParkedOrdersRail
+					v-if="visibleParkedOrders.length"
+					:parked-orders="visibleParkedOrders"
+					:format-currency="formatCurrency"
+					:currency-symbol="currencySymbol"
+					@resume="handleResumeParkedOrder"
+					@view-all="handleLoadDrafts"
+					class="mb-3"
+				/>
 				<InvoiceActionButtons
 					:pos_profile="pos_profile"
 					:saveLoading="saveLoading"
@@ -115,9 +124,12 @@
 
 <script setup>
 import { computed, ref, watch } from "vue";
+import { storeToRefs } from "pinia";
 import { loadItemSelectorSettings } from "../../../utils/itemSelectorSettings";
 import { useResponsive } from "../../../composables/core/useResponsive";
+import { useUIStore } from "../../../stores/uiStore";
 import InvoiceActionButtons from "./InvoiceActionButtons.vue";
+import ParkedOrdersRail from "./ParkedOrdersRail.vue";
 
 defineOptions({
 	name: "InvoiceSummary",
@@ -152,6 +164,7 @@ const emit = defineEmits([
 	"print-draft",
 	"show-payment",
 	"open-customer-display",
+	"resume-parked-order",
 ]);
 
 const saveLoading = ref(false);
@@ -167,6 +180,8 @@ const isEditingAdditionalDiscount = ref(false);
 const isEditingAdditionalDiscountPercentage = ref(false);
 const additionalDiscountField = ref(null);
 const responsive = useResponsive();
+const uiStore = useUIStore();
+const { parkedOrders } = storeToRefs(uiStore);
 
 const additionalDiscountDisplay = ref(normalizeDiscountDisplay(props.additional_discount));
 const additionalDiscountPercentageDisplay = ref(
@@ -178,6 +193,9 @@ const showReturnDiscountAlert = computed(
 		!!props.return_discount_meta &&
 		!props.pos_profile?.posa_use_percentage_discount &&
 		!isFullReturnDiscount(props.return_discount_meta?.ratio),
+);
+const visibleParkedOrders = computed(() =>
+	Array.isArray(parkedOrders.value) ? parkedOrders.value.slice(0, 4) : [],
 );
 
 const hide_qty_decimals = computed(() => {
@@ -330,6 +348,10 @@ async function handleOpenCustomerDisplay() {
 	} finally {
 		customerDisplayLoading.value = false;
 	}
+}
+
+function handleResumeParkedOrder(draft) {
+	emit("resume-parked-order", draft);
 }
 
 defineExpose({

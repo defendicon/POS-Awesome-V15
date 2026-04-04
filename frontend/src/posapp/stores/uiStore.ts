@@ -19,6 +19,7 @@ export const useUIStore = defineStore("ui", () => {
   const invoiceManagementDialog = ref(false);
   const draftsDialog = ref(false);
   const draftsData = ref<any[]>([]);
+  const parkedOrders = ref<any[]>([]);
 
   const ordersDialog = ref(false);
   const ordersData = ref<any[]>([]);
@@ -54,13 +55,22 @@ export const useUIStore = defineStore("ui", () => {
   };
 
   const openDrafts = (data?: any[]) => {
-    draftsData.value = data || [];
+    const nextDrafts = Array.isArray(data) ? data : [];
+    draftsData.value = nextDrafts;
+    parkedOrders.value = nextDrafts;
     draftsDialog.value = true;
   };
 
   const closeDrafts = () => {
     draftsDialog.value = false;
   };
+
+  const setParkedOrders = (data?: any[]) => {
+    parkedOrders.value = Array.isArray(data) ? data : [];
+  };
+
+  const parkedOrdersCount = computed(() => parkedOrders.value.length);
+  const hasParkedOrders = computed(() => parkedOrdersCount.value > 0);
 
   const openOrders = (data?: any[]) => {
     ordersData.value = data || [];
@@ -236,8 +246,12 @@ export const useUIStore = defineStore("ui", () => {
     clearPaymentRouteTarget,
     draftsDialog,
     draftsData,
+    parkedOrders,
+    parkedOrdersCount,
+    hasParkedOrders,
     openDrafts,
     closeDrafts,
+    setParkedOrders,
     ordersDialog,
     ordersData,
     openOrders,

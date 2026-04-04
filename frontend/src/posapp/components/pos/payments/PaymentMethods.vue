@@ -29,15 +29,28 @@
 					></v-text-field>
 				</v-col>
 				<v-col cols="12" md="5" v-if="!isMpesaC2bPayment(payment)">
-					<v-btn
-						block
-						color="primary"
-						variant="flat"
-						class="payment-method-action-btn"
-						@click="$emit('set-full-amount', payment)"
-					>
-						{{ payment.mode_of_payment }}
-					</v-btn>
+					<div class="payment-method-actions">
+						<v-btn
+							block
+							color="primary"
+							variant="flat"
+							class="payment-method-action-btn"
+							:data-test="`payment-full-due-${payment.mode_of_payment}`"
+							@click="$emit('set-full-amount', payment)"
+						>
+							{{ __("Full Due") }}
+						</v-btn>
+						<v-btn
+							block
+							color="secondary"
+							variant="tonal"
+							class="payment-method-action-btn payment-method-action-btn--quick-secondary"
+							:data-test="`payment-remaining-${payment.mode_of_payment}`"
+							@click="$emit('set-rest-amount', payment)"
+						>
+							{{ __("Remaining") }}
+						</v-btn>
+					</div>
 				</v-col>
 
 				<v-col
@@ -190,6 +203,12 @@ const __ = window.__;
 	color: #ffffff !important;
 }
 
+.payment-method-actions {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--pos-space-2);
+}
+
 .payment-method-action-btn:hover,
 .payment-method-action-btn:focus,
 .payment-method-action-btn:focus-visible,
@@ -221,6 +240,18 @@ const __ = window.__;
 	background-color: rgba(var(--v-theme-success), 0.9) !important;
 }
 
+.payment-method-action-btn--quick-secondary {
+	background: rgba(var(--v-theme-primary), 0.12) !important;
+	color: rgb(var(--v-theme-primary)) !important;
+}
+
+.payment-method-action-btn--quick-secondary:hover,
+.payment-method-action-btn--quick-secondary:focus,
+.payment-method-action-btn--quick-secondary:focus-visible,
+.payment-method-action-btn--quick-secondary:active {
+	background-color: rgba(var(--v-theme-primary), 0.18) !important;
+}
+
 .payment-method-action-btn--secondary {
 	background: rgba(var(--v-theme-success), 0.14) !important;
 	color: rgb(var(--v-theme-success)) !important;
@@ -249,6 +280,10 @@ const __ = window.__;
 	.payment-method-card {
 		padding: var(--pos-space-2);
 		gap: var(--pos-space-2);
+	}
+
+	.payment-method-actions {
+		grid-template-columns: 1fr;
 	}
 }
 </style>

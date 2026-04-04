@@ -1,4 +1,5 @@
 import { isOffline } from "../../../../offline/index";
+import { fetchDraftInvoices } from "../../../utils/draftInvoices";
 
 declare const __: (_text: string, _args?: any[]) => string;
 declare const frappe: any;
@@ -155,17 +156,14 @@ export async function show_payment(context: any) {
 
 export async function get_draft_invoices(context: any) {
 	try {
-		const { message } = await frappe.call({
-			method: "posawesome.posawesome.api.invoices.get_draft_invoices",
-			args: {
-				pos_opening_shift: context.pos_opening_shift.name,
-				doctype: context.pos_profile.create_pos_invoice_instead_of_sales_invoice
-					? "POS Invoice"
-					: "Sales Invoice",
-			},
+		const drafts = await fetchDraftInvoices({
+			posOpeningShift: context.pos_opening_shift,
+			posProfile: context.pos_profile,
 		});
-		if (message) {
-			context.uiStore.openDrafts(message);
+		if (drafts.length) {
+			context.uiStore.openDrafts(drafts);
+		} else {
+			context.uiStore.setParkedOrders?.([]);
 		}
 	} catch (error) {
 		console.error("Error fetching draft invoices:", error);

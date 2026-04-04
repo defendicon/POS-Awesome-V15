@@ -253,6 +253,7 @@
 			@print-draft="print_draft_invoice"
 			@show-payment="handleShowPaymentRequest"
 			@open-customer-display="handleOpenCustomerDisplayRequest"
+			@resume-parked-order="resume_parked_order"
 		/>
 	</div>
 </template>
@@ -282,6 +283,7 @@ import { storeToRefs } from "pinia";
 import stockCoordinator from "../../utils/stockCoordinator";
 import { getCurrentInstance, ref } from "vue";
 import { save_and_clear_invoice as saveAndClearInvoiceAction } from "./invoice_utils/actions";
+import { fetchDraftInvoiceDoc, fetchDraftInvoices } from "../../utils/draftInvoices";
 
 // Composables
 import { useOnlineStatus } from "../../composables/core/useOnlineStatus";
@@ -732,6 +734,23 @@ export default {
 			this.fetch_price_lists();
 			this.update_price_list();
 			this.fetch_available_currencies();
+			this.refresh_parked_orders();
+		},
+		async refresh_parked_orders() {
+			if (!this.pos_profile || !this.pos_opening_shift?.name) {
+				this.uiStore.setParkedOrders([]);
+				return;
+			}
+
+			try {
+				const drafts = await fetchDraftInvoices({
+					posOpeningShift: this.pos_opening_shift,
+					posProfile: this.pos_profile,
+				});
+				this.uiStore.setParkedOrders(drafts);
+			} catch (error) {
+				console.error("Error refreshing parked orders:", error);
+			}
 		},
 		handleClearInvoice() {
 			this.clear_invoice();
@@ -854,6 +873,23 @@ export default {
 		},
 		handleShowPaymentRequest() {
 			this.show_payment();
+		},
+		async resume_parked_order(draft) {
+			try {
+				const message = await fetchDraftInvoiceDoc({
+					draft,
+					posProfile: this.pos_profile,
+				});
+				if (message) {
+					this.invoiceStore.triggerLoadInvoice(message);
+				}
+			} catch (error) {
+				console.error("Error loading parked order:", error);
+				this.toastStore.show({
+					title: __("Unable to load parked order"),
+					color: "error",
+				});
+			}
 		},
 		handleOpenCustomerDisplayRequest() {
 			if (this.eventBus && typeof this.eventBus.emit === "function") {
