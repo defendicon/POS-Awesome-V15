@@ -39,6 +39,109 @@ describe("NavbarMenu cashier pin management", () => {
 		});
 	});
 
+	const mountMenu = (overrides: Record<string, any> = {}) =>
+		shallowMount(NavbarMenu, {
+			props: {
+				posProfile: {
+					name: "Main POS",
+					posa_allow_print_last_invoice: 1,
+					posa_enable_customer_display: 1,
+					posa_hide_closing_shift: 0,
+					posa_silent_print: 1,
+					...overrides.posProfile,
+				},
+				cashierName: "Main Cashier",
+				manualOffline: false,
+				networkOnline: true,
+				serverOnline: true,
+				...overrides.props,
+			},
+			global: {
+				mocks: {
+					__: (value: string) => value,
+					$theme: { isDark: { value: false } },
+				},
+				stubs: {
+					QzTrayDialog: true,
+					VMenu: true,
+					VBtn: true,
+					VIcon: true,
+					VCard: true,
+					VList: true,
+					VListItem: true,
+					VDivider: true,
+					VDialog: true,
+					VCardTitle: true,
+					VCardText: true,
+					VCardActions: true,
+					VSpacer: true,
+					VSelect: true,
+					VSwitch: true,
+					VSnackbar: true,
+					VAlert: true,
+					VTextField: true,
+				},
+			},
+		});
+
+	it("surfaces a cashier-first quick actions panel and grouped settings sections", async () => {
+		const employeeStore = useEmployeeStore();
+		employeeStore.setCurrentCashier({
+			user: "cashier@example.com",
+			full_name: "Main Cashier",
+			is_supervisor: false,
+		});
+
+		const wrapper = mountMenu();
+		await flushPromises();
+
+		expect((wrapper.vm as any).activePanel).toBe("main");
+		expect((wrapper.vm as any).quickActions.map((action: any) => action.id)).toEqual([
+			"switch-cashier",
+			"lock-screen",
+			"print-last-invoice",
+			"sync-offline-invoices",
+			"close-shift",
+		]);
+		expect((wrapper.vm as any).quickActionRows).toHaveLength(3);
+
+		await (wrapper.vm as any).openSettingsPanel();
+
+		expect((wrapper.vm as any).activePanel).toBe("settings");
+		expect((wrapper.vm as any).settingsSections.map((section: any) => section.id)).toEqual([
+			"personal",
+			"terminal",
+			"system",
+			"session",
+		]);
+		expect((wrapper.vm as any).supervisorSections).toEqual([]);
+	});
+
+	it("shows restricted supervisor tools only for POS supervisors", async () => {
+		const employeeStore = useEmployeeStore();
+		employeeStore.setCurrentCashier({
+			user: "supervisor@example.com",
+			full_name: "Supervisor",
+			is_supervisor: true,
+		});
+
+		const wrapper = mountMenu();
+		await flushPromises();
+		await (wrapper.vm as any).openSettingsPanel();
+
+		expect((wrapper.vm as any).showSupervisorSection).toBe(true);
+		expect((wrapper.vm as any).supervisorSections).toEqual([
+			expect.objectContaining({
+				id: "restricted",
+				actions: [
+					expect.objectContaining({
+						id: "awesome-dashboard",
+					}),
+				],
+			}),
+		]);
+	});
+
 	it("creates a cashier pin without requiring a current pin when none exists", async () => {
 		const employeeStore = useEmployeeStore();
 		employeeStore.setCurrentCashier({
@@ -78,41 +181,7 @@ describe("NavbarMenu cashier pin management", () => {
 			throw new Error(`Unexpected method: ${method} ${JSON.stringify(args)}`);
 		});
 
-		const wrapper = shallowMount(NavbarMenu, {
-			props: {
-				posProfile: { name: "Main POS" },
-				cashierName: "Main Cashier",
-				manualOffline: false,
-				networkOnline: true,
-				serverOnline: true,
-			},
-			global: {
-				mocks: {
-					__: (value: string) => value,
-					$theme: { isDark: { value: false } },
-				},
-				stubs: {
-					QzTrayDialog: true,
-					VMenu: true,
-					VBtn: true,
-					VIcon: true,
-					VCard: true,
-					VList: true,
-					VListItem: true,
-					VDivider: true,
-					VDialog: true,
-					VCardTitle: true,
-					VCardText: true,
-					VCardActions: true,
-					VSpacer: true,
-					VSelect: true,
-					VSwitch: true,
-					VSnackbar: true,
-					VAlert: true,
-					VTextField: true,
-				},
-			},
-		});
+		const wrapper = mountMenu();
 
 		await flushPromises();
 		await (wrapper.vm as any).openPinDialog();
@@ -163,41 +232,7 @@ describe("NavbarMenu cashier pin management", () => {
 		});
 		(window as any).frappe.call = frappeCall;
 
-		const wrapper = shallowMount(NavbarMenu, {
-			props: {
-				posProfile: { name: "Main POS" },
-				cashierName: "Main Cashier",
-				manualOffline: false,
-				networkOnline: true,
-				serverOnline: true,
-			},
-			global: {
-				mocks: {
-					__: (value: string) => value,
-					$theme: { isDark: { value: false } },
-				},
-				stubs: {
-					QzTrayDialog: true,
-					VMenu: true,
-					VBtn: true,
-					VIcon: true,
-					VCard: true,
-					VList: true,
-					VListItem: true,
-					VDivider: true,
-					VDialog: true,
-					VCardTitle: true,
-					VCardText: true,
-					VCardActions: true,
-					VSpacer: true,
-					VSelect: true,
-					VSwitch: true,
-					VSnackbar: true,
-					VAlert: true,
-					VTextField: true,
-				},
-			},
-		});
+		const wrapper = mountMenu();
 
 		await flushPromises();
 		await (wrapper.vm as any).openPinDialog();

@@ -22,3 +22,6 @@
 - Added self-service cashier PIN management in the actions menu so the current cashier can create a first PIN or change an existing PIN without leaving the POS flow; backend APIs now expose PIN status and save/update behavior using the masked `User` password field.
 - Restricted Awesome Dashboard visibility to POS supervisors by removing the drawer item for non-supervisors and gating the reports view so non-supervisors see an access warning instead of loading dashboard data.
 - Fixed stale `.js` store imports in navbar-related components that surfaced during regression testing and added targeted frontend/backend regression tests for cashier PIN self-service, supervisor-only dashboard access, and wrong-current-PIN rejection.
+- Refactored the long navbar actions menu into a cashier-first flow: quick actions now sit on the first panel, while language/theme/terminal/system/session tools live inside a categorized settings panel.
+- Added a two-column quick actions layout, a dedicated settings entry point, and a restricted supervisor tools section inside the settings panel without duplicating existing dialogs or handlers.
+- Added navbar menu regression coverage for quick-action grouping, settings sections, and supervisor-only restricted tools, then re-verified navbar/report access behavior and `vue-tsc`.
