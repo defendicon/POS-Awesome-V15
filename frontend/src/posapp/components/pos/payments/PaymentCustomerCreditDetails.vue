@@ -22,7 +22,7 @@
 					density="compact"
 					variant="solo"
 					color="primary"
-					:label="$frappe._('Apply Stored Value')"
+					:label="$frappe._('Apply Customer Credit')"
 					class="sleek-field pos-themed-input"
 					hide-details
 					type="text"

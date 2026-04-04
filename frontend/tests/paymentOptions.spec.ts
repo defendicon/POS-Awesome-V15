@@ -57,7 +57,7 @@ describe("PaymentOptions", () => {
 		(globalThis as any).frappe = { _: (value: string) => value };
 	});
 
-	it("surfaces stored value summary details when credit redemption is enabled", () => {
+	it("surfaces customer credit summary details when credit redemption is enabled", () => {
 		const wrapper = mount(PaymentOptions, {
 			props: {
 				invoiceDoc: {
@@ -83,8 +83,8 @@ describe("PaymentOptions", () => {
 			},
 		});
 
-		expect(wrapper.text()).toContain("Use Stored Value");
-		expect(wrapper.text()).toContain("Stored Value Ready");
+		expect(wrapper.text()).toContain("Use Customer Credit");
+		expect(wrapper.text()).toContain("Customer Credit Ready");
 		expect(wrapper.text()).toContain("Available balance");
 		expect(wrapper.text()).toContain("Applied now");
 		expect(wrapper.text()).toContain("2 source(s)");

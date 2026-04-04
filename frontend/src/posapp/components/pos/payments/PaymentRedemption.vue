@@ -44,7 +44,7 @@
 					density="compact"
 					variant="solo"
 					color="primary"
-					:label="$frappe._('Applied Stored Value')"
+					:label="$frappe._('Applied Customer Credit')"
 					class="sleek-field pos-themed-input"
 					hide-details
 					:model-value="formatCurrency(redeemedCustomerCredit)"
@@ -59,7 +59,7 @@
 					density="compact"
 					variant="solo"
 					color="primary"
-					:label="$frappe._('Available Stored Value')"
+					:label="$frappe._('Available Customer Credit')"
 					class="sleek-field pos-themed-input"
 					hide-details
 					:model-value="formatCurrency(availableCustomerCredit)"
