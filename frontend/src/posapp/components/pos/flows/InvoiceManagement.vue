@@ -1436,13 +1436,7 @@ export default {
 				) {
 					return "repaired";
 				}
-				if (
-					Array.isArray(this.repairCandidateInvoiceNames)
-					&& this.repairCandidateInvoiceNames.includes(invoice?.name)
-				) {
-					return "candidate";
-				}
-				return null;
+				return "candidate";
 			}
 			return "candidate";
 		},

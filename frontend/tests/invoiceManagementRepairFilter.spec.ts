@@ -181,8 +181,8 @@ describe("InvoiceManagement repair candidate filter", () => {
 		expect(context.repairedChangeAllocationInvoiceNames).toEqual(["ACC-SINV-0001"]);
 		expect((InvoiceManagement as any).methods.changeAllocationRepairState.call(context, historyInvoices[0])).toBe("repaired");
 		expect((InvoiceManagement as any).methods.isRepairCandidate.call(context, historyInvoices[0])).toBe(false);
-		expect((InvoiceManagement as any).methods.changeAllocationRepairState.call(context, historyInvoices[1])).toBe(null);
-		expect((InvoiceManagement as any).methods.isRepairCandidate.call(context, historyInvoices[1])).toBe(false);
+		expect((InvoiceManagement as any).methods.changeAllocationRepairState.call(context, historyInvoices[1])).toBe("candidate");
+		expect((InvoiceManagement as any).methods.isRepairCandidate.call(context, historyInvoices[1])).toBe(true);
 	});
 
 	it("keeps POS Invoice repair candidates visible when backend preview matches them", async () => {
