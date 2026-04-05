@@ -24,7 +24,7 @@
 						@change="$emit('update-amount', payment, $event)"
 						:rules="[isNumber]"
 						:prefix="currencySymbol(currency)"
-						@focus="$emit('set-rest-amount', payment)"
+						@focus="$emit('set-rest-amount', payment, isReturn)"
 						:readonly="isReturn"
 					></v-text-field>
 				</v-col>
@@ -36,7 +36,7 @@
 							variant="flat"
 							class="payment-method-action-btn"
 							:data-test="`payment-method-action-${payment.mode_of_payment}`"
-							@click="$emit('set-rest-amount', payment)"
+							@click="$emit('set-full-amount', payment, isReturn)"
 						>
 							{{ payment.mode_of_payment }}
 						</v-btn>
