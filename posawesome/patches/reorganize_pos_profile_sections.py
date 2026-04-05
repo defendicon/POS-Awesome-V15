@@ -88,6 +88,7 @@ ORDERED_CHAIN = [
     "use_customer_credit",
     "posa_use_gift_cards",
     "posa_allow_supervisor_manage_gift_cards",
+    "posa_gift_card_liability_account",
     "posa_sales_persons",
     "posa_apply_customer_discount",
     "posa_allow_write_off_change",

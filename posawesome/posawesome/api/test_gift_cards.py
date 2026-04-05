@@ -31,13 +31,47 @@ class FakeGiftCard:
         return self
 
 
+class FakeJournalEntry:
+    def __init__(self, payload=None):
+        payload = payload or {}
+        self.doctype = payload.get("doctype", "Journal Entry")
+        self.voucher_type = payload.get("voucher_type", "Journal Entry")
+        self.posting_date = payload.get("posting_date")
+        self.company = payload.get("company")
+        self.user_remark = payload.get("user_remark")
+        self.accounts = []
+        self.flags = types.SimpleNamespace(ignore_permissions=False)
+        self.saved = False
+        self.submitted = False
+
+    def append(self, fieldname, value):
+        target = getattr(self, fieldname)
+        row = dict(value)
+        target.append(row)
+        return row
+
+    def set_missing_values(self):
+        return None
+
+    def save(self, ignore_permissions=False):
+        self.saved = True
+        return self
+
+    def submit(self):
+        self.submitted = True
+        return self
+
+
 def _install_stubs():
     frappe_module = types.ModuleType("frappe")
+    frappe_utils_module = types.ModuleType("frappe.utils")
     employees_module = types.ModuleType("posawesome.posawesome.api.employees")
+    utilities_module = types.ModuleType("posawesome.posawesome.api.utilities")
 
     state = {
         "cards": {},
         "new_docs": [],
+        "journal_entries": [],
         "terminal_users": {"Main POS": ["supervisor@example.com", "cashier@example.com"]},
         "user_docs": {
             "supervisor@example.com": types.SimpleNamespace(
@@ -53,6 +87,33 @@ def _install_stubs():
                 posa_is_pos_supervisor=0,
             ),
         },
+        "invoices": {
+            "ACC-SINV-0001": types.SimpleNamespace(
+                doctype="Sales Invoice",
+                name="ACC-SINV-0001",
+                company="Test Company",
+                posting_date="2026-04-05",
+                pos_profile="Main POS",
+                debit_to="1310 - Debtors - TC",
+                customer="CUST-0001",
+            )
+        },
+        "pos_profiles": {
+            "Main POS": types.SimpleNamespace(
+                name="Main POS",
+                company="Test Company",
+                cost_center="Main - TC",
+                posa_default_source_account="1110 - Cash - TC",
+                posa_gift_card_liability_account="2190 - Gift Card Liability - TC",
+            )
+        },
+        "companies": {
+            "Test Company": types.SimpleNamespace(
+                name="Test Company",
+                default_cash_account="1110 - Cash - TC",
+                cost_center="Main - TC",
+            )
+        },
     }
 
     frappe_module._ = lambda text: text
@@ -60,6 +121,7 @@ def _install_stubs():
     frappe_module.throw = lambda message: (_ for _ in ()).throw(Exception(message))
     frappe_module.generate_hash = lambda: "GCODE12345"
     frappe_module.utils = types.SimpleNamespace(now_datetime=lambda: "2026-04-05 12:00:00")
+    frappe_utils_module.nowdate = lambda: "2026-04-05"
     frappe_module.session = types.SimpleNamespace(user="administrator@example.com")
 
     def _new_doc(doctype):
@@ -69,7 +131,13 @@ def _install_stubs():
         state["new_docs"].append(doc)
         return doc
 
-    def _get_doc(doctype, name):
+    def _get_doc(doctype, name=None):
+        if isinstance(doctype, dict):
+            if doctype.get("doctype") == "Journal Entry":
+                entry = FakeJournalEntry(doctype)
+                state["journal_entries"].append(entry)
+                return entry
+            raise AssertionError(f"Unexpected dict get_doc doctype: {doctype.get('doctype')}")
         if doctype == "POS Gift Card":
             if name not in state["cards"]:
                 raise AssertionError(f"Unknown gift card: {name}")
@@ -78,10 +146,26 @@ def _install_stubs():
             if name not in state["user_docs"]:
                 raise AssertionError(f"Unknown user: {name}")
             return state["user_docs"][name]
+        if doctype == "Sales Invoice":
+            if name not in state["invoices"]:
+                raise AssertionError(f"Unknown invoice: {name}")
+            return state["invoices"][name]
         raise AssertionError(f"Unexpected get_doc doctype: {doctype}")
 
     frappe_module.new_doc = _new_doc
     frappe_module.get_doc = _get_doc
+    frappe_module.get_cached_doc = (
+        lambda doctype, name: state["pos_profiles"][name]
+        if doctype == "POS Profile"
+        else state["companies"][name]
+    )
+    frappe_module.get_value = (
+        lambda doctype, name, fieldname:
+            getattr(state["pos_profiles"][name], fieldname, None)
+            if doctype == "POS Profile"
+            else getattr(state["companies"][name], fieldname, None)
+    )
+    frappe_module.flags = types.SimpleNamespace(ignore_account_permission=False)
     frappe_module.db = types.SimpleNamespace(
         exists=lambda doctype, name=None: bool(
             doctype == "POS Gift Card"
@@ -98,9 +182,12 @@ def _install_stubs():
     employees_module._is_pos_supervisor = lambda user_doc: bool(
         getattr(user_doc, "posa_is_pos_supervisor", 0)
     )
+    utilities_module.ensure_child_doctype = lambda *args, **kwargs: None
 
     sys.modules["frappe"] = frappe_module
+    sys.modules["frappe.utils"] = frappe_utils_module
     sys.modules["posawesome.posawesome.api.employees"] = employees_module
+    sys.modules["posawesome.posawesome.api.utilities"] = utilities_module
     return state
 
 
@@ -136,6 +223,7 @@ class TestGiftCardApi(unittest.TestCase):
     def setUp(self):
         self.state["cards"].clear()
         self.state["new_docs"].clear()
+        self.state["journal_entries"].clear()
 
     def test_issue_gift_card_requires_supervisor(self):
         with self.assertRaises(Exception) as ctx:
@@ -166,6 +254,16 @@ class TestGiftCardApi(unittest.TestCase):
         self.assertEqual(existing.transactions[0]["transaction_type"], "Top Up")
         self.assertEqual(existing.transactions[0]["amount"], 250)
         self.assertEqual(existing.transactions[0]["balance_after"], 750)
+        self.assertEqual(len(self.state["journal_entries"]), 1)
+        self.assertTrue(self.state["journal_entries"][0].submitted)
+        self.assertEqual(
+            self.state["journal_entries"][0].accounts[0]["account"],
+            "1110 - Cash - TC",
+        )
+        self.assertEqual(
+            self.state["journal_entries"][0].accounts[1]["account"],
+            "2190 - Gift Card Liability - TC",
+        )
 
     def test_redeem_gift_card_records_invoice_reference(self):
         existing = FakeGiftCard(code="GC-0002", balance=800, status="Active")
@@ -185,6 +283,15 @@ class TestGiftCardApi(unittest.TestCase):
         self.assertEqual(existing.transactions[0]["transaction_type"], "Redeem")
         self.assertEqual(existing.transactions[0]["reference_doctype"], "Sales Invoice")
         self.assertEqual(existing.transactions[0]["reference_name"], "ACC-SINV-0001")
+        self.assertEqual(len(self.state["journal_entries"]), 1)
+        self.assertEqual(
+            self.state["journal_entries"][0].accounts[0]["account"],
+            "2190 - Gift Card Liability - TC",
+        )
+        self.assertEqual(
+            self.state["journal_entries"][0].accounts[1]["reference_name"],
+            "ACC-SINV-0001",
+        )
 
     def test_redeem_gift_card_blocks_inactive_card(self):
         existing = FakeGiftCard(code="GC-0003", balance=800, status="Inactive")
@@ -201,6 +308,26 @@ class TestGiftCardApi(unittest.TestCase):
             )
 
         self.assertIn("active gift cards", str(ctx.exception))
+
+    def test_issue_gift_card_with_initial_amount_creates_liability_entry(self):
+        result = self.module.issue_gift_card(
+            pos_profile="Main POS",
+            cashier="supervisor@example.com",
+            company="Test Company",
+            initial_amount=500,
+            gift_card_code="GC-ISSUE-01",
+        )
+
+        self.assertEqual(result["current_balance"], 500)
+        self.assertEqual(len(self.state["journal_entries"]), 1)
+        self.assertEqual(
+            self.state["journal_entries"][0].accounts[0]["account"],
+            "1110 - Cash - TC",
+        )
+        self.assertEqual(
+            self.state["journal_entries"][0].accounts[1]["account"],
+            "2190 - Gift Card Liability - TC",
+        )
 
 
 if __name__ == "__main__":

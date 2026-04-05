@@ -7984,6 +7984,16 @@
 	},
 	{
 		"doctype": "Custom Field",
+		"dt": "POS Profile",
+		"fieldname": "posa_gift_card_liability_account",
+		"fieldtype": "Link",
+		"label": "Gift Card Liability Account",
+		"options": "Account",
+		"insert_after": "posa_allow_supervisor_manage_gift_cards",
+		"name": "POS Profile-posa_gift_card_liability_account"
+	},
+	{
+		"doctype": "Custom Field",
 		"dt": "User",
 		"fieldname": "posa_is_pos_supervisor",
 		"fieldtype": "Check",

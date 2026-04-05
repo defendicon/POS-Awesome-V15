@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import frappe
+from frappe.utils import nowdate
+
+from posawesome.posawesome.api.utilities import ensure_child_doctype
 
 from posawesome.posawesome.api.employees import (
 	_ensure_terminal_user,
@@ -33,6 +36,16 @@ def _normalize_code(gift_card_code: str | None) -> str:
 	return code
 
 
+def _doc_value(doc, key, default=None):
+	if doc is None:
+		return default
+	if hasattr(doc, "get"):
+		value = doc.get(key, default)
+		if value is not None:
+			return value
+	return getattr(doc, key, default)
+
+
 def _require_supervisor(pos_profile=None, cashier=None):
 	profile_name = _resolve_profile_name(pos_profile)
 	if not profile_name:
@@ -48,6 +61,68 @@ def _require_supervisor(pos_profile=None, cashier=None):
 		frappe.throw(frappe._("A POS supervisor is required for this action."))
 
 	return profile_name, cashier, user_doc
+
+
+def _get_profile_doc(pos_profile=None):
+	profile_name = _resolve_profile_name(pos_profile)
+	if not profile_name:
+		frappe.throw(frappe._("POS profile is required."))
+	return frappe.get_cached_doc("POS Profile", profile_name)
+
+
+def _resolve_cost_center(profile_doc, company):
+	cost_center = str(_doc_value(profile_doc, "cost_center") or "").strip()
+	if cost_center:
+		return cost_center
+	cost_center = str(frappe.get_value("Company", company, "cost_center") or "").strip()
+	if cost_center:
+		return cost_center
+	frappe.throw(frappe._("Cost Center is not set for POS Profile or Company."))
+
+
+def _resolve_issue_source_account(profile_doc, company):
+	source_account = str(_doc_value(profile_doc, "posa_default_source_account") or "").strip()
+	if source_account:
+		return source_account
+	source_account = str(frappe.get_value("Company", company, "default_cash_account") or "").strip()
+	if source_account:
+		return source_account
+	frappe.throw(
+		frappe._("Set a default source account on the POS Profile before issuing or topping up gift cards.")
+	)
+
+
+def _resolve_liability_account(profile_doc):
+	liability_account = str(_doc_value(profile_doc, "posa_gift_card_liability_account") or "").strip()
+	if not liability_account:
+		frappe.throw(
+			frappe._("Set a gift card liability account on the POS Profile before using gift cards.")
+		)
+	return liability_account
+
+
+def _create_gift_card_journal_entry(company, posting_date, remark, accounts):
+	je_doc = frappe.get_doc(
+		{
+			"doctype": "Journal Entry",
+			"voucher_type": "Journal Entry",
+			"posting_date": posting_date or nowdate(),
+			"company": company,
+		}
+	)
+
+	for row in accounts:
+		account_row = je_doc.append("accounts", {})
+		account_row.update(row)
+
+	ensure_child_doctype(je_doc, "accounts", "Journal Entry Account")
+	je_doc.flags.ignore_permissions = True
+	frappe.flags.ignore_account_permission = True
+	je_doc.user_remark = remark
+	je_doc.set_missing_values()
+	je_doc.save()
+	je_doc.submit()
+	return je_doc
 
 
 def _get_gift_card(gift_card_code=None):
@@ -93,6 +168,76 @@ def _serialize_gift_card(gift_card_doc):
 	}
 
 
+def _create_issue_or_top_up_entry(profile_doc, company, amount, reference_doctype, reference_name, cashier):
+	if _to_float(amount) <= 0:
+		return None
+
+	source_account = _resolve_issue_source_account(profile_doc, company)
+	liability_account = _resolve_liability_account(profile_doc)
+	cost_center = _resolve_cost_center(profile_doc, company)
+	remark = frappe._("POS Awesome gift card {0} for {1}").format(
+		reference_doctype.lower(),
+		reference_name,
+	)
+
+	return _create_gift_card_journal_entry(
+		company,
+		nowdate(),
+		remark,
+		[
+			{
+				"account": source_account,
+				"debit_in_account_currency": _to_float(amount),
+				"cost_center": cost_center,
+				"user_remark": cashier,
+			},
+			{
+				"account": liability_account,
+				"credit_in_account_currency": _to_float(amount),
+				"cost_center": cost_center,
+				"user_remark": cashier,
+			},
+		],
+	)
+
+
+def _create_redemption_entry(profile_doc, invoice_doc, amount, cashier):
+	redeem_amount = _to_float(amount)
+	if redeem_amount <= 0:
+		return None
+
+	liability_account = _resolve_liability_account(profile_doc)
+	cost_center = _resolve_cost_center(profile_doc, invoice_doc.company)
+	remark = frappe._("POS Awesome gift card redemption for {0} {1}").format(
+		invoice_doc.doctype,
+		invoice_doc.name,
+	)
+
+	return _create_gift_card_journal_entry(
+		invoice_doc.company,
+		invoice_doc.posting_date or nowdate(),
+		remark,
+		[
+			{
+				"account": liability_account,
+				"debit_in_account_currency": redeem_amount,
+				"cost_center": cost_center,
+				"user_remark": cashier,
+			},
+			{
+				"account": invoice_doc.debit_to,
+				"party_type": "Customer",
+				"party": invoice_doc.customer,
+				"reference_type": invoice_doc.doctype,
+				"reference_name": invoice_doc.name,
+				"credit_in_account_currency": redeem_amount,
+				"cost_center": cost_center,
+				"user_remark": cashier,
+			},
+		],
+	)
+
+
 @frappe.whitelist()
 def issue_gift_card(
 	pos_profile=None,
@@ -103,7 +248,8 @@ def issue_gift_card(
 	expiry_date=None,
 	currency="PKR",
 ):
-	_require_supervisor(pos_profile, cashier)
+	profile_name, cashier, _user_doc = _require_supervisor(pos_profile, cashier)
+	profile_doc = _get_profile_doc(profile_name)
 
 	amount = _to_float(initial_amount)
 	if amount < 0:
@@ -124,6 +270,14 @@ def issue_gift_card(
 	gift_card_doc.expiry_date = expiry_date
 	gift_card_doc.issued_by = cashier
 	if amount > 0:
+		_create_issue_or_top_up_entry(
+			profile_doc,
+			company,
+			amount,
+			"POS Gift Card",
+			code,
+			cashier,
+		)
 		_append_transaction(
 			gift_card_doc,
 			"Issue",
@@ -139,7 +293,8 @@ def issue_gift_card(
 
 @frappe.whitelist()
 def top_up_gift_card(pos_profile=None, cashier=None, gift_card_code=None, amount=0):
-	_require_supervisor(pos_profile, cashier)
+	profile_name, cashier, _user_doc = _require_supervisor(pos_profile, cashier)
+	profile_doc = _get_profile_doc(profile_name)
 
 	top_up_amount = _to_float(amount)
 	if top_up_amount <= 0:
@@ -149,6 +304,14 @@ def top_up_gift_card(pos_profile=None, cashier=None, gift_card_code=None, amount
 	if getattr(gift_card_doc, "status", "Active") != "Active":
 		frappe.throw(frappe._("Only active gift cards can be topped up."))
 
+	_create_issue_or_top_up_entry(
+		profile_doc,
+		_doc_value(gift_card_doc, "company"),
+		top_up_amount,
+		"POS Gift Card",
+		_doc_value(gift_card_doc, "name"),
+		cashier,
+	)
 	next_balance = _to_float(getattr(gift_card_doc, "current_balance", 0) + top_up_amount)
 	gift_card_doc.current_balance = next_balance
 	_append_transaction(
@@ -182,6 +345,8 @@ def redeem_gift_card(
 	redeem_amount = _to_float(amount)
 	if redeem_amount <= 0:
 		frappe.throw(frappe._("Redeem amount must be greater than zero."))
+	if not invoice_doctype or not invoice_name:
+		frappe.throw(frappe._("Gift card redemption requires an invoice reference."))
 
 	gift_card_doc = _get_gift_card(gift_card_code)
 	if company and getattr(gift_card_doc, "company", None) != company:
@@ -193,6 +358,13 @@ def redeem_gift_card(
 	current_balance = _to_float(getattr(gift_card_doc, "current_balance", 0))
 	if redeem_amount > current_balance:
 		frappe.throw(frappe._("Gift card balance is insufficient."))
+
+	invoice_doc = frappe.get_doc(invoice_doctype, invoice_name)
+	if company and _doc_value(invoice_doc, "company") != company:
+		frappe.throw(frappe._("Invoice company does not match gift card company."))
+
+	profile_doc = _get_profile_doc(_doc_value(invoice_doc, "pos_profile"))
+	_create_redemption_entry(profile_doc, invoice_doc, redeem_amount, cashier)
 
 	next_balance = _to_float(current_balance - redeem_amount)
 	gift_card_doc.current_balance = next_balance

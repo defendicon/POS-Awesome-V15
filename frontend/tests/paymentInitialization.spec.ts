@@ -5,7 +5,6 @@ import * as paymentInitialization from "../src/posapp/utils/paymentInitializatio
 const {
 	initializePaymentLinesForDialog,
 	resolvePreferredPaymentLine,
-	ensureGiftCardPaymentLine,
 } = paymentInitialization;
 
 describe("paymentInitialization", () => {
@@ -127,57 +126,9 @@ describe("paymentInitialization", () => {
 			giftCardAmount: 120,
 		});
 
-		expect(payment).toBe(doc.payments[0]);
-		expect(doc.payments[0].amount).toBe(180);
-		expect(doc.payments[0].base_amount).toBe(180);
-		expect(doc.payments[1].amount).toBe(0);
-	});
-
-	it("syncs an existing hidden gift card payment line for submission", () => {
-		const doc: any = {
-			rounded_total: 300,
-			conversion_rate: 1,
-			payments: [
-				{ mode_of_payment: "Cash", type: "Cash", amount: 300, base_amount: 300, default: 1 },
-				{ mode_of_payment: "Gift Card", type: "Bank", amount: 0, base_amount: 0 },
-			],
-		};
-
-		const payment = ensureGiftCardPaymentLine(doc, null, 120, 2);
-
-		expect(payment).toBe(doc.payments[1]);
-		expect(doc.payments[1].amount).toBe(120);
-		expect(doc.payments[1].base_amount).toBe(120);
-	});
-
-	it("adds a gift card payment line from the POS profile when the invoice does not already have one", () => {
-		const doc: any = {
-			rounded_total: 300,
-			conversion_rate: 1,
-			payments: [{ mode_of_payment: "Cash", type: "Cash", amount: 300, base_amount: 300, default: 1 }],
-		};
-
-		const payment = ensureGiftCardPaymentLine(
-			doc,
-			{
-				payments: [
-					{ mode_of_payment: "Cash", type: "Cash", account: "1110 - Cash", default: 1 },
-					{ mode_of_payment: "Gift Card", type: "Bank", account: "2190 - Gift Card", default: 0 },
-				],
-			},
-			150,
-			2,
-		);
-
-		expect(payment).toEqual(
-			expect.objectContaining({
-				mode_of_payment: "Gift Card",
-				type: "Bank",
-				account: "2190 - Gift Card",
-				amount: 150,
-				base_amount: 150,
-			}),
-		);
-		expect(doc.payments).toHaveLength(2);
+	expect(payment).toBe(doc.payments[0]);
+	expect(doc.payments[0].amount).toBe(180);
+	expect(doc.payments[0].base_amount).toBe(180);
+	expect(doc.payments[1].amount).toBe(0);
 	});
 });

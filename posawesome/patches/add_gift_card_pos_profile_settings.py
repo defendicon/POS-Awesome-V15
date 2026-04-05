@@ -17,6 +17,13 @@ FIELDS = [
 		"default": "1",
 		"insert_after": "posa_use_gift_cards",
 	},
+	{
+		"fieldname": "posa_gift_card_liability_account",
+		"label": "Gift Card Liability Account",
+		"fieldtype": "Link",
+		"options": "Account",
+		"insert_after": "posa_allow_supervisor_manage_gift_cards",
+	},
 ]
 
 
@@ -33,6 +40,7 @@ def execute():
 					"label": field["label"],
 					"fieldtype": field["fieldtype"],
 					"default": field.get("default"),
+					"options": field.get("options"),
 					"insert_after": field["insert_after"],
 				},
 				update_modified=False,

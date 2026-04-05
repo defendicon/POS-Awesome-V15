@@ -39,6 +39,16 @@ frappe.ui.form.on("POS Profile", {
 			};
 		});
 
+		frm.set_query("posa_gift_card_liability_account", function (doc) {
+			return {
+				filters: {
+					company: doc.company,
+					is_group: 0,
+					root_type: "Liability",
+				},
+			};
+		});
+
 		frm.set_query("account", "posa_allowed_expense_accounts", function (doc) {
 			return {
 				filters: {
