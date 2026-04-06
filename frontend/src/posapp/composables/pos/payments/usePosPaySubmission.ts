@@ -1,5 +1,6 @@
 import { ref, type Ref } from "vue";
 import { isOffline, saveOfflinePayment } from "../../../../offline/index";
+import { normalizeAndValidateReferenceFields } from "./useReferenceFieldRules";
 
 declare const frappe: any;
 declare const __: (_text: string, _args?: any[]) => string;
@@ -83,10 +84,6 @@ export function usePosPaySubmission({
 		const resolvedPartyType = partyType?.value || "Customer";
 		const resolvedPaymentType = paymentType?.value || "Receive";
 		const resolvedPostingDate = postingDate?.value || null;
-		const resolvedReferenceNo =
-			referenceNo?.value?.trim() || posOpeningShift.value?.name || null;
-		const resolvedReferenceDate =
-			referenceDate?.value?.trim() || resolvedPostingDate || null;
 
 		const finalizeSubmission = () => {
 			clearSelections();
@@ -127,6 +124,22 @@ export function usePosPaySubmission({
 				frappe.throw(__("Please select an invoice"));
 			}
 
+			const activePaymentMethods = payment_methods.value.filter(
+				(method: any) => flt(method?.amount) > 0,
+			);
+
+			const referenceFieldState = normalizeAndValidateReferenceFields({
+				paymentMethods: activePaymentMethods,
+				referenceNo: referenceNo?.value,
+				referenceDate: referenceDate?.value,
+				postingDate: resolvedPostingDate,
+				fallbackReferenceNo: posOpeningShift.value?.name || null,
+			});
+
+			if (referenceFieldState.errors.length) {
+				frappe.throw(referenceFieldState.errors.join("<br>"));
+			}
+
 			const selectedInvoicesForPayload = selected_invoices.value.map(
 				(invoice: any) => ({ ...invoice }),
 			);
@@ -138,23 +151,21 @@ export function usePosPaySubmission({
 					0,
 				);
 
-		const payload = {
-			customer: party,
-			party,
-			party_type: resolvedPartyType,
-			payment_type: resolvedPaymentType,
-			company: company.value,
-			currency: invoiceTotalCurrency.value,
-			posting_date: resolvedPostingDate,
-			exchange_rate: exchangeRate.value || null,
-			reference_no: resolvedReferenceNo,
-			reference_date: resolvedReferenceDate,
-			pos_opening_shift_name: posOpeningShift.value.name,
-			pos_profile_name: posProfile.value.name,
-			pos_profile: posProfile.value,
-			payment_methods: payment_methods.value.filter(
-					(m: any) => flt(m.amount) > 0,
-				),
+			const payload = {
+				customer: party,
+				party,
+				party_type: resolvedPartyType,
+				payment_type: resolvedPaymentType,
+				company: company.value,
+				currency: invoiceTotalCurrency.value,
+				posting_date: resolvedPostingDate,
+				exchange_rate: exchangeRate.value || null,
+				reference_no: referenceFieldState.resolvedReferenceNo,
+				reference_date: referenceFieldState.resolvedReferenceDate,
+				pos_opening_shift_name: posOpeningShift.value.name,
+				pos_profile_name: posProfile.value.name,
+				pos_profile: posProfile.value,
+				payment_methods: activePaymentMethods,
 				selected_invoices: selectedInvoicesForPayload,
 				selected_payments: selected_payments.value,
 				total_selected_invoices: flt(totalSelectedInvoicesAmount),
