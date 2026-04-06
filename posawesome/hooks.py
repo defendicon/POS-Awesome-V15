@@ -81,6 +81,7 @@ after_migrate = [
     "posawesome.patches.add_dashboard_global_settings.execute",
     "posawesome.patches.reorganize_pos_profile_sections.execute",
     "posawesome.patches.add_gift_card_pos_profile_settings.execute",
+    "posawesome.patches.add_gift_card_invoice_redemption_fields.execute",
     "posawesome.patches.add_gift_card_to_workspace.execute",
 ]
 
@@ -220,6 +221,8 @@ fixtures = [
                     "POS Profile-use_customer_credit",
                     "POS Profile-posa_use_gift_cards",
                     "POS Profile-posa_allow_supervisor_manage_gift_cards",
+                    "Sales Invoice-gift_card_redemptions",
+                    "POS Invoice-gift_card_redemptions",
                     "POS Profile-use_cashback",
                     "POS Profile-posa_hide_closing_shift",
                     "Customer-posa_discount",
