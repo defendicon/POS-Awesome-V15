@@ -88,6 +88,13 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 		win.document.close();
 		win.focus();
 		win.print();
+		win.close(); // Auto-close after printing
+		setTimeout(() => {
+            if (!win.closed) {
+                win.close();
+                console.log("✅ Preview auto-closed (timeout)");
+            }
+        }, 1000);
 	};
 
 	const loadPrintPage = async (input: { doc?: any; doctype?: string } = {}) => {
