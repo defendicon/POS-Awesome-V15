@@ -35,3 +35,7 @@
 - Extended the payment flow with a scan-friendly gift-card dialog, gift-card payment-row treatment, supervisor-only issue/top-up actions inside POS, and submit-time payload/offline validation so gift-card redemption stays online-only.
 - Extended offline customer-balance support with stored-value snapshot caches, richer cached customer summary fields, and replay-safe redemption metadata on queued offline invoices so customer-balance redemption remains recoverable after sync.
 - Re-verified the Phase 2 closeout slices with focused frontend Vitest coverage, frontend type-check, and backend Python tests for gift cards plus invoice post-submit payment processing.
+
+## 2026-04-07
+- Removed the shell-level drafts rail from `Pos.vue` after confirming the accepted Phase 1 UX keeps drafts inside the existing invoice summary drawer/dialog surfaces rather than duplicating that surface at the POS shell level.
+- Kept the `Drafts` label unchanged, retained the faster payment quick actions and settlement-state polish, and marked Phase 1 code-level scope complete under the current accepted UX shape.
