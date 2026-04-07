@@ -73,10 +73,20 @@
 						/>
 						<PaymentGiftCardSection
 							:enabled="Boolean(pos_profile?.posa_use_gift_cards)"
+							:expanded="giftCardInlineExpanded"
 							:applied-amount="giftCardAppliedAmount"
-							:card-code="giftCardRedemptions[0]?.gift_card_code || ''"
+							:card-code="giftCardCode || giftCardRedemptions[0]?.gift_card_code || ''"
+							:redeem-amount="giftCardAmount"
+							:balance="giftCardBalance"
+							:status="giftCardStatus"
+							:loading="giftCardLoading"
+							:error-message="giftCardError"
 							:format-currency="(value) => formatCurrency(value, invoice_doc.currency)"
-							@open="openGiftCardDialog()"
+							@toggle="toggleGiftCardInline"
+							@update:card-code="giftCardCode = $event"
+							@update:redeem-amount="giftCardAmount = $event"
+							@check-balance="checkGiftCardBalance"
+							@apply="applyGiftCardRedemption"
 							@clear="clearGiftCardRedemption"
 						/>
 					</section>
@@ -382,6 +392,7 @@ const readonly = ref(false); // Add missing readonly ref
 const submissionInFlight = ref(false);
 const queuedShortcutSubmit = ref(null);
 const giftCardDialogOpen = ref(false);
+const giftCardInlineExpanded = ref(false);
 const activeGiftCardPayment = ref(null);
 const giftCardCode = ref("");
 const giftCardAmount = ref(0);
@@ -667,6 +678,7 @@ const giftCardAppliedAmount = computed(() =>
 
 const resetGiftCardState = ({ clearPayment = false } = {}) => {
 	giftCardDialogOpen.value = false;
+	giftCardInlineExpanded.value = false;
 	giftCardCode.value = "";
 	giftCardAmount.value = 0;
 	giftCardBalance.value = 0;
@@ -723,7 +735,22 @@ const clearGiftCardRedemption = () => {
 	giftCardBalance.value = 0;
 	giftCardStatus.value = "";
 	giftCardError.value = "";
+	giftCardInlineExpanded.value = false;
 	rebalancePreferredPaymentCoverage(0);
+};
+
+const toggleGiftCardInline = () => {
+	giftCardInlineExpanded.value = !giftCardInlineExpanded.value;
+	activeGiftCardPayment.value = null;
+	if (giftCardInlineExpanded.value) {
+		giftCardCode.value = giftCardRedemptions.value[0]?.gift_card_code || giftCardCode.value || "";
+		giftCardAmount.value = flt(
+			giftCardRedemptions.value[0]?.amount || giftCardAmount.value || 0,
+			currency_precision.value,
+		);
+	} else {
+		giftCardError.value = "";
+	}
 };
 
 const openGiftCardDialog = (payment = null) => {
@@ -818,6 +845,7 @@ const applyGiftCardRedemption = async () => {
 		},
 	];
 	rebalancePreferredPaymentCoverage(nextAmount);
+	giftCardInlineExpanded.value = false;
 	giftCardDialogOpen.value = false;
 };
 
