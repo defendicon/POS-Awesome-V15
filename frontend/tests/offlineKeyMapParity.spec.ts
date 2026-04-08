@@ -17,6 +17,12 @@ function extractWorkerKeyTableMapKeys(source: string): string[] {
 }
 
 describe("offline key map parity", () => {
+	it("maps bootstrap snapshot state into settings storage", () => {
+		expect(KEY_TABLE_MAP.bootstrap_snapshot).toBe("settings");
+		expect(KEY_TABLE_MAP.bootstrap_snapshot_status).toBe("settings");
+		expect(KEY_TABLE_MAP.bootstrap_limited_mode).toBe("settings");
+	});
+
 	it("keeps app db KEY_TABLE_MAP and worker KEY_TABLE_MAP in sync", () => {
 		const thisFile = fileURLToPath(import.meta.url);
 		const testsDir = path.dirname(thisFile);

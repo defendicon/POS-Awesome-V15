@@ -562,6 +562,49 @@ export function getOpeningStorage() {
 	return memory.pos_opening_storage || null;
 }
 
+export function getBootstrapSnapshot() {
+	return memory.bootstrap_snapshot || null;
+}
+
+export function setBootstrapSnapshot(snapshot) {
+	try {
+		memory.bootstrap_snapshot = snapshot
+			? JSON.parse(JSON.stringify(snapshot))
+			: null;
+		persist("bootstrap_snapshot");
+	} catch (e) {
+		console.error("Failed to set bootstrap snapshot", e);
+	}
+}
+
+export function getBootstrapSnapshotStatus() {
+	return memory.bootstrap_snapshot_status || null;
+}
+
+export function setBootstrapSnapshotStatus(status) {
+	try {
+		memory.bootstrap_snapshot_status = status
+			? JSON.parse(JSON.stringify(status))
+			: null;
+		persist("bootstrap_snapshot_status");
+	} catch (e) {
+		console.error("Failed to set bootstrap snapshot status", e);
+	}
+}
+
+export function getBootstrapLimitedMode() {
+	return !!memory.bootstrap_limited_mode;
+}
+
+export function setBootstrapLimitedMode(state) {
+	try {
+		memory.bootstrap_limited_mode = !!state;
+		persist("bootstrap_limited_mode");
+	} catch (e) {
+		console.error("Failed to set bootstrap limited mode", e);
+	}
+}
+
 function cloneOpeningData(data: any) {
 	try {
 		return JSON.parse(JSON.stringify(data));

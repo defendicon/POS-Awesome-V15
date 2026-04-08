@@ -44,6 +44,9 @@ export const KEY_TABLE_MAP: Record<string, string> = {
 	cache_ready: "settings",
 	stock_cache_ready: "settings",
 	manual_offline: "settings",
+	bootstrap_snapshot: "settings",
+	bootstrap_snapshot_status: "settings",
+	bootstrap_limited_mode: "settings",
 	schema_signature: "settings",
 	items_last_sync: "sync_state",
 	customers_last_sync: "sync_state",
@@ -132,6 +135,9 @@ export const memory: AnyRecord = {
 	print_template: "",
 	terms_and_conditions: "",
 	cache_ready: false,
+	bootstrap_snapshot: null,
+	bootstrap_snapshot_status: null,
+	bootstrap_limited_mode: false,
 };
 
 export const initPromise = new Promise<void>((resolve) => {
@@ -302,6 +308,9 @@ export async function clearAllCache() {
 	memory.manual_offline = false;
 	memory.item_groups_cache = [];
 	memory.coupons_cache = {};
+	memory.bootstrap_snapshot = null;
+	memory.bootstrap_snapshot_status = null;
+	memory.bootstrap_limited_mode = false;
 }
 
 export async function forceClearAllCache() {
@@ -315,6 +324,9 @@ export async function forceClearAllCache() {
 	memory.print_template = "";
 	memory.terms_and_conditions = "";
 	memory.cache_ready = false;
+	memory.bootstrap_snapshot = null;
+	memory.bootstrap_snapshot_status = null;
+	memory.bootstrap_limited_mode = false;
 }
 
 export async function checkDbHealth() {

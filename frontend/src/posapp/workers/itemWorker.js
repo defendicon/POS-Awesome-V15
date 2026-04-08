@@ -118,6 +118,9 @@ const SCHEMA_SIGNATURE = JSON.stringify(BASE_SCHEMA);
 				"cache_ready",
 				"stock_cache_ready",
 				"manual_offline",
+				"bootstrap_snapshot",
+				"bootstrap_snapshot_status",
+				"bootstrap_limited_mode",
 				"schema_signature",
 			];
 
@@ -176,6 +179,9 @@ const KEY_TABLE_MAP = {
 	cache_ready: "settings",
 	stock_cache_ready: "settings",
 	manual_offline: "settings",
+	bootstrap_snapshot: "settings",
+	bootstrap_snapshot_status: "settings",
+	bootstrap_limited_mode: "settings",
 	schema_signature: "settings",
 	items_last_sync: "sync_state",
 	customers_last_sync: "sync_state",
