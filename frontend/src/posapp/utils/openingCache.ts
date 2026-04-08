@@ -2,7 +2,8 @@ export function hasCachedOpeningData(openingData: any): boolean {
 	return !!(
 		openingData &&
 		openingData.pos_profile &&
-		openingData.pos_opening_shift
+		openingData.pos_opening_shift &&
+		openingData.pos_opening_shift.user
 	);
 }
 
@@ -28,4 +29,17 @@ export function getValidCachedOpeningForCurrentUser(
 		return null;
 	}
 	return openingData;
+}
+
+export function getCachedOpeningBootstrapSeed(openingData: any) {
+	if (!hasCachedOpeningData(openingData)) {
+		return null;
+	}
+
+	return {
+		profileName: openingData?.pos_profile?.name || null,
+		profileModified: openingData?.pos_profile?.modified || null,
+		openingShiftName: openingData?.pos_opening_shift?.name || null,
+		openingShiftUser: openingData?.pos_opening_shift?.user || null,
+	};
 }

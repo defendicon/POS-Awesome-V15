@@ -3,7 +3,10 @@ import {
 	setOpeningStorage,
 	setPrintTemplate,
 	setTermsAndConditions,
+	getBootstrapSnapshot,
+	setBootstrapSnapshot,
 } from "../offline/index";
+import { createBootstrapSnapshotFromRegisterData } from "../offline/bootstrapSnapshot";
 
 declare const frappe: any;
 
@@ -49,7 +52,14 @@ function hasProfileChanged(currentProfile: any, nextProfile: any) {
 function updateOpeningStorageProfile(profile: any) {
 	const cached = getOpeningStorage() as any;
 	if (cached?.pos_profile) {
-		setOpeningStorage({ ...cached, pos_profile: profile });
+		const updated = { ...cached, pos_profile: profile };
+		setOpeningStorage(updated);
+		setBootstrapSnapshot(
+			createBootstrapSnapshotFromRegisterData(
+				updated,
+				getBootstrapSnapshot(),
+			),
+		);
 	}
 }
 
@@ -90,6 +100,15 @@ export async function ensurePosProfile() {
 		if (res.message) {
 			frappe.boot.pos_profile = res.message;
 			updateOpeningStorageProfile(res.message);
+			setBootstrapSnapshot(
+				createBootstrapSnapshotFromRegisterData(
+					{
+						pos_profile: res.message,
+						pos_opening_shift: (getOpeningStorage() as any)?.pos_opening_shift,
+					},
+					getBootstrapSnapshot(),
+				),
+			);
 			await cachePrintTemplateAndTerms(res.message);
 			return res.message;
 		}

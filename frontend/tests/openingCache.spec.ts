@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	getValidCachedOpeningForCurrentUser,
+	getCachedOpeningBootstrapSeed,
 	hasCachedOpeningData,
 	isCachedOpeningValidForCurrentUser,
 } from "../src/posapp/utils/openingCache";
@@ -47,5 +48,20 @@ describe("opening cache helpers", () => {
 		expect(hasCachedOpeningData({ pos_profile: openingData.pos_profile })).toBe(
 			false,
 		);
+		expect(
+			hasCachedOpeningData({
+				pos_profile: openingData.pos_profile,
+				pos_opening_shift: { name: "SHIFT-1" },
+			}),
+		).toBe(false);
+	});
+
+	it("builds a bootstrap seed from valid cached opening data", () => {
+		expect(getCachedOpeningBootstrapSeed(openingData)).toEqual({
+			profileName: "POS-1",
+			profileModified: null,
+			openingShiftName: "SHIFT-1",
+			openingShiftUser: "test@example.com",
+		});
 	});
 });

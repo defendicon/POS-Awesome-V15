@@ -138,9 +138,12 @@ import {
 	getOpeningDialogStorage,
 	setOpeningDialogStorage,
 	setOpeningStorage,
+	getBootstrapSnapshot,
+	setBootstrapSnapshot,
 	initPromise,
 	checkDbHealth,
 } from "../../../../offline/index";
+import { createBootstrapSnapshotFromRegisterData } from "../../../../offline/bootstrapSnapshot";
 
 defineOptions({
 	name: "OpeningDialog",
@@ -270,6 +273,12 @@ function submit_dialog() {
 				emit("register", r.message);
 				try {
 					setOpeningStorage(r.message);
+					setBootstrapSnapshot(
+						createBootstrapSnapshotFromRegisterData(
+							r.message,
+							getBootstrapSnapshot(),
+						),
+					);
 				} catch (e) {
 					console.error("Failed to cache opening data", e);
 				}

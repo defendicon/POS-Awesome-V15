@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	buildBootstrapSnapshot,
+	createBootstrapSnapshotFromRegisterData,
 	validateBootstrapSnapshot,
 } from "../src/offline/bootstrapSnapshot";
 
@@ -109,5 +110,27 @@ describe("bootstrap snapshot", () => {
 		expect(result.mode).toBe("limited");
 		expect(result.capabilities.canApplyPricingOffline).toBe(false);
 		expect(result.capabilities.canSellOffline).toBe(true);
+	});
+
+	it("hydrates profile and opening prerequisites from register data", () => {
+		const snapshot = createBootstrapSnapshotFromRegisterData(
+			{
+				pos_profile: {
+					name: "POS-1",
+					modified: "2026-04-08 10:00:00",
+				},
+				pos_opening_shift: {
+					name: "SHIFT-1",
+					user: "test@example.com",
+				},
+			},
+			null,
+		);
+
+		expect(snapshot.profile_name).toBe("POS-1");
+		expect(snapshot.opening_shift_name).toBe("SHIFT-1");
+		expect(snapshot.opening_shift_user).toBe("test@example.com");
+		expect(snapshot.prerequisites.pos_profile).toBe("ready");
+		expect(snapshot.prerequisites.pos_opening_shift).toBe("ready");
 	});
 });

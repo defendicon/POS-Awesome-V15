@@ -43,6 +43,17 @@ export type BootstrapValidationInput = {
 	sessionUser?: string | null;
 };
 
+type RegisterData = {
+	pos_profile?: {
+		name?: string | null;
+		modified?: string | null;
+	};
+	pos_opening_shift?: {
+		name?: string | null;
+		user?: string | null;
+	};
+} | null;
+
 const PREREQUISITES_FOR_OFFLINE_SELL = [
 	"pos_profile",
 	"pos_opening_shift",
@@ -114,6 +125,30 @@ export function buildBootstrapSnapshot(
 		opening_shift_user: input.openingShiftUser || null,
 		prerequisites: input.prerequisites || {},
 	};
+}
+
+export function createBootstrapSnapshotFromRegisterData(
+	registerData: RegisterData,
+	currentSnapshot: BootstrapSnapshot | null | undefined,
+): BootstrapSnapshot {
+	const nextPrerequisites = {
+		...(currentSnapshot?.prerequisites || {}),
+		pos_profile: registerData?.pos_profile?.name ? "ready" : "missing",
+		pos_opening_shift:
+			registerData?.pos_opening_shift?.name &&
+			registerData?.pos_opening_shift?.user
+				? "ready"
+				: "missing",
+	};
+
+	return buildBootstrapSnapshot({
+		buildVersion: currentSnapshot?.build_version || null,
+		profileName: registerData?.pos_profile?.name || null,
+		profileModified: registerData?.pos_profile?.modified || null,
+		openingShiftName: registerData?.pos_opening_shift?.name || null,
+		openingShiftUser: registerData?.pos_opening_shift?.user || null,
+		prerequisites: nextPrerequisites,
+	});
 }
 
 export function validateBootstrapSnapshot(

@@ -9,8 +9,11 @@ import {
 	clearOpeningStorage,
 	setTaxTemplate,
 	isOffline,
+	getBootstrapSnapshot,
+	setBootstrapSnapshot,
 } from "../../../../offline/index";
 import { getValidCachedOpeningForCurrentUser } from "../../../utils/openingCache";
+import { createBootstrapSnapshotFromRegisterData } from "../../../../offline/bootstrapSnapshot";
 
 declare const frappe: any;
 
@@ -89,6 +92,12 @@ export function usePosShift(openDialog?: () => void) {
 		pos_profile.value = data.pos_profile;
 		pos_opening_shift.value = data.pos_opening_shift;
 		uiStore.setRegisterData(data);
+		setBootstrapSnapshot(
+			createBootstrapSnapshotFromRegisterData(
+				data,
+				getBootstrapSnapshot(),
+			),
+		);
 
 		try {
 			frappe.realtime.emit("pos_profile_registered");
