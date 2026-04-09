@@ -100,6 +100,9 @@
 		<NavbarSettingsPanel
 			v-model="settingsPanelOpen"
 			:sections="settingsSections"
+			:pos-profile="posProfile"
+			:current-cashier="currentCashier"
+			:current-cashier-display="currentCashierDisplay"
 			@select-action="handleSettingsPanelAction"
 		/>
 
@@ -404,6 +407,13 @@ export default {
 			}
 
 			const personalActions = [
+				{
+					id: "manage-cashier-pin",
+					label: this.__("Manage Cashier PIN"),
+					subtitle: this.currentCashierDisplay || this.__("Create or change your PIN"),
+					icon: "mdi-form-textbox-password",
+					tone: "secondary",
+				},
 				{
 					id: "toggle-theme",
 					label: this.__("Toggle Theme"),

@@ -273,74 +273,6 @@
 		</v-card>
 	</v-dialog>
 
-	<v-dialog v-model="showPinDialog" max-width="420" persistent>
-		<v-card class="pos-themed-card">
-			<v-card-title class="text-h6 d-flex align-center">
-				<v-icon start color="primary" class="mr-2">mdi-form-textbox-password</v-icon>
-				{{ pinDialogTitle }}
-			</v-card-title>
-
-			<v-card-text>
-				<div class="text-body-2 mb-3">
-					{{ __("Cashier") }}:
-					<strong>{{ currentCashierDisplay || __("Not selected") }}</strong>
-				</div>
-
-				<v-alert v-if="pinMessage" :type="pinMessageType" variant="tonal" density="compact" class="mb-3">
-					{{ pinMessage }}
-				</v-alert>
-
-				<v-text-field
-					v-if="pinStatus.has_pin"
-					v-model="pinForm.current_pin"
-					:type="pinVisibility.current_pin ? 'text' : 'password'"
-					:append-inner-icon="pinVisibility.current_pin ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
-					:label="__('Current PIN')"
-					variant="outlined"
-					density="compact"
-					:disabled="pinStatusLoading || pinSubmitting"
-					@click:append-inner="togglePinVisibility('current_pin')"
-				/>
-
-				<v-text-field
-					v-model="pinForm.new_pin"
-					:type="pinVisibility.new_pin ? 'text' : 'password'"
-					:append-inner-icon="pinVisibility.new_pin ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
-					:label="pinStatus.has_pin ? __('New PIN') : __('Create PIN')"
-					variant="outlined"
-					density="compact"
-					:disabled="pinStatusLoading || pinSubmitting"
-					@click:append-inner="togglePinVisibility('new_pin')"
-				/>
-
-				<v-text-field
-					v-model="pinForm.confirm_pin"
-					:type="pinVisibility.confirm_pin ? 'text' : 'password'"
-					:append-inner-icon="pinVisibility.confirm_pin ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
-					:label="__('Confirm PIN')"
-					variant="outlined"
-					density="compact"
-					:disabled="pinStatusLoading || pinSubmitting"
-					@click:append-inner="togglePinVisibility('confirm_pin')"
-				/>
-
-				<div class="text-caption text-medium-emphasis">
-					{{ __("Use a 4 to 8 digit PIN for cashier switching and terminal unlock.") }}
-				</div>
-			</v-card-text>
-
-			<v-card-actions class="pa-4 pt-0">
-				<v-spacer />
-				<v-btn variant="text" :disabled="pinSubmitting" @click="closePinDialog">
-					{{ __("Cancel") }}
-				</v-btn>
-				<v-btn color="primary" :loading="pinSubmitting || pinStatusLoading" @click="saveCashierPin">
-					{{ pinStatus.has_pin ? __("Update PIN") : __("Create PIN") }}
-				</v-btn>
-			</v-card-actions>
-		</v-card>
-	</v-dialog>
-
 	<QzTrayDialog v-model="showQzTrayDialog" />
 
 	<!-- Notification Snackbars -->
@@ -412,24 +344,6 @@ export default {
 				type: "info",
 				timeout: 3000,
 			},
-			showPinDialog: false,
-			pinStatusLoading: false,
-			pinSubmitting: false,
-			pinStatus: {
-				has_pin: false,
-			},
-			pinForm: {
-				current_pin: "",
-				new_pin: "",
-				confirm_pin: "",
-			},
-			pinVisibility: {
-				current_pin: false,
-				new_pin: false,
-				confirm_pin: false,
-			},
-			pinMessage: "",
-			pinMessageType: "info",
 		};
 	},
 	beforeUnmount() {
@@ -472,9 +386,6 @@ export default {
 			return this.activePanel === "settings"
 				? __("Grouped controls for terminal, UI, and session settings.")
 				: __("Fast cashier actions for active shifts.");
-		},
-		pinDialogTitle() {
-			return this.pinStatus.has_pin ? __("Change Cashier PIN") : __("Create Cashier PIN");
 		},
 		quickActions() {
 			const actions = [
@@ -536,14 +447,6 @@ export default {
 					title: __("Personal"),
 					description: __("Cashier identity and appearance preferences."),
 					actions: [
-						{
-							id: "manage-cashier-pin",
-							label: __("Manage Cashier PIN"),
-							subtitle: this.currentCashierDisplay || __("Create or change your PIN"),
-							icon: "mdi-form-textbox-password",
-							tone: "secondary",
-							handler: "openPinDialogAction",
-						},
 						{
 							id: "language",
 							label: __("Language"),
@@ -729,10 +632,6 @@ export default {
 					this.closeMenu();
 					this.$emit("close-shift");
 					break;
-				case "openPinDialogAction":
-					this.closeMenu();
-					void this.openPinDialog();
-					break;
 				case "openLanguageDialog":
 					this.closeMenu();
 					this.showLanguageDialog = true;
@@ -909,105 +808,6 @@ export default {
 		hideNotification() {
 			this.notification.show = false;
 		},
-		resetPinForm() {
-			this.pinForm = {
-				current_pin: "",
-				new_pin: "",
-				confirm_pin: "",
-			};
-			this.pinVisibility = {
-				current_pin: false,
-				new_pin: false,
-				confirm_pin: false,
-			};
-			this.pinMessage = "";
-			this.pinMessageType = "info";
-		},
-		closePinDialog() {
-			this.showPinDialog = false;
-			this.resetPinForm();
-		},
-		togglePinVisibility(field) {
-			this.pinVisibility[field] = !this.pinVisibility[field];
-		},
-		async openPinDialog() {
-			if (!this.currentCashier?.user || !this.posProfile?.name) {
-				this.showNotification("Load a POS profile and cashier first", "warning");
-				return;
-			}
-
-			this.showPinDialog = true;
-			this.resetPinForm();
-			await this.loadPinStatus();
-		},
-		async loadPinStatus() {
-			this.pinStatusLoading = true;
-			try {
-				const response = await frappe.call({
-					method: "posawesome.posawesome.api.employees.get_cashier_pin_status",
-					args: {
-						pos_profile: this.posProfile.name,
-						user: this.currentCashier.user,
-					},
-				});
-				this.pinStatus = response?.message || { has_pin: false };
-				this.pinMessage = this.pinStatus.has_pin
-					? this.__("Enter the current PIN, then choose a new one.")
-					: this.__("No cashier PIN is set yet. Create one now.");
-				this.pinMessageType = this.pinStatus.has_pin ? "info" : "warning";
-			} catch (error) {
-				this.pinMessage = error?.message || this.__("Unable to load cashier PIN status.");
-				this.pinMessageType = "error";
-			} finally {
-				this.pinStatusLoading = false;
-			}
-		},
-		validatePinForm() {
-			const nextPin = String(this.pinForm.new_pin || "").trim();
-			if (!nextPin) {
-				return this.__("Enter a PIN.");
-			}
-			if (!/^\d{4,8}$/.test(nextPin)) {
-				return this.__("PIN must be 4 to 8 digits.");
-			}
-			if (nextPin !== String(this.pinForm.confirm_pin || "").trim()) {
-				return this.__("PIN confirmation does not match.");
-			}
-			if (this.pinStatus.has_pin && !String(this.pinForm.current_pin || "").trim()) {
-				return this.__("Enter the current PIN first.");
-			}
-			return "";
-		},
-		async saveCashierPin() {
-			const validationError = this.validatePinForm();
-			if (validationError) {
-				this.pinMessage = validationError;
-				this.pinMessageType = "error";
-				return;
-			}
-
-			this.pinSubmitting = true;
-			try {
-				const response = await frappe.call({
-					method: "posawesome.posawesome.api.employees.save_cashier_pin",
-					args: {
-						pos_profile: this.posProfile.name,
-						user: this.currentCashier.user,
-						current_pin: this.pinForm.current_pin,
-						new_pin: this.pinForm.new_pin,
-					},
-				});
-				this.pinStatus = response?.message || { has_pin: true };
-				this.showNotification("Cashier PIN saved successfully", "success");
-				this.closePinDialog();
-			} catch (error) {
-				this.pinMessage = error?.message || this.__("Unable to save cashier PIN.");
-				this.pinMessageType = "error";
-			} finally {
-				this.pinSubmitting = false;
-			}
-		},
-
 		isEnabledSetting(value) {
 			if (value === undefined || value === null) return false;
 			if (typeof value === "string") {

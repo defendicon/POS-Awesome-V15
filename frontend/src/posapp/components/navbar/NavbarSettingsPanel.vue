@@ -107,7 +107,15 @@
 								<span class="mdi mdi-arrow-left" aria-hidden="true"></span>
 								{{ __("Back to {0}", [activeSection.title]) }}
 							</button>
-							<div class="navbar-settings-panel__embedded-placeholder">
+							<NavbarCashierPinForm
+								v-if="activeAction.id === 'manage-cashier-pin'"
+								:pos-profile="posProfile"
+								:current-cashier="currentCashier"
+								:current-cashier-display="currentCashierDisplay"
+								:show-back="false"
+								@saved="handleEmbeddedActionSaved"
+							/>
+							<div v-else class="navbar-settings-panel__embedded-placeholder">
 								<div class="navbar-settings-panel__embedded-title">
 									{{ activeAction.label }}
 								</div>
@@ -158,6 +166,7 @@
 
 <script setup>
 import { computed, ref, watch } from "vue";
+import NavbarCashierPinForm from "./NavbarCashierPinForm.vue";
 
 defineOptions({
 	name: "NavbarSettingsPanel",
@@ -171,6 +180,18 @@ const props = defineProps({
 	sections: {
 		type: Array,
 		default: () => [],
+	},
+	posProfile: {
+		type: Object,
+		default: null,
+	},
+	currentCashier: {
+		type: Object,
+		default: null,
+	},
+	currentCashierDisplay: {
+		type: String,
+		default: "",
 	},
 });
 
@@ -272,6 +293,10 @@ function getDetailIcon() {
 
 function getDetailTone() {
 	return activeAction.value?.tone || getSectionTone(activeSection.value?.id);
+}
+
+function handleEmbeddedActionSaved() {
+	// Success state stays inside the embedded form; no additional shell action required yet.
 }
 </script>
 

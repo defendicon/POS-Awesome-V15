@@ -124,9 +124,10 @@ describe("NavbarSettingsPanel", () => {
 		await wrapper.get('[data-test="settings-panel-category-personal"]').trigger("click");
 		await wrapper.get('[data-test="settings-panel-action-manage-cashier-pin"]').trigger("click");
 
-		expect(wrapper.get('[data-test="settings-panel-detail-view"]').text()).toContain(
+		expect(wrapper.get('[data-test="settings-panel-detail-title"]').text()).toContain(
 			"Manage Cashier PIN",
 		);
+		expect(wrapper.find('[data-test="settings-panel-detail-view"]').exists()).toBe(true);
 		expect(wrapper.find('[data-test="settings-panel-action-toggle-theme"]').exists()).toBe(false);
 	});
 

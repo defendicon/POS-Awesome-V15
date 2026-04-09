@@ -115,6 +115,7 @@ describe("NavbarMenu action surfaces", () => {
 		const actionIds = sections.flatMap((section: any) =>
 			section.actions.map((action: any) => action.id),
 		);
+		expect(actionIds).not.toContain("manage-cashier-pin");
 		expect(actionIds).not.toContain("clear-cache");
 		expect(actionIds).not.toContain("toggle-offline");
 		expect(actionIds).not.toContain("system-status");
