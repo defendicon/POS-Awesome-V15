@@ -7,6 +7,7 @@ export * from "./cash_movements";
 export * from "./cache";
 export * from "./sync/types";
 export * from "./sync/resourceRegistry";
+export * from "./sync/syncState";
 
 // Aliases for backward compatibility
 import { initPromise } from "./db";
