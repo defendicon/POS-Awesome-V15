@@ -39,12 +39,12 @@ const VTooltipStub = defineComponent({
 });
 
 describe("StatusIndicator", () => {
-	it("invokes the parent retry handler when clicked", async () => {
+	it("opens the offline status panel when clicked", async () => {
 		const Parent = defineComponent({
 			components: { StatusIndicator },
 			setup() {
-				const retries = ref(0);
-				return { retries };
+				const panels = ref(0);
+				return { panels };
 			},
 			template: `
 				<StatusIndicator
@@ -52,7 +52,7 @@ describe("StatusIndicator", () => {
 					:server-online="false"
 					:server-connecting="false"
 					:is-ip-host="false"
-					@retry-status="retries += 1"
+					@toggle-panel="panels += 1"
 				/>
 			`,
 		});
@@ -73,7 +73,7 @@ describe("StatusIndicator", () => {
 		onClick?.();
 		await wrapper.vm.$nextTick();
 
-		expect((wrapper.vm as any).retries).toBe(1);
+		expect((wrapper.vm as any).panels).toBe(1);
 	});
 
 	it("shows a visible checking state while connectivity is being revalidated", () => {

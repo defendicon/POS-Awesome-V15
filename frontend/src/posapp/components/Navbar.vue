@@ -15,15 +15,24 @@
 		>
 			<!-- Slot for status indicator -->
 			<template #status-indicator>
-				<StatusIndicator
-					:network-online="networkOnline"
-					:server-online="serverOnline"
-					:server-connecting="serverConnecting"
-					:is-ip-host="isIpHost"
-					:bootstrap-warning-active="bootstrapWarningActive"
-					:bootstrap-warning-tooltip="bootstrapWarningTooltip"
-					@retry-status="$emit('retry-status')"
-				/>
+				<div class="status-entry-surface">
+					<StatusIndicator
+						:network-online="networkOnline"
+						:server-online="serverOnline"
+						:server-connecting="serverConnecting"
+						:is-ip-host="isIpHost"
+						:bootstrap-warning-active="bootstrapWarningActive"
+						:bootstrap-warning-tooltip="bootstrapWarningTooltip"
+						@toggle-panel="toggleOfflineStatusPanel"
+					/>
+					<OfflineStatusPanel
+						v-model="offlinePanelOpen"
+						@toggle-offline="toggleManualOfflineFromPanel"
+						@refresh-offline-data="handleRefreshOfflineDataAction"
+						@rebuild-offline-data="handleRebuildOfflineDataAction"
+						@open-diagnostics="handleOpenOfflineDiagnosticsAction"
+					/>
+				</div>
 			</template>
 
 			<!-- Slot for cache usage meter -->
@@ -68,7 +77,6 @@
 					@open-employee-switch="openEmployeeSwitch"
 					@lock-pos="lockPosScreen"
 					@open-customer-display="$emit('open-customer-display')"
-					@toggle-offline="toggleManualOffline"
 					@clear-cache="clearCache"
 					@show-about="showAboutDialog = true"
 					@toggle-theme="toggleTheme"
@@ -139,6 +147,7 @@ import NavbarAppBar from "./navbar/NavbarAppBar.vue";
 import NavbarDrawer from "./navbar/NavbarDrawer.vue";
 import NavbarMenu from "./navbar/NavbarMenu.vue";
 import NotificationBell from "./navbar/NotificationBell.vue";
+import OfflineStatusPanel from "./navbar/OfflineStatusPanel.vue";
 import StatusIndicator from "./navbar/StatusIndicator.vue";
 import CacheUsageMeter from "./navbar/CacheUsageMeter.vue";
 import AboutDialog from "./navbar/AboutDialog.vue";
@@ -156,6 +165,7 @@ const DatabaseUsageGadget = defineAsyncComponent(() => import("./navbar/Database
 import { useToastStore } from "../stores/toastStore";
 import { useUIStore } from "../stores/uiStore";
 import { useEmployeeStore } from "../stores/employeeStore";
+import { useOfflineSyncStore } from "../stores/offlineSyncStore";
 import { storeToRefs } from "pinia";
 
 export default {
@@ -165,10 +175,12 @@ export default {
 		const toastStore = useToastStore();
 		const uiStore = useUIStore();
 		const employeeStore = useEmployeeStore();
+		const offlineSyncStore = useOfflineSyncStore();
 		// Extract reactive refs
 		const { visible, text, color, timeout, loading: toastLoading, history, unreadCount } = storeToRefs(toastStore);
 		const { isFrozen, freezeTitle, freezeMessage } = storeToRefs(uiStore);
 		const { currentCashier, currentCashierDisplay } = storeToRefs(employeeStore);
+		const { panelOpen: offlinePanelOpen } = storeToRefs(offlineSyncStore);
 
 		return {
 			isRtl,
@@ -176,6 +188,7 @@ export default {
 			rtlClasses,
 			toastStore,
 			uiStore,
+			offlineSyncStore,
 			visible,
 			text,
 			color,
@@ -189,6 +202,7 @@ export default {
 			employeeStore,
 			currentCashier,
 			currentCashierDisplay,
+			offlinePanelOpen,
 		};
 	},
 	components: {
@@ -196,6 +210,7 @@ export default {
 		NavbarDrawer,
 		NavbarMenu,
 		NotificationBell,
+		OfflineStatusPanel,
 		StatusIndicator,
 		CacheUsageMeter,
 		AboutDialog,
@@ -295,6 +310,13 @@ export default {
 			deep: true,
 			immediate: true,
 		},
+		offlineStatusState: {
+			handler() {
+				this.syncOfflineStatusSurface();
+			},
+			deep: true,
+			immediate: true,
+		},
 		currentCashier: {
 			handler() {
 				this.updateNavigationItems();
@@ -306,11 +328,25 @@ export default {
 		appBarColor() {
 			return this.isDark ? this.$vuetify.theme.themes.dark.colors.surface : "white";
 		},
+		offlineStatusState() {
+			return {
+				pendingInvoices: this.pendingInvoices,
+				networkOnline: this.networkOnline,
+				serverOnline: this.serverOnline,
+				serverConnecting: this.serverConnecting,
+				manualOffline: this.manualOffline,
+				cacheUsage: this.cacheUsage,
+				cacheUsageDetails: this.cacheUsageDetails,
+				bootstrapWarningActive: this.bootstrapWarningActive,
+				bootstrapWarningTooltip: this.bootstrapWarningTooltip,
+			};
+		},
 	},
 	mounted() {
 		this.updateNavigationItems();
 		this.initializeNavbar();
 		this.setupEventListeners();
+		this.syncOfflineStatusSurface();
 	},
 
 	created() {
@@ -490,11 +526,98 @@ export default {
 		openCloseShift() {
 			this.$emit("close-shift");
 		},
+		toggleOfflineStatusPanel() {
+			const nextOpen = !this.offlinePanelOpen;
+			this.offlineSyncStore.setPanelOpen(nextOpen);
+			if (nextOpen) {
+				this.refreshCacheUsage();
+			}
+		},
+		closeOfflineStatusPanel() {
+			this.offlineSyncStore.setPanelOpen(false);
+		},
 		syncPendingInvoices() {
 			this.$emit("sync-invoices");
 		},
 		toggleManualOffline() {
 			this.$emit("toggle-offline");
+		},
+		toggleManualOfflineFromPanel() {
+			this.closeOfflineStatusPanel();
+			this.toggleManualOffline();
+		},
+		handleRefreshOfflineDataAction() {
+			this.closeOfflineStatusPanel();
+			this.refreshCacheUsage();
+			this.$emit("refresh-offline-data");
+		},
+		handleRebuildOfflineDataAction() {
+			this.closeOfflineStatusPanel();
+			this.$emit("rebuild-offline-data");
+		},
+		handleOpenOfflineDiagnosticsAction() {
+			this.closeOfflineStatusPanel();
+			this.refreshCacheUsage();
+			this.$emit("open-offline-diagnostics");
+		},
+		parseBootstrapWarningLines() {
+			return String(this.bootstrapWarningTooltip || "")
+				.split("\n")
+				.map((line) => line.trim())
+				.filter(Boolean);
+		},
+		syncOfflineStatusSurface() {
+			this.offlineSyncStore.setSummary({
+				networkOnline: Boolean(this.networkOnline),
+				serverOnline: Boolean(this.serverOnline),
+				serverConnecting: Boolean(this.serverConnecting),
+				manualOffline: Boolean(this.manualOffline),
+				pendingInvoices: Number(this.pendingInvoices || 0),
+				cacheUsage: Number(this.cacheUsage || 0),
+				cacheUsageDetails: this.cacheUsageDetails || {
+					total: 0,
+					indexedDB: 0,
+					localStorage: 0,
+				},
+			});
+
+			const warningLines = this.parseBootstrapWarningLines();
+			const warningTitle =
+				warningLines[0] ||
+				(this.bootstrapWarningActive
+					? this.__("POS is running with limited offline prerequisites.")
+					: "");
+			const warningMessages = warningTitle ? warningLines.slice(1) : warningLines;
+			this.offlineSyncStore.setBootstrapWarning({
+				active: Boolean(this.bootstrapWarningActive),
+				title: warningTitle,
+				messages: warningMessages,
+			});
+
+			const isFallbackOnly =
+				this.offlineSyncStore.resourceStates.length <= 1 &&
+				this.offlineSyncStore.resourceStates.every(
+					(state) => state.resourceId === "bootstrap_config",
+				);
+			if (isFallbackOnly) {
+				if (this.bootstrapWarningActive) {
+					this.offlineSyncStore.setResourceStates([
+						{
+							resourceId: "bootstrap_config",
+							status: "limited",
+							lastSyncedAt: null,
+							watermark: null,
+							lastSuccessHash: null,
+							lastError: warningMessages.join(" "),
+							consecutiveFailures: 0,
+							scopeSignature: this.posProfile?.name ? `profile:${this.posProfile.name}` : null,
+							schemaVersion: null,
+						},
+					]);
+				} else {
+					this.offlineSyncStore.setResourceStates([]);
+				}
+			}
 		},
 		async clearCache() {
 			if (this.clearingCache) {
@@ -691,6 +814,13 @@ export default {
 				this.mini = true;
 			}, 250);
 		},
+		__(text, args = []) {
+			if (window.__) {
+				const nextArgs = Array.isArray(args) ? args : [args];
+				return window.__(text, ...nextArgs);
+			}
+			return text;
+		},
 	},
 	emits: [
 		"nav-click",
@@ -700,6 +830,9 @@ export default {
 		"retry-status",
 		"open-customer-display",
 		"toggle-offline",
+		"refresh-offline-data",
+		"rebuild-offline-data",
+		"open-offline-diagnostics",
 		"toggle-theme",
 		"logout",
 		"refresh-cache-usage",
@@ -719,5 +852,11 @@ export default {
 /* Snackbar positioning - scoped to POSApp */
 .posapp :deep(.v-snackbar) {
 	z-index: 9999;
+}
+
+.status-entry-surface {
+	position: relative;
+	display: flex;
+	align-items: center;
 }
 </style>

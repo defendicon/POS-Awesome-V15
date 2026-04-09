@@ -14,7 +14,8 @@
 						},
 					]"
 					:color="statusColor"
-					@click="emit('retry-status')"
+					aria-haspopup="dialog"
+					@click="emit('toggle-panel')"
 				>
 					<span
 						v-if="props.serverConnecting"
@@ -92,7 +93,7 @@ const props = withDefaults(defineProps<Props>(), {
 	bootstrapWarningTooltip: "",
 });
 const emit = defineEmits<{
-	(e: "retry-status"): void;
+	(e: "toggle-panel"): void;
 }>();
 
 // @ts-ignore

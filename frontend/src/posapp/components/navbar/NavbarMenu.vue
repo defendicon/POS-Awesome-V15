@@ -504,14 +504,14 @@ export default {
 							handler: "printLastInvoiceAction",
 						}
 					: null,
-				{
-					id: "sync-offline-invoices",
-					label: __("Sync Offline Invoices"),
-					subtitle: __("Upload pending transactions"),
-					icon: "mdi-sync",
-					tone: "info",
-					handler: "syncInvoices",
-				},
+						{
+							id: "sync-offline-sales",
+							label: __("Sync Offline Sales"),
+							subtitle: __("Upload pending transactions"),
+							icon: "mdi-sync",
+							tone: "info",
+							handler: "syncInvoices",
+						},
 				!this.posProfile?.posa_hide_closing_shift
 					? {
 							id: "close-shift",
@@ -589,31 +589,13 @@ export default {
 									handler: "openQzTraySetup",
 								}
 							: null,
-						{
-							id: "system-status",
-							label: __("System Status"),
-							subtitle: __("Check cache and performance"),
-							icon: "mdi-database-clock",
-							tone: "neutral",
-							handler: "refreshCacheUsage",
-						},
 					].filter(Boolean),
 				},
 				{
-					id: "system",
-					title: __("System"),
-					description: __("Terminal controls and maintenance actions."),
+					id: "tools",
+					title: __("Tools"),
+					description: __("Maintenance actions that do not belong in cashier flow."),
 					actions: [
-						{
-							id: "toggle-offline",
-							label: this.manualOffline ? __("Go Online") : __("Go Offline"),
-							subtitle: this.manualOffline
-								? __("Disable offline mode")
-								: __("Work without server connection"),
-							icon: "mdi-wifi-off",
-							tone: "warning",
-							handler: "toggleOfflineAction",
-						},
 						{
 							id: "clear-cache",
 							label: __("Clear Cache"),
@@ -775,10 +757,6 @@ export default {
 				case "openQzTraySetup":
 					this.closeMenu();
 					this.showQzTrayDialog = true;
-					break;
-				case "toggleOfflineAction":
-					this.closeMenu();
-					this.$emit("toggle-offline");
 					break;
 				case "clearCacheAction":
 					this.closeMenu();

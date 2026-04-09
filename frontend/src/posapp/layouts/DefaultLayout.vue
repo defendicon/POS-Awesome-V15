@@ -28,6 +28,9 @@
 				@sync-invoices="handleSyncInvoices"
 				@toggle-offline="handleToggleOffline"
 				@retry-status="handleRetryStatus"
+				@refresh-offline-data="handleRefreshOfflineData"
+				@rebuild-offline-data="handleRebuildOfflineData"
+				@open-offline-diagnostics="handleOpenOfflineDiagnostics"
 				@toggle-theme="handleToggleTheme"
 				@logout="handleLogout"
 				@open-customer-display="handleOpenCustomerDisplay"
@@ -801,6 +804,47 @@ const handleRetryStatus = async () => {
 
 	networkOnline.value = navigator.onLine;
 	manualNetworkRetry(networkProxy);
+};
+
+const handleRefreshOfflineData = async () => {
+	handleRefreshCacheUsage();
+	evaluateBootstrapSnapshot({
+		allowPrompt: getIsManualOffline() || !navigator.onLine,
+	});
+	if (!getIsManualOffline() && navigator.onLine) {
+		await handleRetryStatus();
+	}
+	toastStore.show({
+		title: __("Offline data status refreshed"),
+		detail: navigator.onLine
+			? __("Connectivity and cached prerequisite status were rechecked.")
+			: __("Reconnect online to refresh cached offline data from the server."),
+		color: navigator.onLine ? "info" : "warning",
+	});
+};
+
+const handleRebuildOfflineData = () => {
+	handleRefreshCacheUsage();
+	evaluateBootstrapSnapshot({
+		allowPrompt: true,
+	});
+	toastStore.show({
+		title: __("Offline rebuild guidance"),
+		detail: __("If stale data remains, open Menu > Clear Cache and reload this terminal online."),
+		color: "warning",
+	});
+};
+
+const handleOpenOfflineDiagnostics = () => {
+	handleRefreshCacheUsage();
+	toastStore.show({
+		title: __("Offline diagnostics"),
+		detail: __("Pending sales: {0} | Cache usage: {1}%", [
+			pendingInvoicesCount.value || 0,
+			Math.round(cacheUsage.value || 0),
+		]),
+		color: bootstrapWarningActive.value ? "warning" : "info",
+	});
 };
 
 const handleToggleTheme = () => {

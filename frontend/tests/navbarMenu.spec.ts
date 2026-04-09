@@ -100,7 +100,7 @@ describe("NavbarMenu cashier pin management", () => {
 			"switch-cashier",
 			"lock-screen",
 			"print-last-invoice",
-			"sync-offline-invoices",
+			"sync-offline-sales",
 			"close-shift",
 		]);
 		expect((wrapper.vm as any).quickActionRows).toHaveLength(5);
@@ -112,7 +112,7 @@ describe("NavbarMenu cashier pin management", () => {
 		expect((wrapper.vm as any).settingsSections.map((section: any) => section.id)).toEqual([
 			"personal",
 			"terminal",
-			"system",
+			"tools",
 			"session",
 		]);
 		expect((wrapper.vm as any).supervisorSections).toEqual([]);
