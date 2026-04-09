@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	buildBootstrapSnapshot,
+	collectBootstrapPrerequisites,
 	createBootstrapSnapshotFromRegisterData,
 	resolveBootstrapRuntimeState,
 	validateBootstrapSnapshot,
@@ -96,6 +97,8 @@ describe("bootstrap snapshot", () => {
 					pos_profile: "ready",
 					pos_opening_shift: "ready",
 					payment_methods: "ready",
+					items_cache_ready: "ready",
+					customers_cache_ready: "ready",
 					pricing_rules_snapshot: "missing",
 					pricing_rules_context: "missing",
 				},
@@ -111,6 +114,102 @@ describe("bootstrap snapshot", () => {
 		expect(result.mode).toBe("limited");
 		expect(result.capabilities.canApplyPricingOffline).toBe(false);
 		expect(result.capabilities.canSellOffline).toBe(true);
+	});
+
+	it("collects expanded prerequisites from cached state", () => {
+		const prerequisites = collectBootstrapPrerequisites({
+			profileName: "POS-1",
+			openingShiftName: "SHIFT-1",
+			openingShiftUser: "test@example.com",
+			paymentMethods: [{ mode_of_payment: "Cash" }],
+			salesPersons: [],
+			itemsCount: 25,
+			customersCount: 3,
+			itemGroups: ["ALL", "Beverages"],
+			pricingSnapshotCount: 2,
+			pricingContext: { profile_name: "POS-1" },
+			taxInclusive: true,
+			printTemplate: "<div>Receipt</div>",
+			termsAndConditions: "Terms",
+			offers: [{ name: "OFFER-1" }],
+			coupons: { CUSTOMER1: ["COUPON-1"] },
+			stockCacheReady: false,
+		});
+
+		expect(prerequisites.pos_profile).toBe("ready");
+		expect(prerequisites.pos_opening_shift).toBe("ready");
+		expect(prerequisites.payment_methods).toBe("ready");
+		expect(prerequisites.sales_persons).toBe("missing");
+		expect(prerequisites.items_cache_ready).toBe("ready");
+		expect(prerequisites.customers_cache_ready).toBe("ready");
+		expect(prerequisites.item_groups).toBe("ready");
+		expect(prerequisites.pricing_rules_snapshot).toBe("ready");
+		expect(prerequisites.pricing_rules_context).toBe("ready");
+		expect(prerequisites.tax_inclusive).toBe("ready");
+		expect(prerequisites.print_template).toBe("ready");
+		expect(prerequisites.terms_and_conditions).toBe("ready");
+		expect(prerequisites.offers_cache).toBe("ready");
+		expect(prerequisites.coupons_cache).toBe("ready");
+		expect(prerequisites.stock_cache_ready).toBe("missing");
+	});
+
+	it("keeps sell capability available when only warning prerequisites are missing", () => {
+		const result = validateBootstrapSnapshot(
+			buildBootstrapSnapshot({
+				buildVersion: "build-2",
+				profileName: "Main POS",
+				profileModified: "2026-04-08 10:00:00",
+				openingShiftName: "POS-OPEN-1",
+				openingShiftUser: "test@example.com",
+				prerequisites: {
+					pos_profile: "ready",
+					pos_opening_shift: "ready",
+					payment_methods: "ready",
+					items_cache_ready: "ready",
+					customers_cache_ready: "ready",
+					sales_persons: "missing",
+					item_groups: "missing",
+					stock_cache_ready: "missing",
+				},
+			}),
+			{
+				buildVersion: "build-2",
+				profileName: "Main POS",
+				profileModified: "2026-04-08 10:00:00",
+				sessionUser: "test@example.com",
+			},
+		);
+
+		expect(result.mode).toBe("limited");
+		expect(result.capabilities.canSellOffline).toBe(true);
+	});
+
+	it("blocks sell capability when item or customer caches are not ready", () => {
+		const result = validateBootstrapSnapshot(
+			buildBootstrapSnapshot({
+				buildVersion: "build-2",
+				profileName: "Main POS",
+				profileModified: "2026-04-08 10:00:00",
+				openingShiftName: "POS-OPEN-1",
+				openingShiftUser: "test@example.com",
+				prerequisites: {
+					pos_profile: "ready",
+					pos_opening_shift: "ready",
+					payment_methods: "ready",
+					items_cache_ready: "missing",
+					customers_cache_ready: "missing",
+				},
+			}),
+			{
+				buildVersion: "build-2",
+				profileName: "Main POS",
+				profileModified: "2026-04-08 10:00:00",
+				sessionUser: "test@example.com",
+			},
+		);
+
+		expect(result.mode).toBe("limited");
+		expect(result.capabilities.canSellOffline).toBe(false);
 	});
 
 	it("hydrates profile and opening prerequisites from register data", () => {

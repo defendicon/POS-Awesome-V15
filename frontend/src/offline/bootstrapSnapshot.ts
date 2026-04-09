@@ -17,6 +17,25 @@ export type BootstrapRuntimeMetadataInput = {
 	buildVersion?: string | null;
 };
 
+export type BootstrapPrerequisiteCollectionInput = {
+	profileName?: string | null;
+	openingShiftName?: string | null;
+	openingShiftUser?: string | null;
+	paymentMethods?: unknown[] | null;
+	salesPersons?: unknown[] | null;
+	itemsCount?: number | boolean | null;
+	customersCount?: number | boolean | null;
+	itemGroups?: unknown[] | null;
+	pricingSnapshotCount?: number | null;
+	pricingContext?: unknown;
+	taxInclusive?: boolean | null;
+	printTemplate?: string | null;
+	termsAndConditions?: string | null;
+	offers?: unknown[] | null;
+	coupons?: Record<string, unknown> | unknown[] | null;
+	stockCacheReady?: boolean | null;
+};
+
 export type BootstrapSnapshot = {
 	build_version: string | null;
 	profile_name: string | null;
@@ -77,11 +96,14 @@ const PREREQUISITES_FOR_OFFLINE_SELL = [
 	"pos_profile",
 	"pos_opening_shift",
 	"payment_methods",
+	"items_cache_ready",
+	"customers_cache_ready",
 ];
 
 const PREREQUISITES_FOR_OFFLINE_PRICING = [
 	"pricing_rules_snapshot",
 	"pricing_rules_context",
+	"tax_inclusive",
 ];
 
 const PREREQUISITES_FOR_OFFLINE_PRINT = [
@@ -90,6 +112,10 @@ const PREREQUISITES_FOR_OFFLINE_PRINT = [
 ];
 
 const PREREQUISITES_FOR_OFFERS = ["offers_cache", "coupons_cache"];
+const PREREQUISITES_FOR_CUSTOMER_DISPLAY = [
+	"pos_opening_shift",
+	"items_cache_ready",
+];
 
 function isReadyState(state: BootstrapPrerequisiteState | undefined) {
 	return state === "ready";
@@ -110,6 +136,31 @@ function hasAllReady(
 	return keys.every((key) => isReadyState(prerequisites[key]));
 }
 
+function hasTruthyValue(value: unknown) {
+	return value !== null && value !== undefined && value !== "";
+}
+
+function hasNonEmptyArray(value: unknown) {
+	return Array.isArray(value) && value.length > 0;
+}
+
+function hasPositiveCountOrReadyFlag(value: number | boolean | null | undefined) {
+	if (typeof value === "boolean") {
+		return value;
+	}
+	return Number(value || 0) > 0;
+}
+
+function hasCoupons(value: Record<string, unknown> | unknown[] | null | undefined) {
+	if (Array.isArray(value)) {
+		return value.length > 0;
+	}
+	if (!value || typeof value !== "object") {
+		return false;
+	}
+	return Object.keys(value).length > 0;
+}
+
 function deriveCapabilities(
 	prerequisites: Record<string, BootstrapPrerequisiteState>,
 ): BootstrapCapabilities {
@@ -127,9 +178,51 @@ function deriveCapabilities(
 			PREREQUISITES_FOR_OFFLINE_PRINT,
 		),
 		canUseOffersOffline: hasAllReady(prerequisites, PREREQUISITES_FOR_OFFERS),
-		canUseCustomerDisplayOffline: isReadyState(
-			prerequisites.pos_opening_shift,
+		canUseCustomerDisplayOffline: hasAllReady(
+			prerequisites,
+			PREREQUISITES_FOR_CUSTOMER_DISPLAY,
 		),
+	};
+}
+
+export function collectBootstrapPrerequisites(
+	input: BootstrapPrerequisiteCollectionInput,
+): Record<string, BootstrapPrerequisiteState> {
+	return {
+		pos_profile: hasTruthyValue(input?.profileName) ? "ready" : "missing",
+		pos_opening_shift:
+			hasTruthyValue(input?.openingShiftName) &&
+			hasTruthyValue(input?.openingShiftUser)
+				? "ready"
+				: "missing",
+		payment_methods: hasNonEmptyArray(input?.paymentMethods)
+			? "ready"
+			: "missing",
+		sales_persons: hasNonEmptyArray(input?.salesPersons) ? "ready" : "missing",
+		items_cache_ready: hasPositiveCountOrReadyFlag(input?.itemsCount)
+			? "ready"
+			: "missing",
+		customers_cache_ready: hasPositiveCountOrReadyFlag(input?.customersCount)
+			? "ready"
+			: "missing",
+		item_groups: hasNonEmptyArray(input?.itemGroups) ? "ready" : "missing",
+		pricing_rules_snapshot: Number(input?.pricingSnapshotCount || 0) > 0
+			? "ready"
+			: "missing",
+		pricing_rules_context: hasTruthyValue(input?.pricingContext)
+			? "ready"
+			: "missing",
+		tax_inclusive:
+			input?.taxInclusive === null || typeof input?.taxInclusive === "undefined"
+				? "missing"
+				: "ready",
+		print_template: hasTruthyValue(input?.printTemplate) ? "ready" : "missing",
+		terms_and_conditions: hasTruthyValue(input?.termsAndConditions)
+			? "ready"
+			: "missing",
+		offers_cache: hasNonEmptyArray(input?.offers) ? "ready" : "missing",
+		coupons_cache: hasCoupons(input?.coupons) ? "ready" : "missing",
+		stock_cache_ready: input?.stockCacheReady ? "ready" : "missing",
 	};
 }
 
