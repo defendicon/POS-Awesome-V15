@@ -66,6 +66,16 @@ export type BootstrapValidationInput = {
 	sessionUser?: string | null;
 };
 
+export type BootstrapSnapshotRefreshInput = {
+	currentSnapshot?: BootstrapSnapshot | null;
+	buildVersion?: string | null;
+	registerData?: RegisterData;
+	cacheState?: Omit<
+		BootstrapPrerequisiteCollectionInput,
+		"profileName" | "openingShiftName" | "openingShiftUser"
+	>;
+};
+
 export type BootstrapValidationResult = {
 	mode: BootstrapValidationMode;
 	reasons: string[];
@@ -262,6 +272,44 @@ export function createBootstrapSnapshotFromRegisterData(
 		openingShiftName: registerData?.pos_opening_shift?.name || null,
 		openingShiftUser: registerData?.pos_opening_shift?.user || null,
 		prerequisites: nextPrerequisites,
+	});
+}
+
+export function refreshBootstrapSnapshotFromCaches(
+	input: BootstrapSnapshotRefreshInput,
+): BootstrapSnapshot {
+	const currentSnapshot = input?.currentSnapshot || null;
+	const registerData = input?.registerData || null;
+	const profileName =
+		registerData?.pos_profile?.name || currentSnapshot?.profile_name || null;
+	const profileModified =
+		registerData?.pos_profile?.modified ||
+		currentSnapshot?.profile_modified ||
+		null;
+	const openingShiftName =
+		registerData?.pos_opening_shift?.name ||
+		currentSnapshot?.opening_shift_name ||
+		null;
+	const openingShiftUser =
+		registerData?.pos_opening_shift?.user ||
+		currentSnapshot?.opening_shift_user ||
+		null;
+
+	return buildBootstrapSnapshot({
+		buildVersion: input?.buildVersion || currentSnapshot?.build_version || null,
+		profileName,
+		profileModified,
+		openingShiftName,
+		openingShiftUser,
+		prerequisites: {
+			...(currentSnapshot?.prerequisites || {}),
+			...collectBootstrapPrerequisites({
+				profileName,
+				openingShiftName,
+				openingShiftUser,
+				...(input?.cacheState || {}),
+			}),
+		},
 	});
 }
 

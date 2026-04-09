@@ -3,6 +3,7 @@ import {
 	buildBootstrapSnapshot,
 	collectBootstrapPrerequisites,
 	createBootstrapSnapshotFromRegisterData,
+	refreshBootstrapSnapshotFromCaches,
 	resolveBootstrapRuntimeState,
 	validateBootstrapSnapshot,
 } from "../src/offline/bootstrapSnapshot";
@@ -253,6 +254,80 @@ describe("bootstrap snapshot", () => {
 		);
 
 		expect(snapshot.build_version).toBe("build-2");
+	});
+
+	it("refreshes snapshot metadata and prerequisites from cached state", () => {
+		const snapshot = refreshBootstrapSnapshotFromCaches({
+			currentSnapshot: buildBootstrapSnapshot({
+				buildVersion: "build-1",
+				profileName: "OLD-POS",
+				profileModified: "2026-04-08 09:00:00",
+				openingShiftName: "OLD-SHIFT",
+				openingShiftUser: "old@example.com",
+				prerequisites: {
+					payment_methods: "missing",
+				},
+			}),
+			buildVersion: "build-2",
+			registerData: {
+				pos_profile: {
+					name: "POS-1",
+					modified: "2026-04-08 10:00:00",
+				},
+				pos_opening_shift: {
+					name: "SHIFT-1",
+					user: "test@example.com",
+				},
+			},
+			cacheState: {
+				paymentMethods: [{ mode_of_payment: "Cash" }],
+				itemsCount: 10,
+				customersCount: 5,
+				pricingSnapshotCount: 1,
+				pricingContext: { profile_name: "POS-1" },
+				taxInclusive: true,
+				printTemplate: "<div>Receipt</div>",
+				termsAndConditions: "Terms",
+				offers: [{ name: "OFFER-1" }],
+				coupons: { CUSTOMER1: ["COUPON-1"] },
+			},
+		});
+
+		expect(snapshot.build_version).toBe("build-2");
+		expect(snapshot.profile_name).toBe("POS-1");
+		expect(snapshot.profile_modified).toBe("2026-04-08 10:00:00");
+		expect(snapshot.opening_shift_name).toBe("SHIFT-1");
+		expect(snapshot.opening_shift_user).toBe("test@example.com");
+		expect(snapshot.prerequisites.payment_methods).toBe("ready");
+		expect(snapshot.prerequisites.items_cache_ready).toBe("ready");
+		expect(snapshot.prerequisites.customers_cache_ready).toBe("ready");
+	});
+
+	it("preserves existing metadata when refresh runs without new register data", () => {
+		const snapshot = refreshBootstrapSnapshotFromCaches({
+			currentSnapshot: buildBootstrapSnapshot({
+				buildVersion: "build-2",
+				profileName: "POS-1",
+				profileModified: "2026-04-08 10:00:00",
+				openingShiftName: "SHIFT-1",
+				openingShiftUser: "test@example.com",
+				prerequisites: {
+					payment_methods: "missing",
+				},
+			}),
+			cacheState: {
+				paymentMethods: [{ mode_of_payment: "Cash" }],
+				itemsCount: 10,
+				customersCount: 5,
+			},
+		});
+
+		expect(snapshot.build_version).toBe("build-2");
+		expect(snapshot.profile_name).toBe("POS-1");
+		expect(snapshot.opening_shift_name).toBe("SHIFT-1");
+		expect(snapshot.prerequisites.payment_methods).toBe("ready");
+		expect(snapshot.prerequisites.items_cache_ready).toBe("ready");
+		expect(snapshot.prerequisites.customers_cache_ready).toBe("ready");
 	});
 
 	it("returns limited mode when snapshot is missing", () => {
