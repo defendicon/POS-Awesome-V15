@@ -7,6 +7,7 @@ type NetworkVm = {
 	serverConnecting: boolean;
 	internetReachable: boolean;
 	isIpHost?: boolean;
+	onConnectivityRecovered?: () => void | Promise<void>;
 	checkNetworkConnectivity: (
 		_options?: { forceImmediate?: boolean },
 	) => Promise<void>;
@@ -217,6 +218,9 @@ export async function checkNetworkConnectivity(
 					persistStatus(this.networkOnline, true);
 					console.log("Network: Connected");
 					this.$forceUpdate();
+					if (typeof this.onConnectivityRecovered === "function") {
+						await this.onConnectivityRecovered();
+					}
 				}
 			}
 		} else {

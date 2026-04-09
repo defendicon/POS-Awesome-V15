@@ -96,6 +96,7 @@ import { useToastStore } from "../stores/toastStore.js";
 import { useUIStore } from "../stores/uiStore.js";
 import { useUpdateStore } from "../stores/updateStore.js";
 import { useItemsStore } from "../stores/itemsStore.js";
+import { useOfflineSyncStore } from "../stores/offlineSyncStore";
 import { storeToRefs } from "pinia";
 import {
 	getOpeningStorage,
@@ -119,7 +120,16 @@ import {
 	syncOfflineCashMovements,
 	isOffline,
 	getLastSyncTotals,
+	getSyncResourcesByPriority,
+	getSyncResourceState,
+	listSyncResourceStates,
+	syncBootstrapConfigResource,
+	syncPriceListMetaResource,
+	syncCurrencyMatrixResource,
+	syncPaymentMethodCurrenciesResource,
 } from "../../offline/index";
+import { SyncCoordinator } from "../../offline/sync/SyncCoordinator";
+import { createOfflineSyncRuntime } from "../../offline/sync/runtime";
 import {
 	createBootstrapSnapshotFromRegisterData,
 	resolveBootstrapRuntimeState,
@@ -167,6 +177,13 @@ const $theme = instance?.proxy?.$theme || { toggle: () => {}, isDark: false }; /
 const __ = instance?.proxy?.__ || ((value) => value);
 const BUILD_VERSION =
 	typeof __BUILD_VERSION__ !== "undefined" ? __BUILD_VERSION__ : null;
+const OFFLINE_SYNC_SCHEMA_VERSION = "2026-04-09";
+const SUPPORTED_BOOT_SYNC_RESOURCE_IDS = new Set([
+	"bootstrap_config",
+	"price_list_meta",
+	"currency_matrix",
+	"payment_method_currencies",
+]);
 
 // Utils
 const { overlayVisible: globalLoading } = useLoading();
@@ -174,6 +191,7 @@ const { get_closing_data } = usePosShift();
 const syncStore = useSyncStore();
 const customersStore = useCustomersStore();
 const itemsStore = useItemsStore();
+const offlineSyncStore = useOfflineSyncStore();
 const toastStore = useToastStore();
 const uiStore = useUIStore();
 const updateStore = useUpdateStore();
@@ -184,6 +202,24 @@ const { posProfile, lastInvoiceId, posOpeningShift } = storeToRefs(uiStore);
 const { pendingInvoicesCount } = storeToRefs(syncStore);
 const { loadProgress, customersLoaded } = storeToRefs(customersStore);
 const { itemsLoaded, loadProgress: itemsLoadProgress } = storeToRefs(itemsStore);
+const bootCriticalSyncResources = getSyncResourcesByPriority("boot_critical").filter(
+	(resource) => SUPPORTED_BOOT_SYNC_RESOURCE_IDS.has(resource.id),
+);
+const syncCoordinator = new SyncCoordinator({
+	concurrency: 1,
+	resources: bootCriticalSyncResources,
+	runResource: async (resource, trigger) =>
+		runBootCriticalOfflineSyncResource(resource, trigger),
+	onStateChange: (states) => {
+		offlineSyncStore.setResourceStates(
+			filterSupportedBootSyncStates(states),
+		);
+	},
+});
+const offlineSyncRuntime = createOfflineSyncRuntime({
+	canSync: canRunBootCriticalOfflineSync,
+	runTrigger: (trigger) => syncCoordinator.runTrigger(trigger),
+});
 
 // State
 // const posProfile = ref({}); // Migrated to UI Store
@@ -332,6 +368,155 @@ function evaluateBootstrapSnapshot(options = {}) {
 
 	persistBootstrapRuntime(validation, decision);
 	return decision;
+}
+
+function filterSupportedBootSyncStates(states = []) {
+	return (states || []).filter((state) =>
+		SUPPORTED_BOOT_SYNC_RESOURCE_IDS.has(state?.resourceId),
+	);
+}
+
+function getOfflineSyncProfile() {
+	const profile = getCurrentBootstrapProfile();
+	if (!profile?.name) {
+		return null;
+	}
+
+	return {
+		name: profile.name,
+		company: profile.company || null,
+		modified: profile.modified || null,
+		currency: profile.currency || null,
+		selling_price_list: profile.selling_price_list || null,
+		payments: Array.isArray(profile.payments) ? profile.payments : [],
+	};
+}
+
+function canRunBootCriticalOfflineSync() {
+	return !!(
+		getOfflineSyncProfile()?.name &&
+		!getIsManualOffline() &&
+		navigator.onLine
+	);
+}
+
+async function callOfflineSyncMethod(method, args = {}) {
+	if (typeof frappe === "undefined" || typeof frappe.call !== "function") {
+		throw new Error("Frappe call API is unavailable");
+	}
+	const response = await frappe.call({
+		method,
+		args,
+	});
+	return typeof response?.message === "undefined"
+		? response || {}
+		: response.message;
+}
+
+async function runBootCriticalOfflineSyncResource(resource) {
+	const profile = getOfflineSyncProfile();
+	if (!profile?.name) {
+		return {
+			status: "idle",
+		};
+	}
+
+	const persistedState = await getSyncResourceState(resource.id);
+	const sharedArgs = {
+		posProfile: profile,
+		watermark: persistedState?.watermark || null,
+		schemaVersion: OFFLINE_SYNC_SCHEMA_VERSION,
+	};
+
+	switch (resource.id) {
+		case "bootstrap_config":
+			return syncBootstrapConfigResource({
+				...sharedArgs,
+				fetcher: ({ posProfile, watermark, schemaVersion }) =>
+					callOfflineSyncMethod(
+						"posawesome.posawesome.api.offline_sync.bootstrap.sync_bootstrap_config",
+						{
+							pos_profile: posProfile,
+							watermark,
+							schema_version: schemaVersion,
+						},
+					),
+			});
+		case "price_list_meta":
+			return syncPriceListMetaResource({
+				...sharedArgs,
+				fetcher: ({ posProfile, watermark, schemaVersion }) =>
+					callOfflineSyncMethod(
+						"posawesome.posawesome.api.offline_sync.bootstrap.sync_bootstrap_config",
+						{
+							pos_profile: posProfile,
+							watermark,
+							schema_version: schemaVersion,
+						},
+					),
+			});
+		case "currency_matrix":
+			return syncCurrencyMatrixResource({
+				...sharedArgs,
+				fetcher: ({
+					posProfile,
+					currencyPairs = [],
+					watermark,
+					schemaVersion,
+				}) =>
+					callOfflineSyncMethod(
+						"posawesome.posawesome.api.offline_sync.currencies.sync_currency_scope",
+						{
+							pos_profile: posProfile,
+							watermark,
+							currency_pairs: currencyPairs,
+							schema_version: schemaVersion,
+						},
+					),
+			});
+		case "payment_method_currencies":
+			return syncPaymentMethodCurrenciesResource({
+				...sharedArgs,
+				fetcher: ({ posProfile, watermark, schemaVersion }) =>
+					callOfflineSyncMethod(
+						"posawesome.posawesome.api.offline_sync.payment_methods.sync_payment_method_currencies",
+						{
+							pos_profile: posProfile,
+							watermark,
+							schema_version: schemaVersion,
+						},
+					),
+			});
+		default:
+			return {
+				status: "idle",
+			};
+	}
+}
+
+async function hydrateOfflineSyncResourceStates() {
+	try {
+		const states = filterSupportedBootSyncStates(
+			await listSyncResourceStates(),
+		);
+		syncCoordinator.hydrateResourceStates(states);
+	} catch (error) {
+		console.error("Failed to hydrate offline sync state", error);
+	}
+}
+
+function scheduleBootCriticalWarmSync() {
+	return offlineSyncRuntime.scheduleBootWarmSync().catch((error) => {
+		console.error("Failed to schedule boot-critical offline sync", error);
+		return false;
+	});
+}
+
+function triggerOnlineResumeSync() {
+	return offlineSyncRuntime.triggerOnlineResumeSync().catch((error) => {
+		console.error("Failed to trigger online resume sync", error);
+		return false;
+	});
 }
 
 // Computed
@@ -574,6 +759,9 @@ const networkProxy = {
 	set isIpHost(value) {
 		isIpHost.value = Boolean(value);
 	},
+	onConnectivityRecovered: async () => {
+		await triggerOnlineResumeSync();
+	},
 	$forceUpdate: () => {},
 	checkNetworkConnectivity: async (options = {}) => {
 		await utilsCheckNetworkConnectivity.call(networkProxy, options);
@@ -587,6 +775,7 @@ const setupNetworkListeners = () => {
 const initializeData = async () => {
 	await initPromise;
 	await memoryInitPromise;
+	await hydrateOfflineSyncResourceStates();
 	checkDbHealth().catch(() => {});
 	// Offline-first bootstrap: hydrate register state from IndexedDB before server checks.
 	const openingData = getValidCachedOpeningForCurrentUser(
@@ -629,6 +818,7 @@ const initializeData = async () => {
 	evaluateBootstrapSnapshot({
 		allowPrompt: manualOffline.value || !navigator.onLine,
 	});
+	void scheduleBootCriticalWarmSync();
 
 	markSourceLoaded("init");
 
@@ -654,6 +844,7 @@ const setupEventListeners = () => {
 				if (newProfile && newProfile.name) {
 					// Update customers store with profile
 					customersStore.setPosProfile(newProfile);
+					void scheduleBootCriticalWarmSync();
 
 					if (navigator.onLine && !getIsManualOffline()) {
 						refreshTaxInclusiveSetting();
@@ -712,6 +903,7 @@ const setupEventListeners = () => {
 		frappe.realtime.on("reconnect", () => {
 			console.log("Server: Reconnected to WebSocket");
 			window.serverOnline = true;
+			void triggerOnlineResumeSync();
 		});
 	}
 
@@ -803,7 +995,7 @@ const handleRetryStatus = async () => {
 	}
 
 	networkOnline.value = navigator.onLine;
-	manualNetworkRetry(networkProxy);
+	await manualNetworkRetry(networkProxy);
 };
 
 const handleRefreshOfflineData = async () => {
@@ -813,6 +1005,7 @@ const handleRefreshOfflineData = async () => {
 	});
 	if (!getIsManualOffline() && navigator.onLine) {
 		await handleRetryStatus();
+		await triggerOnlineResumeSync();
 	}
 	toastStore.show({
 		title: __("Offline data status refreshed"),
@@ -823,11 +1016,14 @@ const handleRefreshOfflineData = async () => {
 	});
 };
 
-const handleRebuildOfflineData = () => {
+const handleRebuildOfflineData = async () => {
 	handleRefreshCacheUsage();
 	evaluateBootstrapSnapshot({
 		allowPrompt: true,
 	});
+	if (canRunBootCriticalOfflineSync()) {
+		await scheduleBootCriticalWarmSync();
+	}
 	toastStore.show({
 		title: __("Offline rebuild guidance"),
 		detail: __("If stale data remains, open Menu > Clear Cache and reload this terminal online."),

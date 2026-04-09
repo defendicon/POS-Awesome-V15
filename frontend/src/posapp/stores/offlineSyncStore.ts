@@ -72,6 +72,11 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 	const bootstrapWarning = ref<OfflineBootstrapWarning>(createDefaultWarning());
 	const resourceStates = ref<SyncResourceState[]>([]);
 
+	const syncingResourcesCount = computed(
+		() =>
+			resourceStates.value.filter((state) => state.status === "syncing").length,
+	);
+
 	const connectivityLabel = computed(() => {
 		if (summary.value.serverConnecting) {
 			return "Checking";
@@ -126,6 +131,9 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		if (bootstrapWarning.value.active && bootstrapWarning.value.title) {
 			return bootstrapWarning.value.title;
 		}
+		if (syncingResourcesCount.value) {
+			return `Refreshing ${syncingResourcesCount.value} offline resource${syncingResourcesCount.value > 1 ? "s" : ""}.`;
+		}
 		if (attentionResources.value.length) {
 			return `${attentionResources.value.length} offline resource${attentionResources.value.length > 1 ? "s" : ""} need attention.`;
 		}
@@ -166,7 +174,17 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 
 	function setResourceStates(nextStates: SyncResourceState[]) {
 		resourceStates.value = Array.isArray(nextStates)
-			? nextStates.map((state) => ({ ...state }))
+			? nextStates
+					.filter(
+						(state) =>
+							!!state?.resourceId &&
+							(state.status !== "idle" ||
+								!!state.lastSyncedAt ||
+								!!state.watermark ||
+								!!state.lastError ||
+								!!state.schemaVersion),
+					)
+					.map((state) => ({ ...state }))
 			: [];
 	}
 
@@ -182,6 +200,7 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		summary,
 		bootstrapWarning,
 		resourceStates,
+		syncingResourcesCount,
 		connectivityLabel,
 		connectivityTone,
 		attentionResources,

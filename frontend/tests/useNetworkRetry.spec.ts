@@ -58,4 +58,31 @@ describe("manual network retry", () => {
 		expect(vm.serverOnline).toBe(false);
 		expect(vm.internetReachable).toBe(false);
 	});
+
+	it("invokes the recovery callback when live connectivity is restored", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(() =>
+				Promise.resolve({
+					status: 200,
+					ok: true,
+				}),
+			),
+		);
+
+		const vm: any = {
+			networkOnline: false,
+			serverOnline: false,
+			serverConnecting: false,
+			internetReachable: false,
+			onConnectivityRecovered: vi.fn(() => Promise.resolve()),
+			$forceUpdate: vi.fn(),
+		};
+
+		await checkNetworkConnectivity.call(vm, { forceImmediate: true });
+
+		expect(vm.networkOnline).toBe(true);
+		expect(vm.serverOnline).toBe(true);
+		expect(vm.onConnectivityRecovered).toHaveBeenCalledTimes(1);
+	});
 });

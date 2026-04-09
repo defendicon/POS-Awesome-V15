@@ -13,12 +13,18 @@ import type {
 type RunResource = (
 	resource: SyncResourceDefinition,
 	trigger: SyncTrigger,
-) => Promise<void>;
+) => Promise<
+	| void
+	| (Partial<SyncResourceState> & {
+			status?: SyncLifecycleState;
+	  })
+>;
 
 type SyncCoordinatorOptions = {
 	concurrency?: number;
 	resources?: SyncResourceDefinition[];
 	runResource?: RunResource;
+	onStateChange?: (states: SyncResourceState[]) => void;
 };
 
 const PRIORITY_WEIGHT: Record<SyncResourceDefinition["priority"], number> = {
@@ -48,6 +54,8 @@ export class SyncCoordinator {
 
 	private readonly runResource: RunResource;
 
+	private readonly onStateChange: ((states: SyncResourceState[]) => void) | null;
+
 	private readonly inFlightTriggers = new Map<SyncTrigger, Promise<void>>();
 
 	private readonly resourceStates = new Map<SyncResourceId, SyncResourceState>();
@@ -60,6 +68,7 @@ export class SyncCoordinator {
 				triggers: [...resource.triggers],
 			})) || getSyncResourceDefinitions();
 		this.runResource = options.runResource || (async () => undefined);
+		this.onStateChange = options.onStateChange || null;
 
 		for (const resource of this.resources) {
 			this.resourceStates.set(resource.id, createInitialState(resource.id));
@@ -75,6 +84,19 @@ export class SyncCoordinator {
 		return Array.from(this.resourceStates.values()).map((state) => ({
 			...state,
 		}));
+	}
+
+	hydrateResourceStates(states: SyncResourceState[]) {
+		for (const state of states || []) {
+			if (!state?.resourceId || !this.resourceStates.has(state.resourceId)) {
+				continue;
+			}
+			this.resourceStates.set(state.resourceId, {
+				...createInitialState(state.resourceId),
+				...state,
+			});
+		}
+		this.emitStateChange();
 	}
 
 	async runTrigger(trigger: SyncTrigger) {
@@ -131,18 +153,29 @@ export class SyncCoordinator {
 		resource: SyncResourceDefinition,
 		trigger: SyncTrigger,
 	) {
+		const previousState =
+			this.resourceStates.get(resource.id) || createInitialState(resource.id);
 		this.updateResourceState(resource.id, {
 			status: "syncing",
 			lastError: null,
 		});
 
 		try {
-			await this.runResource(resource, trigger);
+			const runResult = await this.runResource(resource, trigger);
+			const resolvedStatus = runResult?.status || "fresh";
 			this.updateResourceState(resource.id, {
-				status: "fresh",
-				lastSyncedAt: new Date().toISOString(),
-				lastError: null,
-				consecutiveFailures: 0,
+				...runResult,
+				status: resolvedStatus,
+				lastSyncedAt:
+					runResult?.lastSyncedAt ||
+					(resolvedStatus === "idle" ? previousState.lastSyncedAt : new Date().toISOString()),
+				lastError: runResult?.lastError || null,
+				consecutiveFailures:
+					typeof runResult?.consecutiveFailures === "number"
+						? runResult.consecutiveFailures
+						: resolvedStatus === "error"
+							? previousState.consecutiveFailures + 1
+							: 0,
 			});
 		} catch (error) {
 			this.updateResourceState(resource.id, {
@@ -166,6 +199,14 @@ export class SyncCoordinator {
 			...previousState,
 			...patch,
 		});
+		this.emitStateChange();
+	}
+
+	private emitStateChange() {
+		if (!this.onStateChange) {
+			return;
+		}
+		this.onStateChange(this.getResourceStates());
 	}
 }
 

@@ -594,12 +594,9 @@ export default {
 				messages: warningMessages,
 			});
 
-			const isFallbackOnly =
-				this.offlineSyncStore.resourceStates.length <= 1 &&
-				this.offlineSyncStore.resourceStates.every(
-					(state) => state.resourceId === "bootstrap_config",
-				);
-			if (isFallbackOnly) {
+			const shouldInjectFallback =
+				this.offlineSyncStore.resourceStates.length === 0;
+			if (shouldInjectFallback) {
 				if (this.bootstrapWarningActive) {
 					this.offlineSyncStore.setResourceStates([
 						{
