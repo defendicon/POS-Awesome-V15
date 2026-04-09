@@ -91,7 +91,9 @@ export function useBatchSerial() {
 
 		if (
 			sanitizedSelection.length !== currentSelection.length ||
-			sanitizedSelection.some((serial, index) => serial !== currentSelection[index])
+			sanitizedSelection.some(
+				(serial, index) => serial !== currentSelection[index],
+			)
 		) {
 			item.serial_no_selected = sanitizedSelection;
 		}
@@ -217,6 +219,7 @@ export function useBatchSerial() {
 		update = true,
 		context: any,
 	) => {
+		const flt = context.flt || ((v: unknown) => Number(v));
 		const normalized_batch_data: any[] = getBatchAvailability(
 			item,
 			context,
@@ -269,7 +272,7 @@ export function useBatchSerial() {
 				const baseCurrency =
 					context.price_list_currency || context.pos_profile.currency;
 				if (context.selected_currency !== baseCurrency) {
-					item.batch_price = context.flt(
+					item.batch_price = flt(
 						batch_to_use.batch_price / context.exchange_rate,
 						context.currency_precision,
 					);
@@ -295,11 +298,11 @@ export function useBatchSerial() {
 				item.base_discount_amount = 0;
 
 				// Calculate final amounts
-				item.amount = context.flt(
+				item.amount = flt(
 					item.qty * item.rate,
 					context.currency_precision,
 				);
-				item.base_amount = context.flt(
+				item.base_amount = flt(
 					item.qty * item.base_rate,
 					context.currency_precision,
 				);
