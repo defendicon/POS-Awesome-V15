@@ -22,6 +22,8 @@ function createInitialCatalogState(): PosCatalogState {
 		searchTerm: "",
 		activeGroup: "ALL",
 		displayedItems: [],
+		profileName: null,
+		warehouse: null,
 	};
 }
 
@@ -90,6 +92,17 @@ export function createPosCatalogStore() {
 		};
 	}
 
+	function setProfileScope(
+		profileName: string | null,
+		warehouse: string | null,
+	) {
+		state.value = {
+			...state.value,
+			profileName,
+			warehouse,
+		};
+	}
+
 	function setHighlightedItemCode(highlightedItemCode: string | null) {
 		state.value = {
 			...state.value,
@@ -154,6 +167,7 @@ export function createPosCatalogStore() {
 		setSearchTerm,
 		setActiveGroup,
 		setDisplayedItems,
+		setProfileScope,
 		setHighlightedItemCode,
 		setSelectedItemCode,
 		markReady,

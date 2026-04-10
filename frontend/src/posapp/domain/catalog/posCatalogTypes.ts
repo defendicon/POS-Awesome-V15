@@ -19,9 +19,9 @@ export type PosCatalogStatus =
 export type PosCatalogViewMode = "cards" | "table";
 
 export type PosCatalogItem = {
-	item_code?: string | null;
-	item_name?: string | null;
-	item_group?: string | null;
+	item_code?: string;
+	item_name?: string;
+	item_group?: string;
 	[key: string]: unknown;
 };
 
@@ -47,4 +47,6 @@ export type PosCatalogState = {
 	searchTerm: string;
 	activeGroup: string;
 	displayedItems: PosCatalogItem[];
+	profileName: string | null;
+	warehouse: string | null;
 };

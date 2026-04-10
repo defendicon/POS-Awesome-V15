@@ -29,7 +29,7 @@ function matchesSearch(item: PosCatalogItem, searchTerm: string) {
 		.some((value) => value.includes(normalizedTerm));
 }
 
-export async function searchCatalogItems({
+export function searchCatalogItems({
 	catalog,
 	items,
 	searchTerm,
@@ -43,7 +43,14 @@ export async function searchCatalogItems({
 	catalog.setSearchTerm(searchTerm);
 	catalog.setActiveGroup(activeGroup);
 	catalog.setDisplayedItems(filteredItems);
-	catalog.setStage("searching", catalog.state.value.status === "idle" ? "ready" : catalog.state.value.status);
+	if (String(searchTerm || "").trim() || activeGroup !== "ALL") {
+		catalog.setStage(
+			"searching",
+			catalog.state.value.status === "idle"
+				? "ready"
+				: catalog.state.value.status,
+		);
+	}
 
 	return filteredItems;
 }

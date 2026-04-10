@@ -12,8 +12,8 @@ type AddCatalogItemToCartContext = {
 		item: PosCatalogItem,
 		requestedQty: number,
 		context: any,
-	) => Promise<void> | void;
-	addItem: (item: PosCatalogItem, context: any) => Promise<void> | void;
+	) => Promise<unknown> | void;
+	addItem: (item: PosCatalogItem, context: any) => Promise<unknown> | void;
 };
 
 export async function addCatalogItemToCart({

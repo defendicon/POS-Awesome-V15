@@ -221,6 +221,13 @@ import { useItemsLoader } from "../../../composables/pos/items/useItemsLoader";
 import { useBarcodeIndexing } from "../../../composables/pos/items/useBarcodeIndexing";
 import { useScanProcessor } from "../../../composables/pos/items/useScanProcessor";
 import { useItemCurrency } from "../../../composables/pos/items/useItemCurrency";
+import { addCatalogItemToCart } from "../../../domain/catalog/addCatalogItemToCart";
+import {
+	initializeCatalogSelector,
+	resolveAdaptiveCatalogView,
+	syncCatalogSelectorDisplay,
+} from "../../../domain/catalog/catalogSelectorBridge";
+import { usePosCatalogStore } from "../../../domain/catalog/posCatalogStore";
 
 import { useCustomersStore } from "../../../stores/customersStore";
 import { useToastStore } from "../../../stores/toastStore";
@@ -277,6 +284,8 @@ const responsive = useResponsive();
 const rtl = useRtl();
 const { fly } = useFlyAnimation();
 const cartValidation = useCartValidation();
+const catalogStore = usePosCatalogStore();
+const itemAdditionApi = useItemAddition();
 
 const itemsIntegration = useItemsIntegration({
 	enableDebounce: false,
@@ -324,7 +333,6 @@ const newItemDialogAwaitingScan = ref(false);
 const qty = ref(1);
 const search_input = ref("");
 const first_search = ref("");
-const items_view = ref("list");
 const itemsPerPage = ref(50);
 const clearingSearch = ref(false);
 const isDragging = ref(false);
@@ -344,6 +352,19 @@ const item_group = computed({
 });
 const virtualScrollBuffer = ref(200);
 const localStorageAvailable = ref(true);
+const items_view = computed({
+	get: () =>
+		resolveAdaptiveCatalogView({
+			preferredView: catalogStore.state.value.preferredView,
+			isPhone: responsive.isPhone.value,
+			windowWidth: responsive.windowWidth.value,
+		}) === "cards"
+			? "card"
+			: "list",
+	set: (value: string) => {
+		catalogStore.setPreferredView(value === "card" ? "cards" : "table");
+	},
+});
 
 // Settings Refs
 const hide_qty_decimals = ref(false);
@@ -411,18 +432,30 @@ const forceCustomerPriceList = computed(() =>
 
 const { items, filteredItems, customer_price_list, loading, isBackgroundLoading } = itemsIntegration;
 
-const displayedItems = computed(() => {
+const displayedItems = computed(() => catalogStore.state.value.displayedItems);
+
+const syncCatalogDisplayState = () => {
 	const baseItems = Array.isArray(filteredItems.value) ? filteredItems.value : [];
 	const rawTerm = first_search.value;
 	const term = (typeof rawTerm === "string" ? rawTerm : "").trim().toLowerCase();
-	return filterAndPaginate(baseItems, {
+
+	return syncCatalogSelectorDisplay({
+		catalog: catalogStore,
+		items: baseItems,
 		searchTerm: term,
-		hideZeroRate: hide_zero_rate_items.value,
-		hideVariants: pos_profile.value?.posa_hide_variants_items,
-		onlyBarcode: showOnlyBarcodeItemsRef.value,
-		limit: enable_custom_items_per_page.value ? items_per_page.value : itemsPerPage.value,
+		activeGroup: item_group.value,
+		filterAndPaginate: (sourceItems) =>
+			filterAndPaginate(sourceItems, {
+				searchTerm: term,
+				hideZeroRate: hide_zero_rate_items.value,
+				hideVariants: pos_profile.value?.posa_hide_variants_items,
+				onlyBarcode: showOnlyBarcodeItemsRef.value,
+				limit: enable_custom_items_per_page.value
+					? items_per_page.value
+					: itemsPerPage.value,
+			}),
 	});
-});
+};
 
 watch(
 	() => props.showOnlyBarcodeItems,
@@ -573,7 +606,7 @@ const add_item = async (item, optionsOrQty: any = {}) => {
 
 		item = { ...item };
 		if (item.has_variants) {
-			await useItemAddition().handleVariantItem(item, {
+			await itemAdditionApi.handleVariantItem(item, {
 				pos_profile: pos_profile.value,
 				itemDetailFetcher,
 				add_item,
@@ -622,8 +655,14 @@ const add_item = async (item, optionsOrQty: any = {}) => {
 		);
 
 		if (isValid) {
-			await useItemAddition().prepareItemForCart(item, requestedQty, context);
-			await useItemAddition().addItem(item, context);
+			await addCatalogItemToCart({
+				catalog: catalogStore,
+				item,
+				requestedQty,
+				itemContext: context,
+				prepareItemForCart: itemAdditionApi.prepareItemForCart,
+				addItem: itemAdditionApi.addItem,
+			});
 			if (eventBus && typeof eventBus.emit === "function") {
 				eventBus.emit("apply_pricing_rules");
 			}
@@ -972,6 +1011,17 @@ onMounted(async () => {
 						);
 					}
 
+					await initializeCatalogSelector({
+						catalog: catalogStore,
+						profileName: newProfile.name || null,
+						warehouse: newProfile.warehouse || null,
+						loadItems: async () =>
+							Array.isArray(items.value) ? [...items.value] : [],
+						appendCachedItemsPage: async () =>
+							(await itemsIntegration.appendCachedItemsPage()) || [],
+					});
+					syncCatalogDisplayState();
+
 					isInitialized.value = true;
 					startItemWorker();
 					itemsSelectorSettings.loadItemSettings();
@@ -1027,6 +1077,30 @@ watch(search_input, (val) => {
 	first_search.value = val;
 	itemSelection.clearHighlightedItem();
 });
+
+watch(
+	[
+		filteredItems,
+		first_search,
+		item_group,
+		hide_zero_rate_items,
+		enable_custom_items_per_page,
+		items_per_page,
+		itemsPerPage,
+		showOnlyBarcodeItemsRef,
+	],
+	() => {
+		syncCatalogDisplayState();
+	},
+	{ immediate: true },
+);
+
+watch(
+	() => itemSelection.highlightedItemCode.value,
+	(value) => {
+		catalogStore.setHighlightedItemCode(value || null);
+	},
+);
 
 watch(searchFocusTrigger, () => {
 	requestItemSearchFocus();
