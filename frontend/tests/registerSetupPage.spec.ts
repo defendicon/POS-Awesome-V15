@@ -1,7 +1,10 @@
+// @vitest-environment jsdom
+
 import { describe, expect, it, vi } from "vitest";
 
 import { buildBootstrapSnapshot } from "../src/offline/bootstrapSnapshot";
 import { createRegisterSetupPage } from "../src/posapp/domain/session/registerSetupPage";
+import { createPosAppRouter } from "../src/posapp/router";
 
 describe("createRegisterSetupPage", () => {
 	const buildDialogData = () => ({
@@ -96,6 +99,14 @@ describe("createRegisterSetupPage", () => {
 		expect(page.state.value.stage).toBe("submitted");
 		expect(page.state.value.submittedRegisterData?.pos_opening_shift?.name).toBe(
 			"POS-OPEN-9",
+		);
+	});
+
+	it("registers a fullscreen /register route in the POS router", () => {
+		const { router } = createPosAppRouter();
+
+		expect(router.getRoutes().some((route) => route.path === "/register")).toBe(
+			true,
 		);
 	});
 });

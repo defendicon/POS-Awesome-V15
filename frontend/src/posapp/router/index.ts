@@ -5,6 +5,11 @@ import { recoverFromChunkLoadError } from "../utils/chunkLoadRecovery";
 const routes = [
 	{ path: "/", redirect: "/pos" },
 	{
+		path: "/register",
+		component: () => import("../components/pos/session/RegisterSetupPage.vue"),
+		meta: { title: "Register Setup", layout: "default" },
+	},
+	{
 		path: "/pos",
 		component: () => import("../components/pos/shell/Pos.vue"),
 		meta: { title: "POS", layout: "default" },
