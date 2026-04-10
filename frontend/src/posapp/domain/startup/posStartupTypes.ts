@@ -1,3 +1,8 @@
+import type {
+	BootstrapRuntimeDecision,
+	BootstrapValidationResult,
+} from "../../../offline/bootstrapSnapshot";
+
 export type PosStartupStage =
 	| "idle"
 	| "register"
@@ -17,9 +22,18 @@ export type PosStartupTimelineEvent = {
 	blockerCode: string | null;
 };
 
+export type PosRegisterStartupData = {
+	profileName: string | null;
+	profileModified: string | null;
+	openingShiftName: string | null;
+	openingShiftUser: string | null;
+};
+
 export type PosRegisterStartupResult = {
 	status: "ready" | "degraded" | "blocked";
-	data?: Record<string, unknown>;
+	data?: PosRegisterStartupData;
+	validation?: BootstrapValidationResult;
+	runtime?: BootstrapRuntimeDecision;
 	warningCodes?: string[];
 	blocker?: PosStartupBlocker | null;
 };
