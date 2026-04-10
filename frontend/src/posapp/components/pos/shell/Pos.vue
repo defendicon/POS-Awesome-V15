@@ -218,7 +218,6 @@ import { useOffers } from "../../../composables/pos/shared/useOffers";
 import { clearExpiredCustomerBalances } from "../../../../offline/index";
 import { useResponsive } from "../../../composables/core/useResponsive";
 import { useRtl } from "../../../composables/core/useRtl";
-import { useCustomersStore } from "../../../stores/customersStore.js";
 import { useUIStore } from "../../../stores/uiStore.js";
 import { useInvoiceStore } from "../../../stores/invoiceStore.js";
 import { useItemsStore } from "../../../stores/itemsStore.js";
@@ -583,14 +582,6 @@ export default {
 			dialog,
 		};
 	},
-	data: function () {
-		return {
-			// dialog moved to setup ref
-			itemsLoaded: false,
-			customersLoaded: false,
-		};
-	},
-
 	components: {
 		ItemsSelector,
 		Invoice,
@@ -625,11 +616,6 @@ export default {
 				// this.uiStore.setPosSettings(doc); // We might need to implement this if it doesn't exist
 			});
 		},
-		checkLoadingComplete() {
-			if (this.itemsLoaded && this.customersLoaded) {
-				// Loading complete logic
-			}
-		},
 		// handleAddItem removed as ItemsSelector handles pos addition internally
 		handleRegisterPosData(data) {
 			this.pos_profile = data.pos_profile;
@@ -652,50 +638,19 @@ export default {
 			// Watch store for updates
 			this.$watch(
 				() => this.uiStore.posProfile,
-				async (newProfile) => {
+				(newProfile) => {
 					if (newProfile && newProfile.name) {
 						this.pos_profile = newProfile;
 						this.get_offers(newProfile.name, newProfile);
-
-						// Initialize Customers Store
-						const customersStore = useCustomersStore();
-						customersStore.setPosProfile(newProfile);
-						await customersStore.get_customer_names();
 					}
 				},
 				{ deep: true, immediate: true },
 			);
-
-			// Items loading state check
-			const { itemsLoaded } = storeToRefs(this.itemsStore);
-			this.$watch(
-				() => itemsLoaded.value,
-				(val) => {
-					if (val) {
-						this.itemsLoaded = true;
-						this.checkLoadingComplete();
-					}
-				},
-				{ immediate: true },
-			);
 		});
 	},
-	// In the created() or mounted() lifecycle hook
 	created() {
 		// Clean up expired customer balance cache on POS load
 		clearExpiredCustomerBalances();
-		const customersStore = useCustomersStore();
-		const { customersLoaded } = storeToRefs(customersStore);
-		this.$watch(
-			() => customersLoaded.value,
-			(value) => {
-				if (value) {
-					this.customersLoaded = true;
-					this.checkLoadingComplete();
-				}
-			},
-			{ immediate: true },
-		);
 	},
 };
 </script>

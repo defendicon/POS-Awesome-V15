@@ -283,6 +283,15 @@ const itemsIntegration = useItemsIntegration({
 	debounceDelay: 300,
 });
 
+const isItemsStoreReadyForProfile = (profile: any) => {
+	const currentProfile = itemsIntegration.posProfile.value;
+	return !!(
+		itemsIntegration.itemsLoaded.value &&
+		currentProfile?.name === profile?.name &&
+		currentProfile?.warehouse === profile?.warehouse
+	);
+};
+
 const {
 	showOnlyBarcodeItems: showOnlyBarcodeItemsRef,
 	filterAndPaginate,
@@ -953,11 +962,15 @@ onMounted(async () => {
 					selected_exchange_rate.value = 1;
 					selected_conversion_rate.value = 1;
 
-					await itemsIntegration.initializeStore(
-						newProfile as any,
-						selectedCustomer.value as any,
-						customer_price_list.value as any,
-					);
+					const needsStoreBootstrap =
+						!isItemsStoreReadyForProfile(newProfile);
+					if (needsStoreBootstrap) {
+						await itemsIntegration.initializeStore(
+							newProfile as any,
+							selectedCustomer.value as any,
+							customer_price_list.value as any,
+						);
+					}
 
 					isInitialized.value = true;
 					startItemWorker();
