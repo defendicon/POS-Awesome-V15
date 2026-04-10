@@ -45,6 +45,11 @@ export type PosCatalogStartupResult = {
 	blocker?: PosStartupBlocker | null;
 };
 
+export type PosCatalogSourceProgress = {
+	started: boolean;
+	ready: boolean;
+};
+
 export type PosStartupState = {
 	stage: PosStartupStage;
 	blocker: PosStartupBlocker | null;
