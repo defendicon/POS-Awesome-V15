@@ -82,6 +82,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch, getCurrentInstance } from "vue";
+import { useRoute, useRouter } from "vue-router";
 // Note paths updated to be relative to layouts/ directory
 import Navbar from "../components/Navbar.vue";
 import ClosingDialog from "../components/pos/shell/ClosingDialog.vue";
@@ -100,6 +101,7 @@ import { useOfflineSyncStore } from "../stores/offlineSyncStore";
 import { storeToRefs } from "pinia";
 import {
 	getOpeningStorage,
+	setOpeningStorage,
 	getBootstrapSnapshot,
 	setBootstrapSnapshot,
 	getBootstrapSnapshotStatus,
@@ -141,10 +143,11 @@ import {
 	manualNetworkRetry,
 } from "../composables/core/useNetwork";
 import { createDefaultLayoutStartup } from "../domain/startup/defaultLayoutStartup";
+import { createDefaultLayoutSessionGate } from "../domain/session/defaultLayoutSessionGate";
+import { recoverPosSession } from "../domain/session/recoverPosSession";
 import { runRegisterStartup } from "../domain/startup/registerStartup";
 import { useRtl } from "../composables/core/useRtl";
 import authService from "../services/authService.js";
-import { getValidCachedOpeningForCurrentUser } from "../utils/openingCache";
 import {
 	formatBootstrapWarning,
 	shouldShowBootstrapBanner,
@@ -175,6 +178,8 @@ const { rtlClasses } = useRtl();
 // We'll use getCurrentInstance().proxy to access globals if needed, but ideally we should refactor theme to a store/composable.
 // For now, let's use a proxy helper.
 const instance = getCurrentInstance();
+const router = useRouter();
+const route = useRoute();
 const $theme = instance?.proxy?.$theme || { toggle: () => {}, isDark: false }; // Fallback
 const __ = instance?.proxy?.__ || ((value) => value);
 const BUILD_VERSION =
@@ -435,6 +440,61 @@ const defaultLayoutStartup = createDefaultLayoutStartup({
 	startCustomers: startCustomersForStartup,
 	startItems: startItemsForStartup,
 	markInitLoaded: () => markSourceLoaded("init"),
+});
+
+async function fetchServerOpeningForSession() {
+	try {
+		const response = await frappe.call(
+			"posawesome.posawesome.api.shifts.check_opening_shift",
+			{
+				user: frappe?.session?.user,
+			},
+		);
+		return response?.message || null;
+	} catch (error) {
+		console.error("Failed to recover POS session from server", error);
+		return null;
+	}
+}
+
+async function recoverCurrentPosSession() {
+	const result = await recoverPosSession({
+		getCachedOpening: () => getOpeningStorage(),
+		getServerOpening: () => fetchServerOpeningForSession(),
+		currentUser: frappe?.session?.user || null,
+		currentSnapshot: getBootstrapSnapshot(),
+		buildVersion: BUILD_VERSION,
+		continueOffline: true,
+	});
+
+	if (result.bootstrapSnapshot) {
+		setBootstrapSnapshot(result.bootstrapSnapshot);
+	}
+
+	return result;
+}
+
+function applyRecoveredPosSession(registerData) {
+	if (!registerData) {
+		return;
+	}
+
+	uiStore.setRegisterData(registerData);
+	setOpeningStorage(registerData);
+	evaluateRegisterStartup();
+
+	if (navigator.onLine) {
+		void refreshTaxInclusiveSetting();
+	}
+}
+
+const defaultLayoutSessionGate = createDefaultLayoutSessionGate({
+	recoverSession: recoverCurrentPosSession,
+	applyReadySession: applyRecoveredPosSession,
+	runPosStartupFlow,
+	currentPath: () => route.path,
+	routeToRegister: () => router.replace("/register"),
+	routeToPos: () => router.replace("/pos"),
 });
 
 async function runPosStartupFlow() {
@@ -714,17 +774,6 @@ const initializeData = async () => {
 	await memoryInitPromise;
 	await hydrateOfflineSyncResourceStates();
 	checkDbHealth().catch(() => {});
-	// Offline-first bootstrap: hydrate register state from IndexedDB before server checks.
-	const openingData = getValidCachedOpeningForCurrentUser(
-		getOpeningStorage(),
-		frappe?.session?.user,
-	);
-	if (openingData) {
-		uiStore.setRegisterData(openingData);
-		if (navigator.onLine) {
-			await refreshTaxInclusiveSetting();
-		}
-	}
 
 	if (queueHealthCheck()) {
 		alert("Offline queue is too large. Old entries will be purged.");
@@ -752,7 +801,14 @@ const initializeData = async () => {
 		serverOnline.value = false;
 		window.serverOnline = false;
 	}
-	await runPosStartupFlow();
+
+	const sessionGateResult = await defaultLayoutSessionGate.start();
+	if (sessionGateResult.stage === "needs_register_setup") {
+		markSourceLoaded("init");
+		markSourceLoaded("items");
+		markSourceLoaded("customers");
+	}
+
 	void scheduleBootCriticalWarmSync();
 };
 
