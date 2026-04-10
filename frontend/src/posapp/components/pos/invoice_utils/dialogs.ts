@@ -137,8 +137,8 @@ export async function show_payment(context: any) {
 		}
 		await new Promise((resolve) => setTimeout(resolve, 0));
 
+		context.invoiceStore?.setInvoiceDoc?.(invoice_doc);
 		context.eventBus.emit("show_payment", "true");
-		context.eventBus.emit("send_invoice_doc_payment", invoice_doc);
 	} catch (error: any) {
 		console.error("Error in show_payment:", error);
 		context.toastStore.show({

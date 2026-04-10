@@ -25,6 +25,30 @@ describe("POS shell session ownership", () => {
 		expect(source).not.toContain('method: "posawesome.posawesome.api.shifts.check_opening_shift"');
 	});
 
+	it("keeps payment preparation out of Payments.vue event-bus listeners", () => {
+		const source = readFileSync(
+			resolve("src/posapp/components/pos/Payments.vue"),
+			"utf8",
+		);
+
+		expect(source).not.toContain('eventBus.on("send_invoice_doc_payment"');
+		expect(source).not.toContain('eventBus.on("register_pos_profile"');
+	});
+
+	it("moves checkout start ownership into DefaultLayout instead of Pos.vue", () => {
+		const layoutSource = readFileSync(
+			resolve("src/posapp/layouts/DefaultLayout.vue"),
+			"utf8",
+		);
+		const posSource = readFileSync(
+			resolve("src/posapp/components/pos/shell/Pos.vue"),
+			"utf8",
+		);
+
+		expect(layoutSource).toContain("startCheckout");
+		expect(posSource).not.toContain("startCheckout(");
+	});
+
 	it("keeps usePosShift focused on closing shift behavior only", () => {
 		const source = readFileSync(
 			resolve("src/posapp/composables/pos/shared/usePosShift.ts"),

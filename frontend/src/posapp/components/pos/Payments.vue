@@ -1195,6 +1195,36 @@ const handleShowPayment = () => {
 	});
 };
 
+const applyPaymentInvoiceDoc = (doc = invoice_doc.value) => {
+	if (!doc) {
+		return;
+	}
+
+	paid_change.value = flt(doc.paid_change || 0, currency_precision.value);
+	credit_change.value = flt(doc.credit_change || 0, currency_precision.value);
+	last_payment_change_was_cash.value = null;
+	is_credit_sale.value = false;
+	is_write_off_change.value = false;
+
+	const initializedPayment = ensurePaymentLinesInitialized(doc);
+
+	if (doc.is_return) {
+		is_return.value = true;
+		is_credit_return.value = false;
+	} else if (initializedPayment) {
+		is_credit_return.value = false;
+	}
+
+	initializeReturnValidity(doc);
+	loyalty_amount.value = 0;
+	redeemed_customer_credit.value = 0;
+	resetGiftCardState({ clearPayment: true });
+	if (doc.customer) {
+		get_addresses();
+	}
+	get_sales_person_names();
+};
+
 const handleCreditChangeUpdate = (value) => {
 	setFormatedCurrency(credit_change, "value", null, false, value);
 	updateCreditChange(credit_change.value);
@@ -1579,6 +1609,18 @@ const queueShortcutSubmit = (payload = {}) => {
 
 // Watchers
 watch(
+	() => invoice_doc.value,
+	(doc) => {
+		if (!doc || !isPaymentOpen.value) {
+			return;
+		}
+
+		applyPaymentInvoiceDoc(doc);
+	},
+	{ deep: false, immediate: true },
+);
+
+watch(
 	() => uiStore.posProfile,
 	(p) => {
 		if (p) {
@@ -1831,36 +1873,6 @@ onMounted(() => {
 	eventBus.on("server-online", () => syncStore.syncPendingInvoices());
 
 	if (eventBus) {
-		eventBus.on("send_invoice_doc_payment", (doc) => {
-			invoiceStore.setInvoiceDoc(doc);
-			paid_change.value = flt(doc.paid_change || 0, currency_precision.value);
-			credit_change.value = flt(doc.credit_change || 0, currency_precision.value);
-			last_payment_change_was_cash.value = null;
-			is_credit_sale.value = false;
-			is_write_off_change.value = false;
-
-			const initializedPayment = ensurePaymentLinesInitialized(doc);
-
-			if (doc.is_return) {
-				is_return.value = true;
-				is_credit_return.value = false;
-			} else if (initializedPayment) {
-				is_credit_return.value = false;
-			}
-			initializeReturnValidity(doc);
-			loyalty_amount.value = 0;
-			redeemed_customer_credit.value = 0;
-			resetGiftCardState({ clearPayment: true });
-			if (doc.customer) {
-				get_addresses();
-			}
-			get_sales_person_names();
-		});
-
-		eventBus.on("register_pos_profile", (data) => {
-			pos_profile.value = data.pos_profile;
-			stock_settings.value = data.stock_settings;
-		});
 		eventBus.on("add_the_new_address", (data) => {
 			const normalized = normalizeAddress(data);
 			if (normalized) {
@@ -1898,8 +1910,6 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-	eventBus.off("send_invoice_doc_payment");
-	eventBus.off("register_pos_profile");
 	eventBus.off("add_the_new_address");
 	eventBus.off("set_pos_settings");
 	eventBus.off("set_mpesa_payment");

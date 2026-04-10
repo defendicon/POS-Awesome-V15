@@ -225,6 +225,7 @@ import { useRtl } from "../../../composables/core/useRtl";
 import { useCustomersStore } from "../../../stores/customersStore.js";
 import { useUIStore } from "../../../stores/uiStore.js";
 import { useToastStore } from "../../../stores/toastStore.js";
+import { usePosCheckoutStore } from "../../../domain/checkout/posCheckoutStore";
 
 // Composables
 import { usePosPayData } from "../../../composables/pos/payments/usePosPayData";
@@ -278,6 +279,7 @@ export default {
 		const customersStore = useCustomersStore();
 		const uiStore = useUIStore();
 		const toastStore = useToastStore();
+		const checkout = usePosCheckoutStore();
 		const { rtlStyles, rtlClasses } = useRtl();
 		const {
 			selectedCustomer,
@@ -594,10 +596,14 @@ export default {
 				customersLoaded: !!customersLoaded.value,
 				loadingCustomers: !!loadingCustomers.value,
 				isCustomerBackgroundLoading: !!isCustomerBackgroundLoading.value,
+				checkoutStage: checkout.state.value.stage,
 			}),
 		);
 		const paymentsLoadingMessage = computed(() =>
-			buildPaymentRouteLoadingMessage(loadProgress.value),
+			buildPaymentRouteLoadingMessage(
+				loadProgress.value,
+				checkout.state.value.stage,
+			),
 		);
 
 		const { isSubmitting, processPayment } = usePosPaySubmission({

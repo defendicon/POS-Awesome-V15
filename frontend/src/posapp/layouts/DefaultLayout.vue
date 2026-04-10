@@ -144,6 +144,9 @@ import {
 } from "../composables/core/useNetwork";
 import { createDefaultLayoutStartup } from "../domain/startup/defaultLayoutStartup";
 import { createDefaultLayoutSessionGate } from "../domain/session/defaultLayoutSessionGate";
+import { usePosCheckoutStore } from "../domain/checkout/posCheckoutStore";
+import { startCheckout } from "../domain/checkout/startCheckout";
+import { resetCheckout } from "../domain/checkout/resetCheckout";
 import { recoverPosSession } from "../domain/session/recoverPosSession";
 import { runRegisterStartup } from "../domain/startup/registerStartup";
 import { useRtl } from "../composables/core/useRtl";
@@ -188,8 +191,10 @@ const OFFLINE_SYNC_SCHEMA_VERSION = "2026-04-09";
 
 // Utils
 const { overlayVisible: globalLoading } = useLoading();
+const posCheckout = usePosCheckoutStore();
 const { get_closing_data, submit_closing_pos } = usePosShift({
 	onSessionClosed: async () => {
+		resetCheckout(posCheckout);
 		bootstrapStatus.value = null;
 		bootstrapLimitedMode.value = false;
 		bootstrapSnackbarVisible.value = false;
@@ -254,6 +259,7 @@ const bootstrapSnackbarVisible = ref(false);
 let _sidebarObserver = null;
 let updateInterval = null;
 let startupFlowPromise = null;
+let checkoutFlowPromise = null;
 
 // Event Bus
 const eventBus = instance?.proxy?.eventBus;
@@ -523,6 +529,29 @@ async function runPosStartupFlow() {
 		});
 
 	return startupFlowPromise;
+}
+
+async function runCheckoutFlow() {
+	if (checkoutFlowPromise) {
+		return checkoutFlowPromise;
+	}
+
+	if (!getCurrentBootstrapProfile()?.name) {
+		return posCheckout.state.value;
+	}
+
+	checkoutFlowPromise = startCheckout({
+		checkout: posCheckout,
+	})
+		.catch((error) => {
+			console.error("POS checkout flow failed", error);
+			return posCheckout.state.value;
+		})
+		.finally(() => {
+			checkoutFlowPromise = null;
+		});
+
+	return checkoutFlowPromise;
 }
 
 // Computed
@@ -818,6 +847,9 @@ const initializeData = async () => {
 		markSourceLoaded("init");
 		markSourceLoaded("items");
 		markSourceLoaded("customers");
+		resetCheckout(posCheckout);
+	} else if (sessionGateResult.stage === "ready") {
+		await runCheckoutFlow();
 	}
 
 	void scheduleBootCriticalWarmSync();
@@ -838,6 +870,7 @@ const setupEventListeners = () => {
 					}
 
 					void runPosStartupFlow();
+					void runCheckoutFlow();
 				}
 			},
 			{ deep: true, immediate: true },

@@ -30,16 +30,31 @@ describe("paymentRouteReadiness", () => {
 				customersLoaded: true,
 				loadingCustomers: false,
 				isCustomerBackgroundLoading: false,
+				checkoutStage: "ready",
 			}),
 		).toBe(false);
 	});
 
+	it("keeps the payments route locked while checkout pricing is still loading", () => {
+		expect(
+			isPaymentRouteLocked({
+				customersLoaded: true,
+				loadingCustomers: false,
+				isCustomerBackgroundLoading: false,
+				checkoutStage: "loading-pricing",
+			}),
+		).toBe(true);
+	});
+
 	it("builds an english loading message with progress when available", () => {
-		expect(buildPaymentRouteLoadingMessage(42)).toBe(
+		expect(buildPaymentRouteLoadingMessage(42, "loading-customer")).toBe(
 			"Preparing payments. Customer data is still loading (42%).",
 		);
-		expect(buildPaymentRouteLoadingMessage(null)).toBe(
+		expect(buildPaymentRouteLoadingMessage(null, "loading-customer")).toBe(
 			"Preparing payments. Customer data is still loading.",
+		);
+		expect(buildPaymentRouteLoadingMessage(null, "loading-pricing")).toBe(
+			"Preparing payments. Checkout pricing is still loading.",
 		);
 	});
 });
