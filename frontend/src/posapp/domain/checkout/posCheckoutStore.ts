@@ -90,3 +90,15 @@ export function createPosCheckoutStore() {
 		setSource,
 	};
 }
+
+let sharedPosCheckoutStore:
+	| ReturnType<typeof createPosCheckoutStore>
+	| null = null;
+
+export function usePosCheckoutStore() {
+	if (!sharedPosCheckoutStore) {
+		sharedPosCheckoutStore = createPosCheckoutStore();
+	}
+
+	return sharedPosCheckoutStore;
+}
