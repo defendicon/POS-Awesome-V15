@@ -975,9 +975,20 @@ export function useItemAddition() {
 		invalidateMergeCache(context);
 	};
 
+	const addPreparedItemToCart = async (
+		item: any,
+		requestedQty: number,
+		context: any,
+	) => {
+		await prepareItemForCart(item, requestedQty, context);
+		await addItem(item, context);
+		return item;
+	};
+
 	return {
 		removeItem,
 		addItem,
+		addPreparedItemToCart,
 		getNewItem,
 		clearInvoice,
 		groupAndAddItem,

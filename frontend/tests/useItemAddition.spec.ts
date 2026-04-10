@@ -132,6 +132,17 @@ describe("useItemAddition new line behavior", () => {
 		expect(context.items[0].price_list_rate).toBe(7);
 	});
 
+	it("provides a single helper to prepare and add an item to the cart", async () => {
+		const api = useItemAddition();
+		const context = createContext(false);
+		const item = createItem();
+
+		await api.addPreparedItemToCart(item, 3, context);
+
+		expect(context.items).toHaveLength(1);
+		expect(context.items[0].qty).toBe(3);
+	});
+
 	it("resets return invoice type back to Invoice on clear", () => {
 		const api = useItemAddition();
 		const emit = vi.fn();
