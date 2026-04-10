@@ -1,4 +1,5 @@
 import type { POSProfile } from "../../types/models";
+import type { BootstrapSnapshot } from "../../../offline/bootstrapSnapshot";
 
 export type PosSessionStage =
 	| "recovering"
@@ -25,6 +26,12 @@ export type PosSessionBlocker = {
 	summary: string;
 };
 
+export type PosSessionRegisterData = {
+	pos_profile?: POSProfile | null;
+	pos_opening_shift?: PosOpeningShift | null;
+	[key: string]: any;
+} | null;
+
 export type ReadyPosSession = {
 	posProfile: POSProfile;
 	posOpeningShift: PosOpeningShift;
@@ -39,3 +46,26 @@ export type PosSessionState = {
 	message: string | null;
 	blocker: PosSessionBlocker | null;
 };
+
+export type RecoverPosSessionReadyResult = {
+	status: "ready";
+	source: PosSessionSource;
+	session: ReadyPosSession;
+	registerData: PosSessionRegisterData;
+	bootstrapSnapshot: BootstrapSnapshot;
+	warningCodes: string[];
+};
+
+export type RecoverPosSessionNeedsSetupResult = {
+	status: "needs_register_setup";
+	source: null;
+	session: null;
+	registerData: null;
+	bootstrapSnapshot: BootstrapSnapshot | null;
+	warningCodes: string[];
+	message: string;
+};
+
+export type RecoverPosSessionResult =
+	| RecoverPosSessionReadyResult
+	| RecoverPosSessionNeedsSetupResult;
