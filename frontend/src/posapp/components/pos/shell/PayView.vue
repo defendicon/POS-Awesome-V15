@@ -4,7 +4,7 @@
 			:visible="isPaymentRouteLocked"
 			:message="paymentsLoadingMessage"
 		/>
-		<v-row v-show="!dialog">
+		<v-row>
 			<v-col md="8" cols="12" class="pb-2 pr-0">
 				<v-card
 					class="main mx-auto mt-3 p-3 pb-16 overflow-y-auto pos-themed-card"
@@ -202,18 +202,13 @@
 </template>
 
 <script>
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, getCurrentInstance } from "vue";
+import { ref, computed, watch, onMounted, onBeforeUnmount, getCurrentInstance } from "vue";
 import { storeToRefs } from "pinia";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import format from "../../../format";
 import { normalizeDateForBackend } from "../../../format";
 import Customer from "../customer/Customer.vue";
 import {
-	initPromise,
-	checkDbHealth,
-	setOpeningStorage,
-	getOpeningStorage,
-	clearOpeningStorage,
 	isOffline,
 	getPendingOfflinePaymentCount,
 	syncOfflinePayments,
@@ -230,7 +225,6 @@ import { useRtl } from "../../../composables/core/useRtl";
 import { useCustomersStore } from "../../../stores/customersStore.js";
 import { useUIStore } from "../../../stores/uiStore.js";
 import { useToastStore } from "../../../stores/toastStore.js";
-import { getValidCachedOpeningForCurrentUser } from "../../../utils/openingCache";
 
 // Composables
 import { usePosPayData } from "../../../composables/pos/payments/usePosPayData";
@@ -296,7 +290,6 @@ export default {
 		const { paymentRouteTarget } = storeToRefs(uiStore);
 
 		// Core Data & State
-		const dialog = ref(false);
 		const pos_profile = ref({});
 		const pos_opening_shift = ref("");
 		const paymentEntryType = ref("Receive");
@@ -718,8 +711,14 @@ export default {
 			});
 		};
 
-		const applyOpeningData = async (data) => {
+		const applySessionData = async (data) => {
 			if (!data) {
+				pos_profile.value = {};
+				pos_opening_shift.value = "";
+				company.value = "";
+				companyCurrency.value = null;
+				payment_methods.value = [];
+				payment_methods_list.value = [];
 				return;
 			}
 			pos_profile.value = data.pos_profile;
@@ -734,50 +733,6 @@ export default {
 			payment_methods_list.value = Array.isArray(pos_profile.value?.payments)
 				? pos_profile.value.payments.map((p) => p.mode_of_payment)
 				: [];
-		};
-
-		const check_opening_entry = async () => {
-			await initPromise;
-			await checkDbHealth();
-			const cachedOpening = getValidCachedOpeningForCurrentUser(
-				getOpeningStorage(),
-				frappe?.session?.user,
-			);
-			if (cachedOpening) {
-				await applyOpeningData(cachedOpening);
-			}
-			try {
-				const r = await frappe.call("posawesome.posawesome.api.shifts.check_opening_shift", {
-					user: frappe.session.user,
-				});
-				if (r.message) {
-					await applyOpeningData(r.message);
-					setOpeningStorage(r.message);
-				} else {
-					clearOpeningStorage();
-				}
-				get_pos_profiles();
-				if (customer_name.value) {
-					refreshOutstandingInvoices();
-					get_unallocated_payments();
-					get_draft_mpesa_payments_register(payment_methods_list.value);
-				}
-			} catch (e) {
-				console.error("Error checking opening entry", e);
-				const cached =
-					cachedOpening ||
-					getValidCachedOpeningForCurrentUser(
-						getOpeningStorage(),
-						frappe?.session?.user,
-					);
-				if (cached) {
-					await applyOpeningData(cached);
-					return;
-				}
-				if (!isOffline()) {
-					clearOpeningStorage();
-				}
-			}
 		};
 
 		const syncPendingPayments = async () => {
@@ -951,7 +906,6 @@ export default {
 				proxy.eventBus.on("network-online", syncPendingPayments);
 				proxy.eventBus.on("server-online", syncPendingPayments);
 			}
-			nextTick(() => check_opening_entry());
 		});
 
 		onBeforeUnmount(() => {
@@ -1074,9 +1028,29 @@ export default {
 		watch([paymentRouteTarget, outstanding_invoices], () => {
 			applyPaymentRouteTarget();
 		});
+		watch(
+			() => ({
+				pos_profile: uiStore.posProfile,
+				pos_opening_shift: uiStore.posOpeningShift,
+				company: uiStore.companyDoc,
+				stock_settings: uiStore.stockSettings,
+			}),
+			async (sessionData) => {
+				await applySessionData(sessionData?.pos_profile ? sessionData : null);
+				if (!sessionData?.pos_profile?.name) {
+					return;
+				}
+				get_pos_profiles();
+				if (customer_name.value) {
+					refreshOutstandingInvoices();
+					get_unallocated_payments();
+					get_draft_mpesa_payments_register(payment_methods_list.value);
+				}
+			},
+			{ deep: true, immediate: true },
+		);
 
 		return {
-			dialog,
 			pos_profile,
 			pos_opening_shift,
 			paymentEntryType,
@@ -1160,7 +1134,6 @@ export default {
 			validateExchangeRate,
 			set_payment_methods,
 			loadPaymentMethodCurrencies,
-			check_opening_entry,
 			syncPendingPayments,
 			paymentRowClass,
 			isSelected,

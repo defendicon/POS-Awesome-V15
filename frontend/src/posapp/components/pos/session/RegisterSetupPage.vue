@@ -191,13 +191,13 @@ const buildVersion =
 const paymentMethodHeaders = [
 	{
 		title: __("Mode of Payment"),
-		align: "start",
+		align: "start" as const,
 		sortable: false,
 		value: "mode_of_payment",
 	},
 	{
 		title: __("Opening Amount"),
-		align: "center",
+		align: "center" as const,
 		sortable: false,
 		value: "amount",
 	},

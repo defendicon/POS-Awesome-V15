@@ -188,7 +188,17 @@ const OFFLINE_SYNC_SCHEMA_VERSION = "2026-04-09";
 
 // Utils
 const { overlayVisible: globalLoading } = useLoading();
-const { get_closing_data } = usePosShift();
+const { get_closing_data, submit_closing_pos } = usePosShift({
+	onSessionClosed: async () => {
+		bootstrapStatus.value = null;
+		bootstrapLimitedMode.value = false;
+		bootstrapSnackbarVisible.value = false;
+		setBootstrapSnapshot(null);
+		setBootstrapSnapshotStatus(null);
+		setBootstrapLimitedMode(false);
+		await router.replace("/register");
+	},
+});
 const syncStore = useSyncStore();
 const customersStore = useCustomersStore();
 const itemsStore = useItemsStore();
@@ -697,6 +707,7 @@ onBeforeUnmount(() => {
 		eventBus.off("data-load-progress");
 		eventBus.off("print_last_invoice");
 		eventBus.off("sync_invoices");
+		eventBus.off("submit_closing_pos");
 	}
 
 	window.removeEventListener("resize", adjust_frappe_sidebar_offset);
@@ -853,6 +864,10 @@ const setupEventListeners = () => {
 		// Manual trigger to sync offline invoices
 		eventBus.on("sync_invoices", () => {
 			handleSyncInvoices();
+		});
+
+		eventBus.on("submit_closing_pos", (data) => {
+			void submit_closing_pos(data);
 		});
 	}
 

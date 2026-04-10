@@ -133,6 +133,13 @@ export const useUIStore = defineStore("ui", () => {
     if (data.pos_opening_shift) posOpeningShift.value = data.pos_opening_shift;
   }
 
+  function clearRegisterData() {
+    posProfile.value = null;
+    stockSettings.value = {};
+    companyDoc.value = null;
+    posOpeningShift.value = null;
+  }
+
   const lastInvoiceId = ref<string | null>(null);
   function setLastInvoice(id: string | null) {
     lastInvoiceId.value = id;
@@ -281,6 +288,7 @@ export const useUIStore = defineStore("ui", () => {
     setStockSettings,
     setCompanyDoc,
     setRegisterData,
+    clearRegisterData,
     setLastInvoice,
     setOffers,
     setApplicableOffers,

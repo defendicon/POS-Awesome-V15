@@ -11,12 +11,6 @@
 		<NewAddress></NewAddress>
 		<MpesaPayments></MpesaPayments>
 		<Variants></Variants>
-		<OpeningDialog
-			v-if="dialog"
-			:dialog="dialog"
-			@close="closeOpeningDialog"
-			@register="handleRegisterPosData"
-		></OpeningDialog>
 		<v-dialog
 			v-if="usePaymentDialog"
 			v-model="paymentDialogOpen"
@@ -31,7 +25,6 @@
 			<Payments dialog-mode />
 		</v-dialog>
 		<v-row
-			v-show="!dialog"
 			dense
 			class="ma-0 dynamic-main-row"
 			:class="{ 'dynamic-main-row--phone': isPhone }"
@@ -200,7 +193,6 @@
 <script>
 import ItemsSelector from "../items/ItemsSelector.vue";
 import Invoice from "../Invoice.vue";
-import OpeningDialog from "../shift/OpeningDialog.vue";
 import Payments from "../Payments.vue";
 import PosOffers from "../offers/PosOffers.vue";
 import PosCoupons from "../offers/PosCoupons.vue";
@@ -212,7 +204,6 @@ import Variants from "../items/Variants.vue";
 import Returns from "../flows/Returns.vue";
 import MpesaPayments from "../payments/Mpesa-Payments.vue";
 import { inject, ref, onMounted, onBeforeUnmount, computed, watch, nextTick } from "vue";
-import { usePosShift } from "../../../composables/pos/shared/usePosShift";
 import { useOffers } from "../../../composables/pos/shared/useOffers";
 // Import the cache cleanup function
 import { clearExpiredCustomerBalances } from "../../../../offline/index";
@@ -227,15 +218,11 @@ import { useCustomerDisplayPublisher } from "../../../composables/pos/shared/use
 export default {
 	setup() {
 		const eventBus = inject("eventBus");
-		const dialog = ref(false);
 		const invoicePanel = ref(null);
 		const additionalDiscountField = ref(null);
 		const mobileDock = ref(null);
 		const responsive = useResponsive();
 		const rtl = useRtl();
-		const shift = usePosShift(() => {
-			dialog.value = true;
-		});
 		const offers = useOffers();
 		const uiStore = useUIStore();
 		const invoiceStore = useInvoiceStore();
@@ -256,7 +243,7 @@ export default {
 		const compactPanel = ref("selector");
 		const isPhone = computed(() => responsive.isPhone.value);
 		const showBottomDock = computed(
-			() => !dialog.value && responsive.windowWidth.value < 1100,
+			() => responsive.windowWidth.value < 1100,
 		);
 		const bottomDockHeight = ref(0);
 		let mobileDockObserver = null;
@@ -456,9 +443,6 @@ export default {
 				});
 			}
 			if (eventBus) {
-				eventBus.on("submit_closing_pos", (data) => {
-					shift.submit_closing_pos(data);
-				});
 				eventBus.on("focus_additional_discount", focusAdditionalDiscountField);
 				eventBus.on("set_compact_panel", setCompactPanel);
 			}
@@ -476,7 +460,6 @@ export default {
 				mobileDockObserver = null;
 			}
 			if (eventBus) {
-				eventBus.off("submit_closing_pos");
 				eventBus.off("focus_additional_discount", focusAdditionalDiscountField);
 				eventBus.off("set_compact_panel", setCompactPanel);
 			}
@@ -535,7 +518,6 @@ export default {
 		return {
 			...responsive,
 			...rtl,
-			...shift,
 			...offers,
 			uiStore,
 			invoiceStore,
@@ -579,13 +561,11 @@ export default {
 			getCurrencySymbol,
 			invoicePanel,
 			eventBus,
-			dialog,
 		};
 	},
 	components: {
 		ItemsSelector,
 		Invoice,
-		OpeningDialog,
 		Payments,
 		Drafts,
 		InvoiceManagement,
@@ -600,9 +580,6 @@ export default {
 	},
 
 	methods: {
-		create_opening_voucher() {
-			this.dialog = true;
-		},
 		get_pos_setting() {
 			frappe.db.get_doc("POS Settings", undefined).then((_doc) => {
 				// Update store directly instead of emitting event
@@ -616,23 +593,10 @@ export default {
 				// this.uiStore.setPosSettings(doc); // We might need to implement this if it doesn't exist
 			});
 		},
-		// handleAddItem removed as ItemsSelector handles pos addition internally
-		handleRegisterPosData(data) {
-			this.pos_profile = data.pos_profile;
-			this.get_offers(this.pos_profile.name, this.pos_profile);
-			this.pos_opening_shift = data.pos_opening_shift;
-
-			// Update Store
-			this.uiStore.setRegisterData(data);
-		},
-		closeOpeningDialog() {
-			this.dialog = false;
-		},
 	},
 
 	mounted: function () {
 		this.$nextTick(function () {
-			this.check_opening_entry();
 			this.get_pos_setting();
 
 			// Watch store for updates

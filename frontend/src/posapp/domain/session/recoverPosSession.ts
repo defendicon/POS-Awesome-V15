@@ -61,8 +61,14 @@ function validateRecoveredSession(
 	registerData: PosSessionRegisterData,
 	options: RecoverPosSessionOptions,
 ) {
+	const bootstrapRegisterData = registerData
+		? {
+				pos_profile: registerData.pos_profile || undefined,
+				pos_opening_shift: registerData.pos_opening_shift || undefined,
+			}
+		: null;
 	const bootstrapSnapshot = createBootstrapSnapshotFromRegisterData(
-		registerData,
+		bootstrapRegisterData,
 		options.currentSnapshot || null,
 		{
 			buildVersion: options.buildVersion || null,
