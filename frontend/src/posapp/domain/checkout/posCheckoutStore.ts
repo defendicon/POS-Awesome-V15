@@ -12,6 +12,12 @@ function createInitialCheckoutState(): PosCheckoutState {
 		stage: "idle",
 		blocker: null,
 		timeline: [],
+		sources: {
+			customer: "unknown",
+			pricing: "unknown",
+			offers: "unknown",
+			payments: "unknown",
+		},
 	};
 }
 
@@ -61,6 +67,19 @@ export function createPosCheckoutStore() {
 		state.value = createInitialCheckoutState();
 	}
 
+	function setSource(
+		stage: keyof PosCheckoutState["sources"],
+		source: PosCheckoutState["sources"][typeof stage],
+	) {
+		state.value = {
+			...state.value,
+			sources: {
+				...state.value.sources,
+				[stage]: source,
+			},
+		};
+	}
+
 	return {
 		state,
 		markStarting,
@@ -68,5 +87,6 @@ export function createPosCheckoutStore() {
 		markReady,
 		blockCheckout,
 		resetCheckout,
+		setSource,
 	};
 }

@@ -13,6 +13,15 @@ export type PosCheckoutBlocker = {
 	summary: string;
 };
 
+export type PosCheckoutSource = "server" | "cache" | "unknown";
+
+export type PosCheckoutSources = {
+	customer: PosCheckoutSource;
+	pricing: PosCheckoutSource;
+	offers: PosCheckoutSource;
+	payments: PosCheckoutSource;
+};
+
 export type PosCheckoutTimelineEvent = {
 	stage: PosCheckoutStage;
 	at: string;
@@ -23,4 +32,5 @@ export type PosCheckoutState = {
 	stage: PosCheckoutStage;
 	blocker: PosCheckoutBlocker | null;
 	timeline: PosCheckoutTimelineEvent[];
+	sources: PosCheckoutSources;
 };
