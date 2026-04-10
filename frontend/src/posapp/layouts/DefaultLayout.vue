@@ -134,14 +134,14 @@ import {
 } from "../../offline/sync/resourceRunner";
 import {
 	createBootstrapSnapshotFromRegisterData,
-	resolveBootstrapRuntimeState,
-	validateBootstrapSnapshot,
 } from "../../offline/bootstrapSnapshot";
 import {
 	setupNetworkListeners as initNetworkListeners,
 	checkNetworkConnectivity as utilsCheckNetworkConnectivity,
 	manualNetworkRetry,
 } from "../composables/core/useNetwork";
+import { createDefaultLayoutStartup } from "../domain/startup/defaultLayoutStartup";
+import { runRegisterStartup } from "../domain/startup/registerStartup";
 import { useRtl } from "../composables/core/useRtl";
 import authService from "../services/authService.js";
 import { getValidCachedOpeningForCurrentUser } from "../utils/openingCache";
@@ -236,9 +236,9 @@ const cacheUsageDetails = ref({ total: 0, indexedDB: 0, localStorage: 0 });
 const bootstrapStatus = ref(getBootstrapSnapshotStatus());
 const bootstrapLimitedMode = ref(getBootstrapLimitedMode());
 const bootstrapSnackbarVisible = ref(false);
-const confirmedBootstrapDecisionKey = ref("");
 let _sidebarObserver = null;
 let updateInterval = null;
+let startupFlowPromise = null;
 
 // Event Bus
 const eventBus = instance?.proxy?.eventBus;
@@ -252,14 +252,6 @@ function getCurrentBootstrapProfile() {
 
 function getCurrentBootstrapOpeningShift() {
 	return posOpeningShift.value || getOpeningStorage()?.pos_opening_shift || null;
-}
-
-function buildBootstrapValidationKey(validation) {
-	return JSON.stringify({
-		mode: validation?.mode || "normal",
-		reasons: validation?.reasons || [],
-		missingPrerequisites: validation?.missingPrerequisites || [],
-	});
 }
 
 function buildCurrentBootstrapValidationInput() {
@@ -312,56 +304,27 @@ function persistBootstrapRuntime(validation, decision) {
 	setBootstrapLimitedMode(decision.limitedMode);
 }
 
-function buildBootstrapConfirmationMessage(validation) {
-	const details = Array.from(
-		new Set(
-			(validation?.reasons || []).map((code) =>
-				formatBootstrapWarning(code, __),
-			),
-		),
-	);
-
-	return [
-		__("Offline snapshot does not match the current POS state."),
-		...details,
-		__("Press OK to continue offline with a warning, or Cancel to retry."),
-	].join("\n\n");
+function buildRegisterStartupOptions() {
+	return {
+		snapshot: ensureBootstrapSnapshotIsCurrent(),
+		registerData: {
+			pos_profile: getCurrentBootstrapProfile(),
+			pos_opening_shift: getCurrentBootstrapOpeningShift(),
+		},
+		validationInput: buildCurrentBootstrapValidationInput(),
+		continueOffline: true,
+	};
 }
 
-function evaluateBootstrapSnapshot(options = {}) {
-	const allowPrompt = !!options.allowPrompt;
-	const snapshot = ensureBootstrapSnapshotIsCurrent();
-	const validation = validateBootstrapSnapshot(
-		snapshot,
-		buildCurrentBootstrapValidationInput(),
-	);
-	const decisionKey = buildBootstrapValidationKey(validation);
-	let decision = resolveBootstrapRuntimeState(validation, {
-		continueOffline: confirmedBootstrapDecisionKey.value === decisionKey,
-	});
-
-	if (decision.requiresConfirmation && allowPrompt) {
-		const confirmed = window.confirm(
-			buildBootstrapConfirmationMessage(validation),
+function evaluateRegisterStartup() {
+	const registerStartup = runRegisterStartup(buildRegisterStartupOptions());
+	if (registerStartup.validation && registerStartup.runtime) {
+		persistBootstrapRuntime(
+			registerStartup.validation,
+			registerStartup.runtime,
 		);
-
-		if (confirmed) {
-			confirmedBootstrapDecisionKey.value = decisionKey;
-			decision = resolveBootstrapRuntimeState(validation, {
-				continueOffline: true,
-			});
-		} else {
-			confirmedBootstrapDecisionKey.value = "";
-			persistBootstrapRuntime(validation, decision);
-			window.location.reload();
-			return decision;
-		}
-	} else if (validation.mode !== "confirmation_required") {
-		confirmedBootstrapDecisionKey.value = "";
 	}
-
-	persistBootstrapRuntime(validation, decision);
-	return decision;
+	return registerStartup;
 }
 
 function getOfflineSyncProfile() {
@@ -432,10 +395,73 @@ function triggerOnlineResumeSync() {
 	});
 }
 
+async function startCustomersForStartup() {
+	const profile = getCurrentBootstrapProfile();
+	if (!profile?.name) {
+		return {
+			started: false,
+			ready: false,
+		};
+	}
+
+	customersStore.setPosProfile(profile);
+	await customersStore.get_customer_names();
+
+	return {
+		started: true,
+		ready: !!customersLoaded.value,
+	};
+}
+
+async function startItemsForStartup() {
+	const profile = getCurrentBootstrapProfile();
+	if (!profile?.name) {
+		return {
+			started: false,
+			ready: false,
+		};
+	}
+
+	await itemsStore.initialize(profile, null, null);
+
+	return {
+		started: true,
+		ready: !!itemsLoaded.value,
+	};
+}
+
+const defaultLayoutStartup = createDefaultLayoutStartup({
+	runRegisterStartup: evaluateRegisterStartup,
+	startCustomers: startCustomersForStartup,
+	startItems: startItemsForStartup,
+	markInitLoaded: () => markSourceLoaded("init"),
+});
+
+async function runPosStartupFlow() {
+	if (startupFlowPromise) {
+		return startupFlowPromise;
+	}
+
+	startupFlowPromise = defaultLayoutStartup
+		.start()
+		.catch((error) => {
+			console.error("POS startup flow failed", error);
+			return defaultLayoutStartup.state.value;
+		})
+		.finally(() => {
+			startupFlowPromise = null;
+		});
+
+	return startupFlowPromise;
+}
+
 // Computed
 const loadingProgress = computed(() => loadingState.progress);
 const loadingActive = computed(() => loadingState.active);
-const loadingMessage = computed(() => loadingState.message);
+const startupBlocker = computed(() => defaultLayoutStartup.state.value.blocker);
+const loadingMessage = computed(
+	() => startupBlocker.value?.summary || loadingState.message,
+);
 const bootstrapAlertType = computed(() =>
 	bootstrapStatus.value?.runtime_mode === "invalid" ? "error" : "warning",
 );
@@ -502,7 +528,7 @@ watch(networkOnline, (newVal, oldVal) => {
 		refreshTaxInclusiveSetting();
 		eventBus?.emit("network-online");
 		handleSyncInvoices();
-		evaluateBootstrapSnapshot({ allowPrompt: false });
+		evaluateRegisterStartup();
 	}
 });
 
@@ -510,7 +536,7 @@ watch(serverOnline, (newVal, oldVal) => {
 	if (newVal && !oldVal) {
 		eventBus?.emit("server-online");
 		handleSyncInvoices();
-		evaluateBootstrapSnapshot({ allowPrompt: false });
+		evaluateRegisterStartup();
 	}
 });
 
@@ -522,9 +548,7 @@ watch(
 		posOpeningShift.value?.user || null,
 	],
 	() => {
-		evaluateBootstrapSnapshot({
-			allowPrompt: getIsManualOffline() || !navigator.onLine,
-		});
+		evaluateRegisterStartup();
 	},
 );
 
@@ -728,23 +752,8 @@ const initializeData = async () => {
 		serverOnline.value = false;
 		window.serverOnline = false;
 	}
-	evaluateBootstrapSnapshot({
-		allowPrompt: manualOffline.value || !navigator.onLine,
-	});
+	await runPosStartupFlow();
 	void scheduleBootCriticalWarmSync();
-
-	markSourceLoaded("init");
-
-	// Trigger initial customer load only when POS profile is already available
-	if (
-		navigator.onLine &&
-		!isOffline() &&
-		posProfile.value &&
-		posProfile.value.name
-	) {
-		customersStore.setPosProfile(posProfile.value);
-		customersStore.get_customer_names();
-	}
 };
 
 const setupEventListeners = () => {
@@ -755,14 +764,13 @@ const setupEventListeners = () => {
 			posProfile,
 			(newProfile) => {
 				if (newProfile && newProfile.name) {
-					// Update customers store with profile
-					customersStore.setPosProfile(newProfile);
 					void scheduleBootCriticalWarmSync();
 
 					if (navigator.onLine && !getIsManualOffline()) {
 						refreshTaxInclusiveSetting();
-						customersStore.get_customer_names();
 					}
+
+					void runPosStartupFlow();
 				}
 			},
 			{ deep: true, immediate: true },
