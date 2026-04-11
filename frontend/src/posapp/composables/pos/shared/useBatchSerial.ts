@@ -1,3 +1,20 @@
+export const getDisplayableBatchOptions = (batchList: any): any[] => {
+	if (!Array.isArray(batchList)) {
+		return [];
+	}
+
+	return batchList.filter((batch) => {
+		if (!batch?.batch_no) {
+			return false;
+		}
+
+		const rawAvailableQty =
+			batch.available_qty ?? batch.batch_qty ?? batch.original_batch_qty;
+		const availableQty = Number(rawAvailableQty);
+		return Number.isFinite(availableQty) && availableQty > 0;
+	});
+};
+
 export function useBatchSerial() {
 	const normalizeSerialSelection = (item: any) => {
 		if (!Array.isArray(item.serial_no_selected)) {
@@ -349,5 +366,6 @@ export function useBatchSerial() {
 		setSerialNo,
 		setBatchQty,
 		getBatchAvailability,
+		getDisplayableBatchOptions,
 	};
 }

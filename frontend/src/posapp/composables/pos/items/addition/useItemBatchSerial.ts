@@ -1,4 +1,5 @@
 import { nextTick } from "vue";
+import { getDisplayableBatchOptions } from "../../shared/useBatchSerial";
 
 declare const frappe: any;
 declare const __: (_text: string) => string;
@@ -20,11 +21,10 @@ export function useItemBatchSerial() {
 	};
 
 	const showBatchDialog = (item: any, context: any) => {
-		const opts =
-			Array.isArray(item.batch_no_data) && item.batch_no_data.length > 0
-				? item.batch_no_data
-				: null;
-		if (opts) {
+		const opts = Array.isArray(item.batch_no_data)
+			? getDisplayableBatchOptions(item.batch_no_data)
+			: [];
+		if (opts.length > 0) {
 			const dialog = new frappe.ui.Dialog({
 				title: __("Select Batch"),
 				fields: [

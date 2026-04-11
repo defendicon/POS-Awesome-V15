@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { useBatchSerial } from "../src/posapp/composables/pos/shared/useBatchSerial";
+import {
+	getDisplayableBatchOptions,
+	useBatchSerial,
+} from "../src/posapp/composables/pos/shared/useBatchSerial";
 
 describe("useBatchSerial.setSerialNo", () => {
 	it("does not force qty to zero when no serial is selected", () => {
@@ -64,6 +67,21 @@ describe("useBatchSerial.setSerialNo", () => {
 });
 
 describe("useBatchSerial.setBatchQty", () => {
+	it("returns only batches with stock greater than zero for display", () => {
+		expect(
+			getDisplayableBatchOptions([
+				{ batch_no: "B-AVAILABLE", available_qty: 3 },
+				{ batch_no: "B-ZERO", available_qty: 0 },
+				{ batch_no: "B-NEGATIVE", available_qty: -2 },
+				{ batch_no: "B-FALLBACK", batch_qty: 4 },
+				{ batch_no: "B-FALLBACK-ZERO", batch_qty: 0 },
+			]),
+		).toEqual([
+			{ batch_no: "B-AVAILABLE", available_qty: 3 },
+			{ batch_no: "B-FALLBACK", batch_qty: 4 },
+		]);
+	});
+
 	it("ignores expired batches and picks next non-expired batch", () => {
 		const { setBatchQty } = useBatchSerial();
 		const context: any = {

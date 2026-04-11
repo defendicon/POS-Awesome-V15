@@ -354,7 +354,7 @@
 						<div class="posa-form-field">
 							<v-autocomplete
 								v-model="item.batch_no"
-								:items="item.batch_no_data"
+								:items="getBatchOptions(item)"
 								item-title="batch_no"
 								variant="outlined"
 								density="compact"
@@ -431,6 +431,7 @@
 </template>
 
 <script setup lang="ts">
+import { getDisplayableBatchOptions } from "../../../composables/pos/shared/useBatchSerial";
 import type { CartItem, POSProfile, InvoiceDoc } from "../../../types/models";
 
 interface Props {
@@ -475,6 +476,8 @@ const onQtyChange = (item: CartItem, event: any) => {
 };
 
 const getRaw = (item: any) => item?.raw || {};
+const getBatchOptions = (item: any) =>
+	getDisplayableBatchOptions(item?.batch_no_data);
 </script>
 
 <style scoped>
