@@ -210,7 +210,11 @@ export async function load_invoice(
 					? context.makeid(20)
 					: Math.random().toString(36).substr(2, 9);
 			}
-			if (item.batch_no) {
+			if (
+				item.batch_no &&
+				Array.isArray(item.batch_no_data) &&
+				item.batch_no_data.length > 0
+			) {
 				if (context.set_batch_qty)
 					context.set_batch_qty(item, item.batch_no);
 			}
