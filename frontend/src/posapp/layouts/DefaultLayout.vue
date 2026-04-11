@@ -84,7 +84,7 @@
 import { ref, computed, onMounted, onBeforeUnmount, watch, getCurrentInstance } from "vue";
 // Note paths updated to be relative to layouts/ directory
 import Navbar from "../components/Navbar.vue";
-import ClosingDialog from "../components/pos/shell/ClosingDialog.vue";
+import ClosingDialog from "../components/terminal/ClosingDialog.vue";
 import AppLoadingOverlay from "../components/ui/LoadingOverlay.vue";
 import UpdatePrompt from "../components/ui/UpdatePrompt.vue";
 import { useLoading } from "../composables/core/useLoading.js";
@@ -95,7 +95,7 @@ import { useSyncStore } from "../stores/syncStore.js";
 import { useToastStore } from "../stores/toastStore.js";
 import { useUIStore } from "../stores/uiStore.js";
 import { useUpdateStore } from "../stores/updateStore.js";
-import { useItemsStore } from "../stores/itemsStore.js";
+import { useCatalogStore } from "../stores/catalogStore.js";
 import { useOfflineSyncStore } from "../stores/offlineSyncStore";
 import { storeToRefs } from "pinia";
 import {
@@ -186,7 +186,7 @@ const { overlayVisible: globalLoading } = useLoading();
 const { get_closing_data } = usePosShift();
 const syncStore = useSyncStore();
 const customersStore = useCustomersStore();
-const itemsStore = useItemsStore();
+const itemsStore = useCatalogStore();
 const offlineSyncStore = useOfflineSyncStore();
 const toastStore = useToastStore();
 const uiStore = useUIStore();

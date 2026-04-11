@@ -100,16 +100,16 @@ after_migrate = [
 
 doc_events = {
     "Sales Invoice": {
-        "validate": "posawesome.posawesome.api.invoice.validate",
-        "before_submit": "posawesome.posawesome.api.invoice.before_submit",
-        "before_cancel": "posawesome.posawesome.api.invoice.before_cancel",
-        "on_cancel": "posawesome.posawesome.api.invoice.on_cancel",
+        "validate": "posawesome.posawesome.api.cart.validate",
+        "before_submit": "posawesome.posawesome.api.cart.before_submit",
+        "before_cancel": "posawesome.posawesome.api.cart.before_cancel",
+        "on_cancel": "posawesome.posawesome.api.cart.on_cancel",
     },
     "POS Invoice": {
-        "validate": "posawesome.posawesome.api.invoice.validate",
-        "before_submit": "posawesome.posawesome.api.invoice.before_submit",
-        "before_cancel": "posawesome.posawesome.api.invoice.before_cancel",
-        "on_cancel": "posawesome.posawesome.api.invoice.on_cancel",
+        "validate": "posawesome.posawesome.api.cart.validate",
+        "before_submit": "posawesome.posawesome.api.cart.before_submit",
+        "before_cancel": "posawesome.posawesome.api.cart.before_cancel",
+        "on_cancel": "posawesome.posawesome.api.cart.on_cancel",
     },
     "Customer": {
         "validate": "posawesome.posawesome.api.customer.validate",

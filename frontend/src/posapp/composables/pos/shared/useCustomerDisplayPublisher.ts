@@ -5,7 +5,7 @@ import {
 	watch,
 	type Ref,
 } from "vue";
-import { useInvoiceStore } from "../../../stores/invoiceStore";
+import { useCartStore } from "../../../stores/cartStore";
 import { useCustomersStore } from "../../../stores/customersStore";
 import {
 	buildCustomerDisplayUrl,
@@ -80,7 +80,7 @@ export function useCustomerDisplayPublisher({
 	posProfile,
 	eventBus,
 }: UseCustomerDisplayPublisherOptions) {
-	const invoiceStore = useInvoiceStore();
+	const invoiceStore = useCartStore();
 	const customersStore = useCustomersStore();
 
 	const channelId = getOrCreateCustomerDisplayChannelId();

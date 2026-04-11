@@ -25,7 +25,7 @@ export const fetchDraftInvoices = async ({
 		: "Sales Invoice";
 
 	const { message } = await frappe.call({
-		method: "posawesome.posawesome.api.invoices.get_draft_invoices",
+		method: "posawesome.posawesome.api.cart_management.get_draft_invoices",
 		args: {
 			pos_opening_shift: posOpeningShift?.name,
 			doctype,
@@ -47,7 +47,7 @@ export const fetchDraftInvoiceDoc = async ({
 	}
 
 	const { message } = await frappe.call({
-		method: "posawesome.posawesome.api.invoices.get_draft_invoice_doc",
+		method: "posawesome.posawesome.api.cart_management.get_draft_invoice_doc",
 		args: {
 			invoice_name: draft.name,
 			doctype: resolveDraftInvoiceDoctype(draft, posProfile),

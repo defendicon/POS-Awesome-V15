@@ -15,7 +15,7 @@ export async function fetchItemStockQuantities(
 			const response = await new Promise<AnyRecord[]>(
 				(resolve, reject) => {
 					frappe.call({
-						method: "posawesome.posawesome.api.items.get_items_details",
+						method: "posawesome.posawesome.api.catalog.get_items_details",
 						args: {
 							pos_profile: JSON.stringify(pos_profile),
 							items_data: JSON.stringify(chunk),

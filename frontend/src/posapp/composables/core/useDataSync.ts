@@ -1,5 +1,5 @@
 import { ref, onMounted, onUnmounted, computed } from "vue";
-import { useItemsStore } from "../../stores/itemsStore";
+import { useCatalogStore } from "../../stores/catalogStore";
 
 type SyncHistoryEntry = {
 	time: number;
@@ -7,7 +7,7 @@ type SyncHistoryEntry = {
 };
 
 export function useDataSync(intervalSeconds = 30) {
-	const itemsStore = useItemsStore();
+	const itemsStore = useCatalogStore();
 	const lastSyncTime = ref<Date | null>(null);
 	const lastSyncSize = ref(0);
 	const totalSyncSize = ref(0);

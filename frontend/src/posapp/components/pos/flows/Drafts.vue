@@ -116,7 +116,7 @@ import { computed } from "vue";
 import format from "../../../format";
 import { useToastStore } from "../../../stores/toastStore";
 import { useUIStore } from "../../../stores/uiStore";
-import { useInvoiceStore } from "../../../stores/invoiceStore";
+import { useCartStore } from "../../../stores/cartStore";
 import { storeToRefs } from "pinia";
 import { useTheme } from "../../../composables/core/useTheme";
 import { useResponsive } from "../../../composables/core/useResponsive";
@@ -128,7 +128,7 @@ export default {
 	setup() {
 		const toastStore = useToastStore();
 		const uiStore = useUIStore();
-		const invoiceStore = useInvoiceStore();
+		const invoiceStore = useCartStore();
 		const theme = useTheme();
 		const responsive = useResponsive();
 		const isCompactDrafts = computed(() => responsive.windowWidth.value < 1100);

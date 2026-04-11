@@ -138,7 +138,7 @@
 import { computed } from "vue";
 import format from "../../../format";
 import { useUIStore } from "../../../stores/uiStore.js";
-import { useInvoiceStore } from "../../../stores/invoiceStore.js";
+import { useCartStore } from "../../../stores/cartStore.js";
 import { storeToRefs } from "pinia";
 import { useResponsive } from "../../../composables/core/useResponsive";
 import { useTheme } from "../../../composables/core/useTheme";
@@ -147,7 +147,7 @@ export default {
 	mixins: [format],
 	setup() {
 		const uiStore = useUIStore();
-		const invoiceStore = useInvoiceStore();
+		const invoiceStore = useCartStore();
 		const responsive = useResponsive();
 		const theme = useTheme();
 		const isCompactOrders = computed(() => responsive.windowWidth.value < 1100);
@@ -275,7 +275,7 @@ export default {
 			try {
 				let invoice_doc_for_load = {};
 				const { message } = await frappe.call({
-					method: "posawesome.posawesome.api.invoices.create_sales_invoice_from_order",
+					method: "posawesome.posawesome.api.cart_management.create_sales_invoice_from_order",
 					args: {
 						sales_order: this.selected[0].name,
 					},
@@ -319,7 +319,7 @@ export default {
 
 				if (invoice_doc_for_load.name) {
 					await frappe.call({
-						method: "posawesome.posawesome.api.invoices.delete_sales_invoice",
+						method: "posawesome.posawesome.api.cart_management.delete_sales_invoice",
 						args: {
 							sales_invoice: invoice_doc_for_load.name,
 						},

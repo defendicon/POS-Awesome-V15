@@ -104,9 +104,9 @@
 import format, { formatUtils } from "../../../format";
 import { useUIStore } from "../../../stores/uiStore.js";
 import { getOpeningStorage } from "../../../../offline/index";
-import { useItemsStore } from "../../../stores/itemsStore";
+import { useCatalogStore } from "../../../stores/catalogStore";
 import { useToastStore } from "../../../stores/toastStore";
-import { usePurchaseOrder } from "../../../composables/pos/payments/usePurchaseOrder";
+import { usePurchaseOrder } from "../../../composables/checkout/usePurchaseOrder";
 import ItemsSelector from "../items/ItemsSelector.vue";
 import PurchasePaymentDialog from "./PurchasePaymentDialog.vue";
 import SupplierDialog from "../dialogs/purchase/SupplierDialog.vue";
@@ -126,7 +126,7 @@ export default {
 	setup() {
 		const uiStore = useUIStore();
 		const toastStore = useToastStore();
-		const itemsStore = useItemsStore();
+		const itemsStore = useCatalogStore();
 		const eventBus = inject("eventBus");
 
 		const pos_profile = ref({});

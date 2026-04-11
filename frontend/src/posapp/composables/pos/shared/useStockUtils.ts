@@ -139,7 +139,7 @@ export function useStockUtils() {
 		) {
 			try {
 				const r = await frappe.call({
-					method: "posawesome.posawesome.api.items.get_price_for_uom",
+					method: "posawesome.posawesome.api.catalog.get_price_for_uom",
 					args: {
 						item_code: item.item_code,
 						price_list: priceList,

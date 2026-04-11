@@ -76,7 +76,7 @@ export async function syncOfflinePayments() {
 	for (const pay of payments) {
 		try {
 			await frappe.call({
-				method: "posawesome.posawesome.api.payment_entry.process_pos_payment",
+				method: "posawesome.posawesome.api.checkout_entry.process_pos_payment",
 				args: pay.args,
 			});
 			synced++;

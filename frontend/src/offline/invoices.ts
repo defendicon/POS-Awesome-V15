@@ -229,7 +229,7 @@ export async function syncOfflineInvoices() {
 		for (const inv of invoices) {
 			try {
 				await frappe.call({
-					method: "posawesome.posawesome.api.invoices.submit_invoice",
+					method: "posawesome.posawesome.api.cart_management.submit_invoice",
 					args: {
 						invoice: inv.invoice,
 						data: inv.data,
@@ -243,7 +243,7 @@ export async function syncOfflineInvoices() {
 				);
 				try {
 					await frappe.call({
-						method: "posawesome.posawesome.api.invoices.update_invoice",
+						method: "posawesome.posawesome.api.cart_management.update_invoice",
 						args: { data: inv.invoice },
 					});
 					drafted += 1;

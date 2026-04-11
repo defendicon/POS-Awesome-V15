@@ -12,7 +12,7 @@ from .customers import (
     make_address,
     set_customer_info,
 )
-from .invoices import (
+from .cart_management import (
     delete_invoice,
     get_draft_invoices,
     get_last_invoice_rates,
@@ -21,7 +21,7 @@ from .invoices import (
     update_invoice,
     validate_return_items,
 )
-from .items import (
+from .catalog import (
     build_scale_barcode,
     get_item_attributes,
     get_item_brand,
@@ -39,7 +39,7 @@ from .offers import (
     get_offers,
     get_pos_coupon,
 )
-from .payments import (
+from .checkout import (
     create_payment_request,
     get_available_credit,
 )

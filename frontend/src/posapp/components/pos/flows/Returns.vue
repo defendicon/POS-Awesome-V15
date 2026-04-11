@@ -335,7 +335,7 @@
 
 <script>
 import format, { formatUtils } from "../../../format";
-import { useInvoiceStore } from "../../../stores/invoiceStore.js";
+import { useCartStore } from "../../../stores/cartStore.js";
 import { useUIStore } from "../../../stores/uiStore.js";
 import { computed } from "vue";
 import { useResponsive } from "../../../composables/core/useResponsive";
@@ -344,7 +344,7 @@ import { useTheme } from "../../../composables/core/useTheme";
 export default {
 	mixins: [format],
 	setup() {
-		const invoiceStore = useInvoiceStore();
+		const invoiceStore = useCartStore();
 		const uiStore = useUIStore();
 		const responsive = useResponsive();
 		const theme = useTheme();
@@ -665,7 +665,7 @@ export default {
 			};
 
 			frappe.call({
-				method: "posawesome.posawesome.api.invoices.search_invoices_for_return",
+				method: "posawesome.posawesome.api.cart_management.search_invoices_for_return",
 				args: this.current_search_params,
 				callback: function (r) {
 					vm.loading_more = false;
@@ -723,7 +723,7 @@ export default {
 				let return_doc = null;
 				try {
 					const { message } = await frappe.call({
-						method: "posawesome.posawesome.api.invoices.get_invoice_for_return",
+						method: "posawesome.posawesome.api.cart_management.get_invoice_for_return",
 						args: {
 							invoice_name: selectedInvoice.name,
 							pos_profile: this.pos_profile?.name,
