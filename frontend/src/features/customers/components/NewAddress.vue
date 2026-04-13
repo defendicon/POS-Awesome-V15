@@ -71,7 +71,7 @@
 </template>
 
 <script>
-import { useToastStore } from "../../../stores/toastStore";
+import { useToastStore } from "../../../posapp/stores/toastStore";
 
 export default {
 	setup() {

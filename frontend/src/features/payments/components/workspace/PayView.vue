@@ -207,7 +207,7 @@ import { storeToRefs } from "pinia";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import format from "../../../../posapp/format";
 import { normalizeDateForBackend } from "../../../../posapp/format";
-import Customer from "../../../../posapp/components/pos/customer/Customer.vue";
+import Customer from "../../../customers/components/Customer.vue";
 import {
 	isOffline,
 	getPendingOfflinePaymentCount,

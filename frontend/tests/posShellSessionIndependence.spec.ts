@@ -98,6 +98,32 @@ describe("POS shell session ownership", () => {
 		);
 	});
 
+	it("moves live customer components into the customers feature", () => {
+		const invoiceCustomerSource = readFileSync(
+			resolve("src/posapp/components/pos/invoice/InvoiceCustomerSection.vue"),
+			"utf8",
+		);
+		const payViewSource = readFileSync(
+			resolve("src/features/payments/components/workspace/PayView.vue"),
+			"utf8",
+		);
+		const posSource = readFileSync(
+			resolve("src/posapp/components/pos/shell/Pos.vue"),
+			"utf8",
+		);
+
+		expect(invoiceCustomerSource).toContain(
+			'import Customer from "../../../../features/customers/components/Customer.vue"',
+		);
+		expect(payViewSource).toContain(
+			'import Customer from "../../../customers/components/Customer.vue"',
+		);
+		expect(posSource).toContain(
+			'import NewAddress from "../../../../features/customers/components/NewAddress.vue"',
+		);
+		expect(posSource).not.toContain('import NewAddress from "../customer/NewAddress.vue"');
+	});
+
 	it("moves checkout start ownership into DefaultLayout instead of Pos.vue", () => {
 		const layoutSource = readFileSync(
 			resolve("src/posapp/layouts/DefaultLayout.vue"),

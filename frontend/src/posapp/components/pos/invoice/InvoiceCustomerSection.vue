@@ -24,7 +24,7 @@
 
 <script setup>
 import { ref } from "vue";
-import Customer from "../customer/Customer.vue";
+import Customer from "../../../../features/customers/components/Customer.vue";
 
 defineProps({
 	pos_profile: {

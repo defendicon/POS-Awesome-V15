@@ -199,7 +199,7 @@ import PosCoupons from "../offers/PosCoupons.vue";
 import Drafts from "../../../../features/orders/components/Drafts.vue";
 import InvoiceManagement from "../../../../features/orders/components/InvoiceManagement.vue";
 import SalesOrders from "../../../../features/orders/components/SalesOrders.vue";
-import NewAddress from "../customer/NewAddress.vue";
+import NewAddress from "../../../../features/customers/components/NewAddress.vue";
 import Variants from "../items/Variants.vue";
 import Returns from "../../../../features/orders/components/Returns.vue";
 import MpesaPayments from "../payments/Mpesa-Payments.vue";
