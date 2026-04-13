@@ -1,7 +1,7 @@
 import { computed, ref } from "vue";
 import { describe, expect, it, vi } from "vitest";
 
-import { usePaymentMethods } from "../src/posapp/composables/pos/payments/usePaymentMethods";
+import { usePaymentMethods } from "../src/features/payments/composables/invoice/usePaymentMethods";
 
 const getSmartTenderSuggestionsMock = vi.fn();
 

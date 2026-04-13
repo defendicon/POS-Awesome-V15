@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { defineComponent, h } from "vue";
 import { mount } from "@vue/test-utils";
 
-import PaymentSummary from "../src/posapp/components/pos/payments/PaymentSummary.vue";
+import PaymentSummary from "../src/features/payments/components/invoice/PaymentSummary.vue";
 
 const BoxStub = defineComponent({
 	setup(_, { slots }) {

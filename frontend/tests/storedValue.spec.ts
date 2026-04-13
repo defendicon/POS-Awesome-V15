@@ -5,7 +5,7 @@ import { defineComponent, h } from "vue";
 import { mount } from "@vue/test-utils";
 import "fake-indexeddb/auto";
 
-import PaymentOptions from "../src/posapp/components/pos/payments/PaymentOptions.vue";
+import PaymentOptions from "../src/features/payments/components/invoice/PaymentOptions.vue";
 import {
 	clearOfflineInvoices,
 	getOfflineInvoices,

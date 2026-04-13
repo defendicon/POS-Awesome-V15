@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { defineComponent, h } from "vue";
 import { mount } from "@vue/test-utils";
 
-import PaymentGiftCardSection from "../src/posapp/components/pos/payments/PaymentGiftCardSection.vue";
+import PaymentGiftCardSection from "../src/features/payments/components/invoice/PaymentGiftCardSection.vue";
 
 const BoxStub = defineComponent({
 	setup(_, { slots }) {

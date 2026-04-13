@@ -293,7 +293,7 @@ import { useInvoiceOffers } from "../../composables/pos/invoice/useInvoiceOffers
 import { useInvoiceUI } from "../../composables/pos/invoice/useInvoiceUI";
 import { useInvoicePrinting } from "../../composables/pos/invoice/useInvoicePrinting";
 import { useInvoiceStock } from "../../composables/pos/invoice/useInvoiceStock";
-import { usePaymentPrinting } from "../../composables/pos/payments/usePaymentPrinting";
+import { usePaymentPrinting } from "../../../features/payments/composables/invoice/usePaymentPrinting";
 import {
 	createInvoiceShortcutListeners,
 	registerInvoiceShortcutListener,

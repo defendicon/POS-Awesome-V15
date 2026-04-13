@@ -193,7 +193,7 @@
 <script>
 import ItemsSelector from "../../../../features/catalog/components/ItemsSelector.vue";
 import Invoice from "../Invoice.vue";
-import Payments from "../Payments.vue";
+import PaymentsView from "../../../../features/payments/components/invoice/PaymentsView.vue";
 import PosOffers from "../offers/PosOffers.vue";
 import PosCoupons from "../offers/PosCoupons.vue";
 import Drafts from "../flows/Drafts.vue";
@@ -566,7 +566,7 @@ export default {
 	components: {
 		ItemsSelector,
 		Invoice,
-		Payments,
+		Payments: PaymentsView,
 		Drafts,
 		InvoiceManagement,
 

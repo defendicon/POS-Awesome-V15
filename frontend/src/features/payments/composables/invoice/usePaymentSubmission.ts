@@ -1,11 +1,11 @@
 import { unref, type Ref, type ComputedRef } from "vue";
-import invoiceService from "../../../services/invoiceService";
+import invoiceService from "../../../../posapp/services/invoiceService";
 import {
 	saveOfflineInvoice,
 	isOffline,
 	updateLocalStock,
 } from "../../../../offline/index";
-import stockCoordinator from "../../../utils/stockCoordinator";
+import stockCoordinator from "../../../../posapp/utils/stockCoordinator";
 
 declare const frappe: any;
 declare const __: (_str: string, _args?: any[]) => string;

@@ -5,10 +5,10 @@ import {
 	isDebugPrintEnabled,
 	silentPrint,
 	watchPrintWindow,
-} from "../../../plugins/print";
-import { printDocumentViaQz } from "../../../services/qzTray";
+} from "../../../../posapp/plugins/print";
+import { printDocumentViaQz } from "../../../../posapp/services/qzTray";
 import { isOffline } from "../../../../offline/index";
-import { resolvePaymentPrintDoctype } from "../../../utils/paymentPrintDoctype";
+import { resolvePaymentPrintDoctype } from "../../../../posapp/utils/paymentPrintDoctype";
 
 declare const frappe: any;
 

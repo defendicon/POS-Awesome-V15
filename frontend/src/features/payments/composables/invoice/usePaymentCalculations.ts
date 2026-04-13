@@ -1,5 +1,5 @@
 import { computed, unref, type Ref } from "vue";
-import { formatUtils } from "../../../format";
+import { formatUtils } from "../../../../posapp/format";
 
 declare const window: any;
 

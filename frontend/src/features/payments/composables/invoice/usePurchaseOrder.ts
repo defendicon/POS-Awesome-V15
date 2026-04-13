@@ -1,6 +1,6 @@
 import { ref, computed, type Ref } from "vue";
-import { useItemsStore } from "../../../stores/itemsStore";
-import { formatUtils } from "../../../format";
+import { useItemsStore } from "../../../../posapp/stores/itemsStore";
+import { formatUtils } from "../../../../posapp/format";
 
 declare const frappe: any;
 declare const __: (_str: string, _args?: any[]) => string;

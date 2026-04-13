@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { defineComponent, h } from "vue";
 import { mount } from "@vue/test-utils";
 
-import PaymentMethods from "../src/posapp/components/pos/payments/PaymentMethods.vue";
+import PaymentMethods from "../src/features/payments/components/invoice/PaymentMethods.vue";
 import GiftCardDialog from "../src/posapp/components/pos/wallet/GiftCardDialog.vue";
 
 const BoxStub = defineComponent({

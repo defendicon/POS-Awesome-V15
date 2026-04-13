@@ -284,46 +284,46 @@ import { ref, computed, watch, onMounted, onBeforeUnmount, getCurrentInstance, n
 import { storeToRefs } from "pinia";
 
 // Stores
-import { useInvoiceStore } from "../../stores/invoiceStore.js";
-import { useCustomersStore } from "../../stores/customersStore.js";
-import { useUIStore } from "../../stores/uiStore.js";
-import { useToastStore } from "../../stores/toastStore.js";
-import { useSyncStore } from "../../stores/syncStore.ts";
-import { useSocketStore } from "../../stores/socketStore";
-import { useEmployeeStore } from "../../stores/employeeStore";
+import { useInvoiceStore } from "../../../../posapp/stores/invoiceStore.js";
+import { useCustomersStore } from "../../../../posapp/stores/customersStore.js";
+import { useUIStore } from "../../../../posapp/stores/uiStore.js";
+import { useToastStore } from "../../../../posapp/stores/toastStore.js";
+import { useSyncStore } from "../../../../posapp/stores/syncStore.ts";
+import { useSocketStore } from "../../../../posapp/stores/socketStore";
+import { useEmployeeStore } from "../../../../posapp/stores/employeeStore";
 
 // Composables
-import { usePaymentCalculations } from "../../composables/pos/payments/usePaymentCalculations";
-import { usePaymentSubmission } from "../../composables/pos/payments/usePaymentSubmission";
-import { useRedemptionLogic } from "../../composables/pos/payments/useRedemptionLogic";
-import { usePaymentPrinting } from "../../composables/pos/payments/usePaymentPrinting";
-import { usePaymentMethods } from "../../composables/pos/payments/usePaymentMethods";
-import { useInvoiceDetails } from "../../composables/pos/invoice/useInvoiceDetails";
-import { useFormat } from "../../format";
-import { isOffline, getCachedGiftCardSnapshot, saveGiftCardSnapshot } from "../../../offline/index";
-import GiftCardDialog from "./wallet/GiftCardDialog.vue";
+import { usePaymentCalculations } from "../../composables/invoice/usePaymentCalculations";
+import { usePaymentSubmission } from "../../composables/invoice/usePaymentSubmission";
+import { useRedemptionLogic } from "../../composables/invoice/useRedemptionLogic";
+import { usePaymentPrinting } from "../../composables/invoice/usePaymentPrinting";
+import { usePaymentMethods } from "../../composables/invoice/usePaymentMethods";
+import { useInvoiceDetails } from "../../../../posapp/composables/pos/invoice/useInvoiceDetails";
+import { useFormat } from "../../../../posapp/format";
+import { isOffline, getCachedGiftCardSnapshot, saveGiftCardSnapshot } from "../../../../offline/index";
+import GiftCardDialog from "../../../../posapp/components/pos/wallet/GiftCardDialog.vue";
 import {
 	initializePaymentLinesForDialog,
 	rebalancePreferredPaymentLine,
 	resolvePreferredPaymentLine,
-} from "../../utils/paymentInitialization";
-import { resolvePaymentPrintFormatDoctypes } from "../../utils/paymentPrintDoctype";
-import { resolvePaymentPrintFormat } from "../../utils/paymentPrintFormat";
-import { parseBooleanSetting } from "../../utils/stock";
+} from "../../../../posapp/utils/paymentInitialization";
+import { resolvePaymentPrintFormatDoctypes } from "../../../../posapp/utils/paymentPrintDoctype";
+import { resolvePaymentPrintFormat } from "../../../../posapp/utils/paymentPrintFormat";
+import { parseBooleanSetting } from "../../../../posapp/utils/stock";
 
 // Components
-import PaymentSummary from "./payments/PaymentSummary.vue";
-import InvoiceTotals from "./payments/InvoiceTotals.vue";
-import PaymentActionButtons from "./payments/PaymentActionButtons.vue";
-import PaymentMethods from "./payments/PaymentMethods.vue";
-import PaymentGiftCardSection from "./payments/PaymentGiftCardSection.vue";
-import PaymentRedemption from "./payments/PaymentRedemption.vue";
-import PaymentAdditionalInfo from "./payments/PaymentAdditionalInfo.vue";
-import PaymentPurchaseOrder from "./payments/PaymentPurchaseOrder.vue";
-import PaymentCustomerCreditDetails from "./payments/PaymentCustomerCreditDetails.vue";
-import PaymentOptions from "./payments/PaymentOptions.vue";
-import PaymentSelectionFields from "./payments/PaymentSelectionFields.vue";
-import PaymentDialogs from "./payments/PaymentDialogs.vue";
+import PaymentSummary from "./PaymentSummary.vue";
+import InvoiceTotals from "./InvoiceTotals.vue";
+import PaymentActionButtons from "./PaymentActionButtons.vue";
+import PaymentMethods from "./PaymentMethods.vue";
+import PaymentGiftCardSection from "./PaymentGiftCardSection.vue";
+import PaymentRedemption from "./PaymentRedemption.vue";
+import PaymentAdditionalInfo from "./PaymentAdditionalInfo.vue";
+import PaymentPurchaseOrder from "./PaymentPurchaseOrder.vue";
+import PaymentCustomerCreditDetails from "./PaymentCustomerCreditDetails.vue";
+import PaymentOptions from "./PaymentOptions.vue";
+import PaymentSelectionFields from "./PaymentSelectionFields.vue";
+import PaymentDialogs from "./PaymentDialogs.vue";
 
 const props = defineProps({
 	dialogMode: {

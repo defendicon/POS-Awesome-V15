@@ -43,12 +43,24 @@ describe("POS shell session ownership", () => {
 
 	it("keeps payment preparation out of Payments.vue event-bus listeners", () => {
 		const source = readFileSync(
-			resolve("src/posapp/components/pos/Payments.vue"),
+			resolve("src/features/payments/components/invoice/PaymentsView.vue"),
 			"utf8",
 		);
 
 		expect(source).not.toContain('eventBus.on("send_invoice_doc_payment"');
 		expect(source).not.toContain('eventBus.on("register_pos_profile"');
+	});
+
+	it("moves invoice payment screen ownership into the payments feature", () => {
+		const posSource = readFileSync(
+			resolve("src/posapp/components/pos/shell/Pos.vue"),
+			"utf8",
+		);
+
+		expect(posSource).toContain(
+			'import PaymentsView from "../../../../features/payments/components/invoice/PaymentsView.vue"',
+		);
+		expect(posSource).not.toContain('import Payments from "../Payments.vue"');
 	});
 
 	it("moves checkout start ownership into DefaultLayout instead of Pos.vue", () => {

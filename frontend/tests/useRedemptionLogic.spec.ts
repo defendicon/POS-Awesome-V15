@@ -1,7 +1,7 @@
 import { nextTick, ref } from "vue";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { useRedemptionLogic } from "../src/posapp/composables/pos/payments/useRedemptionLogic";
+import { useRedemptionLogic } from "../src/features/payments/composables/invoice/useRedemptionLogic";
 
 describe("useRedemptionLogic", () => {
 	beforeEach(() => {

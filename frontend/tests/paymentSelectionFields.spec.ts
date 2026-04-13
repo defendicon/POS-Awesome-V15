@@ -3,7 +3,7 @@
 import { mount } from "@vue/test-utils";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import PaymentSelectionFields from "../src/posapp/components/pos/payments/PaymentSelectionFields.vue";
+import PaymentSelectionFields from "../src/features/payments/components/invoice/PaymentSelectionFields.vue";
 
 const VRowStub = {
 	template: "<div><slot /></div>",

@@ -22,7 +22,7 @@ vi.mock("../src/offline_print_template", () => ({
 	default: vi.fn(async () => "<html></html>"),
 }));
 
-import { usePaymentPrinting } from "../src/posapp/composables/pos/payments/usePaymentPrinting";
+import { usePaymentPrinting } from "../src/features/payments/composables/invoice/usePaymentPrinting";
 
 describe("usePaymentPrinting", () => {
 	beforeEach(() => {
