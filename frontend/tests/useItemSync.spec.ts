@@ -12,7 +12,7 @@ vi.mock("../src/offline/index", () => ({
 	isOffline,
 }));
 
-import { useItemSync } from "../src/posapp/composables/pos/items/useItemSync";
+import { useItemSync } from "../src/features/catalog/composables/useItemSync";
 
 describe("useItemSync", () => {
 	let syncCursor: string | null = null;

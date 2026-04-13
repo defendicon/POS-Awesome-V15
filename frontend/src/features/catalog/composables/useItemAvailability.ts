@@ -1,5 +1,5 @@
 import { ref, onUnmounted } from "vue";
-import stockCoordinator from "../../../utils/stockCoordinator.js";
+import stockCoordinator from "../../../posapp/utils/stockCoordinator.js";
 import {
 	indexItemInBarcodeIndex,
 	lookupItemInBarcodeIndex,

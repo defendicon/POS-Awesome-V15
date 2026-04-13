@@ -4,7 +4,7 @@
  */
 
 import { computed, watch, onMounted, onUnmounted } from "vue";
-import { useItemsStore } from "../../../stores/itemsStore.js";
+import { useItemsStore } from "../../../posapp/stores/itemsStore.js";
 import { storeToRefs } from "pinia";
 
 type IntegrationOptions = {

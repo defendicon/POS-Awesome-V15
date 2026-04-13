@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createPosCatalogStore } from "../src/posapp/domain/catalog/posCatalogStore";
-import { loadCatalogItems } from "../src/posapp/domain/catalog/loadCatalogItems";
+import { createPosCatalogStore } from "../src/features/catalog/domain/posCatalogStore";
+import { loadCatalogItems } from "../src/features/catalog/domain/loadCatalogItems";
 
 describe("loadCatalogItems", () => {
 	it("marks catalog ready when initial item load and cached append succeed", async () => {

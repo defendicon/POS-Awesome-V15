@@ -10,7 +10,7 @@ vi.mock("../src/posapp/composables/pos/shared/useStockUtils", () => ({
 	}),
 }));
 
-vi.mock("../src/posapp/composables/pos/items/useItemAddition", () => ({
+vi.mock("../src/features/catalog/composables/useItemAddition", () => ({
 	useItemAddition: () => ({
 		removeItem: vi.fn(),
 		addItem: vi.fn(),

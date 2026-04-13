@@ -73,7 +73,7 @@ import { computed, ref } from "vue";
 import { RecycleScroller } from "vue-virtual-scroller";
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 import ItemCard from "./ItemCard.vue";
-import Skeleton from "../../ui/Skeleton.vue";
+import Skeleton from "../../../posapp/components/ui/Skeleton.vue";
 
 const props = defineProps({
 	displayedItems: { type: Array, default: () => [] },

@@ -12,7 +12,7 @@ vi.mock("../src/posapp/stores/toastStore", () => ({
 	}),
 }));
 
-import { useScanProcessor } from "../src/posapp/composables/pos/items/useScanProcessor";
+import { useScanProcessor } from "../src/features/catalog/composables/useScanProcessor";
 
 const createScannableItem = (overrides: Record<string, any> = {}) => ({
 	item_code: "ITEM-SCAN",

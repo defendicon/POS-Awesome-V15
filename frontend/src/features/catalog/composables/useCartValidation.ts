@@ -1,9 +1,9 @@
 import { ref } from "vue";
-import { useToastStore } from "../../../stores/toastStore.js";
+import { useToastStore } from "../../../posapp/stores/toastStore.js";
 import {
 	parseBooleanSetting,
 	formatStockShortageError,
-} from "../../../utils/stock.js";
+} from "../../../posapp/utils/stock.js";
 
 declare const __: (_text: string, _args?: any[]) => string;
 declare const frappe: any;

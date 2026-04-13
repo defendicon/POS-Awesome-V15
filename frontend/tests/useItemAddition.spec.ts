@@ -6,7 +6,7 @@ vi.mock("../src/posapp/stores/toastStore", () => ({
 	}),
 }));
 
-import { useItemAddition } from "../src/posapp/composables/pos/items/useItemAddition";
+import { useItemAddition } from "../src/features/catalog/composables/useItemAddition";
 import { useBatchSerial } from "../src/posapp/composables/pos/shared/useBatchSerial";
 
 const createItem = () => ({

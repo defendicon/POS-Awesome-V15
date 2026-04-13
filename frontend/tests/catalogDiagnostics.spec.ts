@@ -4,7 +4,7 @@ import {
 	createPosCatalogBlocker,
 	createPosCatalogTimelineEvent,
 	pushPosCatalogTimelineEvent,
-} from "../src/posapp/domain/catalog/catalogDiagnostics";
+} from "../src/features/catalog/domain/catalogDiagnostics";
 
 describe("catalogDiagnostics", () => {
 	it("creates a catalog blocker with a code and summary", () => {

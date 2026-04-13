@@ -1,14 +1,14 @@
 import { ref, type Ref, type ComputedRef } from "vue";
-import { useToastStore } from "../../../stores/toastStore";
-import { perfMarkStart, perfMarkEnd } from "../../../utils/perf";
+import { useToastStore } from "../../../posapp/stores/toastStore";
+import { perfMarkStart, perfMarkEnd } from "../../../posapp/utils/perf";
 import {
 	formatStockShortageError,
 	parseBooleanSetting,
-} from "../../../utils/stock";
-import { saveItems, savePriceListItems } from "../../../../offline/index";
-import { openItemSelectionDialog } from "../../../utils/itemSelectionDialog";
+} from "../../../posapp/utils/stock";
+import { saveItems, savePriceListItems } from "../../../offline/index";
+import { openItemSelectionDialog } from "../../../posapp/utils/itemSelectionDialog";
 // @ts-ignore
-import placeholderImage from "../../../components/pos/placeholder-image.png";
+import placeholderImage from "../../../posapp/components/pos/placeholder-image.png";
 
 declare const frappe: any;
 declare const __: (_str: string, _args?: any[]) => string;

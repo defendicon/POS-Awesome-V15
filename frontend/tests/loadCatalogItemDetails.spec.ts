@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { loadCatalogItemDetails } from "../src/posapp/domain/catalog/loadCatalogItemDetails";
-import { createPosCatalogStore } from "../src/posapp/domain/catalog/posCatalogStore";
+import { loadCatalogItemDetails } from "../src/features/catalog/domain/loadCatalogItemDetails";
+import { createPosCatalogStore } from "../src/features/catalog/domain/posCatalogStore";
 
 describe("loadCatalogItemDetails", () => {
 	it("records detail hydration failure without blocking a ready selector", async () => {

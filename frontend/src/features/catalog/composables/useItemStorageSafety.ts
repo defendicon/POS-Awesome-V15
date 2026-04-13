@@ -1,5 +1,5 @@
 import { ref, onUnmounted } from "vue";
-import { checkDbHealth } from "../../../../offline/index";
+import { checkDbHealth } from "../../../offline/index";
 
 declare const __: (_text: string) => string;
 declare const frappe: any;

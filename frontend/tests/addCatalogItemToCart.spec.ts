@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { addCatalogItemToCart } from "../src/posapp/domain/catalog/addCatalogItemToCart";
-import { createPosCatalogStore } from "../src/posapp/domain/catalog/posCatalogStore";
+import { addCatalogItemToCart } from "../src/features/catalog/domain/addCatalogItemToCart";
+import { createPosCatalogStore } from "../src/features/catalog/domain/posCatalogStore";
 
 describe("addCatalogItemToCart", () => {
 	it("routes item preparation and add through one catalog action", async () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveAdaptiveCatalogView } from "../src/posapp/domain/catalog/catalogSelectorBridge";
+import { resolveAdaptiveCatalogView } from "../src/features/catalog/domain/catalogSelectorBridge";
 
 describe("resolveAdaptiveCatalogView", () => {
 	it("keeps the preferred table view on wide screens", () => {

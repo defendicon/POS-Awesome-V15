@@ -6,7 +6,7 @@ vi.mock("../src/posapp/stores/toastStore", () => ({
 	}),
 }));
 
-import { useScannerInput } from "../src/posapp/composables/pos/items/useScannerInput";
+import { useScannerInput } from "../src/features/catalog/composables/useScannerInput";
 
 describe("useScannerInput", () => {
 	let now = 0;

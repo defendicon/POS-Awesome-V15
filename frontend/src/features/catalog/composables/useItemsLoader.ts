@@ -1,5 +1,5 @@
 import { ref } from "vue";
-import { initPromise } from "../../../../offline/index";
+import { initPromise } from "../../../offline/index";
 
 type EventBus = {
 	emit: (_event: string, _payload?: unknown) => void;

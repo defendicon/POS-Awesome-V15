@@ -191,7 +191,7 @@
 </template>
 
 <script>
-import ItemsSelector from "../items/ItemsSelector.vue";
+import ItemsSelector from "../../../../features/catalog/components/ItemsSelector.vue";
 import Invoice from "../Invoice.vue";
 import Payments from "../Payments.vue";
 import PosOffers from "../offers/PosOffers.vue";

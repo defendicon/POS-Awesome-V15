@@ -1,23 +1,23 @@
 import { ref, nextTick, onMounted, onUnmounted } from "vue";
-import { useToastStore } from "../../../stores/toastStore";
+import { useToastStore } from "../../../posapp/stores/toastStore";
 import {
 	normalizeScaleBarcodeSettings,
 	parseScaleBarcodeSettingsResponse,
 	getScaleBarcodePrefix,
 	scaleBarcodeMatches,
-} from "../../../utils/scaleBarcode.js";
+} from "../../../posapp/utils/scaleBarcode.js";
 import {
 	getScanTimestamp,
 	sanitizeClipboardText,
 	isScanCandidate,
 	isLikelyKeyboardScan,
 	isSearchFieldPrimedForScan,
-} from "../../../utils/keyboardScan.js";
+} from "../../../posapp/utils/keyboardScan.js";
 import {
 	perfMarkStart,
 	perfMarkEnd,
 	scheduleFrame,
-} from "../../../utils/perf.js";
+} from "../../../posapp/utils/perf.js";
 
 declare const frappe: any;
 declare const __: (_str: string, _args?: any[]) => string;

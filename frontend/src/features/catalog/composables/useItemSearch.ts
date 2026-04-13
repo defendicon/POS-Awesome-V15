@@ -1,5 +1,5 @@
 import { ref } from "vue";
-import { perfMarkStart, perfMarkEnd } from "../../../utils/perf.js";
+import { perfMarkStart, perfMarkEnd } from "../../../posapp/utils/perf.js";
 
 declare const frappe: any;
 

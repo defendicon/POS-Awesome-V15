@@ -1,6 +1,6 @@
 import _ from "lodash";
-import { shouldReloadOnSearchClear } from "../../../utils/searchUtils.js";
-import { isOffline } from "../../../../offline/index";
+import { shouldReloadOnSearchClear } from "../../../posapp/utils/searchUtils.js";
+import { isOffline } from "../../../offline/index";
 
 declare const flt: (_value: unknown) => number;
 

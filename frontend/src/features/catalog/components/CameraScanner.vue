@@ -242,7 +242,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { QrcodeStream } from "vue-qrcode-reader";
-import opencvProcessor from "../../../utils/opencvProcessor";
+import opencvProcessor from "../../../posapp/utils/opencvProcessor";
 
 const __ = typeof window !== "undefined" && window.__ ? window.__ : (text) => text;
 

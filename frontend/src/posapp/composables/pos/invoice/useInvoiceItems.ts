@@ -4,7 +4,7 @@ import { useInvoiceStore } from "../../../stores/invoiceStore";
 import { useToastStore } from "../../../stores/toastStore";
 import { useUIStore } from "../../../stores/uiStore";
 import { useStockUtils } from "../shared/useStockUtils";
-import { useItemAddition } from "../items/useItemAddition";
+import { useItemAddition } from "../../../../features/catalog/composables/useItemAddition";
 import { parseBooleanSetting } from "../../../utils/stock";
 import {
 	getCachedDeliveryCharges,

@@ -1,5 +1,5 @@
 import { useBundles } from "../useBundles";
-import { useStockUtils } from "../../shared/useStockUtils";
+import { useStockUtils } from "../../../../posapp/composables/pos/shared/useStockUtils";
 
 export function useItemBundles() {
 	const { getBundleComponents } = useBundles();

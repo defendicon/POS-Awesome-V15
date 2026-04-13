@@ -25,7 +25,7 @@ vi.mock("../src/posapp/utils/perf.js", () => ({
 	scheduleFrame: vi.fn(async () => {}),
 }));
 
-import { useItemDetailFetcher } from "../src/posapp/composables/pos/items/useItemDetailFetcher";
+import { useItemDetailFetcher } from "../src/features/catalog/composables/useItemDetailFetcher";
 
 describe("useItemDetailFetcher", () => {
 	beforeEach(() => {

@@ -4,7 +4,7 @@ import {
 	getCardColumns,
 	getCardGap,
 	getCardPadding,
-} from "../../../utils/itemSelectorLayout.js";
+} from "../../../posapp/utils/itemSelectorLayout.js";
 
 type SelectorLayoutOptions = {
 	resizeDebounce?: number;

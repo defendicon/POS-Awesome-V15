@@ -2,7 +2,7 @@
 
 import { describe, expect, it, vi } from "vitest";
 
-import { useItemsSelectorFocus } from "../src/posapp/composables/pos/items/useItemsSelectorFocus";
+import { useItemsSelectorFocus } from "../src/features/catalog/composables/useItemsSelectorFocus";
 
 const createVm = (overrides: Record<string, unknown> = {}) => {
 	const focus = vi.fn();

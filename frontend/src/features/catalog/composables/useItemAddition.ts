@@ -1,8 +1,8 @@
 import _ from "lodash";
-import { withPerf } from "../../../utils/perf";
-import { parseBooleanSetting } from "../../../utils/stock";
-import { useToastStore } from "../../../stores/toastStore";
-import { useStockUtils } from "../shared/useStockUtils";
+import { withPerf } from "../../../posapp/utils/perf";
+import { parseBooleanSetting } from "../../../posapp/utils/stock";
+import { useToastStore } from "../../../posapp/stores/toastStore";
+import { useStockUtils } from "../../../posapp/composables/pos/shared/useStockUtils";
 
 // Imported composables
 import { useItemTasks } from "./addition/useItemTasks";
@@ -10,7 +10,7 @@ import { useItemMerging } from "./addition/useItemMerging";
 import { useItemCreation } from "./addition/useItemCreation";
 import { useItemBatchSerial } from "./addition/useItemBatchSerial";
 import { useItemBundles } from "./addition/useItemBundles";
-import { useBatchSerial } from "../shared/useBatchSerial";
+import { useBatchSerial } from "../../../posapp/composables/pos/shared/useBatchSerial";
 
 declare const __: (_text: string, _args?: any[]) => string;
 declare const frappe: any;

@@ -290,7 +290,7 @@
 </template>
 
 <script>
-import ItemsSelector from "../items/ItemsSelector.vue";
+import ItemsSelector from "../../../../features/catalog/components/ItemsSelector.vue";
 import { useItemsStore } from "../../../stores/itemsStore";
 import { useToastStore } from "../../../stores/toastStore";
 import { mapStores } from "pinia";

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createPosCatalogStore } from "../src/posapp/domain/catalog/posCatalogStore";
+import { createPosCatalogStore } from "../src/features/catalog/domain/posCatalogStore";
 
 describe("createPosCatalogStore", () => {
 	it("tracks catalog loading stages and preferred adaptive view mode", () => {

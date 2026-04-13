@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { useItemsSelectorSearch } from "../src/posapp/composables/pos/items/useItemsSelectorSearch";
+import { useItemsSelectorSearch } from "../src/features/catalog/composables/useItemsSelectorSearch";
 
 const createScannerInput = () => ({
 	ensureScaleBarcodeSettings: vi.fn().mockResolvedValue(undefined),

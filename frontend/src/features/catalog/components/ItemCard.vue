@@ -80,7 +80,7 @@
 
 <script setup>
 import { computed } from "vue";
-import placeholderImage from "../placeholder-image.png";
+import placeholderImage from "../../../posapp/components/pos/placeholder-image.png";
 
 const props = defineProps({
 	item: { type: Object, required: true },

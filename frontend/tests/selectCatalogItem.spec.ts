@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createPosCatalogStore } from "../src/posapp/domain/catalog/posCatalogStore";
+import { createPosCatalogStore } from "../src/features/catalog/domain/posCatalogStore";
 import {
 	navigateCatalogHighlight,
 	selectCatalogHighlightedItem,
-} from "../src/posapp/domain/catalog/selectCatalogItem";
+} from "../src/features/catalog/domain/selectCatalogItem";
 
 const ITEMS = [
 	{ item_code: "ITEM-001", item_name: "Apple" },

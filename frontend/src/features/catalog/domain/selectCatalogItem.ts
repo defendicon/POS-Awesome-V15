@@ -1,7 +1,7 @@
 import {
 	findItemIndexByCode,
 	getNextHighlightedIndex,
-} from "../../utils/itemHighlight";
+} from "../../../posapp/utils/itemHighlight";
 import type { PosCatalogItem } from "./posCatalogTypes";
 import type { createPosCatalogStore } from "./posCatalogStore";
 

@@ -185,7 +185,7 @@ import {
 } from "vue";
 import { storeToRefs } from "pinia";
 import * as _ from "lodash";
-import { memoryInitPromise } from "../../../../offline/index";
+import { memoryInitPromise } from "../../../offline/index";
 
 import CameraScanner from "./CameraScanner.vue";
 import ItemActionToolbar from "./ItemActionToolbar.vue";
@@ -197,49 +197,49 @@ import NewItemDialog from "./NewItemDialog.vue";
 import ScanErrorDialog from "./ScanErrorDialog.vue";
 import { resetNewItemDialogState } from "./newItemDialogState";
 
-import { useResponsive } from "../../../composables/core/useResponsive";
-import { useRtl } from "../../../composables/core/useRtl";
-import { useFlyAnimation } from "../../../composables/core/useFlyAnimation";
-import { useCartValidation } from "../../../composables/pos/items/useCartValidation";
-import { useItemsIntegration } from "../../../composables/pos/items/useItemsIntegration";
-import { useItemSearch } from "../../../composables/pos/items/useItemSearch";
-import { useScannerInput } from "../../../composables/pos/items/useScannerInput";
-import { useItemAvailability } from "../../../composables/pos/items/useItemAvailability";
-import { useItemDetailFetcher } from "../../../composables/pos/items/useItemDetailFetcher";
-import { useItemAddition } from "../../../composables/pos/items/useItemAddition";
-import { useItemSelection } from "../../../composables/pos/items/useItemSelection";
-import { useItemSelectorLayout } from "../../../composables/pos/items/useItemSelectorLayout";
-import { useLastInvoiceRate } from "../../../composables/pos/items/useLastInvoiceRate";
-import { useLastBuyingRate } from "../../../composables/pos/items/useLastBuyingRate";
-import { useItemSync } from "../../../composables/pos/items/useItemSync";
-import { useItemStorageSafety } from "../../../composables/pos/items/useItemStorageSafety";
-import { useItemsSelectorSearch } from "../../../composables/pos/items/useItemsSelectorSearch";
-import { useItemsSelectorSettings } from "../../../composables/pos/items/useItemsSelectorSettings";
-import { useItemsSelectorFocus } from "../../../composables/pos/items/useItemsSelectorFocus";
-import { useItemDisplay } from "../../../composables/pos/items/useItemDisplay";
-import { useItemsLoader } from "../../../composables/pos/items/useItemsLoader";
-import { useBarcodeIndexing } from "../../../composables/pos/items/useBarcodeIndexing";
-import { useScanProcessor } from "../../../composables/pos/items/useScanProcessor";
-import { useItemCurrency } from "../../../composables/pos/items/useItemCurrency";
-import { addCatalogItemToCart } from "../../../domain/catalog/addCatalogItemToCart";
+import { useResponsive } from "../../../posapp/composables/core/useResponsive";
+import { useRtl } from "../../../posapp/composables/core/useRtl";
+import { useFlyAnimation } from "../../../posapp/composables/core/useFlyAnimation";
+import { useCartValidation } from "../composables/useCartValidation";
+import { useItemsIntegration } from "../composables/useItemsIntegration";
+import { useItemSearch } from "../composables/useItemSearch";
+import { useScannerInput } from "../composables/useScannerInput";
+import { useItemAvailability } from "../composables/useItemAvailability";
+import { useItemDetailFetcher } from "../composables/useItemDetailFetcher";
+import { useItemAddition } from "../composables/useItemAddition";
+import { useItemSelection } from "../composables/useItemSelection";
+import { useItemSelectorLayout } from "../composables/useItemSelectorLayout";
+import { useLastInvoiceRate } from "../composables/useLastInvoiceRate";
+import { useLastBuyingRate } from "../composables/useLastBuyingRate";
+import { useItemSync } from "../composables/useItemSync";
+import { useItemStorageSafety } from "../composables/useItemStorageSafety";
+import { useItemsSelectorSearch } from "../composables/useItemsSelectorSearch";
+import { useItemsSelectorSettings } from "../composables/useItemsSelectorSettings";
+import { useItemsSelectorFocus } from "../composables/useItemsSelectorFocus";
+import { useItemDisplay } from "../composables/useItemDisplay";
+import { useItemsLoader } from "../composables/useItemsLoader";
+import { useBarcodeIndexing } from "../composables/useBarcodeIndexing";
+import { useScanProcessor } from "../composables/useScanProcessor";
+import { useItemCurrency } from "../composables/useItemCurrency";
+import { addCatalogItemToCart } from "../domain/addCatalogItemToCart";
 import {
 	initializeCatalogSelector,
 	resolveAdaptiveCatalogView,
 	syncCatalogSelectorDisplay,
-} from "../../../domain/catalog/catalogSelectorBridge";
-import { usePosCatalogStore } from "../../../domain/catalog/posCatalogStore";
+} from "../domain/catalogSelectorBridge";
+import { usePosCatalogStore } from "../domain/posCatalogStore";
 
-import { useCustomersStore } from "../../../stores/customersStore";
-import { useToastStore } from "../../../stores/toastStore";
-import { useUIStore } from "../../../stores/uiStore";
-import { useInvoiceStore } from "../../../stores/invoiceStore";
+import { useCustomersStore } from "../../../posapp/stores/customersStore";
+import { useToastStore } from "../../../posapp/stores/toastStore";
+import { useUIStore } from "../../../posapp/stores/uiStore";
+import { useInvoiceStore } from "../../../posapp/stores/invoiceStore";
 
-import { parseBooleanSetting } from "../../../utils/stock";
+import { parseBooleanSetting } from "../../../posapp/utils/stock";
 import {
 	buildSelectorRowProps,
 	createItemHighlightMatcher,
-} from "../../../utils/itemSelectorHighlightBindings";
-import { createItemSearchFocusClearGuard } from "../../../utils/itemSearchFocusClearGuard";
+} from "../../../posapp/utils/itemSelectorHighlightBindings";
+import { createItemSearchFocusClearGuard } from "../../../posapp/utils/itemSearchFocusClearGuard";
 
 const props = defineProps({
 	context: {

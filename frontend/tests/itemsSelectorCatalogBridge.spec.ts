@@ -3,8 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import {
 	initializeCatalogSelector,
 	syncCatalogSelectorDisplay,
-} from "../src/posapp/domain/catalog/catalogSelectorBridge";
-import { createPosCatalogStore } from "../src/posapp/domain/catalog/posCatalogStore";
+} from "../src/features/catalog/domain/catalogSelectorBridge";
+import { createPosCatalogStore } from "../src/features/catalog/domain/posCatalogStore";
 
 describe("catalogSelectorBridge", () => {
 	it("skips catalog boot when the current profile scope is already ready", async () => {

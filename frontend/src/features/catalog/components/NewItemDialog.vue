@@ -114,7 +114,7 @@
 
 <script setup>
 import { ref, reactive, watch, onMounted } from "vue";
-import itemService from "../../../services/itemService";
+import itemService from "../../../posapp/services/itemService";
 
 const props = defineProps({
 	modelValue: {

@@ -3,11 +3,11 @@ import {
 	getItemsLastSync,
 	setItemsLastSync,
 	isOffline,
-} from "../../../../offline/index";
+} from "../../../offline/index";
 import {
 	normalizeBackgroundSyncInterval,
 	shouldRunBackgroundSync,
-} from "../../../utils/backgroundSync.js";
+} from "../../../posapp/utils/backgroundSync.js";
 
 /**
  * useItemSync Composable

@@ -1,6 +1,6 @@
 import { ref, watch, onUnmounted } from "vue";
 import { debounce } from "lodash";
-import { isOffline } from "../../../../offline/index";
+import { isOffline } from "../../../offline/index";
 
 type MaybeRefLike<T> = T | { value: T } | (() => T);
 

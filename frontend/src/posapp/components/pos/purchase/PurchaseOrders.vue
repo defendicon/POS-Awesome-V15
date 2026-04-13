@@ -107,7 +107,7 @@ import { getOpeningStorage } from "../../../../offline/index";
 import { useItemsStore } from "../../../stores/itemsStore";
 import { useToastStore } from "../../../stores/toastStore";
 import { usePurchaseOrder } from "../../../composables/pos/payments/usePurchaseOrder";
-import ItemsSelector from "../items/ItemsSelector.vue";
+import ItemsSelector from "../../../../features/catalog/components/ItemsSelector.vue";
 import PurchasePaymentDialog from "./PurchasePaymentDialog.vue";
 import SupplierDialog from "../dialogs/purchase/SupplierDialog.vue";
 import PurchaseHeader from "./PurchaseHeader.vue";

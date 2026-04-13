@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { createPosCatalogStore } from "../src/posapp/domain/catalog/posCatalogStore";
-import { searchCatalogItems } from "../src/posapp/domain/catalog/searchCatalogItems";
+import { createPosCatalogStore } from "../src/features/catalog/domain/posCatalogStore";
+import { searchCatalogItems } from "../src/features/catalog/domain/searchCatalogItems";
 
 const ITEMS = [
 	{ item_code: "ITEM-001", item_name: "Apple", item_group: "Fruits" },
