@@ -4,7 +4,7 @@ import {
 	getAllowedPartyTypes,
 	normalizePartyTypeForPaymentType,
 	shouldShowReconciliationSections,
-} from "../src/posapp/components/pos_pay/paymentModes";
+} from "../src/features/payments/components/workspace/paymentModes";
 
 describe("paymentModes", () => {
 	it("limits receive mode to customers only", () => {

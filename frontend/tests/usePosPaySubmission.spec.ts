@@ -1,7 +1,7 @@
 import { ref } from "vue";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { usePosPaySubmission } from "../src/posapp/composables/pos/payments/usePosPaySubmission";
+import { usePosPaySubmission } from "../src/features/payments/composables/workspace/usePosPaySubmission";
 
 vi.mock("../src/offline/index", () => ({
 	isOffline: vi.fn(() => false),

@@ -205,51 +205,51 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount, getCurrentInstance } from "vue";
 import { storeToRefs } from "pinia";
 import VueDatePicker from "@vuepic/vue-datepicker";
-import format from "../../../posapp/format";
-import { normalizeDateForBackend } from "../../../posapp/format";
-import Customer from "../../../posapp/components/pos/customer/Customer.vue";
+import format from "../../../../posapp/format";
+import { normalizeDateForBackend } from "../../../../posapp/format";
+import Customer from "../../../../posapp/components/pos/customer/Customer.vue";
 import {
 	isOffline,
 	getPendingOfflinePaymentCount,
 	syncOfflinePayments,
-} from "../../../offline/index";
+} from "../../../../offline/index";
 import {
 	isDebugPrintEnabled,
 	appendDebugPrintParam,
 	silentPrint,
 	watchPrintWindow,
-} from "../../../posapp/plugins/print";
-import { printDocumentViaQz } from "../../../posapp/services/qzTray";
+} from "../../../../posapp/plugins/print";
+import { printDocumentViaQz } from "../../../../posapp/services/qzTray";
 
-import { useRtl } from "../../../posapp/composables/core/useRtl";
-import { useCustomersStore } from "../../../posapp/stores/customersStore.js";
-import { useUIStore } from "../../../posapp/stores/uiStore.js";
-import { useToastStore } from "../../../posapp/stores/toastStore.js";
-import { usePosCheckoutStore } from "../domain/posCheckoutStore";
+import { useRtl } from "../../../../posapp/composables/core/useRtl";
+import { useCustomersStore } from "../../../../posapp/stores/customersStore.js";
+import { useUIStore } from "../../../../posapp/stores/uiStore.js";
+import { useToastStore } from "../../../../posapp/stores/toastStore.js";
+import { usePaymentRouteCheckoutState } from "../../domain/paymentRouteCheckoutState";
 
 // Composables
-import { usePosPayData } from "../../../posapp/composables/pos/payments/usePosPayData";
-import { usePosPaySelection } from "../../../posapp/composables/pos/payments/usePosPaySelection";
-import { usePosPaySubmission } from "../../../posapp/composables/pos/payments/usePosPaySubmission";
+import { usePosPayData } from "../../composables/workspace/usePosPayData";
+import { usePosPaySelection } from "../../composables/workspace/usePosPaySelection";
+import { usePosPaySubmission } from "../../composables/workspace/usePosPaySubmission";
 import {
 	getAllowedPartyTypes,
 	normalizePartyTypeForPaymentType,
 	shouldShowReconciliationSections,
-} from "../../../posapp/components/pos_pay/paymentModes";
+} from "./paymentModes";
 
 // Sub-components
-import PayInvoicesTable from "../../../posapp/components/pos_pay/PayInvoicesTable.vue";
-import PayUnallocatedTable from "../../../posapp/components/pos_pay/PayUnallocatedTable.vue";
-import PayMpesaSection from "../../../posapp/components/pos_pay/PayMpesaSection.vue";
-import PayTotalsSidebar from "../../../posapp/components/pos_pay/PayTotalsSidebar.vue";
-import PayActionButtons from "../../../posapp/components/pos_pay/PayActionButtons.vue";
-import PayPartySelector from "../../../posapp/components/pos_pay/PayPartySelector.vue";
-import AppLoadingOverlay from "../../../posapp/components/ui/LoadingOverlay.vue";
+import PayInvoicesTable from "./PayInvoicesTable.vue";
+import PayUnallocatedTable from "./PayUnallocatedTable.vue";
+import PayMpesaSection from "./PayMpesaSection.vue";
+import PayTotalsSidebar from "./PayTotalsSidebar.vue";
+import PayActionButtons from "./PayActionButtons.vue";
+import PayPartySelector from "./PayPartySelector.vue";
+import AppLoadingOverlay from "../../../../posapp/components/ui/LoadingOverlay.vue";
 import {
 	buildPaymentRouteLoadingMessage,
 	isPaymentRouteLocked as resolvePaymentRouteLocked,
-} from "../../../posapp/utils/paymentRouteReadiness";
-import { loadPaymentMethodCurrencyMap } from "../../../posapp/utils/paymentMethodCurrencyCache";
+} from "../../../../posapp/utils/paymentRouteReadiness";
+import { loadPaymentMethodCurrencyMap } from "../../../../posapp/utils/paymentMethodCurrencyCache";
 
 const getTodayDate = () => frappe?.datetime?.nowdate?.() || new Date().toISOString().slice(0, 10);
 const formatDisplayDate = (date) => {
@@ -279,7 +279,7 @@ export default {
 		const customersStore = useCustomersStore();
 		const uiStore = useUIStore();
 		const toastStore = useToastStore();
-		const checkout = usePosCheckoutStore();
+		const { checkoutStage } = usePaymentRouteCheckoutState();
 		const { rtlStyles, rtlClasses } = useRtl();
 		const {
 			selectedCustomer,
@@ -596,13 +596,13 @@ export default {
 				customersLoaded: !!customersLoaded.value,
 				loadingCustomers: !!loadingCustomers.value,
 				isCustomerBackgroundLoading: !!isCustomerBackgroundLoading.value,
-				checkoutStage: checkout.state.value.stage,
+				checkoutStage: checkoutStage.value,
 			}),
 		);
 		const paymentsLoadingMessage = computed(() =>
 			buildPaymentRouteLoadingMessage(
 				loadProgress.value,
-				checkout.state.value.stage,
+				checkoutStage.value,
 			),
 		);
 

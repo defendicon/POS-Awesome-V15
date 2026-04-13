@@ -1,6 +1,6 @@
 import { ref, type Ref } from "vue";
 import { isOffline, getStoredCustomer } from "../../../../offline/index";
-import { useCustomersStore } from "../../../stores/customersStore.js";
+import { useCustomersStore } from "../../../../posapp/stores/customersStore.js";
 
 declare const frappe: any;
 declare const __: (_text: string, _args?: any[]) => string;

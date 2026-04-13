@@ -14,15 +14,31 @@ describe("POS shell session ownership", () => {
 		expect(source).not.toContain('from "../shift/OpeningDialog.vue"');
 	});
 
-	it("keeps payment route session recovery out of PayView.vue", () => {
+	it("keeps payment route session recovery out of the payments workspace view", () => {
 		const source = readFileSync(
-			resolve("src/features/checkout/components/PayView.vue"),
+			resolve("src/features/payments/components/workspace/PayView.vue"),
 			"utf8",
 		);
 
 		expect(source).not.toContain("const check_opening_entry = async () =>");
 		expect(source).not.toContain("getValidCachedOpeningForCurrentUser");
 		expect(source).not.toContain('method: "posawesome.posawesome.api.shifts.check_opening_shift"');
+	});
+
+	it("moves routed payment workspace ownership into the payments feature", () => {
+		const routerSource = readFileSync(
+			resolve("src/posapp/router/index.ts"),
+			"utf8",
+		);
+		const workspaceSource = readFileSync(
+			resolve("src/features/payments/components/workspace/PayView.vue"),
+			"utf8",
+		);
+
+		expect(routerSource).toContain('import("../../features/payments/components/workspace/PayView.vue")');
+		expect(routerSource).not.toContain('import("../../features/checkout/components/PayView.vue")');
+		expect(workspaceSource).toContain("usePosPayData");
+		expect(workspaceSource).not.toContain("usePosCheckoutStore");
 	});
 
 	it("keeps payment preparation out of Payments.vue event-bus listeners", () => {

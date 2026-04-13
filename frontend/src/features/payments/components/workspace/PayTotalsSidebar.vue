@@ -210,7 +210,7 @@
 <script setup>
 import { computed } from 'vue';
 import VueDatePicker from "@vuepic/vue-datepicker";
-import { normalizeDateForBackend } from "../../format";
+import { normalizeDateForBackend } from "../../../../posapp/format";
 
 const props = defineProps({
     posProfile: Object,

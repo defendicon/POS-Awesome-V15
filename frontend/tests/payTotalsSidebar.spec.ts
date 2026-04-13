@@ -4,7 +4,7 @@ import { defineComponent, h } from "vue";
 import { mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
 
-import PayTotalsSidebar from "../src/posapp/components/pos_pay/PayTotalsSidebar.vue";
+import PayTotalsSidebar from "../src/features/payments/components/workspace/PayTotalsSidebar.vue";
 
 const BoxStub = defineComponent({
 	setup(_, { slots }) {
