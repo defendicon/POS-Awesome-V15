@@ -306,8 +306,7 @@ def apply_tax_inclusive(doc):
             if tax.included_in_print_rate:
                 tax.included_in_print_rate = 0
                 has_changes = True
-        continue
-        if tax_inclusive and not tax.included_in_print_rate:
+        elif tax_inclusive and not tax.included_in_print_rate:
             tax.included_in_print_rate = 1
             has_changes = True
         elif not tax_inclusive and tax.included_in_print_rate:
