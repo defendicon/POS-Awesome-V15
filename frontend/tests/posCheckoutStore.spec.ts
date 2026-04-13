@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createPosCheckoutStore } from "../src/posapp/domain/checkout/posCheckoutStore";
+import { createPosCheckoutStore } from "../src/features/checkout/domain/posCheckoutStore";
 
 describe("createPosCheckoutStore", () => {
 	it("tracks the customer to payments pipeline and marks checkout ready", () => {

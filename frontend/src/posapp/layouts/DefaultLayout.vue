@@ -144,9 +144,9 @@ import {
 } from "../composables/core/useNetwork";
 import { createDefaultLayoutStartup } from "../domain/startup/defaultLayoutStartup";
 import { createDefaultLayoutSessionGate } from "../domain/session/defaultLayoutSessionGate";
-import { usePosCheckoutStore } from "../domain/checkout/posCheckoutStore";
-import { startCheckout } from "../domain/checkout/startCheckout";
-import { resetCheckout } from "../domain/checkout/resetCheckout";
+import { usePosCheckoutStore } from "../../features/checkout/domain/posCheckoutStore";
+import { startCheckout } from "../../features/checkout/domain/startCheckout";
+import { resetCheckout } from "../../features/checkout/domain/resetCheckout";
 import { recoverPosSession } from "../domain/session/recoverPosSession";
 import { runRegisterStartup } from "../domain/startup/registerStartup";
 import { useRtl } from "../composables/core/useRtl";

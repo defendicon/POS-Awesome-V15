@@ -205,51 +205,51 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount, getCurrentInstance } from "vue";
 import { storeToRefs } from "pinia";
 import VueDatePicker from "@vuepic/vue-datepicker";
-import format from "../../../format";
-import { normalizeDateForBackend } from "../../../format";
-import Customer from "../customer/Customer.vue";
+import format from "../../../posapp/format";
+import { normalizeDateForBackend } from "../../../posapp/format";
+import Customer from "../../../posapp/components/pos/customer/Customer.vue";
 import {
 	isOffline,
 	getPendingOfflinePaymentCount,
 	syncOfflinePayments,
-} from "../../../../offline/index";
+} from "../../../offline/index";
 import {
 	isDebugPrintEnabled,
 	appendDebugPrintParam,
 	silentPrint,
 	watchPrintWindow,
-} from "../../../plugins/print";
-import { printDocumentViaQz } from "../../../services/qzTray";
+} from "../../../posapp/plugins/print";
+import { printDocumentViaQz } from "../../../posapp/services/qzTray";
 
-import { useRtl } from "../../../composables/core/useRtl";
-import { useCustomersStore } from "../../../stores/customersStore.js";
-import { useUIStore } from "../../../stores/uiStore.js";
-import { useToastStore } from "../../../stores/toastStore.js";
-import { usePosCheckoutStore } from "../../../domain/checkout/posCheckoutStore";
+import { useRtl } from "../../../posapp/composables/core/useRtl";
+import { useCustomersStore } from "../../../posapp/stores/customersStore.js";
+import { useUIStore } from "../../../posapp/stores/uiStore.js";
+import { useToastStore } from "../../../posapp/stores/toastStore.js";
+import { usePosCheckoutStore } from "../domain/posCheckoutStore";
 
 // Composables
-import { usePosPayData } from "../../../composables/pos/payments/usePosPayData";
-import { usePosPaySelection } from "../../../composables/pos/payments/usePosPaySelection";
-import { usePosPaySubmission } from "../../../composables/pos/payments/usePosPaySubmission";
+import { usePosPayData } from "../../../posapp/composables/pos/payments/usePosPayData";
+import { usePosPaySelection } from "../../../posapp/composables/pos/payments/usePosPaySelection";
+import { usePosPaySubmission } from "../../../posapp/composables/pos/payments/usePosPaySubmission";
 import {
 	getAllowedPartyTypes,
 	normalizePartyTypeForPaymentType,
 	shouldShowReconciliationSections,
-} from "../../pos_pay/paymentModes";
+} from "../../../posapp/components/pos_pay/paymentModes";
 
 // Sub-components
-import PayInvoicesTable from "../../pos_pay/PayInvoicesTable.vue";
-import PayUnallocatedTable from "../../pos_pay/PayUnallocatedTable.vue";
-import PayMpesaSection from "../../pos_pay/PayMpesaSection.vue";
-import PayTotalsSidebar from "../../pos_pay/PayTotalsSidebar.vue";
-import PayActionButtons from "../../pos_pay/PayActionButtons.vue";
-import PayPartySelector from "../../pos_pay/PayPartySelector.vue";
-import AppLoadingOverlay from "../../ui/LoadingOverlay.vue";
+import PayInvoicesTable from "../../../posapp/components/pos_pay/PayInvoicesTable.vue";
+import PayUnallocatedTable from "../../../posapp/components/pos_pay/PayUnallocatedTable.vue";
+import PayMpesaSection from "../../../posapp/components/pos_pay/PayMpesaSection.vue";
+import PayTotalsSidebar from "../../../posapp/components/pos_pay/PayTotalsSidebar.vue";
+import PayActionButtons from "../../../posapp/components/pos_pay/PayActionButtons.vue";
+import PayPartySelector from "../../../posapp/components/pos_pay/PayPartySelector.vue";
+import AppLoadingOverlay from "../../../posapp/components/ui/LoadingOverlay.vue";
 import {
 	buildPaymentRouteLoadingMessage,
 	isPaymentRouteLocked as resolvePaymentRouteLocked,
-} from "../../../utils/paymentRouteReadiness";
-import { loadPaymentMethodCurrencyMap } from "../../../utils/paymentMethodCurrencyCache";
+} from "../../../posapp/utils/paymentRouteReadiness";
+import { loadPaymentMethodCurrencyMap } from "../../../posapp/utils/paymentMethodCurrencyCache";
 
 const getTodayDate = () => frappe?.datetime?.nowdate?.() || new Date().toISOString().slice(0, 10);
 const formatDisplayDate = (date) => {

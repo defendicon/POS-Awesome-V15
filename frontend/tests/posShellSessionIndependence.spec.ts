@@ -16,7 +16,7 @@ describe("POS shell session ownership", () => {
 
 	it("keeps payment route session recovery out of PayView.vue", () => {
 		const source = readFileSync(
-			resolve("src/posapp/components/pos/shell/PayView.vue"),
+			resolve("src/features/checkout/components/PayView.vue"),
 			"utf8",
 		);
 

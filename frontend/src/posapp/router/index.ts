@@ -22,7 +22,7 @@ const routes = [
 	},
 	{
 		path: "/payments",
-		component: () => import("../components/pos/shell/PayView.vue"),
+		component: () => import("../../features/checkout/components/PayView.vue"),
 		meta: { title: "Payments", layout: "default" },
 	},
 	{

@@ -4,7 +4,7 @@ import {
 	createPosCheckoutBlocker,
 	createPosCheckoutTimelineEvent,
 	pushPosCheckoutTimelineEvent,
-} from "../src/posapp/domain/checkout/checkoutDiagnostics";
+} from "../src/features/checkout/domain/checkoutDiagnostics";
 
 describe("checkoutDiagnostics", () => {
 	it("creates a checkout blocker with a code and summary", () => {

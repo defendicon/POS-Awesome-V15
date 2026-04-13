@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { createPosCheckoutStore } from "../src/posapp/domain/checkout/posCheckoutStore";
-import { startCheckout } from "../src/posapp/domain/checkout/startCheckout";
+import { createPosCheckoutStore } from "../src/features/checkout/domain/posCheckoutStore";
+import { startCheckout } from "../src/features/checkout/domain/startCheckout";
 
 describe("checkout offline fallback", () => {
 	it("keeps checkout ready when customer and pricing stages resolve from cache", async () => {
