@@ -839,17 +839,17 @@
 import { inject, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
-import format from "../../../format";
-import { useTheme } from "../../../composables/core/useTheme";
-import { useResponsive } from "../../../composables/core/useResponsive";
-import { useToastStore } from "../../../stores/toastStore";
-import { useUIStore } from "../../../stores/uiStore";
-import { useInvoiceStore } from "../../../stores/invoiceStore";
-import { useCustomersStore } from "../../../stores/customersStore";
-import { useEmployeeStore } from "../../../stores/employeeStore";
-import { appendDebugPrintParam, isDebugPrintEnabled, silentPrint, watchPrintWindow } from "../../../plugins/print";
-import { printDocumentViaQz } from "../../../services/qzTray";
-import { isOffline } from "../../../../offline/index";
+import format from "../../../posapp/format";
+import { useTheme } from "../../../posapp/composables/core/useTheme";
+import { useResponsive } from "../../../posapp/composables/core/useResponsive";
+import { useToastStore } from "../../../posapp/stores/toastStore";
+import { useUIStore } from "../../../posapp/stores/uiStore";
+import { useInvoiceStore } from "../../../posapp/stores/invoiceStore";
+import { useCustomersStore } from "../../../posapp/stores/customersStore";
+import { useEmployeeStore } from "../../../posapp/stores/employeeStore";
+import { appendDebugPrintParam, isDebugPrintEnabled, silentPrint, watchPrintWindow } from "../../../posapp/plugins/print";
+import { printDocumentViaQz } from "../../../posapp/services/qzTray";
+import { isOffline } from "../../../offline/index";
 
 const TAB_PAGE_SIZE = 25;
 

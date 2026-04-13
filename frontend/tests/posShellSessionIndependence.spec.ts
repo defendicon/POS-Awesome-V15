@@ -63,6 +63,41 @@ describe("POS shell session ownership", () => {
 		expect(posSource).not.toContain('import Payments from "../Payments.vue"');
 	});
 
+	it("moves live order overlays into the orders feature", () => {
+		const posSource = readFileSync(
+			resolve("src/posapp/components/pos/shell/Pos.vue"),
+			"utf8",
+		);
+
+		expect(posSource).toContain(
+			'import Drafts from "../../../../features/orders/components/Drafts.vue"',
+		);
+		expect(posSource).toContain(
+			'import InvoiceManagement from "../../../../features/orders/components/InvoiceManagement.vue"',
+		);
+		expect(posSource).toContain(
+			'import SalesOrders from "../../../../features/orders/components/SalesOrders.vue"',
+		);
+		expect(posSource).toContain(
+			'import Returns from "../../../../features/orders/components/Returns.vue"',
+		);
+		expect(posSource).not.toContain('import Drafts from "../flows/Drafts.vue"');
+	});
+
+	it("moves the orders route screen into the orders feature", () => {
+		const routerSource = readFileSync(
+			resolve("src/posapp/router/index.ts"),
+			"utf8",
+		);
+
+		expect(routerSource).toContain(
+			'import("../../features/orders/components/PurchaseOrders.vue")',
+		);
+		expect(routerSource).not.toContain(
+			'import("../components/pos/purchase/PurchaseOrders.vue")',
+		);
+	});
+
 	it("moves checkout start ownership into DefaultLayout instead of Pos.vue", () => {
 		const layoutSource = readFileSync(
 			resolve("src/posapp/layouts/DefaultLayout.vue"),

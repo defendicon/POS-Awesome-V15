@@ -29,7 +29,7 @@ vi.mock("../src/posapp/services/qzTray", () => ({
 	printDocumentViaQz: vi.fn(),
 }));
 
-import InvoiceManagement from "../src/posapp/components/pos/flows/InvoiceManagement.vue";
+import InvoiceManagement from "../src/features/orders/components/InvoiceManagement.vue";
 
 describe("InvoiceManagement repair change allocation", () => {
 	beforeEach(() => {

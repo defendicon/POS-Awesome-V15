@@ -136,12 +136,12 @@
 
 <script>
 import { computed } from "vue";
-import format from "../../../format";
-import { useUIStore } from "../../../stores/uiStore.js";
-import { useInvoiceStore } from "../../../stores/invoiceStore.js";
+import format from "../../../posapp/format";
+import { useUIStore } from "../../../posapp/stores/uiStore.js";
+import { useInvoiceStore } from "../../../posapp/stores/invoiceStore.js";
 import { storeToRefs } from "pinia";
-import { useResponsive } from "../../../composables/core/useResponsive";
-import { useTheme } from "../../../composables/core/useTheme";
+import { useResponsive } from "../../../posapp/composables/core/useResponsive";
+import { useTheme } from "../../../posapp/composables/core/useTheme";
 export default {
 	// props: ["draftsDialog"],
 	mixins: [format],

@@ -113,14 +113,14 @@
 
 <script>
 import { computed } from "vue";
-import format from "../../../format";
-import { useToastStore } from "../../../stores/toastStore";
-import { useUIStore } from "../../../stores/uiStore";
-import { useInvoiceStore } from "../../../stores/invoiceStore";
+import format from "../../../posapp/format";
+import { useToastStore } from "../../../posapp/stores/toastStore";
+import { useUIStore } from "../../../posapp/stores/uiStore";
+import { useInvoiceStore } from "../../../posapp/stores/invoiceStore";
 import { storeToRefs } from "pinia";
-import { useTheme } from "../../../composables/core/useTheme";
-import { useResponsive } from "../../../composables/core/useResponsive";
-import { fetchDraftInvoiceDoc } from "../../../utils/draftInvoices";
+import { useTheme } from "../../../posapp/composables/core/useTheme";
+import { useResponsive } from "../../../posapp/composables/core/useResponsive";
+import { fetchDraftInvoiceDoc } from "../../../posapp/utils/draftInvoices";
 
 export default {
 	// props: ["draftsDialog"],

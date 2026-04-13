@@ -17,7 +17,7 @@ const routes = [
 	{
 		path: "/orders",
 		component: () =>
-			import("../components/pos/purchase/PurchaseOrders.vue"),
+			import("../../features/orders/components/PurchaseOrders.vue"),
 		meta: { title: "Orders", layout: "default" },
 	},
 	{

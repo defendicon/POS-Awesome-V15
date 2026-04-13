@@ -101,17 +101,17 @@
 </template>
 
 <script>
-import format, { formatUtils } from "../../../format";
-import { useUIStore } from "../../../stores/uiStore.js";
-import { getOpeningStorage } from "../../../../offline/index";
-import { useItemsStore } from "../../../stores/itemsStore";
-import { useToastStore } from "../../../stores/toastStore";
-import { usePurchaseOrder } from "../../../../features/payments/composables/invoice/usePurchaseOrder";
-import ItemsSelector from "../../../../features/catalog/components/ItemsSelector.vue";
-import PurchasePaymentDialog from "./PurchasePaymentDialog.vue";
-import SupplierDialog from "../dialogs/purchase/SupplierDialog.vue";
-import PurchaseHeader from "./PurchaseHeader.vue";
-import PurchaseItemsTable from "./PurchaseItemsTable.vue";
+import format, { formatUtils } from "../../../posapp/format";
+import { useUIStore } from "../../../posapp/stores/uiStore.js";
+import { getOpeningStorage } from "../../../offline/index";
+import { useItemsStore } from "../../../posapp/stores/itemsStore";
+import { useToastStore } from "../../../posapp/stores/toastStore";
+import { usePurchaseOrder } from "../../payments/composables/invoice/usePurchaseOrder";
+import ItemsSelector from "../../catalog/components/ItemsSelector.vue";
+import PurchasePaymentDialog from "../../../posapp/components/pos/purchase/PurchasePaymentDialog.vue";
+import SupplierDialog from "../../../posapp/components/pos/dialogs/purchase/SupplierDialog.vue";
+import PurchaseHeader from "../../../posapp/components/pos/purchase/PurchaseHeader.vue";
+import PurchaseItemsTable from "../../../posapp/components/pos/purchase/PurchaseItemsTable.vue";
 import { ref, watch, onMounted, onBeforeUnmount, inject } from "vue";
 
 export default {
