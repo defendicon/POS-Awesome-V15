@@ -49,6 +49,19 @@ describe("POS shell session ownership", () => {
 		expect(posSource).not.toContain("startCheckout(");
 	});
 
+	it("moves startup orchestration into the session runtime module", () => {
+		const layoutSource = readFileSync(
+			resolve("src/posapp/layouts/DefaultLayout.vue"),
+			"utf8",
+		);
+
+		expect(layoutSource).toContain("createDefaultLayoutSessionRuntime");
+		expect(layoutSource).not.toContain("async function recoverCurrentPosSession");
+		expect(layoutSource).not.toContain("async function runPosStartupFlow");
+		expect(layoutSource).not.toContain("async function runCheckoutFlow");
+		expect(layoutSource).not.toContain("function evaluateRegisterStartup");
+	});
+
 	it("keeps usePosShift focused on closing shift behavior only", () => {
 		const source = readFileSync(
 			resolve("src/posapp/composables/pos/shared/usePosShift.ts"),

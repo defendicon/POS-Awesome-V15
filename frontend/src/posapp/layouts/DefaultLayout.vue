@@ -135,20 +135,14 @@ import {
 	runSupportedOfflineSyncResource,
 } from "../../offline/sync/resourceRunner";
 import {
-	createBootstrapSnapshotFromRegisterData,
-} from "../../offline/bootstrapSnapshot";
-import {
 	setupNetworkListeners as initNetworkListeners,
 	checkNetworkConnectivity as utilsCheckNetworkConnectivity,
 	manualNetworkRetry,
 } from "../composables/core/useNetwork";
-import { createDefaultLayoutStartup } from "../domain/startup/defaultLayoutStartup";
-import { createDefaultLayoutSessionGate } from "../domain/session/defaultLayoutSessionGate";
 import { usePosCheckoutStore } from "../../features/checkout/domain/posCheckoutStore";
 import { startCheckout } from "../../features/checkout/domain/startCheckout";
 import { resetCheckout } from "../../features/checkout/domain/resetCheckout";
-import { recoverPosSession } from "../domain/session/recoverPosSession";
-import { runRegisterStartup } from "../domain/startup/registerStartup";
+import { createDefaultLayoutSessionRuntime } from "../../features/session/domain/defaultLayoutSessionRuntime";
 import { useRtl } from "../composables/core/useRtl";
 import authService from "../services/authService.js";
 import {
@@ -258,8 +252,6 @@ const bootstrapLimitedMode = ref(getBootstrapLimitedMode());
 const bootstrapSnackbarVisible = ref(false);
 let _sidebarObserver = null;
 let updateInterval = null;
-let startupFlowPromise = null;
-let checkoutFlowPromise = null;
 
 // Event Bus
 const eventBus = instance?.proxy?.eventBus;
@@ -273,40 +265,6 @@ function getCurrentBootstrapProfile() {
 
 function getCurrentBootstrapOpeningShift() {
 	return posOpeningShift.value || getOpeningStorage()?.pos_opening_shift || null;
-}
-
-function buildCurrentBootstrapValidationInput() {
-	const profile = getCurrentBootstrapProfile();
-	return {
-		buildVersion: BUILD_VERSION,
-		profileName: profile?.name || null,
-		profileModified: profile?.modified || null,
-		sessionUser: frappe?.session?.user || null,
-	};
-}
-
-function ensureBootstrapSnapshotIsCurrent() {
-	const currentSnapshot = getBootstrapSnapshot();
-	const registerData = {
-		pos_profile: getCurrentBootstrapProfile(),
-		pos_opening_shift: getCurrentBootstrapOpeningShift(),
-	};
-
-	if (!registerData.pos_profile && !registerData.pos_opening_shift) {
-		return currentSnapshot;
-	}
-
-	const nextSnapshot = createBootstrapSnapshotFromRegisterData(
-		registerData,
-		currentSnapshot,
-		{ buildVersion: BUILD_VERSION },
-	);
-
-	if (JSON.stringify(currentSnapshot || null) !== JSON.stringify(nextSnapshot)) {
-		setBootstrapSnapshot(nextSnapshot);
-	}
-
-	return nextSnapshot;
 }
 
 function persistBootstrapRuntime(validation, decision) {
@@ -323,29 +281,6 @@ function persistBootstrapRuntime(validation, decision) {
 	bootstrapLimitedMode.value = decision.limitedMode;
 	setBootstrapSnapshotStatus(nextStatus);
 	setBootstrapLimitedMode(decision.limitedMode);
-}
-
-function buildRegisterStartupOptions() {
-	return {
-		snapshot: ensureBootstrapSnapshotIsCurrent(),
-		registerData: {
-			pos_profile: getCurrentBootstrapProfile(),
-			pos_opening_shift: getCurrentBootstrapOpeningShift(),
-		},
-		validationInput: buildCurrentBootstrapValidationInput(),
-		continueOffline: true,
-	};
-}
-
-function evaluateRegisterStartup() {
-	const registerStartup = runRegisterStartup(buildRegisterStartupOptions());
-	if (registerStartup.validation && registerStartup.runtime) {
-		persistBootstrapRuntime(
-			registerStartup.validation,
-			registerStartup.runtime,
-		);
-	}
-	return registerStartup;
 }
 
 function getOfflineSyncProfile() {
@@ -451,13 +386,6 @@ async function startItemsForStartup() {
 	};
 }
 
-const defaultLayoutStartup = createDefaultLayoutStartup({
-	runRegisterStartup: evaluateRegisterStartup,
-	startCustomers: startCustomersForStartup,
-	startItems: startItemsForStartup,
-	markInitLoaded: () => markSourceLoaded("init"),
-});
-
 async function fetchServerOpeningForSession() {
 	try {
 		const response = await frappe.call(
@@ -473,23 +401,6 @@ async function fetchServerOpeningForSession() {
 	}
 }
 
-async function recoverCurrentPosSession() {
-	const result = await recoverPosSession({
-		getCachedOpening: () => getOpeningStorage(),
-		getServerOpening: () => fetchServerOpeningForSession(),
-		currentUser: frappe?.session?.user || null,
-		currentSnapshot: getBootstrapSnapshot(),
-		buildVersion: BUILD_VERSION,
-		continueOffline: true,
-	});
-
-	if (result.bootstrapSnapshot) {
-		setBootstrapSnapshot(result.bootstrapSnapshot);
-	}
-
-	return result;
-}
-
 function applyRecoveredPosSession(registerData) {
 	if (!registerData) {
 		return;
@@ -497,67 +408,34 @@ function applyRecoveredPosSession(registerData) {
 
 	uiStore.setRegisterData(registerData);
 	setOpeningStorage(registerData);
-	evaluateRegisterStartup();
-
-	if (navigator.onLine) {
-		void refreshTaxInclusiveSetting();
-	}
 }
 
-const defaultLayoutSessionGate = createDefaultLayoutSessionGate({
-	recoverSession: recoverCurrentPosSession,
-	applyReadySession: applyRecoveredPosSession,
-	runPosStartupFlow,
+const sessionRuntime = createDefaultLayoutSessionRuntime({
+	getCurrentBootstrapProfile,
+	getCurrentBootstrapOpeningShift,
+	getCurrentSnapshot: () => getBootstrapSnapshot(),
+	setSnapshot: (snapshot) => setBootstrapSnapshot(snapshot),
+	persistBootstrapRuntime,
+	getBuildVersion: () => BUILD_VERSION,
+	getCurrentUser: () => frappe?.session?.user || null,
+	startCustomers: startCustomersForStartup,
+	startItems: startItemsForStartup,
+	markInitLoaded: () => markSourceLoaded("init"),
+	getCachedOpening: () => getOpeningStorage(),
+	fetchServerOpening: () => fetchServerOpeningForSession(),
+	applyRegisterData: applyRecoveredPosSession,
+	refreshTaxInclusiveSetting: () => refreshTaxInclusiveSetting(),
 	currentPath: () => route.path,
 	routeToRegister: () => router.replace("/register"),
 	routeToPos: () => router.replace("/pos"),
+	checkout: posCheckout,
+	startCheckout,
 });
-
-async function runPosStartupFlow() {
-	if (startupFlowPromise) {
-		return startupFlowPromise;
-	}
-
-	startupFlowPromise = defaultLayoutStartup
-		.start()
-		.catch((error) => {
-			console.error("POS startup flow failed", error);
-			return defaultLayoutStartup.state.value;
-		})
-		.finally(() => {
-			startupFlowPromise = null;
-		});
-
-	return startupFlowPromise;
-}
-
-async function runCheckoutFlow() {
-	if (checkoutFlowPromise) {
-		return checkoutFlowPromise;
-	}
-
-	if (!getCurrentBootstrapProfile()?.name) {
-		return posCheckout.state.value;
-	}
-
-	checkoutFlowPromise = startCheckout({
-		checkout: posCheckout,
-	})
-		.catch((error) => {
-			console.error("POS checkout flow failed", error);
-			return posCheckout.state.value;
-		})
-		.finally(() => {
-			checkoutFlowPromise = null;
-		});
-
-	return checkoutFlowPromise;
-}
 
 // Computed
 const loadingProgress = computed(() => loadingState.progress);
 const loadingActive = computed(() => loadingState.active);
-const startupBlocker = computed(() => defaultLayoutStartup.state.value.blocker);
+const startupBlocker = sessionRuntime.startupBlocker;
 const loadingMessage = computed(
 	() => startupBlocker.value?.summary || loadingState.message,
 );
@@ -627,7 +505,7 @@ watch(networkOnline, (newVal, oldVal) => {
 		refreshTaxInclusiveSetting();
 		eventBus?.emit("network-online");
 		handleSyncInvoices();
-		evaluateRegisterStartup();
+		sessionRuntime.evaluateRegisterStartup();
 	}
 });
 
@@ -635,7 +513,7 @@ watch(serverOnline, (newVal, oldVal) => {
 	if (newVal && !oldVal) {
 		eventBus?.emit("server-online");
 		handleSyncInvoices();
-		evaluateRegisterStartup();
+		sessionRuntime.evaluateRegisterStartup();
 	}
 });
 
@@ -647,7 +525,7 @@ watch(
 		posOpeningShift.value?.user || null,
 	],
 	() => {
-		evaluateRegisterStartup();
+		sessionRuntime.evaluateRegisterStartup();
 	},
 );
 
@@ -842,14 +720,14 @@ const initializeData = async () => {
 		window.serverOnline = false;
 	}
 
-	const sessionGateResult = await defaultLayoutSessionGate.start();
+	const sessionGateResult = await sessionRuntime.startSessionGate();
 	if (sessionGateResult.stage === "needs_register_setup") {
 		markSourceLoaded("init");
 		markSourceLoaded("items");
 		markSourceLoaded("customers");
 		resetCheckout(posCheckout);
 	} else if (sessionGateResult.stage === "ready") {
-		await runCheckoutFlow();
+		await sessionRuntime.runCheckoutFlow();
 	}
 
 	void scheduleBootCriticalWarmSync();
@@ -869,8 +747,8 @@ const setupEventListeners = () => {
 						refreshTaxInclusiveSetting();
 					}
 
-					void runPosStartupFlow();
-					void runCheckoutFlow();
+					void sessionRuntime.runPosStartupFlow();
+					void sessionRuntime.runCheckoutFlow();
 				}
 			},
 			{ deep: true, immediate: true },
