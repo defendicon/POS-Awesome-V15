@@ -5,7 +5,7 @@ import { flushPromises, mount } from "@vue/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import QzTrayDialog from "../src/posapp/components/navbar/QzTrayDialog.vue";
-import * as qzTrayService from "../src/posapp/services/qzTray";
+import * as qzTrayService from "../src/platform/printing/qzTray";
 
 const toastShow = vi.hoisted(() => vi.fn());
 const uiStoreState = vi.hoisted(() => ({
@@ -30,7 +30,7 @@ vi.mock("../src/posapp/stores/uiStore", () => ({
 	useUIStore: () => uiStoreState,
 }));
 
-vi.mock("../src/posapp/services/qzTray", async () => {
+vi.mock("../src/platform/printing/qzTray", async () => {
 	const { ref } = await import("vue");
 	const selectedQzPrinter = ref("Counter Printer");
 

@@ -4,8 +4,8 @@ import {
 	isDebugPrintEnabled,
 	silentPrint,
 	watchPrintWindow,
-} from "../../plugins/print";
-import { printDocumentViaQz } from "../../services/qzTray";
+} from "../../../platform/printing/print";
+import { printDocumentViaQz } from "../../../platform/printing/qzTray";
 
 declare const frappe: any;
 

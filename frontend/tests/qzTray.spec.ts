@@ -75,7 +75,7 @@ describe("qzTray service", () => {
 	});
 
 	it("keeps QZ disconnected until the user manually reconnects", async () => {
-		const qzTray = await import("../src/posapp/services/qzTray");
+		const qzTray = await import("../src/platform/printing/qzTray");
 		qzMock.setActive(true);
 
 		await qzTray.disconnectQzTray();
@@ -115,7 +115,7 @@ describe("qzTray service", () => {
 			"Counter Printer",
 		]);
 
-		const qzTray = await import("../src/posapp/services/qzTray");
+		const qzTray = await import("../src/platform/printing/qzTray");
 
 		await qzTray.findQzPrinters();
 
@@ -141,7 +141,7 @@ describe("qzTray service", () => {
 		qzMock.setActive(true);
 		qzMock.findPrinters.mockResolvedValue(["Printer A", "Printer B"]);
 
-		const qzTray = await import("../src/posapp/services/qzTray");
+		const qzTray = await import("../src/platform/printing/qzTray");
 
 		await qzTray.findQzPrinters();
 

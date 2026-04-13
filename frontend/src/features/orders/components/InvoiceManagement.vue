@@ -847,8 +847,8 @@ import { useUIStore } from "../../../posapp/stores/uiStore";
 import { useInvoiceStore } from "../../../posapp/stores/invoiceStore";
 import { useCustomersStore } from "../../../posapp/stores/customersStore";
 import { useEmployeeStore } from "../../../posapp/stores/employeeStore";
-import { appendDebugPrintParam, isDebugPrintEnabled, silentPrint, watchPrintWindow } from "../../../posapp/plugins/print";
-import { printDocumentViaQz } from "../../../posapp/services/qzTray";
+import { appendDebugPrintParam, isDebugPrintEnabled, silentPrint, watchPrintWindow } from "../../../platform/printing/print";
+import { printDocumentViaQz } from "../../../platform/printing/qzTray";
 import { isOffline } from "../../../offline/index";
 
 const TAB_PAGE_SIZE = 25;

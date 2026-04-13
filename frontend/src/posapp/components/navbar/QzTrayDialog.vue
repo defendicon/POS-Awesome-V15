@@ -128,7 +128,7 @@ import {
 	setSelectedQzPrinter,
 	setupQzCertificate,
 	type QzCertStatus,
-} from "../../services/qzTray";
+} from "../../../platform/printing/qzTray";
 
 const props = defineProps<{
 	modelValue: boolean;

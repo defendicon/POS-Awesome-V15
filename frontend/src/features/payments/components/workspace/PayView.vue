@@ -218,8 +218,8 @@ import {
 	appendDebugPrintParam,
 	silentPrint,
 	watchPrintWindow,
-} from "../../../../posapp/plugins/print";
-import { printDocumentViaQz } from "../../../../posapp/services/qzTray";
+} from "../../../../platform/printing/print";
+import { printDocumentViaQz } from "../../../../platform/printing/qzTray";
 
 import { useRtl } from "../../../../posapp/composables/core/useRtl";
 import { useCustomersStore } from "../../../../posapp/stores/customersStore.js";

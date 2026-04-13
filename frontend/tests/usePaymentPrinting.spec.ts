@@ -7,14 +7,14 @@ vi.mock("../src/offline/index", () => ({
 	isOffline: vi.fn(() => false),
 }));
 
-vi.mock("../src/posapp/plugins/print", () => ({
+vi.mock("../src/platform/printing/print", () => ({
 	appendDebugPrintParam: (url: string) => url,
 	isDebugPrintEnabled: () => false,
 	silentPrint: vi.fn(),
 	watchPrintWindow: vi.fn(),
 }));
 
-vi.mock("../src/posapp/services/qzTray", () => ({
+vi.mock("../src/platform/printing/qzTray", () => ({
 	printDocumentViaQz: vi.fn(),
 }));
 

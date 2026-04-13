@@ -5,8 +5,8 @@ import {
 	isDebugPrintEnabled,
 	silentPrint,
 	watchPrintWindow,
-} from "../../../../posapp/plugins/print";
-import { printDocumentViaQz } from "../../../../posapp/services/qzTray";
+} from "../../../../platform/printing/print";
+import { printDocumentViaQz } from "../../../../platform/printing/qzTray";
 import { isOffline } from "../../../../offline/index";
 import { resolvePaymentPrintDoctype } from "../../../../posapp/utils/paymentPrintDoctype";
 
