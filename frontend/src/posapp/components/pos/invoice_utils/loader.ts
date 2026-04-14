@@ -223,7 +223,9 @@ export async function load_invoice(
 			? context._snapshotManualValuesFromDocItems(context.items)
 			: [];
 
-		// await context.update_items_details(context.items);
+		if (context.update_items_details) {
+			await context.update_items_details(context.items);
+		}
 
 		if (manualSnapshots.length && context._restoreManualSnapshots) {
 			context._restoreManualSnapshots(context.items, manualSnapshots);
