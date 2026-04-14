@@ -241,6 +241,9 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 	const set_full_amount = (payment: any, isReturn = false) => {
 		const doc = unref(invoiceDoc);
 		const invoiceAmount = getInvoiceSettlementAmount();
+		const normalizedAmount = isReturn
+			? -Math.abs(invoiceAmount)
+			: invoiceAmount;
 		// Reset other payments
 		doc.payments.forEach((p: any) => {
 			if (p.mode_of_payment !== payment.mode_of_payment) {
@@ -249,11 +252,9 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 			}
 		});
 
-		payment.amount = invoiceAmount;
+		payment.amount = normalizedAmount;
 		if (payment.base_amount !== undefined) {
-			payment.base_amount = isReturn
-				? -Math.abs(invoiceAmount)
-				: invoiceAmount;
+			payment.base_amount = normalizedAmount;
 		}
 	};
 
@@ -269,10 +270,11 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 		const otherPayments = currentPaid - currentPaymentAmount;
 		let amount = invoiceAmount - otherPayments;
 		amount = flt(amount);
+		const normalizedAmount = isReturn ? -Math.abs(amount) : amount;
 
-		payment.amount = amount;
+		payment.amount = normalizedAmount;
 		if (payment.base_amount !== undefined) {
-			payment.base_amount = isReturn ? -Math.abs(amount) : amount;
+			payment.base_amount = normalizedAmount;
 		}
 	};
 

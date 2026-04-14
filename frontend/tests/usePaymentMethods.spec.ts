@@ -90,6 +90,53 @@ describe("usePaymentMethods", () => {
 		expect(invoiceDoc.value.payments[1].base_amount).toBe(150);
 	});
 
+	it("sets return payment methods to a negative cashback amount", () => {
+		const invoiceDoc = ref<any>({
+			rounded_total: -500,
+			grand_total: -500,
+			conversion_rate: 1,
+			payments: [
+				{
+					mode_of_payment: "Cash",
+					type: "Cash",
+					amount: 0,
+					base_amount: 0,
+					default: 1,
+				},
+				{
+					mode_of_payment: "Card",
+					type: "Bank",
+					amount: 0,
+					base_amount: 0,
+				},
+			],
+		});
+
+		const { set_full_amount, set_rest_amount } = usePaymentMethods({
+			invoiceDoc,
+			posProfile: ref({}),
+			diffPayment: computed(() => 0),
+			getNetInvoiceAmount: () => 500,
+			stores: {
+				toastStore: { show: () => undefined },
+				uiStore: { freeze: () => undefined, unfreeze: () => undefined },
+			},
+		});
+
+		set_full_amount(invoiceDoc.value.payments[1], true);
+		expect(invoiceDoc.value.payments[1].amount).toBe(-500);
+		expect(invoiceDoc.value.payments[1].base_amount).toBe(-500);
+
+		invoiceDoc.value.payments[0].amount = 0;
+		invoiceDoc.value.payments[0].base_amount = 0;
+		invoiceDoc.value.payments[1].amount = 0;
+		invoiceDoc.value.payments[1].base_amount = 0;
+
+		set_rest_amount(invoiceDoc.value.payments[1], true);
+		expect(invoiceDoc.value.payments[1].amount).toBe(-500);
+		expect(invoiceDoc.value.payments[1].base_amount).toBe(-500);
+	});
+
 	it("auto-balances against the net settlement amount instead of gross totals", () => {
 		const invoiceDoc = ref<any>({
 			rounded_total: 500,

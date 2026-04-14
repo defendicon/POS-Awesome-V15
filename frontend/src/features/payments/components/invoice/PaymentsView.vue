@@ -310,6 +310,7 @@ import {
 import { resolvePaymentPrintFormatDoctypes } from "../../../../posapp/utils/paymentPrintDoctype";
 import { resolvePaymentPrintFormat } from "../../../../posapp/utils/paymentPrintFormat";
 import { parseBooleanSetting } from "../../../../posapp/utils/stock";
+import { getNetInvoiceSettlementAmount } from "../../domain/paymentSettlement";
 
 // Components
 import PaymentSummary from "./PaymentSummary.vue";
@@ -414,17 +415,16 @@ const isPaymentOpen = computed(() => activeView.value === "payment" || paymentDi
 const netInvoiceSettlementAmount = computed(() => {
 	if (!invoice_doc.value) return 0;
 
-	const invoiceTotal = flt(
-		invoice_doc.value.rounded_total || invoice_doc.value.grand_total,
-		currency_precision.value,
-	);
 	const coveredAmount = flt(
 		(invoice_doc.value?.loyalty_amount || loyalty_amount.value || 0) +
 			(redeemed_customer_credit.value || 0),
 		currency_precision.value,
 	);
 
-	return Math.max(invoiceTotal - coveredAmount, 0);
+	return flt(
+		getNetInvoiceSettlementAmount(invoice_doc.value, coveredAmount),
+		currency_precision.value,
+	);
 });
 
 const validatePayment = computed(() => {

@@ -25,7 +25,7 @@
 						:rules="[isNumber]"
 						:prefix="currencySymbol(currency)"
 						@focus="$emit('set-rest-amount', payment, isReturn)"
-						:readonly="isReturn || isGiftCardPayment(payment)"
+						:readonly="isGiftCardPayment(payment)"
 					></v-text-field>
 				</v-col>
 				<v-col cols="12" md="5" v-if="!isMpesaC2bPayment(payment)">
