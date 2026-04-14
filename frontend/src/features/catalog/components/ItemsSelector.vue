@@ -784,6 +784,10 @@ const handleRemoteStockAdjustment = (payload: unknown) => {
 	itemAvailability.handleInvoiceStockAdjusted(payload);
 };
 
+const handleCartQuantitiesUpdated = (totals: Record<string, unknown>) => {
+	itemAvailability.handleCartQuantitiesUpdated(totals);
+};
+
 // 7. Lifecycle Hooks
 const openNewItemDialog = () => {
 	resetNewItemDialogState(newItemDialogScannedBarcode, newItemDialogAwaitingScan);
@@ -797,6 +801,7 @@ onMounted(async () => {
 		getFilteredItems: () => filteredItems.value,
 		updateItemsDetails: (its, opts) => itemDetailFetcher.update_items_details(its, opts),
 	});
+	itemAvailability.initAvailability();
 
 	itemDetailFetcher.registerContext({
 		get pos_profile() {
@@ -973,6 +978,7 @@ onMounted(async () => {
 			}
 		});
 		eventBus.on("focus_item_search", requestItemSearchFocus);
+		eventBus.on("cart_quantities_updated", handleCartQuantitiesUpdated);
 		eventBus.on("remote_stock_adjustment", handleRemoteStockAdjustment);
 	}
 
@@ -1063,6 +1069,7 @@ onBeforeUnmount(() => {
 		eventBus.off("update_customer_price_list");
 		eventBus.off("update_buying_price_list");
 		eventBus.off("focus_item_search", requestItemSearchFocus);
+		eventBus.off("cart_quantities_updated", handleCartQuantitiesUpdated);
 		eventBus.off("remote_stock_adjustment", handleRemoteStockAdjustment);
 	}
 	if (props.context === "pos") {

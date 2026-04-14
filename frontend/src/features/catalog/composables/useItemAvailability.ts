@@ -43,6 +43,7 @@ export function useItemAvailability() {
 
 	const barcodeIndex = ref<Map<string, BarcodeIndexedItem>>(new Map());
 	const stockUnsubscribe = ref<(() => void) | null>(null);
+	const availabilityInitialized = ref(false);
 
 	// --- Indexing ---
 
@@ -418,9 +419,13 @@ export function useItemAvailability() {
 
 	// --- Lifecycle ---
 	const initAvailability = () => {
+		if (availabilityInitialized.value) {
+			return;
+		}
 		stockUnsubscribe.value = stockCoordinator.subscribe(
 			handleStockSnapshotUpdate,
 		);
+		availabilityInitialized.value = true;
 	};
 
 	onUnmounted(() => {
@@ -428,6 +433,7 @@ export function useItemAvailability() {
 			stockUnsubscribe.value();
 			stockUnsubscribe.value = null;
 		}
+		availabilityInitialized.value = false;
 	});
 
 	return {
