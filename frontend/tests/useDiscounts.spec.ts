@@ -100,4 +100,23 @@ describe("useDiscounts offer price enforcement", () => {
 			}),
 		);
 	});
+
+	it("treats discount percentage edits as percentages of the price list rate", () => {
+		const context = makeContext();
+		const item = makeOfferItem({
+			rate: 900,
+			base_rate: 900,
+			price_list_rate: 900,
+			base_price_list_rate: 900,
+		});
+
+		const { calcPrices } = useDiscounts();
+		calcPrices(item, 50, { target: { id: "discount_percentage" } }, context);
+
+		expect(item.discount_percentage).toBeCloseTo(50);
+		expect(item.discount_amount).toBeCloseTo(450);
+		expect(item.base_discount_amount).toBeCloseTo(450);
+		expect(item.rate).toBeCloseTo(450);
+		expect(item.base_rate).toBeCloseTo(450);
+	});
 });

@@ -319,9 +319,6 @@ const handleRateUpdate = (item: any, newRate: any) => {
 };
 
 const handleDiscountPercentUpdate = (item: any, newDiscount: any) => {
-	props.setFormatedCurrency(item, "discount_percentage", null, false, {
-		target: { value: newDiscount },
-	});
 	props.calcPrices(item, newDiscount, { target: { id: "discount_percentage" } });
 };
 

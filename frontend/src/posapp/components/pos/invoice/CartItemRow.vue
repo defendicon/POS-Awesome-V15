@@ -195,7 +195,7 @@
 		</td>
 
 		<!-- Discount % (Optional) -->
-		<td v-if="showDiscountPercent" class="text-center" :data-column-key="'discount_value'">
+		<td v-if="showDiscountPercent" class="text-center" :data-column-key="'discount_percentage'">
 			<div class="posa-cart-table__editor-box">
 				<div
 					v-if="!isEditingDiscountPercent"
@@ -332,16 +332,18 @@
 
 		<!-- Actions -->
 		<td class="text-center" :data-column-key="'actions'">
-			<v-btn
-				:disabled="!!item.posa_is_replace"
-				size="small"
-				variant="flat"
-				class="posa-cart-table__delete-btn delete-action-btn"
-				@click.stop="$emit('remove-item', item)"
-				:aria-label="__('Remove item')"
-			>
-				<v-icon size="small">mdi-delete-outline</v-icon>
-			</v-btn>
+			<div class="posa-cart-table__actions-wrap">
+				<v-btn
+					:disabled="!!item.posa_is_replace"
+					size="small"
+					variant="flat"
+					class="posa-cart-table__delete-btn delete-action-btn"
+					@click.stop="$emit('remove-item', item)"
+					:aria-label="__('Remove item')"
+				>
+					<v-icon size="small">mdi-delete-outline</v-icon>
+				</v-btn>
+			</div>
 		</td>
 	</tr>
 </template>
@@ -679,6 +681,14 @@ td {
 	text-align: center;
 	color: var(--pos-text-primary);
 	position: relative;
+}
+
+.posa-cart-table__actions-wrap {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
 }
 
 /* Keyboard focus styles */

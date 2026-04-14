@@ -108,10 +108,7 @@
 								class="pos-themed-input"
 								hide-details
 								:model-value="formatFloat(Math.abs(item.discount_percentage || 0))"
-								@change="[
-									setFormatedCurrency(item, 'discount_percentage', null, false, $event),
-									calcPrices(item, $event.target.value, $event),
-								]"
+								@change="calcPrices(item, $event.target.value, $event)"
 								:disabled="
 									!pos_profile.posa_allow_user_to_edit_item_discount ||
 									!!item.posa_is_replace ||
