@@ -159,6 +159,11 @@ export function useBatchSerial() {
 			(batch) => !batch.is_expired,
 		);
 
+		normalized_batch_data = normalized_batch_data.filter((batch) => {
+			const availableQty = Number(batch.available_qty) || 0;
+			return availableQty > 0 || batch.batch_no === item?.batch_no;
+		});
+
 		normalized_batch_data.sort((a, b) => {
 			const aExpired = a.is_expired;
 			const bExpired = b.is_expired;

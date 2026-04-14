@@ -147,4 +147,99 @@ describe("useBatchSerial.setBatchQty", () => {
 		expect(item.amount).toBe(24);
 		expect(item.base_amount).toBe(24);
 	});
+
+	it("hides depleted batches from the batch list while preserving the selected batch", () => {
+		const { setBatchQty } = useBatchSerial();
+		const context: any = {
+			items: [
+				{
+					item_code: "ITEM-DEPLETED",
+					posa_row_id: "other-row",
+					batch_no: "B-EMPTY",
+					qty: 5,
+				},
+			],
+			price_list_currency: "USD",
+			selected_currency: "USD",
+			exchange_rate: 1,
+			currency_precision: 2,
+			flt: (value: any) => Number(value),
+			forceUpdate: vi.fn(),
+		};
+
+		const item: any = {
+			item_code: "ITEM-DEPLETED",
+			posa_row_id: "current-row",
+			qty: 1,
+			has_batch_no: 1,
+			has_serial_no: 0,
+			batch_no_data: [
+				{
+					batch_no: "B-EMPTY",
+					batch_qty: 5,
+					is_expired: false,
+				},
+				{
+					batch_no: "B-AVAILABLE",
+					batch_qty: 2,
+					is_expired: false,
+				},
+			],
+		};
+
+		setBatchQty(item, null, false, context);
+
+		expect(item.batch_no).toBe("B-AVAILABLE");
+		expect(item.batch_no_data.map((b: any) => b.batch_no)).toEqual([
+			"B-AVAILABLE",
+		]);
+	});
+
+	it("keeps the currently selected depleted batch visible for the active line", () => {
+		const { setBatchQty } = useBatchSerial();
+		const context: any = {
+			items: [
+				{
+					item_code: "ITEM-SELECTED",
+					posa_row_id: "other-row",
+					batch_no: "B-SELECTED",
+					qty: 5,
+				},
+			],
+			price_list_currency: "USD",
+			selected_currency: "USD",
+			exchange_rate: 1,
+			currency_precision: 2,
+			flt: (value: any) => Number(value),
+			forceUpdate: vi.fn(),
+		};
+
+		const item: any = {
+			item_code: "ITEM-SELECTED",
+			posa_row_id: "current-row",
+			qty: 1,
+			has_batch_no: 1,
+			has_serial_no: 0,
+			batch_no: "B-SELECTED",
+			batch_no_data: [
+				{
+					batch_no: "B-SELECTED",
+					batch_qty: 5,
+					is_expired: false,
+				},
+				{
+					batch_no: "B-OTHER",
+					batch_qty: 3,
+					is_expired: false,
+				},
+			],
+		};
+
+		setBatchQty(item, "B-SELECTED", false, context);
+
+		expect(item.batch_no_data.map((b: any) => b.batch_no)).toEqual([
+			"B-SELECTED",
+			"B-OTHER",
+		]);
+	});
 });
