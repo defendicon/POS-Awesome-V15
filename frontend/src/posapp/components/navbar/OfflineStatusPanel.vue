@@ -51,6 +51,18 @@
 				>
 					{{ message }}
 				</div>
+				<div
+					v-if="props.bootstrapRepairActive"
+					class="offline-status-panel__warning-line offline-status-panel__warning-line--repair"
+					data-test="offline-status-repairing"
+				>
+					<v-icon
+						icon="mdi-autorenew"
+						size="14"
+						class="offline-status-panel__repair-icon"
+					/>
+					<span>{{ props.bootstrapRepairLabel || __("Repairing offline prerequisites...") }}</span>
+				</div>
 			</div>
 
 			<div class="offline-status-panel__section">
@@ -144,6 +156,8 @@ defineOptions({
 
 const props = defineProps<{
 	modelValue: boolean;
+	bootstrapRepairActive?: boolean;
+	bootstrapRepairLabel?: string;
 }>();
 
 defineEmits<{
@@ -282,6 +296,17 @@ const cacheUsageLabel = computed(() => `${summary.value.cacheUsage || 0}%`);
 	color: #ff9800;
 }
 
+.offline-status-panel__warning-line--repair {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	color: var(--pos-text-primary);
+}
+
+.offline-status-panel__repair-icon {
+	animation: offline-status-panel-spin 1s linear infinite;
+}
+
 .offline-status-panel__actions {
 	flex-wrap: wrap;
 	justify-content: flex-start;
@@ -314,6 +339,15 @@ const cacheUsageLabel = computed(() => `${summary.value.cacheUsage || 0}%`);
 .offline-status-panel-fade-leave-to {
 	opacity: 0;
 	transform: translateY(-6px);
+}
+
+@keyframes offline-status-panel-spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 @media (max-width: 768px) {

@@ -103,6 +103,8 @@ describe("OfflineStatusPanel", () => {
 		const wrapper = mount(OfflineStatusPanel, {
 			props: {
 				modelValue: true,
+				bootstrapRepairActive: true,
+				bootstrapRepairLabel: "Repairing offline prerequisites: offers, coupons",
 			},
 			slots: {
 				activator: "<button data-test='activator'>status</button>",
@@ -127,6 +129,9 @@ describe("OfflineStatusPanel", () => {
 		);
 		expect(wrapper.text()).toContain(
 			"Cached offline data belongs to a different app build.",
+		);
+		expect(wrapper.get('[data-test="offline-status-repairing"]').text()).toContain(
+			"Repairing offline prerequisites: offers, coupons",
 		);
 		expect(wrapper.text()).toContain("bootstrap_config");
 		expect(wrapper.text()).toContain("currency_matrix");

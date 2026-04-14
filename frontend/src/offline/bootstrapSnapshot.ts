@@ -32,7 +32,9 @@ export type BootstrapPrerequisiteCollectionInput = {
 	printTemplate?: string | null;
 	termsAndConditions?: string | null;
 	offers?: unknown[] | null;
+	offersCacheReady?: boolean | null;
 	coupons?: Record<string, unknown> | unknown[] | null;
+	couponsCacheReady?: boolean | null;
 	stockCacheReady?: boolean | null;
 	deliveryChargesCount?: number | boolean | null;
 	currencyOptionsCount?: number | boolean | null;
@@ -177,6 +179,16 @@ function hasCoupons(value: Record<string, unknown> | unknown[] | null | undefine
 	return Object.keys(value).length > 0;
 }
 
+function resolveCacheReadyState(
+	flag: boolean | null | undefined,
+	fallback: boolean,
+): BootstrapPrerequisiteState {
+	if (typeof flag === "boolean") {
+		return flag ? "ready" : "missing";
+	}
+	return fallback ? "ready" : "missing";
+}
+
 function hasOwnKey<T extends object>(value: T | null | undefined, key: keyof T) {
 	return Object.prototype.hasOwnProperty.call(value || {}, key);
 }
@@ -240,8 +252,14 @@ export function collectBootstrapPrerequisites(
 		terms_and_conditions: hasTruthyValue(input?.termsAndConditions)
 			? "ready"
 			: "missing",
-		offers_cache: hasNonEmptyArray(input?.offers) ? "ready" : "missing",
-		coupons_cache: hasCoupons(input?.coupons) ? "ready" : "missing",
+		offers_cache: resolveCacheReadyState(
+			input?.offersCacheReady,
+			hasNonEmptyArray(input?.offers),
+		),
+		coupons_cache: resolveCacheReadyState(
+			input?.couponsCacheReady,
+			hasCoupons(input?.coupons),
+		),
 		stock_cache_ready: input?.stockCacheReady ? "ready" : "missing",
 		delivery_charges_cache: hasPositiveCountOrReadyFlag(
 			input?.deliveryChargesCount,
@@ -346,11 +364,31 @@ function collectBootstrapPrerequisitePatch(
 	}
 
 	if (hasOwnKey(input, "offers")) {
-		patch.offers_cache = hasNonEmptyArray(input?.offers) ? "ready" : "missing";
+		patch.offers_cache = resolveCacheReadyState(
+			input?.offersCacheReady,
+			hasNonEmptyArray(input?.offers),
+		);
+	}
+
+	if (hasOwnKey(input, "offersCacheReady")) {
+		patch.offers_cache = resolveCacheReadyState(
+			input?.offersCacheReady,
+			hasNonEmptyArray(input?.offers),
+		);
 	}
 
 	if (hasOwnKey(input, "coupons")) {
-		patch.coupons_cache = hasCoupons(input?.coupons) ? "ready" : "missing";
+		patch.coupons_cache = resolveCacheReadyState(
+			input?.couponsCacheReady,
+			hasCoupons(input?.coupons),
+		);
+	}
+
+	if (hasOwnKey(input, "couponsCacheReady")) {
+		patch.coupons_cache = resolveCacheReadyState(
+			input?.couponsCacheReady,
+			hasCoupons(input?.coupons),
+		);
 	}
 
 	if (hasOwnKey(input, "stockCacheReady")) {

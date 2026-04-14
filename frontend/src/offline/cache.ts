@@ -424,6 +424,7 @@ export function saveOffers(offers) {
 		persist("offers_cache");
 		refreshBootstrapSnapshotFromCacheState({
 			offers: memory.offers_cache,
+			offersCacheReady: true,
 		});
 	} catch (e) {
 		console.error("Failed to cache offers", e);
@@ -1165,6 +1166,7 @@ export function saveCoupons(coupons) {
 		persist("coupons_cache");
 		refreshBootstrapSnapshotFromCacheState({
 			coupons: memory.coupons_cache,
+			couponsCacheReady: true,
 		});
 	} catch (e) {
 		console.error("Failed to save coupons", e);
@@ -1180,6 +1182,7 @@ export function clearCoupons() {
 	persist("coupons_cache");
 	refreshBootstrapSnapshotFromCacheState({
 		coupons: memory.coupons_cache,
+		couponsCacheReady: true,
 	});
 }
 

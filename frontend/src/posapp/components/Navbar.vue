@@ -27,6 +27,8 @@
 					/>
 					<OfflineStatusPanel
 						v-model="offlinePanelOpen"
+						:bootstrap-repair-active="bootstrapRepairActive"
+						:bootstrap-repair-label="bootstrapRepairLabel"
 						@toggle-offline="toggleManualOfflineFromPanel"
 						@refresh-offline-data="handleRefreshOfflineDataAction"
 						@rebuild-offline-data="handleRebuildOfflineDataAction"
@@ -246,6 +248,14 @@ export default {
 		serverConnecting: Boolean,
 		isIpHost: Boolean,
 		bootstrapWarningActive: Boolean,
+		bootstrapRepairActive: {
+			type: Boolean,
+			default: false,
+		},
+		bootstrapRepairLabel: {
+			type: String,
+			default: "",
+		},
 		bootstrapWarningTooltip: {
 			type: String,
 			default: "",

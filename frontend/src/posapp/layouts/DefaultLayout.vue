@@ -21,6 +21,8 @@
 				:loading-active="loadingActive"
 				:loading-message="loadingMessage"
 				:bootstrap-warning-active="bootstrapWarningActive"
+				:bootstrap-repair-active="bootstrapRepairActive"
+				:bootstrap-repair-label="bootstrapRepairLabel"
 				:bootstrap-warning-tooltip="bootstrapWarningTooltip"
 				@nav-click="handleNavClick"
 				@close-shift="handleCloseShift"
@@ -60,6 +62,18 @@
 						class="bootstrap-warning-message"
 					>
 						{{ bootstrapRecoveryMessage }}
+					</div>
+					<div
+						v-if="bootstrapRepairActive"
+						class="bootstrap-warning-message bootstrap-warning-repair"
+						data-test="bootstrap-warning-repair"
+					>
+						<v-icon
+							icon="mdi-autorenew"
+							size="16"
+							class="bootstrap-warning-repair__icon"
+						/>
+						<span>{{ bootstrapRepairLabel }}</span>
 					</div>
 				</div>
 				<template #actions>
@@ -109,6 +123,8 @@ import {
 	getBootstrapLimitedMode,
 	setBootstrapLimitedMode,
 	getCacheUsageEstimate,
+	getCachedCoupons,
+	getCachedOffers,
 	checkDbHealth,
 	queueHealthCheck,
 	purgeOldQueueEntries,
@@ -125,6 +141,8 @@ import {
 	getSyncResourceDefinitions,
 	getSyncResourceState,
 	listSyncResourceStates,
+	saveCoupons,
+	saveOffers,
 } from "../../offline/index";
 import { SyncCoordinator } from "../../offline/sync/SyncCoordinator";
 import { createOfflineSyncRuntime } from "../../offline/sync/runtime";
@@ -149,6 +167,10 @@ import {
 	formatBootstrapWarning,
 	shouldShowBootstrapBanner,
 } from "../utils/bootstrapWarnings";
+import {
+	resolveBootstrapRuntimeState,
+	validateBootstrapSnapshot,
+} from "../../offline/bootstrapSnapshot";
 
 /**
  * Frappe Desk UI selectors to hide in POS view.
@@ -250,6 +272,9 @@ const cacheUsageDetails = ref({ total: 0, indexedDB: 0, localStorage: 0 });
 const bootstrapStatus = ref(getBootstrapSnapshotStatus());
 const bootstrapLimitedMode = ref(getBootstrapLimitedMode());
 const bootstrapSnackbarVisible = ref(false);
+const bootstrapRepairActive = ref(false);
+const bootstrapRepairLabel = ref("");
+const lastBootstrapRepairSignature = ref("");
 let _sidebarObserver = null;
 let updateInterval = null;
 
@@ -464,6 +489,9 @@ const bootstrapWarningMessages = computed(() => {
 		),
 	);
 });
+const bootstrapWarningCodes = computed(() =>
+	Array.from(new Set(bootstrapStatus.value?.warning_codes || [])),
+);
 const bootstrapWarningActive = computed(
 	() => bootstrapWarningMessages.value.length > 0,
 );
@@ -499,6 +527,109 @@ const bootstrapWarningSignature = computed(() => {
 	});
 });
 
+function getBootstrapValidationContext() {
+	const profile = getCurrentBootstrapProfile();
+	return {
+		buildVersion: BUILD_VERSION,
+		profileName: profile?.name || null,
+		profileModified: profile?.modified || null,
+		sessionUser: frappe?.session?.user || null,
+	};
+}
+
+function evaluateBootstrapSnapshot(options = {}) {
+	const validation = validateBootstrapSnapshot(
+		getBootstrapSnapshot(),
+		getBootstrapValidationContext(),
+	);
+	const decision = resolveBootstrapRuntimeState(validation, options);
+	persistBootstrapRuntime(validation, decision);
+	return { validation, decision };
+}
+
+async function fetchOfflineOffersForRepair(profileName) {
+	if (!profileName) {
+		saveOffers(getCachedOffers());
+		return false;
+	}
+
+	const response = await frappe.call({
+		method: "posawesome.posawesome.api.offers.get_offers",
+		args: {
+			profile: profileName,
+		},
+	});
+	const offers = Array.isArray(response?.message) ? response.message : [];
+	saveOffers(offers);
+	return true;
+}
+
+async function attemptBootstrapAutoRepair(signature, warningCodes = []) {
+	if (
+		!signature ||
+		bootstrapRepairActive.value ||
+		lastBootstrapRepairSignature.value === signature
+	) {
+		return;
+	}
+
+	const repairableCodes = warningCodes.filter((code) =>
+		["offers_cache", "coupons_cache"].includes(code),
+	);
+	if (!repairableCodes.length) {
+		return;
+	}
+
+	if (getIsManualOffline() || !navigator.onLine) {
+		return;
+	}
+
+	const profileName = getCurrentBootstrapProfile()?.name || null;
+	lastBootstrapRepairSignature.value = signature;
+	bootstrapRepairActive.value = true;
+	bootstrapRepairLabel.value = __("Repairing offline prerequisites: {0}", [
+		repairableCodes
+			.map((code) => (code === "offers_cache" ? __("offers") : __("coupons")))
+			.join(", "),
+	]);
+
+	try {
+		let repairedAny = false;
+
+		if (repairableCodes.includes("offers_cache")) {
+			repairedAny = (await fetchOfflineOffersForRepair(profileName)) || repairedAny;
+		}
+
+		if (repairableCodes.includes("coupons_cache")) {
+			saveCoupons(getCachedCoupons() || {});
+			repairedAny = true;
+		}
+
+		evaluateBootstrapSnapshot();
+
+		if (repairedAny) {
+			toastStore.show({
+				title: __("Offline prerequisites repaired"),
+				detail: __("Offers and coupons cache status was refreshed automatically."),
+				color: "success",
+			});
+		}
+	} catch (error) {
+		lastBootstrapRepairSignature.value = "";
+		console.error("Failed to auto-repair bootstrap prerequisites", error);
+		toastStore.show({
+			title: __("Offline prerequisite repair failed"),
+			detail:
+				error?.message ||
+				__("Open Status to review cached data and retry while online."),
+			color: "warning",
+		});
+	} finally {
+		bootstrapRepairActive.value = false;
+		bootstrapRepairLabel.value = "";
+	}
+}
+
 // Watchers
 watch(networkOnline, (newVal, oldVal) => {
 	if (newVal && !oldVal) {
@@ -526,6 +657,9 @@ watch(
 	],
 	() => {
 		sessionRuntime.evaluateRegisterStartup();
+		evaluateBootstrapSnapshot({
+			continueOffline: bootstrapLimitedMode.value,
+		});
 	},
 );
 
@@ -542,12 +676,20 @@ watch(
 	(nextSignature, previousSignature) => {
 		if (!nextSignature) {
 			bootstrapSnackbarVisible.value = false;
+			bootstrapRepairActive.value = false;
+			bootstrapRepairLabel.value = "";
+			lastBootstrapRepairSignature.value = "";
 			return;
 		}
 
 		if (nextSignature !== previousSignature) {
 			bootstrapSnackbarVisible.value = true;
 		}
+
+		void attemptBootstrapAutoRepair(
+			nextSignature,
+			bootstrapWarningCodes.value,
+		);
 	},
 	{ immediate: true },
 );
@@ -730,6 +872,9 @@ const initializeData = async () => {
 		await sessionRuntime.runCheckoutFlow();
 	}
 
+	evaluateBootstrapSnapshot({
+		continueOffline: bootstrapLimitedMode.value,
+	});
 	void scheduleBootCriticalWarmSync();
 };
 
@@ -883,7 +1028,7 @@ const handleToggleOffline = () => {
 		networkOnline.value = navigator.onLine;
 	}
 	evaluateBootstrapSnapshot({
-		allowPrompt: manualOffline.value || !navigator.onLine,
+		continueOffline: manualOffline.value || !navigator.onLine,
 	});
 };
 
@@ -904,7 +1049,7 @@ const handleRetryStatus = async () => {
 const handleRefreshOfflineData = async () => {
 	handleRefreshCacheUsage();
 	evaluateBootstrapSnapshot({
-		allowPrompt: getIsManualOffline() || !navigator.onLine,
+		continueOffline: getIsManualOffline() || !navigator.onLine,
 	});
 	if (!getIsManualOffline() && navigator.onLine) {
 		await handleRetryStatus();
@@ -922,7 +1067,7 @@ const handleRefreshOfflineData = async () => {
 const handleRebuildOfflineData = async () => {
 	handleRefreshCacheUsage();
 	evaluateBootstrapSnapshot({
-		allowPrompt: true,
+		continueOffline: true,
 	});
 	if (canRunOfflineSync()) {
 		await scheduleBootCriticalWarmSync();
@@ -1109,6 +1254,26 @@ const adjust_frappe_sidebar_offset = () => {
 
 .bootstrap-warning-message + .bootstrap-warning-message {
 	margin-top: 4px;
+}
+
+.bootstrap-warning-repair {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-weight: 500;
+}
+
+.bootstrap-warning-repair__icon {
+	animation: bootstrap-warning-spin 1s linear infinite;
+}
+
+@keyframes bootstrap-warning-spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 /* Ensure proper spacing and prevent layout shifts */

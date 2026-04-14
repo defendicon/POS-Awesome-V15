@@ -190,6 +190,18 @@ describe("bootstrap snapshot", () => {
 		expect(prerequisites.payment_method_currency_cache).toBe("ready");
 	});
 
+	it("treats initialized empty offers and coupons caches as ready", () => {
+		const prerequisites = collectBootstrapPrerequisites({
+			offers: [],
+			offersCacheReady: true,
+			coupons: {},
+			couponsCacheReady: true,
+		});
+
+		expect(prerequisites.offers_cache).toBe("ready");
+		expect(prerequisites.coupons_cache).toBe("ready");
+	});
+
 	it("formats new prerequisite warning messages explicitly", () => {
 		expect(formatBootstrapWarning("delivery_charges_cache")).toContain(
 			"delivery charges",

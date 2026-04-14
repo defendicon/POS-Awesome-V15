@@ -10,10 +10,14 @@ describe("DefaultLayout bootstrap warning presentation", () => {
 		);
 
 		expect(source).toContain(':bootstrap-warning-active="bootstrapWarningActive"');
+		expect(source).toContain(':bootstrap-repair-active="bootstrapRepairActive"');
+		expect(source).toContain(':bootstrap-repair-label="bootstrapRepairLabel"');
 		expect(source).toContain(':bootstrap-warning-tooltip="bootstrapWarningTooltip"');
 		expect(source).toContain("<v-snackbar");
 		expect(source).toContain('v-model="bootstrapSnackbarVisible"');
 		expect(source).toContain('location="top center"');
+		expect(source).toContain('data-test="bootstrap-warning-repair"');
+		expect(source).toContain("attemptBootstrapAutoRepair");
 		expect(source).toContain("Status > Clear Cache");
 		expect(source).not.toContain("<v-alert");
 	});
