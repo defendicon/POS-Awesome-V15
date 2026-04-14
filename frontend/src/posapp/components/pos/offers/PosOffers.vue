@@ -95,6 +95,7 @@ import { useCustomersStore } from "../../../stores/customersStore.js";
 import { useUIStore } from "../../../stores/uiStore.js";
 import { useToastStore } from "../../../stores/toastStore.js";
 import { storeToRefs } from "pinia";
+import { mergeDisplayedOffers } from "./offerMerging";
 export default {
 	mixins: [format],
 	setup() {
@@ -205,68 +206,18 @@ export default {
 			return result;
 		},
 		updatePosOffers(offers) {
-			const incoming = (Array.isArray(offers) ? offers : []).map((offer) =>
-				this.normalizeOfferIdentity({ ...offer }),
-			);
-			const toRemove = [];
-			this.pos_offers.forEach((pos_offer) => {
-				const offer = incoming.find(
-					(offer) => this.getOfferId(offer) === this.getOfferId(pos_offer),
-				);
-				if (!offer) {
-					toRemove.push(this.getOfferId(pos_offer));
-				}
-			});
-			this.removeOffers(toRemove);
-			incoming.forEach((offer) => {
-				const pos_offer = this.pos_offers.find(
-					(pos_offer) => this.getOfferId(offer) === this.getOfferId(pos_offer),
-				);
-				if (pos_offer) {
-					pos_offer.items = offer.items;
-					if (
-						offer.apply_on == "Item Group" &&
-						offer.apply_type == "Item Group" &&
-						offer.replace_cheapest_item
-					) {
-						pos_offer.give_item = offer.give_item;
-						pos_offer.apply_item_code = offer.apply_item_code;
-					}
-				} else {
-					const newOffer = { ...offer };
-					if (!offer.row_id) {
-						newOffer.row_id = this.getOfferId(offer) || this.makeid(20);
-					}
-					if (offer.apply_type == "Item Code") {
-						if (offer.replace_item) {
-							newOffer.give_item = offer.item || offer.apply_item_code || null;
-						} else {
-							newOffer.give_item = offer.apply_item_code || null;
-						}
-					}
-					if (offer.offer_applied) {
-						newOffer.offer_applied = !!offer.offer_applied;
-					} else {
-						if (
-							offer.apply_type == "Item Group" &&
-							offer.offer == "Give Product" &&
-							!offer.replace_cheapest_item &&
-							!offer.replace_item
-						) {
-							newOffer.offer_applied = false;
-						} else if (offer.offer === "Grand Total" && this.discount_percentage_offer_name) {
-							newOffer.offer_applied = false;
-						} else {
-							newOffer.offer_applied = !!offer.auto;
-						}
-					}
-					if (newOffer.offer == "Give Product" && !newOffer.give_item) {
-						const giveItems = this.get_give_items(newOffer);
-						if (giveItems.length) {
-							newOffer.give_item = giveItems[0].item_code;
-						}
-					}
-					this.pos_offers.push(newOffer);
+			const previousIds = new Set(this.pos_offers.map((offer) => this.getOfferId(offer)));
+			const mergedOffers = mergeDisplayedOffers(this.pos_offers, offers, {
+				discountPercentageOfferName: this.discount_percentage_offer_name,
+				resolveDefaultGiveItem: (offer) => {
+					const giveItems = this.get_give_items(offer);
+					return giveItems.length ? giveItems[0].item_code : null;
+				},
+			}).map((offer) => this.normalizeOfferIdentity(offer));
+			const nextIds = new Set(mergedOffers.map((offer) => this.getOfferId(offer)));
+			this.pos_offers = mergedOffers;
+			nextIds.forEach((offerId) => {
+				if (!previousIds.has(offerId)) {
 					this.toastStore.show({
 						title: __("New Offer Available"),
 						color: "warning",
