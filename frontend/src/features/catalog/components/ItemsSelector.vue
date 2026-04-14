@@ -224,6 +224,7 @@ import { useItemCurrency } from "../composables/useItemCurrency";
 import { addCatalogItemToCart } from "../domain/addCatalogItemToCart";
 import {
 	initializeCatalogSelector,
+	resolveProfileCatalogView,
 	resolveAdaptiveCatalogView,
 	syncCatalogSelectorDisplay,
 } from "../domain/catalogSelectorBridge";
@@ -1016,6 +1017,12 @@ onMounted(async () => {
 							customer_price_list.value as any,
 						);
 					}
+
+					catalogStore.setPreferredView(
+						resolveProfileCatalogView(
+							newProfile.posa_default_card_view,
+						),
+					);
 
 					await initializeCatalogSelector({
 						catalog: catalogStore,

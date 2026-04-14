@@ -2,6 +2,7 @@ import { loadCatalogItems } from "./loadCatalogItems";
 import { searchCatalogItems } from "./searchCatalogItems";
 import type { PosCatalogItem, PosCatalogViewMode } from "./posCatalogTypes";
 import type { createPosCatalogStore } from "./posCatalogStore";
+import { parseBooleanSetting } from "../../../posapp/utils/stock";
 
 type CatalogStore = ReturnType<typeof createPosCatalogStore>;
 
@@ -86,4 +87,10 @@ export function resolveAdaptiveCatalogView({
 	}
 
 	return preferredView;
+}
+
+export function resolveProfileCatalogView(
+	defaultCardView: unknown,
+): PosCatalogViewMode {
+	return parseBooleanSetting(defaultCardView) ? "cards" : "table";
 }
