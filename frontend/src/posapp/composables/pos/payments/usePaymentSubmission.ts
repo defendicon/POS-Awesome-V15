@@ -473,7 +473,8 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 
 	function ensureReturnPaymentsAreNegative() {
 		const doc = unref(invoiceDoc);
-		if (!doc || !doc.is_return || !unref(options.isCashback)) {
+		// Skip for credit returns (isCashback = false means payments are cleared to 0 intentionally)
+		if (!doc || !doc.is_return || unref(options.isCashback) === false) {
 			return;
 		}
 		// Check if any payment amount is set

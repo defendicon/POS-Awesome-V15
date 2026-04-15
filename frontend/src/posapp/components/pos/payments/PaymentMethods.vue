@@ -6,9 +6,14 @@
 					<p class="payment-method-card__label">{{ frappe._("Method") }}</p>
 					<h4 class="payment-method-card__title">{{ payment.mode_of_payment }}</h4>
 				</div>
-				<span v-if="payment.default === 1" class="payment-method-card__badge">
-					{{ __("Default") }}
-				</span>
+				<div class="payment-method-card__badges">
+					<span v-if="isReturn" class="payment-method-card__badge payment-method-card__badge--refund">
+						{{ __("Refund") }}
+					</span>
+					<span v-if="payment.default === 1" class="payment-method-card__badge">
+						{{ __("Default") }}
+					</span>
+				</div>
 			</div>
 
 			<v-row class="payments ma-0" dense>
@@ -16,9 +21,9 @@
 					<v-text-field
 						density="compact"
 						variant="solo"
-						color="primary"
+						:color="isReturn ? 'error' : 'primary'"
 						:label="frappe._('Amount')"
-						class="sleek-field pos-themed-input"
+						:class="['sleek-field pos-themed-input', isReturn ? 'pos-themed-input--refund' : '']"
 						hide-details
 						:model-value="formatCurrency(payment.amount)"
 						@change="$emit('update-amount', payment, $event)"
@@ -185,6 +190,14 @@ const handlePrimaryAction = (payment) => {
 	color: var(--pos-text-primary);
 }
 
+.payment-method-card__badges {
+	display: flex;
+	gap: var(--pos-space-1);
+	align-items: center;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+}
+
 .payment-method-card__badge {
 	padding: 6px 10px;
 	border-radius: 999px;
@@ -193,6 +206,16 @@ const handlePrimaryAction = (payment) => {
 	font-size: 0.78rem;
 	font-weight: 700;
 	white-space: nowrap;
+}
+
+.payment-method-card__badge--refund {
+	background: rgba(var(--v-theme-error), 0.12);
+	color: rgb(var(--v-theme-error));
+}
+
+:deep(.pos-themed-input--refund input) {
+	color: rgb(var(--v-theme-error)) !important;
+	font-weight: 700;
 }
 
 .payment-method-action-btn {

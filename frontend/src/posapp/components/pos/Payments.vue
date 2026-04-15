@@ -424,7 +424,8 @@ const netInvoiceSettlementAmount = computed(() => {
 		currency_precision.value,
 	);
 
-	return Math.max(invoiceTotal - coveredAmount, 0);
+	const net = invoiceTotal - coveredAmount;
+	return invoice_doc.value?.is_return ? Math.min(net, 0) : Math.max(net, 0);
 });
 
 const validatePayment = computed(() => {
