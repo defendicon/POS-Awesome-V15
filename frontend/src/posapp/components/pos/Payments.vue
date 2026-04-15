@@ -1136,7 +1136,7 @@ const rebalancePreferredPaymentCoverage = (giftCardAmount = giftCardAppliedAmoun
 	});
 };
 
-const mergeProfilePaymentsIntoReturn = (doc: any) => {
+const mergeProfilePaymentsIntoReturn = (doc) => {
 	const profilePayments = buildProfilePaymentLines();
 	if (!profilePayments.length) return;
 
@@ -1145,10 +1145,10 @@ const mergeProfilePaymentsIntoReturn = (doc: any) => {
 	}
 
 	const existingModes = new Set(
-		doc.payments.map((p: any) => p?.mode_of_payment).filter(Boolean),
+		doc.payments.map((p) => p?.mode_of_payment).filter(Boolean),
 	);
 
-	profilePayments.forEach((pp: any) => {
+	profilePayments.forEach((pp) => {
 		if (!existingModes.has(pp.mode_of_payment)) {
 			doc.payments.push({
 				mode_of_payment: pp.mode_of_payment,
