@@ -148,7 +148,7 @@ watch(
 	() => props.modelValue,
 	(open) => {
 		if (open) {
-			selectedSupervisor.value = supervisors.value.length === 1 ? supervisors.value[0].user : "";
+			selectedSupervisor.value = supervisors.value.length === 1 ? (supervisors.value[0]?.user ?? "") : "";
 			supervisorPin.value = "";
 			reason.value = "";
 			errorMessage.value = "";
