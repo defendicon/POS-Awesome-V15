@@ -62,6 +62,10 @@ export function useCashMovement() {
 		expenseAccount?: string;
 		targetAccount?: string;
 		clientRequestId?: string;
+		/** Switched cashier user ID */
+		posaCashier?: string;
+		/** Switched cashier display name */
+		posaCashierName?: string;
 	}) {
 		const validation = validate({
 			movementType: args.movementType,
@@ -78,7 +82,7 @@ export function useCashMovement() {
 
 		submitting.value = true;
 		try {
-			const payload = {
+			const payload: Record<string, any> = {
 				pos_profile: args.posProfileName,
 				pos_opening_shift: args.posOpeningShiftName,
 				posting_date: args.postingDate,
@@ -90,6 +94,10 @@ export function useCashMovement() {
 				target_account: args.targetAccount,
 				client_request_id: args.clientRequestId,
 			};
+			if (args.posaCashier) {
+				payload.posa_cashier = args.posaCashier;
+				payload.posa_cashier_name = args.posaCashierName || args.posaCashier;
+			}
 
 			if (args.movementType === "Expense") {
 				return await cashMovementService.createExpense(payload);

@@ -498,6 +498,21 @@ export function get_invoice_doc(context: any) {
 		});
 	}
 
+	// Stamp active cashier identity — prefer the context.currentCashier (switched cashier)
+	// but preserve any already-persisted value when there is no active switch (e.g. reopened draft).
+	const cashier = context.currentCashier;
+	if (cashier?.user) {
+		doc.posa_cashier = cashier.user;
+		doc.posa_cashier_name = cashier.full_name || cashier.user;
+		doc.posa_cashier_is_supervisor = cashier.is_supervisor ? 1 : 0;
+	} else if (!doc.posa_cashier) {
+		// Defensive fallback: no active cashier switch — keep whatever was on the sourceDoc,
+		// but do not overwrite an already-stamped value with null.
+		doc.posa_cashier = sourceDoc.posa_cashier || null;
+		doc.posa_cashier_name = sourceDoc.posa_cashier_name || null;
+		doc.posa_cashier_is_supervisor = sourceDoc.posa_cashier_is_supervisor ?? 0;
+	}
+
 	return doc;
 }
 

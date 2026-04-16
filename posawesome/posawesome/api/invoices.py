@@ -77,6 +77,10 @@ def get_draft_invoices(
     if frappe.db.has_column(doctype, "posa_is_printed"):
         filters["posa_is_printed"] = 0
 
+    cashier_fields = []
+    if frappe.db.has_column(doctype, "posa_cashier"):
+        cashier_fields = ["posa_cashier", "posa_cashier_name"]
+
     invoices_list = frappe.get_list(
         doctype,
         filters=filters,
@@ -91,7 +95,7 @@ def get_draft_invoices(
             "pos_profile",
             "owner",
             "modified_by",
-        ],
+        ] + cashier_fields,
         limit_page_length=limit_page_length,
         order_by="modified desc",
     )

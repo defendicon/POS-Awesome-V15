@@ -279,6 +279,7 @@ import { useInvoiceStore } from "../../stores/invoiceStore.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
 import { useToastStore } from "../../stores/toastStore.js";
 import { useUIStore } from "../../stores/uiStore.js";
+import { useEmployeeStore } from "../../stores/employeeStore";
 import { storeToRefs } from "pinia";
 import stockCoordinator from "../../utils/stockCoordinator";
 import { getCurrentInstance, ref } from "vue";
@@ -309,6 +310,8 @@ export default {
 		const invoiceStore = useInvoiceStore();
 		const customersStore = useCustomersStore();
 		const toastStore = useToastStore();
+		const employeeStore = useEmployeeStore();
+		const { currentCashier } = storeToRefs(employeeStore);
 		const { isOnline } = useOnlineStatus();
 
 		const { activeView, posProfile: livePosProfile } = storeToRefs(uiStore);
@@ -356,6 +359,7 @@ export default {
 			customerRefreshToken,
 			invoiceType,
 			itemsTableRef,
+			currentCashier,
 			...currencyState,
 			...itemActions,
 			...offerLogic,

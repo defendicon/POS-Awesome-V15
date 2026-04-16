@@ -646,6 +646,7 @@ const { ensureReturnPaymentsAreNegative, restoreReturnPayments, validateSubmissi
 	diff_payment: diff_payment,
 	is_credit_sale: is_credit_sale,
 	loyaltyAmount: loyalty_amount,
+	currentCashier: currentCashier,
 	formatFloat: (val, prec) => flt(val, prec),
 	stores: {
 		toastStore,

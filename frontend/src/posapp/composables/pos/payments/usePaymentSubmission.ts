@@ -27,6 +27,8 @@ export interface PaymentSubmissionOptions {
 	diff_payment?: ComputedRef<number>;
 	is_credit_sale?: Ref<boolean>;
 	loyaltyAmount?: Ref<number>;
+	/** Active switched cashier — used to stamp posa_cashier* on offline invoices */
+	currentCashier?: Ref<any>;
 	stores?: {
 		toastStore?: any;
 		syncStore?: any;
@@ -675,6 +677,15 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				throw new Error(__("Gift card redemption requires an online connection"));
 			}
 			try {
+				// Ensure cashier identity is stamped before persisting to IndexedDB.
+				// The cashier may have switched after the last draft save, so we
+				// re-apply here to keep the offline record authoritative.
+				const activeCashier = unref(options.currentCashier);
+				if (activeCashier?.user) {
+					doc.posa_cashier = activeCashier.user;
+					doc.posa_cashier_name = activeCashier.full_name || activeCashier.user;
+					doc.posa_cashier_is_supervisor = activeCashier.is_supervisor ? 1 : 0;
+				}
 				saveOfflineInvoice({ data, invoice: doc });
 				stores?.syncStore?.updatePendingCount();
 				stores?.toastStore?.show({

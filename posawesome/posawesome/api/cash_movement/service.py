@@ -65,24 +65,32 @@ def _create_cash_movement(payload, movement_type):
     if movement_type == "Deposit" and source_account == target_account:
         frappe.throw(_("Source and target accounts cannot be the same for cash deposit."))
 
-    movement_doc = frappe.get_doc(
-        {
-            "doctype": "POS Cash Movement",
-            "posting_date": data.get("posting_date") or nowdate(),
-            "company": profile_doc.company,
-            "pos_profile": profile_doc.name,
-            "pos_opening_shift": opening_shift.name,
-            "user": frappe.session.user,
-            "movement_type": movement_type,
-            "amount": amount,
-            "against_name": against_name,
-            "source_account": source_account,
-            "target_account": target_account,
-            "expense_account": expense_account,
-            "remarks": remarks,
-            "client_request_id": data.get("client_request_id"),
-        }
-    )
+    posa_cashier = (data.get("posa_cashier") or "").strip() or None
+    posa_cashier_name = (data.get("posa_cashier_name") or "").strip() or None
+
+    movement_payload = {
+        "doctype": "POS Cash Movement",
+        "posting_date": data.get("posting_date") or nowdate(),
+        "company": profile_doc.company,
+        "pos_profile": profile_doc.name,
+        "pos_opening_shift": opening_shift.name,
+        "user": frappe.session.user,
+        "movement_type": movement_type,
+        "amount": amount,
+        "against_name": against_name,
+        "source_account": source_account,
+        "target_account": target_account,
+        "expense_account": expense_account,
+        "remarks": remarks,
+        "client_request_id": data.get("client_request_id"),
+    }
+
+    if posa_cashier and frappe.db.has_column("POS Cash Movement", "posa_cashier"):
+        movement_payload["posa_cashier"] = posa_cashier
+    if posa_cashier_name and frappe.db.has_column("POS Cash Movement", "posa_cashier_name"):
+        movement_payload["posa_cashier_name"] = posa_cashier_name
+
+    movement_doc = frappe.get_doc(movement_payload)
     movement_doc.flags.ignore_permissions = True
     movement_doc.insert()
 

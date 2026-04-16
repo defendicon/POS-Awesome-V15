@@ -69,6 +69,8 @@
 import { computed, ref, watch } from "vue";
 import { useUIStore } from "../../../stores/uiStore";
 import { useToastStore } from "../../../stores/toastStore";
+import { useEmployeeStore } from "../../../stores/employeeStore";
+import { storeToRefs } from "pinia";
 import { useCashMovement } from "../../../composables/pos/cash/useCashMovement";
 import {
 	getPendingOfflineCashMovementCount,
@@ -83,6 +85,8 @@ const __ = window.__ || ((text: string, _args?: any[]) => text);
 
 const uiStore = useUIStore();
 const toastStore = useToastStore();
+const employeeStore = useEmployeeStore();
+const { currentCashier } = storeToRefs(employeeStore);
 
 const {
 	loading,
@@ -153,7 +157,8 @@ async function handleSubmit(payload: any) {
 			throw new Error(__("Selected movement type is not allowed by POS Profile."));
 		}
 
-		const requestPayload = {
+		const activeCashier = currentCashier.value;
+		const requestPayload: Record<string, any> = {
 			pos_profile: posProfileName.value,
 			pos_opening_shift: openingShiftName.value,
 			posting_date: payload.postingDate,
@@ -166,6 +171,10 @@ async function handleSubmit(payload: any) {
 			movement_type: payload.movementType,
 			client_request_id: `cm-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
 		};
+		if (activeCashier?.user) {
+			requestPayload.posa_cashier = activeCashier.user;
+			requestPayload.posa_cashier_name = activeCashier.full_name || activeCashier.user;
+		}
 
 		if (isOffline()) {
 			const method =
@@ -199,6 +208,8 @@ async function handleSubmit(payload: any) {
 			posProfileName: posProfileName.value,
 			posOpeningShiftName: openingShiftName.value,
 			clientRequestId: requestPayload.client_request_id,
+			posaCashier: activeCashier?.user,
+			posaCashierName: activeCashier?.full_name,
 		});
 		toastStore.show({ title: __("Cash movement submitted"), color: "success" });
 		formResetToken.value += 1;

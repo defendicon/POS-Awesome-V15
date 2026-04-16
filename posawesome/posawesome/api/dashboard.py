@@ -39,6 +39,16 @@ def _pick_first_column(doctype: str, candidates: list[str]) -> str | None:
     return None
 
 
+def _resolve_cashier_field(parent_doctype: str) -> str | None:
+    """Return the best available cashier column for *parent_doctype*.
+
+    Prefers ``posa_cashier`` (the switched-cashier field added in this release),
+    then falls back to legacy candidates so dashboards remain functional on
+    sites that have not yet run the fixture migration.
+    """
+    return _pick_first_column(parent_doctype, ["posa_cashier", "owner", "cashier", "modified_by"])
+
+
 def _resolve_profile(pos_profile: Any) -> dict[str, Any]:
     profile_name = ""
 
@@ -1133,7 +1143,7 @@ def _collect_discount_void_return_report(
             ],
         )
         discount_expression = f"abs(coalesce(inv.{discount_field}, 0))" if discount_field else "0"
-        cashier_field = _pick_first_column(parent_doctype, ["owner", "cashier", "modified_by"])
+        cashier_field = _resolve_cashier_field(parent_doctype)
         cashier_expression = f"coalesce(inv.{cashier_field}, '')" if cashier_field else "''"
         is_return_expression = (
             "ifnull(inv.is_return, 0)" if frappe.db.has_column(parent_doctype, "is_return") else "0"
@@ -1738,7 +1748,7 @@ def _collect_staff_cashier_performance_report(
         parent_discount_expression = (
             f"abs(coalesce(inv.{parent_discount_field}, 0))" if parent_discount_field else "0"
         )
-        cashier_field = _pick_first_column(parent_doctype, ["owner", "cashier", "modified_by"])
+        cashier_field = _resolve_cashier_field(parent_doctype)
         cashier_expression = f"coalesce(inv.{cashier_field}, '')" if cashier_field else "''"
         is_return_expression = (
             "ifnull(inv.is_return, 0)" if frappe.db.has_column(parent_doctype, "is_return") else "0"
@@ -2323,7 +2333,7 @@ def _collect_branch_location_report(
         is_return_expression = (
             "ifnull(inv.is_return, 0)" if frappe.db.has_column(parent_doctype, "is_return") else "0"
         )
-        cashier_field = _pick_first_column(parent_doctype, ["owner", "cashier", "modified_by"])
+        cashier_field = _resolve_cashier_field(parent_doctype)
         cashier_expression = f"coalesce(inv.{cashier_field}, '')" if cashier_field else "''"
 
         sales_rows = frappe.db.sql(
