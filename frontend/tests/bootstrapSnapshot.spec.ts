@@ -136,7 +136,9 @@ describe("bootstrap snapshot", () => {
 			},
 		);
 
-		expect(result.mode).toBe("limited");
+		// Missing pricing prerequisites do not block selling — mode stays normal.
+		// Capabilities accurately reflect the reduced offline functionality.
+		expect(result.mode).toBe("normal");
 		expect(result.capabilities.canApplyPricingOffline).toBe(false);
 		expect(result.capabilities.canSellOffline).toBe(true);
 	});
@@ -240,15 +242,15 @@ describe("bootstrap snapshot", () => {
 
 		const decision = resolveBootstrapRuntimeState(result);
 
-		expect(result.mode).toBe("limited");
+		// Optional prerequisites (sales_persons, item_groups, stock_cache_ready)
+		// being absent is a valid empty/not-configured state — mode must stay
+		// "normal" so no false warning banner is shown.
+		expect(result.mode).toBe("normal");
 		expect(result.capabilities.canSellOffline).toBe(true);
-		expect(decision.warningCodes).toEqual(
-			expect.arrayContaining([
-				"sales_persons",
-				"item_groups",
-				"stock_cache_ready",
-			]),
-		);
+		expect(decision.limitedMode).toBe(false);
+		// Warning codes are empty in normal mode — optional missing items do not
+		// surface as actionable warnings.
+		expect(decision.warningCodes).toEqual([]);
 	});
 
 	it("blocks sell capability when item or customer caches are not ready", () => {

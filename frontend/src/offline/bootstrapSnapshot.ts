@@ -525,6 +525,14 @@ export function validateBootstrapSnapshot(
 		reasons.push("opening_shift_user_mismatch");
 	}
 
+	// Only prerequisites that actually block offline selling should set mode =
+	// "limited". Optional prerequisites (offers, delivery charges, currencies,
+	// print templates, sales persons, etc.) may be empty because the feature is
+	// simply not configured — that is a valid empty state, not an error.
+	const blockingMissingPrerequisites = missingPrerequisites.filter((key) =>
+		PREREQUISITES_FOR_OFFLINE_SELL.includes(key),
+	);
+
 	if (reasons.includes("opening_shift_user_mismatch")) {
 		mode = "invalid";
 	} else if (
@@ -533,7 +541,7 @@ export function validateBootstrapSnapshot(
 		reasons.includes("profile_modified_mismatch")
 	) {
 		mode = "confirmation_required";
-	} else if (missingPrerequisites.length) {
+	} else if (blockingMissingPrerequisites.length) {
 		mode = "limited";
 	}
 
@@ -551,9 +559,16 @@ export function resolveBootstrapRuntimeState(
 		continueOffline?: boolean;
 	} = {},
 ): BootstrapRuntimeDecision {
+	// Only include blocking missing prerequisites in warning codes shown to the
+	// user. Optional prerequisites (offers, delivery charges, currencies, etc.)
+	// being absent is a normal empty/not-configured state and should not surface
+	// as an actionable warning in the UI.
+	const blockingMissingCodes = (validation?.missingPrerequisites || []).filter(
+		(key) => PREREQUISITES_FOR_OFFLINE_SELL.includes(key),
+	);
 	const warningCodes = [
 		...(validation?.reasons || []),
-		...(validation?.missingPrerequisites || []),
+		...blockingMissingCodes,
 	];
 
 	if (validation?.mode === "confirmation_required") {
