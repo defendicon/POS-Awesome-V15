@@ -6,6 +6,9 @@ type LastBuyingRate = {
 	currency?: string;
 	uom?: string;
 	source?: string;
+	invoice?: string;
+	posting_date?: string;
+	supplier?: string;
 };
 
 type LastBuyingRatesMap = Record<string, LastBuyingRate>;
@@ -43,17 +46,18 @@ export function useLastBuyingRate(context: UseLastBuyingRateContext = {}) {
 	}, 500);
 
 	const getLastBuyingRate = (item: any): LastBuyingRate | null => {
+		if (!Boolean(unwrapValue(show_last_buying_rate))) return null;
 		if (!item?.item_code) return null;
 		return lastBuyingRates.value[item.item_code] || null;
 	};
 
 	const fetchLastBuyingRates = async () => {
-		const supplierVal = unwrapValue(supplier);
-		if (!supplierVal) {
+		if (!Boolean(unwrapValue(show_last_buying_rate))) {
 			lastBuyingRates.value = {};
 			return;
 		}
 
+		const supplierVal = unwrapValue(supplier);
 		const itemsVal = unwrapValue(displayedItems);
 		if (!itemsVal || itemsVal.length === 0) {
 			lastBuyingRates.value = {};
@@ -66,7 +70,7 @@ export function useLastBuyingRate(context: UseLastBuyingRateContext = {}) {
 
 		if (itemCodes.length === 0) return;
 
-		const cacheKey = `${supplierVal}`;
+		const cacheKey = supplierVal ? `supplier:${supplierVal}` : "supplier:__all__";
 		const cached = lastBuyingRateCache.get(cacheKey);
 		if (cached) {
 			const missingCodes = itemCodes.filter(
@@ -84,7 +88,7 @@ export function useLastBuyingRate(context: UseLastBuyingRateContext = {}) {
 			const { message } = await frappe.call({
 				method: "posawesome.posawesome.api.purchase_orders.get_last_buying_rate",
 				args: {
-					supplier: supplierVal,
+					supplier: supplierVal || null,
 					item_codes: JSON.stringify(itemCodes),
 					company: profile?.company || null,
 				},
@@ -101,6 +105,10 @@ export function useLastBuyingRate(context: UseLastBuyingRateContext = {}) {
 	};
 
 	const scheduleLastBuyingRateRefresh = () => {
+		if (!Boolean(unwrapValue(show_last_buying_rate))) {
+			lastBuyingRates.value = {};
+			return;
+		}
 		scheduler();
 	};
 

@@ -91,7 +91,8 @@
 								:context="context"
 								:selected-currency="selected_currency"
 								:hide-qty-decimals="hide_qty_decimals"
-						:get-last-invoice-rate="getLastRateForContext"
+								:show-rate-info="show_last_invoice_rate"
+								:get-item-rate-info="getItemRateInfo"
 						:is-item-highlighted="isItemHighlighted"
 						:currency-symbol="currencySymbol"
 						:format-currency="memoizedFormatCurrency"
@@ -117,11 +118,12 @@
 						:pos-profile="pos_profile"
 						:selected-currency="selected_currency"
 						:hide-qty-decimals="hide_qty_decimals"
+						:show-rate-info="show_last_invoice_rate"
 						:currency-symbol="currencySymbol"
 						:format-currency="memoizedFormatCurrency"
 						:format-number="memoizedFormatNumber"
 						:rate-precision="ratePrecision"
-						:get-last-invoice-rate="getLastRateForContext"
+						:get-item-rate-info="getItemRateInfo"
 								:is-negative="isNegative"
 								:item-class="getItemRowClass"
 								:row-props="getItemRowProps"
@@ -211,6 +213,7 @@ import { useItemSelection } from "../../../composables/pos/items/useItemSelectio
 import { useItemSelectorLayout } from "../../../composables/pos/items/useItemSelectorLayout";
 import { useLastInvoiceRate } from "../../../composables/pos/items/useLastInvoiceRate";
 import { useLastBuyingRate } from "../../../composables/pos/items/useLastBuyingRate";
+import { useItemRateInfo } from "../../../composables/pos/items/useItemRateInfo";
 import { useItemSync } from "../../../composables/pos/items/useItemSync";
 import { useItemStorageSafety } from "../../../composables/pos/items/useItemStorageSafety";
 import { useItemsSelectorSearch } from "../../../composables/pos/items/useItemsSelectorSearch";
@@ -226,6 +229,7 @@ import { useCustomersStore } from "../../../stores/customersStore";
 import { useToastStore } from "../../../stores/toastStore";
 import { useUIStore } from "../../../stores/uiStore";
 import { useInvoiceStore } from "../../../stores/invoiceStore";
+import { useEmployeeStore } from "../../../stores/employeeStore";
 
 import { parseBooleanSetting } from "../../../utils/stock";
 import {
@@ -253,6 +257,7 @@ const customersStore = useCustomersStore();
 const toastStore = useToastStore();
 const uiStore = useUIStore();
 const invoiceStore = useInvoiceStore();
+const employeeStore = useEmployeeStore();
 const { selectedCustomer } = storeToRefs(customersStore);
 const {
 	posProfile: uiPosProfile,
@@ -260,6 +265,7 @@ const {
 	triggerTopItemSelection,
 	activeView,
 } = storeToRefs(uiStore);
+const { currentCashier } = storeToRefs(employeeStore);
 const { deferStockValidationToPayment: invoiceTypeDefersStockValidation } =
 	storeToRefs(invoiceStore);
 
@@ -379,6 +385,7 @@ const couponsCount = computed(() => uiStore.couponsCount || 0);
 const active_price_list = computed(
 	() => itemsIntegration.active_price_list.value || pos_profile.value?.selling_price_list,
 );
+const isPosSupervisor = computed(() => Boolean(currentCashier.value?.is_supervisor));
 
 const isReturnInvoice = computed(() => {
 	return !!invoiceStore.invoiceDoc?.is_return;
@@ -529,7 +536,7 @@ const { getLastBuyingRate, scheduleLastBuyingRateRefresh, clearLastBuyingRateCac
 	pos_profile: () => pos_profile.value,
 	supplier: () => selectedSupplier.value,
 	displayedItems: () => displayedItems.value,
-	show_last_buying_rate: () => true,
+	show_last_buying_rate: () => show_last_invoice_rate.value && isPosSupervisor.value,
 });
 
 const getLastRateForContext = (item: any) => {
@@ -538,6 +545,14 @@ const getLastRateForContext = (item: any) => {
 	}
 	return getLastInvoiceRate(item);
 };
+
+const { getItemRateInfo } = useItemRateInfo({
+	context: () => props.context,
+	pos_profile: () => pos_profile.value,
+	is_pos_supervisor: () => isPosSupervisor.value,
+	getLastInvoiceRate,
+	getLastBuyingRate,
+});
 
 const {
 	isOverflowing,
@@ -1048,12 +1063,21 @@ watch(selectedCustomer, () => {
 	scheduleLastInvoiceRateRefresh();
 });
 
+watch(isPosSupervisor, (isSupervisor) => {
+	if (!isSupervisor) {
+		clearLastBuyingRateCache();
+		return;
+	}
+	scheduleLastBuyingRateRefresh();
+});
+
 watch(displayedItems, () => {
 	nextTick(() => {
 		checkItemContainerOverflow();
 		scheduleCardMetricsUpdate();
 	});
 	scheduleLastInvoiceRateRefresh();
+	scheduleLastBuyingRateRefresh();
 	itemSelection.syncHighlightedItem();
 });
 
@@ -1339,6 +1363,7 @@ defineExpose({
 	selected_currency,
 	getLastInvoiceRate,
 	getLastRateForContext,
+	getItemRateInfo,
 	isItemHighlighted,
 	isNegative,
 	headerProps,
