@@ -12,6 +12,73 @@ let cachedVersionInfo: {
 let cachedVersionTimestamp = 0;
 let pendingVersionRequest: Promise<any> | null = null;
 
+export interface ActiveVersionTransitionInput {
+	version: string;
+	runtimeVersion: string | null;
+	lastKnownActiveVersion: string | null;
+	reloadScheduled: boolean;
+}
+
+export interface ActiveVersionTransition {
+	nextLastKnownActiveVersion: string;
+	syncCurrentVersion: boolean;
+	syncAvailableVersion: boolean;
+	markUpdateApplied: boolean;
+	reloadWindow: boolean;
+	clearReloadState: boolean;
+}
+
+export function resolveActiveVersionTransition({
+	version,
+	runtimeVersion,
+	lastKnownActiveVersion,
+	reloadScheduled,
+}: ActiveVersionTransitionInput): ActiveVersionTransition {
+	const controllerVersionChanged = version !== lastKnownActiveVersion;
+
+	if (!lastKnownActiveVersion) {
+		return {
+			nextLastKnownActiveVersion: version,
+			syncCurrentVersion: !runtimeVersion || runtimeVersion === version,
+			syncAvailableVersion: Boolean(runtimeVersion && runtimeVersion !== version),
+			markUpdateApplied: false,
+			reloadWindow: false,
+			clearReloadState: false,
+		};
+	}
+
+	if (reloadScheduled) {
+		return {
+			nextLastKnownActiveVersion: version,
+			syncCurrentVersion: runtimeVersion === version,
+			syncAvailableVersion: false,
+			markUpdateApplied: runtimeVersion !== version,
+			reloadWindow: runtimeVersion !== version,
+			clearReloadState: runtimeVersion === version,
+		};
+	}
+
+	if (!runtimeVersion || runtimeVersion === version) {
+		return {
+			nextLastKnownActiveVersion: version,
+			syncCurrentVersion: true,
+			syncAvailableVersion: false,
+			markUpdateApplied: false,
+			reloadWindow: false,
+			clearReloadState: false,
+		};
+	}
+
+	return {
+		nextLastKnownActiveVersion: version,
+		syncCurrentVersion: false,
+		syncAvailableVersion: controllerVersionChanged,
+		markUpdateApplied: false,
+		reloadWindow: false,
+		clearReloadState: false,
+	};
+}
+
 if (typeof window !== "undefined" && "serviceWorker" in navigator) {
 	setActivePinia(pinia);
 	const updateStore = useUpdateStore();
@@ -41,10 +108,7 @@ if (typeof window !== "undefined" && "serviceWorker" in navigator) {
 		});
 
 	navigator.serviceWorker.addEventListener("controllerchange", () => {
-		reloadScheduled = true;
-		updateStore.reloading = true;
-		updateStore.resetSnooze();
-		void requestVersionFromController();
+		void handleControllerChange();
 	});
 
 	async function ensureActiveVersion() {
@@ -90,6 +154,16 @@ if (typeof window !== "undefined" && "serviceWorker" in navigator) {
 			handleActiveVersion(payload.version, payload.timestamp);
 		}
 		return payload;
+	}
+
+	async function handleControllerChange() {
+		if (!reloadScheduled) {
+			await requestVersionFromController();
+			return;
+		}
+
+		updateStore.reloading = true;
+		await requestVersionFromController();
 	}
 
 	async function refreshControllerCacheVersion() {
@@ -187,25 +261,35 @@ if (typeof window !== "undefined" && "serviceWorker" in navigator) {
 			};
 			cachedVersionTimestamp = Date.now();
 		}
-		if (!lastKnownActiveVersion) {
-			lastKnownActiveVersion = version;
-			updateStore.setCurrentVersion(version, timestamp || null);
-			return;
+		const decision = resolveActiveVersionTransition({
+			version,
+			runtimeVersion: updateStore.currentVersion || null,
+			lastKnownActiveVersion,
+			reloadScheduled,
+		});
+
+		lastKnownActiveVersion = decision.nextLastKnownActiveVersion;
+
+		if (decision.markUpdateApplied) {
+			updateStore.markUpdateApplied(version, timestamp || null);
 		}
 
-		if (version !== lastKnownActiveVersion) {
-			lastKnownActiveVersion = version;
-			updateStore.markUpdateApplied(version, timestamp || null);
-			if (reloadScheduled) {
-				reloadScheduled = false;
-				setTimeout(() => window.location.reload(), 50);
-			}
-		} else {
+		if (decision.clearReloadState) {
+			reloadScheduled = false;
+			updateStore.reloading = false;
+		}
+
+		if (decision.syncCurrentVersion) {
 			updateStore.setCurrentVersion(version, timestamp || null);
-			if (reloadScheduled) {
-				reloadScheduled = false;
-				updateStore.reloading = false;
-			}
+		}
+
+		if (decision.syncAvailableVersion) {
+			updateStore.setAvailableVersion(version, timestamp || null);
+		}
+
+		if (decision.reloadWindow) {
+			reloadScheduled = false;
+			setTimeout(() => window.location.reload(), 50);
 		}
 	}
 
