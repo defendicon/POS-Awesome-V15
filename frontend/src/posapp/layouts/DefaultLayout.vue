@@ -1019,11 +1019,6 @@ const refreshTaxInclusiveSetting = async () => {
 		});
 		if (r.message !== undefined) {
 			const val = r.message;
-			try {
-				localStorage.setItem("posa_tax_inclusive", JSON.stringify(val));
-			} catch (err) {
-				console.warn("Failed to cache tax inclusive setting", err);
-			}
 			import("../../offline/index")
 				.then((m) => {
 					if (m && m.setTaxInclusiveSetting) {

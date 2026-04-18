@@ -4,27 +4,27 @@
  * Every offline read and write goes through this module so that storage concerns
  * stay out of sync adapters and Vue components.
  *
- * ## Two-tier storage
+ * ## Storage ownership
  *
- * **Tier 1 — `memory` (in-memory + localStorage)**
- * `memory` is an object held in RAM and mirrored to `localStorage` via `persist(key)`.
- * Every mutation to `memory` must be followed immediately by `persist` so that the value
- * survives a page reload. This tier holds roughly 25 named caches suitable for data that:
- * - Fits comfortably in localStorage (< a few MB in total).
- * - Must be read synchronously: offers, price lists, item details, exchange rates, UOM
- *   tables, coupons, item groups, translations, bootstrap state, etc.
+ * **Runtime cache — `memory`**
+ * `memory` is the synchronous runtime cache for small reference payloads and UI-facing
+ * state. Every mutation to `memory` must be followed immediately by `persist(key)`.
+ * `persist` writes durable data to IndexedDB and only mirrors a narrow allowlist of
+ * lightweight settings/metadata to `localStorage`.
  *
- * **Tier 2 — Dexie / IndexedDB (`db`)**
- * Large datasets that would overflow localStorage live in IndexedDB. Currently:
+ * **Durable store — Dexie / IndexedDB (`db`)**
+ * IndexedDB is the persistent source of truth for business and cache data. Large datasets
+ * that would overflow localStorage live here directly. Currently:
  * - `items` — full item catalogue, stored with derived search fields for Dexie indexing.
  * - `customers` — all customers.
  * - `pos_profiles` / `opening_shifts` — structural records persisted on shift open.
  *
- * Every IndexedDB operation calls `checkDbHealth()` first, then opens the database if
- * it is not already open.
+ * **Light metadata — `localStorage`**
+ * `localStorage` is only used for a small set of lightweight settings and migration
+ * fallback reads. It is not the durable owner of core offline datasets or sync cursors.
  *
  * ## Tier interaction
- * The two tiers are largely independent. The one exception is `getCachedItemDetails`,
+ * The runtime cache and IndexedDB are largely independent. The one exception is `getCachedItemDetails`,
  * which reads per-item detail overrides from `memory.item_details_cache` and merges
  * them onto base records fetched from the Dexie `items` table:
  * `result = { ...baseItem, ...detailOverride }`.
@@ -1084,41 +1084,27 @@ export function reduceCacheUsage() {
 	persist("item_groups_cache");
 }
 
-// --- Sync watermarks (localStorage) ------------------------------------------
-// Stored directly in localStorage (not in `memory`) so they survive hard reloads
-// independently of the `persist` mechanism. Used by delta-sync adapters to build
-// the "changed since" query parameter sent to the server.
+// --- Sync watermarks (memory + IndexedDB) ------------------------------------
+// Delta sync cursors are kept in memory for synchronous access and persisted via
+// `persist()` into the `sync_state` table. `db.ts` still reads legacy
+// `localStorage` keys during initialization for migration safety.
 
 export function setItemsLastSync(timestamp) {
-	if (typeof localStorage !== "undefined") {
-		localStorage.setItem("posa_items_last_sync", timestamp);
-	}
+	memory.items_last_sync = timestamp || null;
+	persist("items_last_sync");
 }
 
 export function getItemsLastSync() {
-	if (typeof localStorage !== "undefined") {
-		return localStorage.getItem("posa_items_last_sync");
-	}
-	return null;
+	return memory.items_last_sync || null;
 }
 
 export function setCustomersLastSync(timestamp) {
-	if (typeof localStorage !== "undefined") {
-		if (timestamp) {
-			localStorage.setItem("posa_customers_last_sync", timestamp);
-		} else {
-			localStorage.removeItem("posa_customers_last_sync");
-		}
-	}
+	memory.customers_last_sync = timestamp || null;
+	persist("customers_last_sync");
 }
 
 export function getCustomersLastSync() {
-	if (typeof localStorage !== "undefined") {
-		const val = localStorage.getItem("posa_customers_last_sync");
-		if (val === "null" || val === "undefined") return null;
-		return val;
-	}
-	return null;
+	return memory.customers_last_sync || null;
 }
 
 export async function getCustomerStorageCount() {
@@ -1137,7 +1123,6 @@ export async function clearCustomerStorage() {
 		if (!db.isOpen()) await db.open();
 		await db.table("customers").clear();
 		memory.customer_storage = [];
-		persist("customer_storage");
 	} catch (e) {
 		console.error("Failed to clear customer storage", e);
 	}

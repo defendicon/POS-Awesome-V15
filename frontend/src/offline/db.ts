@@ -20,12 +20,11 @@
  *
  * **Persist write path (`persist`)**
  * `persist(key)` is the single write path for all `memory` entries. On each call
- * it writes to the Dexie table determined by `KEY_TABLE_MAP`, mirrors that write
- * to the `keyval` catch-all table, and serializes the value to `localStorage`
- * under `posa_<key>`. Keys in `LARGE_KEYS` are excluded from the localStorage
- * step to avoid storage-quota exhaustion. When a Web Worker is available
- * (`persistWorker`), the Dexie and localStorage writes are offloaded to avoid
- * blocking the main thread during heavy sync passes.
+ * it writes once to the Dexie table determined by `KEY_TABLE_MAP`. Only a small,
+ * explicit set of lightweight settings/metadata keys are additionally mirrored to
+ * `localStorage` under `posa_<key>`. When a Web Worker is available
+ * (`persistWorker`), the Dexie/localStorage writes are offloaded to avoid blocking
+ * the main thread during heavy sync passes.
  *
  * **Relationship to the rest of the offline layer**
  * `cache.ts` reads and writes through `memory`, calling `persist(key)` on every
@@ -106,8 +105,31 @@ const LARGE_KEYS = new Set([
 	"local_stock_cache",
 ]);
 
+const LOCAL_STORAGE_KEYS = new Set([
+	"manual_offline",
+	"bootstrap_snapshot",
+	"bootstrap_snapshot_status",
+	"bootstrap_limited_mode",
+	"cache_ready",
+	"stock_cache_ready",
+	"schema_signature",
+	"tax_inclusive",
+]);
+
+const MEMORY_ONLY_KEYS = new Set([
+	"customer_storage",
+]);
+
 function tableForKey(key: string) {
 	return KEY_TABLE_MAP[key] || "keyval";
+}
+
+function shouldPersistToIndexedDb(key: string) {
+	return !MEMORY_ONLY_KEYS.has(key);
+}
+
+function shouldPersistToLocalStorage(key: string) {
+	return LOCAL_STORAGE_KEYS.has(key) && !LARGE_KEYS.has(key);
 }
 
 function isCorruptionError(err: unknown) {
@@ -169,6 +191,9 @@ export const memory: AnyRecord = {
 	local_stock_cache: {},
 	stock_cache_ready: false,
 	customer_storage: [],
+	items_last_sync: null,
+	customers_last_sync: null,
+	payment_methods_last_sync: null,
 	pos_opening_storage: null,
 	opening_dialog_storage: null,
 	sales_persons_storage: [],
@@ -241,6 +266,13 @@ export const initPromise = new Promise<void>((resolve) => {
 });
 
 export function persist(key: string, value: unknown = memory[key]) {
+	if (!shouldPersistToIndexedDb(key) && !shouldPersistToLocalStorage(key)) {
+		if (typeof localStorage !== "undefined") {
+			localStorage.removeItem(`posa_${key}`);
+		}
+		return;
+	}
+
 	if (persistWorker) {
 		let clean = value;
 		try {
@@ -256,21 +288,22 @@ export function persist(key: string, value: unknown = memory[key]) {
 		}
 	}
 
-	const table = tableForKey(key);
-	db.table(table)
-		.put({ key, value })
-		.catch((e) => console.error(`Failed to persist ${key}`, e));
-	if (table !== "keyval") {
-		db.table("keyval")
+	if (shouldPersistToIndexedDb(key)) {
+		const table = tableForKey(key);
+		db.table(table)
 			.put({ key, value })
-			.catch((e) => console.error(`Failed to mirror ${key} to keyval`, e));
+			.catch((e) => console.error(`Failed to persist ${key}`, e));
 	}
 
-	if (typeof localStorage !== "undefined" && !LARGE_KEYS.has(key)) {
-		try {
-			localStorage.setItem(`posa_${key}`, JSON.stringify(value));
-		} catch (err) {
-			console.error("Failed to persist", key, "to localStorage", err);
+	if (typeof localStorage !== "undefined") {
+		if (shouldPersistToLocalStorage(key)) {
+			try {
+				localStorage.setItem(`posa_${key}`, JSON.stringify(value));
+			} catch (err) {
+				console.error("Failed to persist", key, "to localStorage", err);
+			}
+		} else {
+			localStorage.removeItem(`posa_${key}`);
 		}
 	}
 }
@@ -351,6 +384,9 @@ export async function clearAllCache() {
 	memory.local_stock_cache = {};
 	memory.stock_cache_ready = false;
 	memory.customer_storage = [];
+	memory.items_last_sync = null;
+	memory.customers_last_sync = null;
+	memory.payment_methods_last_sync = null;
 	memory.pos_opening_storage = null;
 	memory.opening_dialog_storage = null;
 	memory.sales_persons_storage = [];

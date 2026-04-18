@@ -48,9 +48,6 @@ export async function setSyncResourceState(state: SyncResourceState) {
 		key,
 		value: clonedState,
 	});
-	if (typeof localStorage !== "undefined") {
-		localStorage.setItem(key, JSON.stringify(clonedState));
-	}
 }
 
 export async function getSyncResourceState(
@@ -78,7 +75,4 @@ export async function listSyncResourceStates(): Promise<SyncResourceState[]> {
 export async function clearSyncResourceState(resourceId: SyncResourceId) {
 	const key = buildSyncStateStorageKey(resourceId);
 	await db.table("sync_state").delete(key);
-	if (typeof localStorage !== "undefined") {
-		localStorage.removeItem(key);
-	}
 }

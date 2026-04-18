@@ -1,4 +1,4 @@
-import { db, isOffline, memory, persist } from "./db";
+import { checkDbHealth, db, isOffline, memory, persist } from "./db";
 import {
 	claimRetryableQueueEntries,
 	clearWriteQueueEntries,
@@ -147,7 +147,22 @@ function mergeCustomerStorageRows(rows: AnyRecord[]) {
 export async function getStoredCustomer(customerName: string) {
 	try {
 		const customers = getCustomerStorage();
-		return customers.find((c) => c.name === customerName) || null;
+		const cachedCustomer = customers.find((c) => c.name === customerName);
+		if (cachedCustomer) {
+			return cachedCustomer;
+		}
+
+		await checkDbHealth();
+		if (!db.isOpen()) {
+			await db.open();
+		}
+
+		const storedCustomer = await db.table("customers").get(customerName);
+		if (storedCustomer?.name) {
+			memory.customer_storage = mergeCustomerStorageRows([storedCustomer]);
+			return storedCustomer;
+		}
+		return null;
 	} catch (error) {
 		console.error("Failed to get stored customer", error);
 		return null;
@@ -169,7 +184,6 @@ export async function setCustomerStorage(customers: AnyRecord[]) {
 
 		await db.table("customers").bulkPut(clean);
 		memory.customer_storage = mergeCustomerStorageRows(clean);
-		persist("customer_storage");
 	} catch (error) {
 		console.error("Failed to save customers to storage", error);
 	}
@@ -194,7 +208,6 @@ export async function deleteCustomerStorageByNames(names: string[]) {
 		memory.customer_storage = existingRows.filter(
 			(row) => !normalizedNames.includes(String(row?.name || "").trim()),
 		);
-		persist("customer_storage");
 	} catch (error) {
 		console.error("Failed to delete customers from storage", error);
 	}
