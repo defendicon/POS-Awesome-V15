@@ -2,6 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+	buildChunkRecoveryLocation,
 	clearChunkRecoveryState,
 	isDynamicImportFailure,
 	recoverFromChunkLoadError,
@@ -60,6 +61,22 @@ describe("chunk load recovery helpers", () => {
 		expect(
 			window.sessionStorage.getItem("posa_chunk_cache_recovery_once"),
 		).toBe("1");
+	});
+
+	it("builds chunk recovery URLs against the current POS sub-route", () => {
+		expect(
+			buildChunkRecoveryLocation(
+				{
+					pathname: "/app/posapp/payments",
+					search: "?draft=1",
+					hash: "#totals",
+				},
+				"_posa_chunk_reload",
+				55,
+			),
+		).toBe(
+			"/app/posapp/payments?draft=1&_posa_chunk_reload=55#totals",
+		);
 	});
 
 	it("swallows rejected stable-boot tasks to avoid unhandled rejections", async () => {

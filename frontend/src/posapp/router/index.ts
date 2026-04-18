@@ -3,7 +3,14 @@ import {
 	startRouteLoading,
 	stopRouteLoading,
 } from "../composables/core/useLoading";
-import { recoverFromChunkLoadError } from "../utils/chunkLoadRecovery";
+import {
+	isDynamicImportFailure,
+	recoverFromChunkLoadError,
+} from "../utils/chunkLoadRecovery";
+import { resolvePosAppRouteFullPath } from "../../loader-utils";
+import OfflineRouteUnavailable from "../components/system/OfflineRouteUnavailable.vue";
+
+const OFFLINE_ROUTE_UNAVAILABLE_NAME = "offline-route-unavailable";
 
 const routes = [
 	{ path: "/", redirect: "/pos" },
@@ -84,10 +91,46 @@ const routes = [
 		},
 	},
 	{
+		path: "/offline-route-unavailable",
+		name: OFFLINE_ROUTE_UNAVAILABLE_NAME,
+		component: OfflineRouteUnavailable,
+		meta: {
+			title: "Route Unavailable",
+			layout: "default",
+			loadingMessage: "Loading route fallback...",
+		},
+	},
+	{
 		path: "/:pathMatch(.*)*",
 		redirect: "/pos",
 	},
 ];
+
+export function resolveRouteLoadFailureAction({
+	error,
+	isOnline,
+	pendingRouteFullPath,
+}: {
+	error: unknown;
+	isOnline: boolean;
+	pendingRouteFullPath?: string | null;
+}):
+	| { type: "unhandled" }
+	| { type: "chunk-recovery" }
+	| { type: "offline-fallback"; target: string } {
+	if (!isDynamicImportFailure(error)) {
+		return { type: "unhandled" };
+	}
+
+	if (!isOnline && pendingRouteFullPath) {
+		return {
+			type: "offline-fallback",
+			target: pendingRouteFullPath,
+		};
+	}
+
+	return { type: "chunk-recovery" };
+}
 
 export function resolveRouteLoadingMessage(
 	route: { meta?: Record<string, unknown> } | null | undefined,
@@ -111,8 +154,10 @@ const createPosAppRouter = () => {
 		history,
 		routes,
 	});
+	let pendingRouteFullPath: string | null = null;
 
 	router.beforeEach((to, _from, next) => {
+		pendingRouteFullPath = to.fullPath || "/";
 		startRouteLoading({
 			message: resolveRouteLoadingMessage(to),
 		});
@@ -120,13 +165,45 @@ const createPosAppRouter = () => {
 	});
 
 	router.afterEach(() => {
+		pendingRouteFullPath = null;
 		stopRouteLoading();
 		window.scrollTo(0, 0);
 	});
 
 	router.onError((error) => {
 		stopRouteLoading();
-		void recoverFromChunkLoadError(error, "router");
+		const currentWindowRoute =
+			typeof window !== "undefined"
+				? resolvePosAppRouteFullPath(window.location)
+				: null;
+		const failureAction = resolveRouteLoadFailureAction({
+			error,
+			isOnline:
+				typeof navigator === "undefined" ? true : navigator.onLine,
+			pendingRouteFullPath: pendingRouteFullPath || currentWindowRoute,
+		});
+
+		if (failureAction.type === "offline-fallback") {
+			const target = failureAction.target;
+			console.warn(
+				"Route load failed offline; showing unavailable fallback",
+				{
+					target,
+					error,
+				},
+			);
+			void router.replace({
+				name: OFFLINE_ROUTE_UNAVAILABLE_NAME,
+				query: {
+					target,
+				},
+			});
+			return;
+		}
+
+		if (failureAction.type === "chunk-recovery") {
+			void recoverFromChunkLoadError(error, "router");
+		}
 	});
 
 	return { router, history };

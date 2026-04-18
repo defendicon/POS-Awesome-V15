@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import {
 	createPosAppRouter,
+	resolveRouteLoadFailureAction,
 	resolveRouteLoadingMessage,
 } from "../src/posapp/router";
 
@@ -34,5 +35,34 @@ describe("route loading messaging", () => {
 		const { router } = createPosAppRouter();
 
 		expect(router).toBeTruthy();
+	});
+
+	it("routes offline chunk failures to an explicit unavailable state", () => {
+		expect(
+			resolveRouteLoadFailureAction({
+				error: new TypeError(
+					"Failed to fetch dynamically imported module: /assets/payments.js",
+				),
+				isOnline: false,
+				pendingRouteFullPath: "/payments?draft=1",
+			}),
+		).toEqual({
+			type: "offline-fallback",
+			target: "/payments?draft=1",
+		});
+	});
+
+	it("keeps online chunk failures on the reload recovery path", () => {
+		expect(
+			resolveRouteLoadFailureAction({
+				error: new TypeError(
+					"Failed to fetch dynamically imported module: /assets/payments.js",
+				),
+				isOnline: true,
+				pendingRouteFullPath: "/payments",
+			}),
+		).toEqual({
+			type: "chunk-recovery",
+		});
 	});
 });
