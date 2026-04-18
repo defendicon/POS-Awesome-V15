@@ -6,6 +6,7 @@ from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.doctype.bank_account.bank_account import get_party_bank_account
+from posawesome.posawesome.api.idempotency import doctype_supports_client_request_id
 from posawesome.posawesome.api.payment_processing.utils import (
     get_bank_cash_account,
     set_paid_amount_and_received_amount
@@ -80,7 +81,8 @@ def create_payment_entry(
     pe.letter_head = letter_head
     pe.reference_date = reference_date
     pe.reference_no = reference_no
-    pe.posa_client_request_id = client_request_id
+    if client_request_id and doctype_supports_client_request_id("Payment Entry"):
+        pe.posa_client_request_id = client_request_id
 
     # Set bank account if available
     if pe.party_type in ["Customer", "Supplier"]:

@@ -33,6 +33,8 @@ from posawesome.posawesome.api.idempotency import (
     extract_invoice_client_request_id,
     find_invoice_by_client_request_id,
     set_invoice_client_request_id,
+    strip_invoice_client_request_id,
+    doctype_supports_client_request_id,
 )
 import json
 from frappe.utils import money_in_words
@@ -470,6 +472,8 @@ def update_invoice(data):
     currency_cache = {}
     data = json.loads(data)
     client_request_id = extract_invoice_client_request_id(data)
+    if not doctype_supports_client_request_id(data.get("doctype") or "Sales Invoice"):
+        strip_invoice_client_request_id(data)
     _sanitize_delivery_dates(data)
     _apply_manual_posting_controls(data)
     _strip_client_freebies_from_payload(data)
@@ -713,6 +717,9 @@ def submit_invoice(invoice, data, submit_in_background=False):
         "POS Profile", pos_profile, "create_pos_invoice_instead_of_sales_invoice"
     ):
         doctype = "POS Invoice"
+
+    if not doctype_supports_client_request_id(doctype):
+        strip_invoice_client_request_id(invoice)
 
     existing_by_request = find_invoice_by_client_request_id(client_request_id, preferred_doctype=doctype)
     if existing_by_request:

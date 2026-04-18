@@ -426,6 +426,58 @@ class TestPosPaymentProcessing(unittest.TestCase):
             "pay-fixed-002",
         )
 
+    @patch("posawesome.posawesome.api.payment_processing.processor.create_payment_entry")
+    @patch("posawesome.posawesome.api.payment_processing.processor.frappe")
+    def test_process_pos_payment_skips_replay_lookup_when_custom_field_is_missing(
+        self,
+        mock_frappe,
+        mock_create_payment_entry,
+    ):
+        fake_payment_entry = FakePaymentEntry(paid_amount=100)
+        mock_create_payment_entry.return_value = fake_payment_entry
+        mock_frappe._dict.side_effect = lambda value: AttrDict(value)
+        mock_frappe.log_error = Mock()
+        mock_frappe.msgprint = Mock()
+        mock_frappe.db = types.SimpleNamespace(
+            has_column=lambda doctype, fieldname: False,
+            sql=lambda *args, **kwargs: [],
+            get_value=lambda *args, **kwargs: None,
+        )
+
+        self.processor.process_pos_payment(
+            json.dumps(
+                {
+                    "client_request_id": "pay-fixed-003",
+                    "customer": "Customer 727",
+                    "company": "Test Company",
+                    "currency": "USD",
+                    "pos_profile_name": "Main POS",
+                    "pos_opening_shift_name": "POS-OPEN-0001",
+                    "selected_invoices": [],
+                    "selected_payments": [],
+                    "selected_mpesa_payments": [],
+                    "payment_methods": [{"mode_of_payment": "Cash", "amount": 100}],
+                    "total_selected_invoices": 0,
+                    "total_selected_payments": 0,
+                    "total_selected_mpesa_payments": 0,
+                    "total_payment_methods": 100,
+                    "exchange_rate": None,
+                    "pos_profile": {
+                        "posa_use_pos_awesome_payments": 1,
+                        "posa_allow_make_new_payments": 1,
+                        "posa_allow_reconcile_payments": 0,
+                        "posa_allow_mpesa_reconcile_payments": 0,
+                        "cost_center": "Main - TC",
+                    },
+                }
+            )
+        )
+
+        self.assertEqual(
+            mock_create_payment_entry.call_args.kwargs["client_request_id"],
+            "pay-fixed-003",
+        )
+
     @patch(
         "posawesome.posawesome.api.payment_processing.data.get_advance_payment_entries_for_regional"
     )
