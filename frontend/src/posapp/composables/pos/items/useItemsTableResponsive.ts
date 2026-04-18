@@ -12,6 +12,104 @@ export interface TableHeader {
 	[key: string]: any;
 }
 
+export const DATA_TABLE_EXPAND_COLUMN: TableHeader = {
+	title: "",
+	key: "data-table-expand",
+	sortable: false,
+	align: "center",
+	width: 48,
+	minWidth: 48,
+};
+
+export function getResponsiveVisibleHeaders(
+	headers: TableHeader[],
+	width: number,
+) {
+	return headers
+		.filter((header) => {
+			if (
+				header.required ||
+				header.key === "item_name" ||
+				header.key === "qty" ||
+				header.key === "actions" ||
+				header.key === "amount"
+			) {
+				return true;
+			}
+
+			if (width < 450) {
+				return ["item_name", "qty", "amount", "actions"].includes(
+					header.key,
+				);
+			} else if (width < 650) {
+				return ![
+					"discount_percentage",
+					"discount_amount",
+					"price_list_rate",
+					"uom",
+					"posa_is_offer",
+				].includes(header.key);
+			}
+			return true;
+		})
+		.map((header) => ({
+			...header,
+			width: calculateColumnWidth(header, width),
+			minWidth: calculateMinColumnWidth(header),
+		}));
+}
+
+export function buildFinalVisibleColumns(
+	headers: TableHeader[],
+	width: number,
+	options: { showExpand?: boolean } = {},
+) {
+	const visibleHeaders = getResponsiveVisibleHeaders(headers, width);
+
+	if (options.showExpand === false) {
+		return visibleHeaders;
+	}
+
+	return [...visibleHeaders, DATA_TABLE_EXPAND_COLUMN];
+}
+
+const calculateColumnWidth = (header: TableHeader, width: number) => {
+	const baseWidths: Record<string, { min: number; max: number; ratio: number }> = {
+		item_name: { min: 200, max: 250, ratio: 0.3 },
+		qty: { min: 140, max: 160, ratio: 0.12 },
+		rate: { min: 100, max: 130, ratio: 0.12 },
+		amount: { min: 100, max: 130, ratio: 0.12 },
+		discount_percentage: { min: 90, max: 120, ratio: 0.1 },
+		discount_amount: { min: 90, max: 120, ratio: 0.11 },
+		price_list_rate: { min: 120, max: 140, ratio: 0.13 },
+		actions: { min: 80, max: 100, ratio: 0.08 },
+		posa_is_offer: { min: 70, max: 90, ratio: 0.06 },
+	};
+
+	const config = baseWidths[header.key] || {
+		min: 80,
+		max: 150,
+		ratio: 0.1,
+	};
+	const calculatedWidth = width * config.ratio;
+	return Math.max(config.min, Math.min(config.max, calculatedWidth));
+};
+
+const calculateMinColumnWidth = (header: TableHeader) => {
+	const minWidths: Record<string, number> = {
+		item_name: 200,
+		qty: 140,
+		rate: 100,
+		amount: 100,
+		discount_percentage: 90,
+		discount_amount: 90,
+		price_list_rate: 120,
+		actions: 80,
+		posa_is_offer: 70,
+	};
+	return minWidths[header.key] || 80;
+};
+
 export function useItemsTableResponsive(
 	containerRef: Ref<HTMLElement | null>,
 	headers: Ref<TableHeader[]>,
@@ -29,82 +127,11 @@ export function useItemsTableResponsive(
 		return "xl";
 	};
 
-	const calculateColumnWidth = (header: TableHeader, width: number) => {
-		const baseWidths: Record<
-			string,
-			{ min: number; max: number; ratio: number }
-		> = {
-			item_name: { min: 200, max: 250, ratio: 0.3 },
-			qty: { min: 140, max: 160, ratio: 0.12 },
-			rate: { min: 100, max: 130, ratio: 0.12 },
-			amount: { min: 100, max: 130, ratio: 0.12 },
-			discount_percentage: { min: 90, max: 120, ratio: 0.1 },
-			discount_amount: { min: 90, max: 120, ratio: 0.11 },
-			price_list_rate: { min: 120, max: 140, ratio: 0.13 },
-			actions: { min: 80, max: 100, ratio: 0.08 },
-			posa_is_offer: { min: 70, max: 90, ratio: 0.06 },
-		};
-
-		const config = baseWidths[header.key] || {
-			min: 80,
-			max: 150,
-			ratio: 0.1,
-		};
-		const calculatedWidth = width * config.ratio;
-		return Math.max(config.min, Math.min(config.max, calculatedWidth));
-	};
-
-	const calculateMinColumnWidth = (header: TableHeader) => {
-		const minWidths: Record<string, number> = {
-			item_name: 200,
-			qty: 140,
-			rate: 100,
-			amount: 100,
-			discount_percentage: 90,
-			discount_amount: 90,
-			price_list_rate: 120,
-			actions: 80,
-			posa_is_offer: 70,
-		};
-		return minWidths[header.key] || 80;
-	};
-
 	const responsiveHeaders = computed(() => {
 		const width = containerWidth.value;
 		if (!headers.value || headers.value.length === 0) return [];
 
-		return headers.value
-			.filter((header) => {
-				if (
-					header.required ||
-					header.key === "item_name" ||
-					header.key === "qty" ||
-					header.key === "actions" ||
-					header.key === "amount"
-				) {
-					return true;
-				}
-
-				if (width < 450) {
-					return ["item_name", "qty", "amount", "actions"].includes(
-						header.key,
-					);
-				} else if (width < 650) {
-					return ![
-						"discount_percentage",
-						"discount_amount",
-						"price_list_rate",
-						"uom",
-						"posa_is_offer",
-					].includes(header.key);
-				}
-				return true;
-			})
-			.map((header) => ({
-				...header,
-				width: calculateColumnWidth(header, width),
-				minWidth: calculateMinColumnWidth(header),
-			}));
+		return getResponsiveVisibleHeaders(headers.value, width);
 	});
 
 	const isColumnVisible = (key: string) => {
