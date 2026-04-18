@@ -1,5 +1,6 @@
 import { ref, type Ref } from "vue";
 import { isOffline, saveOfflinePayment } from "../../../../offline/index";
+import { ensurePaymentClientRequestId } from "../../../../offline/idempotency";
 
 declare const frappe: any;
 declare const __: (_text: string, _args?: any[]) => string;
@@ -166,6 +167,7 @@ export function usePosPaySubmission({
 					total_selected_mpesa_payments.value,
 				),
 			};
+			ensurePaymentClientRequestId(payload);
 
 			if (isOffline()) {
 				try {

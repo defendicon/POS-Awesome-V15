@@ -8111,5 +8111,37 @@
 		"default": "0",
 		"insert_after": "posa_pos_pin",
 		"name": "User-posa_is_pos_supervisor"
+	},
+	{
+		"doctype": "Custom Field",
+		"dt": "Sales Invoice",
+		"fieldname": "posa_client_request_id",
+		"fieldtype": "Data",
+		"label": "POSA Client Request ID",
+		"read_only": 1,
+		"unique": 1,
+		"insert_after": "posa_is_printed",
+		"name": "Sales Invoice-posa_client_request_id"
+	},
+	{
+		"doctype": "Custom Field",
+		"dt": "POS Invoice",
+		"fieldname": "posa_client_request_id",
+		"fieldtype": "Data",
+		"label": "POSA Client Request ID",
+		"read_only": 1,
+		"unique": 1,
+		"insert_after": "posa_is_printed",
+		"name": "POS Invoice-posa_client_request_id"
+	},
+	{
+		"doctype": "Custom Field",
+		"dt": "Payment Entry",
+		"fieldname": "posa_client_request_id",
+		"fieldtype": "Data",
+		"label": "POSA Client Request ID",
+		"read_only": 1,
+		"insert_after": "reference_no",
+		"name": "Payment Entry-posa_client_request_id"
 	}
 ]

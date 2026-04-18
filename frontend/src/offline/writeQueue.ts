@@ -1,4 +1,8 @@
 import { checkDbHealth, db, initPromise, memory } from "./db";
+import {
+	ensureOfflineInvoiceRequest,
+	ensurePaymentClientRequestId,
+} from "./idempotency";
 
 type AnyRecord = Record<string, any>;
 
@@ -132,11 +136,15 @@ function toErrorMessage(error: unknown) {
 function normalizePaymentPayload(payload: AnyRecord) {
 	const nextPayload = cloneSerializable(payload);
 	const paymentPayload = nextPayload?.args?.payload;
-	if (paymentPayload && !paymentPayload.client_request_id) {
-		paymentPayload.client_request_id = `pay-${Date.now()}-${Math.random()
-			.toString(36)
-			.slice(2, 10)}`;
+	if (paymentPayload) {
+		ensurePaymentClientRequestId(paymentPayload);
 	}
+	return nextPayload;
+}
+
+function normalizeInvoicePayload(payload: AnyRecord) {
+	const nextPayload = cloneSerializable(payload);
+	ensureOfflineInvoiceRequest(nextPayload);
 	return nextPayload;
 }
 
@@ -159,6 +167,10 @@ function normalizePayload(
 		return normalizePaymentPayload(payload);
 	}
 
+	if (entityType === "invoice") {
+		return normalizeInvoicePayload(payload);
+	}
+
 	if (entityType === "cash_movement") {
 		return normalizeCashMovementPayload(payload);
 	}
@@ -171,6 +183,11 @@ function deriveIdempotencyKey(
 	payload: AnyRecord,
 ): string {
 	if (entityType === "invoice") {
+		const requestId = String(payload?.invoice?.posa_client_request_id || "").trim();
+		if (requestId) {
+			return `invoice:${requestId}`;
+		}
+
 		const invoiceName = String(payload?.invoice?.name || "").trim();
 		if (invoiceName) {
 			return `invoice:${invoiceName}`;

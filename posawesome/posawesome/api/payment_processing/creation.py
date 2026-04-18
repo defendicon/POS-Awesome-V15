@@ -26,6 +26,7 @@ def create_payment_entry(
     posting_date=None,
     cost_center=None,
     submit=0,
+    client_request_id=None,
 ):
     date = nowdate() if not posting_date else posting_date
     party = party or customer
@@ -79,6 +80,7 @@ def create_payment_entry(
     pe.letter_head = letter_head
     pe.reference_date = reference_date
     pe.reference_no = reference_no
+    pe.posa_client_request_id = client_request_id
 
     # Set bank account if available
     if pe.party_type in ["Customer", "Supplier"]:

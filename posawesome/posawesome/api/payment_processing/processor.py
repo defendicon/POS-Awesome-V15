@@ -7,11 +7,27 @@ from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation impo
 from erpnext.accounts.utils import reconcile_against_document
 from posawesome.posawesome.api.m_pesa import submit_mpesa_payment
 from posawesome.posawesome.api.payment_processing.creation import create_payment_entry
+from posawesome.posawesome.api.idempotency import (
+    find_payment_entries_by_client_request_id,
+    normalize_client_request_id,
+)
 
 @frappe.whitelist()
 def process_pos_payment(payload):
     data = json.loads(payload)
     data = frappe._dict(data)
+    client_request_id = normalize_client_request_id(data.get("client_request_id"))
+
+    existing_entries = find_payment_entries_by_client_request_id(client_request_id)
+    if existing_entries:
+        return {
+            "new_payments_entry": existing_entries,
+            "all_payments_entry": existing_entries,
+            "reconciled_payments": [],
+            "errors": [],
+            "replayed": True,
+        }
+
     if not data.pos_profile.get("posa_use_pos_awesome_payments"):
         frappe.throw(_("POS Awesome Payments is not enabled for this POS Profile"))
 
@@ -310,6 +326,7 @@ def process_pos_payment(payload):
                     reference_date=data.get("reference_date") or posting_date,
                     cost_center=data.pos_profile.get("cost_center"),
                     submit=0,
+                    client_request_id=client_request_id,
                 )
 
                 remaining_amount = amount

@@ -1056,5 +1056,63 @@ class TestManualPostingDatePreservation(unittest.TestCase):
         self.assertEqual(result["status"], 1)
 
 
+class TestInvoiceIdempotency(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.frappe, cls.enqueue_calls = _install_framework_stubs()
+        _install_dependency_stubs()
+        _install_package_stubs()
+        cls.creation = _load_module()
+
+    def setUp(self):
+        self.enqueue_calls.clear()
+        self.frappe._publish_realtime_calls.clear()
+
+    def test_submit_invoice_returns_existing_submitted_doc_for_same_client_request_id(self):
+        existing_doc = FakeDoc(
+            doctype="Sales Invoice",
+            name="ACC-SINV-IDEMP-0001",
+            docstatus=1,
+            pos_profile="Main POS",
+            company="Test Company",
+        )
+
+        def fake_get_value(doctype, filters=None, fieldname=None, **kwargs):
+            if (
+                doctype == "Sales Invoice"
+                and isinstance(filters, dict)
+                and filters.get("posa_client_request_id") == "inv-fixed-001"
+            ):
+                return "ACC-SINV-IDEMP-0001"
+            return 0
+
+        self.creation.frappe.db.get_value = fake_get_value
+        self.creation.frappe.db.exists = lambda *args, **kwargs: False
+        self.creation.frappe.get_doc = lambda *args: existing_doc
+        self.creation.update_invoice = lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("duplicate replay should not build a new invoice")
+        )
+
+        result = self.creation.submit_invoice(
+            json.dumps(
+                {
+                    "doctype": "Sales Invoice",
+                    "pos_profile": "Main POS",
+                    "company": "Test Company",
+                    "currency": "USD",
+                    "items": [],
+                    "payments": [],
+                    "posa_client_request_id": "inv-fixed-001",
+                }
+            ),
+            json.dumps({"idempotency_key": "inv-fixed-001"}),
+            submit_in_background=0,
+        )
+
+        self.assertEqual(result["name"], "ACC-SINV-IDEMP-0001")
+        self.assertEqual(result["status"], 1)
+        self.assertTrue(result["replayed"])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,6 +1,7 @@
 import { isOffline, memory, persist } from "./db";
 import { syncOfflineCustomers } from "./customers";
 import { reduceCacheUsage } from "./cache";
+import { ensureOfflineInvoiceRequest } from "./idempotency";
 import { updateLocalStock } from "./stock";
 import {
 	claimRetryableQueueEntries,
@@ -96,6 +97,8 @@ export function validateStockForOfflineInvoice(items: AnyRecord[]) {
 }
 
 function prepareOfflineInvoiceEntry(entry: AnyRecord) {
+	ensureOfflineInvoiceRequest(entry);
+
 	if (
 		!entry.invoice ||
 		!Array.isArray(entry.invoice.items) ||
