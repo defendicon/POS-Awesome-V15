@@ -1,7 +1,7 @@
 import { reactive } from "vue";
 import {
-	start as startLoadingScope,
-	stop as stopLoadingScope,
+	startBootstrapLoading,
+	stopBootstrapLoading,
 	setScopeMeta,
 } from "../composables/core/useLoading";
 
@@ -59,7 +59,7 @@ export function initLoadingSources(list: string[]): void {
 
 	loadingState.progress = 0;
 	loadingState.active = true;
-	startLoadingScope("bootstrap");
+	startBootstrapLoading();
 	setScopeMeta("bootstrap", {
 		kind: "bootstrap",
 		blocking: true,
@@ -171,7 +171,7 @@ function completeLoading(): void {
 		setTimeout(() => {
 			loadingState.active = false;
 			loadingState.message = __("Loading app data...");
-			stopLoadingScope("bootstrap");
+			stopBootstrapLoading();
 			// Reset for next use
 			sourceCount = 0;
 			completedSum = 0;
@@ -198,7 +198,7 @@ export function resetLoadingState(): void {
 	sourceCount = 0;
 	completedSum = 0;
 	isCompleting = false;
-	stopLoadingScope("bootstrap");
+	stopBootstrapLoading();
 }
 
 /**

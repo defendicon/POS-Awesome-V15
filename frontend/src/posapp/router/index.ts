@@ -1,5 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { start, stop } from "../composables/core/useLoading";
+import {
+	startRouteLoading,
+	stopRouteLoading,
+} from "../composables/core/useLoading";
 import { recoverFromChunkLoadError } from "../utils/chunkLoadRecovery";
 
 const routes = [
@@ -7,60 +10,100 @@ const routes = [
 	{
 		path: "/pos",
 		component: () => import("../components/pos/shell/Pos.vue"),
-		meta: { title: "POS", layout: "default" },
+		meta: { title: "POS", layout: "default", loadingMessage: "Loading POS..." },
 	},
 	{
 		path: "/orders",
 		component: () =>
 			import("../components/pos/purchase/PurchaseOrders.vue"),
-		meta: { title: "Orders", layout: "default" },
+		meta: { title: "Orders", layout: "default", loadingMessage: "Loading orders..." },
 	},
 	{
 		path: "/payments",
 		component: () => import("../components/pos/shell/PayView.vue"),
-		meta: { title: "Payments", layout: "default" },
+		meta: { title: "Payments", layout: "default", loadingMessage: "Loading payments..." },
 	},
 	{
 		path: "/gift-cards",
 		component: () => import("../components/pos/wallet/GiftCardsView.vue"),
-		meta: { title: "Gift Cards", layout: "default" },
+		meta: {
+			title: "Gift Cards",
+			layout: "default",
+			loadingMessage: "Loading gift cards...",
+		},
 	},
 	{
 		path: "/dashboard",
 		component: () => import("@/posapp/components/reports/Reports.vue"),
-		meta: { title: "Awesome Dashboard", layout: "default" },
+		meta: {
+			title: "Awesome Dashboard",
+			layout: "default",
+			loadingMessage: "Loading dashboard...",
+		},
 	},
 	{
 		path: "/reports",
 		component: () => import("@/posapp/components/reports/Reports.vue"),
-		meta: { title: "Reports", layout: "default" },
+		meta: { title: "Reports", layout: "default", loadingMessage: "Loading reports..." },
 	},
 	{
 		path: "/barcode",
 		component: () => import("../components/pos/shell/BarcodePrinting.vue"),
-		meta: { title: "Barcode Printing", layout: "default" },
+		meta: {
+			title: "Barcode Printing",
+			layout: "default",
+			loadingMessage: "Loading barcode printing...",
+		},
 	},
 	{
 		path: "/cash-movement",
 		component: () => import("../components/pos/cash/CashMovementView.vue"),
-		meta: { title: "Cash Movement", layout: "default" },
+		meta: {
+			title: "Cash Movement",
+			layout: "default",
+			loadingMessage: "Loading cash movement...",
+		},
 	},
 	{
 		path: "/closing",
 		component: () => import("../components/pos/shell/ClosingDialog.vue"),
-		meta: { title: "Close Shift", layout: "default" },
+		meta: {
+			title: "Close Shift",
+			layout: "default",
+			loadingMessage: "Loading close shift...",
+		},
 	},
 	{
 		path: "/customer-display",
 		component: () =>
 			import("../components/customer_display/CustomerDisplay.vue"),
-		meta: { title: "Customer Display", layout: "display" },
+		meta: {
+			title: "Customer Display",
+			layout: "display",
+			loadingMessage: "Loading customer display...",
+		},
 	},
 	{
 		path: "/:pathMatch(.*)*",
 		redirect: "/pos",
 	},
 ];
+
+export function resolveRouteLoadingMessage(
+	route: { meta?: Record<string, unknown> } | null | undefined,
+) {
+	const explicitMessage = route?.meta?.loadingMessage;
+	if (typeof explicitMessage === "string" && explicitMessage.trim()) {
+		return explicitMessage;
+	}
+
+	const title = route?.meta?.title;
+	if (typeof title === "string" && title.trim()) {
+		return `Loading ${title}...`;
+	}
+
+	return "Loading view...";
+}
 
 const createPosAppRouter = () => {
 	const history = createWebHistory("/app/posapp");
@@ -69,18 +112,20 @@ const createPosAppRouter = () => {
 		routes,
 	});
 
-	router.beforeEach((_to, _from, next) => {
-		start("route");
+	router.beforeEach((to, _from, next) => {
+		startRouteLoading({
+			message: resolveRouteLoadingMessage(to),
+		});
 		next();
 	});
 
 	router.afterEach(() => {
-		stop("route");
+		stopRouteLoading();
 		window.scrollTo(0, 0);
 	});
 
 	router.onError((error) => {
-		stop("route");
+		stopRouteLoading();
 		void recoverFromChunkLoadError(error, "router");
 	});
 
