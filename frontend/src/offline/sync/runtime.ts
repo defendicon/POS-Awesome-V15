@@ -48,6 +48,7 @@ export function createOfflineSyncRuntime(options: OfflineSyncRuntimeOptions) {
 	let bootPromise: Promise<boolean> | null = null;
 	let onlineResumePromise: Promise<boolean> | null = null;
 	let timerPromise: Promise<boolean> | null = null;
+	let userActionPromise: Promise<boolean> | null = null;
 	let timerHandle: number | ReturnType<typeof setTimeout> | null = null;
 	let removeVisibilityListener: (() => void) | null = null;
 	const scheduleFrame = options.scheduleFrame || defaultScheduleFrame;
@@ -185,6 +186,39 @@ export function createOfflineSyncRuntime(options: OfflineSyncRuntimeOptions) {
 		return timerPromise;
 	}
 
+	function triggerUserActionSync() {
+		if (userActionPromise) {
+			return userActionPromise;
+		}
+		if (!options.canSync()) {
+			return Promise.resolve(false);
+		}
+
+		userActionPromise = (async () => {
+			try {
+				await options.runTrigger("user_action");
+				return true;
+			} finally {
+				userActionPromise = null;
+			}
+		})();
+
+		return userActionPromise;
+	}
+
+	async function triggerOperatorRefreshSync(options: {
+		includeBootSync?: boolean;
+	} = {}) {
+		const { includeBootSync = false } = options;
+		let didRun = false;
+
+		if (includeBootSync) {
+			didRun = (await scheduleBootWarmSync()) || didRun;
+		}
+
+		return (await triggerUserActionSync()) || didRun;
+	}
+
 	function startTimerSync() {
 		if (timerHandle !== null) {
 			return timerHandle;
@@ -213,6 +247,8 @@ export function createOfflineSyncRuntime(options: OfflineSyncRuntimeOptions) {
 		scheduleBootWarmSync,
 		triggerOnlineResumeSync,
 		triggerTimerSync,
+		triggerUserActionSync,
+		triggerOperatorRefreshSync,
 		startTimerSync,
 		stopTimerSync,
 	};

@@ -452,6 +452,15 @@ function triggerOnlineResumeSync() {
 	});
 }
 
+function triggerOperatorRefreshSync(options = {}) {
+	return offlineSyncRuntime.triggerOperatorRefreshSync(options).catch((error) => {
+		console.error("Failed to run operator offline refresh", error, syncCoordinator.getLastRunSummary());
+		return false;
+	}).finally(() => {
+		evaluateBootstrapSnapshot({ allowPrompt: false });
+	});
+}
+
 // Computed
 const loadingProgress = computed(() => loadingState.progress);
 const loadingActive = computed(() => loadingState.active);
@@ -962,7 +971,7 @@ const handleRefreshOfflineData = async () => {
 	});
 	if (!getIsManualOffline() && navigator.onLine) {
 		await handleRetryStatus();
-		await triggerOnlineResumeSync();
+		await triggerOperatorRefreshSync();
 		evaluateBootstrapSnapshot({ allowPrompt: false });
 	}
 	toastStore.show({
@@ -980,7 +989,7 @@ const handleRebuildOfflineData = async () => {
 		allowPrompt: true,
 	});
 	if (canRunOfflineSync()) {
-		await scheduleBootCriticalWarmSync();
+		await triggerOperatorRefreshSync({ includeBootSync: true });
 		evaluateBootstrapSnapshot({ allowPrompt: false });
 	}
 	toastStore.show({

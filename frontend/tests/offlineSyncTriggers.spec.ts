@@ -74,6 +74,57 @@ describe("offline sync runtime triggers", () => {
 		await Promise.all([first, second]);
 	});
 
+	it("dedupes user action re-entry while an operator refresh is already in flight", async () => {
+		let resolveRun: (() => void) | null = null;
+		const runTrigger = vi.fn(
+			() =>
+				new Promise<void>((resolve) => {
+					resolveRun = resolve;
+				}),
+		);
+		const runtime = createOfflineSyncRuntime({
+			canSync: () => true,
+			runTrigger,
+		});
+
+		const first = runtime.triggerUserActionSync();
+		const second = runtime.triggerUserActionSync();
+
+		expect(first).toBe(second);
+		expect(runTrigger).toHaveBeenCalledTimes(1);
+		expect(runTrigger).toHaveBeenCalledWith("user_action");
+
+		resolveRun?.();
+		await Promise.all([first, second]);
+	});
+
+	it("runs boot before user_action during an operator rebuild refresh", async () => {
+		let scheduledFrame: (() => void | Promise<void>) | null = null;
+		const runTrigger = vi.fn(async () => undefined);
+		const runtime = createOfflineSyncRuntime({
+			canSync: () => true,
+			runTrigger,
+			scheduleFrame: (callback) => {
+				scheduledFrame = callback;
+				return 1;
+			},
+		});
+
+		const pending = runtime.triggerOperatorRefreshSync({
+			includeBootSync: true,
+		});
+
+		expect(runTrigger).not.toHaveBeenCalled();
+
+		await scheduledFrame?.();
+		await pending;
+
+		expect(runTrigger.mock.calls.map(([trigger]) => trigger)).toEqual([
+			"boot",
+			"user_action",
+		]);
+	});
+
 	it("starts adaptive timer sync with the foreground cadence and stops it cleanly", async () => {
 		let scheduledCallback: (() => void | Promise<void>) | null = null;
 		let scheduledDelay: number | null = null;
