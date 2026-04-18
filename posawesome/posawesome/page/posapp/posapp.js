@@ -140,6 +140,7 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 
 			const script = document.createElement("script");
 			script.id = LOADER_SCRIPT_ID;
+			script.type = "module";
 			script.async = true;
 			script.src = buildVersionedAssetUrl(LOADER_URL, version);
 			script.setAttribute("data-build-version", requestedVersion);
