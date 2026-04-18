@@ -333,6 +333,7 @@ describe("bootstrap snapshot", () => {
 				pos_profile: {
 					name: "POS-1",
 					modified: "2026-04-08 10:00:00",
+					payments: [{ mode_of_payment: "Cash" }],
 				},
 				pos_opening_shift: {
 					name: "SHIFT-1",
@@ -347,6 +348,7 @@ describe("bootstrap snapshot", () => {
 		expect(snapshot.opening_shift_user).toBe("test@example.com");
 		expect(snapshot.prerequisites.pos_profile).toBe("ready");
 		expect(snapshot.prerequisites.pos_opening_shift).toBe("ready");
+		expect(snapshot.prerequisites.payment_methods).toBe("ready");
 	});
 
 	it("stamps the current build version into register snapshot updates", () => {

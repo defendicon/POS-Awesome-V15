@@ -185,6 +185,7 @@ type RegisterData = {
 	pos_profile?: {
 		name?: string | null;
 		modified?: string | null;
+		payments?: unknown[] | null;
 	};
 	pos_opening_shift?: {
 		name?: string | null;
@@ -977,6 +978,13 @@ export function createBootstrapSnapshotFromRegisterData(
 				? "ready"
 				: "missing",
 	};
+	if (hasOwnKey(registerData?.pos_profile, "payments")) {
+		nextPrerequisites.payment_methods = hasNonEmptyArray(
+			registerData?.pos_profile?.payments,
+		)
+			? "ready"
+			: "missing";
+	}
 
 	return buildBootstrapSnapshot({
 		buildVersion:

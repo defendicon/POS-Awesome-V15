@@ -57,6 +57,7 @@
 
 import { refreshBootstrapSnapshotFromCaches } from "./bootstrapSnapshot";
 import { memory, persist, db, checkDbHealth } from "./db";
+import { emitBootstrapSnapshotUpdated } from "../posapp/utils/bootstrapRuntimeEvents";
 
 const normalizeScope = (scope: unknown): string => String(scope || "");
 const hasScope = (scope: unknown): boolean => normalizeScope(scope).length > 0;
@@ -903,6 +904,7 @@ export function setBootstrapSnapshot(snapshot) {
 			? JSON.parse(JSON.stringify(snapshot))
 			: null;
 		persist("bootstrap_snapshot");
+		emitBootstrapSnapshotUpdated(memory.bootstrap_snapshot);
 	} catch (e) {
 		console.error("Failed to set bootstrap snapshot", e);
 	}
