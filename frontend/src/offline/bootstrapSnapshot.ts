@@ -85,12 +85,56 @@ export type BootstrapValidationMode =
 	| "confirmation_required"
 	| "invalid";
 
+export type BootstrapCapabilityId =
+	| "sell_offline"
+	| "pricing_offline"
+	| "print_offline"
+	| "customer_display_offline"
+	| "offers_offline"
+	| "address_lookup_offline"
+	| "delivery_charges_offline"
+	| "stock_confidence_offline";
+
+export type BootstrapCapabilityStatus =
+	| "ready"
+	| "degraded"
+	| "unavailable"
+	| "override_required"
+	| "blocked";
+
+export type BootstrapCapabilitySeverity = "info" | "warning" | "error";
+
+export type BootstrapOfflinePolicyMode =
+	| "allow_with_warning"
+	| "require_manager_override"
+	| "block_if_unverified";
+
+export type BootstrapOfflinePolicies = {
+	pricingVerification: BootstrapOfflinePolicyMode;
+	stockConfidence: BootstrapOfflinePolicyMode;
+};
+
+export type BootstrapCapabilitySummary = {
+	id: BootstrapCapabilityId;
+	label: string;
+	status: BootstrapCapabilityStatus;
+	severity: BootstrapCapabilitySeverity;
+	message: string;
+	action: string;
+	warningCodes: string[];
+	prerequisites: string[];
+	policy: BootstrapOfflinePolicyMode | null;
+};
+
 export type BootstrapCapabilities = {
 	canSellOffline: boolean;
 	canApplyPricingOffline: boolean;
 	canPrintOffline: boolean;
 	canUseOffersOffline: boolean;
 	canUseCustomerDisplayOffline: boolean;
+	canLookupAddressesOffline: boolean;
+	canCalculateDeliveryChargesOffline: boolean;
+	canTrustStockOffline: boolean;
 };
 
 export type BootstrapValidationInput = {
@@ -98,6 +142,7 @@ export type BootstrapValidationInput = {
 	profileName?: string | null;
 	profileModified?: string | null;
 	sessionUser?: string | null;
+	policies?: Partial<BootstrapOfflinePolicies>;
 };
 
 export type BootstrapSnapshotRefreshInput = {
@@ -115,6 +160,15 @@ export type BootstrapValidationResult = {
 	reasons: string[];
 	missingPrerequisites: string[];
 	capabilities: BootstrapCapabilities;
+	capabilitySummaries: BootstrapCapabilitySummary[];
+};
+
+export type BootstrapPrimaryWarning = {
+	active: boolean;
+	title: string;
+	messages: string[];
+	severity: BootstrapCapabilitySeverity;
+	capabilityId: BootstrapCapabilityId | "session_mismatch" | "snapshot";
 };
 
 export type BootstrapRuntimeDecision = {
@@ -123,6 +177,8 @@ export type BootstrapRuntimeDecision = {
 	requiresConfirmation: boolean;
 	warningCodes: string[];
 	capabilities: BootstrapCapabilities;
+	capabilitySummaries: BootstrapCapabilitySummary[];
+	primaryWarning: BootstrapPrimaryWarning;
 };
 
 type RegisterData = {
@@ -160,6 +216,25 @@ const PREREQUISITES_FOR_CUSTOMER_DISPLAY = [
 	"pos_opening_shift",
 	"items_cache_ready",
 ];
+const PREREQUISITES_FOR_ADDRESS_LOOKUP = ["customer_addresses_cache"];
+const PREREQUISITES_FOR_DELIVERY_CHARGES = ["delivery_charges_cache"];
+const PREREQUISITES_FOR_STOCK_CONFIDENCE = ["stock_cache_ready"];
+
+const DEFAULT_BOOTSTRAP_POLICIES: BootstrapOfflinePolicies = {
+	pricingVerification: "allow_with_warning",
+	stockConfidence: "require_manager_override",
+};
+
+const CAPABILITY_LABELS: Record<BootstrapCapabilityId, string> = {
+	sell_offline: "Sell Offline",
+	pricing_offline: "Pricing Offline",
+	print_offline: "Print Offline",
+	customer_display_offline: "Customer Display Offline",
+	offers_offline: "Offers Offline",
+	address_lookup_offline: "Address Lookup Offline",
+	delivery_charges_offline: "Delivery Charges Offline",
+	stock_confidence_offline: "Stock Confidence Offline",
+};
 
 function isReadyState(state: BootstrapPrerequisiteState | undefined) {
 	return state === "ready";
@@ -210,26 +285,447 @@ function hasOwnKey<T extends object>(value: T | null | undefined, key: keyof T) 
 }
 
 function deriveCapabilities(
-	prerequisites: Record<string, BootstrapPrerequisiteState>,
+	capabilitySummaries: BootstrapCapabilitySummary[],
 ): BootstrapCapabilities {
+	const capabilityState = Object.fromEntries(
+		capabilitySummaries.map((summary) => [summary.id, summary.status]),
+	) as Record<BootstrapCapabilityId, BootstrapCapabilityStatus>;
+
 	return {
-		canSellOffline: hasAllReady(
-			prerequisites,
-			PREREQUISITES_FOR_OFFLINE_SELL,
-		),
-		canApplyPricingOffline: hasAllReady(
-			prerequisites,
-			PREREQUISITES_FOR_OFFLINE_PRICING,
-		),
-		canPrintOffline: hasAllReady(
-			prerequisites,
-			PREREQUISITES_FOR_OFFLINE_PRINT,
-		),
-		canUseOffersOffline: hasAllReady(prerequisites, PREREQUISITES_FOR_OFFERS),
-		canUseCustomerDisplayOffline: hasAllReady(
-			prerequisites,
-			PREREQUISITES_FOR_CUSTOMER_DISPLAY,
-		),
+		canSellOffline: capabilityState.sell_offline === "ready",
+		canApplyPricingOffline: capabilityState.pricing_offline === "ready",
+		canPrintOffline: capabilityState.print_offline === "ready",
+		canUseOffersOffline: capabilityState.offers_offline === "ready",
+		canUseCustomerDisplayOffline:
+			capabilityState.customer_display_offline === "ready",
+		canLookupAddressesOffline:
+			capabilityState.address_lookup_offline === "ready",
+		canCalculateDeliveryChargesOffline:
+			capabilityState.delivery_charges_offline === "ready",
+		canTrustStockOffline:
+			capabilityState.stock_confidence_offline === "ready",
+	};
+}
+
+function resolveBootstrapPolicies(
+	inputPolicies: Partial<BootstrapOfflinePolicies> | undefined,
+): BootstrapOfflinePolicies {
+	return {
+		...DEFAULT_BOOTSTRAP_POLICIES,
+		...(inputPolicies || {}),
+	};
+}
+
+function buildCapabilitySummary(
+	id: BootstrapCapabilityId,
+	status: BootstrapCapabilityStatus,
+	severity: BootstrapCapabilitySeverity,
+	message: string,
+	action: string,
+	warningCodes: string[],
+	prerequisites: string[],
+	policy: BootstrapOfflinePolicyMode | null = null,
+): BootstrapCapabilitySummary {
+	return {
+		id,
+		label: CAPABILITY_LABELS[id],
+		status,
+		severity,
+		message,
+		action,
+		warningCodes,
+		prerequisites,
+		policy,
+	};
+}
+
+function deriveCapabilitySummaries(
+	prerequisites: Record<string, BootstrapPrerequisiteState>,
+	policies: BootstrapOfflinePolicies,
+): BootstrapCapabilitySummary[] {
+	const sellReady = hasAllReady(prerequisites, PREREQUISITES_FOR_OFFLINE_SELL);
+	const missingPricing = PREREQUISITES_FOR_OFFLINE_PRICING.filter(
+		(key) => !isReadyState(prerequisites[key]),
+	);
+	const missingPrint = PREREQUISITES_FOR_OFFLINE_PRINT.filter(
+		(key) => !isReadyState(prerequisites[key]),
+	);
+	const missingOffers = PREREQUISITES_FOR_OFFERS.filter(
+		(key) => !isReadyState(prerequisites[key]),
+	);
+	const missingCustomerDisplay = PREREQUISITES_FOR_CUSTOMER_DISPLAY.filter(
+		(key) => !isReadyState(prerequisites[key]),
+	);
+	const missingAddresses = PREREQUISITES_FOR_ADDRESS_LOOKUP.filter(
+		(key) => !isReadyState(prerequisites[key]),
+	);
+	const missingDeliveryCharges = PREREQUISITES_FOR_DELIVERY_CHARGES.filter(
+		(key) => !isReadyState(prerequisites[key]),
+	);
+	const missingStockConfidence = PREREQUISITES_FOR_STOCK_CONFIDENCE.filter(
+		(key) => !isReadyState(prerequisites[key]),
+	);
+
+	const summaries: BootstrapCapabilitySummary[] = [];
+
+	summaries.push(
+		sellReady
+			? buildCapabilitySummary(
+					"sell_offline",
+					"ready",
+					"info",
+					"Offline selling prerequisites are ready.",
+					"",
+					[],
+					PREREQUISITES_FOR_OFFLINE_SELL,
+				)
+			: buildCapabilitySummary(
+					"sell_offline",
+					"unavailable",
+					"error",
+					"Offline selling is unavailable until core selling caches are refreshed.",
+					"Reconnect and refresh offline sell prerequisites before continuing.",
+					PREREQUISITES_FOR_OFFLINE_SELL.filter(
+						(key) => !isReadyState(prerequisites[key]),
+					),
+					PREREQUISITES_FOR_OFFLINE_SELL,
+				),
+	);
+
+	if (!sellReady) {
+		summaries.push(
+			buildCapabilitySummary(
+				"pricing_offline",
+				"unavailable",
+				"error",
+				"Offline pricing cannot be trusted until core selling data is ready.",
+				"Restore offline selling prerequisites first.",
+				missingPricing,
+				PREREQUISITES_FOR_OFFLINE_PRICING,
+				policies.pricingVerification,
+			),
+		);
+	} else if (!missingPricing.length) {
+		summaries.push(
+			buildCapabilitySummary(
+				"pricing_offline",
+				"ready",
+				"info",
+				"Offline pricing rules and tax settings are ready.",
+				"",
+				[],
+				PREREQUISITES_FOR_OFFLINE_PRICING,
+				policies.pricingVerification,
+			),
+		);
+	} else {
+		const pricingStatusByPolicy: Record<
+			BootstrapOfflinePolicyMode,
+			{
+				status: BootstrapCapabilityStatus;
+				severity: BootstrapCapabilitySeverity;
+				message: string;
+				action: string;
+			}
+		> = {
+			allow_with_warning: {
+				status: "degraded",
+				severity: "warning",
+				message:
+					"Offline pricing is unverified. Offers, customer pricing, taxes, or discounts may differ after reconnect.",
+				action:
+					"Allow sale with warning and flag the invoice as offline pricing unverified.",
+			},
+			require_manager_override: {
+				status: "override_required",
+				severity: "warning",
+				message:
+					"Offline pricing is unverified and requires a local supervisor override before selling.",
+				action:
+					"Collect a local supervisor PIN or privileged approval on the terminal.",
+			},
+			block_if_unverified: {
+				status: "blocked",
+				severity: "error",
+				message:
+					"Offline pricing is unverified and selling is blocked by policy until pricing is refreshed.",
+				action: "Reconnect and refresh pricing data before selling.",
+			},
+		};
+		const policyState = pricingStatusByPolicy[policies.pricingVerification];
+		summaries.push(
+			buildCapabilitySummary(
+				"pricing_offline",
+				policyState.status,
+				policyState.severity,
+				policyState.message,
+				policyState.action,
+				missingPricing,
+				PREREQUISITES_FOR_OFFLINE_PRICING,
+				policies.pricingVerification,
+			),
+		);
+	}
+
+	summaries.push(
+		!missingPrint.length
+			? buildCapabilitySummary(
+					"print_offline",
+					"ready",
+					"info",
+					"Offline printing prerequisites are ready.",
+					"",
+					[],
+					PREREQUISITES_FOR_OFFLINE_PRINT,
+				)
+			: buildCapabilitySummary(
+					"print_offline",
+					"degraded",
+					"info",
+					"Offline printing may omit template content until cached print assets are refreshed.",
+					"Reconnect to refresh receipt template content.",
+					missingPrint,
+					PREREQUISITES_FOR_OFFLINE_PRINT,
+				),
+	);
+
+	summaries.push(
+		!missingCustomerDisplay.length
+			? buildCapabilitySummary(
+					"customer_display_offline",
+					"ready",
+					"info",
+					"Customer display can continue operating offline.",
+					"",
+					[],
+					PREREQUISITES_FOR_CUSTOMER_DISPLAY,
+				)
+			: buildCapabilitySummary(
+					"customer_display_offline",
+					"degraded",
+					"info",
+					"Customer display may be incomplete offline until display prerequisites are refreshed.",
+					"Reconnect to refresh customer display prerequisites.",
+					missingCustomerDisplay,
+					PREREQUISITES_FOR_CUSTOMER_DISPLAY,
+				),
+	);
+
+	summaries.push(
+		!missingOffers.length
+			? buildCapabilitySummary(
+					"offers_offline",
+					"ready",
+					"info",
+					"Offline offers and coupons are ready.",
+					"",
+					[],
+					PREREQUISITES_FOR_OFFERS,
+				)
+			: buildCapabilitySummary(
+					"offers_offline",
+					"degraded",
+					"info",
+					"Offers and coupons may be unavailable offline.",
+					"Reconnect to refresh offers and coupon data.",
+					missingOffers,
+					PREREQUISITES_FOR_OFFERS,
+				),
+	);
+
+	summaries.push(
+		!missingAddresses.length
+			? buildCapabilitySummary(
+					"address_lookup_offline",
+					"ready",
+					"info",
+					"Offline customer address lookup is ready.",
+					"",
+					[],
+					PREREQUISITES_FOR_ADDRESS_LOOKUP,
+				)
+			: buildCapabilitySummary(
+					"address_lookup_offline",
+					"degraded",
+					"info",
+					"Customer address lookup may be incomplete offline.",
+					"Reconnect to refresh cached customer addresses.",
+					missingAddresses,
+					PREREQUISITES_FOR_ADDRESS_LOOKUP,
+				),
+	);
+
+	summaries.push(
+		!missingDeliveryCharges.length
+			? buildCapabilitySummary(
+					"delivery_charges_offline",
+					"ready",
+					"info",
+					"Offline delivery charge lookup is ready.",
+					"",
+					[],
+					PREREQUISITES_FOR_DELIVERY_CHARGES,
+				)
+			: buildCapabilitySummary(
+					"delivery_charges_offline",
+					"degraded",
+					"info",
+					"Delivery charges may need review because cached delivery data is incomplete.",
+					"Reconnect to refresh delivery charge data.",
+					missingDeliveryCharges,
+					PREREQUISITES_FOR_DELIVERY_CHARGES,
+				),
+	);
+
+	if (!sellReady) {
+		summaries.push(
+			buildCapabilitySummary(
+				"stock_confidence_offline",
+				"unavailable",
+				"error",
+				"Offline stock confidence cannot be assessed until core selling data is ready.",
+				"Restore offline selling prerequisites first.",
+				missingStockConfidence,
+				PREREQUISITES_FOR_STOCK_CONFIDENCE,
+				policies.stockConfidence,
+			),
+		);
+	} else if (!missingStockConfidence.length) {
+		summaries.push(
+			buildCapabilitySummary(
+				"stock_confidence_offline",
+				"ready",
+				"info",
+				"Offline stock cache is ready for stock confidence checks.",
+				"",
+				[],
+				PREREQUISITES_FOR_STOCK_CONFIDENCE,
+				policies.stockConfidence,
+			),
+		);
+	} else {
+		const stockStatusByPolicy: Record<
+			BootstrapOfflinePolicyMode,
+			{
+				status: BootstrapCapabilityStatus;
+				severity: BootstrapCapabilitySeverity;
+				message: string;
+				action: string;
+			}
+		> = {
+			allow_with_warning: {
+				status: "degraded",
+				severity: "warning",
+				message:
+					"Stock confidence is low because offline stock data is incomplete.",
+				action: "Review quantities carefully before completing the sale.",
+			},
+			require_manager_override: {
+				status: "override_required",
+				severity: "warning",
+				message:
+					"Stock confidence is low and a local supervisor override is required by policy.",
+				action:
+					"Collect a local supervisor PIN or privileged approval before selling uncertain stock.",
+			},
+			block_if_unverified: {
+				status: "blocked",
+				severity: "error",
+				message:
+					"Stock confidence is low and policy blocks the sale until stock data is refreshed.",
+				action: "Reconnect and refresh stock data before selling.",
+			},
+		};
+		const policyState = stockStatusByPolicy[policies.stockConfidence];
+		summaries.push(
+			buildCapabilitySummary(
+				"stock_confidence_offline",
+				policyState.status,
+				policyState.severity,
+				policyState.message,
+				policyState.action,
+				missingStockConfidence,
+				PREREQUISITES_FOR_STOCK_CONFIDENCE,
+				policies.stockConfidence,
+			),
+		);
+	}
+
+	return summaries;
+}
+
+function buildPrimaryWarningFromDecision(
+	validation: BootstrapValidationResult,
+	capabilitySummaries: BootstrapCapabilitySummary[],
+): BootstrapPrimaryWarning {
+	if (validation.mode === "invalid") {
+		return {
+			active: true,
+			title: "Offline restore is unavailable for this session.",
+			messages: [
+				"Cached opening shift belongs to another user and cannot be restored offline.",
+			],
+			severity: "error",
+			capabilityId: "session_mismatch",
+		};
+	}
+
+	const mismatchMessages: Record<string, string> = {
+		snapshot_missing:
+			"Offline bootstrap snapshot is missing. Refresh offline data while online.",
+		build_version_mismatch:
+			"Cached offline data belongs to a different app build.",
+		profile_name_mismatch:
+			"Cached offline data belongs to a different POS profile.",
+		profile_modified_mismatch:
+			"POS profile settings changed after the offline snapshot was captured.",
+	};
+
+	if (
+		validation.mode === "confirmation_required" &&
+		validation.reasons.length
+	) {
+		return {
+			active: true,
+			title: "Offline snapshot needs confirmation.",
+			messages: validation.reasons.map(
+				(reason) => mismatchMessages[reason] || reason,
+			),
+			severity: "warning",
+			capabilityId: "session_mismatch",
+		};
+	}
+
+	const priorityOrder: BootstrapCapabilityId[] = [
+		"sell_offline",
+		"stock_confidence_offline",
+		"pricing_offline",
+		"print_offline",
+	];
+	const ranked = capabilitySummaries
+		.filter((summary) => summary.severity !== "info" && summary.status !== "ready")
+		.sort(
+			(left, right) =>
+				priorityOrder.indexOf(left.id) - priorityOrder.indexOf(right.id),
+		);
+
+	if (!ranked.length) {
+		return {
+			active: false,
+			title: "",
+			messages: [],
+			severity: "info",
+			capabilityId: "snapshot",
+		};
+	}
+
+	const top = ranked[0]!;
+	return {
+		active: true,
+		title: top.label,
+		messages: [top.message, top.action].filter(Boolean),
+		severity: top.severity,
+		capabilityId: top.id,
 	};
 }
 
@@ -557,25 +1053,26 @@ export function validateBootstrapSnapshot(
 	snapshot: BootstrapSnapshot | null | undefined,
 	current: BootstrapValidationInput,
 ): BootstrapValidationResult {
+	const policies = resolveBootstrapPolicies(current?.policies);
 	if (!snapshot) {
+		const capabilitySummaries = deriveCapabilitySummaries({}, policies);
 		return {
 			mode: "limited" as BootstrapValidationMode,
 			reasons: ["snapshot_missing"],
 			missingPrerequisites: ["bootstrap_snapshot"],
-			capabilities: {
-				canSellOffline: false,
-				canApplyPricingOffline: false,
-				canPrintOffline: false,
-				canUseOffersOffline: false,
-				canUseCustomerDisplayOffline: false,
-			},
+			capabilities: deriveCapabilities(capabilitySummaries),
+			capabilitySummaries,
 		};
 	}
 
 	const reasons: string[] = [];
 	const prerequisites = snapshot?.prerequisites || {};
 	const missingPrerequisites = collectMissingPrerequisites(prerequisites);
-	const capabilities = deriveCapabilities(prerequisites);
+	const capabilitySummaries = deriveCapabilitySummaries(
+		prerequisites,
+		policies,
+	);
+	const capabilities = deriveCapabilities(capabilitySummaries);
 	let mode: BootstrapValidationMode = "normal";
 
 	if ((snapshot?.build_version || null) !== (current?.buildVersion || null)) {
@@ -620,6 +1117,7 @@ export function validateBootstrapSnapshot(
 		reasons,
 		missingPrerequisites,
 		capabilities,
+		capabilitySummaries,
 	};
 }
 
@@ -652,6 +1150,16 @@ export function resolveBootstrapRuntimeState(
 		...(validation?.reasons || []),
 		...blockingMissingCodes,
 	];
+	const primaryWarning = buildPrimaryWarningFromDecision(
+		validation,
+		validation?.capabilitySummaries || [],
+	);
+	const hasSellingImpact = (validation?.capabilitySummaries || []).some(
+		(summary) =>
+			["sell_offline", "pricing_offline", "stock_confidence_offline"].includes(
+				summary.id,
+			) && summary.status !== "ready",
+	);
 
 	if (validation?.mode === "confirmation_required") {
 		if (options.continueOffline) {
@@ -661,6 +1169,8 @@ export function resolveBootstrapRuntimeState(
 				requiresConfirmation: false,
 				warningCodes,
 				capabilities: validation.capabilities,
+				capabilitySummaries: validation.capabilitySummaries || [],
+				primaryWarning,
 			};
 		}
 
@@ -670,6 +1180,8 @@ export function resolveBootstrapRuntimeState(
 			requiresConfirmation: true,
 			warningCodes,
 			capabilities: validation.capabilities,
+			capabilitySummaries: validation.capabilitySummaries || [],
+			primaryWarning,
 		};
 	}
 
@@ -680,6 +1192,8 @@ export function resolveBootstrapRuntimeState(
 			requiresConfirmation: false,
 			warningCodes,
 			capabilities: validation.capabilities,
+			capabilitySummaries: validation.capabilitySummaries || [],
+			primaryWarning,
 		};
 	}
 
@@ -690,14 +1204,18 @@ export function resolveBootstrapRuntimeState(
 			requiresConfirmation: false,
 			warningCodes,
 			capabilities: validation.capabilities,
+			capabilitySummaries: validation.capabilitySummaries || [],
+			primaryWarning,
 		};
 	}
 
 	return {
-		mode: "normal",
-		limitedMode: false,
+		mode: hasSellingImpact ? "limited" : "normal",
+		limitedMode: hasSellingImpact,
 		requiresConfirmation: false,
-		warningCodes: [],
+		warningCodes: primaryWarning.active ? warningCodes : [],
 		capabilities: validation.capabilities,
+		capabilitySummaries: validation.capabilitySummaries || [],
+		primaryWarning,
 	};
 }

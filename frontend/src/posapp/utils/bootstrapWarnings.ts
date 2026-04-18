@@ -104,6 +104,9 @@ export function formatBootstrapWarning(
  *   read from `getBootstrapSnapshotStatus()`.
  */
 export function shouldShowBootstrapBanner(status: Record<string, any> | null | undefined) {
+	if (status?.primary_warning?.active) {
+		return true;
+	}
 	const runtimeMode = status?.runtime_mode || status?.mode || "normal";
 	return runtimeMode === "limited" || runtimeMode === "invalid";
 }

@@ -35,6 +35,7 @@ import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
 import type { SyncResourceId, SyncResourceState } from "../../offline/sync/types";
+import type { BootstrapCapabilitySummary } from "../../offline/bootstrapSnapshot";
 
 export interface OfflineStatusSummary {
 	networkOnline: boolean;
@@ -55,6 +56,8 @@ export interface OfflineBootstrapWarning {
 	title: string;
 	messages: string[];
 }
+
+export interface OfflineCapabilitySummary extends BootstrapCapabilitySummary {}
 
 const RESOURCE_LABELS: Record<SyncResourceId, string> = {
 	bootstrap_config: "Bootstrap Config",
@@ -103,6 +106,7 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 	const panelOpen = ref(false);
 	const summary = ref<OfflineStatusSummary>(createDefaultSummary());
 	const bootstrapWarning = ref<OfflineBootstrapWarning>(createDefaultWarning());
+	const capabilitySummaries = ref<OfflineCapabilitySummary[]>([]);
 	const resourceStates = ref<SyncResourceState[]>([]);
 
 	const syncingResourcesCount = computed(
@@ -164,6 +168,13 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		if (bootstrapWarning.value.active && bootstrapWarning.value.title) {
 			return bootstrapWarning.value.title;
 		}
+		const actionableCapabilities = capabilitySummaries.value.filter(
+			(capability) =>
+				capability.status !== "ready" && capability.severity !== "info",
+		);
+		if (actionableCapabilities.length) {
+			return actionableCapabilities[0]!.message;
+		}
 		if (syncingResourcesCount.value) {
 			return `Refreshing ${syncingResourcesCount.value} offline resource${syncingResourcesCount.value > 1 ? "s" : ""}.`;
 		}
@@ -205,6 +216,19 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		};
 	}
 
+	function setCapabilitySummaries(nextSummaries: OfflineCapabilitySummary[]) {
+		capabilitySummaries.value = Array.isArray(nextSummaries)
+			? nextSummaries
+					.filter((summary) => !!summary?.id)
+					.map((summary) => ({ ...summary }))
+					.sort((left, right) => {
+						const leftScore = left.status === "ready" ? 1 : 0;
+						const rightScore = right.status === "ready" ? 1 : 0;
+						return leftScore - rightScore;
+					})
+			: [];
+	}
+
 	function setResourceStates(nextStates: SyncResourceState[]) {
 		resourceStates.value = Array.isArray(nextStates)
 			? nextStates
@@ -225,6 +249,7 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		panelOpen.value = false;
 		summary.value = createDefaultSummary();
 		bootstrapWarning.value = createDefaultWarning();
+		capabilitySummaries.value = [];
 		resourceStates.value = [];
 	}
 
@@ -232,6 +257,7 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		panelOpen,
 		summary,
 		bootstrapWarning,
+		capabilitySummaries,
 		resourceStates,
 		syncingResourcesCount,
 		connectivityLabel,
@@ -243,6 +269,7 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		togglePanel,
 		setSummary,
 		setBootstrapWarning,
+		setCapabilitySummaries,
 		setResourceStates,
 		reset,
 	};

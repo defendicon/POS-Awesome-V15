@@ -72,9 +72,47 @@ describe("OfflineStatusPanel", () => {
 		});
 		store.setBootstrapWarning({
 			active: true,
-			title: "POS is running with limited offline prerequisites.",
-			messages: ["Cached offline data belongs to a different app build."],
+			title: "Pricing Offline",
+			messages: [
+				"Offline pricing is unverified. Offers, customer pricing, taxes, or discounts may differ after reconnect.",
+			],
 		});
+		store.setCapabilitySummaries([
+			{
+				id: "pricing_offline",
+				label: "Pricing Offline",
+				status: "degraded",
+				severity: "warning",
+				message:
+					"Offline pricing is unverified. Offers, customer pricing, taxes, or discounts may differ after reconnect.",
+				action:
+					"Allow sale with warning and flag the invoice as offline pricing unverified.",
+				warningCodes: [
+					"pricing_rules_snapshot",
+					"pricing_rules_context",
+					"tax_inclusive",
+				],
+				prerequisites: [
+					"pricing_rules_snapshot",
+					"pricing_rules_context",
+					"tax_inclusive",
+				],
+				policy: "allow_with_warning",
+			},
+			{
+				id: "stock_confidence_offline",
+				label: "Stock Confidence Offline",
+				status: "override_required",
+				severity: "warning",
+				message:
+					"Stock confidence is low and a local supervisor override is required by policy.",
+				action:
+					"Collect a local supervisor PIN or privileged approval before selling uncertain stock.",
+				warningCodes: ["stock_cache_ready"],
+				prerequisites: ["stock_cache_ready"],
+				policy: "require_manager_override",
+			},
+		]);
 		store.setResourceStates([
 			{
 				resourceId: "bootstrap_config",
@@ -123,10 +161,14 @@ describe("OfflineStatusPanel", () => {
 		});
 
 		expect(wrapper.get('[data-test="offline-status-panel"]').text()).toContain(
-			"POS is running with limited offline prerequisites.",
+			"Pricing Offline",
 		);
 		expect(wrapper.text()).toContain(
-			"Cached offline data belongs to a different app build.",
+			"Offline pricing is unverified. Offers, customer pricing, taxes, or discounts may differ after reconnect.",
+		);
+		expect(wrapper.text()).toContain("Stock Confidence Offline");
+		expect(wrapper.text()).toContain(
+			"Collect a local supervisor PIN or privileged approval before selling uncertain stock.",
 		);
 		expect(wrapper.text()).toContain("bootstrap_config");
 		expect(wrapper.text()).toContain("currency_matrix");

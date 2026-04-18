@@ -250,6 +250,10 @@ export default {
 			type: String,
 			default: "",
 		},
+		bootstrapCapabilities: {
+			type: Array,
+			default: () => [],
+		},
 		syncTotals: {
 			type: Object,
 			default: () => ({ pending: 0, synced: 0, drafted: 0 }),
@@ -353,6 +357,7 @@ export default {
 				cacheUsageDetails: this.cacheUsageDetails,
 				bootstrapWarningActive: this.bootstrapWarningActive,
 				bootstrapWarningTooltip: this.bootstrapWarningTooltip,
+				bootstrapCapabilities: this.bootstrapCapabilities,
 			};
 		},
 		drawerFooterAction() {
@@ -774,6 +779,11 @@ export default {
 				title: warningTitle,
 				messages: warningMessages,
 			});
+			this.offlineSyncStore.setCapabilitySummaries(
+				Array.isArray(this.bootstrapCapabilities)
+					? this.bootstrapCapabilities
+					: [],
+			);
 
 			const shouldInjectFallback =
 				this.offlineSyncStore.resourceStates.length === 0;

@@ -22,6 +22,7 @@
 				:loading-message="loadingMessage"
 				:bootstrap-warning-active="bootstrapWarningActive"
 				:bootstrap-warning-tooltip="bootstrapWarningTooltip"
+				:bootstrap-capabilities="bootstrapCapabilitySummaries"
 				@nav-click="handleNavClick"
 				@close-shift="handleCloseShift"
 				@print-last-invoice="handlePrintLastInvoice"
@@ -306,6 +307,8 @@ function persistBootstrapRuntime(validation, decision) {
 		missing_prerequisites: validation.missingPrerequisites,
 		warning_codes: decision.warningCodes,
 		capabilities: validation.capabilities,
+		capability_summaries: decision.capabilitySummaries,
+		primary_warning: decision.primaryWarning,
 	};
 
 	bootstrapStatus.value = nextStatus;
@@ -439,20 +442,35 @@ const loadingProgress = computed(() => loadingState.progress);
 const loadingActive = computed(() => loadingState.active);
 const loadingMessage = computed(() => loadingState.message);
 const bootstrapAlertType = computed(() =>
-	bootstrapStatus.value?.runtime_mode === "invalid" ? "error" : "warning",
+	bootstrapStatus.value?.primary_warning?.severity === "error" ||
+	bootstrapStatus.value?.runtime_mode === "invalid"
+		? "error"
+		: "warning",
+);
+const bootstrapCapabilitySummaries = computed(
+	() => bootstrapStatus.value?.capability_summaries || [],
 );
 const bootstrapWarningTitle = computed(() => {
+	if (bootstrapStatus.value?.primary_warning?.title) {
+		return __(bootstrapStatus.value.primary_warning.title);
+	}
 	if (bootstrapStatus.value?.runtime_mode === "invalid") {
 		return __("Offline restore is unavailable for this session.");
 	}
 	if (bootstrapLimitedMode.value) {
-		return __("POS is running with limited offline prerequisites.");
+		return __("Offline selling is available with degraded capabilities.");
 	}
 	return "";
 });
 const bootstrapWarningMessages = computed(() => {
 	if (!shouldShowBootstrapBanner(bootstrapStatus.value)) {
 		return [];
+	}
+
+	if (Array.isArray(bootstrapStatus.value?.primary_warning?.messages)) {
+		return bootstrapStatus.value.primary_warning.messages.map((message) =>
+			__(message),
+		);
 	}
 
 	return Array.from(
