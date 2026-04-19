@@ -2,3 +2,5 @@
 playwright-report/
 test-results/
 blob-report/
+# Auto-generated API reference — rebuild with: yarn docs:generate
+docs/api/

@@ -208,10 +208,11 @@
 			<div v-if="loadingActive" class="loading-container">
 				<div class="glass-card">
 					<span class="loading-message">{{ loadingMessage }}</span>
-					<div class="progress-badge">{{ loadingProgress }}%</div>
+					<div v-if="!loadingIndeterminate" class="progress-badge">{{ loadingProgress }}%</div>
 				</div>
 				<v-progress-linear
 					:model-value="loadingProgress"
+					:indeterminate="loadingIndeterminate"
 					color="primary"
 					height="4"
 					absolute
@@ -277,6 +278,10 @@ export default {
 			default: 0,
 		},
 		loadingActive: {
+			type: Boolean,
+			default: false,
+		},
+		loadingIndeterminate: {
 			type: Boolean,
 			default: false,
 		},

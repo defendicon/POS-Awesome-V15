@@ -1,3 +1,16 @@
+/**
+ * Offline pricing-rule evaluation engine.
+ *
+ * Applies Frappe/ERPNext pricing rules to a single cart item without any network calls.
+ * Used by `usePricingRulesStore` which holds a pre-loaded rule snapshot from IndexedDB.
+ *
+ * The primary entry point is {@link evaluatePricingRules}. Helper functions
+ * ({@link collectCandidates}, {@link ruleSort}, {@link matchParty}, etc.) are exported
+ * for unit testing but are not part of the public API contract — they may change.
+ *
+ * @module lib/pricingEngine
+ */
+
 const DEFAULT_PRECISION = 6;
 
 type AnyRecord = Record<string, any>;
@@ -7,6 +20,10 @@ const parseOptionalFloat = (value: unknown): number | null => {
 	return Number.isFinite(numeric) ? numeric : null;
 };
 
+/**
+ * Rounds `value` to `precision` decimal places using symmetric (half-up) rounding.
+ * Non-finite inputs return `0`.
+ */
 export const round = (
 	value: unknown,
 	precision = DEFAULT_PRECISION,
@@ -19,6 +36,11 @@ export const round = (
 	return Math.round(numeric * factor) / factor;
 };
 
+/**
+ * Returns `true` when `currentDate` falls within the `[start, end]` range.
+ * A missing `start` or `end` is treated as unbounded. A missing or unparseable
+ * `currentDate` returns `true` (permissive — the rule is not excluded on date grounds).
+ */
 export const inDateRange = (
 	currentDate: string | Date | null | undefined,
 	start: string | Date | null | undefined,
@@ -49,6 +71,11 @@ export const inDateRange = (
 	return true;
 };
 
+/**
+ * Returns `true` when the pricing rule's customer/group/territory restrictions are
+ * satisfied by the current invoice context.
+ * A rule with no restrictions on a dimension always passes that dimension's check.
+ */
 export const matchParty = (
 	rule: AnyRecord,
 	customer: string | null | undefined,
@@ -116,6 +143,15 @@ const pushUnique = (
 	seen.add(ruleKey);
 };
 
+/**
+ * Collects all pricing-rule candidates applicable to `item` from the pre-built index.
+ *
+ * Candidates are de-duplicated by rule name. The order is: item-specific → group → brand → general.
+ * Callers must then filter by date, party, currency, and quantity thresholds.
+ *
+ * @param item - The cart item to match against.
+ * @param indexBundle - Pre-built lookup maps produced by `usePricingRulesStore`.
+ */
 export const collectCandidates = (
 	item: AnyRecord = {},
 	indexBundle: {
@@ -432,7 +468,25 @@ const applyFreeItemRule = (
 	};
 };
 
-// Unified function to evaluate both pricing and free items in a single pass
+/**
+ * Evaluates all applicable pricing rules for a single cart item in one pass.
+ *
+ * Returns two independent results:
+ * - `pricing` — the final rate and accumulated discount after applying non-free-item rules.
+ * - `freebies` — zero or more free-item records to be added to the invoice by the caller.
+ *
+ * Rules are applied in priority order determined by {@link ruleSort}. A rule with
+ * `stop_further_rules` halts pricing-rule processing; `apply_multiple_pricing_rules`
+ * controls whether subsequent rules are also applied.
+ *
+ * Input fields (all part of the single destructured argument):
+ * - `item` — cart item to evaluate; must have `item_code`, `item_group`, and `brand`.
+ * - `qty` — line quantity (UOM-adjusted). Defaults to `item.qty`.
+ * - `docQty` — document-level quantity used for threshold checks.
+ * - `baseRate` — starting rate before discounts. Defaults to `item.base_price_list_rate`.
+ * - `ctx` — evaluation context: date, customer, customer_group, territory, price_list, currency.
+ * - `indexes` — pre-built rule index from `usePricingRulesStore.buildIndexes()`.
+ */
 export const evaluatePricingRules = ({
 	item,
 	qty,

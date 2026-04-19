@@ -1,52 +1,70 @@
-import { memory, persist, isOffline, db } from "./db";
+import { checkDbHealth, db, isOffline, memory, persist } from "./db";
+import {
+	claimRetryableQueueEntries,
+	clearWriteQueueEntries,
+	deleteWriteQueueEntryByIndex,
+	enqueueWriteQueueEntry,
+	getQueuedPayloadCount,
+	getQueuedPayloadSnapshots,
+	markWriteQueueEntryFailed,
+	markWriteQueueEntrySynced,
+	refreshQueueMemory,
+	updateQueuedPayloads,
+	type OfflineEntityType,
+} from "./writeQueue";
 
 type AnyRecord = Record<string, any>;
 
-export function saveOfflineCustomer(entry: AnyRecord) {
-	const key = "offline_customers";
-	const entries = memory.offline_customers;
-	// Serialize to avoid storing reactive objects that IndexedDB
-	// cannot clone.
+const CUSTOMER_ENTITY: OfflineEntityType = "customer";
+
+export async function saveOfflineCustomer(entry: AnyRecord) {
 	let cleanEntry;
 	try {
 		cleanEntry = JSON.parse(JSON.stringify(entry));
-	} catch (e) {
-		console.error("Failed to serialize offline customer", e);
-		throw e;
+	} catch (error) {
+		console.error("Failed to serialize offline customer", error);
+		throw error;
 	}
-	entries.push(cleanEntry);
-	memory.offline_customers = entries;
-	persist(key);
+
+	return enqueueWriteQueueEntry(CUSTOMER_ENTITY, cleanEntry);
 }
 
-export function updateOfflineInvoicesCustomer(
+export async function updateOfflineInvoicesCustomer(
 	oldName: string,
 	newName: string,
 ) {
 	let updated = false;
-	const invoices = memory.offline_invoices || [];
-	invoices.forEach((inv) => {
-		if (inv.invoice && inv.invoice.customer === oldName) {
-			inv.invoice.customer = newName;
-			if (inv.invoice.customer_name) {
-				inv.invoice.customer_name = newName;
+
+	await updateQueuedPayloads("invoice", (payload) => {
+		if (payload?.invoice?.customer === oldName) {
+			payload.invoice.customer = newName;
+			if (payload.invoice.customer_name) {
+				payload.invoice.customer_name = newName;
 			}
 			updated = true;
 		}
+		return payload;
 	});
+
 	if (updated) {
-		memory.offline_invoices = invoices;
-		persist("offline_invoices");
+		await refreshQueueMemory("invoice");
 	}
 }
 
 export function getOfflineCustomers() {
-	return memory.offline_customers;
+	return getQueuedPayloadSnapshots(CUSTOMER_ENTITY);
 }
 
-export function clearOfflineCustomers() {
-	memory.offline_customers = [];
-	persist("offline_customers");
+export async function clearOfflineCustomers() {
+	await clearWriteQueueEntries(CUSTOMER_ENTITY);
+}
+
+export async function deleteOfflineCustomer(index: number) {
+	await deleteWriteQueueEntryByIndex(CUSTOMER_ENTITY, index);
+}
+
+export function getPendingOfflineCustomerCount() {
+	return getQueuedPayloadCount(CUSTOMER_ENTITY);
 }
 
 export async function syncOfflineCustomers() {
@@ -58,41 +76,50 @@ export async function syncOfflineCustomers() {
 		return { pending: customers.length, synced: 0 };
 	}
 
-	const failures: AnyRecord[] = [];
+	const claimedEntries = await claimRetryableQueueEntries(CUSTOMER_ENTITY);
+	if (!claimedEntries.length) {
+		return { pending: getPendingOfflineCustomerCount(), synced: 0 };
+	}
+
 	let synced = 0;
 
-	for (const cust of customers) {
+	for (const entry of claimedEntries) {
+		const queuedCustomer = entry.payload;
 		try {
 			const result = await frappe.call({
 				method: "posawesome.posawesome.api.customers.create_customer",
-				args: cust.args,
+				args: queuedCustomer.args,
 			});
-			synced++;
+			synced += 1;
+			await markWriteQueueEntrySynced(
+				CUSTOMER_ENTITY,
+				Number(entry.queue_id),
+				entry.last_attempt_at,
+			);
+
 			if (
 				result &&
 				result.message &&
 				result.message.name &&
-				result.message.name !== cust.args.customer_name
+				result.message.name !== queuedCustomer.args.customer_name
 			) {
-				updateOfflineInvoicesCustomer(
-					cust.args.customer_name,
+				await updateOfflineInvoicesCustomer(
+					queuedCustomer.args.customer_name,
 					result.message.name,
 				);
 			}
 		} catch (error) {
 			console.error("Failed to create customer", error);
-			failures.push(cust);
+			await markWriteQueueEntryFailed(
+				CUSTOMER_ENTITY,
+				Number(entry.queue_id),
+				error,
+				entry.last_attempt_at,
+			);
 		}
 	}
 
-	if (failures.length) {
-		memory.offline_customers = failures;
-		persist("offline_customers");
-	} else {
-		clearOfflineCustomers();
-	}
-
-	return { pending: failures.length, synced };
+	return { pending: getPendingOfflineCustomerCount(), synced };
 }
 
 export function getCustomerStorage() {
@@ -125,31 +152,45 @@ function mergeCustomerStorageRows(rows: AnyRecord[]) {
 export async function getStoredCustomer(customerName: string) {
 	try {
 		const customers = getCustomerStorage();
-		return customers.find((c) => c.name === customerName) || null;
-	} catch (e) {
-		console.error("Failed to get stored customer", e);
+		const cachedCustomer = customers.find((c) => c.name === customerName);
+		if (cachedCustomer) {
+			return cachedCustomer;
+		}
+
+		await checkDbHealth();
+		if (!db.isOpen()) {
+			await db.open();
+		}
+
+		const storedCustomer = await db.table("customers").get(customerName);
+		if (storedCustomer?.name) {
+			memory.customer_storage = mergeCustomerStorageRows([storedCustomer]);
+			return storedCustomer;
+		}
+		return null;
+	} catch (error) {
+		console.error("Failed to get stored customer", error);
 		return null;
 	}
 }
 
 export async function setCustomerStorage(customers: AnyRecord[]) {
 	try {
-		const clean = customers.map((c) => ({
-			name: c.name,
-			customer_name: c.customer_name,
-			mobile_no: c.mobile_no,
-			email_id: c.email_id,
-			primary_address: c.primary_address,
-			tax_id: c.tax_id,
-			stored_value_balance: c.stored_value_balance || 0,
-			stored_value_sources: c.stored_value_sources || 0,
+		const clean = customers.map((customer) => ({
+			name: customer.name,
+			customer_name: customer.customer_name,
+			mobile_no: customer.mobile_no,
+			email_id: customer.email_id,
+			primary_address: customer.primary_address,
+			tax_id: customer.tax_id,
+			stored_value_balance: customer.stored_value_balance || 0,
+			stored_value_sources: customer.stored_value_sources || 0,
 		}));
 
 		await db.table("customers").bulkPut(clean);
 		memory.customer_storage = mergeCustomerStorageRows(clean);
-		persist("customer_storage");
-	} catch (e) {
-		console.error("Failed to save customers to storage", e);
+	} catch (error) {
+		console.error("Failed to save customers to storage", error);
 	}
 }
 
@@ -172,9 +213,8 @@ export async function deleteCustomerStorageByNames(names: string[]) {
 		memory.customer_storage = existingRows.filter(
 			(row) => !normalizedNames.includes(String(row?.name || "").trim()),
 		);
-		persist("customer_storage");
-	} catch (e) {
-		console.error("Failed to delete customers from storage", e);
+	} catch (error) {
+		console.error("Failed to delete customers from storage", error);
 	}
 }
 
@@ -208,8 +248,8 @@ export function saveStoredValueSnapshot(
 		};
 		memory.stored_value_snapshot_cache = cache;
 		persist("stored_value_snapshot_cache");
-	} catch (e) {
-		console.error("Failed to cache stored value snapshot", e);
+	} catch (error) {
+		console.error("Failed to cache stored value snapshot", error);
 	}
 }
 
@@ -224,8 +264,8 @@ export function getCachedStoredValueSnapshot(customer: string, company: string) 
 			return isValid ? cachedData : null;
 		}
 		return null;
-	} catch (e) {
-		console.error("Failed to get cached stored value snapshot", e);
+	} catch (error) {
+		console.error("Failed to get cached stored value snapshot", error);
 		return null;
 	}
 }
@@ -234,8 +274,8 @@ export function clearStoredValueSnapshotCache() {
 	try {
 		memory.stored_value_snapshot_cache = {};
 		persist("stored_value_snapshot_cache");
-	} catch (e) {
-		console.error("Failed to clear stored value snapshot cache", e);
+	} catch (error) {
+		console.error("Failed to clear stored value snapshot cache", error);
 	}
 }
 
@@ -252,8 +292,8 @@ export function saveGiftCardSnapshot(giftCardCode: string, snapshot: AnyRecord) 
 		};
 		memory.gift_card_snapshot_cache = cache;
 		persist("gift_card_snapshot_cache");
-	} catch (e) {
-		console.error("Failed to cache gift card snapshot", e);
+	} catch (error) {
+		console.error("Failed to cache gift card snapshot", error);
 	}
 }
 
@@ -268,8 +308,8 @@ export function getCachedGiftCardSnapshot(giftCardCode: string) {
 			return isValid ? cachedData : null;
 		}
 		return null;
-	} catch (e) {
-		console.error("Failed to get cached gift card snapshot", e);
+	} catch (error) {
+		console.error("Failed to get cached gift card snapshot", error);
 		return null;
 	}
 }
@@ -278,8 +318,8 @@ export function clearGiftCardSnapshotCache() {
 	try {
 		memory.gift_card_snapshot_cache = {};
 		persist("gift_card_snapshot_cache");
-	} catch (e) {
-		console.error("Failed to clear gift card snapshot cache", e);
+	} catch (error) {
+		console.error("Failed to clear gift card snapshot cache", error);
 	}
 }
 
@@ -287,13 +327,13 @@ export function saveCustomerBalance(customer: string, balance: number) {
 	try {
 		const cache = memory.customer_balance_cache;
 		cache[customer] = {
-			balance: balance,
+			balance,
 			timestamp: Date.now(),
 		};
 		memory.customer_balance_cache = cache;
 		persist("customer_balance_cache");
-	} catch (e) {
-		console.error("Failed to cache customer balance", e);
+	} catch (error) {
+		console.error("Failed to cache customer balance", error);
 	}
 }
 
@@ -307,8 +347,8 @@ export function getCachedCustomerBalance(customer: string) {
 			return isValid ? cachedData.balance : null;
 		}
 		return null;
-	} catch (e) {
-		console.error("Failed to get cached customer balance", e);
+	} catch (error) {
+		console.error("Failed to get cached customer balance", error);
 		return null;
 	}
 }
@@ -317,8 +357,8 @@ export function clearCustomerBalanceCache() {
 	try {
 		memory.customer_balance_cache = {};
 		persist("customer_balance_cache");
-	} catch (e) {
-		console.error("Failed to clear customer balance cache", e);
+	} catch (error) {
+		console.error("Failed to clear customer balance cache", error);
 	}
 }
 
@@ -330,17 +370,14 @@ export function clearExpiredCustomerBalances() {
 
 		Object.keys(cache).forEach((customer) => {
 			const cachedData = cache[customer];
-			if (
-				cachedData &&
-				now - cachedData.timestamp < 24 * 60 * 60 * 1000
-			) {
+			if (cachedData && now - cachedData.timestamp < 24 * 60 * 60 * 1000) {
 				validCache[customer] = cachedData;
 			}
 		});
 
 		memory.customer_balance_cache = validCache;
 		persist("customer_balance_cache");
-	} catch (e) {
-		console.error("Failed to clear expired customer balances", e);
+	} catch (error) {
+		console.error("Failed to clear expired customer balances", error);
 	}
 }

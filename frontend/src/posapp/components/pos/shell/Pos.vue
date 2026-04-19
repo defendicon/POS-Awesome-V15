@@ -584,11 +584,7 @@ export default {
 		};
 	},
 	data: function () {
-		return {
-			// dialog moved to setup ref
-			itemsLoaded: false,
-			customersLoaded: false,
-		};
+		return {};
 	},
 
 	components: {
@@ -625,11 +621,6 @@ export default {
 				// this.uiStore.setPosSettings(doc); // We might need to implement this if it doesn't exist
 			});
 		},
-		checkLoadingComplete() {
-			if (this.itemsLoaded && this.customersLoaded) {
-				// Loading complete logic
-			}
-		},
 		// handleAddItem removed as ItemsSelector handles pos addition internally
 		handleRegisterPosData(data) {
 			this.pos_profile = data.pos_profile;
@@ -665,37 +656,12 @@ export default {
 				},
 				{ deep: true, immediate: true },
 			);
-
-			// Items loading state check
-			const { itemsLoaded } = storeToRefs(this.itemsStore);
-			this.$watch(
-				() => itemsLoaded.value,
-				(val) => {
-					if (val) {
-						this.itemsLoaded = true;
-						this.checkLoadingComplete();
-					}
-				},
-				{ immediate: true },
-			);
 		});
 	},
 	// In the created() or mounted() lifecycle hook
 	created() {
 		// Clean up expired customer balance cache on POS load
 		clearExpiredCustomerBalances();
-		const customersStore = useCustomersStore();
-		const { customersLoaded } = storeToRefs(customersStore);
-		this.$watch(
-			() => customersLoaded.value,
-			(value) => {
-				if (value) {
-					this.customersLoaded = true;
-					this.checkLoadingComplete();
-				}
-			},
-			{ immediate: true },
-		);
 	},
 };
 </script>

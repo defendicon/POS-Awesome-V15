@@ -1,6 +1,29 @@
 /**
  * Centralized invoice state management using Pinia.
- * Handles large invoice datasets efficiently and keeps totals in sync.
+ *
+ * ## Storage model
+ * Cart items are stored in a normalized two-part structure to avoid O(n) array scans
+ * and to allow efficient in-place mutation without triggering a full array rebuild:
+ * - `itemsData` — `reactive(Map<posa_row_id, CartItem>)` for O(1) keyed lookup and
+ *   direct field mutation on the reactive proxy.
+ * - `itemOrder` — `ref<string[]>` that preserves insertion order.
+ *
+ * The `items` computed property reconstructs an ordered `CartItem[]` from both structures
+ * on each access and should be used wherever an array view of the cart is needed.
+ *
+ * `posa_row_id` is the stable key for every cart row. When an incoming item lacks one,
+ * a random alphanumeric ID is generated and written back onto the input object.
+ *
+ * ## Totals
+ * `totalQty`, `grossTotal`, and `discountTotal` are maintained as separate refs.
+ * Operations that add or remove rows call `recalculateTotals()` immediately. Incremental
+ * field edits (detected by a deep watcher on `itemsData`) are debounced through
+ * `triggerUpdateTotals` (50 ms) to avoid thrashing during rapid user input.
+ *
+ * ## Sticky fields
+ * Discount and delivery-charge fields that should survive an invoice reset are stored as
+ * top-level refs. Pass `{ preserveStickies: true }` to `clear()` to retain them when
+ * loading a new invoice without changing the operator's current settings.
  */
 
 import { defineStore } from "pinia";
@@ -15,6 +38,10 @@ import type {
 	DeliveryCharge,
 } from "../types/models";
 
+/**
+ * Converts an arbitrary value to a finite number.
+ * Returns `0` for `null`, `undefined`, empty strings, `NaN`, and `±Infinity`.
+ */
 const toNumber = (value: any): number => {
 	if (value == null) {
 		return 0;
@@ -56,6 +83,11 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	const grossTotal = ref(0);
 	const discountTotal = ref(0);
 
+	/**
+	 * Bumps `metadata.changeVersion` and records `lastUpdated = Date.now()`.
+	 * Called after every state mutation so that watchers and downstream computed
+	 * properties can detect that the invoice has changed.
+	 */
 	const touch = () => {
 		metadata.value = {
 			lastUpdated: Date.now(),
@@ -63,7 +95,17 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		};
 	};
 
-	// O(n) calculation of totals
+	/**
+	 * Walks every item in `itemsData` and recomputes `totalQty`, `grossTotal`,
+	 * and `discountTotal` from scratch in a single O(n) pass.
+	 *
+	 * - `grossTotal` = Σ (qty × rate)
+	 * - `discountTotal` = Σ |qty × discount_amount| (unsigned; sign is not preserved)
+	 *
+	 * Called immediately after `setItems`, `addItems`, `removeItemByRowId`, and
+	 * `clearItems`. For incremental field edits it is invoked via the debounced
+	 * `triggerUpdateTotals` to avoid recalculating on every keystroke.
+	 */
 	const recalculateTotals = () => {
 		let tQty = 0;
 		let tGross = 0;
@@ -84,7 +126,11 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		discountTotal.value = tDisc;
 	};
 
-	// Throttled update trigger
+	/**
+	 * Schedules a `recalculateTotals` call 50 ms in the future, coalescing multiple
+	 * calls within the same tick into a single recalculation.
+	 * Used by `addItem`, `replaceItemAt`, and the deep `itemsData` watcher.
+	 */
 	let updateTimer: ReturnType<typeof setTimeout> | null = null;
 	const triggerUpdateTotals = () => {
 		if (updateTimer) return;
@@ -94,6 +140,14 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		}, 50);
 	};
 
+	/**
+	 * Normalises a raw invoice value into an `InvoiceDoc` object or `null`.
+	 *
+	 * - `null` / `undefined` → `null`.
+	 * - A non-empty string → `{ name: string, doctype: "POS Invoice" }` (minimal stub).
+	 * - An empty / whitespace-only string → `null`.
+	 * - Any object → shallow clone of the input cast to `InvoiceDoc`.
+	 */
 	const normalizeDoc = (doc: any): InvoiceDoc | null => {
 		if (!doc) {
 			return null;
@@ -108,11 +162,24 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		return { ...doc };
 	};
 
+	/**
+	 * Replaces `invoiceDoc` with a normalised copy of `doc` and calls `touch()`.
+	 * Passing `null`, `undefined`, or an empty string clears the current document.
+	 *
+	 * @param doc - Raw invoice document object, a name string, or a nullish value.
+	 */
 	const setInvoiceDoc = (doc: any) => {
 		invoiceDoc.value = normalizeDoc(doc);
 		touch();
 	};
 
+	/**
+	 * Shallow-merges `patch` into the current `invoiceDoc` and calls `touch()`.
+	 * If no document is set yet, the patch is applied onto an empty object.
+	 * Existing fields not present in `patch` are preserved.
+	 *
+	 * @param patch - Partial `InvoiceDoc` fields to apply. Defaults to `{}`.
+	 */
 	const mergeInvoiceDoc = (patch: Partial<InvoiceDoc> = {}) => {
 		const current = invoiceDoc.value
 			? { ...invoiceDoc.value }
@@ -132,56 +199,99 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	const deliveryCharges = ref<DeliveryCharge[]>([]);
 	const deliveryChargesRate = ref(0);
 	const selectedDeliveryCharge = ref("");
+	/**
+	 * `true` when `invoiceType` is `"Order"` or `"Quotation"`.
+	 *
+	 * When `true`, stock-level validation is skipped at cart-add time and deferred until
+	 * the payment/confirmation step. This mirrors ERPNext order behaviour where stock can
+	 * be committed before it is physically available.
+	 *
+	 * TODO: verify whether `"Quotation"` actually participates in stock-validation deferral
+	 * in the current backend flow, or whether only `"Order"` does.
+	 */
 	const deferStockValidationToPayment = computed(() =>
 		invoiceType.value === "Order" || invoiceType.value === "Quotation",
 	);
 
+	/**
+	 * Sets `invoiceType`. Falls back to `"Invoice"` when `value` is empty or not a string.
+	 *
+	 * @param value - One of `"Invoice"`, `"Order"`, or `"Quotation"`.
+	 */
 	const setInvoiceType = (value: string) => {
 		invoiceType.value = typeof value === "string" && value ? value : "Invoice";
 	};
 
+	/** Resets `invoiceType` to `"Invoice"`. */
 	const resetInvoiceType = () => {
 		invoiceType.value = "Invoice";
 	};
 
+	/**
+	 * Overrides the invoice posting date.
+	 *
+	 * @param date - Date string in `"YYYY-MM-DD"` format.
+	 */
 	const setPostingDate = (date: string) => {
 		postingDate.value = date;
 	};
 
+	/** Resets `postingDate` to today's date via `frappe.datetime.nowdate()`. */
 	const resetPostingDate = () => {
 		postingDate.value = frappe.datetime.nowdate();
 	};
 
+	/** Sets the line-level discount amount. Non-numeric values are coerced to `0`. */
 	const setDiscountAmount = (val: any) => {
 		discountAmount.value = toNumber(val);
 	};
 
+	/** Sets the transaction-level additional discount amount. Non-numeric values are coerced to `0`. */
 	const setAdditionalDiscount = (val: any) => {
 		additionalDiscount.value = toNumber(val);
 	};
 
+	/** Sets the transaction-level discount percentage. Non-numeric values are coerced to `0`. */
 	const setAdditionalDiscountPercentage = (val: any) => {
 		additionalDiscountPercentage.value = toNumber(val);
 	};
 
+	/** Replaces the delivery-charge list. Non-array values are coerced to `[]`. */
 	const setDeliveryCharges = (val: any) => {
 		deliveryCharges.value = Array.isArray(val) ? val : [];
 	};
 
+	/** Sets the active delivery charge rate. Non-numeric values are coerced to `0`. */
 	const setDeliveryChargesRate = (val: any) => {
 		deliveryChargesRate.value = toNumber(val);
 	};
 
+	/** Sets the name of the currently selected delivery charge option. */
 	const setSelectedDeliveryCharge = (val: string) => {
 		selectedDeliveryCharge.value = val;
 	};
 
+	/**
+	 * Clears `deliveryCharges`, resets `deliveryChargesRate` to `0`,
+	 * and clears `selectedDeliveryCharge`.
+	 */
 	const resetDeliveryCharges = () => {
 		deliveryCharges.value = [];
 		deliveryChargesRate.value = 0;
 		selectedDeliveryCharge.value = "";
 	};
 
+	/**
+	 * Replaces all cart items with the supplied list.
+	 *
+	 * Clears `itemsData` and `itemOrder` before inserting the new items. Each item
+	 * must carry a `posa_row_id`; if absent, a random alphanumeric ID is generated and
+	 * written back onto the input object. Items are shallow-cloned on insertion.
+	 *
+	 * Totals are recalculated immediately (not debounced) after the replacement.
+	 *
+	 * @param list - Array of cart items to set. Non-array values are ignored (cart is cleared).
+	 */
 	const setItems = (list: any[]) => {
 		itemsData.clear();
 		const order: string[] = [];
@@ -202,6 +312,24 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		recalculateTotals(); // Immediate update on set
 	};
 
+	/**
+	 * Adds a single item to the cart and returns its reactive map proxy.
+	 *
+	 * If `item.posa_row_id` is absent a random alphanumeric ID is generated and written
+	 * back onto the input object. The item is shallow-cloned before being stored so that
+	 * external mutations to the original object do not affect the stored copy.
+	 *
+	 * **Insertion position:**
+	 * - `index >= 0` and within bounds → inserted at that position in `itemOrder`.
+	 * - `index === 0` when the order array is empty → `unshift` (prepend).
+	 * - Any other value (default `-1`) → appended at the end.
+	 *
+	 * Totals are updated via the debounced `triggerUpdateTotals`.
+	 *
+	 * @param item - Cart item to add. Must be a non-null object; null/undefined is a no-op.
+	 * @param index - Insertion position in `itemOrder`. Defaults to `-1` (append).
+	 * @returns The reactive proxy of the stored item, or `undefined` if `item` is falsy.
+	 */
 	const addItem = (item: any, index = -1) => {
 		if (!item) return;
 		const rowId =
@@ -224,6 +352,16 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		return itemsData.get(rowId);
 	};
 
+	/**
+	 * Adds multiple items to the cart in a single operation.
+	 *
+	 * Items are inserted as a contiguous block at `index`, preserving their relative order
+	 * within the batch. Totals are recalculated immediately (not debounced) after insertion.
+	 *
+	 * @param items - Array of cart items to add.
+	 * @param index - Insertion position. Defaults to `-1` (append).
+	 * @returns Array of reactive map proxies (one per added item), in insertion order.
+	 */
 	const addItems = (items: any[], index = -1) => {
 		if (!Array.isArray(items) || !items.length) return [];
 		const addedIds: string[] = [];
@@ -252,6 +390,18 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		return addedIds.map((id) => itemsData.get(id));
 	};
 
+	/**
+	 * Replaces the cart item at positional `index` with `item`.
+	 *
+	 * If `item.posa_row_id` differs from the ID currently held at `index`, the old entry
+	 * is removed from `itemsData` and `itemOrder[index]` is updated to the new ID.
+	 * When the IDs match, only the map entry is overwritten. The item is shallow-cloned.
+	 *
+	 * No-ops silently when `index` is out of range.
+	 *
+	 * @param index - Zero-based position in `itemOrder`.
+	 * @param item - Replacement cart item. Its `posa_row_id` may differ from the existing row.
+	 */
 	const replaceItemAt = (index: number, item: any) => {
 		if (index < 0 || index >= itemOrder.value.length) {
 			return;
@@ -271,6 +421,16 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		triggerUpdateTotals();
 	};
 
+	/**
+	 * Updates an existing item in-place or inserts it as a new row.
+	 *
+	 * - If `item.posa_row_id` is present and already in `itemsData`, `Object.assign` is
+	 *   used to merge all fields onto the existing reactive proxy (preserving reactivity
+	 *   without replacing the object reference).
+	 * - If the ID is absent or not yet in the map, the item is forwarded to `addItem`.
+	 *
+	 * @param item - Cart item to upsert. Null/undefined is a no-op.
+	 */
 	const upsertItem = (item: any) => {
 		if (!item) {
 			return;
@@ -293,6 +453,14 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		}
 	};
 
+	/**
+	 * Removes the item identified by `rowId` from both `itemsData` and `itemOrder`,
+	 * then recalculates totals immediately.
+	 *
+	 * No-ops silently when `rowId` is falsy or not found in the map.
+	 *
+	 * @param rowId - The `posa_row_id` of the item to remove.
+	 */
 	const removeItemByRowId = (rowId: string) => {
 		if (!rowId) {
 			return;
@@ -309,6 +477,10 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		}
 	};
 
+	/**
+	 * Empties all cart items and resets `totalQty`, `grossTotal`, and `discountTotal` to `0`.
+	 * No-ops (without calling `touch()`) when the cart is already empty.
+	 */
 	const clearItems = () => {
 		if (itemOrder.value.length > 0) {
 			itemOrder.value = [];
@@ -320,11 +492,32 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		}
 	};
 
+	/**
+	 * Replaces the packed-items list (product bundles expanded by ERPNext).
+	 * Each item is shallow-cloned. Non-array values are coerced to `[]`.
+	 *
+	 * @param list - Array of packed-item records from the ERPNext `packed_items` table.
+	 */
 	const setPackedItems = (list: any[]) => {
 		packedItems.value = Array.isArray(list) ? list.map(cloneItem) : [];
 		touch();
 	};
 
+	/**
+	 * Resets the invoice to a blank state.
+	 *
+	 * Always clears: `invoiceDoc`, all cart items, and `packedItems`.
+	 *
+	 * When `preserveStickies` is `false` (default) the following sticky fields are
+	 * also reset:
+	 * - `invoiceType` → `"Invoice"`.
+	 * - `discountAmount`, `additionalDiscount`, `additionalDiscountPercentage` → `0`.
+	 * - Delivery charge fields → empty/zero.
+	 *
+	 * @param options.preserveStickies - When `true`, sticky discount and delivery charge
+	 *   fields are left unchanged. Useful when loading a new invoice without clearing
+	 *   the operator's current discount or delivery settings.
+	 */
 	const clear = (options: { preserveStickies?: boolean } = {}) => {
 		const { preserveStickies = false } = options;
 		invoiceDoc.value = null;
@@ -342,6 +535,11 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		touch();
 	};
 
+	/**
+	 * Ordered array of cart items, reconstructed from `itemOrder` and `itemsData`.
+	 * Items missing from the map are silently filtered out (should not occur in normal use).
+	 * Use this anywhere an array view of the cart is needed.
+	 */
 	// Computed property that reconstructs the array from map + order
 	const items = computed(() => {
 		return itemOrder.value
@@ -351,8 +549,14 @@ export const useInvoiceStore = defineStore("invoice", () => {
 			);
 	});
 
+	/** Number of rows currently in the cart (length of `itemOrder`). */
 	const itemsCount = computed(() => itemOrder.value.length);
 
+	/**
+	 * Map from `posa_row_id` to `{ index, item }`, built from `itemOrder` and `itemsData`.
+	 * Useful when callers need both the item and its positional index without scanning
+	 * the `items` array. Reconstructed on every change to `itemOrder` or `itemsData`.
+	 */
 	const itemsMap = computed(() => {
 		const map = new Map<string, { index: number; item: CartItem }>();
 		itemOrder.value.forEach((id, index) => {
@@ -407,10 +611,22 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		postingDate,
 		setPostingDate,
 		resetPostingDate,
+		/**
+		 * Signals that `doc` should be loaded as the active invoice.
+		 * Sets `invoiceToLoad`, which is watched by the invoice-loading composable.
+		 *
+		 * @param doc - Invoice document object or name string to load.
+		 */
 		triggerLoadInvoice: (doc: any) => {
 			invoiceToLoad.value = doc;
 		},
 		orderToLoad,
+		/**
+		 * Signals that `doc` should be loaded as the active order.
+		 * Sets `orderToLoad`, which is watched by the order-loading composable.
+		 *
+		 * @param doc - Order document object or name string to load.
+		 */
 		triggerLoadOrder: (doc: any) => {
 			orderToLoad.value = doc;
 		},

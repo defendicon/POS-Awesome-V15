@@ -295,11 +295,11 @@ function loadInvoices() {
 	invoices.value = getOfflineInvoices();
 }
 
-function removeInvoice(index) {
+async function removeInvoice(index) {
 	if (!props.posProfile.posa_allow_delete_offline_invoice) {
 		return;
 	}
-	deleteOfflineInvoice(index);
+	await deleteOfflineInvoice(index);
 	loadInvoices();
 	emit("deleted", getPendingOfflineInvoiceCount());
 }

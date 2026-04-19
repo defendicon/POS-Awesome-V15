@@ -1,7 +1,8 @@
 import { reactive } from "vue";
 import {
-	start as startGlobalLoading,
-	stop as stopGlobalLoading,
+	startBootstrapLoading,
+	stopBootstrapLoading,
+	setScopeMeta,
 } from "../composables/core/useLoading";
 
 /**
@@ -58,7 +59,13 @@ export function initLoadingSources(list: string[]): void {
 
 	loadingState.progress = 0;
 	loadingState.active = true;
-	startGlobalLoading();
+	startBootstrapLoading();
+	setScopeMeta("bootstrap", {
+		kind: "bootstrap",
+		blocking: true,
+		message: loadingState.message,
+		progress: 0,
+	});
 }
 
 /**
@@ -84,6 +91,10 @@ export function setSourceProgress(name: string, value: number): void {
 	if (loadingState.message !== newMessage) {
 		loadingState.message = newMessage;
 	}
+	setScopeMeta("bootstrap", {
+		message: loadingState.message,
+		progress: loadingState.progress,
+	});
 
 	// Only update totals when progress increases
 	if (newValue > oldValue) {
@@ -123,6 +134,10 @@ function animateProgress(from: number, to: number): void {
 		} else {
 			loadingState.progress = to;
 		}
+		setScopeMeta("bootstrap", {
+			message: loadingState.message,
+			progress: loadingState.progress,
+		});
 	}
 
 	requestAnimationFrame(updateProgress);
@@ -138,17 +153,25 @@ function completeLoading(): void {
 
 	loadingState.progress = 100;
 	loadingState.message = __("Setup complete!");
+	setScopeMeta("bootstrap", {
+		message: loadingState.message,
+		progress: 100,
+	});
 
 	// Brief completion phase, then show ready
 	setTimeout(() => {
 		if (!loadingState.active) return; // Check if still active
 		loadingState.message = __("Ready!");
+		setScopeMeta("bootstrap", {
+			message: loadingState.message,
+			progress: 100,
+		});
 
 		// Hide after showing ready message
 		setTimeout(() => {
 			loadingState.active = false;
 			loadingState.message = __("Loading app data...");
-			stopGlobalLoading();
+			stopBootstrapLoading();
 			// Reset for next use
 			sourceCount = 0;
 			completedSum = 0;
@@ -175,7 +198,7 @@ export function resetLoadingState(): void {
 	sourceCount = 0;
 	completedSum = 0;
 	isCompleting = false;
-	stopGlobalLoading();
+	stopBootstrapLoading();
 }
 
 /**

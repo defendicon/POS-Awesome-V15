@@ -72,6 +72,10 @@ function buildMirroredState(
 		watermark: sourceState.watermark,
 		lastError: sourceState.lastError,
 		consecutiveFailures: sourceState.consecutiveFailures,
+		lastAttemptAt: sourceState.lastAttemptAt,
+		nextRetryAt: sourceState.nextRetryAt,
+		cooldownMs: sourceState.cooldownMs,
+		lastTrigger: sourceState.lastTrigger,
 		scopeSignature: sourceState.scopeSignature,
 		schemaVersion: sourceState.schemaVersion,
 	};

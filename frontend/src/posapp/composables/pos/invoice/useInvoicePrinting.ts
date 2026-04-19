@@ -1,3 +1,16 @@
+/**
+ * Draft invoice printing with pre-save gate.
+ *
+ * All dependencies are injected as parameters rather than imported, keeping this
+ * composable decoupled from specific save or print implementations.
+ *
+ * `print_draft_invoice` guards the print path with the
+ * `posa_allow_print_draft_invoices` profile flag. When the flag is set it calls
+ * `save_and_clear_invoice` first to obtain a named document, then invokes
+ * `load_print_page` with the saved document. Both the save step and the print step
+ * are wrapped in try/catch; any failure shows an error toast and returns early
+ * without surfacing the exception to the caller.
+ */
 import { unref } from "vue";
 import { useToastStore } from "../../../stores/toastStore";
 import { parseBooleanSetting } from "../../../utils/stock";

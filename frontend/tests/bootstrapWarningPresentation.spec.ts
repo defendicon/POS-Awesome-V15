@@ -9,8 +9,11 @@ describe("DefaultLayout bootstrap warning presentation", () => {
 			"utf8",
 		);
 
-		expect(source).toContain(':bootstrap-warning-active="bootstrapWarningActive"');
-		expect(source).toContain(':bootstrap-warning-tooltip="bootstrapWarningTooltip"');
+		expect(source).toContain(':bootstrap-warning-active="visibleBootstrapWarningActive"');
+		expect(source).toContain(':bootstrap-warning-tooltip="visibleBootstrapWarningTooltip"');
+		expect(source).toContain(':bootstrap-capabilities="visibleBootstrapCapabilitySummaries"');
+		expect(source).toContain("shouldLiftBootstrapWarningStartupGate");
+		expect(source).toContain("initialBootstrapSyncSettled");
 		expect(source).toContain("<v-snackbar");
 		expect(source).toContain('v-model="bootstrapSnackbarVisible"');
 		expect(source).toContain('location="top center"');

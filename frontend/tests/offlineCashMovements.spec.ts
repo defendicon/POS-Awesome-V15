@@ -1,52 +1,55 @@
+// @vitest-environment jsdom
+
+import "fake-indexeddb/auto";
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { persist, memory, isOffline } = vi.hoisted(() => ({
-	persist: vi.fn(),
-	memory: {
-		offline_cash_movements: [] as any[],
-	},
-	isOffline: vi.fn(),
-}));
-
-vi.mock("../src/offline/db", () => ({
-	memory,
-	persist,
-	isOffline,
-}));
-
 import {
-	clearOfflineCashMovements,
+	db,
 	getPendingOfflineCashMovementCount,
+	initPromise,
+	memory,
+	clearOfflineCashMovements,
 	saveOfflineCashMovement,
 	syncOfflineCashMovements,
-} from "../src/offline/cash_movements";
+} from "../src/offline/index";
 
 describe("offline cash movements", () => {
-	beforeEach(() => {
+	beforeEach(async () => {
+		await initPromise;
+		await db.table("write_queue").clear();
+		await db.table("queue").clear();
+		await db.table("keyval").clear();
 		memory.offline_cash_movements = [];
-		persist.mockReset();
-		isOffline.mockReset();
+		localStorage.clear();
 		(globalThis as any).frappe = {
 			call: vi.fn(),
 		};
 	});
 
-	it("stores movement in offline queue", () => {
-		saveOfflineCashMovement({
+	it("stores movement in the durable write queue", async () => {
+		await saveOfflineCashMovement({
 			method: "x",
-			args: { payload: { amount: 10 } },
+			args: { payload: { amount: 10, client_request_id: "cm-1" } },
 		});
 
 		expect(getPendingOfflineCashMovementCount()).toBe(1);
-		expect(persist).toHaveBeenCalledWith("offline_cash_movements");
+		const rows = await db.table("write_queue").toArray();
+		expect(rows).toHaveLength(1);
+		expect(rows[0]).toEqual(
+			expect.objectContaining({
+				entity_type: "cash_movement",
+				status: "pending",
+				retry_count: 0,
+			}),
+		);
 	});
 
-	it("syncs queued movements and clears queue when online", async () => {
-		saveOfflineCashMovement({
+	it("syncs queued movements and clears the active queue when online", async () => {
+		await saveOfflineCashMovement({
 			method: "posawesome.posawesome.api.cash_movement.service.create_pos_expense",
-			args: { payload: { amount: 10 } },
+			args: { payload: { amount: 10, client_request_id: "cm-2" } },
 		});
-		isOffline.mockReturnValue(false);
 		(globalThis as any).frappe.call.mockResolvedValue({ message: { ok: 1 } });
 
 		const result = await syncOfflineCashMovements();
@@ -57,21 +60,30 @@ describe("offline cash movements", () => {
 	});
 
 	it("does not sync while offline", async () => {
-		saveOfflineCashMovement({
-			args: { payload: { movement_type: "Deposit", amount: 20 } },
+		memory.manual_offline = true;
+		await saveOfflineCashMovement({
+			args: {
+				payload: {
+					movement_type: "Deposit",
+					amount: 20,
+					client_request_id: "cm-3",
+				},
+			},
 		});
-		isOffline.mockReturnValue(true);
 
 		const result = await syncOfflineCashMovements();
 
 		expect(result).toEqual({ pending: 1, synced: 0 });
 		expect((globalThis as any).frappe.call).not.toHaveBeenCalled();
 		expect(getPendingOfflineCashMovementCount()).toBe(1);
+		memory.manual_offline = false;
 	});
 
-	it("clear utility empties queue", () => {
-		saveOfflineCashMovement({ args: { payload: { amount: 5 } } });
-		clearOfflineCashMovements();
+	it("clear utility empties the queue", async () => {
+		await saveOfflineCashMovement({
+			args: { payload: { amount: 5, client_request_id: "cm-4" } },
+		});
+		await clearOfflineCashMovements();
 		expect(getPendingOfflineCashMovementCount()).toBe(0);
 	});
 });

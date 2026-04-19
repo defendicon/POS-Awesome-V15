@@ -12,6 +12,13 @@ const itemAvailabilitySpies = vi.hoisted(() => ({
 	handleInvoiceStockAdjusted: vi.fn(),
 }));
 
+const lastBuyingRateSpies = vi.hoisted(() => ({
+	contexts: [] as any[],
+	getLastBuyingRate: vi.fn(() => null),
+	scheduleLastBuyingRateRefresh: vi.fn(),
+	clearLastBuyingRateCache: vi.fn(),
+}));
+
 vi.mock("../src/offline/index", () => ({
 	memoryInitPromise: Promise.resolve(),
 }));
@@ -181,11 +188,51 @@ vi.mock("../src/posapp/composables/pos/items/useLastInvoiceRate", () => ({
 }));
 
 vi.mock("../src/posapp/composables/pos/items/useLastBuyingRate", () => ({
-	useLastBuyingRate: () => ({
-		getLastBuyingRate: vi.fn(() => null),
-		scheduleLastBuyingRateRefresh: vi.fn(),
-		clearLastBuyingRateCache: vi.fn(),
-	}),
+	useLastBuyingRate: (context: any) => {
+		lastBuyingRateSpies.contexts.push(context);
+		return {
+			getLastBuyingRate: lastBuyingRateSpies.getLastBuyingRate,
+			scheduleLastBuyingRateRefresh:
+				lastBuyingRateSpies.scheduleLastBuyingRateRefresh,
+			clearLastBuyingRateCache:
+				lastBuyingRateSpies.clearLastBuyingRateCache,
+		};
+	},
+}));
+
+vi.mock("../src/posapp/composables/pos/items/useItemRateInfo", () => ({
+	useItemRateInfo: (context: any) => {
+		const resolveSupervisorFlag = () => {
+			const value = context?.is_pos_supervisor;
+			if (typeof value === "function") {
+				return Boolean(value());
+			}
+			if (value && typeof value === "object" && "value" in value) {
+				return Boolean(value.value);
+			}
+			return Boolean(value);
+		};
+
+		return {
+			getItemRateInfo: (_item: any) => ({
+				entries: [
+					{
+						key: "sale",
+						visible: true,
+					},
+					{
+						key: "purchase",
+						visible: resolveSupervisorFlag(),
+					},
+					{
+						key: "cost",
+						visible: resolveSupervisorFlag(),
+					},
+				].filter((entry) => entry.visible),
+			}),
+			resolveProfileCurrency: vi.fn(() => null),
+		};
+	},
 }));
 
 vi.mock("../src/posapp/composables/pos/items/useItemSync", () => ({
@@ -273,7 +320,18 @@ vi.mock("../src/posapp/composables/pos/items/useItemCurrency", () => ({
 }));
 
 vi.mock("../src/posapp/utils/stock", () => ({
-	parseBooleanSetting: (value: any) => Boolean(value),
+	parseBooleanSetting: (value: any) => {
+		if (value === undefined || value === null) {
+			return false;
+		}
+		if (typeof value === "string") {
+			return ["1", "true", "yes", "on"].includes(value.trim().toLowerCase());
+		}
+		if (typeof value === "number") {
+			return value === 1;
+		}
+		return Boolean(value);
+	},
 }));
 
 vi.mock("../src/posapp/utils/itemSelectorHighlightBindings", () => ({
@@ -336,6 +394,7 @@ vi.mock("../src/posapp/components/pos/items/ScanErrorDialog.vue", () => ({
 describe("ItemsSelector stock wiring", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		lastBuyingRateSpies.contexts.length = 0;
 		setActivePinia(createPinia());
 		(window as any).__ = (value: string) => value;
 		(window as any).frappe = {
@@ -404,5 +463,106 @@ describe("ItemsSelector stock wiring", () => {
 		).toHaveBeenCalledWith({
 			items: [{ item_code: "ITEM-1", actual_qty: 8 }],
 		});
+	});
+
+	it('parses string supervisor flags before exposing supervisor-only rate info', async () => {
+		const { useUIStore } = await import("../src/posapp/stores/uiStore");
+		const { useEmployeeStore } = await import("../src/posapp/stores/employeeStore");
+		const uiStore = useUIStore();
+		const employeeStore = useEmployeeStore();
+
+		uiStore.setPosProfile({
+			name: "POS-1",
+			currency: "PKR",
+			selling_price_list: "Standard Selling",
+		} as any);
+		employeeStore.currentCashier = {
+			user: "cashier@example.com",
+			full_name: "Cashier",
+			is_supervisor: "0",
+		} as any;
+
+		const eventBus = {
+			on: vi.fn(),
+			off: vi.fn(),
+			emit: vi.fn(),
+		};
+
+		const ItemsSelector = (await import(
+			"../src/posapp/components/pos/items/ItemsSelector.vue"
+		)).default;
+
+		const wrapper = shallowMount(ItemsSelector, {
+			global: {
+				provide: {
+					eventBus,
+				},
+			},
+		});
+
+		await Promise.resolve();
+		await wrapper.vm.$nextTick();
+
+		const lastBuyingRateContext = lastBuyingRateSpies.contexts.at(-1);
+
+		expect(lastBuyingRateContext.show_last_buying_rate()).toBe(false);
+		expect(
+			wrapper.vm.getItemRateInfo({
+				item_code: "ITEM-1",
+				standard_rate: 10,
+			}).entries,
+		).toEqual([{ key: "sale", visible: true }]);
+	});
+
+	it("exposes supervisor-only rate info when the cashier flag is a string one", async () => {
+		const { useUIStore } = await import("../src/posapp/stores/uiStore");
+		const { useEmployeeStore } = await import("../src/posapp/stores/employeeStore");
+		const uiStore = useUIStore();
+		const employeeStore = useEmployeeStore();
+
+		uiStore.setPosProfile({
+			name: "POS-1",
+			currency: "PKR",
+			selling_price_list: "Standard Selling",
+		} as any);
+		employeeStore.currentCashier = {
+			user: "supervisor@example.com",
+			full_name: "Supervisor",
+			is_supervisor: "1",
+		} as any;
+
+		const eventBus = {
+			on: vi.fn(),
+			off: vi.fn(),
+			emit: vi.fn(),
+		};
+
+		const ItemsSelector = (await import(
+			"../src/posapp/components/pos/items/ItemsSelector.vue"
+		)).default;
+
+		const wrapper = shallowMount(ItemsSelector, {
+			global: {
+				provide: {
+					eventBus,
+				},
+			},
+		});
+
+		await Promise.resolve();
+		await wrapper.vm.$nextTick();
+
+		const lastBuyingRateContext = lastBuyingRateSpies.contexts.at(-1);
+		const entries = wrapper.vm.getItemRateInfo({
+			item_code: "ITEM-1",
+			standard_rate: 10,
+		}).entries;
+
+		expect(lastBuyingRateContext.show_last_buying_rate()).toBe(true);
+		expect(entries.map((entry: any) => entry.key)).toEqual([
+			"sale",
+			"purchase",
+			"cost",
+		]);
 	});
 });

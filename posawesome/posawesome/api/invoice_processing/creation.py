@@ -29,6 +29,13 @@ from posawesome.posawesome.api.invoice_processing.stock import (
 from posawesome.posawesome.api.payment_processing.utils import get_bank_cash_account as get_bank_account
 from posawesome.posawesome.api.utilities import ensure_child_doctype, set_batch_nos_for_bundels
 from posawesome.posawesome.api.payments import redeeming_customer_credit
+from posawesome.posawesome.api.idempotency import (
+    extract_invoice_client_request_id,
+    find_invoice_by_client_request_id,
+    set_invoice_client_request_id,
+    strip_invoice_client_request_id,
+    doctype_supports_client_request_id,
+)
 import json
 from frappe.utils import money_in_words
 from frappe.utils.background_jobs import enqueue
@@ -464,6 +471,9 @@ def _resolve_payment_amounts(payment, conversion_rate=1):
 def update_invoice(data):
     currency_cache = {}
     data = json.loads(data)
+    client_request_id = extract_invoice_client_request_id(data)
+    if not doctype_supports_client_request_id(data.get("doctype") or "Sales Invoice"):
+        strip_invoice_client_request_id(data)
     _sanitize_delivery_dates(data)
     _apply_manual_posting_controls(data)
     _strip_client_freebies_from_payload(data)
@@ -481,6 +491,7 @@ def update_invoice(data):
     return_validity_enabled, default_validity_days = _get_return_validity_settings(pos_profile)
 
     invoice_doc = _get_mutable_invoice_doc(data, doctype)
+    set_invoice_client_request_id(invoice_doc, client_request_id)
 
     # Set currency from data before set_missing_values
     # Validate return items if this is a return invoice
@@ -695,6 +706,7 @@ def update_invoice(data):
 def submit_invoice(invoice, data, submit_in_background=False):
     data = json.loads(data)
     invoice = json.loads(invoice)
+    client_request_id = extract_invoice_client_request_id(invoice, data)
     _sanitize_delivery_dates(invoice)
     _apply_manual_posting_controls(invoice)
     submit_in_background = cint(submit_in_background)
@@ -706,6 +718,22 @@ def submit_invoice(invoice, data, submit_in_background=False):
     ):
         doctype = "POS Invoice"
 
+    if not doctype_supports_client_request_id(doctype):
+        strip_invoice_client_request_id(invoice)
+
+    existing_by_request = find_invoice_by_client_request_id(client_request_id, preferred_doctype=doctype)
+    if existing_by_request:
+        if cint(existing_by_request.docstatus) == 1:
+            return {
+                "name": existing_by_request.name,
+                "status": existing_by_request.docstatus,
+                "docstatus": existing_by_request.docstatus,
+                "doctype": existing_by_request.doctype,
+                "replayed": True,
+            }
+        invoice["name"] = existing_by_request.name
+        doctype = existing_by_request.doctype
+
     invoice_name = invoice.get("name")
     if invoice_name and frappe.db.exists(doctype, invoice_name):
         existing_doc = frappe.get_doc(doctype, invoice_name)
@@ -714,6 +742,8 @@ def submit_invoice(invoice, data, submit_in_background=False):
             invoice_name = None
 
     if not invoice_name or not frappe.db.exists(doctype, invoice_name):
+        if client_request_id:
+            invoice["posa_client_request_id"] = client_request_id
         created = update_invoice(json.dumps(invoice))
         invoice_name = created.get("name")
         invoice_doc = frappe.get_doc(doctype, invoice_name)
@@ -723,6 +753,8 @@ def submit_invoice(invoice, data, submit_in_background=False):
             del invoice["modified"]
         invoice_doc = frappe.get_doc(doctype, invoice_name)
         invoice_doc.update(invoice)
+
+    set_invoice_client_request_id(invoice_doc, client_request_id)
 
     _deduplicate_free_items(invoice_doc)
 

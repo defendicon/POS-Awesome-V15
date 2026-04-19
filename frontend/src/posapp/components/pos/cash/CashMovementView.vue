@@ -172,7 +172,7 @@ async function handleSubmit(payload: any) {
 				payload.movementType === "Deposit"
 					? "posawesome.posawesome.api.cash_movement.service.create_cash_deposit"
 					: "posawesome.posawesome.api.cash_movement.service.create_pos_expense";
-			saveOfflineCashMovement({
+			await saveOfflineCashMovement({
 				method,
 				args: {
 					payload: requestPayload,

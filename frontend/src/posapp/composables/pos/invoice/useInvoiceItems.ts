@@ -1,3 +1,35 @@
+/**
+ * Cart item management: column preferences, quantity editing, and delivery charges.
+ *
+ * **Column visibility**
+ * `available_columns` lists every possible cart table column. `selected_columns`
+ * is the operator-chosen subset, persisted to `localStorage` under the key
+ * `posawesome_selected_columns`. The computed `items_headers` merges required
+ * columns with the operator selection. `loadColumnPreferences` applies profile
+ * defaults when no saved preference exists; `saveColumnPreferences` writes back
+ * on every change.
+ *
+ * **Quantity editing (`setFormatedQty`)**
+ * The central quantity setter enforces several layered rules in order:
+ * 1. Clamps to `_offer_constraints.max_qty` for offer lines.
+ * 2. Enforces stock ceiling when `posa_validate_stock` is enabled, with a
+ *    "block vs. warn" branch controlled by `posa_block_sale_beyond_available_qty`
+ *    and `allow_negative_stock`.
+ * 3. Forces negative sign on return invoices.
+ * After setting qty it calls `calc_stock_qty` and, for bundles,
+ * `updateBundleChildrenQty`. It emits `apply_pricing_rules` on the bus.
+ *
+ * **Increment / decrement helpers**
+ * `add_one` and `subtract_one` mirror the sign of the current qty so they work
+ * correctly on return lines. Both remove the item automatically when qty would
+ * reach zero. `blockSaleBeyondAvailableQty` is disabled for Order/Quotation types.
+ *
+ * **Delivery charges**
+ * `fetch_delivery_charges(customer)` calls the server and caches results via
+ * `saveDeliveryChargesCache`. On failure `getCachedDeliveryCharges` is used.
+ * Three watchers keep `invoiceStore` in sync with the local delivery charge refs
+ * so the customer display panel always reflects the current selection.
+ */
 import { ref, computed, watch } from "vue";
 import type { Ref } from "vue";
 import { useInvoiceStore } from "../../../stores/invoiceStore";
@@ -16,10 +48,6 @@ import { bus } from "../../../bus";
 // @ts-ignore
 const __ = window.__ || ((s) => s);
 
-/**
- * useInvoiceItems Composable
- * Manages invoice items, validation, quantities, and table headers.
- */
 export function useInvoiceItems(invoiceType: Ref<string>) {
 	const invoiceStore = useInvoiceStore();
 	const toastStore = useToastStore();

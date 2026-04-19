@@ -11,7 +11,6 @@ export function isPaymentRouteLocked({
 }: PaymentRouteReadinessInput): boolean {
 	return Boolean(
 		loadingCustomers ||
-			isCustomerBackgroundLoading ||
 			!customersLoaded,
 	);
 }

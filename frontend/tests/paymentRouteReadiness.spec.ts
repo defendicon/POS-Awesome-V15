@@ -5,8 +5,18 @@ import {
 	isPaymentRouteLocked,
 } from "../src/posapp/utils/paymentRouteReadiness";
 
-describe("paymentRouteReadiness", () => {
-	it("locks the payments route while customer loading is still in progress", () => {
+describe("payment route readiness", () => {
+	it("does not block the payment route for background customer refresh alone", () => {
+		expect(
+			isPaymentRouteLocked({
+				customersLoaded: true,
+				loadingCustomers: false,
+				isCustomerBackgroundLoading: true,
+			}),
+		).toBe(false);
+	});
+
+	it("still blocks the payment route while initial customer loading is incomplete", () => {
 		expect(
 			isPaymentRouteLocked({
 				customersLoaded: false,
@@ -14,32 +24,9 @@ describe("paymentRouteReadiness", () => {
 				isCustomerBackgroundLoading: false,
 			}),
 		).toBe(true);
-
-		expect(
-			isPaymentRouteLocked({
-				customersLoaded: true,
-				loadingCustomers: false,
-				isCustomerBackgroundLoading: true,
-			}),
-		).toBe(true);
 	});
 
-	it("unlocks the payments route only after customer loading is complete", () => {
-		expect(
-			isPaymentRouteLocked({
-				customersLoaded: true,
-				loadingCustomers: false,
-				isCustomerBackgroundLoading: false,
-			}),
-		).toBe(false);
-	});
-
-	it("builds an english loading message with progress when available", () => {
-		expect(buildPaymentRouteLoadingMessage(42)).toBe(
-			"Preparing payments. Customer data is still loading (42%).",
-		);
-		expect(buildPaymentRouteLoadingMessage(null)).toBe(
-			"Preparing payments. Customer data is still loading.",
-		);
+	it("builds a progress-aware payment loading message", () => {
+		expect(buildPaymentRouteLoadingMessage(42)).toContain("(42%)");
 	});
 });

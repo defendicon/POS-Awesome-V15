@@ -13,6 +13,15 @@ vi.mock("../src/posapp/composables/core/useRtl", () => ({
 	}),
 }));
 
+vi.mock("../src/offline/index", () => ({
+	forceClearAllCache: vi.fn(async () => undefined),
+	isOffline: vi.fn(() => false),
+}));
+
+vi.mock("../src/utils/clearAllCaches", () => ({
+	clearAllCaches: vi.fn(async () => undefined),
+}));
+
 import Navbar from "../src/posapp/components/Navbar.vue";
 import { useEmployeeStore } from "../src/posapp/stores/employeeStore";
 

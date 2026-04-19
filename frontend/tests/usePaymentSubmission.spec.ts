@@ -383,6 +383,120 @@ describe("usePaymentSubmission", () => {
 		);
 	});
 
+	it("adds a stable client request id to invoice submissions", async () => {
+		const invoiceService =
+			(await import("../src/posapp/services/invoiceService")).default;
+		(invoiceService.submitInvoice as any).mockResolvedValue({
+			name: "ACC-SINV-0099",
+			doctype: "Sales Invoice",
+			docstatus: 1,
+		});
+
+		const invoiceDoc = ref<any>({
+			name: "ACC-SINV-0099",
+			doctype: "Sales Invoice",
+			is_return: 0,
+			items: [{ item_code: "ITEM-1", qty: 1 }],
+			payments: [{ mode_of_payment: "Cash", amount: 50, type: "Cash" }],
+			rounded_total: 50,
+			grand_total: 50,
+		});
+
+		const { submitInvoice } = usePaymentSubmission({
+			invoiceDoc,
+			posProfile: ref({
+				posa_allow_submissions_in_background_job: 0,
+				create_pos_invoice_instead_of_sales_invoice: 0,
+			}),
+			stockSettings: ref({}),
+			invoiceType: ref("Invoice"),
+			formatFloat: (value) => Number(value || 0),
+			stores: {
+				toastStore: { show: vi.fn() },
+				uiStore: { setLastInvoice: vi.fn(), setLastStockAdjustment: vi.fn() },
+				customersStore: { setSelectedCustomer: vi.fn() },
+				invoiceStore: { invoiceDoc: invoiceDoc.value },
+			},
+			isCashback: ref(false),
+			paidChange: ref(0),
+			creditChange: ref(0),
+			redeemedCustomerCredit: ref(0),
+			customerCreditDict: ref([]),
+			diff_payment: ref(0),
+		});
+
+		await submitInvoice(false, {
+			onFinishNavigation: vi.fn(),
+		});
+
+		const [, submittedDoc] = (invoiceService.submitInvoice as any).mock.calls[0];
+		expect(submittedDoc.posa_client_request_id).toEqual(expect.any(String));
+		expect(invoiceDoc.value.posa_client_request_id).toBe(
+			submittedDoc.posa_client_request_id,
+		);
+	});
+
+	it("reuses the same client request id across repeated invoice submit attempts", async () => {
+		const invoiceService =
+			(await import("../src/posapp/services/invoiceService")).default;
+		(invoiceService.submitInvoice as any).mockResolvedValue({
+			name: "ACC-SINV-0100",
+			doctype: "Sales Invoice",
+			docstatus: 1,
+		});
+
+		const invoiceDoc = ref<any>({
+			name: "ACC-SINV-0100",
+			doctype: "Sales Invoice",
+			is_return: 0,
+			items: [{ item_code: "ITEM-1", qty: 1 }],
+			payments: [{ mode_of_payment: "Cash", amount: 50, type: "Cash" }],
+			rounded_total: 50,
+			grand_total: 50,
+		});
+
+		const { submitInvoice } = usePaymentSubmission({
+			invoiceDoc,
+			posProfile: ref({
+				posa_allow_submissions_in_background_job: 0,
+				create_pos_invoice_instead_of_sales_invoice: 0,
+			}),
+			stockSettings: ref({}),
+			invoiceType: ref("Invoice"),
+			formatFloat: (value) => Number(value || 0),
+			stores: {
+				toastStore: { show: vi.fn() },
+				uiStore: { setLastInvoice: vi.fn(), setLastStockAdjustment: vi.fn() },
+				customersStore: { setSelectedCustomer: vi.fn() },
+				invoiceStore: { invoiceDoc: invoiceDoc.value },
+			},
+			isCashback: ref(false),
+			paidChange: ref(0),
+			creditChange: ref(0),
+			redeemedCustomerCredit: ref(0),
+			customerCreditDict: ref([]),
+			diff_payment: ref(0),
+		});
+
+		await submitInvoice(false, {
+			onFinishNavigation: vi.fn(),
+		});
+		await submitInvoice(false, {
+			onFinishNavigation: vi.fn(),
+		});
+
+		const firstSubmittedDoc = (invoiceService.submitInvoice as any).mock.calls[0][1];
+		const secondSubmittedDoc = (invoiceService.submitInvoice as any).mock.calls[1][1];
+
+		expect(firstSubmittedDoc.posa_client_request_id).toEqual(expect.any(String));
+		expect(secondSubmittedDoc.posa_client_request_id).toBe(
+			firstSubmittedDoc.posa_client_request_id,
+		);
+		expect(invoiceDoc.value.posa_client_request_id).toBe(
+			firstSubmittedDoc.posa_client_request_id,
+		);
+	});
+
 	it("blocks offline invoice save when gift card redemption is present", async () => {
 		const offlineModule = await import("../src/offline/index");
 		(offlineModule.isOffline as any).mockReturnValue(true);

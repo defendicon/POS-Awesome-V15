@@ -55,6 +55,44 @@
 
 			<div class="offline-status-panel__section">
 				<div class="offline-status-panel__section-title">
+					{{ __("Offline Capabilities") }}
+				</div>
+				<div
+					v-if="capabilitySummaries.length"
+					class="offline-status-panel__resources"
+				>
+					<div
+						v-for="capability in capabilitySummaries"
+						:key="capability.id"
+						class="offline-status-panel__resource"
+						:data-test="`offline-capability-${capability.id}`"
+					>
+						<div class="offline-status-panel__resource-head">
+							<div class="offline-status-panel__resource-title">
+								{{ capability.label }}
+							</div>
+							<div class="offline-status-panel__resource-status">
+								{{ capability.status }}
+							</div>
+						</div>
+						<div class="offline-status-panel__resource-detail">
+							{{ capability.message }}
+						</div>
+						<div
+							v-if="capability.action"
+							class="offline-status-panel__resource-id"
+						>
+							{{ capability.action }}
+						</div>
+					</div>
+				</div>
+				<div v-else class="offline-status-panel__empty">
+					{{ __("No capability warnings recorded yet.") }}
+				</div>
+			</div>
+
+			<div class="offline-status-panel__section">
+				<div class="offline-status-panel__section-title">
 					{{ __("Resource Health") }}
 				</div>
 				<div
@@ -162,6 +200,7 @@ const offlineSyncStore = useOfflineSyncStore();
 const {
 	summary,
 	bootstrapWarning,
+	capabilitySummaries,
 	connectivityLabel,
 	connectivityTone,
 	sortedResources,

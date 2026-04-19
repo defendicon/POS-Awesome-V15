@@ -1,3 +1,47 @@
+/**
+ * POS offer evaluation, application, and lifecycle management.
+ *
+ * **Refresh scheduling**
+ * Offer evaluation is never called directly. Instead, callers call
+ * `scheduleOfferRefresh(changedRowIds?)` which coalesces multiple rapid changes
+ * into a single `requestAnimationFrame` callback (falling back to `setTimeout 16`).
+ * The composable watches `items`, `posOffers`, `posa_coupons`, and
+ * `invoiceStore.metadata` and schedules a refresh automatically on any change.
+ *
+ * **Digest-based loop prevention**
+ * After each evaluation pass a digest string is computed from the resulting offer
+ * states and item quantities. If the digest matches the previous pass the update
+ * is skipped, breaking potential infinite-loop cycles between offer application
+ * and item changes.
+ *
+ * **Evaluation context**
+ * `buildOfferEvaluationContext` groups cart items into four buckets (by item code,
+ * item group, brand, and transaction) so that individual offer evaluators
+ * (`getItemOffer`, `getGroupOffer`, `getBrandOffer`, `getTransactionOffer`) perform
+ * O(1) bucket lookups rather than full list scans. Results are cached per offer
+ * name in `_cachedOfferResults`; only offers affected by the changed row IDs are
+ * recomputed on incremental refreshes.
+ *
+ * **Offer benefit types**
+ * - `"Give Product"` — adds a free item to the cart (computed qty supports
+ *   recursive / per-unit modes).
+ * - `"Item Price"` — applies a discount directly to matching cart items.
+ * - `"Grand Total"` — sets the invoice-level additional discount.
+ *
+ * **Manual suppression**
+ * `_manuallySuppressedAutoOffers` tracks offer row IDs the operator has
+ * deliberately deselected. Auto-enabled offers are not re-applied while
+ * suppressed; suppression is cleared when the offer leaves the available set.
+ *
+ * **Debug logging**
+ * Set `localStorage.posawesome_debug_offers = "1"` to enable verbose console
+ * output from every evaluation step.
+ *
+ * **Dependency injection**
+ * `setUpdateItemDetail(fn)` injects the item-detail updater from the parent
+ * composable so that offer application can propagate changes through the shared
+ * item detail pipeline without a circular import.
+ */
 import { ref, computed, watch } from "vue";
 import { useInvoiceStore } from "../../../stores/invoiceStore";
 import { useUIStore } from "../../../stores/uiStore";

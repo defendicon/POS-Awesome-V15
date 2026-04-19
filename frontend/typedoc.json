@@ -1,0 +1,35 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "plugin": ["typedoc-plugin-markdown"],
+  "entryPoints": [
+    "src/offline/index.ts",
+    "src/offline/bootstrapSnapshot.ts",
+    "src/offline/sync/types.ts",
+    "src/offline/sync/SyncCoordinator.ts",
+    "src/offline/sync/resourceRegistry.ts",
+    "src/posapp/stores/index.ts",
+    "src/posapp/types/models.ts",
+    "src/posapp/utils/currencyConversion.ts",
+    "src/posapp/utils/stock.ts",
+    "src/posapp/utils/bootstrapWarnings.ts",
+    "src/posapp/utils/searchUtils.ts",
+    "src/posapp/composables/pos/shared/useDiscounts.ts",
+    "src/lib/pricingEngine.ts",
+    "src/posapp/stores/offlineSyncStore.ts"
+  ],
+  "entryPointStrategy": "resolve",
+  "out": "docs/api",
+  "outputFileStrategy": "modules",
+  "readme": "none",
+  "githubPages": false,
+  "includeVersion": false,
+  "disableSources": false,
+  "skipErrorChecking": false,
+  "treatWarningsAsErrors": false,
+  "categorizeByGroup": true,
+  "groupOrder": ["Functions", "Classes", "Interfaces", "Type Aliases", "Variables"],
+  "navigationLinks": {
+    "Docs": "../index.md",
+    "Getting Started": "../getting-started.md"
+  }
+}

@@ -1,47 +1,51 @@
-import { memory, persist, isOffline } from "./db";
+import { isOffline } from "./db";
+import {
+	claimRetryableQueueEntries,
+	clearWriteQueueEntries,
+	deleteWriteQueueEntryByIndex,
+	enqueueWriteQueueEntry,
+	getQueuedPayloadCount,
+	getQueuedPayloadSnapshots,
+	markWriteQueueEntryFailed,
+	markWriteQueueEntrySynced,
+	type OfflineEntityType,
+} from "./writeQueue";
 
 type AnyRecord = Record<string, any>;
 
-const CREATE_EXPENSE_METHOD = "posawesome.posawesome.api.cash_movement.service.create_pos_expense";
-const CREATE_DEPOSIT_METHOD = "posawesome.posawesome.api.cash_movement.service.create_cash_deposit";
+const CASH_MOVEMENT_ENTITY: OfflineEntityType = "cash_movement";
 
-export function saveOfflineCashMovement(entry: AnyRecord) {
-	const key = "offline_cash_movements";
-	const entries = memory.offline_cash_movements || [];
+const CREATE_EXPENSE_METHOD =
+	"posawesome.posawesome.api.cash_movement.service.create_pos_expense";
+const CREATE_DEPOSIT_METHOD =
+	"posawesome.posawesome.api.cash_movement.service.create_cash_deposit";
+
+export async function saveOfflineCashMovement(entry: AnyRecord) {
 	let cleanEntry;
 	try {
 		cleanEntry = JSON.parse(JSON.stringify(entry));
-	} catch (e) {
-		console.error("Failed to serialize offline cash movement", e);
-		throw e;
+	} catch (error) {
+		console.error("Failed to serialize offline cash movement", error);
+		throw error;
 	}
-	entries.push(cleanEntry);
-	memory.offline_cash_movements = entries;
-	persist(key);
+
+	return enqueueWriteQueueEntry(CASH_MOVEMENT_ENTITY, cleanEntry);
 }
 
 export function getOfflineCashMovements() {
-	return memory.offline_cash_movements || [];
+	return getQueuedPayloadSnapshots(CASH_MOVEMENT_ENTITY);
 }
 
-export function clearOfflineCashMovements() {
-	memory.offline_cash_movements = [];
-	persist("offline_cash_movements");
+export async function clearOfflineCashMovements() {
+	await clearWriteQueueEntries(CASH_MOVEMENT_ENTITY);
 }
 
-export function deleteOfflineCashMovement(index: number) {
-	if (
-		Array.isArray(memory.offline_cash_movements) &&
-		index >= 0 &&
-		index < memory.offline_cash_movements.length
-	) {
-		memory.offline_cash_movements.splice(index, 1);
-		persist("offline_cash_movements");
-	}
+export async function deleteOfflineCashMovement(index: number) {
+	await deleteWriteQueueEntryByIndex(CASH_MOVEMENT_ENTITY, index);
 }
 
 export function getPendingOfflineCashMovementCount() {
-	return (memory.offline_cash_movements || []).length;
+	return getQueuedPayloadCount(CASH_MOVEMENT_ENTITY);
 }
 
 function resolveMethod(entry: AnyRecord) {
@@ -51,7 +55,9 @@ function resolveMethod(entry: AnyRecord) {
 	const movementType = String(
 		entry?.payload?.movement_type || entry?.args?.payload?.movement_type || "",
 	).toLowerCase();
-	return movementType === "deposit" ? CREATE_DEPOSIT_METHOD : CREATE_EXPENSE_METHOD;
+	return movementType === "deposit"
+		? CREATE_DEPOSIT_METHOD
+		: CREATE_EXPENSE_METHOD;
 }
 
 function resolveArgs(entry: AnyRecord) {
@@ -72,28 +78,35 @@ export async function syncOfflineCashMovements() {
 		return { pending: queue.length, synced: 0 };
 	}
 
-	const failures: AnyRecord[] = [];
+	const claimedEntries = await claimRetryableQueueEntries(CASH_MOVEMENT_ENTITY);
+	if (!claimedEntries.length) {
+		return { pending: getPendingOfflineCashMovementCount(), synced: 0 };
+	}
+
 	let synced = 0;
 
-	for (const movement of queue) {
+	for (const entry of claimedEntries) {
 		try {
 			await frappe.call({
-				method: resolveMethod(movement),
-				args: resolveArgs(movement),
+				method: resolveMethod(entry.payload),
+				args: resolveArgs(entry.payload),
 			});
-			synced++;
+			synced += 1;
+			await markWriteQueueEntrySynced(
+				CASH_MOVEMENT_ENTITY,
+				Number(entry.queue_id),
+				entry.last_attempt_at,
+			);
 		} catch (error) {
 			console.error("Failed to sync offline cash movement", error);
-			failures.push(movement);
+			await markWriteQueueEntryFailed(
+				CASH_MOVEMENT_ENTITY,
+				Number(entry.queue_id),
+				error,
+				entry.last_attempt_at,
+			);
 		}
 	}
 
-	if (failures.length) {
-		memory.offline_cash_movements = failures;
-		persist("offline_cash_movements");
-	} else {
-		clearOfflineCashMovements();
-	}
-
-	return { pending: failures.length, synced };
+	return { pending: getPendingOfflineCashMovementCount(), synced };
 }

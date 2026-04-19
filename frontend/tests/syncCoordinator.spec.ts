@@ -5,6 +5,10 @@ import type {
 	SyncTrigger,
 } from "../src/offline/sync/types";
 
+vi.mock("../src/offline/sync/syncState", () => ({
+	setSyncResourceState: vi.fn(async () => undefined),
+}));
+
 const makeResource = (
 	id: SyncResourceDefinition["id"],
 	priority: SyncResourceDefinition["priority"],
@@ -99,5 +103,117 @@ describe("SyncCoordinator", () => {
 		expect(coordinator.getResourceState("bootstrap_config")?.status).toBe(
 			"fresh",
 		);
+	});
+
+	it("continues warm resources after a non-critical failure and records a summary", async () => {
+		const resources = [
+			makeResource("items", "warm", ["online_resume"]),
+			makeResource("customers", "warm", ["online_resume"]),
+		];
+		const coordinator = new SyncCoordinator({
+			concurrency: 1,
+			resources,
+			runResource: async (resource) => {
+				if (resource.id === "items") {
+					throw new Error("items failed");
+				}
+				return undefined;
+			},
+		});
+
+		await expect(coordinator.runTrigger("online_resume")).resolves.toBeUndefined();
+
+		expect(coordinator.getResourceState("items")?.status).toBe("error");
+		expect(coordinator.getResourceState("customers")?.status).toBe("fresh");
+		expect(coordinator.getLastRunSummary()).toMatchObject({
+			trigger: "online_resume",
+			failed: 1,
+			succeeded: 1,
+			bootCriticalFailures: 0,
+			errors: [
+				expect.objectContaining({
+					resourceId: "items",
+					message: "items failed",
+				}),
+			],
+		});
+	});
+
+	it("completes all boot-critical resources before throwing and skips lower priorities", async () => {
+		const resources = [
+			makeResource("bootstrap_config", "boot_critical", ["boot"]),
+			makeResource("price_list_meta", "boot_critical", ["boot"]),
+			makeResource("items", "warm", ["boot"]),
+		];
+		const started: string[] = [];
+		const coordinator = new SyncCoordinator({
+			concurrency: 1,
+			resources,
+			runResource: async (resource) => {
+				started.push(resource.id);
+				if (resource.id === "bootstrap_config") {
+					throw new Error("bootstrap failed");
+				}
+				return undefined;
+			},
+		});
+
+		await expect(coordinator.runTrigger("boot")).rejects.toThrow(
+			"Boot-critical offline sync failed",
+		);
+
+		expect(started).toEqual(["bootstrap_config", "price_list_meta"]);
+		expect(coordinator.getLastRunSummary()).toMatchObject({
+			bootCriticalFailures: 1,
+			failed: 1,
+			succeeded: 1,
+		});
+	});
+
+	it("defers retries during cooldown while keeping usable stale state", async () => {
+		const resource = makeResource("items", "warm", ["timer", "user_action"]);
+		const runResource = vi
+			.fn()
+			.mockRejectedValueOnce(new Error("temporary failure"))
+			.mockResolvedValueOnce(undefined);
+		const coordinator = new SyncCoordinator({
+			concurrency: 1,
+			resources: [resource],
+			runResource,
+			initialBackoffMs: 60_000,
+			maxBackoffMs: 60_000,
+		});
+
+		coordinator.hydrateResourceStates([
+			{
+				resourceId: "items",
+				status: "fresh",
+				lastSyncedAt: "2026-04-18T10:00:00.000Z",
+				watermark: "wm-1",
+				lastSuccessHash: null,
+				lastError: null,
+				consecutiveFailures: 0,
+				lastAttemptAt: null,
+				nextRetryAt: null,
+				cooldownMs: null,
+				lastTrigger: null,
+				scopeSignature: "profile:main",
+				schemaVersion: "1",
+			},
+		]);
+
+		await expect(coordinator.runTrigger("timer")).resolves.toBeUndefined();
+		expect(runResource).toHaveBeenCalledTimes(1);
+
+		await expect(coordinator.runTrigger("timer")).resolves.toBeUndefined();
+		expect(runResource).toHaveBeenCalledTimes(1);
+		expect(coordinator.getResourceState("items")).toMatchObject({
+			status: "stale",
+			consecutiveFailures: 1,
+		});
+
+		await expect(coordinator.runTrigger("user_action")).resolves.toBeUndefined();
+		expect(runResource).toHaveBeenCalledTimes(2);
+		expect(coordinator.getResourceState("items")?.status).toBe("fresh");
 	});
 });

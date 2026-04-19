@@ -1056,5 +1056,177 @@ class TestManualPostingDatePreservation(unittest.TestCase):
         self.assertEqual(result["status"], 1)
 
 
+class TestInvoiceIdempotency(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.frappe, cls.enqueue_calls = _install_framework_stubs()
+        _install_dependency_stubs()
+        _install_package_stubs()
+        cls.creation = _load_module()
+
+    def setUp(self):
+        self.enqueue_calls.clear()
+        self.frappe._publish_realtime_calls.clear()
+
+    def test_submit_invoice_returns_existing_submitted_doc_for_same_client_request_id(self):
+        existing_doc = FakeDoc(
+            doctype="Sales Invoice",
+            name="ACC-SINV-IDEMP-0001",
+            docstatus=1,
+            pos_profile="Main POS",
+            company="Test Company",
+        )
+
+        def fake_get_value(doctype, filters=None, fieldname=None, **kwargs):
+            if (
+                doctype == "Sales Invoice"
+                and isinstance(filters, dict)
+                and filters.get("posa_client_request_id") == "inv-fixed-001"
+            ):
+                return "ACC-SINV-IDEMP-0001"
+            return 0
+
+        self.creation.frappe.db.get_value = fake_get_value
+        self.creation.frappe.db.exists = lambda *args, **kwargs: False
+        self.creation.frappe.get_doc = lambda *args: existing_doc
+        self.creation.update_invoice = lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("duplicate replay should not build a new invoice")
+        )
+
+        result = self.creation.submit_invoice(
+            json.dumps(
+                {
+                    "doctype": "Sales Invoice",
+                    "pos_profile": "Main POS",
+                    "company": "Test Company",
+                    "currency": "USD",
+                    "items": [],
+                    "payments": [],
+                    "posa_client_request_id": "inv-fixed-001",
+                }
+            ),
+            json.dumps({"idempotency_key": "inv-fixed-001"}),
+            submit_in_background=0,
+        )
+
+        self.assertEqual(result["name"], "ACC-SINV-IDEMP-0001")
+        self.assertEqual(result["status"], 1)
+        self.assertTrue(result["replayed"])
+
+    def test_submit_invoice_skips_idempotency_lookup_when_custom_field_is_missing(self):
+        invoice_doc = FakeDoc(
+            doctype="Sales Invoice",
+            name="ACC-SINV-NEW-0001",
+            docstatus=0,
+            pos_profile="Main POS",
+            company="Test Company",
+            currency="USD",
+            customer="CUST-0001",
+            is_return=0,
+            items=[],
+            payments=[],
+            taxes=[],
+            flags=types.SimpleNamespace(ignore_permissions=False),
+            redeem_loyalty_points=0,
+            loyalty_program=None,
+            cost_center=None,
+            write_off_amount=0,
+            rounded_total=0,
+            grand_total=0,
+            remarks="",
+        )
+        invoice_doc.submit = lambda: setattr(invoice_doc, "docstatus", 1)
+
+        self.creation.frappe.db.has_column = lambda doctype, fieldname: False
+        self.creation.frappe.db.get_value = lambda *args, **kwargs: 0
+        self.creation.frappe.db.exists = lambda doctype, name: name == "ACC-SINV-NEW-0001"
+        self.creation.frappe.get_value = lambda *args, **kwargs: 0
+        self.creation.frappe.get_doc = lambda *args: invoice_doc
+        self.creation._save_draft_with_latest_timestamp = lambda doc: doc
+        self.creation._apply_invoice_gift_card_settlement = lambda *args, **kwargs: None
+        self.creation._process_post_submit_payments = lambda *args, **kwargs: None
+
+        result = self.creation.submit_invoice(
+            json.dumps(
+                {
+                    "doctype": "Sales Invoice",
+                    "name": "ACC-SINV-NEW-0001",
+                    "pos_profile": "Main POS",
+                    "company": "Test Company",
+                    "currency": "USD",
+                    "customer": "CUST-0001",
+                    "items": [],
+                    "payments": [],
+                    "posa_client_request_id": "inv-fixed-002",
+                }
+            ),
+            json.dumps({"idempotency_key": "inv-fixed-002"}),
+            submit_in_background=0,
+        )
+
+        self.assertEqual(result["status"], 1)
+        self.assertEqual(getattr(invoice_doc, "posa_client_request_id", None), None)
+
+    def test_submit_invoice_does_not_query_missing_client_request_column(self):
+        invoice_doc = FakeDoc(
+            doctype="Sales Invoice",
+            name="ACC-SINV-NEW-0002",
+            docstatus=0,
+            pos_profile="Main POS",
+            company="Test Company",
+            currency="USD",
+            customer="CUST-0001",
+            is_return=0,
+            items=[],
+            payments=[],
+            taxes=[],
+            flags=types.SimpleNamespace(ignore_permissions=False),
+            redeem_loyalty_points=0,
+            loyalty_program=None,
+            cost_center=None,
+            write_off_amount=0,
+            rounded_total=0,
+            grand_total=0,
+            remarks="",
+        )
+        invoice_doc.submit = lambda: setattr(invoice_doc, "docstatus", 1)
+
+        def explode_if_lookup_runs(*args, **kwargs):
+            filters = args[1] if len(args) > 1 else kwargs.get("filters")
+            if isinstance(filters, dict) and "posa_client_request_id" in filters:
+                raise AssertionError("idempotency lookup should be skipped when the field is missing")
+            return 0
+
+        self.creation.frappe.db.has_column = lambda doctype, fieldname: False
+        self.creation.frappe.db.get_value = explode_if_lookup_runs
+        self.creation.frappe.db.exists = lambda doctype, name: name == "ACC-SINV-NEW-0002"
+        self.creation.frappe.get_value = lambda *args, **kwargs: 0
+        self.creation.frappe.get_doc = lambda *args: invoice_doc
+        self.creation._save_draft_with_latest_timestamp = lambda doc: doc
+        self.creation._apply_invoice_gift_card_settlement = lambda *args, **kwargs: None
+        self.creation._process_post_submit_payments = lambda *args, **kwargs: None
+
+        result = self.creation.submit_invoice(
+            json.dumps(
+                {
+                    "doctype": "Sales Invoice",
+                    "name": "ACC-SINV-NEW-0002",
+                    "pos_profile": "Main POS",
+                    "company": "Test Company",
+                    "currency": "USD",
+                    "customer": "CUST-0001",
+                    "items": [],
+                    "payments": [],
+                    "posa_client_request_id": "inv-fixed-003",
+                }
+            ),
+            json.dumps({"idempotency_key": "inv-fixed-003"}),
+            submit_in_background=0,
+        )
+
+        self.assertEqual(result["status"], 1)
+        self.assertEqual(getattr(invoice_doc, "posa_client_request_id", None), None)
+
+
 if __name__ == "__main__":
     unittest.main()

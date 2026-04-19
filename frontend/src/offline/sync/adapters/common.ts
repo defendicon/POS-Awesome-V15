@@ -14,6 +14,7 @@ export type SyncScopedProfile = {
 	company?: string | null;
 	warehouse?: string | null;
 	modified?: string | null;
+	payments?: unknown[] | null;
 };
 
 export type SyncChangeRecord<T = any> = {
@@ -106,8 +107,11 @@ export function refreshSnapshotFromSync({
 			},
 		},
 		cacheState: ({
-			profileName: posProfile?.name || null,
 			...cacheState,
+			profileName: posProfile?.name || null,
+			paymentMethods: Array.isArray(posProfile?.payments)
+				? posProfile.payments
+				: cacheState?.paymentMethods,
 		} as any),
 	});
 	setBootstrapSnapshot(nextSnapshot);

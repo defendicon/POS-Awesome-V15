@@ -379,4 +379,48 @@ describe("usePosPaySubmission", () => {
 		expect(callConfig.args.payload.party_type).toBe("Supplier");
 		expect(callConfig.args.payload.party).toBe("Supp-001");
 	});
+
+	it("adds a stable client request id to payment submissions", async () => {
+		(globalThis as any).frappe.call.mockImplementation(({ callback }: any) => {
+			callback({
+				message: {
+					new_payments_entry: [{ name: "ACC-PAY-1000" }],
+				},
+			});
+		});
+
+		const { processPayment } = usePosPaySubmission({
+			customerName: ref("Customer 727"),
+			company: ref("Test Company"),
+			posProfile: ref({ name: "Main POS" }),
+			posOpeningShift: ref({ name: "POS-OPEN-0001" }),
+			exchangeRate: ref(1),
+			invoiceTotalCurrency: ref("USD"),
+			referenceNo: ref(""),
+			referenceDate: ref(""),
+			autoAllocatePaymentAmount: ref(false),
+			payment_methods: ref([{ mode_of_payment: "Cash", amount: 100 }]),
+			selected_invoices: ref([]),
+			selected_payments: ref([]),
+			selected_mpesa_payments: ref([]),
+			total_selected_invoices: ref(0),
+			total_selected_payments: ref(0),
+			total_selected_mpesa_payments: ref(0),
+			total_payment_methods: ref(100),
+			clearSelections: vi.fn(),
+			resetPaymentMethodAmounts: vi.fn(),
+			load_print_page: vi.fn(),
+			eventBus: { emit: vi.fn() },
+			get_outstanding_invoices: vi.fn(),
+			get_unallocated_payments: vi.fn(),
+			get_draft_mpesa_payments_register: vi.fn(),
+			set_mpesa_search_params: vi.fn(),
+			autoReconcile: vi.fn(),
+		});
+
+		await processPayment();
+
+		const callConfig = (globalThis as any).frappe.call.mock.calls[0][0];
+		expect(callConfig.args.payload.client_request_id).toEqual(expect.any(String));
+	});
 });

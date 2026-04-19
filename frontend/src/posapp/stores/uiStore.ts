@@ -1,3 +1,35 @@
+/**
+ * Central UI state bus for the POS main view.
+ *
+ * **Loading vs. freeze overlays**
+ * Two distinct blocking states exist:
+ * - `isLoading` / `loadingText` — non-blocking spinner shown during async work.
+ * - `isFrozen` / `freezeTitle` / `freezeMessage` — blocks all user interaction
+ *   (e.g. during payment submission). Managed via `freeze()` / `unfreeze()`.
+ *
+ * **Active view**
+ * `activeView` drives the main content panel: `"items"` | `"payment"` |
+ * `"offers"` | `"coupons"`. Updated via `setActiveView()`.
+ *
+ * **POS session data**
+ * `posProfile`, `stockSettings`, `companyDoc`, and `posOpeningShift` are set once
+ * at register boot through `setRegisterData()`. `currency` and `company` are
+ * derived computed properties from `posProfile`.
+ *
+ * **Dialog triggers**
+ * Dialogs are opened and closed through dedicated action pairs:
+ * `openPaymentDialog` / `closePaymentDialog`, `openInvoiceManagement` /
+ * `closeInvoiceManagement`, `openDrafts` / `closeDrafts`, `openOrders` /
+ * `closeOrders`, `openNewAddress` / `closeNewAddress`, `openMpesaPayments` /
+ * `closeMpesaPayments`, `openVariants` / `closeVariants`.
+ *
+ * **Counter-based triggers**
+ * Some side effects are driven by incrementing a counter ref rather than emitting
+ * events, to avoid Vue event-bus coupling:
+ * - `searchFocusTrigger` (via `triggerItemSearchFocus()`) — focuses the item search input.
+ * - `forceReloadTrigger` (via `triggerForceReloadItems()`) — forces the item list to reload.
+ * - `triggerTopItemSelection` (via `selectTopItem()`) — selects the first item in the list.
+ */
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import type { POSProfile } from "../types/models";

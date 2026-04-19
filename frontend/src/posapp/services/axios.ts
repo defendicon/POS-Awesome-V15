@@ -1,26 +1,26 @@
 import axios from "axios";
-import { start, stop } from "../composables/core/useLoading";
+import { LOADING_SCOPE_IDS, start, stop } from "../composables/core/useLoading";
 
 const api = axios.create();
 
 api.interceptors.request.use(
 	(config) => {
-		start("api");
+		start(LOADING_SCOPE_IDS.action);
 		return config;
 	},
 	(error) => {
-		stop("api");
+		stop(LOADING_SCOPE_IDS.action);
 		return Promise.reject(error);
 	},
 );
 
 api.interceptors.response.use(
 	(response) => {
-		stop("api");
+		stop(LOADING_SCOPE_IDS.action);
 		return response;
 	},
 	(error) => {
-		stop("api");
+		stop(LOADING_SCOPE_IDS.action);
 		return Promise.reject(error);
 	},
 );

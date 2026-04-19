@@ -1,3 +1,27 @@
+/**
+ * Invoice panel layout, resize persistence, and modal-confirmation helpers.
+ *
+ * **Resizable invoice panel**
+ * The invoice item list panel can be resized by the operator on large screens.
+ * `canResizeInvoicePanel()` returns `true` only when the viewport is at least
+ * 1280 × 860 px; below that threshold a viewport-fraction default is used instead.
+ * The clamped height is persisted in `localStorage` under the key
+ * `posawesome_invoice_height` and reloaded on the next session.
+ * The maximum height scales with viewport size: 58 % on very small screens,
+ * 64 % on medium, 72 % on large. A minimum of 320 px is enforced.
+ * The CSS custom property `--container-height` is used as the fallback default.
+ *
+ * **Payment confirmation dialog**
+ * `confirmPaymentSubmission()` opens `confirm_payment_dialog` and returns a
+ * `Promise<boolean>` that resolves when `resolvePaymentConfirmation(result)` is
+ * called by the dialog component. The resolver is stored in a closure-local
+ * variable and cleared after resolution to prevent double-resolve.
+ *
+ * **Drag feedback**
+ * `showDropFeedback(isDragging, target)` adds or removes the `drag-over` CSS
+ * class from the `.modern-items-table` element inside `target`, providing visual
+ * feedback during item drag-and-drop onto the cart.
+ */
 import { ref } from "vue";
 
 export function useInvoiceUI() {

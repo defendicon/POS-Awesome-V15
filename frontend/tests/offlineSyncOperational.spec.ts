@@ -351,6 +351,22 @@ describe("operational offline sync adapters", () => {
 			"ITEM-002",
 		]);
 		expect(stockMocks.setStockCacheReady).toHaveBeenCalledWith(true);
+		expect(
+			bootstrapSnapshotMocks.refreshBootstrapSnapshotFromCaches,
+		).toHaveBeenCalledWith(
+			expect.objectContaining({
+				cacheState: expect.objectContaining({
+					stockCacheReady: true,
+				}),
+			}),
+		);
+		expect(cacheMocks.setBootstrapSnapshot).toHaveBeenCalledWith(
+			expect.objectContaining({
+				prerequisites: expect.objectContaining({
+					stock_cache_ready: "ready",
+				}),
+			}),
+		);
 		expect(syncStateMocks.setSyncResourceState).toHaveBeenCalledWith(
 			expect.objectContaining({
 				resourceId: "stock",

@@ -1,3 +1,33 @@
+/**
+ * Terminal cashier identity, multi-cashier switching, and terminal lock.
+ *
+ * **`TerminalEmployee` interface**
+ * `user` (Frappe user ID) and `full_name` are always present. `enabled`,
+ * `is_current`, and `is_supervisor` are optional flags set by the server.
+ *
+ * **Cashier persistence**
+ * The active cashier's `user` string is persisted in `localStorage` under
+ * `"posa_terminal_cashier"` (`STORAGE_KEY`). On store creation `currentCashier`
+ * is seeded from `frappe.session` (the logged-in browser user) so it is never
+ * null at startup.
+ *
+ * **`setTerminalEmployees(employees)`**
+ * Normalises the list from the server, then calls `ensureCurrentCashier()` to
+ * resolve the active cashier using the following priority:
+ * 1. Stored user from `localStorage`.
+ * 2. Employee marked `is_current` in the list.
+ * 3. The logged-in `frappe.session` user.
+ * 4. First employee in the list.
+ *
+ * **Supervisor flag**
+ * `setCurrentCashier` detects when the `is_supervisor` flag changes for the same
+ * user and triggers a refresh so the UI reflects the correct role immediately.
+ *
+ * **Terminal lock**
+ * `lockTerminal()` closes the switch dialog and opens `lockDialogOpen`.
+ * `unlockTerminal(cashier?)` closes the lock and optionally switches the active
+ * cashier in one step. `isLocked` is a computed alias for `lockDialogOpen`.
+ */
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 

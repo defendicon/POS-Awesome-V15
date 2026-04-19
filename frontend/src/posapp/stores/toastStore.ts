@@ -1,3 +1,29 @@
+/**
+ * Snackbar notification queue and bell-icon history for the POS.
+ *
+ * **Two notification surfaces**
+ * - **Snackbar** — shows one notification at a time. After the active notification
+ *   closes a 300 ms animation gap elapses before the next item is dequeued.
+ * - **Bell history** — stores the last 20 notifications in `history` (newest first)
+ *   with an `unreadCount` badge; cleared via `markRead()` / `clearHistory()`.
+ *
+ * **`show(data)`**
+ * Accepts a plain string or a `NotificationData` object. Notifications with the
+ * same `key` are merged rather than queued separately: if the key matches the
+ * currently displayed notification its text is updated in-place; if it matches a
+ * queued entry the counts are combined. This prevents a burst of identical status
+ * updates from flooding the snackbar.
+ *
+ * **Key generation**
+ * When no explicit `key` is provided the default key is `"<color>::<title>"`.
+ * Pass an explicit `key` to opt into per-notification deduplication (e.g.
+ * `key: "invoice-processing::INV-0001"` for a long-running loading indicator).
+ *
+ * **Interfaces**
+ * - `NotificationData` — caller-facing input shape (all fields optional).
+ * - `Notification` — normalized internal shape with required fields and counts.
+ * - `HistoryEntry` — bell-history entry with timestamp and unique `id`.
+ */
 import { defineStore } from "pinia";
 import { ref } from "vue";
 

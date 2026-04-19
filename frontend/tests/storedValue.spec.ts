@@ -64,12 +64,12 @@ const VTextFieldStub = defineComponent({
 });
 
 describe("stored value UX", () => {
-	beforeEach(() => {
+	beforeEach(async () => {
 		(window as any).frappe = { _: (value: string) => value };
 		(globalThis as any).frappe = { _: (value: string) => value };
 		(window as any).__ = (value: string) => value;
 		(globalThis as any).__ = (value: string) => value;
-		clearOfflineInvoices();
+		await clearOfflineInvoices();
 		clearStoredValueSnapshotCache();
 		memory.pos_opening_storage = {
 			stock_settings: {
@@ -144,8 +144,8 @@ describe("stored value UX", () => {
 		expect(customer?.stored_value_sources).toBe(2);
 	});
 
-	it("adds replay-safe customer balance metadata to offline invoices", () => {
-		saveOfflineInvoice({
+	it("adds replay-safe customer balance metadata to offline invoices", async () => {
+		await saveOfflineInvoice({
 			invoice: {
 				name: "OFFLINE-SINV-1",
 				customer: "CUST-003",

@@ -14,7 +14,26 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 	const CSS_LINK_ID = "posa-posapp-css";
 	const BOOT_RETRY_KEY = "posa_boot_retry_once";
 	const BOOT_CACHE_RECOVERY_KEY = "posa_boot_cache_recovery_once";
+	const POSAPP_BASE_PATH = "/app/posapp";
 	let buildMetadataPromise = null;
+	const trimTrailingSlash = (path) => {
+		if (!path || path.length <= 1) {
+			return path || "/";
+		}
+		return path.replace(/\/+$/, "") || "/";
+	};
+	const buildBootstrapRecoveryLocation = (param) => {
+		const normalizedBasePath = trimTrailingSlash(POSAPP_BASE_PATH);
+		const pathname = window.location.pathname || normalizedBasePath;
+		const normalizedPath =
+			pathname === `${normalizedBasePath}/`
+				? normalizedBasePath
+				: pathname;
+		const searchParams = new URLSearchParams(window.location.search || "");
+		searchParams.set(param, Date.now().toString());
+		const query = searchParams.toString();
+		return `${normalizedPath}${query ? `?${query}` : ""}${window.location.hash || ""}`;
+	};
 	const buildVersionedAssetUrl = (assetPath, version) =>
 		version
 			? `${assetPath}?v=${encodeURIComponent(version)}`
@@ -121,6 +140,7 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 
 			const script = document.createElement("script");
 			script.id = LOADER_SCRIPT_ID;
+			script.type = "module";
 			script.async = true;
 			script.src = buildVersionedAssetUrl(LOADER_URL, version);
 			script.setAttribute("data-build-version", requestedVersion);
@@ -289,7 +309,9 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 			} catch (err) {
 				console.warn("Unable to persist boot retry state", err);
 			}
-			window.location.replace(`/app/posapp?_posa_boot_retry=${Date.now()}`);
+			window.location.replace(
+				buildBootstrapRecoveryLocation("_posa_boot_retry"),
+			);
 			return;
 		}
 
@@ -300,7 +322,9 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 				console.warn("Unable to persist boot recovery state", err);
 			}
 			await performAssetRecovery();
-			window.location.replace(`/app/posapp?_posa_asset_recovery=${Date.now()}`);
+			window.location.replace(
+				buildBootstrapRecoveryLocation("_posa_asset_recovery"),
+			);
 			return;
 		}
 

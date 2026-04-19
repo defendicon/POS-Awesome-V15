@@ -1,3 +1,29 @@
+/**
+ * Currency, exchange-rate, and price-list management for the active invoice.
+ *
+ * **Two exchange rates**
+ * The composable tracks two distinct rates that serve different purposes:
+ * - `exchange_rate` — price-list currency → selected display currency. Used when
+ *   converting item prices for display in the customer's preferred currency.
+ * - `conversion_rate` — selected currency → company base currency. Used in
+ *   accounting fields (`base_*`) on the invoice document.
+ *
+ * **Currency and price list data**
+ * `fetch_available_currencies` retrieves supported currencies from the server and
+ * falls back to `getCachedCurrencyOptions` when offline. Similarly,
+ * `fetch_price_lists` uses `getCachedPriceListMeta` as its offline source.
+ *
+ * **Precision helpers**
+ * `flt(value, precision?)` rounds to `currency_precision` by default, while
+ * `roundAmount(value)` always uses `currency_precision`. These wrap the shared
+ * `format.methods.flt` utility.
+ *
+ * **Item rate propagation**
+ * Calling `update_currency` or `update_item_rates` iterates the current invoice
+ * items and recalculates their `rate`, `base_rate`, and `amount` fields using the
+ * active exchange and conversion rates. The `bus` event system notifies other
+ * composables (e.g. discount recalculation) after each rate change.
+ */
 import { ref, computed, watch } from "vue";
 import { useInvoiceStore } from "../../../stores/invoiceStore";
 import { useToastStore } from "../../../stores/toastStore";

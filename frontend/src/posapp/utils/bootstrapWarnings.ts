@@ -1,5 +1,26 @@
+/**
+ * UI helpers for surfacing offline-prerequisite warnings to the operator.
+ *
+ * These functions are deliberately free of Vue reactivity — they operate on plain
+ * objects so they can be used in both component code and unit tests.
+ *
+ * @module bootstrapWarnings
+ */
+
 type TranslateFn = (value: string) => string;
 
+/**
+ * Maps a prerequisite warning code to a translated human-readable message.
+ *
+ * Warning codes are produced by `resolveBootstrapRuntimeState` in
+ * `offline/bootstrapSnapshot.ts`. The default `translate` identity function is used in
+ * tests; production code passes the Frappe `__()` translator.
+ *
+ * @param code - A prerequisite key (e.g. `"pos_profile"`) or a mismatch reason
+ *   (e.g. `"build_version_mismatch"`).
+ * @param translate - Optional translation function; defaults to identity.
+ * @returns Translated user-facing message string.
+ */
 export function formatBootstrapWarning(
 	code: string,
 	translate: TranslateFn = (value) => value,
@@ -72,7 +93,20 @@ export function formatBootstrapWarning(
 	}
 }
 
+/**
+ * Returns `true` when the persisted bootstrap status warrants showing the offline warning
+ * banner in the navbar.
+ *
+ * Only `"limited"` (blocking prerequisites missing) and `"invalid"` (wrong user session)
+ * modes trigger the banner. A `"normal"` or `"confirmation_required"` mode returns `false`.
+ *
+ * @param status - The `bootstrapStatus` object stored in `DefaultLayout.vue`, typically
+ *   read from `getBootstrapSnapshotStatus()`.
+ */
 export function shouldShowBootstrapBanner(status: Record<string, any> | null | undefined) {
+	if (status?.primary_warning?.active) {
+		return true;
+	}
 	const runtimeMode = status?.runtime_mode || status?.mode || "normal";
 	return runtimeMode === "limited" || runtimeMode === "invalid";
 }

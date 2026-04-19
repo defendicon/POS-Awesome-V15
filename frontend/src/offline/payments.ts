@@ -1,16 +1,27 @@
-import { memory, persist, isOffline } from "./db";
+import { isOffline } from "./db";
 import { syncOfflineCustomers } from "./customers";
+import {
+	claimRetryableQueueEntries,
+	clearWriteQueueEntries,
+	deleteWriteQueueEntryByIndex,
+	enqueueWriteQueueEntry,
+	getQueuedPayloadCount,
+	getQueuedPayloadSnapshots,
+	markWriteQueueEntryFailed,
+	markWriteQueueEntrySynced,
+	type OfflineEntityType,
+} from "./writeQueue";
 
 type AnyRecord = Record<string, any>;
 
-export function saveOfflinePayment(entry: AnyRecord) {
-	const key = "offline_payments";
-	const entries = memory.offline_payments;
-	// Strip down POS Profile to essential fields to avoid
-	// serialization errors from complex reactive objects
-	if (entry?.args?.payload?.pos_profile) {
-		const profile = entry.args.payload.pos_profile;
-		entry.args.payload.pos_profile = {
+const PAYMENT_ENTITY: OfflineEntityType = "payment";
+
+function prepareOfflinePaymentEntry(entry: AnyRecord) {
+	const nextEntry = JSON.parse(JSON.stringify(entry));
+
+	if (nextEntry?.args?.payload?.pos_profile) {
+		const profile = nextEntry.args.payload.pos_profile;
+		nextEntry.args.payload.pos_profile = {
 			posa_use_pos_awesome_payments:
 				profile.posa_use_pos_awesome_payments,
 			posa_allow_make_new_payments: profile.posa_allow_make_new_payments,
@@ -23,40 +34,34 @@ export function saveOfflinePayment(entry: AnyRecord) {
 			name: profile.name,
 		};
 	}
-	let cleanEntry;
+
+	return nextEntry;
+}
+
+export async function saveOfflinePayment(entry: AnyRecord) {
 	try {
-		cleanEntry = JSON.parse(JSON.stringify(entry));
-	} catch (e) {
-		console.error("Failed to serialize offline payment", e);
-		throw e;
+		const cleanEntry = prepareOfflinePaymentEntry(entry);
+		return await enqueueWriteQueueEntry(PAYMENT_ENTITY, cleanEntry);
+	} catch (error) {
+		console.error("Failed to serialize offline payment", error);
+		throw error;
 	}
-	entries.push(cleanEntry);
-	memory.offline_payments = entries;
-	persist(key);
 }
 
 export function getOfflinePayments() {
-	return memory.offline_payments;
+	return getQueuedPayloadSnapshots(PAYMENT_ENTITY);
 }
 
-export function clearOfflinePayments() {
-	memory.offline_payments = [];
-	persist("offline_payments");
+export async function clearOfflinePayments() {
+	await clearWriteQueueEntries(PAYMENT_ENTITY);
 }
 
-export function deleteOfflinePayment(index: number) {
-	if (
-		Array.isArray(memory.offline_payments) &&
-		index >= 0 &&
-		index < memory.offline_payments.length
-	) {
-		memory.offline_payments.splice(index, 1);
-		persist("offline_payments");
-	}
+export async function deleteOfflinePayment(index: number) {
+	await deleteWriteQueueEntryByIndex(PAYMENT_ENTITY, index);
 }
 
 export function getPendingOfflinePaymentCount() {
-	return (memory.offline_payments ?? []).length;
+	return getQueuedPayloadCount(PAYMENT_ENTITY);
 }
 
 export async function syncOfflinePayments() {
@@ -70,28 +75,35 @@ export async function syncOfflinePayments() {
 		return { pending: payments.length, synced: 0 };
 	}
 
-	const failures: AnyRecord[] = [];
+	const claimedEntries = await claimRetryableQueueEntries(PAYMENT_ENTITY);
+	if (!claimedEntries.length) {
+		return { pending: getPendingOfflinePaymentCount(), synced: 0 };
+	}
+
 	let synced = 0;
 
-	for (const pay of payments) {
+	for (const entry of claimedEntries) {
 		try {
 			await frappe.call({
 				method: "posawesome.posawesome.api.payment_entry.process_pos_payment",
-				args: pay.args,
+				args: entry.payload.args,
 			});
-			synced++;
+			synced += 1;
+			await markWriteQueueEntrySynced(
+				PAYMENT_ENTITY,
+				Number(entry.queue_id),
+				entry.last_attempt_at,
+			);
 		} catch (error) {
 			console.error("Failed to submit payment", error);
-			failures.push(pay);
+			await markWriteQueueEntryFailed(
+				PAYMENT_ENTITY,
+				Number(entry.queue_id),
+				error,
+				entry.last_attempt_at,
+			);
 		}
 	}
 
-	if (failures.length) {
-		memory.offline_payments = failures;
-		persist("offline_payments");
-	} else {
-		clearOfflinePayments();
-	}
-
-	return { pending: failures.length, synced };
+	return { pending: getPendingOfflinePaymentCount(), synced };
 }

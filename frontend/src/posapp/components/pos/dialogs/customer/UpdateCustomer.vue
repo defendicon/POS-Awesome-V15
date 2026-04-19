@@ -610,7 +610,7 @@ export default {
 			const customersStore = useCustomersStore();
 
 			if (isOffline()) {
-				saveOfflineCustomer({ args: apiArgs });
+				await saveOfflineCustomer({ args: apiArgs });
 				vm.toastStore.show({ title: __("Customer saved offline"), color: "warning" });
 				args.name = this.customer_name;
 				await customersStore.addOrUpdateCustomer({

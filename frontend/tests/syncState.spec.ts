@@ -25,7 +25,7 @@ describe("sync state helpers", () => {
 		syncStateTable.toArray.mockReset();
 	});
 
-	it("persists sync state to sync_state storage and localStorage", async () => {
+	it("persists sync state only to sync_state storage", async () => {
 		const { buildSyncStateStorageKey, setSyncResourceState } = await import(
 			"../src/offline/sync/syncState"
 		);
@@ -48,11 +48,7 @@ describe("sync state helpers", () => {
 			key: buildSyncStateStorageKey("items"),
 			value: state,
 		});
-		expect(
-			JSON.parse(
-				window.localStorage.getItem(buildSyncStateStorageKey("items")) || "{}",
-			),
-		).toEqual(state);
+		expect(window.localStorage.getItem(buildSyncStateStorageKey("items"))).toBeNull();
 	});
 
 	it("prefers persisted db state and falls back to localStorage", async () => {

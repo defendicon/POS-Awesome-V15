@@ -5,6 +5,8 @@ let db;
 const BASE_SCHEMA = {
 	keyval: "&key",
 	queue: "&key",
+	write_queue:
+		"++queue_id,entity_type,status,created_at,last_attempt_at,retry_count,&idempotency_key,[entity_type+status]",
 	cache: "&key",
 	items: "&item_code,item_name,item_group,*barcodes,*name_keywords,*serials,*batches",
 	item_prices: "&[price_list+item_code],price_list,item_code",
@@ -151,6 +153,7 @@ const SCHEMA_SIGNATURE = JSON.stringify(BASE_SCHEMA);
 			}
 		});
 	db.version(10).stores(BASE_SCHEMA);
+	db.version(11).stores(BASE_SCHEMA);
 	try {
 		await db.open();
 	} catch (err) {
@@ -196,27 +199,44 @@ const KEY_TABLE_MAP = {
 };
 
 const LARGE_KEYS = new Set(["items", "item_details_cache", "local_stock_cache"]);
+const LOCAL_STORAGE_KEYS = new Set([
+	"manual_offline",
+	"bootstrap_snapshot",
+	"bootstrap_snapshot_status",
+	"bootstrap_limited_mode",
+	"cache_ready",
+	"stock_cache_ready",
+	"schema_signature",
+	"tax_inclusive",
+]);
+const MEMORY_ONLY_KEYS = new Set(["customer_storage"]);
 
 function tableForKey(key) {
 	return KEY_TABLE_MAP[key] || "keyval";
 }
 
 async function persist(key, value) {
-	try {
-		if (!db.isOpen()) {
-			await db.open();
+	if (!MEMORY_ONLY_KEYS.has(key)) {
+		try {
+			if (!db.isOpen()) {
+				await db.open();
+			}
+			const table = tableForKey(key);
+			await db.table(table).put({ key, value });
+		} catch (e) {
+			console.error("Worker persist failed", e);
 		}
-		const table = tableForKey(key);
-		await db.table(table).put({ key, value });
-	} catch (e) {
-		console.error("Worker persist failed", e);
 	}
 
-	if (typeof localStorage !== "undefined" && !LARGE_KEYS.has(key)) {
-		try {
-			localStorage.setItem(`posa_${key}`, JSON.stringify(value));
-		} catch (err) {
-			console.error("Worker localStorage failed", err);
+	if (typeof localStorage !== "undefined") {
+		if (LOCAL_STORAGE_KEYS.has(key) && !LARGE_KEYS.has(key)) {
+			try {
+				localStorage.setItem(`posa_${key}`, JSON.stringify(value));
+			} catch (err) {
+				console.error("Worker localStorage failed", err);
+			}
+		} else {
+			localStorage.removeItem(`posa_${key}`);
 		}
 	}
 }

@@ -1,7 +1,41 @@
+/**
+ * UI-facing state store for the offline status panel and sync resource display.
+ *
+ * This store is the data model for the offline status panel component. It does not
+ * drive sync itself — that is `SyncCoordinator`'s responsibility. The coordinator
+ * calls `setSummary`, `setBootstrapWarning`, and `setResourceStates` to push state
+ * into this store; the panel reads it reactively.
+ *
+ * **Interfaces**
+ * - `OfflineStatusSummary` — network/server connectivity flags, pending invoice
+ *   count, and cache usage breakdown (total, IndexedDB, localStorage).
+ * - `OfflineBootstrapWarning` — banner shown when boot-critical resources fail to
+ *   sync; contains a `title` and an array of human-readable `messages`.
+ *
+ * **Computed display properties**
+ * - `connectivityLabel` — `"Online"` | `"Offline"` | `"Limited"` | `"Checking"`.
+ * - `connectivityTone` — matching severity token (`"success"` | `"danger"` | `"warning"`).
+ * - `attentionResources` — resource states filtered to `"stale"`, `"error"`, or
+ *   `"limited"` statuses, each decorated with its human-readable `label` from
+ *   `RESOURCE_LABELS`.
+ * - `sortedResources` — attention resources first (in their natural order), then
+ *   remaining resources; used directly by the resource list in the panel.
+ * - `summaryMessage` — single-sentence status string shown below the connectivity
+ *   badge.
+ *
+ * **`setResourceStates` filtering**
+ * Pure-idle states with no history (`lastSyncedAt`, `watermark`, `lastError`, or
+ * `schemaVersion` all absent) are dropped to reduce noise in the panel.
+ *
+ * **`getSyncResourceLabel(resourceId)`**
+ * Exported standalone helper that maps a `SyncResourceId` to its display label via
+ * `RESOURCE_LABELS`; falls back to the raw ID string for unknown resources.
+ */
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
 import type { SyncResourceId, SyncResourceState } from "../../offline/sync/types";
+import type { BootstrapCapabilitySummary } from "../../offline/bootstrapSnapshot";
 
 export interface OfflineStatusSummary {
 	networkOnline: boolean;
@@ -22,6 +56,8 @@ export interface OfflineBootstrapWarning {
 	title: string;
 	messages: string[];
 }
+
+export interface OfflineCapabilitySummary extends BootstrapCapabilitySummary {}
 
 const RESOURCE_LABELS: Record<SyncResourceId, string> = {
 	bootstrap_config: "Bootstrap Config",
@@ -70,6 +106,7 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 	const panelOpen = ref(false);
 	const summary = ref<OfflineStatusSummary>(createDefaultSummary());
 	const bootstrapWarning = ref<OfflineBootstrapWarning>(createDefaultWarning());
+	const capabilitySummaries = ref<OfflineCapabilitySummary[]>([]);
 	const resourceStates = ref<SyncResourceState[]>([]);
 
 	const syncingResourcesCount = computed(
@@ -131,6 +168,13 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		if (bootstrapWarning.value.active && bootstrapWarning.value.title) {
 			return bootstrapWarning.value.title;
 		}
+		const actionableCapabilities = capabilitySummaries.value.filter(
+			(capability) =>
+				capability.status !== "ready" && capability.severity !== "info",
+		);
+		if (actionableCapabilities.length) {
+			return actionableCapabilities[0]!.message;
+		}
 		if (syncingResourcesCount.value) {
 			return `Refreshing ${syncingResourcesCount.value} offline resource${syncingResourcesCount.value > 1 ? "s" : ""}.`;
 		}
@@ -172,6 +216,19 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		};
 	}
 
+	function setCapabilitySummaries(nextSummaries: OfflineCapabilitySummary[]) {
+		capabilitySummaries.value = Array.isArray(nextSummaries)
+			? nextSummaries
+					.filter((summary) => !!summary?.id)
+					.map((summary) => ({ ...summary }))
+					.sort((left, right) => {
+						const leftScore = left.status === "ready" ? 1 : 0;
+						const rightScore = right.status === "ready" ? 1 : 0;
+						return leftScore - rightScore;
+					})
+			: [];
+	}
+
 	function setResourceStates(nextStates: SyncResourceState[]) {
 		resourceStates.value = Array.isArray(nextStates)
 			? nextStates
@@ -192,6 +249,7 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		panelOpen.value = false;
 		summary.value = createDefaultSummary();
 		bootstrapWarning.value = createDefaultWarning();
+		capabilitySummaries.value = [];
 		resourceStates.value = [];
 	}
 
@@ -199,6 +257,7 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		panelOpen,
 		summary,
 		bootstrapWarning,
+		capabilitySummaries,
 		resourceStates,
 		syncingResourcesCount,
 		connectivityLabel,
@@ -210,6 +269,7 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		togglePanel,
 		setSummary,
 		setBootstrapWarning,
+		setCapabilitySummaries,
 		setResourceStates,
 		reset,
 	};

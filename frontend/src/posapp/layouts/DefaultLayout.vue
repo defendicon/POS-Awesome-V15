@@ -19,9 +19,11 @@
 				:cache-usage-details="cacheUsageDetails"
 				:loading-progress="loadingProgress"
 				:loading-active="loadingActive"
+				:loading-indeterminate="loadingIndeterminate"
 				:loading-message="loadingMessage"
-				:bootstrap-warning-active="bootstrapWarningActive"
-				:bootstrap-warning-tooltip="bootstrapWarningTooltip"
+				:bootstrap-warning-active="visibleBootstrapWarningActive"
+				:bootstrap-warning-tooltip="visibleBootstrapWarningTooltip"
+				:bootstrap-capabilities="visibleBootstrapCapabilitySummaries"
 				@nav-click="handleNavClick"
 				@close-shift="handleCloseShift"
 				@print-last-invoice="handlePrintLastInvoice"
@@ -46,20 +48,20 @@
 			>
 				<div class="bootstrap-warning-snackbar__content">
 					<div class="bootstrap-warning-title">
-						{{ bootstrapWarningTitle }}
+						{{ visibleBootstrapWarningTitle }}
 					</div>
 					<div
-						v-for="message in bootstrapWarningMessages"
+						v-for="message in visibleBootstrapWarningMessages"
 						:key="message"
 						class="bootstrap-warning-message"
 					>
 						{{ message }}
 					</div>
 					<div
-						v-if="bootstrapRecoveryMessage"
+						v-if="visibleBootstrapRecoveryMessage"
 						class="bootstrap-warning-message"
 					>
-						{{ bootstrapRecoveryMessage }}
+						{{ visibleBootstrapRecoveryMessage }}
 					</div>
 				</div>
 				<template #actions>
@@ -112,6 +114,7 @@ import {
 	purgeOldQueueEntries,
 	initPromise,
 	memoryInitPromise,
+	ensureOfflineQueueReady,
 	toggleManualOffline,
 	isManualOffline as getIsManualOffline,
 	syncOfflineInvoices,
@@ -149,6 +152,11 @@ import {
 	formatBootstrapWarning,
 	shouldShowBootstrapBanner,
 } from "../utils/bootstrapWarnings";
+import { listenForBootstrapSnapshotUpdates } from "../utils/bootstrapRuntimeEvents";
+import {
+	resolveBootstrapWarningUiState,
+	shouldLiftBootstrapWarningStartupGate,
+} from "../utils/bootstrapWarningVisibility";
 
 /**
  * Frappe Desk UI selectors to hide in POS view.
@@ -180,9 +188,10 @@ const __ = instance?.proxy?.__ || ((value) => value);
 const BUILD_VERSION =
 	typeof __BUILD_VERSION__ !== "undefined" ? __BUILD_VERSION__ : null;
 const OFFLINE_SYNC_SCHEMA_VERSION = "2026-04-09";
+const OFFLINE_SYNC_TIMER_INTERVAL_MS = 60_000;
 
 // Utils
-const { overlayVisible: globalLoading } = useLoading();
+const { overlayVisible: globalLoading, getScopeState } = useLoading();
 const { get_closing_data } = usePosShift();
 const syncStore = useSyncStore();
 const customersStore = useCustomersStore();
@@ -212,7 +221,9 @@ const syncCoordinator = new SyncCoordinator({
 });
 const offlineSyncRuntime = createOfflineSyncRuntime({
 	canSync: canRunOfflineSync,
+	canRunTimerSync: canRunTimerOfflineSync,
 	runTrigger: (trigger) => syncCoordinator.runTrigger(trigger),
+	timerIntervalMs: OFFLINE_SYNC_TIMER_INTERVAL_MS,
 });
 
 // State
@@ -237,8 +248,11 @@ const bootstrapStatus = ref(getBootstrapSnapshotStatus());
 const bootstrapLimitedMode = ref(getBootstrapLimitedMode());
 const bootstrapSnackbarVisible = ref(false);
 const confirmedBootstrapDecisionKey = ref("");
+const initialBootstrapSyncSettled = ref(false);
+const startupBootstrapWarningsReady = ref(false);
 let _sidebarObserver = null;
 let updateInterval = null;
+let removeBootstrapSnapshotListener = null;
 
 // Event Bus
 const eventBus = instance?.proxy?.eventBus;
@@ -304,6 +318,8 @@ function persistBootstrapRuntime(validation, decision) {
 		missing_prerequisites: validation.missingPrerequisites,
 		warning_codes: decision.warningCodes,
 		capabilities: validation.capabilities,
+		capability_summaries: decision.capabilitySummaries,
+		primary_warning: decision.primaryWarning,
 	};
 
 	bootstrapStatus.value = nextStatus;
@@ -376,6 +392,14 @@ function canRunOfflineSync() {
 	);
 }
 
+function canRunTimerOfflineSync() {
+	return !!(
+		canRunOfflineSync() &&
+		serverOnline.value &&
+		!serverConnecting.value
+	);
+}
+
 async function callOfflineSyncMethod(method, args = {}) {
 	if (typeof frappe === "undefined" || typeof frappe.call !== "function") {
 		throw new Error("Frappe call API is unavailable");
@@ -420,37 +444,81 @@ async function hydrateOfflineSyncResourceStates() {
 
 function scheduleBootCriticalWarmSync() {
 	return offlineSyncRuntime.scheduleBootWarmSync().catch((error) => {
-		console.error("Failed to schedule offline sync", error);
+		console.error("Failed to schedule offline sync", error, syncCoordinator.getLastRunSummary());
 		return false;
+	}).finally(() => {
+		evaluateBootstrapSnapshot({ allowPrompt: false });
 	});
 }
 
 function triggerOnlineResumeSync() {
 	return offlineSyncRuntime.triggerOnlineResumeSync().catch((error) => {
-		console.error("Failed to trigger online resume sync", error);
+		console.error("Failed to trigger online resume sync", error, syncCoordinator.getLastRunSummary());
 		return false;
+	}).finally(() => {
+		evaluateBootstrapSnapshot({ allowPrompt: false });
+	});
+}
+
+function triggerOperatorRefreshSync(options = {}) {
+	return offlineSyncRuntime.triggerOperatorRefreshSync(options).catch((error) => {
+		console.error("Failed to run operator offline refresh", error, syncCoordinator.getLastRunSummary());
+		return false;
+	}).finally(() => {
+		evaluateBootstrapSnapshot({ allowPrompt: false });
 	});
 }
 
 // Computed
-const loadingProgress = computed(() => loadingState.progress);
-const loadingActive = computed(() => loadingState.active);
-const loadingMessage = computed(() => loadingState.message);
+const routeLoadingState = getScopeState("route");
+const loadingActive = computed(
+	() => loadingState.active || routeLoadingState.value.count > 0,
+);
+const loadingIndeterminate = computed(
+	() => !loadingState.active && routeLoadingState.value.count > 0,
+);
+const loadingMessage = computed(() => {
+	if (loadingState.active) {
+		return loadingState.message;
+	}
+	return routeLoadingState.value.message || __("Loading view...");
+});
+const loadingProgress = computed(() => {
+	if (loadingState.active) {
+		return loadingState.progress;
+	}
+	return 0;
+});
 const bootstrapAlertType = computed(() =>
-	bootstrapStatus.value?.runtime_mode === "invalid" ? "error" : "warning",
+	bootstrapStatus.value?.primary_warning?.severity === "error" ||
+	bootstrapStatus.value?.runtime_mode === "invalid"
+		? "error"
+		: "warning",
+);
+const bootstrapCapabilitySummaries = computed(
+	() => bootstrapStatus.value?.capability_summaries || [],
 );
 const bootstrapWarningTitle = computed(() => {
+	if (bootstrapStatus.value?.primary_warning?.title) {
+		return __(bootstrapStatus.value.primary_warning.title);
+	}
 	if (bootstrapStatus.value?.runtime_mode === "invalid") {
 		return __("Offline restore is unavailable for this session.");
 	}
 	if (bootstrapLimitedMode.value) {
-		return __("POS is running with limited offline prerequisites.");
+		return __("Offline selling is available with degraded capabilities.");
 	}
 	return "";
 });
 const bootstrapWarningMessages = computed(() => {
 	if (!shouldShowBootstrapBanner(bootstrapStatus.value)) {
 		return [];
+	}
+
+	if (Array.isArray(bootstrapStatus.value?.primary_warning?.messages)) {
+		return bootstrapStatus.value.primary_warning.messages.map((message) =>
+			__(message),
+		);
 	}
 
 	return Array.from(
@@ -484,15 +552,41 @@ const bootstrapWarningTooltip = computed(() => {
 		.filter(Boolean)
 		.join("\n");
 });
+const bootstrapWarningUiState = computed(() =>
+	resolveBootstrapWarningUiState({
+		startupWarningsReady: startupBootstrapWarningsReady.value,
+		warningActive: bootstrapWarningActive.value,
+		warningTooltip: bootstrapWarningTooltip.value,
+		capabilitySummaries: bootstrapCapabilitySummaries.value,
+	}),
+);
+const visibleBootstrapWarningActive = computed(
+	() => bootstrapWarningUiState.value.active,
+);
+const visibleBootstrapWarningTooltip = computed(
+	() => bootstrapWarningUiState.value.tooltip,
+);
+const visibleBootstrapCapabilitySummaries = computed(
+	() => bootstrapWarningUiState.value.capabilitySummaries,
+);
+const visibleBootstrapWarningTitle = computed(() =>
+	visibleBootstrapWarningActive.value ? bootstrapWarningTitle.value : "",
+);
+const visibleBootstrapWarningMessages = computed(() =>
+	visibleBootstrapWarningActive.value ? bootstrapWarningMessages.value : [],
+);
+const visibleBootstrapRecoveryMessage = computed(() =>
+	visibleBootstrapWarningActive.value ? bootstrapRecoveryMessage.value : "",
+);
 const bootstrapWarningSignature = computed(() => {
-	if (!bootstrapWarningActive.value) {
+	if (!visibleBootstrapWarningActive.value) {
 		return "";
 	}
 
 	return JSON.stringify({
 		type: bootstrapAlertType.value,
-		title: bootstrapWarningTitle.value,
-		messages: bootstrapWarningMessages.value,
+		title: visibleBootstrapWarningTitle.value,
+		messages: visibleBootstrapWarningMessages.value,
 	});
 });
 
@@ -552,6 +646,25 @@ watch(
 );
 
 watch(
+	() => [loadingActive.value, initialBootstrapSyncSettled.value],
+	([isLoading, isBootstrapSettled]) => {
+		const shouldLift = shouldLiftBootstrapWarningStartupGate({
+			loadingActive: Boolean(isLoading),
+			initialBootstrapSettled: Boolean(isBootstrapSettled),
+			startupGateLifted: startupBootstrapWarningsReady.value,
+		});
+
+		if (!shouldLift || startupBootstrapWarningsReady.value) {
+			return;
+		}
+
+		startupBootstrapWarningsReady.value = true;
+		evaluateBootstrapSnapshot({ allowPrompt: false });
+	},
+	{ immediate: true },
+);
+
+watch(
 	customersLoaded,
 	(loaded) => {
 		if (loaded) {
@@ -582,10 +695,14 @@ watch(
 // Lifecycle Hooks
 onMounted(() => {
 	pollForFrappeNav();
+	removeBootstrapSnapshotListener = listenForBootstrapSnapshotUpdates(() => {
+		evaluateBootstrapSnapshot({ allowPrompt: false });
+	});
 
 	window.addEventListener("resize", adjust_frappe_sidebar_offset);
 	// initLoadingSources move to setup to catch early store readiness
 	initializeData();
+	offlineSyncRuntime.startTimerSync();
 	setupNetworkListeners(); // Local function wrapper
 	setupEventListeners();
 	handleRefreshCacheUsage();
@@ -606,6 +723,11 @@ onBeforeUnmount(() => {
 		clearInterval(updateInterval);
 		updateInterval = null;
 	}
+	if (removeBootstrapSnapshotListener) {
+		removeBootstrapSnapshotListener();
+		removeBootstrapSnapshotListener = null;
+	}
+	offlineSyncRuntime.stopTimerSync();
 	if (eventBus) {
 		eventBus.off("data-loaded");
 		eventBus.off("register_pos_profile");
@@ -688,6 +810,7 @@ const setupNetworkListeners = () => {
 const initializeData = async () => {
 	await initPromise;
 	await memoryInitPromise;
+	await ensureOfflineQueueReady();
 	await hydrateOfflineSyncResourceStates();
 	checkDbHealth().catch(() => {});
 	// Offline-first bootstrap: hydrate register state from IndexedDB before server checks.
@@ -731,7 +854,8 @@ const initializeData = async () => {
 	evaluateBootstrapSnapshot({
 		allowPrompt: manualOffline.value || !navigator.onLine,
 	});
-	void scheduleBootCriticalWarmSync();
+	await scheduleBootCriticalWarmSync();
+	initialBootstrapSyncSettled.value = true;
 
 	markSourceLoaded("init");
 
@@ -918,7 +1042,8 @@ const handleRefreshOfflineData = async () => {
 	});
 	if (!getIsManualOffline() && navigator.onLine) {
 		await handleRetryStatus();
-		await triggerOnlineResumeSync();
+		await triggerOperatorRefreshSync();
+		evaluateBootstrapSnapshot({ allowPrompt: false });
 	}
 	toastStore.show({
 		title: __("Offline data status refreshed"),
@@ -935,7 +1060,8 @@ const handleRebuildOfflineData = async () => {
 		allowPrompt: true,
 	});
 	if (canRunOfflineSync()) {
-		await scheduleBootCriticalWarmSync();
+		await triggerOperatorRefreshSync({ includeBootSync: true });
+		evaluateBootstrapSnapshot({ allowPrompt: false });
 	}
 	toastStore.show({
 		title: __("Offline rebuild guidance"),
@@ -946,13 +1072,26 @@ const handleRebuildOfflineData = async () => {
 
 const handleOpenOfflineDiagnostics = () => {
 	handleRefreshCacheUsage();
+	const lastRunSummary = syncCoordinator.getLastRunSummary();
+	const syncSummary =
+		lastRunSummary && lastRunSummary.resourcesTotal
+			? __("Last sync: {0} | ok: {1} | failed: {2} | skipped: {3}", [
+					lastRunSummary.trigger,
+					lastRunSummary.succeeded,
+					lastRunSummary.failed,
+					lastRunSummary.skipped,
+			  ])
+			: __("No sync trigger has run yet in this session.");
 	toastStore.show({
 		title: __("Offline diagnostics"),
-		detail: __("Pending sales: {0} | Cache usage: {1}%", [
+		detail: `${__(
+			"Pending sales: {0} | Cache usage: {1}%",
+			[
 			pendingInvoicesCount.value || 0,
 			Math.round(cacheUsage.value || 0),
-		]),
-		color: bootstrapWarningActive.value ? "warning" : "info",
+			],
+		)}\n${syncSummary}`,
+		color: visibleBootstrapWarningActive.value ? "warning" : "info",
 	});
 };
 
@@ -1002,11 +1141,6 @@ const refreshTaxInclusiveSetting = async () => {
 		});
 		if (r.message !== undefined) {
 			const val = r.message;
-			try {
-				localStorage.setItem("posa_tax_inclusive", JSON.stringify(val));
-			} catch (err) {
-				console.warn("Failed to cache tax inclusive setting", err);
-			}
 			import("../../offline/index")
 				.then((m) => {
 					if (m && m.setTaxInclusiveSetting) {

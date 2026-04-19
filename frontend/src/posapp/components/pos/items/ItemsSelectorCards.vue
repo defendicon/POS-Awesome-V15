@@ -48,7 +48,8 @@
 					:context="context"
 					:selected-currency="selectedCurrency"
 					:hide-qty-decimals="hideQtyDecimals"
-					:last-invoice-rate="getLastInvoiceRate(item)"
+					:show-rate-info="showRateInfo"
+					:get-item-rate-info="getItemRateInfo"
 					:is-item-highlighted="isItemHighlighted(item)"
 					:currency-symbol="currencySymbol"
 					:format-currency="formatCurrency"
@@ -91,7 +92,8 @@ const props = defineProps({
 	context: { type: String, default: "pos" },
 	selectedCurrency: { type: String, default: "" },
 	hideQtyDecimals: { type: Boolean, default: false },
-	getLastInvoiceRate: { type: Function, required: true },
+	showRateInfo: { type: Boolean, default: true },
+	getItemRateInfo: { type: Function, required: true },
 	isItemHighlighted: { type: Function, required: true },
 	currencySymbol: { type: Function, required: true },
 	formatCurrency: { type: Function, required: true },

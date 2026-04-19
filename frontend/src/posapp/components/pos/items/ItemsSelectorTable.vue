@@ -18,45 +18,34 @@
 		>
 			<template v-slot:item.rate="{ item }">
 				<div v-if="context !== 'purchase'">
-					<div class="text-primary">
-						{{
-							currencySymbol(
-								item.original_currency ||
-									item.currency ||
-									item.price_list_currency ||
-									posProfile.currency,
-							)
-						}}
-						{{
-							formatCurrency(
-								item.original_rate ?? item.rate ?? 0,
-								item.original_currency ||
-									item.currency ||
-									item.price_list_currency ||
-									posProfile.currency,
-								ratePrecision(item.original_rate ?? item.rate ?? 0),
-							)
-						}}
-					</div>
-					<div
-						v-if="getLastInvoiceRate(item)"
-						class="text-caption d-flex align-center last-rate-inline"
-					>
-						<v-icon size="14" class="mr-1" color="secondary">mdi-history</v-icon>
-						<span class="mr-1">{{ __("Last") }}:</span>
-						<span class="font-weight-medium">
-							{{ currencySymbol(getLastInvoiceRate(item).currency || posProfile.currency) }}
+					<div class="text-primary rate-cell-primary">
+						<div>
 							{{
-								formatCurrency(
-									getLastInvoiceRate(item).rate,
-									getLastInvoiceRate(item).currency || posProfile.currency,
-									ratePrecision(getLastInvoiceRate(item).rate || 0),
+								currencySymbol(
+									item.original_currency ||
+										item.currency ||
+										item.price_list_currency ||
+										posProfile.currency,
 								)
 							}}
-							<span v-if="getLastInvoiceRate(item).uom" class="last-rate-uom">
-								/{{ getLastInvoiceRate(item).uom }}
-							</span>
-						</span>
+							{{
+								formatCurrency(
+									item.original_rate ?? item.rate ?? 0,
+									item.original_currency ||
+										item.currency ||
+										item.price_list_currency ||
+										posProfile.currency,
+									ratePrecision(item.original_rate ?? item.rate ?? 0),
+								)
+							}}
+						</div>
+						<ItemRateInfoMenu
+							v-if="showRateInfo"
+							:rate-info="getItemRateInfo(item)"
+							:currency-symbol="currencySymbol"
+							:format-currency="formatCurrency"
+							:rate-precision="ratePrecision"
+						/>
 					</div>
 					<div
 						v-if="
@@ -74,48 +63,37 @@
 						{{ formatCurrency(item.rate, selectedCurrency, ratePrecision(item.rate)) }}
 					</div>
 				</div>
-			<div v-else>
-				<div class="text-primary">
-					{{
-						currencySymbol(
-							item.original_currency ||
-								item.currency ||
-								item.price_list_currency ||
-								posProfile.currency,
-						)
-					}}
-					{{
-						formatCurrency(
-							item.original_rate ?? item.rate ?? item.standard_rate ?? 0,
-							item.original_currency ||
-								item.currency ||
-								item.price_list_currency ||
-								posProfile.currency,
-							ratePrecision(item.original_rate ?? item.rate ?? item.standard_rate ?? 0),
-						)
-					}}
+				<div v-else>
+					<div class="text-primary rate-cell-primary">
+						<div>
+							{{
+								currencySymbol(
+									item.original_currency ||
+										item.currency ||
+										item.price_list_currency ||
+										posProfile.currency,
+								)
+							}}
+							{{
+								formatCurrency(
+									item.original_rate ?? item.rate ?? item.standard_rate ?? 0,
+									item.original_currency ||
+										item.currency ||
+										item.price_list_currency ||
+										posProfile.currency,
+									ratePrecision(item.original_rate ?? item.rate ?? item.standard_rate ?? 0),
+								)
+							}}
+						</div>
+						<ItemRateInfoMenu
+							v-if="showRateInfo"
+							:rate-info="getItemRateInfo(item)"
+							:currency-symbol="currencySymbol"
+							:format-currency="formatCurrency"
+							:rate-precision="ratePrecision"
+						/>
+					</div>
 				</div>
-				<div
-					v-if="getLastInvoiceRate(item)"
-					class="text-caption d-flex align-center last-rate-inline"
-				>
-					<v-icon size="14" class="mr-1" color="secondary">mdi-history</v-icon>
-					<span class="mr-1">{{ __("Last") }}:</span>
-					<span class="font-weight-medium">
-						{{ currencySymbol(getLastInvoiceRate(item).currency || posProfile.currency) }}
-						{{
-							formatCurrency(
-								getLastInvoiceRate(item).rate,
-								getLastInvoiceRate(item).currency || posProfile.currency,
-								ratePrecision(getLastInvoiceRate(item).rate || 0),
-							)
-						}}
-						<span v-if="getLastInvoiceRate(item).uom" class="last-rate-uom">
-							/{{ getLastInvoiceRate(item).uom }}
-						</span>
-					</span>
-				</div>
-			</div>
 			</template>
 			<template v-slot:item.actual_qty="{ item }">
 				<span class="golden--text" :class="{ 'negative-number': isNegative(item.actual_qty) }">
@@ -128,6 +106,7 @@
 
 <script setup>
 import { ref } from "vue";
+import ItemRateInfoMenu from "./ItemRateInfoMenu.vue";
 
 const props = defineProps({
 	displayedItems: { type: Array, default: () => [] },
@@ -137,11 +116,12 @@ const props = defineProps({
 	posProfile: { type: Object, default: () => ({}) },
 	selectedCurrency: { type: String, default: "" },
 	hideQtyDecimals: { type: Boolean, default: false },
+	showRateInfo: { type: Boolean, default: true },
 	currencySymbol: { type: Function, required: true },
 	formatCurrency: { type: Function, required: true },
 	formatNumber: { type: Function, required: true },
 	ratePrecision: { type: Function, required: true },
-	getLastInvoiceRate: { type: Function, required: true },
+	getItemRateInfo: { type: Function, required: true },
 	isNegative: { type: Function, required: true },
 	itemClass: { type: [String, Function], default: "" },
 	rowProps: { type: [Object, Function], default: null },
@@ -211,13 +191,10 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 	background-color: rgba(var(--v-theme-primary), 0.32);
 }
 
-.last-rate-inline {
-	color: rgba(var(--v-theme-on-surface), 0.6);
-	white-space: nowrap;
-}
-
-:deep(.v-theme--dark) .last-rate-inline {
-	color: rgba(var(--v-theme-on-surface), 0.75);
+.rate-cell-primary {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
 }
 
 .sleek-data-table {

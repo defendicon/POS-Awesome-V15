@@ -34,6 +34,13 @@
 						<span class="price-amount">
 							{{ formatCurrency(primaryRate, primaryCurrency, primaryPrecision) }}
 						</span>
+						<ItemRateInfoMenu
+							v-if="showRateInfo"
+							:rate-info="rateInfo"
+							:currency-symbol="currencySymbol"
+							:format-currency="formatCurrency"
+							:rate-precision="ratePrecision"
+						/>
 					</div>
 					<div v-if="showSecondaryPrice" class="secondary-price">
 						<span class="currency-symbol">
@@ -41,23 +48,6 @@
 						</span>
 						<span class="price-amount">
 							{{ formatCurrency(item.rate, secondaryCurrency, primaryPrecision) }}
-						</span>
-					</div>
-					<div v-if="lastInvoiceRate" class="last-rate-chip">
-						<v-icon size="14" class="mr-1" color="secondary">mdi-history</v-icon>
-						<span class="last-rate-label">{{ __("Last") }}:</span>
-						<span class="last-rate-value">
-							{{ currencySymbol(lastInvoiceRate.currency || posProfile.currency) }}
-							{{
-								formatCurrency(
-									lastInvoiceRate.rate,
-									lastInvoiceRate.currency || posProfile.currency,
-									primaryPrecision,
-								)
-							}}
-							<span v-if="lastInvoiceRate.uom" class="last-rate-uom">
-								/{{ lastInvoiceRate.uom }}
-							</span>
 						</span>
 					</div>
 				</div>
@@ -81,6 +71,7 @@
 <script setup>
 import { computed } from "vue";
 import placeholderImage from "../placeholder-image.png";
+import ItemRateInfoMenu from "./ItemRateInfoMenu.vue";
 
 const props = defineProps({
 	item: { type: Object, required: true },
@@ -88,7 +79,8 @@ const props = defineProps({
 	context: { type: String, default: "pos" },
 	selectedCurrency: { type: String, default: "" },
 	hideQtyDecimals: { type: Boolean, default: false },
-	lastInvoiceRate: { type: Object, default: null },
+	showRateInfo: { type: Boolean, default: true },
+	getItemRateInfo: { type: Function, required: true },
 	isItemHighlighted: { type: Boolean, default: false },
 	currencySymbol: { type: Function, required: true },
 	formatCurrency: { type: Function, required: true },
@@ -126,6 +118,8 @@ const primaryRate = computed(() => {
 const primaryPrecision = computed(() => {
 	return props.ratePrecision(primaryRate.value);
 });
+
+const rateInfo = computed(() => props.getItemRateInfo(props.item));
 
 const secondaryCurrency = computed(() => props.selectedCurrency);
 
@@ -291,22 +285,6 @@ const onDragEnd = (event) => {
 .secondary-price {
 	font-size: 0.8rem;
 	color: var(--pos-text-secondary);
-}
-
-.last-rate-chip {
-	font-size: 0.75rem;
-	color: var(--pos-secondary);
-	background: var(--pos-hover-bg);
-	padding: 4px 8px;
-	border-radius: var(--pos-radius-xs);
-	display: inline-flex;
-	align-items: center;
-	width: fit-content;
-}
-
-.last-rate-value {
-	margin-left: 4px;
-	font-weight: 500;
 }
 
 .card-item-stock {

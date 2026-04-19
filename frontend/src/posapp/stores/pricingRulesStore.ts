@@ -1,3 +1,38 @@
+/**
+ * Offline pricing-rules snapshot with context-scoped indexes and staleness tracking.
+ *
+ * **Interfaces**
+ * - `PricingRule` — a single rule record with optional `item_code`, `item_group`,
+ *   `brand`, discount/rate fields, `specificity` (computed), and `priority`.
+ * - `RuleContext` — lookup scope: `company`, `price_list`, `currency`, `customer`,
+ *   `customer_group`, `territory`, `date`.
+ *
+ * **Specificity and sorting**
+ * `normaliseRule` attaches a `specificity` score (item_code=3, item_group=2,
+ * brand=1, general=0). `compareRules` sorts by specificity → priority →
+ * `benefitScore` (max of discount/margin/freebies) → name. All index buckets are
+ * sorted on write so callers always receive the highest-priority rule first.
+ *
+ * **Four inverted indexes**
+ * `indexRules()` partitions the rule list into `indexes.byItem`, `indexes.byGroup`,
+ * `indexes.byBrand`, and `indexes.general`. These are rebuilt synchronously on
+ * every `setSnapshot` call and on hydration.
+ *
+ * **Staleness (`HOURS_STALE = 24`)**
+ * `staleAt` stores an ISO timestamp 24 hours after the last sync. `isStale`
+ * returns true when `Date.now()` exceeds that timestamp. The snapshot is
+ * preserved without refresh when the device is offline, even if stale.
+ *
+ * **Offline persistence**
+ * The snapshot is saved to IndexedDB via `savePricingRulesSnapshot` on every
+ * `setSnapshot` call. `hydrateFromCache()` is called at store creation to
+ * restore the snapshot without a network round-trip.
+ *
+ * **`ensureActiveRules(ctx, { force? })`**
+ * Idempotent — skips the server fetch if the context key matches and the snapshot
+ * is not stale (unless `force: true`). Context key is the JSON-serialised
+ * `RuleContext`; a mismatch triggers `invalidateIfContextChanges`.
+ */
 import { defineStore } from "pinia";
 import { computed, reactive, ref } from "vue";
 // @ts-ignore

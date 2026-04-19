@@ -1,5 +1,63 @@
+/**
+ * Unified cache layer for all offline POS data.
+ *
+ * Every offline read and write goes through this module so that storage concerns
+ * stay out of sync adapters and Vue components.
+ *
+ * ## Storage ownership
+ *
+ * **Runtime cache — `memory`**
+ * `memory` is the synchronous runtime cache for small reference payloads and UI-facing
+ * state. Every mutation to `memory` must be followed immediately by `persist(key)`.
+ * `persist` writes durable data to IndexedDB and only mirrors a narrow allowlist of
+ * lightweight settings/metadata to `localStorage`.
+ *
+ * **Durable store — Dexie / IndexedDB (`db`)**
+ * IndexedDB is the persistent source of truth for business and cache data. Large datasets
+ * that would overflow localStorage live here directly. Currently:
+ * - `items` — full item catalogue, stored with derived search fields for Dexie indexing.
+ * - `customers` — all customers.
+ * - `pos_profiles` / `opening_shifts` — structural records persisted on shift open.
+ *
+ * **Light metadata — `localStorage`**
+ * `localStorage` is only used for a small set of lightweight settings and migration
+ * fallback reads. It is not the durable owner of core offline datasets or sync cursors.
+ *
+ * ## Tier interaction
+ * The runtime cache and IndexedDB are largely independent. The one exception is `getCachedItemDetails`,
+ * which reads per-item detail overrides from `memory.item_details_cache` and merges
+ * them onto base records fetched from the Dexie `items` table:
+ * `result = { ...baseItem, ...detailOverride }`.
+ *
+ * ## Scope
+ * Most item functions accept a `scope` parameter (the POS profile name). Items are
+ * stored with a `profile_scope` field so reads and deletes are filtered to the active
+ * profile. Omitting scope falls back to unscoped behaviour and logs a deprecation
+ * warning. Keyed caches (delivery charges, exchange rates, etc.) use
+ * `buildScopedCacheKey` to namespace entries by profile or company.
+ *
+ * ## Bootstrap snapshot side effects
+ * Many `save*` functions call `refreshBootstrapSnapshotFromCacheState` as a side
+ * effect after writing. This keeps the offline-readiness snapshot current so that the
+ * UI indicator reflects the true cache state without a separate polling pass.
+ *
+ * ## Clone safety
+ * Data written to IndexedDB must be structured-clone safe. `toCloneSafeValue` strips
+ * functions, symbols, bigints, and circular references before writes. Data returned by
+ * getters is similarly cloned via `cloneCachePayload` so callers cannot mutate the
+ * cached copy and corrupt future reads.
+ *
+ * ## TTL
+ * Most `memory`-tier caches use `DEFAULT_CACHE_TTL_MS` (24 hours). `getCachedItemDetails`
+ * uses a shorter 15-minute TTL. Stale entries are treated as cache misses; callers are
+ * responsible for re-fetching via the appropriate sync adapter.
+ *
+ * @module offline/cache
+ */
+
 import { refreshBootstrapSnapshotFromCaches } from "./bootstrapSnapshot";
 import { memory, persist, db, checkDbHealth } from "./db";
+import { emitBootstrapSnapshotUpdated } from "../posapp/utils/bootstrapRuntimeEvents";
 
 const normalizeScope = (scope: unknown): string => String(scope || "");
 const hasScope = (scope: unknown): boolean => normalizeScope(scope).length > 0;
@@ -647,6 +705,22 @@ export function saveItemDetailsCache(profileName, priceList, items) {
 	}
 }
 
+/**
+ * Returns cached item details, split into `cached` (fresh) and `missing` (absent or stale)
+ * groups so callers know exactly which items need a network fetch.
+ *
+ * This function spans both storage tiers:
+ * 1. Reads per-item detail overrides from `memory.item_details_cache`
+ *    (keyed by `profileName → priceList → item_code`, TTL 15 minutes).
+ * 2. For items that are fresh, fetches their base records from the Dexie `items` table
+ *    and merges them: `result = { ...baseItem, ...detailOverride }`.
+ *
+ * @param profileName - POS profile name used as the first cache key dimension.
+ * @param priceList - Price list name used as the second cache key dimension.
+ * @param itemCodes - Item codes to look up.
+ * @param ttl - Cache TTL in milliseconds. Defaults to 15 minutes.
+ * @returns `{ cached: mergedItems[], missing: itemCodes[] }`.
+ */
 export async function getCachedItemDetails(
 	profileName: string,
 	priceList: string,
@@ -797,6 +871,20 @@ export function getBootstrapSnapshot() {
 	return memory.bootstrap_snapshot || null;
 }
 
+/**
+ * Re-evaluates the stored bootstrap snapshot against the current cache state and
+ * persists the updated snapshot.
+ *
+ * Called as a side effect by most `save*` functions in this module. Callers pass a
+ * partial `cacheState` object describing what changed (e.g. `{ offers: [...] }`);
+ * `refreshBootstrapSnapshotFromCaches` merges it with the rest of the current snapshot
+ * to produce an updated readiness record.
+ *
+ * This is the mechanism that keeps the offline-readiness banner in sync with actual
+ * cache state without a dedicated polling loop.
+ *
+ * @param cacheState - Partial cache state describing what was just written.
+ */
 export function refreshBootstrapSnapshotFromCacheState(cacheState = {}) {
 	try {
 		setBootstrapSnapshot(
@@ -816,6 +904,7 @@ export function setBootstrapSnapshot(snapshot) {
 			? JSON.parse(JSON.stringify(snapshot))
 			: null;
 		persist("bootstrap_snapshot");
+		emitBootstrapSnapshotUpdated(memory.bootstrap_snapshot);
 	} catch (e) {
 		console.error("Failed to set bootstrap snapshot", e);
 	}
@@ -848,6 +937,11 @@ export function setBootstrapLimitedMode(state) {
 		console.error("Failed to set bootstrap limited mode", e);
 	}
 }
+
+// --- Opening storage (memory + IndexedDB) ------------------------------------
+// `pos_opening_storage` lives in `memory` for fast synchronous access.
+// `pos_profiles` and `opening_shifts` are additionally written to Dexie so they
+// survive a hard reload even if localStorage is cleared.
 
 function cloneOpeningData(data: any) {
 	try {
@@ -948,6 +1042,17 @@ export function setTaxInclusiveSetting(value) {
 	});
 }
 
+/**
+ * Clears all `memory`-tier caches to free up localStorage space under memory pressure.
+ *
+ * **Does NOT touch the Dexie IndexedDB tables** (`items`, `customers`, etc.). Those are
+ * preserved so the POS can continue operating offline. Only the faster, smaller
+ * `memory`-tier caches (price lists, item details, exchange rates, etc.) are emptied.
+ * All cleared keys are immediately persisted so that the empty state survives a reload.
+ *
+ * Callers should expect that any `getCached*` call after this returns `null` / empty until
+ * the relevant sync adapter re-populates the cache.
+ */
 export function reduceCacheUsage() {
 	memory.price_list_cache = {};
 	memory.item_details_cache = {};
@@ -981,36 +1086,27 @@ export function reduceCacheUsage() {
 	persist("item_groups_cache");
 }
 
+// --- Sync watermarks (memory + IndexedDB) ------------------------------------
+// Delta sync cursors are kept in memory for synchronous access and persisted via
+// `persist()` into the `sync_state` table. `db.ts` still reads legacy
+// `localStorage` keys during initialization for migration safety.
+
 export function setItemsLastSync(timestamp) {
-	if (typeof localStorage !== "undefined") {
-		localStorage.setItem("posa_items_last_sync", timestamp);
-	}
+	memory.items_last_sync = timestamp || null;
+	persist("items_last_sync");
 }
 
 export function getItemsLastSync() {
-	if (typeof localStorage !== "undefined") {
-		return localStorage.getItem("posa_items_last_sync");
-	}
-	return null;
+	return memory.items_last_sync || null;
 }
 
 export function setCustomersLastSync(timestamp) {
-	if (typeof localStorage !== "undefined") {
-		if (timestamp) {
-			localStorage.setItem("posa_customers_last_sync", timestamp);
-		} else {
-			localStorage.removeItem("posa_customers_last_sync");
-		}
-	}
+	memory.customers_last_sync = timestamp || null;
+	persist("customers_last_sync");
 }
 
 export function getCustomersLastSync() {
-	if (typeof localStorage !== "undefined") {
-		const val = localStorage.getItem("posa_customers_last_sync");
-		if (val === "null" || val === "undefined") return null;
-		return val;
-	}
-	return null;
+	return memory.customers_last_sync || null;
 }
 
 export async function getCustomerStorageCount() {
@@ -1029,7 +1125,6 @@ export async function clearCustomerStorage() {
 		if (!db.isOpen()) await db.open();
 		await db.table("customers").clear();
 		memory.customer_storage = [];
-		persist("customer_storage");
 	} catch (e) {
 		console.error("Failed to clear customer storage", e);
 	}
@@ -1207,6 +1302,12 @@ export function clearItemGroups() {
 		itemGroups: memory.item_groups_cache,
 	});
 }
+
+// --- Scoped key-value caches (memory, TTL-based) ------------------------------
+// The following caches store small, scoped payloads in `memory` using composite
+// keys built by `buildScopedCacheKey`. Each entry carries a `timestamp` checked
+// by `isFreshCacheEntry` against `DEFAULT_CACHE_TTL_MS` (24 h) or an override.
+// Save operations call `refreshBootstrapSnapshotFromCacheState` as a side effect.
 
 export function saveDeliveryChargesCache(
 	profileName,

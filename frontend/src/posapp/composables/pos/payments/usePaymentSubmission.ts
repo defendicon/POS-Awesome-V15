@@ -5,6 +5,7 @@ import {
 	isOffline,
 	updateLocalStock,
 } from "../../../../offline/index";
+import { ensureInvoiceClientRequestId } from "../../../../offline/idempotency";
 import stockCoordinator from "../../../utils/stockCoordinator";
 
 declare const frappe: any;
@@ -468,7 +469,9 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 	};
 
 	const buildSubmissionInvoiceDoc = (doc: any) => {
-		return JSON.parse(JSON.stringify(doc || {}));
+		const submissionDoc = JSON.parse(JSON.stringify(doc || {}));
+		ensureInvoiceClientRequestId(submissionDoc);
+		return submissionDoc;
 	};
 
 	function ensureReturnPaymentsAreNegative() {
@@ -631,6 +634,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 		}
 
 		if (doc) {
+			ensureInvoiceClientRequestId(doc);
 			doc.write_off_amount = writeOffAmount;
 			doc.base_write_off_amount = formatFloat(
 				writeOffAmount * (doc.conversion_rate || 1),
@@ -675,7 +679,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				throw new Error(__("Gift card redemption requires an online connection"));
 			}
 			try {
-				saveOfflineInvoice({ data, invoice: doc });
+				await saveOfflineInvoice({ data, invoice: doc });
 				stores?.syncStore?.updatePendingCount();
 				stores?.toastStore?.show({
 					title: __("Invoice saved offline"),

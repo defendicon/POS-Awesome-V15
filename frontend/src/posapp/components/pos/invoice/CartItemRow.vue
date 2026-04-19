@@ -1,7 +1,8 @@
 <template>
 	<tr class="posa-cart-item-row" v-memo="memoDeps">
+		<template v-for="column in visibleColumns" :key="column.key">
 		<!-- Item Name Column -->
-		<td class="text-start" :data-column-key="'item_name'">
+		<td v-if="column.key === 'item_name'" class="text-start" :data-column-key="'item_name'">
 			<div class="d-flex align-center">
 				<span>{{ item.item_name }}</span>
 				<v-chip v-if="item.is_bundle" color="secondary" size="x-small" class="ml-1">
@@ -71,7 +72,7 @@
 		</td>
 
 		<!-- Quantity Column -->
-		<td class="text-center" :data-column-key="'qty'">
+		<td v-else-if="column.key === 'qty'" class="text-center" :data-column-key="'qty'">
 			<div class="posa-cart-table__qty-counter" :class="{ 'rtl-layout': isRTL }">
 				<v-btn
 					:disabled="disableDecrement"
@@ -129,7 +130,7 @@
 		</td>
 
 		<!-- UOM Column (Optional) -->
-		<td v-if="showUom" class="text-center" :data-column-key="'uom'">
+		<td v-else-if="column.key === 'uom'" class="text-center" :data-column-key="'uom'">
 			<div class="posa-cart-table__editor-box uom-editor" @click.stop>
 				<v-btn
 					size="x-small"
@@ -185,7 +186,11 @@
 		</td>
 
 		<!-- Price List Rate (Optional) -->
-		<td v-if="showPriceListRate" class="text-end" :data-column-key="'price_list_rate'">
+		<td
+			v-else-if="column.key === 'price_list_rate'"
+			class="text-end"
+			:data-column-key="'price_list_rate'"
+		>
 			<div class="currency-display right-aligned">
 				<span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
 				<span class="amount-value" :class="{ 'negative-number': isNegative(item.price_list_rate) }">
@@ -195,7 +200,11 @@
 		</td>
 
 		<!-- Discount % (Optional) -->
-		<td v-if="showDiscountPercent" class="text-center" :data-column-key="'discount_percentage'">
+		<td
+			v-else-if="column.key === 'discount_percentage'"
+			class="text-center"
+			:data-column-key="'discount_percentage'"
+		>
 			<div class="posa-cart-table__editor-box">
 				<div
 					v-if="!isEditingDiscountPercent"
@@ -238,7 +247,11 @@
 		</td>
 
 		<!-- Discount Amount (Optional) -->
-		<td v-if="showDiscountAmount" class="text-center" :data-column-key="'discount_amount'">
+		<td
+			v-else-if="column.key === 'discount_amount'"
+			class="text-center"
+			:data-column-key="'discount_amount'"
+		>
 			<div class="posa-cart-table__editor-box">
 				<div
 					v-if="!isEditingDiscountAmount"
@@ -273,7 +286,7 @@
 		</td>
 
 		<!-- Rate Column -->
-		<td class="text-center" :data-column-key="'rate'">
+		<td v-else-if="column.key === 'rate'" class="text-center" :data-column-key="'rate'">
 			<div class="posa-cart-table__editor-box">
 				<div
 					v-if="!isEditingRate"
@@ -308,7 +321,7 @@
 		</td>
 
 		<!-- Amount Column -->
-		<td class="text-center" :data-column-key="'amount'">
+		<td v-else-if="column.key === 'amount'" class="text-center" :data-column-key="'amount'">
 			<div class="currency-display right-aligned">
 				<span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
 				<span class="amount-value" :class="{ 'negative-number': isNegative(item.qty * item.rate) }">
@@ -318,7 +331,11 @@
 		</td>
 
 		<!-- Offer Toggle (Optional) -->
-		<td v-if="showOffer" class="text-center" :data-column-key="'posa_is_offer'">
+		<td
+			v-else-if="column.key === 'posa_is_offer'"
+			class="text-center"
+			:data-column-key="'posa_is_offer'"
+		>
 			<v-btn
 				size="x-small"
 				color="primary"
@@ -331,7 +348,7 @@
 		</td>
 
 		<!-- Actions -->
-		<td class="text-center" :data-column-key="'actions'">
+		<td v-else-if="column.key === 'actions'" class="text-center" :data-column-key="'actions'">
 			<v-btn
 				:disabled="!!item.posa_is_replace"
 				size="small"
@@ -343,6 +360,26 @@
 				<v-icon size="small">mdi-delete-outline</v-icon>
 			</v-btn>
 		</td>
+
+		<td
+			v-else-if="column.key === 'data-table-expand'"
+			class="text-center"
+			:data-column-key="'data-table-expand'"
+		>
+			<v-btn
+				icon
+				size="small"
+				variant="text"
+				class="posa-cart-table__expand-btn"
+				@click.stop="$emit('toggle-expand')"
+				:aria-label="isExpanded ? __('Collapse item details') : __('Expand item details')"
+			>
+				<v-icon size="small">
+					{{ isExpanded ? "mdi-chevron-up" : "mdi-chevron-down" }}
+				</v-icon>
+			</v-btn>
+		</td>
+		</template>
 	</tr>
 </template>
 
@@ -358,6 +395,10 @@ const props = defineProps({
 		type: Object,
 		required: true,
 	},
+	visibleColumns: {
+		type: Array,
+		default: () => [],
+	},
 	posProfile: {
 		type: Object,
 		required: true,
@@ -372,12 +413,7 @@ const props = defineProps({
 	isNegative: Function,
 	hideQtyDecimals: Boolean,
 	isRTL: Boolean,
-	// Column visibility flags to avoid passing full headers array
-	showUom: Boolean,
-	showPriceListRate: Boolean,
-	showDiscountPercent: Boolean,
-	showDiscountAmount: Boolean,
-	showOffer: Boolean,
+	isExpanded: Boolean,
 });
 
 const emit = defineEmits([
@@ -390,6 +426,9 @@ const emit = defineEmits([
 	"update-rate",
 	"update-discount-percent",
 	"update-discount-amount",
+	"toggle-offer",
+	"toggle-expand",
+	"remove-item",
 ]);
 
 const __ = window.__ || ((text) => text);
@@ -427,6 +466,8 @@ const memoDeps = computed(() => {
 		props.item.posa_offer_applied,
 		props.item.is_free_item,
 		props.item.price_list_rate,
+		props.isExpanded,
+		props.visibleColumns.map((column) => column?.key).join("|"),
 		// Include edit states to ensure UI updates when switching modes
 		isEditingQty.value,
 		isEditingRate.value,

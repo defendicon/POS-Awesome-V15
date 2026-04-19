@@ -1,3 +1,21 @@
+/**
+ * Lightweight Pinia store for the legacy offline invoice sync queue.
+ *
+ * This store wraps the offline invoice queue helpers (`syncOfflineInvoices`,
+ * `getPendingOfflineInvoiceCount`) and exposes a reactive `pendingInvoicesCount`
+ * for status-bar badges. It does **not** drive the full `SyncCoordinator` —
+ * the coordinator manages background resource sync independently.
+ *
+ * **`syncPendingInvoices()`**
+ * Reads the pending count, shows a warning toast if any are queued, and then
+ * calls `syncOfflineInvoices()`. The sync is skipped entirely when `isOffline()`
+ * returns true. On completion it shows success/draft toasts and refreshes the
+ * count. Errors are caught and logged; the count is always updated in `finally`.
+ *
+ * **Options API style**
+ * This store uses the Options API form of `defineStore` (with `state` /
+ * `actions`) rather than the Setup API used by newer stores in this codebase.
+ */
 import { defineStore } from "pinia";
 import {
 	getPendingOfflineInvoiceCount,
