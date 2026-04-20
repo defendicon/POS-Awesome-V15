@@ -168,6 +168,13 @@ export const DERIVED_OFFLINE_CACHE_KEYS = Object.freeze([
 
 const DERIVED_OFFLINE_METADATA_KEYS = Object.freeze(["cache_version"]);
 
+// Intentionally preserved across build-cache reconciliation:
+// - `manual_offline` is an explicit user/network override, not stale derived data.
+// - `pos_opening_storage` / `opening_dialog_storage` hold active shift/session state.
+// - `pos_last_sync_totals` is operational queue telemetry derived from pending work.
+// These keys are cleared by their owning flows when appropriate, but not by
+// `clearDerivedOfflineCaches()`.
+
 const DERIVED_OFFLINE_TABLES_TO_CLEAR = Object.freeze([
 	"items",
 	"item_prices",
@@ -276,6 +283,7 @@ const MEMORY_DEFAULTS: AnyRecord = {
 	bootstrap_snapshot: null,
 	bootstrap_snapshot_status: null,
 	bootstrap_limited_mode: false,
+	schema_signature: null,
 };
 
 export const memory: AnyRecord = {
@@ -557,14 +565,14 @@ export async function clearDerivedOfflineCaches() {
 	} catch (error) {
 		console.error("Failed to clear derived offline caches", error);
 		throw error;
+	} finally {
+		[...DERIVED_OFFLINE_CACHE_KEYS, ...DERIVED_OFFLINE_METADATA_KEYS].forEach(
+			(key) => {
+				resetMemoryKey(key);
+				removeLocalStorageMirror(key);
+			},
+		);
 	}
-
-	[...DERIVED_OFFLINE_CACHE_KEYS, ...DERIVED_OFFLINE_METADATA_KEYS].forEach(
-		(key) => {
-			resetMemoryKey(key);
-			removeLocalStorageMirror(key);
-		},
-	);
 }
 
 export async function checkDbHealth() {

@@ -235,4 +235,21 @@ describe("itemsStore loadItems", () => {
 			"Customer Retail",
 		);
 	});
+
+	it("does not prime detail cache when the server returns no items", async () => {
+		const store = useItemsStore();
+		const profile = {
+			name: "POS-1",
+			warehouse: "Main WH",
+			selling_price_list: "Retail",
+			currency: "PKR",
+			item_groups: [],
+		} as any;
+
+		itemServiceMocks.getItems.mockResolvedValueOnce([]);
+
+		await store.initialize(profile);
+
+		expect(itemsSyncMocks.primeItemDetailsCache).not.toHaveBeenCalled();
+	});
 });

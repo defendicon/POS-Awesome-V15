@@ -125,72 +125,6 @@ export function useItemsSync() {
 		});
 	};
 
-	const backgroundLoadItemDetails = async (
-		itemList: Item[],
-		posProfile: POSProfile | null,
-		activePriceList: string,
-		getItemByCode: (_code: string) => Item | undefined,
-	) => {
-		if (!itemList || itemList.length === 0) return;
-
-		try {
-			// Process in batches to avoid overwhelming the server
-			const batchSize = 20;
-			for (let i = 0; i < itemList.length; i += batchSize) {
-				const batch = itemList.slice(i, i + batchSize);
-
-				// Add small delay between batches
-				if (i > 0) {
-					await new Promise((resolve) => setTimeout(resolve, 200));
-				}
-
-				await loadItemDetailsBatch(
-					batch,
-					posProfile,
-					activePriceList,
-					getItemByCode,
-				);
-			}
-		} catch (error) {
-			console.error("Background item details loading failed:", error);
-		}
-	};
-
-	const loadItemDetailsBatch = async (
-		itemBatch: Item[],
-		posProfile: POSProfile | null,
-		activePriceList: string,
-		getItemByCode: (_code: string) => Item | undefined,
-	) => {
-		try {
-			if (!posProfile) return;
-			// @ts-ignore
-			const response = await frappe.call({
-				method: "posawesome.posawesome.api.items.get_items_details",
-				args: {
-					pos_profile: JSON.stringify(posProfile),
-					items_data: JSON.stringify(itemBatch),
-					price_list: activePriceList,
-				},
-			});
-
-			const details = response.message || [];
-
-			// Update items with details
-			details.forEach((detail: any) => {
-				const item = getItemByCode(detail.item_code);
-				if (item) {
-					Object.assign(item, detail);
-				}
-			});
-
-			// Cache the details
-			saveItemDetailsCache(posProfile.name, activePriceList, details);
-		} catch (error) {
-			console.error("Failed to load item details batch:", error);
-		}
-	};
-
 	const cancelBackgroundSync = () => {
 		backgroundSyncState.value.token += 1;
 		backgroundSyncState.value.running = false;
@@ -413,7 +347,6 @@ export function useItemsSync() {
 		loadItemGroups,
 		persistItemsToStorage,
 		primeItemDetailsCache,
-		backgroundLoadItemDetails,
 		cancelBackgroundSync,
 		refreshModifiedItems,
 		backgroundSyncItems,
