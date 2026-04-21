@@ -18,7 +18,7 @@ describe("document sources", () => {
 	it("enables order and quote sources from POS profile booleans", () => {
 		const profile = {
 			custom_allow_select_sales_order: "1",
-			custom_allow_select_quotation: true,
+			custom_allow_create_quotation: true,
 		};
 
 		const sources = getAvailableDocumentSources(profile);

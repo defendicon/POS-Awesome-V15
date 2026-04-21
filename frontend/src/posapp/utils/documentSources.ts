@@ -107,7 +107,8 @@ export function isSalesOrderSourceEnabled(posProfile: any): boolean {
 
 export function isQuotationSourceEnabled(posProfile: any): boolean {
 	return parseBooleanSetting(
-		posProfile?.custom_allow_select_quotation ??
+		posProfile?.custom_allow_create_quotation ??
+			posProfile?.custom_allow_select_quotation ??
 			posProfile?.posa_allow_select_quotation ??
 			posProfile?.posa_allow_quotation_selection,
 	);
