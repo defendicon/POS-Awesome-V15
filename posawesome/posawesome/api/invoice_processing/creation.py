@@ -429,6 +429,7 @@ def _save_draft_with_latest_timestamp(invoice_doc, retries=2):
                 invoice_doc.modified = latest_modified
 
         try:
+            _normalize_return_payments(invoice_doc)
             invoice_doc.save()
             return invoice_doc
         except TimestampMismatchError:
@@ -449,6 +450,26 @@ def _save_draft_with_latest_timestamp(invoice_doc, retries=2):
                 invoice_doc.flags, "ignore_permissions", False
             )
             invoice_doc = latest_doc
+
+
+def _normalize_return_payments(invoice_doc, conversion_rate=None):
+    if not invoice_doc or not invoice_doc.get("is_return"):
+        return invoice_doc
+
+    rate = flt(conversion_rate or invoice_doc.get("conversion_rate") or 1) or 1
+    paid_amount = 0
+    base_paid_amount = 0
+
+    for payment in invoice_doc.get("payments") or []:
+        resolved_amount, resolved_base_amount = _resolve_payment_amounts(payment, rate)
+        payment.amount = -abs(resolved_amount)
+        payment.base_amount = -abs(resolved_base_amount)
+        paid_amount += payment.amount
+        base_paid_amount += payment.base_amount
+
+    invoice_doc.paid_amount = flt(paid_amount)
+    invoice_doc.base_paid_amount = flt(base_paid_amount)
+    return invoice_doc
 
 
 def _resolve_payment_amounts(payment, conversion_rate=1):
@@ -676,18 +697,10 @@ def update_invoice(data):
             else:
                 tax.included_in_print_rate = 1 if inclusive else 0
 
-    # For return invoices, payments should be negative amounts
-    if invoice_doc.is_return:
-        for payment in invoice_doc.payments:
-            resolved_amount, resolved_base_amount = _resolve_payment_amounts(
-                payment,
-                invoice_doc.get("conversion_rate") or conversion_rate,
-            )
-            payment.amount = -abs(resolved_amount)
-            payment.base_amount = -abs(resolved_base_amount)
-
-        invoice_doc.paid_amount = flt(sum(p.amount for p in invoice_doc.payments))
-        invoice_doc.base_paid_amount = flt(sum(p.base_amount for p in invoice_doc.payments))
+    _normalize_return_payments(
+        invoice_doc,
+        invoice_doc.get("conversion_rate") or conversion_rate,
+    )
 
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True

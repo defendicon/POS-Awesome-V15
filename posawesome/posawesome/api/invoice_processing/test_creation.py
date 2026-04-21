@@ -201,10 +201,14 @@ class TestUpdateInvoiceReturnPayments(unittest.TestCase):
         _install_dependency_stubs()
         _install_package_stubs()
         cls.creation = _load_module()
+        cls._original_save_draft_with_latest_timestamp = cls.creation._save_draft_with_latest_timestamp
 
     def setUp(self):
         self.enqueue_calls.clear()
         self.frappe._publish_realtime_calls.clear()
+        self.creation._save_draft_with_latest_timestamp = (
+            self.__class__._original_save_draft_with_latest_timestamp
+        )
 
     def test_return_invoice_derives_missing_base_amount_from_amount(self):
         invoice_doc = FakeDoc(
@@ -255,6 +259,51 @@ class TestUpdateInvoiceReturnPayments(unittest.TestCase):
         self.assertEqual(invoice_doc.payments[0].base_amount, -125)
         self.assertEqual(result["paid_amount"], -125)
         self.assertEqual(result["base_paid_amount"], -125)
+
+    def test_save_draft_normalizes_positive_return_payments_before_validation(self):
+        invoice_doc = FakeDoc(
+            doctype="Sales Invoice",
+            name="ACC-SINV-RET-0001",
+            pos_profile="Main POS",
+            company="Test Company",
+            currency="USD",
+            posting_date="2026-03-21",
+            is_return=1,
+            return_against="ACC-SINV-0001",
+            items=[],
+            payments=[
+                FakeDoc(
+                    amount=125,
+                    base_amount=None,
+                )
+            ],
+            taxes=[],
+            flags=types.SimpleNamespace(ignore_pricing_rule=False, ignore_permissions=False),
+            paid_amount=0,
+            base_paid_amount=0,
+            conversion_rate=1,
+            plc_conversion_rate=1,
+            price_list_currency="USD",
+        )
+        invoice_doc.is_new = lambda: False
+
+        def _save():
+            for payment in invoice_doc.payments:
+                if payment.amount > 0 or payment.base_amount > 0:
+                    raise AssertionError("positive return payment reached save()")
+            invoice_doc._saved = True
+            return invoice_doc
+
+        invoice_doc.save = _save
+        self.creation.frappe.db.get_value = lambda *args, **kwargs: None
+
+        self.creation._save_draft_with_latest_timestamp(invoice_doc)
+
+        self.assertEqual(invoice_doc.payments[0].amount, -125)
+        self.assertEqual(invoice_doc.payments[0].base_amount, -125)
+        self.assertEqual(invoice_doc.paid_amount, -125)
+        self.assertEqual(invoice_doc.base_paid_amount, -125)
+        self.assertTrue(invoice_doc._saved)
 
     def test_return_invoice_derives_missing_amount_from_base_amount(self):
         invoice_doc = FakeDoc(
