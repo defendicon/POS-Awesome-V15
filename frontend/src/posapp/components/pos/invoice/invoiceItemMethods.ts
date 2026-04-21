@@ -321,8 +321,8 @@ const invoiceItemMethods: Record<string, unknown> &
 	show_payment() {
 		return Dialogs.show_payment(this);
 	},
-	get_draft_invoices() {
-		return Dialogs.get_draft_invoices(this);
+	get_draft_invoices(source = "invoice") {
+		return Dialogs.get_draft_invoices(this, source as "invoice" | "order" | "quote");
 	},
 	get_draft_orders() {
 		return Dialogs.get_draft_orders(this);
@@ -330,8 +330,15 @@ const invoiceItemMethods: Record<string, unknown> &
 	open_returns() {
 		return Dialogs.open_returns(this);
 	},
-	open_invoice_management(targetTab = "history") {
-		return Dialogs.open_invoice_management(this, targetTab);
+	open_invoice_management(targetTab = "history", draftSource = "invoice") {
+		return Dialogs.open_invoice_management_with_source(
+			this,
+			targetTab,
+			draftSource as "invoice" | "order" | "quote",
+		);
+	},
+	load_draft_source_record(draft) {
+		return Dialogs.load_draft_source_record(this, draft);
 	},
 	close_payments() {
 		return Dialogs.close_payments(this);

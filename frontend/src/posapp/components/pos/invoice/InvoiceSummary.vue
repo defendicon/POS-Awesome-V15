@@ -113,7 +113,7 @@
 	</v-card>
 
 	<v-navigation-drawer
-		v-if="showDesktopDrafts && allDrafts.length"
+		v-if="showDesktopDrafts"
 		v-model="desktopDraftsDrawer"
 		location="right"
 		temporary
@@ -121,11 +121,24 @@
 		class="drafts-drawer"
 	>
 		<div class="drafts-drawer__body">
+			<DocumentSourceSelector
+				v-if="showDraftSourceSelector"
+				v-model="currentDraftSource"
+				:options="availableDraftSources"
+				compact
+				:aria-label="__('Draft source')"
+				class="drafts-drawer__sources"
+			/>
 			<ParkedOrdersList
 				:parked-orders="allDrafts"
 				:format-currency="formatCurrency"
 				:currency-symbol="currencySymbol"
 				:show-manage-all="true"
+				:title="currentDraftSourceOption.panelTitle"
+				:eyebrow="currentDraftSourceOption.panelEyebrow"
+				:subtitle="currentDraftSourceOption.panelSubtitle"
+				:empty-title="__(currentDraftSourceOption.emptyTitle)"
+				:empty-subtitle="__(currentDraftSourceOption.emptySubtitle)"
 				@resume="handleResumeDraft"
 				@manage-all="handleManageAllDrafts"
 			/>
@@ -133,7 +146,7 @@
 	</v-navigation-drawer>
 
 	<v-dialog
-		v-else-if="allDrafts.length"
+		v-else
 		v-model="mobileDraftsDialog"
 		max-width="680"
 		scrollable
@@ -141,17 +154,30 @@
 	>
 		<v-card class="pos-themed-card">
 			<v-card-title class="d-flex align-center justify-space-between">
-				<span>{{ __("Drafts") }}</span>
+				<span>{{ __(currentDraftSourceOption.panelTitle) }}</span>
 				<v-btn variant="text" size="small" @click="mobileDraftsDialog = false">
 					{{ __("Close") }}
 				</v-btn>
 			</v-card-title>
 			<v-card-text class="pt-0">
+				<DocumentSourceSelector
+					v-if="showDraftSourceSelector"
+					v-model="currentDraftSource"
+					:options="availableDraftSources"
+					compact
+					:aria-label="__('Draft source')"
+					class="drafts-drawer__sources"
+				/>
 				<ParkedOrdersList
 					:parked-orders="allDrafts"
 					:format-currency="formatCurrency"
 					:currency-symbol="currencySymbol"
 					:show-manage-all="true"
+					:title="currentDraftSourceOption.panelTitle"
+					:eyebrow="currentDraftSourceOption.panelEyebrow"
+					:subtitle="currentDraftSourceOption.panelSubtitle"
+					:empty-title="__(currentDraftSourceOption.emptyTitle)"
+					:empty-subtitle="__(currentDraftSourceOption.emptySubtitle)"
 					@resume="handleResumeDraft"
 					@manage-all="handleManageAllDrafts"
 				/>
@@ -166,8 +192,15 @@ import { storeToRefs } from "pinia";
 import { loadItemSelectorSettings } from "../../../utils/itemSelectorSettings";
 import { useResponsive } from "../../../composables/core/useResponsive";
 import { useUIStore } from "../../../stores/uiStore";
+import {
+	getAvailableDocumentSources,
+	getDefaultDocumentSource,
+	getDocumentSourceOption,
+	shouldShowDocumentSourceSelector,
+} from "../../../utils/documentSources";
 import InvoiceActionButtons from "./InvoiceActionButtons.vue";
 import ParkedOrdersList from "./ParkedOrdersList.vue";
+import DocumentSourceSelector from "../shared/DocumentSourceSelector.vue";
 
 defineOptions({
 	name: "InvoiceSummary",
@@ -221,7 +254,7 @@ const desktopDraftsDrawer = ref(false);
 const mobileDraftsDialog = ref(false);
 const responsive = useResponsive();
 const uiStore = useUIStore();
-const { parkedOrders } = storeToRefs(uiStore);
+const { parkedOrders, draftSource } = storeToRefs(uiStore);
 
 const additionalDiscountDisplay = ref(normalizeDiscountDisplay(props.additional_discount));
 const additionalDiscountPercentageDisplay = ref(
@@ -236,11 +269,43 @@ const showReturnDiscountAlert = computed(
 		!isFullReturnDiscount(props.return_discount_meta?.ratio),
 );
 const allDrafts = computed(() => (Array.isArray(parkedOrders.value) ? parkedOrders.value : []));
+const availableDraftSources = computed(() => getAvailableDocumentSources(props.pos_profile));
+const showDraftSourceSelector = computed(() =>
+	shouldShowDocumentSourceSelector(availableDraftSources.value),
+);
+const currentDraftSource = computed({
+	get() {
+		return getDefaultDocumentSource(props.pos_profile, draftSource.value);
+	},
+	async set(value) {
+		const nextSource = getDefaultDocumentSource(props.pos_profile, value);
+		if (draftSource.value === nextSource) {
+			return;
+		}
+		uiStore.setDraftSource(nextSource);
+		uiStore.setParkedOrders([]);
+		await emit("load-drafts", nextSource);
+	},
+});
+const currentDraftSourceOption = computed(() =>
+	getDocumentSourceOption(currentDraftSource.value),
+);
 
 const hide_qty_decimals = computed(() => {
 	const opts = loadItemSelectorSettings();
 	return !!opts?.hide_qty_decimals;
 });
+
+watch(
+	() => props.pos_profile,
+	() => {
+		const nextSource = getDefaultDocumentSource(props.pos_profile, draftSource.value);
+		if (draftSource.value !== nextSource) {
+			uiStore.setDraftSource(nextSource);
+		}
+	},
+	{ deep: true, immediate: true },
+);
 
 watch(
 	() => props.additional_discount,
@@ -318,24 +383,19 @@ async function handleSaveAndClear() {
 }
 
 async function handleLoadDrafts() {
-	if (allDrafts.value.length) {
-		openDraftsSurface();
-		return;
-	}
-
 	loadDraftsLoading.value = true;
 	try {
-		await emit("load-drafts");
+		const nextSource = getDefaultDocumentSource(props.pos_profile, draftSource.value);
+		uiStore.setDraftSource(nextSource);
+		uiStore.setParkedOrders([]);
+		await emit("load-drafts", nextSource);
+		openDraftsSurface();
 	} finally {
 		loadDraftsLoading.value = false;
 	}
 }
 
 function openDraftsSurface() {
-	if (!allDrafts.value.length) {
-		return;
-	}
-
 	if (showDesktopDrafts.value) {
 		desktopDraftsDrawer.value = true;
 		return;
@@ -374,7 +434,8 @@ async function handleOpenInvoiceManagement() {
 function handleManageAllDrafts() {
 	desktopDraftsDrawer.value = false;
 	mobileDraftsDialog.value = false;
-	emit("open-invoice-management", "drafts");
+	uiStore.setInvoiceManagementDraftSource(currentDraftSource.value);
+	emit("open-invoice-management", "drafts", currentDraftSource.value);
 }
 
 async function handleOpenReturns() {
@@ -434,6 +495,18 @@ defineExpose({
 
 .drafts-drawer__body {
 	padding: 4px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.drafts-drawer__sources {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	padding: 4px;
+	background: var(--pos-surface-muted);
+	border-radius: 16px;
 }
 
 .cards {

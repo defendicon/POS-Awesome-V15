@@ -54,4 +54,14 @@ describe("uiStore parked orders", () => {
 		expect(store.invoiceManagementDialog).toBe(true);
 		expect(store.invoiceManagementTargetTab).toBe("drafts");
 	});
+
+	it("can preserve the selected drafts source when invoice management opens", () => {
+		const store = useUIStore();
+
+		store.openInvoiceManagement("drafts", "quote");
+
+		expect(store.invoiceManagementDialog).toBe(true);
+		expect(store.invoiceManagementTargetTab).toBe("drafts");
+		expect(store.invoiceManagementDraftSource).toBe("quote");
+	});
 });

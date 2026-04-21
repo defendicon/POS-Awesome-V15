@@ -283,7 +283,7 @@ import { storeToRefs } from "pinia";
 import stockCoordinator from "../../utils/stockCoordinator";
 import { getCurrentInstance, ref } from "vue";
 import { save_and_clear_invoice as saveAndClearInvoiceAction } from "./invoice_utils/actions";
-import { fetchDraftInvoiceDoc, fetchDraftInvoices } from "../../utils/draftInvoices";
+import { fetchDraftInvoices } from "../../utils/draftInvoices";
 
 // Composables
 import { useOnlineStatus } from "../../composables/core/useOnlineStatus";
@@ -876,12 +876,9 @@ export default {
 		},
 		async resume_parked_order(draft) {
 			try {
-				const message = await fetchDraftInvoiceDoc({
-					draft,
-					posProfile: this.pos_profile,
-				});
+				const message = await this.load_draft_source_record(draft);
 				if (message) {
-					this.invoiceStore.triggerLoadInvoice(message);
+					this.uiStore?.closeDrafts?.();
 				}
 			} catch (error) {
 				console.error("Error loading parked order:", error);
