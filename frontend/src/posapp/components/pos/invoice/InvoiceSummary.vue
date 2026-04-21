@@ -385,7 +385,7 @@ async function handleSaveAndClear() {
 async function handleLoadDrafts() {
 	loadDraftsLoading.value = true;
 	try {
-		const nextSource = getDefaultDocumentSource(props.pos_profile, draftSource.value);
+		const nextSource = getDefaultDocumentSource(props.pos_profile, "invoice");
 		uiStore.setDraftSource(nextSource);
 		uiStore.setParkedOrders([]);
 		await emit("load-drafts", nextSource);
