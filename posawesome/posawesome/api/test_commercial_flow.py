@@ -188,6 +188,14 @@ class TestCommercialFlowApi(unittest.TestCase):
         self.assertEqual(result["result"]["docstatus"], 1)
         self.assertEqual(result["flow_context"]["fulfillment_mode"], "delivery")
 
+    def test_as_dict_ignores_non_callable_as_dict_attribute(self):
+        row = {"name": "DN-0002", "as_dict": None, "docstatus": 1}
+
+        payload = self.module._as_dict(row)
+
+        self.assertEqual(payload["name"], "DN-0002")
+        self.assertIsNone(payload["as_dict"])
+
 
 if __name__ == "__main__":
     unittest.main()

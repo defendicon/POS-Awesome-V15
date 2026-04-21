@@ -33,8 +33,9 @@ DELIVERY_ACTIONS = {
 
 
 def _as_dict(doc):
-    if hasattr(doc, "as_dict"):
-        return doc.as_dict()
+    as_dict_method = getattr(doc, "as_dict", None)
+    if callable(as_dict_method):
+        return as_dict_method()
     if isinstance(doc, dict):
         return dict(doc)
     return dict(doc or {})
