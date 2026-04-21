@@ -602,14 +602,17 @@
 								<template #item.actions="{ item }">
 									<div class="d-flex justify-end ga-1">
 										<v-btn
-											icon="mdi-folder-open-outline"
+											v-for="action in draftActions(item)"
+											:key="`${item.name}-${action}`"
 											variant="text"
 											size="small"
-											:color="currentDraftSourceOption.color"
-											:title="__(currentDraftSourceOption.primaryActionLabel)"
-											:aria-label="__(currentDraftSourceOption.primaryActionLabel)"
-											@click="loadDraft(item)"
-										/>
+											:color="draftActionColor(action)"
+											:title="draftActionLabel(action)"
+											:aria-label="draftActionLabel(action)"
+											@click="runDraftAction(item, action)"
+										>
+											{{ draftActionLabel(action) }}
+										</v-btn>
 										<v-btn
 											v-if="canDeleteActiveDraftSource"
 											icon="mdi-delete-outline"
@@ -666,13 +669,14 @@
 
 									<div class="invoice-record-card__actions">
 										<v-btn
-											prepend-icon="mdi-folder-open-outline"
+											v-for="action in draftActions(invoice)"
+											:key="`${invoice.name}-${action}`"
 											size="small"
-											variant="flat"
-											:color="currentDraftSourceOption.color"
-											@click="loadDraft(invoice)"
+											:variant="isPrimaryDraftAction(action) ? 'flat' : 'text'"
+											:color="draftActionColor(action)"
+											@click="runDraftAction(invoice, action)"
 										>
-											{{ __(currentDraftSourceOption.primaryActionLabel) }}
+											{{ draftActionLabel(action) }}
 										</v-btn>
 										<v-btn
 											v-if="canDeleteActiveDraftSource"
@@ -900,11 +904,15 @@ import { isOffline } from "../../../../offline/index";
 import DocumentSourceSelector from "../shared/DocumentSourceSelector.vue";
 import {
 	canDeleteDocumentSourceRecord,
+	commitDocumentFlowAction,
 	fetchDocumentSourceRecords,
-	getAvailableDocumentSources,
-	getDefaultDocumentSource,
+	getAvailableCommercialDocumentSources,
+	getDefaultCommercialDocumentSource,
+	getDocumentFlowActionLabel,
+	getDocumentFlowActionsForRecord,
 	getDocumentSourceOption,
 	loadDocumentSourceRecord,
+	prepareDocumentFlowAction,
 	shouldShowDocumentSourceSelector,
 } from "../../../utils/documentSources";
 
@@ -993,6 +1001,7 @@ export default {
 			invoice: [],
 			order: [],
 			quote: [],
+			delivery: [],
 		},
 		repairChangeLoading: false,
 		detailDialog: false,
@@ -1008,10 +1017,10 @@ export default {
 	computed: {
 		currentInvoiceDoctype() { return this.posProfile?.create_pos_invoice_instead_of_sales_invoice ? "POS Invoice" : "Sales Invoice"; },
 		availableDraftSources() {
-			return getAvailableDocumentSources(this.posProfile);
+			return getAvailableCommercialDocumentSources(this.posProfile);
 		},
 		currentDraftSource() {
-			return getDefaultDocumentSource(this.posProfile, this.draftSource);
+			return getDefaultCommercialDocumentSource(this.posProfile, this.draftSource);
 		},
 		currentDraftSourceOption() {
 			return getDocumentSourceOption(this.currentDraftSource);
@@ -1136,7 +1145,7 @@ export default {
 		invoiceManagementDialog(value) {
 			if (value) {
 				this.activeTab = this.invoiceManagementTargetTab || "history";
-				this.draftSource = getDefaultDocumentSource(
+				this.draftSource = getDefaultCommercialDocumentSource(
 					this.posProfile,
 					this.uiStore.invoiceManagementDraftSource || this.draftSource,
 				);
@@ -1173,7 +1182,7 @@ export default {
 		},
 		posProfile: {
 			async handler(value, previousValue) {
-				this.draftSource = getDefaultDocumentSource(
+				this.draftSource = getDefaultCommercialDocumentSource(
 					value,
 					this.uiStore.invoiceManagementDraftSource || this.draftSource,
 				);
@@ -1637,6 +1646,7 @@ export default {
 		draftSourceChipLabel(invoice) {
 			if (this.currentDraftSource === "invoice") return __("Draft");
 			if (this.currentDraftSource === "quote") return __(invoice?.status || "Quote");
+			if (this.currentDraftSource === "delivery") return __("Delivered");
 			return __("Order");
 		},
 		draftSecondaryMetaLabel(invoice) {
@@ -1651,8 +1661,84 @@ export default {
 				value: __(invoice?.status || this.currentDraftSourceOption.label),
 			};
 		},
+		draftActions(invoice) {
+			return getDocumentFlowActionsForRecord(
+				invoice || { source: this.currentDraftSource },
+			);
+		},
+		draftActionLabel(action) {
+			return __(getDocumentFlowActionLabel(action));
+		},
+		draftActionColor(action) {
+			if (action === "quote_submit") return "warning";
+			if (action === "order_to_delivery_note") return "success";
+			if (action === "order_to_invoice" || action === "quote_to_invoice" || action === "delivery_to_invoice") {
+				return "primary";
+			}
+			if (action === "quote_to_order" || action === "order_load" || action === "quote_edit_draft") {
+				return this.currentDraftSourceOption.color;
+			}
+			return this.currentDraftSourceOption.color;
+		},
+		isPrimaryDraftAction(action) {
+			return action !== "quote_submit" && action !== "order_to_delivery_note";
+		},
+		async runDraftAction(invoice, action) {
+			if (!invoice?.name || !action) {
+				return;
+			}
+
+			try {
+				if (action === "invoice_load_draft") {
+					await this.loadDraft(invoice);
+					return;
+				}
+
+				if (action === "quote_submit" || action === "order_to_delivery_note") {
+					const result = await commitDocumentFlowAction({
+						action,
+						source: invoice?.source || this.currentDraftSource,
+						record: invoice,
+					});
+					if (action === "quote_submit") {
+						this.toastStore.show({ title: __("Quotation submitted"), color: "success" });
+						await this.loadDrafts();
+						return;
+					}
+
+					if (result?.result?.name) {
+						this.toastStore.show({
+							title: __("Delivery Note {0} created", [result.result.name]),
+							color: "success",
+						});
+					} else {
+						this.toastStore.show({ title: __("Delivery note created"), color: "success" });
+					}
+					this.draftSource = "delivery";
+					this.uiStore.setInvoiceManagementDraftSource("delivery");
+					await this.loadDrafts();
+					return;
+				}
+
+				const prepared = await prepareDocumentFlowAction({
+					action,
+					source: invoice?.source || this.currentDraftSource,
+					record: invoice,
+					currentInvoiceDoctype: this.currentInvoiceDoctype,
+				});
+				if (!prepared?.prepared_doc) {
+					this.toastStore.show({ title: __("Unable to prepare document"), color: "error" });
+					return;
+				}
+				this.invoiceStore.triggerLoadFlow?.(prepared);
+				this.uiStore.closeInvoiceManagement();
+			} catch (error) {
+				console.error("Error running draft action:", error);
+				this.toastStore.show({ title: __("Unable to process document action"), color: "error" });
+			}
+		},
 		async updateDraftSource(source) {
-			const nextSource = getDefaultDocumentSource(this.posProfile, source);
+			const nextSource = getDefaultCommercialDocumentSource(this.posProfile, source);
 			if (this.draftSource === nextSource) return;
 			this.draftSource = nextSource;
 			this.uiStore.setInvoiceManagementDraftSource(nextSource);

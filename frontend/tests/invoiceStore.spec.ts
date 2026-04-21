@@ -75,4 +75,28 @@ describe("invoiceStore invoice type state", () => {
 		expect(store.invoiceType).toBe("Quotation");
 		expect(store.deferStockValidationToPayment).toBe(true);
 	});
+
+	it("stores flow context when loading a prepared commercial-flow document", () => {
+		const store = useInvoiceStore();
+		const flow = {
+			prepared_doc: { doctype: "Sales Invoice", customer: "Test Customer" },
+			flow_context: {
+				source_doctype: "Sales Order",
+				source_name: "SO-0001",
+				prepared_action: "order_to_invoice",
+				target_doctype: "Sales Invoice",
+				update_stock: 1,
+			},
+		};
+
+		store.triggerLoadFlow(flow);
+
+		expect(store.flowToLoad).toEqual(flow);
+		expect(store.flowContext).toEqual(flow.flow_context);
+
+		store.clear();
+
+		expect(store.flowToLoad).toBeNull();
+		expect(store.flowContext).toBeNull();
+	});
 });

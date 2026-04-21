@@ -2,6 +2,7 @@ import { useItemAddition } from "../../../composables/pos/items/useItemAddition"
 import { get_invoice_doc, get_invoice_items, get_payments } from "./document";
 import { _logPriceListDebug, _buildPriceListSnapshot } from "./currency";
 import { applyReturnDiscountProration } from "./item_updates";
+import { prepareDocumentFlowAction } from "../../../utils/documentSources";
 
 declare const __: (_text: string, _args?: any[]) => string;
 declare const frappe: any;
@@ -292,17 +293,23 @@ export async function new_order(context: any, data: any = {}) {
 export async function get_invoice_from_order_doc(context: any) {
 	let doc: any = {};
 	if (context.invoice_doc.doctype == "Sales Order") {
-		await frappe.call({
-			method: "posawesome.posawesome.api.invoices.create_sales_invoice_from_order",
-			args: {
-				sales_order: context.invoice_doc.name,
+		const prepared = await prepareDocumentFlowAction({
+			action: "order_to_invoice",
+			source: "order",
+			record: {
+				...context.invoice_doc,
+				source: "order",
+				source_doctype: "Sales Order",
+				source_docstatus:
+					context.invoice_doc?.source_docstatus ??
+					context.invoice_doc?.docstatus ??
+					1,
 			},
-			callback: function (r) {
-				if (r.message) {
-					doc = r.message;
-				}
-			},
+			currentInvoiceDoctype: context.pos_profile?.create_pos_invoice_instead_of_sales_invoice
+				? "POS Invoice"
+				: "Sales Invoice",
 		});
+		doc = prepared?.prepared_doc || {};
 	} else {
 		doc = context.invoice_doc;
 	}

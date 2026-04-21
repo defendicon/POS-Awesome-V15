@@ -238,6 +238,15 @@ export default {
 		draftsDialog(value) {
 			if (!value) {
 				this.selected = [];
+				return;
+			}
+
+			if (!this.uiStore.invoiceManagementDialog) {
+				this.uiStore.closeDrafts();
+				this.uiStore.openInvoiceManagement(
+					"drafts",
+					this.uiStore.draftSource || "invoice",
+				);
 			}
 		},
 		draftsData: {

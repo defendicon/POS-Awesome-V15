@@ -4,10 +4,21 @@ import { fetchDraftInvoiceDoc } from "./draftInvoices";
 declare const frappe: any;
 
 export type DocumentSourceKey = "invoice" | "order" | "quote";
+export type CommercialDocumentSourceKey = DocumentSourceKey | "delivery";
+export type DocumentFlowActionKey =
+	| "invoice_load_draft"
+	| "quote_edit_draft"
+	| "quote_submit"
+	| "quote_to_order"
+	| "quote_to_invoice"
+	| "order_load"
+	| "order_to_delivery_note"
+	| "order_to_invoice"
+	| "delivery_to_invoice";
 
 export type DocumentSourceOption = {
-	key: DocumentSourceKey;
-	label: "Invoice" | "Order" | "Quote";
+	key: CommercialDocumentSourceKey;
+	label: "Invoice" | "Order" | "Quote" | "Delivery";
 	icon: string;
 	color: string;
 	panelTitle: string;
@@ -21,7 +32,7 @@ export type DocumentSourceOption = {
 };
 
 export type DocumentSourceRecord = Record<string, any> & {
-	source: DocumentSourceKey;
+	source: CommercialDocumentSourceKey;
 	posting_date?: string;
 	posting_time?: string;
 	customer?: string;
@@ -31,10 +42,22 @@ export type DocumentSourceRecord = Record<string, any> & {
 	doctype?: string;
 	items_count?: number;
 	status?: string;
+	source_doctype?: string;
+	source_docstatus?: number;
+	allowed_actions?: DocumentFlowActionKey[];
+};
+
+export type PreparedDocumentFlow = {
+	action: DocumentFlowActionKey;
+	source: CommercialDocumentSourceKey;
+	source_record: DocumentSourceRecord;
+	prepared_doc: Record<string, any>;
+	flow_context: Record<string, any>;
+	allowed_actions?: DocumentFlowActionKey[];
 };
 
 type FetchSourceOptions = {
-	source: DocumentSourceKey;
+	source: CommercialDocumentSourceKey;
 	posProfile: any;
 	posOpeningShift?: any;
 	currentInvoiceDoctype?: string;
@@ -44,7 +67,7 @@ type FetchSourceOptions = {
 };
 
 type LoadSourceOptions = {
-	source: DocumentSourceKey;
+	source: CommercialDocumentSourceKey;
 	record: DocumentSourceRecord;
 	posProfile: any;
 	currentInvoiceDoctype?: string;
@@ -52,6 +75,20 @@ type LoadSourceOptions = {
 	uiStore?: any;
 	closeDrafts?: boolean;
 	closeInvoiceManagement?: boolean;
+};
+
+type PrepareFlowOptions = {
+	action: DocumentFlowActionKey;
+	source: CommercialDocumentSourceKey;
+	record: DocumentSourceRecord;
+	currentInvoiceDoctype?: string;
+};
+
+type CommitFlowOptions = {
+	action: DocumentFlowActionKey;
+	source: CommercialDocumentSourceKey;
+	record: DocumentSourceRecord;
+	payload?: Record<string, any> | null;
 };
 
 export const DOCUMENT_SOURCE_OPTIONS: DocumentSourceOption[] = [
@@ -97,6 +134,20 @@ export const DOCUMENT_SOURCE_OPTIONS: DocumentSourceOption[] = [
 		searchLabel: "Search quotes or customers",
 		primaryActionLabel: "Load Quote",
 	},
+	{
+		key: "delivery",
+		label: "Delivery",
+		icon: "mdi-truck-delivery-outline",
+		color: "success",
+		panelTitle: "Delivery",
+		panelEyebrow: "Delivery notes",
+		panelSubtitle: "Create an invoice from a completed delivery.",
+		emptyTitle: "No delivery notes found",
+		emptySubtitle: "Matching delivery notes will appear here.",
+		loadingLabel: "Loading delivery notes...",
+		searchLabel: "Search delivery notes or customers",
+		primaryActionLabel: "Invoice Delivery",
+	},
 ];
 
 export function isSalesOrderSourceEnabled(posProfile: any): boolean {
@@ -119,8 +170,24 @@ export function getAvailableDocumentSources(posProfile: any): DocumentSourceOpti
 		if (source.key === "invoice") return true;
 		if (source.key === "order") return isSalesOrderSourceEnabled(posProfile);
 		if (source.key === "quote") return isQuotationSourceEnabled(posProfile);
+		if (source.key === "delivery") return false;
 		return false;
 	});
+}
+
+export function getAvailableCommercialDocumentSources(
+	posProfile: any,
+): DocumentSourceOption[] {
+	const sources = [...getAvailableDocumentSources(posProfile)];
+	if (isSalesOrderSourceEnabled(posProfile)) {
+		const deliveryOption = DOCUMENT_SOURCE_OPTIONS.find(
+			(source) => source.key === "delivery",
+		);
+		if (deliveryOption) {
+			sources.push(deliveryOption);
+		}
+	}
+	return sources;
 }
 
 export function getDefaultDocumentSource(
@@ -132,7 +199,19 @@ export function getDefaultDocumentSource(
 	if (availableSources.some((source) => source.key === current)) {
 		return current;
 	}
-	return availableSources[0]?.key || "invoice";
+	return (availableSources[0]?.key as DocumentSourceKey) || "invoice";
+}
+
+export function getDefaultCommercialDocumentSource(
+	posProfile: any,
+	currentSource?: string | null,
+): CommercialDocumentSourceKey {
+	const availableSources = getAvailableCommercialDocumentSources(posProfile);
+	const current = String(currentSource || "").toLowerCase() as CommercialDocumentSourceKey;
+	if (availableSources.some((source) => source.key === current)) {
+		return current;
+	}
+	return (availableSources[0]?.key as CommercialDocumentSourceKey) || "invoice";
 }
 
 export function shouldShowDocumentSourceSelector(
@@ -150,11 +229,16 @@ export function getDocumentSourceOption(
 	);
 }
 
-export function canDeleteDocumentSourceRecord(source: DocumentSourceKey): boolean {
+export function canDeleteDocumentSourceRecord(
+	source: CommercialDocumentSourceKey,
+): boolean {
 	return source === "invoice";
 }
 
-function normalizeDocumentStatus(source: DocumentSourceKey, record: any): string {
+function normalizeDocumentStatus(
+	source: CommercialDocumentSourceKey,
+	record: any,
+): string {
 	if (record?.status) {
 		return record.status;
 	}
@@ -164,11 +248,14 @@ function normalizeDocumentStatus(source: DocumentSourceKey, record: any): string
 	if (source === "order") {
 		return "Submitted";
 	}
+	if (source === "delivery") {
+		return "Submitted";
+	}
 	return "Draft";
 }
 
 export function normalizeDocumentSourceRecord(
-	source: DocumentSourceKey,
+	source: CommercialDocumentSourceKey,
 	record: Record<string, any>,
 ): DocumentSourceRecord {
 	const postingDate =
@@ -188,7 +275,9 @@ export function normalizeDocumentSourceRecord(
 				? "Sales Invoice"
 				: source === "order"
 					? "Sales Order"
-					: "Quotation"),
+					: source === "delivery"
+						? "Delivery Note"
+						: "Quotation"),
 		posting_date: postingDate,
 		posting_time: record?.posting_time || "",
 		customer,
@@ -199,7 +288,92 @@ export function normalizeDocumentSourceRecord(
 			? record.items.length
 			: Number(record?.items_count || 0),
 		status: normalizeDocumentStatus(source, record),
+		source_doctype:
+			record?.source_doctype ||
+			(source === "invoice"
+				? "Sales Invoice"
+				: source === "order"
+					? "Sales Order"
+					: source === "delivery"
+						? "Delivery Note"
+						: "Quotation"),
+		source_docstatus: Number(record?.source_docstatus ?? record?.docstatus ?? 0),
+		allowed_actions: Array.isArray(record?.allowed_actions)
+			? record.allowed_actions
+			: getDocumentFlowActionsForRecord({ ...record, source }),
 	};
+}
+
+export function getSourceDoctypeForKey(
+	source: CommercialDocumentSourceKey,
+	currentInvoiceDoctype = "Sales Invoice",
+): string {
+	if (source === "invoice") return currentInvoiceDoctype;
+	if (source === "order") return "Sales Order";
+	if (source === "delivery") return "Delivery Note";
+	return "Quotation";
+}
+
+export function getDocumentFlowActionsForRecord(
+	record: Partial<DocumentSourceRecord> | null | undefined,
+): DocumentFlowActionKey[] {
+	const source = String(record?.source || "").toLowerCase();
+	const docstatus = Number(record?.source_docstatus ?? record?.docstatus ?? 0);
+	if (source === "invoice") {
+		return docstatus === 0 ? ["invoice_load_draft"] : [];
+	}
+	if (source === "quote") {
+		if (docstatus === 0) return ["quote_edit_draft", "quote_submit"];
+		if (docstatus === 1) return ["quote_to_order", "quote_to_invoice"];
+		return [];
+	}
+	if (source === "order") {
+		return docstatus === 1
+			? ["order_load", "order_to_delivery_note", "order_to_invoice"]
+			: [];
+	}
+	if (source === "delivery") {
+		return docstatus === 1 ? ["delivery_to_invoice"] : [];
+	}
+	return [];
+}
+
+export function getPrimaryDocumentFlowAction(
+	record: Partial<DocumentSourceRecord> | null | undefined,
+): DocumentFlowActionKey | null {
+	const allowed = getDocumentFlowActionsForRecord(record);
+	return allowed[0] || null;
+}
+
+export function getDocumentFlowActionLabel(
+	action: DocumentFlowActionKey,
+): string {
+	switch (action) {
+		case "invoice_load_draft":
+			return "Load Draft";
+		case "quote_edit_draft":
+			return "Edit Quote";
+		case "quote_submit":
+			return "Submit Quote";
+		case "quote_to_order":
+			return "Create Order";
+		case "quote_to_invoice":
+			return "Create Invoice";
+		case "order_load":
+			return "Open Order";
+		case "order_to_delivery_note":
+			return "Delivery Note";
+		case "order_to_invoice":
+			return "Create Invoice";
+		case "delivery_to_invoice":
+			return "Create Invoice";
+		default:
+			return "Open";
+	}
+}
+
+export function isPrepareOnlyFlowAction(action: DocumentFlowActionKey): boolean {
+	return action !== "quote_submit" && action !== "order_to_delivery_note";
 }
 
 export async function fetchDocumentSourceRecords(
@@ -219,126 +393,98 @@ export async function fetchDocumentSourceRecords(
 		return [];
 	}
 
-	if (source === "invoice") {
-		if (!posOpeningShift?.name && !isSupervisorScope) {
-			return [];
-		}
-
-		const { message } = await frappe.call({
-			method: "posawesome.posawesome.api.invoices.get_draft_invoices",
-			args: {
-				pos_opening_shift: posOpeningShift?.name,
-				doctype: currentInvoiceDoctype,
-				limit_page_length: 0,
-				company: isSupervisorScope ? posProfile?.company : null,
-				pos_profile:
-					isSupervisorScope && typeof resolveSupervisorProfileScope === "function"
-						? resolveSupervisorProfileScope()
-						: null,
-				cashier: null,
-				is_supervisor: isSupervisorScope ? 1 : 0,
-			},
-		});
-		return Array.isArray(message)
-			? message.map((entry) =>
-					normalizeDocumentSourceRecord("invoice", {
-						...entry,
-						doctype: entry?.doctype || currentInvoiceDoctype,
-					}),
-				)
-			: [];
-	}
-
-	if (source === "order") {
-		const { message } = await frappe.call({
-			method: "posawesome.posawesome.api.sales_orders.search_orders",
-			args: {
-				order_name: search || undefined,
-				company: posProfile?.company,
-				currency: posProfile?.currency,
-			},
-		});
-		return Array.isArray(message)
-			? message.map((entry) => normalizeDocumentSourceRecord("order", entry))
-			: [];
-	}
-
 	const { message } = await frappe.call({
-		method: "posawesome.posawesome.api.quotations.search_quotations",
+		method: "posawesome.posawesome.api.commercial_flow.list_source_documents",
 		args: {
+			source,
+			pos_opening_shift: posOpeningShift?.name,
+			doctype: currentInvoiceDoctype,
 			company: posProfile?.company,
 			currency: posProfile?.currency,
-			quotation_name: search || undefined,
+			pos_profile:
+				isSupervisorScope && typeof resolveSupervisorProfileScope === "function"
+					? resolveSupervisorProfileScope()
+					: null,
+			cashier: null,
+			is_supervisor: isSupervisorScope ? 1 : 0,
+			search: search || undefined,
 			include_draft: 1,
 			include_submitted: 1,
 		},
 	});
 	return Array.isArray(message)
-		? message.map((entry) => normalizeDocumentSourceRecord("quote", entry))
+		? message.map((entry) => normalizeDocumentSourceRecord(source, entry))
 		: [];
+}
+
+export async function prepareDocumentFlowAction(
+	options: PrepareFlowOptions,
+): Promise<PreparedDocumentFlow | null> {
+	const { action, source, record, currentInvoiceDoctype = "Sales Invoice" } =
+		options;
+
+	if (!record?.name) {
+		return null;
+	}
+
+	const { message } = await frappe.call({
+		method: "posawesome.posawesome.api.commercial_flow.prepare_document_flow_action",
+		args: {
+			action,
+			source_doctype:
+				record?.source_doctype ||
+				record?.doctype ||
+				getSourceDoctypeForKey(source, currentInvoiceDoctype),
+			source_name: record.name,
+			target_invoice_doctype: currentInvoiceDoctype,
+		},
+	});
+
+	if (!message?.prepared_doc) {
+		return null;
+	}
+
+	return {
+		...message,
+		source_record: normalizeDocumentSourceRecord(
+			source,
+			message.source_record || record,
+		),
+		prepared_doc: { ...message.prepared_doc },
+	};
+}
+
+export async function commitDocumentFlowAction(
+	options: CommitFlowOptions,
+): Promise<any> {
+	const { action, source, record, payload = null } = options;
+	if (!record?.name) {
+		return null;
+	}
+
+	const { message } = await frappe.call({
+		method: "posawesome.posawesome.api.commercial_flow.commit_document_flow_action",
+		args: {
+			action,
+			source_doctype: record?.source_doctype || record?.doctype || getSourceDoctypeForKey(source),
+			source_name: record.name,
+			payload: payload ? JSON.stringify(payload) : null,
+		},
+	});
+	return message || null;
 }
 
 export async function prepareSalesOrderRecordForLoading(
 	orderRecord: DocumentSourceRecord,
-): Promise<DocumentSourceRecord | null> {
-	if (!orderRecord?.name) {
-		return null;
-	}
-
-	let invoiceDocForLoad: any = {};
-	const { message } = await frappe.call({
-		method: "posawesome.posawesome.api.invoices.create_sales_invoice_from_order",
-		args: {
-			sales_order: orderRecord.name,
-		},
+	currentInvoiceDoctype = "Sales Invoice",
+): Promise<Record<string, any> | null> {
+	const prepared = await prepareDocumentFlowAction({
+		action: "order_load",
+		source: "order",
+		record: orderRecord,
+		currentInvoiceDoctype,
 	});
-
-	if (message) {
-		invoiceDocForLoad = message;
-	}
-
-	const orderToLoad = {
-		...orderRecord,
-		items: Array.isArray(orderRecord?.items)
-			? orderRecord.items.map((item: Record<string, any>) => ({ ...item }))
-			: [],
-	};
-
-	if (Array.isArray(invoiceDocForLoad?.items) && Array.isArray(orderToLoad.items)) {
-		const loadedItemsMap = invoiceDocForLoad.items.reduce(
-			(map: Record<string, any>, item: Record<string, any>) => {
-				if (item?.item_code) {
-					map[item.item_code] = item;
-				}
-				return map;
-			},
-			{},
-		);
-
-		orderToLoad.items = orderToLoad.items.filter((selectedItem: Record<string, any>) => {
-			const loadedItem = loadedItemsMap[selectedItem?.item_code];
-			if (!loadedItem) {
-				return false;
-			}
-
-			selectedItem.qty = loadedItem.qty;
-			selectedItem.amount = loadedItem.amount;
-			selectedItem.uom = loadedItem.uom;
-			selectedItem.rate = loadedItem.rate;
-			return true;
-		});
-	}
-
-	if (invoiceDocForLoad?.name) {
-		await frappe.call({
-			method: "posawesome.posawesome.api.invoices.delete_sales_invoice",
-			args: {
-				sales_invoice: invoiceDocForLoad.name,
-			},
-		});
-	}
-
-	return normalizeDocumentSourceRecord("order", orderToLoad);
+	return prepared?.prepared_doc || null;
 }
 
 export async function loadDocumentSourceRecord(
@@ -356,8 +502,12 @@ export async function loadDocumentSourceRecord(
 	} = options;
 
 	let loadedRecord: any = null;
+	const primaryAction = getPrimaryDocumentFlowAction(record);
+	if (!primaryAction) {
+		return null;
+	}
 
-	if (source === "invoice") {
+	if (source === "invoice" && primaryAction === "invoice_load_draft") {
 		loadedRecord = await fetchDraftInvoiceDoc({
 			draft: {
 				...record,
@@ -366,24 +516,30 @@ export async function loadDocumentSourceRecord(
 			posProfile,
 		});
 		if (loadedRecord) {
-			invoiceStore.triggerLoadInvoice(loadedRecord);
+			invoiceStore.triggerLoadFlow?.({
+				action: primaryAction,
+				source,
+				prepared_doc: loadedRecord,
+				source_record: record,
+				flow_context: {
+					source,
+					source_doctype: record?.source_doctype || currentInvoiceDoctype,
+					source_name: record?.name,
+					prepared_action: primaryAction,
+					target_doctype: loadedRecord.doctype || currentInvoiceDoctype,
+				},
+			});
 		}
-	} else if (source === "order") {
-		loadedRecord = await prepareSalesOrderRecordForLoading(record);
-		if (loadedRecord) {
-			invoiceStore.triggerLoadOrder(loadedRecord);
-		}
-	} else if (source === "quote") {
-		const { message } = await frappe.call({
-			method: "frappe.client.get",
-			args: {
-				doctype: "Quotation",
-				name: record?.name,
-			},
+	} else {
+		const prepared = await prepareDocumentFlowAction({
+			action: primaryAction,
+			source,
+			record,
+			currentInvoiceDoctype,
 		});
-		loadedRecord = message || null;
-		if (loadedRecord) {
-			invoiceStore.triggerLoadInvoice(loadedRecord);
+		loadedRecord = prepared?.prepared_doc || null;
+		if (prepared && typeof invoiceStore.triggerLoadFlow === "function") {
+			invoiceStore.triggerLoadFlow(prepared);
 		}
 	}
 
