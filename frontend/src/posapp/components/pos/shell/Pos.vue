@@ -215,13 +215,17 @@ import { inject, ref, onMounted, onBeforeUnmount, computed, watch, nextTick } fr
 import { usePosShift } from "../../../composables/pos/shared/usePosShift";
 import { useOffers } from "../../../composables/pos/shared/useOffers";
 // Import the cache cleanup function
-import { clearExpiredCustomerBalances } from "../../../../offline/index";
+import {
+	clearExpiredCustomerBalances,
+	isManualOffline as getIsManualOffline,
+} from "../../../../offline/index";
 import { useResponsive } from "../../../composables/core/useResponsive";
 import { useRtl } from "../../../composables/core/useRtl";
 import { useCustomersStore } from "../../../stores/customersStore.js";
 import { useUIStore } from "../../../stores/uiStore.js";
 import { useInvoiceStore } from "../../../stores/invoiceStore.js";
 import { useItemsStore } from "../../../stores/itemsStore.js";
+import { ensureCustomersReady } from "../../../modules/customers/customerLoadingCoordinator";
 import { storeToRefs } from "pinia";
 import { useCustomerDisplayPublisher } from "../../../composables/pos/shared/useCustomerDisplayPublisher";
 
@@ -650,8 +654,13 @@ export default {
 
 						// Initialize Customers Store
 						const customersStore = useCustomersStore();
-						customersStore.setPosProfile(newProfile);
-						await customersStore.get_customer_names();
+						await ensureCustomersReady({
+							profile: newProfile,
+							online: navigator.onLine,
+							manualOffline: getIsManualOffline(),
+							setProfile: customersStore.setPosProfile,
+							load: customersStore.get_customer_names,
+						});
 					}
 				},
 				{ deep: true, immediate: true },

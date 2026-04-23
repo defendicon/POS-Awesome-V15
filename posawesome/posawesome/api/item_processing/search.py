@@ -189,6 +189,7 @@ def _build_search_plan(
 
     fields = [
         "name",
+        "modified",
         "item_code",
         "item_name",
         "stock_uom",

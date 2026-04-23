@@ -237,6 +237,7 @@ import {
 	createItemHighlightMatcher,
 } from "../../../utils/itemSelectorHighlightBindings";
 import { createItemSearchFocusClearGuard } from "../../../utils/itemSearchFocusClearGuard";
+import { ensureItemsReady } from "../../../modules/items/itemLoadingCoordinator";
 
 const props = defineProps({
 	context: {
@@ -978,11 +979,17 @@ onMounted(async () => {
 					selected_exchange_rate.value = 1;
 					selected_conversion_rate.value = 1;
 
-					await itemsIntegration.initializeStore(
-						newProfile as any,
-						selectedCustomer.value as any,
-						customer_price_list.value as any,
-					);
+					await ensureItemsReady({
+						profile: newProfile as any,
+						customer: selectedCustomer.value as any,
+						priceList: customer_price_list.value as any,
+						initialize: async () =>
+							await itemsIntegration.initializeStore(
+								newProfile as any,
+								selectedCustomer.value as any,
+								customer_price_list.value as any,
+							),
+					});
 
 					isInitialized.value = true;
 					startItemWorker();

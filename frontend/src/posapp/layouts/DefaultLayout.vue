@@ -157,6 +157,7 @@ import {
 	resolveBootstrapWarningUiState,
 	shouldLiftBootstrapWarningStartupGate,
 } from "../utils/bootstrapWarningVisibility";
+import { ensureCustomersReady } from "../modules/customers/customerLoadingCoordinator";
 
 /**
  * Frappe Desk UI selectors to hide in POS view.
@@ -871,8 +872,13 @@ const initializeData = async () => {
 		posProfile.value &&
 		posProfile.value.name
 	) {
-		customersStore.setPosProfile(posProfile.value);
-		customersStore.get_customer_names();
+		void ensureCustomersReady({
+			profile: posProfile.value,
+			online: navigator.onLine,
+			manualOffline: getIsManualOffline(),
+			setProfile: customersStore.setPosProfile,
+			load: customersStore.get_customer_names,
+		});
 	}
 };
 
@@ -885,12 +891,17 @@ const setupEventListeners = () => {
 			(newProfile) => {
 				if (newProfile && newProfile.name) {
 					// Update customers store with profile
-					customersStore.setPosProfile(newProfile);
 					void scheduleBootCriticalWarmSync();
 
 					if (navigator.onLine && !getIsManualOffline()) {
 						refreshTaxInclusiveSetting();
-						customersStore.get_customer_names();
+						void ensureCustomersReady({
+							profile: newProfile,
+							online: navigator.onLine,
+							manualOffline: getIsManualOffline(),
+							setProfile: customersStore.setPosProfile,
+							load: customersStore.get_customer_names,
+						});
 					}
 				}
 			},

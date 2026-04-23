@@ -211,6 +211,7 @@ import { useCustomersStore } from "../../../stores/customersStore.js";
 import { useOnlineStatus } from "../../../composables/core/useOnlineStatus";
 import { useToastStore } from "../../../stores/toastStore.js";
 import { useUIStore } from "../../../stores/uiStore.js";
+import { ensureCustomersReady } from "../../../modules/customers/customerLoadingCoordinator";
 
 export default {
 	props: {
@@ -293,14 +294,20 @@ export default {
 			{ immediate: true },
 		);
 
-		watch(
-			() => props.pos_profile,
-			(profile) => {
-				if (profile) {
-					customersStore.setPosProfile(profile);
-				}
-			},
-			{ immediate: true },
+			watch(
+				() => props.pos_profile,
+				(profile) => {
+					if (profile) {
+						void ensureCustomersReady({
+							profile,
+							online: networkOnline.value,
+							manualOffline: false,
+							setProfile: customersStore.setPosProfile,
+							load: customersStore.get_customer_names,
+						});
+					}
+				},
+				{ immediate: true },
 		);
 
 		const detachScrollListener = () => {
@@ -493,8 +500,13 @@ export default {
 				() => uiStore.posProfile,
 				async (profile) => {
 					if (profile) {
-						customersStore.setPosProfile(profile);
-						await customersStore.get_customer_names();
+						await ensureCustomersReady({
+							profile,
+							online: networkOnline.value,
+							manualOffline: false,
+							setProfile: customersStore.setPosProfile,
+							load: customersStore.get_customer_names,
+						});
 					}
 				},
 				{ deep: true, immediate: true },
