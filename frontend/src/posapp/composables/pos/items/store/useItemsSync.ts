@@ -129,6 +129,7 @@ export function useItemsSync() {
 		backgroundSyncState.value.token += 1;
 		backgroundSyncState.value.running = false;
 		isBackgroundLoading.value = false;
+		loadProgress.value = 0;
 	};
 
 	const refreshModifiedItems = async (
@@ -230,9 +231,17 @@ export function useItemsSync() {
 		const token = ++backgroundSyncState.value.token;
 		backgroundSyncState.value.running = true;
 		isBackgroundLoading.value = true;
+		loadProgress.value = 0;
 
 		const appended: Item[] = [];
 		const DEFAULT_PAGE_SIZE = 200;
+		const bootstrapCount = Array.isArray(initialBatch)
+			? initialBatch.length
+			: items.value.length;
+		const remainingCatalogEstimate =
+			totalItemCount.value > bootstrapCount
+				? totalItemCount.value - bootstrapCount
+				: 0;
 
 		try {
 			if (reset) {
@@ -244,6 +253,7 @@ export function useItemsSync() {
 			}
 
 			let loaded = items.value.length;
+			let syncedCount = 0;
 			let lastItemName = items.value.length
 				? items.value[items.value.length - 1]?.item_name || null
 				: null;
@@ -292,20 +302,21 @@ export function useItemsSync() {
 				setItems(batch, { append: true });
 				appended.push(...batch);
 				loaded += batch.length;
+				syncedCount += batch.length;
 				lastItemName =
 					batch[batch.length - 1]?.item_name || lastItemName;
 
 				await updateCachedPaginationFromStorage();
 
-				if (totalItemCount.value > 0) {
+				if (remainingCatalogEstimate > 0) {
 					loadProgress.value = Math.min(
 						99,
-						Math.round((loaded / totalItemCount.value) * 100),
+						Math.round((syncedCount / remainingCatalogEstimate) * 100),
 					);
-				} else if (loaded > 0) {
+				} else if (syncedCount > 0) {
 					loadProgress.value = Math.min(
 						99,
-						Math.round((loaded / (loaded + limit)) * 100),
+						Math.round((syncedCount / (syncedCount + limit)) * 100),
 					);
 				}
 
