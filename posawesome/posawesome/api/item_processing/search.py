@@ -444,7 +444,7 @@ def _run_item_query(
 
         details = get_items_details(
             json.dumps(pos_profile),
-            json.dumps(items_data),
+            as_json(items_data),
             price_list=price_list,
             customer=customer,
         )
