@@ -94,6 +94,23 @@ export const useItemsStore = defineStore("items", () => {
 		});
 	};
 
+	const isInitialBatchLoad = (
+		options: {
+			stagedStartup?: boolean;
+			forceServer?: boolean;
+			searchValue?: string;
+			groupFilter?: string;
+		},
+	) => {
+		return Boolean(
+			options.stagedStartup &&
+				!options.forceServer &&
+				!limitSearchEnabled.value &&
+				!(options.searchValue || "").trim() &&
+				(options.groupFilter || "ALL") === "ALL",
+		);
+	};
+
 	// Core State
 	const items = ref<Item[]>([]);
 	const filteredItems = ref<Item[]>([]);
@@ -352,7 +369,13 @@ export const useItemsStore = defineStore("items", () => {
 		await loadCachedItems();
 
 		if (!itemsLoaded.value || items.value.length === 0) {
-			await loadItems({ forceServer: false });
+			const useStagedStartup =
+				!limitSearchEnabled.value && shouldPersistItems();
+			await loadItems({
+				forceServer: false,
+				limit: useStagedStartup ? resolvePageSize() : null,
+				stagedStartup: useStagedStartup,
+			});
 		}
 		itemsLoaded.value = true;
 	};
@@ -463,6 +486,7 @@ export const useItemsStore = defineStore("items", () => {
 			groupFilter?: string;
 			priceList?: string | null;
 			limit?: number | null;
+			stagedStartup?: boolean;
 		} = {},
 	) => {
 		const {
@@ -471,6 +495,7 @@ export const useItemsStore = defineStore("items", () => {
 			groupFilter = "ALL",
 			priceList = null,
 			limit = null,
+			stagedStartup = false,
 		} = options;
 
 		const startTime = performance.now();
@@ -485,6 +510,12 @@ export const useItemsStore = defineStore("items", () => {
 				typeof groupFilter === "string" && groupFilter.length > 0
 					? groupFilter
 					: "ALL";
+			const stagedInitialBatch = isInitialBatchLoad({
+				stagedStartup,
+				forceServer,
+				searchValue,
+				groupFilter: normalizedGroup,
+			});
 
 			cacheKey = generateCacheKey(
 				searchValue,
@@ -597,7 +628,7 @@ export const useItemsStore = defineStore("items", () => {
 			setItems(fetchedItems);
 			itemsLoaded.value = true;
 
-			if (!limitSearchEnabled.value) {
+			if (!limitSearchEnabled.value && !stagedInitialBatch) {
 				await cacheItems(cacheKey, fetchedItems);
 			}
 
@@ -621,15 +652,21 @@ export const useItemsStore = defineStore("items", () => {
 					const storedCount = await getStoredItemsCountByScopeCompat(
 						getStorageScope(),
 					).catch(() => fetchedItems.length);
-					syncBootstrapItemReadiness(
-						Math.max(Number(storedCount || 0), fetchedItems.length),
-					);
+					if (stagedInitialBatch) {
+						syncBootstrapItemReadiness(0);
+					} else {
+						syncBootstrapItemReadiness(
+							Math.max(Number(storedCount || 0), fetchedItems.length),
+						);
+					}
 				}
-				triggerBackgroundSync({
-					groupFilter: normalizedGroup,
-					initialBatch: fetchedItems,
-					reset: false,
-				});
+				if (stagedInitialBatch || fetchedItems.length >= resolvePageSize()) {
+					triggerBackgroundSync({
+						groupFilter: normalizedGroup,
+						initialBatch: fetchedItems,
+						reset: false,
+					});
+				}
 			} else if (!searchValue && normalizedGroup === "ALL") {
 				syncBootstrapItemReadiness(0);
 			}

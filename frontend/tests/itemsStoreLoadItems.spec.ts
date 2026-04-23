@@ -17,6 +17,11 @@ const itemsSyncMocks = vi.hoisted(() => ({
 	backgroundSyncItems: vi.fn(async () => []),
 }));
 
+const itemsCacheMocks = vi.hoisted(() => ({
+	getCachedItems: vi.fn(async () => null),
+	cacheItems: vi.fn(async () => {}),
+}));
+
 vi.mock("../src/posapp/services/itemService", () => ({
 	default: {
 		getItems: itemServiceMocks.getItems,
@@ -48,8 +53,8 @@ vi.mock("../src/posapp/composables/pos/items/store/useItemsCache", () => ({
 		assessCacheHealth: vi.fn(async () => {}),
 		clearAllCaches: vi.fn(async () => {}),
 		clearSearchCache: vi.fn(),
-		getCachedItems: vi.fn(async () => null),
-		cacheItems: vi.fn(async () => {}),
+		getCachedItems: itemsCacheMocks.getCachedItems,
+		cacheItems: itemsCacheMocks.cacheItems,
 		getCachedSearchResult: vi.fn(() => null),
 		setCachedSearchResult: vi.fn(),
 		getCachedPriceList: vi.fn(() => null),
@@ -203,6 +208,51 @@ describe("itemsStore loadItems", () => {
 		);
 		expect(store.items).toHaveLength(1);
 		expect(store.filteredItems).toHaveLength(1);
+	});
+
+	it("uses a bounded first startup batch when no offline items are cached", async () => {
+		const store = useItemsStore();
+		const profile = {
+			name: "POS-1",
+			warehouse: "Main WH",
+			selling_price_list: "Retail",
+			currency: "PKR",
+			item_groups: [],
+		} as any;
+
+		await store.initialize(profile);
+
+		expect(itemServiceMocks.getItems).toHaveBeenCalledWith(
+			expect.objectContaining({
+				limit: 50,
+				search_value: "",
+			}),
+			expect.any(AbortSignal),
+		);
+		expect(itemsSyncMocks.backgroundSyncItems).toHaveBeenCalledWith(
+			expect.objectContaining({
+				groupFilter: "ALL",
+				initialBatch: [
+					expect.objectContaining({
+						item_code: "ITEM-1",
+					}),
+				],
+				reset: false,
+			}),
+			expect.anything(),
+			"Retail",
+			"POS-1_Main WH",
+			true,
+			expect.any(Function),
+			expect.any(Function),
+			expect.any(Function),
+			expect.anything(),
+			expect.anything(),
+			expect.anything(),
+		);
+		expect(itemsCacheMocks.cacheItems).not.toHaveBeenCalled();
+		expect(store.itemsLoaded).toBe(true);
+		expect(store.items).toHaveLength(1);
 	});
 
 	it("uses the resolved price list when seeding fetched detail rows", async () => {
