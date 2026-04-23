@@ -88,9 +88,15 @@ export const useItemsStore = defineStore("items", () => {
 		return await fn(priceList);
 	};
 
-	const syncBootstrapItemReadiness = (count: number | boolean) => {
+	const syncBootstrapItemReadiness = (
+		count: number | boolean,
+		completeness: "unknown" | "incomplete" | "complete" | "stale" = "unknown",
+	) => {
 		refreshBootstrapSnapshotFromCacheState({
 			itemsCount: count,
+			itemsState: {
+				completeness,
+			},
 		});
 	};
 
@@ -386,7 +392,7 @@ export const useItemsStore = defineStore("items", () => {
 				resetCachedPagination({ enabled: false, total: 0 });
 				setItems([], { totalCount: 0 });
 				itemsLoaded.value = false;
-				syncBootstrapItemReadiness(0);
+				syncBootstrapItemReadiness(0, "unknown");
 				return;
 			}
 
@@ -402,7 +408,7 @@ export const useItemsStore = defineStore("items", () => {
 			if (resolvedCount === 0) {
 				itemsLoaded.value = false;
 				resetCachedPagination();
-				syncBootstrapItemReadiness(0);
+				syncBootstrapItemReadiness(0, "unknown");
 				return;
 			}
 
@@ -420,7 +426,7 @@ export const useItemsStore = defineStore("items", () => {
 					setItems(cachedItems, { totalCount: resolvedCount });
 					cachedPagination.value.offset = cachedItems.length;
 					itemsLoaded.value = true;
-					syncBootstrapItemReadiness(resolvedCount);
+					syncBootstrapItemReadiness(resolvedCount, "incomplete");
 				}
 				return;
 			}
@@ -443,7 +449,7 @@ export const useItemsStore = defineStore("items", () => {
 					? itemGroup.value
 					: "ALL";
 			itemsLoaded.value = true;
-			syncBootstrapItemReadiness(resolvedCount);
+			syncBootstrapItemReadiness(resolvedCount, "incomplete");
 		} catch (error) {
 			console.warn("Failed to load cached items:", error);
 			itemsLoaded.value = true;
@@ -569,6 +575,7 @@ export const useItemsStore = defineStore("items", () => {
 						if (normalizedGroup === "ALL") {
 							syncBootstrapItemReadiness(
 								Math.max(Number(storedCount || 0), cachedResult.length),
+								"complete",
 							);
 						}
 					}
@@ -653,10 +660,11 @@ export const useItemsStore = defineStore("items", () => {
 						getStorageScope(),
 					).catch(() => fetchedItems.length);
 					if (stagedInitialBatch) {
-						syncBootstrapItemReadiness(0);
+						syncBootstrapItemReadiness(0, "unknown");
 					} else {
 						syncBootstrapItemReadiness(
 							Math.max(Number(storedCount || 0), fetchedItems.length),
+							stagedInitialBatch ? "incomplete" : "complete",
 						);
 					}
 				}
@@ -668,7 +676,7 @@ export const useItemsStore = defineStore("items", () => {
 					});
 				}
 			} else if (!searchValue && normalizedGroup === "ALL") {
-				syncBootstrapItemReadiness(0);
+				syncBootstrapItemReadiness(0, "unknown");
 			}
 
 			if (fetchedItems.length > 0) {

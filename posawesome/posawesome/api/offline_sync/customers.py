@@ -42,14 +42,20 @@ def _build_response(
 	changes=None,
 	deleted=None,
 	next_watermark=None,
+	next_cursor=None,
 	has_more=False,
+	total_count=None,
+	sync_mode=None,
 	full_resync_required=False,
 ):
 	response = {
 		"changes": changes or [],
 		"deleted": deleted or [],
 		"next_watermark": next_watermark,
+		"next_cursor": next_cursor,
 		"has_more": bool(has_more),
+		"total_count": total_count,
+		"sync_mode": sync_mode,
 		"schema_version": SYNC_SCHEMA_VERSION,
 	}
 	if full_resync_required:
@@ -111,6 +117,7 @@ def sync_customers(
 	pos_profile=None,
 	watermark=None,
 	start_after=None,
+	cursor=None,
 	limit=200,
 	schema_version=None,
 ):
@@ -124,10 +131,12 @@ def sync_customers(
 	resolved_limit = _coerce_limit(limit)
 	fetch_limit = resolved_limit + 1
 	serialized_profile = json.dumps(profile)
+	full_sync_mode = not watermark
+	effective_cursor = cursor or start_after
 	rows = get_customer_names(
 		serialized_profile,
 		limit=fetch_limit,
-		start_after=start_after,
+		start_after=effective_cursor,
 		modified_after=watermark,
 	) or []
 
@@ -146,6 +155,12 @@ def sync_customers(
 
 	deleted_rows = _collect_deleted_customers(profile, watermark, fetch_limit)
 	deleted = [{"key": row["key"]} for row in deleted_rows]
+	next_cursor = rows[-1].get("name") if has_more and rows else None
+	total_count = (
+		get_customers_count(serialized_profile)
+		if full_sync_mode
+		else None
+	)
 	next_watermark = _max_timestamp(
 		watermark,
 		[row.get("modified") for row in rows],
@@ -155,5 +170,8 @@ def sync_customers(
 		changes=changes,
 		deleted=deleted,
 		next_watermark=next_watermark,
+		next_cursor=next_cursor,
 		has_more=has_more,
+		total_count=total_count,
+		sync_mode="full" if full_sync_mode else "delta",
 	)

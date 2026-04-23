@@ -53,6 +53,12 @@ export type BootstrapPrerequisiteCollectionInput = {
 	salesPersons?: unknown[] | null;
 	itemsCount?: number | boolean | null;
 	customersCount?: number | boolean | null;
+	itemsState?: {
+		completeness?: string | null;
+	};
+	customersState?: {
+		completeness?: string | null;
+	};
 	itemGroups?: unknown[] | null;
 	pricingSnapshotCount?: number | null;
 	pricingContext?: unknown;
@@ -269,6 +275,26 @@ function hasPositiveCountOrReadyFlag(value: number | boolean | null | undefined)
 		return value;
 	}
 	return Number(value || 0) > 0;
+}
+
+function resolveDatasetPrerequisiteState(
+	explicitState: { completeness?: string | null } | null | undefined,
+	fallbackValue: number | boolean | null | undefined,
+): BootstrapPrerequisiteState {
+	const completeness = String(explicitState?.completeness || "").trim().toLowerCase();
+	if (completeness === "complete") {
+		return "ready";
+	}
+	if (["incomplete", "unknown"].includes(completeness)) {
+		return "missing";
+	}
+	if (["stale", "limited"].includes(completeness)) {
+		return "stale";
+	}
+	if (completeness === "error") {
+		return "error";
+	}
+	return hasPositiveCountOrReadyFlag(fallbackValue) ? "ready" : "missing";
 }
 
 function hasCoupons(value: Record<string, unknown> | unknown[] | null | undefined) {
@@ -751,12 +777,14 @@ export function collectBootstrapPrerequisites(
 			? "ready"
 			: "missing",
 		sales_persons: hasNonEmptyArray(input?.salesPersons) ? "ready" : "missing",
-		items_cache_ready: hasPositiveCountOrReadyFlag(input?.itemsCount)
-			? "ready"
-			: "missing",
-		customers_cache_ready: hasPositiveCountOrReadyFlag(input?.customersCount)
-			? "ready"
-			: "missing",
+		items_cache_ready: resolveDatasetPrerequisiteState(
+			input?.itemsState,
+			input?.itemsCount,
+		),
+		customers_cache_ready: resolveDatasetPrerequisiteState(
+			input?.customersState,
+			input?.customersCount,
+		),
 		item_groups: hasNonEmptyArray(input?.itemGroups) ? "ready" : "missing",
 		pricing_rules_snapshot: Number(input?.pricingSnapshotCount || 0) > 0
 			? "ready"
@@ -827,17 +855,31 @@ function collectBootstrapPrerequisitePatch(
 	}
 
 	if (hasOwnKey(input, "itemsCount")) {
-		patch.items_cache_ready = hasPositiveCountOrReadyFlag(input?.itemsCount)
-			? "ready"
-			: "missing";
+		patch.items_cache_ready = resolveDatasetPrerequisiteState(
+			input?.itemsState,
+			input?.itemsCount,
+		);
 	}
 
 	if (hasOwnKey(input, "customersCount")) {
-		patch.customers_cache_ready = hasPositiveCountOrReadyFlag(
+		patch.customers_cache_ready = resolveDatasetPrerequisiteState(
+			input?.customersState,
 			input?.customersCount,
 		)
-			? "ready"
-			: "missing";
+	}
+
+	if (hasOwnKey(input, "itemsState")) {
+		patch.items_cache_ready = resolveDatasetPrerequisiteState(
+			input?.itemsState,
+			input?.itemsCount,
+		);
+	}
+
+	if (hasOwnKey(input, "customersState")) {
+		patch.customers_cache_ready = resolveDatasetPrerequisiteState(
+			input?.customersState,
+			input?.customersCount,
+		);
 	}
 
 	if (hasOwnKey(input, "itemGroups")) {

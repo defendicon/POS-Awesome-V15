@@ -78,6 +78,7 @@ function buildMirroredState(
 		lastTrigger: sourceState.lastTrigger,
 		scopeSignature: sourceState.scopeSignature,
 		schemaVersion: sourceState.schemaVersion,
+		diagnostics: sourceState.diagnostics || null,
 	};
 }
 
@@ -204,6 +205,7 @@ export async function runSupportedOfflineSyncResource({
 					priceList,
 					customer,
 					watermark,
+					cursor,
 					schemaVersion,
 				}) =>
 					callOfflineSyncMethod(
@@ -213,6 +215,7 @@ export async function runSupportedOfflineSyncResource({
 							price_list: priceList,
 							customer: customer || null,
 							watermark,
+							cursor,
 							schema_version: schemaVersion,
 						},
 					),
@@ -225,12 +228,13 @@ export async function runSupportedOfflineSyncResource({
 		case "stock":
 			return syncStockResource({
 				...sharedArgs,
-				fetcher: ({ posProfile, watermark, schemaVersion }) =>
+				fetcher: ({ posProfile, watermark, cursor, schemaVersion }) =>
 					callOfflineSyncMethod(
 						"posawesome.posawesome.api.offline_sync.stock.sync_stock",
 						{
 							pos_profile: posProfile,
 							watermark,
+							cursor,
 							schema_version: schemaVersion,
 						},
 					),
@@ -238,12 +242,13 @@ export async function runSupportedOfflineSyncResource({
 		case "customers":
 			return syncCustomersResource({
 				...sharedArgs,
-				fetcher: ({ posProfile, watermark, schemaVersion }) =>
+				fetcher: ({ posProfile, watermark, cursor, schemaVersion }) =>
 					callOfflineSyncMethod(
 						"posawesome.posawesome.api.offline_sync.customers.sync_customers",
 						{
 							pos_profile: posProfile,
 							watermark,
+							cursor,
 							schema_version: schemaVersion,
 						},
 					),

@@ -59,10 +59,42 @@ export type SyncTrigger =
 export type SyncLifecycleState =
 	| "idle"
 	| "syncing"
+	| "verifying"
+	| "repairing"
 	| "fresh"
+	| "partial"
 	| "stale"
 	| "error"
 	| "limited";
+
+export type SyncResourceCompleteness =
+	| "unknown"
+	| "complete"
+	| "incomplete"
+	| "stale"
+	| "limited"
+	| "error";
+
+export interface SyncResourceDiagnostics {
+	completeness: SyncResourceCompleteness;
+	mode?: "full" | "delta" | "verification" | null;
+	currentAction?: string | null;
+	detail?: string | null;
+	localCount?: number | null;
+	serverCount?: number | null;
+	missingCount?: number | null;
+	pagesFetched?: number | null;
+	batchCount?: number | null;
+	hasMore?: boolean;
+	nextCursor?: string | null;
+	lastVerifiedAt?: string | null;
+	lastRepairAt?: string | null;
+	lastCompletedAt?: string | null;
+	lastRecoveryReason?: string | null;
+	repairRecommended?: boolean;
+	limitedReason?: string | null;
+	scopeKey?: string | null;
+}
 
 /**
  * Static definition of a single sync resource. Registered in `resourceRegistry.ts`
@@ -118,6 +150,8 @@ export interface SyncResourceState {
 	scopeSignature: string | null;
 	/** Schema version of the stored data. Used to trigger a full resync after data-model changes. */
 	schemaVersion: string | null;
+	/** Extended completeness and diagnostics metadata used by repair/recovery UI. */
+	diagnostics?: SyncResourceDiagnostics | null;
 }
 
 export interface SyncTriggerResourceSummary {

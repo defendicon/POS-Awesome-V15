@@ -149,7 +149,7 @@ describe("operational offline sync adapters", () => {
 			fetcher,
 		});
 
-		expect(cacheMocks.clearStoredItems).toHaveBeenCalledWith();
+		expect(cacheMocks.clearStoredItems).toHaveBeenCalledWith("POS-1_Main WH");
 		expect(cacheMocks.clearPriceListCache).toHaveBeenCalledOnce();
 		expect(cacheMocks.clearItemDetailsCache).toHaveBeenCalledOnce();
 		expect(cacheMocks.saveItemsBulk).toHaveBeenCalledWith(
@@ -214,6 +214,123 @@ describe("operational offline sync adapters", () => {
 			}),
 		);
 		expect(result.status).toBe("fresh");
+	});
+
+	it("exhausts paginated item full syncs and records verified counts", async () => {
+		cacheMocks.getStoredItemsCountByScope.mockResolvedValue(4);
+
+		const fetcher = vi
+			.fn()
+			.mockResolvedValueOnce({
+				schema_version: "2026-04-09",
+				next_cursor: "ITEM-002",
+				next_watermark: "2026-04-09T10:02:00",
+				total_count: 4,
+				has_more: true,
+				changes: [
+					{
+						key: "item::ITEM-001",
+						modified: "2026-04-09T10:01:00",
+						data: {
+							item_code: "ITEM-001",
+							item_name: "Alpha",
+							modified: "2026-04-09T10:01:00",
+						},
+					},
+					{
+						key: "item::ITEM-002",
+						modified: "2026-04-09T10:02:00",
+						data: {
+							item_code: "ITEM-002",
+							item_name: "Beta",
+							modified: "2026-04-09T10:02:00",
+						},
+					},
+				],
+				deleted: [],
+			})
+			.mockResolvedValueOnce({
+				schema_version: "2026-04-09",
+				next_cursor: null,
+				next_watermark: "2026-04-09T10:04:00",
+				total_count: 4,
+				has_more: false,
+				changes: [
+					{
+						key: "item::ITEM-003",
+						modified: "2026-04-09T10:03:00",
+						data: {
+							item_code: "ITEM-003",
+							item_name: "Gamma",
+							modified: "2026-04-09T10:03:00",
+						},
+					},
+					{
+						key: "item::ITEM-004",
+						modified: "2026-04-09T10:04:00",
+						data: {
+							item_code: "ITEM-004",
+							item_name: "Delta",
+							modified: "2026-04-09T10:04:00",
+						},
+					},
+				],
+				deleted: [],
+			});
+
+		const result = await syncItemsResource({
+			posProfile: {
+				name: "POS-1",
+				company: "Test Co",
+				warehouse: "Main WH",
+				modified: "2026-04-09T10:05:00",
+			},
+			priceList: "Retail",
+			watermark: null,
+			fetcher,
+		});
+
+		expect(fetcher).toHaveBeenCalledTimes(2);
+		expect(fetcher).toHaveBeenNthCalledWith(
+			1,
+			expect.objectContaining({
+				cursor: null,
+				watermark: null,
+			}),
+		);
+		expect(fetcher).toHaveBeenNthCalledWith(
+			2,
+			expect.objectContaining({
+				cursor: "ITEM-002",
+				watermark: null,
+			}),
+		);
+		expect(cacheMocks.saveItemsBulk).toHaveBeenCalledTimes(2);
+		expect(cacheMocks.setItemsLastSync).toHaveBeenCalledWith(
+			"2026-04-09T10:04:00",
+		);
+		expect(syncStateMocks.setSyncResourceState).toHaveBeenLastCalledWith(
+			expect.objectContaining({
+				resourceId: "item_prices",
+				status: "fresh",
+				diagnostics: expect.objectContaining({
+					completeness: "complete",
+					localCount: 4,
+					serverCount: 4,
+					missingCount: 0,
+					nextCursor: null,
+				}),
+			}),
+		);
+		expect(result.status).toBe("fresh");
+		expect(result.diagnostics).toEqual(
+			expect.objectContaining({
+				completeness: "complete",
+				localCount: 4,
+				serverCount: 4,
+				missingCount: 0,
+			}),
+		);
 	});
 
 	it("clears stale customer scope before applying delta writes and deletes", async () => {
@@ -284,6 +401,142 @@ describe("operational offline sync adapters", () => {
 					profile: "POS-1",
 					company: "Test Co",
 					warehouse: null,
+				}),
+			}),
+		);
+		expect(result.status).toBe("fresh");
+	});
+
+	it("falls back to a full customer repair when delta batches are limited", async () => {
+		cacheMocks.getCustomerStorageCount.mockResolvedValue(3);
+		syncStateMocks.getSyncResourceState.mockResolvedValue({
+			resourceId: "customers",
+			status: "fresh",
+			lastSyncedAt: "2026-04-09T10:59:00",
+			watermark: "2026-04-09T11:00:00",
+			lastSuccessHash: null,
+			lastError: null,
+			consecutiveFailures: 0,
+			scopeSignature: JSON.stringify({
+				profile: "POS-1",
+				company: "Test Co",
+				warehouse: null,
+			}),
+			schemaVersion: "2026-04-09",
+			diagnostics: {
+				completeness: "complete",
+				localCount: 3,
+				serverCount: 3,
+				missingCount: 0,
+			},
+		});
+
+		const fetcher = vi
+			.fn()
+			.mockResolvedValueOnce({
+				schema_version: "2026-04-09",
+				next_watermark: "2026-04-09T11:02:00",
+				has_more: true,
+				changes: [
+					{
+						key: "customer::CUST-001",
+						modified: "2026-04-09T11:01:00",
+						data: {
+							name: "CUST-001",
+							customer_name: "Customer One",
+						},
+					},
+				],
+				deleted: [],
+			})
+			.mockResolvedValueOnce({
+				schema_version: "2026-04-09",
+				next_cursor: "CUST-002",
+				next_watermark: "2026-04-09T11:02:00",
+				total_count: 3,
+				has_more: true,
+				changes: [
+					{
+						key: "customer::CUST-001",
+						modified: "2026-04-09T11:01:00",
+						data: {
+							name: "CUST-001",
+							customer_name: "Customer One",
+						},
+					},
+					{
+						key: "customer::CUST-002",
+						modified: "2026-04-09T11:02:00",
+						data: {
+							name: "CUST-002",
+							customer_name: "Customer Two",
+						},
+					},
+				],
+				deleted: [],
+			})
+			.mockResolvedValueOnce({
+				schema_version: "2026-04-09",
+				next_cursor: null,
+				next_watermark: "2026-04-09T11:03:00",
+				total_count: 3,
+				has_more: false,
+				changes: [
+					{
+						key: "customer::CUST-003",
+						modified: "2026-04-09T11:03:00",
+						data: {
+							name: "CUST-003",
+							customer_name: "Customer Three",
+						},
+					},
+				],
+				deleted: [],
+			});
+
+		const result = await syncCustomersResource({
+			posProfile: {
+				name: "POS-1",
+				company: "Test Co",
+				modified: "2026-04-09T11:03:00",
+			},
+			watermark: "2026-04-09T11:00:00",
+			fetcher,
+		});
+
+		expect(fetcher).toHaveBeenCalledTimes(3);
+		expect(fetcher).toHaveBeenNthCalledWith(
+			1,
+			expect.objectContaining({
+				watermark: "2026-04-09T11:00:00",
+				cursor: null,
+			}),
+		);
+		expect(fetcher).toHaveBeenNthCalledWith(
+			2,
+			expect.objectContaining({
+				watermark: null,
+				cursor: null,
+			}),
+		);
+		expect(fetcher).toHaveBeenNthCalledWith(
+			3,
+			expect.objectContaining({
+				watermark: null,
+				cursor: "CUST-002",
+			}),
+		);
+		expect(cacheMocks.clearCustomerStorage).toHaveBeenCalledOnce();
+		expect(syncStateMocks.setSyncResourceState).toHaveBeenLastCalledWith(
+			expect.objectContaining({
+				resourceId: "customers",
+				status: "fresh",
+				diagnostics: expect.objectContaining({
+					completeness: "complete",
+					localCount: 3,
+					serverCount: 3,
+					missingCount: 0,
+					repairRecommended: false,
 				}),
 			}),
 		);

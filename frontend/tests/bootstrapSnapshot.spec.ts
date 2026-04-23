@@ -197,6 +197,22 @@ describe("bootstrap snapshot", () => {
 		expect(prerequisites.payment_method_currency_cache).toBe("ready");
 	});
 
+	it("keeps item and customer prerequisites incomplete until completeness is verified", () => {
+		const prerequisites = collectBootstrapPrerequisites({
+			itemsCount: 40,
+			customersCount: 12,
+			itemsState: {
+				completeness: "incomplete",
+			},
+			customersState: {
+				completeness: "stale",
+			},
+		});
+
+		expect(prerequisites.items_cache_ready).toBe("missing");
+		expect(prerequisites.customers_cache_ready).toBe("stale");
+	});
+
 	it("formats new prerequisite warning messages explicitly", () => {
 		expect(formatBootstrapWarning("delivery_charges_cache")).toContain(
 			"delivery charges",

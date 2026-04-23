@@ -1,9 +1,13 @@
 import json
 
 import frappe
+from frappe import as_json
 
-from posawesome.posawesome.api.items import get_delta_items, get_items
+from posawesome.posawesome.api.items import get_delta_items
+from posawesome.posawesome.api.item_processing.details import get_items_details
+from posawesome.posawesome.api.item_processing.search import get_items_count
 from posawesome.posawesome.api.utils import (
+	HAS_VARIANTS_EXCLUSION,
 	expand_item_groups,
 	get_active_pos_profile,
 	get_item_groups,
@@ -43,14 +47,20 @@ def _build_response(
 	changes=None,
 	deleted=None,
 	next_watermark=None,
+	next_cursor=None,
 	has_more=False,
+	total_count=None,
+	sync_mode=None,
 	full_resync_required=False,
 ):
 	response = {
 		"changes": changes or [],
 		"deleted": deleted or [],
 		"next_watermark": next_watermark,
+		"next_cursor": next_cursor,
 		"has_more": bool(has_more),
+		"total_count": total_count,
+		"sync_mode": sync_mode,
 		"schema_version": SYNC_SCHEMA_VERSION,
 	}
 	if full_resync_required:
@@ -130,6 +140,95 @@ def _collect_deleted_items(profile, watermark, limit):
 	]
 
 
+def _get_full_items_page(profile, price_list, customer, start_after, limit):
+	allowed_groups = _get_allowed_item_groups(profile)
+	filters = {
+		"disabled": 0,
+		"is_sales_item": 1,
+		"is_fixed_asset": 0,
+	}
+	if allowed_groups:
+		filters["item_group"] = ["in", allowed_groups]
+	if start_after:
+		filters["item_code"] = [">", start_after]
+	if not profile.get("posa_show_template_items"):
+		filters.update(HAS_VARIANTS_EXCLUSION)
+	if profile.get("posa_hide_variants_items"):
+		filters["variant_of"] = ["is", "not set"]
+
+	fields = [
+		"name",
+		"item_code",
+		"item_name",
+		"stock_uom",
+		"is_stock_item",
+		"has_variants",
+		"variant_of",
+		"item_group",
+		"idx",
+		"has_batch_no",
+		"has_serial_no",
+		"max_discount",
+		"brand",
+		"allow_negative_stock",
+		"modified",
+		"image",
+	]
+
+	result = []
+	cursor = start_after
+	while len(result) < limit:
+		remaining = max(1, limit - len(result))
+		raw_rows = frappe.get_all(
+			"Item",
+			filters=filters,
+			fields=fields,
+			order_by="item_code asc",
+			limit_page_length=remaining + 25,
+		) or []
+
+		if not raw_rows:
+			break
+
+		details = get_items_details(
+			json.dumps(profile),
+			as_json(raw_rows),
+			price_list=price_list,
+			customer=customer,
+		) or []
+		detail_map = {
+			row.get("item_code"): row
+			for row in details
+			if row and row.get("item_code")
+		}
+
+		for raw_row in raw_rows:
+			cursor = raw_row.get("item_code") or cursor
+			item_code = raw_row.get("item_code")
+			if not item_code:
+				continue
+			detail = detail_map.get(item_code, {})
+			merged = {}
+			merged.update(raw_row)
+			merged.update(detail)
+			if (
+				profile.get("posa_display_items_in_stock")
+				and (not merged.get("actual_qty") or merged.get("actual_qty") < 0)
+				and not merged.get("has_variants")
+			):
+				continue
+			result.append(merged)
+			if len(result) >= limit:
+				break
+
+		if len(raw_rows) < remaining + 25:
+			break
+
+		filters["item_code"] = [">", cursor]
+
+	return result, cursor
+
+
 @frappe.whitelist()
 def sync_items(
 	pos_profile=None,
@@ -137,6 +236,7 @@ def sync_items(
 	price_list=None,
 	customer=None,
 	start_after=None,
+	cursor=None,
 	limit=200,
 	schema_version=None,
 ):
@@ -151,6 +251,8 @@ def sync_items(
 	fetch_limit = resolved_limit + 1
 	serialized_profile = json.dumps(profile)
 	effective_price_list = price_list or profile.get("selling_price_list")
+	full_sync_mode = not watermark
+	effective_cursor = cursor or start_after
 
 	if watermark:
 		rows = get_delta_items(
@@ -161,15 +263,13 @@ def sync_items(
 			limit=fetch_limit,
 		) or []
 	else:
-		rows = get_items(
-			serialized_profile,
-			price_list=effective_price_list,
-			item_group="",
-			search_value="",
-			customer=customer,
-			start_after=start_after,
-			limit=fetch_limit,
-		) or []
+		rows, effective_cursor = _get_full_items_page(
+			profile,
+			effective_price_list,
+			customer,
+			effective_cursor,
+			fetch_limit,
+		)
 
 	has_more = len(rows) > resolved_limit
 	rows = rows[:resolved_limit]
@@ -186,6 +286,12 @@ def sync_items(
 
 	deleted_rows = _collect_deleted_items(profile, watermark, fetch_limit)
 	deleted = [{"key": row["key"]} for row in deleted_rows]
+	next_cursor = rows[-1].get("item_code") if has_more and rows else None
+	total_count = (
+		get_items_count(serialized_profile, item_groups=_get_allowed_item_groups(profile))
+		if full_sync_mode and not profile.get("posa_display_items_in_stock")
+		else None
+	)
 
 	next_watermark = _max_timestamp(
 		watermark,
@@ -196,5 +302,8 @@ def sync_items(
 		changes=changes,
 		deleted=deleted,
 		next_watermark=next_watermark,
+		next_cursor=next_cursor,
 		has_more=has_more,
+		total_count=total_count,
+		sync_mode="full" if full_sync_mode else "delta",
 	)

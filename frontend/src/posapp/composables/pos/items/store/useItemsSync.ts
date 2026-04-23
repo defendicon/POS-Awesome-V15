@@ -321,6 +321,9 @@ export function useItemsSync() {
 				setItemsLastSync(new Date().toISOString());
 				refreshBootstrapSnapshotFromCacheState({
 					itemsCount: loaded,
+					itemsState: {
+						completeness: "complete",
+					},
 				});
 			}
 

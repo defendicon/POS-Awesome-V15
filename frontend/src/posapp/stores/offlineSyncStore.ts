@@ -59,6 +59,13 @@ export interface OfflineBootstrapWarning {
 
 export interface OfflineCapabilitySummary extends BootstrapCapabilitySummary {}
 
+export interface OfflineActionState {
+	refreshing: boolean;
+	repairing: boolean;
+	rebuilding: boolean;
+	clearing: boolean;
+}
+
 const RESOURCE_LABELS: Record<SyncResourceId, string> = {
 	bootstrap_config: "Bootstrap Config",
 	price_list_meta: "Price List Metadata",
@@ -98,6 +105,15 @@ function createDefaultWarning(): OfflineBootstrapWarning {
 	};
 }
 
+function createDefaultActionState(): OfflineActionState {
+	return {
+		refreshing: false,
+		repairing: false,
+		rebuilding: false,
+		clearing: false,
+	};
+}
+
 export function getSyncResourceLabel(resourceId: SyncResourceId) {
 	return RESOURCE_LABELS[resourceId] || resourceId;
 }
@@ -108,6 +124,7 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 	const bootstrapWarning = ref<OfflineBootstrapWarning>(createDefaultWarning());
 	const capabilitySummaries = ref<OfflineCapabilitySummary[]>([]);
 	const resourceStates = ref<SyncResourceState[]>([]);
+	const actionState = ref<OfflineActionState>(createDefaultActionState());
 
 	const syncingResourcesCount = computed(
 		() =>
@@ -143,13 +160,60 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 	const attentionResources = computed(() =>
 		resourceStates.value
 			.filter((state) =>
-				["stale", "error", "limited"].includes(state.status),
+				[
+					"syncing",
+					"verifying",
+					"repairing",
+					"partial",
+					"stale",
+					"error",
+					"limited",
+				].includes(state.status),
 			)
 			.map((state) => ({
 				...state,
 				label: getSyncResourceLabel(state.resourceId),
 			})),
 	);
+
+	const globalStatus = computed(() => {
+		if (actionState.value.rebuilding) return "Repairing";
+		if (actionState.value.repairing) return "Repairing";
+		if (actionState.value.refreshing) return "Verifying";
+		if (
+			resourceStates.value.some((state) => state.status === "repairing")
+		) {
+			return "Repairing";
+		}
+		if (
+			resourceStates.value.some((state) =>
+				["syncing", "verifying"].includes(state.status),
+			)
+		) {
+			return "Syncing";
+		}
+		if (resourceStates.value.some((state) => state.status === "error")) {
+			return "Error";
+		}
+		if (
+			resourceStates.value.some((state) =>
+				["partial", "limited", "stale"].includes(state.status),
+			)
+		) {
+			return "Limited";
+		}
+		if (
+			resourceStates.value.some(
+				(state) =>
+					!state.lastSyncedAt &&
+					!state.diagnostics?.lastVerifiedAt &&
+					state.status === "idle",
+			)
+		) {
+			return "Not Loaded";
+		}
+		return "Ready";
+	});
 
 	const sortedResources = computed(() => {
 		const attentionMap = new Map(
@@ -174,6 +238,15 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		);
 		if (actionableCapabilities.length) {
 			return actionableCapabilities[0]!.message;
+		}
+		if (actionState.value.rebuilding) {
+			return "Rebuilding offline data.";
+		}
+		if (actionState.value.repairing) {
+			return "Repairing missing offline data.";
+		}
+		if (actionState.value.refreshing) {
+			return "Verifying offline completeness.";
 		}
 		if (syncingResourcesCount.value) {
 			return `Refreshing ${syncingResourcesCount.value} offline resource${syncingResourcesCount.value > 1 ? "s" : ""}.`;
@@ -239,10 +312,18 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 								!!state.lastSyncedAt ||
 								!!state.watermark ||
 								!!state.lastError ||
-								!!state.schemaVersion),
+								!!state.schemaVersion ||
+								!!state.diagnostics),
 					)
 					.map((state) => ({ ...state }))
 			: [];
+	}
+
+	function setActionState(nextState: Partial<OfflineActionState>) {
+		actionState.value = {
+			...actionState.value,
+			...nextState,
+		};
 	}
 
 	function reset() {
@@ -251,6 +332,7 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		bootstrapWarning.value = createDefaultWarning();
 		capabilitySummaries.value = [];
 		resourceStates.value = [];
+		actionState.value = createDefaultActionState();
 	}
 
 	return {
@@ -259,11 +341,13 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		bootstrapWarning,
 		capabilitySummaries,
 		resourceStates,
+		actionState,
 		syncingResourcesCount,
 		connectivityLabel,
 		connectivityTone,
 		attentionResources,
 		sortedResources,
+		globalStatus,
 		summaryMessage,
 		setPanelOpen,
 		togglePanel,
@@ -271,6 +355,7 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		setBootstrapWarning,
 		setCapabilitySummaries,
 		setResourceStates,
+		setActionState,
 		reset,
 	};
 });

@@ -39,14 +39,20 @@ def _build_response(
 	changes=None,
 	deleted=None,
 	next_watermark=None,
+	next_cursor=None,
 	has_more=False,
+	total_count=None,
+	sync_mode=None,
 	full_resync_required=False,
 ):
 	response = {
 		"changes": changes or [],
 		"deleted": deleted or [],
 		"next_watermark": next_watermark,
+		"next_cursor": next_cursor,
 		"has_more": bool(has_more),
+		"total_count": total_count,
+		"sync_mode": sync_mode,
 		"schema_version": SYNC_SCHEMA_VERSION,
 	}
 	if full_resync_required:
@@ -125,6 +131,7 @@ def sync_stock(
 	pos_profile=None,
 	watermark=None,
 	start_after=None,
+	cursor=None,
 	limit=200,
 	schema_version=None,
 ):
@@ -138,7 +145,9 @@ def sync_stock(
 	resolved_limit = _coerce_limit(limit)
 	fetch_limit = resolved_limit + 1
 	warehouse = profile.get("warehouse")
-	rows = _collect_stock_rows(profile, watermark, start_after, fetch_limit)
+	full_sync_mode = not watermark
+	effective_cursor = cursor or start_after
+	rows = _collect_stock_rows(profile, watermark, effective_cursor, fetch_limit)
 	has_more = len(rows) > resolved_limit
 	rows = rows[:resolved_limit]
 
@@ -173,9 +182,12 @@ def sync_stock(
 		watermark,
 		[row.get("modified") for row in rows],
 	)
+	next_cursor = rows[-1].get("item_code") if has_more and rows else None
 	return _build_response(
 		changes=changes,
 		deleted=[],
 		next_watermark=next_watermark,
+		next_cursor=next_cursor,
 		has_more=has_more,
+		sync_mode="full" if full_sync_mode else "delta",
 	)

@@ -178,6 +178,9 @@ describe("OfflineStatusPanel", () => {
 		expect(wrapper.get('[data-test="offline-status-action-refresh"]').text()).toContain(
 			"Refresh Offline Data",
 		);
+		expect(wrapper.get('[data-test="offline-status-action-repair"]').text()).toContain(
+			"Repair Missing Data",
+		);
 		expect(wrapper.get('[data-test="offline-status-action-rebuild"]').text()).toContain(
 			"Rebuild Offline Data",
 		);
@@ -207,6 +210,7 @@ describe("OfflineStatusPanel", () => {
 				return {
 					toggleCount: ref(0),
 					refreshCount: ref(0),
+					repairCount: ref(0),
 					rebuildCount: ref(0),
 					clearCacheCount: ref(0),
 					diagnosticCount: ref(0),
@@ -217,6 +221,7 @@ describe("OfflineStatusPanel", () => {
 					:model-value="true"
 					@toggle-offline="toggleCount += 1"
 					@refresh-offline-data="refreshCount += 1"
+					@repair-offline-data="repairCount += 1"
 					@rebuild-offline-data="rebuildCount += 1"
 					@clear-cache="clearCacheCount += 1"
 					@open-diagnostics="diagnosticCount += 1"
@@ -242,12 +247,14 @@ describe("OfflineStatusPanel", () => {
 
 		await wrapper.get('[data-test="offline-status-action-connectivity"]').trigger("click");
 		await wrapper.get('[data-test="offline-status-action-refresh"]').trigger("click");
+		await wrapper.get('[data-test="offline-status-action-repair"]').trigger("click");
 		await wrapper.get('[data-test="offline-status-action-rebuild"]').trigger("click");
 		await wrapper.get('[data-test="offline-status-action-clear-cache"]').trigger("click");
 		await wrapper.get('[data-test="offline-status-action-diagnostics"]').trigger("click");
 
 		expect((wrapper.vm as any).toggleCount).toBe(1);
 		expect((wrapper.vm as any).refreshCount).toBe(1);
+		expect((wrapper.vm as any).repairCount).toBe(1);
 		expect((wrapper.vm as any).rebuildCount).toBe(1);
 		expect((wrapper.vm as any).clearCacheCount).toBe(1);
 		expect((wrapper.vm as any).diagnosticCount).toBe(1);

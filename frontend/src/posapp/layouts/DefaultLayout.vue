@@ -31,6 +31,7 @@
 				@toggle-offline="handleToggleOffline"
 				@retry-status="handleRetryStatus"
 				@refresh-offline-data="handleRefreshOfflineData"
+				@repair-offline-data="handleRepairOfflineData"
 				@rebuild-offline-data="handleRebuildOfflineData"
 				@open-offline-diagnostics="handleOpenOfflineDiagnostics"
 				@toggle-theme="handleToggleTheme"
@@ -78,6 +79,7 @@
 				<!-- Replaced router-view with slot for layout usage -->
 				<slot />
 			</div>
+			<OfflineDiagnosticsDialog v-model="offlineDiagnosticsOpen" />
 		</v-main>
 	</v-app>
 </template>
@@ -86,6 +88,7 @@
 import { ref, computed, onMounted, onBeforeUnmount, watch, getCurrentInstance } from "vue";
 // Note paths updated to be relative to layouts/ directory
 import Navbar from "../components/Navbar.vue";
+import OfflineDiagnosticsDialog from "../components/navbar/OfflineDiagnosticsDialog.vue";
 import ClosingDialog from "../components/pos/shell/ClosingDialog.vue";
 import AppLoadingOverlay from "../components/ui/LoadingOverlay.vue";
 import UpdatePrompt from "../components/ui/UpdatePrompt.vue";
@@ -126,6 +129,9 @@ import {
 	getSyncResourceDefinitions,
 	getSyncResourceState,
 	listSyncResourceStates,
+	clearDerivedOfflineCaches,
+	clearSyncResourceState,
+	listenForSyncResourceStateUpdates,
 } from "../../offline/index";
 import { SyncCoordinator } from "../../offline/sync/SyncCoordinator";
 import { createOfflineSyncRuntime } from "../../offline/sync/runtime";
@@ -253,6 +259,8 @@ const startupBootstrapWarningsReady = ref(false);
 let _sidebarObserver = null;
 let updateInterval = null;
 let removeBootstrapSnapshotListener = null;
+let removeSyncResourceStateListener = null;
+const offlineDiagnosticsOpen = ref(false);
 
 // Event Bus
 const eventBus = instance?.proxy?.eventBus;
@@ -703,6 +711,9 @@ onMounted(() => {
 	removeBootstrapSnapshotListener = listenForBootstrapSnapshotUpdates(() => {
 		evaluateBootstrapSnapshot({ allowPrompt: false });
 	});
+	removeSyncResourceStateListener = listenForSyncResourceStateUpdates((state) => {
+		syncCoordinator.hydrateResourceStates([state]);
+	});
 
 	window.addEventListener("resize", adjust_frappe_sidebar_offset);
 	// initLoadingSources move to setup to catch early store readiness
@@ -731,6 +742,10 @@ onBeforeUnmount(() => {
 	if (removeBootstrapSnapshotListener) {
 		removeBootstrapSnapshotListener();
 		removeBootstrapSnapshotListener = null;
+	}
+	if (removeSyncResourceStateListener) {
+		removeSyncResourceStateListener();
+		removeSyncResourceStateListener = null;
 	}
 	offlineSyncRuntime.stopTimerSync();
 	if (eventBus) {
@@ -1041,42 +1056,103 @@ const handleRetryStatus = async () => {
 };
 
 const handleRefreshOfflineData = async () => {
+	offlineSyncStore.setActionState({
+		refreshing: true,
+		repairing: false,
+		rebuilding: false,
+	});
 	handleRefreshCacheUsage();
 	evaluateBootstrapSnapshot({
 		allowPrompt: getIsManualOffline() || !navigator.onLine,
 	});
-	if (!getIsManualOffline() && navigator.onLine) {
-		await handleRetryStatus();
-		await triggerOperatorRefreshSync();
-		evaluateBootstrapSnapshot({ allowPrompt: false });
+	try {
+		if (!getIsManualOffline() && navigator.onLine) {
+			await handleRetryStatus();
+			await triggerOperatorRefreshSync();
+			evaluateBootstrapSnapshot({ allowPrompt: false });
+		}
+		toastStore.show({
+			title: __("Offline data status refreshed"),
+			detail: navigator.onLine
+				? __("Connectivity and cached prerequisite status were rechecked.")
+				: __("Reconnect online to refresh cached offline data from the server."),
+			color: navigator.onLine ? "info" : "warning",
+		});
+	} finally {
+		offlineSyncStore.setActionState({
+			refreshing: false,
+		});
 	}
-	toastStore.show({
-		title: __("Offline data status refreshed"),
-		detail: navigator.onLine
-			? __("Connectivity and cached prerequisite status were rechecked.")
-			: __("Reconnect online to refresh cached offline data from the server."),
-		color: navigator.onLine ? "info" : "warning",
+};
+
+const handleRepairOfflineData = async () => {
+	offlineSyncStore.setActionState({
+		refreshing: false,
+		repairing: true,
+		rebuilding: false,
 	});
+	try {
+		handleRefreshCacheUsage();
+		if (!getIsManualOffline() && navigator.onLine) {
+			await handleRetryStatus();
+			await triggerOperatorRefreshSync({ includeBootSync: true });
+			evaluateBootstrapSnapshot({ allowPrompt: false });
+		}
+		toastStore.show({
+			title: __("Offline repair finished"),
+			detail: navigator.onLine
+				? __("Incomplete offline resources were rechecked and repaired where possible.")
+				: __("Reconnect online to repair incomplete offline resources."),
+			color: navigator.onLine ? "success" : "warning",
+		});
+	} finally {
+		offlineSyncStore.setActionState({
+			repairing: false,
+		});
+	}
 };
 
 const handleRebuildOfflineData = async () => {
-	handleRefreshCacheUsage();
-	evaluateBootstrapSnapshot({
-		allowPrompt: true,
+	offlineSyncStore.setActionState({
+		refreshing: false,
+		repairing: false,
+		rebuilding: true,
 	});
-	if (canRunOfflineSync()) {
-		await triggerOperatorRefreshSync({ includeBootSync: true });
-		evaluateBootstrapSnapshot({ allowPrompt: false });
+	try {
+		handleRefreshCacheUsage();
+		evaluateBootstrapSnapshot({
+			allowPrompt: true,
+		});
+		await clearDerivedOfflineCaches();
+		for (const resource of supportedOfflineSyncResources) {
+			await clearSyncResourceState(resource.id);
+		}
+		offlineSyncStore.setResourceStates([]);
+		if (canRunOfflineSync()) {
+			await triggerOperatorRefreshSync({ includeBootSync: true });
+			evaluateBootstrapSnapshot({ allowPrompt: false });
+		}
+		toastStore.show({
+			title: __("Offline data rebuilt"),
+			detail: __("Offline prerequisite data was cleared and reconstructed for the current POS scope."),
+			color: "success",
+		});
+	} catch (error) {
+		console.error("Failed to rebuild offline data", error);
+		toastStore.show({
+			title: __("Failed to rebuild offline data"),
+			color: "error",
+		});
+	} finally {
+		offlineSyncStore.setActionState({
+			rebuilding: false,
+		});
 	}
-	toastStore.show({
-		title: __("Offline rebuild guidance"),
-		detail: __("If stale data remains, open Status > Clear Cache and reload this terminal online."),
-		color: "warning",
-	});
 };
 
 const handleOpenOfflineDiagnostics = () => {
 	handleRefreshCacheUsage();
+	offlineDiagnosticsOpen.value = true;
 	const lastRunSummary = syncCoordinator.getLastRunSummary();
 	const syncSummary =
 		lastRunSummary && lastRunSummary.resourcesTotal

@@ -2,6 +2,7 @@ import { db } from "../db";
 import type { SyncResourceId, SyncResourceState } from "./types";
 
 const SYNC_STATE_KEY_PREFIX = "posa_sync_state::";
+const SYNC_STATE_UPDATED_EVENT = "posa:sync-resource-state-updated";
 
 type StoredSyncStateRow = {
 	key: string;
@@ -48,6 +49,13 @@ export async function setSyncResourceState(state: SyncResourceState) {
 		key,
 		value: clonedState,
 	});
+	if (typeof window !== "undefined" && typeof window.dispatchEvent === "function") {
+		window.dispatchEvent(
+			new CustomEvent(SYNC_STATE_UPDATED_EVENT, {
+				detail: cloneSyncState(clonedState),
+			}),
+		);
+	}
 }
 
 export async function getSyncResourceState(
@@ -75,4 +83,23 @@ export async function listSyncResourceStates(): Promise<SyncResourceState[]> {
 export async function clearSyncResourceState(resourceId: SyncResourceId) {
 	const key = buildSyncStateStorageKey(resourceId);
 	await db.table("sync_state").delete(key);
+}
+
+export function listenForSyncResourceStateUpdates(
+	listener: (state: SyncResourceState) => void,
+) {
+	if (typeof window === "undefined" || typeof window.addEventListener !== "function") {
+		return () => undefined;
+	}
+	const wrappedListener = (event: Event) => {
+		const detail = (event as CustomEvent<SyncResourceState>).detail;
+		if (!detail?.resourceId) {
+			return;
+		}
+		listener(cloneSyncState(detail) as SyncResourceState);
+	};
+	window.addEventListener(SYNC_STATE_UPDATED_EVENT, wrappedListener);
+	return () => {
+		window.removeEventListener(SYNC_STATE_UPDATED_EVENT, wrappedListener);
+	};
 }

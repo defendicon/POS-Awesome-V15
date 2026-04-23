@@ -52,6 +52,7 @@ function createInitialState(resourceId: SyncResourceId): SyncResourceState {
 		lastTrigger: null,
 		scopeSignature: null,
 		schemaVersion: null,
+		diagnostics: null,
 	};
 }
 

@@ -14,6 +14,9 @@
 					<div class="offline-status-panel__subtitle">
 						{{ summaryMessage }}
 					</div>
+					<div class="offline-status-panel__headline-status">
+						{{ globalStatus }}
+					</div>
 				</div>
 				<v-chip
 					size="small"
@@ -71,9 +74,9 @@
 							<div class="offline-status-panel__resource-title">
 								{{ capability.label }}
 							</div>
-							<div class="offline-status-panel__resource-status">
-								{{ capability.status }}
-							</div>
+						<div class="offline-status-panel__resource-status">
+							{{ formatCapabilityStatus(capability.status) }}
+						</div>
 						</div>
 						<div class="offline-status-panel__resource-detail">
 							{{ capability.message }}
@@ -109,12 +112,36 @@
 							<div class="offline-status-panel__resource-title">
 								{{ resource.label }}
 							</div>
-							<div class="offline-status-panel__resource-status">
-								{{ resource.status }}
-							</div>
+						<div class="offline-status-panel__resource-status">
+							{{ formatResourceStatus(resource) }}
 						</div>
+					</div>
 						<div class="offline-status-panel__resource-id">
 							{{ resource.resourceId }}
+						</div>
+						<div
+							v-if="resource.diagnostics?.currentAction"
+							class="offline-status-panel__resource-detail"
+						>
+							{{ resource.diagnostics.currentAction }}
+						</div>
+						<div
+							v-if="resource.diagnostics?.detail"
+							class="offline-status-panel__resource-detail"
+						>
+							{{ resource.diagnostics.detail }}
+						</div>
+						<div
+							v-if="resource.diagnostics?.serverCount !== null || resource.diagnostics?.localCount !== null"
+							class="offline-status-panel__resource-detail"
+						>
+							{{ formatCounts(resource) }}
+						</div>
+						<div
+							v-if="resource.lastSyncedAt || resource.diagnostics?.lastVerifiedAt"
+							class="offline-status-panel__resource-detail"
+						>
+							{{ formatTimestamp(resource.diagnostics?.lastVerifiedAt || resource.lastSyncedAt) }}
 						</div>
 						<div
 							v-if="resource.lastError"
@@ -140,20 +167,31 @@
 				<button
 					type="button"
 					data-test="offline-status-action-refresh"
+					:disabled="isBusy"
 					@click="$emit('refresh-offline-data')"
 				>
-					{{ __("Refresh Offline Data") }}
+					{{ actionState.refreshing ? __("Refreshing...") : __("Refresh Offline Data") }}
+				</button>
+				<button
+					type="button"
+					data-test="offline-status-action-repair"
+					:disabled="isBusy"
+					@click="$emit('repair-offline-data')"
+				>
+					{{ actionState.repairing ? __("Repairing...") : __("Repair Missing Data") }}
 				</button>
 				<button
 					type="button"
 					data-test="offline-status-action-rebuild"
+					:disabled="isBusy"
 					@click="$emit('rebuild-offline-data')"
 				>
-					{{ __("Rebuild Offline Data") }}
+					{{ actionState.rebuilding ? __("Rebuilding...") : __("Rebuild Offline Data") }}
 				</button>
 				<button
 					type="button"
 					data-test="offline-status-action-clear-cache"
+					:disabled="isBusy"
 					@click="$emit('clear-cache')"
 				>
 					{{ __("Clear Cache") }}
@@ -188,6 +226,7 @@ defineEmits<{
 	(e: "update:modelValue", value: boolean): void;
 	(e: "toggle-offline"): void;
 	(e: "refresh-offline-data"): void;
+	(e: "repair-offline-data"): void;
 	(e: "rebuild-offline-data"): void;
 	(e: "clear-cache"): void;
 	(e: "open-diagnostics"): void;
@@ -205,7 +244,17 @@ const {
 	connectivityTone,
 	sortedResources,
 	summaryMessage,
+	globalStatus,
+	actionState,
 } = storeToRefs(offlineSyncStore);
+
+const isBusy = computed(
+	() =>
+		actionState.value.refreshing ||
+		actionState.value.repairing ||
+		actionState.value.rebuilding ||
+		actionState.value.clearing,
+);
 
 const connectivityActionLabel = computed(() =>
 	summary.value.manualOffline ? __("Go Online") : __("Go Offline"),
@@ -223,6 +272,62 @@ const chipColor = computed(() => {
 });
 
 const cacheUsageLabel = computed(() => `${summary.value.cacheUsage || 0}%`);
+
+const formatCapabilityStatus = (status: string) =>
+	String(status || "")
+		.replace(/_/g, " ")
+		.replace(/\b\w/g, (char) => char.toUpperCase());
+
+const formatResourceStatus = (resource: any) => {
+	switch (resource?.status) {
+		case "fresh":
+			return __("Ready");
+		case "partial":
+			return __("Partially Loaded");
+		case "syncing":
+			return __("Syncing");
+		case "verifying":
+			return __("Verifying");
+		case "repairing":
+			return __("Repairing");
+		case "limited":
+			return __("Limited");
+		case "stale":
+			return __("Stale");
+		case "error":
+			return __("Error");
+		default:
+			return __("Not Loaded");
+	}
+};
+
+const formatCounts = (resource: any) => {
+	const localCount = resource?.diagnostics?.localCount;
+	const serverCount = resource?.diagnostics?.serverCount;
+	const missingCount = resource?.diagnostics?.missingCount;
+	const parts: string[] = [];
+	if (localCount !== null && typeof localCount !== "undefined") {
+		parts.push(`${__("Local")}: ${localCount}`);
+	}
+	if (serverCount !== null && typeof serverCount !== "undefined") {
+		parts.push(`${__("Server")}: ${serverCount}`);
+	}
+	if (missingCount !== null && typeof missingCount !== "undefined") {
+		parts.push(`${__("Missing")}: ${missingCount}`);
+	}
+	return parts.join(" | ");
+};
+
+const formatTimestamp = (value: string | null | undefined) => {
+	if (!value) {
+		return "";
+	}
+	try {
+		return `${__("Verified")}: ${new Date(value).toLocaleString()}`;
+	} catch {
+		return value;
+	}
+};
 </script>
 
 <style scoped>
@@ -260,6 +365,12 @@ const cacheUsageLabel = computed(() => `${summary.value.cacheUsage || 0}%`);
 	font-size: 14px;
 	font-weight: 700;
 	color: var(--pos-text-primary);
+}
+
+.offline-status-panel__headline-status {
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--pos-primary);
 }
 
 .offline-status-panel__subtitle,
@@ -336,6 +447,12 @@ const cacheUsageLabel = computed(() => `${summary.value.cacheUsage || 0}%`);
 	font-weight: 600;
 	transition: background 0.18s ease, border-color 0.18s ease,
 		transform 0.18s ease;
+}
+
+.offline-status-panel__actions button:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+	transform: none;
 }
 
 .offline-status-panel__actions button:hover {

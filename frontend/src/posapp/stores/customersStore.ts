@@ -231,9 +231,15 @@ export const useCustomersStore = defineStore("customers", () => {
 		refreshToken.value += 1;
 	}
 
-	function syncBootstrapCustomerReadiness(count: number | boolean) {
+	function syncBootstrapCustomerReadiness(
+		count: number | boolean,
+		completeness: "unknown" | "incomplete" | "complete" | "stale" = "unknown",
+	) {
 		refreshBootstrapSnapshotFromCacheState({
 			customersCount: count,
+			customersState: {
+				completeness,
+			},
 		});
 	}
 
@@ -258,7 +264,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		totalCustomerCount.value = 0;
 		loadedCustomerCount.value = 0;
 		nextCustomerStart.value = null;
-		syncBootstrapCustomerReadiness(0);
+		syncBootstrapCustomerReadiness(0, "unknown");
 	}
 
 	async function performSearch({ append = false } = {}) {
@@ -403,7 +409,7 @@ export const useCustomersStore = defineStore("customers", () => {
 				if (rows.length) {
 					await setCustomerStorage(rows);
 					loadedCustomerCount.value += rows.length;
-					syncBootstrapCustomerReadiness(loadedCustomerCount.value);
+					syncBootstrapCustomerReadiness(loadedCustomerCount.value, "incomplete");
 					if (totalCustomerCount.value) {
 						const progress = Math.min(
 							100,
@@ -425,7 +431,7 @@ export const useCustomersStore = defineStore("customers", () => {
 					setCustomersLastSync(new Date().toISOString());
 					loadProgress.value = 100;
 					customersLoaded.value = true;
-					syncBootstrapCustomerReadiness(loadedCustomerCount.value);
+					syncBootstrapCustomerReadiness(loadedCustomerCount.value, "complete");
 					logFinalLoadedCustomerCount();
 				}
 			}
@@ -466,7 +472,7 @@ export const useCustomersStore = defineStore("customers", () => {
 			logServerCustomerCount(serverCount);
 			totalCustomerCount.value = serverCount;
 			loadedCustomerCount.value = localCount;
-			syncBootstrapCustomerReadiness(localCount);
+			syncBootstrapCustomerReadiness(localCount, "incomplete");
 			loadProgress.value = serverCount
 				? Math.round((localCount / serverCount) * 100)
 				: 0;
@@ -481,7 +487,7 @@ export const useCustomersStore = defineStore("customers", () => {
 				if (rows.length) {
 					await setCustomerStorage(rows);
 					loadedCustomerCount.value += rows.length;
-					syncBootstrapCustomerReadiness(loadedCustomerCount.value);
+					syncBootstrapCustomerReadiness(loadedCustomerCount.value, "incomplete");
 					if (totalCustomerCount.value) {
 						loadProgress.value = Math.min(
 							100,
@@ -503,14 +509,14 @@ export const useCustomersStore = defineStore("customers", () => {
 					setCustomersLastSync(new Date().toISOString());
 					loadProgress.value = 100;
 					customersLoaded.value = true;
-					syncBootstrapCustomerReadiness(loadedCustomerCount.value);
+					syncBootstrapCustomerReadiness(loadedCustomerCount.value, "complete");
 					logFinalLoadedCustomerCount();
 				}
 				await searchCustomers(searchTerm.value);
 			} else if (serverCount < localCount) {
 				await clearCustomerStorage();
 				setCustomersLastSync(null);
-				syncBootstrapCustomerReadiness(0);
+				syncBootstrapCustomerReadiness(0, "unknown");
 				resetPagination();
 				await load_customer_names_internal();
 			} else {
@@ -537,7 +543,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		await ensureDatabase();
 		const localCount = await getCustomerStorageCount();
 		logLocalCustomerCount(localCount);
-		syncBootstrapCustomerReadiness(localCount);
+		syncBootstrapCustomerReadiness(localCount, localCount > 0 ? "incomplete" : "unknown");
 
 		if (localCount > 0) {
 			customersLoaded.value = true;
@@ -585,7 +591,7 @@ export const useCustomersStore = defineStore("customers", () => {
 				await setCustomerStorage(rows);
 			}
 			loadedCustomerCount.value = rows.length;
-			syncBootstrapCustomerReadiness(loadedCustomerCount.value);
+			syncBootstrapCustomerReadiness(loadedCustomerCount.value, "incomplete");
 			if (totalCustomerCount.value) {
 				loadProgress.value = Math.min(
 					100,
@@ -605,7 +611,7 @@ export const useCustomersStore = defineStore("customers", () => {
 				setCustomersLastSync(new Date().toISOString());
 				loadProgress.value = 100;
 				customersLoaded.value = true;
-				syncBootstrapCustomerReadiness(loadedCustomerCount.value);
+				syncBootstrapCustomerReadiness(loadedCustomerCount.value, "complete");
 				logFinalLoadedCustomerCount();
 			}
 			customersLoaded.value = true;
@@ -645,7 +651,7 @@ export const useCustomersStore = defineStore("customers", () => {
 			customers.value = [...customers.value, customer];
 		}
 		await setCustomerStorage([customer]);
-		syncBootstrapCustomerReadiness(Math.max(customers.value.length, 1));
+		syncBootstrapCustomerReadiness(Math.max(customers.value.length, 1), "complete");
 		setSelectedCustomer(customer.name);
 		requestCustomerRefresh();
 	}
@@ -659,7 +665,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		clearLocalState();
 		await clearCustomerStorage();
 		setCustomersLastSync(null);
-		syncBootstrapCustomerReadiness(0);
+		syncBootstrapCustomerReadiness(0, "unknown");
 
 		await get_customer_names();
 

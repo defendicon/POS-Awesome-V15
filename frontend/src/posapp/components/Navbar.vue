@@ -30,6 +30,7 @@
 						v-model="offlinePanelOpen"
 						@toggle-offline="toggleManualOfflineFromPanel"
 						@refresh-offline-data="handleRefreshOfflineDataAction"
+						@repair-offline-data="handleRepairOfflineDataAction"
 						@rebuild-offline-data="handleRebuildOfflineDataAction"
 						@clear-cache="handleClearCacheAction"
 						@open-diagnostics="handleOpenOfflineDiagnosticsAction"
@@ -383,6 +384,13 @@ export default {
 					tone: "info",
 				},
 				{
+					id: "repair-offline-data",
+					label: this.__("Repair Missing Data"),
+					subtitle: this.__("Resume incomplete syncs and recover missing records"),
+					icon: "mdi-wrench-clock",
+					tone: "warning",
+				},
+				{
 					id: "rebuild-offline-data",
 					label: this.__("Rebuild Offline Data"),
 					subtitle: this.__("Recreate local offline prerequisites from scratch"),
@@ -696,6 +704,11 @@ export default {
 			this.refreshCacheUsage();
 			this.$emit("refresh-offline-data");
 		},
+		handleRepairOfflineDataAction() {
+			this.closeOfflineStatusPanel();
+			this.refreshCacheUsage();
+			this.$emit("repair-offline-data");
+		},
 		handleRebuildOfflineDataAction() {
 			this.closeOfflineStatusPanel();
 			this.$emit("rebuild-offline-data");
@@ -720,6 +733,10 @@ export default {
 				case "rebuild-offline-data":
 					this.closeSettingsPanel();
 					this.$emit("rebuild-offline-data");
+					break;
+				case "repair-offline-data":
+					this.closeSettingsPanel();
+					this.$emit("repair-offline-data");
 					break;
 				case "clear-cache":
 					this.closeSettingsPanel();
@@ -1024,6 +1041,7 @@ export default {
 		"open-customer-display",
 		"toggle-offline",
 		"refresh-offline-data",
+		"repair-offline-data",
 		"rebuild-offline-data",
 		"open-offline-diagnostics",
 		"toggle-theme",
