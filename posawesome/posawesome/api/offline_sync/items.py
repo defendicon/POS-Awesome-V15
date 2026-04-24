@@ -84,6 +84,10 @@ def _get_allowed_item_groups(profile):
 	try:
 		return expand_item_groups(get_item_groups(profile.get("name")) or [])
 	except Exception:
+		frappe.log_error(
+			frappe.get_traceback(),
+			f"POS Awesome: failed to resolve offline-sync item groups for profile {profile.get('name') if isinstance(profile, dict) else ''}",
+		)
 		return []
 
 

@@ -24,6 +24,7 @@ vi.mock("../src/utils/clearAllCaches", () => ({
 
 import Navbar from "../src/posapp/components/Navbar.vue";
 import { useEmployeeStore } from "../src/posapp/stores/employeeStore";
+import { clearAllCaches } from "../src/utils/clearAllCaches";
 
 describe("Navbar supervisor access", () => {
 	beforeEach(() => {
@@ -194,5 +195,57 @@ describe("Navbar supervisor access", () => {
 
 		expect((wrapper.vm as any).drawer).toBe(false);
 		expect((wrapper.vm as any).settingsPanelOpen).toBe(true);
+	});
+
+	it("shows an error toast instead of a false success toast when cache clearing fails", async () => {
+		const employeeStore = useEmployeeStore();
+		employeeStore.setCurrentCashier({
+			user: "cashier@example.com",
+			full_name: "Main Cashier",
+			is_supervisor: true,
+		});
+
+		(clearAllCaches as unknown as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+			new Error("boom"),
+		);
+
+		const wrapper = shallowMount(Navbar, {
+			props: {
+				posProfile: { name: "Main POS" },
+			},
+			global: {
+				mocks: {
+					__: (value: string) => value,
+				},
+				stubs: {
+					NavbarAppBar: true,
+					NavbarDrawer: true,
+					NavbarMenu: true,
+					NotificationBell: true,
+					StatusIndicator: true,
+					CacheUsageMeter: true,
+					AboutDialog: true,
+					EmployeeSwitchDialog: true,
+					OfflineInvoicesDialog: true,
+					ServerUsageGadget: true,
+					DatabaseUsageGadget: true,
+					VDialog: true,
+					VCard: true,
+					VCardTitle: true,
+					VCardText: true,
+					VSnackbar: true,
+					VBtn: true,
+					VProgressCircular: true,
+				},
+			},
+		});
+
+		await (wrapper.vm as any).clearCache();
+
+		const shownTitles = (wrapper.vm as any).toastStore.history.map(
+			(entry: { title: string }) => entry.title,
+		);
+		expect(shownTitles).toContain("Failed to clear cache");
+		expect(shownTitles).not.toContain("Cache cleared successfully");
 	});
 });

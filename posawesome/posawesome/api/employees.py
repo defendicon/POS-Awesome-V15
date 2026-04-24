@@ -43,6 +43,10 @@ def _get_user_pin(user_doc) -> str:
 	try:
 		return str(user_doc.get_password("posa_pos_pin") or "").strip()
 	except Exception:
+		frappe.log_error(
+			frappe.get_traceback(),
+			f"POS Awesome: failed to read cashier PIN for user {getattr(user_doc, 'name', '')}",
+		)
 		return ""
 
 

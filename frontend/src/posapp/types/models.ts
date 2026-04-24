@@ -15,6 +15,17 @@ export interface Item {
   brand?: string;
   serial_no?: string | null;
   batch_no?: string | null;
+  actual_qty?: number | null;
+  rate?: number;
+  price_list_rate?: number;
+  original_rate?: number;
+  currency?: string;
+  original_currency?: string;
+  item_uoms?: Array<Record<string, any>>;
+  serial_no_data?: Array<Record<string, any>>;
+  batch_no_data?: Array<Record<string, any>>;
+  _scale_qty?: number;
+  _scale_price?: number;
   /** 1 if the item tracks serial numbers, 0 otherwise. */
   has_serial_no?: number;
   /** 1 if the item tracks batch numbers, 0 otherwise. */
@@ -91,6 +102,10 @@ export interface Payment {
   amount: number;
   account?: string;
   type?: string;
+  base_amount?: number;
+  default?: boolean;
+  currency?: string;
+  conversion_rate?: number;
   [key: string]: any;
 }
 
