@@ -228,6 +228,7 @@ import { useItemCurrency } from "../../../composables/pos/items/useItemCurrency"
 import { startItemsSelectorInitialization } from "../../../composables/pos/items/useItemsSelectorInitialization";
 import { registerItemsSelectorEvents } from "../../../composables/pos/items/useItemsSelectorEvents";
 import { registerItemsSelectorTypeToSearch } from "../../../composables/pos/items/useItemsSelectorTypeToSearch";
+import { useItemsSelectorLayoutLifecycle } from "../../../composables/pos/items/useItemsSelectorLayoutLifecycle";
 
 import { useCustomersStore } from "../../../stores/customersStore";
 import { useToastStore } from "../../../stores/toastStore";
@@ -285,6 +286,7 @@ const initError = ref<unknown>(null);
 let stopItemInitializationWatcher: (() => void) | null = null;
 let cleanupItemsSelectorEvents: (() => void) | null = null;
 let cleanupTypeToSearch: (() => void) | null = null;
+let cleanupLayoutLifecycle: (() => void) | null = null;
 
 const responsive = useResponsive();
 const rtl = useRtl();
@@ -600,6 +602,15 @@ const {
 } = useItemSelectorLayout({
 	resizeDebounce: 100,
 	loadVisibleItems: () => itemsLoader.loadVisibleItems(),
+});
+
+const itemSelectorLayoutLifecycle = useItemsSelectorLayoutLifecycle({
+	displayedItems,
+	checkItemContainerOverflow,
+	scheduleCardMetricsUpdate,
+	scheduleLastInvoiceRateRefresh,
+	scheduleLastBuyingRateRefresh,
+	syncHighlightedItem: () => itemSelection.syncHighlightedItem(),
 });
 
 // 5. Core Methods
@@ -970,7 +981,8 @@ onMounted(async () => {
 		startBackgroundSyncScheduler: () => itemSync.startBackgroundSyncScheduler(),
 	});
 
-	window.addEventListener("resize", checkItemContainerOverflow);
+	itemSelectorLayoutLifecycle.mount();
+	cleanupLayoutLifecycle = itemSelectorLayoutLifecycle.cleanup;
 	cleanupTypeToSearch = registerItemsSelectorTypeToSearch({
 		getContext: () => props.context,
 		activeView,
@@ -979,10 +991,6 @@ onMounted(async () => {
 		revealItemSearchView,
 		requestForegroundItemSearchFocus,
 		appendSearchCharacter,
-	});
-	nextTick(() => {
-		checkItemContainerOverflow();
-		scheduleCardMetricsUpdate();
 	});
 });
 
@@ -997,8 +1005,9 @@ onBeforeUnmount(() => {
 	cleanupItemsSelectorEvents = null;
 	cleanupTypeToSearch?.();
 	cleanupTypeToSearch = null;
+	cleanupLayoutLifecycle?.();
+	cleanupLayoutLifecycle = null;
 	itemSearchFocusClearGuard.dispose();
-	window.removeEventListener("resize", checkItemContainerOverflow);
 });
 
 // 8. Watchers
@@ -1036,16 +1045,6 @@ watch(isPosSupervisor, (isSupervisor) => {
 		return;
 	}
 	scheduleLastBuyingRateRefresh();
-});
-
-watch(displayedItems, () => {
-	nextTick(() => {
-		checkItemContainerOverflow();
-		scheduleCardMetricsUpdate();
-	});
-	scheduleLastInvoiceRateRefresh();
-	scheduleLastBuyingRateRefresh();
-	itemSelection.syncHighlightedItem();
 });
 
 // 9. Template Bindings & Direct Exports
