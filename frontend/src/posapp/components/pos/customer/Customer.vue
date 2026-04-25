@@ -284,6 +284,20 @@ export default {
 			customersStore.queueSearch(term || "");
 		}, 300);
 
+		const ensureCustomersForProfile = (profile) => {
+			if (!profile) {
+				return Promise.resolve(false);
+			}
+
+			return ensureCustomersReady({
+				profile,
+				online: networkOnline.value,
+				manualOffline: false,
+				setProfile: customersStore.setPosProfile,
+				load: customersStore.get_customer_names,
+			});
+		};
+
 		watch(
 			selectedCustomer,
 			(value) => {
@@ -294,20 +308,12 @@ export default {
 			{ immediate: true },
 		);
 
-			watch(
-				() => props.pos_profile,
-				(profile) => {
-					if (profile) {
-						void ensureCustomersReady({
-							profile,
-							online: networkOnline.value,
-							manualOffline: false,
-							setProfile: customersStore.setPosProfile,
-							load: customersStore.get_customer_names,
-						});
-					}
-				},
-				{ immediate: true },
+		watch(
+			() => props.pos_profile,
+			(profile) => {
+				void ensureCustomersForProfile(profile);
+			},
+			{ immediate: true },
 		);
 
 		const detachScrollListener = () => {
@@ -499,15 +505,7 @@ export default {
 			watch(
 				() => uiStore.posProfile,
 				async (profile) => {
-					if (profile) {
-						await ensureCustomersReady({
-							profile,
-							online: networkOnline.value,
-							manualOffline: false,
-							setProfile: customersStore.setPosProfile,
-							load: customersStore.get_customer_names,
-						});
-					}
+					await ensureCustomersForProfile(profile);
 				},
 				{ deep: true, immediate: true },
 			);
