@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { resolveBooleanSetting } from "../src/posapp/composables/pos/items/selectorSearch/resolveBooleanSetting";
 import { useItemsSelectorSearch } from "../src/posapp/composables/pos/items/useItemsSelectorSearch";
 
 const createScannerInput = () => ({
@@ -103,5 +104,29 @@ describe("useItemsSelectorSearch", () => {
 
 		expect(preventDefault).toHaveBeenCalled();
 		expect(selectHighlightedItem).toHaveBeenCalledTimes(1);
+	});
+});
+
+describe("resolveBooleanSetting", () => {
+	it("enables only explicit affirmative string settings", () => {
+		expect(resolveBooleanSetting("1")).toBe(true);
+		expect(resolveBooleanSetting(" true ")).toBe(true);
+		expect(resolveBooleanSetting("YES")).toBe(true);
+		expect(resolveBooleanSetting("0")).toBe(false);
+		expect(resolveBooleanSetting("false")).toBe(false);
+		expect(resolveBooleanSetting("enabled")).toBe(false);
+	});
+
+	it("enables only numeric one for numeric settings", () => {
+		expect(resolveBooleanSetting(1)).toBe(true);
+		expect(resolveBooleanSetting(0)).toBe(false);
+		expect(resolveBooleanSetting(2)).toBe(false);
+	});
+
+	it("falls back to JavaScript truthiness for non-string and non-number settings", () => {
+		expect(resolveBooleanSetting(true)).toBe(true);
+		expect(resolveBooleanSetting(false)).toBe(false);
+		expect(resolveBooleanSetting(null)).toBe(false);
+		expect(resolveBooleanSetting({})).toBe(true);
 	});
 });

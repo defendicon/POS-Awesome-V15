@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { shouldReloadOnSearchClear } from "../../../utils/searchUtils.js";
 import { isOffline } from "../../../../offline/index";
+import { resolveBooleanSetting } from "./selectorSearch/resolveBooleanSetting";
 
 declare const flt: (_value: unknown) => number;
 
@@ -26,17 +27,6 @@ export const useItemsSelectorSearch = ({
 	clearHighlightedItem,
 }: SearchDeps) => {
 	const getVm = (): any => (typeof getVM === "function" ? getVM() : null);
-
-	const resolveBooleanSetting = (value: unknown): boolean => {
-		if (typeof value === "string") {
-			const normalized = value.trim().toLowerCase();
-			return normalized === "1" || normalized === "true" || normalized === "yes";
-		}
-		if (typeof value === "number") {
-			return value === 1;
-		}
-		return Boolean(value);
-	};
 
 	const usesLimitSearch = (vm: any): boolean => {
 		if (typeof isLimitSearchEnabled === "function") {
