@@ -167,6 +167,28 @@ class TestCommercialFlowApi(unittest.TestCase):
         self.assertEqual(prepared["flow_context"]["target_doctype"], "Sales Order")
         self.assertEqual(prepared["flow_context"]["source_links"]["quotation"], "QTN-0002")
 
+    def test_prepare_document_flow_action_normalizes_draft_quote_customer(self):
+        self.frappe.get_doc = lambda doctype, name: FakeDoc(
+            doctype=doctype,
+            name=name,
+            quotation_to="Customer",
+            party_name="CUST-0001",
+            customer_name="Customer One",
+            status="Draft",
+            docstatus=0,
+            items=[],
+        )
+
+        prepared = self.module.prepare_document_flow_action(
+            action="quote_edit_draft",
+            source_doctype="Quotation",
+            source_name="QTN-0001",
+        )
+
+        self.assertEqual(prepared["prepared_doc"]["customer"], "CUST-0001")
+        self.assertEqual(prepared["prepared_doc"]["party_name"], "CUST-0001")
+        self.assertEqual(prepared["source_record"]["customer"], "CUST-0001")
+
     def test_commit_document_flow_action_creates_and_submits_delivery_note(self):
         self.frappe.get_doc = lambda doctype, name: FakeDoc(
             doctype=doctype,

@@ -41,6 +41,28 @@ def _as_dict(doc):
     return dict(doc or {})
 
 
+def _normalize_quotation_customer_fields(payload):
+    if not isinstance(payload, dict):
+        return payload
+
+    if payload.get("doctype") != "Quotation":
+        return payload
+
+    quotation_to = str(payload.get("quotation_to") or "Customer").strip()
+    if quotation_to != "Customer":
+        return payload
+
+    customer = payload.get("customer") or payload.get("party_name")
+    if not customer:
+        return payload
+
+    payload["customer"] = customer
+    payload["party_name"] = customer
+    payload["customer_name"] = payload.get("customer_name") or customer
+    payload["quotation_to"] = "Customer"
+    return payload
+
+
 def _normalize_source_key(source):
     key = str(source or "invoice").strip().lower()
     if key not in SOURCE_DOCTYPES:
@@ -71,6 +93,8 @@ def _serialize_source_record(source_key, row):
     payload["source"] = source_key
     payload["source_doctype"] = source_doctype
     payload["doctype"] = payload.get("doctype") or source_doctype
+    if source_key == "quote":
+        _normalize_quotation_customer_fields(payload)
     payload["source_docstatus"] = cint(payload.get("docstatus"))
     payload["allowed_actions"] = _get_allowed_actions(source_key, payload)
     return payload
@@ -277,6 +301,8 @@ def prepare_document_flow_action(
 
     source_doc = frappe.get_doc(normalized_source_doctype, source_name)
     source_payload = _as_dict(source_doc)
+    if source_key == "quote":
+        _normalize_quotation_customer_fields(source_payload)
     allowed_actions = _assert_allowed_action(source_key, source_payload, action)
 
     if action in INVOICE_LOAD_ACTIONS | {"quote_edit_draft", "order_load"}:

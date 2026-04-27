@@ -56,6 +56,14 @@ function setStoredCustomerScope(scope: string): void {
 	localStorage.removeItem(CUSTOMER_SCOPE_STORAGE_KEY);
 }
 
+function getStringField(
+	source: Record<string, unknown>,
+	field: string,
+): string | undefined {
+	const value = source[field];
+	return typeof value === "string" && value.trim() ? value : undefined;
+}
+
 function normalizeProfile(profile: unknown): POSProfile | null {
 	if (!profile) {
 		return null;
@@ -221,12 +229,54 @@ export const useCustomersStore = defineStore("customers", () => {
 		selectedCustomer.value = name || null;
 	}
 
+	function upsertCustomerSummaryFromInfo(info: CustomerInfo) {
+		const customerName = getStringField(info, "name") || getStringField(info, "customer");
+		if (!customerName) {
+			return;
+		}
+
+		const existingIndex = customers.value.findIndex(
+			(customer) => customer.name === customerName,
+		);
+		const existing =
+			existingIndex >= 0 ? customers.value[existingIndex] : null;
+		const summary: CustomerSummary = {
+			...(existing || {}),
+			name: customerName,
+			customer_name:
+				getStringField(info, "customer_name") ||
+				existing?.customer_name ||
+				customerName,
+		};
+		const email = getStringField(info, "email_id");
+		const mobile = getStringField(info, "mobile_no");
+		const primaryAddress =
+			getStringField(info, "primary_address") ||
+			getStringField(info, "customer_address");
+		const taxId = getStringField(info, "tax_id");
+		if (email) summary.email_id = email;
+		if (mobile) summary.mobile_no = mobile;
+		if (primaryAddress) summary.primary_address = primaryAddress;
+		if (taxId) summary.tax_id = taxId;
+
+		if (existingIndex >= 0) {
+			const updated = [...customers.value];
+			updated.splice(existingIndex, 1, summary);
+			customers.value = updated;
+			return;
+		}
+
+		customers.value = [...customers.value, summary];
+	}
+
 	function setCustomerInfo(info: CustomerInfo) {
 		customerInfo.value = info || {};
+		upsertCustomerSummaryFromInfo(customerInfo.value);
 		const customerName =
-			typeof info?.name === "string" ? info.name : undefined;
+			getStringField(customerInfo.value, "name") ||
+			getStringField(customerInfo.value, "customer");
 		if (customerName) {
-			void setCustomerStorage([info]);
+			void setCustomerStorage([{ ...customerInfo.value, name: customerName }]);
 		}
 		if (
 			customerName &&

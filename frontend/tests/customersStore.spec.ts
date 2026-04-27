@@ -74,4 +74,21 @@ describe("customersStore profile and customer dto handling", () => {
 		expectTypeOf(store.customers).toEqualTypeOf<CustomerSummary[]>();
 		expect(setCustomerStorageMock).toHaveBeenCalledWith([customer]);
 	});
+
+	it("adds fetched customer info to the visible selector list", () => {
+		const store = useCustomersStore();
+		const info: CustomerInfo = {
+			name: "CUST-QUOTE",
+			customer_name: "Quotation Customer",
+			email_id: "quote@example.com",
+		};
+
+		store.setCustomerInfo(info);
+
+		expect(store.customers).toContainEqual({
+			name: "CUST-QUOTE",
+			customer_name: "Quotation Customer",
+			email_id: "quote@example.com",
+		});
+	});
 });
