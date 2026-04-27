@@ -207,7 +207,11 @@ const { posProfile, lastInvoiceId, posOpeningShift } = storeToRefs(uiStore);
 
 const { pendingInvoicesCount } = storeToRefs(syncStore);
 const { loadProgress, customersLoaded } = storeToRefs(customersStore);
-const { itemsLoaded, loadProgress: itemsLoadProgress } = storeToRefs(itemsStore);
+const {
+	itemsLoaded,
+	isBackgroundLoading: itemsBackgroundLoading,
+	loadProgress: itemsLoadProgress,
+} = storeToRefs(itemsStore);
 const supportedOfflineSyncResources = filterSupportedOfflineSyncResources(
 	getSyncResourceDefinitions(),
 );
@@ -652,11 +656,18 @@ watch(
 );
 
 watch(
-	() => [loadingActive.value, initialBootstrapSyncSettled.value],
-	([isLoading, isBootstrapSettled]) => {
+	() => [
+		loadingActive.value,
+		initialBootstrapSyncSettled.value,
+		itemsLoaded.value,
+		itemsBackgroundLoading.value,
+	],
+	([isLoading, isBootstrapSettled, areItemsLoaded, areItemsSyncing]) => {
 		const shouldLift = shouldLiftBootstrapWarningStartupGate({
 			loadingActive: Boolean(isLoading),
 			initialBootstrapSettled: Boolean(isBootstrapSettled),
+			itemsStartupSyncSettled:
+				Boolean(areItemsLoaded) && !Boolean(areItemsSyncing),
 			startupGateLifted: startupBootstrapWarningsReady.value,
 		});
 
