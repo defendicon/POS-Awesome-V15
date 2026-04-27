@@ -8,8 +8,6 @@ import {
 } from "../../../utils/scaleBarcode.js";
 import {
 	getScanTimestamp,
-	sanitizeClipboardText,
-	isScanCandidate,
 	isLikelyKeyboardScan,
 	isSearchFieldPrimedForScan,
 } from "../../../utils/keyboardScan.js";
@@ -18,6 +16,7 @@ import {
 	perfMarkEnd,
 	scheduleFrame,
 } from "../../../utils/perf.js";
+import { classifyClipboardScanText } from "./scannerInput/clipboardScan";
 
 declare const frappe: any;
 declare const __: (_str: string, _args?: any[]) => string;
@@ -509,19 +508,20 @@ export function useScannerInput(options: ScannerInputOptions = {}) {
 		const pastedText = event.clipboardData.getData("text");
 		if (!pastedText) return;
 
-		const sanitized = sanitizeClipboardText(pastedText);
-		if (!sanitized) {
+		const pasteScan = classifyClipboardScanText(
+			pastedText,
+			keyboardScanMinLength,
+		);
+		if (pasteScan.shouldPreventDefault) {
 			event.preventDefault();
-			return;
 		}
 
-		if (isScanCandidate(sanitized, keyboardScanMinLength)) {
-			event.preventDefault();
+		if (pasteScan.shouldScan) {
 			if (setSearchInputHandler.value)
-				(setSearchInputHandler.value as any)(sanitized);
+				(setSearchInputHandler.value as any)(pasteScan.sanitizedText);
 
 			nextTick(() => {
-				onBarcodeScanned(sanitized);
+				onBarcodeScanned(pasteScan.sanitizedText);
 			});
 		}
 	};

@@ -543,6 +543,17 @@
 						</v-window-item>
 
 						<v-window-item value="drafts">
+							<div class="draft-source-toolbar mb-4">
+								<DocumentSourceSelector
+									v-if="showDraftSourceSelector"
+									:model-value="currentDraftSource"
+									:options="availableDraftSources"
+									compact
+									:aria-label="__('Draft source')"
+									@update:model-value="updateDraftSource"
+								/>
+							</div>
+
 							<div class="filter-grid mb-4">
 								<v-text-field
 									v-model="draftSearch"
@@ -552,7 +563,7 @@
 									hide-details
 									clearable
 									prepend-inner-icon="mdi-magnify"
-									:label="__('Search drafts or customers')"
+									:label="__(currentDraftSourceOption.searchLabel)"
 								/>
 								<v-text-field
 									v-model="draftDateFrom"
@@ -576,13 +587,13 @@
 
 							<div v-if="loading && activeTab === 'drafts'" class="tab-loader">
 								<v-progress-circular indeterminate color="secondary" size="28" width="3" />
-								<span>{{ __("Loading drafts...") }}</span>
+								<span>{{ __(currentDraftSourceOption.loadingLabel) }}</span>
 							</div>
 
 							<div v-else-if="!filteredDraftInvoices.length" class="empty-state">
-								<v-icon size="42" color="secondary">mdi-file-document-edit-outline</v-icon>
-								<div class="empty-state__title">{{ __("No drafts found") }}</div>
-								<div class="empty-state__subtitle">{{ __("Saved draft invoices will appear here.") }}</div>
+								<v-icon size="42" :color="currentDraftSourceOption.color">{{ currentDraftSourceOption.icon }}</v-icon>
+								<div class="empty-state__title">{{ __(currentDraftSourceOption.emptyTitle) }}</div>
+								<div class="empty-state__subtitle">{{ __(currentDraftSourceOption.emptySubtitle) }}</div>
 							</div>
 
 							<v-data-table v-else-if="viewMode === 'list'" :headers="draftHeaders" :items="paginatedDraftInvoices" item-value="name" class="elevation-1" :items-per-page="-1" hide-default-footer>
@@ -590,8 +601,28 @@
 								<template #item.grand_total="{ item }">{{ currencySymbol(item.currency) }} {{ formatCurrency(item.grand_total) }}</template>
 								<template #item.actions="{ item }">
 									<div class="d-flex justify-end ga-1">
-										<v-btn icon="mdi-folder-open-outline" variant="text" size="small" color="primary" :title="__('Load Draft')" :aria-label="__('Load draft invoice')" @click="loadDraft(item)" />
-										<v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" :title="__('Delete Draft')" :aria-label="__('Delete draft invoice')" @click="deleteDraft(item)" />
+										<v-btn
+											v-for="action in draftActions(item)"
+											:key="`${item.name}-${action}`"
+											variant="text"
+											size="small"
+											:color="draftActionColor(action)"
+											:title="draftActionLabel(action)"
+											:aria-label="draftActionLabel(action)"
+											@click="runDraftAction(item, action)"
+										>
+											{{ draftActionLabel(action) }}
+										</v-btn>
+										<v-btn
+											v-if="canDeleteActiveDraftSource"
+											icon="mdi-delete-outline"
+											variant="text"
+											size="small"
+											color="error"
+											:title="__('Delete Draft')"
+											:aria-label="__('Delete draft invoice')"
+											@click="deleteDraft(item)"
+										/>
 									</div>
 								</template>
 							</v-data-table>
@@ -607,7 +638,9 @@
 										<div>
 											<div class="invoice-record-card__title-row">
 												<div class="invoice-record-card__title">{{ invoice.name }}</div>
-												<v-chip size="small" color="secondary" variant="flat">{{ __("Draft") }}</v-chip>
+												<v-chip size="small" :color="currentDraftSourceOption.color" variant="flat">
+													{{ draftSourceChipLabel(invoice) }}
+												</v-chip>
 											</div>
 											<div class="invoice-record-card__subtitle">
 												{{ invoice.customer_name || invoice.customer || __("Walk-in Customer") }}
@@ -628,15 +661,33 @@
 												<div class="meta-pair__value">{{ formatDateTime(invoice.posting_date, invoice.posting_time) }}</div>
 											</div>
 											<div class="meta-pair">
-												<div class="meta-pair__label">{{ __("Items") }}</div>
-												<div class="meta-pair__value">{{ draftItemCount(invoice) }}</div>
+												<div class="meta-pair__label">{{ draftSecondaryMetaLabel(invoice).label }}</div>
+												<div class="meta-pair__value">{{ draftSecondaryMetaLabel(invoice).value }}</div>
 											</div>
 										</div>
 									</div>
 
 									<div class="invoice-record-card__actions">
-										<v-btn prepend-icon="mdi-folder-open-outline" size="small" variant="flat" color="primary" @click="loadDraft(invoice)">{{ __("Load Draft") }}</v-btn>
-										<v-btn icon="mdi-delete-outline" size="small" variant="text" color="error" :title="__('Delete Draft')" :aria-label="__('Delete draft invoice')" @click="deleteDraft(invoice)" />
+										<v-btn
+											v-for="action in draftActions(invoice)"
+											:key="`${invoice.name}-${action}`"
+											size="small"
+											:variant="isPrimaryDraftAction(action) ? 'flat' : 'text'"
+											:color="draftActionColor(action)"
+											@click="runDraftAction(invoice, action)"
+										>
+											{{ draftActionLabel(action) }}
+										</v-btn>
+										<v-btn
+											v-if="canDeleteActiveDraftSource"
+											icon="mdi-delete-outline"
+											size="small"
+											variant="text"
+											color="error"
+											:title="__('Delete Draft')"
+											:aria-label="__('Delete draft invoice')"
+											@click="deleteDraft(invoice)"
+										/>
 									</div>
 								</v-card>
 							</div>
@@ -850,11 +901,28 @@ import { useEmployeeStore } from "../../../stores/employeeStore";
 import { appendDebugPrintParam, isDebugPrintEnabled, silentPrint, watchPrintWindow } from "../../../plugins/print";
 import { printDocumentViaQz } from "../../../services/qzTray";
 import { isOffline } from "../../../../offline/index";
+import DocumentSourceSelector from "../shared/DocumentSourceSelector.vue";
+import {
+	canDeleteDocumentSourceRecord,
+	commitDocumentFlowAction,
+	fetchDocumentSourceRecords,
+	getAvailableCommercialDocumentSources,
+	getDefaultCommercialDocumentSource,
+	getDocumentFlowActionLabel,
+	getDocumentFlowActionsForRecord,
+	getDocumentSourceOption,
+	loadDocumentSourceRecord,
+	prepareDocumentFlowAction,
+	shouldShowDocumentSourceSelector,
+} from "../../../utils/documentSources";
 
 const TAB_PAGE_SIZE = 25;
 
 export default {
 	mixins: [format],
+	components: {
+		DocumentSourceSelector,
+	},
 	setup() {
 		const uiStore = useUIStore();
 		const invoiceStore = useInvoiceStore();
@@ -923,12 +991,18 @@ export default {
 		draftSearch: "",
 		draftDateFrom: "",
 		draftDateTo: "",
+		draftSource: "invoice",
 		returnSearch: "",
 		returnDateFrom: "",
 		returnDateTo: "",
 		unpaidInvoices: [],
 		historyInvoices: [],
-		draftInvoices: [],
+		draftRecordsBySource: {
+			invoice: [],
+			order: [],
+			quote: [],
+			delivery: [],
+		},
 		repairChangeLoading: false,
 		detailDialog: false,
 		selectedInvoiceDetail: null,
@@ -936,13 +1010,41 @@ export default {
 		historyStatusItems: ["All", "Paid", "Partly Paid", "Unpaid", "Overdue", "Credit Note Issued"],
 		partialHeaders: [{ title: __("Invoice"), key: "name" }, { title: __("Customer"), key: "customer_name" }, { title: __("Posting"), key: "posting_date" }, { title: __("Due Date"), key: "due_date" }, { title: __("Status"), key: "status" }, { title: __("Total"), key: "grand_total", align: "end" }, { title: __("Paid"), key: "paid_amount", align: "end" }, { title: __("Outstanding"), key: "outstanding_amount", align: "end" }, { title: __("Actions"), key: "actions", align: "end", sortable: false }],
 		historyHeaders: [{ title: __("Invoice"), key: "name" }, { title: __("Customer"), key: "customer_name" }, { title: __("Posting"), key: "posting_date" }, { title: __("Status"), key: "status" }, { title: __("Total"), key: "grand_total", align: "end" }, { title: __("Tendered"), key: "paid_amount", align: "end" }, { title: __("Change Return"), key: "change_amount", align: "end" }, { title: __("Outstanding"), key: "outstanding_amount", align: "end" }, { title: __("Actions"), key: "actions", align: "end", sortable: false }],
-		draftHeaders: [{ title: __("Invoice"), key: "name" }, { title: __("Customer"), key: "customer_name" }, { title: __("Posting"), key: "posting_date" }, { title: __("Total"), key: "grand_total", align: "end" }, { title: __("Actions"), key: "actions", align: "end", sortable: false }],
 		returnHeaders: [{ title: __("Invoice"), key: "name" }, { title: __("Customer"), key: "customer_name" }, { title: __("Posting"), key: "posting_date" }, { title: __("Against"), key: "return_against" }, { title: __("Total"), key: "grand_total", align: "end" }, { title: __("Actions"), key: "actions", align: "end", sortable: false }],
 		detailHeaders: [{ title: __("Item"), key: "item_name" }, { title: __("Code"), key: "item_code" }, { title: __("Qty"), key: "qty", align: "end" }, { title: __("Rate"), key: "rate", align: "end" }, { title: __("Amount"), key: "amount", align: "end" }],
 		paymentHeaders: [{ title: __("Mode"), key: "mode_of_payment" }, { title: __("Amount"), key: "amount", align: "end" }, { title: __("Account"), key: "account" }],
 	}),
 	computed: {
 		currentInvoiceDoctype() { return this.posProfile?.create_pos_invoice_instead_of_sales_invoice ? "POS Invoice" : "Sales Invoice"; },
+		availableDraftSources() {
+			return getAvailableCommercialDocumentSources(this.posProfile);
+		},
+		currentDraftSource() {
+			return getDefaultCommercialDocumentSource(this.posProfile, this.draftSource);
+		},
+		currentDraftSourceOption() {
+			return getDocumentSourceOption(this.currentDraftSource);
+		},
+		showDraftSourceSelector() {
+			return shouldShowDocumentSourceSelector(this.availableDraftSources);
+		},
+		canDeleteActiveDraftSource() {
+			return canDeleteDocumentSourceRecord(this.currentDraftSource);
+		},
+		draftHeaders() {
+			return [
+				{ title: __(this.currentDraftSourceOption.label), key: "name" },
+				{ title: __("Customer"), key: "customer_name" },
+				{ title: __("Posting"), key: "posting_date" },
+				{ title: __("Total"), key: "grand_total", align: "end" },
+				{ title: __("Actions"), key: "actions", align: "end", sortable: false },
+			];
+		},
+		draftRecords() {
+			return Array.isArray(this.draftRecordsBySource?.[this.currentDraftSource])
+				? this.draftRecordsBySource[this.currentDraftSource]
+				: [];
+		},
 		supervisorProfileScope() {
 			return this.resolveSupervisorProfileScope();
 		},
@@ -984,7 +1086,7 @@ export default {
 				this.historyDateTo,
 			).length;
 		},
-		filteredDraftInvoices() { return this.sortInvoicesByLatest(this.filterCollection(this.draftInvoices, this.draftSearch, "All", this.draftDateFrom, this.draftDateTo)); },
+		filteredDraftInvoices() { return this.sortInvoicesByLatest(this.filterCollection(this.draftRecords, this.draftSearch, "All", this.draftDateFrom, this.draftDateTo)); },
 		filteredReturnInvoices() { return this.sortInvoicesByLatest(this.filterCollection(this.historyInvoices.filter((d) => d.is_return), this.returnSearch, "All", this.returnDateFrom, this.returnDateTo)); },
 		filteredUnpaidSummary() {
 			return this.filteredUnpaidInvoices.reduce((accumulator, invoice) => {
@@ -1043,6 +1145,10 @@ export default {
 		invoiceManagementDialog(value) {
 			if (value) {
 				this.activeTab = this.invoiceManagementTargetTab || "history";
+				this.draftSource = getDefaultCommercialDocumentSource(
+					this.posProfile,
+					this.uiStore.invoiceManagementDraftSource || this.draftSource,
+				);
 				this.initializeSupervisorProfileScope();
 				this.loadSupervisorPosProfiles();
 				this.refreshAll();
@@ -1076,6 +1182,10 @@ export default {
 		},
 		posProfile: {
 			async handler(value, previousValue) {
+				this.draftSource = getDefaultCommercialDocumentSource(
+					value,
+					this.uiStore.invoiceManagementDraftSource || this.draftSource,
+				);
 				this.initializeSupervisorProfileScope();
 				if (!this.invoiceManagementDialog) return;
 
@@ -1533,6 +1643,109 @@ export default {
 			if (Number.isFinite(Number(invoice?.items_count))) return Number(invoice.items_count);
 			return 0;
 		},
+		draftSourceChipLabel(invoice) {
+			if (this.currentDraftSource === "invoice") return __("Draft");
+			if (this.currentDraftSource === "quote") return __(invoice?.status || "Quote");
+			if (this.currentDraftSource === "delivery") return __("Delivered");
+			return __("Order");
+		},
+		draftSecondaryMetaLabel(invoice) {
+			if (this.currentDraftSource === "invoice") {
+				return {
+					label: __("Items"),
+					value: this.draftItemCount(invoice),
+				};
+			}
+			return {
+				label: __("Status"),
+				value: __(invoice?.status || this.currentDraftSourceOption.label),
+			};
+		},
+		draftActions(invoice) {
+			return getDocumentFlowActionsForRecord(
+				invoice || { source: this.currentDraftSource },
+			);
+		},
+		draftActionLabel(action) {
+			return __(getDocumentFlowActionLabel(action));
+		},
+		draftActionColor(action) {
+			if (action === "quote_submit") return "warning";
+			if (action === "order_to_delivery_note") return "success";
+			if (action === "order_to_invoice" || action === "quote_to_invoice" || action === "delivery_to_invoice") {
+				return "primary";
+			}
+			if (action === "quote_to_order" || action === "order_load" || action === "quote_edit_draft") {
+				return this.currentDraftSourceOption.color;
+			}
+			return this.currentDraftSourceOption.color;
+		},
+		isPrimaryDraftAction(action) {
+			return action !== "quote_submit" && action !== "order_to_delivery_note";
+		},
+		async runDraftAction(invoice, action) {
+			if (!invoice?.name || !action) {
+				return;
+			}
+
+			try {
+				if (action === "invoice_load_draft") {
+					await this.loadDraft(invoice);
+					return;
+				}
+
+				if (action === "quote_submit" || action === "order_to_delivery_note") {
+					const result = await commitDocumentFlowAction({
+						action,
+						source: invoice?.source || this.currentDraftSource,
+						record: invoice,
+					});
+					if (action === "quote_submit") {
+						this.toastStore.show({ title: __("Quotation submitted"), color: "success" });
+						await this.loadDrafts();
+						return;
+					}
+
+					if (result?.result?.name) {
+						this.toastStore.show({
+							title: __("Delivery Note {0} created", [result.result.name]),
+							color: "success",
+						});
+					} else {
+						this.toastStore.show({ title: __("Delivery note created"), color: "success" });
+					}
+					this.draftSource = "delivery";
+					this.uiStore.setInvoiceManagementDraftSource("delivery");
+					await this.loadDrafts();
+					return;
+				}
+
+				const prepared = await prepareDocumentFlowAction({
+					action,
+					source: invoice?.source || this.currentDraftSource,
+					record: invoice,
+					currentInvoiceDoctype: this.currentInvoiceDoctype,
+				});
+				if (!prepared?.prepared_doc) {
+					this.toastStore.show({ title: __("Unable to prepare document"), color: "error" });
+					return;
+				}
+				this.invoiceStore.triggerLoadFlow?.(prepared);
+				this.uiStore.closeInvoiceManagement();
+			} catch (error) {
+				console.error("Error running draft action:", error);
+				this.toastStore.show({ title: __("Unable to process document action"), color: "error" });
+			}
+		},
+		async updateDraftSource(source) {
+			const nextSource = getDefaultCommercialDocumentSource(this.posProfile, source);
+			if (this.draftSource === nextSource) return;
+			this.draftSource = nextSource;
+			this.uiStore.setInvoiceManagementDraftSource(nextSource);
+			if (this.activeTab === "drafts") {
+				await this.loadDrafts();
+			}
+		},
 		async refreshAll() {
 			this.resetPagination();
 			await Promise.all([this.loadUnpaidInvoices(), this.loadHistory(), this.loadDrafts()]);
@@ -1613,27 +1826,31 @@ export default {
 			}
 		},
 		async loadDrafts() {
-			if (!this.posOpeningShift?.name && !this.isSupervisorScope()) return void (this.draftInvoices = []);
+			if (!this.posProfile?.name) {
+				this.draftRecordsBySource[this.currentDraftSource] = [];
+				return;
+			}
 			this.loading = true;
 			try {
-				const { message } = await frappe.call({
-					method: "posawesome.posawesome.api.invoices.get_draft_invoices",
-					args: {
-						pos_opening_shift: this.posOpeningShift.name,
-						doctype: this.currentInvoiceDoctype,
-						limit_page_length: 0,
-						company: this.isSupervisorScope() ? this.posProfile?.company : null,
-						pos_profile: this.isSupervisorScope() && typeof this.resolveSupervisorProfileScope === "function"
+				const records = await fetchDocumentSourceRecords({
+					source: this.currentDraftSource,
+					posOpeningShift: this.posOpeningShift,
+					posProfile: this.posProfile,
+					currentInvoiceDoctype: this.currentInvoiceDoctype,
+					isSupervisorScope: this.isSupervisorScope(),
+					resolveSupervisorProfileScope: () =>
+						typeof this.resolveSupervisorProfileScope === "function"
 							? this.resolveSupervisorProfileScope()
 							: null,
-						cashier: null,
-						is_supervisor: this.isSupervisorScope() ? 1 : 0,
-					},
 				});
-				this.draftInvoices = Array.isArray(message) ? message.map((entry) => ({ ...entry, doctype: entry.doctype || this.currentInvoiceDoctype })) : [];
+				this.draftRecordsBySource = {
+					...this.draftRecordsBySource,
+					[this.currentDraftSource]: records,
+				};
+				this.uiStore.setInvoiceManagementDraftSource(this.currentDraftSource);
 			} catch (error) {
-				console.error("Error loading draft invoices:", error);
-				this.toastStore.show({ title: __("Unable to fetch draft invoices"), color: "error" });
+				console.error("Error loading source records:", error);
+				this.toastStore.show({ title: __("Unable to fetch documents"), color: "error" });
 			} finally {
 				this.loading = false;
 			}
@@ -1650,17 +1867,23 @@ export default {
 		},
 		async loadDraft(invoice) {
 			try {
-				const { message } = await frappe.call({ method: "posawesome.posawesome.api.invoices.get_draft_invoice_doc", args: { invoice_name: invoice.name, doctype: invoice.doctype || this.currentInvoiceDoctype } });
-				if (message) {
-					this.invoiceStore.triggerLoadInvoice(message);
-					this.uiStore.closeInvoiceManagement();
-				}
+				await loadDocumentSourceRecord({
+					source: invoice?.source || this.currentDraftSource,
+					record: invoice,
+					posProfile: this.posProfile,
+					currentInvoiceDoctype: this.currentInvoiceDoctype,
+					invoiceStore: this.invoiceStore,
+					uiStore: this.uiStore,
+					closeDrafts: true,
+					closeInvoiceManagement: true,
+				});
 			} catch (error) {
-				console.error("Error loading draft invoice:", error);
-				this.toastStore.show({ title: __("Unable to load draft invoice"), color: "error" });
+				console.error("Error loading source record:", error);
+				this.toastStore.show({ title: __("Unable to load document"), color: "error" });
 			}
 		},
 		async deleteDraft(invoice) {
+			if (!this.canDeleteActiveDraftSource) return;
 			if (!window.confirm(__("Delete draft invoice {0}?", [invoice.name]))) return;
 			try {
 				await frappe.call({ method: "posawesome.posawesome.api.invoices.delete_invoice", args: { invoice: invoice.name } });
@@ -1943,6 +2166,11 @@ export default {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 8px;
+}
+
+.draft-source-toolbar {
+	display: flex;
+	align-items: center;
 }
 
 .tab-loader,

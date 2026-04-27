@@ -5,6 +5,15 @@ import types
 import unittest
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
+sys.path.insert(
+	0,
+	str(REPO_ROOT / "posawesome" / "posawesome" / "api" / "test_support"),
+)
+
+from offline_sync_harness import (
+	install_offline_sync_package_stubs,
+	load_offline_sync_common,
+)
 
 
 class AttrDict(dict):
@@ -15,6 +24,8 @@ class AttrDict(dict):
 
 
 def _install_stubs():
+	install_offline_sync_package_stubs()
+
 	frappe_module = types.ModuleType("frappe")
 	frappe_module._ = lambda text: text
 	frappe_module.throw = lambda message: (_ for _ in ()).throw(Exception(message))
@@ -57,6 +68,9 @@ def _install_stubs():
 		for index, row in enumerate(rows)
 	}
 	sys.modules["posawesome.posawesome.api.item_processing.stock"] = stock_module
+	sys.modules["posawesome.posawesome.api.offline_sync.common"] = (
+		load_offline_sync_common()
+	)
 
 
 def _load_module():
@@ -97,6 +111,9 @@ class TestOfflineSyncStock(unittest.TestCase):
 		self.assertEqual(response["changes"][1]["data"]["warehouse"], "Stores - TC")
 		self.assertEqual(response["deleted"], [])
 		self.assertEqual(response["next_watermark"], "2026-04-09T10:04:00")
+		self.assertEqual(response["schema_version"], self.module.SYNC_SCHEMA_VERSION)
+		self.assertIn("next_watermark", response)
+		self.assertIn("has_more", response)
 
 	def test_sync_stock_supports_initial_pagination_without_watermark(self):
 		response = self.module.sync_stock(
@@ -111,6 +128,9 @@ class TestOfflineSyncStock(unittest.TestCase):
 		)
 		self.assertTrue(response["has_more"])
 		self.assertEqual(response["next_watermark"], "2026-04-09T10:03:00")
+		self.assertEqual(response["schema_version"], self.module.SYNC_SCHEMA_VERSION)
+		self.assertIn("next_watermark", response)
+		self.assertIn("has_more", response)
 
 
 if __name__ == "__main__":

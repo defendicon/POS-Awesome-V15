@@ -1,5 +1,9 @@
 import { isOffline } from "../../../../offline/index";
-import { fetchDraftInvoices } from "../../../utils/draftInvoices";
+import {
+	fetchDocumentSourceRecords,
+	getDefaultDocumentSource,
+	loadDocumentSourceRecord,
+} from "../../../utils/documentSources";
 
 declare const __: (_text: string, _args?: any[]) => string;
 declare const frappe: any;
@@ -154,26 +158,36 @@ export async function show_payment(context: any) {
 	}
 }
 
-export async function get_draft_invoices(context: any) {
+export async function get_draft_invoices(
+	context: any,
+	source: "invoice" | "order" | "quote" = "invoice",
+) {
 	try {
-		const drafts = await fetchDraftInvoices({
+		const selectedSource = getDefaultDocumentSource(
+			context.pos_profile,
+			source || context.uiStore?.draftSource,
+		);
+		const drafts = await fetchDocumentSourceRecords({
+			source: selectedSource,
 			posOpeningShift: context.pos_opening_shift,
 			posProfile: context.pos_profile,
+			currentInvoiceDoctype: context.pos_profile?.create_pos_invoice_instead_of_sales_invoice
+				? "POS Invoice"
+				: "Sales Invoice",
 		});
+		context.uiStore.setDraftSource?.(selectedSource);
 		context.uiStore.setDraftsData?.(drafts);
 		context.uiStore.setParkedOrders?.(drafts);
 		context.uiStore.closeDrafts?.();
 
-		if (drafts.length) {
-			if (typeof context.$nextTick === "function") {
-				await context.$nextTick();
-			}
-			context.$refs?.invoiceSummary?.openDraftsSurface?.();
+		if (typeof context.$nextTick === "function") {
+			await context.$nextTick();
 		}
+		context.$refs?.invoiceSummary?.openDraftsSurface?.();
 	} catch (error) {
 		console.error("Error fetching draft invoices:", error);
 		context.toastStore.show({
-			title: __("Unable to fetch draft invoices"),
+			title: __("Unable to fetch documents"),
 			color: "error",
 		});
 	}
@@ -206,7 +220,41 @@ export function open_returns(context: any) {
 }
 
 export function open_invoice_management(context: any, targetTab: string = "history") {
-	context.uiStore?.openInvoiceManagement?.(targetTab);
+	context.uiStore?.openInvoiceManagement?.(
+		targetTab,
+		context.uiStore?.draftSource || "invoice",
+	);
+}
+
+export function open_invoice_management_with_source(
+	context: any,
+	targetTab: string = "history",
+	draftSource: "invoice" | "order" | "quote" = "invoice",
+) {
+	context.uiStore?.setInvoiceManagementDraftSource?.(draftSource);
+	return open_invoice_management(context, targetTab);
+}
+
+export async function load_draft_source_record(context: any, draft: any) {
+	try {
+		const selectedSource = draft?.source || context.uiStore?.draftSource || "invoice";
+		const message = await loadDocumentSourceRecord({
+			source: selectedSource,
+			record: draft,
+			posProfile: context.pos_profile,
+			currentInvoiceDoctype: context.pos_profile?.create_pos_invoice_instead_of_sales_invoice
+				? "POS Invoice"
+				: "Sales Invoice",
+			invoiceStore: context.invoiceStore,
+			uiStore: context.uiStore,
+			closeDrafts: false,
+			closeInvoiceManagement: false,
+		});
+		return message;
+	} catch (error) {
+		console.error("Error loading source record:", error);
+		throw error;
+	}
 }
 
 export function close_payments(context: any) {

@@ -252,4 +252,43 @@ describe("itemsStore loadItems", () => {
 
 		expect(itemsSyncMocks.primeItemDetailsCache).not.toHaveBeenCalled();
 	});
+
+	it("limits the initial cold-start fetch so background sync can hydrate the rest", async () => {
+		const store = useItemsStore();
+		const profile = {
+			name: "POS-1",
+			warehouse: "Main WH",
+			selling_price_list: "Retail",
+			currency: "PKR",
+			item_groups: [],
+			posa_use_limit_search: 0,
+		} as any;
+
+		await store.initialize(profile);
+
+		expect(itemServiceMocks.getItems).toHaveBeenCalledWith(
+			expect.objectContaining({
+				price_list: "Retail",
+				limit: 50,
+			}),
+			expect.any(AbortSignal),
+		);
+		expect(itemsSyncMocks.backgroundSyncItems).toHaveBeenCalledTimes(1);
+		expect(itemsSyncMocks.backgroundSyncItems).toHaveBeenCalledWith(
+			expect.objectContaining({
+				groupFilter: "ALL",
+				reset: false,
+			}),
+			expect.anything(),
+			"Retail",
+			"POS-1_Main WH",
+			true,
+			expect.any(Function),
+			expect.any(Function),
+			expect.any(Function),
+			expect.anything(),
+			expect.anything(),
+			expect.anything(),
+		);
+	});
 });

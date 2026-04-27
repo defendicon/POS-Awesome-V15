@@ -1,4 +1,4 @@
-import { ref, watch, onUnmounted } from "vue";
+import { ref } from "vue";
 import { debounce } from "lodash";
 
 type LastBuyingRate = {
@@ -46,13 +46,13 @@ export function useLastBuyingRate(context: UseLastBuyingRateContext = {}) {
 	}, 500);
 
 	const getLastBuyingRate = (item: any): LastBuyingRate | null => {
-		if (!Boolean(unwrapValue(show_last_buying_rate))) return null;
+		if (!unwrapValue(show_last_buying_rate)) return null;
 		if (!item?.item_code) return null;
 		return lastBuyingRates.value[item.item_code] || null;
 	};
 
 	const fetchLastBuyingRates = async () => {
-		if (!Boolean(unwrapValue(show_last_buying_rate))) {
+		if (!unwrapValue(show_last_buying_rate)) {
 			lastBuyingRates.value = {};
 			return;
 		}
@@ -105,7 +105,7 @@ export function useLastBuyingRate(context: UseLastBuyingRateContext = {}) {
 	};
 
 	const scheduleLastBuyingRateRefresh = () => {
-		if (!Boolean(unwrapValue(show_last_buying_rate))) {
+		if (!unwrapValue(show_last_buying_rate)) {
 			lastBuyingRates.value = {};
 			return;
 		}

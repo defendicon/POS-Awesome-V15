@@ -3,7 +3,16 @@ import { ref, computed } from "vue";
 
 declare const frappe: any;
 declare const __: any;
-import type { Customer, POSProfile } from "../types/models";
+import type {
+	CustomerInfo,
+	CustomerSummary,
+	POSProfile,
+	StoredCustomer,
+} from "../types/models";
+import {
+	customerMatchesSearchTerm,
+	normalizeCustomerSearchTerm,
+} from "./customers/customerSearch";
 // @ts-ignore
 import {
 	db,
@@ -47,22 +56,28 @@ function setStoredCustomerScope(scope: string): void {
 	localStorage.removeItem(CUSTOMER_SCOPE_STORAGE_KEY);
 }
 
-function normalizeSearchTerm(term: string | null | undefined): string {
-	if (typeof term !== "string") {
-		return "";
-	}
-	return term.trim();
+function getStringField(
+	source: Record<string, unknown>,
+	field: string,
+): string | undefined {
+	const value = source[field];
+	return typeof value === "string" && value.trim() ? value : undefined;
 }
 
-function normalizeProfile(profile: any): POSProfile | null {
+function normalizeProfile(profile: unknown): POSProfile | null {
 	if (!profile) {
 		return null;
 	}
 
-	let resolved = profile;
+	let resolved: unknown = profile;
 
-	if (profile.pos_profile) {
-		resolved = profile.pos_profile;
+	if (
+		typeof profile === "object" &&
+		profile !== null &&
+		"pos_profile" in profile &&
+		(profile as { pos_profile?: unknown }).pos_profile
+	) {
+		resolved = (profile as { pos_profile?: unknown }).pos_profile;
 	}
 
 	if (typeof resolved === "string") {
@@ -73,7 +88,7 @@ function normalizeProfile(profile: any): POSProfile | null {
 
 		if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
 			try {
-				return JSON.parse(trimmed);
+				return JSON.parse(trimmed) as POSProfile;
 			} catch (err) {
 				console.error("Failed to parse POS profile JSON", err);
 				return null;
@@ -86,7 +101,7 @@ function normalizeProfile(profile: any): POSProfile | null {
 	return resolved as POSProfile;
 }
 
-function getSerializedProfile(profile: any): string | null {
+function getSerializedProfile(profile: unknown): string | null {
 	if (!profile) {
 		return null;
 	}
@@ -102,14 +117,23 @@ function getSerializedProfile(profile: any): string | null {
 		return JSON.stringify({ name: trimmed });
 	}
 
-	let fallbackName = null;
+	let fallbackName: string | null = null;
 	if (typeof profile === "object" && profile !== null) {
-		if (typeof profile.name === "string") {
-			fallbackName = profile.name;
-		} else if (typeof profile.pos_profile === "string") {
-			fallbackName = profile.pos_profile;
-		} else if (profile.pos_profile?.name) {
-			fallbackName = profile.pos_profile.name;
+		const typedProfile = profile as {
+			name?: unknown;
+			pos_profile?: unknown;
+		};
+		if (typeof typedProfile.name === "string") {
+			fallbackName = typedProfile.name;
+		} else if (typeof typedProfile.pos_profile === "string") {
+			fallbackName = typedProfile.pos_profile;
+		} else if (
+			typeof typedProfile.pos_profile === "object" &&
+			typedProfile.pos_profile !== null &&
+			"name" in typedProfile.pos_profile &&
+			typeof (typedProfile.pos_profile as { name?: unknown }).name === "string"
+		) {
+			fallbackName = (typedProfile.pos_profile as { name: string }).name;
 		}
 	}
 
@@ -125,9 +149,9 @@ function getSerializedProfile(profile: any): string | null {
 }
 
 export const useCustomersStore = defineStore("customers", () => {
-	const customers = ref<Customer[]>([]);
+	const customers = ref<CustomerSummary[]>([]);
 	const selectedCustomer = ref<string | null>(null);
-	const customerInfo = ref<Record<string, any>>({});
+	const customerInfo = ref<CustomerInfo>({});
 	const searchTerm = ref("");
 	const page = ref(0);
 	const hasMore = ref(true);
@@ -143,7 +167,7 @@ export const useCustomersStore = defineStore("customers", () => {
 	const customerProfileScope = ref("");
 	const refreshToken = ref(0);
 	const isUpdateCustomerDialogOpen = ref(false);
-	const customerToUpdate = ref<Customer | null>(null);
+	const customerToUpdate = ref<StoredCustomer | null>(null);
 	let customerFetchPromise: Promise<void> | null = null;
 	const customerLoadLogState = {
 		local: false,
@@ -196,7 +220,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		customers.value = [];
 	}
 
-	function setPosProfile(profile: any) {
+	function setPosProfile(profile: unknown) {
 		posProfile.value = normalizeProfile(profile);
 		customerProfileScope.value = getCustomerProfileScope(posProfile.value);
 	}
@@ -205,25 +229,75 @@ export const useCustomersStore = defineStore("customers", () => {
 		selectedCustomer.value = name || null;
 	}
 
-	function setCustomerInfo(info: Record<string, any>) {
+	function upsertCustomerSummaryFromInfo(info: CustomerInfo) {
+		const customerName = getStringField(info, "name") || getStringField(info, "customer");
+		if (!customerName) {
+			return;
+		}
+
+		const existingIndex = customers.value.findIndex(
+			(customer) => customer.name === customerName,
+		);
+		const existing =
+			existingIndex >= 0 ? customers.value[existingIndex] : null;
+		const summary: CustomerSummary = {
+			...(existing || {}),
+			name: customerName,
+			customer_name:
+				getStringField(info, "customer_name") ||
+				existing?.customer_name ||
+				customerName,
+		};
+		const email = getStringField(info, "email_id");
+		const mobile = getStringField(info, "mobile_no");
+		const primaryAddress =
+			getStringField(info, "primary_address") ||
+			getStringField(info, "customer_address");
+		const taxId = getStringField(info, "tax_id");
+		if (email) summary.email_id = email;
+		if (mobile) summary.mobile_no = mobile;
+		if (primaryAddress) summary.primary_address = primaryAddress;
+		if (taxId) summary.tax_id = taxId;
+
+		if (existingIndex >= 0) {
+			const updated = [...customers.value];
+			updated.splice(existingIndex, 1, summary);
+			customers.value = updated;
+			return;
+		}
+
+		customers.value = [...customers.value, summary];
+	}
+
+	function setCustomerInfo(info: CustomerInfo) {
 		customerInfo.value = info || {};
-		if (info?.name) {
-			void setCustomerStorage([info]);
+		upsertCustomerSummaryFromInfo(customerInfo.value);
+		const customerName =
+			getStringField(customerInfo.value, "name") ||
+			getStringField(customerInfo.value, "customer");
+		if (customerName) {
+			void setCustomerStorage([{ ...customerInfo.value, name: customerName }]);
 		}
 		if (
-			info?.name &&
+			customerName &&
 			posProfile.value?.company &&
 			typeof info?.stored_value_balance !== "undefined"
 		) {
 			const totalCredit = Number(info.stored_value_balance || 0);
-			saveStoredValueSnapshot(info.name, posProfile.value.company, totalCredit > 0 ? [
-				{
-					type: "Snapshot",
-					credit_origin: "offline-customer-cache",
-					total_credit: totalCredit,
-					source_type: "Stored Value Snapshot",
-				},
-			] : []);
+			saveStoredValueSnapshot(
+				customerName,
+				posProfile.value.company,
+				totalCredit > 0
+					? [
+							{
+								type: "Snapshot",
+								credit_origin: "offline-customer-cache",
+								total_credit: totalCredit,
+								source_type: "Stored Value Snapshot",
+							},
+						]
+					: [],
+			);
 		}
 	}
 
@@ -265,35 +339,11 @@ export const useCustomersStore = defineStore("customers", () => {
 		await ensureDatabase();
 
 		let collection = db.table("customers");
-		const normalizedTerm = normalizeSearchTerm(searchTerm.value);
+		const normalizedTerm = normalizeCustomerSearchTerm(searchTerm.value);
 		if (normalizedTerm) {
-			const searchParts = normalizedTerm
-				.toLowerCase()
-				.split(/\s+/)
-				.filter(Boolean);
-			collection = collection.filter((customer: Customer) => {
-				if (!customer) {
-					return false;
-				}
-
-				const values = [
-					customer.customer_name,
-					customer.name,
-					customer.mobile_no,
-					customer.email_id,
-					customer.tax_id,
-				]
-					.filter((value) => value !== null && value !== undefined)
-					.map((value) => String(value).toLowerCase());
-
-				if (!searchParts.length) {
-					return true;
-				}
-
-				return searchParts.every((part) =>
-					values.some((value) => value.includes(part)),
-				);
-			});
+			collection = collection.filter((customer: CustomerSummary) =>
+				customerMatchesSearchTerm(customer, normalizedTerm),
+			);
 		}
 
 		const offset = page.value * PAGE_SIZE;
@@ -318,14 +368,14 @@ export const useCustomersStore = defineStore("customers", () => {
 
 	async function searchCustomers(term = "", append = false) {
 		if (!append) {
-			searchTerm.value = normalizeSearchTerm(term);
+			searchTerm.value = normalizeCustomerSearchTerm(term);
 			resetPagination();
 		}
 		return performSearch({ append });
 	}
 
 	async function queueSearch(term: string) {
-		const normalized = normalizeSearchTerm(term);
+		const normalized = normalizeCustomerSearchTerm(term);
 		if (isCustomerBackgroundLoading.value) {
 			pendingCustomerSearch.value = normalized;
 			return null;
@@ -355,7 +405,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		startAfter: string | null,
 		modifiedAfter: string | null,
 		limit: number,
-	): Promise<Customer[]> {
+	): Promise<CustomerSummary[]> {
 		const serializedProfile = getSerializedProfile(posProfile.value);
 		return new Promise((resolve, reject) => {
 			if (!serializedProfile) {
@@ -395,7 +445,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		try {
 			let cursor: string | null = startAfter;
 			while (cursor) {
-				const rows: Customer[] = await fetchCustomerPage(
+				const rows: CustomerSummary[] = await fetchCustomerPage(
 					cursor,
 					syncSince,
 					limit,
@@ -473,7 +523,7 @@ export const useCustomersStore = defineStore("customers", () => {
 
 			if (serverCount > localCount) {
 				const syncSince = getCustomersLastSync();
-				const rows: Customer[] = await fetchCustomerPage(
+				const rows: CustomerSummary[] = await fetchCustomerPage(
 					null,
 					syncSince,
 					PAGE_SIZE,
@@ -575,7 +625,7 @@ export const useCustomersStore = defineStore("customers", () => {
 				totalCustomerCount.value = 0;
 			}
 
-			const rows: Customer[] = await fetchCustomerPage(
+			const rows: CustomerSummary[] = await fetchCustomerPage(
 				null,
 				syncSince,
 				PAGE_SIZE,
@@ -630,7 +680,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		return customerFetchPromise;
 	}
 
-	async function addOrUpdateCustomer(customer: Customer) {
+	async function addOrUpdateCustomer(customer: StoredCustomer) {
 		if (!customer || !customer.name) {
 			return;
 		}
@@ -668,7 +718,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		}
 	}
 
-	function openUpdateCustomerDialog(customer: Customer | null = null) {
+	function openUpdateCustomerDialog(customer: StoredCustomer | null = null) {
 		customerToUpdate.value = customer;
 		isUpdateCustomerDialogOpen.value = true;
 	}

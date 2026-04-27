@@ -2,8 +2,9 @@
 	<section class="drafts-list">
 		<div class="drafts-list__header">
 			<div>
-				<p class="drafts-list__eyebrow">{{ __("Ready to resume") }}</p>
-				<h4 class="drafts-list__title">{{ __("Drafts") }}</h4>
+				<p class="drafts-list__eyebrow">{{ eyebrow || __("Ready to resume") }}</p>
+				<h4 class="drafts-list__title">{{ title || __("Drafts") }}</h4>
+				<p v-if="subtitle" class="drafts-list__subtitle">{{ subtitle }}</p>
 			</div>
 			<div class="drafts-list__actions">
 				<span class="drafts-list__count">{{ parkedOrders.length }}</span>
@@ -20,7 +21,7 @@
 			</div>
 		</div>
 
-		<div class="drafts-list__cards">
+		<div v-if="parkedOrders.length" class="drafts-list__cards">
 			<button
 				v-for="draft in parkedOrders"
 				:key="draft.name"
@@ -42,6 +43,10 @@
 				</div>
 			</button>
 		</div>
+		<div v-else class="drafts-list__empty">
+			<strong>{{ emptyTitle || __("No records found") }}</strong>
+			<span>{{ emptySubtitle || __("Try another source or refresh the list.") }}</span>
+		</div>
 	</section>
 </template>
 
@@ -62,6 +67,26 @@ defineProps({
 	showManageAll: {
 		type: Boolean,
 		default: false,
+	},
+	title: {
+		type: String,
+		default: "",
+	},
+	eyebrow: {
+		type: String,
+		default: "",
+	},
+	subtitle: {
+		type: String,
+		default: "",
+	},
+	emptyTitle: {
+		type: String,
+		default: "",
+	},
+	emptySubtitle: {
+		type: String,
+		default: "",
 	},
 });
 
@@ -100,6 +125,12 @@ const __ = window.__;
 	color: var(--pos-text-primary);
 }
 
+.drafts-list__subtitle {
+	margin: 4px 0 0;
+	font-size: 0.82rem;
+	color: var(--pos-text-secondary);
+}
+
 .drafts-list__actions {
 	display: flex;
 	align-items: center;
@@ -126,6 +157,21 @@ const __ = window.__;
 	max-height: calc(100vh - 180px);
 	overflow: auto;
 	padding-right: 2px;
+}
+
+.drafts-list__empty {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 18px 16px;
+	border-radius: 18px;
+	border: 1px dashed rgba(var(--v-theme-primary), 0.24);
+	background: rgba(var(--v-theme-surface), 0.72);
+	color: var(--pos-text-secondary);
+}
+
+.drafts-list__empty strong {
+	color: var(--pos-text-primary);
 }
 
 .drafts-list__card {

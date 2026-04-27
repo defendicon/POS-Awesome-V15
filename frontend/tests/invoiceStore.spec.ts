@@ -1,6 +1,10 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { useInvoiceStore } from "../src/posapp/stores/invoiceStore";
+import type {
+	InvoiceDocRef,
+	PartialInvoiceDoc,
+} from "../src/posapp/types/models";
 
 describe("invoiceStore invoice type state", () => {
 	beforeEach(() => {
@@ -74,5 +78,48 @@ describe("invoiceStore invoice type state", () => {
 
 		expect(store.invoiceType).toBe("Quotation");
 		expect(store.deferStockValidationToPayment).toBe(true);
+	});
+
+	it("normalizes a string invoice name into a minimal invoice reference", () => {
+		const store = useInvoiceStore();
+		const invoiceRef: InvoiceDocRef = {
+			name: "ACC-PSINV-2026-0001",
+			doctype: "POS Invoice",
+		};
+		const partialInvoice: PartialInvoiceDoc = {
+			name: "ACC-PSINV-2026-0002",
+			customer: "CUST-001",
+		};
+
+		store.setInvoiceDoc("ACC-PSINV-2026-0001");
+		expect(store.invoiceDoc).toEqual(invoiceRef);
+
+		store.setInvoiceDoc(partialInvoice);
+		expect(store.invoiceDoc).toMatchObject(partialInvoice);
+		expectTypeOf(store.invoiceDoc).toEqualTypeOf<PartialInvoiceDoc | null>();
+	});
+
+	it("stores flow context when loading a prepared commercial-flow document", () => {
+		const store = useInvoiceStore();
+		const flow = {
+			prepared_doc: { doctype: "Sales Invoice", customer: "Test Customer" },
+			flow_context: {
+				source_doctype: "Sales Order",
+				source_name: "SO-0001",
+				prepared_action: "order_to_invoice",
+				target_doctype: "Sales Invoice",
+				update_stock: 1,
+			},
+		};
+
+		store.triggerLoadFlow(flow);
+
+		expect(store.flowToLoad).toEqual(flow);
+		expect(store.flowContext).toEqual(flow.flow_context);
+
+		store.clear();
+
+		expect(store.flowToLoad).toBeNull();
+		expect(store.flowContext).toBeNull();
 	});
 });

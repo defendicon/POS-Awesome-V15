@@ -50,6 +50,26 @@ describe("bootstrap warning startup deferral", () => {
 		expect(state.tooltip).toBe("Stock Confidence Offline");
 	});
 
+	it("keeps startup warnings hidden until item background sync settles", () => {
+		const shouldLift = shouldLiftBootstrapWarningStartupGate({
+			loadingActive: false,
+			initialBootstrapSettled: true,
+			itemsStartupSyncSettled: false,
+			startupGateLifted: false,
+		});
+
+		const state = resolveBootstrapWarningUiState({
+			startupWarningsReady: shouldLift,
+			warningActive: true,
+			warningTooltip: "Stock Confidence Offline",
+			capabilitySummaries: [],
+		});
+
+		expect(shouldLift).toBe(false);
+		expect(state.active).toBe(false);
+		expect(state.tooltip).toBe("");
+	});
+
 	it("never surfaces a startup warning if the data becomes healthy before the gate lifts", () => {
 		const state = resolveBootstrapWarningUiState({
 			startupWarningsReady: true,

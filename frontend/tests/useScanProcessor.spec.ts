@@ -242,4 +242,43 @@ describe("useScanProcessor serial scan handling", () => {
 		expect(ctx.itemAddition.addItem).toHaveBeenCalledTimes(1);
 		expect(ctx.scannerInput.scanErrorDialog.value).toBe(false);
 	});
+
+	it("uses the standard barcode uom when posa_uom is not populated", async () => {
+		const ctx = makeContext();
+		(globalThis as any).frappe.call = vi.fn(
+			async ({ method, args }: { method: string; args: any }) => {
+				if (
+					method ===
+					"posawesome.posawesome.api.items.get_price_for_uom"
+				) {
+					expect(args).toMatchObject({
+						item_code: "ITEM-SCAN",
+						price_list: "Standard Selling",
+						uom: "Box",
+					});
+					return { message: 120 };
+				}
+				return { message: null };
+			},
+		);
+
+		const { addScannedItemToInvoice } = useScanProcessor(ctx as any);
+		await addScannedItemToInvoice(
+			createScannableItem({
+				stock_uom: "Nos",
+				item_barcode: [{ barcode: "BOX-001", uom: "Box" }],
+				item_uoms: [
+					{ uom: "Nos", conversion_factor: 1 },
+					{ uom: "Box", conversion_factor: 12 },
+				],
+			}),
+			"BOX-001",
+		);
+
+		expect(ctx.itemAddition.addItem).toHaveBeenCalledTimes(1);
+		const addedItem = ctx.itemAddition.addItem.mock.calls[0][0];
+		expect(addedItem.uom).toBe("Box");
+		expect(addedItem.rate).toBe(120);
+		expect(addedItem.conversion_factor).toBe(12);
+	});
 });

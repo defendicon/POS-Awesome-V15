@@ -3,13 +3,18 @@ import type { BootstrapCapabilitySummary } from "../../offline/bootstrapSnapshot
 export function shouldLiftBootstrapWarningStartupGate(input: {
 	loadingActive: boolean;
 	initialBootstrapSettled: boolean;
+	itemsStartupSyncSettled?: boolean;
 	startupGateLifted: boolean;
 }) {
 	if (input.startupGateLifted) {
 		return true;
 	}
 
-	return !input.loadingActive && input.initialBootstrapSettled;
+	return (
+		!input.loadingActive &&
+		input.initialBootstrapSettled &&
+		input.itemsStartupSyncSettled !== false
+	);
 }
 
 export function resolveBootstrapWarningUiState<

@@ -14,7 +14,7 @@ export interface StockChangeEvent {
 	type: string;
 	codes: string[];
 	snapshot: AvailabilitySnapshot;
-	meta: Record<string, any>;
+	meta: Record<string, unknown>;
 }
 
 /**
@@ -55,7 +55,7 @@ export interface StockEntry {
 	base_qty?: number;
 	qty?: number;
 	stock_qty?: number;
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 const listeners = new Set<StockListener>();
@@ -63,7 +63,7 @@ const baseQuantities = new Map<string, number>();
 const reservedQuantities = new Map<string, number>();
 const availabilityMap = new Map<string, number>();
 
-const normalizeCode = (code: any): string | null => {
+const normalizeCode = (code: unknown): string | null => {
 	if (code === undefined || code === null) {
 		return null;
 	}
@@ -71,7 +71,7 @@ const normalizeCode = (code: any): string | null => {
 	return normalized ? normalized : null;
 };
 
-const toNumber = (value: any): number | null => {
+const toNumber = (value: unknown): number | null => {
 	if (value === undefined || value === null) {
 		return null;
 	}
@@ -123,7 +123,7 @@ const buildSnapshot = (codes: string[]): AvailabilitySnapshot => {
 const notifyListeners = (
 	type: string,
 	codes: string[],
-	meta: Record<string, any> = {},
+	meta: Record<string, unknown> = {},
 ): void => {
 	if (!Array.isArray(codes) || !codes.length) {
 		return;

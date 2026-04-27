@@ -1,4 +1,4 @@
-export const BOOTSTRAP_SNAPSHOT_UPDATED_EVENT =
+const BOOTSTRAP_SNAPSHOT_UPDATED_EVENT =
 	"posa:bootstrap-snapshot-updated";
 
 export function emitBootstrapSnapshotUpdated(snapshot: unknown) {

@@ -142,6 +142,7 @@ import { useInvoiceStore } from "../../../stores/invoiceStore.js";
 import { storeToRefs } from "pinia";
 import { useResponsive } from "../../../composables/core/useResponsive";
 import { useTheme } from "../../../composables/core/useTheme";
+import { loadDocumentSourceRecord } from "../../../utils/documentSources";
 export default {
 	// props: ["draftsDialog"],
 	mixins: [format],
@@ -273,58 +274,19 @@ export default {
 			this.errorMessage = "";
 
 			try {
-				let invoice_doc_for_load = {};
-				const { message } = await frappe.call({
-					method: "posawesome.posawesome.api.invoices.create_sales_invoice_from_order",
-					args: {
-						sales_order: this.selected[0].name,
+				await loadDocumentSourceRecord({
+					source: "order",
+					record: this.selected[0],
+					posProfile: this.pos_profile,
+					invoiceStore: this.invoiceStore,
+					uiStore: {
+						closeDrafts: () => {},
+						closeInvoiceManagement: () => {},
 					},
+					closeDrafts: false,
+					closeInvoiceManagement: false,
 				});
-
-				if (message) {
-					invoice_doc_for_load = message;
-				}
-
-				if (invoice_doc_for_load.items) {
-					const selectedItems = this.selected[0].items;
-					const loadedItems = invoice_doc_for_load.items;
-
-					const loadedItemsMap = {};
-					loadedItems.forEach((item) => {
-						loadedItemsMap[item.item_code] = item;
-					});
-
-					// Iterate through selectedItems and update or discard items
-					for (let i = 0; i < selectedItems.length; i++) {
-						const selectedItem = selectedItems[i];
-						const loadedItem = loadedItemsMap[selectedItem.item_code];
-
-						if (loadedItem) {
-							// Update the fields of selected item with loaded item's values
-							selectedItem.qty = loadedItem.qty;
-							selectedItem.amount = loadedItem.amount;
-							selectedItem.uom = loadedItem.uom;
-							selectedItem.rate = loadedItem.rate;
-							// Update other fields as needed
-						} else {
-							// If 'item_code' doesn't exist in loadedItems, discard the item
-							selectedItems.splice(i, 1);
-							i--; // Adjust the index as items are removed
-						}
-					}
-				}
-
-				this.invoiceStore.triggerLoadOrder(this.selected[0]);
 				this.uiStore.closeOrders();
-
-				if (invoice_doc_for_load.name) {
-					await frappe.call({
-						method: "posawesome.posawesome.api.invoices.delete_sales_invoice",
-						args: {
-							sales_invoice: invoice_doc_for_load.name,
-						},
-					});
-				}
 			} catch (error) {
 				console.error("Failed to submit sales order:", error);
 				this.errorMessage = __("Unable to load the selected sales order");
@@ -340,6 +302,12 @@ export default {
 		ordersDialog(value) {
 			if (!value) {
 				this.clearSelected();
+				return;
+			}
+
+			if (!this.uiStore.invoiceManagementDialog) {
+				this.uiStore.closeOrders();
+				this.uiStore.openInvoiceManagement("drafts", "order");
 			}
 		},
 		ordersData: {

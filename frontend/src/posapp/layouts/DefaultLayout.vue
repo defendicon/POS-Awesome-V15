@@ -157,6 +157,7 @@ import {
 	resolveBootstrapWarningUiState,
 	shouldLiftBootstrapWarningStartupGate,
 } from "../utils/bootstrapWarningVisibility";
+import { ensureCustomersReady } from "../modules/customers/customerLoadingCoordinator";
 
 /**
  * Frappe Desk UI selectors to hide in POS view.
@@ -206,7 +207,11 @@ const { posProfile, lastInvoiceId, posOpeningShift } = storeToRefs(uiStore);
 
 const { pendingInvoicesCount } = storeToRefs(syncStore);
 const { loadProgress, customersLoaded } = storeToRefs(customersStore);
-const { itemsLoaded, loadProgress: itemsLoadProgress } = storeToRefs(itemsStore);
+const {
+	itemsLoaded,
+	isBackgroundLoading: itemsBackgroundLoading,
+	loadProgress: itemsLoadProgress,
+} = storeToRefs(itemsStore);
 const supportedOfflineSyncResources = filterSupportedOfflineSyncResources(
 	getSyncResourceDefinitions(),
 );
@@ -651,11 +656,18 @@ watch(
 );
 
 watch(
-	() => [loadingActive.value, initialBootstrapSyncSettled.value],
-	([isLoading, isBootstrapSettled]) => {
+	() => [
+		loadingActive.value,
+		initialBootstrapSyncSettled.value,
+		itemsLoaded.value,
+		itemsBackgroundLoading.value,
+	],
+	([isLoading, isBootstrapSettled, areItemsLoaded, areItemsSyncing]) => {
 		const shouldLift = shouldLiftBootstrapWarningStartupGate({
 			loadingActive: Boolean(isLoading),
 			initialBootstrapSettled: Boolean(isBootstrapSettled),
+			itemsStartupSyncSettled:
+				Boolean(areItemsLoaded) && !Boolean(areItemsSyncing),
 			startupGateLifted: startupBootstrapWarningsReady.value,
 		});
 
@@ -863,40 +875,33 @@ const initializeData = async () => {
 	initialBootstrapSyncSettled.value = true;
 
 	markSourceLoaded("init");
-
-	// Trigger initial customer load only when POS profile is already available
-	if (
-		navigator.onLine &&
-		!isOffline() &&
-		posProfile.value &&
-		posProfile.value.name
-	) {
-		customersStore.setPosProfile(posProfile.value);
-		customersStore.get_customer_names();
-	}
 };
 
 const setupEventListeners = () => {
-	// Listen for POS profile registration
-	if (eventBus) {
-		// Watch for POS profile becoming available to trigger customer load
-		watch(
-			posProfile,
-			(newProfile) => {
-				if (newProfile && newProfile.name) {
-					// Update customers store with profile
-					customersStore.setPosProfile(newProfile);
-					void scheduleBootCriticalWarmSync();
+	// Watch for POS profile becoming available to trigger customer load
+	watch(
+		posProfile,
+		(newProfile) => {
+			if (newProfile && newProfile.name) {
+				// Update customers store with profile
+				void scheduleBootCriticalWarmSync();
 
-					if (navigator.onLine && !getIsManualOffline()) {
-						refreshTaxInclusiveSetting();
-						customersStore.get_customer_names();
-					}
+				if (navigator.onLine && !getIsManualOffline()) {
+					refreshTaxInclusiveSetting();
+					void ensureCustomersReady({
+						profile: newProfile,
+						online: navigator.onLine,
+						manualOffline: getIsManualOffline(),
+						setProfile: customersStore.setPosProfile,
+						load: customersStore.get_customer_names,
+					});
 				}
-			},
-			{ deep: true, immediate: true },
-		);
+			}
+		},
+		{ deep: true, immediate: true },
+	);
 
+	if (eventBus) {
 		// Track last submitted invoice id
 		// eventBus.on("set_last_invoice", (invoiceId) => {
 		// 	uiStore.setLastInvoice(invoiceId);

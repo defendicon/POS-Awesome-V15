@@ -85,7 +85,9 @@ function safeStorageSet(storage: Storage | null, key: string, value: string) {
 
 	try {
 		storage.setItem(key, value);
-	} catch {}
+	} catch {
+		// Storage writes may fail in private or restricted browser contexts.
+	}
 }
 
 function readBooleanFlag(storage: Storage | null, key: string) {
@@ -155,7 +157,7 @@ function writeBuildState(
 	}
 }
 
-export function getRuntimeBuildVersion(explicitBuildVersion?: string | null) {
+function getRuntimeBuildVersion(explicitBuildVersion?: string | null) {
 	if (typeof explicitBuildVersion !== "undefined") {
 		return normalizeBuildVersion(explicitBuildVersion);
 	}
@@ -251,7 +253,7 @@ export function detectBuildChange(
 	};
 }
 
-export async function purgeDerivedOfflineCaches() {
+async function purgeDerivedOfflineCaches() {
 	await clearDerivedOfflineCachesFromDb();
 }
 
@@ -321,11 +323,3 @@ export async function reconcileBuildChangeOnStartup(
 	};
 }
 
-export async function reconcileWhenBackOnline(
-	input: Omit<ReconcileBuildChangeInput, "isOnline"> = {},
-) {
-	return reconcileBuildChangeOnStartup({
-		...input,
-		isOnline: true,
-	});
-}

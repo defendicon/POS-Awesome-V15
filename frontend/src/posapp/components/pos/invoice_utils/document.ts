@@ -175,6 +175,7 @@ export function get_invoice_doc(context: any) {
 
 	// Keep stock update explicit for invoice doctypes so submit-time checks are predictable.
 	if (doc.doctype === "Sales Invoice" || doc.doctype === "POS Invoice") {
+		const explicitFlowUpdateStock = context.flowContext?.update_stock;
 		const profileUpdateStock = context.pos_profile?.update_stock;
 		const defaultUpdateStock =
 			profileUpdateStock === 0 ||
@@ -185,7 +186,12 @@ export function get_invoice_doc(context: any) {
 		const isOrderInvoiceFlow =
 			context.invoiceType === "Order" &&
 			!context.pos_profile?.posa_create_only_sales_order;
-		doc.update_stock = isOrderInvoiceFlow ? 0 : defaultUpdateStock;
+		doc.update_stock =
+			explicitFlowUpdateStock === 0 || explicitFlowUpdateStock === 1
+				? explicitFlowUpdateStock
+				: isOrderInvoiceFlow
+					? 0
+					: defaultUpdateStock;
 	}
 
 	// Currency related fields
@@ -549,6 +555,24 @@ export function get_invoice_items(context: any) {
 			}),
 			...(item.pos_invoice_item && {
 				pos_invoice_item: item.pos_invoice_item,
+			}),
+			...(item.quotation && {
+				quotation: item.quotation,
+			}),
+			...(item.quotation_item && {
+				quotation_item: item.quotation_item,
+			}),
+			...(item.sales_order && {
+				sales_order: item.sales_order,
+			}),
+			...(item.so_detail && {
+				so_detail: item.so_detail,
+			}),
+			...(item.delivery_note && {
+				delivery_note: item.delivery_note,
+			}),
+			...(item.dn_detail && {
+				dn_detail: item.dn_detail,
 			}),
 			// Explicitly include stock status to optimize backend validation loops
 			// where O(N) cache lookups occur if this flag is missing.

@@ -1,0 +1,86 @@
+{
+	"$schema": "https://unpkg.com/knip@6/schema.json",
+	"workspaces": {
+		".": {
+			"entry": [
+				"package.json",
+				"frappe-vue-style.js",
+				"electron/preload.js"
+			],
+			"project": [
+				"*.js",
+				"*.mjs",
+				"electron/**/*.js"
+			],
+			"ignoreDependencies": [
+				"@vitejs/plugin-vue",
+				"@vuepic/vue-datepicker",
+				"@vueuse/core",
+				"dexie",
+				"lodash",
+				"mitt",
+				"nunjucks",
+				"pinia",
+				"socket.io-client",
+				"vite",
+				"vite-plugin-static-copy",
+				"vue",
+				"vue-qrcode-reader",
+				"vue-virtual-scroller",
+				"vuetify",
+				"@commitlint/cli",
+				"@semantic-release/commit-analyzer",
+				"@semantic-release/github",
+				"@semantic-release/release-notes-generator",
+				"autoprefixer",
+				"esbuild",
+				"electron-builder",
+				"postcss",
+				"prettier",
+				"semantic-release",
+				"tailwindcss"
+			],
+			"ignoreBinaries": [
+				"electron",
+				"electron-builder",
+				"prettier",
+				"semantic-release",
+				"type-check",
+				"vitest"
+			]
+		},
+		"frontend": {
+			"entry": [
+				"src/posawesome.bundle.ts",
+				"src/offline/index.ts",
+				"src/loader.ts",
+				"src/posapp/workers/itemWorker.js",
+				"src/posapp/workers/opencvWorker.js",
+				"tests/**/*.{spec,test}.{js,ts}",
+				"tests/smoke/**/*.{spec,test}.{js,ts}"
+			],
+			"project": [
+				"src/**/*.{js,ts,vue}",
+				"tests/**/*.{js,ts}",
+				"*.js",
+				"*.ts",
+				"*.mjs"
+			],
+			"ignore": [
+				"src/libs/**"
+			],
+			"ignoreDependencies": [
+				"@techstark/opencv-js",
+				"@vueuse/core",
+				"html2pdf.js",
+				"jsbarcode",
+				"socket.io-client",
+				"@typescript-eslint/parser",
+				"esbuild"
+			],
+			"ignoreUnresolved": [
+				"/assets/posawesome/dist/js/libs/dexie.min.js?v=1"
+			]
+		}
+	}
+}

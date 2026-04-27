@@ -149,6 +149,21 @@ class TestItemFetchers(unittest.TestCase):
 		self.assertEqual(row["manufacturing_cost_source"], "bom")
 		self.assertEqual(row["manufacturing_bom"], "BOM-ITEM-001")
 
+	def test_fetch_barcodes_includes_standard_uom_field(self):
+		calls = []
+
+		def fake_get_all(doctype, **kwargs):
+			calls.append((doctype, kwargs))
+			return [AttrDict({"parent": "ITEM-001", "barcode": "BOX-001", "uom": "Box", "posa_uom": None})]
+
+		self.module.frappe.get_all = fake_get_all
+
+		rows = self.module._fetch_barcodes(("ITEM-001",))
+
+		self.assertEqual(rows[0].uom, "Box")
+		self.assertEqual(calls[0][0], "Item Barcode")
+		self.assertIn("uom", calls[0][1]["fields"])
+
 
 if __name__ == "__main__":
 	unittest.main()

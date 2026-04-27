@@ -211,6 +211,7 @@ import { useCustomersStore } from "../../../stores/customersStore.js";
 import { useOnlineStatus } from "../../../composables/core/useOnlineStatus";
 import { useToastStore } from "../../../stores/toastStore.js";
 import { useUIStore } from "../../../stores/uiStore.js";
+import { ensureCustomersReady } from "../../../modules/customers/customerLoadingCoordinator";
 
 export default {
 	props: {
@@ -283,6 +284,20 @@ export default {
 			customersStore.queueSearch(term || "");
 		}, 300);
 
+		const ensureCustomersForProfile = (profile) => {
+			if (!profile) {
+				return Promise.resolve(false);
+			}
+
+			return ensureCustomersReady({
+				profile,
+				online: networkOnline.value,
+				manualOffline: false,
+				setProfile: customersStore.setPosProfile,
+				load: customersStore.get_customer_names,
+			});
+		};
+
 		watch(
 			selectedCustomer,
 			(value) => {
@@ -296,9 +311,7 @@ export default {
 		watch(
 			() => props.pos_profile,
 			(profile) => {
-				if (profile) {
-					customersStore.setPosProfile(profile);
-				}
+				void ensureCustomersForProfile(profile);
 			},
 			{ immediate: true },
 		);
@@ -492,10 +505,7 @@ export default {
 			watch(
 				() => uiStore.posProfile,
 				async (profile) => {
-					if (profile) {
-						customersStore.setPosProfile(profile);
-						await customersStore.get_customer_names();
-					}
+					await ensureCustomersForProfile(profile);
 				},
 				{ deep: true, immediate: true },
 			);

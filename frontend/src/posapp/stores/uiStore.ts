@@ -50,9 +50,11 @@ export const useUIStore = defineStore("ui", () => {
 
   const invoiceManagementDialog = ref(false);
   const invoiceManagementTargetTab = ref<string>("history");
+  const invoiceManagementDraftSource = ref<string>("invoice");
   const draftsDialog = ref(false);
   const draftsData = ref<any[]>([]);
   const parkedOrders = ref<any[]>([]);
+  const draftSource = ref<string>("invoice");
 
   const ordersDialog = ref(false);
   const ordersData = ref<any[]>([]);
@@ -69,14 +71,16 @@ export const useUIStore = defineStore("ui", () => {
     paymentDialogOpen.value = false;
   };
 
-  const openInvoiceManagement = (targetTab: string = "history") => {
+  const openInvoiceManagement = (targetTab: string = "history", draftSourceKey: string = "invoice") => {
     invoiceManagementTargetTab.value = targetTab || "history";
+    invoiceManagementDraftSource.value = draftSourceKey || "invoice";
     invoiceManagementDialog.value = true;
   };
 
   const closeInvoiceManagement = () => {
     invoiceManagementDialog.value = false;
     invoiceManagementTargetTab.value = "history";
+    invoiceManagementDraftSource.value = "invoice";
   };
 
   const paymentRouteTarget = ref<any | null>(null);
@@ -89,8 +93,9 @@ export const useUIStore = defineStore("ui", () => {
     paymentRouteTarget.value = null;
   };
 
-  const openDrafts = (data?: any[]) => {
+  const openDrafts = (data?: any[], sourceKey: string = "invoice") => {
     const nextDrafts = Array.isArray(data) ? data : [];
+    draftSource.value = sourceKey || "invoice";
     draftsData.value = nextDrafts;
     parkedOrders.value = nextDrafts;
     draftsDialog.value = true;
@@ -106,6 +111,14 @@ export const useUIStore = defineStore("ui", () => {
 
   const setParkedOrders = (data?: any[]) => {
     parkedOrders.value = Array.isArray(data) ? data : [];
+  };
+
+  const setDraftSource = (sourceKey?: string) => {
+    draftSource.value = sourceKey || "invoice";
+  };
+
+  const setInvoiceManagementDraftSource = (sourceKey?: string) => {
+    invoiceManagementDraftSource.value = sourceKey || "invoice";
   };
 
   const parkedOrdersCount = computed(() => parkedOrders.value.length);
@@ -276,6 +289,7 @@ export const useUIStore = defineStore("ui", () => {
     paymentDialogOpen,
     invoiceManagementDialog,
     invoiceManagementTargetTab,
+    invoiceManagementDraftSource,
     paymentRouteTarget,
     setActiveView,
     openPaymentDialog,
@@ -287,12 +301,15 @@ export const useUIStore = defineStore("ui", () => {
     draftsDialog,
     draftsData,
     parkedOrders,
+    draftSource,
     parkedOrdersCount,
     hasParkedOrders,
     openDrafts,
     closeDrafts,
     setDraftsData,
     setParkedOrders,
+    setDraftSource,
+    setInvoiceManagementDraftSource,
     ordersDialog,
     ordersData,
     openOrders,

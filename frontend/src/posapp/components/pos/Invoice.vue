@@ -283,7 +283,7 @@ import { storeToRefs } from "pinia";
 import stockCoordinator from "../../utils/stockCoordinator";
 import { getCurrentInstance, ref } from "vue";
 import { save_and_clear_invoice as saveAndClearInvoiceAction } from "./invoice_utils/actions";
-import { fetchDraftInvoiceDoc, fetchDraftInvoices } from "../../utils/draftInvoices";
+import { fetchDraftInvoices } from "../../utils/draftInvoices";
 
 // Composables
 import { useOnlineStatus } from "../../composables/core/useOnlineStatus";
@@ -318,6 +318,8 @@ export default {
 			packedItems: packed_items,
 			invoiceDoc: invoice_doc,
 			invoiceType,
+			flowToLoad,
+			flowContext,
 		} = storeToRefs(invoiceStore);
 		const itemsTableRef = ref(null);
 		const currencyState = useInvoiceCurrency({}, {});
@@ -355,6 +357,8 @@ export default {
 			selectedCustomer,
 			customerRefreshToken,
 			invoiceType,
+			flowToLoad,
+			flowContext,
 			itemsTableRef,
 			...currencyState,
 			...itemActions,
@@ -762,6 +766,33 @@ export default {
 		handleLoadOrder(data) {
 			this.new_order(data);
 		},
+		handleLoadFlow(flow) {
+			if (!flow?.prepared_doc) {
+				return;
+			}
+
+			this.invoiceStore.setFlowContext?.(flow.flow_context || null);
+			const action = flow?.action || flow?.flow_context?.prepared_action;
+			const targetDoctype =
+				flow?.flow_context?.target_doctype || flow?.prepared_doc?.doctype || "";
+
+			this.load_invoice(flow.prepared_doc, { preserveStickies: true });
+
+			if (targetDoctype === "Quotation" || action === "quote_edit_draft") {
+				this.invoiceType = "Quotation";
+				this.invoiceTypes = ["Invoice", "Order", "Quotation"];
+				return;
+			}
+
+			if (targetDoctype === "Sales Order" || action === "order_load" || action === "quote_to_order") {
+				this.invoiceType = "Order";
+				this.invoiceTypes = ["Invoice", "Order", "Quotation"];
+				return;
+			}
+
+			this.invoiceType = "Invoice";
+			this.invoiceTypes = ["Invoice", "Order", "Quotation"];
+		},
 
 		calcProratedReturnDiscount(returnDoc) {
 			if (!returnDoc) return 0;
@@ -876,12 +907,9 @@ export default {
 		},
 		async resume_parked_order(draft) {
 			try {
-				const message = await fetchDraftInvoiceDoc({
-					draft,
-					posProfile: this.pos_profile,
-				});
+				const message = await this.load_draft_source_record(draft);
 				if (message) {
-					this.invoiceStore.triggerLoadInvoice(message);
+					this.uiStore?.closeDrafts?.();
 				}
 			} catch (error) {
 				console.error("Error loading parked order:", error);
@@ -977,6 +1005,16 @@ export default {
 			(doc) => {
 				if (doc) {
 					this.handleLoadOrder(doc);
+				}
+			},
+			{ deep: false },
+		);
+
+		this.$watch(
+			() => this.invoiceStore.flowToLoad,
+			(flow) => {
+				if (flow?.prepared_doc) {
+					this.handleLoadFlow(flow);
 				}
 			},
 			{ deep: false },

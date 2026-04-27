@@ -107,6 +107,7 @@ function formatTimestamp(timestamp: number | null): string | null {
 			return formatter.format(date);
 		}
 	} catch {
+		// Fall back to ISO formatting when locale formatting is unavailable.
 	}
 	return date.toISOString();
 }

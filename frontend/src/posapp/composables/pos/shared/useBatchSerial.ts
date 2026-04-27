@@ -275,26 +275,25 @@ export function useBatchSerial() {
 				update,
 			});
 
+			const parsedBatchPrice = Number(batch_to_use.batch_price);
 			const hasBatchPrice =
-				batch_to_use.batch_price !== undefined &&
-				batch_to_use.batch_price !== null &&
-				batch_to_use.batch_price !== "";
+				Number.isFinite(parsedBatchPrice) && parsedBatchPrice > 0;
 			const shouldApplyBatchPrice = hasBatchPrice;
 
 			if (shouldApplyBatchPrice) {
 				// Store batch price in base currency
-				item.base_batch_price = batch_to_use.batch_price;
+				item.base_batch_price = parsedBatchPrice;
 
 				// Convert batch price to selected currency if needed
 				const baseCurrency =
 					context.price_list_currency || context.pos_profile.currency;
 				if (context.selected_currency !== baseCurrency) {
 					item.batch_price = flt(
-						batch_to_use.batch_price / context.exchange_rate,
+						parsedBatchPrice / context.exchange_rate,
 						context.currency_precision,
 					);
 				} else {
-					item.batch_price = batch_to_use.batch_price;
+					item.batch_price = parsedBatchPrice;
 				}
 
 				// Set rates based on batch price

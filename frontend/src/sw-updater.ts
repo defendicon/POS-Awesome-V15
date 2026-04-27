@@ -10,7 +10,33 @@ let cachedVersionInfo: {
 	timestamp: number | null;
 } | null = null;
 let cachedVersionTimestamp = 0;
-let pendingVersionRequest: Promise<any> | null = null;
+type VersionInfo = {
+	version: string | null;
+	timestamp: number | null;
+};
+
+type ServiceWorkerVersionInfoPayload = {
+	type: "SW_VERSION_INFO";
+	version: string;
+	timestamp?: number | string | null;
+};
+
+type BuildInfoResponse = {
+	version?: string | null;
+	buildVersion?: string | null;
+	timestamp?: number | string | null;
+	buildTimestamp?: number | string | null;
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+	Boolean(value) && typeof value === "object";
+
+const isServiceWorkerVersionInfoPayload = (
+	value: unknown,
+): value is ServiceWorkerVersionInfoPayload =>
+	isRecord(value) && value.type === "SW_VERSION_INFO";
+
+let pendingVersionRequest: Promise<VersionInfo | null> | null = null;
 
 export interface ActiveVersionTransitionInput {
 	version: string;
@@ -120,13 +146,11 @@ if (typeof window !== "undefined" && "serviceWorker" in navigator) {
 		}
 	}
 
-	function parseVersionInfoPayload(payload: any) {
-		if (!payload) {
+	function parseVersionInfoPayload(
+		payload: unknown,
+	): { version: string; timestamp: number | null } {
+		if (!isServiceWorkerVersionInfoPayload(payload)) {
 			throw new Error("Service worker version request timed out");
-		}
-
-		if (payload.type !== "SW_VERSION_INFO") {
-			throw new Error("Service worker returned an unexpected version response");
 		}
 
 		const version =
@@ -144,8 +168,8 @@ if (typeof window !== "undefined" && "serviceWorker" in navigator) {
 	}
 
 	navigator.serviceWorker.addEventListener("message", (event) => {
-		const data: any = event.data || {};
-		if (data.type === "SW_VERSION_INFO") {
+		const data = event.data;
+		if (isServiceWorkerVersionInfoPayload(data)) {
 			try {
 				const parsed = parseVersionInfoPayload(data);
 				handleActiveVersion(parsed.version, parsed.timestamp);
@@ -222,7 +246,7 @@ if (typeof window !== "undefined" && "serviceWorker" in navigator) {
 	}
 
 	async function requestVersionFromController() {
-		const payload: any = await postMessageToController({
+		const payload = await postMessageToController({
 			type: "CHECK_VERSION",
 		});
 		const parsed = parseVersionInfoPayload(payload);
@@ -249,7 +273,7 @@ if (typeof window !== "undefined" && "serviceWorker" in navigator) {
 	}
 
 	async function refreshControllerCacheVersion() {
-		const payload: any = await postMessageToController({
+		const payload = await postMessageToController({
 			type: "REFRESH_CACHE_VERSION",
 		});
 		const parsed = parseVersionInfoPayload(payload);
@@ -313,7 +337,7 @@ if (typeof window !== "undefined" && "serviceWorker" in navigator) {
 				if (!response.ok) {
 					return null;
 				}
-				const data: any = await response.json();
+				const data = (await response.json()) as BuildInfoResponse;
 				const version = data.version || data.buildVersion || null;
 				const timestamp = Number(data.timestamp || data.buildTimestamp);
 				const parsed = {

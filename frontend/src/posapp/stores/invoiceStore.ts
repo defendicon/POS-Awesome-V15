@@ -34,8 +34,10 @@ declare const __: any;
 import type {
 	CartItem,
 	InvoiceDoc,
+	InvoiceDocRef,
 	InvoiceMetadata,
 	DeliveryCharge,
+	PartialInvoiceDoc,
 } from "../types/models";
 
 /**
@@ -66,7 +68,7 @@ const toNumber = (value: any): number => {
 const cloneItem = <T>(item: T): T => ({ ...item });
 
 export const useInvoiceStore = defineStore("invoice", () => {
-	const invoiceDoc = ref<InvoiceDoc | null>(null);
+	const invoiceDoc = ref<PartialInvoiceDoc | null>(null);
 	const invoiceType = ref("Invoice");
 	// Normalized state: keys array + items map
 	const itemOrder = ref<string[]>([]);
@@ -148,18 +150,19 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	 * - An empty / whitespace-only string → `null`.
 	 * - Any object → shallow clone of the input cast to `InvoiceDoc`.
 	 */
-	const normalizeDoc = (doc: any): InvoiceDoc | null => {
+	const normalizeDoc = (doc: unknown): PartialInvoiceDoc | null => {
 		if (!doc) {
 			return null;
 		}
 
 		if (typeof doc === "string") {
-			return doc.trim()
-				? ({ name: doc, doctype: "POS Invoice" } as InvoiceDoc)
+			const name = doc.trim();
+			return name
+				? ({ name, doctype: "POS Invoice" } satisfies InvoiceDocRef)
 				: null;
 		}
 
-		return { ...doc };
+		return { ...(doc as PartialInvoiceDoc) };
 	};
 
 	/**
@@ -168,7 +171,9 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	 *
 	 * @param doc - Raw invoice document object, a name string, or a nullish value.
 	 */
-	const setInvoiceDoc = (doc: any) => {
+	const setInvoiceDoc = (
+		doc: PartialInvoiceDoc | string | null | undefined,
+	) => {
 		invoiceDoc.value = normalizeDoc(doc);
 		touch();
 	};
@@ -180,16 +185,18 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	 *
 	 * @param patch - Partial `InvoiceDoc` fields to apply. Defaults to `{}`.
 	 */
-	const mergeInvoiceDoc = (patch: Partial<InvoiceDoc> = {}) => {
+	const mergeInvoiceDoc = (patch: PartialInvoiceDoc = {}) => {
 		const current = invoiceDoc.value
 			? { ...invoiceDoc.value }
-			: ({} as InvoiceDoc);
+			: ({} as PartialInvoiceDoc);
 		invoiceDoc.value = Object.assign(current, patch || {});
 		touch();
 	};
 
 	const invoiceToLoad = ref<any>(null);
 	const orderToLoad = ref<any>(null);
+	const flowToLoad = ref<any>(null);
+	const flowContext = ref<any | null>(null);
 	const postingDate = ref(frappe.datetime.nowdate());
 
 	// Sticky fields moved from local component state
@@ -521,6 +528,8 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	const clear = (options: { preserveStickies?: boolean } = {}) => {
 		const { preserveStickies = false } = options;
 		invoiceDoc.value = null;
+		flowContext.value = null;
+		flowToLoad.value = null;
 		clearItems();
 		packedItems.value = [];
 
@@ -617,10 +626,14 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		 *
 		 * @param doc - Invoice document object or name string to load.
 		 */
-		triggerLoadInvoice: (doc: any) => {
+		triggerLoadInvoice: (
+			doc: PartialInvoiceDoc | string | null | undefined,
+		) => {
 			invoiceToLoad.value = doc;
 		},
 		orderToLoad,
+		flowToLoad,
+		flowContext,
 		/**
 		 * Signals that `doc` should be loaded as the active order.
 		 * Sets `orderToLoad`, which is watched by the order-loading composable.
@@ -629,6 +642,16 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		 */
 		triggerLoadOrder: (doc: any) => {
 			orderToLoad.value = doc;
+		},
+		setFlowContext: (context: any) => {
+			flowContext.value = context || null;
+		},
+		clearFlowContext: () => {
+			flowContext.value = null;
+		},
+		triggerLoadFlow: (flow: any) => {
+			flowToLoad.value = flow;
+			flowContext.value = flow?.flow_context || null;
 		},
 		// Exposed sticky fields
 		discountAmount,

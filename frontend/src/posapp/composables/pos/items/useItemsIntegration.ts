@@ -32,6 +32,7 @@ export function useItemsIntegration(options: IntegrationOptions = {}) {
 		isLoading,
 		isBackgroundLoading,
 		loadProgress,
+		syncedItemsCount,
 		totalItemCount,
 		itemsLoaded,
 		searchTerm,
@@ -137,8 +138,7 @@ export function useItemsIntegration(options: IntegrationOptions = {}) {
 	};
 
 	const update_items_details = async (_itemList: unknown[]) => {
-		// This is now handled automatically by the store in background
-		// Keep for compatibility but don't need to do anything
+		// Compatibility shim: item detail refresh now runs through the store-managed path.
 		return Promise.resolve(undefined);
 	};
 
@@ -267,6 +267,7 @@ export function useItemsIntegration(options: IntegrationOptions = {}) {
 		isLoading,
 		isBackgroundLoading,
 		loadProgress,
+		syncedItemsCount,
 		totalItemCount,
 		itemsLoaded,
 		searchTerm,

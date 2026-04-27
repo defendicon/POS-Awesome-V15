@@ -10,6 +10,7 @@ import { useItemMerging } from "./addition/useItemMerging";
 import { useItemCreation } from "./addition/useItemCreation";
 import { useItemBatchSerial } from "./addition/useItemBatchSerial";
 import { useItemBundles } from "./addition/useItemBundles";
+import { collectUsedSerialsForItem } from "./addition/serialSelection";
 import { useBatchSerial } from "../shared/useBatchSerial";
 
 declare const __: (_text: string, _args?: any[]) => string;
@@ -83,37 +84,6 @@ export function useItemAddition() {
 		return Math.max(absQty, 1);
 	};
 
-	const collectUsedSerials = (item: any, context: any) => {
-		const used = new Set<string>();
-		const lines = Array.isArray(context?.items) ? context.items : [];
-
-		lines.forEach((line: any) => {
-			if (!line || line.posa_row_id === item?.posa_row_id) return;
-			if (line.item_code !== item?.item_code) return;
-			if (item?.has_batch_no && item?.batch_no && line.batch_no && line.batch_no !== item.batch_no) {
-				return;
-			}
-
-			if (Array.isArray(line.serial_no_selected)) {
-				line.serial_no_selected.forEach((serial: any) => {
-					const normalized = String(serial || "").trim();
-					if (normalized) used.add(normalized);
-				});
-				return;
-			}
-
-			if (line.serial_no) {
-				String(line.serial_no)
-					.split("\n")
-					.map((serial) => String(serial || "").trim())
-					.filter(Boolean)
-					.forEach((serial) => used.add(serial));
-			}
-		});
-
-		return used;
-	};
-
 	const autoAssignSerials = (item: any, context: any) => {
 		if (!item?.has_serial_no) return;
 
@@ -140,7 +110,7 @@ export function useItemAddition() {
 			return;
 		}
 
-		const usedSerials = collectUsedSerials(item, context);
+		const usedSerials = collectUsedSerialsForItem(item, context);
 		item.serial_no_selected.forEach((serial: any) => {
 			const normalized = String(serial || "").trim();
 			if (normalized) usedSerials.add(normalized);

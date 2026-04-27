@@ -114,6 +114,7 @@
 							:displayCurrency="displayCurrency"
 							:diff_payment="diff_payment"
 							:diff_label="diff_label"
+							:item-discount-total="paymentItemDiscountTotal"
 							:currencySymbol="currencySymbol"
 							:formatCurrency="formatCurrency"
 						/>
@@ -407,6 +408,31 @@ const giftCardRedemptions = ref([]);
 const invoice_doc = computed({
 	get: () => invoiceStore.invoiceDoc || {},
 	set: (value) => invoiceStore.setInvoiceDoc(value),
+});
+
+const paymentItemDiscountTotal = computed(() => {
+	const items = Array.isArray(invoice_doc.value?.items)
+		? invoice_doc.value.items
+		: [];
+
+	const total = items.reduce((sum, item) => {
+		const qty = Math.abs(flt(item?.qty || 0, currency_precision.value));
+		const explicitDiscount = Math.abs(
+			flt(item?.discount_amount || 0, currency_precision.value),
+		);
+		const rateDiscount =
+			explicitDiscount > 0
+				? explicitDiscount
+				: Math.max(
+						flt(item?.price_list_rate || 0, currency_precision.value) -
+							flt(item?.rate || 0, currency_precision.value),
+						0,
+					);
+
+		return sum + qty * rateDiscount;
+	}, 0);
+
+	return flt(total, currency_precision.value);
 });
 
 const displayCurrency = computed(() => (invoice_doc.value ? invoice_doc.value.currency : ""));

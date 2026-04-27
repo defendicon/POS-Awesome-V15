@@ -21,7 +21,9 @@ function recordPendingBundleActivation(version: string) {
 	}
 	try {
 		window.sessionStorage.setItem("posa_pending_bundle_activation", version);
-	} catch {}
+	} catch {
+		// Session storage can be unavailable in restricted browser contexts.
+	}
 }
 
 declare global {

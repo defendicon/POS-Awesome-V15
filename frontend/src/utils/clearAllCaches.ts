@@ -290,6 +290,7 @@ export async function clearAllCaches(options: ClearAllCachesOptions = {}) {
 		opts.onSuccess();
 	} catch (e) {
 		opts.onError(e);
+		throw e;
 	}
 }
 

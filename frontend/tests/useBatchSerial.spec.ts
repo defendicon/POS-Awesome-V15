@@ -1,9 +1,17 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
 	getDisplayableBatchOptions,
 	useBatchSerial,
 } from "../src/posapp/composables/pos/shared/useBatchSerial";
+
+beforeEach(() => {
+	vi.spyOn(console, "debug").mockImplementation(() => undefined);
+});
+
+afterEach(() => {
+	vi.restoreAllMocks();
+});
 
 describe("useBatchSerial.setSerialNo", () => {
 	it("does not force qty to zero when no serial is selected", () => {
@@ -164,5 +172,50 @@ describe("useBatchSerial.setBatchQty", () => {
 		expect(item.base_price_list_rate).toBe(12);
 		expect(item.amount).toBe(24);
 		expect(item.base_amount).toBe(24);
+	});
+
+	it("does not zero item totals when selected batch has no positive batch price", () => {
+		const { setBatchQty } = useBatchSerial();
+		const context: any = {
+			items: [],
+			pos_profile: { currency: "USD" },
+			price_list_currency: "USD",
+			selected_currency: "USD",
+			exchange_rate: 1,
+			currency_precision: 2,
+			flt: (value: any) => Number(value),
+			forceUpdate: vi.fn(),
+		};
+
+		const item: any = {
+			item_code: "ITEM-BATCH-ZERO-PRICE",
+			qty: 2,
+			has_batch_no: 1,
+			has_serial_no: 0,
+			rate: 15,
+			price_list_rate: 15,
+			base_rate: 15,
+			base_price_list_rate: 15,
+			amount: 30,
+			base_amount: 30,
+			batch_no_data: [
+				{
+					batch_no: "B-ZERO-PRICE",
+					batch_qty: 8,
+					batch_price: 0,
+					is_expired: false,
+				},
+			],
+		};
+
+		setBatchQty(item, "B-ZERO-PRICE", false, context);
+
+		expect(item.batch_no).toBe("B-ZERO-PRICE");
+		expect(item.rate).toBe(15);
+		expect(item.price_list_rate).toBe(15);
+		expect(item.base_rate).toBe(15);
+		expect(item.base_price_list_rate).toBe(15);
+		expect(item.amount).toBe(30);
+		expect(item.base_amount).toBe(30);
 	});
 });

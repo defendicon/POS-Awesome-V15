@@ -34,6 +34,9 @@
 						:enable-background-sync="enable_background_sync"
 						:last-sync-time="lastSyncTimeLabel"
 						:sync-status="syncStatus"
+						:show-sync-progress="showSearchSyncProgress"
+						:sync-progress="syncProgressValue"
+						:sync-items-count="syncItemsCount"
 						:context="context"
 						@esc="esc_event"
 						@enter="onEnter"
@@ -179,15 +182,12 @@ import {
 	ref,
 	computed,
 	watch,
-	nextTick,
 	reactive,
 	inject,
 	type Ref,
-	type CSSProperties,
 } from "vue";
 import { storeToRefs } from "pinia";
 import * as _ from "lodash";
-import { memoryInitPromise } from "../../../../offline/index";
 
 import CameraScanner from "./CameraScanner.vue";
 import ItemActionToolbar from "./ItemActionToolbar.vue";
@@ -197,7 +197,6 @@ import ItemsSelectorCards from "./ItemsSelectorCards.vue";
 import ItemsSelectorTable from "./ItemsSelectorTable.vue";
 import NewItemDialog from "./NewItemDialog.vue";
 import ScanErrorDialog from "./ScanErrorDialog.vue";
-import { resetNewItemDialogState } from "./newItemDialogState";
 
 import { useResponsive } from "../../../composables/core/useResponsive";
 import { useRtl } from "../../../composables/core/useRtl";
@@ -224,6 +223,16 @@ import { useItemsLoader } from "../../../composables/pos/items/useItemsLoader";
 import { useBarcodeIndexing } from "../../../composables/pos/items/useBarcodeIndexing";
 import { useScanProcessor } from "../../../composables/pos/items/useScanProcessor";
 import { useItemCurrency } from "../../../composables/pos/items/useItemCurrency";
+import { startItemsSelectorInitialization } from "../../../composables/pos/items/useItemsSelectorInitialization";
+import { registerItemsSelectorEvents } from "../../../composables/pos/items/useItemsSelectorEvents";
+import { registerItemsSelectorTypeToSearch } from "../../../composables/pos/items/useItemsSelectorTypeToSearch";
+import { useItemsSelectorLayoutLifecycle } from "../../../composables/pos/items/useItemsSelectorLayoutLifecycle";
+import { useItemsSelectorSearchInput } from "../../../composables/pos/items/useItemsSelectorSearchInput";
+import { useItemsSelectorScannerBridge } from "../../../composables/pos/items/useItemsSelectorScannerBridge";
+import { useItemsSelectorPriceListSync } from "../../../composables/pos/items/useItemsSelectorPriceListSync";
+import { useItemsSelectorPanelSizing } from "../../../composables/pos/items/useItemsSelectorPanelSizing";
+import { useItemsSelectorQuantity } from "../../../composables/pos/items/useItemsSelectorQuantity";
+import { useItemsSelectorDisplayBindings } from "../../../composables/pos/items/useItemsSelectorDisplayBindings";
 
 import { useCustomersStore } from "../../../stores/customersStore";
 import { useToastStore } from "../../../stores/toastStore";
@@ -232,10 +241,6 @@ import { useInvoiceStore } from "../../../stores/invoiceStore";
 import { useEmployeeStore } from "../../../stores/employeeStore";
 
 import { parseBooleanSetting } from "../../../utils/stock";
-import {
-	buildSelectorRowProps,
-	createItemHighlightMatcher,
-} from "../../../utils/itemSelectorHighlightBindings";
 import { createItemSearchFocusClearGuard } from "../../../utils/itemSearchFocusClearGuard";
 
 const props = defineProps({
@@ -276,8 +281,13 @@ const selected_currency = ref("");
 const selected_exchange_rate = ref(1);
 const selected_conversion_rate = ref(1);
 const isInitialized = ref(false);
-const initTimeout = ref(null);
-const initError = ref(null);
+const initTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
+const initError = ref<unknown>(null);
+let stopItemInitializationWatcher: (() => void) | null = null;
+let cleanupItemsSelectorEvents: (() => void) | null = null;
+let cleanupTypeToSearch: (() => void) | null = null;
+let cleanupLayoutLifecycle: (() => void) | null = null;
+let cleanupSearchInput: (() => void) | null = null;
 
 const responsive = useResponsive();
 const rtl = useRtl();
@@ -315,10 +325,6 @@ const {
 } = useBarcodeIndexing();
 
 // 2. Local State & Settings
-const newItemDialog = ref(false);
-const newItemDialogScannedBarcode = ref("");
-const newItemDialogAwaitingScan = ref(false);
-const qty = ref(1);
 const search_input = ref("");
 const first_search = ref("");
 const items_view = ref("list");
@@ -363,11 +369,17 @@ const temp_show_last_invoice_rate = ref(true);
 const temp_enable_background_sync = ref(true);
 const temp_background_sync_interval = ref(30);
 
-const flyConfig = reactive({ speed: 0.6, easing: "ease-in-out" });
-const headerProps = reactive({
-	"sort-icon": "mdi-arrow-up",
-	class: "pos-table-header",
+const {
+	qty,
+	debounceQty: debounce_qty,
+	clearQty,
+	onQtyBlur,
+} = useItemsSelectorQuantity({
+	hideQtyDecimals: hide_qty_decimals,
+	initialQty: 1,
 });
+
+const flyConfig = reactive({ speed: 0.6, easing: "ease-in-out" });
 
 // 3. Computed Properties
 const pos_profile = computed(() => (itemsIntegration.posProfile.value || {}) as any);
@@ -385,6 +397,12 @@ const couponsCount = computed(() => uiStore.couponsCount || 0);
 const active_price_list = computed(
 	() => itemsIntegration.active_price_list.value || pos_profile.value?.selling_price_list,
 );
+const { syncSelectorPriceList } = useItemsSelectorPriceListSync({
+	activePriceList: itemsIntegration.active_price_list,
+	getDefaultPriceList: () => pos_profile.value?.selling_price_list || "",
+	updatePriceList: (priceList) => itemsIntegration.updatePriceList(priceList),
+	getItems: (force) => itemsIntegration.get_items(force),
+});
 const isPosSupervisor = computed(() =>
 	parseBooleanSetting(currentCashier.value?.is_supervisor),
 );
@@ -409,7 +427,15 @@ const forceCustomerPriceList = computed(() =>
 	parseBooleanSetting(pos_profile.value?.posa_force_price_from_customer_price_list),
 );
 
-const { items, filteredItems, customer_price_list, loading, isBackgroundLoading } = itemsIntegration;
+const {
+	items,
+	filteredItems,
+	customer_price_list,
+	loading,
+	isBackgroundLoading,
+	loadProgress,
+	syncedItemsCount,
+} = itemsIntegration;
 
 const displayedItems = computed(() => {
 	const baseItems = Array.isArray(filteredItems.value) ? filteredItems.value : [];
@@ -442,19 +468,6 @@ watch(
 	{ immediate: true },
 );
 
-const debounce_qty = computed({
-	get() {
-		if (qty.value === null) return "";
-		return hide_qty_decimals.value ? Math.round(qty.value) : qty.value;
-	},
-	set(value) {
-		let parsed: number | null = parseFloat(String(value).replace(/,/g, ""));
-		if (isNaN(parsed)) parsed = null;
-		if (hide_qty_decimals.value && parsed != null) parsed = Math.round(parsed);
-		qty.value = parsed as any;
-	},
-});
-
 const isLoadingOrSyncing = computed(() => {
 	if (loading.value) return true;
 	if (isBackgroundLoading.value && items.value.length === 0) return true;
@@ -463,9 +476,32 @@ const isLoadingOrSyncing = computed(() => {
 
 const syncStatus = computed(() => {
 	if (loading.value) return __("Loading items...");
-	if (isBackgroundLoading.value) return __("Syncing offline catalog...");
+	if (isBackgroundLoading.value && syncProgressValue.value > 0) {
+		return __("Syncing items in background");
+	}
+	if (isBackgroundLoading.value) return __("Preparing background sync");
 	return "";
 });
+
+const syncProgressValue = computed(() => {
+	const progress = Number(loadProgress.value || 0);
+	if (!Number.isFinite(progress) || progress <= 0) {
+		return 0;
+	}
+	return Math.min(100, Math.round(progress));
+});
+
+const syncItemsCount = computed(() => {
+	const count = Number(syncedItemsCount.value || 0);
+	if (!Number.isFinite(count) || count <= 0) {
+		return 0;
+	}
+	return Math.round(count);
+});
+
+const showSearchSyncProgress = computed(
+	() => isBackgroundLoading.value && items.value.length > 0,
+);
 
 const lastSyncTimeLabel = computed(() => {
 	const lastSync = itemSync.last_background_sync_time?.value;
@@ -571,6 +607,15 @@ const {
 } = useItemSelectorLayout({
 	resizeDebounce: 100,
 	loadVisibleItems: () => itemsLoader.loadVisibleItems(),
+});
+
+const itemSelectorLayoutLifecycle = useItemsSelectorLayoutLifecycle({
+	displayedItems,
+	checkItemContainerOverflow,
+	scheduleCardMetricsUpdate,
+	scheduleLastInvoiceRateRefresh,
+	scheduleLastBuyingRateRefresh,
+	syncHighlightedItem: () => itemSelection.syncHighlightedItem(),
 });
 
 // 5. Core Methods
@@ -687,14 +732,6 @@ const scanProcessor = useScanProcessor({
 	search_from_scanner_ref: scannerInput.searchFromScanner,
 });
 
-// 6. Template Helpers
-const clearSearch = () => {
-	clearingSearch.value = true;
-	search_input.value = "";
-	first_search.value = "";
-	clearingSearch.value = false;
-};
-
 const clearSearchAndQty = () => {
 	clearSearch();
 	clearQty();
@@ -710,28 +747,6 @@ const onDragStart = (event, item) => {
 const onDragEnd = () => {
 	isDragging.value = false;
 	uiStore.setDraggedItem(null);
-};
-
-const resolveIncomingPriceList = (incomingPriceList: unknown) => {
-	const normalized = typeof incomingPriceList === "string" ? incomingPriceList.trim() : "";
-	if (normalized) {
-		return normalized;
-	}
-	return pos_profile.value?.selling_price_list || "";
-};
-
-const syncSelectorPriceList = async (incomingPriceList: unknown) => {
-	const nextPriceList = resolveIncomingPriceList(incomingPriceList);
-	if (!nextPriceList) {
-		return;
-	}
-
-	if (itemsIntegration.active_price_list.value !== nextPriceList) {
-		await itemsIntegration.updatePriceList(nextPriceList);
-	}
-
-	await itemsIntegration.get_items(true);
-	itemDetailFetcher.update_cur_items_details();
 };
 
 const toggleItemSettings = () => {
@@ -753,12 +768,6 @@ const applyItemSettings = (settings) => {
 
 const handleRemoteStockAdjustment = (payload: unknown) => {
 	itemAvailability.handleInvoiceStockAdjusted(payload);
-};
-
-// 7. Lifecycle Hooks
-const openNewItemDialog = () => {
-	resetNewItemDialogState(newItemDialogScannedBarcode, newItemDialogAwaitingScan);
-	newItemDialog.value = true;
 };
 
 onMounted(async () => {
@@ -913,137 +922,67 @@ onMounted(async () => {
 		scannerInput.setScanHandler(scanProcessor.processScannedItem);
 	}
 
-	if (eventBus) {
-		eventBus.on("update_currency", (data) => {
-			if (typeof data === "string" && data) {
-				selected_currency.value = data;
-				return;
-			}
-			if (data && data.currency) {
-				selected_currency.value = data.currency;
-				if (data.exchange_rate) {
-					selected_exchange_rate.value = Number(data.exchange_rate) || 1;
-				}
-				if (data.conversion_rate) {
-					selected_conversion_rate.value = Number(data.conversion_rate) || 1;
-				}
-			}
-		});
-		eventBus.on("update_customer_price_list", (priceList) => {
-			syncSelectorPriceList(priceList);
-		});
-		eventBus.on("update_buying_price_list", (data) => {
-			if (data && typeof data === "object") {
-				if (data.price_list) syncSelectorPriceList(data.price_list);
-				selectedSupplier.value = data.supplier || null;
-				scheduleLastBuyingRateRefresh();
-			} else if (typeof data === "string") {
-				syncSelectorPriceList(data);
-				selectedSupplier.value = null;
-				scheduleLastBuyingRateRefresh();
-			} else {
-				selectedSupplier.value = null;
-			}
-		});
-		eventBus.on("focus_item_search", requestItemSearchFocus);
-		eventBus.on(
-			"cart_quantities_updated",
-			itemAvailability.handleCartQuantitiesUpdated,
-		);
-		eventBus.on("remote_stock_adjustment", handleRemoteStockAdjustment);
-	}
+	cleanupItemsSelectorEvents = registerItemsSelectorEvents({
+		eventBus,
+		selectedCurrency: selected_currency,
+		selectedExchangeRate: selected_exchange_rate,
+		selectedConversionRate: selected_conversion_rate,
+		selectedSupplier,
+		syncSelectorPriceList,
+		scheduleLastBuyingRateRefresh,
+		requestItemSearchFocus,
+		handleCartQuantitiesUpdated: itemAvailability.handleCartQuantitiesUpdated,
+		handleRemoteStockAdjustment,
+	});
 
-	// Watch UI Profile for initialization (Source of Truth)
-	watch(
+	stopItemInitializationWatcher = startItemsSelectorInitialization({
 		uiPosProfile,
-		async (newProfile) => {
-			if (newProfile && newProfile.name && !isInitialized.value) {
-				// Safety timeout to prevent infinite loading if memoryInit or store init hangs
-				if (initTimeout.value) clearTimeout(initTimeout.value);
-				// @ts-ignore
-				initTimeout.value = setTimeout(() => {
-					if (!isInitialized.value) {
-						console.warn(
-							"ItemsSelector: Initialization taking too long, forcing isInitialized to true.",
-						);
-						isInitialized.value = true;
-					}
-				}, 10000);
+		selectedCustomer,
+		customerPriceList: customer_price_list,
+		selectedCurrency: selected_currency,
+		selectedExchangeRate: selected_exchange_rate,
+		selectedConversionRate: selected_conversion_rate,
+		isInitialized,
+		initTimeout,
+		initError,
+		itemsIntegration,
+		startItemWorker,
+		loadItemSettings: () => itemsSelectorSettings.loadItemSettings(),
+		startBackgroundSyncScheduler: () => itemSync.startBackgroundSyncScheduler(),
+	});
 
-				try {
-					await memoryInitPromise;
-
-					// Set local currency ref
-					selected_currency.value = newProfile.currency || "";
-					selected_exchange_rate.value = 1;
-					selected_conversion_rate.value = 1;
-
-					await itemsIntegration.initializeStore(
-						newProfile as any,
-						selectedCustomer.value as any,
-						customer_price_list.value as any,
-					);
-
-					isInitialized.value = true;
-					startItemWorker();
-					itemsSelectorSettings.loadItemSettings();
-					itemDetailFetcher.update_cur_items_details();
-					itemSync.startBackgroundSyncScheduler();
-				} catch (err: any) {
-					console.error("ItemsSelector: Initialization failed", err);
-					initError.value = err.message || err;
-					// Unblock UI even on error
-					isInitialized.value = true;
-				} finally {
-					if (initTimeout.value) {
-						clearTimeout(initTimeout.value);
-						initTimeout.value = null;
-					}
-				}
-			}
-		},
-		{ immediate: true },
-	);
-
-	window.addEventListener("resize", checkItemContainerOverflow);
-	if (props.context === "pos") {
-		document.addEventListener("keydown", handleGlobalTypeToSearchKeydown, true);
-	}
-	nextTick(() => {
-		checkItemContainerOverflow();
-		scheduleCardMetricsUpdate();
+	itemSelectorLayoutLifecycle.mount();
+	cleanupLayoutLifecycle = itemSelectorLayoutLifecycle.cleanup;
+	cleanupTypeToSearch = registerItemsSelectorTypeToSearch({
+		getContext: () => props.context,
+		activeView,
+		cameraScannerActive: scannerInput.cameraScannerActive,
+		prepareSearchInjection,
+		revealItemSearchView,
+		requestForegroundItemSearchFocus,
+		appendSearchCharacter,
 	});
 });
 
 onBeforeUnmount(() => {
+	stopItemInitializationWatcher?.();
+	stopItemInitializationWatcher = null;
 	if (initTimeout.value) clearTimeout(initTimeout.value);
 	itemSync.stopBackgroundSyncScheduler();
 	// @ts-ignore
 	if (itemWorker.value) itemWorker.value.terminate();
-	if (eventBus) {
-		eventBus.off("update_currency");
-		eventBus.off("update_customer_price_list");
-		eventBus.off("update_buying_price_list");
-		eventBus.off("focus_item_search", requestItemSearchFocus);
-		eventBus.off(
-			"cart_quantities_updated",
-			itemAvailability.handleCartQuantitiesUpdated,
-		);
-		eventBus.off("remote_stock_adjustment", handleRemoteStockAdjustment);
-	}
-	if (props.context === "pos") {
-		document.removeEventListener("keydown", handleGlobalTypeToSearchKeydown, true);
-	}
+	cleanupItemsSelectorEvents?.();
+	cleanupItemsSelectorEvents = null;
+	cleanupTypeToSearch?.();
+	cleanupTypeToSearch = null;
+	cleanupLayoutLifecycle?.();
+	cleanupLayoutLifecycle = null;
+	cleanupSearchInput?.();
+	cleanupSearchInput = null;
 	itemSearchFocusClearGuard.dispose();
-	window.removeEventListener("resize", checkItemContainerOverflow);
 });
 
 // 8. Watchers
-watch(search_input, (val) => {
-	first_search.value = val;
-	itemSelection.clearHighlightedItem();
-});
-
 watch(searchFocusTrigger, () => {
 	requestItemSearchFocus();
 });
@@ -1075,27 +1014,24 @@ watch(isPosSupervisor, (isSupervisor) => {
 	scheduleLastBuyingRateRefresh();
 });
 
-watch(displayedItems, () => {
-	nextTick(() => {
-		checkItemContainerOverflow();
-		scheduleCardMetricsUpdate();
-	});
-	scheduleLastInvoiceRateRefresh();
-	scheduleLastBuyingRateRefresh();
-	itemSelection.syncHighlightedItem();
-});
-
 // 9. Template Bindings & Direct Exports
-const ratePrecision = itemDisplay.ratePrecision;
-const format_currency = itemDisplay.format_currency;
-const format_number = itemDisplay.format_number;
-const currencySymbol = itemDisplay.currencySymbol;
-const headers = computed(() => itemDisplay.headers.value);
-const memoizedFormatCurrency = computed(() => itemDisplay.memoizedFormatCurrency.value);
-const memoizedFormatNumber = computed(() => itemDisplay.memoizedFormatNumber.value);
-
-const isItemHighlighted = createItemHighlightMatcher(itemSelection);
-const isNegative = (val) => val < 0;
+const {
+	ratePrecision,
+	format_currency,
+	format_number,
+	currencySymbol,
+	headers,
+	memoizedFormatCurrency,
+	memoizedFormatNumber,
+	isItemHighlighted,
+	isNegative,
+	headerProps,
+	getItemRowClass,
+	getItemRowProps,
+} = useItemsSelectorDisplayBindings({
+	itemDisplay,
+	itemSelection,
+});
 
 const {
 	scannerLocked,
@@ -1106,207 +1042,76 @@ const {
 	acknowledgeScanError,
 	onBarcodeScanned: onBarcodeScannedFromScannerInput,
 } = scannerInput;
+const startCameraScanning = () => {
+	itemsSelectorFocus.startCameraScanning();
+};
 const { responsiveStyles } = responsive;
 const { rtlClasses } = rtl;
 const isPhone = computed(() => responsive.isPhone.value);
-const canResizeSelectorPanel = computed(
-	() => responsive.windowWidth.value >= 1280 && responsive.windowHeight.value >= 860,
-);
-const phoneSelectorHeight = "calc(var(--viewport-height) - var(--bottom-safe-space) - 24px)";
-const selectorCardStyle = computed<CSSProperties>(() => ({
-	height: isPhone.value ? phoneSelectorHeight : responsiveStyles.value["--container-height"],
-	maxHeight: isPhone.value ? phoneSelectorHeight : responsiveStyles.value["--container-height"],
-	minHeight: isPhone.value
-		? "calc(var(--viewport-height) * 0.46)"
-		: responsiveStyles.value["--container-height"],
-	resize: canResizeSelectorPanel.value ? "vertical" : "none",
-	overflow: "auto",
-	position: "relative",
-}));
+const { selectorCardStyle } = useItemsSelectorPanelSizing({
+	isPhone,
+	windowWidth: responsive.windowWidth,
+	windowHeight: responsive.windowHeight,
+	responsiveStyles,
+});
 const itemSearchFocusClearGuard = createItemSearchFocusClearGuard();
-
-const SEARCH_TRIGGER_KEY_PATTERN = /^[A-Za-z0-9\-._/\\]$/;
-
-const isEditableElement = (element: Element | null | undefined) => {
-	if (!(element instanceof HTMLElement)) {
-		return false;
-	}
-	const contentEditable = element.getAttribute("contenteditable");
-	if (
-		element.isContentEditable ||
-		(typeof element.contentEditable === "string" &&
-			element.contentEditable.toLowerCase() !== "inherit") ||
-		(contentEditable !== null && contentEditable.toLowerCase() !== "false")
-	) {
-		return true;
-	}
-	const tagName = element.tagName;
-	if (tagName === "INPUT" || tagName === "TEXTAREA" || tagName === "SELECT") {
-		return true;
-	}
-	return Boolean(
-		element.closest(
-			"input, textarea, select, [contenteditable='true'], [contenteditable=''], [contenteditable='plaintext-only']",
-		),
-	);
-};
-
-const isTypeToSearchKey = (event: KeyboardEvent) => {
-	if (!event || event.defaultPrevented || event.repeat) {
-		return false;
-	}
-	if (event.ctrlKey || event.metaKey || event.altKey) {
-		return false;
-	}
-	return SEARCH_TRIGGER_KEY_PATTERN.test(event.key || "");
-};
-
-const hasVisibleDialog = () => {
-	if (typeof document === "undefined") {
-		return false;
-	}
-	const dialogs = document.querySelectorAll("[role='dialog']");
-	return Array.from(dialogs).some((dialog) => {
-		if (!(dialog instanceof HTMLElement)) {
-			return false;
-		}
-		return Boolean(dialog.offsetWidth || dialog.offsetHeight || dialog.getClientRects().length);
-	});
-};
+const {
+	clearSearch,
+	handleSearchInput,
+	prepareSearchInjection,
+	appendSearchCharacter,
+	revealItemSearchView,
+	requestItemSearchFocus,
+	requestForegroundItemSearchFocus,
+	handleItemSearchFocus,
+	cleanup: stopSearchInputWatcher,
+} = useItemsSelectorSearchInput({
+	searchInput: search_input,
+	firstSearch: first_search,
+	clearingSearch,
+	activeView,
+	eventBus,
+	scannerInput,
+	searchFocusGuard: itemSearchFocusClearGuard,
+	clearHighlightedItem: () => itemSelection.clearHighlightedItem(),
+	focusItemSearch: () => itemsSelectorFocus.focusItemSearch(),
+	setActiveView: (view) => uiStore.setActiveView(view),
+	triggerItemSearchFocus: () => uiStore.triggerItemSearchFocus(),
+});
+cleanupSearchInput = stopSearchInputWatcher;
+const {
+	newItemDialog,
+	newItemDialogScannedBarcode,
+	openNewItemDialog,
+	startNewItemBarcodeScan,
+	onBarcodeScanned,
+	onScannerOpened,
+	onScannerClosed,
+	handleItemCreated,
+} = useItemsSelectorScannerBridge({
+	cameraScannerActive: scannerInput.cameraScannerActive,
+	startCameraScanning,
+	requestForegroundItemSearchFocus,
+	onBarcodeScannedFromScannerInput,
+	reloadItems: () => itemsIntegration.get_items(true),
+});
 
 // Proxy functions for template
 const esc_event = () => clearSearch();
 const onEnter = (e) => itemsSelectorSearch.onEnter(e);
 const handleSearchKeydown = (e) => itemsSelectorFocus.handleSearchKeydown(e);
-const handleSearchInput = (val) => {
-	search_input.value = val;
-	first_search.value = String(val ?? "");
-	if (scannerInput.handleSearchInput) {
-		scannerInput.handleSearchInput(first_search.value);
-	}
-};
 const handleSearchPaste = (e) => itemsSelectorFocus.handleSearchPaste(e);
 const searchItems = (term) => itemsIntegration.searchItems(term);
 const get_items = (force = false) => itemsIntegration.get_items(force);
 const loadVisibleItems = (reset = false) => itemsLoader.loadVisibleItems(reset);
 const verifyServerItemCount = () => {};
-const prepareSearchInjection = () => {
-	clearSearch();
-	itemSearchFocusClearGuard.armPreserveNextFocusClear();
-};
-const appendSearchCharacter = (character: string) => {
-	const nextValue = `${String(search_input.value || "")}${character}`;
-	handleSearchInput(nextValue);
-};
-const revealItemSearchView = () => {
-	eventBus?.emit?.("set_compact_panel", "selector");
-	if (activeView.value !== "items") {
-		uiStore.setActiveView("items");
-	}
-};
-const requestItemSearchFocus = () => {
-	if (activeView.value !== "items") {
-		return;
-	}
-	nextTick(() => {
-		itemsSelectorFocus.focusItemSearch();
-	});
-};
-const requestForegroundItemSearchFocus = () => {
-	revealItemSearchView();
-	uiStore.triggerItemSearchFocus();
-	eventBus?.emit?.("focus_item_search");
-};
-scannerInput.setInputHandlers?.({
-	get: () => String(search_input.value || ""),
-	set: (value: string) => {
-		prepareSearchInjection();
-		handleSearchInput(String(value ?? ""));
-	},
-	clear: clearSearch,
-	focus: requestForegroundItemSearchFocus,
-});
-const handleGlobalTypeToSearchKeydown = (event: KeyboardEvent) => {
-	if (!isTypeToSearchKey(event)) {
-		return;
-	}
-	if (
-		props.context !== "pos" ||
-		activeView.value === "payment" ||
-		scannerInput.cameraScannerActive.value ||
-		hasVisibleDialog() ||
-		isEditableElement(document.activeElement)
-	) {
-		return;
-	}
-	event.preventDefault();
-	event.stopPropagation();
-	prepareSearchInjection();
-	revealItemSearchView();
-	requestForegroundItemSearchFocus();
-	appendSearchCharacter(event.key);
-};
-const handleItemSearchFocus = () => {
-	if (!itemSearchFocusClearGuard.shouldClearSearchOnFocus()) {
-		requestItemSearchFocus();
-		return;
-	}
-	clearSearch();
-	requestItemSearchFocus();
-};
-const clearQty = () => {
-	qty.value = null as any;
-};
-const onQtyBlur = () => {
-	if (!qty.value || qty.value <= 0) {
-		qty.value = 1;
-	}
-};
-const startCameraScanning = () => {
-	itemsSelectorFocus.startCameraScanning();
-};
-const startNewItemBarcodeScan = () => {
-	newItemDialogScannedBarcode.value = "";
-	newItemDialogAwaitingScan.value = true;
-	startCameraScanning();
-};
 const forceReloadItems = () => itemsIntegration.get_items(true);
 const cancelItemDetailsRequest = () => itemDetailFetcher.cancelItemDetailsRequest();
-
-const onBarcodeScanned = async (code: string) => {
-	if (newItemDialog.value && newItemDialogAwaitingScan.value) {
-		newItemDialogScannedBarcode.value = code;
-		newItemDialogAwaitingScan.value = false;
-		return;
-	}
-
-	requestForegroundItemSearchFocus();
-	if (onBarcodeScannedFromScannerInput) {
-		onBarcodeScannedFromScannerInput(code);
-	}
-};
 
 const select_item = (e, item) => itemSelection.handleItemSelection(e, item);
 const click_item_row = (e, data) => itemSelection.handleRowClick(e, data);
 const onVirtualRangeUpdate = (s, e, vs, ve) => itemsLoader.onVirtualRangeUpdate(s, e, vs, ve);
 const onListScroll = (e) => handleListScroll(e);
-const onScannerOpened = () => {
-	scannerInput.cameraScannerActive.value = true;
-};
-const onScannerClosed = () => {
-	scannerInput.cameraScannerActive.value = false;
-	newItemDialogAwaitingScan.value = false;
-};
-
-const getItemRowClass = (item) => itemSelection.getItemRowClass(item);
-
-const getItemRowProps = (item) => buildSelectorRowProps(itemSelection, item);
-
-const handleItemCreated = (_item) => {
-	newItemDialog.value = false;
-	resetNewItemDialogState(newItemDialogScannedBarcode, newItemDialogAwaitingScan);
-	itemsIntegration.get_items(true);
-};
 
 defineExpose({
 	search_input,
