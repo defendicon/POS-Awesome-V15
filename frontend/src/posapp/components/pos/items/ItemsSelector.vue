@@ -401,7 +401,6 @@ const { syncSelectorPriceList } = useItemsSelectorPriceListSync({
 	activePriceList: itemsIntegration.active_price_list,
 	getDefaultPriceList: () => pos_profile.value?.selling_price_list || "",
 	updatePriceList: (priceList) => itemsIntegration.updatePriceList(priceList),
-	getItems: (force) => itemsIntegration.get_items(force),
 });
 const isPosSupervisor = computed(() =>
 	parseBooleanSetting(currentCashier.value?.is_supervisor),

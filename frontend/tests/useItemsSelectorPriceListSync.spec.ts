@@ -4,7 +4,7 @@ import { ref } from "vue";
 import { useItemsSelectorPriceListSync } from "../src/posapp/composables/pos/items/useItemsSelectorPriceListSync";
 
 describe("useItemsSelectorPriceListSync", () => {
-	it("uses the incoming price list when it is a non-empty string", async () => {
+	it("uses the incoming price list without forcing a second item reload", async () => {
 		const activePriceList = ref("Retail");
 		const updatePriceList = vi.fn(async (priceList: string) => {
 			activePriceList.value = priceList;
@@ -15,16 +15,15 @@ describe("useItemsSelectorPriceListSync", () => {
 			activePriceList,
 			getDefaultPriceList: () => "Retail",
 			updatePriceList,
-			getItems,
 		});
 
 		await sync.syncSelectorPriceList(" Wholesale ");
 
 		expect(updatePriceList).toHaveBeenCalledWith("Wholesale");
-		expect(getItems).toHaveBeenCalledWith(true);
+		expect(getItems).not.toHaveBeenCalled();
 	});
 
-	it("falls back to the profile selling price list for blank input", async () => {
+	it("falls back to the profile selling price list for blank input without reloading when unchanged", async () => {
 		const activePriceList = ref("Retail");
 		const updatePriceList = vi.fn();
 		const getItems = vi.fn(async () => []);
@@ -33,13 +32,31 @@ describe("useItemsSelectorPriceListSync", () => {
 			activePriceList,
 			getDefaultPriceList: () => "Retail",
 			updatePriceList,
-			getItems,
 		});
 
 		await sync.syncSelectorPriceList("  ");
 
 		expect(updatePriceList).not.toHaveBeenCalled();
-		expect(getItems).toHaveBeenCalledWith(true);
+		expect(getItems).not.toHaveBeenCalled();
+	});
+
+	it("switches back to the default price list without forcing a full reload", async () => {
+		const activePriceList = ref("Wholesale");
+		const updatePriceList = vi.fn(async (priceList: string) => {
+			activePriceList.value = priceList;
+		});
+		const getItems = vi.fn(async () => []);
+
+		const sync = useItemsSelectorPriceListSync({
+			activePriceList,
+			getDefaultPriceList: () => "Retail",
+			updatePriceList,
+		});
+
+		await sync.syncSelectorPriceList(null);
+
+		expect(updatePriceList).toHaveBeenCalledWith("Retail");
+		expect(getItems).not.toHaveBeenCalled();
 	});
 
 	it("does nothing when no incoming or default price list is available", async () => {
@@ -49,7 +66,6 @@ describe("useItemsSelectorPriceListSync", () => {
 			activePriceList: ref(""),
 			getDefaultPriceList: () => "",
 			updatePriceList,
-			getItems,
 		});
 
 		await sync.syncSelectorPriceList(null);
