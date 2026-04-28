@@ -23,6 +23,28 @@ describe("useItemsSelectorPriceListSync", () => {
 		expect(getItems).not.toHaveBeenCalled();
 	});
 
+	it("refreshes visible item rates for the new price list without full item reload", async () => {
+		const activePriceList = ref("Retail");
+		const updatePriceList = vi.fn(async (priceList: string) => {
+			activePriceList.value = priceList;
+		});
+		const refreshVisibleItemRates = vi.fn(async () => []);
+		const getItems = vi.fn(async () => []);
+
+		const sync = useItemsSelectorPriceListSync({
+			activePriceList,
+			getDefaultPriceList: () => "Retail",
+			updatePriceList,
+			refreshVisibleItemRates,
+		});
+
+		await sync.syncSelectorPriceList("Wholesale");
+
+		expect(updatePriceList).toHaveBeenCalledWith("Wholesale");
+		expect(refreshVisibleItemRates).toHaveBeenCalledWith("Wholesale");
+		expect(getItems).not.toHaveBeenCalled();
+	});
+
 	it("falls back to the profile selling price list for blank input without reloading when unchanged", async () => {
 		const activePriceList = ref("Retail");
 		const updatePriceList = vi.fn();

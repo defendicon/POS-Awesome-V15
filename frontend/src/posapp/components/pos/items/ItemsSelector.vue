@@ -403,6 +403,18 @@ const { syncSelectorPriceList } = useItemsSelectorPriceListSync({
 	activePriceList: itemsIntegration.active_price_list,
 	getDefaultPriceList: () => pos_profile.value?.selling_price_list || "",
 	updatePriceList: (priceList) => itemsIntegration.updatePriceList(priceList),
+	refreshVisibleItemRates: (priceList) => {
+		const visibleItems = Array.isArray(displayedItems.value)
+			? [...displayedItems.value]
+			: [];
+		if (!visibleItems.length) {
+			return Promise.resolve([]);
+		}
+		return itemDetailFetcher.update_items_details(visibleItems, {
+			forceRefresh: true,
+			priceListOverride: priceList,
+		});
+	},
 });
 const isPosSupervisor = computed(() =>
 	parseBooleanSetting(currentCashier.value?.is_supervisor),
