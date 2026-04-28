@@ -45,6 +45,7 @@
 							:currency-symbol="currencySymbol"
 							:format-currency="formatCurrency"
 							:rate-precision="ratePrecision"
+							@open="emit('rate-info-open', item)"
 						/>
 					</div>
 					<div
@@ -91,6 +92,7 @@
 							:currency-symbol="currencySymbol"
 							:format-currency="formatCurrency"
 							:rate-precision="ratePrecision"
+							@open="emit('rate-info-open', item)"
 						/>
 					</div>
 				</div>
@@ -128,7 +130,7 @@ const props = defineProps({
 	noDataText: { type: String, default: "" },
 });
 
-const emit = defineEmits(["row-click", "list-scroll"]);
+const emit = defineEmits(["row-click", "list-scroll", "rate-info-open"]);
 
 const handleRowClick = (event, data) => {
 	emit("row-click", event, data);

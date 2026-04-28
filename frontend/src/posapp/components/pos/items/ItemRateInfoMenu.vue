@@ -9,6 +9,7 @@
 		:close-delay="160"
 		:close-on-content-click="true"
 		content-class="item-rate-info-menu-content"
+		@update:model-value="handleMenuToggle"
 	>
 		<template #activator="{ props: activatorProps }">
 			<v-btn
@@ -65,6 +66,14 @@ const props = defineProps({
 	formatCurrency: { type: Function, required: true },
 	ratePrecision: { type: Function, required: true },
 });
+
+const emit = defineEmits(["open"]);
+
+const handleMenuToggle = (isOpen: boolean) => {
+	if (isOpen) {
+		emit("open");
+	}
+};
 
 const rows = computed(() =>
 	(props.rateInfo.entries || []).map((info) => ({

@@ -63,6 +63,7 @@
 					@click="handleItemClick"
 					@dragstart="handleDragStart"
 					@dragend="handleDragEnd"
+					@rate-info-open="handleRateInfoOpen"
 				/>
 			</template>
 		</RecycleScroller>
@@ -105,7 +106,14 @@ const props = defineProps({
 	clearSearchLabel: { type: String, default: "" },
 });
 
-const emit = defineEmits(["select-item", "dragstart", "dragend", "virtual-range-update", "clear-search"]);
+const emit = defineEmits([
+	"select-item",
+	"dragstart",
+	"dragend",
+	"virtual-range-update",
+	"clear-search",
+	"rate-info-open",
+]);
 
 const showClearButton = computed(() => {
 	return Boolean(props.searchInput) || (props.itemGroup && props.itemGroup !== "ALL");
@@ -121,6 +129,10 @@ const handleDragStart = (event, item) => {
 
 const handleDragEnd = (event) => {
 	emit("dragend", event);
+};
+
+const handleRateInfoOpen = (item) => {
+	emit("rate-info-open", item);
 };
 
 const handleRangeUpdate = (...args) => {

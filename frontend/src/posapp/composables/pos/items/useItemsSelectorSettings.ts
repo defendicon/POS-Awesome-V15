@@ -127,8 +127,6 @@ export const useItemsSelectorSettings = ({
 		);
 		if (!vm.show_last_invoice_rate) {
 			vm.clearLastInvoiceRateCache();
-		} else {
-			vm.scheduleLastInvoiceRateRefresh();
 		}
 		saveItemSettings();
 		(itemSync || vm.itemSync).startBackgroundSyncScheduler();

@@ -106,11 +106,12 @@
 						:no-items-subtitle="__('Try adjusting your search or filters')"
 						:clear-search-label="__('Clear Search')"
 						@select-item="select_item"
-						@dragstart="onDragStart"
-						@dragend="onDragEnd"
-						@virtual-range-update="onVirtualRangeUpdate"
-						@clear-search="clearSearch"
-					/>
+							@dragstart="onDragStart"
+							@dragend="onDragEnd"
+							@virtual-range-update="onVirtualRangeUpdate"
+							@clear-search="clearSearch"
+							@rate-info-open="loadLastInvoiceRateForItem"
+						/>
 					<ItemsSelectorTable
 						v-else
 						ref="itemsTable"
@@ -126,14 +127,15 @@
 						:format-currency="memoizedFormatCurrency"
 						:format-number="memoizedFormatNumber"
 						:rate-precision="ratePrecision"
-						:get-item-rate-info="getItemRateInfo"
-								:is-negative="isNegative"
-								:item-class="getItemRowClass"
-								:row-props="getItemRowProps"
-								:no-data-text="__('No items found')"
-								@row-click="click_item_row"
-								@list-scroll="onListScroll"
-							/>
+							:get-item-rate-info="getItemRateInfo"
+							:is-negative="isNegative"
+							:item-class="getItemRowClass"
+							:row-props="getItemRowProps"
+							:no-data-text="__('No items found')"
+							@row-click="click_item_row"
+							@list-scroll="onListScroll"
+							@rate-info-open="loadLastInvoiceRateForItem"
+						/>
 						</v-col>
 					</v-row>
 				</v-card>
@@ -559,12 +561,17 @@ const itemsSelectorFocus = useItemsSelectorFocus({
 	itemSelection,
 });
 
-const { getLastInvoiceRate, scheduleLastInvoiceRateRefresh, clearLastInvoiceRateCache } = useLastInvoiceRate({
+const {
+	getLastInvoiceRate,
+	fetchLastInvoiceRateForItem,
+	scheduleLastInvoiceRateRefresh,
+	clearLastInvoiceRateCache,
+} = useLastInvoiceRate({
 	pos_profile: () => pos_profile.value,
 	customer: () => selectedCustomer.value,
 	displayedItems: () => displayedItems.value,
 	show_last_invoice_rate: () => show_last_invoice_rate.value,
-	autoRefresh: true,
+	autoRefresh: false,
 });
 
 const selectedSupplier = ref<string | null>(null);
@@ -593,6 +600,13 @@ const { getItemRateInfo } = useItemRateInfo({
 	getLastBuyingRate,
 });
 
+const loadLastInvoiceRateForItem = (item: any) => {
+	if (!show_last_invoice_rate.value || props.context !== "pos") {
+		return;
+	}
+	void fetchLastInvoiceRateForItem(item);
+};
+
 const {
 	isOverflowing,
 	cardColumns,
@@ -612,7 +626,7 @@ const itemSelectorLayoutLifecycle = useItemsSelectorLayoutLifecycle({
 	displayedItems,
 	checkItemContainerOverflow,
 	scheduleCardMetricsUpdate,
-	scheduleLastInvoiceRateRefresh,
+	scheduleLastInvoiceRateRefresh: () => {},
 	scheduleLastBuyingRateRefresh,
 	syncHighlightedItem: () => itemSelection.syncHighlightedItem(),
 });
@@ -1002,7 +1016,6 @@ watch(activeView, (view) => {
 watch(selectedCustomer, () => {
 	itemsIntegration.customer.value = selectedCustomer.value || null;
 	clearLastInvoiceRateCache();
-	scheduleLastInvoiceRateRefresh();
 });
 
 watch(isPosSupervisor, (isSupervisor) => {
@@ -1171,6 +1184,7 @@ defineExpose({
 	selected_currency,
 	getLastInvoiceRate,
 	getLastRateForContext,
+	loadLastInvoiceRateForItem,
 	getItemRateInfo,
 	isItemHighlighted,
 	isNegative,

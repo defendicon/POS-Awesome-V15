@@ -84,6 +84,44 @@ describe("buildLoadItemsRequest", () => {
 		expect(resolvePageSize).not.toHaveBeenCalled();
 	});
 
+	it("does not force server cache rebuilds for item search requests", () => {
+		const profile = {
+			name: "POS-1",
+			warehouse: "Main WH",
+			selling_price_list: "Retail",
+			currency: "PKR",
+			posa_use_server_cache: 1,
+			posa_force_reload_items: 0,
+			item_groups: [],
+		} as any;
+
+		const request = buildLoadItemsRequest({
+			options: {
+				forceServer: true,
+				searchValue: "apple",
+			},
+			posProfile: profile,
+			activePriceList: "Retail",
+			customer: "CUST-1",
+			itemCount: 200,
+			totalItemCount: 5000,
+			limitSearchEnabled: true,
+			resolvePageSize: vi.fn(() => 75),
+			resolveLimitSearchSize: vi.fn(() => 25),
+		});
+
+		expect(request.args).toMatchObject({
+			price_list: "Retail",
+			search_value: "apple",
+			customer: "CUST-1",
+			limit: 25,
+		});
+		expect(JSON.parse(request.args.pos_profile)).toMatchObject({
+			posa_use_server_cache: 1,
+			posa_force_reload_items: 0,
+		});
+	});
+
 	it("uses the page-size resolver for non-forced cold bootstrap requests", () => {
 		const resolvePageSize = vi.fn(() => 60);
 

@@ -90,7 +90,8 @@ export const buildLoadItemsRequest = ({
 
 	const requestProfile = JSON.parse(JSON.stringify(posProfile));
 	const effectivePriceList = priceList || activePriceList;
-	if (forceServer) {
+	const shouldForceServerCacheRefresh = forceServer && !searchValue;
+	if (shouldForceServerCacheRefresh) {
 		requestProfile.posa_use_server_cache = 0;
 		requestProfile.posa_force_reload_items = 1;
 	}

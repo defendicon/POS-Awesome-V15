@@ -107,6 +107,7 @@ export function useLastInvoiceRate(context: UseLastInvoiceRateContext = {}) {
 					item_codes: missingCodes,
 					company: company,
 				},
+				freeze: false,
 			});
 
 			const rows: LastInvoiceRow[] = (res && res.message) || [];
@@ -155,6 +156,17 @@ export function useLastInvoiceRate(context: UseLastInvoiceRateContext = {}) {
 			.map((it) => it?.item_code)
 			.filter(Boolean) as string[];
 		return fetchLastInvoiceRates(itemCodes);
+	};
+
+	const fetchLastInvoiceRateForItem = async (
+		item: { item_code?: string } | null | undefined,
+	) => {
+		const itemCode =
+			typeof item?.item_code === "string" ? item.item_code.trim() : "";
+		if (!itemCode) {
+			return lastInvoiceRates.value;
+		}
+		return fetchLastInvoiceRates([itemCode]);
 	};
 
 	const scheduleLastInvoiceRateRefresh = () => {
@@ -222,6 +234,7 @@ export function useLastInvoiceRate(context: UseLastInvoiceRateContext = {}) {
 		lastInvoiceRates,
 		lastInvoiceRateLoading,
 		fetchLastInvoiceRates,
+		fetchLastInvoiceRateForItem,
 		refreshLastInvoiceRatesForVisibleItems,
 		scheduleLastInvoiceRateRefresh,
 		getLastInvoiceRate,

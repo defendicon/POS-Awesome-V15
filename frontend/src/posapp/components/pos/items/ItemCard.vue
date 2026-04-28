@@ -40,6 +40,7 @@
 							:currency-symbol="currencySymbol"
 							:format-currency="formatCurrency"
 							:rate-precision="ratePrecision"
+							@open="emit('rate-info-open', item)"
 						/>
 					</div>
 					<div v-if="showSecondaryPrice" class="secondary-price">
@@ -89,7 +90,7 @@ const props = defineProps({
 	isNegative: { type: Function, default: (val) => val < 0 },
 });
 
-const emit = defineEmits(["click", "dragstart", "dragend"]);
+const emit = defineEmits(["click", "dragstart", "dragend", "rate-info-open"]);
 
 const primaryCurrency = computed(() => {
 	if (props.context === "purchase") {
