@@ -56,6 +56,7 @@ export function useLastInvoiceRate(context: UseLastInvoiceRateContext = {}) {
 	const lastInvoiceRates = ref<LastInvoiceRatesMap>({});
 	const lastInvoiceRateCache = new Map<any, Map<string, LastInvoiceRate>>();
 	const lastInvoiceRateLoading = ref(false);
+	const lastInvoiceRateLoadingItems = ref<Set<string>>(new Set());
 
 	let lastInvoiceRateScheduler: ReturnType<typeof debounce> | null = null;
 
@@ -97,6 +98,10 @@ export function useLastInvoiceRate(context: UseLastInvoiceRateContext = {}) {
 		}
 
 		lastInvoiceRateLoading.value = true;
+		lastInvoiceRateLoadingItems.value = new Set([
+			...lastInvoiceRateLoadingItems.value,
+			...missingCodes,
+		]);
 		try {
 			const profile = unwrapValue(pos_profile);
 			const company = profile?.company;
@@ -112,8 +117,10 @@ export function useLastInvoiceRate(context: UseLastInvoiceRateContext = {}) {
 
 			const rows: LastInvoiceRow[] = (res && res.message) || [];
 			const updatedCache = new Map(cachedForCustomer);
+			const returnedCodes = new Set<string>();
 			rows.forEach((row: LastInvoiceRow) => {
 				if (row && row.item_code) {
+					returnedCodes.add(row.item_code);
 					updatedCache.set(row.item_code, {
 						rate: row.rate,
 						currency: row.currency,
@@ -121,6 +128,11 @@ export function useLastInvoiceRate(context: UseLastInvoiceRateContext = {}) {
 						uom: row.uom,
 						posting_date: row.posting_date,
 					});
+				}
+			});
+			missingCodes.forEach((code) => {
+				if (!returnedCodes.has(code)) {
+					updatedCache.set(code, {});
 				}
 			});
 
@@ -134,6 +146,9 @@ export function useLastInvoiceRate(context: UseLastInvoiceRateContext = {}) {
 			return lastInvoiceRates.value;
 		} finally {
 			lastInvoiceRateLoading.value = false;
+			const nextLoading = new Set(lastInvoiceRateLoadingItems.value);
+			missingCodes.forEach((code) => nextLoading.delete(code));
+			lastInvoiceRateLoadingItems.value = nextLoading;
 		}
 	};
 
@@ -202,6 +217,14 @@ export function useLastInvoiceRate(context: UseLastInvoiceRateContext = {}) {
 		return lastInvoiceRates.value[item.item_code] || null;
 	};
 
+	const isLastInvoiceRateLoading = (
+		item: { item_code?: string } | null | undefined,
+	) => {
+		const itemCode =
+			typeof item?.item_code === "string" ? item.item_code.trim() : "";
+		return Boolean(itemCode && lastInvoiceRateLoadingItems.value.has(itemCode));
+	};
+
 	const clearLastInvoiceRateCache = () => {
 		lastInvoiceRateCache.clear();
 		lastInvoiceRates.value = {};
@@ -233,11 +256,13 @@ export function useLastInvoiceRate(context: UseLastInvoiceRateContext = {}) {
 	return {
 		lastInvoiceRates,
 		lastInvoiceRateLoading,
+		lastInvoiceRateLoadingItems,
 		fetchLastInvoiceRates,
 		fetchLastInvoiceRateForItem,
 		refreshLastInvoiceRatesForVisibleItems,
 		scheduleLastInvoiceRateRefresh,
 		getLastInvoiceRate,
+		isLastInvoiceRateLoading,
 		clearLastInvoiceRateCache,
 	};
 }

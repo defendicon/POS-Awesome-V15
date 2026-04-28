@@ -236,6 +236,28 @@ describe("itemsStore loadItems", () => {
 		);
 	});
 
+	it("switches customer price list without loading or repricing the full catalog", async () => {
+		const store = useItemsStore();
+		const profile = {
+			name: "POS-1",
+			warehouse: "Main WH",
+			selling_price_list: "Retail",
+			currency: "PKR",
+			item_groups: [],
+		} as any;
+
+		await store.initialize(profile);
+		itemServiceMocks.getItems.mockClear();
+		offlineMocks.getCachedPriceListItems.mockClear();
+
+		await store.updatePriceList("Customer Retail");
+
+		expect(store.activePriceList).toBe("Customer Retail");
+		expect(store.items[0].price_list_rate).toBe(120);
+		expect(itemServiceMocks.getItems).not.toHaveBeenCalled();
+		expect(offlineMocks.getCachedPriceListItems).not.toHaveBeenCalled();
+	});
+
 	it("does not prime detail cache when the server returns no items", async () => {
 		const store = useItemsStore();
 		const profile = {

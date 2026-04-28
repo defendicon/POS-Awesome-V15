@@ -42,6 +42,25 @@ describe("useItemRateInfo", () => {
 		expect(payload.cost.visible).toBe(false);
 	});
 
+	it("marks the last invoice rate row as loading while the opened item is fetching", () => {
+		const rateInfo = useItemRateInfo({
+			context: () => "pos",
+			pos_profile: () => ({ currency: "PKR" }),
+			is_pos_supervisor: () => false,
+			getLastInvoiceRate: () => null,
+			isLastInvoiceRateLoading: (item) => item?.item_code === "ITEM-001",
+		});
+
+		const payload = rateInfo.getItemRateInfo({
+			item_code: "ITEM-001",
+			stock_uom: "Nos",
+		});
+
+		expect(payload.lastSale.loading).toBe(true);
+		expect(payload.lastSale.available).toBe(false);
+		expect(payload.entries).toHaveLength(1);
+	});
+
 	it("shows sale, purchase, and manufacturing cost for supervisors", () => {
 		const rateInfo = useItemRateInfo({
 			context: () => "pos",

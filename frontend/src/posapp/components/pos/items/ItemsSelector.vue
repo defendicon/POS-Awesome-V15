@@ -564,6 +564,7 @@ const itemsSelectorFocus = useItemsSelectorFocus({
 const {
 	getLastInvoiceRate,
 	fetchLastInvoiceRateForItem,
+	isLastInvoiceRateLoading,
 	scheduleLastInvoiceRateRefresh,
 	clearLastInvoiceRateCache,
 } = useLastInvoiceRate({
@@ -598,6 +599,7 @@ const { getItemRateInfo } = useItemRateInfo({
 	is_pos_supervisor: () => isPosSupervisor.value,
 	getLastInvoiceRate,
 	getLastBuyingRate,
+	isLastInvoiceRateLoading,
 });
 
 const loadLastInvoiceRateForItem = (item: any) => {

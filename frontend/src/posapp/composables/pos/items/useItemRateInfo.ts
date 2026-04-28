@@ -22,6 +22,7 @@ export type ItemRateInfoEntry = {
 	key?: "sale" | "purchase" | "cost";
 	visible: boolean;
 	available: boolean;
+	loading: boolean;
 	rowLabel: string;
 	label: string;
 	rate: number | null;
@@ -46,6 +47,7 @@ interface UseItemRateInfoContext {
 	is_pos_supervisor?: MaybeRefLike<boolean>;
 	getLastInvoiceRate?: (item: any) => InvoiceRateInfo | null;
 	getLastBuyingRate?: (item: any) => BuyingRateInfo | null;
+	isLastInvoiceRateLoading?: (item: any) => boolean;
 }
 
 const unwrapValue = <T>(source: MaybeRefLike<T> | undefined): T | undefined => {
@@ -61,6 +63,7 @@ const unwrapValue = <T>(source: MaybeRefLike<T> | undefined): T | undefined => {
 const buildEntry = (entry: Partial<ItemRateInfoEntry>): ItemRateInfoEntry => ({
 	visible: true,
 	available: false,
+	loading: false,
 	rowLabel: "",
 	label: "Not available",
 	rate: null,
@@ -84,6 +87,8 @@ const parseFiniteNumber = (value: unknown) => {
 export function useItemRateInfo(context: UseItemRateInfoContext = {}) {
 	const getLastInvoiceRate = context.getLastInvoiceRate || (() => null);
 	const getLastBuyingRate = context.getLastBuyingRate || (() => null);
+	const isLastInvoiceRateLoading =
+		context.isLastInvoiceRateLoading || (() => false);
 	const isSupervisor = () => Boolean(unwrapValue(context.is_pos_supervisor));
 
 	const resolveProfileCurrency = () => {
@@ -92,6 +97,13 @@ export function useItemRateInfo(context: UseItemRateInfoContext = {}) {
 	};
 
 	const buildSaleEntry = (item: any): ItemRateInfoEntry => {
+		if (isLastInvoiceRateLoading(item)) {
+			return buildEntry({
+				key: "sale",
+				rowLabel: "Last Invoice Rate",
+				loading: true,
+			});
+		}
 		const row = getLastInvoiceRate(item);
 		if (!row || row.rate == null) {
 			return buildEntry({

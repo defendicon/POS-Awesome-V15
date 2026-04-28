@@ -84,14 +84,6 @@ export const useItemsStore = defineStore("items", () => {
 		return await searchFn(args);
 	};
 
-	const getCachedPriceListItemsCompat = async (priceList: string) => {
-		const fn = await getOfflineFn("getCachedPriceListItems");
-		if (typeof fn !== "function") {
-			return null;
-		}
-		return await fn(priceList);
-	};
-
 	const syncBootstrapItemReadiness = (count: number | boolean) => {
 		refreshBootstrapSnapshotFromCacheState({
 			itemsCount: count,
@@ -121,8 +113,6 @@ export const useItemsStore = defineStore("items", () => {
 		cacheItems,
 		getCachedSearchResult,
 		setCachedSearchResult,
-		getCachedPriceList,
-		setCachedPriceList,
 		generateCacheKey,
 	} = useItemsCache();
 
@@ -900,69 +890,7 @@ export const useItemsStore = defineStore("items", () => {
 		if (!newPriceList || newPriceList === customerPriceList.value) return;
 
 		customerPriceList.value = newPriceList;
-
-		try {
-			const cacheKey = `price_list_${getCacheScope()}_${newPriceList}`;
-			let priceData = getCachedPriceList(cacheKey);
-
-			if (!priceData) {
-				priceData = await getCachedPriceListItemsCompat(newPriceList);
-				if (priceData && priceData.length > 0) {
-					setCachedPriceList(cacheKey, priceData);
-				}
-			}
-
-			if (priceData && priceData.length > 0) {
-				applyPriceListToItems(priceData);
-			} else {
-				await loadItems({
-					forceServer: true,
-					priceList: newPriceList,
-				});
-			}
-		} catch (error) {
-			console.error("Failed to update price list:", error);
-		}
-	};
-
-	const applyPriceListToItems = (priceListItems: any[]) => {
-		const priceMap = new Map();
-		priceListItems.forEach((item) => {
-			priceMap.set(item.item_code, item);
-		});
-
-		items.value.forEach((item) => {
-			const priceItem = priceMap.get(item.item_code);
-			if (priceItem) {
-				const nextRate =
-					priceItem.price_list_rate || priceItem.rate || 0;
-				const nextCurrency =
-					priceItem.currency ||
-					item.original_currency ||
-					item.currency ||
-					posProfile.value?.currency;
-
-				item.rate = nextRate;
-				item.price_list_rate = nextRate;
-				item.original_rate = nextRate;
-				item.original_currency = nextCurrency;
-				item.currency = nextCurrency;
-			}
-		});
 		clearSearchCache();
-
-		if (searchTerm.value) {
-			filteredItems.value = performLocalSearch(
-				searchTerm.value,
-				items.value,
-				itemGroup.value,
-			);
-		} else {
-			filteredItems.value = filterItemsByGroup(
-				items.value,
-				itemGroup.value,
-			);
-		}
 	};
 
 	const refreshItems = async () => {
