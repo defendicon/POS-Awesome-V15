@@ -1,5 +1,6 @@
 import stockCoordinator from "../../../utils/stockCoordinator";
 import { isOffline } from "../../../../offline/index";
+import { syncReturnDiscountProration } from "./return_discount";
 
 declare const __: (_text: string, _args?: any[]) => string;
 declare const frappe: any;
@@ -890,48 +891,8 @@ export function _normalizeReturnDocTotals(context: any, doc: any) {
 }
 
 export function applyReturnDiscountProration(context: any) {
-	if (
-		!context ||
-		!context.isReturnInvoice ||
-		context.pos_profile?.posa_use_percentage_discount ||
-		!context.return_doc ||
-		typeof context.return_doc !== "object"
-	) {
-		return;
-	}
-
-	const returnDoc = context.return_doc;
-	const originalDiscount = Math.abs(
-		Number(context.return_discount_base_amount || returnDoc.discount_amount || 0),
+	syncReturnDiscountProration(
+		context,
+		"[POSA][Returns] Hook auto-prorate discount",
 	);
-	const originalTotal = Math.abs(
-		Number(
-			context.return_discount_base_total ??
-				returnDoc.total ??
-				returnDoc.net_total ??
-				returnDoc.grand_total ??
-				0,
-		),
-	);
-	const returnTotal = Math.abs(Number(context.Total || 0));
-
-	if (!originalDiscount || !originalTotal || !returnTotal) {
-		return;
-	}
-
-	const ratio = Math.min(1, returnTotal / originalTotal);
-	const prorated = -Math.abs(originalDiscount * ratio);
-	const current = Number(context.additional_discount || 0);
-	if (Math.abs(current - prorated) > 0.0001) {
-		console.log("[POSA][Returns] Hook auto-prorate discount", {
-			originalDiscount,
-			originalTotal,
-			returnTotal,
-			ratio,
-			prorated,
-		});
-		context.additional_discount = prorated;
-		context.discount_amount = prorated;
-		context.additional_discount_percentage = 0;
-	}
 }

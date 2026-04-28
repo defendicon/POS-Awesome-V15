@@ -4,6 +4,7 @@ import {
 	_normalizeReturnDocTotals,
 	_collectManualRateOverrides,
 	_applyManualRateOverridesToDoc,
+	applyReturnDiscountProration,
 } from "./item_updates"; // _normalizeReturnDocTotals needs extraction or location check
 import { load_invoice } from "./loader";
 import { parseBooleanSetting } from "../../../utils/stock";
@@ -210,6 +211,7 @@ export async function update_invoice_from_order(context: any, doc: any) {
 }
 
 export async function process_invoice(context: any) {
+	applyReturnDiscountProration(context);
 	const doc = context.get_invoice_doc ? context.get_invoice_doc() : {};
 	_logPriceListDebug(context, "pre-submit", {
 		customer: context.customer,

@@ -106,4 +106,44 @@ describe("InvoiceSummary drafts placement", () => {
 		expect(wrapper.find('[data-test="parked-orders-view-all"]').exists()).toBe(false);
 		expect(wrapper.find('[data-test="mobile-drafts-dialog"]').exists()).toBe(false);
 	});
+
+	it("shows the return prorated additional discount as a positive field value", () => {
+		const wrapper = mount(InvoiceSummary, {
+			props: {
+				...baseProps,
+				additional_discount: -250,
+				return_discount_meta: {
+					ratio: 0.5,
+					original_discount: 250,
+					prorated_discount: 125,
+				},
+			},
+			global: {
+				stubs: {
+					VCard: BoxStub,
+					VRow: BoxStub,
+					VCol: BoxStub,
+					VAlert: BoxStub,
+					VTextField: BoxStub,
+					VBtn: BoxStub,
+					VNavigationDrawer: BoxStub,
+					VCardTitle: BoxStub,
+					VCardText: BoxStub,
+					VCardActions: BoxStub,
+					VChip: BoxStub,
+					VIcon: BoxStub,
+					InvoiceActionButtons: true,
+					ParkedOrdersList: true,
+					VDialog: BoxStub,
+				},
+			},
+		});
+
+		const setupState = (wrapper.vm as any).$?.setupState || {};
+		const displayValue =
+			setupState.additionalDiscountDisplay?.value ??
+			setupState.additionalDiscountDisplay;
+
+		expect(displayValue).toBe(125);
+	});
 });

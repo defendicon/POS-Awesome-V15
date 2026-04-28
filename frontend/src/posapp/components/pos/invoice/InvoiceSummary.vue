@@ -256,7 +256,7 @@ const responsive = useResponsive();
 const uiStore = useUIStore();
 const { parkedOrders, draftSource } = storeToRefs(uiStore);
 
-const additionalDiscountDisplay = ref(normalizeDiscountDisplay(props.additional_discount));
+const additionalDiscountDisplay = ref(normalizeAdditionalDiscountDisplay(props.additional_discount));
 const additionalDiscountPercentageDisplay = ref(
 	normalizeDiscountDisplay(props.additional_discount_percentage),
 );
@@ -308,10 +308,14 @@ watch(
 );
 
 watch(
-	() => props.additional_discount,
-	(value) => {
+	() => [
+		props.additional_discount,
+		props.return_discount_meta?.prorated_discount,
+		props.pos_profile?.posa_use_percentage_discount,
+	],
+	([value]) => {
 		if (!isEditingAdditionalDiscount.value) {
-			additionalDiscountDisplay.value = normalizeDiscountDisplay(value);
+			additionalDiscountDisplay.value = normalizeAdditionalDiscountDisplay(value);
 		}
 	},
 );
@@ -328,6 +332,26 @@ watch(
 function normalizeDiscountDisplay(value) {
 	if (value === 0 || value === "0") {
 		return "";
+	}
+	return value;
+}
+
+function normalizeAdditionalDiscountDisplay(value) {
+	if (value === 0 || value === "0") {
+		return "";
+	}
+	if (
+		props.return_discount_meta &&
+		!props.pos_profile?.posa_use_percentage_discount
+	) {
+		const proratedValue = Number(props.return_discount_meta.prorated_discount);
+		if (Number.isFinite(proratedValue)) {
+			return Math.abs(proratedValue);
+		}
+		const numericValue = Number(value);
+		if (Number.isFinite(numericValue)) {
+			return Math.abs(numericValue);
+		}
 	}
 	return value;
 }
