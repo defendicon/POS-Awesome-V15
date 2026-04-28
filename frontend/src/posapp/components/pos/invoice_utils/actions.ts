@@ -302,7 +302,7 @@ export async function new_order(context: any, data: any = {}) {
 
 export async function get_invoice_from_order_doc(context: any) {
 	let doc: any = {};
-	if (context.invoice_doc.doctype == "Sales Order") {
+	if (context.invoice_doc?.doctype == "Sales Order") {
 		const prepared = await prepareDocumentFlowAction({
 			action: "order_to_invoice",
 			source: "order",
@@ -323,12 +323,18 @@ export async function get_invoice_from_order_doc(context: any) {
 	} else {
 		doc = context.invoice_doc;
 	}
-	doc = doc || {};
-	doc.items = Array.isArray(doc.items)
-		? doc.items
-		: Array.isArray(context.invoice_doc?.items)
+	if (!doc || typeof doc !== "object" || Array.isArray(doc)) {
+		doc = {};
+	}
+	const sourceItems =
+		context.invoice_doc &&
+		typeof context.invoice_doc === "object" &&
+		Array.isArray(context.invoice_doc.items)
 			? context.invoice_doc.items
 			: [];
+	doc.items = Array.isArray(doc.items)
+		? doc.items
+		: sourceItems;
 	const items: any[] = [];
 	const updatedItemsData: any[] = get_invoice_items(context);
 	doc.items.forEach((item) => {

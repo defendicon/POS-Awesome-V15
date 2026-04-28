@@ -63,10 +63,14 @@ export async function ensureCustomersReady({
 		return true;
 	}
 
-	const loadPromise = (async () => {
-		await load();
-		completedLoads.add(loadKey);
-	})();
+	let loadPromise: Promise<void>;
+	try {
+		loadPromise = Promise.resolve(load()).then(() => {
+			completedLoads.add(loadKey);
+		});
+	} catch (error) {
+		loadPromise = Promise.reject(error);
+	}
 
 	inflightLoads.set(loadKey, loadPromise);
 

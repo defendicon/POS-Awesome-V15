@@ -105,9 +105,9 @@ def search_quotations(
             "modified",
             "modified_by",
         ],
-		page_length=0,
-		order_by="modified desc",
-	)
+        limit_page_length=0,
+        order_by="modified desc",
+    )
 
     return [_normalize_quotation_row(dict(row)) for row in quotations]
 

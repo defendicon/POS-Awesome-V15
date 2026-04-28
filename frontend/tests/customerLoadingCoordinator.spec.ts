@@ -137,4 +137,35 @@ describe("customer loading coordinator", () => {
 		resolveLoad?.();
 		await Promise.all([first, second]);
 	});
+
+	it("clears failed inflight loads so the same profile can retry", async () => {
+		const profile = { name: "POS-1", modified: "2026-04-23T10:00:00" };
+		const setProfile = vi.fn();
+		const load = vi
+			.fn()
+			.mockRejectedValueOnce(new Error("load failed"))
+			.mockResolvedValueOnce(undefined);
+
+		await expect(
+			ensureCustomersReady({
+				profile,
+				online: true,
+				manualOffline: false,
+				setProfile,
+				load,
+			}),
+		).rejects.toThrow("load failed");
+
+		await expect(
+			ensureCustomersReady({
+				profile,
+				online: true,
+				manualOffline: false,
+				setProfile,
+				load,
+			}),
+		).resolves.toBe(true);
+
+		expect(load).toHaveBeenCalledTimes(2);
+	});
 });
