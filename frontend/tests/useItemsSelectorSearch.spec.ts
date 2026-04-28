@@ -1,7 +1,11 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { resolveBooleanSetting } from "../src/posapp/composables/pos/items/selectorSearch/resolveBooleanSetting";
 import { useItemsSelectorSearch } from "../src/posapp/composables/pos/items/useItemsSelectorSearch";
+
+vi.mock("../src/offline/index", () => ({
+	isOffline: () => false,
+}));
 
 const createScannerInput = () => ({
 	ensureScaleBarcodeSettings: vi.fn().mockResolvedValue(undefined),
@@ -13,6 +17,10 @@ const createScannerInput = () => ({
 });
 
 describe("useItemsSelectorSearch", () => {
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
 	it("uses the standard barcode uom when adding a visible barcode match", async () => {
 		(globalThis as any).flt = (value: unknown) => Number(value || 0);
 		const addItem = vi.fn().mockResolvedValue(undefined);
@@ -118,6 +126,57 @@ describe("useItemsSelectorSearch", () => {
 		expect(preventDefault).toHaveBeenCalled();
 		expect(searchItems).toHaveBeenCalledWith("abcd");
 		expect(selectHighlightedItem).not.toHaveBeenCalled();
+	});
+
+	it("uses local item search and refreshes visible details asynchronously in storage mode", async () => {
+		vi.useFakeTimers();
+		const searchItems = vi.fn().mockImplementation(async () => {
+			vm.displayedItems = [{ item_code: "ITEM-001" }];
+			return vm.displayedItems;
+		});
+		const loadVisibleItems = vi.fn().mockResolvedValue([]);
+		const getItems = vi.fn().mockResolvedValue([]);
+		const updateItemsDetails = vi.fn(
+			() => new Promise<void>(() => {}),
+		);
+		const enterEvent = vi.fn();
+		const vm: any = {
+			first_search: "abc",
+			search_input: "abc",
+			search: "",
+			search_from_scanner: false,
+			isBackgroundLoading: false,
+			storageAvailable: true,
+			pos_profile: { posa_use_limit_search: 0 },
+			displayedItems: [],
+			searchItems,
+			loadVisibleItems,
+			get_items: getItems,
+			enter_event: enterEvent,
+			itemDetailFetcher: {
+				cancelItemDetailsRequest: vi.fn(),
+				update_items_details: updateItemsDetails,
+			},
+		};
+
+		const api = useItemsSelectorSearch({
+			getVM: () => vm,
+			scannerInput: createScannerInput(),
+		});
+
+		await api._performSearch();
+
+		expect(searchItems).toHaveBeenCalledWith("abc");
+		expect(loadVisibleItems).not.toHaveBeenCalled();
+		expect(getItems).not.toHaveBeenCalled();
+		expect(enterEvent).toHaveBeenCalledTimes(1);
+		expect(updateItemsDetails).not.toHaveBeenCalled();
+
+		await vi.runOnlyPendingTimersAsync();
+
+		expect(updateItemsDetails).toHaveBeenCalledWith([
+			{ item_code: "ITEM-001" },
+		]);
 	});
 
 	it("selects the highlighted item when enter is pressed with a highlighted ref index", () => {

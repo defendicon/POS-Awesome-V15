@@ -97,6 +97,36 @@ export const useItemsSelectorSearch = ({
 		void enter_event();
 	};
 
+	const scheduleVisibleItemDetailsRefresh = (vm: any) => {
+		if (!vm?.itemDetailFetcher) return;
+		if (typeof vm.itemDetailFetcher.update_items_details !== "function")
+			return;
+
+		const refresh = () => {
+			const visibleItems = Array.isArray(vm.displayedItems)
+				? [...vm.displayedItems]
+				: [];
+			if (!visibleItems.length) return;
+			const result =
+				vm.itemDetailFetcher.update_items_details(visibleItems);
+			if (result && typeof result.catch === "function") {
+				result.catch((error: unknown) => {
+					console.error("Failed to refresh visible item details:", error);
+				});
+			}
+		};
+
+		const scheduler =
+			typeof globalThis.setTimeout === "function"
+				? globalThis.setTimeout
+				: null;
+		if (scheduler) {
+			scheduler(refresh, 0);
+			return;
+		}
+		void Promise.resolve().then(refresh);
+	};
+
 	const getCurrentSearchInput = (vm: any): string => {
 		if (typeof getSearchInput === "function") {
 			return String(getSearchInput() || "");
@@ -332,11 +362,17 @@ export const useItemsSelectorSearch = ({
 				}
 			}
 		} else if (hasStorageAvailable(vm)) {
-			const loadVisibleItems = getVisibleItemsLoader(vm);
-			if (loadVisibleItems) {
-				await loadVisibleItems(true);
+			const searchItems = getSearchExecutor(vm);
+			if (searchItems) {
+				await searchItems(trimmedQuery);
+			} else {
+				const loadVisibleItems = getVisibleItemsLoader(vm);
+				if (loadVisibleItems) {
+					await loadVisibleItems(true);
+				}
 			}
 			triggerEnterEvent(vm);
+			scheduleVisibleItemDetailsRefresh(vm);
 		} else {
 			// When local storage is disabled, always fetch items
 			// from the server so searches aren't limited to the
