@@ -3,7 +3,6 @@ import {
 	getTermsAndConditions,
 	memoryInitPromise,
 } from "./offline/index";
-import nunjucks from "nunjucks";
 
 declare const frappe: any;
 
@@ -193,6 +192,7 @@ export default async function renderOfflineInvoiceHTML(invoice: any) {
 	}
 
 	try {
+		const { default: nunjucks } = await import("nunjucks");
 		const env = nunjucks.configure({ autoescape: false });
 		env.addFilter("format_currency", (value: unknown, currency: string) => {
 			const number =

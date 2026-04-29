@@ -88,6 +88,15 @@ export default defineConfig({
 						if (id.includes("vue")) {
 							return "vue";
 						}
+						if (id.includes("html2pdf")) {
+							return "vendor-pdf";
+						}
+						if (id.includes("jsbarcode") || id.includes("JsBarcode")) {
+							return "vendor-barcode";
+						}
+						if (id.includes("nunjucks")) {
+							return "vendor-templates";
+						}
 						return "vendor";
 					}
 				},
