@@ -980,19 +980,13 @@ export const useItemsStore = defineStore("items", () => {
 
 		const additions: Item[] = [];
 		const touchedItems: Item[] = [];
-		const canonicalItemsByCode = new Map<string, Item>();
-		items.value.forEach((item) => {
-			if (item?.item_code) {
-				canonicalItemsByCode.set(item.item_code, item);
-			}
-		});
 
 		updates.forEach((update) => {
 			if (!update?.item_code) {
 				return;
 			}
 
-			const existing = canonicalItemsByCode.get(update.item_code);
+			const existing = itemsMap.value.get(update.item_code);
 			if (existing) {
 				Object.assign(existing, update);
 				const syncedRate = update.price_list_rate ?? update.rate;
