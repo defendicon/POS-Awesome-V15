@@ -4,7 +4,7 @@
  */
 
 import { defineStore } from "pinia";
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, shallowRef } from "vue";
 import type { Item, POSProfile } from "../types/models";
 import itemService from "../services/itemService";
 import { refreshBootstrapSnapshotFromCacheState } from "../../offline/index";
@@ -286,37 +286,63 @@ export const useItemsStore = defineStore("items", () => {
 		return cachedPagination.value.offset < cachedPagination.value.total;
 	});
 
-	const itemStats = computed(() => {
-		const groups = new Set<string>();
-		let withImages = 0;
-		let withStock = 0;
-		let lowStock = 0;
+	// Define type for itemStats to ensure type safety
+	type ItemStatsType = {
+		total: number;
+		filtered: number;
+		groups: number;
+		withImages: number;
+		withStock: number;
+		lowStock: number;
+	};
 
-		items.value.forEach((item) => {
-			if (item.item_group) {
-				groups.add(item.item_group);
-			}
-			if (item.image) {
-				withImages += 1;
-			}
-			const qty = item.actual_qty || 0;
-			if (qty > 0) {
-				withStock += 1;
-			}
-			if (qty < 5) {
-				lowStock += 1;
-			}
-		});
-
-		return {
-			total: items.value.length,
-			filtered: filteredItems.value.length,
-			groups: groups.size,
-			withImages,
-			withStock,
-			lowStock,
-		};
+	// Initialize itemStats with empty/zero values
+	const itemStats = shallowRef<ItemStatsType>({
+		total: 0,
+		filtered: 0,
+		groups: 0,
+		withImages: 0,
+		withStock: 0,
+		lowStock: 0,
 	});
+
+	// Watch items array length and rebuild stats when items are added/removed
+	// (not when individual item fields change)
+	watch(
+		() => items.value.length,
+		() => {
+			const groups = new Set<string>();
+			let withImages = 0;
+			let withStock = 0;
+			let lowStock = 0;
+
+			items.value.forEach((item) => {
+				if (item.item_group) {
+					groups.add(item.item_group);
+				}
+				if (item.image) {
+					withImages += 1;
+				}
+				const qty = item.actual_qty || 0;
+				if (qty > 0) {
+					withStock += 1;
+				}
+				if (qty < 5) {
+					lowStock += 1;
+				}
+			});
+
+			itemStats.value = {
+				total: items.value.length,
+				filtered: filteredItems.value.length,
+				groups: groups.size,
+				withImages,
+				withStock,
+				lowStock,
+			};
+		},
+		{ immediate: true }
+	);
 
 	const cacheStats = computed(() => {
 		const memCache = cache.value.memory;
