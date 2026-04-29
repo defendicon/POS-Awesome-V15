@@ -55,6 +55,7 @@
  * @module offline/cache
  */
 
+import Dexie from "dexie/dist/dexie.mjs";
 import { refreshBootstrapSnapshotFromCaches } from "./bootstrapSnapshot";
 import { memory, persist, db, checkDbHealth } from "./db";
 import { emitBootstrapSnapshotUpdated } from "../posapp/utils/bootstrapRuntimeEvents";
@@ -416,20 +417,17 @@ export async function saveItems(items, scope = "") {
 			}
 			try {
 				await db.table("items").bulkPut(scopedItems);
-			} catch (bulkError) {
-				console.warn(
-					"bulkPut failed for items chunk; retrying one-by-one",
-					bulkError,
-				);
-				for (const row of scopedItems) {
-					try {
-						await db.table("items").put(row);
-					} catch (rowError) {
-						console.error("Failed to save item row", {
-							item_code: row?.item_code,
-							rowError,
-						});
-					}
+			} catch (error) {
+				// Dexie BulkError provides per-item failure details via error.failures
+				if (error instanceof Dexie.BulkError) {
+					console.warn(
+						`bulkPut: ${error.failures.length} items failed out of ${scopedItems.length}`,
+						error.failures,
+					);
+					// Continue processing - partial writes are acceptable here
+				} else {
+					// Unexpected error, not a BulkError - rethrow
+					throw error;
 				}
 			}
 		}
@@ -458,7 +456,7 @@ export async function clearStoredItems(scope = "") {
 export function saveItemUOMs(itemCode, uoms) {
 	try {
 		const cache = memory.uom_cache;
-		const cleanUoms = JSON.parse(JSON.stringify(uoms));
+		const cleanUoms = structuredClone(uoms);
 		cache[itemCode] = cleanUoms;
 		memory.uom_cache = cache;
 		persist("uom_cache");
@@ -542,7 +540,7 @@ export function savePriceListItems(priceList, items) {
 		const cache = memory.price_list_cache || {};
 		let cleanItems;
 		try {
-			cleanItems = JSON.parse(JSON.stringify(items));
+			cleanItems = structuredClone(items);
 		} catch (err) {
 			console.error("Failed to serialize price list items", err);
 			cleanItems = [];
@@ -612,7 +610,7 @@ export function mergeCachedPriceListItems(
 				return;
 			}
 			const cleanItem =
-				cloneCachePayload(item) || JSON.parse(JSON.stringify(item));
+				cloneCachePayload(item) || structuredClone(item);
 			itemIndex.set(item.item_code, cleanItem);
 		});
 
@@ -685,7 +683,7 @@ export function saveItemDetailsCache(profileName, priceList, items) {
 				rate: it.rate,
 				price_list_rate: it.price_list_rate,
 			}));
-			cleanItems = JSON.parse(JSON.stringify(cleanItems));
+			cleanItems = structuredClone(cleanItems);
 		} catch (err) {
 			console.error("Failed to serialize item details", err);
 			cleanItems = [];
@@ -826,7 +824,7 @@ export function removeItemDetailsCacheEntries(
 export function saveTaxTemplate(name, doc) {
 	try {
 		const cache = memory.tax_template_cache || {};
-		const cleanDoc = JSON.parse(JSON.stringify(doc));
+		const cleanDoc = structuredClone(doc);
 		cache[name] = cleanDoc;
 		memory.tax_template_cache = cache;
 		persist("tax_template_cache");
@@ -853,7 +851,7 @@ export function getSalesPersonsStorage() {
 
 export function setSalesPersonsStorage(data) {
 	try {
-		memory.sales_persons_storage = JSON.parse(JSON.stringify(data));
+		memory.sales_persons_storage = structuredClone(data);
 		persist("sales_persons_storage");
 		refreshBootstrapSnapshotFromCacheState({
 			salesPersons: memory.sales_persons_storage,
@@ -901,7 +899,7 @@ export function refreshBootstrapSnapshotFromCacheState(cacheState = {}) {
 export function setBootstrapSnapshot(snapshot) {
 	try {
 		memory.bootstrap_snapshot = snapshot
-			? JSON.parse(JSON.stringify(snapshot))
+			? structuredClone(snapshot)
 			: null;
 		persist("bootstrap_snapshot");
 		emitBootstrapSnapshotUpdated(memory.bootstrap_snapshot);
@@ -917,7 +915,7 @@ export function getBootstrapSnapshotStatus() {
 export function setBootstrapSnapshotStatus(status) {
 	try {
 		memory.bootstrap_snapshot_status = status
-			? JSON.parse(JSON.stringify(status))
+			? structuredClone(status)
 			: null;
 		persist("bootstrap_snapshot_status");
 	} catch (e) {
@@ -945,7 +943,7 @@ export function setBootstrapLimitedMode(state) {
 
 function cloneOpeningData(data: any) {
 	try {
-		return JSON.parse(JSON.stringify(data));
+		return structuredClone(data);
 	} catch (e) {
 		console.error("Failed to clone opening data", e);
 		return null;
@@ -1023,7 +1021,7 @@ export function getOpeningDialogStorage() {
 
 export function setOpeningDialogStorage(data) {
 	try {
-		memory.opening_dialog_storage = JSON.parse(JSON.stringify(data));
+		memory.opening_dialog_storage = structuredClone(data);
 		persist("opening_dialog_storage");
 	} catch (e) {
 		console.error("Failed to set opening dialog storage", e);
@@ -1136,7 +1134,7 @@ function sanitiseSnapshot(snapshot = []) {
 		return [];
 	}
 	try {
-		return JSON.parse(JSON.stringify(snapshot));
+		return structuredClone(snapshot);
 	} catch (error) {
 		console.error("Failed to sanitise pricing rules snapshot", error);
 		return [];

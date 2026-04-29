@@ -69,7 +69,7 @@ let queueReadyPromise: Promise<void> | null = null;
 
 const nowIso = () => new Date().toISOString();
 
-const cloneSerializable = <T>(value: T): T => JSON.parse(JSON.stringify(value));
+const cloneSerializable = <T>(value: T): T => structuredClone(value);
 
 function stableStringify(value: any): string {
 	if (Array.isArray(value)) {
@@ -435,6 +435,7 @@ export async function claimRetryableQueueEntries(entityType: OfflineEntityType) 
 			.equals(entityType)
 			.sortBy("created_at")) as OfflineQueueEntry[];
 
+		const claimedEntries: OfflineQueueEntry[] = [];
 		for (const entry of entries) {
 			if (!isRetryableStatus(entry.status)) {
 				continue;
@@ -454,8 +455,13 @@ export async function claimRetryableQueueEntries(entityType: OfflineEntityType) 
 						: entry.last_error,
 			};
 
-			await table.put(nextEntry);
+			claimedEntries.push(nextEntry);
 			claimed.push(nextEntry);
+		}
+
+		// Batch all writes in a single bulkPut transaction
+		if (claimedEntries.length > 0) {
+			await table.bulkPut(claimedEntries);
 		}
 	});
 
