@@ -19,7 +19,7 @@ def _payment_entry_job(order_name, payments):
 
 @frappe.whitelist()
 def search_orders(company, currency, order_name=None, limit=50):
-    limit = min(cint(limit) or 50, 200)
+    limit = min(max(1, cint(limit) or 50), 200)
 
     filters = {
         "billing_status": ["in", ["Not Billed", "Partly Billed"]],
@@ -30,13 +30,13 @@ def search_orders(company, currency, order_name=None, limit=50):
     if order_name:
         filters["name"] = ["like", f"%{order_name}%"]
 
-    orders = frappe.get_all(
+    orders = frappe.get_list(
         "Sales Order",
         filters=filters,
         fields=[
             "name", "customer", "customer_name", "transaction_date",
             "delivery_date", "currency", "grand_total", "billing_status",
-            "per_delivered", "per_billed",
+            "per_delivered", "per_billed", "docstatus", "status",
         ],
         order_by="transaction_date desc",
         limit_page_length=limit,
