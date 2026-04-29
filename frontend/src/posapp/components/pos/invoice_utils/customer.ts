@@ -7,6 +7,9 @@ import {
 
 declare const frappe: any;
 
+const _customerInfoCache = new Map<string, { data: any; expiresAt: number }>();
+const CUSTOMER_CACHE_TTL_MS = 5 * 60 * 1000;
+
 export async function fetch_customer_details(context: any) {
 	try {
 		const customer =
@@ -15,6 +18,12 @@ export async function fetch_customer_details(context: any) {
 				: "";
 		if (!customer) return;
 		const requestedCustomer = customer;
+
+		const company: string =
+			context?.pos_profile?.company ||
+			context?.company?.name ||
+			context?.company ||
+			"";
 
 		context.customer_info = {};
 		const cachedCustomer = await getStoredCustomer(customer);
@@ -26,16 +35,22 @@ export async function fetch_customer_details(context: any) {
 			context.customer_info = cachedCustomer;
 		}
 
+		const cacheKey = `${customer}::${company}`;
+		const memCached = _customerInfoCache.get(cacheKey);
+		if (memCached && memCached.expiresAt > Date.now()) {
+			if (
+				typeof context.customer === "string" &&
+				context.customer.trim() === requestedCustomer
+			) {
+				context.customer_info = memCached.data;
+				_applyCustomerContext(context, memCached.data, requestedCustomer);
+			}
+			return;
+		}
+
 		const r = await frappe.call({
 			method: "posawesome.posawesome.api.customers.get_customer_info",
-			args: {
-				customer,
-				company:
-					context?.pos_profile?.company ||
-					context?.company?.name ||
-					context?.company ||
-					null,
-			},
+			args: { customer, company: company || null },
 		});
 
 		if (
@@ -44,6 +59,10 @@ export async function fetch_customer_details(context: any) {
 			context.customer.trim() === requestedCustomer
 		) {
 			context.customer_info = r.message;
+			_customerInfoCache.set(cacheKey, {
+				data: r.message,
+				expiresAt: Date.now() + CUSTOMER_CACHE_TTL_MS,
+			});
 			await setCustomerStorage([r.message]);
 			if (context?.pos_profile?.company) {
 				const totalCredit = Number(r.message?.stored_value_balance || 0);
@@ -60,36 +79,44 @@ export async function fetch_customer_details(context: any) {
 					] : [],
 				);
 			}
-			const resolvedPriceList =
-				context.customer_info.customer_price_list ||
-				context.customer_info.customer_group_price_list ||
-				context.pos_profile?.selling_price_list ||
-				"";
-			if (
-				resolvedPriceList &&
-				context.selected_price_list !== resolvedPriceList
-			) {
-				context.selected_price_list = resolvedPriceList;
-			}
-			if (context.customer_info.price_list_currency) {
-				context.price_list_currency =
-					context.customer_info.price_list_currency;
-			} else if (resolvedPriceList) {
-				context.price_list_currency =
-					context.price_list_currency || context.pos_profile.currency;
-			} else {
-				context.price_list_currency = context.pos_profile.currency;
-			}
-
-			// If we have items with default rates (rate=0 or rate not set), re-apply price list
-			// Or if we need to enforce customer price list
-			if (context.items.length > 0) {
-				if (context.update_items_details)
-					await context.update_items_details(context.items);
-			}
+			_applyCustomerContext(context, r.message, requestedCustomer);
 		}
 	} catch (error) {
 		console.error("Error fetching customer details:", error);
+	}
+}
+
+async function _applyCustomerContext(
+	context: any,
+	info: any,
+	requestedCustomer: string,
+) {
+	if (
+		typeof context.customer !== "string" ||
+		context.customer.trim() !== requestedCustomer
+	)
+		return;
+
+	const resolvedPriceList =
+		info.customer_price_list ||
+		info.customer_group_price_list ||
+		context.pos_profile?.selling_price_list ||
+		"";
+	if (resolvedPriceList && context.selected_price_list !== resolvedPriceList) {
+		context.selected_price_list = resolvedPriceList;
+	}
+	if (info.price_list_currency) {
+		context.price_list_currency = info.price_list_currency;
+	} else if (resolvedPriceList) {
+		context.price_list_currency =
+			context.price_list_currency || context.pos_profile.currency;
+	} else {
+		context.price_list_currency = context.pos_profile.currency;
+	}
+
+	if (context.items.length > 0) {
+		if (context.update_items_details)
+			await context.update_items_details(context.items);
 	}
 }
 

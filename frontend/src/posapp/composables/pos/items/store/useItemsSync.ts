@@ -209,6 +209,7 @@ export function useItemsSync() {
 		} = {},
 		posProfile: POSProfile | null,
 		activePriceList: string,
+		customer: string | null,
 		scope: string,
 		shouldPersistItems: boolean,
 		resolvePageSize: (_pageSize?: number) => number,
@@ -298,6 +299,7 @@ export function useItemsSync() {
 					args: {
 						pos_profile: JSON.stringify(requestProfile),
 						price_list: activePriceList,
+						customer: customer || "",
 						item_group:
 							normalizedGroup !== "ALL"
 								? normalizedGroup.toLowerCase()

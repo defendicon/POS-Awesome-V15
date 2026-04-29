@@ -430,6 +430,7 @@ export const useItemsStore = defineStore("items", () => {
 			options,
 			posProfile.value,
 			activePriceList.value,
+			customer.value,
 			getStorageScope(),
 			shouldPersistItems(),
 			resolvePageSize,

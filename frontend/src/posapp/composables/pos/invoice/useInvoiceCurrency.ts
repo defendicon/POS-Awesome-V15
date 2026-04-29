@@ -151,54 +151,52 @@ export function useInvoiceCurrency() {
 		const plCurrency = price_list_currency.value || companyCurrency;
 
 		try {
-			// Price list currency to selected currency rate
-			if (selected_currency.value === plCurrency) {
+			const needsDisplayRate = selected_currency.value !== plCurrency;
+			const needsConversionRate = selected_currency.value !== companyCurrency;
+
+			const [r, r2] = await Promise.all([
+				needsDisplayRate
+					? frappe.call({
+							method: "posawesome.posawesome.api.invoices.fetch_exchange_rate_pair",
+							args: { from_currency: plCurrency, to_currency: selected_currency.value },
+						})
+					: Promise.resolve(null),
+				needsConversionRate
+					? frappe.call({
+							method: "posawesome.posawesome.api.invoices.fetch_exchange_rate_pair",
+							args: { from_currency: selected_currency.value, to_currency: companyCurrency },
+						})
+					: Promise.resolve(null),
+			]);
+
+			if (!needsDisplayRate) {
 				exchange_rate.value = 1;
-			} else {
-				const r = await frappe.call({
-					method: "posawesome.posawesome.api.invoices.fetch_exchange_rate_pair",
-					args: {
-						from_currency: plCurrency,
-						to_currency: selected_currency.value,
-					},
+			} else if (r?.message) {
+				exchange_rate.value = r.message.exchange_rate;
+				saveExchangeRateCache({
+					profileName: pos_profile.value.name,
+					company: pos_profile.value.company,
+					fromCurrency: plCurrency,
+					toCurrency: selected_currency.value,
+					date: r.message.date || rateDate,
+					exchange_rate: r.message.exchange_rate,
 				});
-				if (r && r.message) {
-					exchange_rate.value = r.message.exchange_rate;
-					saveExchangeRateCache({
-						profileName: pos_profile.value.name,
-						company: pos_profile.value.company,
-						fromCurrency: plCurrency,
-						toCurrency: selected_currency.value,
-						date: r.message.date || rateDate,
-						exchange_rate: r.message.exchange_rate,
-					});
-				}
 			}
 
-			// Selected currency to company currency rate
-			if (selected_currency.value === companyCurrency) {
+			if (!needsConversionRate) {
 				conversion_rate.value = 1;
 				exchange_rate_date.value = frappe.datetime.get_today();
-			} else {
-				const r2 = await frappe.call({
-					method: "posawesome.posawesome.api.invoices.fetch_exchange_rate_pair",
-					args: {
-						from_currency: selected_currency.value,
-						to_currency: companyCurrency,
-					},
+			} else if (r2?.message) {
+				conversion_rate.value = r2.message.exchange_rate;
+				exchange_rate_date.value = r2.message.date;
+				saveExchangeRateCache({
+					profileName: pos_profile.value.name,
+					company: pos_profile.value.company,
+					fromCurrency: selected_currency.value,
+					toCurrency: companyCurrency,
+					date: r2.message.date || rateDate,
+					exchange_rate: r2.message.exchange_rate,
 				});
-				if (r2 && r2.message) {
-					conversion_rate.value = r2.message.exchange_rate;
-					exchange_rate_date.value = r2.message.date;
-					saveExchangeRateCache({
-						profileName: pos_profile.value.name,
-						company: pos_profile.value.company,
-						fromCurrency: selected_currency.value,
-						toCurrency: companyCurrency,
-						date: r2.message.date || rateDate,
-						exchange_rate: r2.message.exchange_rate,
-					});
-				}
 			}
 		} catch (error) {
 			console.error("Error updating currency:", error);

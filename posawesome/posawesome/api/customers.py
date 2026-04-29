@@ -146,13 +146,8 @@ def get_customers_count(pos_profile):
     return frappe.db.count("Customer", filters)
 
 
-@frappe.whitelist()
-def get_customer_info(customer=None, company=None):
-    customer = cstr(customer or "").strip()
-    if not customer:
-        return {}
-
-    customer = frappe.get_doc("Customer", customer)
+def _fetch_customer_info(customer_name, company):
+    customer = frappe.get_doc("Customer", customer_name)
 
     res = {"loyalty_points": None, "conversion_factor": None}
 
@@ -195,7 +190,6 @@ def get_customer_info(customer=None, company=None):
         res["loyalty_points"] = lp_details.get("loyalty_points")
         res["conversion_factor"] = lp_details.get("conversion_factor")
 
-    company = cstr(company or "").strip()
     if company:
         stored_value = get_stored_value_summary(customer=customer.name, company=company)
         res["stored_value_balance"] = stored_value.get("available_amount", 0)
@@ -238,6 +232,23 @@ def get_customer_info(customer=None, company=None):
         res["country"] = addr.country or ""
 
     return res
+
+
+@frappe.whitelist()
+def get_customer_info(customer=None, company=None):
+    customer = cstr(customer or "").strip()
+    if not customer:
+        return {}
+
+    company = cstr(company or "").strip()
+
+    @redis_cache(ttl=300)
+    def _cached(customer_name, company):
+        return _fetch_customer_info(customer_name, company)
+
+    return _cached(customer, company)
+
+
 
 
 @frappe.whitelist()
