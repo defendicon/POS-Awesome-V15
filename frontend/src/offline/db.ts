@@ -296,7 +296,7 @@ function cloneDefaultValue<T>(value: T): T {
 	}
 
 	try {
-		return JSON.parse(JSON.stringify(value));
+		return structuredClone(value);
 	} catch {
 		return value;
 	}
@@ -400,7 +400,7 @@ export function persist(key: string, value: unknown = memory[key]) {
 	if (persistWorker) {
 		let clean = value;
 		try {
-			clean = JSON.parse(JSON.stringify(value));
+			clean = structuredClone(value);
 		} catch (e) {
 			console.error("Failed to serialize", key, e);
 		}

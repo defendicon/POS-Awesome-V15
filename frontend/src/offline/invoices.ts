@@ -115,7 +115,7 @@ function prepareOfflineInvoiceEntry(entry: AnyRecord) {
 
 	let cleanEntry;
 	try {
-		cleanEntry = JSON.parse(JSON.stringify(entry));
+		cleanEntry = structuredClone(entry);
 	} catch (error) {
 		console.error("Failed to serialize offline invoice", error);
 		throw error;

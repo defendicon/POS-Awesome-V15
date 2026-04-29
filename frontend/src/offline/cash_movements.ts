@@ -23,7 +23,7 @@ const CREATE_DEPOSIT_METHOD =
 export async function saveOfflineCashMovement(entry: AnyRecord) {
 	let cleanEntry;
 	try {
-		cleanEntry = JSON.parse(JSON.stringify(entry));
+		cleanEntry = structuredClone(entry);
 	} catch (error) {
 		console.error("Failed to serialize offline cash movement", error);
 		throw error;

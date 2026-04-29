@@ -165,7 +165,7 @@ export class SyncCoordinator {
 
 	getLastRunSummary() {
 		return this.lastRunSummary
-			? JSON.parse(JSON.stringify(this.lastRunSummary))
+			? structuredClone(this.lastRunSummary)
 			: null;
 	}
 

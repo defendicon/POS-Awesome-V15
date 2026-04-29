@@ -18,7 +18,7 @@ const PAYMENT_ENTITY: OfflineEntityType = "payment";
 const SYNC_CONCURRENCY = 3;
 
 function prepareOfflinePaymentEntry(entry: AnyRecord) {
-	const nextEntry = JSON.parse(JSON.stringify(entry));
+	const nextEntry = structuredClone(entry);
 
 	if (nextEntry?.args?.payload?.pos_profile) {
 		const profile = nextEntry.args.payload.pos_profile;

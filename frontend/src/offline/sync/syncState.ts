@@ -18,7 +18,7 @@ function cloneSyncState(
 	if (!state) {
 		return null;
 	}
-	return JSON.parse(JSON.stringify(state));
+	return structuredClone(state);
 }
 
 function readLocalSyncState(

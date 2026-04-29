@@ -20,7 +20,7 @@ const CUSTOMER_ENTITY: OfflineEntityType = "customer";
 export async function saveOfflineCustomer(entry: AnyRecord) {
 	let cleanEntry;
 	try {
-		cleanEntry = JSON.parse(JSON.stringify(entry));
+		cleanEntry = structuredClone(entry);
 	} catch (error) {
 		console.error("Failed to serialize offline customer", error);
 		throw error;
@@ -232,7 +232,7 @@ export function saveStoredValueSnapshot(
 		if (!key.trim() || !Array.isArray(sources)) {
 			return;
 		}
-		const cleanSources = JSON.parse(JSON.stringify(sources));
+		const cleanSources = structuredClone(sources);
 		const availableAmount = cleanSources.reduce(
 			(sum: number, row: AnyRecord) => sum + Number(row?.total_credit || 0),
 			0,
@@ -287,7 +287,7 @@ export function saveGiftCardSnapshot(giftCardCode: string, snapshot: AnyRecord) 
 		}
 		const cache = memory.gift_card_snapshot_cache || {};
 		cache[code] = {
-			...JSON.parse(JSON.stringify(snapshot || {})),
+			...structuredClone(snapshot || {}),
 			timestamp: Date.now(),
 		};
 		memory.gift_card_snapshot_cache = cache;
