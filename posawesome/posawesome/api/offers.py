@@ -66,7 +66,7 @@ def get_offers(profile):
     data = (
         frappe.db.sql(
             """
-        SELECT name, offer_applied, auto, min_qty, max_qty, min_amt, max_amt, discount_type, rate, discount_amount, discount_percentage
+        SELECT name, auto, min_qty, max_qty, min_amt, max_amt, discount_type, rate, discount_amount, discount_percentage
         FROM `tabPOS Offer`
         WHERE
         disable = 0 AND
@@ -95,7 +95,7 @@ def get_offers(profile):
             inferred_discount_type = _infer_discount_type_from_values(offer)
             if inferred_discount_type:
                 offer["discount_type"] = inferred_discount_type
-        offer = _normalize_discount_fields(offer)
+        _normalize_discount_fields(offer)
 
     promotional_scheme_offers = _get_promotional_scheme_offers(pos_profile) or []
 

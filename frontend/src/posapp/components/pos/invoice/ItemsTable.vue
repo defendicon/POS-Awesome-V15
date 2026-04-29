@@ -321,6 +321,7 @@ const handleQtyUpdate = (item: any, newQty: any) => {
 const handleRateUpdate = (item: any, newRate: any) => {
 	props.setFormatedCurrency(item, "rate", null, false, { target: { value: newRate } });
 	props.calcPrices(item, newRate, { target: { id: "rate" } });
+	invoiceStore.upsertItem(item);
 };
 
 const handleDiscountPercentUpdate = (item: any, newDiscount: any) => {
@@ -328,6 +329,7 @@ const handleDiscountPercentUpdate = (item: any, newDiscount: any) => {
 		target: { value: newDiscount },
 	});
 	props.calcPrices(item, newDiscount, { target: { id: "discount_percentage" } });
+	invoiceStore.upsertItem(item);
 };
 
 const handleDiscountAmountUpdate = (item: any, newDiscount: any) => {
@@ -335,6 +337,7 @@ const handleDiscountAmountUpdate = (item: any, newDiscount: any) => {
 		target: { value: newDiscount },
 	});
 	props.calcPrices(item, newDiscount, { target: { id: "discount_amount" } });
+	invoiceStore.upsertItem(item);
 };
 
 const handleRowClick = (event: any, item: any, toggleExpand: any, internalItem: any) => {
