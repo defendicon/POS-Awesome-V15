@@ -136,6 +136,7 @@ import { useItemsTableSearch } from "../../../composables/pos/items/useItemsTabl
 import { useItemsTableDragDrop } from "../../../composables/pos/items/useItemsTableDragDrop";
 import {
 	DATA_TABLE_EXPAND_COLUMN,
+	getCartTableItemHeight,
 	useItemsTableResponsive,
 } from "../../../composables/pos/items/useItemsTableResponsive";
 import { useItemsTableMerge } from "../../../composables/pos/items/useItemsTableMerge";
@@ -254,10 +255,11 @@ const finalVisibleColumns = computed(() => [
 const virtualScrollConfig = computed(() => {
 	const itemCount = items.value?.length || 0;
 	const height = containerHeight.value || 600;
+	const itemHeight = getCartTableItemHeight(breakpoint.value);
 
 	return {
-		itemHeight: tableDensity.value === "compact" ? 48 : tableDensity.value === "comfortable" ? 72 : 60,
-		itemsPerPage: Math.max(20, Math.ceil(height / 60) + 5),
+		itemHeight,
+		itemsPerPage: Math.max(20, Math.ceil(height / itemHeight) + 5),
 		bufferSize: itemCount > 1000 ? 20 : itemCount > 500 ? 15 : 10,
 	};
 });

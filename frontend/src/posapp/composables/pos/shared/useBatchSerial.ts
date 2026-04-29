@@ -214,18 +214,6 @@ export function useBatchSerial() {
 			}
 		});
 
-		console.debug("[POS BatchFlow] Calculated batch availability", {
-			item_code: item?.item_code,
-			row_id: item?.posa_row_id,
-			batches: normalized_batch_data.map((batch) => ({
-				batch_no: batch.batch_no,
-				available_qty: batch.available_qty,
-				remaining_qty: batch.remaining_qty,
-				used_qty: batch.used_qty,
-				is_expired: batch.is_expired,
-			})),
-		});
-
 		return normalized_batch_data;
 	};
 
@@ -267,13 +255,6 @@ export function useBatchSerial() {
 			item.actual_batch_qty = batch_to_use.available_qty;
 			item.batch_no_expiry_date = batch_to_use.expiry_date;
 			item.batch_no_is_expired = batch_to_use.is_expired;
-			console.debug("[POS BatchFlow] Selected batch for line", {
-				item_code: item?.item_code,
-				row_id: item?.posa_row_id,
-				batch_no: item.batch_no,
-				available_qty: batch_to_use.available_qty,
-				update,
-			});
 
 			const parsedBatchPrice = Number(batch_to_use.batch_price);
 			const hasBatchPrice =

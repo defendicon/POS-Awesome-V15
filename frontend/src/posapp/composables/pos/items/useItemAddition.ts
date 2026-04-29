@@ -39,9 +39,6 @@ export function useItemAddition() {
 
 	const { expandBundle } = useItemBundles() as any;
 	const sharedBatchSerial = useBatchSerial();
-	const logBatchFlow = (message: string, payload?: any) => {
-		console.debug(`[POS BatchFlow] ${message}`, payload || {});
-	};
 
 	const callSetBatchQty = (
 		context: any,
@@ -199,11 +196,6 @@ export function useItemAddition() {
 		for (const [rowId, data] of currentUpdates) {
 			const item = context.invoiceStore.itemsData.get(rowId);
 			if (item) {
-				console.log("[useItemAddition] Merging item qty", {
-					item_code: item.item_code,
-					old_qty: item.qty,
-					added: data.qty,
-				});
 				item.qty += data.qty;
 				calcStockQty(item, item.qty);
 
@@ -220,9 +212,6 @@ export function useItemAddition() {
 
 		// 2. Process Additions
 		if (currentItems.length) {
-			console.log("[useItemAddition] Adding new items to store", {
-				count: currentItems.length,
-			});
 			const addedItems = context.invoiceStore.addItems(currentItems, 0); // Prepend to top
 
 			addedItems.forEach((item, index) => {
@@ -267,14 +256,6 @@ export function useItemAddition() {
 		if (!Array.isArray(splitItems) || splitItems.length === 0) {
 			return;
 		}
-		logBatchFlow("Adding split items directly", {
-			count: splitItems.length,
-			items: splitItems.map((entry: any) => ({
-				item_code: entry?.item_code,
-				batch_no: entry?.batch_no,
-				qty: entry?.qty,
-			})),
-		});
 
 		if (context.invoiceStore) {
 			const added = context.invoiceStore.addItems(splitItems, 0);
@@ -327,15 +308,6 @@ export function useItemAddition() {
 				item.actual_qty <= 0 &&
 				!allowNegativeStock
 			) {
-				console.debug("POS stock gate: item blocked", {
-					item_code: item.item_code,
-					actual_qty: item.actual_qty,
-					block_sale_beyond_available_qty: blockSale,
-					allow_negative_stock: allowNegativeStock,
-					item_allow_negative_stock: parseBooleanSetting(
-						item.allow_negative_stock,
-					),
-				});
 				toastStore.show({
 					title: __("Item is out of stock"),
 					detail: __(
@@ -447,12 +419,6 @@ export function useItemAddition() {
 							});
 							remaining_qty -= take;
 						}
-						logBatchFlow("Batch allocation prepared", {
-							item_code: new_item.item_code,
-							requested_qty: new_item.qty,
-							allocations,
-							remaining_qty,
-						});
 
 						// If we still have remainder but ran out of batches, add it to the last allocation
 						if (remaining_qty > 0) {
@@ -461,14 +427,6 @@ export function useItemAddition() {
 									allocations[allocations.length - 1];
 								if (lastAllocation) {
 									lastAllocation.qty += remaining_qty;
-									logBatchFlow(
-										"Insufficient batch availability, keeping remainder on last allocation",
-										{
-											item_code: new_item.item_code,
-											remainder: remaining_qty,
-											last_batch: lastAllocation.batch,
-										},
-									);
 								}
 							} else {
 								// No usable batches found? Just use standard logic
@@ -554,11 +512,6 @@ export function useItemAddition() {
 						requireBatchMatch,
 					);
 					index = mergeTarget ? mergeTarget.index : -1;
-					logBatchFlow("Re-check merge target", {
-						item_code: mergeProbeItem?.item_code,
-						batch_no: mergeProbeItem?.batch_no || "",
-						found_index: index,
-					});
 				}
 
 				if (index === -1 || context.new_line) {
@@ -615,10 +568,6 @@ export function useItemAddition() {
 
 						// Handle extra items from batch splitting
 						if (extra_items && extra_items.length > 0) {
-							console.log(
-								"[useItemAddition] Adding split batch items",
-								extra_items.length,
-							);
 							extra_items.forEach((split_item) => {
 								context.items.unshift(split_item);
 								// Replicate basic setup for split items

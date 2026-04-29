@@ -290,7 +290,6 @@ export function useScannerInput(options: ScannerInputOptions = {}) {
 		const runScanPipeline = async (code: string) => {
 			const mark = perfMarkStart("pos:scan-handler");
 			try {
-				console.log("Barcode scanned:", code);
 				pendingScanCode.value = code;
 				searchFromScanner.value = true;
 

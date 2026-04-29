@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	buildFinalVisibleColumns,
+	getCartTableItemHeight,
 	getResponsiveVisibleHeaders,
 } from "../src/posapp/composables/pos/items/useItemsTableResponsive";
 
@@ -63,5 +64,14 @@ describe("items table final visible columns", () => {
 			"actions",
 			"data-table-expand",
 		]);
+	});
+
+	it("matches virtual row height to the CSS cell-height breakpoint values", () => {
+		expect(getCartTableItemHeight("xs")).toBe(48);
+		expect(getCartTableItemHeight("sm")).toBe(52);
+		expect(getCartTableItemHeight("md")).toBe(56);
+		expect(getCartTableItemHeight("lg")).toBe(60);
+		expect(getCartTableItemHeight("xl")).toBe(64);
+		expect(getCartTableItemHeight("unknown")).toBe(60);
 	});
 });

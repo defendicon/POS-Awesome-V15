@@ -21,6 +21,18 @@ export const DATA_TABLE_EXPAND_COLUMN: TableHeader = {
 	minWidth: 48,
 };
 
+const CART_TABLE_ITEM_HEIGHT_BY_BREAKPOINT: Record<string, number> = {
+	xs: 48,
+	sm: 52,
+	md: 56,
+	lg: 60,
+	xl: 64,
+};
+
+export function getCartTableItemHeight(breakpoint: string) {
+	return CART_TABLE_ITEM_HEIGHT_BY_BREAKPOINT[breakpoint] || 60;
+}
+
 export function getResponsiveVisibleHeaders(
 	headers: TableHeader[],
 	width: number,
