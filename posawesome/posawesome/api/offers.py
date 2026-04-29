@@ -137,7 +137,7 @@ def _get_promotional_scheme_offers(pos_profile):
     offers = []
     for row in promotional_schemes:
         try:
-            scheme = frappe.get_doc("Promotional Scheme", row.name)
+            scheme = frappe.get_cached_doc("Promotional Scheme", row.name)
         except Exception:
             frappe.log_error(
                 frappe.get_traceback(),
