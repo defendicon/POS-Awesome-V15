@@ -141,6 +141,15 @@ export function useItemSearch() {
 	};
 
 	/**
+	 * Updates the search indexes when items change.
+	 * Invalidates the search cache to prevent stale results.
+	 * @param {Array} items - The updated list of items
+	 */
+	const updateIndexes = (_items: SearchItem[]) => {
+		searchCache.clear();
+	};
+
+	/**
 	 * Clears the internal search cache.
 	 */
 	const clearSearchCache = () => {
@@ -292,6 +301,7 @@ export function useItemSearch() {
 	return {
 		showOnlyBarcodeItems,
 		memoizedSearch,
+		updateIndexes,
 		clearSearchCache,
 		fetchServerItemsTimestamp,
 		filterAndPaginate,
