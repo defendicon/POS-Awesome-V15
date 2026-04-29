@@ -42,7 +42,7 @@
  * composable so that offer application can propagate changes through the shared
  * item detail pipeline without a circular import.
  */
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onUnmounted } from "vue";
 import { useInvoiceStore } from "../../../stores/invoiceStore";
 import { useUIStore } from "../../../stores/uiStore";
 import { useToastStore } from "../../../stores/toastStore";
@@ -90,6 +90,8 @@ export function useInvoiceOffers() {
 
 	// Watch for changes that should trigger offer evaluation
 	// We watch metadata specifically because it is "touched" whenever items are modified in the store
+	// Shallow watch only — fires on array element additions/removals and metadata reference changes,
+	// but does NOT deep-traverse item objects on every field mutation (avoids O(n×m) traversal cost).
 	watch(
 		[items, posOffers, posa_coupons, () => invoiceStore.metadata],
 		() => {
@@ -98,7 +100,6 @@ export function useInvoiceOffers() {
 			);
 			scheduleOfferRefresh();
 		},
-		{ deep: true },
 	);
 
 	// Private state for refresh logic
@@ -109,6 +110,21 @@ export function useInvoiceOffers() {
 	const _lastAppliedOffersDigest = ref<string | null>(null);
 	const _cachedOfferResults = ref<Map<string, any>>(new Map());
 	const _manuallySuppressedAutoOffers = ref<Set<string>>(new Set());
+
+	// Cancel any pending RAF/setTimeout on unmount to prevent callbacks firing in a dead context
+	onUnmounted(() => {
+		if (_offerRefreshHandle != null) {
+			if (
+				typeof window !== "undefined" &&
+				typeof window.cancelAnimationFrame === "function"
+			) {
+				window.cancelAnimationFrame(_offerRefreshHandle);
+			} else {
+				clearTimeout(_offerRefreshHandle);
+			}
+			_offerRefreshHandle = null;
+		}
+	});
 
 	// Computed properties matching Invoice.vue context
 	const Total = computed(() => invoiceStore.grossTotal);
