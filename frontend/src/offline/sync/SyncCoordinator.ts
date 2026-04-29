@@ -126,7 +126,7 @@ export class SyncCoordinator {
 	private lastRunSummary: SyncTriggerRunSummary | null = null;
 
 	constructor(options: SyncCoordinatorOptions = {}) {
-		this.concurrency = Math.max(1, options.concurrency || 1);
+		this.concurrency = Math.max(1, options.concurrency || 2);
 		this.resources =
 			options.resources?.map((resource) => ({
 				...resource,

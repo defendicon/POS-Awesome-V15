@@ -10,34 +10,43 @@ export async function fetchItemStockQuantities(
 ) {
 	const allItems: AnyRecord[] = [];
 	try {
+		const chunks: AnyRecord[][] = [];
 		for (let i = 0; i < items.length; i += chunkSize) {
-			const chunk = items.slice(i, i + chunkSize);
-			const response = await new Promise<AnyRecord[]>(
-				(resolve, reject) => {
-					frappe.call({
-						method: "posawesome.posawesome.api.items.get_items_details",
-						args: {
-							pos_profile: JSON.stringify(pos_profile),
-							items_data: JSON.stringify(chunk),
-						},
-						freeze: false,
-						callback: function (r) {
-							if (r.message) {
-								resolve(r.message);
-							} else {
-								reject(new Error("No response from server"));
-							}
-						},
-						error: function (err) {
-							reject(err);
-						},
-					});
-				},
-			);
+			chunks.push(items.slice(i, i + chunkSize));
+		}
+
+		const responses = await Promise.all(
+			chunks.map(
+				(chunk) =>
+					new Promise<AnyRecord[]>((resolve, reject) => {
+						frappe.call({
+							method: "posawesome.posawesome.api.items.get_items_details",
+							args: {
+								pos_profile: JSON.stringify(pos_profile),
+								items_data: JSON.stringify(chunk),
+							},
+							freeze: false,
+							callback: function (r) {
+								if (r.message) {
+									resolve(r.message);
+								} else {
+									reject(new Error("No response from server"));
+								}
+							},
+							error: function (err) {
+								reject(err);
+							},
+						});
+					}),
+			),
+		);
+
+		for (const response of responses) {
 			if (response) {
 				allItems.push(...response);
 			}
 		}
+
 		return allItems;
 	} catch (error) {
 		console.error("Failed to fetch item stock quantities:", error);
