@@ -138,7 +138,7 @@ def _search_delivery_notes(company, currency, delivery_note_name=None):
             "modified",
             "modified_by",
         ],
-        limit_page_length=0,
+        limit_page_length=100,
         order_by="modified desc",
     )
     return [_serialize_source_record("delivery", row) for row in rows]
@@ -264,7 +264,7 @@ def list_source_documents(
             pos_profile=pos_profile,
             cashier=cashier,
             is_supervisor=is_supervisor,
-            limit_page_length=0,
+            limit_page_length=100,
         )
         return [_serialize_source_record("invoice", row) for row in rows]
 
