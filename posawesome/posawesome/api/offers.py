@@ -66,7 +66,7 @@ def get_offers(profile):
     data = (
         frappe.db.sql(
             """
-        SELECT *
+        SELECT name, row_id, offer_applied, auto, min_qty, max_qty, min_amt, max_amt, discount_type, rate, discount_amount, discount_percentage
         FROM `tabPOS Offer`
         WHERE
         disable = 0 AND
@@ -115,6 +115,7 @@ def _get_promotional_scheme_offers(pos_profile):
     values = {"company": pos_profile.company, "date": date}
 
     try:
+        # Batch fetch all promotional scheme names in a single query (eliminates N+1 on scheme fetching)
         promotional_schemes = frappe.db.sql(
             """
             SELECT name
