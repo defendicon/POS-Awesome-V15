@@ -17,8 +17,9 @@
  * ## Totals
  * `totalQty`, `grossTotal`, and `discountTotal` are maintained as separate refs.
  * Operations that add or remove rows call `recalculateTotals()` immediately. Incremental
- * field edits (detected by a deep watcher on `itemsData`) are debounced through
- * `triggerUpdateTotals` (50 ms) to avoid thrashing during rapid user input.
+ * field edits (detected by watching `itemsDataVersion`, a counter incremented on every
+ * `itemsData` mutation) are debounced through `triggerUpdateTotals` (50 ms) to avoid
+ * thrashing during rapid user input.
  *
  * ## Sticky fields
  * Discount and delivery-charge fields that should survive an invoice reset are stored as
@@ -73,6 +74,10 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	// Normalized state: keys array + items map
 	const itemOrder = ref<string[]>([]);
 	const itemsData = reactive(new Map<string, CartItem>());
+
+	// Version counter incremented on every itemsData mutation; watched instead of
+	// deep-watching the Map to avoid O(n) traversal on every field change.
+	const itemsDataVersion = ref(0);
 
 	const packedItems = ref<any[]>([]);
 	const metadata = ref<InvoiceMetadata>({
@@ -315,6 +320,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 			});
 		}
 		itemOrder.value = order;
+		itemsDataVersion.value++;
 		touch();
 		recalculateTotals(); // Immediate update on set
 	};
@@ -345,6 +351,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 
 		const cloned = cloneItem(item);
 		itemsData.set(rowId, cloned);
+		itemsDataVersion.value++;
 
 		if (index >= 0 && index < itemOrder.value.length) {
 			itemOrder.value.splice(index, 0, rowId);
@@ -383,6 +390,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		});
 
 		if (addedIds.length > 0) {
+			itemsDataVersion.value++;
 			if (index >= 0 && index < itemOrder.value.length) {
 				itemOrder.value.splice(index, 0, ...addedIds);
 			} else if (index === 0) {
@@ -424,6 +432,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 			itemOrder.value[index] = rowId;
 		}
 		itemsData.set(rowId, cloneItem(item));
+		itemsDataVersion.value++;
 		touch();
 		triggerUpdateTotals();
 	};
@@ -453,6 +462,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 			const existing = itemsData.get(rowId);
 			if (existing) {
 				Object.assign(existing, item);
+				itemsDataVersion.value++;
 			}
 			touch();
 		} else {
@@ -475,6 +485,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 
 		if (itemsData.has(rowId)) {
 			itemsData.delete(rowId);
+			itemsDataVersion.value++;
 			const idx = itemOrder.value.indexOf(rowId);
 			if (idx !== -1) {
 				itemOrder.value.splice(idx, 1);
@@ -492,6 +503,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		if (itemOrder.value.length > 0) {
 			itemOrder.value = [];
 			itemsData.clear();
+			itemsDataVersion.value++;
 			touch();
 			totalQty.value = 0;
 			grossTotal.value = 0;
@@ -577,15 +589,12 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		return map;
 	});
 
-	// Watch deep changes in the map values
-	watch(
-		itemsData,
-		() => {
-			touch();
-			triggerUpdateTotals();
-		},
-		{ deep: true },
-	);
+	// Watch itemsDataVersion (a plain number ref) instead of deep-watching the Map.
+	// This fires once per mutation batch without traversing every key/value on each change.
+	watch(itemsDataVersion, () => {
+		touch();
+		triggerUpdateTotals();
+	});
 
 	return {
 		invoiceDoc,
