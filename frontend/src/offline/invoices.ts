@@ -18,6 +18,7 @@ import {
 type AnyRecord = Record<string, any>;
 
 const INVOICE_ENTITY: OfflineEntityType = "invoice";
+const SYNC_CONCURRENCY = 3;
 
 const asBoolean = (value: any): boolean => {
 	return (
@@ -226,45 +227,65 @@ export async function syncOfflineInvoices() {
 		let synced = 0;
 		let drafted = 0;
 
-		for (const entry of claimedEntries) {
-			const queuedInvoice = entry.payload;
-			try {
-				await frappe.call({
-					method: "posawesome.posawesome.api.invoices.submit_invoice",
-					args: {
-						invoice: queuedInvoice.invoice,
-						data: queuedInvoice.data,
-					},
-				});
-				synced += 1;
-				await markWriteQueueEntrySynced(
-					INVOICE_ENTITY,
-					Number(entry.queue_id),
-					entry.last_attempt_at,
-				);
-			} catch (error) {
-				console.error("Failed to submit invoice, saving as draft", error);
-				try {
-					await frappe.call({
-						method: "posawesome.posawesome.api.invoices.update_invoice",
-						args: { data: queuedInvoice.invoice },
-					});
-					drafted += 1;
-					await markWriteQueueEntrySynced(
-						INVOICE_ENTITY,
-						Number(entry.queue_id),
-						entry.last_attempt_at,
-					);
-				} catch (draftError) {
-					console.error("Failed to save invoice as draft", draftError);
-					await markWriteQueueEntryFailed(
-						INVOICE_ENTITY,
-						Number(entry.queue_id),
-						draftError,
-						entry.last_attempt_at,
-					);
+		// Process invoices in batches with concurrency limit
+		for (let i = 0; i < claimedEntries.length; i += SYNC_CONCURRENCY) {
+			const batch = claimedEntries.slice(i, i + SYNC_CONCURRENCY);
+			const results = await Promise.allSettled(
+				batch.map(async (entry) => {
+					const queuedInvoice = entry.payload;
+					try {
+						await frappe.call({
+							method: "posawesome.posawesome.api.invoices.submit_invoice",
+							args: {
+								invoice: queuedInvoice.invoice,
+								data: queuedInvoice.data,
+							},
+						});
+						await markWriteQueueEntrySynced(
+							INVOICE_ENTITY,
+							Number(entry.queue_id),
+							entry.last_attempt_at,
+						);
+						return { status: "synced", entry };
+					} catch (error) {
+						console.error("Failed to submit invoice, saving as draft", error);
+						try {
+							await frappe.call({
+								method: "posawesome.posawesome.api.invoices.update_invoice",
+								args: { data: queuedInvoice.invoice },
+							});
+							await markWriteQueueEntrySynced(
+								INVOICE_ENTITY,
+								Number(entry.queue_id),
+								entry.last_attempt_at,
+							);
+							return { status: "drafted", entry };
+						} catch (draftError) {
+							console.error("Failed to save invoice as draft", draftError);
+							await markWriteQueueEntryFailed(
+								INVOICE_ENTITY,
+								Number(entry.queue_id),
+								draftError,
+								entry.last_attempt_at,
+							);
+							throw draftError;
+						}
+					}
+				}),
+			);
+
+			// Process results and count successes/failures
+			results.forEach((result) => {
+				if (result.status === "fulfilled" && result.value) {
+					if (result.value.status === "synced") {
+						synced += 1;
+					} else if (result.value.status === "drafted") {
+						drafted += 1;
+					}
+				} else if (result.status === "rejected") {
+					console.error("Invoice batch item rejected:", result.reason);
 				}
-			}
+			});
 		}
 
 		if (synced > 0 && drafted === 0 && getPendingOfflineInvoiceCount() === 0) {

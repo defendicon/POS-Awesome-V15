@@ -15,6 +15,7 @@ import {
 type AnyRecord = Record<string, any>;
 
 const PAYMENT_ENTITY: OfflineEntityType = "payment";
+const SYNC_CONCURRENCY = 3;
 
 function prepareOfflinePaymentEntry(entry: AnyRecord) {
 	const nextEntry = JSON.parse(JSON.stringify(entry));
@@ -82,27 +83,43 @@ export async function syncOfflinePayments() {
 
 	let synced = 0;
 
-	for (const entry of claimedEntries) {
-		try {
-			await frappe.call({
-				method: "posawesome.posawesome.api.payment_entry.process_pos_payment",
-				args: entry.payload.args,
-			});
-			synced += 1;
-			await markWriteQueueEntrySynced(
-				PAYMENT_ENTITY,
-				Number(entry.queue_id),
-				entry.last_attempt_at,
-			);
-		} catch (error) {
-			console.error("Failed to submit payment", error);
-			await markWriteQueueEntryFailed(
-				PAYMENT_ENTITY,
-				Number(entry.queue_id),
-				error,
-				entry.last_attempt_at,
-			);
-		}
+	// Process payments in batches with concurrency limit
+	for (let i = 0; i < claimedEntries.length; i += SYNC_CONCURRENCY) {
+		const batch = claimedEntries.slice(i, i + SYNC_CONCURRENCY);
+		const results = await Promise.allSettled(
+			batch.map(async (entry) => {
+				try {
+					await frappe.call({
+						method: "posawesome.posawesome.api.payment_entry.process_pos_payment",
+						args: entry.payload.args,
+					});
+					await markWriteQueueEntrySynced(
+						PAYMENT_ENTITY,
+						Number(entry.queue_id),
+						entry.last_attempt_at,
+					);
+					return { status: "synced" };
+				} catch (error) {
+					console.error("Failed to submit payment", error);
+					await markWriteQueueEntryFailed(
+						PAYMENT_ENTITY,
+						Number(entry.queue_id),
+						error,
+						entry.last_attempt_at,
+					);
+					throw error;
+				}
+			}),
+		);
+
+		// Process results and count successes
+		results.forEach((result) => {
+			if (result.status === "fulfilled" && result.value?.status === "synced") {
+				synced += 1;
+			} else if (result.status === "rejected") {
+				console.error("Payment batch item rejected:", result.reason);
+			}
+		});
 	}
 
 	return { pending: getPendingOfflinePaymentCount(), synced };
