@@ -165,7 +165,7 @@ def _fetch_customer_info(customer_name, company):
     res["posa_discount"] = customer.posa_discount
     res["name"] = customer.name
     res["customer_name"] = customer.customer_name
-    res["customer_group_price_list"] = frappe.get_value(
+    res["customer_group_price_list"] = frappe.db.get_value(
         "Customer Group", customer.customer_group, "default_price_list"
     )
 
@@ -174,7 +174,7 @@ def _fetch_customer_info(customer_name, company):
         or res.get("customer_group_price_list")
     )
     if effective_price_list:
-        res["price_list_currency"] = frappe.get_value(
+        res["price_list_currency"] = frappe.db.get_value(
             "Price List", effective_price_list, "currency"
         )
     else:

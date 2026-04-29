@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
+from frappe.utils.caching import redis_cache
 
 
 def _resolve_profile_name(pos_profile=None) -> str:
@@ -14,6 +15,7 @@ def _resolve_profile_name(pos_profile=None) -> str:
 	return ""
 
 
+@redis_cache(ttl=300)
 def _get_terminal_users(profile_name: str) -> list[str]:
 	rows = frappe.get_all(
 		"POS Profile User",
