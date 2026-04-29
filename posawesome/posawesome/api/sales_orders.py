@@ -6,7 +6,7 @@ import json
 import frappe
 from erpnext.accounts.party import get_party_account
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
-from frappe.utils import getdate, nowdate
+from frappe.utils import getdate, nowdate, cint
 
 from posawesome.posawesome.api.payment_entry import create_payment_entry
 
@@ -18,7 +18,9 @@ def _payment_entry_job(order_name, payments):
 
 
 @frappe.whitelist()
-def search_orders(company, currency, order_name=None):
+def search_orders(company, currency, order_name=None, limit=50):
+    limit = min(cint(limit) or 50, 200)
+
     filters = {
         "billing_status": ["in", ["Not Billed", "Partly Billed"]],
         "docstatus": 1,
@@ -27,17 +29,20 @@ def search_orders(company, currency, order_name=None):
     }
     if order_name:
         filters["name"] = ["like", f"%{order_name}%"]
-    orders_list = frappe.get_list(
+
+    orders = frappe.get_all(
         "Sales Order",
         filters=filters,
-        fields=["name"],
-        limit_page_length=0,
-        order_by="customer",
+        fields=[
+            "name", "customer", "customer_name", "transaction_date",
+            "delivery_date", "currency", "grand_total", "billing_status",
+            "per_delivered", "per_billed",
+        ],
+        order_by="transaction_date desc",
+        limit_page_length=limit,
     )
-    data = []
-    for order in orders_list:
-        data.append(frappe.get_doc("Sales Order", order["name"]))
-    return data
+
+    return orders
 
 
 def _map_delivery_dates(data):
