@@ -31,6 +31,9 @@ import {
 const PAGE_SIZE = 1000;
 const CUSTOMER_SCOPE_STORAGE_KEY = "posa_customers_profile_scope";
 
+// Debounce timer for customer search to reduce Dexie query thrashing
+let _searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
 function getCustomerProfileScope(profile: POSProfile | null): string {
 	const profileName =
 		typeof profile?.name === "string" ? profile.name.trim() : "";
@@ -150,6 +153,7 @@ function getSerializedProfile(profile: unknown): string | null {
 
 export const useCustomersStore = defineStore("customers", () => {
 	const customers = ref<CustomerSummary[]>([]);
+	const customersIndexMap = new Map<string, number>(); // customer_name → index in customers array
 	const selectedCustomer = ref<string | null>(null);
 	const customerInfo = ref<CustomerInfo>({});
 	const searchTerm = ref("");
@@ -214,10 +218,18 @@ export const useCustomersStore = defineStore("customers", () => {
 		}
 	}
 
+	function rebuildCustomersIndexMap() {
+		customersIndexMap.clear();
+		customers.value.forEach((c, i) => {
+			if (c.name) customersIndexMap.set(c.name, i);
+		});
+	}
+
 	function resetPagination() {
 		page.value = 0;
 		hasMore.value = true;
 		customers.value = [];
+		customersIndexMap.clear();
 	}
 
 	function setPosProfile(profile: unknown) {
@@ -235,9 +247,9 @@ export const useCustomersStore = defineStore("customers", () => {
 			return;
 		}
 
-		const existingIndex = customers.value.findIndex(
-			(customer) => customer.name === customerName,
-		);
+		const existingIndex = customersIndexMap.has(customerName)
+			? customersIndexMap.get(customerName)!
+			: -1;
 		const existing =
 			existingIndex >= 0 ? customers.value[existingIndex] : null;
 		const summary: CustomerSummary = {
@@ -266,7 +278,9 @@ export const useCustomersStore = defineStore("customers", () => {
 			return;
 		}
 
+		const newIdx = customers.value.length;
 		customers.value = [...customers.value, summary];
+		if (customerName) customersIndexMap.set(customerName, newIdx);
 	}
 
 	function setCustomerInfo(info: CustomerInfo) {
@@ -354,8 +368,14 @@ export const useCustomersStore = defineStore("customers", () => {
 
 		if (append) {
 			customers.value = [...customers.value, ...results];
+			// Add new results to the index map
+			const startIdx = customers.value.length - results.length;
+			results.forEach((c, i) => {
+				if (c.name) customersIndexMap.set(c.name, startIdx + i);
+			});
 		} else {
 			customers.value = results;
+			rebuildCustomersIndexMap();
 		}
 
 		hasMore.value = results.length === PAGE_SIZE;
@@ -374,13 +394,21 @@ export const useCustomersStore = defineStore("customers", () => {
 		return performSearch({ append });
 	}
 
+	const debouncedSearchCustomers = (term: string) => {
+		if (_searchDebounceTimer) clearTimeout(_searchDebounceTimer);
+		_searchDebounceTimer = setTimeout(() => {
+			searchCustomers(term);
+		}, 200);
+	};
+
 	async function queueSearch(term: string) {
 		const normalized = normalizeCustomerSearchTerm(term);
 		if (isCustomerBackgroundLoading.value) {
 			pendingCustomerSearch.value = normalized;
 			return null;
 		}
-		return searchCustomers(normalized, false);
+		debouncedSearchCustomers(normalized);
+		return null;
 	}
 
 	async function loadMoreCustomers() {
@@ -684,15 +712,17 @@ export const useCustomersStore = defineStore("customers", () => {
 		if (!customer || !customer.name) {
 			return;
 		}
-		const existingIndex = customers.value.findIndex(
-			(c) => c.name === customer.name,
-		);
+		const existingIndex = customersIndexMap.has(customer.name)
+			? customersIndexMap.get(customer.name)!
+			: -1;
 		if (existingIndex !== -1) {
 			const updated = [...customers.value];
 			updated.splice(existingIndex, 1, customer);
 			customers.value = updated;
 		} else {
+			const newIdx = customers.value.length;
 			customers.value = [...customers.value, customer];
+			if (customer.name) customersIndexMap.set(customer.name, newIdx);
 		}
 		await setCustomerStorage([customer]);
 		syncBootstrapCustomerReadiness(Math.max(customers.value.length, 1));
