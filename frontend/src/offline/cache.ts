@@ -418,15 +418,13 @@ export async function saveItems(items, scope = "") {
 			try {
 				await db.table("items").bulkPut(scopedItems);
 			} catch (error) {
-				// Dexie BulkError provides per-item failure details via error.failures
 				if (error instanceof Dexie.BulkError) {
+					const bulkErr = error as Dexie.BulkError;
 					console.warn(
-						`bulkPut: ${error.failures.length} items failed out of ${scopedItems.length}`,
-						error.failures,
+						`bulkPut: ${bulkErr.failures.length} items failed out of ${scopedItems.length}`,
+						bulkErr.failures,
 					);
-					// Continue processing - partial writes are acceptable here
 				} else {
-					// Unexpected error, not a BulkError - rethrow
 					throw error;
 				}
 			}
