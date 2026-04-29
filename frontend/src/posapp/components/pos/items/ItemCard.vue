@@ -12,6 +12,7 @@
 				class="card-item-image"
 				aspect-ratio="1"
 				:alt="item.item_name"
+				loading="lazy"
 			>
 				<template #placeholder>
 					<div class="image-placeholder">
