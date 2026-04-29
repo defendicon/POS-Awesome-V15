@@ -66,7 +66,7 @@ def get_offers(profile):
     data = (
         frappe.db.sql(
             """
-        SELECT name, row_id, offer_applied, auto, min_qty, max_qty, min_amt, max_amt, discount_type, rate, discount_amount, discount_percentage
+        SELECT name, offer_applied, auto, min_qty, max_qty, min_amt, max_amt, discount_type, rate, discount_amount, discount_percentage
         FROM `tabPOS Offer`
         WHERE
         disable = 0 AND
