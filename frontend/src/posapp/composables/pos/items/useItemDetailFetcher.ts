@@ -17,6 +17,22 @@ import { buildItemDetailsRequestIdentity } from "./detailFetcher/requestIdentity
 
 declare const frappe: any;
 
+function parseBooleanSetting(value: any): boolean {
+	if (typeof value === "string") {
+		const normalized = value.trim().toLowerCase();
+		return normalized === "1" || normalized === "true" || normalized === "yes";
+	}
+	if (typeof value === "number") {
+		return value === 1;
+	}
+	return Boolean(value);
+}
+
+function hasNonZeroPrice(value: any): boolean {
+	const numeric = Number(value ?? 0);
+	return Number.isFinite(numeric) && numeric !== 0;
+}
+
 type ItemDetailRequestCache = {
 	key: string | null;
 	promise: Promise<any> | null;
@@ -78,6 +94,12 @@ export function useItemDetailFetcher() {
 		const profileName = ctx.pos_profile?.name || "no_profile";
 		const warehouse = ctx.pos_profile?.warehouse || "no_warehouse";
 		return `${profileName}_${warehouse}`;
+	}
+
+	function shouldForceCustomerPriceList() {
+		return parseBooleanSetting(
+			ctx.pos_profile?.posa_force_price_from_customer_price_list,
+		);
 	}
 
 	function cancelItemDetailsRequest() {
@@ -223,12 +245,9 @@ export function useItemDetailFetcher() {
 						saveItemUOMs(item.item_code, det.item_uoms);
 					}
 					if (det.rate !== undefined) {
-						const force =
-							ctx.pos_profile
-								?.posa_force_price_from_customer_price_list !==
-							false;
+						const force = shouldForceCustomerPriceList();
 						const price = det.price_list_rate ?? det.rate ?? 0;
-						if (force || price) {
+						if (force || hasNonZeroPrice(price)) {
 							upd.rate = price;
 							upd.price_list_rate = price;
 							upd.original_rate = price;
@@ -262,13 +281,10 @@ export function useItemDetailFetcher() {
 						saveItemUOMs(item.item_code, updItem.item_uoms);
 					}
 					if (updItem.rate !== undefined) {
-						const force =
-							ctx.pos_profile
-								?.posa_force_price_from_customer_price_list !==
-							false;
+						const force = shouldForceCustomerPriceList();
 						const price =
 							updItem.price_list_rate ?? updItem.rate ?? 0;
-						if (force || price) {
+						if (force || hasNonZeroPrice(price)) {
 							upd.rate = price;
 							upd.price_list_rate = price;
 							upd.original_rate = price;
@@ -368,12 +384,9 @@ export function useItemDetailFetcher() {
 					saveItemUOMs(item.item_code, det.item_uoms);
 				}
 				if (det.rate !== undefined) {
-					const force =
-						ctx.pos_profile
-							?.posa_force_price_from_customer_price_list !==
-						false;
+					const force = shouldForceCustomerPriceList();
 					const price = det.price_list_rate ?? det.rate ?? 0;
-					if (force || price) {
+					if (force || hasNonZeroPrice(price)) {
 						item.rate = price;
 						item.price_list_rate = price;
 						item.original_rate = price;
@@ -492,6 +505,29 @@ export function useItemDetailFetcher() {
 					const updated_item = detailMap.get(item.item_code);
 					if (updated_item) {
 						const prev_qty = item.actual_qty;
+						const syncedPrice =
+							updated_item.price_list_rate ?? updated_item.rate ?? 0;
+						const shouldApplySyncedPrice =
+							shouldForceCustomerPriceList() ||
+							hasNonZeroPrice(syncedPrice);
+						const priceUpdates = shouldApplySyncedPrice
+							? {
+									rate:
+										updated_item.rate !== undefined
+											? updated_item.rate
+											: item.rate,
+									price_list_rate:
+										updated_item.price_list_rate !== undefined
+											? updated_item.price_list_rate
+											: item.price_list_rate,
+									original_rate:
+										updated_item.price_list_rate !== undefined
+											? updated_item.price_list_rate
+											: updated_item.rate !== undefined
+												? updated_item.rate
+												: item.original_rate,
+								}
+							: {};
 
 						updatedItems.push({
 							item: item,
@@ -514,20 +550,7 @@ export function useItemDetailFetcher() {
 									updated_item.item_uoms.length > 0
 										? updated_item.item_uoms
 										: item.item_uoms,
-								rate:
-									updated_item.rate !== undefined
-										? updated_item.rate
-										: item.rate,
-								price_list_rate:
-									updated_item.price_list_rate !== undefined
-										? updated_item.price_list_rate
-										: item.price_list_rate,
-								original_rate:
-									updated_item.price_list_rate !== undefined
-										? updated_item.price_list_rate
-										: updated_item.rate !== undefined
-											? updated_item.rate
-											: item.original_rate,
+								...priceUpdates,
 								currency:
 									updated_item.currency || item.currency,
 								original_currency:

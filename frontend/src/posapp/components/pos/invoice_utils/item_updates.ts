@@ -5,6 +5,28 @@ import { syncReturnDiscountProration } from "./return_discount";
 declare const __: (_text: string, _args?: any[]) => string;
 declare const frappe: any;
 
+function parseBooleanSetting(value: any): boolean {
+	if (typeof value === "string") {
+		const normalized = value.trim().toLowerCase();
+		return normalized === "1" || normalized === "true" || normalized === "yes";
+	}
+	if (typeof value === "number") {
+		return value === 1;
+	}
+	return Boolean(value);
+}
+
+function hasNonZeroPrice(value: any): boolean {
+	const numeric = Number(value ?? 0);
+	return Number.isFinite(numeric) && numeric !== 0;
+}
+
+function shouldForceCustomerPriceList(posProfile: any): boolean {
+	return parseBooleanSetting(
+		posProfile?.posa_force_price_from_customer_price_list,
+	);
+}
+
 export async function update_items_details(context: any, items: any[]) {
 	if (!items?.length) return;
 	if (!context.pos_profile) return;
@@ -70,10 +92,7 @@ export async function update_items_details(context: any, items: any[]) {
 					updated_item.rate !== undefined ||
 					updated_item.price_list_rate !== undefined
 				) {
-					const force =
-						context.pos_profile
-							?.posa_force_price_from_customer_price_list !==
-						false;
+					const force = shouldForceCustomerPriceList(context.pos_profile);
 					const price =
 						updated_item.price_list_rate ?? updated_item.rate ?? 0;
 					const priceCurrency =
@@ -90,7 +109,7 @@ export async function update_items_details(context: any, items: any[]) {
 						!manualLocked;
 
 					if (shouldOverrideRate) {
-						if (force || price) {
+						if (force || hasNonZeroPrice(price)) {
 							if (context._applyPriceListRate)
 								context._applyPriceListRate(
 									item,
@@ -101,7 +120,7 @@ export async function update_items_details(context: any, items: any[]) {
 					} else if (
 						!lockReturnPricing &&
 						!item.price_list_rate &&
-						(force || price)
+						(force || hasNonZeroPrice(price))
 					) {
 						if (context._computePriceConversion) {
 							const converted = context._computePriceConversion(
@@ -372,7 +391,10 @@ export function _applyItemDetailPayload(
 	}
 
 	if (!item.locked_price) {
-		if (forceUpdate || !item.base_rate) {
+		const shouldApplyDetailRate =
+			shouldForceCustomerPriceList(context.pos_profile) ||
+			hasNonZeroPrice(data.price_list_rate);
+		if ((forceUpdate || !item.base_rate) && shouldApplyDetailRate) {
 			const plcConversionRate = context._getPlcConversionRate
 				? context._getPlcConversionRate()
 				: 1;

@@ -5,6 +5,7 @@ type UseItemsSelectorPriceListSyncArgs = {
 	getDefaultPriceList: () => unknown;
 	updatePriceList: (priceList: string) => Promise<unknown> | unknown;
 	getItems: (force: boolean) => Promise<unknown> | unknown;
+	refreshVisibleItems?: (priceList: string) => Promise<unknown> | unknown;
 };
 
 const normalizePriceList = (priceList: unknown) =>
@@ -14,7 +15,7 @@ export function useItemsSelectorPriceListSync({
 	activePriceList,
 	getDefaultPriceList,
 	updatePriceList,
-	getItems,
+	refreshVisibleItems,
 }: UseItemsSelectorPriceListSyncArgs) {
 	const resolveIncomingPriceList = (incomingPriceList: unknown) => {
 		const normalized = normalizePriceList(incomingPriceList);
@@ -30,11 +31,14 @@ export function useItemsSelectorPriceListSync({
 			return;
 		}
 
-		if (activePriceList.value !== nextPriceList) {
-			await updatePriceList(nextPriceList);
+		if (activePriceList.value === nextPriceList) {
+			return;
 		}
 
-		await getItems(true);
+		const updateResult = await updatePriceList(nextPriceList);
+		if (updateResult !== "server-loaded" && refreshVisibleItems) {
+			await refreshVisibleItems(nextPriceList);
+		}
 	};
 
 	return {

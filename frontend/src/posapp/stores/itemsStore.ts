@@ -897,7 +897,9 @@ export const useItemsStore = defineStore("items", () => {
 	};
 
 	const updatePriceList = async (newPriceList: string) => {
-		if (!newPriceList || newPriceList === customerPriceList.value) return;
+		if (!newPriceList || newPriceList === customerPriceList.value) {
+			return "unchanged";
+		}
 
 		customerPriceList.value = newPriceList;
 
@@ -914,14 +916,14 @@ export const useItemsStore = defineStore("items", () => {
 
 			if (priceData && priceData.length > 0) {
 				applyPriceListToItems(priceData);
-			} else {
-				await loadItems({
-					forceServer: true,
-					priceList: newPriceList,
-				});
+				return "cache-applied";
 			}
+
+			clearSearchCache();
+			return "price-list-updated";
 		} catch (error) {
 			console.error("Failed to update price list:", error);
+			return "error";
 		}
 	};
 

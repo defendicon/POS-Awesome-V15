@@ -291,4 +291,24 @@ describe("itemsStore loadItems", () => {
 			expect.anything(),
 		);
 	});
+
+	it("does not full reload the selector when switching to an uncached customer price list", async () => {
+		const store = useItemsStore();
+		const profile = {
+			name: "POS-1",
+			warehouse: "Main WH",
+			selling_price_list: "Retail",
+			currency: "PKR",
+			item_groups: [],
+		} as any;
+
+		await store.initialize(profile);
+		itemServiceMocks.getItems.mockClear();
+
+		const result = await store.updatePriceList("Customer Retail");
+
+		expect(result).toBe("price-list-updated");
+		expect(store.customerPriceList).toBe("Customer Retail");
+		expect(itemServiceMocks.getItems).not.toHaveBeenCalled();
+	});
 });

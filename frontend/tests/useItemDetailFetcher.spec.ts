@@ -104,5 +104,92 @@ describe("useItemDetailFetcher", () => {
 		expect((globalThis as any).frappe.call).toHaveBeenCalledTimes(1);
 		expect(details).toHaveLength(1);
 	});
+
+	it("does not force zero customer price list rates when the force flag is disabled as a string", async () => {
+		getCachedItemDetails.mockResolvedValueOnce({
+			cached: [
+				{
+					item_code: "ITEM-1",
+					actual_qty: 4,
+					rate: "0",
+					price_list_rate: "0",
+				},
+			],
+			missing: [],
+		});
+
+		const fetcher = useItemDetailFetcher();
+		fetcher.registerContext({
+			pos_profile: {
+				name: "POS-TEST",
+				posa_force_price_from_customer_price_list: "0",
+			},
+			active_price_list: "Customer Price List",
+			itemAvailability: null,
+			applyCurrencyConversionToItem: vi.fn(),
+			items: [],
+			displayedItems: [],
+			usesLimitSearch: false,
+			storageAvailable: false,
+		});
+
+		const item: any = {
+			item_code: "ITEM-1",
+			rate: 25,
+			price_list_rate: 25,
+			original_rate: 25,
+		};
+
+		await fetcher.update_items_details([item]);
+
+		expect(item.rate).toBe(25);
+		expect(item.price_list_rate).toBe(25);
+		expect(item.original_rate).toBe(25);
+		expect(item.actual_qty).toBe(4);
+	});
+
+	it("does not force zero fetched rates when the force flag is disabled as a string", async () => {
+		(globalThis as any).frappe.call = vi.fn(async () => ({
+			message: [
+				{
+					item_code: "ITEM-1",
+					actual_qty: 4,
+					rate: "0",
+					price_list_rate: "0",
+					has_batch_no: 0,
+					has_serial_no: 0,
+				},
+			],
+		}));
+
+		const fetcher = useItemDetailFetcher();
+		fetcher.registerContext({
+			pos_profile: {
+				name: "POS-TEST",
+				posa_force_price_from_customer_price_list: "0",
+			},
+			active_price_list: "Customer Price List",
+			itemAvailability: null,
+			applyCurrencyConversionToItem: vi.fn(),
+			items: [],
+			displayedItems: [],
+			usesLimitSearch: false,
+			storageAvailable: false,
+		});
+
+		const item: any = {
+			item_code: "ITEM-1",
+			rate: 25,
+			price_list_rate: 25,
+			original_rate: 25,
+		};
+
+		await fetcher.update_items_details([item], { forceRefresh: true });
+
+		expect(item.rate).toBe(25);
+		expect(item.price_list_rate).toBe(25);
+		expect(item.original_rate).toBe(25);
+		expect(item.actual_qty).toBe(4);
+	});
 });
 

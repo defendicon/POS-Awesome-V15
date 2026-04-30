@@ -8,6 +8,7 @@ describe("useItemsSelectorPriceListSync", () => {
 		const activePriceList = ref("Retail");
 		const updatePriceList = vi.fn(async (priceList: string) => {
 			activePriceList.value = priceList;
+			return "server-loaded";
 		});
 		const getItems = vi.fn(async () => []);
 
@@ -21,7 +22,7 @@ describe("useItemsSelectorPriceListSync", () => {
 		await sync.syncSelectorPriceList(" Wholesale ");
 
 		expect(updatePriceList).toHaveBeenCalledWith("Wholesale");
-		expect(getItems).toHaveBeenCalledWith(true);
+		expect(getItems).not.toHaveBeenCalled();
 	});
 
 	it("falls back to the profile selling price list for blank input", async () => {
@@ -39,7 +40,31 @@ describe("useItemsSelectorPriceListSync", () => {
 		await sync.syncSelectorPriceList("  ");
 
 		expect(updatePriceList).not.toHaveBeenCalled();
-		expect(getItems).toHaveBeenCalledWith(true);
+		expect(getItems).not.toHaveBeenCalled();
+	});
+
+	it("refreshes visible selector items after applying cached price list data", async () => {
+		const activePriceList = ref("Retail");
+		const updatePriceList = vi.fn(async (priceList: string) => {
+			activePriceList.value = priceList;
+			return "cache-applied";
+		});
+		const getItems = vi.fn(async () => []);
+		const refreshVisibleItems = vi.fn(async () => {});
+
+		const sync = useItemsSelectorPriceListSync({
+			activePriceList,
+			getDefaultPriceList: () => "Retail",
+			updatePriceList,
+			getItems,
+			refreshVisibleItems,
+		});
+
+		await sync.syncSelectorPriceList("Wholesale");
+
+		expect(updatePriceList).toHaveBeenCalledWith("Wholesale");
+		expect(getItems).not.toHaveBeenCalled();
+		expect(refreshVisibleItems).toHaveBeenCalledWith("Wholesale");
 	});
 
 	it("does nothing when no incoming or default price list is available", async () => {
