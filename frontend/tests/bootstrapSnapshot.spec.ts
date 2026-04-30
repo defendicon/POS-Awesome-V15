@@ -148,6 +148,45 @@ describe("bootstrap snapshot", () => {
 		).toBe("degraded");
 	});
 
+	it("disables pricing capability when price list item rates are not cached", () => {
+		const result = validateBootstrapSnapshot(
+			buildBootstrapSnapshot({
+				buildVersion: "build-2",
+				profileName: "Main POS",
+				profileModified: "2026-04-08 10:00:00",
+				openingShiftName: "POS-OPEN-1",
+				openingShiftUser: "test@example.com",
+				prerequisites: {
+					pos_profile: "ready",
+					pos_opening_shift: "ready",
+					payment_methods: "ready",
+					items_cache_ready: "ready",
+					customers_cache_ready: "ready",
+					pricing_rules_snapshot: "ready",
+					pricing_rules_context: "ready",
+					tax_inclusive: "ready",
+					price_list_meta_cache: "ready",
+					price_list_prices_cache: "missing",
+				},
+			}),
+			{
+				buildVersion: "build-2",
+				profileName: "Main POS",
+				profileModified: "2026-04-08 10:00:00",
+				sessionUser: "test@example.com",
+			},
+		);
+
+		expect(result.mode).toBe("normal");
+		expect(result.capabilities.canSellOffline).toBe(true);
+		expect(result.capabilities.canApplyPricingOffline).toBe(false);
+		expect(
+			result.capabilitySummaries.find(
+				(summary) => summary.id === "pricing_offline",
+			)?.warningCodes,
+		).toContain("price_list_prices_cache");
+	});
+
 	it("collects expanded prerequisites from cached state", () => {
 		const prerequisites = collectBootstrapPrerequisites({
 			profileName: "POS-1",
@@ -170,6 +209,7 @@ describe("bootstrap snapshot", () => {
 			currencyOptionsCount: 2,
 			exchangeRateCount: 2,
 			priceListMetaReady: true,
+			priceListPricesReady: true,
 			customerAddressesCount: 1,
 			paymentMethodCurrencyCount: 2,
 		});
@@ -193,6 +233,7 @@ describe("bootstrap snapshot", () => {
 		expect(prerequisites.currency_options_cache).toBe("ready");
 		expect(prerequisites.exchange_rate_cache).toBe("ready");
 		expect(prerequisites.price_list_meta_cache).toBe("ready");
+		expect(prerequisites.price_list_prices_cache).toBe("ready");
 		expect(prerequisites.customer_addresses_cache).toBe("ready");
 		expect(prerequisites.payment_method_currency_cache).toBe("ready");
 	});
@@ -208,6 +249,9 @@ describe("bootstrap snapshot", () => {
 			"exchange rate",
 		);
 		expect(formatBootstrapWarning("price_list_meta_cache")).toContain(
+			"price list",
+		);
+		expect(formatBootstrapWarning("price_list_prices_cache")).toContain(
 			"price list",
 		);
 		expect(formatBootstrapWarning("customer_addresses_cache")).toContain(
@@ -235,6 +279,8 @@ describe("bootstrap snapshot", () => {
 					pricing_rules_snapshot: "ready",
 					pricing_rules_context: "ready",
 					tax_inclusive: "ready",
+					price_list_meta_cache: "ready",
+					price_list_prices_cache: "ready",
 					stock_cache_ready: "ready",
 					sales_persons: "missing",
 					item_groups: "missing",

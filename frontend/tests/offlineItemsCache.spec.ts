@@ -144,5 +144,8 @@ describe("offline cache item persistence", () => {
 				price_list_rate: 0,
 			}),
 		]);
+		expect(memory.bootstrap_snapshot?.prerequisites?.price_list_prices_cache).toBe(
+			"ready",
+		);
 	});
 });

@@ -66,6 +66,7 @@ export type BootstrapPrerequisiteCollectionInput = {
 	currencyOptionsCount?: number | boolean | null;
 	exchangeRateCount?: number | boolean | null;
 	priceListMetaReady?: boolean | null;
+	priceListPricesReady?: boolean | null;
 	customerAddressesCount?: number | boolean | null;
 	paymentMethodCurrencyCount?: number | boolean | null;
 };
@@ -205,6 +206,8 @@ const PREREQUISITES_FOR_OFFLINE_PRICING = [
 	"pricing_rules_snapshot",
 	"pricing_rules_context",
 	"tax_inclusive",
+	"price_list_meta_cache",
+	"price_list_prices_cache",
 ];
 
 const PREREQUISITES_FOR_OFFLINE_PRINT = [
@@ -789,6 +792,9 @@ export function collectBootstrapPrerequisites(
 			? "ready"
 			: "missing",
 		price_list_meta_cache: input?.priceListMetaReady ? "ready" : "missing",
+		price_list_prices_cache: input?.priceListPricesReady
+			? "ready"
+			: "missing",
 		customer_addresses_cache: hasPositiveCountOrReadyFlag(
 			input?.customerAddressesCount,
 		)
@@ -915,6 +921,12 @@ function collectBootstrapPrerequisitePatch(
 
 	if (hasOwnKey(input, "priceListMetaReady")) {
 		patch.price_list_meta_cache = input?.priceListMetaReady
+			? "ready"
+			: "missing";
+	}
+
+	if (hasOwnKey(input, "priceListPricesReady")) {
+		patch.price_list_prices_cache = input?.priceListPricesReady
 			? "ready"
 			: "missing";
 	}

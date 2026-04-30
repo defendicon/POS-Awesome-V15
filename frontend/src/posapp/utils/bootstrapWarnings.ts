@@ -80,6 +80,8 @@ export function formatBootstrapWarning(
 			return translate("Offline exchange rate cache is incomplete.");
 		case "price_list_meta_cache":
 			return translate("Offline price list metadata cache is incomplete.");
+		case "price_list_prices_cache":
+			return translate("Offline price list item rates cache is incomplete.");
 		case "customer_addresses_cache":
 			return translate("Offline customer addresses cache is incomplete.");
 		case "payment_method_currency_cache":

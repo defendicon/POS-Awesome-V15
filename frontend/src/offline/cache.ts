@@ -554,6 +554,9 @@ export function savePriceListItems(priceList, items) {
 		};
 		memory.price_list_cache = cache;
 		persist("price_list_cache");
+		refreshBootstrapSnapshotFromCacheState({
+			priceListPricesReady: cleanItems.length > 0,
+		});
 	} catch (e) {
 		console.error("Failed to cache price list items", e);
 	}
@@ -579,6 +582,7 @@ export function clearPriceListCache() {
 	try {
 		memory.price_list_cache = {};
 		persist("price_list_cache");
+		refreshBootstrapSnapshotFromCacheState({ priceListPricesReady: false });
 	} catch (e) {
 		console.error("Failed to clear price list cache", e);
 	}
@@ -619,6 +623,7 @@ export function mergeCachedPriceListItems(
 		};
 		memory.price_list_cache = cache;
 		persist("price_list_cache");
+		refreshBootstrapSnapshotFromCacheState({ priceListPricesReady: true });
 	} catch (e) {
 		console.error("Failed to merge cached price list items", e);
 	}

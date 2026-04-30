@@ -236,13 +236,8 @@ export const useItemsStore = defineStore("items", () => {
 		return true;
 	};
 
-	const shouldFetchSearchFromServerForPriceList = () => {
-		const active = String(activePriceList.value || "").trim();
-		const profilePriceList = String(
-			posProfile.value?.selling_price_list || "",
-		).trim();
-		return Boolean(active && active !== profilePriceList);
-	};
+	const shouldFetchSearchFromServerForPriceList = () =>
+		Boolean(String(activePriceList.value || "").trim());
 
 	const getCacheScope = () => {
 		const profileName = posProfile.value?.name || "no_profile";

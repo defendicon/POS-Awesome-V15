@@ -369,4 +369,43 @@ describe("itemsStore loadItems", () => {
 			]),
 		);
 	});
+
+	it("server-prices searched rows even when the selected price list is the profile default", async () => {
+		const store = useItemsStore();
+		const profile = {
+			name: "POS-1",
+			warehouse: "Main WH",
+			selling_price_list: "Aman Ali Dollar Store",
+			currency: "PKR",
+			item_groups: [],
+		} as any;
+
+		await store.initialize(profile);
+		itemServiceMocks.getItems.mockClear();
+		itemServiceMocks.getItems.mockResolvedValueOnce([
+			{
+				item_code: "ZINC-1",
+				item_name: "Zinc Carbonate 400g",
+				item_group: "All Item Groups",
+				rate: 0,
+				price_list_rate: 0,
+			},
+		]);
+
+		const results = await store.searchItems("zinc");
+
+		expect(itemServiceMocks.getItems).toHaveBeenCalledWith(
+			expect.objectContaining({
+				price_list: "Aman Ali Dollar Store",
+				search_value: "zinc",
+			}),
+			expect.any(AbortSignal),
+		);
+		expect(results[0]).toEqual(
+			expect.objectContaining({
+				item_code: "ZINC-1",
+				price_list_rate: 0,
+			}),
+		);
+	});
 });
