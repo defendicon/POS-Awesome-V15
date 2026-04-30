@@ -594,11 +594,8 @@ export function mergeCachedPriceListItems(
 		}
 		const cache = memory.price_list_cache || {};
 		const cachedEntry = cache[priceList];
-		if (!cachedEntry || !Array.isArray(cachedEntry.items)) {
-			return;
-		}
 
-		const mergedItems = Array.isArray(cachedEntry.items)
+		const mergedItems = Array.isArray(cachedEntry?.items)
 			? [...cachedEntry.items]
 			: [];
 		const itemIndex = new Map(

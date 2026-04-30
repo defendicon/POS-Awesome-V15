@@ -44,7 +44,12 @@ vi.mock("../src/offline/db", () => {
 	};
 });
 
-import { saveItems } from "../src/offline/cache";
+import {
+	getCachedPriceListItems,
+	mergeCachedPriceListItems,
+	saveItems,
+} from "../src/offline/cache";
+import { memory } from "../src/offline/db";
 
 describe("offline cache item persistence", () => {
 	beforeEach(() => {
@@ -52,6 +57,7 @@ describe("offline cache item persistence", () => {
 		put.mockReset();
 		toArray.mockReset();
 		anyOf.mockClear();
+		memory.price_list_cache = {};
 	});
 
 	it("merges partial detail updates with existing scoped item rows", async () => {
@@ -125,5 +131,18 @@ describe("offline cache item persistence", () => {
 				name_keywords: ["fallback", "item"],
 			}),
 		);
+	});
+
+	it("creates price list cache entries when merging searched customer price list rows", () => {
+		mergeCachedPriceListItems("Customer Retail", [
+			{ item_code: "ITEM-1", price_list_rate: 0 },
+		]);
+
+		expect(getCachedPriceListItems("Customer Retail")).toEqual([
+			expect.objectContaining({
+				item_code: "ITEM-1",
+				price_list_rate: 0,
+			}),
+		]);
 	});
 });

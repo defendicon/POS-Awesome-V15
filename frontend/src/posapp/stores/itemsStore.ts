@@ -92,6 +92,17 @@ export const useItemsStore = defineStore("items", () => {
 		return await fn(priceList);
 	};
 
+	const mergeCachedPriceListItemsCompat = async (
+		priceList: string,
+		itemList: Item[],
+	) => {
+		const fn = await getOfflineFn("mergeCachedPriceListItems");
+		if (typeof fn !== "function") {
+			return;
+		}
+		fn(priceList, itemList);
+	};
+
 	const syncBootstrapItemReadiness = (count: number | boolean) => {
 		refreshBootstrapSnapshotFromCacheState({
 			itemsCount: count,
@@ -223,6 +234,14 @@ export const useItemsStore = defineStore("items", () => {
 			return false;
 		}
 		return true;
+	};
+
+	const shouldFetchSearchFromServerForPriceList = () => {
+		const active = String(activePriceList.value || "").trim();
+		const profilePriceList = String(
+			posProfile.value?.selling_price_list || "",
+		).trim();
+		return Boolean(active && active !== profilePriceList);
 	};
 
 	const getCacheScope = () => {
@@ -618,6 +637,10 @@ export const useItemsStore = defineStore("items", () => {
 					posProfile.value,
 					effectivePriceList,
 				);
+				await mergeCachedPriceListItemsCompat(
+					effectivePriceList,
+					fetchedItems,
+				);
 			}
 
 			updatePerformanceMetrics(startTime);
@@ -735,6 +758,30 @@ export const useItemsStore = defineStore("items", () => {
 			filteredItems.value = cached;
 			performanceMetrics.value.searchHits++;
 			return cached;
+		}
+
+		if (shouldFetchSearchFromServerForPriceList()) {
+			try {
+				await loadItems({
+					searchValue: term,
+					groupFilter: itemGroup.value,
+					forceServer: true,
+				});
+
+				const serverResults = filterItemsByGroup(
+					items.value,
+					itemGroup.value,
+				);
+				filteredItems.value = serverResults;
+				setCachedSearchResult(cacheKey, serverResults);
+				performanceMetrics.value.searchMisses++;
+
+				return serverResults;
+			} catch (error) {
+				console.error("Search failed:", error);
+				performanceMetrics.value.searchMisses++;
+				return [];
+			}
 		}
 
 		try {

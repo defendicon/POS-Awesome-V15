@@ -9,7 +9,17 @@ const offlineMocks = vi.hoisted(() => ({
 	refreshBootstrapSnapshotFromCacheState: vi.fn(),
 	getStoredItemsCountByScope: vi.fn(async () => 0),
 	getAllStoredItems: vi.fn(async () => []),
+	searchStoredItems: vi.fn(async () => [
+		{
+			item_code: "ITEM-2",
+			item_name: "Customer Item",
+			item_group: "All Item Groups",
+			rate: 120,
+			price_list_rate: 120,
+		},
+	]),
 	getCachedPriceListItems: vi.fn(async () => null),
+	mergeCachedPriceListItems: vi.fn(),
 }));
 
 const itemsSyncMocks = vi.hoisted(() => ({
@@ -30,7 +40,9 @@ vi.mock("../src/offline/index", () => ({
 		offlineMocks.refreshBootstrapSnapshotFromCacheState,
 	getStoredItemsCountByScope: offlineMocks.getStoredItemsCountByScope,
 	getAllStoredItems: offlineMocks.getAllStoredItems,
+	searchStoredItems: offlineMocks.searchStoredItems,
 	getCachedPriceListItems: offlineMocks.getCachedPriceListItems,
+	mergeCachedPriceListItems: offlineMocks.mergeCachedPriceListItems,
 }));
 
 vi.mock("../src/posapp/composables/pos/items/store/useItemsCache", () => ({
@@ -310,5 +322,51 @@ describe("itemsStore loadItems", () => {
 		expect(result).toBe("price-list-updated");
 		expect(store.customerPriceList).toBe("Customer Retail");
 		expect(itemServiceMocks.getItems).not.toHaveBeenCalled();
+	});
+
+	it("searches the server with the active customer price list instead of showing default cached rates", async () => {
+		const store = useItemsStore();
+		const profile = {
+			name: "POS-1",
+			warehouse: "Main WH",
+			selling_price_list: "Retail",
+			currency: "PKR",
+			item_groups: [],
+		} as any;
+
+		await store.initialize(profile);
+		await store.updatePriceList("Customer Retail");
+		itemServiceMocks.getItems.mockClear();
+		itemServiceMocks.getItems.mockResolvedValueOnce([
+			{
+				item_code: "ITEM-2",
+				item_name: "Customer Item",
+				item_group: "All Item Groups",
+				rate: 0,
+				price_list_rate: 0,
+			},
+		]);
+
+		const results = await store.searchItems("customer item");
+
+		expect(itemServiceMocks.getItems).toHaveBeenCalledWith(
+			expect.objectContaining({
+				price_list: "Customer Retail",
+				search_value: "customer item",
+			}),
+			expect.any(AbortSignal),
+		);
+		expect(results).toEqual([
+			expect.objectContaining({
+				item_code: "ITEM-2",
+				price_list_rate: 0,
+			}),
+		]);
+		expect(offlineMocks.mergeCachedPriceListItems).toHaveBeenCalledWith(
+			"Customer Retail",
+			expect.arrayContaining([
+				expect.objectContaining({ item_code: "ITEM-2" }),
+			]),
+		);
 	});
 });
