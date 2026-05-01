@@ -57,10 +57,7 @@
 					>
 						{{ message }}
 					</div>
-					<div
-						v-if="visibleBootstrapRecoveryMessage"
-						class="bootstrap-warning-message"
-					>
+					<div v-if="visibleBootstrapRecoveryMessage" class="bootstrap-warning-message">
 						{{ visibleBootstrapRecoveryMessage }}
 					</div>
 				</div>
@@ -140,24 +137,20 @@ import {
 	resolveBootstrapRuntimeState,
 	validateBootstrapSnapshot,
 } from "../../offline/bootstrapSnapshot";
-import {
-	setupNetworkListeners as initNetworkListeners,
-	checkNetworkConnectivity as utilsCheckNetworkConnectivity,
-	manualNetworkRetry,
-} from "../composables/core/useNetwork";
 import { useRtl } from "../composables/core/useRtl";
+import { useBootSync } from "../composables/runtime/useBootSync";
+import { useNetworkLifecycle } from "../composables/runtime/useNetworkLifecycle";
+import { useUpdateChecks } from "../composables/runtime/useUpdateChecks";
+import { useCustomerReadiness } from "../composables/runtime/useCustomerReadiness";
+import { useQueueMetrics } from "../composables/runtime/useQueueMetrics";
 import authService from "../services/authService.js";
 import { getValidCachedOpeningForCurrentUser } from "../utils/openingCache";
-import {
-	formatBootstrapWarning,
-	shouldShowBootstrapBanner,
-} from "../utils/bootstrapWarnings";
+import { formatBootstrapWarning, shouldShowBootstrapBanner } from "../utils/bootstrapWarnings";
 import { listenForBootstrapSnapshotUpdates } from "../utils/bootstrapRuntimeEvents";
 import {
 	resolveBootstrapWarningUiState,
 	shouldLiftBootstrapWarningStartupGate,
 } from "../utils/bootstrapWarningVisibility";
-import { ensureCustomersReady } from "../modules/customers/customerLoadingCoordinator";
 
 /**
  * Frappe Desk UI selectors to hide in POS view.
@@ -186,8 +179,7 @@ const { rtlClasses } = useRtl();
 const instance = getCurrentInstance();
 const $theme = instance?.proxy?.$theme || { toggle: () => {}, isDark: false }; // Fallback
 const __ = instance?.proxy?.__ || ((value) => value);
-const BUILD_VERSION =
-	typeof __BUILD_VERSION__ !== "undefined" ? __BUILD_VERSION__ : null;
+const BUILD_VERSION = typeof __BUILD_VERSION__ !== "undefined" ? __BUILD_VERSION__ : null;
 const OFFLINE_SYNC_SCHEMA_VERSION = "2026-04-09";
 const OFFLINE_SYNC_TIMER_INTERVAL_MS = 60_000;
 
@@ -212,14 +204,11 @@ const {
 	isBackgroundLoading: itemsBackgroundLoading,
 	loadProgress: itemsLoadProgress,
 } = storeToRefs(itemsStore);
-const supportedOfflineSyncResources = filterSupportedOfflineSyncResources(
-	getSyncResourceDefinitions(),
-);
+const supportedOfflineSyncResources = filterSupportedOfflineSyncResources(getSyncResourceDefinitions());
 const syncCoordinator = new SyncCoordinator({
 	concurrency: 1,
 	resources: supportedOfflineSyncResources,
-	runResource: async (resource, trigger) =>
-		runOfflineSyncResource(resource, trigger),
+	runResource: async (resource, trigger) => runOfflineSyncResource(resource, trigger),
 	onStateChange: (states) => {
 		offlineSyncStore.setResourceStates(filterSupportedOfflineSyncStates(states));
 	},
@@ -241,14 +230,29 @@ const serverConnecting = ref(false);
 const internetReachable = ref(false);
 const isIpHost = ref(false);
 
-// Sync data
-const syncTotals = ref({ pending: 0, synced: 0, drafted: 0 });
 const manualOffline = ref(false);
 
-// Cache data
-const cacheUsage = ref(0);
-const cacheUsageLoading = ref(false);
-const cacheUsageDetails = ref({ total: 0, indexedDB: 0, localStorage: 0 });
+const queueMetrics = useQueueMetrics({
+	getCacheUsageEstimate,
+	getPendingOfflineInvoiceCount,
+	getPendingOfflineCashMovementCount,
+	syncOfflineInvoices,
+	syncOfflineCashMovements,
+	isOffline,
+	syncStore,
+	toastStore,
+	translate: __,
+});
+const {
+	cacheUsage,
+	cacheUsageLoading,
+	cacheUsageDetails,
+	syncTotals,
+	refreshCacheUsage,
+	checkCacheCapacity,
+	syncQueues,
+	formatDiagnosticsDetail,
+} = queueMetrics;
 const bootstrapStatus = ref(getBootstrapSnapshotStatus());
 const bootstrapLimitedMode = ref(getBootstrapLimitedMode());
 const bootstrapSnackbarVisible = ref(false);
@@ -256,7 +260,7 @@ const confirmedBootstrapDecisionKey = ref("");
 const initialBootstrapSyncSettled = ref(false);
 const startupBootstrapWarningsReady = ref(false);
 let _sidebarObserver = null;
-let updateInterval = null;
+let _navPollTimer = null;
 let removeBootstrapSnapshotListener = null;
 
 // Event Bus
@@ -264,6 +268,46 @@ const eventBus = instance?.proxy?.eventBus;
 
 // Initialize loading sources immediately in setup so watchers can mark them 100%
 initLoadingSources(["init", "items", "customers"]);
+
+const bootSync = useBootSync({
+	offlineSyncRuntime,
+	evaluateBootstrapSnapshot,
+	getLastRunSummary: () => syncCoordinator.getLastRunSummary(),
+});
+
+const updateChecks = useUpdateChecks({
+	updateStore,
+	buildVersion: BUILD_VERSION,
+});
+
+const networkLifecycle = useNetworkLifecycle({
+	networkOnline,
+	serverOnline,
+	serverConnecting,
+	internetReachable,
+	isIpHost,
+	eventBus,
+	realtime: frappe?.realtime,
+	isManualOffline: getIsManualOffline,
+	onSyncInvoices: () => handleSyncInvoices(),
+	onConnectivityRecovered: () => triggerOnlineResumeSync(),
+	onEvaluateBootstrap: (options) => evaluateBootstrapSnapshot(options),
+	onRefreshTaxInclusive: () => refreshTaxInclusiveSetting(),
+});
+
+const customerReadiness = useCustomerReadiness({
+	profile: posProfile,
+	isOnline: () => navigator.onLine,
+	isManualOffline: getIsManualOffline,
+	setProfile: customersStore.setPosProfile,
+	load: customersStore.get_customer_names,
+	onProfileReady: () => {
+		void scheduleBootCriticalWarmSync();
+		if (navigator.onLine && !getIsManualOffline()) {
+			void refreshTaxInclusiveSetting();
+		}
+	},
+});
 
 function getCurrentBootstrapProfile() {
 	return posProfile.value || frappe?.boot?.pos_profile || null;
@@ -302,11 +346,9 @@ function ensureBootstrapSnapshotIsCurrent() {
 		return currentSnapshot;
 	}
 
-	const nextSnapshot = createBootstrapSnapshotFromRegisterData(
-		registerData,
-		currentSnapshot,
-		{ buildVersion: BUILD_VERSION },
-	);
+	const nextSnapshot = createBootstrapSnapshotFromRegisterData(registerData, currentSnapshot, {
+		buildVersion: BUILD_VERSION,
+	});
 
 	if (JSON.stringify(currentSnapshot || null) !== JSON.stringify(nextSnapshot)) {
 		setBootstrapSnapshot(nextSnapshot);
@@ -335,11 +377,7 @@ function persistBootstrapRuntime(validation, decision) {
 
 function buildBootstrapConfirmationMessage(validation) {
 	const details = Array.from(
-		new Set(
-			(validation?.reasons || []).map((code) =>
-				formatBootstrapWarning(code, __),
-			),
-		),
+		new Set((validation?.reasons || []).map((code) => formatBootstrapWarning(code, __))),
 	);
 
 	return [
@@ -352,19 +390,14 @@ function buildBootstrapConfirmationMessage(validation) {
 function evaluateBootstrapSnapshot(options = {}) {
 	const allowPrompt = !!options.allowPrompt;
 	const snapshot = ensureBootstrapSnapshotIsCurrent();
-	const validation = validateBootstrapSnapshot(
-		snapshot,
-		buildCurrentBootstrapValidationInput(),
-	);
+	const validation = validateBootstrapSnapshot(snapshot, buildCurrentBootstrapValidationInput());
 	const decisionKey = buildBootstrapValidationKey(validation);
 	let decision = resolveBootstrapRuntimeState(validation, {
 		continueOffline: confirmedBootstrapDecisionKey.value === decisionKey,
 	});
 
 	if (decision.requiresConfirmation && allowPrompt) {
-		const confirmed = window.confirm(
-			buildBootstrapConfirmationMessage(validation),
-		);
+		const confirmed = window.confirm(buildBootstrapConfirmationMessage(validation));
 
 		if (confirmed) {
 			confirmedBootstrapDecisionKey.value = decisionKey;
@@ -390,19 +423,11 @@ function getOfflineSyncProfile() {
 }
 
 function canRunOfflineSync() {
-	return !!(
-		getOfflineSyncProfile()?.name &&
-		!getIsManualOffline() &&
-		navigator.onLine
-	);
+	return !!(getOfflineSyncProfile()?.name && !getIsManualOffline() && navigator.onLine);
 }
 
 function canRunTimerOfflineSync() {
-	return !!(
-		canRunOfflineSync() &&
-		serverOnline.value &&
-		!serverConnecting.value
-	);
+	return !!(canRunOfflineSync() && serverOnline.value && !serverConnecting.value);
 }
 
 async function callOfflineSyncMethod(method, args = {}) {
@@ -413,9 +438,7 @@ async function callOfflineSyncMethod(method, args = {}) {
 		method,
 		args,
 	});
-	return typeof response?.message === "undefined"
-		? response || {}
-		: response.message;
+	return typeof response?.message === "undefined" ? response || {} : response.message;
 }
 
 async function runOfflineSyncResource(resource) {
@@ -438,9 +461,7 @@ async function runOfflineSyncResource(resource) {
 
 async function hydrateOfflineSyncResourceStates() {
 	try {
-		const states = filterSupportedOfflineSyncStates(
-			await listSyncResourceStates(),
-		);
+		const states = filterSupportedOfflineSyncStates(await listSyncResourceStates());
 		syncCoordinator.hydrateResourceStates(states);
 	} catch (error) {
 		console.error("Failed to hydrate offline sync state", error);
@@ -448,45 +469,21 @@ async function hydrateOfflineSyncResourceStates() {
 }
 
 function scheduleBootCriticalWarmSync() {
-	return offlineSyncRuntime.scheduleBootWarmSync().catch((error) => {
-		console.error("Failed to schedule offline sync", error, syncCoordinator.getLastRunSummary());
-		return false;
-	}).finally(() => {
-		evaluateBootstrapSnapshot({ allowPrompt: false });
-	});
+	return bootSync.scheduleBootCriticalWarmSync();
 }
 
 function triggerOnlineResumeSync() {
-	return offlineSyncRuntime.triggerOnlineResumeSync().catch((error) => {
-		console.error(
-			"Failed to trigger online resume sync",
-			error,
-			syncCoordinator.getLastRunSummary(),
-		);
-		return false;
-	})
-		.finally(() => {
-			evaluateBootstrapSnapshot({ allowPrompt: false });
-		});
+	return bootSync.triggerOnlineResumeSync();
 }
 
 function triggerOperatorRefreshSync(options = {}) {
-	return offlineSyncRuntime.triggerOperatorRefreshSync(options).catch((error) => {
-		console.error("Failed to run operator offline refresh", error, syncCoordinator.getLastRunSummary());
-		return false;
-	}).finally(() => {
-		evaluateBootstrapSnapshot({ allowPrompt: false });
-	});
+	return bootSync.triggerOperatorRefreshSync(options);
 }
 
 // Computed
 const routeLoadingState = getScopeState("route");
-const loadingActive = computed(
-	() => loadingState.active || routeLoadingState.value.count > 0,
-);
-const loadingIndeterminate = computed(
-	() => !loadingState.active && routeLoadingState.value.count > 0,
-);
+const loadingActive = computed(() => loadingState.active || routeLoadingState.value.count > 0);
+const loadingIndeterminate = computed(() => !loadingState.active && routeLoadingState.value.count > 0);
 const loadingMessage = computed(() => {
 	if (loadingState.active) {
 		return loadingState.message;
@@ -505,9 +502,7 @@ const bootstrapAlertType = computed(() =>
 		? "error"
 		: "warning",
 );
-const bootstrapCapabilitySummaries = computed(
-	() => bootstrapStatus.value?.capability_summaries || [],
-);
+const bootstrapCapabilitySummaries = computed(() => bootstrapStatus.value?.capability_summaries || []);
 const bootstrapWarningTitle = computed(() => {
 	if (bootstrapStatus.value?.primary_warning?.title) {
 		return __(bootstrapStatus.value.primary_warning.title);
@@ -526,22 +521,14 @@ const bootstrapWarningMessages = computed(() => {
 	}
 
 	if (Array.isArray(bootstrapStatus.value?.primary_warning?.messages)) {
-		return bootstrapStatus.value.primary_warning.messages.map((message) =>
-			__(message),
-		);
+		return bootstrapStatus.value.primary_warning.messages.map((message) => __(message));
 	}
 
 	return Array.from(
-		new Set(
-			(bootstrapStatus.value?.warning_codes || []).map((code) =>
-				formatBootstrapWarning(code, __),
-			),
-		),
+		new Set((bootstrapStatus.value?.warning_codes || []).map((code) => formatBootstrapWarning(code, __))),
 	);
 });
-const bootstrapWarningActive = computed(
-	() => bootstrapWarningMessages.value.length > 0,
-);
+const bootstrapWarningActive = computed(() => bootstrapWarningMessages.value.length > 0);
 const bootstrapRecoveryMessage = computed(() => {
 	if (!bootstrapWarningActive.value) {
 		return "";
@@ -554,11 +541,7 @@ const bootstrapWarningTooltip = computed(() => {
 		return "";
 	}
 
-	return [
-		bootstrapWarningTitle.value,
-		...bootstrapWarningMessages.value,
-		bootstrapRecoveryMessage.value,
-	]
+	return [bootstrapWarningTitle.value, ...bootstrapWarningMessages.value, bootstrapRecoveryMessage.value]
 		.filter(Boolean)
 		.join("\n");
 });
@@ -570,15 +553,9 @@ const bootstrapWarningUiState = computed(() =>
 		capabilitySummaries: bootstrapCapabilitySummaries.value,
 	}),
 );
-const visibleBootstrapWarningActive = computed(
-	() => bootstrapWarningUiState.value.active,
-);
-const visibleBootstrapWarningTooltip = computed(
-	() => bootstrapWarningUiState.value.tooltip,
-);
-const visibleBootstrapCapabilitySummaries = computed(
-	() => bootstrapWarningUiState.value.capabilitySummaries,
-);
+const visibleBootstrapWarningActive = computed(() => bootstrapWarningUiState.value.active);
+const visibleBootstrapWarningTooltip = computed(() => bootstrapWarningUiState.value.tooltip);
+const visibleBootstrapCapabilitySummaries = computed(() => bootstrapWarningUiState.value.capabilitySummaries);
 const visibleBootstrapWarningTitle = computed(() =>
 	visibleBootstrapWarningActive.value ? bootstrapWarningTitle.value : "",
 );
@@ -598,24 +575,6 @@ const bootstrapWarningSignature = computed(() => {
 		title: visibleBootstrapWarningTitle.value,
 		messages: visibleBootstrapWarningMessages.value,
 	});
-});
-
-// Watchers
-watch(networkOnline, (newVal, oldVal) => {
-	if (newVal && !oldVal) {
-		refreshTaxInclusiveSetting();
-		eventBus?.emit("network-online");
-		handleSyncInvoices();
-		evaluateBootstrapSnapshot({ allowPrompt: false });
-	}
-});
-
-watch(serverOnline, (newVal, oldVal) => {
-	if (newVal && !oldVal) {
-		eventBus?.emit("server-online");
-		handleSyncInvoices();
-		evaluateBootstrapSnapshot({ allowPrompt: false });
-	}
 });
 
 watch(
@@ -666,8 +625,7 @@ watch(
 		const shouldLift = shouldLiftBootstrapWarningStartupGate({
 			loadingActive: Boolean(isLoading),
 			initialBootstrapSettled: Boolean(isBootstrapSettled),
-			itemsStartupSyncSettled:
-				Boolean(areItemsLoaded) && !Boolean(areItemsSyncing),
+			itemsStartupSyncSettled: Boolean(areItemsLoaded) && !Boolean(areItemsSyncing),
 			startupGateLifted: startupBootstrapWarningsReady.value,
 		});
 
@@ -719,32 +677,23 @@ onMounted(() => {
 	window.addEventListener("resize", adjust_frappe_sidebar_offset);
 	// initLoadingSources move to setup to catch early store readiness
 	initializeData();
-	offlineSyncRuntime.startTimerSync();
-	setupNetworkListeners(); // Local function wrapper
+	bootSync.start();
+	networkLifecycle.start();
+	customerReadiness.start();
 	setupEventListeners();
 	handleRefreshCacheUsage();
-
-	updateStore.initializeFromStorage();
-	if (BUILD_VERSION) {
-		updateStore.setCurrentVersion(BUILD_VERSION);
-	}
-	updateStore.checkForUpdates(true);
-	updateInterval = setInterval(
-		() => updateStore.checkForUpdates(),
-		24 * 60 * 60 * 1000,
-	);
+	updateChecks.start();
 });
 
 onBeforeUnmount(() => {
-	if (updateInterval) {
-		clearInterval(updateInterval);
-		updateInterval = null;
-	}
+	updateChecks.stop();
 	if (removeBootstrapSnapshotListener) {
 		removeBootstrapSnapshotListener();
 		removeBootstrapSnapshotListener = null;
 	}
-	offlineSyncRuntime.stopTimerSync();
+	bootSync.stop();
+	networkLifecycle.stop();
+	customerReadiness.stop();
 	if (eventBus) {
 		eventBus.off("data-loaded");
 		eventBus.off("register_pos_profile");
@@ -755,6 +704,11 @@ onBeforeUnmount(() => {
 	}
 
 	window.removeEventListener("resize", adjust_frappe_sidebar_offset);
+
+	if (_navPollTimer) {
+		clearTimeout(_navPollTimer);
+		_navPollTimer = null;
+	}
 
 	if (_sidebarObserver) {
 		_sidebarObserver.disconnect();
@@ -773,55 +727,10 @@ const pollForFrappeNav = (maxAttempts = 50, interval = 100) => {
 			remove_frappe_nav();
 			setup_sidebar_observer();
 		} else {
-			setTimeout(checkAndRemove, interval);
+			_navPollTimer = setTimeout(checkAndRemove, interval);
 		}
 	};
 	checkAndRemove();
-};
-
-// Network Logic - Bridge mixin-style composable to Composition API refs.
-const networkProxy = {
-	get networkOnline() {
-		return networkOnline.value;
-	},
-	set networkOnline(value) {
-		networkOnline.value = Boolean(value);
-	},
-	get serverOnline() {
-		return serverOnline.value;
-	},
-	set serverOnline(value) {
-		serverOnline.value = Boolean(value);
-	},
-	get serverConnecting() {
-		return serverConnecting.value;
-	},
-	set serverConnecting(value) {
-		serverConnecting.value = Boolean(value);
-	},
-	get internetReachable() {
-		return internetReachable.value;
-	},
-	set internetReachable(value) {
-		internetReachable.value = Boolean(value);
-	},
-	get isIpHost() {
-		return isIpHost.value;
-	},
-	set isIpHost(value) {
-		isIpHost.value = Boolean(value);
-	},
-	onConnectivityRecovered: async () => {
-		await triggerOnlineResumeSync();
-	},
-	$forceUpdate: () => {},
-	checkNetworkConnectivity: async (options = {}) => {
-		await utilsCheckNetworkConnectivity.call(networkProxy, options);
-	},
-};
-
-const setupNetworkListeners = () => {
-	initNetworkListeners.call(networkProxy);
 };
 
 const initializeData = async () => {
@@ -831,10 +740,7 @@ const initializeData = async () => {
 	await hydrateOfflineSyncResourceStates();
 	checkDbHealth().catch(() => {});
 	// Offline-first bootstrap: hydrate register state from IndexedDB before server checks.
-	const openingData = getValidCachedOpeningForCurrentUser(
-		getOpeningStorage(),
-		frappe?.session?.user,
-	);
+	const openingData = getValidCachedOpeningForCurrentUser(getOpeningStorage(), frappe?.session?.user);
 	if (openingData) {
 		uiStore.setRegisterData(openingData);
 		if (navigator.onLine) {
@@ -850,13 +756,9 @@ const initializeData = async () => {
 	await syncStore.updatePendingCount();
 	syncTotals.value = getLastSyncTotals();
 
-	getCacheUsageEstimate()
-		.then((usage) => {
-			if (usage.percentage > 90) {
-				alert("Local cache nearing capacity. Consider going online to sync.");
-			}
-		})
-		.catch(() => {});
+	void checkCacheCapacity(90, () => {
+		alert("Local cache nearing capacity. Consider going online to sync.");
+	});
 
 	// Check if running on IP host
 	isIpHost.value = /^\d+\.\d+\.\d+\.\d+/.test(window.location.hostname);
@@ -878,29 +780,6 @@ const initializeData = async () => {
 };
 
 const setupEventListeners = () => {
-	// Watch for POS profile becoming available to trigger customer load
-	watch(
-		posProfile,
-		(newProfile) => {
-			if (newProfile && newProfile.name) {
-				// Update customers store with profile
-				void scheduleBootCriticalWarmSync();
-
-				if (navigator.onLine && !getIsManualOffline()) {
-					refreshTaxInclusiveSetting();
-				}
-				void ensureCustomersReady({
-					profile: newProfile,
-					online: navigator.onLine,
-					manualOffline: getIsManualOffline(),
-					setProfile: customersStore.setPosProfile,
-					load: customersStore.get_customer_names,
-				});
-			}
-		},
-		{ deep: true, immediate: true },
-	);
-
 	if (eventBus) {
 		// Track last submitted invoice id
 		// eventBus.on("set_last_invoice", (invoiceId) => {
@@ -925,41 +804,6 @@ const setupEventListeners = () => {
 			handleSyncInvoices();
 		});
 	}
-
-	// Enhanced server connection status listeners
-	if (frappe.realtime) {
-		frappe.realtime.on("connect", () => {
-			serverOnline.value = true;
-			window.serverOnline = true;
-			serverConnecting.value = false;
-			console.log("Server: Connected via WebSocket");
-		});
-
-		frappe.realtime.on("disconnect", () => {
-			serverOnline.value = false;
-			window.serverOnline = false;
-			serverConnecting.value = false;
-			console.log("Server: Disconnected from WebSocket");
-		});
-
-		frappe.realtime.on("connecting", () => {
-			serverConnecting.value = true;
-			console.log("Server: Connecting to WebSocket...");
-		});
-
-		frappe.realtime.on("reconnect", () => {
-			console.log("Server: Reconnected to WebSocket");
-			window.serverOnline = true;
-			void triggerOnlineResumeSync();
-		});
-	}
-
-	// Visibility Listener
-	document.addEventListener("visibilitychange", () => {
-		if (!document.hidden && navigator.onLine && !getIsManualOffline()) {
-			// checkNetworkConnectivity();
-		}
-	});
 };
 
 const handleNavClick = () => {
@@ -971,47 +815,7 @@ const handleCloseShift = () => {
 };
 
 const handleSyncInvoices = async () => {
-	const pending = getPendingOfflineInvoiceCount();
-	const pendingCashMovements = getPendingOfflineCashMovementCount();
-	if (pending) {
-		toastStore.show({
-			title: `${pending} invoice${pending > 1 ? "s" : ""} pending for sync`,
-			color: "warning",
-		});
-	}
-	if (pendingCashMovements) {
-		toastStore.show({
-			title: `${pendingCashMovements} cash movement${pendingCashMovements > 1 ? "s" : ""} pending for sync`,
-			color: "warning",
-		});
-	}
-	if (isOffline()) {
-		return;
-	}
-	const result = await syncOfflineInvoices();
-	const cashMovementResult = await syncOfflineCashMovements();
-	if (result && (result.synced || result.drafted)) {
-		if (result.synced) {
-			toastStore.show({
-				title: `${result.synced} offline invoice${result.synced > 1 ? "s" : ""} synced`,
-				color: "success",
-			});
-		}
-		if (result.drafted) {
-			toastStore.show({
-				title: `${result.drafted} offline invoice${result.drafted > 1 ? "s" : ""} saved as draft`,
-				color: "warning",
-			});
-		}
-	}
-	if (cashMovementResult?.synced) {
-		toastStore.show({
-			title: `${cashMovementResult.synced} offline cash movement${cashMovementResult.synced > 1 ? "s" : ""} synced`,
-			color: "success",
-		});
-	}
-	syncStore.updatePendingCount();
-	syncTotals.value = result || syncTotals.value;
+	await syncQueues();
 };
 
 const handleToggleOffline = () => {
@@ -1042,7 +846,7 @@ const handleRetryStatus = async () => {
 	}
 
 	networkOnline.value = navigator.onLine;
-	await manualNetworkRetry(networkProxy);
+	await networkLifecycle.retry();
 };
 
 const handleRefreshOfflineData = async () => {
@@ -1090,17 +894,11 @@ const handleOpenOfflineDiagnostics = () => {
 					lastRunSummary.succeeded,
 					lastRunSummary.failed,
 					lastRunSummary.skipped,
-			  ])
+				])
 			: __("No sync trigger has run yet in this session.");
 	toastStore.show({
 		title: __("Offline diagnostics"),
-		detail: `${__(
-			"Pending sales: {0} | Cache usage: {1}%",
-			[
-			pendingInvoicesCount.value || 0,
-			Math.round(cacheUsage.value || 0),
-			],
-		)}\n${syncSummary}`,
+		detail: formatDiagnosticsDetail(pendingInvoicesCount.value || 0, syncSummary),
 		color: visibleBootstrapWarningActive.value ? "warning" : "info",
 	});
 };
@@ -1120,22 +918,7 @@ const handleOpenCustomerDisplay = () => {
 };
 
 const handleRefreshCacheUsage = () => {
-	cacheUsageLoading.value = true;
-	getCacheUsageEstimate()
-		.then((usage) => {
-			cacheUsage.value = usage.percentage || 0;
-			cacheUsageDetails.value = {
-				total: usage.total || 0,
-				indexedDB: usage.indexedDB || 0,
-				localStorage: usage.localStorage || 0,
-			};
-		})
-		.catch((e) => {
-			console.error("Failed to refresh cache usage", e);
-		})
-		.finally(() => {
-			cacheUsageLoading.value = false;
-		});
+	void refreshCacheUsage();
 };
 
 const refreshTaxInclusiveSetting = async () => {
