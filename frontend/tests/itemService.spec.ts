@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("../src/posapp/services/api", () => ({
 	default: {
 		call: vi.fn(),
+		callEnvelope: vi.fn(),
 	},
 }));
 
@@ -12,7 +13,7 @@ import itemService from "../src/posapp/services/itemService";
 describe("itemService.createItem", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.mocked(api.call).mockResolvedValue({} as never);
+		vi.mocked(api.callEnvelope).mockResolvedValue({} as never);
 	});
 
 	it("adds a barcode child row when barcode is provided", async () => {
@@ -22,17 +23,14 @@ describe("itemService.createItem", () => {
 			barcode: "123456789",
 		});
 
-		expect(api.call).toHaveBeenCalledWith(
-			"frappe.client.insert",
-			{
-				doc: expect.objectContaining({
-					doctype: "Item",
-					item_code: "ITEM-001",
-					item_name: "Item 001",
-					barcodes: [{ barcode: "123456789" }],
-				}),
-			},
-		);
+		expect(api.callEnvelope).toHaveBeenCalledWith("frappe.client.insert", {
+			doc: expect.objectContaining({
+				doctype: "Item",
+				item_code: "ITEM-001",
+				item_name: "Item 001",
+				barcodes: [{ barcode: "123456789" }],
+			}),
+		});
 	});
 
 	it("omits barcode rows when barcode is blank", async () => {
@@ -42,13 +40,10 @@ describe("itemService.createItem", () => {
 			barcode: "   ",
 		});
 
-		expect(api.call).toHaveBeenCalledWith(
-			"frappe.client.insert",
-			{
-				doc: expect.not.objectContaining({
-					barcodes: expect.anything(),
-				}),
-			},
-		);
+		expect(api.callEnvelope).toHaveBeenCalledWith("frappe.client.insert", {
+			doc: expect.not.objectContaining({
+				barcodes: expect.anything(),
+			}),
+		});
 	});
 });

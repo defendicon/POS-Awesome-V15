@@ -115,6 +115,7 @@
 <script setup>
 import { ref, reactive, watch, onMounted } from "vue";
 import itemService from "../../../services/itemService";
+import { unwrapApiResult } from "../../../services/api";
 
 const props = defineProps({
 	modelValue: {
@@ -187,7 +188,7 @@ watch(
 const getUOMs = async () => {
 	if (uomList.value.length) return;
 	try {
-		const r = await itemService.getUOMs();
+		const r = unwrapApiResult(await itemService.getUOMs());
 		if (r) {
 			uomList.value = r.map((d) => d.name);
 		}
@@ -213,14 +214,16 @@ const submit = async () => {
 
 	loading.value = true;
 	try {
-		const res = await itemService.createItem({
-			item_code: form.item_code,
-			item_name: form.item_name,
-			barcode: form.barcode,
-			item_group: form.item_group,
-			stock_uom: form.stock_uom,
-			standard_rate: form.standard_rate,
-		});
+		const res = unwrapApiResult(
+			await itemService.createItem({
+				item_code: form.item_code,
+				item_name: form.item_name,
+				barcode: form.barcode,
+				item_group: form.item_group,
+				stock_uom: form.stock_uom,
+				standard_rate: form.standard_rate,
+			}),
+		);
 
 		const newItem = res.message || res;
 		newItem.actual_qty = 0; // Initialize stock

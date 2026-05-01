@@ -7,6 +7,7 @@ import { defineStore } from "pinia";
 import { ref, computed, watch } from "vue";
 import type { Item, POSProfile } from "../types/models";
 import itemService from "../services/itemService";
+import { unwrapApiResult } from "../services/api";
 import { refreshBootstrapSnapshotFromCacheState } from "../../offline/index";
 
 // Composables
@@ -513,9 +514,10 @@ export const useItemsStore = defineStore("items", () => {
 					cachedPagination.value.total = cachedResult.length;
 					cachedPagination.value.loading = false;
 					if (!searchValue && shouldPersistItems()) {
-						const storedCount = await getStoredItemsCountByScopeCompat(
-							getStorageScope(),
-						).catch(() => 0);
+						const storedCount =
+							await getStoredItemsCountByScopeCompat(
+								getStorageScope(),
+							).catch(() => 0);
 						if (!storedCount && cachedResult.length) {
 							await persistItemsToStorage(
 								cachedResult,
@@ -535,7 +537,10 @@ export const useItemsStore = defineStore("items", () => {
 						}
 						if (normalizedGroup === "ALL") {
 							syncBootstrapItemReadiness(
-								Math.max(Number(storedCount || 0), cachedResult.length),
+								Math.max(
+									Number(storedCount || 0),
+									cachedResult.length,
+								),
 							);
 						}
 					}
@@ -553,9 +558,8 @@ export const useItemsStore = defineStore("items", () => {
 				return [];
 			}
 
-			const fetchedItems = await itemService.getItems(
-				args,
-				abortController.signal,
+			const fetchedItems = unwrapApiResult(
+				await itemService.getItems(args, abortController.signal),
 			);
 
 			if (requestToken.value !== currentRequestToken) {
@@ -977,11 +981,13 @@ export const useItemsStore = defineStore("items", () => {
 		if (item) return item;
 
 		try {
-			const newItem: any = await itemService.getItemsFromBarcode({
-				selling_price_list: activePriceList.value,
-				currency: posProfile.value?.currency || "",
-				barcode: barcode,
-			});
+			const newItem: any = unwrapApiResult(
+				await itemService.getItemsFromBarcode({
+					selling_price_list: activePriceList.value,
+					currency: posProfile.value?.currency || "",
+					barcode: barcode,
+				}),
+			);
 
 			if (newItem) {
 				if (
@@ -1026,7 +1032,9 @@ export const useItemsStore = defineStore("items", () => {
 		}
 	};
 
-	const refreshModifiedItems = async (priceListOverride: string | null = null) => {
+	const refreshModifiedItems = async (
+		priceListOverride: string | null = null,
+	) => {
 		if (!itemsLoaded.value) return { size: 0, count: 0, items: [] };
 		const resolvedPriceList =
 			typeof priceListOverride === "string" &&
@@ -1083,10 +1091,7 @@ export const useItemsStore = defineStore("items", () => {
 				) {
 					(update as any).original_rate = syncedRate;
 				}
-				if (
-					update.currency &&
-					update.original_currency === undefined
-				) {
+				if (update.currency && update.original_currency === undefined) {
 					(update as any).original_currency = update.currency;
 				}
 				additions.push(update);

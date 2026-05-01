@@ -2,6 +2,7 @@ import { ref } from "vue";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { usePaymentSubmission } from "../src/posapp/composables/pos/payments/usePaymentSubmission";
+import { ApiEnvelopeError } from "../src/posapp/services/api";
 
 vi.mock("../src/offline/index", () => ({
 	isOffline: vi.fn(() => false),
@@ -26,7 +27,9 @@ describe("usePaymentSubmission", () => {
 		vi.clearAllMocks();
 		vi.stubGlobal("__", (value: string, args?: any[]) => {
 			if (!args?.length) return value;
-			return value.replace(/\{(\d+)\}/g, (_match, index) => String(args[Number(index)] ?? ""));
+			return value.replace(/\{(\d+)\}/g, (_match, index) =>
+				String(args[Number(index)] ?? ""),
+			);
 		});
 		vi.stubGlobal("frappe", {
 			utils: {
@@ -39,7 +42,12 @@ describe("usePaymentSubmission", () => {
 		const invoiceDoc = ref<any>({
 			is_return: 0,
 			payments: [
-				{ mode_of_payment: "Cash", amount: -120, base_amount: -120, default: 1 },
+				{
+					mode_of_payment: "Cash",
+					amount: -120,
+					base_amount: -120,
+					default: 1,
+				},
 				{ mode_of_payment: "Card", amount: 0, base_amount: 0 },
 				{ mode_of_payment: "Bank", amount: 35, base_amount: 35 },
 			],
@@ -57,15 +65,21 @@ describe("usePaymentSubmission", () => {
 		restoreReturnPayments();
 
 		expect(invoiceDoc.value.payments).toEqual([
-			{ mode_of_payment: "Cash", amount: 120, base_amount: 120, default: 1 },
+			{
+				mode_of_payment: "Cash",
+				amount: 120,
+				base_amount: 120,
+				default: 1,
+			},
 			{ mode_of_payment: "Card", amount: 0, base_amount: 0 },
 			{ mode_of_payment: "Bank", amount: 35, base_amount: 35 },
 		]);
 	});
 
 	it("defers print and schedules background wait when invoice submission is queued", async () => {
-		const invoiceService =
-			(await import("../src/posapp/services/invoiceService")).default;
+		const invoiceService = (
+			await import("../src/posapp/services/invoiceService")
+		).default;
 		(invoiceService.submitInvoice as any).mockResolvedValue({
 			name: "ACC-SINV-0001",
 			doctype: "Sales Invoice",
@@ -95,7 +109,10 @@ describe("usePaymentSubmission", () => {
 			formatFloat: (value) => Number(value || 0),
 			stores: {
 				toastStore: { show: vi.fn() },
-				uiStore: { setLastInvoice: vi.fn(), setLastStockAdjustment: vi.fn() },
+				uiStore: {
+					setLastInvoice: vi.fn(),
+					setLastStockAdjustment: vi.fn(),
+				},
 				customersStore: { setSelectedCustomer: vi.fn() },
 				invoiceStore: { invoiceDoc: invoiceDoc.value },
 			},
@@ -126,8 +143,9 @@ describe("usePaymentSubmission", () => {
 	});
 
 	it("schedules deferred printing instead of calling onPrint when post-submit work remains", async () => {
-		const invoiceService =
-			(await import("../src/posapp/services/invoiceService")).default;
+		const invoiceService = (
+			await import("../src/posapp/services/invoiceService")
+		).default;
 		(invoiceService.submitInvoice as any).mockResolvedValue({
 			name: "ACC-SINV-0002",
 			doctype: "Sales Invoice",
@@ -157,7 +175,10 @@ describe("usePaymentSubmission", () => {
 			formatFloat: (value) => Number(value || 0),
 			stores: {
 				toastStore: { show: vi.fn() },
-				uiStore: { setLastInvoice: vi.fn(), setLastStockAdjustment: vi.fn() },
+				uiStore: {
+					setLastInvoice: vi.fn(),
+					setLastStockAdjustment: vi.fn(),
+				},
 				customersStore: { setSelectedCustomer: vi.fn() },
 				invoiceStore: { invoiceDoc: invoiceDoc.value },
 			},
@@ -187,8 +208,9 @@ describe("usePaymentSubmission", () => {
 	});
 
 	it("prints immediately when there is no deferred post-submit work", async () => {
-		const invoiceService =
-			(await import("../src/posapp/services/invoiceService")).default;
+		const invoiceService = (
+			await import("../src/posapp/services/invoiceService")
+		).default;
 		(invoiceService.submitInvoice as any).mockResolvedValue({
 			name: "ACC-SINV-0004",
 			doctype: "Sales Invoice",
@@ -218,7 +240,10 @@ describe("usePaymentSubmission", () => {
 			formatFloat: (value) => Number(value || 0),
 			stores: {
 				toastStore: { show: vi.fn() },
-				uiStore: { setLastInvoice: vi.fn(), setLastStockAdjustment: vi.fn() },
+				uiStore: {
+					setLastInvoice: vi.fn(),
+					setLastStockAdjustment: vi.fn(),
+				},
 				customersStore: { setSelectedCustomer: vi.fn() },
 				invoiceStore: { invoiceDoc: invoiceDoc.value },
 			},
@@ -249,8 +274,9 @@ describe("usePaymentSubmission", () => {
 	});
 
 	it("shows a merged processing toast instead of a plain success toast when post-submit payments are pending", async () => {
-		const invoiceService =
-			(await import("../src/posapp/services/invoiceService")).default;
+		const invoiceService = (
+			await import("../src/posapp/services/invoiceService")
+		).default;
 		(invoiceService.submitInvoice as any).mockResolvedValue({
 			name: "ACC-SINV-0003",
 			doctype: "Sales Invoice",
@@ -279,7 +305,10 @@ describe("usePaymentSubmission", () => {
 			formatFloat: (value) => Number(value || 0),
 			stores: {
 				toastStore: { show: toastShow },
-				uiStore: { setLastInvoice: vi.fn(), setLastStockAdjustment: vi.fn() },
+				uiStore: {
+					setLastInvoice: vi.fn(),
+					setLastStockAdjustment: vi.fn(),
+				},
 				customersStore: { setSelectedCustomer: vi.fn() },
 				invoiceStore: { invoiceDoc: invoiceDoc.value },
 			},
@@ -306,8 +335,9 @@ describe("usePaymentSubmission", () => {
 	});
 
 	it("includes gift card redemptions in the submit payload", async () => {
-		const invoiceService =
-			(await import("../src/posapp/services/invoiceService")).default;
+		const invoiceService = (
+			await import("../src/posapp/services/invoiceService")
+		).default;
 		(invoiceService.submitInvoice as any).mockResolvedValue({
 			name: "ACC-SINV-0005",
 			doctype: "Sales Invoice",
@@ -343,7 +373,10 @@ describe("usePaymentSubmission", () => {
 			formatFloat: (value) => Number(value || 0),
 			stores: {
 				toastStore: { show: vi.fn() },
-				uiStore: { setLastInvoice: vi.fn(), setLastStockAdjustment: vi.fn() },
+				uiStore: {
+					setLastInvoice: vi.fn(),
+					setLastStockAdjustment: vi.fn(),
+				},
 				customersStore: { setSelectedCustomer: vi.fn() },
 				invoiceStore: { invoiceDoc: invoiceDoc.value },
 			},
@@ -384,8 +417,9 @@ describe("usePaymentSubmission", () => {
 	});
 
 	it("adds a stable client request id to invoice submissions", async () => {
-		const invoiceService =
-			(await import("../src/posapp/services/invoiceService")).default;
+		const invoiceService = (
+			await import("../src/posapp/services/invoiceService")
+		).default;
 		(invoiceService.submitInvoice as any).mockResolvedValue({
 			name: "ACC-SINV-0099",
 			doctype: "Sales Invoice",
@@ -413,7 +447,10 @@ describe("usePaymentSubmission", () => {
 			formatFloat: (value) => Number(value || 0),
 			stores: {
 				toastStore: { show: vi.fn() },
-				uiStore: { setLastInvoice: vi.fn(), setLastStockAdjustment: vi.fn() },
+				uiStore: {
+					setLastInvoice: vi.fn(),
+					setLastStockAdjustment: vi.fn(),
+				},
 				customersStore: { setSelectedCustomer: vi.fn() },
 				invoiceStore: { invoiceDoc: invoiceDoc.value },
 			},
@@ -429,7 +466,8 @@ describe("usePaymentSubmission", () => {
 			onFinishNavigation: vi.fn(),
 		});
 
-		const [, submittedDoc] = (invoiceService.submitInvoice as any).mock.calls[0];
+		const [, submittedDoc] = (invoiceService.submitInvoice as any).mock
+			.calls[0];
 		expect(submittedDoc.posa_client_request_id).toEqual(expect.any(String));
 		expect(invoiceDoc.value.posa_client_request_id).toBe(
 			submittedDoc.posa_client_request_id,
@@ -437,8 +475,9 @@ describe("usePaymentSubmission", () => {
 	});
 
 	it("reuses the same client request id across repeated invoice submit attempts", async () => {
-		const invoiceService =
-			(await import("../src/posapp/services/invoiceService")).default;
+		const invoiceService = (
+			await import("../src/posapp/services/invoiceService")
+		).default;
 		(invoiceService.submitInvoice as any).mockResolvedValue({
 			name: "ACC-SINV-0100",
 			doctype: "Sales Invoice",
@@ -466,7 +505,10 @@ describe("usePaymentSubmission", () => {
 			formatFloat: (value) => Number(value || 0),
 			stores: {
 				toastStore: { show: vi.fn() },
-				uiStore: { setLastInvoice: vi.fn(), setLastStockAdjustment: vi.fn() },
+				uiStore: {
+					setLastInvoice: vi.fn(),
+					setLastStockAdjustment: vi.fn(),
+				},
 				customersStore: { setSelectedCustomer: vi.fn() },
 				invoiceStore: { invoiceDoc: invoiceDoc.value },
 			},
@@ -485,10 +527,14 @@ describe("usePaymentSubmission", () => {
 			onFinishNavigation: vi.fn(),
 		});
 
-		const firstSubmittedDoc = (invoiceService.submitInvoice as any).mock.calls[0][1];
-		const secondSubmittedDoc = (invoiceService.submitInvoice as any).mock.calls[1][1];
+		const firstSubmittedDoc = (invoiceService.submitInvoice as any).mock
+			.calls[0][1];
+		const secondSubmittedDoc = (invoiceService.submitInvoice as any).mock
+			.calls[1][1];
 
-		expect(firstSubmittedDoc.posa_client_request_id).toEqual(expect.any(String));
+		expect(firstSubmittedDoc.posa_client_request_id).toEqual(
+			expect.any(String),
+		);
 		expect(secondSubmittedDoc.posa_client_request_id).toBe(
 			firstSubmittedDoc.posa_client_request_id,
 		);
@@ -506,7 +552,9 @@ describe("usePaymentSubmission", () => {
 			doctype: "Sales Invoice",
 			is_return: 0,
 			items: [{ item_code: "ITEM-1", qty: 1 }],
-			payments: [{ mode_of_payment: "Gift Card", amount: 300, type: "Bank" }],
+			payments: [
+				{ mode_of_payment: "Gift Card", amount: 300, type: "Bank" },
+			],
 			rounded_total: 300,
 			grand_total: 300,
 		});
@@ -531,7 +579,10 @@ describe("usePaymentSubmission", () => {
 			stores: {
 				toastStore: { show: vi.fn() },
 				syncStore: { updatePendingCount: vi.fn() },
-				uiStore: { setLastInvoice: vi.fn(), setLastStockAdjustment: vi.fn() },
+				uiStore: {
+					setLastInvoice: vi.fn(),
+					setLastStockAdjustment: vi.fn(),
+				},
 				customersStore: { setSelectedCustomer: vi.fn() },
 				invoiceStore: { invoiceDoc: invoiceDoc.value },
 			},
@@ -554,8 +605,9 @@ describe("usePaymentSubmission", () => {
 	});
 
 	it("submits gift card redemptions without requiring a gift card payment row", async () => {
-		const invoiceService =
-			(await import("../src/posapp/services/invoiceService")).default;
+		const invoiceService = (
+			await import("../src/posapp/services/invoiceService")
+		).default;
 		(invoiceService.submitInvoice as any).mockResolvedValue({
 			name: "ACC-SINV-0007",
 			doctype: "Sales Invoice",
@@ -567,7 +619,14 @@ describe("usePaymentSubmission", () => {
 			doctype: "Sales Invoice",
 			is_return: 0,
 			items: [{ item_code: "ITEM-1", qty: 1 }],
-			payments: [{ mode_of_payment: "Cash", type: "Cash", account: "1110 - Cash", amount: 0 }],
+			payments: [
+				{
+					mode_of_payment: "Cash",
+					type: "Cash",
+					account: "1110 - Cash",
+					amount: 0,
+				},
+			],
 			rounded_total: 300,
 			grand_total: 300,
 		});
@@ -586,14 +645,24 @@ describe("usePaymentSubmission", () => {
 				posa_allow_submissions_in_background_job: 0,
 				create_pos_invoice_instead_of_sales_invoice: 0,
 				posa_allow_partial_payment: 0,
-				payments: [{ mode_of_payment: "Cash", type: "Cash", account: "1110 - Cash", default: 1 }],
+				payments: [
+					{
+						mode_of_payment: "Cash",
+						type: "Cash",
+						account: "1110 - Cash",
+						default: 1,
+					},
+				],
 			}),
 			stockSettings: ref({}),
 			invoiceType: ref("Invoice"),
 			formatFloat: (value) => Number(value || 0),
 			stores: {
 				toastStore: { show: vi.fn() },
-				uiStore: { setLastInvoice: vi.fn(), setLastStockAdjustment: vi.fn() },
+				uiStore: {
+					setLastInvoice: vi.fn(),
+					setLastStockAdjustment: vi.fn(),
+				},
 				customersStore: { setSelectedCustomer: vi.fn() },
 				invoiceStore: { invoiceDoc: invoiceDoc.value },
 			},
@@ -635,9 +704,91 @@ describe("usePaymentSubmission", () => {
 		);
 	});
 
+	it("maps validation envelope failures and preserves the request id", async () => {
+		const invoiceService = (
+			await import("../src/posapp/services/invoiceService")
+		).default;
+		(invoiceService.submitInvoice as any).mockRejectedValue(
+			new ApiEnvelopeError({
+				ok: false,
+				data: null,
+				error: {
+					code: "VALIDATION_ERROR",
+					message: "Customer is required",
+					retryable: false,
+				},
+				requestId: "req-validation-1",
+				serverTime: "2026-05-01T06:00:00Z",
+			}),
+		);
+		const consoleError = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => undefined);
+		const toastStore = { show: vi.fn() };
+
+		const invoiceDoc = ref<any>({
+			name: "ACC-SINV-VALIDATION",
+			doctype: "Sales Invoice",
+			is_return: 0,
+			items: [{ item_code: "ITEM-1", qty: 1 }],
+			payments: [{ mode_of_payment: "Cash", amount: 100, type: "Cash" }],
+			rounded_total: 100,
+			grand_total: 100,
+		});
+
+		const { submitInvoice } = usePaymentSubmission({
+			invoiceDoc,
+			posProfile: ref({
+				posa_allow_submissions_in_background_job: 0,
+				create_pos_invoice_instead_of_sales_invoice: 0,
+			}),
+			stockSettings: ref({}),
+			invoiceType: ref("Invoice"),
+			formatFloat: (value) => Number(value || 0),
+			stores: {
+				toastStore,
+				uiStore: {
+					setLastInvoice: vi.fn(),
+					setLastStockAdjustment: vi.fn(),
+				},
+				customersStore: { setSelectedCustomer: vi.fn() },
+				invoiceStore: { invoiceDoc: invoiceDoc.value },
+			},
+			isCashback: ref(false),
+			paidChange: ref(0),
+			creditChange: ref(0),
+			redeemedCustomerCredit: ref(0),
+			customerCreditDict: ref([]),
+			diff_payment: ref(0),
+		});
+
+		await expect(
+			submitInvoice(false, {
+				onFinishNavigation: vi.fn(),
+			}),
+		).rejects.toThrow("Customer is required");
+
+		expect(toastStore.show).toHaveBeenCalledWith(
+			expect.objectContaining({
+				title: "Unable to submit invoice",
+				detail: expect.stringContaining("req-validation-1"),
+				color: "error",
+			}),
+		);
+		expect(consoleError).toHaveBeenCalledWith(
+			"Error submitting invoice:",
+			expect.objectContaining({
+				code: "VALIDATION_ERROR",
+				requestId: "req-validation-1",
+			}),
+		);
+		consoleError.mockRestore();
+	});
+
 	it("normalizes return payment rows before submit even when cashback is disabled", async () => {
-		const invoiceService =
-			(await import("../src/posapp/services/invoiceService")).default;
+		const invoiceService = (
+			await import("../src/posapp/services/invoiceService")
+		).default;
 		(invoiceService.submitInvoice as any).mockResolvedValue({
 			name: "ACC-SINV-RETURN-0001",
 			doctype: "Sales Invoice",
@@ -672,7 +823,10 @@ describe("usePaymentSubmission", () => {
 			formatFloat: (value) => Number(value || 0),
 			stores: {
 				toastStore: { show: vi.fn() },
-				uiStore: { setLastInvoice: vi.fn(), setLastStockAdjustment: vi.fn() },
+				uiStore: {
+					setLastInvoice: vi.fn(),
+					setLastStockAdjustment: vi.fn(),
+				},
 				customersStore: { setSelectedCustomer: vi.fn() },
 				invoiceStore: { invoiceDoc: invoiceDoc.value },
 			},
@@ -688,7 +842,8 @@ describe("usePaymentSubmission", () => {
 			onFinishNavigation: vi.fn(),
 		});
 
-		const [, submittedDoc] = (invoiceService.submitInvoice as any).mock.calls[0];
+		const [, submittedDoc] = (invoiceService.submitInvoice as any).mock
+			.calls[0];
 		expect(submittedDoc.payments).toEqual([
 			expect.objectContaining({
 				mode_of_payment: "Cash",
@@ -699,8 +854,9 @@ describe("usePaymentSubmission", () => {
 	});
 
 	it("allows gift card submission when no gift card mode of payment is configured", async () => {
-		const invoiceService =
-			(await import("../src/posapp/services/invoiceService")).default;
+		const invoiceService = (
+			await import("../src/posapp/services/invoiceService")
+		).default;
 		(invoiceService.submitInvoice as any).mockResolvedValue({
 			name: "ACC-SINV-0008",
 			doctype: "Sales Invoice",
@@ -731,14 +887,24 @@ describe("usePaymentSubmission", () => {
 				posa_allow_submissions_in_background_job: 0,
 				create_pos_invoice_instead_of_sales_invoice: 0,
 				posa_allow_partial_payment: 0,
-				payments: [{ mode_of_payment: "Cash", type: "Cash", account: "1110 - Cash", default: 1 }],
+				payments: [
+					{
+						mode_of_payment: "Cash",
+						type: "Cash",
+						account: "1110 - Cash",
+						default: 1,
+					},
+				],
 			}),
 			stockSettings: ref({}),
 			invoiceType: ref("Invoice"),
 			formatFloat: (value) => Number(value || 0),
 			stores: {
 				toastStore: { show: vi.fn() },
-				uiStore: { setLastInvoice: vi.fn(), setLastStockAdjustment: vi.fn() },
+				uiStore: {
+					setLastInvoice: vi.fn(),
+					setLastStockAdjustment: vi.fn(),
+				},
 				customersStore: { setSelectedCustomer: vi.fn() },
 				invoiceStore: { invoiceDoc: invoiceDoc.value },
 			},

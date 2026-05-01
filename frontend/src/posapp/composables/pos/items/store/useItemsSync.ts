@@ -1,6 +1,7 @@
 import { ref } from "vue";
 import type { Item, POSProfile } from "../../../../types/models";
 import itemService from "../../../../services/itemService";
+import { unwrapApiResult } from "../../../../services/api";
 // @ts-ignore
 import {
 	saveItemsBulk,
@@ -57,7 +58,9 @@ export function useItemsSync() {
 				saveItemGroups(groups);
 			} else {
 				// Fallback to API
-				const response = await itemService.getItemGroups();
+				const response = unwrapApiResult(
+					await itemService.getItemGroups(),
+				);
 
 				if (response) {
 					const groups = ["ALL"];
@@ -110,12 +113,16 @@ export function useItemsSync() {
 		posProfile: POSProfile | null,
 		activePriceList: string,
 	) => {
-		if (!Array.isArray(itemList) || itemList.length === 0 || !posProfile?.name) {
+		if (
+			!Array.isArray(itemList) ||
+			itemList.length === 0 ||
+			!posProfile?.name
+		) {
 			return;
 		}
 
-		const detailItems = itemList.filter(
-			(item): item is Item => Boolean(item?.item_code),
+		const detailItems = itemList.filter((item): item is Item =>
+			Boolean(item?.item_code),
 		);
 		if (!detailItems.length) {
 			return;
@@ -337,7 +344,9 @@ export function useItemsSync() {
 				if (remainingCatalogEstimate > 0) {
 					loadProgress.value = Math.min(
 						99,
-						Math.round((syncedCount / remainingCatalogEstimate) * 100),
+						Math.round(
+							(syncedCount / remainingCatalogEstimate) * 100,
+						),
 					);
 				} else if (syncedCount > 0) {
 					loadProgress.value = Math.min(
