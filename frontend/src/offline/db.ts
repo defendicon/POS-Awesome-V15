@@ -47,6 +47,8 @@ const BASE_SCHEMA = {
 	queue: "&key",
 	write_queue:
 		"++queue_id,entity_type,status,created_at,last_attempt_at,retry_count,&idempotency_key,[entity_type+status]",
+	invoice_outbox:
+		"++outbox_id,&client_request_id,status,created_at,next_retry_at,retry_count,[status+next_retry_at]",
 	cache: "&key",
 	items: "&item_code,item_name,item_group,*barcodes,*name_keywords,*serials,*batches",
 	item_prices: "&[price_list+item_code],price_list,item_code",
@@ -89,6 +91,7 @@ export const KEY_TABLE_MAP: Record<string, string> = {
 	cache_ready: "settings",
 	stock_cache_ready: "settings",
 	manual_offline: "settings",
+	invoice_outbox_mode: "settings",
 	bootstrap_snapshot: "settings",
 	bootstrap_snapshot_status: "settings",
 	bootstrap_limited_mode: "settings",
@@ -107,6 +110,7 @@ const LARGE_KEYS = new Set([
 
 const LOCAL_STORAGE_KEYS = new Set([
 	"manual_offline",
+	"invoice_outbox_mode",
 	"bootstrap_snapshot",
 	"bootstrap_snapshot_status",
 	"bootstrap_limited_mode",
@@ -116,9 +120,7 @@ const LOCAL_STORAGE_KEYS = new Set([
 	"tax_inclusive",
 ]);
 
-const MEMORY_ONLY_KEYS = new Set([
-	"customer_storage",
-]);
+const MEMORY_ONLY_KEYS = new Set(["customer_storage"]);
 
 export const PENDING_OFFLINE_QUEUE_KEYS = Object.freeze([
 	"offline_invoices",
@@ -224,6 +226,7 @@ db.version(8).stores(BASE_SCHEMA);
 db.version(9).stores(BASE_SCHEMA);
 db.version(10).stores(BASE_SCHEMA);
 db.version(11).stores(BASE_SCHEMA);
+db.version(12).stores(BASE_SCHEMA);
 
 let persistWorker: Worker | null = null;
 if (typeof Worker !== "undefined") {
@@ -243,6 +246,7 @@ const MEMORY_DEFAULTS: AnyRecord = {
 	offline_customers: [],
 	offline_payments: [],
 	offline_cash_movements: [],
+	invoice_outbox_mode: "off",
 	pos_last_sync_totals: { pending: 0, synced: 0, drafted: 0 },
 	uom_cache: {},
 	offers_cache: [],
@@ -326,16 +330,28 @@ function removeLocalStorageMirror(key: string) {
 async function deletePersistedKey(key: string) {
 	const primaryTable = tableForKey(key);
 	const deletePrimary = () =>
-		db.table(primaryTable).delete(key).catch((error) => {
-			console.warn(`Failed to delete ${key} from ${primaryTable}`, error);
-		});
+		db
+			.table(primaryTable)
+			.delete(key)
+			.catch((error) => {
+				console.warn(
+					`Failed to delete ${key} from ${primaryTable}`,
+					error,
+				);
+			});
 	const tasks = [deletePrimary()];
 
 	if (primaryTable !== "keyval") {
 		tasks.push(
-			db.table("keyval").delete(key).catch((error) => {
-				console.warn(`Failed to delete ${key} fallback from keyval`, error);
-			}),
+			db
+				.table("keyval")
+				.delete(key)
+				.catch((error) => {
+					console.warn(
+						`Failed to delete ${key} fallback from keyval`,
+						error,
+					);
+				}),
 		);
 	}
 
@@ -501,6 +517,7 @@ export async function clearAllCache() {
 	memory.offline_customers = [];
 	memory.offline_payments = [];
 	memory.offline_cash_movements = [];
+	memory.invoice_outbox_mode = "off";
 	memory.pos_last_sync_totals = { pending: 0, synced: 0, drafted: 0 };
 	memory.uom_cache = {};
 	memory.offers_cache = [];
@@ -551,27 +568,35 @@ export async function clearDerivedOfflineCaches() {
 
 		await Promise.all(
 			DERIVED_OFFLINE_TABLES_TO_CLEAR.map((tableName) =>
-				db.table(tableName).clear().catch((error) => {
-					console.warn(`Failed to clear derived table ${tableName}`, error);
-				}),
+				db
+					.table(tableName)
+					.clear()
+					.catch((error) => {
+						console.warn(
+							`Failed to clear derived table ${tableName}`,
+							error,
+						);
+					}),
 			),
 		);
 
 		await Promise.all(
-			[...DERIVED_OFFLINE_CACHE_KEYS, ...DERIVED_OFFLINE_METADATA_KEYS].map(
-				(key) => deletePersistedKey(key),
-			),
+			[
+				...DERIVED_OFFLINE_CACHE_KEYS,
+				...DERIVED_OFFLINE_METADATA_KEYS,
+			].map((key) => deletePersistedKey(key)),
 		);
 	} catch (error) {
 		console.error("Failed to clear derived offline caches", error);
 		throw error;
 	} finally {
-		[...DERIVED_OFFLINE_CACHE_KEYS, ...DERIVED_OFFLINE_METADATA_KEYS].forEach(
-			(key) => {
-				resetMemoryKey(key);
-				removeLocalStorageMirror(key);
-			},
-		);
+		[
+			...DERIVED_OFFLINE_CACHE_KEYS,
+			...DERIVED_OFFLINE_METADATA_KEYS,
+		].forEach((key) => {
+			resetMemoryKey(key);
+			removeLocalStorageMirror(key);
+		});
 	}
 }
 

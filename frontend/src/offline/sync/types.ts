@@ -13,6 +13,7 @@ export type SyncResourceId =
 	| "item_prices"
 	| "stock"
 	| "customers"
+	| "invoice_outbox"
 	| "customer_addresses"
 	| "delivery_charges";
 

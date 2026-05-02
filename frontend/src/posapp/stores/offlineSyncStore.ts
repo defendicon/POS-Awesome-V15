@@ -70,6 +70,7 @@ const RESOURCE_LABELS: Record<SyncResourceId, string> = {
 	item_prices: "Item Prices",
 	stock: "Stock",
 	customers: "Customers",
+	invoice_outbox: "Invoice Outbox",
 	customer_addresses: "Customer Addresses",
 	delivery_charges: "Delivery Charges",
 };

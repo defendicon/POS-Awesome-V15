@@ -108,7 +108,7 @@
  "links": [],
  "modified": "2026-05-01 00:00:00.000000",
  "modified_by": "Administrator",
- "module": "POS Awesome",
+ "module": "POSAwesome",
  "name": "POS Invoice Submission Ledger",
  "naming_rule": "By fieldname",
  "owner": "Administrator",

@@ -2,6 +2,12 @@ import { isOffline, memory, persist } from "./db";
 import { syncOfflineCustomers } from "./customers";
 import { reduceCacheUsage } from "./cache";
 import { ensureOfflineInvoiceRequest } from "./idempotency";
+import {
+	enqueueInvoiceOutboxEntry,
+	getInvoiceOutboxMode,
+	syncInvoiceOutboxResource,
+	shouldWriteInvoiceOutbox,
+} from "./invoiceOutbox";
 import { updateLocalStock } from "./stock";
 import {
 	claimRetryableQueueEntries,
@@ -144,7 +150,13 @@ function prepareOfflineInvoiceEntry(entry: AnyRecord) {
 
 export async function saveOfflineInvoice(entry: AnyRecord) {
 	const cleanEntry = prepareOfflineInvoiceEntry(entry);
-	const createdEntry = await enqueueWriteQueueEntry(INVOICE_ENTITY, cleanEntry);
+	if (shouldWriteInvoiceOutbox()) {
+		await enqueueInvoiceOutboxEntry(cleanEntry);
+	}
+	const createdEntry = await enqueueWriteQueueEntry(
+		INVOICE_ENTITY,
+		cleanEntry,
+	);
 
 	if (entry.invoice?.items) {
 		updateLocalStock(entry.invoice.items);
@@ -191,6 +203,24 @@ export function getLastSyncTotals() {
 }
 
 export async function syncOfflineInvoices() {
+	if (getInvoiceOutboxMode() === "coordinator") {
+		const result = await syncInvoiceOutboxResource(
+			async (method, args = {}) => {
+				const response = await frappe.call({ method, args });
+				return typeof response?.message === "undefined"
+					? response || {}
+					: response.message;
+			},
+		);
+		const totals = {
+			pending: Number((result as AnyRecord).pendingCount || 0),
+			synced: Number((result as AnyRecord).acknowledged || 0),
+			drafted: 0,
+		};
+		setLastSyncTotals(totals);
+		return totals;
+	}
+
 	if (invoiceSyncInProgress) {
 		return {
 			pending: getPendingOfflineInvoiceCount(),
@@ -243,7 +273,10 @@ export async function syncOfflineInvoices() {
 					entry.last_attempt_at,
 				);
 			} catch (error) {
-				console.error("Failed to submit invoice, saving as draft", error);
+				console.error(
+					"Failed to submit invoice, saving as draft",
+					error,
+				);
 				try {
 					await frappe.call({
 						method: "posawesome.posawesome.api.invoices.update_invoice",
@@ -256,7 +289,10 @@ export async function syncOfflineInvoices() {
 						entry.last_attempt_at,
 					);
 				} catch (draftError) {
-					console.error("Failed to save invoice as draft", draftError);
+					console.error(
+						"Failed to save invoice as draft",
+						draftError,
+					);
 					await markWriteQueueEntryFailed(
 						INVOICE_ENTITY,
 						Number(entry.queue_id),
@@ -267,7 +303,11 @@ export async function syncOfflineInvoices() {
 			}
 		}
 
-		if (synced > 0 && drafted === 0 && getPendingOfflineInvoiceCount() === 0) {
+		if (
+			synced > 0 &&
+			drafted === 0 &&
+			getPendingOfflineInvoiceCount() === 0
+		) {
 			reduceCacheUsage();
 		}
 

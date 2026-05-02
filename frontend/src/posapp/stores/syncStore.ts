@@ -18,10 +18,13 @@
  */
 import { defineStore } from "pinia";
 import {
+	getInvoiceOutboxMode,
+	getPendingInvoiceOutboxCount,
 	getPendingOfflineInvoiceCount,
 	syncOfflineInvoices,
 	isOffline,
 } from "../../offline/index";
+import { useSyncCoordinator } from "../../offline/sync/useSyncCoordinator";
 import { useToastStore } from "./toastStore.js";
 
 export const useSyncStore = defineStore("sync", {
@@ -31,8 +34,12 @@ export const useSyncStore = defineStore("sync", {
 	actions: {
 		async updatePendingCount() {
 			try {
-				const count = await getPendingOfflineInvoiceCount();
-				this.pendingInvoicesCount = count;
+				const legacyCount = await getPendingOfflineInvoiceCount();
+				const outboxCount =
+					getInvoiceOutboxMode() === "off"
+						? legacyCount
+						: await getPendingInvoiceOutboxCount();
+				this.pendingInvoicesCount = outboxCount;
 			} catch (error) {
 				console.error("Failed to update pending invoices count", error);
 			}
@@ -57,7 +64,17 @@ export const useSyncStore = defineStore("sync", {
 			}
 
 			try {
-				const result = await syncOfflineInvoices();
+				const result =
+					getInvoiceOutboxMode() === "coordinator"
+						? await useSyncCoordinator()
+								.runTrigger("user_action")
+								.then(async () => ({
+									pending:
+										await getPendingInvoiceOutboxCount(),
+									synced: 0,
+									drafted: 0,
+								}))
+						: await syncOfflineInvoices();
 				if (result && (result.synced || result.drafted)) {
 					if (result.synced) {
 						toastStore.show({

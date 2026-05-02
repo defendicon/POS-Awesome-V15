@@ -156,6 +156,16 @@ const SYNC_RESOURCES: ReadonlyArray<SyncResourceDefinition> = Object.freeze([
 		fullResyncSupported: true,
 	},
 	{
+		id: "invoice_outbox",
+		scope: "profile",
+		mode: "scoped",
+		priority: "warm",
+		triggers: ["online_resume", "timer", "user_action"],
+		storageKey: "invoice_outbox",
+		watermarkType: "none",
+		fullResyncSupported: false,
+	},
+	{
 		id: "customer_addresses",
 		scope: "customer",
 		mode: "on_demand",

@@ -1,3 +1,7 @@
+// @vitest-environment jsdom
+
+import "fake-indexeddb/auto";
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const adapterMocks = vi.hoisted(() => ({
@@ -137,7 +141,8 @@ describe("offline sync resource runner", () => {
 				watermark: "2026-04-09T09:30:00",
 			}),
 		);
-		const itemsFetcher = adapterMocks.syncItemsResource.mock.calls[0][0].fetcher;
+		const itemsFetcher =
+			adapterMocks.syncItemsResource.mock.calls[0][0].fetcher;
 		await itemsFetcher({
 			posProfile: { name: "POS-1", warehouse: "Main WH" },
 			priceList: "Retail",
@@ -173,7 +178,7 @@ describe("offline sync resource runner", () => {
 				lastSuccessHash: null,
 				lastError: null,
 				consecutiveFailures: 0,
-				scopeSignature: "{\"profile\":\"POS-1\"}",
+				scopeSignature: '{"profile":"POS-1"}',
 				schemaVersion: "2026-04-09",
 			})),
 			callOfflineSyncMethod: vi.fn(async () => ({})),

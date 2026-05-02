@@ -21,6 +21,7 @@ describe("sync resource registry", () => {
 			"item_prices",
 			"stock",
 			"customers",
+			"invoice_outbox",
 			"customer_addresses",
 			"delivery_charges",
 		]);
@@ -29,7 +30,9 @@ describe("sync resource registry", () => {
 
 	it("filters resources by priority without mutating registry order", () => {
 		expect(
-			getSyncResourcesByPriority("boot_critical").map((resource) => resource.id),
+			getSyncResourcesByPriority("boot_critical").map(
+				(resource) => resource.id,
+			),
 		).toEqual([
 			"bootstrap_config",
 			"price_list_meta",
@@ -43,7 +46,9 @@ describe("sync resource registry", () => {
 			getSyncResourcesByPriority("lazy").map((resource) => resource.id),
 		).toEqual(["customer_addresses", "delivery_charges"]);
 
-		expect(getSyncResourceDefinitions().map((resource) => resource.id)).toEqual([
+		expect(
+			getSyncResourceDefinitions().map((resource) => resource.id),
+		).toEqual([
 			"bootstrap_config",
 			"price_list_meta",
 			"currency_matrix",
@@ -54,6 +59,7 @@ describe("sync resource registry", () => {
 			"item_prices",
 			"stock",
 			"customers",
+			"invoice_outbox",
 			"customer_addresses",
 			"delivery_charges",
 		]);
@@ -72,7 +78,9 @@ describe("sync resource registry", () => {
 		]);
 
 		expect(
-			getSyncResourcesForTrigger("online_resume").map((resource) => resource.id),
+			getSyncResourcesForTrigger("online_resume").map(
+				(resource) => resource.id,
+			),
 		).toEqual([
 			"bootstrap_config",
 			"price_list_meta",
@@ -84,6 +92,7 @@ describe("sync resource registry", () => {
 			"item_prices",
 			"stock",
 			"customers",
+			"invoice_outbox",
 		]);
 	});
 });
