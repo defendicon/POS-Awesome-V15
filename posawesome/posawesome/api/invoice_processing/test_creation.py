@@ -1446,6 +1446,26 @@ class TestInvoiceIdempotency(unittest.TestCase):
         self.assertEqual(calls["insert"], 1)
         self.assertEqual(calls["save"], 0)
 
+    def test_post_submit_without_payment_work_ignores_missing_ledger(self):
+        self.creation.frappe.db.exists = lambda doctype, name: False
+        invoice_doc = FakeDoc(
+            doctype="Sales Invoice",
+            name="ACC-SINV-0001",
+            docstatus=1,
+        )
+
+        self.creation._process_post_submit_payments(
+            invoice_doc,
+            {},
+            0,
+            0,
+            None,
+            [],
+            False,
+            None,
+            "missing-ledger-name",
+        )
+
     def test_repair_incomplete_submission_ledger_reconciles_submitted_invoice(self):
         ledger_doc = FakeDoc(
             doctype="POS Invoice Submission Ledger",

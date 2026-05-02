@@ -130,16 +130,42 @@ def _save_submission_ledger(ledger_doc):
     if not ledger_doc:
         return None
 
+    ledger_name = getattr(ledger_doc, "name", None)
+    ledger_exists = False
+    if ledger_name:
+        try:
+            ledger_exists = bool(frappe.db.exists(LEDGER_DOCTYPE, ledger_name))
+        except Exception:
+            ledger_exists = False
+
     if hasattr(ledger_doc, "is_new"):
         if ledger_doc.is_new() and hasattr(ledger_doc, "insert"):
             ledger_doc.insert(ignore_permissions=True)
             return ledger_doc
 
-    if getattr(ledger_doc, "name", None) and hasattr(ledger_doc, "save"):
+    if ledger_name and not ledger_exists and hasattr(ledger_doc, "insert"):
+        ledger_doc.insert(ignore_permissions=True)
+    elif ledger_name and hasattr(ledger_doc, "save"):
         ledger_doc.save(ignore_permissions=True)
     elif hasattr(ledger_doc, "insert"):
         ledger_doc.insert(ignore_permissions=True)
     return ledger_doc
+
+
+def _get_submission_ledger_by_name(ledger_name):
+    if not ledger_name:
+        return None
+    try:
+        return frappe.get_doc(LEDGER_DOCTYPE, ledger_name)
+    except Exception:
+        return None
+
+
+def _update_submission_ledger_by_name(ledger_name, state, **fields):
+    ledger_doc = _get_submission_ledger_by_name(ledger_name)
+    if not ledger_doc:
+        return None
+    return _update_submission_ledger(ledger_doc, state, **fields)
 
 
 def _update_submission_ledger(ledger_doc, state, **fields):
@@ -271,8 +297,7 @@ def _process_post_submit_payments(
 ):
     if not _has_post_submit_payment_work(data):
         if ledger_name:
-            ledger_doc = frappe.get_doc(LEDGER_DOCTYPE, ledger_name)
-            _update_submission_ledger(ledger_doc, STATE_POST_SUBMIT_DONE)
+            _update_submission_ledger_by_name(ledger_name, STATE_POST_SUBMIT_DONE)
         return
 
     if run_async:
@@ -308,8 +333,7 @@ def _process_post_submit_payments(
 
     _run_post_submit_payments(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
     if ledger_name:
-        ledger_doc = frappe.get_doc(LEDGER_DOCTYPE, ledger_name)
-        _update_submission_ledger(ledger_doc, STATE_POST_SUBMIT_DONE)
+        _update_submission_ledger_by_name(ledger_name, STATE_POST_SUBMIT_DONE)
 
 
 def process_post_submit_payments_job(kwargs):
@@ -331,8 +355,7 @@ def process_post_submit_payments_job(kwargs):
         frappe.flags.ignore_account_permission = True
         _run_post_submit_payments(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
         if ledger_name:
-            ledger_doc = frappe.get_doc(LEDGER_DOCTYPE, ledger_name)
-            _update_submission_ledger(ledger_doc, STATE_POST_SUBMIT_DONE)
+            _update_submission_ledger_by_name(ledger_name, STATE_POST_SUBMIT_DONE)
         user = kwargs.get("user")
         if user and hasattr(frappe, "publish_realtime"):
             frappe.publish_realtime(
@@ -349,8 +372,9 @@ def process_post_submit_payments_job(kwargs):
         ledger_name = kwargs.get("ledger_name")
         if ledger_name:
             try:
-                ledger_doc = frappe.get_doc(LEDGER_DOCTYPE, ledger_name)
-                _mark_ledger_failed(ledger_doc, error_msg)
+                ledger_doc = _get_submission_ledger_by_name(ledger_name)
+                if ledger_doc:
+                    _mark_ledger_failed(ledger_doc, error_msg)
             except Exception:
                 pass
         frappe.log_error(f"POS Post Submit Payment Processing Failed for {invoice}: {error_msg}")
@@ -1135,6 +1159,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
             queue="default",
             timeout=3000,
             is_async=True,
+            enqueue_after_commit=True,
             kwargs={
                 "invoice": invoice_doc.name,
                 "doctype": invoice_doc.doctype,
@@ -1197,7 +1222,7 @@ def submit_in_background_job(kwargs):
         payments = kwargs.get("payments") or []
         user = kwargs.get("user") or getattr(getattr(frappe, "session", None), "user", None)
         ledger_name = kwargs.get("ledger_name")
-        ledger_doc = frappe.get_doc(LEDGER_DOCTYPE, ledger_name) if ledger_name else None
+        ledger_doc = _get_submission_ledger_by_name(ledger_name) if ledger_name else None
 
         invoice_doc = frappe.get_doc(doctype, invoice)
 
@@ -1277,8 +1302,9 @@ def submit_in_background_job(kwargs):
         ledger_name = kwargs.get("ledger_name")
         if ledger_name:
             try:
-                ledger_doc = frappe.get_doc(LEDGER_DOCTYPE, ledger_name)
-                _mark_ledger_failed(ledger_doc, error_msg)
+                ledger_doc = _get_submission_ledger_by_name(ledger_name)
+                if ledger_doc:
+                    _mark_ledger_failed(ledger_doc, error_msg)
             except Exception:
                 pass
         frappe.log_error(f"POS Background Submission Failed for {invoice}: {error_msg}")
