@@ -4,7 +4,7 @@ from frappe import _
 from frappe.utils import nowdate, flt, fmt_money, cint
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation import reconcile_dr_cr_note
-from erpnext.accounts.utils import reconcile_against_document
+from erpnext.accounts.utils import get_account_currency, reconcile_against_document
 from posawesome.posawesome.api.m_pesa import submit_mpesa_payment
 from posawesome.posawesome.api.payment_processing.creation import create_payment_entry
 from posawesome.posawesome.api.idempotency import (
@@ -62,6 +62,94 @@ def _to_public_entry(entry):
         "unallocated_amount": _get_value(entry, "unallocated_amount"),
         "outstanding_amount": _get_value(entry, "outstanding_amount"),
     }
+
+
+def _create_exchange_gain_loss_je(payment_entry, company, party_type, party, payment_type, difference, precision):
+    existing = frappe.get_all(
+        "Journal Entry",
+        filters={
+            "reference_type": "Payment Entry",
+            "reference_name": payment_entry.name,
+            "voucher_type": "Exchange Gain Or Loss",
+            "is_system_generated": 1,
+        },
+        limit=1,
+    )
+    if existing:
+        return
+
+    company_defaults = frappe.get_cached_value(
+        "Company", company, ("exchange_gain_loss_account", "cost_center"), as_dict=True
+    )
+    gain_loss_account = company_defaults.exchange_gain_loss_account
+    cost_center = company_defaults.cost_center or payment_entry.cost_center
+
+    if not gain_loss_account:
+        frappe.log_error(f"No exchange_gain_loss_account set for company {company}", "POS Payment Error")
+        return
+
+    if abs(difference) < 0.01:
+        return
+
+    party_acct = payment_entry.paid_from if payment_type == "Receive" else payment_entry.paid_to
+    party_acct_currency = get_account_currency(party_acct)
+    gl_currency = get_account_currency(gain_loss_account) or party_acct_currency
+
+    is_gain = (payment_type == "Receive" and difference > 0) or (payment_type == "Pay" and difference < 0)
+    abs_diff = abs(difference)
+
+    je = frappe.new_doc("Journal Entry")
+    je.voucher_type = "Exchange Gain Or Loss"
+    je.company = company
+    je.posting_date = payment_entry.posting_date
+    je.multi_currency = 0
+    je.is_system_generated = 1
+
+    if is_gain:
+        je.append("accounts", {
+            "account": party_acct,
+            "party_type": party_type,
+            "party": party,
+            "debit_in_account_currency": abs_diff,
+            "debit": abs_diff,
+            "account_currency": party_acct_currency,
+            "exchange_rate": 1,
+            "reference_type": "Payment Entry",
+            "reference_name": payment_entry.name,
+            "cost_center": cost_center,
+        })
+        je.append("accounts", {
+            "account": gain_loss_account,
+            "credit_in_account_currency": abs_diff,
+            "credit": abs_diff,
+            "account_currency": gl_currency,
+            "exchange_rate": 1,
+            "cost_center": cost_center,
+        })
+    else:
+        je.append("accounts", {
+            "account": gain_loss_account,
+            "debit_in_account_currency": abs_diff,
+            "debit": abs_diff,
+            "account_currency": gl_currency,
+            "exchange_rate": 1,
+            "cost_center": cost_center,
+        })
+        je.append("accounts", {
+            "account": party_acct,
+            "party_type": party_type,
+            "party": party,
+            "credit_in_account_currency": abs_diff,
+            "credit": abs_diff,
+            "account_currency": party_acct_currency,
+            "exchange_rate": 1,
+            "reference_type": "Payment Entry",
+            "reference_name": payment_entry.name,
+            "cost_center": cost_center,
+        })
+
+    je.save(ignore_permissions=True)
+    je.submit()
 
 
 def _to_public_entries(entries):
@@ -233,12 +321,6 @@ def process_pos_payment(payload):
     if not data.pos_profile.get("posa_use_pos_awesome_payments"):
         frappe.throw(_("POS Awesome Payments is not enabled for this POS Profile"))
 
-    # Log short summary only to avoid truncation
-    frappe.log_error(
-        f"Payment request from {data.customer} for {data.total_payment_methods} amount with {len(data.selected_invoices)} invoices",
-        "POS Payment Debug",
-    )
-
     party = data.get("party") or data.get("customer")
     party_type = data.get("party_type") or "Customer"
     payment_type = data.get("payment_type") or "Receive"
@@ -335,10 +417,14 @@ def process_pos_payment(payload):
             if not invoice_name:
                 continue
             outstanding = flt(invoice.get("outstanding_amount"))
+            conversion_rate = flt(invoice.get("conversion_rate")) or 1
             if outstanding <= 0 and voucher_type == "Sales Invoice":
                 try:
                     si = frappe.get_doc("Sales Invoice", invoice_name)
                     outstanding = flt(si.outstanding_amount)
+                    conversion_rate = flt(si.conversion_rate) or 1
+                    if conversion_rate > 0:
+                        outstanding = flt(outstanding / conversion_rate, 2)
                 except Exception:
                     outstanding = 0
             if outstanding <= 0:
@@ -348,6 +434,7 @@ def process_pos_payment(payload):
                     "name": invoice_name,
                     "outstanding_amount": outstanding,
                     "voucher_type": voucher_type,
+                    "conversion_rate": conversion_rate,
                 }
             )
 
@@ -592,36 +679,137 @@ def process_pos_payment(payload):
                     client_request_id=client_request_id,
                 )
 
-                remaining_amount = amount
-                allocated_amount = 0
+                party_account = get_party_account(party_type, party, company)
+                party_account_currency = get_account_currency(party_account)
+
+                first_inv = remaining_invoices[0] if remaining_invoices else {}
+                exchange_rate_val = flt(data.get("exchange_rate", 1))
+                precision = flt(frappe.db.get_default("currency_precision") or 2)
+
+                bank_currency = (
+                    payment_entry.paid_to_account_currency
+                    if payment_type == "Receive"
+                    else payment_entry.paid_from_account_currency
+                )
+                bank_amount = (
+                    payment_entry.received_amount
+                    if payment_type == "Receive"
+                    else payment_entry.paid_amount
+                )
+
+                company_currency = frappe.get_cached_value("Company", company, "default_currency")
+
+                # Convert bank amount to party currency ONCE
+                if bank_currency == party_account_currency:
+                    remaining_party = flt(bank_amount, precision)
+                elif bank_currency == company_currency:
+                    remaining_party = flt(bank_amount, precision)
+                else:
+                    bank_to_party = flt(get_exchange_rate(bank_currency, party_account_currency, posting_date), precision)
+                    remaining_party = flt(bank_amount * bank_to_party, precision)
+
+                total_allocated = 0
+
                 for inv in remaining_invoices:
-                    if remaining_amount <= 0:
+                    if remaining_party <= 0:
                         break
                     if inv["outstanding_amount"] <= 0:
                         continue
-                    allocation = min(remaining_amount, inv["outstanding_amount"])
+
+                    voucher_type = inv.get("voucher_type") or "Sales Invoice"
+
+                    # Fetch from DB for accurate party-currency amounts (ERPNext pattern)
+                    inv_doc = frappe.get_cached_doc(voucher_type, inv["name"])
+                    inv_currency = inv_doc.currency
+                    inv_conv_rate = flt(inv_doc.conversion_rate, 1)
+
+                    # Get amounts in party account currency
+                    if inv_currency == party_account_currency:
+                        inv_outstanding_party = flt(inv_doc.outstanding_amount)
+                        inv_total_party = flt(inv_doc.grand_total or inv_doc.rounded_total or inv_doc.outstanding_amount)
+                    elif party_account_currency == company_currency:
+                        inv_outstanding_party = flt(inv_doc.outstanding_amount * inv_conv_rate, precision)
+                        inv_total_party = flt(inv_doc.base_rounded_total or inv_doc.base_grand_total or inv_outstanding_party)
+                    else:
+                        inv_to_party = flt(get_exchange_rate(inv_currency, party_account_currency, posting_date), precision)
+                        comp_to_party = flt(get_exchange_rate(company_currency, party_account_currency, posting_date), precision)
+                        inv_outstanding_party = flt(inv_doc.outstanding_amount * inv_to_party, precision)
+                        inv_total_party = flt((inv_doc.base_rounded_total or inv_doc.base_grand_total) * comp_to_party, precision)
+
+                    if inv_outstanding_party <= 0:
+                        continue
+
+                    allocation = min(remaining_party, inv_outstanding_party)
+
                     if allocation <= 0:
                         continue
+
                     payment_entry.append(
                         "references",
                         {
-                            "reference_doctype": inv.get("voucher_type") or "Sales Invoice",
+                            "reference_doctype": voucher_type,
                             "reference_name": inv["name"],
-                            "total_amount": inv["outstanding_amount"],
-                            "outstanding_amount": inv["outstanding_amount"],
+                            "total_amount": inv_total_party,
+                            "outstanding_amount": inv_outstanding_party,
                             "allocated_amount": allocation,
                         },
                     )
-                    inv["outstanding_amount"] -= allocation
-                    remaining_amount -= allocation
-                    allocated_amount += allocation
 
-                payment_entry.total_allocated_amount = allocated_amount
-                payment_entry.unallocated_amount = payment_entry.paid_amount - allocated_amount
-                payment_entry.difference_amount = payment_entry.paid_amount - allocated_amount
+                    remaining_party -= allocation
+                    total_allocated = flt(total_allocated + allocation, precision)
+
+                payment_entry.total_allocated_amount = total_allocated
+
+                party_amount = (
+                    payment_entry.paid_amount if payment_type == "Receive" else payment_entry.received_amount
+                )
+                payment_entry.unallocated_amount = flt(party_amount - total_allocated, precision)
+
+                invoice_exchange_rate = flt(first_inv.get("conversion_rate", 0))
+                ref_names = ", ".join(r.reference_name for r in payment_entry.references)
+                verb = "received" if payment_type == "Receive" else "paid"
+                party_label = "from" if payment_type == "Receive" else "to"
+                party_label_amount = payment_entry.paid_amount if payment_type == "Receive" else payment_entry.received_amount
+                invoice_type = "Sales Invoice" if payment_type == "Receive" else "Purchase Invoice"
+                reference_no_str = data.get("reference_no") or pos_opening_shift_name
+                reference_date_str = data.get("reference_date") or posting_date
+
+                if invoice_exchange_rate and not _amounts_match(invoice_exchange_rate, exchange_rate_val):
+                    rate_note = f"\nExchange Rate: 1 {bank_currency} = {exchange_rate_val} {party_account_currency}"
+                else:
+                    rate_note = ""
+
+                payment_entry.remarks = (
+                    f"Amount {bank_currency} {flt(bank_amount)} {verb} {party_label} {party}\n"
+                    f"Transaction reference no {reference_no_str or ''} dated {reference_date_str or ''}\n"
+                    f"Amount {party_account_currency} {flt(party_label_amount)} against {invoice_type} {ref_names}{rate_note}"
+                )
 
                 payment_entry.save(ignore_permissions=True)
                 payment_entry.submit()
+
+                difference = flt(payment_entry.base_paid_amount - payment_entry.base_total_allocated_amount, precision)
+                if (
+                    invoice_exchange_rate > 0
+                    and not _amounts_match(invoice_exchange_rate, exchange_rate_val)
+                    and abs(difference) >= 0.01
+                ):
+                    _create_exchange_gain_loss_je(
+                        payment_entry=payment_entry,
+                        company=company,
+                        party_type=party_type,
+                        party=party,
+                        payment_type=payment_type,
+                        difference=difference,
+                        precision=precision,
+                    )
+                    payment_entry.reload()
+                    for ref in payment_entry.references:
+                        frappe.db.set_value("Payment Entry Reference", ref.name, "exchange_gain_loss", abs(difference))
+                    frappe.db.set_value("Payment Entry", payment_entry.name, {
+                        "unallocated_amount": 0,
+                        "difference_amount": difference,
+                    })
 
                 new_payments_entry.append(payment_entry)
                 all_payments_entry.append(payment_entry)

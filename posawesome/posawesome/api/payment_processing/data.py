@@ -45,6 +45,7 @@ def _get_open_sales_invoices(
             "currency",
             "pos_profile",
             "customer_name",
+            "conversion_rate",
         ],
         order_by="posting_date desc, name desc",
     )
@@ -79,6 +80,7 @@ def _get_open_purchase_invoices(
             "base_grand_total",
             "currency",
             "supplier_name",
+            "conversion_rate",
         ],
         order_by="posting_date desc, name desc",
     )
@@ -180,7 +182,14 @@ def get_outstanding_invoices(customer=None, company=None, currency=None, pos_pro
 
         normalized_rows = []
         for invoice in invoice_rows:
-            outstanding_amount = flt(invoice.get("outstanding_amount"))
+            invoice_outstanding = flt(invoice.get("outstanding_amount"))
+            conversion_rate = flt(invoice.get("conversion_rate"))
+
+            if conversion_rate > 0:
+                outstanding_amount = flt(invoice_outstanding / conversion_rate, 2)
+            else:
+                outstanding_amount = invoice_outstanding
+
             if outstanding_amount <= 0:
                 continue
 
@@ -212,6 +221,7 @@ def get_outstanding_invoices(customer=None, company=None, currency=None, pos_pro
                             invoice.get("supplier_name") if party_type == "Supplier" else invoice.get("customer_name")
                         ) or customer_name,
                         "party_type": party_type,
+                        "conversion_rate": flt(invoice.get("conversion_rate")) or 1,
                     }
                 )
             )

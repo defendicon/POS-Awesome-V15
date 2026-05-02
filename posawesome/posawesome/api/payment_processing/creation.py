@@ -37,31 +37,36 @@ def create_payment_entry(
     company_currency = company_doc.default_currency
     letter_head = company_doc.default_letter_head
 
-    # Get party account and currency in one call
+    # Get party account and currency
     party_account = get_party_account(party_type, party, company)
+    if not party_account:
+        frappe.throw(_(
+            "No default {0} account set for {1}"
+        ).format("receivable" if party_type == "Customer" else "payable", party))
     party_account_currency = get_account_currency(party_account)
 
-    if party_account_currency != currency:
-        frappe.throw(
-            _(
-                "Currency is not correct, party account currency is {party_account_currency} and transaction currency is {currency}"
-            ).format(party_account_currency=party_account_currency, currency=currency)
-        )
-    # Get bank details in one call
+    # Get bank details BEFORE validation
     bank = get_bank_cash_account(company, mode_of_payment)
+    if not bank:
+        frappe.throw(_("Bank/Cash account not found for mode of payment {0}").format(mode_of_payment))
+
+    # Validate currency: frontend always sends bank currency (physical cash)
+    expected_currency = bank.account_currency
+    if currency != expected_currency:
+        frappe.throw(_(
+            "Currency is not correct. Expected {expected}, got {currency}"
+        ).format(expected=expected_currency, currency=currency))
 
     # Get exchange rate
     if exchange_rate and flt(exchange_rate) > 0:
         conversion_rate = flt(exchange_rate)
     else:
-        conversion_rate = get_exchange_rate(currency, company_currency, date, "for_selling")
+        conversion_rate = get_exchange_rate(
+            currency, company_currency, date,
+            "for_buying" if payment_type == "Pay" else "for_selling"
+        )
 
-    # Calculate amounts
-    paid_amount, received_amount = set_paid_amount_and_received_amount(
-        party_account_currency, bank, amount, payment_type, None, conversion_rate
-    )
-
-    # Create payment entry with minimal db calls
+    # Create payment entry with metadata only
     pe = frappe.new_doc("Payment Entry")
     pe.payment_type = payment_type
     pe.company = company
@@ -76,11 +81,10 @@ def create_payment_entry(
         party_account_currency if payment_type == "Receive" else bank.account_currency
     )
     pe.paid_to_account_currency = party_account_currency if payment_type == "Pay" else bank.account_currency
-    pe.paid_amount = paid_amount
-    pe.received_amount = received_amount
     pe.letter_head = letter_head
     pe.reference_date = reference_date
     pe.reference_no = reference_no
+
     if client_request_id and doctype_supports_client_request_id("Payment Entry"):
         pe.posa_client_request_id = client_request_id
 
@@ -91,22 +95,42 @@ def create_payment_entry(
             pe.bank_account = bank_account
             pe.set_bank_account_data()
 
-    # Set required fields
+    # Let ERPNext fill missing metadata (party name, contact, defaults)
     pe.setup_party_account_field()
     pe.set_missing_values()
 
-    if exchange_rate and flt(exchange_rate) > 0:
-        pe.source_exchange_rate = flt(exchange_rate)
-        pe.target_exchange_rate = flt(exchange_rate)
-        frappe.logger().info(f"Set custom exchange rate: {exchange_rate}")
+    # NOW override with our multi-currency calculations
+    bank_amount = flt(amount)
+    precision = flt(frappe.db.get_default("currency_precision") or 2)
 
+    if party_account_currency != bank.account_currency:
+        if payment_type == "Pay":
+            pe.paid_amount = bank_amount
+            pe.received_amount = flt(bank_amount * conversion_rate, precision)
+            pe.source_exchange_rate = conversion_rate
+            pe.target_exchange_rate = 1
+        else:  # Receive
+            pe.paid_amount = flt(bank_amount * conversion_rate, precision)
+            pe.received_amount = bank_amount
+            pe.source_exchange_rate = 1
+            pe.target_exchange_rate = conversion_rate
 
-    if party_account and bank:
-        pe.set_amounts()
+        pe.base_paid_amount = flt(pe.paid_amount * pe.source_exchange_rate, precision)
+        pe.base_received_amount = flt(pe.received_amount * pe.target_exchange_rate, precision)
+    else:
+        paid_amount, received_amount = set_paid_amount_and_received_amount(
+            party_account_currency, bank, amount, payment_type, None, conversion_rate
+        )
+        pe.paid_amount = paid_amount
+        pe.received_amount = received_amount
+        # Defensive: ensure base amounts are set for same-currency case
+        if not pe.base_paid_amount:
+            pe.base_paid_amount = flt(paid_amount)
+        if not pe.base_received_amount:
+            pe.base_received_amount = flt(received_amount)
 
-    # Insert and submit in one go if needed
-    pe.insert(ignore_permissions=True)
     if submit:
+        pe.insert(ignore_permissions=True)
         pe.submit()
 
     return pe
