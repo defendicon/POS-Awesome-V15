@@ -15,3 +15,4 @@ posawesome.patches.add_dashboard_settings
 posawesome.patches.add_dashboard_global_settings
 posawesome.patches.add_gift_card_invoice_redemption_fields
 posawesome.patches.add_gift_card_to_workspace
+posawesome.patches.add_submission_ledger_to_workspace
