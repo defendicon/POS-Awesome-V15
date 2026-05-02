@@ -36,6 +36,7 @@ function recordPendingBundleActivation(version: string) {
 declare global {
 	interface Window {
 		__posawesomeBundlePromise?: Promise<BootAssetResult>;
+		__posawesomeBundleVersion?: string;
 		startPosBoot?: (options?: { pageRef?: any }) => Promise<unknown>;
 	}
 }
@@ -232,10 +233,12 @@ async function loadPosAssets(
 	ensureStylesheetLoaded(metadata, buildVersion);
 	if (
 		window.__posawesomeBundlePromise &&
-		typeof window.__posawesomeBundlePromise.then === "function"
+		typeof window.__posawesomeBundlePromise.then === "function" &&
+		window.__posawesomeBundleVersion === (buildVersion || "")
 	) {
 		return window.__posawesomeBundlePromise;
 	}
+	window.__posawesomeBundleVersion = buildVersion || "";
 	window.__posawesomeBundlePromise = importPosAwesomeBundle(metadata);
 	return window.__posawesomeBundlePromise;
 }

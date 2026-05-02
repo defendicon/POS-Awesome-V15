@@ -97,6 +97,53 @@ describe("chunk load recovery helpers", () => {
 		).toBe("1");
 	});
 
+	it("uses recovery URL params as durable retry history when storage was cleared", async () => {
+		const chunkError = new TypeError(
+			"Failed to fetch dynamically imported module: /assets/chunk.js",
+		);
+
+		window.history.replaceState(
+			null,
+			"",
+			"/app/posapp?_posa_chunk_reload=1&_posa_chunk_cache_recovery=2",
+		);
+
+		const recovered = await recoverFromChunkLoadError(
+			chunkError,
+			"storage-cleared-after-cache-recovery",
+		);
+
+		expect(recovered).toBe(false);
+		expect(
+			window.sessionStorage.getItem("posa_chunk_recovery_terminal"),
+		).toBe("1");
+		expect(window.location.search).toContain("_posa_chunk_reload=1");
+		expect(window.location.search).toContain(
+			"_posa_chunk_cache_recovery=2",
+		);
+	});
+
+	it("uses the URL reload marker to go directly to cache recovery after storage is cleared", async () => {
+		const chunkError = new TypeError(
+			"Failed to fetch dynamically imported module: /assets/chunk.js",
+		);
+
+		window.history.replaceState(
+			null,
+			"",
+			"/app/posapp?_posa_chunk_reload=1",
+		);
+
+		await recoverFromChunkLoadError(
+			chunkError,
+			"storage-cleared-after-reload",
+		);
+
+		expect(
+			window.sessionStorage.getItem("posa_chunk_cache_recovery_once"),
+		).toBe("1");
+	});
+
 	it("does not clear retry decisions after stable boot", async () => {
 		vi.useFakeTimers();
 		window.sessionStorage.setItem("posa_chunk_reload_once", "1");
