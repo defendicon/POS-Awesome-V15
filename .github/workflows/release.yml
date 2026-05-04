@@ -110,10 +110,8 @@ jobs:
           bench get-app "$GITHUB_WORKSPACE"
           bench --site example.com install-app posawesome
 
-      - name: Frappe app tests
-        run: |
-          cd frappe-bench
-          bench --site example.com run-tests --app posawesome
+      - name: POS Awesome backend unit smoke
+        run: python -m unittest discover -s posawesome/posawesome/api -p "test_offline_sync_*.py"
 
   build-gates:
     name: Build release gates

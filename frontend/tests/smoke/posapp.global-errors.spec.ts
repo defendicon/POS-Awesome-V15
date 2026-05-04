@@ -1,6 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
 
 const POS_PATH = process.env.POSA_SMOKE_PATH || "/app/posapp";
+const HAS_CONFIGURED_SMOKE_TARGET = Boolean(process.env.POSA_SMOKE_BASE_URL);
+
+test.skip(
+	Boolean(process.env.CI) && !HAS_CONFIGURED_SMOKE_TARGET,
+	"POSA_SMOKE_BASE_URL is not configured for CI smoke testing.",
+);
 
 function isBenignErrorMessage(message: string): boolean {
 	const normalized = message.toLowerCase();

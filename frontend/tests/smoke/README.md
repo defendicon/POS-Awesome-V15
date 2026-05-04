@@ -21,5 +21,6 @@ Copy `frontend/.env.example` to `frontend/.env.local` and fill in local values.
 - `POSA_SMOKE_USER`: login username (optional)
 - `POSA_SMOKE_PASSWORD`: login password (optional)
 
+In CI, the POS app route smoke test is skipped unless `POSA_SMOKE_BASE_URL` is configured.
 If credentials are set, the test logs in before opening POS.
 If credentials are not set, test assumes an already authenticated session.
