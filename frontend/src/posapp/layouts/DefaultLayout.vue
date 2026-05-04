@@ -466,10 +466,15 @@ async function refreshOfflinePricingRules(options = {}) {
 		return false;
 	}
 
-	await pricingRulesStore.ensureActiveRules(context, {
-		force: options.force === true,
-	});
-	return true;
+	try {
+		await pricingRulesStore.ensureActiveRules(context, {
+			force: options.force === true,
+		});
+		return true;
+	} catch (error) {
+		console.error("Failed to refresh offline pricing rules", error);
+		return false;
+	}
 }
 
 function canRunOfflineSync() {
