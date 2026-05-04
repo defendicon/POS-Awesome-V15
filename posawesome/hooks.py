@@ -1,11 +1,14 @@
 app_name = "posawesome"
 app_title = "POS Awesome"
-app_publisher = "Youssef Restom"
+app_publisher = "defendicon"
 app_description = "POS Awesome"
 app_icon = "octicon octicon-file-directory"
 app_color = "grey"
-app_email = "youssef@totrox.com"
+app_email = "defendicon@github.com"
 app_license = "GPLv3"
+app_url = "https://github.com/defendicon/POS-Awesome-V15"
+app_source_link = "https://github.com/defendicon/POS-Awesome-V15"
+source_link = "https://github.com/defendicon/POS-Awesome-V15"
 
 # Includes in <head>
 # ------------------

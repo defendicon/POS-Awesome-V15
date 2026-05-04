@@ -1,6 +1,14 @@
 {
 	"name": "posawesome",
-	"version": "15.18.0",
+	"version": "15.28.2",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/defendicon/POS-Awesome-V15.git"
+	},
+	"homepage": "https://github.com/defendicon/POS-Awesome-V15",
+	"bugs": {
+		"url": "https://github.com/defendicon/POS-Awesome-V15/issues"
+	},
 	"main": "electron/main.js",
 	"scripts": {
 		"dev": "cd frontend && yarn dev",

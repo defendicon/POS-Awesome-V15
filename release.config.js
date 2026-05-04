@@ -10,6 +10,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 module.exports = {
 	branches: ["develop"],
 	tagFormat: "${version}",
+	repositoryUrl: "https://github.com/defendicon/POS-Awesome-V15.git",
 	plugins: [
 		"@semantic-release/commit-analyzer",
 		[
@@ -85,7 +86,7 @@ module.exports = {
 			{
 				assets: ["CHANGELOG.md", "package.json", "yarn.lock", "posawesome/__init__.py"],
 				message:
-					"Release: v${nextRelease.version} — ${new Date().toISOString().slice(0, 10)}\n\n${nextRelease.notes}\n",
+					"Release: ${nextRelease.version} — ${new Date().toISOString().slice(0, 10)}\n\n${nextRelease.notes}\n",
 			},
 		],
 		[

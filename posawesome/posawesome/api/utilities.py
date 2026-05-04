@@ -13,6 +13,8 @@ import re
 import json
 import subprocess
 
+from posawesome import __version__ as POS_AWESOME_APP_VERSION
+
 try:
     import psutil
 except ImportError:  # pragma: no cover - optional dependency
@@ -23,6 +25,28 @@ import functools
 
 from .utils import get_item_groups, fetch_sales_person_names
 from posawesome.utils import get_build_version
+
+POS_AWESOME_REPO_URL = "https://github.com/defendicon/POS-Awesome-V15"
+
+
+def _normalize_release_tag(version):
+    tag = cstr(version).strip()
+    if tag.startswith("v") and len(tag) > 1 and tag[1].isdigit():
+        tag = tag[1:]
+    return tag or None
+
+
+def _build_release_url(version):
+    tag = _normalize_release_tag(version)
+    return f"{POS_AWESOME_REPO_URL}/releases/tag/{tag}" if tag else None
+
+
+def _get_update_metadata() -> Dict[str, Any]:
+    return {
+        "app_version": POS_AWESOME_APP_VERSION,
+        "repo_url": POS_AWESOME_REPO_URL,
+        "release_url": _build_release_url(POS_AWESOME_APP_VERSION),
+    }
 
 
 def get_version():
@@ -171,7 +195,7 @@ def get_app_info() -> Dict[str, List[Dict[str, str]]]:
 
         apps_info.append({"app_name": app_name, "installed_version": app_version})
 
-    return {"apps": apps_info, "build_version": get_build_version()}
+    return {"apps": apps_info, "build_version": get_build_version(), **_get_update_metadata()}
 
 
 def _get_git_commit_info(app_name: str = "posawesome") -> Dict[str, Any]:
@@ -203,7 +227,7 @@ def _get_git_commit_info(app_name: str = "posawesome") -> Dict[str, Any]:
 @frappe.whitelist()
 def get_build_info() -> Dict[str, Any]:
     """Return build version + latest git commit info for update prompts."""
-    data: Dict[str, Any] = {"build_version": get_build_version()}
+    data: Dict[str, Any] = {"build_version": get_build_version(), **_get_update_metadata()}
     data.update(_get_git_commit_info("posawesome"))
     return data
 
@@ -337,7 +361,7 @@ def _get_current_branch(app_path: str) -> str:
 
 @frappe.whitelist()
 def get_remote_update_info() -> Dict[str, Any]:
-    data: Dict[str, Any] = {"build_version": get_build_version()}
+    data: Dict[str, Any] = {"build_version": get_build_version(), **_get_update_metadata()}
     base = _get_git_commit_info("posawesome")
     if base:
         data.update(base)
