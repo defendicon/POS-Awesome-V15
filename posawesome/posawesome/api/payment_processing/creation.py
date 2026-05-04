@@ -32,6 +32,13 @@ def create_payment_entry(
     date = nowdate() if not posting_date else posting_date
     party = party or customer
 
+    frappe.log_error(
+        f"[CREATION] START - company={company}, amount={amount}, currency={currency}, "
+        f"mode_of_payment={mode_of_payment}, party={party}, party_type={party_type}, "
+        f"payment_type={payment_type}, exchange_rate={exchange_rate}, posting_date={posting_date}",
+        "POS Payment Entry Trace"
+    )
+
     # Cache commonly used values
     company_doc = frappe.get_cached_doc("Company", company)
     company_currency = company_doc.default_currency
@@ -50,6 +57,13 @@ def create_payment_entry(
     if not bank:
         frappe.throw(_("Bank/Cash account not found for mode of payment {0}").format(mode_of_payment))
 
+    frappe.log_error(
+        f"[CREATION] CURRENCY CHECK - party_account={party_account}, "
+        f"party_account_currency={party_account_currency}, bank_account={bank.account}, "
+        f"bank_currency={bank.account_currency}, company_currency={company_currency}",
+        "POS Payment Entry Trace"
+    )
+
     # Validate currency: frontend always sends bank currency (physical cash)
     expected_currency = bank.account_currency
     if currency != expected_currency:
@@ -60,10 +74,18 @@ def create_payment_entry(
     # Get exchange rate
     if exchange_rate and flt(exchange_rate) > 0:
         conversion_rate = flt(exchange_rate)
+        frappe.log_error(
+            f"[CREATION] Using user-provided exchange_rate={exchange_rate}, conversion_rate={conversion_rate}",
+            "POS Payment Entry Trace"
+        )
     else:
         conversion_rate = get_exchange_rate(
             currency, company_currency, date,
             "for_buying" if payment_type == "Pay" else "for_selling"
+        )
+        frappe.log_error(
+            f"[CREATION] System fetched exchange_rate: {currency} -> {company_currency} = {conversion_rate}",
+            "POS Payment Entry Trace"
         )
 
     # Create payment entry with metadata only
@@ -103,17 +125,32 @@ def create_payment_entry(
     bank_amount = flt(amount)
     precision = flt(frappe.db.get_default("currency_precision") or 2)
 
+    frappe.log_error(
+        f"[CREATION] Before calculation - bank_amount={bank_amount}, precision={precision}, "
+        f"party_account_currency={party_account_currency}, bank.account_currency={bank.account_currency}",
+        "POS Payment Entry Trace"
+    )
+
     if party_account_currency != bank.account_currency:
-        if payment_type == "Pay":
-            pe.paid_amount = bank_amount
-            pe.received_amount = flt(bank_amount * conversion_rate, precision)
-            pe.source_exchange_rate = conversion_rate
-            pe.target_exchange_rate = 1
-        else:  # Receive
-            pe.paid_amount = flt(bank_amount * conversion_rate, precision)
+        bank_to_base = conversion_rate
+        party_to_base = flt(get_exchange_rate(party_account_currency, company_currency, date))
+
+        frappe.log_error(
+            f"[CREATION] CROSS-CURRENCY BRANCH - bank_to_base={bank_to_base}, party_to_base={party_to_base}, "
+            f"payment_type={payment_type}",
+            "POS Payment Entry Trace"
+        )
+
+        if payment_type == "Receive":
             pe.received_amount = bank_amount
-            pe.source_exchange_rate = 1
-            pe.target_exchange_rate = conversion_rate
+            pe.source_exchange_rate = party_to_base
+            pe.target_exchange_rate = bank_to_base
+            pe.paid_amount = flt(bank_amount * bank_to_base / party_to_base, precision)
+        else:  # Pay
+            pe.paid_amount = bank_amount
+            pe.source_exchange_rate = bank_to_base
+            pe.target_exchange_rate = party_to_base
+            pe.received_amount = flt(bank_amount * bank_to_base / party_to_base, precision)
 
         pe.base_paid_amount = flt(pe.paid_amount * pe.source_exchange_rate, precision)
         pe.base_received_amount = flt(pe.received_amount * pe.target_exchange_rate, precision)
@@ -128,6 +165,16 @@ def create_payment_entry(
             pe.base_paid_amount = flt(paid_amount)
         if not pe.base_received_amount:
             pe.base_received_amount = flt(received_amount)
+
+    frappe.log_error(
+        f"[CREATION] FINAL PE VALUES - paid_amount={pe.paid_amount}, received_amount={pe.received_amount}, "
+        f"source_exchange_rate={pe.source_exchange_rate}, target_exchange_rate={pe.target_exchange_rate}, "
+        f"base_paid_amount={pe.base_paid_amount}, base_received_amount={pe.base_received_amount}, "
+        f"paid_from={pe.paid_from}, paid_to={pe.paid_to}, "
+        f"paid_from_account_currency={pe.paid_from_account_currency}, "
+        f"paid_to_account_currency={pe.paid_to_account_currency}",
+        "POS Payment Entry Trace"
+    )
 
     if submit:
         pe.insert(ignore_permissions=True)

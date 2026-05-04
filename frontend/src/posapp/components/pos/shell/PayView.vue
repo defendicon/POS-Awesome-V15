@@ -465,7 +465,7 @@ export default {
 		const total_outstanding_amount = computed(() => {
 			if (!outstanding_invoices.value.length) return 0;
 			return outstanding_invoices.value.reduce(
-				(acc, cur) => acc + flt(cur?.outstanding_amount || 0),
+				(acc, cur) => acc + flt(cur?.outstanding_amount_in_invoice_currency ?? cur?.outstanding_amount ?? 0),
 				0,
 			);
 		});
@@ -506,12 +506,12 @@ export default {
 				if (!summary[key]) {
 					summary[key] = {
 						amount: 0,
-						symbol: currencySymbol(partyCurr),
+						symbol: currencySymbol(invoiceCurr),
 						party_currency: partyCurr,
 						invoice_currency: invoiceCurr,
 					};
 				}
-				summary[key].amount += flt(inv.outstanding_amount || 0);
+				summary[key].amount += flt(inv.outstanding_amount_in_invoice_currency ?? inv.outstanding_amount ?? 0);
 			});
 			return summary;
 		});

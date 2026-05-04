@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 from frappe.utils import nowdate
 from posawesome.posawesome.api.payment_processing.utils import (
     get_party_account,
@@ -133,3 +134,117 @@ def create_direct_journal_entry(
     except Exception as e:
         frappe.log_error(f"Error creating direct journal entry: {str(e)}", "Direct JE Error")
         frappe.throw(f"Failed to create journal entry: {str(e)}")
+
+
+def create_pos_exchange_gain_loss_journal(
+    company,
+    posting_date,
+    party_type,
+    party,
+    party_account,
+    gain_loss_account,
+    exc_gain_loss,
+    dr_or_cr,
+    reverse_dr_or_cr,
+    ref1_dt,
+    ref1_dn,
+    ref1_detail_no,
+    ref2_dt,
+    ref2_dn,
+    ref2_detail_no,
+    cost_center,
+    dimensions,
+    project=None,
+):
+    """
+    Create Exchange Gain/Loss JE with correct account_currency amounts.
+
+    Fixes ERPNext core behavior where *_in_account_currency is set to 0 even when
+    the account currency matches the company currency. GL entries inherit values
+    from JE rows at submit time, so we must set correct values BEFORE submit.
+
+    Args:
+        company: Company name
+        posting_date: Posting date for the JE
+        party_type: Party type (e.g., "Customer")
+        party: Party name
+        party_account: Party account (receivable/payable)
+        gain_loss_account: Exchange Gain/Loss account
+        exc_gain_loss: Exchange gain/loss amount (positive number)
+        dr_or_cr: "debit" or "credit" for party account
+        reverse_dr_or_cr: Opposite of dr_or_cr
+        ref1_dt: Reference doctype for party account (e.g., "Sales Invoice")
+        ref1_dn: Reference name for party account
+        ref1_detail_no: Reference detail number (idx) for party account
+        ref2_dt: Reference doctype for gain/loss account (e.g., "Payment Entry")
+        ref2_dn: Reference name for gain/loss account
+        ref2_detail_no: Reference detail number (idx) for gain/loss account
+        cost_center: Cost center
+        dimensions: Accounting dimensions dict or None
+        project: Project name or None
+
+    Returns:
+        str: Journal Entry name
+    """
+    import erpnext
+    from erpnext.accounts.doctype.account.account import get_account_currency
+
+    je = frappe.new_doc("Journal Entry")
+    je.voucher_type = "Exchange Gain Or Loss"
+    je.company = company
+    je.posting_date = posting_date or nowdate()
+    je.multi_currency = 1
+    je.is_system_generated = True
+
+    company_currency = frappe.get_cached_value("Company", company, "default_currency")
+    party_account_currency = get_account_currency(party_account)
+    gain_loss_account_currency = get_account_currency(gain_loss_account)
+
+    if gain_loss_account_currency != company_currency:
+        frappe.throw(
+            _("Exchange Gain/Loss account {0} must be in company currency {1}").format(
+                gain_loss_account, company_currency
+            )
+        )
+
+    default_cost_center = cost_center or erpnext.get_default_cost_center(company)
+
+    # Party account row - FIX: set _in_account_currency to match company currency
+    party_row = {
+        "account": party_account,
+        "party_type": party_type,
+        "party": party,
+        "account_currency": party_account_currency,
+        "exchange_rate": 1,
+        "cost_center": default_cost_center,
+        "project": project,
+        "reference_type": ref1_dt,
+        "reference_name": ref1_dn,
+        "reference_detail_no": ref1_detail_no,
+        dr_or_cr: abs(exc_gain_loss),
+        dr_or_cr + "_in_account_currency": abs(exc_gain_loss),
+    }
+    if dimensions:
+        party_row.update(dimensions)
+    je.append("accounts", party_row)
+
+    # Gain/loss account row - FIX: set _in_account_currency to match company currency
+    gl_row = {
+        "account": gain_loss_account,
+        "account_currency": gain_loss_account_currency,
+        "exchange_rate": 1,
+        "cost_center": default_cost_center,
+        "project": project,
+        "reference_type": ref2_dt,
+        "reference_name": ref2_dn,
+        "reference_detail_no": ref2_detail_no,
+        reverse_dr_or_cr: abs(exc_gain_loss),
+        reverse_dr_or_cr + "_in_account_currency": abs(exc_gain_loss),
+    }
+    if dimensions:
+        gl_row.update(dimensions)
+    je.append("accounts", gl_row)
+
+    je.save()
+    je.submit()
+    return je.name

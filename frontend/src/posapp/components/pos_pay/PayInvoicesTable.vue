@@ -134,7 +134,7 @@
 					>{{
 						currencySymbol(item?.currency || posProfile.currency)
 					}}
-					{{ formatCurrency(item?.outstanding_amount || 0) }}</span
+					{{ formatCurrency(item?.outstanding_amount_in_invoice_currency ?? item?.outstanding_amount ?? 0) }}</span
 				>
 			</template>
 		</v-data-table>
