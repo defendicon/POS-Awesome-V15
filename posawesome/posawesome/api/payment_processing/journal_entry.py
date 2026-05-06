@@ -245,6 +245,6 @@ def create_pos_exchange_gain_loss_journal(
         gl_row.update(dimensions)
     je.append("accounts", gl_row)
 
-    je.save()
-    je.submit()
+    je.save(ignore_permissions=True)
+    je.submit(ignore_permissions=True)
     return je.name

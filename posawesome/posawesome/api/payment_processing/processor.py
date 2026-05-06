@@ -704,9 +704,10 @@ def process_pos_payment(payload):
                 pe_exchange_rate = payment_entry.target_exchange_rate if payment_type == "Receive" else payment_entry.source_exchange_rate
 
                 # Store gain/loss BEFORE save - ERPNext resets exchange_gain_loss during validation
+                # Map by reference_name instead of list index to avoid mismatch when invoices are skipped
                 gain_loss_refs = []
-                for i, ref in enumerate(payment_entry.references):
-                    inv = remaining_invoices[i] if i < len(remaining_invoices) else {}
+                for ref in payment_entry.references:
+                    inv = next((inv for inv in remaining_invoices if inv["name"] == ref.reference_name), {})
                     inv_rate = flt(inv.get("conversion_rate")) or 1
                     if inv_rate and pe_exchange_rate and inv_rate != pe_exchange_rate:
                         allocated_yer = flt(ref.allocated_amount)
