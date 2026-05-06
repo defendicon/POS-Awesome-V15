@@ -11,6 +11,26 @@ from posawesome.posawesome.doctype.pos_closing_shift.closing_processing.invoices
 )
 
 
+def build_pos_payment_reference(payment_entry):
+    party_type = payment_entry.get("party_type")
+    party = payment_entry.get("party")
+    row = frappe._dict(
+        {
+            "payment_entry": payment_entry.name,
+            "mode_of_payment": payment_entry.mode_of_payment,
+            "paid_amount": payment_entry.paid_amount,
+            "posting_date": payment_entry.posting_date,
+            "party_type": party_type,
+            "party": party,
+        }
+    )
+
+    if party_type == "Customer":
+        row.customer = party
+
+    return row
+
+
 @frappe.whitelist()
 def make_closing_shift_from_opening(opening_shift):
     opening_shift = json.loads(opening_shift)
@@ -127,17 +147,7 @@ def make_closing_shift_from_opening(opening_shift):
     pos_payments = get_payments_entries(opening_shift.get("name"))
 
     for py in pos_payments:
-        pos_payments_table.append(
-            frappe._dict(
-                {
-                    "payment_entry": py.name,
-                    "mode_of_payment": py.mode_of_payment,
-                    "paid_amount": py.paid_amount,
-                    "posting_date": py.posting_date,
-                    "customer": py.party,
-                }
-            )
-        )
+        pos_payments_table.append(build_pos_payment_reference(py))
         existing_pay = [pay for pay in payments if pay.mode_of_payment == py.mode_of_payment]
         multiplier = -1 if py.payment_type == "Pay" else 1
         signed_amount = multiplier * abs(get_base_value(py, "paid_amount", "base_paid_amount"))

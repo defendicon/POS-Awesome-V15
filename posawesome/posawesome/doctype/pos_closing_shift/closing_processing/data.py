@@ -67,6 +67,7 @@ def get_payments_entries(pos_opening_shift):
             "target_exchange_rate",
             "reference_no",
             "posting_date",
+            "party_type",
             "party",
             "payment_type",
         ],

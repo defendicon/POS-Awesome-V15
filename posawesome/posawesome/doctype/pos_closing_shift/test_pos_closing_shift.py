@@ -8,7 +8,7 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
-from posawesome.posawesome.doctype.pos_closing_shift.closing_processing import invoices, overview
+from posawesome.posawesome.doctype.pos_closing_shift.closing_processing import creation, invoices, overview
 
 
 class DummyClosingShift:
@@ -19,6 +19,25 @@ class DummyClosingShift:
 
     def get(self, key, default=None):
         return self._tables.get(key, default)
+
+
+class AttrDict(dict):
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(key)
+
+    def __setattr__(self, key, value):
+        self[key] = value
+
+
+class DummyPaymentEntry:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+    def get(self, key, default=None):
+        return getattr(self, key, default)
 
 
 class TestPOSClosingShift(unittest.TestCase):
@@ -104,6 +123,42 @@ class TestPOSClosingShift(unittest.TestCase):
         overview.get_payment_reconciliation_details(closing_shift_doc)
 
         payment_doc.check_permission.assert_called_once_with("read")
+
+    @patch("posawesome.posawesome.doctype.pos_closing_shift.closing_processing.creation.frappe")
+    def test_supplier_payment_reference_does_not_populate_customer_link(self, mock_frappe):
+        mock_frappe._dict.side_effect = lambda value: AttrDict(value)
+        payment_entry = DummyPaymentEntry(
+            name="ACC-PAY-SUP-0001",
+            mode_of_payment="Cash",
+            paid_amount=50,
+            posting_date="2026-05-06",
+            party_type="Supplier",
+            party="Haji Khalid & Sons",
+        )
+
+        row = creation.build_pos_payment_reference(payment_entry)
+
+        self.assertEqual(row.party_type, "Supplier")
+        self.assertEqual(row.party, "Haji Khalid & Sons")
+        self.assertNotIn("customer", row)
+
+    @patch("posawesome.posawesome.doctype.pos_closing_shift.closing_processing.creation.frappe")
+    def test_customer_payment_reference_keeps_customer_link(self, mock_frappe):
+        mock_frappe._dict.side_effect = lambda value: AttrDict(value)
+        payment_entry = DummyPaymentEntry(
+            name="ACC-PAY-CUS-0001",
+            mode_of_payment="Cash",
+            paid_amount=75,
+            posting_date="2026-05-06",
+            party_type="Customer",
+            party="Walk-in Customer",
+        )
+
+        row = creation.build_pos_payment_reference(payment_entry)
+
+        self.assertEqual(row.party_type, "Customer")
+        self.assertEqual(row.party, "Walk-in Customer")
+        self.assertEqual(row.customer, "Walk-in Customer")
 
     @patch("posawesome.posawesome.doctype.pos_closing_shift.closing_processing.invoices.frappe")
     def test_submit_printed_invoices_skips_return_drafts_against_cancelled_invoices(self, mock_frappe):

@@ -128,13 +128,20 @@ function add_to_pos_transaction(d, frm) {
 }
 
 function add_to_pos_payments(d, frm) {
-	frm.add_child("pos_payments", {
+	const child = {
 		payment_entry: d.name,
 		posting_date: d.posting_date,
 		paid_amount: d.paid_amount,
-		customer: d.party,
+		party_type: d.party_type,
+		party: d.party,
 		mode_of_payment: d.mode_of_payment,
-	});
+	};
+
+	if (d.party_type === "Customer") {
+		child.customer = d.party;
+	}
+
+	frm.add_child("pos_payments", child);
 }
 
 async function add_to_payments(d, frm, conversion_rate) {

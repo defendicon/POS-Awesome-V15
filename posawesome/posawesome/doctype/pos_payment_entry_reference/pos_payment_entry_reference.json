@@ -9,6 +9,8 @@
   "payment_entry",
   "posting_date",
   "column_break_3",
+  "party_type",
+  "party",
   "customer",
   "paid_amount",
   "mode_of_payment"
@@ -38,11 +40,27 @@
    "fetch_from": "pos_invoice.customer",
    "fieldname": "customer",
    "fieldtype": "Link",
-   "in_list_view": 1,
+   "hidden": 1,
    "label": "Customer",
    "options": "Customer",
    "read_only": 1,
-   "reqd": 1
+   "reqd": 0
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Party Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Party",
+   "options": "party_type",
+   "read_only": 1
   },
   {
    "fetch_from": "pos_invoice.grand_total",
