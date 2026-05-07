@@ -14,6 +14,8 @@ from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
 )
 from posawesome.posawesome.doctype.pos_coupon.pos_coupon import update_coupon_code_count
 
+SUBMISSION_LEDGER_DOCTYPE = "POS Invoice Submission Ledger"
+
 
 def validate(doc, method):
     validate_shift(doc)
@@ -36,6 +38,36 @@ def before_cancel(doc, method):
 def on_cancel(doc, method):
     cancel_posawesome_credit_journal_entries(doc)
     restore_posawesome_gift_card_redemptions(doc)
+    delete_invoice_submission_ledger_entries(doc)
+
+
+def delete_invoice_submission_ledger_entries(doc):
+    delete_invoice_submission_ledger_entries_for_invoice(
+        getattr(doc, "doctype", None),
+        getattr(doc, "name", None),
+    )
+
+
+def delete_invoice_submission_ledger_entries_for_invoice(doctype, invoice_name):
+    if not doctype or not invoice_name:
+        return
+
+    ledger_names = frappe.get_all(
+        SUBMISSION_LEDGER_DOCTYPE,
+        filters={
+            "document_type": doctype,
+            "invoice_name": invoice_name,
+        },
+        pluck="name",
+    )
+
+    for ledger_name in ledger_names:
+        frappe.delete_doc(
+            SUBMISSION_LEDGER_DOCTYPE,
+            ledger_name,
+            force=True,
+            ignore_permissions=True,
+        )
 
 
 def cancel_posawesome_credit_journal_entries(doc):
