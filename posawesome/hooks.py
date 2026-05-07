@@ -79,6 +79,7 @@ after_migrate = [
     "posawesome.patches.add_gift_card_to_workspace.execute",
     "posawesome.patches.add_submission_ledger_to_workspace.execute",
     "posawesome.patches.migrate_pos_supervisor_to_role.execute",
+    "posawesome.patches.remove_item_barcode_posa_uom.execute",
 ]
 
 # Desk Notifications
@@ -186,7 +187,6 @@ fixtures = [
                 (
                     "Sales Invoice-posa_pos_opening_shift",
                     "POS Invoice-posa_pos_opening_shift",
-                    "Item Barcode-posa_uom",
                     "POS Profile-posa_pos_awesome_settings",
                     "POS Profile-posa_section_pricing_controls",
                     "POS Profile-posa_section_sales_returns",

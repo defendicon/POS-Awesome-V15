@@ -42,7 +42,6 @@ Custom Field - label: POS Invoice-posa_is_printed,Printed
 Custom Field - label: POS Profile-posa_search_serial_no,Search by Serial Number
 Custom Field - description: POS Profile-posa_allow_submissions_in_background_job,Send invoice to submit after printing
 Custom Field - label: POS Profile-posa_show_template_items,Show Template Items
-Custom Field - label: Item Barcode-posa_uom,UOM
 Custom Field - label: POS Profile-posa_local_storage,Use Browser Local Storage
 Custom Field - label: POS Profile-posa_force_server_items,Fetch Items Directly from Server
 Custom Field - label: POS Profile-use_cashback,Use Cashback

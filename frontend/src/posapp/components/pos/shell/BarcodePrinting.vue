@@ -432,7 +432,7 @@ export default {
 			const settingsReady = this.isScaleSettingsConfigured();
 
 			const byCurrentUom = currentUom
-				? barcodeRows.filter((row) => String(row?.posa_uom || row?.uom || "").trim() === currentUom)
+				? barcodeRows.filter((row) => String(row?.uom || "").trim() === currentUom)
 				: [];
 
 			const pickTemplate = (rows) =>
@@ -844,7 +844,7 @@ export default {
 			let itemUoms = Array.isArray(item.item_uoms) ? item.item_uoms : [];
 			if (!itemUoms.length && itemBarcodes.length > 0) {
 				const barcodeUoms = itemBarcodes
-					.map((row) => row?.posa_uom || row?.uom)
+					.map((row) => row?.uom)
 					.filter(Boolean)
 					.map((uom) => ({ uom }));
 				itemUoms = barcodeUoms;
@@ -889,7 +889,7 @@ export default {
 							itemUoms = Array.isArray(details.item_uoms) ? details.item_uoms : itemUoms;
 							if (!itemUoms.length && itemBarcodes.length > 0) {
 								const barcodeUoms = itemBarcodes
-									.map((row) => row?.posa_uom || row?.uom)
+									.map((row) => row?.uom)
 									.filter(Boolean)
 									.map((uom) => ({ uom }));
 								itemUoms = barcodeUoms;
@@ -942,7 +942,7 @@ export default {
 						const currentUom = String(defaultUom || "").trim();
 						const scopedRows = currentUom
 							? itemBarcodes.filter(
-									(row) => String(row?.posa_uom || row?.uom || "").trim() === currentUom,
+									(row) => String(row?.uom || "").trim() === currentUom,
 								)
 							: itemBarcodes;
 						const matched =
@@ -1097,7 +1097,7 @@ export default {
 				: [];
 			if (!options.length && Array.isArray(item.item_barcode)) {
 				item.item_barcode.forEach((row) => {
-					const uom = row?.posa_uom || row?.uom;
+					const uom = row?.uom;
 					if (uom) options.push(uom);
 				});
 			}
@@ -1109,7 +1109,7 @@ export default {
 		resolveBarcodeForUom(item, uom) {
 			const barcodeRows = Array.isArray(item.item_barcode) ? item.item_barcode : [];
 			if (uom && barcodeRows.length > 0) {
-				const matched = barcodeRows.find((row) => row?.barcode && (row.posa_uom || row.uom) === uom);
+				const matched = barcodeRows.find((row) => row?.barcode && row.uom === uom);
 				if (matched?.barcode) return matched.barcode;
 			}
 			if (item.barcode) return item.barcode;

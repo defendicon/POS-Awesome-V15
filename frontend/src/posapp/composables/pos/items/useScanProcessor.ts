@@ -193,7 +193,7 @@ export function useScanProcessor(context: ScanProcessorContext) {
 			const barcodeMatch = newItem.item_barcode.find(
 				(b: any) => b.barcode === scannedCode,
 			);
-			const matchedUom = barcodeMatch?.posa_uom || barcodeMatch?.uom;
+			const matchedUom = barcodeMatch?.uom;
 			if (barcodeMatch && matchedUom) {
 				newItem.uom = matchedUom;
 

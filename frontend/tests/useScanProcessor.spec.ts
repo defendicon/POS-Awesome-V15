@@ -243,7 +243,7 @@ describe("useScanProcessor serial scan handling", () => {
 		expect(ctx.scannerInput.scanErrorDialog.value).toBe(false);
 	});
 
-	it("uses the standard barcode uom when posa_uom is not populated", async () => {
+	it("uses the standard barcode uom even when legacy posa_uom is populated", async () => {
 		const ctx = makeContext();
 		(globalThis as any).frappe.call = vi.fn(
 			async ({ method, args }: { method: string; args: any }) => {
@@ -266,7 +266,7 @@ describe("useScanProcessor serial scan handling", () => {
 		await addScannedItemToInvoice(
 			createScannableItem({
 				stock_uom: "Nos",
-				item_barcode: [{ barcode: "BOX-001", uom: "Box" }],
+				item_barcode: [{ barcode: "BOX-001", uom: "Box", posa_uom: "Nos" }],
 				item_uoms: [
 					{ uom: "Nos", conversion_factor: 1 },
 					{ uom: "Box", conversion_factor: 12 },

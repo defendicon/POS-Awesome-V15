@@ -154,7 +154,7 @@ class TestItemFetchers(unittest.TestCase):
 
         def fake_get_all(doctype, **kwargs):
             calls.append((doctype, kwargs))
-            return [AttrDict({"parent": "ITEM-001", "barcode": "BOX-001", "uom": "Box", "posa_uom": None})]
+            return [AttrDict({"parent": "ITEM-001", "barcode": "BOX-001", "uom": "Box"})]
 
         self.module.frappe.get_all = fake_get_all
 
@@ -163,6 +163,7 @@ class TestItemFetchers(unittest.TestCase):
         self.assertEqual(rows[0].uom, "Box")
         self.assertEqual(calls[0][0], "Item Barcode")
         self.assertIn("uom", calls[0][1]["fields"])
+        self.assertNotIn("posa_uom", calls[0][1]["fields"])
 
 
 if __name__ == "__main__":

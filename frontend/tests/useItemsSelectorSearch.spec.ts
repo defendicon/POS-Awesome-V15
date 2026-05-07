@@ -32,7 +32,7 @@ describe("useItemsSelectorSearch", () => {
 					item_code: "ITEM-001",
 					item_name: "Item 001",
 					stock_uom: "Nos",
-					item_barcode: [{ barcode: "BOX-001", uom: "Box" }],
+					item_barcode: [{ barcode: "BOX-001", uom: "Box", posa_uom: "Nos" }],
 				},
 			],
 			flags: {},

@@ -213,7 +213,7 @@ export const useItemsSelectorSearch = ({
 		if (Array.isArray(new_item.item_barcode)) {
 			new_item.item_barcode.forEach((element) => {
 				if (search === element.barcode) {
-					new_item.uom = element.posa_uom || element.uom;
+					new_item.uom = element.uom;
 					match = true;
 				}
 			});
