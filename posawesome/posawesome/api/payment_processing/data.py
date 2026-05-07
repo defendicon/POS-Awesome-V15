@@ -46,6 +46,7 @@ def _get_open_sales_invoices(
             "pos_profile",
             "customer_name",
             "conversion_rate",
+            "party_account_currency",
         ],
         order_by="posting_date desc, name desc",
     )
@@ -81,6 +82,7 @@ def _get_open_purchase_invoices(
             "currency",
             "supplier_name",
             "conversion_rate",
+            "party_account_currency",
         ],
         order_by="posting_date desc, name desc",
     )
@@ -200,7 +202,19 @@ def get_outstanding_invoices(
 
             row_currency = invoice.get("currency") or currency
 
-            outstanding_in_invoice_currency = flt(outstanding_amount / conversion_rate, 2) if conversion_rate > 0 else outstanding_amount
+            # Convert outstanding from party account currency to invoice currency
+            # Examples:
+            # - Party YER (company), Invoice USD: 60,003 YER ÷ 531 (YER/USD) = 113 USD
+            # - Party USD (invoice), Invoice USD: 100 USD → 100 USD (no conversion)
+            party_account_currency = invoice.get("party_account_currency") or currency
+            if party_account_currency == row_currency:
+                outstanding_in_invoice_currency = outstanding_amount
+            else:
+                precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
+                if conversion_rate > 0:
+                    outstanding_in_invoice_currency = flt(outstanding_amount / conversion_rate, precision)
+                else:
+                    outstanding_in_invoice_currency = outstanding_amount
             invoice_total = flt(
                 invoice.get("rounded_total")
                 or invoice.get("grand_total")

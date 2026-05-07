@@ -636,17 +636,33 @@ def process_pos_payment(payload):
                     inv_conv_rate = flt(inv_doc.conversion_rate)
 
                     # Get amounts in party account currency
-                    if inv_currency == party_account_currency:
-                        inv_outstanding_party = flt(inv_doc.outstanding_amount)
-                        inv_total_party = flt(inv_doc.grand_total or inv_doc.rounded_total or inv_doc.outstanding_amount)
-                    elif party_account_currency == company_currency:
-                        inv_outstanding_party = flt(inv_doc.outstanding_amount * inv_conv_rate, precision)
-                        inv_total_party = flt(inv_doc.base_rounded_total or inv_doc.base_grand_total or inv_outstanding_party)
+                    company_currency = payment_entry.company_currency
+                    party_account_currency = payment_entry.party_account_currency
+
+                    # Calculate reference details as per ERPNext's get_reference_details
+                    if party_account_currency != company_currency:
+                        # Multi-currency scenario
+                        if inv_currency == party_account_currency:
+                            # Invoice currency matches party account currency
+                            total_amount = flt(inv_doc.rounded_total or inv_doc.grand_total, precision)
+                            outstanding_amount = flt(inv_doc.outstanding_amount / inv_conv_rate, precision) if inv_conv_rate else 0
+                            exchange_rate = inv_conv_rate
+                        else:
+                            # Invoice currency different from party account currency
+                            inv_to_party = flt(get_exchange_rate(inv_currency, party_account_currency, posting_date))
+                            total_amount = flt((inv_doc.rounded_total or inv_doc.grand_total) * inv_to_party, precision)
+                            comp_to_party = flt(get_exchange_rate(company_currency, party_account_currency, posting_date))
+                            outstanding_amount = flt(inv_doc.outstanding_amount * comp_to_party, precision)
+                            exchange_rate = inv_to_party
                     else:
-                        inv_to_party = flt(get_exchange_rate(inv_currency, party_account_currency, posting_date))
-                        comp_to_party = flt(get_exchange_rate(company_currency, party_account_currency, posting_date))
-                        inv_outstanding_party = flt(inv_doc.outstanding_amount * inv_to_party, precision)
-                        inv_total_party = flt((inv_doc.base_rounded_total or inv_doc.base_grand_total) * comp_to_party, precision)
+                        # party_account_currency == company_currency (both YER)
+                        # Use company currency amounts to match get_reference_details behavior
+                        total_amount = flt(inv_doc.base_rounded_total or inv_doc.base_grand_total, precision)
+                        outstanding_amount = flt(inv_doc.outstanding_amount, precision)
+                        exchange_rate = 1
+                        inv_outstanding_party = outstanding_amount
+
+                    inv_total_party = total_amount
 
                     if inv_outstanding_party <= 0:
                         continue
@@ -661,9 +677,10 @@ def process_pos_payment(payload):
                         {
                             "reference_doctype": voucher_type,
                             "reference_name": inv["name"],
-                            "total_amount": inv_total_party,
-                            "outstanding_amount": inv_outstanding_party,
+                            "total_amount": total_amount,
+                            "outstanding_amount": outstanding_amount,
                             "allocated_amount": allocation,
+                            "exchange_rate": exchange_rate,
                         },
                     )
 
@@ -672,6 +689,7 @@ def process_pos_payment(payload):
 
                 payment_entry.total_allocated_amount = total_allocated
 
+                # party_amount must be in party currency to match total_allocated (now in party currency)
                 party_amount = (
                     payment_entry.paid_amount if payment_type == "Receive" else payment_entry.received_amount
                 )
@@ -699,28 +717,79 @@ def process_pos_payment(payload):
 
                 pe_exchange_rate = payment_entry.target_exchange_rate if payment_type == "Receive" else payment_entry.source_exchange_rate
 
-                # Store gain/loss BEFORE save - ERPNext resets exchange_gain_loss during validation
-                # Map by reference_name instead of list index to avoid mismatch when invoices are skipped
-                gain_loss_refs = []
+                # Build a map of reference rows by invoice name
+                ref_map = {}
                 for ref in payment_entry.references:
-                    inv = next((inv for inv in remaining_invoices if inv["name"] == ref.reference_name), {})
+                    ref_map[ref.reference_name] = ref
+
+                # Calculate gain/loss using ACTUAL allocated amounts
+                gain_loss_refs = []
+                for inv in remaining_invoices:
                     inv_rate = flt(inv.get("conversion_rate")) or 1
                     if inv_rate and pe_exchange_rate and inv_rate != pe_exchange_rate:
-                        allocated_yer = flt(ref.allocated_amount)
-                        allocated_at_inv_rate = flt((allocated_yer / pe_exchange_rate) * inv_rate, precision)
-                        gl_value = flt(allocated_yer - allocated_at_inv_rate, precision)
-                        ref.exchange_gain_loss = gl_value
+                        inv_doc = frappe.get_cached_doc(inv.get("voucher_type") or "Sales Invoice", inv["name"])
+
+                        # Get actual allocated amount in invoice currency
+                        ref = ref_map.get(inv["name"])
+                        if ref and ref.allocated_amount:
+                            # allocated_amount is in company currency (YER), convert to invoice currency (USD)
+                            allocated_in_invoice_currency = flt(ref.allocated_amount) / inv_rate
+                        else:
+                            # Fallback to full invoice amount
+                            allocated_in_invoice_currency = flt(inv_doc.rounded_total or inv_doc.grand_total, precision)
+
+                        gl_value = flt(allocated_in_invoice_currency * (pe_exchange_rate - inv_rate), precision)
                         gain_loss_refs.append({
-                            "reference_name": ref.reference_name,
-                            "reference_doctype": ref.reference_doctype,
+                            "reference_name": inv["name"],
+                            "reference_doctype": inv.get("voucher_type") or "Sales Invoice",
                             "exchange_gain_loss": gl_value,
-                            "idx": ref.idx,
+                            "idx": ref.idx if ref else 1,
                         })
+
+                # Build summary for UI notification
+                exchange_gain_loss_summary = []
+                net_gain_loss = 0
+                for gl_ref in gain_loss_refs:
+                    if gl_ref.get("exchange_gain_loss"):
+                        amount = abs(gl_ref["exchange_gain_loss"])
+                        gl_type = "gain" if gl_ref["exchange_gain_loss"] > 0 else "loss"
+                        exchange_gain_loss_summary.append({
+                            "payment": payment_entry.name,
+                            "invoice": gl_ref["reference_name"],
+                            "amount": amount,
+                            "currency": company_currency,
+                            "type": gl_type
+                        })
+                        net_gain_loss += gl_ref["exchange_gain_loss"]
+
+                # Add gain/loss info to Payment Entry remarks (with deduplication)
+                if exchange_gain_loss_summary:
+                    gl_parts = []
+                    for item in exchange_gain_loss_summary:
+                        gl_parts.append(f"{item['type'].title()}: {item['amount']} {item['currency']}")
+                    gl_remark = f"Exchange Gain/Loss: {'; '.join(gl_parts)}"
+                    if gl_remark not in (payment_entry.remarks or ""):
+                        payment_entry.remarks += f"\n{gl_remark}"
+
+                # Update reference rows with exchange_gain_loss for reporting consistency
+                for ref in payment_entry.references:
+                    matching_gl = next((gl for gl in gain_loss_refs if gl["reference_name"] == ref.reference_name), None)
+                    if matching_gl:
+                        ref.exchange_gain_loss = matching_gl["exchange_gain_loss"]
 
                 payment_entry.save(ignore_permissions=True)
                 payment_entry.submit()
 
                 payment_entry.reload()
+
+                # Zero out unallocated_amount after gain/loss is booked
+                # because the "extra" money is now recognized as exchange gain/loss
+                if gain_loss_refs:
+                    try:
+                        frappe.flags.ignore_permissions = True
+                        payment_entry.db_set("unallocated_amount", 0, update_modified=False)
+                    finally:
+                        frappe.flags.ignore_permissions = False
 
                 for gl_ref in gain_loss_refs:
                     if not gl_ref["exchange_gain_loss"]:
@@ -742,8 +811,8 @@ def process_pos_payment(payload):
                         exc_gain_loss=abs(flt(gl_ref['exchange_gain_loss'])),
                         dr_or_cr=dr_or_cr,
                         reverse_dr_or_cr=reverse_dr_or_cr,
-                        ref1_dt=gl_ref['reference_doctype'],
-                        ref1_dn=gl_ref['reference_name'],
+                        ref1_dt="Payment Entry",
+                        ref1_dn=payment_entry.name,
                         ref1_detail_no=gl_ref['idx'],
                         ref2_dt="Payment Entry",
                         ref2_dn=payment_entry.name,
@@ -802,4 +871,6 @@ def process_pos_payment(payload):
         "all_payments_entry": _to_public_entries(all_payments_entry),
         "reconciled_payments": reconciled_payments,
         "errors": errors,
+        "exchange_gain_loss_summary": exchange_gain_loss_summary,
+        "net_gain_loss": net_gain_loss,
     }

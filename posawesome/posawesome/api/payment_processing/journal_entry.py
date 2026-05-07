@@ -123,7 +123,11 @@ def create_direct_journal_entry(
         )
 
         je.save(ignore_permissions=True)
-        je.submit()
+        try:
+            frappe.flags.ignore_permissions = True
+            je.submit()
+        finally:
+            frappe.flags.ignore_permissions = False
 
         frappe.log_error(f"Created Journal Entry: {je.name}", "Direct JE Debug")
 
@@ -244,5 +248,9 @@ def create_pos_exchange_gain_loss_journal(
     je.append("accounts", gl_row)
 
     je.save(ignore_permissions=True)
-    je.submit(ignore_permissions=True)
+    try:
+        frappe.flags.ignore_permissions = True
+        je.submit()
+    finally:
+        frappe.flags.ignore_permissions = False
     return je.name
