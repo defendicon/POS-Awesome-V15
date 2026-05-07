@@ -9,6 +9,11 @@ function toPublicAssetUrl(fileName) {
 	return `${DIST_BASE_URL}${String(fileName || "").replace(/^\/+/, "")}`;
 }
 
+function toVersionedPublicAssetUrl(fileName, version) {
+	const url = toPublicAssetUrl(fileName);
+	return version ? `${url}?v=${encodeURIComponent(version)}` : url;
+}
+
 function getChunkFileName(bundle, chunkName) {
 	const match = Object.values(bundle || {}).find(
 		(entry) => entry?.type === "chunk" && entry?.name === chunkName,
@@ -22,9 +27,9 @@ export function buildVersionPayload(version, bundle = {}) {
 	return {
 		version,
 		assets: {
-			loader: toPublicAssetUrl("loader.js"),
-			posawesome: toPublicAssetUrl("posawesome.js"),
-			css: toPublicAssetUrl("posawesome.css"),
+			loader: toVersionedPublicAssetUrl("loader.js", version),
+			posawesome: toVersionedPublicAssetUrl("posawesome.js", version),
+			css: toVersionedPublicAssetUrl("posawesome.css", version),
 			offlineIndex: offlineIndexFile
 				? toPublicAssetUrl(offlineIndexFile)
 				: toPublicAssetUrl("offline/index.js"),

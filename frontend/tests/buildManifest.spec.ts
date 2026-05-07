@@ -23,12 +23,27 @@ describe("build manifest helpers", () => {
 		expect(payload).toEqual({
 			version: "build-2000",
 			assets: {
-				loader: "/assets/posawesome/dist/js/loader.js",
-				posawesome: "/assets/posawesome/dist/js/posawesome.js",
-				css: "/assets/posawesome/dist/js/posawesome.css",
+				loader: "/assets/posawesome/dist/js/loader.js?v=build-2000",
+				posawesome:
+					"/assets/posawesome/dist/js/posawesome.js?v=build-2000",
+				css: "/assets/posawesome/dist/js/posawesome.css?v=build-2000",
 				offlineIndex:
 					"/assets/posawesome/dist/js/offline/index-AbCd1234.js",
 			},
 		});
+	});
+
+	it("cache-busts stable shell asset URLs with the build version", () => {
+		const payload = buildVersionPayload("build with spaces", {});
+
+		expect(payload.assets.loader).toBe(
+			"/assets/posawesome/dist/js/loader.js?v=build%20with%20spaces",
+		);
+		expect(payload.assets.posawesome).toBe(
+			"/assets/posawesome/dist/js/posawesome.js?v=build%20with%20spaces",
+		);
+		expect(payload.assets.css).toBe(
+			"/assets/posawesome/dist/js/posawesome.css?v=build%20with%20spaces",
+		);
 	});
 });
