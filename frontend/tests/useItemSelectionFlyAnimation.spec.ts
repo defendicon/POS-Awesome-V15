@@ -8,12 +8,23 @@ describe("useItemSelection fly animation", () => {
 		document.body.innerHTML = "";
 	});
 
-	it("targets the cart top row instead of the selector-side table", async () => {
+	it("targets the cart top-center anchor instead of the selector-side table", async () => {
 		const selectorTable = document.createElement("div");
 		selectorTable.className = "items-table-container";
 		document.body.appendChild(selectorTable);
 		const cartTable = document.createElement("div");
 		cartTable.className = "posa-items-table-container";
+		vi.spyOn(cartTable, "getBoundingClientRect").mockReturnValue({
+			left: 300,
+			top: 80,
+			width: 420,
+			height: 320,
+			right: 720,
+			bottom: 400,
+			x: 300,
+			y: 80,
+			toJSON: () => ({}),
+		});
 		cartTable.innerHTML = `
 			<table class="posa-cart-table">
 				<tbody>
@@ -44,16 +55,30 @@ describe("useItemSelection fly animation", () => {
 
 		expect(source?.className).toBe("item-fly-placeholder");
 		expect(source?.style.backgroundColor).toBeTruthy();
-		expect(target?.dataset.test).toBe("cart-top-row");
+		expect(target?.className).toBe("item-fly-target-anchor");
+		expect(target?.style.left).toBe("510px");
+		expect(target?.style.top).toBe("104px");
 		expect(target).not.toBe(selectorTable);
 		expect(fly).toHaveBeenCalledWith(source, target, { speed: 0.6 });
 		expect(document.body.contains(source as Node)).toBe(false);
+		expect(document.body.contains(target as Node)).toBe(false);
 		expect(addItem).toHaveBeenCalledWith({ item_code: "ITEM-001" });
 	});
 
 	it("animates card clicks toward the cart when the selector table is not rendered", () => {
 		const cartTable = document.createElement("div");
 		cartTable.className = "posa-items-table-container";
+		vi.spyOn(cartTable, "getBoundingClientRect").mockReturnValue({
+			left: 300,
+			top: 80,
+			width: 420,
+			height: 320,
+			right: 720,
+			bottom: 400,
+			x: 300,
+			y: 80,
+			toJSON: () => ({}),
+		});
 		cartTable.innerHTML = `
 			<table class="posa-cart-table">
 				<tbody>
@@ -85,7 +110,9 @@ describe("useItemSelection fly animation", () => {
 
 		expect(fly).toHaveBeenCalledWith(
 			image,
-			document.querySelector('[data-test="cart-top-row"]'),
+			expect.objectContaining({
+				className: "item-fly-target-anchor",
+			}),
 			{ speed: 0.6 },
 		);
 		expect(addItem).toHaveBeenCalledWith({ item_code: "ITEM-002" });

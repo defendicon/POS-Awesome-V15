@@ -194,12 +194,6 @@ export function useItemSelection() {
 
 	// --- Mouse Interaction ---
 
-	function getCartTopRowTarget() {
-		return document.querySelector(
-			".posa-cart-table tbody tr:not(.v-data-table-rows-no-data)",
-		) as HTMLElement | null;
-	}
-
 	function createCartTopAnchor(container: HTMLElement) {
 		const rect = container.getBoundingClientRect();
 		const anchor = document.createElement("div");
@@ -216,11 +210,6 @@ export function useItemSelection() {
 	}
 
 	function resolveFlyTarget() {
-		const topRow = getCartTopRowTarget();
-		if (topRow) {
-			return { target: topRow, cleanup: null as (() => void) | null };
-		}
-
 		const cartContainer = document.querySelector(
 			".posa-items-table-container",
 		) as HTMLElement | null;
