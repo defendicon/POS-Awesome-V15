@@ -3,7 +3,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 
-POS_SUPERVISOR_ROLE = "POS Supervisor"
+POS_SUPERVISOR_ROLE = "POS Awesome Supervisor"
 
 
 def _resolve_profile_name(pos_profile=None) -> str:

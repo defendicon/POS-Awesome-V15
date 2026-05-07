@@ -358,7 +358,7 @@ fixtures = [
     },
     {
         "doctype": "Role",
-        "filters": [["name", "in", ("POS Supervisor",)]],
+        "filters": [["name", "in", ("POS Awesome Supervisor",)]],
     },
     {
         "doctype": "Property Setter",

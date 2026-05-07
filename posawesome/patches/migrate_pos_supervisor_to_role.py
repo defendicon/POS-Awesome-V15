@@ -1,6 +1,6 @@
 import frappe
 
-POS_SUPERVISOR_ROLE = "POS Supervisor"
+POS_SUPERVISOR_ROLE = "POS Awesome Supervisor"
 LEGACY_SUPERVISOR_FIELD = "posa_is_pos_supervisor"
 
 

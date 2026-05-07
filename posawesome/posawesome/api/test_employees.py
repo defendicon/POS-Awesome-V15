@@ -74,7 +74,7 @@ class TestEmployeesApi(unittest.TestCase):
     def test_get_terminal_employees_marks_supervisor_from_user_role(self):
         self.employees.frappe.session.user = "cashier@example.com"
         self.employees.frappe.get_roles = lambda user=None: (
-            ["Sales User", "POS Supervisor"] if user == "cashier@example.com" else ["Sales User"]
+            ["Sales User", "POS Awesome Supervisor"] if user == "cashier@example.com" else ["Sales User"]
         )
         self.employees.frappe.get_all = lambda doctype, **kwargs: (
             [
@@ -137,7 +137,7 @@ class TestEmployeesApi(unittest.TestCase):
         self.assertFalse(result["is_supervisor"])
 
     def test_get_cashier_pin_status_reports_existing_pin(self):
-        self.employees.frappe.get_roles = lambda user=None: ["POS Supervisor"]
+        self.employees.frappe.get_roles = lambda user=None: ["POS Awesome Supervisor"]
 
         class FakeUserDoc:
             def __init__(self):
