@@ -48,7 +48,6 @@ import { useUIStore } from "../../../stores/uiStore";
 import { useToastStore } from "../../../stores/toastStore";
 import { storeToRefs } from "pinia";
 import itemService from "../../../services/itemService";
-import { unwrapApiResult } from "../../../services/api";
 import { bus } from "../../../bus";
 
 // @ts-ignore
@@ -246,10 +245,9 @@ export function useInvoiceOffers() {
 				brand = "";
 			} else {
 				try {
-					const message = unwrapApiResult(
-						await itemService.getItemBrand(item.item_code),
+					brand = normalizeBrand(
+						await itemService.getItemBrandData(item.item_code),
 					);
-					brand = normalizeBrand(message);
 				} catch (error) {
 					console.error("Failed to fetch item brand:", error);
 					brand = "";

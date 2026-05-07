@@ -7,7 +7,6 @@ import { defineStore } from "pinia";
 import { ref, computed, watch } from "vue";
 import type { Item, POSProfile } from "../types/models";
 import itemService from "../services/itemService";
-import { unwrapApiResult } from "../services/api";
 import { refreshBootstrapSnapshotFromCacheState } from "../../offline/index";
 
 // Composables
@@ -558,8 +557,9 @@ export const useItemsStore = defineStore("items", () => {
 				return [];
 			}
 
-			const fetchedItems = unwrapApiResult(
-				await itemService.getItems(args, abortController.signal),
+			const fetchedItems = await itemService.getItemsData(
+				args,
+				abortController.signal,
 			);
 
 			if (requestToken.value !== currentRequestToken) {
@@ -981,13 +981,11 @@ export const useItemsStore = defineStore("items", () => {
 		if (item) return item;
 
 		try {
-			const newItem: any = unwrapApiResult(
-				await itemService.getItemsFromBarcode({
-					selling_price_list: activePriceList.value,
-					currency: posProfile.value?.currency || "",
-					barcode: barcode,
-				}),
-			);
+			const newItem: any = await itemService.getItemsFromBarcodeData({
+				selling_price_list: activePriceList.value,
+				currency: posProfile.value?.currency || "",
+				barcode: barcode,
+			});
 
 			if (newItem) {
 				if (

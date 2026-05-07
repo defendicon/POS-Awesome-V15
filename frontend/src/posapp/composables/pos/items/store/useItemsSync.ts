@@ -1,7 +1,6 @@
 import { ref } from "vue";
 import type { Item, POSProfile } from "../../../../types/models";
 import itemService from "../../../../services/itemService";
-import { unwrapApiResult } from "../../../../services/api";
 // @ts-ignore
 import {
 	saveItemsBulk,
@@ -58,9 +57,7 @@ export function useItemsSync() {
 				saveItemGroups(groups);
 			} else {
 				// Fallback to API
-				const response = unwrapApiResult(
-					await itemService.getItemGroups(),
-				);
+				const response = await itemService.getItemGroupsData();
 
 				if (response) {
 					const groups = ["ALL"];

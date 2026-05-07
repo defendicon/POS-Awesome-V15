@@ -9,8 +9,8 @@ import itemService from "../src/posapp/services/itemService";
 
 vi.mock("../src/posapp/services/itemService", () => ({
 	default: {
-		getUOMs: vi.fn(),
-		createItem: vi.fn(),
+		getUOMsData: vi.fn(),
+		createItemData: vi.fn(),
 	},
 }));
 
@@ -132,8 +132,8 @@ describe("NewItemDialog", () => {
 			msgprint: vi.fn(),
 			show_alert: vi.fn(),
 		};
-		vi.mocked(itemService.getUOMs).mockResolvedValue([{ name: "Nos" }]);
-		vi.mocked(itemService.createItem).mockResolvedValue({
+		vi.mocked(itemService.getUOMsData).mockResolvedValue([{ name: "Nos" }]);
+		vi.mocked(itemService.createItemData).mockResolvedValue({
 			item_code: "ITEM-001",
 			item_name: "Item 001",
 		} as any);
@@ -181,7 +181,7 @@ describe("NewItemDialog", () => {
 		await wrapper.get('[data-test="new-item-submit"]').trigger("click");
 		await flushPromises();
 
-		expect(itemService.createItem).toHaveBeenCalledWith(
+		expect(itemService.createItemData).toHaveBeenCalledWith(
 			expect.objectContaining({
 				item_code: "ITEM-001",
 				item_name: "Item 001",

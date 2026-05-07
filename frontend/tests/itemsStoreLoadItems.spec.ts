@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 
 const itemServiceMocks = vi.hoisted(() => ({
-	getItems: vi.fn(),
+	getItemsData: vi.fn(),
 }));
 
 const offlineMocks = vi.hoisted(() => ({
@@ -19,9 +19,9 @@ const itemsSyncMocks = vi.hoisted(() => ({
 
 vi.mock("../src/posapp/services/itemService", () => ({
 	default: {
-		getItems: itemServiceMocks.getItems,
-		getItemGroups: vi.fn(async () => []),
-		getItemsFromBarcode: vi.fn(async () => null),
+		getItemsData: itemServiceMocks.getItemsData,
+		getItemGroupsData: vi.fn(async () => []),
+		getItemsFromBarcodeData: vi.fn(async () => null),
 	},
 }));
 
@@ -156,7 +156,7 @@ describe("itemsStore loadItems", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		setActivePinia(createPinia());
-		itemServiceMocks.getItems.mockResolvedValue([
+		itemServiceMocks.getItemsData.mockResolvedValue([
 			{
 				item_code: "ITEM-1",
 				item_name: "Item One",
@@ -182,8 +182,8 @@ describe("itemsStore loadItems", () => {
 
 		await store.initialize(profile);
 
-		expect(itemServiceMocks.getItems).toHaveBeenCalledTimes(1);
-		expect(itemServiceMocks.getItems).toHaveBeenCalledWith(
+		expect(itemServiceMocks.getItemsData).toHaveBeenCalledTimes(1);
+		expect(itemServiceMocks.getItemsData).toHaveBeenCalledWith(
 			expect.objectContaining({
 				price_list: "Retail",
 			}),
@@ -223,7 +223,7 @@ describe("itemsStore loadItems", () => {
 			priceList: "Customer Retail",
 		});
 
-		expect(itemServiceMocks.getItems).toHaveBeenLastCalledWith(
+		expect(itemServiceMocks.getItemsData).toHaveBeenLastCalledWith(
 			expect.objectContaining({
 				price_list: "Customer Retail",
 			}),
@@ -246,7 +246,7 @@ describe("itemsStore loadItems", () => {
 			item_groups: [],
 		} as any;
 
-		itemServiceMocks.getItems.mockResolvedValueOnce([]);
+		itemServiceMocks.getItemsData.mockResolvedValueOnce([]);
 
 		await store.initialize(profile);
 
@@ -266,7 +266,7 @@ describe("itemsStore loadItems", () => {
 
 		await store.initialize(profile);
 
-		expect(itemServiceMocks.getItems).toHaveBeenCalledWith(
+		expect(itemServiceMocks.getItemsData).toHaveBeenCalledWith(
 			expect.objectContaining({
 				price_list: "Retail",
 				limit: 50,

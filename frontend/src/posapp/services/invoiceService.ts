@@ -1,5 +1,5 @@
 import api from "./api";
-import type { ApiEnvelope } from "./api";
+import { unwrapApiResult, type ApiEnvelope } from "./api";
 import type { InvoiceDoc, POSProfile } from "../types/models";
 
 function getSubmitInvoiceCall(
@@ -27,7 +27,7 @@ function getSubmitInvoiceCall(
 }
 
 const invoiceService = {
-	submitInvoiceEnvelope(
+	submitInvoice(
 		data: any,
 		invoiceDoc: InvoiceDoc | string,
 		invoiceType: string,
@@ -42,19 +42,15 @@ const invoiceService = {
 		return api.callEnvelope(method, args);
 	},
 
-	submitInvoice(
+	async submitInvoiceData(
 		data: any,
 		invoiceDoc: InvoiceDoc | string,
 		invoiceType: string,
 		posProfile: POSProfile,
-	): Promise<ApiEnvelope<any>> {
-		const { method, args } = getSubmitInvoiceCall(
-			data,
-			invoiceDoc,
-			invoiceType,
-			posProfile,
+	): Promise<any> {
+		return unwrapApiResult(
+			await this.submitInvoice(data, invoiceDoc, invoiceType, posProfile),
 		);
-		return api.callEnvelope(method, args);
 	},
 };
 

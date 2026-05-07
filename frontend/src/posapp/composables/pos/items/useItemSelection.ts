@@ -210,6 +210,8 @@ export function useItemSelection() {
 			placeholder.style.width = "40px";
 			placeholder.style.height = "40px";
 			placeholder.style.borderRadius = "50%";
+			placeholder.style.backgroundColor = "rgba(25, 118, 210, 0.22)";
+			placeholder.style.boxShadow = "0 8px 18px rgba(0, 0, 0, 0.18)";
 			placeholder.style.position = "fixed";
 			placeholder.style.top = `${event.clientY - 20}px`;
 			placeholder.style.left = `${event.clientX - 20}px`;

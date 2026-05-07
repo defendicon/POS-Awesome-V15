@@ -16,7 +16,7 @@ const offlineMocks = vi.hoisted(() => ({
 
 vi.mock("../src/posapp/services/itemService", () => ({
 	default: {
-		getItemGroups: vi.fn(async () => []),
+		getItemGroupsData: vi.fn(async () => []),
 	},
 }));
 
