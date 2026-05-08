@@ -12,7 +12,7 @@
 
 > **formatNegativeStockWarning**(`itemName`, `availableQty`, `requestedQty`): `string`
 
-Defined in: [posapp/utils/stock.ts:55](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/posapp/utils/stock.ts#L55)
+Defined in: [posapp/utils/stock.ts:55](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/posapp/utils/stock.ts#L55)
 
 Formats a negative stock warning message.
 
@@ -48,7 +48,7 @@ Formatted translated string
 
 > **formatStockShortageError**(`itemName`, `availableQty`, `requestedQty`): `string`
 
-Defined in: [posapp/utils/stock.ts:36](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/posapp/utils/stock.ts#L36)
+Defined in: [posapp/utils/stock.ts:36](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/posapp/utils/stock.ts#L36)
 
 Formats a stock shortage error message.
 
@@ -84,7 +84,7 @@ Formatted translated string
 
 > **parseBooleanSetting**(`value`): `boolean`
 
-Defined in: [posapp/utils/stock.ts:12](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/posapp/utils/stock.ts#L12)
+Defined in: [posapp/utils/stock.ts:12](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/posapp/utils/stock.ts#L12)
 
 Parses a value into a boolean based on standard Frappe/POS settings.
 

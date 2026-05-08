@@ -12,7 +12,7 @@
 
 > **extractItemCodeFromSearch**(`searchString`, `scalePrefix`, `scaleBarcodeMatches`): `string`
 
-Defined in: [posapp/utils/searchUtils.ts:13](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/posapp/utils/searchUtils.ts#L13)
+Defined in: [posapp/utils/searchUtils.ts:13](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/posapp/utils/searchUtils.ts#L13)
 
 Extract item code from a potential scale barcode
 
@@ -48,7 +48,7 @@ Extracted item code or original string
 
 > **isValidSearchQuery**(`query`): `boolean`
 
-Defined in: [posapp/utils/searchUtils.ts:50](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/posapp/utils/searchUtils.ts#L50)
+Defined in: [posapp/utils/searchUtils.ts:50](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/posapp/utils/searchUtils.ts#L50)
 
 Check if a search query is valid (non-empty after trimming)
 
@@ -72,7 +72,7 @@ True if query is valid
 
 > **normalizeSearchInputValue**(`event`): `string`
 
-Defined in: [posapp/utils/searchUtils.ts:88](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/posapp/utils/searchUtils.ts#L88)
+Defined in: [posapp/utils/searchUtils.ts:88](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/posapp/utils/searchUtils.ts#L88)
 
 Normalize input event value to a string
 
@@ -96,7 +96,7 @@ string
 
 > **normalizeSearchQuery**(`query`): `string`
 
-Defined in: [posapp/utils/searchUtils.ts:40](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/posapp/utils/searchUtils.ts#L40)
+Defined in: [posapp/utils/searchUtils.ts:40](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/posapp/utils/searchUtils.ts#L40)
 
 Sanitize and normalize a search query
 
@@ -120,7 +120,7 @@ Normalized query
 
 > **shouldReloadOnSearchClear**(`params`): `boolean`
 
-Defined in: [posapp/utils/searchUtils.ts:70](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/posapp/utils/searchUtils.ts#L70)
+Defined in: [posapp/utils/searchUtils.ts:70](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/posapp/utils/searchUtils.ts#L70)
 
 Check if search should trigger a reload
 
@@ -142,7 +142,7 @@ True if reload is needed
 
 ### ReloadOnSearchClearParams
 
-Defined in: [posapp/utils/searchUtils.ts:58](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/posapp/utils/searchUtils.ts#L58)
+Defined in: [posapp/utils/searchUtils.ts:58](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/posapp/utils/searchUtils.ts#L58)
 
 Interface for reload parameters
 
@@ -152,22 +152,22 @@ Interface for reload parameters
 
 > **currentSearch**: `string`
 
-Defined in: [posapp/utils/searchUtils.ts:59](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/posapp/utils/searchUtils.ts#L59)
+Defined in: [posapp/utils/searchUtils.ts:59](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/posapp/utils/searchUtils.ts#L59)
 
 ##### itemsCount
 
 > **itemsCount**: `number`
 
-Defined in: [posapp/utils/searchUtils.ts:62](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/posapp/utils/searchUtils.ts#L62)
+Defined in: [posapp/utils/searchUtils.ts:62](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/posapp/utils/searchUtils.ts#L62)
 
 ##### itemsLoaded
 
 > **itemsLoaded**: `boolean`
 
-Defined in: [posapp/utils/searchUtils.ts:61](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/posapp/utils/searchUtils.ts#L61)
+Defined in: [posapp/utils/searchUtils.ts:61](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/posapp/utils/searchUtils.ts#L61)
 
 ##### previousSearch
 
 > **previousSearch**: `string`
 
-Defined in: [posapp/utils/searchUtils.ts:60](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/posapp/utils/searchUtils.ts#L60)
+Defined in: [posapp/utils/searchUtils.ts:60](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/posapp/utils/searchUtils.ts#L60)

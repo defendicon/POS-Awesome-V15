@@ -21,7 +21,7 @@ for unit testing but are not part of the public API contract — they may change
 
 > **applyLocalPricingRules**(`params`): `object`
 
-Defined in: [lib/pricingEngine.ts:668](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/lib/pricingEngine.ts#L668)
+Defined in: [lib/pricingEngine.ts:668](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/lib/pricingEngine.ts#L668)
 
 #### Parameters
 
@@ -89,7 +89,7 @@ Defined in: [lib/pricingEngine.ts:668](https://github.com/defendicon/POS-Awesome
 
 > **collectCandidates**(`item?`, `indexBundle?`): `AnyRecord`[]
 
-Defined in: [lib/pricingEngine.ts:155](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/lib/pricingEngine.ts#L155)
+Defined in: [lib/pricingEngine.ts:155](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/lib/pricingEngine.ts#L155)
 
 Collects all pricing-rule candidates applicable to `item` from the pre-built index.
 
@@ -134,7 +134,7 @@ Pre-built lookup maps produced by `usePricingRulesStore`.
 
 > **computeFreeItems**(`params`): `AnyRecord`[]
 
-Defined in: [lib/pricingEngine.ts:685](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/lib/pricingEngine.ts#L685)
+Defined in: [lib/pricingEngine.ts:685](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/lib/pricingEngine.ts#L685)
 
 #### Parameters
 
@@ -190,7 +190,7 @@ Defined in: [lib/pricingEngine.ts:685](https://github.com/defendicon/POS-Awesome
 
 > **evaluatePricingRules**(`__namedParameters`): `object`
 
-Defined in: [lib/pricingEngine.ts:490](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/lib/pricingEngine.ts#L490)
+Defined in: [lib/pricingEngine.ts:490](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/lib/pricingEngine.ts#L490)
 
 Evaluates all applicable pricing rules for a single cart item in one pass.
 
@@ -284,7 +284,7 @@ Input fields (all part of the single destructured argument):
 
 > **inDateRange**(`currentDate`, `start`, `end`): `boolean`
 
-Defined in: [lib/pricingEngine.ts:44](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/lib/pricingEngine.ts#L44)
+Defined in: [lib/pricingEngine.ts:44](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/lib/pricingEngine.ts#L44)
 
 Returns `true` when `currentDate` falls within the `[start, end]` range.
 A missing `start` or `end` is treated as unbounded. A missing or unparseable
@@ -314,7 +314,7 @@ A missing `start` or `end` is treated as unbounded. A missing or unparseable
 
 > **matchParty**(`rule`, `customer`, `customerGroup`, `territory`): `boolean`
 
-Defined in: [lib/pricingEngine.ts:79](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/lib/pricingEngine.ts#L79)
+Defined in: [lib/pricingEngine.ts:79](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/lib/pricingEngine.ts#L79)
 
 Returns `true` when the pricing rule's customer/group/territory restrictions are
 satisfied by the current invoice context.
@@ -348,7 +348,7 @@ A rule with no restrictions on a dimension always passes that dimension's check.
 
 > **matchPriceListAndCurrency**(`rule`, `priceList`, `currency`): `boolean`
 
-Defined in: [lib/pricingEngine.ts:110](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/lib/pricingEngine.ts#L110)
+Defined in: [lib/pricingEngine.ts:110](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/lib/pricingEngine.ts#L110)
 
 #### Parameters
 
@@ -374,7 +374,7 @@ Defined in: [lib/pricingEngine.ts:110](https://github.com/defendicon/POS-Awesome
 
 > **round**(`value`, `precision?`): `number`
 
-Defined in: [lib/pricingEngine.ts:27](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/lib/pricingEngine.ts#L27)
+Defined in: [lib/pricingEngine.ts:27](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/lib/pricingEngine.ts#L27)
 
 Rounds `value` to `precision` decimal places using symmetric (half-up) rounding.
 Non-finite inputs return `0`.
@@ -399,7 +399,7 @@ Non-finite inputs return `0`.
 
 > **ruleSort**(`a`, `b`): `number`
 
-Defined in: [lib/pricingEngine.ts:204](https://github.com/defendicon/POS-Awesome-V15/blob/9e132ec6d5e8255838c37e2e2c41a75a25684fe2/frontend/src/lib/pricingEngine.ts#L204)
+Defined in: [lib/pricingEngine.ts:204](https://github.com/defendicon/POS-Awesome-V15/blob/8947095fbfc8af113ba946d00a76764f6861af8e/frontend/src/lib/pricingEngine.ts#L204)
 
 #### Parameters
 
