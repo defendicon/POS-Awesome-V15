@@ -1,112 +1,112 @@
 {
-	"name": "posawesome",
-	"version": "15.28.2",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/defendicon/POS-Awesome-V15.git"
-	},
-	"homepage": "https://github.com/defendicon/POS-Awesome-V15",
-	"bugs": {
-		"url": "https://github.com/defendicon/POS-Awesome-V15/issues"
-	},
-	"main": "electron/main.js",
-	"scripts": {
-		"dev": "cd frontend && yarn dev",
-		"build": "cd frontend && yarn install && yarn build",
-		"lint": "eslint .",
-		"test:build-verify": "node scripts/verify_build_artifacts.test.mjs",
-		"verify:build": "node scripts/verify_build_artifacts.mjs",
-		"electron:dev": "electron .",
-		"electron:smoke": "node scripts/electron_smoke_check.mjs",
-		"electron:build": "electron-builder",
-		"electron:build:linux": "electron-builder --linux",
-		"electron:build:win": "electron-builder --win",
-		"release:verify": "yarn verify:build && yarn electron:smoke --require-artifact",
-		"format": "prettier --write \"**/*.{js,vue,css,scss,html}\""
-	},
-	"dependencies": {
-		"@vitejs/plugin-vue": "^5.2.3",
-		"@vuepic/vue-datepicker": "11.0.2",
-		"@vueuse/core": "^13.4.0",
-		"dexie": "^4.0.11",
-		"electron-store": "^10.0.1",
-		"lodash": "^4.17.21",
-		"mitt": "^3.0.1",
-		"nunjucks": "^3.2.4",
-		"pinia": "^3.0.3",
-		"socket.io-client": "^4.8.1",
-		"vite": "^6.2.4",
-		"vite-plugin-static-copy": "^3.1.1",
-		"vue": "^3.3.4",
-		"vue-qrcode-reader": "^5.7.2",
-		"vue-virtual-scroller": "^2.0.0-beta.8",
-		"vuetify": "^3.7.5"
-	},
-	"devDependencies": {
-		"@commitlint/cli": "^19.8.1",
-		"@commitlint/config-conventional": "^19.8.1",
-		"@eslint/js": "^9.16.0",
-		"@semantic-release/changelog": "^6.0.3",
-		"@semantic-release/commit-analyzer": "^13.0.1",
-		"@semantic-release/exec": "^7.1.0",
-		"@semantic-release/git": "^10.0.1",
-		"@semantic-release/github": "^11.0.4",
-		"@semantic-release/release-notes-generator": "^14.0.3",
-		"autoprefixer": "^10.4.21",
-		"esbuild": "^0.25.5",
-		"electron": "^33.2.0",
-		"electron-builder": "^25.1.8",
-		"eslint": "^9.16.0",
-		"eslint-plugin-vue": "^9.32.0",
-		"eslint-plugin-vuetify": "^2.5.1",
-		"globals": "^15.15.0",
-		"postcss": "^8.5.6",
-		"prettier": "^3.6.2",
-		"semantic-release": "^24.2.7",
-		"tailwindcss": "^3.4.4",
-		"vue-eslint-parser": "^10.2.0"
-	},
-	"build": {
-		"appId": "com.posawesome.desktop",
-		"productName": "POS Awesome Desktop",
-		"asar": true,
-		"publish": [],
-		"directories": {
-			"output": "dist-electron"
-		},
-		"files": [
-			"electron/**/*",
-			"package.json",
-			"yarn.lock",
-			"node_modules/**/*"
-		],
-		"mac": {
-			"target": [
-				"dmg",
-				"zip"
-			]
-		},
-		"win": {
-			"target": [
-				"nsis"
-			],
-			"artifactName": "POSAwesome-Setup-${version}.${ext}"
-		},
-		"linux": {
-			"target": [
-				"AppImage"
-			],
-			"artifactName": "POSAwesome-${version}.${ext}",
-			"category": "Office"
-		},
-		"protocols": [
-			{
-				"name": "POS Awesome Links",
-				"schemes": [
-					"posawesome"
-				]
-			}
-		]
-	},
-	"packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "name": "posawesome",
+  "version": "15.29.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/defendicon/POS-Awesome-V15.git"
+  },
+  "homepage": "https://github.com/defendicon/POS-Awesome-V15",
+  "bugs": {
+    "url": "https://github.com/defendicon/POS-Awesome-V15/issues"
+  },
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "cd frontend && yarn dev",
+    "build": "cd frontend && yarn install && yarn build",
+    "lint": "eslint .",
+    "test:build-verify": "node scripts/verify_build_artifacts.test.mjs",
+    "verify:build": "node scripts/verify_build_artifacts.mjs",
+    "electron:dev": "electron .",
+    "electron:smoke": "node scripts/electron_smoke_check.mjs",
+    "electron:build": "electron-builder",
+    "electron:build:linux": "electron-builder --linux",
+    "electron:build:win": "electron-builder --win",
+    "release:verify": "yarn verify:build && yarn electron:smoke --require-artifact",
+    "format": "prettier --write \"**/*.{js,vue,css,scss,html}\""
+  },
+  "dependencies": {
+    "@vitejs/plugin-vue": "^5.2.3",
+    "@vuepic/vue-datepicker": "11.0.2",
+    "@vueuse/core": "^13.4.0",
+    "dexie": "^4.0.11",
+    "electron-store": "^10.0.1",
+    "lodash": "^4.17.21",
+    "mitt": "^3.0.1",
+    "nunjucks": "^3.2.4",
+    "pinia": "^3.0.3",
+    "socket.io-client": "^4.8.1",
+    "vite": "^6.2.4",
+    "vite-plugin-static-copy": "^3.1.1",
+    "vue": "^3.3.4",
+    "vue-qrcode-reader": "^5.7.2",
+    "vue-virtual-scroller": "^2.0.0-beta.8",
+    "vuetify": "^3.7.5"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@eslint/js": "^9.16.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/exec": "^7.1.0",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^11.0.4",
+    "@semantic-release/release-notes-generator": "^14.0.3",
+    "autoprefixer": "^10.4.21",
+    "esbuild": "^0.25.5",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "eslint": "^9.16.0",
+    "eslint-plugin-vue": "^9.32.0",
+    "eslint-plugin-vuetify": "^2.5.1",
+    "globals": "^15.15.0",
+    "postcss": "^8.5.6",
+    "prettier": "^3.6.2",
+    "semantic-release": "^24.2.7",
+    "tailwindcss": "^3.4.4",
+    "vue-eslint-parser": "^10.2.0"
+  },
+  "build": {
+    "appId": "com.posawesome.desktop",
+    "productName": "POS Awesome Desktop",
+    "asar": true,
+    "publish": [],
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "electron/**/*",
+      "package.json",
+      "yarn.lock",
+      "node_modules/**/*"
+    ],
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "POSAwesome-Setup-${version}.${ext}"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "artifactName": "POSAwesome-${version}.${ext}",
+      "category": "Office"
+    },
+    "protocols": [
+      {
+        "name": "POS Awesome Links",
+        "schemes": [
+          "posawesome"
+        ]
+      }
+    ]
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
