@@ -357,6 +357,14 @@ export function useInvoiceItems(invoiceType: Ref<string>) {
 		if (field_name === "qty") updateBundleChildrenQty(item);
 
 		if (field_name === "qty") {
+			invoiceStore.mutateItem(
+				item,
+				() => undefined,
+				{
+					fields: ["qty", "stock_qty"],
+					kind: ["quantity", "stock", "pricing"],
+				},
+			);
 			bus.emit("apply_pricing_rules");
 		}
 
@@ -371,6 +379,10 @@ export function useInvoiceItems(invoiceType: Ref<string>) {
 			.forEach((ch: any) => {
 				ch.qty = multiplier * (ch.child_qty_per_bundle || 1);
 				calc_stock_qty(ch, ch.qty);
+				invoiceStore.mutateItem(ch, () => undefined, {
+					fields: ["qty", "stock_qty"],
+					kind: ["quantity", "stock", "pricing"],
+				});
 			});
 	};
 

@@ -94,17 +94,37 @@ export function useInvoiceOffers() {
 	const discount_percentage_offer_name = ref<string | null>(null);
 	const brand_cache = ref<Record<string, string>>({});
 
-	// Watch for changes that should trigger offer evaluation
-	// We watch metadata specifically because it is "touched" whenever items are modified in the store
+	// Offer evaluation should follow pricing-relevant cart invalidation, not every
+	// row mutation. Display edits and manual discount edits can update totals without
+	// paying the offer/pricing evaluation cost.
 	watch(
-		[items, posOffers, posa_coupons, () => invoiceStore.metadata],
+		[posOffers, posa_coupons],
 		() => {
-			offerDebugLog(
-				"[useInvoiceOffers] watch triggered for items/offers/coupons/metadata",
-			);
+			offerDebugLog("[useInvoiceOffers] offers/coupons changed");
 			scheduleOfferRefresh();
 		},
 		{ deep: true },
+	);
+
+	watch(
+		() => invoiceStore.cartInvalidation.version,
+		() => {
+			const state = invoiceStore.cartInvalidation;
+			const changedRowIds = Array.from(
+				new Set([
+					...(state.pricingRows || []),
+					...(state.structureRows || []),
+				]),
+			);
+			if (!changedRowIds.length) {
+				return;
+			}
+			offerDebugLog("[useInvoiceOffers] pricing rows changed", {
+				changedRowIds,
+			});
+			scheduleOfferRefresh(changedRowIds);
+			invoiceStore.clearCartInvalidation();
+		},
 	);
 
 	// Private state for refresh logic

@@ -16,9 +16,9 @@
  *
  * ## Totals
  * `totalQty`, `grossTotal`, and `discountTotal` are maintained as separate refs.
- * Operations that add or remove rows call `recalculateTotals()` immediately. Incremental
- * field edits (detected by a deep watcher on `itemsData`) are debounced through
- * `triggerUpdateTotals` (50 ms) to avoid thrashing during rapid user input.
+ * Row contribution totals are cached by `posa_row_id`, so explicit row mutations update
+ * only the affected row contribution. Row-scoped watchers remain as a compatibility
+ * fallback for legacy direct mutations without rescanning the whole cart.
  *
  * ## Sticky fields
  * Discount and delivery-charge fields that should survive an invoice reset are stored as
@@ -27,7 +27,7 @@
  */
 
 import { defineStore } from "pinia";
-import { computed, ref, reactive, watch } from "vue";
+import { computed, ref, reactive, watch, type WatchStopHandle } from "vue";
 
 declare const frappe: any;
 declare const __: any;
@@ -67,6 +67,124 @@ const toNumber = (value: any): number => {
 
 const cloneItem = <T>(item: T): T => ({ ...item });
 
+type CartMutationKind =
+	| "quantity"
+	| "rate"
+	| "discount"
+	| "pricing"
+	| "stock"
+	| "display"
+	| "structure";
+
+type CartMutationOptions = {
+	kind?: CartMutationKind | CartMutationKind[];
+	manual?: boolean;
+	touch?: boolean;
+};
+
+type RowTotals = {
+	qty: number;
+	gross: number;
+	discount: number;
+	signature: string;
+};
+
+const emptyInvalidationState = () => ({
+	version: 0,
+	quantityRows: [] as string[],
+	rateRows: [] as string[],
+	discountRows: [] as string[],
+	pricingRows: [] as string[],
+	stockRows: [] as string[],
+	displayRows: [] as string[],
+	structureRows: [] as string[],
+});
+
+const dedupePush = (list: string[], rowId: string) => {
+	if (rowId && !list.includes(rowId)) {
+		list.push(rowId);
+	}
+};
+
+const normalizeKinds = (
+	kind?: CartMutationKind | CartMutationKind[],
+): CartMutationKind[] => {
+	if (!kind) return [];
+	return Array.isArray(kind) ? kind.filter(Boolean) : [kind];
+};
+
+const classifyChangedFields = (fields: string[]): CartMutationKind[] => {
+	const kinds = new Set<CartMutationKind>();
+	const quantityFields = new Set([
+		"qty",
+		"stock_qty",
+		"base_qty",
+		"base_quantity",
+		"conversion_factor",
+	]);
+	const rateFields = new Set([
+		"rate",
+		"base_rate",
+		"price_list_rate",
+		"base_price_list_rate",
+	]);
+	const discountFields = new Set([
+		"discount_amount",
+		"base_discount_amount",
+		"discount_percentage",
+	]);
+	const stockFields = new Set([
+		"qty",
+		"stock_qty",
+		"warehouse",
+		"batch_no",
+		"serial_no",
+		"serial_no_selected",
+		"conversion_factor",
+		"uom",
+	]);
+	const pricingFields = new Set([
+		"item_code",
+		"item_group",
+		"brand",
+		"qty",
+		"stock_qty",
+		"uom",
+		"conversion_factor",
+		"rate",
+		"base_rate",
+		"price_list_rate",
+		"base_price_list_rate",
+	]);
+
+	fields.forEach((field) => {
+		if (quantityFields.has(field)) kinds.add("quantity");
+		if (rateFields.has(field)) kinds.add("rate");
+		if (discountFields.has(field)) kinds.add("discount");
+		if (stockFields.has(field)) kinds.add("stock");
+		if (pricingFields.has(field)) kinds.add("pricing");
+	});
+
+	if (!kinds.size && fields.length) {
+		kinds.add("display");
+	}
+
+	return Array.from(kinds);
+};
+
+const computeRowTotals = (item: CartItem): RowTotals => {
+	const qty = toNumber(item.qty);
+	const rate = toNumber(item.rate);
+	const discountAmount = toNumber(item.discount_amount || 0);
+
+	return {
+		qty,
+		gross: qty * rate,
+		discount: Math.abs(qty * discountAmount),
+		signature: `${qty}|${rate}|${discountAmount}`,
+	};
+};
+
 export const useInvoiceStore = defineStore("invoice", () => {
 	const invoiceDoc = ref<PartialInvoiceDoc | null>(null);
 	const invoiceType = ref("Invoice");
@@ -84,6 +202,10 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	const totalQty = ref(0);
 	const grossTotal = ref(0);
 	const discountTotal = ref(0);
+	const rowTotals = reactive(new Map<string, RowTotals>());
+	const rowWatchStops = new Map<string, WatchStopHandle>();
+	const rowWatcherSuppressions = new Map<string, Set<string>>();
+	const cartInvalidation = ref(emptyInvalidationState());
 
 	/**
 	 * Bumps `metadata.changeVersion` and records `lastUpdated = Date.now()`.
@@ -97,6 +219,168 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		};
 	};
 
+	const markRowsChanged = (
+		rowIds: string | string[],
+		kinds: CartMutationKind[] = [],
+		options: { touchStore?: boolean } = {},
+	) => {
+		const ids = Array.isArray(rowIds) ? rowIds.filter(Boolean) : [rowIds];
+		if (!ids.length || !kinds.length) {
+			if (options.touchStore) touch();
+			return;
+		}
+
+		const next = {
+			...cartInvalidation.value,
+			quantityRows: [...cartInvalidation.value.quantityRows],
+			rateRows: [...cartInvalidation.value.rateRows],
+			discountRows: [...cartInvalidation.value.discountRows],
+			pricingRows: [...cartInvalidation.value.pricingRows],
+			stockRows: [...cartInvalidation.value.stockRows],
+			displayRows: [...cartInvalidation.value.displayRows],
+			structureRows: [...cartInvalidation.value.structureRows],
+			version: cartInvalidation.value.version + 1,
+		};
+
+		ids.forEach((rowId) => {
+			kinds.forEach((kind) => {
+				if (kind === "quantity") dedupePush(next.quantityRows, rowId);
+				if (kind === "rate") dedupePush(next.rateRows, rowId);
+				if (kind === "discount") dedupePush(next.discountRows, rowId);
+				if (kind === "pricing") dedupePush(next.pricingRows, rowId);
+				if (kind === "stock") dedupePush(next.stockRows, rowId);
+				if (kind === "display") dedupePush(next.displayRows, rowId);
+				if (kind === "structure") dedupePush(next.structureRows, rowId);
+			});
+		});
+
+		cartInvalidation.value = next;
+		if (options.touchStore) touch();
+	};
+
+	const clearCartInvalidation = () => {
+		cartInvalidation.value = emptyInvalidationState();
+	};
+
+	const applyRowTotals = (rowId: string, item: CartItem) => {
+		if (!rowId || !item) return false;
+
+		const next = computeRowTotals(item);
+		const previous = rowTotals.get(rowId);
+		if (previous?.signature === next.signature) return false;
+
+		if (previous) {
+			totalQty.value -= previous.qty;
+			grossTotal.value -= previous.gross;
+			discountTotal.value -= previous.discount;
+		}
+
+		rowTotals.set(rowId, next);
+		totalQty.value += next.qty;
+		grossTotal.value += next.gross;
+		discountTotal.value += next.discount;
+		return true;
+	};
+
+	const removeRowTotals = (rowId: string) => {
+		const previous = rowTotals.get(rowId);
+		if (!previous) return;
+
+		totalQty.value -= previous.qty;
+		grossTotal.value -= previous.gross;
+		discountTotal.value -= previous.discount;
+		rowTotals.delete(rowId);
+	};
+
+	const unregisterRowWatcher = (rowId: string) => {
+		const stop = rowWatchStops.get(rowId);
+		if (stop) stop();
+		rowWatchStops.delete(rowId);
+		rowWatcherSuppressions.delete(rowId);
+	};
+
+	const unregisterAllRowWatchers = () => {
+		rowWatchStops.forEach((stop) => stop());
+		rowWatchStops.clear();
+		rowWatcherSuppressions.clear();
+	};
+
+	const suppressRowWatcherFields = (rowId: string, fields: string[]) => {
+		if (!rowId || !fields.length) return;
+		const suppressed = rowWatcherSuppressions.get(rowId) || new Set<string>();
+		fields.forEach((field) => suppressed.add(field));
+		rowWatcherSuppressions.set(rowId, suppressed);
+	};
+
+	const registerRowWatcher = (rowId: string, item: CartItem) => {
+		if (!rowId || !item) return;
+		unregisterRowWatcher(rowId);
+		const stop = watch(
+			() => [
+				item.qty,
+				item.stock_qty,
+				item.base_qty,
+				item.rate,
+				item.base_rate,
+				item.price_list_rate,
+				item.base_price_list_rate,
+				item.discount_amount,
+				item.base_discount_amount,
+				item.discount_percentage,
+				item.uom,
+				item.conversion_factor,
+				item.warehouse,
+				item.batch_no,
+				item.serial_no,
+			],
+			(newValues, oldValues = []) => {
+				const watchedFields = [
+					"qty",
+					"stock_qty",
+					"base_qty",
+					"rate",
+					"base_rate",
+					"price_list_rate",
+					"base_price_list_rate",
+					"discount_amount",
+					"base_discount_amount",
+					"discount_percentage",
+					"uom",
+					"conversion_factor",
+					"warehouse",
+					"batch_no",
+					"serial_no",
+				];
+				const changedFields = watchedFields.filter(
+					(_field, index) => newValues[index] !== oldValues[index],
+				);
+				if (!changedFields.length) return;
+
+				const suppressed = rowWatcherSuppressions.get(rowId);
+				const unsuppressedFields = suppressed
+					? changedFields.filter((field) => {
+							if (suppressed.has(field)) {
+								suppressed.delete(field);
+								return false;
+							}
+							return true;
+						})
+					: changedFields;
+				if (suppressed && !suppressed.size) {
+					rowWatcherSuppressions.delete(rowId);
+				}
+				if (!unsuppressedFields.length) return;
+
+				applyRowTotals(rowId, item);
+				markRowsChanged(rowId, classifyChangedFields(unsuppressedFields), {
+					touchStore: true,
+				});
+			},
+			{ flush: "post" },
+		);
+		rowWatchStops.set(rowId, stop);
+	};
+
 	/**
 	 * Walks every item in `itemsData` and recomputes `totalQty`, `grossTotal`,
 	 * and `discountTotal` from scratch in a single O(n) pass.
@@ -104,42 +388,30 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	 * - `grossTotal` = Σ (qty × rate)
 	 * - `discountTotal` = Σ |qty × discount_amount| (unsigned; sign is not preserved)
 	 *
-	 * Called immediately after `setItems`, `addItems`, `removeItemByRowId`, and
-	 * `clearItems`. For incremental field edits it is invoked via the debounced
-	 * `triggerUpdateTotals` to avoid recalculating on every keystroke.
+	 * Kept as a full consistency rebuild for bulk replacement and explicit callers.
+	 * Normal row edits use `applyRowTotals()` instead of rescanning every row.
 	 */
 	const recalculateTotals = () => {
 		let tQty = 0;
 		let tGross = 0;
 		let tDisc = 0;
+		rowTotals.clear();
 
 		for (const item of Array.from(itemsData.values())) {
-			const qty = toNumber(item.qty);
-			const rate = toNumber(item.rate);
-			const disc = toNumber(item.discount_amount || 0);
+			const rowId = item.posa_row_id;
+			const row = computeRowTotals(item);
+			if (rowId) {
+				rowTotals.set(rowId, row);
+			}
 
-			tQty += qty;
-			tGross += qty * rate;
-			tDisc += Math.abs(qty * disc);
+			tQty += row.qty;
+			tGross += row.gross;
+			tDisc += row.discount;
 		}
 
 		totalQty.value = tQty;
 		grossTotal.value = tGross;
 		discountTotal.value = tDisc;
-	};
-
-	/**
-	 * Schedules a `recalculateTotals` call 50 ms in the future, coalescing multiple
-	 * calls within the same tick into a single recalculation.
-	 * Used by `addItem`, `replaceItemAt`, and the deep `itemsData` watcher.
-	 */
-	let updateTimer: ReturnType<typeof setTimeout> | null = null;
-	const triggerUpdateTotals = () => {
-		if (updateTimer) return;
-		updateTimer = setTimeout(() => {
-			recalculateTotals();
-			updateTimer = null;
-		}, 50);
 	};
 
 	/**
@@ -300,7 +572,9 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	 * @param list - Array of cart items to set. Non-array values are ignored (cart is cleared).
 	 */
 	const setItems = (list: any[]) => {
+		unregisterAllRowWatchers();
 		itemsData.clear();
+		rowTotals.clear();
 		const order: string[] = [];
 		if (Array.isArray(list)) {
 			list.forEach((item) => {
@@ -310,13 +584,18 @@ export const useInvoiceStore = defineStore("invoice", () => {
 					Math.random().toString(36).substring(2, 20);
 				// Ensure item has ID
 				if (!item.posa_row_id) item.posa_row_id = rowId;
-				itemsData.set(rowId, cloneItem(item));
+				const cloned = cloneItem(item);
+				itemsData.set(rowId, cloned);
+				registerRowWatcher(rowId, cloned);
 				order.push(rowId);
 			});
 		}
 		itemOrder.value = order;
 		touch();
 		recalculateTotals(); // Immediate update on set
+		if (order.length) {
+			markRowsChanged(order, ["structure", "pricing", "stock"]);
+		}
 	};
 
 	/**
@@ -331,7 +610,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	 * - `index === 0` when the order array is empty → `unshift` (prepend).
 	 * - Any other value (default `-1`) → appended at the end.
 	 *
-	 * Totals are updated via the debounced `triggerUpdateTotals`.
+	 * Totals are updated immediately for this row's cached contribution.
 	 *
 	 * @param item - Cart item to add. Must be a non-null object; null/undefined is a no-op.
 	 * @param index - Insertion position in `itemOrder`. Defaults to `-1` (append).
@@ -345,6 +624,8 @@ export const useInvoiceStore = defineStore("invoice", () => {
 
 		const cloned = cloneItem(item);
 		itemsData.set(rowId, cloned);
+		registerRowWatcher(rowId, cloned);
+		applyRowTotals(rowId, cloned);
 
 		if (index >= 0 && index < itemOrder.value.length) {
 			itemOrder.value.splice(index, 0, rowId);
@@ -354,7 +635,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 			itemOrder.value.push(rowId);
 		}
 		touch();
-		triggerUpdateTotals();
+		markRowsChanged(rowId, ["structure", "pricing", "stock"]);
 		// Return the reactive proxy from the map
 		return itemsData.get(rowId);
 	};
@@ -378,7 +659,10 @@ export const useInvoiceStore = defineStore("invoice", () => {
 			const rowId =
 				item.posa_row_id || Math.random().toString(36).substring(2, 20);
 			if (!item.posa_row_id) item.posa_row_id = rowId;
-			itemsData.set(rowId, cloneItem(item));
+			const cloned = cloneItem(item);
+			itemsData.set(rowId, cloned);
+			registerRowWatcher(rowId, cloned);
+			applyRowTotals(rowId, cloned);
 			addedIds.push(rowId);
 		});
 
@@ -391,11 +675,150 @@ export const useInvoiceStore = defineStore("invoice", () => {
 				itemOrder.value.push(...addedIds);
 			}
 			touch();
-			recalculateTotals(); // Immediate update for batch addition
+			markRowsChanged(addedIds, ["structure", "pricing", "stock"]);
 		}
 
 		return addedIds.map((id) => itemsData.get(id));
 	};
+
+	const resolveRowId = (rowIdOrItem: string | CartItem | any) => {
+		if (typeof rowIdOrItem === "string") return rowIdOrItem;
+		return rowIdOrItem?.posa_row_id || "";
+	};
+
+	const getItemByRowId = (rowId: string) => {
+		if (!rowId) return undefined;
+		return itemsData.get(rowId);
+	};
+
+	const updateItemFields = (
+		rowIdOrItem: string | CartItem | any,
+		patch: Partial<CartItem> = {},
+		options: CartMutationOptions = {},
+	) => {
+		const rowId = resolveRowId(rowIdOrItem);
+		const item = getItemByRowId(rowId);
+		if (!rowId || !item || !patch) return item;
+
+		const changedFields = Object.keys(patch).filter(
+			(field) => (item as any)[field] !== (patch as any)[field],
+		);
+		if (!changedFields.length) return item;
+
+		if (options.manual) {
+			if (
+				changedFields.some((field) =>
+					["rate", "base_rate", "price_list_rate", "base_price_list_rate"].includes(field),
+				)
+			) {
+				item._manual_rate_set = true;
+			}
+			if (
+				changedFields.some((field) =>
+					[
+						"discount_amount",
+						"base_discount_amount",
+						"discount_percentage",
+					].includes(field),
+				)
+			) {
+				item._manual_discount_set = true;
+			}
+		}
+
+		Object.assign(item, patch);
+		suppressRowWatcherFields(rowId, changedFields);
+		applyRowTotals(rowId, item);
+
+		const explicitKinds = normalizeKinds(options.kind);
+		const kinds = explicitKinds.length
+			? explicitKinds
+			: classifyChangedFields(changedFields);
+		markRowsChanged(rowId, kinds);
+		if (options.touch !== false) touch();
+		return item;
+	};
+
+	const mutateItem = (
+		rowIdOrItem: string | CartItem | any,
+		mutator: (item: CartItem) => void,
+		options: CartMutationOptions & { fields?: string[] } = {},
+	) => {
+		const rowId = resolveRowId(rowIdOrItem);
+		const item = getItemByRowId(rowId);
+		if (!rowId || !item || typeof mutator !== "function") return item;
+
+		mutator(item);
+		suppressRowWatcherFields(rowId, options.fields || []);
+		applyRowTotals(rowId, item);
+
+		const explicitKinds = normalizeKinds(options.kind);
+		const kinds = explicitKinds.length
+			? explicitKinds
+			: classifyChangedFields(options.fields || []);
+		if (kinds.length) markRowsChanged(rowId, kinds);
+		if (options.touch !== false) touch();
+		return item;
+	};
+
+	const updateItemQuantity = (
+		rowIdOrItem: string | CartItem | any,
+		qty: any,
+		options: CartMutationOptions = {},
+	) =>
+		updateItemFields(
+			rowIdOrItem,
+			{ qty: toNumber(qty) } as Partial<CartItem>,
+			{
+				...options,
+				kind: options.kind || ["quantity", "stock", "pricing"],
+			},
+		);
+
+	const updateItemRate = (
+		rowIdOrItem: string | CartItem | any,
+		rate: any,
+		options: CartMutationOptions = {},
+	) =>
+		updateItemFields(
+			rowIdOrItem,
+			{ rate: toNumber(rate) } as Partial<CartItem>,
+			{
+				...options,
+				manual: options.manual ?? true,
+				kind: options.kind || ["rate", "pricing"],
+			},
+		);
+
+	const updateItemDiscountPercent = (
+		rowIdOrItem: string | CartItem | any,
+		discountPercentage: any,
+		options: CartMutationOptions = {},
+	) =>
+		updateItemFields(
+			rowIdOrItem,
+			{ discount_percentage: toNumber(discountPercentage) } as Partial<CartItem>,
+			{
+				...options,
+				manual: options.manual ?? true,
+				kind: options.kind || ["discount"],
+			},
+		);
+
+	const updateItemDiscountAmount = (
+		rowIdOrItem: string | CartItem | any,
+		discountAmount: any,
+		options: CartMutationOptions = {},
+	) =>
+		updateItemFields(
+			rowIdOrItem,
+			{ discount_amount: toNumber(discountAmount) } as Partial<CartItem>,
+			{
+				...options,
+				manual: options.manual ?? true,
+				kind: options.kind || ["discount"],
+			},
+		);
 
 	/**
 	 * Replaces the cart item at positional `index` with `item`.
@@ -420,12 +843,17 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		if (!item.posa_row_id) item.posa_row_id = rowId;
 
 		if (oldId !== rowId) {
+			unregisterRowWatcher(oldId);
+			removeRowTotals(oldId);
 			itemsData.delete(oldId);
 			itemOrder.value[index] = rowId;
 		}
-		itemsData.set(rowId, cloneItem(item));
+		const cloned = cloneItem(item);
+		itemsData.set(rowId, cloned);
+		registerRowWatcher(rowId, cloned);
+		applyRowTotals(rowId, cloned);
 		touch();
-		triggerUpdateTotals();
+		markRowsChanged(rowId, ["structure", "pricing", "stock"]);
 	};
 
 	/**
@@ -452,9 +880,10 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		if (itemsData.has(rowId)) {
 			const existing = itemsData.get(rowId);
 			if (existing) {
-				Object.assign(existing, item);
+				updateItemFields(rowId, item, {
+					kind: classifyChangedFields(Object.keys(item)),
+				});
 			}
-			touch();
 		} else {
 			addItem(item);
 		}
@@ -474,13 +903,15 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		}
 
 		if (itemsData.has(rowId)) {
+			unregisterRowWatcher(rowId);
+			removeRowTotals(rowId);
 			itemsData.delete(rowId);
 			const idx = itemOrder.value.indexOf(rowId);
 			if (idx !== -1) {
 				itemOrder.value.splice(idx, 1);
 			}
 			touch();
-			recalculateTotals(); // Immediate update on remove
+			markRowsChanged(rowId, ["structure", "pricing", "stock"]);
 		}
 	};
 
@@ -491,11 +922,14 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	const clearItems = () => {
 		if (itemOrder.value.length > 0) {
 			itemOrder.value = [];
+			unregisterAllRowWatchers();
 			itemsData.clear();
+			rowTotals.clear();
 			touch();
 			totalQty.value = 0;
 			grossTotal.value = 0;
 			discountTotal.value = 0;
+			clearCartInvalidation();
 		}
 	};
 
@@ -577,16 +1011,6 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		return map;
 	});
 
-	// Watch deep changes in the map values
-	watch(
-		itemsData,
-		() => {
-			touch();
-			triggerUpdateTotals();
-		},
-		{ deep: true },
-	);
-
 	return {
 		invoiceDoc,
 		invoiceType,
@@ -596,6 +1020,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		itemsData, // Expose raw map if needed
 		packedItems,
 		metadata,
+		cartInvalidation,
 		totalQty,
 		grossTotal,
 		discountTotal,
@@ -609,6 +1034,14 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		setItems,
 		addItem,
 		addItems,
+		getItemByRowId,
+		updateItemFields,
+		mutateItem,
+		updateItemQuantity,
+		updateItemRate,
+		updateItemDiscountPercent,
+		updateItemDiscountAmount,
+		clearCartInvalidation,
 		replaceItemAt,
 		upsertItem,
 		removeItemByRowId,

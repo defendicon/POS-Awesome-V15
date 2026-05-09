@@ -122,4 +122,101 @@ describe("invoiceStore invoice type state", () => {
 		expect(store.flowToLoad).toBeNull();
 		expect(store.flowContext).toBeNull();
 	});
+
+	it("updates one cart row through explicit quantity mutation without changing row identity", () => {
+		const store = useInvoiceStore();
+
+		store.setItems([
+			{
+				posa_row_id: "row-a",
+				item_code: "ITEM-A",
+				qty: 1,
+				rate: 10,
+				discount_amount: 1,
+			},
+			{
+				posa_row_id: "row-b",
+				item_code: "ITEM-B",
+				qty: 2,
+				rate: 20,
+				discount_amount: 0,
+			},
+		] as any[]);
+		store.clearCartInvalidation();
+
+		const rowA = store.getItemByRowId("row-a");
+		const rowB = store.getItemByRowId("row-b");
+
+		store.updateItemQuantity("row-a", 3);
+
+		expect(store.itemOrder).toEqual(["row-a", "row-b"]);
+		expect(store.getItemByRowId("row-a")).toBe(rowA);
+		expect(store.getItemByRowId("row-b")).toBe(rowB);
+		expect(rowB?.qty).toBe(2);
+		expect(store.totalQty).toBe(5);
+		expect(store.grossTotal).toBe(70);
+		expect(store.discountTotal).toBe(3);
+		expect(store.cartInvalidation.quantityRows).toEqual(["row-a"]);
+		expect(store.cartInvalidation.stockRows).toEqual(["row-a"]);
+		expect(store.cartInvalidation.pricingRows).toEqual(["row-a"]);
+		expect(store.cartInvalidation.discountRows).toEqual([]);
+	});
+
+	it("tracks manual discount edits separately from pricing-rule invalidation", () => {
+		const store = useInvoiceStore();
+
+		store.setItems([
+			{
+				posa_row_id: "row-a",
+				item_code: "ITEM-A",
+				qty: 2,
+				rate: 10,
+				discount_amount: 1,
+				discount_percentage: 10,
+			},
+		] as any[]);
+		store.clearCartInvalidation();
+
+		const item = store.updateItemDiscountAmount("row-a", 3, {
+			manual: true,
+		});
+
+		expect(item?._manual_discount_set).toBe(true);
+		expect(store.totalQty).toBe(2);
+		expect(store.grossTotal).toBe(20);
+		expect(store.discountTotal).toBe(6);
+		expect(store.cartInvalidation.discountRows).toEqual(["row-a"]);
+		expect(store.cartInvalidation.pricingRows).toEqual([]);
+	});
+
+	it("keeps display-only row updates out of pricing and totals invalidation", () => {
+		const store = useInvoiceStore();
+
+		store.setItems([
+			{
+				posa_row_id: "row-a",
+				item_code: "ITEM-A",
+				item_name: "Original",
+				qty: 2,
+				rate: 10,
+				discount_amount: 1,
+			},
+		] as any[]);
+		store.clearCartInvalidation();
+
+		store.updateItemFields(
+			"row-a",
+			{ item_name: "Renamed" } as any,
+			{ kind: "display" },
+		);
+
+		expect(store.totalQty).toBe(2);
+		expect(store.grossTotal).toBe(20);
+		expect(store.discountTotal).toBe(2);
+		expect(store.cartInvalidation.displayRows).toEqual(["row-a"]);
+		expect(store.cartInvalidation.pricingRows).toEqual([]);
+		expect(store.cartInvalidation.quantityRows).toEqual([]);
+		expect(store.cartInvalidation.rateRows).toEqual([]);
+		expect(store.cartInvalidation.discountRows).toEqual([]);
+	});
 });
