@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { computed, markRaw, ref, shallowRef } from "vue";
 
 declare const frappe: any;
 declare const __: any;
@@ -149,7 +149,8 @@ function getSerializedProfile(profile: unknown): string | null {
 }
 
 export const useCustomersStore = defineStore("customers", () => {
-	const customers = ref<CustomerSummary[]>([]);
+	const customers = shallowRef<CustomerSummary[]>(markRaw([]));
+	const customerByName = shallowRef(markRaw(new Map<string, CustomerSummary>()));
 	const selectedCustomer = ref<string | null>(null);
 	const customerInfo = ref<CustomerInfo>({});
 	const searchTerm = ref("");
@@ -217,7 +218,56 @@ export const useCustomersStore = defineStore("customers", () => {
 	function resetPagination() {
 		page.value = 0;
 		hasMore.value = true;
-		customers.value = [];
+		customers.value = markRaw([]);
+	}
+
+	function withCustomerScope<T extends Record<string, any>>(customer: T): T {
+		return {
+			...customer,
+			profile_scope: customer.profile_scope || customerProfileScope.value || "",
+		};
+	}
+
+	function toVisibleCustomer<T extends Record<string, any>>(customer: T): CustomerSummary {
+		const {
+			profile_scope: _profileScope,
+			search_key: _searchKey,
+			search_tokens: _searchTokens,
+			...visibleCustomer
+		} = customer;
+		return visibleCustomer as unknown as CustomerSummary;
+	}
+
+	function setVisibleCustomers(rows: CustomerSummary[]) {
+		const safeRows = Array.isArray(rows) ? rows.map(toVisibleCustomer) : [];
+		customers.value = markRaw(safeRows);
+		const nextMap = new Map<string, CustomerSummary>();
+		safeRows.forEach((customer) => {
+			if (customer?.name) {
+				nextMap.set(customer.name, customer);
+			}
+		});
+		customerByName.value = markRaw(nextMap);
+	}
+
+	function appendVisibleCustomers(rows: CustomerSummary[]) {
+		if (!Array.isArray(rows) || !rows.length) {
+			return;
+		}
+		const merged = new Map(customerByName.value);
+		customers.value.forEach((customer) => {
+			if (customer?.name) {
+				merged.set(customer.name, customer);
+			}
+		});
+		rows.map(toVisibleCustomer).forEach((customer) => {
+			if (customer?.name) {
+				merged.set(customer.name, customer);
+			}
+		});
+		const nextRows = Array.from(merged.values());
+		customers.value = markRaw(nextRows);
+		customerByName.value = markRaw(merged);
 	}
 
 	function setPosProfile(profile: unknown) {
@@ -235,11 +285,7 @@ export const useCustomersStore = defineStore("customers", () => {
 			return;
 		}
 
-		const existingIndex = customers.value.findIndex(
-			(customer) => customer.name === customerName,
-		);
-		const existing =
-			existingIndex >= 0 ? customers.value[existingIndex] : null;
+		const existing = customerByName.value.get(customerName) || null;
 		const summary: CustomerSummary = {
 			...(existing || {}),
 			name: customerName,
@@ -259,14 +305,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		if (primaryAddress) summary.primary_address = primaryAddress;
 		if (taxId) summary.tax_id = taxId;
 
-		if (existingIndex >= 0) {
-			const updated = [...customers.value];
-			updated.splice(existingIndex, 1, summary);
-			customers.value = updated;
-			return;
-		}
-
-		customers.value = [...customers.value, summary];
+		appendVisibleCustomers([summary]);
 	}
 
 	function setCustomerInfo(info: CustomerInfo) {
@@ -276,7 +315,7 @@ export const useCustomersStore = defineStore("customers", () => {
 			getStringField(customerInfo.value, "name") ||
 			getStringField(customerInfo.value, "customer");
 		if (customerName) {
-			void setCustomerStorage([{ ...customerInfo.value, name: customerName }]);
+			void setCustomerStorage([withCustomerScope({ ...customerInfo.value, name: customerName })]);
 		}
 		if (
 			customerName &&
@@ -341,8 +380,28 @@ export const useCustomersStore = defineStore("customers", () => {
 		let collection = db.table("customers");
 		const normalizedTerm = normalizeCustomerSearchTerm(searchTerm.value);
 		if (normalizedTerm) {
-			collection = collection.filter((customer: CustomerSummary) =>
-				customerMatchesSearchTerm(customer, normalizedTerm),
+			const tokens = normalizedTerm.toLowerCase().split(/\s+/).filter(Boolean);
+			if (tokens.length === 1) {
+				try {
+					collection = db
+						.table("customers")
+						.where("search_tokens")
+						.startsWithIgnoreCase(tokens[0]);
+				} catch {
+					collection = db.table("customers");
+				}
+			}
+			collection = collection.filter((customer: CustomerSummary) => {
+				const sameScope =
+					!customerProfileScope.value ||
+					(customer as any).profile_scope === customerProfileScope.value;
+				return sameScope && customerMatchesSearchTerm(customer, normalizedTerm);
+			});
+		} else if (customerProfileScope.value) {
+			collection = collection.filter(
+				(customer: CustomerSummary) =>
+					(customer as any).profile_scope === customerProfileScope.value ||
+					!(customer as any).profile_scope,
 			);
 		}
 
@@ -353,9 +412,9 @@ export const useCustomersStore = defineStore("customers", () => {
 			.toArray();
 
 		if (append) {
-			customers.value = [...customers.value, ...results];
+			appendVisibleCustomers(results);
 		} else {
-			customers.value = results;
+			setVisibleCustomers(results);
 		}
 
 		hasMore.value = results.length === PAGE_SIZE;
@@ -451,7 +510,7 @@ export const useCustomersStore = defineStore("customers", () => {
 					limit,
 				);
 				if (rows.length) {
-					await setCustomerStorage(rows);
+					await setCustomerStorage(rows.map(withCustomerScope));
 					loadedCustomerCount.value += rows.length;
 					syncBootstrapCustomerReadiness(loadedCustomerCount.value);
 					if (totalCustomerCount.value) {
@@ -529,7 +588,7 @@ export const useCustomersStore = defineStore("customers", () => {
 					PAGE_SIZE,
 				);
 				if (rows.length) {
-					await setCustomerStorage(rows);
+					await setCustomerStorage(rows.map(withCustomerScope));
 					loadedCustomerCount.value += rows.length;
 					syncBootstrapCustomerReadiness(loadedCustomerCount.value);
 					if (totalCustomerCount.value) {
@@ -632,7 +691,7 @@ export const useCustomersStore = defineStore("customers", () => {
 			);
 
 			if (rows.length) {
-				await setCustomerStorage(rows);
+				await setCustomerStorage(rows.map(withCustomerScope));
 			}
 			loadedCustomerCount.value = rows.length;
 			syncBootstrapCustomerReadiness(loadedCustomerCount.value);
@@ -684,17 +743,9 @@ export const useCustomersStore = defineStore("customers", () => {
 		if (!customer || !customer.name) {
 			return;
 		}
-		const existingIndex = customers.value.findIndex(
-			(c) => c.name === customer.name,
-		);
-		if (existingIndex !== -1) {
-			const updated = [...customers.value];
-			updated.splice(existingIndex, 1, customer);
-			customers.value = updated;
-		} else {
-			customers.value = [...customers.value, customer];
-		}
-		await setCustomerStorage([customer]);
+		const scopedCustomer = withCustomerScope(customer);
+		appendVisibleCustomers([customer]);
+		await setCustomerStorage([scopedCustomer]);
 		syncBootstrapCustomerReadiness(Math.max(customers.value.length, 1));
 		setSelectedCustomer(customer.name);
 		requestCustomerRefresh();
@@ -742,6 +793,7 @@ export const useCustomersStore = defineStore("customers", () => {
 
 	return {
 		customers,
+		customerByName,
 		filteredCustomers,
 		selectedCustomer,
 		customerInfo,

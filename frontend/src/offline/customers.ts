@@ -16,6 +16,7 @@ import {
 type AnyRecord = Record<string, any>;
 
 const CUSTOMER_ENTITY: OfflineEntityType = "customer";
+const CUSTOMER_RUNTIME_CACHE_LIMIT = 50;
 
 export async function saveOfflineCustomer(entry: AnyRecord) {
 	let cleanEntry;
@@ -146,7 +147,31 @@ function mergeCustomerStorageRows(rows: AnyRecord[]) {
 		merged.set(row.name, row);
 	});
 
-	return Array.from(merged.values());
+	return Array.from(merged.values()).slice(-CUSTOMER_RUNTIME_CACHE_LIMIT);
+}
+
+function normalizeCustomerSearchPart(value: unknown): string {
+	return String(value ?? "")
+		.trim()
+		.toLowerCase();
+}
+
+function buildCustomerSearchKey(customer: AnyRecord): string {
+	return [
+		customer.name,
+		customer.customer_name,
+		customer.mobile_no,
+		customer.email_id,
+		customer.tax_id,
+		customer.primary_address,
+	]
+		.map(normalizeCustomerSearchPart)
+		.filter(Boolean)
+		.join(" ");
+}
+
+function buildCustomerSearchTokens(customer: AnyRecord): string[] {
+	return Array.from(new Set(buildCustomerSearchKey(customer).split(/\s+/).filter(Boolean)));
 }
 
 export async function getStoredCustomer(customerName: string) {
@@ -185,6 +210,9 @@ export async function setCustomerStorage(customers: AnyRecord[]) {
 			tax_id: customer.tax_id,
 			stored_value_balance: customer.stored_value_balance || 0,
 			stored_value_sources: customer.stored_value_sources || 0,
+			profile_scope: customer.profile_scope || "",
+			search_key: buildCustomerSearchKey(customer),
+			search_tokens: buildCustomerSearchTokens(customer),
 		}));
 
 		await db.table("customers").bulkPut(clean);

@@ -4,7 +4,7 @@
  */
 
 import { defineStore } from "pinia";
-import { ref, computed, watch } from "vue";
+import { computed, markRaw, ref, shallowRef, watch } from "vue";
 import type { Item, POSProfile } from "../types/models";
 import itemService from "../services/itemService";
 import { refreshBootstrapSnapshotFromCacheState } from "../../offline/index";
@@ -99,8 +99,8 @@ export const useItemsStore = defineStore("items", () => {
 	};
 
 	// Core State
-	const items = ref<Item[]>([]);
-	const filteredItems = ref<Item[]>([]);
+	const items = shallowRef<Item[]>(markRaw([]));
+	const filteredItems = shallowRef<Item[]>(markRaw([]));
 	const totalItemCount = ref(0);
 	const itemsLoaded = ref(false);
 	const searchTerm = ref("");
@@ -127,6 +127,12 @@ export const useItemsStore = defineStore("items", () => {
 	} = useItemsCache();
 
 	const {
+		itemByCode,
+		barcodeToItem,
+		itemNameSearchIndex,
+		priceByItemAndPriceList,
+		stockByItemAndWarehouse,
+		uomConversionByItem,
 		itemsMap,
 		barcodeIndex,
 		updateIndexes,
@@ -244,7 +250,7 @@ export const useItemsStore = defineStore("items", () => {
 				: "ALL";
 
 		if (!append) {
-			items.value = Array.isArray(newItems) ? [...newItems] : [];
+			items.value = markRaw(Array.isArray(newItems) ? [...newItems] : []);
 			resetIndexes();
 			updateIndexes(items.value, posProfile.value);
 		} else if (Array.isArray(newItems) && newItems.length) {
@@ -261,7 +267,7 @@ export const useItemsStore = defineStore("items", () => {
 			});
 
 			if (additions.length) {
-				items.value = [...items.value, ...additions];
+				items.value = markRaw([...items.value, ...additions]);
 				const appendedItems = items.value.slice(-additions.length);
 				updateIndexes(appendedItems, posProfile.value);
 			}
@@ -274,10 +280,10 @@ export const useItemsStore = defineStore("items", () => {
 		}
 
 		if (!searchTerm.value) {
-			filteredItems.value = filterItemsByGroup(
+			filteredItems.value = markRaw(filterItemsByGroup(
 				items.value,
 				normalizedGroup,
-			);
+			));
 		}
 	};
 
@@ -660,10 +666,10 @@ export const useItemsStore = defineStore("items", () => {
 
 		clearSearchCache();
 		if (preserveItems) {
-			filteredItems.value = filterItemsByGroup(
+			filteredItems.value = markRaw(filterItemsByGroup(
 				items.value,
 				itemGroup.value,
-			);
+			));
 			return filteredItems.value;
 		}
 
@@ -692,20 +698,20 @@ export const useItemsStore = defineStore("items", () => {
 			}
 
 			if (!cachedPagination.value.enabled) {
-				filteredItems.value = filterItemsByGroup(
+				filteredItems.value = markRaw(filterItemsByGroup(
 					items.value,
 					itemGroup.value,
-				);
+				));
 			} else {
 				cachedPagination.value.search = "";
 				cachedPagination.value.offset = Math.min(
 					cachedPagination.value.offset,
 					items.value.length,
 				);
-				filteredItems.value = filterItemsByGroup(
+				filteredItems.value = markRaw(filterItemsByGroup(
 					items.value,
 					itemGroup.value,
-				);
+				));
 			}
 			return filteredItems.value;
 		}
@@ -722,7 +728,7 @@ export const useItemsStore = defineStore("items", () => {
 					items.value,
 					itemGroup.value,
 				);
-				filteredItems.value = serverResults;
+				filteredItems.value = markRaw(serverResults);
 				performanceMetrics.value.searchMisses++;
 
 				return serverResults;
@@ -736,7 +742,7 @@ export const useItemsStore = defineStore("items", () => {
 		const cacheKey = `search_${getCacheScope()}_${activePriceList.value || "default"}_${term}_${itemGroup.value}`;
 		const cached = getCachedSearchResult(cacheKey);
 		if (cached) {
-			filteredItems.value = cached;
+			filteredItems.value = markRaw(cached);
 			performanceMetrics.value.searchHits++;
 			return cached;
 		}
@@ -797,7 +803,7 @@ export const useItemsStore = defineStore("items", () => {
 
 			setCachedSearchResult(cacheKey, searchResults);
 
-			filteredItems.value = searchResults;
+			filteredItems.value = markRaw(searchResults);
 			performanceMetrics.value.searchMisses++;
 
 			if (shouldUseIndexed) {
@@ -821,7 +827,7 @@ export const useItemsStore = defineStore("items", () => {
 			if (cachedPagination.value.enabled && shouldUseIndexedSearch()) {
 				await resetCachedItemsForGroup(group);
 			} else {
-				filteredItems.value = filterItemsByGroup(items.value, group);
+				filteredItems.value = markRaw(filterItemsByGroup(items.value, group));
 			}
 		}
 	};
@@ -877,7 +883,7 @@ export const useItemsStore = defineStore("items", () => {
 			!cachedPagination.value.enabled ||
 			!shouldUseIndexedSearch()
 		) {
-			filteredItems.value = filterItemsByGroup(items.value, group);
+			filteredItems.value = markRaw(filterItemsByGroup(items.value, group));
 			return;
 		}
 
@@ -956,16 +962,16 @@ export const useItemsStore = defineStore("items", () => {
 		clearSearchCache();
 
 		if (searchTerm.value) {
-			filteredItems.value = performLocalSearch(
+			filteredItems.value = markRaw(performLocalSearch(
 				searchTerm.value,
 				items.value,
 				itemGroup.value,
-			);
+			));
 		} else {
-			filteredItems.value = filterItemsByGroup(
+			filteredItems.value = markRaw(filterItemsByGroup(
 				items.value,
 				itemGroup.value,
-			);
+			));
 		}
 	};
 
@@ -1008,16 +1014,16 @@ export const useItemsStore = defineStore("items", () => {
 					}
 				}
 
-				items.value.push(newItem);
+				items.value = markRaw([...items.value, newItem]);
 				updateIndexes([newItem], posProfile.value);
 
 				if (searchTerm.value) {
 					await searchItems(searchTerm.value);
 				} else {
-					filteredItems.value = filterItemsByGroup(
+					filteredItems.value = markRaw(filterItemsByGroup(
 						items.value,
 						itemGroup.value,
-					);
+					));
 				}
 
 				clearSearchCache();
@@ -1097,7 +1103,7 @@ export const useItemsStore = defineStore("items", () => {
 		});
 
 		if (additions.length > 0) {
-			items.value = [...items.value, ...additions];
+			items.value = markRaw([...items.value, ...additions]);
 			const appendedItems = items.value.slice(-additions.length);
 			updateIndexes(appendedItems, posProfile.value);
 		}
@@ -1105,22 +1111,22 @@ export const useItemsStore = defineStore("items", () => {
 		if (touchedItems.length > 0) {
 			// Force a shallow array refresh so virtualized tables/cards re-render
 			// even when rows are updated in-place.
-			items.value = [...items.value];
+			items.value = markRaw([...items.value]);
 			updateIndexes(touchedItems, posProfile.value);
 		}
 
 		clearSearchCache();
 		if (searchTerm.value) {
-			filteredItems.value = performLocalSearch(
+			filteredItems.value = markRaw(performLocalSearch(
 				searchTerm.value,
 				items.value,
 				itemGroup.value,
-			);
+			));
 		} else {
-			filteredItems.value = filterItemsByGroup(
+			filteredItems.value = markRaw(filterItemsByGroup(
 				items.value,
 				itemGroup.value,
-			);
+			));
 		}
 	};
 
@@ -1135,6 +1141,12 @@ export const useItemsStore = defineStore("items", () => {
 		// State
 		items,
 		filteredItems,
+		itemByCode,
+		barcodeToItem,
+		itemNameSearchIndex,
+		priceByItemAndPriceList,
+		stockByItemAndWarehouse,
+		uomConversionByItem,
 		itemsMap,
 		barcodeIndex,
 		itemGroups,

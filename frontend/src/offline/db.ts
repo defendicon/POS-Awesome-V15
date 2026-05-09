@@ -50,9 +50,11 @@ const BASE_SCHEMA = {
 	invoice_outbox:
 		"++outbox_id,&client_request_id,status,resource,created_at,next_retry_at,nextAttemptAt,retry_count,[status+next_retry_at],[resource+status],[status+nextAttemptAt]",
 	cache: "&key",
-	items: "&item_code,item_name,item_group,*barcodes,*name_keywords,*serials,*batches",
+	items:
+		"&item_code,item_name,item_group,profile_scope,[profile_scope+item_code],[profile_scope+item_group],*barcodes,*name_keywords,*search_tokens,*serials,*batches",
 	item_prices: "&[price_list+item_code],price_list,item_code",
-	customers: "&name,customer_name,mobile_no,email_id,tax_id",
+	customers:
+		"&name,customer_name,mobile_no,email_id,tax_id,profile_scope,search_key,*search_tokens,[profile_scope+name]",
 	pos_profiles: "&name",
 	opening_shifts: "&name,user,pos_profile",
 	local_stock: "&key",
@@ -228,6 +230,7 @@ db.version(10).stores(BASE_SCHEMA);
 db.version(11).stores(BASE_SCHEMA);
 db.version(12).stores(BASE_SCHEMA);
 db.version(13).stores(BASE_SCHEMA);
+db.version(14).stores(BASE_SCHEMA);
 
 let persistWorker: Worker | null = null;
 if (typeof Worker !== "undefined") {

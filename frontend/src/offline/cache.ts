@@ -162,6 +162,25 @@ const deriveItemSearchFields = (item: SearchableItem | null | undefined) => {
 		...safeItem,
 		barcodes: getBarcodes(),
 		name_keywords: getNameKeywords(),
+		search_tokens: Array.from(
+			new Set(
+				[
+					safeItem.item_code,
+					safeItem.item_name,
+					safeItem.description,
+					...getBarcodes(),
+					...getNameKeywords(),
+					...getSerials(),
+					...getBatches(),
+				]
+					.flatMap((value) =>
+						String(value ?? "")
+							.toLowerCase()
+							.split(/\s+/),
+					)
+					.filter(Boolean),
+			),
+		),
 		serials: getSerials(),
 		batches: getBatches(),
 	};
@@ -284,8 +303,36 @@ export async function searchStoredItems({
 		if (normalizedSearch) {
 			const term = normalizedSearch.toLowerCase();
 			const terms = term.split(/\s+/).filter(Boolean);
+			if (terms.length === 1) {
+				try {
+					const indexedRows = await db
+						.table("items")
+						.where("search_tokens")
+						.startsWithIgnoreCase(terms[0])
+						.limit(Math.max(limit * 4, limit))
+						.toArray();
+					const scopedRows = indexedRows.filter(
+						(row) =>
+							(!hasScope(scope) || isMatchingScope(row, scope)) &&
+							(!normalizedGroup ||
+								normalizedGroup.toLowerCase() === "all" ||
+								String(row.item_group || "").toLowerCase() ===
+									normalizedGroup.toLowerCase()),
+					);
+					return scopedRows.slice(offset, offset + limit);
+				} catch {
+					// Fall back to the compatible filtered collection below.
+				}
+			}
 
 			collection = collection.filter((it) => {
+				if (Array.isArray(it.search_tokens) && terms.length) {
+					return terms.every((t) =>
+						it.search_tokens.some((token) =>
+							String(token || "").toLowerCase().includes(t),
+						),
+					);
+				}
 				const nameMatch =
 					it.item_name &&
 					terms.every((t) => it.item_name.toLowerCase().includes(t));

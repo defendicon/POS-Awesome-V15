@@ -121,4 +121,20 @@ describe("offline storage ownership", () => {
 			}),
 		);
 	});
+
+	it("does not mirror bulk customer pages into an ever-growing runtime array", async () => {
+		const { setCustomerStorage } = await import("../src/offline/customers");
+		const { memory } = await import("../src/offline/db");
+
+		await setCustomerStorage(
+			Array.from({ length: 250 }, (_, index) => ({
+				name: `CUST-${index}`,
+				customer_name: `Customer ${index}`,
+			})),
+		);
+
+		expect(customersTable.bulkPut).toHaveBeenCalled();
+		expect(memory.customer_storage.length).toBeLessThanOrEqual(50);
+		expect(persist).not.toHaveBeenCalledWith("customer_storage");
+	});
 });

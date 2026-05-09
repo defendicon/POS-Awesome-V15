@@ -72,7 +72,12 @@ describe("customersStore profile and customer dto handling", () => {
 		expect(store.customers).toEqual([customer]);
 		expect(store.customerInfo).toEqual(info);
 		expectTypeOf(store.customers).toEqualTypeOf<CustomerSummary[]>();
-		expect(setCustomerStorageMock).toHaveBeenCalledWith([customer]);
+		expect(setCustomerStorageMock).toHaveBeenCalledWith([
+			expect.objectContaining({
+				...customer,
+				profile_scope: "Main POS",
+			}),
+		]);
 	});
 
 	it("adds fetched customer info to the visible selector list", () => {
