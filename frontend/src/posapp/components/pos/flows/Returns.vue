@@ -332,6 +332,12 @@ import { useResponsive } from "../../../composables/core/useResponsive";
 import { useTheme } from "../../../composables/core/useTheme";
 
 export default {
+	props: {
+		openRequest: {
+			type: Object,
+			default: null,
+		},
+	},
 	mixins: [format],
 	setup() {
 		const invoiceStore = useInvoiceStore();
@@ -412,6 +418,13 @@ export default {
 	}),
 	computed: {},
 	watch: {
+		openRequest: {
+			handler(request) {
+				if (!request) return;
+				this.open_dialog(request.company);
+			},
+			immediate: true,
+		},
 		from_date() {
 			this.formatFromDate();
 		},
@@ -420,6 +433,26 @@ export default {
 		},
 	},
 	methods: {
+		open_dialog(data) {
+			this.invoicesDialog = true;
+			this.company = data;
+			this.invoice_name = "";
+			this.customer_name = "";
+			this.customer_id = "";
+			this.mobile_no = "";
+			this.tax_id = "";
+			this.from_date = null;
+			this.to_date = null;
+			this.from_date_formatted = null;
+			this.to_date_formatted = null;
+			this.min_amount = "";
+			this.max_amount = "";
+			this.dialog_data = [];
+			this.selected = [];
+			this.page = 1;
+			this.has_more_invoices = false;
+			this.searched_once = false;
+		},
 		isSelectedInvoice(item) {
 			return Array.isArray(this.selected) && this.selected.some((entry) => entry?.name === item?.name);
 		},
@@ -815,24 +848,7 @@ export default {
 	},
 	created: function () {
 		this.eventBus.on("open_returns", (data) => {
-			this.invoicesDialog = true;
-			this.company = data;
-			this.invoice_name = "";
-			this.customer_name = "";
-			this.customer_id = "";
-			this.mobile_no = "";
-			this.tax_id = "";
-			this.from_date = null;
-			this.to_date = null;
-			this.from_date_formatted = null;
-			this.to_date_formatted = null;
-			this.min_amount = "";
-			this.max_amount = "";
-			this.dialog_data = [];
-			this.selected = [];
-			this.page = 1;
-			this.has_more_invoices = false;
-			this.searched_once = false;
+			this.open_dialog(data);
 		});
 
 		this.$watch(

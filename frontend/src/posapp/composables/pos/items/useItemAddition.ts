@@ -1,5 +1,6 @@
 import _ from "lodash";
 import { withPerf } from "../../../utils/perf";
+import { debugLog } from "../../../utils/debug";
 import { parseBooleanSetting } from "../../../utils/stock";
 import { useToastStore } from "../../../stores/toastStore";
 import { useStockUtils } from "../shared/useStockUtils";
@@ -40,7 +41,7 @@ export function useItemAddition() {
 	const { expandBundle } = useItemBundles() as any;
 	const sharedBatchSerial = useBatchSerial();
 	const logBatchFlow = (message: string, payload?: any) => {
-		console.debug(`[POS BatchFlow] ${message}`, payload || {});
+		debugLog(`[POS BatchFlow] ${message}`, payload || {});
 	};
 
 	const callSetBatchQty = (
@@ -199,7 +200,7 @@ export function useItemAddition() {
 		for (const [rowId, data] of currentUpdates) {
 			const item = context.invoiceStore.itemsData.get(rowId);
 			if (item) {
-				console.log("[useItemAddition] Merging item qty", {
+				debugLog("[useItemAddition] Merging item qty", {
 					item_code: item.item_code,
 					old_qty: item.qty,
 					added: data.qty,
@@ -220,7 +221,7 @@ export function useItemAddition() {
 
 		// 2. Process Additions
 		if (currentItems.length) {
-			console.log("[useItemAddition] Adding new items to store", {
+			debugLog("[useItemAddition] Adding new items to store", {
 				count: currentItems.length,
 			});
 			const addedItems = context.invoiceStore.addItems(currentItems, 0); // Prepend to top
@@ -327,7 +328,7 @@ export function useItemAddition() {
 				item.actual_qty <= 0 &&
 				!allowNegativeStock
 			) {
-				console.debug("POS stock gate: item blocked", {
+				debugLog("POS stock gate: item blocked", {
 					item_code: item.item_code,
 					actual_qty: item.actual_qty,
 					block_sale_beyond_available_qty: blockSale,
@@ -615,7 +616,7 @@ export function useItemAddition() {
 
 						// Handle extra items from batch splitting
 						if (extra_items && extra_items.length > 0) {
-							console.log(
+							debugLog(
 								"[useItemAddition] Adding split batch items",
 								extra_items.length,
 							);

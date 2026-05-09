@@ -1,5 +1,6 @@
 import { clearPriceListCache } from "../../../../offline/index";
 import { useCustomersStore } from "../../../stores/customersStore.js";
+import { debugLog } from "../../../utils/debug";
 
 interface WatcherItem {
 	posa_row_id?: string | number;
@@ -85,7 +86,7 @@ const applyReturnDiscountProration = (context: InvoiceWatchersVm) => {
 	const prorated = -Math.abs(originalDiscount * ratio);
 	const current = Number(context.additional_discount || 0);
 	if (Math.abs(current - prorated) > 0.0001) {
-		console.log("[POSA][Returns] Auto-prorate discount", {
+		debugLog("[POSA][Returns] Auto-prorate discount", {
 			originalDiscount,
 			originalTotal,
 			returnTotal,

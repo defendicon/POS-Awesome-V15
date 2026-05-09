@@ -74,6 +74,12 @@
 import { useToastStore } from "../../../stores/toastStore";
 
 export default {
+	props: {
+		openRequest: {
+			type: Object,
+			default: null,
+		},
+	},
 	setup() {
 		const toastStore = useToastStore();
 		return { toastStore };
@@ -86,6 +92,11 @@ export default {
 	computed: {},
 
 	methods: {
+		open_dialog(data) {
+			this.addressDialog = true;
+			this.customer = data;
+		},
+
 		close_dialog() {
 			this.addressDialog = false;
 		},
@@ -114,11 +125,16 @@ export default {
 			});
 		},
 	},
-	created: function () {
-		this.eventBus.on("open_new_address", (data) => {
-			this.addressDialog = true;
-			this.customer = data;
-		});
+	watch: {
+		openRequest: {
+			handler(request) {
+				if (!request) {
+					return;
+				}
+				this.open_dialog(request.customer);
+			},
+			immediate: true,
+		},
 	},
 };
 </script>

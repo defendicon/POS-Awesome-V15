@@ -459,8 +459,14 @@ if (typeof window !== "undefined" && !normalizePosAppPath()) {
 				await assets.module?.initPosStorage?.();
 			},
 			runBootSync: async ({ assets }) => {
-				await assets.module?.runPosBootSync?.();
 				setupDeskPageChrome(options.pageRef);
+				window.setTimeout(() => {
+					void Promise.resolve(assets.module?.runPosBootSync?.()).catch(
+						(error) => {
+							console.warn("POS boot background sync failed", error);
+						},
+					);
+				}, 0);
 			},
 			performAssetRecovery,
 			redirect: redirectToBootRecovery,

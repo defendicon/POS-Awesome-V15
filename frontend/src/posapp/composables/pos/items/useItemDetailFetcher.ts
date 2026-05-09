@@ -13,6 +13,7 @@ import {
 	isOffline,
 } from "../../../../offline/index";
 import { scheduleFrame } from "../../../utils/perf.js";
+import { debugLog } from "../../../utils/debug";
 import { buildItemDetailsRequestIdentity } from "./detailFetcher/requestIdentity";
 
 declare const frappe: any;
@@ -686,7 +687,7 @@ export function useItemDetailFetcher() {
 			const cache = getLocalStockCache();
 			const cacheSize = Object.keys(cache).length;
 			if (isStockCacheReady() && cacheSize >= items.length) {
-				console.debug("Stock cache already initialized");
+				debugLog("Stock cache already initialized");
 				return;
 			}
 			if (items.length > 500) {

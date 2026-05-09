@@ -164,7 +164,7 @@
 
 		<!-- Camera Scanner Component -->
 		<CameraScanner
-			v-if="pos_profile.posa_enable_camera_scanning"
+			v-if="shouldMountCameraScanner"
 			ref="cameraScanner"
 			:scan-type="pos_profile.posa_camera_scan_type || 'Both'"
 			@barcode-scanned="onBarcodeScanned"
@@ -184,12 +184,13 @@ import {
 	watch,
 	reactive,
 	inject,
+	nextTick,
+	defineAsyncComponent,
 	type Ref,
 } from "vue";
 import { storeToRefs } from "pinia";
 import * as _ from "lodash";
 
-import CameraScanner from "./CameraScanner.vue";
 import ItemActionToolbar from "./ItemActionToolbar.vue";
 import ItemSettingsDialog from "./ItemSettingsDialog.vue";
 import ItemHeader from "./ItemHeader.vue";
@@ -197,6 +198,8 @@ import ItemsSelectorCards from "./ItemsSelectorCards.vue";
 import ItemsSelectorTable from "./ItemsSelectorTable.vue";
 import NewItemDialog from "./NewItemDialog.vue";
 import ScanErrorDialog from "./ScanErrorDialog.vue";
+
+const CameraScanner = defineAsyncComponent(() => import("./CameraScanner.vue"));
 
 import { useResponsive } from "../../../composables/core/useResponsive";
 import { useRtl } from "../../../composables/core/useRtl";
@@ -342,6 +345,7 @@ const item_group = computed({
 });
 const virtualScrollBuffer = ref(200);
 const localStorageAvailable = ref(true);
+const shouldMountCameraScanner = ref(false);
 
 // Settings Refs
 const hide_qty_decimals = ref(false);
@@ -1019,7 +1023,17 @@ const {
 	onBarcodeScanned: onBarcodeScannedFromScannerInput,
 } = scannerInput;
 const startCameraScanning = () => {
-	itemsSelectorFocus.startCameraScanning();
+	if (scannerInput.scannerLocked.value) {
+		scannerInput.playScanTone?.("error");
+		return;
+	}
+	if (!pos_profile.value?.posa_enable_camera_scanning) {
+		return;
+	}
+	shouldMountCameraScanner.value = true;
+	nextTick(() => {
+		itemsSelectorFocus.startCameraScanning();
+	});
 };
 const { responsiveStyles } = responsive;
 const { rtlClasses } = rtl;

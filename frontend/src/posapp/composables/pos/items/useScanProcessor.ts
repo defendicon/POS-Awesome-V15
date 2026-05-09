@@ -5,6 +5,7 @@ import {
 	formatStockShortageError,
 	parseBooleanSetting,
 } from "../../../utils/stock";
+import { debugLog } from "../../../utils/debug";
 import { saveItems, savePriceListItems } from "../../../../offline/index";
 import { openItemSelectionDialog } from "../../../utils/itemSelectionDialog";
 import {
@@ -101,7 +102,7 @@ export function useScanProcessor(context: ScanProcessorContext) {
 	const awaitingScanResult = ref(false);
 	const pendingScanCode = ref("");
 	const logScanFlow = (step: string, payload?: any) => {
-		console.debug(`[POS ScanFlow] ${step}`, payload || {});
+		debugLog(`[POS ScanFlow] ${step}`, payload || {});
 	};
 
 	const isNegativeStockEnabled = (item: any = null) => {

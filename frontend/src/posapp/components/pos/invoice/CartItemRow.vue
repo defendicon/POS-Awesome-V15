@@ -391,6 +391,7 @@
 
 <script setup>
 import { computed, nextTick, ref } from "vue";
+import { debugLog } from "../../../utils/debug";
 
 defineOptions({
 	name: "CartItemRow",
@@ -481,7 +482,7 @@ const memoDeps = computed(() => {
 		isEditingDiscountPercent.value,
 		isEditingDiscountAmount.value,
 	];
-	console.log(`[CartItemRow] memoDeps updated for ${props.item.item_code}`, {
+	debugLog(`[CartItemRow] memoDeps updated for ${props.item.item_code}`, {
 		uom: props.item.uom,
 		rate: props.item.rate,
 		price_list_rate: props.item.price_list_rate,
@@ -574,7 +575,7 @@ function changeUom(direction) {
 	}
 
 	const newUom = uoms[newIndex];
-	console.log("[CartItemRow] changeUom", {
+	debugLog("[CartItemRow] changeUom", {
 		item: props.item.item_code,
 		direction,
 		old_uom: props.item.uom,
@@ -587,7 +588,7 @@ function changeUom(direction) {
 
 function handleUomSelect(newUom) {
 	if (disableUomEdit.value) return;
-	console.log("[CartItemRow] handleUomSelect", {
+	debugLog("[CartItemRow] handleUomSelect", {
 		item: props.item.item_code,
 		old_uom: props.item.uom,
 		new_uom: newUom,

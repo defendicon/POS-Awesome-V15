@@ -9,6 +9,7 @@ const LOADER_RECOVERY_KEY = "posa_loader_chunk_recovery_once";
 const CHUNK_RECOVERY_STABLE_DELAY_MS = 3000;
 const CHUNK_RELOAD_PARAM = "_posa_chunk_reload";
 const CHUNK_CACHE_RECOVERY_PARAM = "_posa_chunk_cache_recovery";
+const POSAWESOME_CACHE_PREFIX = "posawesome-cache-";
 
 function normalizeErrorText(error: unknown): string {
 	const message =
@@ -140,7 +141,11 @@ async function clearServiceWorkersAndCaches() {
 	try {
 		if (typeof caches !== "undefined") {
 			const cacheKeys = await caches.keys();
-			await Promise.all(cacheKeys.map((key) => caches.delete(key)));
+			await Promise.all(
+				cacheKeys
+					.filter((key) => key.startsWith(POSAWESOME_CACHE_PREFIX))
+					.map((key) => caches.delete(key)),
+			);
 		}
 	} catch (err) {
 		console.warn("Chunk recovery: failed to cleanup Cache API", err);

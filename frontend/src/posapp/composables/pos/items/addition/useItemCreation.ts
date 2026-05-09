@@ -1,3 +1,5 @@
+import { debugLog } from "../../../../utils/debug";
+
 declare const __: (_text: string, _args?: any[]) => string;
 declare const frappe: any;
 
@@ -108,7 +110,7 @@ export function useItemCreation() {
 				? new_item.base_price_list_rate / initialCF
 				: new_item.original_base_rate;
 
-		console.log("[useItemCreation] getNewItem complete", {
+		debugLog("[useItemCreation] getNewItem complete", {
 			item_code: new_item.item_code,
 			uom: new_item.uom,
 			cf: new_item.conversion_factor,
@@ -229,7 +231,7 @@ export function useItemCreation() {
 		// Set final quantity
 		const hasBarcodeQty = item._barcode_qty;
 
-		console.log("[useItemAddition] prepareItemForCart qty check", {
+		debugLog("[useItemAddition] prepareItemForCart qty check", {
 			item_code: item.item_code,
 			initial_item_qty: item.qty,
 			requestedQty,
@@ -242,7 +244,7 @@ export function useItemCreation() {
 				qtyVal = Math.trunc(qtyVal);
 			}
 			item.qty = qtyVal;
-			console.log("[useItemAddition] qty updated", {
+			debugLog("[useItemAddition] qty updated", {
 				item_qty: item.qty,
 			});
 		}

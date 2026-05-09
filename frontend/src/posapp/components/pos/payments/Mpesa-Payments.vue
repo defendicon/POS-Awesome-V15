@@ -84,7 +84,7 @@
 </template>
 
 <script setup>
-import { inject, onBeforeUnmount, onMounted, ref } from "vue";
+import { inject, ref, watch } from "vue";
 import { formatUtils } from "../../../format";
 
 defineOptions({
@@ -94,6 +94,12 @@ defineOptions({
 const frappe = window.frappe;
 const __ = window.__ || ((text) => text);
 const eventBus = inject("eventBus");
+const props = defineProps({
+	openRequest: {
+		type: Object,
+		default: null,
+	},
+});
 
 const dialog = ref(false);
 const selected = ref([]);
@@ -136,6 +142,23 @@ const headers = [
 
 function close_dialog() {
 	dialog.value = false;
+}
+
+function openDialog(data) {
+	if (!data) {
+		return;
+	}
+	dialog.value = true;
+	full_name.value = "";
+	mobile_no.value = "";
+	company.value = data.company;
+	customer.value = data.customer;
+	mode_of_payment.value = data.mode_of_payment;
+	dialog_data.value = "";
+	selected.value = [];
+	errorMessage.value = "";
+	isLoading.value = false;
+	isSubmitting.value = false;
 }
 
 async function search() {
@@ -216,23 +239,14 @@ function formatCurrency(value) {
 	return formatted;
 }
 
-onMounted(() => {
-	eventBus?.on("open_mpesa_payments", (data) => {
-		dialog.value = true;
-		full_name.value = "";
-		mobile_no.value = "";
-		company.value = data.company;
-		customer.value = data.customer;
-		mode_of_payment.value = data.mode_of_payment;
-		dialog_data.value = "";
-		selected.value = [];
-		errorMessage.value = "";
-		isLoading.value = false;
-		isSubmitting.value = false;
-	});
-});
-
-onBeforeUnmount(() => {
-	eventBus?.off("open_mpesa_payments");
-});
+watch(
+	() => props.openRequest,
+	(request) => {
+		if (!request) {
+			return;
+		}
+		openDialog(request.data);
+	},
+	{ immediate: true },
+);
 </script>

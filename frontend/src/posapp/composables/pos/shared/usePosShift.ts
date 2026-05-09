@@ -15,6 +15,7 @@ import {
 } from "../../../../offline/index";
 import { getValidCachedOpeningForCurrentUser } from "../../../utils/openingCache";
 import { createBootstrapSnapshotFromRegisterData } from "../../../../offline/bootstrapSnapshot";
+import { debugLog } from "../../../utils/debug";
 
 declare const __BUILD_VERSION__: string;
 declare const frappe: any;
@@ -219,7 +220,7 @@ export function usePosShift(openDialog?: () => void) {
 	}
 
 	function submit_closing_pos(data: any) {
-		console.log("Submitting closing shift", data);
+		debugLog("Submitting closing shift", data);
 		frappe
 			.call(
 				"posawesome.posawesome.doctype.pos_closing_shift.pos_closing_shift.submit_closing_shift",
@@ -228,7 +229,7 @@ export function usePosShift(openDialog?: () => void) {
 				},
 			)
 			.then((r: any) => {
-				console.log("Submit result", r);
+				debugLog("Submit result", r);
 				if (r.message) {
 					pos_profile.value = null;
 					pos_opening_shift.value = null;

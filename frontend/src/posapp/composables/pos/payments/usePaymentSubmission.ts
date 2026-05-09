@@ -9,6 +9,7 @@ import {
 import { ensureInvoiceClientRequestId } from "../../../../offline/idempotency";
 import stockCoordinator from "../../../utils/stockCoordinator";
 import { parseBooleanSetting } from "../../../utils/stock";
+import { debugLog } from "../../../utils/debug";
 
 declare const frappe: any;
 declare const __: (_str: string, _args?: any[]) => string;
@@ -1098,7 +1099,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 					});
 				}
 				// Retry
-				console.log("Retrying submission with fixed payment amounts");
+				debugLog("Retrying submission with fixed payment amounts");
 				return new Promise((resolve) =>
 					setTimeout(
 						() => resolve(submitInvoice(print, callbacks)),

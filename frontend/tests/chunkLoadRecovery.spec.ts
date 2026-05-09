@@ -144,6 +144,44 @@ describe("chunk load recovery helpers", () => {
 		).toBe("1");
 	});
 
+	it("only deletes POSAwesome-owned caches during cache recovery", async () => {
+		const chunkError = new TypeError(
+			"Failed to fetch dynamically imported module: /assets/chunk.js",
+		);
+		const deletedCaches: string[] = [];
+		const originalCaches = (globalThis as any).caches;
+		(globalThis as any).caches = {
+			keys: vi.fn(async () => [
+				"posawesome-cache-build-1",
+				"frappe-runtime-cache",
+				"workbox-precache-v2",
+			]),
+			delete: vi.fn(async (key: string) => {
+				deletedCaches.push(key);
+				return true;
+			}),
+		};
+		const originalServiceWorker = navigator.serviceWorker;
+		Object.defineProperty(navigator, "serviceWorker", {
+			configurable: true,
+			value: {
+				getRegistrations: vi.fn(async () => []),
+			},
+		});
+
+		window.sessionStorage.setItem("posa_chunk_reload_once", "1");
+
+		await recoverFromChunkLoadError(chunkError, "cache-scope-test");
+
+		expect(deletedCaches).toEqual(["posawesome-cache-build-1"]);
+
+		(globalThis as any).caches = originalCaches;
+		Object.defineProperty(navigator, "serviceWorker", {
+			configurable: true,
+			value: originalServiceWorker,
+		});
+	});
+
 	it("does not clear retry decisions after stable boot", async () => {
 		vi.useFakeTimers();
 		window.sessionStorage.setItem("posa_chunk_reload_once", "1");

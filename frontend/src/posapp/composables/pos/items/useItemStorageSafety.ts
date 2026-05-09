@@ -1,5 +1,6 @@
 import { ref, onUnmounted } from "vue";
 import { checkDbHealth } from "../../../../offline/index";
+import { debugLog } from "../../../utils/debug";
 
 declare const __: (_text: string) => string;
 declare const frappe: any;
@@ -48,7 +49,7 @@ export function useItemStorageSafety() {
 
 		// Terminate worker to prevent it from trying to access broken DB
 		if (itemWorker.value) {
-			console.log("Terminating item worker due to storage failure");
+			debugLog("Terminating item worker due to storage failure");
 			itemWorker.value.terminate();
 			itemWorker.value = null;
 		}
@@ -105,7 +106,7 @@ export function useItemStorageSafety() {
 				// unless it's a persistent DB error.
 			};
 
-			console.log("Item Worker started");
+			debugLog("Item Worker started");
 		} catch (e: unknown) {
 			console.error("Failed to start item worker", e);
 		}

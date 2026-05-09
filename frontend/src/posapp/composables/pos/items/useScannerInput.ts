@@ -1,5 +1,6 @@
 import { ref, nextTick, onMounted, onUnmounted } from "vue";
 import { useToastStore } from "../../../stores/toastStore";
+import { debugLog } from "../../../utils/debug";
 import {
 	normalizeScaleBarcodeSettings,
 	parseScaleBarcodeSettingsResponse,
@@ -290,7 +291,7 @@ export function useScannerInput(options: ScannerInputOptions = {}) {
 		const runScanPipeline = async (code: string) => {
 			const mark = perfMarkStart("pos:scan-handler");
 			try {
-				console.log("Barcode scanned:", code);
+				debugLog("Barcode scanned:", code);
 				pendingScanCode.value = code;
 				searchFromScanner.value = true;
 

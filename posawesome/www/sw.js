@@ -54,7 +54,11 @@ async function precacheUrls(cacheName, version, assets = {}) {
 
 async function cleanupObsoleteCaches(activeCacheName) {
 	const keys = await caches.keys();
-	await Promise.all(keys.filter((key) => key !== activeCacheName).map((key) => caches.delete(key)));
+	await Promise.all(
+		keys
+			.filter((key) => key.startsWith(CACHE_PREFIX) && key !== activeCacheName)
+			.map((key) => caches.delete(key)),
+	);
 }
 
 function postVersionMessage(target) {
@@ -188,7 +192,11 @@ async function forceUnregisterServiceWorker() {
 	currentVersion = null;
 	currentAssets = {};
 	const keys = await caches.keys();
-	await Promise.all(keys.map((key) => caches.delete(key)));
+	await Promise.all(
+		keys
+			.filter((key) => key.startsWith(CACHE_PREFIX))
+			.map((key) => caches.delete(key)),
+	);
 	await self.registration.unregister();
 }
 

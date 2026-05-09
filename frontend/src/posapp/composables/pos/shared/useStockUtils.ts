@@ -5,6 +5,7 @@ import {
 	toSelectedCurrency,
 } from "../../../utils/currencyConversion.js";
 import { useToastStore } from "../../../stores/toastStore.js";
+import { debugLog } from "../../../utils/debug";
 
 export function useStockUtils() {
 	const toastStore = useToastStore();
@@ -158,7 +159,7 @@ export function useStockUtils() {
 			}
 		}
 
-		console.log("[useStockUtils] calcUom progress", {
+		debugLog("[useStockUtils] calcUom progress", {
 			item: item.item_code,
 			requestedUom: value,
 			foundUom: new_uom?.uom,
@@ -272,7 +273,7 @@ export function useStockUtils() {
 			if (context.calc_stock_qty) context.calc_stock_qty(item, item.qty);
 			if (context.forceUpdate) context.forceUpdate();
 
-			console.log("[useStockUtils] calcUom DONE (specific price)", {
+			debugLog("[useStockUtils] calcUom DONE (specific price)", {
 				item: item.item_code,
 				rate: item.rate,
 				price_list_rate: item.price_list_rate,
@@ -485,7 +486,7 @@ export function useStockUtils() {
 		}
 		if (context.forceUpdate) context.forceUpdate();
 
-		console.log("[useStockUtils] calcUom DONE (proportionate)", {
+		debugLog("[useStockUtils] calcUom DONE (proportionate)", {
 			item: item.item_code,
 			uom: item.uom,
 			cf: item.conversion_factor,

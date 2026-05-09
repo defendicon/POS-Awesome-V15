@@ -6,6 +6,7 @@
 import { computed, watch, onMounted, onUnmounted } from "vue";
 import { useItemsStore } from "../../../stores/itemsStore.js";
 import { storeToRefs } from "pinia";
+import { debugLog } from "../../../utils/debug";
 
 type IntegrationOptions = {
 	enableDebounce?: boolean;
@@ -169,7 +170,7 @@ export function useItemsIntegration(options: IntegrationOptions = {}) {
 		);
 
 		// Initialization complete
-		console.log("Items store initialized:", {
+		debugLog("Items store initialized:", {
 			itemsCount: totalItemCount.value,
 			cacheHealth: cacheHealth.value,
 		});
@@ -205,7 +206,7 @@ export function useItemsIntegration(options: IntegrationOptions = {}) {
 	// Cache management
 	const clearAllCaches = async () => {
 		await itemsStore.clearAllCaches();
-		console.log("All caches cleared");
+		debugLog("All caches cleared");
 	};
 
 	const assessCacheHealth = async () => {
@@ -238,7 +239,7 @@ export function useItemsIntegration(options: IntegrationOptions = {}) {
 	// Watch for important changes
 	watch(itemsLoaded, (loaded) => {
 		if (loaded) {
-			console.log("Items loaded:", {
+			debugLog("Items loaded:", {
 				count: totalItemCount.value,
 				cached: cacheHealth.value.items === "healthy",
 			});
@@ -246,14 +247,14 @@ export function useItemsIntegration(options: IntegrationOptions = {}) {
 	});
 
 	watch(filteredItems, (newItems) => {
-		console.debug("Filtered items updated:", {
+		debugLog("Filtered items updated:", {
 			count: newItems.length,
 			total: totalItemCount.value,
 		});
 	});
 
 	watch(isLoading, (loading) => {
-		console.debug("Loading state changed:", loading);
+		debugLog("Loading state changed:", loading);
 	});
 
 	// Return interface compatible with existing component

@@ -243,6 +243,7 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { QrcodeStream } from "vue-qrcode-reader";
 import opencvProcessor from "../../../utils/opencvProcessor";
+import { debugLog } from "../../../utils/debug";
 
 const __ = typeof window !== "undefined" && window.__ ? window.__ : (text) => text;
 
@@ -451,7 +452,7 @@ const onCameraReady = (capabilities = {}) => {
 	errorMessage.value = "";
 	cameraPermissionDenied.value = false;
 	isScanning.value = true;
-	console.log("Camera ready for scanning", {
+	debugLog("Camera ready for scanning", {
 		deviceId: selectedDeviceId.value,
 		torch: Boolean(cameraCapabilities.value?.torch),
 		basicMode: useBasicConstraints.value,
@@ -587,7 +588,7 @@ const onError = (error) => {
 };
 
 const tryFallbackCamera = async () => {
-	console.log("Trying fallback camera settings...");
+	debugLog("Trying fallback camera settings...");
 	try {
 		if (useBasicConstraints.value) {
 			throw new Error("Fallback constraints already active");
@@ -649,7 +650,7 @@ const toggleOpenCVProcessing = async () => {
 	if (nextEnabledState) {
 		const isReady = await initializeOpenCV({ showAlertOnFailure: true });
 		if (isReady) {
-			console.log("OpenCV processing enabled");
+			debugLog("OpenCV processing enabled");
 		}
 	} else {
 		openCVReady.value = false;
@@ -723,7 +724,7 @@ onBeforeUnmount(async () => {
 	try {
 		openCVReady.value = false;
 		await opencvProcessor.destroy();
-		console.log("OpenCV Web Worker cleaned up successfully");
+		debugLog("OpenCV Web Worker cleaned up successfully");
 	} catch (error) {
 		console.warn("Error cleaning up OpenCV Web Worker:", error);
 	}

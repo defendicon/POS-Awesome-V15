@@ -1,12 +1,10 @@
 import { unref, type Ref } from "vue";
-import renderOfflineInvoiceHTML from "../../../../offline_print_template";
 import {
 	appendDebugPrintParam,
 	isDebugPrintEnabled,
 	silentPrint,
 	watchPrintWindow,
 } from "../../../plugins/print";
-import { printDocumentViaQz } from "../../../services/qzTray";
 import { isOffline } from "../../../../offline/index";
 import { resolvePaymentPrintDoctype } from "../../../utils/paymentPrintDoctype";
 
@@ -21,6 +19,24 @@ export interface PaymentPrintingOptions {
 
 export function usePaymentPrinting(options: PaymentPrintingOptions) {
 	const { invoiceDoc, posProfile, invoiceType, printFormat } = options;
+
+	const renderOfflineInvoice = async (invoice: any) => {
+		const { default: renderOfflineInvoiceHTML } = await import(
+			"../../../../offline_print_template"
+		);
+		return renderOfflineInvoiceHTML(invoice);
+	};
+
+	const printViaQz = async (printOptions: {
+		doctype: string;
+		name: string;
+		printFormat: string;
+		letterhead: any;
+		noLetterhead: any;
+	}) => {
+		const { printDocumentViaQz } = await import("../../../services/qzTray");
+		return printDocumentViaQz(printOptions);
+	};
 
 	const resolvePrintContext = (input: { doc?: any; doctype?: string } = {}) => {
 		const doc = input.doc || unref(invoiceDoc);
@@ -52,7 +68,7 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 		{ debugPrint = false, printFormatStr = "" } = {},
 	) => {
 		if (!invoice) return;
-		const html = await renderOfflineInvoiceHTML(invoice);
+		const html = await renderOfflineInvoice(invoice);
 		const win = window.open("", "_blank");
 		if (!win) return;
 		win.document.write(html);
@@ -72,7 +88,7 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 
 	const printOfflineInvoice = async (invoice: any) => {
 		if (!invoice) return;
-		const html = await renderOfflineInvoiceHTML(invoice);
+		const html = await renderOfflineInvoice(invoice);
 		const win = window.open("", "_blank");
 		if (!win) return;
 		win.document.write(html);
@@ -151,7 +167,7 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 		if (profile.posa_silent_print) {
 			if (!isOffline()) {
 				try {
-					await printDocumentViaQz({
+					await printViaQz({
 						doctype,
 						name: doc.name,
 						printFormat: print_format || "Standard",

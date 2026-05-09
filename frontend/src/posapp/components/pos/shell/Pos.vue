@@ -4,13 +4,13 @@
 		:class="rtlClasses"
 		:style="[responsiveStyles, layoutStyleOverrides, rtlStyles]"
 	>
-		<Drafts></Drafts>
-		<InvoiceManagement></InvoiceManagement>
-		<SalesOrders></SalesOrders>
-		<Returns></Returns>
-		<NewAddress></NewAddress>
-		<MpesaPayments></MpesaPayments>
-		<Variants></Variants>
+		<Drafts v-if="uiStore.draftsDialog"></Drafts>
+		<InvoiceManagement v-if="uiStore.invoiceManagementDialog"></InvoiceManagement>
+		<SalesOrders v-if="uiStore.ordersDialog"></SalesOrders>
+		<Returns v-if="returnsMounted" :open-request="returnsOpenRequest"></Returns>
+		<NewAddress v-if="newAddressMounted" :open-request="newAddressOpenRequest"></NewAddress>
+		<MpesaPayments v-if="mpesaMounted" :open-request="mpesaOpenRequest"></MpesaPayments>
+		<Variants v-if="uiStore.variantsDialog"></Variants>
 		<OpeningDialog
 			v-if="dialog"
 			:dialog="dialog"
@@ -28,7 +28,7 @@
 			@update:model-value="handlePaymentDialogUpdate"
 			@after-leave="handlePaymentDialogAfterLeave"
 		>
-			<Payments dialog-mode />
+			<Payments v-if="paymentDialogOpen" dialog-mode />
 		</v-dialog>
 		<v-row
 			v-show="!dialog"
@@ -202,20 +202,12 @@
 </template>
 
 <script>
+import { defineAsyncComponent, inject, ref, onMounted, onBeforeUnmount, computed, watch, nextTick } from "vue";
 import ItemsSelector from "../items/ItemsSelector.vue";
 import Invoice from "../Invoice.vue";
 import OpeningDialog from "../shift/OpeningDialog.vue";
-import Payments from "../Payments.vue";
 import PosOffers from "../offers/PosOffers.vue";
 import PosCoupons from "../offers/PosCoupons.vue";
-import Drafts from "../flows/Drafts.vue";
-import InvoiceManagement from "../flows/InvoiceManagement.vue";
-import SalesOrders from "../flows/SalesOrders.vue";
-import NewAddress from "../customer/NewAddress.vue";
-import Variants from "../items/Variants.vue";
-import Returns from "../flows/Returns.vue";
-import MpesaPayments from "../payments/Mpesa-Payments.vue";
-import { inject, ref, onMounted, onBeforeUnmount, computed, watch, nextTick } from "vue";
 import { usePosShift } from "../../../composables/pos/shared/usePosShift";
 import { useOffers } from "../../../composables/pos/shared/useOffers";
 // Import the cache cleanup function
@@ -227,6 +219,15 @@ import { useInvoiceStore } from "../../../stores/invoiceStore.js";
 import { useItemsStore } from "../../../stores/itemsStore.js";
 import { storeToRefs } from "pinia";
 import { useCustomerDisplayPublisher } from "../../../composables/pos/shared/useCustomerDisplayPublisher";
+
+const Payments = defineAsyncComponent(() => import("../Payments.vue"));
+const Drafts = defineAsyncComponent(() => import("../flows/Drafts.vue"));
+const InvoiceManagement = defineAsyncComponent(() => import("../flows/InvoiceManagement.vue"));
+const SalesOrders = defineAsyncComponent(() => import("../flows/SalesOrders.vue"));
+const NewAddress = defineAsyncComponent(() => import("../customer/NewAddress.vue"));
+const Variants = defineAsyncComponent(() => import("../items/Variants.vue"));
+const Returns = defineAsyncComponent(() => import("../flows/Returns.vue"));
+const MpesaPayments = defineAsyncComponent(() => import("../payments/Mpesa-Payments.vue"));
 
 export default {
 	setup() {
@@ -262,6 +263,12 @@ export default {
 		const showBottomDock = computed(() => !dialog.value && responsive.windowWidth.value < 1100);
 		const bottomDockHeight = ref(0);
 		let mobileDockObserver = null;
+		const returnsMounted = ref(false);
+		const returnsOpenRequest = ref(null);
+		const newAddressMounted = ref(false);
+		const newAddressOpenRequest = ref(null);
+		const mpesaMounted = ref(false);
+		const mpesaOpenRequest = ref(null);
 		const isEditingAdditionalDiscount = ref(false);
 		const isEditingAdditionalDiscountPercentage = ref(false);
 		const invoiceTotal = computed(() => {
@@ -480,6 +487,27 @@ export default {
 			field?.focus?.();
 			field?.$el?.querySelector?.("input")?.focus?.();
 		};
+		const handleOpenReturns = (company) => {
+			returnsMounted.value = true;
+			returnsOpenRequest.value = {
+				company,
+				token: Date.now(),
+			};
+		};
+		const handleOpenNewAddress = (customer) => {
+			newAddressMounted.value = true;
+			newAddressOpenRequest.value = {
+				customer,
+				token: Date.now(),
+			};
+		};
+		const handleOpenMpesaPayments = (data) => {
+			mpesaMounted.value = true;
+			mpesaOpenRequest.value = {
+				data,
+				token: Date.now(),
+			};
+		};
 
 		useCustomerDisplayPublisher({
 			posProfile,
@@ -498,6 +526,9 @@ export default {
 				});
 				eventBus.on("focus_additional_discount", focusAdditionalDiscountField);
 				eventBus.on("set_compact_panel", setCompactPanel);
+				eventBus.on("open_returns", handleOpenReturns);
+				eventBus.on("open_new_address", handleOpenNewAddress);
+				eventBus.on("open_mpesa_payments", handleOpenMpesaPayments);
 			}
 			nextTick(() => {
 				updateBottomDockHeight();
@@ -516,6 +547,9 @@ export default {
 				eventBus.off("submit_closing_pos");
 				eventBus.off("focus_additional_discount", focusAdditionalDiscountField);
 				eventBus.off("set_compact_panel", setCompactPanel);
+				eventBus.off("open_returns", handleOpenReturns);
+				eventBus.off("open_new_address", handleOpenNewAddress);
+				eventBus.off("open_mpesa_payments", handleOpenMpesaPayments);
 			}
 		});
 
@@ -617,6 +651,12 @@ export default {
 			invoicePanel,
 			eventBus,
 			dialog,
+			returnsMounted,
+			returnsOpenRequest,
+			newAddressMounted,
+			newAddressOpenRequest,
+			mpesaMounted,
+			mpesaOpenRequest,
 		};
 	},
 	data: function () {

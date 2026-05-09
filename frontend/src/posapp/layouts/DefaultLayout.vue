@@ -813,7 +813,7 @@ onMounted(() => {
 	networkLifecycle.start();
 	customerReadiness.start();
 	setupEventListeners();
-	handleRefreshCacheUsage();
+	scheduleBackgroundTask(handleRefreshCacheUsage);
 	updateChecks.start();
 });
 
@@ -865,20 +865,26 @@ const pollForFrappeNav = (maxAttempts = 50, interval = 100) => {
 	checkAndRemove();
 };
 
-const initializeData = async () => {
-	await initPromise;
+const scheduleBackgroundTask = (task, timeout = 0) => {
+	const runner = () => {
+		void Promise.resolve()
+			.then(task)
+			.catch((error) => {
+				console.warn("POS background startup task failed", error);
+			});
+	};
+	if (typeof requestIdleCallback === "function") {
+		requestIdleCallback(runner, { timeout: timeout || 3000 });
+		return;
+	}
+	window.setTimeout(runner, timeout);
+};
+
+const runStartupBackgroundMaintenance = async () => {
 	await memoryInitPromise;
 	await ensureOfflineQueueReady();
 	await hydrateOfflineSyncResourceStates();
-	checkDbHealth().catch(() => {});
-	// Offline-first bootstrap: hydrate register state from IndexedDB before server checks.
-	const openingData = getValidCachedOpeningForCurrentUser(getOpeningStorage(), frappe?.session?.user);
-	if (openingData) {
-		uiStore.setRegisterData(openingData);
-		if (navigator.onLine) {
-			await refreshTaxInclusiveSetting();
-		}
-	}
+	await checkDbHealth().catch(() => {});
 
 	if (queueHealthCheck()) {
 		alert("Offline queue is too large. Old entries will be purged.");
@@ -891,6 +897,24 @@ const initializeData = async () => {
 	void checkCacheCapacity(90, () => {
 		alert("Local cache nearing capacity. Consider going online to sync.");
 	});
+
+	await scheduleBootCriticalWarmSync();
+	await refreshOfflinePricingRules();
+	evaluateBootstrapSnapshot({ allowPrompt: false });
+	initialBootstrapSyncSettled.value = true;
+	void runStartupOfflineDataWarmup("initial_load");
+};
+
+const initializeData = async () => {
+	await initPromise;
+	// Offline-first bootstrap: hydrate register state from IndexedDB before server checks.
+	const openingData = getValidCachedOpeningForCurrentUser(getOpeningStorage(), frappe?.session?.user);
+	if (openingData) {
+		uiStore.setRegisterData(openingData);
+		if (navigator.onLine) {
+			scheduleBackgroundTask(refreshTaxInclusiveSetting);
+		}
+	}
 
 	// Check if running on IP host
 	isIpHost.value = /^\d+\.\d+\.\d+\.\d+/.test(window.location.hostname);
@@ -905,13 +929,8 @@ const initializeData = async () => {
 	evaluateBootstrapSnapshot({
 		allowPrompt: manualOffline.value || !navigator.onLine,
 	});
-	await scheduleBootCriticalWarmSync();
-	await refreshOfflinePricingRules();
-	evaluateBootstrapSnapshot({ allowPrompt: false });
-	initialBootstrapSyncSettled.value = true;
-	void runStartupOfflineDataWarmup("initial_load");
-
 	markSourceLoaded("init");
+	scheduleBackgroundTask(runStartupBackgroundMaintenance);
 };
 
 const setupEventListeners = () => {

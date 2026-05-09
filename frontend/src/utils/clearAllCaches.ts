@@ -1,4 +1,5 @@
 const DEFAULT_INDEXED_DB_NAMES = ["posawesome_offline"];
+const POSAWESOME_CACHE_PREFIX = "posawesome-cache-";
 
 async function delay(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -89,7 +90,9 @@ export async function clearCacheAPI(cacheNames: string[] = []) {
 	try {
 		let cacheTargets = cacheNames;
 		if (!cacheTargets.length) {
-			cacheTargets = await caches.keys();
+			cacheTargets = (await caches.keys()).filter((name) =>
+				name.startsWith(POSAWESOME_CACHE_PREFIX),
+			);
 		}
 		await Promise.all(cacheTargets.map((name) => caches.delete(name)));
 		console.log(
