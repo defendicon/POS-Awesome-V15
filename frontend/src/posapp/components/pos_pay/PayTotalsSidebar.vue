@@ -165,66 +165,145 @@
 							</template>
 						</div>
 					</div>
-					<div v-if="partyAccount && getPaymentMethodAccount(selectedMop.mode_of_payment)" class="text-caption mb-2">
-						<div class="d-flex align-center mb-1">
-							<span class="text-medium-emphasis" style="min-width: 50px">{{ __("From:") }}</span>
-							<template v-if="paymentType === 'Pay' && bankAccountOptions.length">
-								<v-select
-									:model-value="selectedMop.bank_account || ''"
-									:items="bankAccountOptions"
-									item-title="label"
-									item-value="value"
-									density="compact"
-									variant="outlined"
-									hide-details
-									class="flex-grow-1 ml-1"
-									@update:model-value="onBankAccountChange($event)"
-								>
-									<template #item="{ props, item }">
-										<v-list-item v-bind="props" density="compact">
-											<template #append>
-												<v-chip size="x-small" color="primary" variant="tonal">{{ item.raw.currency }}</v-chip>
-												<v-chip size="x-small" color="secondary" variant="tonal" class="ml-1">{{ item.raw.accountType }}</v-chip>
-											</template>
-										</v-list-item>
-									</template>
-								</v-select>
-							</template>
-							<template v-else>
-								<span class="ml-1 text-truncate">{{ partyAccount.account }}</span>
-								<v-chip size="x-small" color="primary" variant="tonal" class="ml-auto">{{ partyAccount.currency }}</v-chip>
-							</template>
+					<div v-if="partyAccount && getPaymentMethodAccount(selectedMop.mode_of_payment)" class="mb-2">
+						<div class="account-selector-row mb-2">
+							<div class="d-flex align-center">
+								<v-icon size="18" class="mr-2 text-medium-emphasis">mdi-account-arrow-right</v-icon>
+								<span class="text-body-2 text-medium-emphasis">{{ __("Party Account") }}</span>
+							</div>
+							<div class="d-flex align-center ml-auto">
+								<span class="text-truncate text-body-2 font-weight-medium">{{ partyAccount.account }}</span>
+								<v-chip size="x-small" color="primary" variant="tonal" class="ml-2">{{ partyAccount.currency }}</v-chip>
+							</div>
 						</div>
-						<div class="d-flex align-center">
-							<span class="text-medium-emphasis" style="min-width: 50px">{{ __("To:") }}</span>
-							<template v-if="paymentType === 'Receive' && bankAccountOptions.length">
-								<v-select
-									:model-value="selectedMop.bank_account || ''"
-									:items="bankAccountOptions"
-									item-title="label"
-									item-value="value"
-									density="compact"
-									variant="outlined"
-									hide-details
-									class="flex-grow-1 ml-1"
-									@update:model-value="onBankAccountChange($event)"
-								>
-									<template #item="{ props, item }">
-										<v-list-item v-bind="props" density="compact">
-											<template #append>
-												<v-chip size="x-small" color="primary" variant="tonal">{{ item.raw.currency }}</v-chip>
-												<v-chip size="x-small" color="secondary" variant="tonal" class="ml-1">{{ item.raw.accountType }}</v-chip>
-											</template>
-										</v-list-item>
-									</template>
-								</v-select>
-							</template>
-							<template v-else>
-								<span class="ml-1 text-truncate">{{ getPaymentMethodAccount(selectedMop.mode_of_payment).account }}</span>
-								<v-chip size="x-small" color="primary" variant="tonal" class="ml-auto">{{ getPaymentMethodAccount(selectedMop.mode_of_payment).account_currency }}</v-chip>
+						<div class="account-selector-row">
+							<div class="d-flex align-center">
+								<v-icon size="18" class="mr-2 text-medium-emphasis">mdi-bank</v-icon>
+								<span class="text-body-2 text-medium-emphasis">{{ __("Payment Account") }}</span>
+							</div>
+							<template v-if="paymentType === 'Pay' || paymentType === 'Receive'">
+								<template v-if="bankAccountOptions.length">
+									<div class="account-selector-card" @click="openAccountDialog">
+										<div class="d-flex align-center">
+											<span class="text-truncate text-body-2 font-weight-medium">
+												{{ isCustomAccount ? selectedMop.bank_account : defaultBankAccount }}
+											</span>
+											<v-chip v-if="isCustomAccount" size="x-small" color="warning" variant="tonal" class="ml-2">
+												{{ __("Custom") }}
+											</v-chip>
+										</div>
+										<div class="d-flex align-center mt-1">
+											<v-chip size="x-small" :color="getAccountTypeColor(getCurrentSelectedAccountType())" variant="tonal">
+												<v-icon start size="12">{{ getAccountTypeIcon(getCurrentSelectedAccountType()) }}</v-icon>
+												{{ getCurrentSelectedAccountType() }}
+											</v-chip>
+											<v-chip size="x-small" color="primary" variant="tonal" class="ml-1">
+												{{ getCurrentSelectedCurrency() }}
+											</v-chip>
+											<v-icon size="18" class="ml-2 text-medium-emphasis">mdi-chevron-down</v-icon>
+										</div>
+									</div>
+								</template>
+								<template v-else>
+									<span class="text-truncate text-body-2 font-weight-medium">{{ getPaymentMethodAccount(selectedMop.mode_of_payment).account }}</span>
+									<v-chip size="x-small" color="primary" variant="tonal" class="ml-2">{{ getPaymentMethodAccount(selectedMop.mode_of_payment).account_currency }}</v-chip>
+								</template>
 							</template>
 						</div>
 					</div>
+
+					<v-dialog v-model="accountDialogOpen" max-width="500" :scrim="true" class="account-dialog">
+						<v-card class="account-dialog-card">
+							<v-card-title class="d-flex align-center pa-4">
+								<v-icon class="mr-2">mdi-bank</v-icon>
+								<span>{{ __("Select Payment Account") }}</span>
+								<v-spacer></v-spacer>
+								<v-btn icon variant="text" size="small" @click="accountDialogOpen = false">
+									<v-icon>mdi-close</v-icon>
+								</v-btn>
+							</v-card-title>
+							<v-divider></v-divider>
+							<v-card-text class="pa-4">
+								<v-autocomplete
+									v-model="selectedAccountTemp"
+									:items="bankAccountOptions"
+									item-title="label"
+									item-value="value"
+									variant="outlined"
+									density="comfortable"
+									:label="__('Search Account')"
+									prepend-inner-icon="mdi-magnify"
+									hide-no-data
+									return-object
+									clearable
+								>
+									<template #item="{ props, item }">
+										<v-list-item v-bind="props" class="account-list-item">
+											<template #prepend>
+												<v-icon :color="getAccountTypeColor(item.raw.accountType)">
+													{{ getAccountTypeIcon(item.raw.accountType) }}
+												</v-icon>
+											</template>
+											<v-list-item-subtitle>
+												<div class="d-flex align-center">
+													<span class="font-weight-medium">{{ item.raw.label }}</span>
+												</div>
+											</v-list-item-subtitle>
+											<template #append>
+												<div class="d-flex align-center">
+													<v-chip size="small" :color="getAccountTypeColor(item.raw.accountType)" variant="tonal">
+														{{ item.raw.accountType }}
+													</v-chip>
+													<v-chip size="small" color="primary" variant="tonal" class="ml-1">
+														{{ item.raw.currency }}
+													</v-chip>
+												</div>
+											</template>
+										</v-list-item>
+									</template>
+									<template #selection="{ item }">
+										<div class="d-flex align-center">
+											<v-icon :color="getAccountTypeColor(item.raw.accountType)" class="mr-2">
+												{{ getAccountTypeIcon(item.raw.accountType) }}
+											</v-icon>
+											<span>{{ item.raw.label }}</span>
+											<v-chip size="small" :color="getAccountTypeColor(item.raw.accountType)" variant="tonal" class="ml-2">
+												{{ item.raw.accountType }}
+											</v-chip>
+											<v-chip size="small" color="primary" variant="tonal" class="ml-1">
+												{{ item.raw.currency }}
+											</v-chip>
+										</div>
+									</template>
+								</v-autocomplete>
+								<div class="d-flex align-center mt-3">
+									<v-btn
+										variant="tonal"
+										color="warning"
+										size="small"
+										prepend-icon="mdi-refresh"
+										@click="resetToDefault"
+									>
+										{{ __("Reset to Default") }}
+									</v-btn>
+									<v-spacer></v-spacer>
+									<span class="text-caption text-medium-emphasis">
+										{{ __("Default:") }} {{ defaultBankAccount }}
+									</span>
+								</div>
+							</v-card-text>
+							<v-divider></v-divider>
+							<v-card-actions class="pa-4">
+								<v-btn variant="text" @click="accountDialogOpen = false">
+									{{ __("Cancel") }}
+								</v-btn>
+								<v-spacer></v-spacer>
+								<v-btn color="primary" variant="flat" @click="confirmAccountSelection">
+									{{ __("Confirm") }}
+								</v-btn>
+							</v-card-actions>
+						</v-card>
+					</v-dialog>
 					<template v-if="flt(selectedMop.amount) > 0 && newPaymentFields[selectedMop.row_id]">
 						<v-divider class="my-1"></v-divider>
 						<div class="text-caption">
@@ -581,6 +660,74 @@ const onBankAccountChange = (account) => {
 	emit("update:bankAccount", selectedMopName.value, account);
 };
 
+const accountDialogOpen = ref(false);
+const selectedAccountTemp = ref(null);
+
+const currentEditableAccount = computed(() => {
+	if (!selectedMop.value || !props.paymentMethodAccounts) return null;
+	if (props.paymentType === "Receive") {
+		return props.paymentMethodAccounts[selectedMop.value.mode_of_payment];
+	} else {
+		return props.paymentMethodAccounts[selectedMop.value.mode_of_payment];
+	}
+});
+
+const defaultBankAccount = computed(() => {
+	return currentEditableAccount.value?.account || null;
+});
+
+const isCustomAccount = computed(() => {
+	if (!selectedMop.value) return false;
+	return selectedMop.value.bank_account && selectedMop.value.bank_account !== defaultBankAccount.value;
+});
+
+const openAccountDialog = () => {
+	if (!selectedMop.value || !bankAccountOptions.value.length) return;
+	selectedAccountTemp.value = selectedMop.value.bank_account || defaultBankAccount.value || null;
+	accountDialogOpen.value = true;
+};
+
+const confirmAccountSelection = () => {
+	if (selectedAccountTemp.value !== null && selectedAccountTemp.value !== "") {
+		emit("update:bankAccount", selectedMopName.value, selectedAccountTemp.value);
+	}
+	accountDialogOpen.value = false;
+};
+
+const resetToDefault = () => {
+	selectedAccountTemp.value = defaultBankAccount.value;
+};
+
+const getAccountTypeColor = (type) => {
+	if (type === "Bank") return "info";
+	if (type === "Cash") return "success";
+	return "secondary";
+};
+
+const getAccountTypeIcon = (type) => {
+	if (type === "Bank") return "mdi-bank";
+	if (type === "Cash") return "mdi-cash";
+	return "mdi-account";
+};
+
+const getCurrentSelectedAccountType = () => {
+	const account = selectedMop.value?.bank_account || defaultBankAccount.value;
+	if (!account || !bankAccountOptions.value.length) {
+		return currentEditableAccount.value?.account_type || "";
+	}
+	const found = bankAccountOptions.value.find((a) => a.value === account);
+	return found?.accountType || currentEditableAccount.value?.account_type || "";
+};
+
+const getCurrentSelectedCurrency = () => {
+	const account = selectedMop.value?.bank_account || defaultBankAccount.value;
+	if (!account || !bankAccountOptions.value.length) {
+		return currentEditableAccount.value?.account_currency || "";
+	}
+	const found = bankAccountOptions.value.find((a) => a.value === account);
+	return found?.currency || currentEditableAccount.value?.account_currency || "";
+};
+
 const enteredPayments = computed(() => {
 	if (!props.filteredPaymentMethods) return [];
 	return props.filteredPaymentMethods
@@ -672,5 +819,72 @@ defineExpose({
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+.account-selector-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 8px 12px;
+	background: rgba(var(--v-theme-surface), 0.5);
+	border-radius: 8px;
+	border: 1px solid rgba(var(--v-border-color), 0.15);
+}
+
+.account-selector-card {
+	display: flex;
+	flex-direction: column;
+	padding: 10px 14px;
+	background: rgba(var(--v-theme-primary), 0.08);
+	border: 1px solid rgba(var(--v-theme-primary), 0.2);
+	border-radius: 10px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	min-width: 200px;
+	max-width: 280px;
+}
+
+.account-selector-card:hover {
+	background: rgba(var(--v-theme-primary), 0.12);
+	border-color: rgba(var(--v-theme-primary), 0.35);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.account-dialog-card {
+	border-radius: 16px;
+	overflow: hidden;
+}
+
+.account-dialog-card .v-card-title {
+	background: rgba(var(--v-theme-primary), 0.05);
+	font-weight: 600;
+}
+
+.account-list-item {
+	border-radius: 8px;
+	margin: 4px 0;
+	transition: background 0.15s ease;
+}
+
+.account-list-item:hover {
+	background: rgba(var(--v-theme-primary), 0.08);
+}
+
+.account-dialog-card :deep(.v-autocomplete) {
+	border-radius: 10px;
+}
+
+@media (max-width: 600px) {
+	.account-selector-row {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 8px;
+	}
+
+	.account-selector-card {
+		width: 100%;
+		max-width: none;
+	}
 }
 </style>
