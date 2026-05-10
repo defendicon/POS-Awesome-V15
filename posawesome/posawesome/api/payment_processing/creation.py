@@ -28,6 +28,7 @@ def create_payment_entry(
     cost_center=None,
     submit=0,
     client_request_id=None,
+    bank_account=None,
 ):
     date = nowdate() if not posting_date else posting_date
     party = party or customer
@@ -46,7 +47,7 @@ def create_payment_entry(
     party_account_currency = get_account_currency(party_account)
 
     # Get bank details BEFORE validation
-    bank = get_bank_cash_account(company, mode_of_payment)
+    bank = get_bank_cash_account(company, mode_of_payment, bank_account=bank_account)
     if not bank:
         frappe.throw(_("Bank/Cash account not found for mode of payment {0}").format(mode_of_payment))
 

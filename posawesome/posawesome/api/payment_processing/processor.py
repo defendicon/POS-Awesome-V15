@@ -589,6 +589,7 @@ def process_pos_payment(payload):
                     cost_center=data.pos_profile.get("cost_center"),
                     submit=0,
                     client_request_id=client_request_id,
+                    bank_account=payment_method.get("bank_account"),
                 )
 
                 party_account = get_party_account(party_type, party, company)

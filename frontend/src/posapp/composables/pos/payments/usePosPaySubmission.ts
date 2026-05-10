@@ -153,9 +153,14 @@ export function usePosPaySubmission({
 			pos_opening_shift_name: posOpeningShift.value.name,
 			pos_profile_name: posProfile.value.name,
 			pos_profile: posProfile.value,
-			payment_methods: payment_methods.value.filter(
-					(m: any) => flt(m.amount) > 0,
-				),
+			payment_methods: payment_methods.value
+				.filter((m: any) => flt(m.amount) > 0)
+				.map((m: any) => ({
+					mode_of_payment: m.mode_of_payment,
+					amount: m.amount,
+					row_id: m.row_id,
+					bank_account: m.bank_account || null,
+				})),
 				selected_invoices: selectedInvoicesForPayload,
 				selected_payments: selected_payments.value,
 				total_selected_invoices: flt(totalSelectedInvoicesAmount),
@@ -202,6 +207,20 @@ export function usePosPaySubmission({
 			}
 
 			frappe.utils.play_sound("submit");
+
+			// Show exchange gain/loss notification as toast (non-intrusive)
+			if (response.message?.net_gain_loss) {
+				const netAmount = response.message.net_gain_loss;
+				const currency = response.message.exchange_gain_loss_summary?.[0]?.currency || '';
+				const label = netAmount >= 0 ? __("Gain") : __("Loss");
+
+				// Use toast notification (auto-dismiss)
+				eventBus.emit("show_notification", {
+					message: __("{0}: {1} {2}", [label, Math.abs(netAmount).toFixed(2), currency]),
+					type: netAmount >= 0 ? "success" : "warning",
+					duration: 4000,
+				});
+			}
 
 			if (autoAllocatePaymentAmount.value) {
 				const autoReconcileResult = await autoReconcile(null, {

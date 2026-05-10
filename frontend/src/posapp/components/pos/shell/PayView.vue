@@ -180,10 +180,12 @@
 						:get-payment-method-currency="getPaymentMethodCurrency"
 						:party-account="partyAccount"
 						:payment-method-accounts="payment_method_accounts"
+						:available-bank-accounts="available_bank_accounts"
 						:payment-type="paymentEntryType"
 						:invoice-conversion-rate="invoiceConversionRate"
 						@validate-exchange-rate="validateExchangeRate"
 						@fetch-exchange-rate="fetchExchangeRate"
+						@update:bank-account="handleBankAccountChange"
 					/>
 
 					<PayActionButtons
@@ -315,6 +317,7 @@ export default {
 		const exchangeRateError = ref(null);
 		const payment_method_currencies = ref({});
 		const payment_method_accounts = ref({});
+		const available_bank_accounts = ref({});
 		const payment_methods_list = ref([]);
 		const partyAccount = ref(null);
 
@@ -713,6 +716,7 @@ export default {
 				mode_of_payment: m.mode_of_payment,
 				amount: 0,
 				row_id: m.name,
+				bank_account: null,
 			}));
 		};
 
@@ -731,8 +735,29 @@ export default {
 					currencies[mode] = typeof data === "string" ? data : data.account_currency;
 				}
 				payment_method_currencies.value = currencies;
+				// Fetch available accounts for all modes
+				for (const mode of modes) {
+					await fetchAvailableAccounts(mode);
+				}
 			} catch (e) {
 				console.error("Failed to load payment method accounts", e);
+			}
+		};
+
+		const fetchAvailableAccounts = async (mode) => {
+			if (!company.value || !mode) return;
+			try {
+				const r = await frappe.call({
+					method: "posawesome.posawesome.api.payment_processing.utils.get_available_accounts_for_mop",
+					args: { company: company.value, mode_of_payment: mode },
+				});
+				const accounts = r.message || [];
+				available_bank_accounts.value = {
+					...available_bank_accounts.value,
+					[mode]: accounts,
+				};
+			} catch (e) {
+				console.error("Failed to fetch available accounts for", mode, e);
 			}
 		};
 
@@ -754,6 +779,33 @@ export default {
 			} catch (e) {
 				console.error("Failed to fetch party account", e);
 				partyAccount.value = null;
+			}
+		};
+
+		const handleBankAccountChange = (mode, bankAccount) => {
+			const method = payment_methods.value.find((m) => m.mode_of_payment === mode);
+			if (method) {
+				method.bank_account = bankAccount;
+				// Update currency map when account changes
+				if (bankAccount && available_bank_accounts.value[mode]) {
+					const acct = available_bank_accounts.value[mode].find(
+						(a) => a.account === bankAccount,
+					);
+					if (acct) {
+						payment_method_currencies.value = {
+							...payment_method_currencies.value,
+							[mode]: acct.account_currency,
+						};
+						payment_method_accounts.value = {
+							...payment_method_accounts.value,
+							[mode]: {
+								account: acct.account,
+								account_currency: acct.account_currency,
+								account_type: acct.account_type,
+							},
+						};
+					}
+				}
 			}
 		};
 
@@ -1185,6 +1237,9 @@ export default {
 			validateExchangeRate,
 			set_payment_methods,
 			loadPaymentMethodCurrencies,
+			fetchAvailableAccounts,
+			handleBankAccountChange,
+			available_bank_accounts,
 			check_opening_entry,
 			syncPendingPayments,
 			paymentRowClass,

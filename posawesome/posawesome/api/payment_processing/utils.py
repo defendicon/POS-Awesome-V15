@@ -74,6 +74,31 @@ def set_paid_amount_and_received_amount(
 
 
 @frappe.whitelist()
+def get_available_accounts_for_mop(company, mode_of_payment):
+    """Get all bank/cash accounts available for a given mode of payment."""
+    default_account = get_bank_cash_account(company, mode_of_payment)
+    if not default_account:
+        return []
+
+    account_type = default_account.get("account_type")
+    if not account_type:
+        return []
+
+    accounts = frappe.get_list(
+        "Account",
+        filters={
+            "company": company,
+            "account_type": account_type,
+            "is_group": 0,
+            "disabled": 0,
+        },
+        fields=["name as account", "account_currency", "account_type", "account_name"],
+        order_by="name asc",
+    )
+    return accounts
+
+
+@frappe.whitelist()
 def get_mode_of_payment_accounts(company, mode_of_payments):
     import json
 

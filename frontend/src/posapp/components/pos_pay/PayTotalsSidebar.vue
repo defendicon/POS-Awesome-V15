@@ -168,13 +168,61 @@
 					<div v-if="partyAccount && getPaymentMethodAccount(selectedMop.mode_of_payment)" class="text-caption mb-2">
 						<div class="d-flex align-center mb-1">
 							<span class="text-medium-emphasis" style="min-width: 50px">{{ __("From:") }}</span>
-							<span class="ml-1 text-truncate">{{ partyAccount.account }}</span>
-							<v-chip size="x-small" color="primary" variant="tonal" class="ml-auto">{{ partyAccount.currency }}</v-chip>
+							<template v-if="paymentType === 'Pay' && bankAccountOptions.length">
+								<v-select
+									:model-value="selectedMop.bank_account || ''"
+									:items="bankAccountOptions"
+									item-title="label"
+									item-value="value"
+									density="compact"
+									variant="outlined"
+									hide-details
+									class="flex-grow-1 ml-1"
+									@update:model-value="onBankAccountChange($event)"
+								>
+									<template #item="{ props, item }">
+										<v-list-item v-bind="props" density="compact">
+											<template #append>
+												<v-chip size="x-small" color="primary" variant="tonal">{{ item.raw.currency }}</v-chip>
+												<v-chip size="x-small" color="secondary" variant="tonal" class="ml-1">{{ item.raw.accountType }}</v-chip>
+											</template>
+										</v-list-item>
+									</template>
+								</v-select>
+							</template>
+							<template v-else>
+								<span class="ml-1 text-truncate">{{ partyAccount.account }}</span>
+								<v-chip size="x-small" color="primary" variant="tonal" class="ml-auto">{{ partyAccount.currency }}</v-chip>
+							</template>
 						</div>
 						<div class="d-flex align-center">
 							<span class="text-medium-emphasis" style="min-width: 50px">{{ __("To:") }}</span>
-							<span class="ml-1 text-truncate">{{ getPaymentMethodAccount(selectedMop.mode_of_payment).account }}</span>
-							<v-chip size="x-small" color="primary" variant="tonal" class="ml-auto">{{ getPaymentMethodAccount(selectedMop.mode_of_payment).account_currency }}</v-chip>
+							<template v-if="paymentType === 'Receive' && bankAccountOptions.length">
+								<v-select
+									:model-value="selectedMop.bank_account || ''"
+									:items="bankAccountOptions"
+									item-title="label"
+									item-value="value"
+									density="compact"
+									variant="outlined"
+									hide-details
+									class="flex-grow-1 ml-1"
+									@update:model-value="onBankAccountChange($event)"
+								>
+									<template #item="{ props, item }">
+										<v-list-item v-bind="props" density="compact">
+											<template #append>
+												<v-chip size="x-small" color="primary" variant="tonal">{{ item.raw.currency }}</v-chip>
+												<v-chip size="x-small" color="secondary" variant="tonal" class="ml-1">{{ item.raw.accountType }}</v-chip>
+											</template>
+										</v-list-item>
+									</template>
+								</v-select>
+							</template>
+							<template v-else>
+								<span class="ml-1 text-truncate">{{ getPaymentMethodAccount(selectedMop.mode_of_payment).account }}</span>
+								<v-chip size="x-small" color="primary" variant="tonal" class="ml-auto">{{ getPaymentMethodAccount(selectedMop.mode_of_payment).account_currency }}</v-chip>
+							</template>
 						</div>
 					</div>
 					<template v-if="flt(selectedMop.amount) > 0 && newPaymentFields[selectedMop.row_id]">
@@ -399,6 +447,10 @@ const props = defineProps({
 		type: Object,
 		default: () => ({}),
 	},
+	availableBankAccounts: {
+		type: Object,
+		default: () => ({}),
+	},
 	paymentType: {
 		type: String,
 		default: "Receive",
@@ -414,6 +466,7 @@ const emit = defineEmits([
 	"update:autoAllocatePaymentAmount",
 	"update:referenceNo",
 	"update:referenceDate",
+	"update:bankAccount",
 	"validate-exchange-rate",
 	"fetch-exchange-rate",
 ]);
@@ -511,6 +564,22 @@ watch(
 		}
 	},
 );
+
+const bankAccountOptions = computed(() => {
+	if (!selectedMopName.value || !props.availableBankAccounts) return [];
+	const accounts = props.availableBankAccounts[selectedMopName.value];
+	if (!accounts || !accounts.length) return [];
+	return accounts.map((a) => ({
+		label: `${a.account_name || a.account}  (${a.account_currency})`,
+		value: a.account,
+		currency: a.account_currency,
+		accountType: a.account_type,
+	}));
+});
+
+const onBankAccountChange = (account) => {
+	emit("update:bankAccount", selectedMopName.value, account);
+};
 
 const enteredPayments = computed(() => {
 	if (!props.filteredPaymentMethods) return [];
