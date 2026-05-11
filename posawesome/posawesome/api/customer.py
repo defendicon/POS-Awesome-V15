@@ -9,6 +9,7 @@ from frappe.utils import flt
 from posawesome.posawesome.doctype.referral_code.referral_code import (
     create_referral_code,
 )
+from posawesome.posawesome.api.customer_mobile import enforce_unique_mobile
 
 from . import customers
 
@@ -19,6 +20,7 @@ def after_insert(doc, method):
 
 
 def validate(doc, method):
+    enforce_unique_mobile(doc, method)
     validate_referral_code(doc)
 
 

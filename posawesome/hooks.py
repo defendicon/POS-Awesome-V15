@@ -19,6 +19,7 @@ _asset_version = get_build_version()
 
 app_include_js = [
     f"/assets/posawesome/dist/js/loader.js?v={_asset_version}",
+    f"/assets/posawesome/js/posa_kg_calculator.js?v={_asset_version}",
 ]
 
 app_include_css = [
@@ -70,7 +71,8 @@ doctype_js = {
 # ------------
 
 # before_install = "posawesome.install.before_install"
-# after_install = "posawesome.install.after_install"
+after_install = "posawesome.posawesome.api.lpg_workflow_install.after_install"
+after_migrate = "posawesome.posawesome.api.lpg_workflow_install.after_migrate"
 # before_uninstall = "posawesome.uninstall.before_uninstall"
 after_uninstall = "posawesome.uninstall.after_uninstall"
 
@@ -110,6 +112,12 @@ doc_events = {
     "Customer": {
         "validate": "posawesome.posawesome.api.customer.validate",
         "after_insert": "posawesome.posawesome.api.customer.after_insert",
+    },
+    "Quotation": {
+        "validate": "posawesome.posawesome.api.quotation_hooks.validate",
+    },
+    "Sales Order": {
+        "validate": "posawesome.posawesome.api.quotation_hooks.validate",
     },
 }
 
@@ -302,6 +310,16 @@ fixtures = [
                     "POS Settings-posa_return_validity_days",
                     "POS Invoice-posa_return_valid_upto",
                     "Sales Invoice-posa_return_valid_upto",
+                    "Sales Invoice Item-posa_kg_qty",
+                    "POS Invoice Item-posa_kg_qty",
+                    "Quotation Item-posa_kg_qty",
+                    "Sales Order Item-posa_kg_qty",
+                    "Sales Invoice Item-posa_rate_per_kg",
+                    "POS Invoice Item-posa_rate_per_kg",
+                    "Quotation Item-posa_rate_per_kg",
+                    "Sales Order Item-posa_rate_per_kg",
+                    "Sales Invoice-posa_receipt_barcode",
+                    "POS Invoice-posa_receipt_barcode",
                 ),
             ]
         ],

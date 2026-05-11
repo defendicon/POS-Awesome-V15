@@ -9,6 +9,9 @@ from frappe.utils import add_days, flt
 
 from posawesome.posawesome.api.utilities import get_company_domain  # Updated import
 from posawesome.posawesome.api.payments import get_posawesome_credit_redeem_remark
+from posawesome.posawesome.api.posa_kg_calc import sync_kg_fields
+from posawesome.posawesome.api.lpg_pricing import apply_tiered_pricing
+from posawesome.posawesome.api.lpg_barcode import set_receipt_barcode
 from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
     get_applicable_delivery_charges,
 )
@@ -21,6 +24,10 @@ def validate(doc, method):
     auto_set_delivery_charges(doc)
     calc_delivery_charges(doc)
     apply_tax_inclusive(doc)
+    # Phase 5 — LPG customizations:
+    apply_tiered_pricing(doc, method)   # Feature 2: outlet/customer-group tiered pricing
+    sync_kg_fields(doc, method)         # Feature 1: ₦↔Kg sync
+    set_receipt_barcode(doc, method)    # Feature 3: barcode payload
 
 
 def before_submit(doc, method):

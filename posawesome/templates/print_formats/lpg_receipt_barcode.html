@@ -1,0 +1,15 @@
+{# Reusable Jinja snippet for any print format.
+   Drop this into a Sales Invoice / POS Invoice print format with:
+       {% include "templates/print_formats/lpg_receipt_barcode.html" %}
+   Renders a Code128 barcode encoding: <invoice_name>|<total_kg>
+#}
+{% if doc.posa_receipt_barcode %}
+<div style="text-align:center; margin-top:8px;">
+    <img src="{{ frappe.utils.get_barcode_image(doc.posa_receipt_barcode, type='code128', width=2, height=60) }}"
+         alt="Receipt Barcode"
+         style="max-width:100%;" />
+    <div style="font-family:monospace; font-size:11px; margin-top:2px;">
+        {{ doc.posa_receipt_barcode }}
+    </div>
+</div>
+{% endif %}
