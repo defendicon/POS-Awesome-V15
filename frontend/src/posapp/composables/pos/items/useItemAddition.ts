@@ -360,12 +360,7 @@ export function useItemAddition() {
 				!allowNegativeStock
 			) {
 				const existingItem =
-					findMergeTarget(context, item, false)?.item ||
-					context.items.find(
-						(i) =>
-							i.item_code === item.item_code &&
-							i.uom === item.uom,
-					);
+					findMergeTarget(context, item, false)?.item || null;
 				const currentQty = existingItem ? existingItem.qty : 0;
 				const requestedQty = item.qty || 1;
 				const maxQty =

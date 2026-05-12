@@ -74,4 +74,15 @@ describe("large cart performance guards", () => {
 		expect(source).not.toMatch(/watch\(\s*itemsData[\s\S]*deep:\s*true/i);
 		expect(source).toContain("triggerUpdateTotals");
 	});
+
+	it("uses the stable invoice store order for cart merge caching", () => {
+		const source = readFileSync(
+			sourcePath("posapp/composables/pos/items/addition/useItemMerging.ts"),
+			"utf8",
+		);
+
+		expect(source).toContain("getStoreOrder");
+		expect(source).toContain("context?.invoiceStore?.itemOrder");
+		expect(source).toContain("cache.lastOrder");
+	});
 });
