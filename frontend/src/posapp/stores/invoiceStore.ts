@@ -16,9 +16,9 @@
  *
  * ## Totals
  * `totalQty`, `grossTotal`, and `discountTotal` are maintained as separate refs.
- * Operations that add or remove rows call `recalculateTotals()` immediately. Incremental
- * field edits (detected by a deep watcher on `itemsData`) are debounced through
- * `triggerUpdateTotals` (50 ms) to avoid thrashing during rapid user input.
+ * Row inserts/removals and store-mediated item edits update those totals
+ * incrementally. External direct item field edits are still caught by a debounced
+ * full recalculation.
  *
  * ## Sticky fields
  * Discount and delivery-charge fields that should survive an invoice reset are stored as
@@ -67,6 +67,18 @@ const toNumber = (value: any): number => {
 
 const cloneItem = <T>(item: T): T => ({ ...item });
 
+const getItemTotals = (item: any) => {
+	const qty = toNumber(item?.qty);
+	const rate = toNumber(item?.rate);
+	const disc = toNumber(item?.discount_amount || 0);
+
+	return {
+		qty,
+		gross: qty * rate,
+		discount: Math.abs(qty * disc),
+	};
+};
+
 export const useInvoiceStore = defineStore("invoice", () => {
 	const invoiceDoc = ref<PartialInvoiceDoc | null>(null);
 	const invoiceType = ref("Invoice");
@@ -84,6 +96,18 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	const totalQty = ref(0);
 	const grossTotal = ref(0);
 	const discountTotal = ref(0);
+	let suppressWatchedTotalRefresh = false;
+
+	const runWithIncrementalTotals = <T>(mutation: () => T): T => {
+		suppressWatchedTotalRefresh = true;
+		try {
+			return mutation();
+		} finally {
+			queueMicrotask(() => {
+				suppressWatchedTotalRefresh = false;
+			});
+		}
+	};
 
 	/**
 	 * Bumps `metadata.changeVersion` and records `lastUpdated = Date.now()`.
@@ -126,6 +150,35 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		totalQty.value = tQty;
 		grossTotal.value = tGross;
 		discountTotal.value = tDisc;
+	};
+
+	const applyTotalsDelta = (
+		deltaQty: number,
+		deltaGross: number,
+		deltaDiscount: number,
+	) => {
+		totalQty.value += deltaQty;
+		grossTotal.value += deltaGross;
+		discountTotal.value += deltaDiscount;
+	};
+
+	const addLineTotals = (item: any, multiplier = 1) => {
+		const totals = getItemTotals(item);
+		applyTotalsDelta(
+			totals.qty * multiplier,
+			totals.gross * multiplier,
+			totals.discount * multiplier,
+		);
+	};
+
+	const applyLineTotalsDiff = (before: any, after: any) => {
+		const oldTotals = getItemTotals(before);
+		const newTotals = getItemTotals(after);
+		applyTotalsDelta(
+			newTotals.qty - oldTotals.qty,
+			newTotals.gross - oldTotals.gross,
+			newTotals.discount - oldTotals.discount,
+		);
 	};
 
 	/**
@@ -339,24 +392,26 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	 */
 	const addItem = (item: any, index = -1) => {
 		if (!item) return;
-		const rowId =
-			item.posa_row_id || Math.random().toString(36).substring(2, 20);
-		if (!item.posa_row_id) item.posa_row_id = rowId;
+		return runWithIncrementalTotals(() => {
+			const rowId =
+				item.posa_row_id || Math.random().toString(36).substring(2, 20);
+			if (!item.posa_row_id) item.posa_row_id = rowId;
 
-		const cloned = cloneItem(item);
-		itemsData.set(rowId, cloned);
+			const cloned = cloneItem(item);
+			itemsData.set(rowId, cloned);
 
-		if (index >= 0 && index < itemOrder.value.length) {
-			itemOrder.value.splice(index, 0, rowId);
-		} else if (index === 0) {
-			itemOrder.value.unshift(rowId);
-		} else {
-			itemOrder.value.push(rowId);
-		}
-		touch();
-		triggerUpdateTotals();
-		// Return the reactive proxy from the map
-		return itemsData.get(rowId);
+			if (index >= 0 && index < itemOrder.value.length) {
+				itemOrder.value.splice(index, 0, rowId);
+			} else if (index === 0) {
+				itemOrder.value.unshift(rowId);
+			} else {
+				itemOrder.value.push(rowId);
+			}
+			addLineTotals(cloned);
+			touch();
+			// Return the reactive proxy from the map
+			return itemsData.get(rowId);
+		});
 	};
 
 	/**
@@ -371,30 +426,33 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	 */
 	const addItems = (items: any[], index = -1) => {
 		if (!Array.isArray(items) || !items.length) return [];
-		const addedIds: string[] = [];
+		return runWithIncrementalTotals(() => {
+			const addedIds: string[] = [];
 
-		items.forEach((item) => {
-			if (!item) return;
-			const rowId =
-				item.posa_row_id || Math.random().toString(36).substring(2, 20);
-			if (!item.posa_row_id) item.posa_row_id = rowId;
-			itemsData.set(rowId, cloneItem(item));
-			addedIds.push(rowId);
-		});
+			items.forEach((item) => {
+				if (!item) return;
+				const rowId =
+					item.posa_row_id || Math.random().toString(36).substring(2, 20);
+				if (!item.posa_row_id) item.posa_row_id = rowId;
+				const cloned = cloneItem(item);
+				itemsData.set(rowId, cloned);
+				addLineTotals(cloned);
+				addedIds.push(rowId);
+			});
 
-		if (addedIds.length > 0) {
-			if (index >= 0 && index < itemOrder.value.length) {
-				itemOrder.value.splice(index, 0, ...addedIds);
-			} else if (index === 0) {
-				itemOrder.value.unshift(...addedIds);
-			} else {
-				itemOrder.value.push(...addedIds);
+			if (addedIds.length > 0) {
+				if (index >= 0 && index < itemOrder.value.length) {
+					itemOrder.value.splice(index, 0, ...addedIds);
+				} else if (index === 0) {
+					itemOrder.value.unshift(...addedIds);
+				} else {
+					itemOrder.value.push(...addedIds);
+				}
+				touch();
 			}
-			touch();
-			recalculateTotals(); // Immediate update for batch addition
-		}
 
-		return addedIds.map((id) => itemsData.get(id));
+			return addedIds.map((id) => itemsData.get(id));
+		});
 	};
 
 	/**
@@ -413,19 +471,23 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		if (index < 0 || index >= itemOrder.value.length) {
 			return;
 		}
-		const oldId = itemOrder.value[index];
-		if (oldId === undefined) return;
+		return runWithIncrementalTotals(() => {
+			const oldId = itemOrder.value[index];
+			if (oldId === undefined) return;
 
-		const rowId = item.posa_row_id || oldId;
-		if (!item.posa_row_id) item.posa_row_id = rowId;
+			const rowId = item.posa_row_id || oldId;
+			if (!item.posa_row_id) item.posa_row_id = rowId;
+			const previous = oldId ? itemsData.get(oldId) : undefined;
 
-		if (oldId !== rowId) {
-			itemsData.delete(oldId);
-			itemOrder.value[index] = rowId;
-		}
-		itemsData.set(rowId, cloneItem(item));
-		touch();
-		triggerUpdateTotals();
+			if (oldId !== rowId) {
+				itemsData.delete(oldId);
+				itemOrder.value[index] = rowId;
+			}
+			const cloned = cloneItem(item);
+			itemsData.set(rowId, cloned);
+			applyLineTotalsDiff(previous, cloned);
+			touch();
+		});
 	};
 
 	/**
@@ -450,14 +512,29 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		}
 
 		if (itemsData.has(rowId)) {
-			const existing = itemsData.get(rowId);
-			if (existing) {
+			updateItemWithTotals(rowId, (existing) => {
 				Object.assign(existing, item);
-			}
-			touch();
+			});
 		} else {
 			addItem(item);
 		}
+	};
+
+	const updateItemWithTotals = (
+		rowId: string,
+		updater: (_item: CartItem) => void,
+	) => {
+		if (!rowId || typeof updater !== "function") return;
+		const item = itemsData.get(rowId);
+		if (!item) return;
+
+		return runWithIncrementalTotals(() => {
+			const before = cloneItem(item);
+			updater(item);
+			applyLineTotalsDiff(before, item);
+			touch();
+			return item;
+		});
 	};
 
 	/**
@@ -474,13 +551,18 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		}
 
 		if (itemsData.has(rowId)) {
-			itemsData.delete(rowId);
-			const idx = itemOrder.value.indexOf(rowId);
-			if (idx !== -1) {
-				itemOrder.value.splice(idx, 1);
-			}
-			touch();
-			recalculateTotals(); // Immediate update on remove
+			runWithIncrementalTotals(() => {
+				const existing = itemsData.get(rowId);
+				itemsData.delete(rowId);
+				const idx = itemOrder.value.indexOf(rowId);
+				if (idx !== -1) {
+					itemOrder.value.splice(idx, 1);
+				}
+				if (existing) {
+					addLineTotals(existing, -1);
+				}
+				touch();
+			});
 		}
 	};
 
@@ -581,6 +663,9 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	watch(
 		itemsData,
 		() => {
+			if (suppressWatchedTotalRefresh) {
+				return;
+			}
 			touch();
 			triggerUpdateTotals();
 		},
@@ -611,6 +696,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		addItems,
 		replaceItemAt,
 		upsertItem,
+		updateItemWithTotals,
 		removeItemByRowId,
 		clearItems,
 		setPackedItems,

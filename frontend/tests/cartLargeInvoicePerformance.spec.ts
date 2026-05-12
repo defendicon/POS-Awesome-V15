@@ -38,4 +38,30 @@ describe("large cart performance guards", () => {
 			/\.v-data-table-virtual__spacer\s*\{[\s\S]*height:\s*0/i,
 		);
 	});
+
+	it("does not log from the rapid item merge path", () => {
+		const additionSource = readFileSync(
+			sourcePath("posapp/composables/pos/items/useItemAddition.ts"),
+			"utf8",
+		);
+		const creationSource = readFileSync(
+			sourcePath("posapp/composables/pos/items/addition/useItemCreation.ts"),
+			"utf8",
+		);
+		const batchSerialSource = readFileSync(
+			sourcePath("posapp/composables/pos/shared/useBatchSerial.ts"),
+			"utf8",
+		);
+
+		expect(additionSource).not.toContain("[useItemAddition] Merging item qty");
+		expect(additionSource).not.toContain(
+			"[useItemAddition] Adding new items to store",
+		);
+		expect(additionSource).not.toContain(
+			"[useItemAddition] Adding split batch items",
+		);
+		expect(creationSource).not.toContain("[useItemAddition]");
+		expect(creationSource).not.toContain("[useItemCreation]");
+		expect(batchSerialSource).toContain("__POSAWESOME_DEBUG_BATCH_FLOW__");
+	});
 });
