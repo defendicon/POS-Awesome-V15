@@ -236,6 +236,49 @@ describe("itemsStore loadItems", () => {
 		);
 	});
 
+	it("limits customer price list cache-miss refreshes to the foreground page", async () => {
+		const store = useItemsStore();
+		const profile = {
+			name: "POS-1",
+			warehouse: "Main WH",
+			selling_price_list: "Retail",
+			currency: "PKR",
+			item_groups: [],
+		} as any;
+
+		await store.initialize(profile);
+		itemServiceMocks.getItemsData.mockClear();
+
+		await store.updatePriceList("Customer Retail");
+
+		expect(offlineMocks.getCachedPriceListItems).toHaveBeenCalledWith(
+			"Customer Retail",
+		);
+		expect(itemServiceMocks.getItemsData).toHaveBeenCalledWith(
+			expect.objectContaining({
+				price_list: "Customer Retail",
+				limit: 50,
+			}),
+			expect.any(AbortSignal),
+		);
+		expect(itemsSyncMocks.backgroundSyncItems).toHaveBeenCalledWith(
+			expect.objectContaining({
+				groupFilter: "ALL",
+				reset: false,
+			}),
+			expect.anything(),
+			"Customer Retail",
+			"POS-1_Main WH",
+			true,
+			expect.any(Function),
+			expect.any(Function),
+			expect.any(Function),
+			expect.anything(),
+			expect.anything(),
+			expect.anything(),
+		);
+	});
+
 	it("does not prime detail cache when the server returns no items", async () => {
 		const store = useItemsStore();
 		const profile = {
