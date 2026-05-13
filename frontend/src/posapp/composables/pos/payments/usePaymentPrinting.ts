@@ -167,10 +167,7 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 			}
 			silentPrint(url, printOptions);
 		} else {
-			const printWindow = window.open(url, "Print");
-			if (printWindow) {
-				watchPrintWindow(printWindow, printOptions);
-			}
+			silentPrint(url, printOptions);
 		}
 	};
 

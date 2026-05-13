@@ -23,7 +23,7 @@ vi.mock("../src/offline_print_template", () => ({
 }));
 
 import { usePaymentPrinting } from "../src/posapp/composables/pos/payments/usePaymentPrinting";
-import { watchPrintWindow } from "../src/posapp/plugins/print";
+import { silentPrint, watchPrintWindow } from "../src/posapp/plugins/print";
 
 describe("usePaymentPrinting", () => {
 	beforeEach(() => {
@@ -36,10 +36,6 @@ describe("usePaymentPrinting", () => {
 	});
 
 	it("prefers the override document doctype when building the print URL", async () => {
-		const openSpy = vi
-			.spyOn(window, "open")
-			.mockReturnValue({ closed: false } as any);
-
 		const { loadPrintPage } = usePaymentPrinting({
 			invoiceDoc: ref({ name: "ACC-SINV-0001", doctype: "Sales Invoice" }),
 			posProfile: ref({
@@ -61,17 +57,17 @@ describe("usePaymentPrinting", () => {
 			},
 		});
 
-		expect(openSpy).toHaveBeenCalledWith(
+		expect(silentPrint).toHaveBeenCalledWith(
 			expect.stringContaining("doctype=POS%20Invoice"),
-			"Print",
+			expect.any(Object),
 		);
-		expect(openSpy).toHaveBeenCalledWith(
+		expect(silentPrint).toHaveBeenCalledWith(
 			expect.stringContaining("&name=ACC-PINV-0001"),
-			"Print",
+			expect.any(Object),
 		);
 	});
 
-	it("disables printview auto print and lets the print watcher trigger one prompt", async () => {
+	it("prints in-page when opening print in a new tab is disabled", async () => {
 		const openSpy = vi
 			.spyOn(window, "open")
 			.mockReturnValue({ closed: false } as any);
@@ -92,12 +88,9 @@ describe("usePaymentPrinting", () => {
 
 		await loadPrintPage();
 
-		expect(openSpy).toHaveBeenCalledWith(
+		expect(openSpy).not.toHaveBeenCalled();
+		expect(silentPrint).toHaveBeenCalledWith(
 			expect.stringContaining("trigger_print=0"),
-			"Print",
-		);
-		expect(watchPrintWindow).toHaveBeenCalledWith(
-			expect.anything(),
 			expect.objectContaining({ triggerPrint: "1" }),
 		);
 	});
