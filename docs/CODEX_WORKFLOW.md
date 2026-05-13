@@ -19,11 +19,32 @@ For every requested change, identify:
 - Linked features affected
 - Shared logic affected
 - Backend/API impact
+- POS Profile configuration impact
+- POS Profile custom fields impact
 - Offline/cache impact
 - Printing/reporting impact
 - Test/build impact
 
 Do not start coding until the impact is understood.
+
+## POS Profile Check
+
+Before coding, Codex must check whether the requested change depends on POS Profile.
+
+Questions to answer internally:
+
+1. Does this feature use POS Profile company?
+2. Does this feature use POS Profile warehouse?
+3. Does this feature use POS Profile price list?
+4. Does this feature use POS Profile customer?
+5. Does this feature use POS Profile payment methods?
+6. Does this feature use POS Profile taxes?
+7. Does this feature use POS Profile print format?
+8. Does offline cache depend on this POS Profile data?
+9. Does the Sales Invoice payload require POS Profile defaults?
+10. Are there custom fields on POS Profile that affect this feature?
+
+If yes, Codex must align the code change with POS Profile behavior.
 
 ## Step 3: Implement
 

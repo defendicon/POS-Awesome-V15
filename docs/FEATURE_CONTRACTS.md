@@ -14,6 +14,8 @@ Pricing is linked with:
 - Item price
 - Customer price list
 - POS Profile price list
+- POS Profile currency
+- POS Profile company
 - Pricing Rule
 - UOM conversion
 - Manual rate change
@@ -31,6 +33,7 @@ Rules:
 - Price must be resolved from one shared pricing flow.
 - Manual rate should not be overwritten unless ERPNext behavior requires it.
 - Customer price list should take priority over POS Profile price list when configured.
+- Pricing changes must check POS Profile price list and customer-specific price list priority.
 - UOM conversion must not inflate or deflate prices incorrectly.
 - Multi-currency conversion must be handled consistently.
 - Discount percentage and discount amount must not fight each other.
@@ -67,6 +70,9 @@ Cart is linked with:
 - Item search
 - Barcode scan
 - UOM selection
+- POS Profile warehouse
+- POS Profile customer
+- POS Profile company
 - Batch/serial logic
 - Stock validation
 - Pricing
@@ -84,6 +90,7 @@ Rules:
 - Avoid separate total calculation logic in multiple screens.
 - Cart should survive offline/online transitions safely.
 - Large carts must remain performant.
+- Cart defaults must respect POS Profile configuration.
 
 ---
 
@@ -96,6 +103,7 @@ Offline cache is linked with:
 - Customers
 - Stock
 - POS Profile
+- POS Profile configuration
 - Cart
 - Sales Invoice sync
 - Printing
@@ -108,6 +116,7 @@ Rules:
 - New build/version changes must not leave old IndexedDB data in a broken state.
 - Sync transformations must be backward compatible where possible.
 - Offline mode must use the same business rules as online mode wherever possible.
+- Offline cache must refresh safely when POS Profile configuration changes.
 
 ---
 
@@ -125,6 +134,8 @@ Printing is linked with:
 - QZ Tray
 - Browser print
 - ERPNext print format
+- POS Profile print format
+- POS Profile letter head
 
 Rules:
 
@@ -132,6 +143,7 @@ Rules:
 - QZ Tray and browser print should use the same final invoice values.
 - Receipt formatting changes must not change business calculations.
 - Print output should not calculate totals differently from the invoice payload.
+- Print settings should respect POS Profile configuration where applicable.
 
 ---
 
@@ -177,3 +189,41 @@ Rules:
 - UOM conversion must be applied consistently.
 - Rate must not be inflated because of wrong conversion direction.
 - Quantity, stock, and invoice payload must use compatible UOM data.
+
+---
+
+## 8. POS Profile Contract
+
+POS Profile is linked with:
+
+- Company
+- Warehouse
+- Cost Center
+- Customer
+- Customer price list fallback
+- POS Profile price list
+- Currency
+- Taxes and Charges
+- Payment Methods
+- Write Off Account
+- Change Amount Account
+- Stock validation
+- Item filtering
+- Customer filtering
+- Offline cache
+- Sync logic
+- Sales Invoice payload
+- Print format
+- QZ Tray receipt
+- POS opening and closing
+
+Rules:
+
+- POS Profile must be checked before changing any POS behavior.
+- Do not hardcode company, warehouse, price list, payment method, tax, or print behavior.
+- Customer-specific price list should take priority when configured, then POS Profile price list should be used as fallback.
+- Stock, warehouse, and invoice payload must respect POS Profile configuration.
+- Payment screen must respect payment methods configured in POS Profile.
+- Print and receipt logic must respect POS Profile print settings where applicable.
+- Offline cache must load and store POS Profile-dependent data safely.
+- Custom POS Profile fields must be considered when present.

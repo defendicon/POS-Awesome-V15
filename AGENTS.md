@@ -48,7 +48,12 @@ When changing any POS feature, always check impact on:
 - Discount amount
 - UOM conversion
 - Customer price list
+- POS Profile configuration
 - POS Profile price list
+- POS Profile warehouse
+- POS Profile payment methods
+- POS Profile tax settings
+- POS Profile print settings
 - Stock validation
 - Cart totals
 - Payment screen
@@ -61,6 +66,36 @@ When changing any POS feature, always check impact on:
 - Reports/dashboards
 
 Never fix only the visible screen if the same logic is used elsewhere.
+
+---
+
+## POS Profile Configuration Rule
+
+POS Profile is a central configuration source for POS behavior.
+
+Before changing any POS feature, Codex must check whether the requested change depends on POS Profile settings.
+
+Always consider POS Profile impact on:
+
+- Company
+- Warehouse
+- Customer
+- Price List
+- Currency
+- Taxes and Charges
+- Payment Methods
+- Stock validation
+- Item filters
+- Customer filters
+- Sales Invoice defaults
+- Print format
+- Offline cache loading
+- Opening and closing flows
+- Any custom POS Profile fields
+
+Do not hardcode behavior that should come from POS Profile.
+
+Do not change pricing, stock, payment, printing, offline cache, or invoice payload logic without checking whether POS Profile controls that behavior.
 
 ---
 

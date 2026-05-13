@@ -15,6 +15,8 @@ Check:
 - Pricing Rule
 - Customer price list
 - POS Profile price list
+- POS Profile currency
+- POS Profile company
 - UOM conversion
 - Multi-currency if applicable
 - Invoice total
@@ -33,6 +35,9 @@ Check:
 - Change UOM
 - Change rate
 - Apply discount
+- POS Profile warehouse
+- POS Profile customer
+- POS Profile company
 - Large cart performance
 - Payment screen total
 - Sales Invoice payload
@@ -51,6 +56,8 @@ Check:
 - New build update behavior
 - App reload behavior
 - IndexedDB compatibility
+- POS Profile configuration changes
+- POS Profile-dependent cache scope
 
 ---
 
@@ -67,6 +74,8 @@ Check:
 - Grand total
 - UOM display
 - Customer display
+- POS Profile print format
+- POS Profile letter head
 
 ---
 
@@ -78,9 +87,31 @@ Check:
 - Newly added customer
 - Customer-specific price list
 - POS Profile fallback price list
+- POS Profile default customer
+- POS Profile customer filters
 - Offline customer data
 - Invoice payload customer field
 - Printed customer details
+
+---
+
+## POS Profile Changes / POS Profile Dependent Features
+
+Check:
+
+- Correct POS Profile is loaded
+- Company comes from POS Profile
+- Warehouse comes from POS Profile
+- Price List comes from POS Profile when customer-specific price list is not set
+- Customer-specific price list priority still works
+- Currency is handled correctly
+- Taxes and Charges are applied correctly
+- Payment Methods match POS Profile configuration
+- Sales Invoice payload uses correct POS Profile defaults
+- Print format respects POS Profile settings where applicable
+- Offline cache loads POS Profile-dependent data correctly
+- App does not crash if optional POS Profile fields are missing
+- Custom POS Profile fields are not ignored when relevant
 
 ---
 

@@ -30,6 +30,31 @@ The POS system contains linked frontend and backend flows. Frontend UI changes o
 - Printing
 - Reports
 
+## POS Profile as Central Configuration
+
+POS Profile is one of the most important configuration sources in this project.
+
+Many POS flows depend on POS Profile, including:
+
+- Default company
+- Default warehouse
+- Default customer
+- Selling price list
+- Currency
+- Payment methods
+- Taxes and charges
+- Stock behavior
+- Print format
+- Sales Invoice defaults
+- Opening and closing shift behavior
+- Offline data loading
+
+When making changes, avoid hardcoding values that should come from POS Profile.
+
+Frontend and backend logic must respect POS Profile settings consistently.
+
+If a feature behaves differently based on POS Profile, Codex must trace that configuration before changing code.
+
 ## Preferred Architecture
 
 Prefer:
