@@ -140,6 +140,21 @@ export function useInvoiceOffers() {
 		return result;
 	};
 
+	const refreshInvoiceTotalsAfterOfferPriceChange = () => {
+		if (typeof invoiceStore.recalculateTotals === "function") {
+			invoiceStore.recalculateTotals();
+		}
+	};
+
+	const syncOfferLineAmounts = (item: any) => {
+		if (!item) return;
+		const qty = parseFiniteNumber(item.qty, 0);
+		const rate = parseFiniteNumber(item.rate, 0);
+		const baseRate = parseFiniteNumber(item.base_rate ?? item.rate, rate);
+		item.amount = qty * rate;
+		item.base_amount = qty * baseRate;
+	};
+
 	const normalizeOfferRowId = (value: any) => String(value ?? "").trim();
 	const getOfferRowId = (offer: any) =>
 		normalizeOfferRowId(offer?.row_id || offer?.name);
@@ -1599,9 +1614,11 @@ export function useInvoiceOffers() {
 					0,
 				),
 			};
+			syncOfferLineAmounts(item);
 
 			if (update_item_detail_fn) update_item_detail_fn(item);
 		});
+		refreshInvoiceTotalsAfterOfferPriceChange();
 	};
 
 	const RemoveOnPrice = (offer: any) => {
@@ -1651,9 +1668,11 @@ export function useInvoiceOffers() {
 			item.discount_amount = 0;
 			item.base_discount_amount = 0;
 			item._offer_constraints = null;
+			syncOfferLineAmounts(item);
 
 			if (update_item_detail_fn) update_item_detail_fn(item);
 		});
+		refreshInvoiceTotalsAfterOfferPriceChange();
 
 		toastStore.show({
 			title: __("Offer Removed"),

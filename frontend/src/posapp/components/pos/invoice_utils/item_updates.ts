@@ -5,6 +5,29 @@ import { syncReturnDiscountProration } from "./return_discount";
 declare const __: (_text: string, _args?: any[]) => string;
 declare const frappe: any;
 
+function syncLineAmounts(context: any, item: any) {
+	if (!item) return;
+	const qty = Number.parseFloat(String(item.qty ?? 0)) || 0;
+	const rate = Number.parseFloat(String(item.rate ?? 0)) || 0;
+	const baseRate =
+		Number.parseFloat(String(item.base_rate ?? item.rate ?? 0)) || 0;
+	const fmt = (value: number) =>
+		context?.flt
+			? context.flt(value, context.currency_precision)
+			: value;
+
+	item.amount = fmt(qty * rate);
+	item.base_amount = fmt(qty * baseRate);
+}
+
+function refreshInvoiceTotals(context: any) {
+	if (typeof context?.invoiceStore?.recalculateTotals === "function") {
+		context.invoiceStore.recalculateTotals();
+	} else if (typeof context?.invoiceStore?.triggerUpdateTotals === "function") {
+		context.invoiceStore.triggerUpdateTotals();
+	}
+}
+
 export async function update_items_details(context: any, items: any[]) {
 	if (!items?.length) return;
 	if (!context.pos_profile) return;
@@ -122,11 +145,10 @@ export async function update_items_details(context: any, items: any[]) {
 				if (resolvedCurrency) {
 					item.currency = resolvedCurrency;
 				}
+				syncLineAmounts(context, item);
 			});
 
-			if (context.invoiceStore?.triggerUpdateTotals) {
-				context.invoiceStore.triggerUpdateTotals();
-			}
+			refreshInvoiceTotals(context);
 		}
 	} catch (error) {
 		console.error("Error updating items:", error);
@@ -439,14 +461,11 @@ export function _applyItemDetailPayload(
 			item.base_rate = baseRate;
 			item.discount_amount = fmt(toDisplay(baseDiscountAmount));
 			item.rate = fmt(toDisplay(baseRate));
-			item.base_amount = fmt(baseRate * (Number(item.qty) || 0));
-			item.amount = fmt(item.rate * (Number(item.qty) || 0));
 		}
 	}
 
-	if (context.invoiceStore?.triggerUpdateTotals) {
-		context.invoiceStore.triggerUpdateTotals();
-	}
+	syncLineAmounts(context, item);
+	refreshInvoiceTotals(context);
 }
 
 export function _collectManualRateOverrides(context: any, items: any[]) {

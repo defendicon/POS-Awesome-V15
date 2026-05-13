@@ -110,7 +110,12 @@ afterEach(() => {
 
 describe("invoiceItemMethods._applyItemDetailPayload", () => {
 	it("applies server discount percentage to item pricing", () => {
-		const context = createContext();
+		const context = {
+			...createContext(),
+			invoiceStore: {
+				recalculateTotals: vi.fn(),
+			},
+		};
 		const item = {
 			item_code: "ITEM-1",
 			qty: 1,
@@ -163,6 +168,7 @@ describe("invoiceItemMethods._applyItemDetailPayload", () => {
 		expect(item.rate).toBeCloseTo(90);
 		expect(item.base_rate).toBeCloseTo(90);
 		expect(item.amount).toBeCloseTo(90);
+		expect(context.invoiceStore.recalculateTotals).toHaveBeenCalledTimes(1);
 	});
 
 	it("does not override existing discount amounts", () => {
@@ -382,6 +388,9 @@ describe("invoiceItemMethods._applyServerPricingRules", () => {
 			items: [manualItem],
 			_syncAutoFreeLines: vi.fn(),
 			_updatePricingBadge: vi.fn(),
+			invoiceStore: {
+				recalculateTotals: vi.fn(),
+			},
 			$forceUpdate: vi.fn(),
 		};
 		context._fromBaseCurrency = invoiceItemMethods._fromBaseCurrency;
@@ -419,6 +428,7 @@ describe("invoiceItemMethods._applyServerPricingRules", () => {
 		expect(manualItem.discount_amount).toBeCloseTo(60);
 		expect(manualItem.base_discount_amount).toBeCloseTo(60);
 		expect(manualItem.discount_percentage).toBeCloseTo(40);
+		expect(context.invoiceStore.recalculateTotals).toHaveBeenCalledTimes(1);
 
 		delete global.frappe;
 	});
