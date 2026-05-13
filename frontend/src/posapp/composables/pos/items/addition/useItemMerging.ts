@@ -163,6 +163,19 @@ export function useItemMerging() {
 			// Since target is the object, we need its ID.
 			// currentIndex might be passed, but we should verify.
 			const rowId = target.posa_row_id;
+			const order = getStoreOrder(context) || [];
+			const resolvedIndex =
+				typeof currentIndex === "number" && currentIndex >= 0
+					? currentIndex
+					: order.indexOf(rowId);
+			if (resolvedIndex <= 0) {
+				refreshMergeCacheEntry(
+					context,
+					target,
+					resolvedIndex === 0 ? 0 : null,
+				);
+				return;
+			}
 			// Optimised store method would be better, but composing actions works:
 			context.invoiceStore.removeItemByRowId(rowId);
 			context.invoiceStore.addItem(target, 0); // Insert at 0

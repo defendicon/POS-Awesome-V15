@@ -70,6 +70,33 @@ export function useItemAddition() {
 		return sharedBatchSerial.setSerialNo(item, context);
 	};
 
+	const updateLineAmounts = (line: any, context: any) => {
+		if (!line) return;
+		const toNumber = (value: any) => {
+			const parsed = Number.parseFloat(String(value ?? 0));
+			return Number.isFinite(parsed) ? parsed : 0;
+		};
+		const round =
+			typeof context?.flt === "function"
+				? context.flt
+				: (value: any) => toNumber(value);
+		const precision = Number.isFinite(Number(context?.currency_precision))
+			? Number(context.currency_precision)
+			: undefined;
+		const qty = toNumber(line.qty);
+		const rate = toNumber(line.rate);
+		const baseRate = toNumber(line.base_rate ?? line.rate);
+		line.amount = round(qty * rate, precision);
+		line.base_amount = round(qty * baseRate, precision);
+	};
+
+	const canMergeWithTarget = (context: any, target: any) => {
+		if (!target) return false;
+		const qty = Number.parseFloat(String(target.qty ?? 0));
+		if (!Number.isFinite(qty) || qty === 0) return false;
+		return context?.isReturnInvoice ? qty < 0 : qty > 0;
+	};
+
 	const getBatchAvailabilityForItem = (context: any, item: any) => {
 		if (typeof context?.getBatchAvailability === "function") {
 			return context.getBatchAvailability(item, context);
@@ -209,6 +236,7 @@ export function useItemAddition() {
 						callSetBatchQty(context, line, line.batch_no, false);
 					}
 					callSetSerialNo(context, line);
+					updateLineAmounts(line, context);
 				})
 				: context.invoiceStore.itemsData.get(rowId);
 			if (item) {
@@ -221,11 +249,15 @@ export function useItemAddition() {
 						callSetBatchQty(context, item, item.batch_no, false);
 					}
 					callSetSerialNo(context, item);
+					updateLineAmounts(item, context);
 				}
 
 				// Resolve all promises waiting for this update
 				data.resolvers.forEach((r) => r(item));
 			}
+		}
+		if (currentUpdates.size && context.invoiceStore?.recalculateTotals) {
+			context.invoiceStore.recalculateTotals();
 		}
 
 		// 2. Process Additions
@@ -361,7 +393,15 @@ export function useItemAddition() {
 			) {
 				const existingItem =
 					findMergeTarget(context, item, false)?.item || null;
-				const currentQty = existingItem ? existingItem.qty : 0;
+				const compatibleExistingItem = canMergeWithTarget(
+					context,
+					existingItem,
+				)
+					? existingItem
+					: null;
+				const currentQty = compatibleExistingItem
+					? compatibleExistingItem.qty
+					: 0;
 				const requestedQty = item.qty || 1;
 				const maxQty =
 					item._base_actual_qty / (item.conversion_factor || 1);
@@ -384,6 +424,9 @@ export function useItemAddition() {
 			if (!context.new_line) {
 				// For normal additions (not returns), only merge with existing positive quantity lines
 				mergeTarget = findMergeTarget(context, item, requireBatchMatch);
+				if (!canMergeWithTarget(context, mergeTarget?.item)) {
+					mergeTarget = null;
+				}
 				index = mergeTarget ? mergeTarget.index : -1;
 			}
 
@@ -555,6 +598,9 @@ export function useItemAddition() {
 						mergeProbeItem,
 						requireBatchMatch,
 					);
+					if (!canMergeWithTarget(context, mergeTarget?.item)) {
+						mergeTarget = null;
+					}
 					index = mergeTarget ? mergeTarget.index : -1;
 					logBatchFlow("Re-check merge target", {
 						item_code: mergeProbeItem?.item_code,
@@ -761,6 +807,7 @@ export function useItemAddition() {
 
 					callSetSerialNo(context, cur_item);
 					if (cur_item.has_serial_no) autoAssignSerials(cur_item, context);
+					updateLineAmounts(cur_item, context);
 
 					if (
 						context.calc_uom &&
@@ -790,7 +837,7 @@ export function useItemAddition() {
 					}
 				}
 			} else {
-				const cur_item = context.items[index];
+				let cur_item = context.items[index];
 				const previousQty = cur_item.qty;
 				if (context.update_items_details) {
 					cur_item._needs_update = true;
@@ -819,24 +866,40 @@ export function useItemAddition() {
 					item.to_set_serial_no = null;
 				}
 
-				// For returns, subtract from quantity to make it more negative
-				if (context.isReturnInvoice) {
-					cur_item.qty -= Math.abs(item.qty || 1);
-				} else {
-					cur_item.qty += item.qty || 1;
-				}
-				calcStockQty(cur_item, cur_item.qty);
+				const mergeIntoLine = (line: any) => {
+					// For returns, subtract from quantity to make it more negative
+					if (context.isReturnInvoice) {
+						line.qty -= Math.abs(item.qty || 1);
+					} else {
+						line.qty += item.qty || 1;
+					}
+					calcStockQty(line, line.qty);
 
-				// Update batch quantity if needed
+					// Update batch quantity if needed
+					if (
+						line.has_batch_no &&
+						line.batch_no
+					) {
+						callSetBatchQty(context, line, line.batch_no, false);
+					}
+
+					callSetSerialNo(context, line);
+					if (line.has_serial_no) autoAssignSerials(line, context);
+					updateLineAmounts(line, context);
+				};
+
 				if (
-					cur_item.has_batch_no &&
-					cur_item.batch_no
+					context.invoiceStore?.updateItemWithTotals &&
+					cur_item?.posa_row_id
 				) {
-					callSetBatchQty(context, cur_item, cur_item.batch_no, false);
+					const updatedItem = context.invoiceStore.updateItemWithTotals(
+						cur_item.posa_row_id,
+						mergeIntoLine,
+					);
+					if (updatedItem) cur_item = updatedItem;
+				} else {
+					mergeIntoLine(cur_item);
 				}
-
-				callSetSerialNo(context, cur_item);
-				if (cur_item.has_serial_no) autoAssignSerials(cur_item, context);
 
 				// Recalculate rates if UOM differs from stock UOM
 				if (

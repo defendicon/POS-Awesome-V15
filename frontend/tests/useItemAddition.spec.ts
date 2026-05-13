@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
+import { createPinia, setActivePinia } from "pinia";
 
 vi.mock("../src/posapp/stores/toastStore", () => ({
 	useToastStore: () => ({
@@ -8,6 +9,7 @@ vi.mock("../src/posapp/stores/toastStore", () => ({
 
 import { useItemAddition } from "../src/posapp/composables/pos/items/useItemAddition";
 import { useBatchSerial } from "../src/posapp/composables/pos/shared/useBatchSerial";
+import { useInvoiceStore } from "../src/posapp/stores/invoiceStore";
 
 const createItem = () => ({
 	item_code: "ITEM-001",
@@ -53,6 +55,7 @@ describe("useItemAddition new line behavior", () => {
 				nowdate: () => "2026-03-05",
 			},
 		};
+		setActivePinia(createPinia());
 	});
 
 	it("merges matching items when new_line is off", async () => {
@@ -69,6 +72,69 @@ describe("useItemAddition new line behavior", () => {
 
 		expect(context.items).toHaveLength(1);
 		expect(context.items[0].qty).toBe(2);
+	});
+
+	it("refreshes line amount when a repeated click merges quantity", async () => {
+		const api = useItemAddition();
+		const context = createContext(false);
+
+		const first = createItem();
+		await api.prepareItemForCart(first, 1, context);
+		await api.addItem(first, context);
+
+		const second = createItem();
+		await api.prepareItemForCart(second, 1, context);
+		await api.addItem(second, context);
+
+		expect(context.items[0].qty).toBe(2);
+		expect(context.items[0].rate).toBe(10);
+		expect(context.items[0].amount).toBe(20);
+		expect(context.items[0].base_amount).toBe(20);
+	});
+
+	it("does not merge a normal sale addition into an existing negative return line", async () => {
+		const api = useItemAddition();
+		const context = createContext(false);
+		context.items.push({
+			...createItem(),
+			posa_row_id: "return-row",
+			qty: -2,
+			amount: -20,
+		});
+
+		const item = createItem();
+		await api.prepareItemForCart(item, 1, context);
+		await api.addItem(item, context);
+
+		expect(context.items).toHaveLength(2);
+		expect(context.items[0].qty).toBe(1);
+		expect(context.items[1].qty).toBe(-2);
+	});
+
+	it("refreshes line amount when invoice store merge batches repeated clicks", async () => {
+		const api = useItemAddition();
+		const invoiceStore = useInvoiceStore();
+		const makeContext = () => ({
+			...createContext(false),
+			invoiceStore,
+			items: invoiceStore.items,
+			currency_precision: 2,
+			flt: (value: any) => Number(value),
+		});
+
+		const first = createItem();
+		await api.prepareItemForCart(first, 1, makeContext());
+		await api.addItem(first, makeContext());
+
+		const second = createItem();
+		await api.prepareItemForCart(second, 1, makeContext());
+		await api.addItem(second, makeContext());
+		await Promise.resolve();
+
+		expect(invoiceStore.items).toHaveLength(1);
+		expect(invoiceStore.items[0].qty).toBe(2);
+		expect(invoiceStore.items[0].amount).toBe(20);
+		expect(invoiceStore.grossTotal).toBe(20);
 	});
 
 	it("adds matching items as separate rows when new_line is on", async () => {
