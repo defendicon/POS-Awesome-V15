@@ -273,6 +273,27 @@ export function useInvoiceItems(invoiceType: Ref<string>) {
 			enforceStockLimits && flt(item.qty, null) >= flt(maxQty, null);
 	};
 
+	const syncLineAmounts = (item: any) => {
+		if (!item) return;
+		const qty = Number.parseFloat(String(item.qty ?? 0)) || 0;
+		const rate = Number.parseFloat(String(item.rate ?? 0)) || 0;
+		const baseRate =
+			Number.parseFloat(String(item.base_rate ?? item.rate ?? 0)) || 0;
+		item.amount = flt(qty * rate, null);
+		item.base_amount = flt(qty * baseRate, null);
+	};
+
+	const notifyCartLineChanged = () => {
+		if (typeof invoiceStore.recalculateTotals === "function") {
+			invoiceStore.recalculateTotals();
+		} else if (typeof invoiceStore.triggerUpdateTotals === "function") {
+			invoiceStore.triggerUpdateTotals();
+		}
+		if (typeof invoiceStore.touch === "function") {
+			invoiceStore.touch();
+		}
+	};
+
 	const setFormatedQty = (
 		item: any,
 		field_name: string,
@@ -357,10 +378,9 @@ export function useInvoiceItems(invoiceType: Ref<string>) {
 		if (field_name === "qty") updateBundleChildrenQty(item);
 
 		if (field_name === "qty") {
+			syncLineAmounts(item);
 			bus.emit("apply_pricing_rules");
-			if (invoiceStore.triggerUpdateTotals) {
-				invoiceStore.triggerUpdateTotals();
-			}
+			notifyCartLineChanged();
 		}
 
 		return parsedValue;
