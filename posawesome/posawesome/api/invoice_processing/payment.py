@@ -193,40 +193,33 @@ def _create_change_payment_entries(
             ]
         )
 
-    def _using_only_configured_cash_mode():
-        """Return True when every paid row matches the configured cash mode and account."""
+    def _has_paid_configured_cash_row():
+        """Return True when change can be paid from the POS cash drawer."""
 
         if not cash_mode_of_payment or not cash_account_name:
             return False
 
-        cash_mode_lower = str(cash_mode_of_payment).strip().lower()
-        cash_account_lower = str(cash_account_name).strip().lower()
-        paid_rows = [row for row in invoice_doc.payments if flt(row.get("amount")) > 0]
-        if not paid_rows:
-            return False
+        cash_mode_lower = _normalized_text(cash_mode_of_payment)
+        cash_account_lower = _normalized_text(cash_account_name)
 
-        saw_configured_cash_row = False
+        for row in invoice_doc.payments:
+            if flt(row.get("amount")) <= 0:
+                continue
 
-        for row in paid_rows:
-            mode_lower = str(row.get("mode_of_payment") or "").strip().lower()
+            mode_lower = _normalized_text(row.get("mode_of_payment"))
+            account_lower = _normalized_text(row.get("account"))
 
-            if mode_lower != cash_mode_lower:
-                # Any different paid mode means we should not skip overpayment handling
-                return False
+            if mode_lower == cash_mode_lower and account_lower == cash_account_lower:
+                return True
 
-            row_account_lower = str(row.get("account") or "").strip().lower()
-            if row_account_lower != cash_account_lower:
-                # Different account from the configured cash mode should trigger overpayment handling
-                return False
+        return False
 
-            saw_configured_cash_row = True
-
-        return saw_configured_cash_row
-
-    # If every payment row uses the configured cash mode, skip overpayment handling
-    # and let the regular cash change flow apply.
-    if _using_only_configured_cash_mode() and not created_receive_payment_entries:
-        return
+    # When the tender includes the configured/default cash method, paid change is
+    # handled by the invoice's normal cash change fields instead of an extra Pay
+    # Payment Entry. Non-cash-only overpayments still need a Payment Entry so the
+    # source receive entry can be reconciled.
+    if paid_change_amount > 0 and _has_paid_configured_cash_row():
+        paid_change_amount = 0
 
     if credit_change_amount > 0:
         advance_payment_entry = frappe.new_doc("Payment Entry")

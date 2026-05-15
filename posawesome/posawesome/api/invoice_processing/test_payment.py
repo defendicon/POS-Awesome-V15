@@ -213,9 +213,9 @@ class TestCreateChangePaymentEntries(unittest.TestCase):
             payments=[
                 {
                     "amount": 1000,
-                    "type": "Cash",
-                    "mode_of_payment": "Cash",
-                    "account": "Cash",
+                    "type": "Bank",
+                    "mode_of_payment": "Card",
+                    "account": "Card - TC",
                 }
             ],
         )
@@ -228,8 +228,8 @@ class TestCreateChangePaymentEntries(unittest.TestCase):
                 "created_receive_payment_entries": [
                     {
                         "name": "ACC-PAY-RECEIVE-0001",
-                        "mode_of_payment": "Cash",
-                        "account": "Cash",
+                        "mode_of_payment": "Card",
+                        "account": "Card - TC",
                         "unallocated_amount": 410,
                     }
                 ],
@@ -254,6 +254,42 @@ class TestCreateChangePaymentEntries(unittest.TestCase):
         self.assertEqual(reconcile_args[0]["party_type"], "Customer")
         self.assertEqual(reconcile_args[0]["party"], "CUST-0001")
         self.assertEqual(reconcile_args[0]["dr_or_cr"], "credit_in_account_currency")
+
+    def test_paid_change_entry_is_not_created_when_cash_payment_can_return_change(self):
+        invoice_doc = FakeInvoiceDoc(
+            docstatus=1,
+            doctype="Sales Invoice",
+            name="SINV-0001",
+            customer="CUST-0001",
+            company="Test Company",
+            debit_to="Debtors - TC",
+            posting_date="2026-03-26",
+            posa_pos_opening_shift="POS-OPEN-0001",
+            payments=[
+                {
+                    "amount": 600,
+                    "type": "Cash",
+                    "mode_of_payment": "Cash",
+                    "account": "Cash",
+                },
+                {
+                    "amount": 500,
+                    "type": "Bank",
+                    "mode_of_payment": "Card",
+                    "account": "Card - TC",
+                },
+            ],
+        )
+
+        self.module._create_change_payment_entries(
+            invoice_doc,
+            {"paid_change": 100, "credit_change": 0},
+            pos_profile="Main POS",
+            cash_account={"account": "Cash"},
+        )
+
+        self.assertEqual(self.created_entries, [])
+        self.assertEqual(self.reconcile_calls, [])
 
     def test_credit_change_entry_is_created_without_invoice_allocation(self):
         invoice_doc = FakeInvoiceDoc(
