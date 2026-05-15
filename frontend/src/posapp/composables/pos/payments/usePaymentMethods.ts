@@ -269,6 +269,9 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 		const otherPayments = currentPaid - currentPaymentAmount;
 		let amount = invoiceAmount - otherPayments;
 		amount = flt(amount);
+		if (!isReturn) {
+			amount = Math.max(amount, 0);
+		}
 
 		payment.amount = amount;
 		if (payment.base_amount !== undefined) {
