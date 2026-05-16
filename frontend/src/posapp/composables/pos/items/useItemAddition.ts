@@ -238,20 +238,8 @@ export function useItemAddition() {
 					callSetSerialNo(context, line);
 					updateLineAmounts(line, context);
 				})
-				: context.invoiceStore.itemsData.get(rowId);
+				: null;
 			if (item) {
-				if (!context.invoiceStore.updateItemWithTotals) {
-					item.qty += data.qty;
-					calcStockQty(item, item.qty);
-
-					// Handle other updates that happen on merge
-					if (item.has_batch_no && item.batch_no) {
-						callSetBatchQty(context, item, item.batch_no, false);
-					}
-					callSetSerialNo(context, item);
-					updateLineAmounts(item, context);
-				}
-
 				// Resolve all promises waiting for this update
 				data.resolvers.forEach((r) => r(item));
 			}
