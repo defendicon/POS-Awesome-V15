@@ -9,7 +9,7 @@ from frappe.utils import cint, flt, nowdate, getdate
 from erpnext.accounts.party import get_party_account
 
 
-from .utils import get_active_pos_profile, get_default_warehouse
+from . import utils as pos_utils
 
 
 def _resolve_pos_profile(pos_profile):
@@ -29,10 +29,14 @@ def _resolve_pos_profile(pos_profile):
             if isinstance(decoded, str) and decoded:
                 return frappe.get_doc("POS Profile", decoded).as_dict()
 
-    profile = get_active_pos_profile()
+    profile = pos_utils.get_active_pos_profile()
     if not profile:
         frappe.throw(_("POS Profile is required to create purchase documents."))
     return profile
+
+
+def _assert_pos_write_allowed(profile, company=None):
+    pos_utils.assert_pos_profile_write_allowed(profile, company=company)
 
 
 def _ensure_allowed(profile, flag, label):
@@ -243,6 +247,7 @@ def _create_purchase_receipt(po_doc, payload, default_warehouse, transaction_dat
 def create_supplier(data):
     payload = json.loads(data) if isinstance(data, str) else data
     profile = _resolve_pos_profile(payload.get("pos_profile"))
+    _assert_pos_write_allowed(profile, company=payload.get("company"))
     _ensure_allowed(profile, "posa_allow_create_purchase_suppliers", _("Create suppliers"))
 
     supplier_name = payload.get("supplier_name") or payload.get("supplier")
@@ -432,6 +437,7 @@ def get_last_buying_rate(supplier, item_codes, company=None):
 def create_purchase_item(data):
     payload = json.loads(data) if isinstance(data, str) else data
     profile = _resolve_pos_profile(payload.get("pos_profile"))
+    _assert_pos_write_allowed(profile, company=payload.get("company"))
     _ensure_allowed(profile, "posa_allow_create_purchase_items", _("Create items"))
 
     item_code = payload.get("item_code") or payload.get("item_name")
@@ -595,6 +601,8 @@ def create_purchase_order(data):
 
     payload = json.loads(data) if isinstance(data, str) else data
     profile = _resolve_pos_profile(payload.get("pos_profile"))
+    company = payload.get("company") or profile.get("company") or frappe.defaults.get_default("company")
+    _assert_pos_write_allowed(profile, company=company)
     _ensure_allowed(profile, "posa_allow_purchase_order", _("Purchase orders"))
 
     receive_now = cint(payload.get("receive"))
@@ -609,11 +617,10 @@ def create_purchase_order(data):
     if not supplier:
         frappe.throw(_("Supplier {0} was not found.").format(supplier_input))
 
-    company = payload.get("company") or profile.get("company") or frappe.defaults.get_default("company")
     if not company:
         frappe.throw(_("Company is required."))
 
-    warehouse = payload.get("warehouse") or profile.get("warehouse") or get_default_warehouse(company)
+    warehouse = payload.get("warehouse") or profile.get("warehouse") or pos_utils.get_default_warehouse(company)
     transaction_date = payload.get("transaction_date") or nowdate()
     schedule_date = payload.get("schedule_date") or transaction_date
 
