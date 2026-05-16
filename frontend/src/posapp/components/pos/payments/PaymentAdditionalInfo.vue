@@ -50,38 +50,32 @@
 					<template v-slot:item="{ props, item }">
 						<v-list-item v-bind="props">
 							<v-list-item-title class="text-primary text-subtitle-1">
-								<div
-									v-html="(item?.raw && item.raw.address_title) || item.address_title"
-								></div>
+								<div>{{ (item?.raw && item.raw.address_title) || item.address_title }}</div>
 							</v-list-item-title>
 							<v-list-item-subtitle>
-								<div
-									v-html="(item?.raw && item.raw.address_line1) || item.address_line1"
-								></div>
+								<div>{{ (item?.raw && item.raw.address_line1) || item.address_line1 }}</div>
 							</v-list-item-subtitle>
 							<v-list-item-subtitle
 								v-if="(item?.raw && item.raw.address_line2) || item.address_line2"
 							>
-								<div
-									v-html="(item?.raw && item.raw.address_line2) || item.address_line2"
-								></div>
+								<div>{{ (item?.raw && item.raw.address_line2) || item.address_line2 }}</div>
 							</v-list-item-subtitle>
 							<v-list-item-subtitle v-if="(item?.raw && item.raw.city) || item.city">
-								<div v-html="(item?.raw && item.raw.city) || item.city"></div>
+								<div>{{ (item?.raw && item.raw.city) || item.city }}</div>
 							</v-list-item-subtitle>
 							<v-list-item-subtitle v-if="(item?.raw && item.raw.state) || item.state">
-								<div v-html="(item?.raw && item.raw.state) || item.state"></div>
+								<div>{{ (item?.raw && item.raw.state) || item.state }}</div>
 							</v-list-item-subtitle>
 							<v-list-item-subtitle v-if="(item?.raw && item.raw.country) || item.country">
-								<div v-html="(item?.raw && item.raw.country) || item.country"></div>
+								<div>{{ (item?.raw && item.raw.country) || item.country }}</div>
 							</v-list-item-subtitle>
 							<v-list-item-subtitle v-if="(item?.raw && item.raw.mobile_no) || item.mobile_no">
-								<div v-html="(item?.raw && item.raw.mobile_no) || item.mobile_no"></div>
+								<div>{{ (item?.raw && item.raw.mobile_no) || item.mobile_no }}</div>
 							</v-list-item-subtitle>
 							<v-list-item-subtitle
 								v-if="(item?.raw && item.raw.address_type) || item.address_type"
 							>
-								<div v-html="(item?.raw && item.raw.address_type) || item.address_type"></div>
+								<div>{{ (item?.raw && item.raw.address_type) || item.address_type }}</div>
 							</v-list-item-subtitle>
 						</v-list-item>
 					</template>
