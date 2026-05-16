@@ -90,6 +90,46 @@ describe("usePaymentMethods", () => {
 		expect(invoiceDoc.value.payments[1].base_amount).toBe(150);
 	});
 
+	it("does not set a negative remaining amount on regular sale overpayments", () => {
+		const invoiceDoc = ref<any>({
+			rounded_total: 120,
+			grand_total: 120,
+			conversion_rate: 1,
+			payments: [
+				{
+					mode_of_payment: "Cash",
+					type: "Cash",
+					amount: 0,
+					base_amount: 0,
+					default: 1,
+				},
+				{
+					mode_of_payment: "Online Transfer",
+					type: "Bank",
+					amount: 150,
+					base_amount: 150,
+				},
+			],
+		});
+
+		const { set_rest_amount } = usePaymentMethods({
+			invoiceDoc,
+			posProfile: ref({}),
+			diffPayment: computed(() => -30),
+			getNetInvoiceAmount: () => 120,
+			stores: {
+				toastStore: { show: () => undefined },
+				uiStore: { freeze: () => undefined, unfreeze: () => undefined },
+			},
+		});
+
+		set_rest_amount(invoiceDoc.value.payments[0], false);
+
+		expect(invoiceDoc.value.payments[0].amount).toBe(0);
+		expect(invoiceDoc.value.payments[0].base_amount).toBe(0);
+		expect(invoiceDoc.value.payments[1].amount).toBe(150);
+	});
+
 	it("auto-balances against the net settlement amount instead of gross totals", () => {
 		const invoiceDoc = ref<any>({
 			rounded_total: 500,

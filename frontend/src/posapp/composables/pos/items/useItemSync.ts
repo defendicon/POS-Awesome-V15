@@ -59,6 +59,7 @@ export function useItemSync() {
 	const isBackgroundLoading = ref(false);
 	const last_background_sync_time = ref<string | null>(null);
 	const BG_SYNC_LOG = "[POSA][BackgroundSync]";
+	const MAX_BACKGROUND_DETAIL_REFRESH_ITEMS = 100;
 
 	// Context (Late Binding)
 	const ctx: ItemSyncContext = {
@@ -90,6 +91,50 @@ export function useItemSync() {
 			ctx,
 			Object.getOwnPropertyDescriptors(context),
 		);
+	}
+
+	function getItemCode(item: SyncItem | null | undefined) {
+		const code = item?.item_code;
+		return code === undefined || code === null ? "" : String(code);
+	}
+
+	function getBackgroundDetailRefreshLimit() {
+		const pageLimit = Number(ctx.itemsPageLimit);
+		if (!Number.isFinite(pageLimit) || pageLimit <= 0) {
+			return MAX_BACKGROUND_DETAIL_REFRESH_ITEMS;
+		}
+		return Math.min(pageLimit, MAX_BACKGROUND_DETAIL_REFRESH_ITEMS);
+	}
+
+	function selectVisibleUpdatedItems(updatedItems: SyncItem[]) {
+		if (!Array.isArray(updatedItems) || updatedItems.length === 0) {
+			return [];
+		}
+
+		const displayedCodes = new Set(
+			(ctx.getDisplayedItems() || [])
+				.map((item) => getItemCode(item))
+				.filter(Boolean),
+		);
+		if (displayedCodes.size === 0) {
+			return [];
+		}
+
+		const limit = getBackgroundDetailRefreshLimit();
+		const selected: SyncItem[] = [];
+		const seen = new Set<string>();
+		for (const item of updatedItems) {
+			const code = getItemCode(item);
+			if (!code || seen.has(code) || !displayedCodes.has(code)) {
+				continue;
+			}
+			selected.push(item);
+			seen.add(code);
+			if (selected.length >= limit) {
+				break;
+			}
+		}
+		return selected;
 	}
 
 	function startBackgroundSyncScheduler() {
@@ -212,15 +257,27 @@ export function useItemSync() {
 				});
 
 				if (updatedItems && updatedItems.length) {
-					if (ctx.itemDetailFetcher) {
+					const visibleUpdatedItems =
+						selectVisibleUpdatedItems(updatedItems);
+					if (ctx.itemDetailFetcher && visibleUpdatedItems.length) {
 						await ctx.itemDetailFetcher.update_items_details(
-							updatedItems,
+							visibleUpdatedItems,
 							{
 								forceRefresh: true,
 								priceListOverride: backgroundPriceList,
 							},
 						);
 					}
+					console.info(
+						`${BG_SYNC_LOG} visible details refreshed`,
+						{
+							source,
+							refreshedCount: visibleUpdatedItems.length,
+							skippedCount:
+								updatedItems.length -
+								visibleUpdatedItems.length,
+						},
+					);
 					if (ctx.eventBus) {
 						ctx.eventBus.emit("set_all_items", ctx.getItems());
 					}

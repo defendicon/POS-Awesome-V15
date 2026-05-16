@@ -85,13 +85,15 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 		const { doc, profile, doctype, print_format, letter_head } = resolvePrintContext(input);
 		const debugPrint = isDebugPrintEnabled();
 
+		// Keep printview auto-trigger disabled; watchPrintWindow/silentPrint owns
+		// the single browser print call so submit-and-print does not prompt twice.
 		let url =
 			frappe.urllib.get_base_url() +
 			"/printview?doctype=" +
 			encodeURIComponent(doctype) +
 			"&name=" +
 			doc.name +
-			"&trigger_print=1" +
+			"&trigger_print=0" +
 			"&format=" +
 			print_format +
 			"&no_letterhead=" +
@@ -165,10 +167,7 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 			}
 			silentPrint(url, printOptions);
 		} else {
-			const printWindow = window.open(url, "Print");
-			if (printWindow) {
-				watchPrintWindow(printWindow, printOptions);
-			}
+			silentPrint(url, printOptions);
 		}
 	};
 

@@ -121,4 +121,41 @@ describe("useInvoiceItems stock quantity limits", () => {
 		expect(calcStockQty).toHaveBeenCalledWith(item, 6);
 		expect(toastShow).not.toHaveBeenCalled();
 	});
+
+	it("bumps invoice metadata when quantity decreases so offers and pricing rules re-evaluate", async () => {
+		const { useUIStore } = await import("../src/posapp/stores/uiStore");
+		const { useInvoiceStore } = await import("../src/posapp/stores/invoiceStore");
+		const { useInvoiceItems } = await import(
+			"../src/posapp/composables/pos/invoice/useInvoiceItems"
+		);
+		const uiStore = useUIStore();
+		uiStore.setPosProfile({
+			name: "POS-1",
+			posa_validate_stock: 0,
+			posa_block_sale_beyond_available_qty: 0,
+		} as any);
+		uiStore.setStockSettings({ allow_negative_stock: 1 } as any);
+		const invoiceStore = useInvoiceStore();
+		invoiceStore.addItem({
+			posa_row_id: "row-dis-water",
+			item_code: "dis-water",
+			item_name: "DIS WATER",
+			qty: 25,
+			rate: 10,
+			base_rate: 10,
+			conversion_factor: 1,
+			is_stock_item: 1,
+			allow_negative_stock: 1,
+		});
+		const invoiceItems = useInvoiceItems(ref("Invoice"));
+		const beforeVersion = invoiceStore.metadata.changeVersion;
+
+		invoiceItems.subtract_one(invoiceStore.items[0]);
+
+		expect(invoiceStore.items[0].qty).toBe(24);
+		expect(invoiceStore.items[0].amount).toBe(240);
+		expect(invoiceStore.grossTotal).toBe(240);
+		expect(invoiceStore.metadata.changeVersion).toBeGreaterThan(beforeVersion);
+		expect(calcStockQty).toHaveBeenCalledWith(invoiceStore.items[0], 24);
+	});
 });

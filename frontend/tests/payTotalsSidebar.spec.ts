@@ -2,7 +2,15 @@
 
 import { defineComponent, h } from "vue";
 import { mount } from "@vue/test-utils";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("../src/posapp/composables/core/useRtl", () => ({
+	useRtl: () => ({
+		isRtl: false,
+		rtlStyles: {},
+		rtlClasses: [],
+	}),
+}));
 
 import PayTotalsSidebar from "../src/posapp/components/pos_pay/PayTotalsSidebar.vue";
 

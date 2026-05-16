@@ -569,12 +569,6 @@
 	display: none !important;
 }
 
-/* Additional cleanup for v-data-table-virtual specific elements */
-.posa-cart-table .v-data-table-virtual__spacer {
-	display: none !important;
-	height: 0 !important;
-}
-
 /* Hide empty measurement/calculation rows */
 .posa-cart-table tr[data-test-id],
 .posa-cart-table tr[data-testid],

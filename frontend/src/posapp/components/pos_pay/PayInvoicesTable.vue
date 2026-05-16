@@ -5,11 +5,6 @@
 			<v-col md="7" cols="12">
 				<p>
 					<strong>{{ resolvedSectionTitle }}</strong>
-					<span v-if="totalOutstanding" class="text-primary"
-						>{{ __("- Total Outstanding") }} :
-						{{ currencySymbol(posProfile.currency) }}
-						{{ formatCurrency(totalOutstanding) }}</span
-					>
 				</p>
 			</v-col>
 			<v-col md="5" cols="12">
@@ -73,16 +68,16 @@
 				></v-select>
 			</v-col>
 			<v-col md="8" cols="12">
-				<div class="text-caption text-medium-emphasis mt-2">
+				<div class="text-body-2 mt-2">
 					<span v-for="(data, key) in outstandingByCurrency" :key="key" class="mr-4">
-						<strong>
+						<span class="text-primary font-weight-bold">
 							{{ formatCurrency(data.amount) }}
 							{{ data.symbol }}
 							{{ data.party_currency }}
 							<span v-if="data.party_currency !== data.invoice_currency">
 								({{ data.invoice_currency }})
 							</span>
-						</strong>
+						</span>
 					</span>
 				</div>
 			</v-col>

@@ -142,4 +142,97 @@ describe("store useItemsSync background progress", () => {
 			stockCacheReady: true,
 		});
 	});
+
+	it("requests larger background batches by default", async () => {
+		const sync = useItemsSync();
+		const resolvePageSize = vi.fn((pageSize?: number) => pageSize || 0);
+		const frappeCall = vi.fn().mockResolvedValueOnce({ message: [] });
+		(globalThis as any).frappe = { call: frappeCall };
+
+		await sync.backgroundSyncItems(
+			{},
+			{ name: "POS-1", warehouse: "WH-1" } as any,
+			"Retail",
+			"POS-1_WH-1",
+			true,
+			resolvePageSize,
+			vi.fn(),
+			vi.fn(async () => {}),
+			{ value: 0 },
+			{ value: false },
+			{ value: [] },
+		);
+
+		expect(resolvePageSize).toHaveBeenCalledWith(1000);
+		expect(frappeCall).toHaveBeenCalledWith(
+			expect.objectContaining({
+				args: expect.objectContaining({
+					limit: 1000,
+				}),
+			}),
+		);
+	});
+
+	it("throttles cached pagination refresh while background batches continue", async () => {
+		const sync = useItemsSync();
+		const updateCachedPaginationFromStorage = vi.fn(async () => {});
+		const setItems = vi.fn();
+		const frappeCall = vi
+			.fn()
+			.mockResolvedValueOnce({
+				message: [
+					{ item_code: "ITEM-1", item_name: "Item 1" },
+					{ item_code: "ITEM-2", item_name: "Item 2" },
+				],
+			})
+			.mockResolvedValueOnce({
+				message: [
+					{ item_code: "ITEM-3", item_name: "Item 3" },
+					{ item_code: "ITEM-4", item_name: "Item 4" },
+				],
+			})
+			.mockResolvedValueOnce({
+				message: [
+					{ item_code: "ITEM-5", item_name: "Item 5" },
+					{ item_code: "ITEM-6", item_name: "Item 6" },
+				],
+			})
+			.mockResolvedValueOnce({
+				message: [
+					{ item_code: "ITEM-7", item_name: "Item 7" },
+					{ item_code: "ITEM-8", item_name: "Item 8" },
+				],
+			})
+			.mockResolvedValueOnce({
+				message: [
+					{ item_code: "ITEM-9", item_name: "Item 9" },
+					{ item_code: "ITEM-10", item_name: "Item 10" },
+				],
+			})
+			.mockResolvedValueOnce({
+				message: [
+					{ item_code: "ITEM-11", item_name: "Item 11" },
+					{ item_code: "ITEM-12", item_name: "Item 12" },
+				],
+			})
+			.mockResolvedValueOnce({ message: [] });
+		(globalThis as any).frappe = { call: frappeCall };
+
+		await sync.backgroundSyncItems(
+			{},
+			{ name: "POS-1", warehouse: "WH-1" } as any,
+			"Retail",
+			"POS-1_WH-1",
+			true,
+			() => 2,
+			setItems,
+			updateCachedPaginationFromStorage,
+			{ value: 12 },
+			{ value: false },
+			{ value: [] },
+		);
+
+		expect(setItems).toHaveBeenCalledTimes(6);
+		expect(updateCachedPaginationFromStorage).toHaveBeenCalledTimes(2);
+	});
 });

@@ -1,6 +1,7 @@
 import { ref, computed, type Ref } from "vue";
 
 declare const flt: (_value: unknown, _precision?: number) => number;
+declare const __: (_text: string, _args?: any[]) => string;
 
 type PosPaySelectionArgs = {
 	posProfile: Ref<any>;
@@ -53,6 +54,19 @@ export function usePosPaySelection({
 			const amount = parseFloat(cur?.amount || 0);
 			return acc + (isNaN(amount) ? 0 : amount);
 		}, 0);
+	});
+
+	const selected_payments_detail = computed(() => {
+		if (!selected_payments.value.length) return [];
+		return selected_payments.value.map((payment: any) => ({
+			mode_of_payment: payment.mode_of_payment || __("Unknown"),
+			paid_amount: flt(payment.paid_amount || 0),
+			received_amount: flt(payment.received_amount || 0),
+			unallocated_amount: flt(payment.unallocated_amount || 0),
+			currency: payment.currency || posProfile.value?.currency,
+			exchange_rate: flt(payment.source_exchange_rate ?? payment.exchange_rate ?? 1),
+			account: payment.account || "",
+		}));
 	});
 
 	const total_of_diff = computed(() => {
@@ -112,6 +126,7 @@ export function usePosPaySelection({
 		total_selected_payments,
 		total_selected_mpesa_payments,
 		total_payment_methods,
+		selected_payments_detail,
 		total_of_diff,
 		toggleInvoiceSelection,
 		isInvoiceSelected,

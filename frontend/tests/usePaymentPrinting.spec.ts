@@ -23,6 +23,7 @@ vi.mock("../src/offline_print_template", () => ({
 }));
 
 import { usePaymentPrinting } from "../src/posapp/composables/pos/payments/usePaymentPrinting";
+import { silentPrint, watchPrintWindow } from "../src/posapp/plugins/print";
 
 describe("usePaymentPrinting", () => {
 	beforeEach(() => {
@@ -35,10 +36,6 @@ describe("usePaymentPrinting", () => {
 	});
 
 	it("prefers the override document doctype when building the print URL", async () => {
-		const openSpy = vi
-			.spyOn(window, "open")
-			.mockReturnValue({ closed: false } as any);
-
 		const { loadPrintPage } = usePaymentPrinting({
 			invoiceDoc: ref({ name: "ACC-SINV-0001", doctype: "Sales Invoice" }),
 			posProfile: ref({
@@ -60,13 +57,72 @@ describe("usePaymentPrinting", () => {
 			},
 		});
 
-		expect(openSpy).toHaveBeenCalledWith(
+		expect(silentPrint).toHaveBeenCalledWith(
 			expect.stringContaining("doctype=POS%20Invoice"),
-			"Print",
+			expect.any(Object),
 		);
-		expect(openSpy).toHaveBeenCalledWith(
+		expect(silentPrint).toHaveBeenCalledWith(
 			expect.stringContaining("&name=ACC-PINV-0001"),
-			"Print",
+			expect.any(Object),
+		);
+	});
+
+	it("prints in-page when opening print in a new tab is disabled", async () => {
+		const openSpy = vi
+			.spyOn(window, "open")
+			.mockReturnValue({ closed: false } as any);
+
+		const { loadPrintPage } = usePaymentPrinting({
+			invoiceDoc: ref({ name: "ACC-SINV-0002", doctype: "Sales Invoice" }),
+			posProfile: ref({
+				print_format_for_online: "Standard",
+				print_format: "Standard",
+				letter_head: 0,
+				posa_open_print_in_new_tab: false,
+				posa_silent_print: false,
+				create_pos_invoice_instead_of_sales_invoice: 0,
+			}),
+			invoiceType: ref("Invoice"),
+			printFormat: ref("Standard"),
+		});
+
+		await loadPrintPage();
+
+		expect(openSpy).not.toHaveBeenCalled();
+		expect(silentPrint).toHaveBeenCalledWith(
+			expect.stringContaining("trigger_print=0"),
+			expect.objectContaining({ triggerPrint: "1" }),
+		);
+	});
+
+	it("opens print view in a new tab without auto printing when configured", async () => {
+		const openSpy = vi
+			.spyOn(window, "open")
+			.mockReturnValue({ closed: false } as any);
+
+		const { loadPrintPage } = usePaymentPrinting({
+			invoiceDoc: ref({ name: "ACC-SINV-0003", doctype: "Sales Invoice" }),
+			posProfile: ref({
+				print_format_for_online: "Standard",
+				print_format: "Standard",
+				letter_head: 0,
+				posa_open_print_in_new_tab: true,
+				posa_silent_print: false,
+				create_pos_invoice_instead_of_sales_invoice: 0,
+			}),
+			invoiceType: ref("Invoice"),
+			printFormat: ref("Standard"),
+		});
+
+		await loadPrintPage();
+
+		expect(openSpy).toHaveBeenCalledWith(
+			expect.stringContaining("trigger_print=0"),
+			"_blank",
+		);
+		expect(watchPrintWindow).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ triggerPrint: "0", shouldPrint: false }),
 		);
 	});
 });

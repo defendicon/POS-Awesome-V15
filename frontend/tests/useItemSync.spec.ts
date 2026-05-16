@@ -114,4 +114,74 @@ describe("useItemSync", () => {
 		expect(syncCursor).toBe("2026-03-07 09:10:11.000000");
 		expect(sync.last_background_sync_time.value).toBeTruthy();
 	});
+
+	it("limits forced detail refresh to changed items visible on the current page", async () => {
+		const sync = useItemSync();
+		syncCursor = "2026-03-06 15:27:28.166399";
+		const updatedItems = Array.from({ length: 150 }, (_, index) => ({
+			item_code: `ITEM-${index + 1}`,
+		}));
+		const refreshModifiedItems = vi.fn(async () => ({
+			items: updatedItems,
+		}));
+		const updateItemsDetails = vi.fn(async () => {});
+
+		sync.registerContext({
+			pos_profile: { name: "POS-TEST" },
+			enable_background_sync: true,
+			background_sync_interval: 30,
+			itemsPageLimit: 50,
+			refreshModifiedItems,
+			itemDetailFetcher: {
+				update_items_details: updateItemsDetails,
+			},
+			getItems: () => updatedItems,
+			getDisplayedItems: () => [
+				{ item_code: "ITEM-2" },
+				{ item_code: "ITEM-75" },
+				{ item_code: "ITEM-150" },
+				{ item_code: "UNCHANGED" },
+			],
+		});
+
+		await sync.performBackgroundSync({ source: "test" });
+
+		expect(updateItemsDetails).toHaveBeenCalledTimes(1);
+		expect(updateItemsDetails).toHaveBeenCalledWith(
+			[
+				{ item_code: "ITEM-2" },
+				{ item_code: "ITEM-75" },
+				{ item_code: "ITEM-150" },
+			],
+			{
+				forceRefresh: true,
+				priceListOverride: null,
+			},
+		);
+	});
+
+	it("skips forced detail refresh when no changed item is currently visible", async () => {
+		const sync = useItemSync();
+		syncCursor = "2026-03-06 15:27:28.166399";
+		const refreshModifiedItems = vi.fn(async () => ({
+			items: [{ item_code: "ITEM-1" }],
+		}));
+		const updateItemsDetails = vi.fn(async () => {});
+
+		sync.registerContext({
+			pos_profile: { name: "POS-TEST" },
+			enable_background_sync: true,
+			background_sync_interval: 30,
+			refreshModifiedItems,
+			itemDetailFetcher: {
+				update_items_details: updateItemsDetails,
+			},
+			getItems: () => [{ item_code: "ITEM-1" }],
+			getDisplayedItems: () => [{ item_code: "ITEM-2" }],
+		});
+
+		await sync.performBackgroundSync({ source: "test" });
+
+		expect(updateItemsDetails).not.toHaveBeenCalled();
+	});
 });

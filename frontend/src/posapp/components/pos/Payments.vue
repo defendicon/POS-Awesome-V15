@@ -563,7 +563,6 @@ const {
 	set_full_amount,
 	set_rest_amount,
 	request_payment,
-	autoBalancePayments,
 	getVisibleDenominations,
 	isCashLikePayment,
 } = usePaymentMethods({
@@ -1300,14 +1299,10 @@ const handlePaymentAmountChange = (payment, event) => {
 	if (invoice_doc.value?.is_return && payment.amount > 0) {
 		payment.amount = -payment.amount;
 	}
-	if (payment.base_amount !== undefined && invoice_doc.value?.is_return) {
+	if (payment.base_amount !== undefined) {
 		const conversion_rate = invoice_doc.value.conversion_rate || 1;
 		payment.base_amount = flt(payment.amount * conversion_rate, currency_precision.value);
 	}
-
-	nextTick(() => {
-		autoBalancePayments(payment);
-	});
 };
 
 const setPaymentToDenomination = (payment, amount) => {
@@ -1317,9 +1312,6 @@ const setPaymentToDenomination = (payment, amount) => {
 		payment.base_amount = flt(amount * conversion_rate, currency_precision.value);
 	}
 	last_payment_change_was_cash.value = isCashLikePayment(payment);
-	nextTick(() => {
-		autoBalancePayments(payment);
-	});
 };
 
 // UI Feedback Methods

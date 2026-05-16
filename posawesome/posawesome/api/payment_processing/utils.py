@@ -74,15 +74,59 @@ def set_paid_amount_and_received_amount(
 
 
 @frappe.whitelist()
+def get_available_accounts_for_mop(company, mode_of_payment):
+    """Get all bank/cash accounts available for a given mode of payment."""
+    default_account = get_bank_cash_account(company, mode_of_payment)
+    if not default_account:
+        return []
+
+    account_type = default_account.get("account_type")
+    if not account_type:
+        return []
+
+    accounts = frappe.get_list(
+        "Account",
+        filters={
+            "company": company,
+            "account_type": account_type,
+            "is_group": 0,
+            "disabled": 0,
+        },
+        fields=["name as account", "account_currency", "account_type", "account_name"],
+        order_by="name asc",
+    )
+    return accounts
+
+
+@frappe.whitelist()
 def get_mode_of_payment_accounts(company, mode_of_payments):
     import json
 
     if isinstance(mode_of_payments, str):
         mode_of_payments = json.loads(mode_of_payments)
 
-    currency_map = {}
+    result = {}
     for mode in mode_of_payments:
         account = get_bank_cash_account(company, mode)
         if account:
-            currency_map[mode] = account.get("account_currency")
-    return currency_map
+            result[mode] = {
+                "account": account.get("account"),
+                "account_currency": account.get("account_currency"),
+                "account_type": account.get("account_type"),
+            }
+    return result
+
+
+@frappe.whitelist()
+def get_party_account_info(party_type, party, company):
+    account = get_party_account(party_type, party, company)
+    if not account:
+        return None
+
+    currency = frappe.get_cached_value("Account", account, "account_currency")
+    account_name = frappe.get_cached_value("Account", account, "account_name")
+    return {
+        "account": account,
+        "account_name": account_name,
+        "currency": currency,
+    }

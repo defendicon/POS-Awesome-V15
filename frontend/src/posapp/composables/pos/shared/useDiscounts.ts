@@ -545,6 +545,9 @@ export function useDiscounts() {
 
 			// Update stock calculations and force UI update
 			if (context.calc_stock_qty) context.calc_stock_qty(item, item.qty);
+			if (context.invoiceStore?.triggerUpdateTotals) {
+				context.invoiceStore.triggerUpdateTotals();
+			}
 			if (context.forceUpdate) context.forceUpdate();
 		} catch (error: unknown) {
 			console.error("Error calculating prices:", error);
@@ -672,6 +675,9 @@ export function useDiscounts() {
 		);
 		item.base_amount = toBaseCurrency(context, item.amount);
 
+		if (context.invoiceStore?.triggerUpdateTotals) {
+			context.invoiceStore.triggerUpdateTotals();
+		}
 		if (context.forceUpdate) context.forceUpdate();
 	};
 

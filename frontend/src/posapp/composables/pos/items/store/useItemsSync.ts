@@ -27,6 +27,10 @@ const hasStockQuantity = (item: Item) =>
 const containsStockQuantities = (items: Item[]) =>
 	Array.isArray(items) && items.some(hasStockQuantity);
 
+const DELTA_SYNC_LIMIT = 1000;
+const BACKGROUND_SYNC_PAGE_SIZE = 1000;
+const BACKGROUND_PAGINATION_REFRESH_BATCHES = 5;
+
 export function useItemsSync() {
 	const isLoading = ref(false);
 	const isBackgroundLoading = ref(false);
@@ -166,7 +170,7 @@ export function useItemsSync() {
 					price_list: activePriceList,
 					customer,
 					modified_after: lastSync,
-					limit: 500,
+					limit: DELTA_SYNC_LIMIT,
 				},
 				freeze: false,
 			});
@@ -249,11 +253,11 @@ export function useItemsSync() {
 		syncedItemsCount.value = 0;
 
 		const appended: Item[] = [];
-		const DEFAULT_PAGE_SIZE = 200;
 		const bootstrapCount = Array.isArray(initialBatch)
 			? initialBatch.length
 			: items.value.length;
 		let stockCacheReady = false;
+		let batchesSincePaginationRefresh = 0;
 		const remainingCatalogEstimate =
 			totalItemCount.value > bootstrapCount
 				? totalItemCount.value - bootstrapCount
@@ -283,7 +287,7 @@ export function useItemsSync() {
 				? items.value[items.value.length - 1]?.item_name || null
 				: null;
 
-			const limit = resolvePageSize(DEFAULT_PAGE_SIZE);
+			const limit = resolvePageSize(BACKGROUND_SYNC_PAGE_SIZE);
 
 			while (
 				backgroundSyncState.value.token === token &&
@@ -335,8 +339,7 @@ export function useItemsSync() {
 				syncedItemsCount.value = syncedCount;
 				lastItemName =
 					batch[batch.length - 1]?.item_name || lastItemName;
-
-				await updateCachedPaginationFromStorage();
+				batchesSincePaginationRefresh += 1;
 
 				if (remainingCatalogEstimate > 0) {
 					loadProgress.value = Math.min(
@@ -350,6 +353,16 @@ export function useItemsSync() {
 						99,
 						Math.round((syncedCount / (syncedCount + limit)) * 100),
 					);
+				}
+
+				const reachedEnd = batch.length < limit;
+				if (
+					reachedEnd ||
+					batchesSincePaginationRefresh >=
+						BACKGROUND_PAGINATION_REFRESH_BATCHES
+				) {
+					await updateCachedPaginationFromStorage();
+					batchesSincePaginationRefresh = 0;
 				}
 
 				if (batch.length < limit) {

@@ -922,6 +922,7 @@ export const useItemsStore = defineStore("items", () => {
 				await loadItems({
 					forceServer: true,
 					priceList: newPriceList,
+					limit: resolvePageSize(),
 				});
 			}
 		} catch (error) {

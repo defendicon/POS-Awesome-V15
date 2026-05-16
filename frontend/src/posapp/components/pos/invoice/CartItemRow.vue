@@ -456,7 +456,7 @@ const discountAmountInput = ref(null);
 const uomSelect = ref(null);
 
 const memoDeps = computed(() => {
-	const deps = [
+	return [
 		props.item.qty,
 		props.item.rate,
 		props.item.amount,
@@ -481,13 +481,6 @@ const memoDeps = computed(() => {
 		isEditingDiscountPercent.value,
 		isEditingDiscountAmount.value,
 	];
-	console.log(`[CartItemRow] memoDeps updated for ${props.item.item_code}`, {
-		uom: props.item.uom,
-		rate: props.item.rate,
-		price_list_rate: props.item.price_list_rate,
-		qty: props.item.qty,
-	});
-	return deps;
 });
 
 const qtyLength = computed(() => String(Math.abs(props.item.qty || 0)).replace(".", "").length);
