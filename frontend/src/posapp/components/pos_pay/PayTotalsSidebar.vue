@@ -627,10 +627,6 @@ const getPaymentMethodAccount = (mode) => {
 
 const rateFromCurrencyToCompany = (currency) => {
 	if (!currency || currency === props.companyCurrency) return 1;
-	if (currency === props.invoiceTotalCurrency) {
-		if (flt(props.exchangeRate) > 0) return flt(props.exchangeRate);
-		if (flt(props.invoiceConversionRate) > 0) return flt(props.invoiceConversionRate);
-	}
 	if (flt(props.exchangeRate) > 0) return flt(props.exchangeRate);
 	if (flt(props.invoiceConversionRate) > 0) return flt(props.invoiceConversionRate);
 	return 1;

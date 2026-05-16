@@ -736,9 +736,7 @@ export default {
 				}
 				payment_method_currencies.value = currencies;
 				// Fetch available accounts for all modes
-				for (const mode of modes) {
-					await fetchAvailableAccounts(mode);
-				}
+				await Promise.all(modes.map((mode) => fetchAvailableAccounts(mode)));
 			} catch (e) {
 				console.error("Failed to load payment method accounts", e);
 			}

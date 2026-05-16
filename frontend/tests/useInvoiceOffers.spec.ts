@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { useInvoiceStore } from "../src/posapp/stores/invoiceStore";
 import { useInvoiceOffers } from "../src/posapp/composables/pos/invoice/useInvoiceOffers";
@@ -31,6 +31,10 @@ describe("useInvoiceOffers", () => {
 			},
 		};
 		(globalThis as any).frappe = (window as any).frappe;
+		(globalThis as any).flt = vi.fn((value: any, precision = 2) => {
+			const numeric = Number.parseFloat(String(value));
+			return Number.isFinite(numeric) ? Number(numeric.toFixed(precision)) : 0;
+		});
 		setActivePinia(createPinia());
 	});
 
@@ -49,13 +53,14 @@ describe("useInvoiceOffers", () => {
 				apply_on: "Item Code",
 				items: JSON.stringify(["row-dis-water"]),
 				discount_type: "Rate",
-				rate: 12,
+				rate: 12.345,
 				offer_applied: true,
 			},
 		]);
 
-		expect(invoiceStore.items[0].rate).toBe(12);
-		expect(invoiceStore.items[0].amount).toBe(300);
-		expect(invoiceStore.grossTotal).toBe(300);
+		expect(invoiceStore.items[0].rate).toBe(12.35);
+		expect(invoiceStore.items[0].amount).toBe(308.75);
+		expect(invoiceStore.grossTotal).toBe(308.75);
+		expect((globalThis as any).flt).toHaveBeenCalled();
 	});
 });

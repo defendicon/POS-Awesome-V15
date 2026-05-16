@@ -29,7 +29,7 @@ class FakePaymentEntry:
 
     def append(self, fieldname, value):
         if fieldname == "references":
-            self.references.append(value)
+            self.references.append(AttrDict(value))
 
     def save(self, ignore_permissions=False):
         self.saved = ignore_permissions
@@ -688,6 +688,82 @@ class TestPosPaymentProcessing(unittest.TestCase):
             mock_create_payment_entry.call_args.kwargs["client_request_id"],
             "pay-fixed-002",
         )
+
+    @patch("posawesome.posawesome.api.payment_processing.processor.get_account_currency")
+    @patch("posawesome.posawesome.api.payment_processing.processor.create_payment_entry")
+    @patch("posawesome.posawesome.api.payment_processing.processor.frappe")
+    def test_process_pos_payment_sets_reference_exchange_gain_loss(
+        self,
+        mock_frappe,
+        mock_create_payment_entry,
+        mock_get_account_currency,
+    ):
+        fake_payment_entry = FakePaymentEntry(paid_amount=100)
+        fake_payment_entry.received_amount = 100
+        fake_payment_entry.paid_to_account_currency = "USD"
+        fake_payment_entry.paid_from_account_currency = "USD"
+        fake_payment_entry.company_currency = "USD"
+        fake_payment_entry.party_account_currency = "USD"
+        fake_payment_entry.target_exchange_rate = 1.5
+        fake_payment_entry.source_exchange_rate = 1.5
+        mock_create_payment_entry.return_value = fake_payment_entry
+        mock_get_account_currency.return_value = "USD"
+        mock_frappe._dict.side_effect = lambda value: AttrDict(value)
+        mock_frappe.log_error = Mock()
+        mock_frappe.msgprint = Mock()
+        mock_frappe.get_cached_value.return_value = "USD"
+        mock_frappe.db = types.SimpleNamespace(
+            get_default=lambda key: 2,
+            has_column=lambda doctype, fieldname: True,
+            sql=lambda *args, **kwargs: [],
+            get_value=lambda *args, **kwargs: None,
+        )
+        mock_frappe.get_cached_doc.return_value = types.SimpleNamespace(
+            currency="USD",
+            conversion_rate=1.2,
+            rounded_total=100,
+            grand_total=100,
+            outstanding_amount=100,
+        )
+
+        result = self.processor.process_pos_payment(
+            json.dumps(
+                {
+                    "customer": "Customer 727",
+                    "company": "Test Company",
+                    "currency": "USD",
+                    "pos_profile_name": "Main POS",
+                    "pos_opening_shift_name": "POS-OPEN-0001",
+                    "selected_invoices": [
+                        {
+                            "name": "SINV-0001",
+                            "outstanding_amount": 100,
+                            "conversion_rate": 1.2,
+                            "currency": "USD",
+                        }
+                    ],
+                    "selected_payments": [],
+                    "selected_mpesa_payments": [],
+                    "payment_methods": [{"mode_of_payment": "Cash", "amount": 100}],
+                    "total_selected_invoices": 100,
+                    "total_selected_payments": 0,
+                    "total_selected_mpesa_payments": 0,
+                    "total_payment_methods": 100,
+                    "exchange_rate": 1.5,
+                    "pos_profile": {
+                        "posa_use_pos_awesome_payments": 1,
+                        "posa_allow_make_new_payments": 1,
+                        "posa_allow_reconcile_payments": 1,
+                        "posa_allow_mpesa_reconcile_payments": 0,
+                        "cost_center": "Main - TC",
+                    },
+                }
+            )
+        )
+
+        self.assertEqual(fake_payment_entry.references[0].exchange_gain_loss, 30)
+        self.assertEqual(result["net_gain_loss"], 30)
+        self.assertEqual(result["exchange_gain_loss_summary"][0]["amount"], 30)
 
     @patch("posawesome.posawesome.api.payment_processing.processor.create_payment_entry")
     @patch("posawesome.posawesome.api.payment_processing.processor.frappe")

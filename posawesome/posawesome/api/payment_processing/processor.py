@@ -78,6 +78,14 @@ def _requested_reconciled_amount(payment):
     return 0
 
 
+def _get_currency_precision():
+    try:
+        precision = flt(frappe.db.get_default("currency_precision"))
+    except Exception:
+        precision = 0
+    return precision or 2
+
+
 def _build_completed_reconciliation_summaries(selected_payments, completed_documents):
     completed_by_name = {
         _get_value(document, "name"): document
@@ -597,20 +605,25 @@ def process_pos_payment(payload):
 
                 first_inv = remaining_invoices[0] if remaining_invoices else {}
                 exchange_rate_val = flt(data.get("exchange_rate", 1))
-                precision = flt(frappe.db.get_default("currency_precision") or 2)
+                precision = _get_currency_precision()
 
                 bank_currency = (
-                    payment_entry.paid_to_account_currency
+                    getattr(payment_entry, "paid_to_account_currency", None)
                     if payment_type == "Receive"
-                    else payment_entry.paid_from_account_currency
-                )
+                    else getattr(payment_entry, "paid_from_account_currency", None)
+                ) or currency
                 bank_amount = (
-                    payment_entry.received_amount
+                    getattr(payment_entry, "received_amount", None)
                     if payment_type == "Receive"
-                    else payment_entry.paid_amount
+                    else getattr(payment_entry, "paid_amount", None)
                 )
+                bank_amount = flt(bank_amount or getattr(payment_entry, "amount", 0) or amount, precision)
 
-                company_currency = frappe.get_cached_value("Company", company, "default_currency")
+                company_currency = (
+                    frappe.get_cached_value("Company", company, "default_currency")
+                    or getattr(payment_entry, "company_currency", None)
+                    or currency
+                )
 
                 # Convert bank amount to party currency ONCE
                 if bank_currency == party_account_currency:
@@ -638,8 +651,10 @@ def process_pos_payment(payload):
                     inv_conv_rate = flt(inv_doc.conversion_rate)
 
                     # Get amounts in party account currency
-                    company_currency = payment_entry.company_currency
-                    party_account_currency = payment_entry.party_account_currency
+                    company_currency = getattr(payment_entry, "company_currency", None) or company_currency
+                    party_account_currency = (
+                        getattr(payment_entry, "party_account_currency", None) or party_account_currency
+                    )
 
                     # Calculate reference details as per ERPNext's get_reference_details
                     # All amounts must be in party account currency
@@ -690,15 +705,19 @@ def process_pos_payment(payload):
 
                 # party_amount must be in party currency to match total_allocated (now in party currency)
                 party_amount = (
-                    payment_entry.paid_amount if payment_type == "Receive" else payment_entry.received_amount
+                    getattr(payment_entry, "paid_amount", None)
+                    if payment_type == "Receive"
+                    else getattr(payment_entry, "received_amount", None)
                 )
+                party_amount = flt(party_amount or getattr(payment_entry, "amount", 0) or amount, precision)
                 payment_entry.unallocated_amount = flt(party_amount - total_allocated, precision)
+                payment_entry.difference_amount = payment_entry.unallocated_amount
 
                 invoice_exchange_rate = flt(first_inv.get("conversion_rate", 0))
                 ref_names = ", ".join(r.reference_name for r in payment_entry.references)
                 verb = "received" if payment_type == "Receive" else "paid"
                 party_label = "from" if payment_type == "Receive" else "to"
-                party_label_amount = payment_entry.paid_amount if payment_type == "Receive" else payment_entry.received_amount
+                party_label_amount = party_amount
                 invoice_type = "Sales Invoice" if payment_type == "Receive" else "Purchase Invoice"
                 reference_no_str = data.get("reference_no") or pos_opening_shift_name
                 reference_date_str = data.get("reference_date") or posting_date
@@ -714,14 +733,18 @@ def process_pos_payment(payload):
                     f"Amount {party_account_currency} {flt(party_label_amount)} against {invoice_type} {ref_names}{rate_note}"
                 )
 
-                pe_exchange_rate = payment_entry.target_exchange_rate if payment_type == "Receive" else payment_entry.source_exchange_rate
+                pe_exchange_rate = (
+                    getattr(payment_entry, "target_exchange_rate", None)
+                    if payment_type == "Receive"
+                    else getattr(payment_entry, "source_exchange_rate", None)
+                )
 
                 # Build a map of reference rows by invoice name
                 ref_map = {}
                 for ref in payment_entry.references:
                     ref_map[ref.reference_name] = ref
 
-                # Calculate gain/loss for UI notification only (not set on reference)
+                # Calculate gain/loss for ERPNext reconciliation and UI notification
                 exchange_gain_loss_summary = []
                 net_gain_loss = 0
                 for inv in remaining_invoices:
@@ -736,6 +759,7 @@ def process_pos_payment(payload):
                             allocated_base = flt(ref.allocated_amount * pe_exchange_rate, precision)
                             allocated_base_at_ref_rate = flt(ref.allocated_amount * ref_rate, precision)
                             gl_value = allocated_base - allocated_base_at_ref_rate
+                            ref.exchange_gain_loss = flt(gl_value, precision)
                         else:
                             inv_doc = frappe.get_cached_doc(inv.get("voucher_type") or "Sales Invoice", inv["name"])
                             # Fallback to full invoice amount in company currency

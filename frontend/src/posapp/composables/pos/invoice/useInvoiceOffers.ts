@@ -151,8 +151,8 @@ export function useInvoiceOffers() {
 		const qty = parseFiniteNumber(item.qty, 0);
 		const rate = parseFiniteNumber(item.rate, 0);
 		const baseRate = parseFiniteNumber(item.base_rate ?? item.rate, rate);
-		item.amount = qty * rate;
-		item.base_amount = qty * baseRate;
+		item.amount = roundWithFlt(qty * rate);
+		item.base_amount = roundWithFlt(qty * baseRate);
 	};
 
 	const normalizeOfferRowId = (value: any) => String(value ?? "").trim();
@@ -1235,6 +1235,11 @@ export function useInvoiceOffers() {
 		return Number.isFinite(numeric) ? numeric : fallback;
 	};
 
+	const roundWithFlt = (value: any, precision?: number) =>
+		typeof flt === "function"
+			? flt(value, precision)
+			: parseFiniteNumber(value, 0);
+
 	const parseOfferItemRowIds = (offer: any) => {
 		if (!offer) return [];
 		return parseArrayField(offer.items);
@@ -1470,8 +1475,8 @@ export function useInvoiceOffers() {
 		const basePrice = resolveOfferBasePrice(new_item, conversionRate);
 
 		if (basePrice > 0) {
-			new_item.base_price_list_rate = basePrice;
-			new_item.price_list_rate = basePrice / conversionRate;
+			new_item.base_price_list_rate = roundWithFlt(basePrice);
+			new_item.price_list_rate = roundWithFlt(basePrice / conversionRate);
 		}
 
 		if (offerDiscountType === "Rate") {
@@ -1479,13 +1484,13 @@ export function useInvoiceOffers() {
 				parseFiniteNumber(offer?.rate, basePrice),
 				0,
 			);
-			const baseDiscount = Math.max(basePrice - newBaseRate, 0);
-			new_item.base_rate = newBaseRate;
-			new_item.rate = new_item.base_rate / conversionRate;
+			const baseDiscount = roundWithFlt(Math.max(basePrice - newBaseRate, 0));
+			new_item.base_rate = roundWithFlt(newBaseRate);
+			new_item.rate = roundWithFlt(new_item.base_rate / conversionRate);
 			new_item.base_discount_amount = baseDiscount;
-			new_item.discount_amount = baseDiscount / conversionRate;
+			new_item.discount_amount = roundWithFlt(baseDiscount / conversionRate);
 			new_item.discount_percentage = basePrice
-				? (baseDiscount / basePrice) * 100
+				? roundWithFlt((baseDiscount / basePrice) * 100)
 				: 0;
 		} else if (offerDiscountType === "Discount Percentage") {
 			const percent = clampNumber(
@@ -1493,21 +1498,21 @@ export function useInvoiceOffers() {
 				0,
 				100,
 			);
-			const baseDiscount = (basePrice * percent) / 100;
-			new_item.discount_percentage = percent;
+			const baseDiscount = roundWithFlt((basePrice * percent) / 100);
+			new_item.discount_percentage = roundWithFlt(percent);
 			new_item.base_discount_amount = baseDiscount;
-			new_item.discount_amount = baseDiscount / conversionRate;
-			new_item.base_rate = Math.max(basePrice - baseDiscount, 0);
-			new_item.rate = new_item.base_rate / conversionRate;
+			new_item.discount_amount = roundWithFlt(baseDiscount / conversionRate);
+			new_item.base_rate = roundWithFlt(Math.max(basePrice - baseDiscount, 0));
+			new_item.rate = roundWithFlt(new_item.base_rate / conversionRate);
 		} else if (offerDiscountType === "Discount Amount") {
 			const amount = parseFiniteNumber(offer?.discount_amount, 0);
-			const baseDiscount = clampNumber(amount, 0, basePrice);
+			const baseDiscount = roundWithFlt(clampNumber(amount, 0, basePrice));
 			new_item.base_discount_amount = baseDiscount;
-			new_item.discount_amount = baseDiscount / conversionRate;
-			new_item.base_rate = Math.max(basePrice - baseDiscount, 0);
-			new_item.rate = new_item.base_rate / conversionRate;
+			new_item.discount_amount = roundWithFlt(baseDiscount / conversionRate);
+			new_item.base_rate = roundWithFlt(Math.max(basePrice - baseDiscount, 0));
+			new_item.rate = roundWithFlt(new_item.base_rate / conversionRate);
 			new_item.discount_percentage = basePrice
-				? (baseDiscount / basePrice) * 100
+				? roundWithFlt((baseDiscount / basePrice) * 100)
 				: 0;
 		}
 		new_item._offer_constraints = {
@@ -1561,21 +1566,21 @@ export function useInvoiceOffers() {
 			item.conversion_factor = conversionRate;
 			const offerDiscountType = String(offer?.discount_type || "").trim();
 			const basePrice = resolveOfferBasePrice(item, conversionRate);
-			item.base_price_list_rate = basePrice;
-			item.price_list_rate = basePrice / conversionRate;
+			item.base_price_list_rate = roundWithFlt(basePrice);
+			item.price_list_rate = roundWithFlt(basePrice / conversionRate);
 
 			if (offerDiscountType === "Rate") {
 				const newBaseRate = Math.max(
 					parseFiniteNumber(offer?.rate, basePrice),
 					0,
 				);
-				const baseDiscount = Math.max(basePrice - newBaseRate, 0);
-				item.base_rate = newBaseRate;
-				item.rate = item.base_rate / conversionRate;
+				const baseDiscount = roundWithFlt(Math.max(basePrice - newBaseRate, 0));
+				item.base_rate = roundWithFlt(newBaseRate);
+				item.rate = roundWithFlt(item.base_rate / conversionRate);
 				item.base_discount_amount = baseDiscount;
-				item.discount_amount = baseDiscount / conversionRate;
+				item.discount_amount = roundWithFlt(baseDiscount / conversionRate);
 				item.discount_percentage = basePrice
-					? (baseDiscount / basePrice) * 100
+					? roundWithFlt((baseDiscount / basePrice) * 100)
 					: 0;
 			} else if (offerDiscountType === "Discount Percentage") {
 				const percent = clampNumber(
@@ -1583,21 +1588,21 @@ export function useInvoiceOffers() {
 					0,
 					100,
 				);
-				const baseDiscount = (basePrice * percent) / 100;
-				item.discount_percentage = percent;
+				const baseDiscount = roundWithFlt((basePrice * percent) / 100);
+				item.discount_percentage = roundWithFlt(percent);
 				item.base_discount_amount = baseDiscount;
-				item.discount_amount = baseDiscount / conversionRate;
-				item.base_rate = Math.max(basePrice - baseDiscount, 0);
-				item.rate = item.base_rate / conversionRate;
+				item.discount_amount = roundWithFlt(baseDiscount / conversionRate);
+				item.base_rate = roundWithFlt(Math.max(basePrice - baseDiscount, 0));
+				item.rate = roundWithFlt(item.base_rate / conversionRate);
 			} else if (offerDiscountType === "Discount Amount") {
 				const amount = parseFiniteNumber(offer?.discount_amount, 0);
-				const baseDiscount = clampNumber(amount, 0, basePrice);
+				const baseDiscount = roundWithFlt(clampNumber(amount, 0, basePrice));
 				item.base_discount_amount = baseDiscount;
-				item.discount_amount = baseDiscount / conversionRate;
-				item.base_rate = Math.max(basePrice - baseDiscount, 0);
-				item.rate = item.base_rate / conversionRate;
+				item.discount_amount = roundWithFlt(baseDiscount / conversionRate);
+				item.base_rate = roundWithFlt(Math.max(basePrice - baseDiscount, 0));
+				item.rate = roundWithFlt(item.base_rate / conversionRate);
 				item.discount_percentage = basePrice
-					? (baseDiscount / basePrice) * 100
+					? roundWithFlt((baseDiscount / basePrice) * 100)
 					: 0;
 			}
 			item._offer_constraints = {
@@ -1691,12 +1696,12 @@ export function useInvoiceOffers() {
 				0,
 				100,
 			);
-			const discount = (total * percent) / 100;
+			const discount = roundWithFlt((total * percent) / 100);
 			invoiceStore.setAdditionalDiscount(discount);
 			discount_percentage_offer_name.value = offer.name;
 		} else if (offerDiscountType === "Discount Amount") {
 			invoiceStore.setAdditionalDiscount(
-				parseFiniteNumber(offer?.discount_amount, 0),
+				roundWithFlt(parseFiniteNumber(offer?.discount_amount, 0)),
 			);
 		}
 	};
