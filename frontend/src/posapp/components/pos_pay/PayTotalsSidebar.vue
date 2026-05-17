@@ -79,7 +79,7 @@
 						<v-divider v-if="idx < selectedPaymentsDetail.length - 1" class="mt-1" />
 					</v-list-item>
 			</v-list>
-			
+
 			<v-divider class="my-1" />
 			<div class="d-flex justify-space-between align-center font-weight-bold text-body-2">
 				<span>{{ __("Total") }}</span>
@@ -164,7 +164,8 @@
 									{{ paymentType === "Pay" ? __("Paid:") : __("Recv:") }}
 								</span>
 								<v-text-field
-									v-model="selectedMop.amount"
+									:model-value="selectedMop.amount"
+									@update:model-value="onPaidAmountInput"
 									type="number"
 									variant="outlined"
 									density="compact"
@@ -276,18 +277,37 @@
 								</v-col>
 							<v-col cols="6" class="py-0">
 								<div class="d-flex justify-space-between align-center pr-1">
-									<span class="text-medium-emphasis text-caption">{{ __("Base Paid:") }}</span>
-									<v-text-field
-										:model-value="effectiveBasePaid(selectedMop.row_id)"
-										@update:model-value="v => basePaidManual[selectedMop.row_id] = v ? flt(v) : null"
-										density="compact"
-										variant="plain"
-										hide-details
-										type="number"
-										@wheel.prevent
-										:prefix="currencySymbol(companyCurrency)"
-										class="base-paid-input"
-									/>
+									<span class="text-medium-emphasis text-caption">
+										{{ __("Base Paid:") }}
+										<v-chip
+											v-if="isManualOverrideActive(selectedMop)"
+											size="x-small"
+											color="warning"
+											variant="tonal"
+											class="ml-1"
+										>
+											{{ __("manual") }}
+										</v-chip>
+									</span>
+									<div class="d-flex align-center">
+										<v-text-field
+											:model-value="effectiveBasePaid(selectedMop)"
+											@update:model-value="onBasePaidInput"
+											density="compact"
+											variant="plain"
+											hide-details
+											type="number"
+											@wheel.prevent
+											:prefix="currencySymbol(companyCurrency)"
+											class="base-paid-input"
+										/>
+									</div>
+								</div>
+								<div
+									v-if="getBasePaidVariance(selectedMop)"
+									class="text-caption text-warning mt-1"
+								>
+									{{ getBasePaidVariance(selectedMop)?.warning }}
 								</div>
 							</v-col>
 								<v-col cols="6" class="py-0">
@@ -553,6 +573,11 @@ const flt = (value, precision) => {
 	return isNaN(num) ? 0 : precision != null ? parseFloat(num.toFixed(precision)) : num;
 };
 
+const getMopKey = (mop) => {
+	if (!mop) return null;
+	return [mop.mode_of_payment || "", mop.account || "default", mop.currency || ""].join("|");
+};
+
 const props = defineProps({
 	posProfile: Object,
 	totalSelectedInvoices: Number,
@@ -679,10 +704,121 @@ const newPaymentFields = computed(() => {
 });
 
 const basePaidManual = ref({});
+const basePaidDirtyKeys = ref(new Set());
+const basePaidAuditLog = ref([]);
 
-const effectiveBasePaid = (rowId) => {
-	const manual = basePaidManual.value[rowId];
-	return manual != null ? flt(manual) : (newPaymentFields.value[rowId]?.basePaidAmount || 0);
+const STORAGE_KEY = computed(() => {
+	const party = props.partyAccount?.account || props.partyAccount?.name || "unknown";
+	return `pos_manual_base_${party}`;
+});
+
+const effectiveBasePaid = (mop) => {
+	const key = getMopKey(mop);
+	if (key && basePaidDirtyKeys.value.has(key) && basePaidManual.value[key] != null) {
+		return flt(basePaidManual.value[key]);
+	}
+	const rowId = mop?.row_id;
+	return rowId ? (newPaymentFields.value[rowId]?.basePaidAmount || 0) : 0;
+};
+
+const computedBasePaid = (mop) => {
+	const rowId = mop?.row_id;
+	return rowId ? (newPaymentFields.value[rowId]?.basePaidAmount || 0) : 0;
+};
+
+const isManualOverrideActive = (mop) => {
+	const key = getMopKey(mop);
+	return key ? basePaidDirtyKeys.value.has(key) : false;
+};
+
+const getBasePaidVariance = (mop) => {
+	const key = getMopKey(mop);
+	if (!key || !basePaidDirtyKeys.value.has(key)) return null;
+	const manual = basePaidManual.value[key];
+	const computed = computedBasePaid(mop);
+	if (!computed || manual == null) return null;
+	const variance = Math.abs(manual - computed) / computed;
+	if (variance > 0.05) {
+		return { variance: (variance * 100).toFixed(1), warning: `Manual base paid differs ${(variance * 100).toFixed(1)}% from computed` };
+	}
+	return null;
+};
+
+const persistManualOverrides = () => {
+	try {
+		const data = {
+			manual: Object.fromEntries(Object.entries(basePaidManual.value)),
+			dirty: Array.from(basePaidDirtyKeys.value),
+			audit: basePaidAuditLog.value.slice(-100),
+			updatedAt: new Date().toISOString(),
+		};
+		localStorage.setItem(STORAGE_KEY.value, JSON.stringify(data));
+	} catch (e) {
+		/* localStorage full or unavailable */
+	}
+};
+
+const loadManualOverrides = () => {
+	try {
+		const raw = localStorage.getItem(STORAGE_KEY.value);
+		if (!raw) return;
+		const data = JSON.parse(raw);
+		if (data.manual) basePaidManual.value = data.manual;
+		if (data.dirty) basePaidDirtyKeys.value = new Set(data.dirty);
+		if (data.audit) basePaidAuditLog.value = data.audit;
+	} catch (e) {
+		/* Corrupted data — start fresh */
+	}
+};
+
+loadManualOverrides();
+
+watch(
+	[basePaidManual, basePaidDirtyKeys],
+	() => {
+		if (Object.keys(basePaidManual.value).length > 0) {
+			persistManualOverrides();
+		}
+	},
+	{ deep: true },
+);
+
+const onPaidAmountInput = (newVal) => {
+	const mop = selectedMop.value;
+	if (!mop) return;
+	const key = getMopKey(mop);
+	if (key) {
+		basePaidDirtyKeys.value.delete(key);
+	}
+	mop.amount = newVal ? flt(newVal) : 0;
+};
+
+const onBasePaidInput = (newVal) => {
+	const mop = selectedMop.value;
+	if (!mop) return;
+	const key = getMopKey(mop);
+	if (!key) return;
+
+	const parsed = newVal ? flt(newVal) : null;
+	const oldVal = basePaidManual.value[key];
+	const computedVal = computedBasePaid(mop);
+
+	basePaidManual.value[key] = parsed;
+	basePaidDirtyKeys.value.add(key);
+
+	basePaidAuditLog.value.push({
+		timestamp: new Date().toISOString(),
+		mopKey: key,
+		modeOfPayment: mop.mode_of_payment,
+		oldBasePaid: oldVal ?? computedVal,
+		newBasePaid: parsed,
+		computedBasePaid: computedVal,
+		exchangeRate: flt(props.exchangeRate),
+		paidAmountUSD: flt(mop.amount),
+		user: typeof frappe !== "undefined" && frappe?.session?.user ? frappe.session.user : "unknown",
+	});
+
+	persistManualOverrides();
 };
 
 const selectedMopName = ref(null);
@@ -813,7 +949,7 @@ const enteredPayments = computed(() => {
 				row_id: m.row_id,
 				mode_of_payment: m.mode_of_payment,
 				amount: flt(m.amount),
-				baseAmount: effectiveBasePaid(m.row_id) || flt(m.amount),
+				baseAmount: effectiveBasePaid(m) || flt(m.amount),
 			};
 		});
 });
@@ -852,8 +988,20 @@ const updateReferenceDate = (val) => {
 	return resolvedValue;
 };
 
+const clearOverridesOnSubmit = () => {
+	const key = STORAGE_KEY.value;
+	try { localStorage.removeItem(key); } catch (e) { /* ignore */ }
+	basePaidManual.value = {};
+	basePaidDirtyKeys.value = new Set();
+	try {
+		sessionStorage.setItem(`pos_audit_archive_${Date.now()}`, JSON.stringify(basePaidAuditLog.value));
+	} catch (e) { /* ignore */ }
+	basePaidAuditLog.value = [];
+};
+
 defineExpose({
 	updateReferenceDate,
+	clearOverridesOnSubmit,
 });
 </script>
 

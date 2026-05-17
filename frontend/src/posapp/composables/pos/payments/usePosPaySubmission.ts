@@ -99,6 +99,7 @@ export function usePosPaySubmission({
 			get_unallocated_payments();
 			set_mpesa_search_params();
 			get_draft_mpesa_payments_register();
+			eventBus.emit("payment-submitted");
 		};
 
 		try {

@@ -154,6 +154,7 @@
 					style="max-height: calc(100dvh - 32px); height: calc(100dvh - 32px)"
 				>
 					<PayTotalsSidebar
+						ref="payTotalsSidebarRef"
 						v-model:exchange-rate="exchangeRate"
 						v-model:auto-allocate-payment-amount="autoAllocatePaymentAmount"
 						v-model:reference-no="referenceNo"
@@ -1032,10 +1033,15 @@ export default {
 		const submit_and_print = () => processPayment({ printAfter: true });
 
 		// Lifecycle & Watchers
+		const payTotalsSidebarRef = ref(null);
+
 		onMounted(() => {
 			if (proxy?.eventBus) {
 				proxy.eventBus.on("network-online", syncPendingPayments);
 				proxy.eventBus.on("server-online", syncPendingPayments);
+				proxy.eventBus.on("payment-submitted", () => {
+					payTotalsSidebarRef.value?.clearOverridesOnSubmit();
+				});
 			}
 			nextTick(() => check_opening_entry());
 		});
@@ -1044,6 +1050,7 @@ export default {
 			if (proxy?.eventBus) {
 				proxy.eventBus.off("network-online", syncPendingPayments);
 				proxy.eventBus.off("server-online", syncPendingPayments);
+				proxy.eventBus.off("payment-submitted");
 			}
 		});
 
