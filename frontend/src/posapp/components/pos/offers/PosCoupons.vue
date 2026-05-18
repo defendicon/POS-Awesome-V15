@@ -255,7 +255,12 @@ export default {
 
 	watch: {
 		posa_coupons: {
-			// Drop deep:true; handler reacts to array reassignments only.
+			// Keep deep:true here. `updatePosCoupons` mutates
+			// `coupon.applied = 0/1` in-place (lines 207/209) — a
+			// shallow watcher would miss those mutations and leave the
+			// applied-counter badge + the `update_invoice_coupons`
+			// event subscribers out of sync.
+			deep: true,
 			handler() {
 				this.updateInvoice();
 				this.updateCounters();

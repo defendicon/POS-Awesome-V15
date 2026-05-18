@@ -334,8 +334,12 @@ export default {
 
 	watch: {
 		pos_offers: {
-			// Drop deep:true — handler reacts to array
-			// reassignments only.
+			// Keep deep:true here. `updatePosOffers` mutates
+			// `pos_offer.items = offer.items` in-place (line 224) — a
+			// shallow watcher would miss those mutations and leave
+			// downstream `update_invoice_offers` event subscribers and
+			// the coupon-sync chain out of sync.
+			deep: true,
 			handler() {
 				this.handelOffers();
 				this.updateCounters();
