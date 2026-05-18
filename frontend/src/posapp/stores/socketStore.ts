@@ -132,8 +132,20 @@ export const useSocketStore = defineStore("socket", () => {
     return withTimeout<PostSubmitPaymentState>(paymentWaiters, invoice, timeoutMs);
   };
 
+  let initialised = false;
+
   function init() {
     if (typeof frappe === "undefined" || !frappe.realtime) return;
+    // Guard against double-registration. Each call to `init()` was
+    // attaching another set of 6 `frappe.realtime.on(...)` handlers
+    // with no `.off()` cleanup. Pos.vue (re)mounts on customer
+    // change re-ran init via Payments.vue's `useSocketStore()`
+    // chain, so listeners climbed 6 per mount → 22k+ in minutes,
+    // visible in Firefox Performance as a 2 k → 22 k listener
+    // count and 27 s `vendor-CF6GND7R.js f` self-time (Vue's reactive
+    // trigger walking the bloated subscriber list).
+    if (initialised) return;
+    initialised = true;
 
     // Global listener for background submission errors
     frappe.realtime.on("pos_invoice_submit_error", (data: InvoiceProcessingPayload) => {
