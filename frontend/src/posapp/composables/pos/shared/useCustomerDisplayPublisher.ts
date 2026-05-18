@@ -257,12 +257,15 @@ export function useCustomerDisplayPublisher({
 		},
 	);
 
+	// Drop deep:true on these — `customerInfo` and `posProfile`
+	// are replaced as a whole on customer / shift change, which
+	// the shallow watch already detects. Inner field mutations
+	// don't need to re-trigger the customer-display publish.
 	watch(
 		() => customersStore.customerInfo,
 		() => {
 			schedulePublish();
 		},
-		{ deep: true },
 	);
 
 	watch(
@@ -271,7 +274,7 @@ export function useCustomerDisplayPublisher({
 			tryAutoOpen();
 			schedulePublish();
 		},
-		{ deep: true, immediate: true },
+		{ immediate: true },
 	);
 
 	return {

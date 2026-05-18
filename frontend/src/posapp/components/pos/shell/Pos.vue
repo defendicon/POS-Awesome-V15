@@ -678,6 +678,8 @@ export default {
 
 			// Watch store for updates
 			this.$watch(
+				// Drop deep:true — react to profile reassignment only
+				// (handled when shift opens / closes / switches).
 				() => this.uiStore.posProfile,
 				(newProfile) => {
 					if (newProfile && newProfile.name) {
@@ -685,7 +687,7 @@ export default {
 						this.get_offers(newProfile.name, newProfile);
 					}
 				},
-				{ deep: true, immediate: true },
+				{ immediate: true },
 			);
 		});
 	},

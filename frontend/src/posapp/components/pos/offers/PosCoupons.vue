@@ -255,7 +255,7 @@ export default {
 
 	watch: {
 		posa_coupons: {
-			deep: true,
+			// Drop deep:true; handler reacts to array reassignments only.
 			handler() {
 				this.updateInvoice();
 				this.updateCounters();
@@ -296,7 +296,7 @@ export default {
 			(profile) => {
 				if (profile) this.pos_profile = profile;
 			},
-			{ deep: true, immediate: true },
+			{ immediate: true },
 		);
 		/*
 		this.$nextTick(function () {

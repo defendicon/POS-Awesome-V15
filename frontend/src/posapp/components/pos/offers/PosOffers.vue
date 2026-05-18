@@ -334,7 +334,8 @@ export default {
 
 	watch: {
 		pos_offers: {
-			deep: true,
+			// Drop deep:true — handler reacts to array
+			// reassignments only.
 			handler() {
 				this.handelOffers();
 				this.updateCounters();
@@ -355,7 +356,7 @@ export default {
 			(profile) => {
 				if (profile) this.pos_profile = profile;
 			},
-			{ deep: true, immediate: true },
+			{ immediate: true },
 		);
 		this.$watch(
 			() => this.uiStore.applicableOffers,
@@ -364,7 +365,7 @@ export default {
 					this.updatePosOffers(offers);
 				}
 			},
-			{ deep: true, immediate: true },
+			{ immediate: true },
 		);
 
 		/*
