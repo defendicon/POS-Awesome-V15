@@ -79,7 +79,11 @@ export default defineConfig({
 				format: "es",
 				entryFileNames: getEntryFileName,
 				chunkFileNames: "[name]-[hash].js",
-				assetFileNames: "posawesome.[ext]",
+				// Hash assets too — entries are now hashed
+				// (build-manifest.js) so the un-hashed `posawesome.css`
+				// would otherwise be the only file the browser can pin
+				// stale across deploys.
+				assetFileNames: "[name]-[hash].[ext]",
 				manualChunks: (id) => {
 					if (id.includes("node_modules")) {
 						if (id.includes("vuetify")) {

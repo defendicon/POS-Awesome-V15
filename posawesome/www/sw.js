@@ -15,16 +15,25 @@ function buildVersionedAssetUrl(url, version) {
 	return `${url}?v=${encodeURIComponent(version || DEFAULT_CACHE_VERSION)}`;
 }
 
+function pickAssetUrl(assets, key, fallbackPath, version) {
+	// Entries are now content-hashed at build time (see
+	// build-manifest.js). The hashed filename is published in
+	// version.json -> assets[key]; fall back to the legacy un-hashed
+	// path for transitional rollouts where an old version.json is
+	// still being served.
+	const value = typeof assets?.[key] === "string" ? assets[key].trim() : "";
+	if (value) {
+		return value;
+	}
+	return buildVersionedAssetUrl(fallbackPath, version);
+}
+
 function getPrecacheUrls(version, assets = {}) {
-	const offlineIndexUrl =
-		typeof assets.offlineIndex === "string" && assets.offlineIndex
-			? assets.offlineIndex
-			: buildVersionedAssetUrl("/assets/posawesome/dist/js/offline/index.js", version);
 	return [
-		buildVersionedAssetUrl("/assets/posawesome/dist/js/loader.js", version),
-		buildVersionedAssetUrl("/assets/posawesome/dist/js/posawesome.css", version),
-		buildVersionedAssetUrl("/assets/posawesome/dist/js/posawesome.js", version),
-		offlineIndexUrl,
+		pickAssetUrl(assets, "loader", "/assets/posawesome/dist/js/loader.js", version),
+		pickAssetUrl(assets, "css", "/assets/posawesome/dist/js/posawesome.css", version),
+		pickAssetUrl(assets, "posawesome", "/assets/posawesome/dist/js/posawesome.js", version),
+		pickAssetUrl(assets, "offlineIndex", "/assets/posawesome/dist/js/offline/index.js", version),
 		...STATIC_PRECACHE_URLS,
 	];
 }

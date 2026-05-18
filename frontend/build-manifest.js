@@ -1,8 +1,11 @@
 const DIST_BASE_URL = "/assets/posawesome/dist/js/";
-const STATIC_ENTRY_NAMES = new Set(["posawesome", "loader"]);
 
-export function getEntryFileName(chunkInfo) {
-	return STATIC_ENTRY_NAMES.has(chunkInfo?.name) ? "[name].js" : "[name]-[hash].js";
+// Every emitted entry is now content-hashed. The Page controller
+// (posapp.js) and the Service Worker (sw.js) read the actual hashed
+// filenames from version.json's `assets` map at runtime, so the
+// browser cannot pin a stale cached `posawesome.js` across deploys.
+export function getEntryFileName() {
+	return "[name]-[hash].js";
 }
 
 function toPublicAssetUrl(fileName) {
@@ -21,15 +24,39 @@ function getChunkFileName(bundle, chunkName) {
 	return match?.fileName || null;
 }
 
+function getCssAssetFileName(bundle) {
+	// `cssCodeSplit: false` emits a single combined stylesheet (Vite
+	// names it `style-<hash>.css` by default). Pick the largest CSS
+	// asset to be robust to either naming scheme.
+	const cssAssets = Object.values(bundle || {}).filter(
+		(entry) =>
+			entry?.type === "asset" &&
+			typeof entry?.fileName === "string" &&
+			entry.fileName.endsWith(".css"),
+	);
+	if (!cssAssets.length) return null;
+	cssAssets.sort((a, b) => (b.source?.length || 0) - (a.source?.length || 0));
+	return cssAssets[0].fileName;
+}
+
 export function buildVersionPayload(version, bundle = {}) {
+	const loaderFile = getChunkFileName(bundle, "loader");
+	const posawesomeFile = getChunkFileName(bundle, "posawesome");
 	const offlineIndexFile = getChunkFileName(bundle, "offline/index");
+	const cssFile = getCssAssetFileName(bundle);
 
 	return {
 		version,
 		assets: {
-			loader: toVersionedPublicAssetUrl("loader.js", version),
-			posawesome: toVersionedPublicAssetUrl("posawesome.js", version),
-			css: toVersionedPublicAssetUrl("posawesome.css", version),
+			loader: loaderFile
+				? toVersionedPublicAssetUrl(loaderFile, version)
+				: toVersionedPublicAssetUrl("loader.js", version),
+			posawesome: posawesomeFile
+				? toVersionedPublicAssetUrl(posawesomeFile, version)
+				: toVersionedPublicAssetUrl("posawesome.js", version),
+			css: cssFile
+				? toVersionedPublicAssetUrl(cssFile, version)
+				: toVersionedPublicAssetUrl("posawesome.css", version),
 			offlineIndex: offlineIndexFile
 				? toPublicAssetUrl(offlineIndexFile)
 				: toPublicAssetUrl("offline/index.js"),
