@@ -385,5 +385,15 @@ export default {
 			this.allItems = data;
 		});
 	},
+	beforeUnmount() {
+		// Cleanup eventBus listeners to prevent the leak that
+		// accumulated thousands of subscribers across customer-change
+		// remount cycles.
+		if (this.eventBus) {
+			this.eventBus.off("update_pos_offers");
+			this.eventBus.off("update_discount_percentage_offer_name");
+			this.eventBus.off("set_all_items");
+		}
+	},
 };
 </script>

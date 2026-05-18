@@ -120,6 +120,11 @@ export default {
 			this.customer = data;
 		});
 	},
+	beforeUnmount() {
+		if (this.eventBus) {
+			this.eventBus.off("open_new_address");
+		}
+	},
 };
 </script>
 

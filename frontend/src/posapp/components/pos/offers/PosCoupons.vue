@@ -312,6 +312,12 @@ export default {
 			this.posa_coupons = data;
 		});
 	},
+	beforeUnmount() {
+		if (this.eventBus) {
+			this.eventBus.off("update_pos_coupons");
+			this.eventBus.off("set_pos_coupons");
+		}
+	},
 };
 </script>
 
