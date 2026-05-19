@@ -155,6 +155,23 @@ export function useInvoiceOffers() {
 		item.base_amount = roundWithFlt(qty * baseRate);
 	};
 
+	const updateStoreBackedItem = (
+		item: any,
+		updater: (_item: any) => void,
+	) => {
+		if (!item || typeof updater !== "function") return item;
+		const rowId = item.posa_row_id;
+		if (
+			rowId &&
+			typeof invoiceStore.updateItemWithTotals === "function" &&
+			invoiceStore.itemsData.has(rowId)
+		) {
+			return invoiceStore.updateItemWithTotals(rowId, updater) || item;
+		}
+		updater(item);
+		return item;
+	};
+
 	const normalizeOfferRowId = (value: any) => String(value ?? "").trim();
 	const getOfferRowId = (offer: any) =>
 		normalizeOfferRowId(offer?.row_id || offer?.name);
@@ -1545,83 +1562,99 @@ export function useInvoiceOffers() {
 		combined.forEach((item) => {
 			if (!item || !offerItems.includes(item.posa_row_id)) return;
 
-			item.posa_offer_applied = 1;
-			item._manual_rate_set = true;
-			item._manual_rate_set_from_uom = false;
+			const updatedItem = updateStoreBackedItem(item, (line) => {
+				line.posa_offer_applied = 1;
+				line._manual_rate_set = true;
+				line._manual_rate_set_from_uom = false;
 
-			const normalizedItemUoms = Array.isArray(item.item_uoms)
-				? item.item_uoms
-				: [];
-			const selectedUom = item.uom ? String(item.uom).trim() : "";
-			const selectedUomData = normalizedItemUoms.find(
-				(entry: any) =>
-					entry &&
-					String(entry.uom || "").trim() ===
-						String(selectedUom || ""),
-			);
-			const conversionRate = resolveOfferConversionFactor(
-				item,
-				selectedUomData,
-			);
-			item.conversion_factor = conversionRate;
-			const offerDiscountType = String(offer?.discount_type || "").trim();
-			const basePrice = resolveOfferBasePrice(item, conversionRate);
-			item.base_price_list_rate = roundWithFlt(basePrice);
-			item.price_list_rate = roundWithFlt(basePrice / conversionRate);
-
-			if (offerDiscountType === "Rate") {
-				const newBaseRate = Math.max(
-					parseFiniteNumber(offer?.rate, basePrice),
-					0,
+				const normalizedItemUoms = Array.isArray(line.item_uoms)
+					? line.item_uoms
+					: [];
+				const selectedUom = line.uom ? String(line.uom).trim() : "";
+				const selectedUomData = normalizedItemUoms.find(
+					(entry: any) =>
+						entry &&
+						String(entry.uom || "").trim() ===
+							String(selectedUom || ""),
 				);
-				const baseDiscount = roundWithFlt(Math.max(basePrice - newBaseRate, 0));
-				item.base_rate = roundWithFlt(newBaseRate);
-				item.rate = roundWithFlt(item.base_rate / conversionRate);
-				item.base_discount_amount = baseDiscount;
-				item.discount_amount = roundWithFlt(baseDiscount / conversionRate);
-				item.discount_percentage = basePrice
-					? roundWithFlt((baseDiscount / basePrice) * 100)
-					: 0;
-			} else if (offerDiscountType === "Discount Percentage") {
-				const percent = clampNumber(
-					parseFiniteNumber(offer?.discount_percentage, 0),
-					0,
-					100,
+				const conversionRate = resolveOfferConversionFactor(
+					line,
+					selectedUomData,
 				);
-				const baseDiscount = roundWithFlt((basePrice * percent) / 100);
-				item.discount_percentage = roundWithFlt(percent);
-				item.base_discount_amount = baseDiscount;
-				item.discount_amount = roundWithFlt(baseDiscount / conversionRate);
-				item.base_rate = roundWithFlt(Math.max(basePrice - baseDiscount, 0));
-				item.rate = roundWithFlt(item.base_rate / conversionRate);
-			} else if (offerDiscountType === "Discount Amount") {
-				const amount = parseFiniteNumber(offer?.discount_amount, 0);
-				const baseDiscount = roundWithFlt(clampNumber(amount, 0, basePrice));
-				item.base_discount_amount = baseDiscount;
-				item.discount_amount = roundWithFlt(baseDiscount / conversionRate);
-				item.base_rate = roundWithFlt(Math.max(basePrice - baseDiscount, 0));
-				item.rate = roundWithFlt(item.base_rate / conversionRate);
-				item.discount_percentage = basePrice
-					? roundWithFlt((baseDiscount / basePrice) * 100)
-					: 0;
-			}
-			item._offer_constraints = {
-				max_qty: null,
-				fixed_uom: "",
-				discount_type: offerDiscountType,
-				min_base_rate: parseFiniteNumber(item.base_rate, 0),
-				max_base_discount_amount: parseFiniteNumber(
-					item.base_discount_amount,
-					0,
-				),
-				max_discount_percentage: parseFiniteNumber(
-					item.discount_percentage,
-					0,
-				),
-			};
-			syncOfferLineAmounts(item);
+				line.conversion_factor = conversionRate;
+				const offerDiscountType = String(offer?.discount_type || "").trim();
+				const basePrice = resolveOfferBasePrice(line, conversionRate);
+				line.base_price_list_rate = roundWithFlt(basePrice);
+				line.price_list_rate = roundWithFlt(basePrice / conversionRate);
 
-			if (update_item_detail_fn) update_item_detail_fn(item);
+				if (offerDiscountType === "Rate") {
+					const newBaseRate = Math.max(
+						parseFiniteNumber(offer?.rate, basePrice),
+						0,
+					);
+					const baseDiscount = roundWithFlt(
+						Math.max(basePrice - newBaseRate, 0),
+					);
+					line.base_rate = roundWithFlt(newBaseRate);
+					line.rate = roundWithFlt(line.base_rate / conversionRate);
+					line.base_discount_amount = baseDiscount;
+					line.discount_amount = roundWithFlt(
+						baseDiscount / conversionRate,
+					);
+					line.discount_percentage = basePrice
+						? roundWithFlt((baseDiscount / basePrice) * 100)
+						: 0;
+				} else if (offerDiscountType === "Discount Percentage") {
+					const percent = clampNumber(
+						parseFiniteNumber(offer?.discount_percentage, 0),
+						0,
+						100,
+					);
+					const baseDiscount = roundWithFlt((basePrice * percent) / 100);
+					line.discount_percentage = roundWithFlt(percent);
+					line.base_discount_amount = baseDiscount;
+					line.discount_amount = roundWithFlt(
+						baseDiscount / conversionRate,
+					);
+					line.base_rate = roundWithFlt(
+						Math.max(basePrice - baseDiscount, 0),
+					);
+					line.rate = roundWithFlt(line.base_rate / conversionRate);
+				} else if (offerDiscountType === "Discount Amount") {
+					const amount = parseFiniteNumber(offer?.discount_amount, 0);
+					const baseDiscount = roundWithFlt(
+						clampNumber(amount, 0, basePrice),
+					);
+					line.base_discount_amount = baseDiscount;
+					line.discount_amount = roundWithFlt(
+						baseDiscount / conversionRate,
+					);
+					line.base_rate = roundWithFlt(
+						Math.max(basePrice - baseDiscount, 0),
+					);
+					line.rate = roundWithFlt(line.base_rate / conversionRate);
+					line.discount_percentage = basePrice
+						? roundWithFlt((baseDiscount / basePrice) * 100)
+						: 0;
+				}
+				line._offer_constraints = {
+					max_qty: null,
+					fixed_uom: "",
+					discount_type: offerDiscountType,
+					min_base_rate: parseFiniteNumber(line.base_rate, 0),
+					max_base_discount_amount: parseFiniteNumber(
+						line.base_discount_amount,
+						0,
+					),
+					max_discount_percentage: parseFiniteNumber(
+						line.discount_percentage,
+						0,
+					),
+				};
+				syncOfferLineAmounts(line);
+			});
+
+			if (update_item_detail_fn) update_item_detail_fn(updatedItem);
 		});
 		refreshInvoiceTotalsAfterOfferPriceChange();
 	};
@@ -1633,49 +1666,51 @@ export function useInvoiceOffers() {
 		combined.forEach((item) => {
 			if (!item || !offerItems.includes(item.posa_row_id)) return;
 
-			item.posa_offer_applied = 0;
-			item._manual_rate_set = false;
-			item._manual_rate_set_from_uom = false;
-			const originalPriceListRate = parseFiniteNumber(
-				item.original_price_list_rate,
-				Number.NaN,
-			);
-			const originalBasePriceListRate = parseFiniteNumber(
-				item.original_base_price_list_rate,
-				Number.NaN,
-			);
-			const originalRate = parseFiniteNumber(
-				item.original_rate,
-				Number.NaN,
-			);
-			const originalBaseRate = parseFiniteNumber(
-				item.original_base_rate,
-				Number.NaN,
-			);
+			const updatedItem = updateStoreBackedItem(item, (line) => {
+				line.posa_offer_applied = 0;
+				line._manual_rate_set = false;
+				line._manual_rate_set_from_uom = false;
+				const originalPriceListRate = parseFiniteNumber(
+					line.original_price_list_rate,
+					Number.NaN,
+				);
+				const originalBasePriceListRate = parseFiniteNumber(
+					line.original_base_price_list_rate,
+					Number.NaN,
+				);
+				const originalRate = parseFiniteNumber(
+					line.original_rate,
+					Number.NaN,
+				);
+				const originalBaseRate = parseFiniteNumber(
+					line.original_base_rate,
+					Number.NaN,
+				);
 
-			if (Number.isFinite(originalPriceListRate)) {
-				item.price_list_rate = originalPriceListRate;
-			}
-			if (Number.isFinite(originalBasePriceListRate)) {
-				item.base_price_list_rate = originalBasePriceListRate;
-			}
-			if (Number.isFinite(originalRate)) {
-				item.rate = originalRate;
-			} else if (Number.isFinite(originalPriceListRate)) {
-				item.rate = originalPriceListRate;
-			}
-			if (Number.isFinite(originalBaseRate)) {
-				item.base_rate = originalBaseRate;
-			} else if (Number.isFinite(originalBasePriceListRate)) {
-				item.base_rate = originalBasePriceListRate;
-			}
-			item.discount_percentage = 0;
-			item.discount_amount = 0;
-			item.base_discount_amount = 0;
-			item._offer_constraints = null;
-			syncOfferLineAmounts(item);
+				if (Number.isFinite(originalPriceListRate)) {
+					line.price_list_rate = originalPriceListRate;
+				}
+				if (Number.isFinite(originalBasePriceListRate)) {
+					line.base_price_list_rate = originalBasePriceListRate;
+				}
+				if (Number.isFinite(originalRate)) {
+					line.rate = originalRate;
+				} else if (Number.isFinite(originalPriceListRate)) {
+					line.rate = originalPriceListRate;
+				}
+				if (Number.isFinite(originalBaseRate)) {
+					line.base_rate = originalBaseRate;
+				} else if (Number.isFinite(originalBasePriceListRate)) {
+					line.base_rate = originalBasePriceListRate;
+				}
+				line.discount_percentage = 0;
+				line.discount_amount = 0;
+				line.base_discount_amount = 0;
+				line._offer_constraints = null;
+				syncOfferLineAmounts(line);
+			});
 
-			if (update_item_detail_fn) update_item_detail_fn(item);
+			if (update_item_detail_fn) update_item_detail_fn(updatedItem);
 		});
 		refreshInvoiceTotalsAfterOfferPriceChange();
 
@@ -1722,7 +1757,9 @@ export function useInvoiceOffers() {
 			const itemOffers = parseArrayField(item?.posa_offers);
 			if (!itemOffers.includes(offerRowId)) {
 				itemOffers.push(offerRowId);
-				item.posa_offers = JSON.stringify(itemOffers);
+				updateStoreBackedItem(item, (line) => {
+					line.posa_offers = JSON.stringify(itemOffers);
+				});
 			}
 		});
 	};
@@ -1737,7 +1774,9 @@ export function useInvoiceOffers() {
 			const index = itemOffers.indexOf(offerRowId);
 			if (index > -1) {
 				itemOffers.splice(index, 1);
-				item.posa_offers = JSON.stringify(itemOffers);
+				updateStoreBackedItem(item, (line) => {
+					line.posa_offers = JSON.stringify(itemOffers);
+				});
 			}
 		});
 	};

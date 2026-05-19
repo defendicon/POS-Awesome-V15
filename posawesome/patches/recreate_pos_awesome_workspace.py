@@ -10,6 +10,7 @@ def execute():
     if frappe.db.exists("Workspace", WORKSPACE_NAME):
         try:
             frappe.delete_doc("Workspace", WORKSPACE_NAME, force=1, ignore_permissions=True)
+            # Commit the deletion so the fixture importer can recreate the workspace cleanly.
             frappe.db.commit()
             print(f"Successfully deleted workspace '{WORKSPACE_NAME}' to allow for a clean recreation.")
         except Exception as e:

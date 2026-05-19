@@ -82,6 +82,7 @@ export default {
 		addressDialog: false,
 		address: {},
 		customer: "",
+		openNewAddressHandler: null,
 	}),
 	computed: {},
 
@@ -115,10 +116,17 @@ export default {
 		},
 	},
 	created: function () {
-		this.eventBus.on("open_new_address", (data) => {
+		this.openNewAddressHandler = (data) => {
 			this.addressDialog = true;
 			this.customer = data;
-		});
+		};
+		this.eventBus.on("open_new_address", this.openNewAddressHandler);
+	},
+	beforeUnmount() {
+		if (this.openNewAddressHandler) {
+			this.eventBus.off("open_new_address", this.openNewAddressHandler);
+			this.openNewAddressHandler = null;
+		}
 	},
 };
 </script>

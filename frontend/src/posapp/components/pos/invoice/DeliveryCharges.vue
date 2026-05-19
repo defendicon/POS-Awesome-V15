@@ -25,9 +25,10 @@
 					<v-list-item v-bind="props">
 						<v-list-item-title
 							class="text-primary text-subtitle-1"
-							v-html="item.raw.name"
-						></v-list-item-title>
-						<v-list-item-subtitle v-html="`Rate: ${item.raw.rate}`"></v-list-item-subtitle>
+						>
+							{{ item.raw.name }}
+						</v-list-item-title>
+						<v-list-item-subtitle>Rate: {{ item.raw.rate }}</v-list-item-subtitle>
 					</v-list-item>
 				</template>
 			</v-autocomplete>

@@ -188,6 +188,7 @@ def make_payment_request(**args):
             pr.submit()
 
     if args.order_type == "Shopping Cart":
+        # Persist the Payment Request before redirecting the browser to the gateway URL.
         frappe.db.commit()
         frappe.local.response["type"] = "redirect"
         frappe.local.response["location"] = pr.get_payment_url()

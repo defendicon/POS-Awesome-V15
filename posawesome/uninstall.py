@@ -45,6 +45,7 @@ def clear_custom_fields_and_properties():
                             except Exception as e:
                                 print(f"Error deleting Property Setter {name}: {e}")
 
+    # Intentionally persist uninstall cleanup before moving to the next cleanup phase.
     frappe.db.commit()
 
 
@@ -52,5 +53,6 @@ def remove_delivery_charges_field():
     # Remove posa_delivery_charges field from Sales Invoice
     frappe.db.delete("Custom Field", "Sales Invoice-posa_delivery_charges")
     frappe.db.delete("Custom Field", "Sales Invoice-posa_delivery_charges_rate")
+    # Intentionally persist optional cleanup even when other uninstall hooks have already run.
     frappe.db.commit()
     print("Removed delivery charges fields from Sales Invoice")

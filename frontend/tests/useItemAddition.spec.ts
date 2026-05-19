@@ -138,6 +138,51 @@ describe("useItemAddition new line behavior", () => {
 		expect(invoiceStore.grossTotal).toBe(20);
 	});
 
+	it("resolves batched merge when invoice store lacks updateItemWithTotals", async () => {
+		const api = useItemAddition();
+		const context = createContext(false) as any;
+		const existing = {
+			...createItem(),
+			posa_row_id: "batch-row",
+			has_batch_no: 1,
+			batch_no: "B-FEFO",
+		};
+		context.items.push(existing);
+		const invoiceStore = {
+			addItems: vi.fn((items: any[], index = -1) => {
+				if (index === 0) {
+					context.items.unshift(...items);
+				} else {
+					context.items.push(...items);
+				}
+				return items;
+			}),
+			recalculateTotals: vi.fn(),
+			touch: vi.fn(),
+		};
+		context.invoiceStore = invoiceStore;
+		context.currency_precision = 2;
+		context.flt = (value: any) => Number(value);
+		context.setBatchQty = vi.fn((line: any, value: string | null) => {
+			line.batch_no = value;
+		});
+
+		const selectedBatchItem = {
+			...createItem(),
+			has_batch_no: 1,
+			to_set_batch_no: "B-FEFO",
+		};
+		await api.prepareItemForCart(selectedBatchItem, 1, context);
+		const merged = await api.addItem(selectedBatchItem, context);
+		await Promise.resolve();
+
+		expect(merged).toBe(context.items[0]);
+		expect(context.items).toHaveLength(1);
+		expect(context.items[0].qty).toBe(2);
+		expect(context.items[0].amount).toBe(20);
+		expect(invoiceStore.recalculateTotals).toHaveBeenCalled();
+	});
+
 	it("adds matching items as separate rows when new_line is on", async () => {
 		const api = useItemAddition();
 		const context = createContext(true);

@@ -209,8 +209,19 @@ export function useItemMerging() {
 		);
 		if (match) {
 			// If found, increment quantity
-			match.qty += newItem.qty || 1;
-			match.amount = match.qty * match.rate;
+			const rowId = match.posa_row_id;
+			if (
+				context?.invoiceStore?.updateItemWithTotals &&
+				rowId
+			) {
+				context.invoiceStore.updateItemWithTotals(rowId, (line) => {
+					line.qty += newItem.qty || 1;
+					line.amount = line.qty * line.rate;
+				});
+			} else {
+				match.qty += newItem.qty || 1;
+				match.amount = match.qty * match.rate;
+			}
 		} else {
 			if (context && context.invoiceStore) {
 				context.invoiceStore.addItem(newItem);

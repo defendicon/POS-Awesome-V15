@@ -226,35 +226,38 @@ export function useItemAddition() {
 
 		// 1. Process Updates
 		for (const [rowId, data] of currentUpdates) {
-			const item = context.invoiceStore.updateItemWithTotals
-				? context.invoiceStore.updateItemWithTotals(rowId, (line) => {
-					line.qty += data.qty;
-					calcStockQty(line, line.qty);
+			const applyPendingUpdate = (line: any) => {
+				line.qty += data.qty;
+				calcStockQty(line, line.qty);
 
-					// Handle other updates that happen on merge
-					if (line.has_batch_no && line.batch_no) {
-						callSetBatchQty(context, line, line.batch_no, false);
-					}
-					callSetSerialNo(context, line);
-					updateLineAmounts(line, context);
-				})
-				: context.invoiceStore.itemsData.get(rowId);
-			if (item) {
-				if (!context.invoiceStore.updateItemWithTotals) {
-					item.qty += data.qty;
-					calcStockQty(item, item.qty);
-
-					// Handle other updates that happen on merge
-					if (item.has_batch_no && item.batch_no) {
-						callSetBatchQty(context, item, item.batch_no, false);
-					}
-					callSetSerialNo(context, item);
-					updateLineAmounts(item, context);
+				// Handle other updates that happen on merge
+				if (line.has_batch_no && line.batch_no) {
+					callSetBatchQty(context, line, line.batch_no, false);
 				}
+				callSetSerialNo(context, line);
+				updateLineAmounts(line, context);
+			};
+			let item = context.invoiceStore.updateItemWithTotals
+				? context.invoiceStore.updateItemWithTotals(
+					rowId,
+					applyPendingUpdate,
+				)
+				: null;
 
-				// Resolve all promises waiting for this update
-				data.resolvers.forEach((r) => r(item));
+			if (!item) {
+				item =
+					context.items?.find?.(
+						(line: any) => line?.posa_row_id === rowId,
+					) ||
+					context.invoiceStore?.itemsData?.get?.(rowId) ||
+					null;
+				if (item) {
+					applyPendingUpdate(item);
+				}
 			}
+
+			// Resolve all promises waiting for this update, even if the row disappeared.
+			data.resolvers.forEach((r) => r(item));
 		}
 		if (currentUpdates.size && context.invoiceStore?.recalculateTotals) {
 			context.invoiceStore.recalculateTotals();

@@ -366,15 +366,13 @@
 							>
 								<template v-slot:item="{ props, item }">
 									<v-list-item v-bind="props">
-										<v-list-item-title v-html="getRaw(item).batch_no"></v-list-item-title>
+										<v-list-item-title>{{ getRaw(item).batch_no }}</v-list-item-title>
 										<v-list-item-subtitle class="d-flex align-center">
-											<span
-												v-html="
-													`Available QTY  '${
-														getRaw(item).available_qty ?? getRaw(item).batch_qty
-													}' - Expiry Date ${getRaw(item).expiry_date}`
-												"
-											></span>
+											<span>{{
+												`Available QTY  '${
+													getRaw(item).available_qty ?? getRaw(item).batch_qty
+												}' - Expiry Date ${getRaw(item).expiry_date}`
+											}}</span>
 											<v-chip
 												v-if="getRaw(item).is_expired"
 												color="error"
