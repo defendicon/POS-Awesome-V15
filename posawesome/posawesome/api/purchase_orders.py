@@ -36,7 +36,7 @@ def _resolve_pos_profile(pos_profile):
 
 
 def _assert_pos_write_allowed(profile, company=None):
-    pos_utils.assert_pos_profile_write_allowed(profile, company=company)
+    return pos_utils.assert_pos_profile_write_allowed(profile, company=company)
 
 
 def _ensure_allowed(profile, flag, label):
