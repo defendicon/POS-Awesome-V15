@@ -266,8 +266,8 @@ def create_customer(
     city=None,
     country=None,
 ):
-    _assert_customer_write_allowed(pos_profile_doc, company=company)
-    pos_profile = _load_json_arg(pos_profile_doc)
+    pos_profile_doc_obj = _assert_customer_write_allowed(pos_profile_doc, company=company)
+    pos_profile = pos_profile_doc_obj.as_dict() if pos_profile_doc_obj else {}
 
     # Format birthday to MySQL compatible format (YYYY-MM-DD) if provided
     formatted_birthday = None
