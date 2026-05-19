@@ -7,9 +7,14 @@
  */
 export const normalizeBackgroundSyncInterval = (
     value: any,
-    defaultValue: number = 30,
-    minValue: number = 10
+    defaultValue: number = 60,
+    minValue: number = 30
 ): number => {
+    // Defaults raised 2026-05-09 (default 30→60s, floor 10→30s) after
+    // ops report main-thread jank on low-end Android (Moto E15) — the
+    // 30s cadence kept rebuilding reactive item arrays while operators
+    // were typing in the search box. Operator-set higher intervals on
+    // POS Profile still win.
     const parsed = parseInt(value, 10);
     if (!Number.isFinite(parsed) || parsed <= 0) {
         return defaultValue;

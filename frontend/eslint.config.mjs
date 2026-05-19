@@ -16,7 +16,7 @@ export default [
 		],
 	},
 	{
-		files: ["**/*.{js,mjs,cjs,ts,vue}"],
+		files: ["**/*.{js,mjs,cjs,ts,tsx,vue}"],
 		languageOptions: {
 			parser: vueParser,
 			parserOptions: {
@@ -66,7 +66,7 @@ export default [
 		processor: pluginVue.processors[".vue"],
 	},
 	{
-		files: ["**/*.ts", "**/*.vue"],
+		files: ["**/*.{ts,tsx,vue}"],
 		rules: {
 			"no-undef": "off",
 		},

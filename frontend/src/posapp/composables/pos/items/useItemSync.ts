@@ -9,6 +9,31 @@ import {
 	shouldRunBackgroundSync,
 } from "../../../utils/backgroundSync.js";
 
+const visibilityCallbacks = new Set<() => void>();
+let visibilityHandler: (() => void) | null = null;
+
+function bindSharedVisibilityListener(callback: () => void) {
+	visibilityCallbacks.add(callback);
+	if (typeof document === "undefined" || visibilityHandler) return;
+	visibilityHandler = () => {
+		visibilityCallbacks.forEach((listener) => listener());
+	};
+	document.addEventListener("visibilitychange", visibilityHandler);
+}
+
+function unbindSharedVisibilityListener(callback: () => void) {
+	visibilityCallbacks.delete(callback);
+	if (
+		typeof document === "undefined" ||
+		visibilityCallbacks.size ||
+		!visibilityHandler
+	) {
+		return;
+	}
+	document.removeEventListener("visibilitychange", visibilityHandler);
+	visibilityHandler = null;
+}
+
 /**
  * useItemSync Composable
  *
@@ -65,7 +90,7 @@ export function useItemSync() {
 	const ctx: ItemSyncContext = {
 		pos_profile: null,
 		enable_background_sync: true,
-		background_sync_interval: 30,
+		background_sync_interval: 60,
 		usesLimitSearch: false,
 		itemsPageLimit: 100,
 		// Methods to be provided via context
@@ -159,11 +184,20 @@ export function useItemSync() {
 			normalizeBackgroundSyncInterval(ctx.background_sync_interval) *
 			1000;
 		background_sync_timer.value = setInterval(() => {
+			// Skip while the tab is hidden — operators on cheap Android
+			// devices accumulated visible main-thread jank from sync runs
+			// firing in background tabs that the user wasn't even on.
+			// The next visibility change triggers an immediate catch-up
+			// run via the listener below.
+			if (typeof document !== "undefined" && document.hidden) {
+				return;
+			}
 			performBackgroundSync({ source: "interval" });
 		}, intervalMs);
 		console.debug(`${BG_SYNC_LOG} scheduler active`, { intervalMs });
 
 		performBackgroundSync({ source: "initial" });
+		bindVisibilityListener();
 	}
 
 	function stopBackgroundSyncScheduler() {
@@ -172,6 +206,22 @@ export function useItemSync() {
 			background_sync_timer.value = null;
 			console.debug(`${BG_SYNC_LOG} scheduler stopped`);
 		}
+		unbindVisibilityListener();
+	}
+
+	// Visibility listener: pause syncs when the tab is hidden, run a
+	// single catch-up sync when the operator returns. Saves several
+	// MB of allocations per minute on multi-tab Chrome sessions.
+	const onVisibilityChange = () => {
+		if (!document.hidden && ctx.enable_background_sync) {
+			performBackgroundSync({ source: "visibility" });
+		}
+	};
+	function bindVisibilityListener() {
+		bindSharedVisibilityListener(onVisibilityChange);
+	}
+	function unbindVisibilityListener() {
+		unbindSharedVisibilityListener(onVisibilityChange);
 	}
 
 	async function ensureBackgroundSyncBaseline() {

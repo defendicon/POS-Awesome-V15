@@ -36,6 +36,7 @@ def confirmation(**kwargs):
         doc.middlename = args.get("MiddleName")
         doc.lastname = args.get("LastName")
         doc.insert(ignore_permissions=True)
+        # Persist the webhook receipt before acknowledging M-Pesa.
         frappe.db.commit()
         context = {"ResultCode": 0, "ResultDesc": "Accepted"}
         return dict(context)

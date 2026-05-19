@@ -4,6 +4,7 @@ import json
 import logging
 import time
 from functools import cache
+from typing import Any
 
 import frappe
 
@@ -12,6 +13,133 @@ HAS_VARIANTS_EXCLUSION = {"has_variants": 0}
 
 
 logger = logging.getLogger(__name__)
+
+
+def _get_mapping_value(source: Any, key: str, default: Any = None) -> Any:
+    """Read a field from either a Frappe document-like object or a dict."""
+
+    if source is None:
+        return default
+
+    if isinstance(source, dict):
+        return source.get(key, default)
+
+    if hasattr(source, "get"):
+        return source.get(key, default)
+
+    return getattr(source, key, default)
+
+
+def _is_guest_user(user: str | None) -> bool:
+    """Return True when the request user cannot perform POS writes."""
+
+    return not user or user == "Guest"
+
+
+def _is_profile_company_allowed(profile_company: str | None, company: str | None) -> bool:
+    """Return True when a requested company is compatible with a POS Profile."""
+
+    if not company:
+        return True
+
+    return bool(profile_company) and profile_company == company
+
+
+def _is_profile_action_enabled(pos_profile: Any, action_flag: str | None) -> bool:
+    """Return True when the optional POS Profile feature flag permits the action."""
+
+    if not action_flag:
+        return True
+
+    return bool(_get_mapping_value(pos_profile, action_flag))
+
+
+def _get_pos_profile_doc(pos_profile: Any):
+    """Resolve a POS Profile name, dict, JSON string, or document-like object."""
+
+    if pos_profile is None:
+        return None
+
+    if isinstance(pos_profile, str):
+        raw_value = pos_profile.strip()
+        if not raw_value:
+            return None
+
+        try:
+            decoded_value = json.loads(raw_value)
+        except Exception:
+            decoded_value = raw_value
+
+        if isinstance(decoded_value, dict):
+            profile_name = decoded_value.get("name")
+            if profile_name:
+                if not frappe.db.exists("POS Profile", profile_name):
+                    return None
+                return frappe.get_cached_doc("POS Profile", profile_name)
+            return None
+
+        if isinstance(decoded_value, str) and decoded_value:
+            if not frappe.db.exists("POS Profile", decoded_value):
+                return None
+            return frappe.get_cached_doc("POS Profile", decoded_value)
+
+        return None
+
+    if isinstance(pos_profile, dict):
+        profile_name = pos_profile.get("name")
+        if profile_name:
+            if not frappe.db.exists("POS Profile", profile_name):
+                return None
+            return frappe.get_cached_doc("POS Profile", profile_name)
+        return None
+
+    profile_name = _get_mapping_value(pos_profile, "name")
+    if profile_name and frappe.db.exists("POS Profile", profile_name):
+        return pos_profile
+
+    return None
+
+
+def assert_pos_profile_write_allowed(pos_profile, action_flag=None, company=None):
+    """Validate the current request can perform a POS Profile-scoped write.
+
+    This intentionally does not replace document permissions or remove existing
+    ``ignore_permissions`` usage. It centralizes the lightweight POS checks that
+    write APIs can call before performing POS-specific persistence.
+    """
+
+    from frappe import _
+
+    user = getattr(frappe.session, "user", None)
+    if _is_guest_user(user):
+        frappe.throw(_("Guest users are not allowed to perform POS write actions."))
+
+    profile_doc = _get_pos_profile_doc(pos_profile)
+    if pos_profile and not profile_doc:
+        frappe.throw(_("POS Profile {0} was not found.").format(pos_profile))
+
+    if (company or action_flag) and not profile_doc:
+        frappe.throw(_("POS Profile is required for this POS write action."))
+
+    if profile_doc and company:
+        profile_company = _get_mapping_value(profile_doc, "company")
+        if not _is_profile_company_allowed(profile_company, company):
+            frappe.throw(
+                _("POS Profile {0} is not allowed to write for company {1}.").format(
+                    _get_mapping_value(profile_doc, "name", pos_profile),
+                    company,
+                )
+            )
+
+    if profile_doc and action_flag and not _is_profile_action_enabled(profile_doc, action_flag):
+        frappe.throw(
+            _("POS Profile {0} does not allow this action: {1}.").format(
+                _get_mapping_value(profile_doc, "name", pos_profile),
+                action_flag,
+            )
+        )
+
+    return profile_doc
 
 
 def expand_item_groups(item_groups):

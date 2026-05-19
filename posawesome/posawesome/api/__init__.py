@@ -44,6 +44,17 @@ from .offers import (
     get_offers,
     get_pos_coupon,
 )
+# Pre-import `pricing_rules` so its module load happens during the
+# package __init__ pass — same call stack as offers/items/etc.
+# Without this Python 3.14's stricter `_ModuleLock` raises a
+# deadlock when two concurrent SPA requests race on
+# `posawesome.posawesome.api.offers` (already loaded once via
+# this __init__) and `posawesome.posawesome.api.pricing_rules`
+# (loaded on first frappe.call to `get_active_pricing_rules`,
+# triggering a re-entry into this __init__ from a different
+# thread). Pre-importing means subsequent calls hit the cached
+# module without re-running this __init__ chain.
+from .pricing_rules import get_active_pricing_rules, reconcile_line_prices  # noqa: F401
 from .payments import (
     create_payment_request,
     get_available_credit,

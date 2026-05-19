@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { getItemsLastSync, setItemsLastSync, isOffline } = vi.hoisted(() => ({
 	getItemsLastSync: vi.fn(),
@@ -25,6 +25,11 @@ describe("useItemSync", () => {
 			syncCursor = timestamp;
 		});
 		isOffline.mockReturnValue(false);
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+		vi.unstubAllGlobals();
 	});
 
 	it("uses latest context values from getters when running background sync", async () => {
@@ -183,5 +188,48 @@ describe("useItemSync", () => {
 		await sync.performBackgroundSync({ source: "test" });
 
 		expect(updateItemsDetails).not.toHaveBeenCalled();
+	});
+
+	it("shares one document visibility listener across sync instances", () => {
+		vi.useFakeTimers();
+		const listeners = new Map<string, EventListener>();
+		const addEventListener = vi.fn((event: string, listener: EventListener) => {
+			listeners.set(event, listener);
+		});
+		const removeEventListener = vi.fn((event: string, listener: EventListener) => {
+			if (listeners.get(event) === listener) {
+				listeners.delete(event);
+			}
+		});
+		vi.stubGlobal("document", {
+			hidden: false,
+			addEventListener,
+			removeEventListener,
+		});
+
+		const first = useItemSync();
+		const second = useItemSync();
+		first.registerContext({
+			pos_profile: { name: "POS-TEST" },
+			enable_background_sync: true,
+			background_sync_interval: 30,
+		});
+		second.registerContext({
+			pos_profile: { name: "POS-TEST" },
+			enable_background_sync: true,
+			background_sync_interval: 30,
+		});
+
+		first.startBackgroundSyncScheduler();
+		second.startBackgroundSyncScheduler();
+
+		expect(addEventListener).toHaveBeenCalledTimes(1);
+		expect(addEventListener).toHaveBeenCalledWith("visibilitychange", expect.any(Function));
+
+		first.stopBackgroundSyncScheduler();
+		expect(removeEventListener).not.toHaveBeenCalled();
+
+		second.stopBackgroundSyncScheduler();
+		expect(removeEventListener).toHaveBeenCalledTimes(1);
 	});
 });

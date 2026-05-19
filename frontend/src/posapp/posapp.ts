@@ -92,8 +92,22 @@ async function startOptionalRuntimeServices() {
 		window.location.hostname === "localhost" ||
 		window.location.hostname === "127.0.0.1"
 	) {
+		// Register at `/sw.js?v=<build>` so a new build forces a fresh
+		// SW registration. The sw.js bytes are stable across deploys
+		// (the file reads version.json at runtime), so without a
+		// per-build URL discriminator the browser keeps the old SW
+		// instance serving its old precache. Symptom in the field:
+		// "POS won't let me add items" — the operator sees the new
+		// Pinia store hooked up to the OLD bundle's DOM. Frappe drops
+		// the query string for static files, so the served bytes are
+		// identical; only the registration scope key differs.
+		const swBuildVersion =
+			typeof __BUILD_VERSION__ !== "undefined" ? __BUILD_VERSION__ : "";
+		const swUrl = swBuildVersion
+			? `/sw.js?v=${encodeURIComponent(swBuildVersion)}`
+			: "/sw.js";
 		navigator.serviceWorker
-			.register("/sw.js")
+			.register(swUrl)
 			.then((registration) => {
 				console.log("SW registered successfully", registration);
 			})

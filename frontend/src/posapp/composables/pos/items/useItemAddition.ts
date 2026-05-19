@@ -44,6 +44,11 @@ export function useItemAddition() {
 			console.debug(`[POS BatchFlow] ${message}`, payload || {});
 		}
 	};
+	const toFiniteNumber = (value: any, fallback = 0) => {
+		const numeric = Number(value);
+		return Number.isFinite(numeric) ? numeric : fallback;
+	};
+	const qtyOrOne = (value: any) => toFiniteNumber(value, 0) || 1;
 
 	const callSetBatchQty = (
 		context: any,
@@ -226,35 +231,38 @@ export function useItemAddition() {
 
 		// 1. Process Updates
 		for (const [rowId, data] of currentUpdates) {
-			const item = context.invoiceStore.updateItemWithTotals
-				? context.invoiceStore.updateItemWithTotals(rowId, (line) => {
-					line.qty += data.qty;
-					calcStockQty(line, line.qty);
+			const applyPendingUpdate = (line: any) => {
+				line.qty = toFiniteNumber(line.qty) + toFiniteNumber(data.qty);
+				calcStockQty(line, line.qty);
 
-					// Handle other updates that happen on merge
-					if (line.has_batch_no && line.batch_no) {
-						callSetBatchQty(context, line, line.batch_no, false);
-					}
-					callSetSerialNo(context, line);
-					updateLineAmounts(line, context);
-				})
-				: context.invoiceStore.itemsData.get(rowId);
-			if (item) {
-				if (!context.invoiceStore.updateItemWithTotals) {
-					item.qty += data.qty;
-					calcStockQty(item, item.qty);
-
-					// Handle other updates that happen on merge
-					if (item.has_batch_no && item.batch_no) {
-						callSetBatchQty(context, item, item.batch_no, false);
-					}
-					callSetSerialNo(context, item);
-					updateLineAmounts(item, context);
+				// Handle other updates that happen on merge
+				if (line.has_batch_no && line.batch_no) {
+					callSetBatchQty(context, line, line.batch_no, false);
 				}
+				callSetSerialNo(context, line);
+				updateLineAmounts(line, context);
+			};
+			let item = context.invoiceStore.updateItemWithTotals
+				? context.invoiceStore.updateItemWithTotals(
+					rowId,
+					applyPendingUpdate,
+				)
+				: null;
 
-				// Resolve all promises waiting for this update
-				data.resolvers.forEach((r) => r(item));
+			if (!item) {
+				item =
+					context.items?.find?.(
+						(line: any) => line?.posa_row_id === rowId,
+					) ||
+					context.invoiceStore?.itemsData?.get?.(rowId) ||
+					null;
+				if (item) {
+					applyPendingUpdate(item);
+				}
 			}
+
+			// Resolve all promises waiting for this update, even if the row disappeared.
+			data.resolvers.forEach((r) => r(item));
 		}
 		if (currentUpdates.size && context.invoiceStore?.recalculateTotals) {
 			context.invoiceStore.recalculateTotals();
@@ -627,9 +635,13 @@ export function useItemAddition() {
 								if (pendingIndex !== -1 && !context.new_line) {
 									const pendingItem = pendingItems[pendingIndex];
 									if (context.isReturnInvoice) {
-										pendingItem.qty -= Math.abs(line.qty || 1);
+										pendingItem.qty =
+											toFiniteNumber(pendingItem.qty) -
+											Math.abs(qtyOrOne(line.qty));
 									} else {
-										pendingItem.qty += line.qty || 1;
+										pendingItem.qty =
+											toFiniteNumber(pendingItem.qty) +
+											qtyOrOne(line.qty);
 									}
 									if (lineIndex === 0) {
 										const existingResolvers =
@@ -698,8 +710,8 @@ export function useItemAddition() {
 					// Existing item update
 					const cur_item = context.items[index];
 					const qtyDelta = context.isReturnInvoice
-						? -Math.abs(new_item.qty || 1)
-						: new_item.qty || 1;
+						? -Math.abs(qtyOrOne(new_item.qty))
+						: qtyOrOne(new_item.qty);
 
 					if (context.invoiceStore) {
 						// Use batching for updates
@@ -708,7 +720,7 @@ export function useItemAddition() {
 							if (pendingUpdates.has(rowId)) {
 								const data = pendingUpdates.get(rowId);
 								if (!data) return;
-								data.qty += qtyDelta;
+								data.qty = toFiniteNumber(data.qty) + qtyDelta;
 								data.resolvers.push(resolve);
 							} else {
 								pendingUpdates.set(rowId, {
@@ -751,9 +763,13 @@ export function useItemAddition() {
 									if (pendingIndex !== -1 && !context.new_line) {
 										const pendingItem = pendingItems[pendingIndex];
 										if (context.isReturnInvoice) {
-											pendingItem.qty -= Math.abs(splitLine.qty || 1);
+											pendingItem.qty =
+												toFiniteNumber(pendingItem.qty) -
+												Math.abs(qtyOrOne(splitLine.qty));
 										} else {
-											pendingItem.qty += splitLine.qty || 1;
+											pendingItem.qty =
+												toFiniteNumber(pendingItem.qty) +
+												qtyOrOne(splitLine.qty);
 										}
 									} else {
 										pendingItems.push(splitLine);
@@ -789,7 +805,7 @@ export function useItemAddition() {
 							}
 						});
 					}
-					cur_item.qty += qtyDelta;
+					cur_item.qty = toFiniteNumber(cur_item.qty) + qtyDelta;
 
 					calcStockQty(cur_item, cur_item.qty);
 
@@ -869,9 +885,11 @@ export function useItemAddition() {
 				const mergeIntoLine = (line: any) => {
 					// For returns, subtract from quantity to make it more negative
 					if (context.isReturnInvoice) {
-						line.qty -= Math.abs(item.qty || 1);
+						line.qty =
+							toFiniteNumber(line.qty) -
+							Math.abs(qtyOrOne(item.qty));
 					} else {
-						line.qty += item.qty || 1;
+						line.qty = toFiniteNumber(line.qty) + qtyOrOne(item.qty);
 					}
 					calcStockQty(line, line.qty);
 
