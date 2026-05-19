@@ -4,18 +4,37 @@
 
 This audit was written from the current repository state and spot-checked against the local `stage-develop` ref where earlier claims appeared to disagree with the checked-out worktree.
 
-Commands used for verification:
+Commands used for verification are grouped by shell. Run them from the repository root.
 
-- `rg -n "v-html" frontend/src`
-- `git show stage-develop:frontend/src/posapp/components/pos/customer/Customer.vue | Select-String -Pattern "v-html" -Context 1,1`
-- `rg -n "itemsData|watch\\(|deep:\\s*true" frontend/src/posapp`
-- `git show stage-develop:frontend/src/posapp/stores/invoiceStore.ts | Select-String -Pattern "deep|watch\\(" -Context 1,2`
-- `rg -n "RecycleScroller|virtual|ItemsSelector" frontend/src`
-- `rg -n "Payments\\.vue|PayView\\.vue|PayView|Payments" frontend/src docs`
-- `rg -n "ignore_permissions|@frappe\\.whitelist" posawesome -g "*.py"`
-- `rg -n "assert_pos_profile_write_allowed|_assert_customer_write_allowed|_assert_pos_write_allowed|ignore_permissions" posawesome/posawesome/api -g "*.py"`
-- `Get-Content package.json`
-- `Get-Content eslint.config.mjs`
+Bash, Git Bash, or WSL:
+
+```bash
+rg -n "v-html" frontend/src
+git show stage-develop:frontend/src/posapp/components/pos/customer/Customer.vue | grep -n -C 1 "v-html"
+rg -n "itemsData|watch\\(|deep:\\s*true" frontend/src/posapp
+git show stage-develop:frontend/src/posapp/stores/invoiceStore.ts | grep -n -C 2 -E "deep|watch\\("
+rg -n "RecycleScroller|virtual|ItemsSelector" frontend/src
+rg -n "Payments\\.vue|PayView\\.vue|PayView|Payments" frontend/src docs
+rg -n "ignore_permissions|@frappe\\.whitelist" posawesome -g "*.py"
+rg -n "assert_pos_profile_write_allowed|_assert_customer_write_allowed|_assert_pos_write_allowed|ignore_permissions" posawesome/posawesome/api -g "*.py"
+cat package.json
+cat eslint.config.mjs
+```
+
+PowerShell on Windows:
+
+```powershell
+rg -n "v-html" frontend/src
+git show stage-develop:frontend/src/posapp/components/pos/customer/Customer.vue | Select-String -Pattern "v-html" -Context 1,1
+rg -n "itemsData|watch\\(|deep:\\s*true" frontend/src/posapp
+git show stage-develop:frontend/src/posapp/stores/invoiceStore.ts | Select-String -Pattern "deep|watch\\(" -Context 1,2
+rg -n "RecycleScroller|virtual|ItemsSelector" frontend/src
+rg -n "Payments\\.vue|PayView\\.vue|PayView|Payments" frontend/src docs
+rg -n "ignore_permissions|@frappe\\.whitelist" posawesome -g "*.py"
+rg -n "assert_pos_profile_write_allowed|_assert_customer_write_allowed|_assert_pos_write_allowed|ignore_permissions" posawesome/posawesome/api -g "*.py"
+Get-Content package.json
+Get-Content eslint.config.mjs
+```
 
 ## 1. Confirmed Issues
 

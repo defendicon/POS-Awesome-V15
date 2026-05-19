@@ -22,10 +22,7 @@ def _load_json_arg(value):
 
 
 def _assert_customer_write_allowed(pos_profile_doc=None, company=None):
-    if pos_profile_doc:
-        return assert_pos_profile_write_allowed(pos_profile_doc, company=company)
-
-    return assert_pos_profile_write_allowed(None)
+    return assert_pos_profile_write_allowed(pos_profile_doc, company=company)
 
 
 def get_customer_groups(pos_profile):

@@ -8,6 +8,7 @@ vi.mock("../src/posapp/stores/toastStore", () => ({
 }));
 
 import { useItemAddition } from "../src/posapp/composables/pos/items/useItemAddition";
+import { useItemMerging } from "../src/posapp/composables/pos/items/addition/useItemMerging";
 import { useBatchSerial } from "../src/posapp/composables/pos/shared/useBatchSerial";
 import { useInvoiceStore } from "../src/posapp/stores/invoiceStore";
 
@@ -146,6 +147,7 @@ describe("useItemAddition new line behavior", () => {
 			posa_row_id: "batch-row",
 			has_batch_no: 1,
 			batch_no: "B-FEFO",
+			qty: "1",
 		};
 		context.items.push(existing);
 		const invoiceStore = {
@@ -171,6 +173,7 @@ describe("useItemAddition new line behavior", () => {
 			...createItem(),
 			has_batch_no: 1,
 			to_set_batch_no: "B-FEFO",
+			qty: "1",
 		};
 		await api.prepareItemForCart(selectedBatchItem, 1, context);
 		const merged = await api.addItem(selectedBatchItem, context);
@@ -179,8 +182,20 @@ describe("useItemAddition new line behavior", () => {
 		expect(merged).toBe(context.items[0]);
 		expect(context.items).toHaveLength(1);
 		expect(context.items[0].qty).toBe(2);
+		expect(typeof context.items[0].qty).toBe("number");
 		expect(context.items[0].amount).toBe(20);
 		expect(invoiceStore.recalculateTotals).toHaveBeenCalled();
+	});
+
+	it("keeps grouped merge quantities numeric when incoming qty is a string", () => {
+		const { groupAndAddItem } = useItemMerging() as any;
+		const items = [{ item_code: "ITEM-001", uom: "Nos", rate: 10, qty: "1", amount: 10 }];
+
+		groupAndAddItem(items, { item_code: "ITEM-001", uom: "Nos", rate: 10, qty: "2" }, {});
+
+		expect(items[0].qty).toBe(3);
+		expect(typeof items[0].qty).toBe("number");
+		expect(items[0].amount).toBe(30);
 	});
 
 	it("adds matching items as separate rows when new_line is on", async () => {

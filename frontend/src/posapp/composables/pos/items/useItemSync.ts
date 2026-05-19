@@ -9,6 +9,31 @@ import {
 	shouldRunBackgroundSync,
 } from "../../../utils/backgroundSync.js";
 
+const visibilityCallbacks = new Set<() => void>();
+let visibilityHandler: (() => void) | null = null;
+
+function bindSharedVisibilityListener(callback: () => void) {
+	visibilityCallbacks.add(callback);
+	if (typeof document === "undefined" || visibilityHandler) return;
+	visibilityHandler = () => {
+		visibilityCallbacks.forEach((listener) => listener());
+	};
+	document.addEventListener("visibilitychange", visibilityHandler);
+}
+
+function unbindSharedVisibilityListener(callback: () => void) {
+	visibilityCallbacks.delete(callback);
+	if (
+		typeof document === "undefined" ||
+		visibilityCallbacks.size ||
+		!visibilityHandler
+	) {
+		return;
+	}
+	document.removeEventListener("visibilitychange", visibilityHandler);
+	visibilityHandler = null;
+}
+
 /**
  * useItemSync Composable
  *
@@ -187,20 +212,16 @@ export function useItemSync() {
 	// Visibility listener: pause syncs when the tab is hidden, run a
 	// single catch-up sync when the operator returns. Saves several
 	// MB of allocations per minute on multi-tab Chrome sessions.
-	let _visibilityHandler: (() => void) | null = null;
+	const onVisibilityChange = () => {
+		if (!document.hidden && ctx.enable_background_sync) {
+			performBackgroundSync({ source: "visibility" });
+		}
+	};
 	function bindVisibilityListener() {
-		if (typeof document === "undefined" || _visibilityHandler) return;
-		_visibilityHandler = () => {
-			if (!document.hidden && ctx.enable_background_sync) {
-				performBackgroundSync({ source: "visibility" });
-			}
-		};
-		document.addEventListener("visibilitychange", _visibilityHandler);
+		bindSharedVisibilityListener(onVisibilityChange);
 	}
 	function unbindVisibilityListener() {
-		if (typeof document === "undefined" || !_visibilityHandler) return;
-		document.removeEventListener("visibilitychange", _visibilityHandler);
-		_visibilityHandler = null;
+		unbindSharedVisibilityListener(onVisibilityChange);
 	}
 
 	async function ensureBackgroundSyncBaseline() {

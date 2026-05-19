@@ -305,82 +305,26 @@ export const createEmptyDashboard = (): DashboardResponse => ({
 	},
 });
 
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+	return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function deepMergeDashboard<T>(base: T, payload: unknown): T {
+	if (!isPlainObject(base) || !isPlainObject(payload)) {
+		return (payload === undefined ? base : payload) as T;
+	}
+
+	const merged: Record<string, unknown> = { ...base };
+	Object.entries(payload).forEach(([key, value]) => {
+		const baseValue = (base as Record<string, unknown>)[key];
+		merged[key] = isPlainObject(baseValue) && isPlainObject(value)
+			? deepMergeDashboard(baseValue, value)
+			: value;
+	});
+	return merged as T;
+}
+
 export function mergeDashboardPayload(payload?: Partial<DashboardResponse>): DashboardResponse {
 	const base = createEmptyDashboard();
-	return {
-		...base,
-		...payload,
-		sales_overview: {
-			...base.sales_overview,
-			...(payload?.sales_overview || {}),
-		},
-		daily_sales_summary: {
-			...(base.daily_sales_summary || {}),
-			...(payload?.daily_sales_summary || {}),
-		},
-		monthly_sales_summary: {
-			...(base.monthly_sales_summary || {}),
-			...(payload?.monthly_sales_summary || {}),
-		},
-		payment_method_report: {
-			...(base.payment_method_report || {}),
-			...(payload?.payment_method_report || {}),
-		},
-		discount_void_return_report: {
-			...(base.discount_void_return_report || {}),
-			...(payload?.discount_void_return_report || {}),
-		},
-		customer_report: {
-			...(base.customer_report || {}),
-			...(payload?.customer_report || {}),
-		},
-		staff_performance_report: {
-			...(base.staff_performance_report || {}),
-			...(payload?.staff_performance_report || {}),
-		},
-		profitability_report: {
-			...(base.profitability_report || {}),
-			...(payload?.profitability_report || {}),
-		},
-		branch_location_report: {
-			...(base.branch_location_report || {}),
-			...(payload?.branch_location_report || {}),
-		},
-		tax_charges_report: {
-			...(base.tax_charges_report || {}),
-			...(payload?.tax_charges_report || {}),
-		},
-		sales_trend: {
-			...(base.sales_trend || {}),
-			...(payload?.sales_trend || {}),
-		},
-		item_sales_report: {
-			...(base.item_sales_report || {}),
-			...(payload?.item_sales_report || {}),
-		},
-		category_brand_variant_report: {
-			...(base.category_brand_variant_report || {}),
-			...(payload?.category_brand_variant_report || {}),
-		},
-		inventory_status_report: {
-			...(base.inventory_status_report || {}),
-			...(payload?.inventory_status_report || {}),
-		},
-		stock_movement_report: {
-			...(base.stock_movement_report || {}),
-			...(payload?.stock_movement_report || {}),
-		},
-		reorder_purchase_suggestions: {
-			...(base.reorder_purchase_suggestions || {}),
-			...(payload?.reorder_purchase_suggestions || {}),
-		},
-		inventory_insights: {
-			...base.inventory_insights,
-			...(payload?.inventory_insights || {}),
-		},
-		supplier_overview: {
-			...base.supplier_overview,
-			...(payload?.supplier_overview || {}),
-		},
-	};
+	return deepMergeDashboard(base, payload || {});
 }

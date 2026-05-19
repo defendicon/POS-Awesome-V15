@@ -87,6 +87,10 @@ class TestPosProfileWriteAuthorization(unittest.TestCase):
         with self.assertRaisesRegex(Exception, "POS Profile is required"):
             self.utils.assert_pos_profile_write_allowed(None, action_flag="posa_allow_test_action")
 
+    def test_missing_pos_profile_is_blocked_for_company_scoped_write(self):
+        with self.assertRaisesRegex(Exception, "POS Profile is required"):
+            self.utils.assert_pos_profile_write_allowed(None, company="Test Co")
+
     def test_disabled_pos_profile_flag_blocks_action(self):
         with self.assertRaisesRegex(Exception, "does not allow this action"):
             self.utils.assert_pos_profile_write_allowed(

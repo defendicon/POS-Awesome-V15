@@ -54,6 +54,7 @@ describe("report derivation helpers", () => {
 		expect(sortByStringAsc(rows, (row) => row.name).map((row) => row.name)).toEqual(["a", "b", "c"]);
 		expect(limitRows(rows, 2).map((row) => row.name)).toEqual(["b", "a"]);
 		expect(latestRows(rows, 2).map((row) => row.name)).toEqual(["a", "c"]);
+		expect(latestRows(rows, 0)).toEqual([]);
 		expect(rows.map((row) => row.name)).toEqual(["b", "a", "c"]);
 	});
 });

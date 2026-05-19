@@ -31,12 +31,19 @@ describe("report dashboard payload defaults", () => {
 			inventory_insights: {
 				fast_moving_items: [{ item_code: "ITEM-001", item_name: "Item", sold_qty: 4 }],
 			} as any,
+			payment_method_report: {
+				totals: {
+					paid_amount: 250,
+				},
+			} as any,
 		});
 
 		expect(dashboard.enabled).toBe(false);
 		expect(dashboard.sales_overview.today_sales).toBe(125);
 		expect(dashboard.sales_overview.monthly_sales).toBe(0);
 		expect(dashboard.payment_method_report.totals.invoice_count).toBe(0);
+		expect(dashboard.payment_method_report.totals.paid_amount).toBe(250);
+		expect(dashboard.payment_method_report.totals.cash_amount).toBe(0);
 		expect(dashboard.inventory_insights.fast_moving_items).toHaveLength(1);
 		expect(dashboard.inventory_insights.low_stock_items).toEqual([]);
 		expect(dashboard.supplier_overview.purchase_summary).toEqual([]);

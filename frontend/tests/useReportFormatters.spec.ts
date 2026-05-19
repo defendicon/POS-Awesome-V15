@@ -44,6 +44,9 @@ describe("createReportFormatters", () => {
 		expect(formatters.formatDays(undefined)).toBe("N/A");
 		expect(formatters.formatDate()).toBe("-");
 		expect(formatters.formatDate("not-a-date")).toBe("not-a-date");
+		expect(formatters.formatDate("2026-05-19")).toBe(
+			new Date(2026, 4, 19).toLocaleDateString(),
+		);
 	});
 
 	it("maps report categories and statuses to stable display labels and colors", () => {
@@ -68,6 +71,7 @@ describe("createReportFormatters", () => {
 
 		expect(formatters.progressFromQuantity(50, 100)).toBe(50);
 		expect(formatters.progressFromQuantity(200, 100)).toBe(100);
+		expect(formatters.progressFromQuantity(-10, 100)).toBe(0);
 		expect(formatters.trendProgress(-25, 100)).toBe(25);
 		expect(formatters.trendProgress(300, 100)).toBe(100);
 		expect(formatters.formatTrendPct(12.34)).toBe("+12.3%");

@@ -38,7 +38,16 @@ export function createReportFormatters(options: ReportFormatterOptions) {
 		if (!value) {
 			return "-";
 		}
-		const parsed = new Date(value);
+		let parsed: Date;
+		if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+			const parts = value.split("-").map(Number);
+			const year = parts[0] as number;
+			const month = parts[1] as number;
+			const day = parts[2] as number;
+			parsed = new Date(year, month - 1, day);
+		} else {
+			parsed = new Date(value);
+		}
 		if (Number.isNaN(parsed.getTime())) {
 			return value;
 		}
@@ -117,7 +126,9 @@ export function createReportFormatters(options: ReportFormatterOptions) {
 	}
 
 	function progressFromQuantity(quantity: number, maxQuantity: number) {
-		return Math.min(100, (Number(quantity || 0) / Math.max(1, Number(maxQuantity || 1))) * 100);
+		const computedPercent =
+			(Number(quantity || 0) / Math.max(1, Number(maxQuantity || 1))) * 100;
+		return Math.min(100, Math.max(0, computedPercent));
 	}
 
 	function stockChipColor(quantity: number) {

@@ -61,7 +61,13 @@
 								v-for="row in cashierRows"
 								:key="`dvr-cashier-${row.cashier}`"
 								:title="row.cashier || __('Unknown')"
-								:value="formatMoney(Number(row.void_amount || 0) + Number(row.return_amount || 0))"
+								:value="
+									formatMoney(
+										Number(row.discount_amount || 0) +
+											Number(row.return_amount || 0) +
+											Number(row.void_amount || 0),
+									)
+								"
 							>
 								<template #meta>
 									{{ __("Discount") }}:

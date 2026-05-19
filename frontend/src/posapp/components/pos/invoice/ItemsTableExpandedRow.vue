@@ -369,9 +369,9 @@
 										<v-list-item-title>{{ getRaw(item).batch_no }}</v-list-item-title>
 										<v-list-item-subtitle class="d-flex align-center">
 											<span>{{
-												`Available QTY  '${
+												`Available QTY ${
 													getRaw(item).available_qty ?? getRaw(item).batch_qty
-												}' - Expiry Date ${getRaw(item).expiry_date}`
+												} - Expiry Date ${getRaw(item).expiry_date}`
 											}}</span>
 											<v-chip
 												v-if="getRaw(item).is_expired"

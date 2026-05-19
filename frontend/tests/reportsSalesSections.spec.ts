@@ -211,6 +211,7 @@ describe("Sales report sections", () => {
 		expect(wrapper.text()).toContain("Discount / Void / Return Report");
 		expect(wrapper.text()).toContain("Discount: PKR 55.00");
 		expect(wrapper.text()).toContain("Ayesha");
+		expect(wrapper.text()).toContain("PKR 40.00");
 		expect(wrapper.text()).toContain("Coffee");
 		expect(wrapper.text()).toContain("Last 14 Days Activity");
 	});

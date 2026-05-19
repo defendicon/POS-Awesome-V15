@@ -200,6 +200,7 @@ export function useItemMerging() {
 		newItem: MergeEntry,
 		context: MergeContext,
 	) {
+		const qtyToAdd = Number(newItem.qty) || 1;
 		// Find a matching item (by item_code, uom, and rate)
 		const match = items.find(
 			(item) =>
@@ -215,12 +216,12 @@ export function useItemMerging() {
 				rowId
 			) {
 				context.invoiceStore.updateItemWithTotals(rowId, (line) => {
-					line.qty += newItem.qty || 1;
-					line.amount = line.qty * line.rate;
+					line.qty = Number(line.qty || 0) + qtyToAdd;
+					line.amount = line.qty * Number(line.rate || 0);
 				});
 			} else {
-				match.qty += newItem.qty || 1;
-				match.amount = match.qty * match.rate;
+				match.qty = Number(match.qty || 0) + qtyToAdd;
+				match.amount = match.qty * Number(match.rate || 0);
 			}
 		} else {
 			if (context && context.invoiceStore) {

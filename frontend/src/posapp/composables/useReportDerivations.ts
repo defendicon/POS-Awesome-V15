@@ -74,5 +74,8 @@ export function limitRows<T>(rows: T[], limit: number, fallback = 20) {
 }
 
 export function latestRows<T>(rows: T[], count: number) {
+	if (count <= 0) {
+		return [];
+	}
 	return rows.slice(-count);
 }
