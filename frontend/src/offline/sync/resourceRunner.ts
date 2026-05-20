@@ -238,12 +238,14 @@ export async function runSupportedOfflineSyncResource({
 		case "customers":
 			return syncCustomersResource({
 				...sharedArgs,
-				fetcher: ({ posProfile, watermark, schemaVersion }) =>
+				fetcher: ({ posProfile, watermark, startAfter, limit, schemaVersion }) =>
 					callOfflineSyncMethod(
 						"posawesome.posawesome.api.offline_sync.customers.sync_customers",
 						{
 							pos_profile: posProfile,
 							watermark,
+							start_after: startAfter || null,
+							limit: limit || null,
 							schema_version: schemaVersion,
 						},
 					),

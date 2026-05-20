@@ -290,6 +290,62 @@ describe("operational offline sync adapters", () => {
 		expect(result.status).toBe("fresh");
 	});
 
+	it("fetches every customer page before marking a full cache sync fresh", async () => {
+		const fetcher = vi.fn(async ({ watermark, startAfter, limit }) => {
+			expect(watermark).toBeNull();
+			expect(limit).toBe(1000);
+			if (!startAfter) {
+				return {
+					schema_version: "2026-05-20",
+					next_watermark: "2026-05-20T10:00:00",
+					has_more: true,
+					changes: [
+						{
+							key: "customer::CUST-001",
+							modified: "2026-05-20T10:00:00",
+							data: { name: "CUST-001", customer_name: "Customer One" },
+						},
+					],
+					deleted: [],
+				};
+			}
+			expect(startAfter).toBe("CUST-001");
+			return {
+				schema_version: "2026-05-20",
+				next_watermark: "2026-05-20T10:05:00",
+				has_more: false,
+				changes: [
+					{
+						key: "customer::CUST-002",
+						modified: "2026-05-20T10:05:00",
+						data: { name: "CUST-002", customer_name: "Customer Two" },
+					},
+				],
+				deleted: [],
+			};
+		});
+
+		const result = await syncCustomersResource({
+			posProfile: {
+				name: "POS-1",
+				company: "Test Co",
+				modified: "2026-05-20T11:00:00",
+			},
+			watermark: null,
+			fetcher,
+		});
+
+		expect(fetcher).toHaveBeenCalledTimes(2);
+		expect(customerMocks.setCustomerStorage).toHaveBeenCalledWith([
+			expect.objectContaining({ name: "CUST-001" }),
+			expect.objectContaining({ name: "CUST-002" }),
+		]);
+		expect(cacheMocks.setCustomersLastSync).toHaveBeenCalledWith(
+			"2026-05-20T10:05:00",
+		);
+		expect(result.status).toBe("fresh");
+	});
+
 	it("refreshes the full customer cache when the server asks for a schema resync", async () => {
 		syncStateMocks.getSyncResourceState.mockResolvedValue({
 			resourceId: "customers",
