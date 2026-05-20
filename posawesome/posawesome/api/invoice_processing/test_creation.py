@@ -971,6 +971,33 @@ class TestManualPostingDatePreservation(unittest.TestCase):
         base.update(overrides)
         return FakeDoc(**base)
 
+    def test_loyalty_redemption_settings_clear_zero_amount_redemption_flag(self):
+        invoice_doc = self._build_invoice_doc(
+            redeem_loyalty_points=1,
+            loyalty_amount=0,
+            loyalty_points=0,
+        )
+
+        self.creation._apply_loyalty_redemption_settings(invoice_doc, "Main POS")
+
+        self.assertEqual(invoice_doc.redeem_loyalty_points, 0)
+        self.assertEqual(invoice_doc.loyalty_amount, 0)
+        self.assertEqual(invoice_doc.loyalty_points, 0)
+
+    def test_loyalty_redemption_settings_requires_configured_expense_account_for_positive_redemption(self):
+        invoice_doc = self._build_invoice_doc(
+            redeem_loyalty_points=1,
+            loyalty_program="Retail Loyalty",
+            loyalty_amount=10,
+            loyalty_points=2,
+        )
+        self.creation.frappe.db.get_value = lambda doctype, name, fieldname: None
+
+        with self.assertRaises(Exception) as ctx:
+            self.creation._apply_loyalty_redemption_settings(invoice_doc, "Main POS")
+
+        self.assertIn("Expense Account in Loyalty Program Retail Loyalty", str(ctx.exception))
+
     def test_update_invoice_marks_backdated_payload_for_manual_posting(self):
         captured_payloads = []
         invoice_doc = self._build_invoice_doc()

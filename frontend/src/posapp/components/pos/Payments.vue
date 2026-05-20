@@ -299,7 +299,12 @@ import { usePaymentPrinting } from "../../composables/pos/payments/usePaymentPri
 import { usePaymentMethods } from "../../composables/pos/payments/usePaymentMethods";
 import { useInvoiceDetails } from "../../composables/pos/invoice/useInvoiceDetails";
 import { useFormat } from "../../format";
-import { isOffline, getCachedGiftCardSnapshot, saveGiftCardSnapshot } from "../../../offline/index";
+import {
+	isOffline,
+	getStoredCustomer,
+	getCachedGiftCardSnapshot,
+	saveGiftCardSnapshot,
+} from "../../../offline/index";
 import GiftCardDialog from "./wallet/GiftCardDialog.vue";
 import {
 	initializePaymentLinesForDialog,
@@ -1329,9 +1334,29 @@ const creditSourceLabel = (row) => {
 	return row.credit_origin;
 };
 
+const applyPaymentCustomerInfo = (info, customer) => {
+	if (!info) return;
+	const nextInfo = {
+		...info,
+		name: info.name || info.customer || customer,
+		customer: info.customer || info.name || customer,
+	};
+	customer_info.value = nextInfo;
+	customersStore.setCustomerInfo(nextInfo);
+};
+
 const refreshPaymentCustomerInfo = async (doc) => {
 	const customer = typeof doc?.customer === "string" ? doc.customer.trim() : "";
-	if (!customer || isOffline()) {
+	if (!customer) {
+		return;
+	}
+
+	const cachedCustomer = await getStoredCustomer(customer);
+	if (cachedCustomer?.name) {
+		applyPaymentCustomerInfo(cachedCustomer, customer);
+	}
+
+	if (isOffline()) {
 		return;
 	}
 
@@ -1344,8 +1369,7 @@ const refreshPaymentCustomerInfo = async (doc) => {
 			},
 		});
 		if (result?.message && !result.exc) {
-			customer_info.value = { ...result.message };
-			customersStore.setCustomerInfo(customer_info.value);
+			applyPaymentCustomerInfo(result.message, customer);
 		}
 	} catch (error) {
 		console.error("Failed to refresh payment customer loyalty details", error);
@@ -1711,6 +1735,12 @@ watch(paid_change, (newVal) => {
 watch(loyalty_amount, (value) => {
 	if (!invoice_doc.value) return;
 	const amount = parseFloat(value) || 0;
+	if (amount <= 0) {
+		invoice_doc.value.loyalty_amount = 0;
+		invoice_doc.value.redeem_loyalty_points = 0;
+		invoice_doc.value.loyalty_points = 0;
+		return;
+	}
 	if (amount > available_points_amount.value + 0.001) {
 		invoice_doc.value.loyalty_amount = 0;
 		invoice_doc.value.redeem_loyalty_points = 0;

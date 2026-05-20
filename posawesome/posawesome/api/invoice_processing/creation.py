@@ -268,6 +268,47 @@ def _apply_invoice_gift_card_settlement(invoice_doc, data):
     )
 
 
+def _apply_loyalty_redemption_settings(invoice_doc, pos_profile=None):
+    loyalty_amount = flt(invoice_doc.get("loyalty_amount"))
+    loyalty_points = flt(invoice_doc.get("loyalty_points"))
+
+    if not cint(invoice_doc.get("redeem_loyalty_points")) or (loyalty_amount <= 0 and loyalty_points <= 0):
+        invoice_doc.redeem_loyalty_points = 0
+        invoice_doc.loyalty_amount = 0
+        invoice_doc.loyalty_points = 0
+        return
+
+    if not invoice_doc.loyalty_program:
+        invoice_doc.loyalty_program = frappe.db.get_value(
+            "Customer",
+            invoice_doc.customer,
+            "loyalty_program",
+        )
+
+    if not invoice_doc.loyalty_program:
+        frappe.throw(_("Loyalty Program is required to redeem loyalty points."))
+
+    if not invoice_doc.loyalty_redemption_account:
+        invoice_doc.loyalty_redemption_account = frappe.db.get_value(
+            "Loyalty Program",
+            invoice_doc.loyalty_program,
+            "expense_account",
+        )
+
+    if not invoice_doc.loyalty_redemption_account:
+        frappe.throw(
+            _("Please set Expense Account in Loyalty Program {0} before redeeming loyalty points.").format(
+                invoice_doc.loyalty_program
+            )
+        )
+
+    if not invoice_doc.loyalty_redemption_cost_center:
+        invoice_doc.loyalty_redemption_cost_center = (
+            invoice_doc.cost_center
+            or frappe.db.get_value("POS Profile", pos_profile or invoice_doc.pos_profile, "cost_center")
+        )
+
+
 def _run_post_submit_payments(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments):
     from posawesome.posawesome.api.invoice_processing.payment import _create_change_payment_entries
 
@@ -1027,19 +1068,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
 
     _deduplicate_free_items(invoice_doc)
 
-    if invoice_doc.redeem_loyalty_points and not invoice_doc.loyalty_program:
-        invoice_doc.loyalty_program = frappe.db.get_value("Customer", invoice_doc.customer, "loyalty_program")
-
-    if invoice_doc.redeem_loyalty_points and invoice_doc.loyalty_program:
-        if not invoice_doc.loyalty_redemption_account:
-            invoice_doc.loyalty_redemption_account = frappe.db.get_value(
-                "Loyalty Program", invoice_doc.loyalty_program, "expense_account"
-            )
-
-        if not invoice_doc.loyalty_redemption_cost_center:
-            invoice_doc.loyalty_redemption_cost_center = invoice_doc.cost_center or frappe.db.get_value(
-                "POS Profile", pos_profile, "cost_center"
-            )
+    _apply_loyalty_redemption_settings(invoice_doc, pos_profile)
 
     # Ensure item name overrides are respected on submit
     _apply_item_name_overrides(invoice_doc)
@@ -1247,19 +1276,7 @@ def submit_in_background_job(kwargs):
 
         _apply_write_off_settings(invoice_doc, data)
 
-        if invoice_doc.redeem_loyalty_points and not invoice_doc.loyalty_program:
-            invoice_doc.loyalty_program = frappe.db.get_value(
-                "Customer", invoice_doc.customer, "loyalty_program"
-            )
-
-        if invoice_doc.redeem_loyalty_points and invoice_doc.loyalty_program:
-            if not invoice_doc.loyalty_redemption_account:
-                invoice_doc.loyalty_redemption_account = frappe.db.get_value(
-                    "Loyalty Program", invoice_doc.loyalty_program, "expense_account"
-                )
-
-            if not invoice_doc.loyalty_redemption_cost_center:
-                invoice_doc.loyalty_redemption_cost_center = invoice_doc.cost_center
+        _apply_loyalty_redemption_settings(invoice_doc, invoice_doc.pos_profile)
 
         _apply_invoice_gift_card_settlement(invoice_doc, data)
         _normalize_return_payment_rows(invoice_doc, invoice_doc.get("conversion_rate") or 1)
