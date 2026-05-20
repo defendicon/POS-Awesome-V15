@@ -8,6 +8,7 @@ type EnsureCustomersReadyArgs = {
 	online: boolean;
 	manualOffline: boolean;
 	force?: boolean;
+	isReady?: () => boolean;
 	setProfile: (_profile: CustomerProfile | null) => void;
 	load: () => Promise<void>;
 };
@@ -34,6 +35,7 @@ export async function ensureCustomersReady({
 	online,
 	manualOffline,
 	force = false,
+	isReady,
 	setProfile,
 	load,
 }: EnsureCustomersReadyArgs) {
@@ -53,8 +55,24 @@ export async function ensureCustomersReady({
 		completedLoads.delete(loadKey);
 	}
 
-	if (!force && completedLoads.has(loadKey)) {
+	const hasReadyCustomerCache = () => {
+		if (!isReady) {
+			return true;
+		}
+		try {
+			return Boolean(isReady());
+		} catch (error) {
+			console.warn("Unable to verify customer cache readiness", error);
+			return false;
+		}
+	};
+
+	if (!force && completedLoads.has(loadKey) && hasReadyCustomerCache()) {
 		return false;
+	}
+
+	if (!hasReadyCustomerCache()) {
+		completedLoads.delete(loadKey);
 	}
 
 	const inflight = inflightLoads.get(loadKey);
@@ -66,7 +84,9 @@ export async function ensureCustomersReady({
 	let loadPromise: Promise<void>;
 	try {
 		loadPromise = Promise.resolve(load()).then(() => {
-			completedLoads.add(loadKey);
+			if (hasReadyCustomerCache()) {
+				completedLoads.add(loadKey);
+			}
 		});
 	} catch (error) {
 		loadPromise = Promise.reject(error);

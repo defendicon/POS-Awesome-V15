@@ -11,9 +11,10 @@ type UseCustomerReadinessOptions = {
 	profile: Ref<CustomerProfile | null | undefined>;
 	isOnline: () => boolean;
 	isManualOffline: () => boolean;
-	setProfile: (profile: CustomerProfile | null) => void;
+	setProfile: (_profile: CustomerProfile | null) => void;
 	load: () => Promise<void>;
-	onProfileReady?: (profile: CustomerProfile) => void | Promise<void>;
+	isReady?: () => boolean;
+	onProfileReady?: (_profile: CustomerProfile) => void | Promise<void>;
 	ensureCustomersReady?: typeof defaultEnsureCustomersReady;
 };
 
@@ -44,6 +45,7 @@ export function useCustomerReadiness(options: UseCustomerReadinessOptions) {
 					manualOffline: options.isManualOffline(),
 					setProfile: options.setProfile,
 					load: options.load,
+					isReady: options.isReady,
 				});
 			},
 			{ deep: true, immediate: true },

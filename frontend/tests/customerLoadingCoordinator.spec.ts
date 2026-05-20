@@ -64,6 +64,38 @@ describe("customer loading coordinator", () => {
 		expect(load).toHaveBeenCalledTimes(1);
 	});
 
+	it("reloads a completed profile when the caller cache is no longer ready", async () => {
+		const profile = { name: "POS-1", modified: "2026-04-23T10:00:00" };
+		const setProfile = vi.fn();
+		let cacheReady = true;
+		const load = vi.fn(async () => {
+			cacheReady = true;
+		});
+		const isReady = vi.fn(() => cacheReady);
+
+		await ensureCustomersReady({
+			profile,
+			online: true,
+			manualOffline: false,
+			setProfile,
+			load,
+			isReady,
+		});
+
+		cacheReady = false;
+
+		await ensureCustomersReady({
+			profile,
+			online: true,
+			manualOffline: false,
+			setProfile,
+			load,
+			isReady,
+		});
+
+		expect(load).toHaveBeenCalledTimes(2);
+	});
+
 	it("allows forced reloads for the same profile revision", async () => {
 		const profile = { name: "POS-1", modified: "2026-04-23T10:00:00" };
 		const setProfile = vi.fn();
