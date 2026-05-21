@@ -36,7 +36,7 @@ Await it before reading any `memory` value at application startup.
 
 > **buildSyncStateStorageKey**(`resourceId`): `string`
 
-Defined in: [offline/sync/syncState.ts:11](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/syncState.ts#L11)
+Defined in: [offline/sync/syncState.ts:11](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/syncState.ts#L11)
 
 #### Parameters
 
@@ -54,7 +54,7 @@ Defined in: [offline/sync/syncState.ts:11](https://github.com/defendicon/POS-Awe
 
 > **checkDbHealth**(): `Promise`\<`boolean`\>
 
-Defined in: [offline/db.ts:807](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L807)
+Defined in: [offline/db.ts:807](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L807)
 
 #### Returns
 
@@ -66,7 +66,7 @@ Defined in: [offline/db.ts:807](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > **claimRetryableQueueEntries**(`entityType`): `Promise`\<[`OfflineQueueEntry`](#offlinequeueentry)[]\>
 
-Defined in: [offline/writeQueue.ts:429](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L429)
+Defined in: [offline/writeQueue.ts:429](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L429)
 
 #### Parameters
 
@@ -84,7 +84,7 @@ Defined in: [offline/writeQueue.ts:429](https://github.com/defendicon/POS-Awesom
 
 > **clearAllCache**(): `Promise`\<`void`\>
 
-Defined in: [offline/db.ts:665](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L665)
+Defined in: [offline/db.ts:665](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L665)
 
 #### Returns
 
@@ -96,7 +96,7 @@ Defined in: [offline/db.ts:665](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > **clearCoupons**(): `void`
 
-Defined in: [offline/cache.ts:1271](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1271)
+Defined in: [offline/cache.ts:1271](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1271)
 
 #### Returns
 
@@ -108,7 +108,7 @@ Defined in: [offline/cache.ts:1271](https://github.com/defendicon/POS-Awesome-V1
 
 > **clearCustomerBalanceCache**(): `void`
 
-Defined in: [offline/customers.ts:356](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L356)
+Defined in: [offline/customers.ts:395](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L395)
 
 #### Returns
 
@@ -120,7 +120,7 @@ Defined in: [offline/customers.ts:356](https://github.com/defendicon/POS-Awesome
 
 > **clearCustomerStorage**(): `Promise`\<`void`\>
 
-Defined in: [offline/cache.ts:1122](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1122)
+Defined in: [offline/cache.ts:1122](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1122)
 
 #### Returns
 
@@ -132,7 +132,7 @@ Defined in: [offline/cache.ts:1122](https://github.com/defendicon/POS-Awesome-V1
 
 > **clearDerivedOfflineCaches**(): `Promise`\<`void`\>
 
-Defined in: [offline/db.ts:731](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L731)
+Defined in: [offline/db.ts:731](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L731)
 
 #### Returns
 
@@ -144,7 +144,7 @@ Defined in: [offline/db.ts:731](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > **clearExpiredCustomerBalances**(): `void`
 
-Defined in: [offline/customers.ts:365](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L365)
+Defined in: [offline/customers.ts:404](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L404)
 
 #### Returns
 
@@ -156,7 +156,7 @@ Defined in: [offline/customers.ts:365](https://github.com/defendicon/POS-Awesome
 
 > **clearGiftCardSnapshotCache**(): `void`
 
-Defined in: [offline/customers.ts:317](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L317)
+Defined in: [offline/customers.ts:355](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L355)
 
 #### Returns
 
@@ -168,7 +168,7 @@ Defined in: [offline/customers.ts:317](https://github.com/defendicon/POS-Awesome
 
 > **clearItemDetailsCache**(): `void`
 
-Defined in: [offline/cache.ts:767](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L767)
+Defined in: [offline/cache.ts:767](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L767)
 
 #### Returns
 
@@ -180,7 +180,7 @@ Defined in: [offline/cache.ts:767](https://github.com/defendicon/POS-Awesome-V15
 
 > **clearItemGroups**(): `void`
 
-Defined in: [offline/cache.ts:1296](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1296)
+Defined in: [offline/cache.ts:1296](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1296)
 
 #### Returns
 
@@ -192,7 +192,7 @@ Defined in: [offline/cache.ts:1296](https://github.com/defendicon/POS-Awesome-V1
 
 > **clearLocalStockCache**(): `void`
 
-Defined in: [offline/stock.ts:181](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/stock.ts#L181)
+Defined in: [offline/stock.ts:181](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/stock.ts#L181)
 
 #### Returns
 
@@ -204,7 +204,7 @@ Defined in: [offline/stock.ts:181](https://github.com/defendicon/POS-Awesome-V15
 
 > **clearOfflineCashMovements**(): `Promise`\<`void`\>
 
-Defined in: [offline/cash\_movements.ts:39](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cash_movements.ts#L39)
+Defined in: [offline/cash\_movements.ts:39](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cash_movements.ts#L39)
 
 #### Returns
 
@@ -216,7 +216,7 @@ Defined in: [offline/cash\_movements.ts:39](https://github.com/defendicon/POS-Aw
 
 > **clearOfflineCustomers**(): `Promise`\<`void`\>
 
-Defined in: [offline/customers.ts:58](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L58)
+Defined in: [offline/customers.ts:58](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L58)
 
 #### Returns
 
@@ -228,7 +228,7 @@ Defined in: [offline/customers.ts:58](https://github.com/defendicon/POS-Awesome-
 
 > **clearOfflineInvoices**(): `Promise`\<`void`\>
 
-Defined in: [offline/invoices.ts:238](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoices.ts#L238)
+Defined in: [offline/invoices.ts:238](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoices.ts#L238)
 
 #### Returns
 
@@ -240,7 +240,7 @@ Defined in: [offline/invoices.ts:238](https://github.com/defendicon/POS-Awesome-
 
 > **clearOfflinePayments**(): `Promise`\<`void`\>
 
-Defined in: [offline/payments.ts:55](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/payments.ts#L55)
+Defined in: [offline/payments.ts:55](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/payments.ts#L55)
 
 #### Returns
 
@@ -252,7 +252,7 @@ Defined in: [offline/payments.ts:55](https://github.com/defendicon/POS-Awesome-V
 
 > **clearOpeningStorage**(): `void`
 
-Defined in: [offline/cache.ts:1009](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1009)
+Defined in: [offline/cache.ts:1009](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1009)
 
 #### Returns
 
@@ -264,7 +264,7 @@ Defined in: [offline/cache.ts:1009](https://github.com/defendicon/POS-Awesome-V1
 
 > **clearPriceListCache**(): `void`
 
-Defined in: [offline/cache.ts:578](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L578)
+Defined in: [offline/cache.ts:578](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L578)
 
 #### Returns
 
@@ -276,7 +276,7 @@ Defined in: [offline/cache.ts:578](https://github.com/defendicon/POS-Awesome-V15
 
 > **clearPricingRulesSnapshot**(): `void`
 
-Defined in: [offline/cache.ts:1177](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1177)
+Defined in: [offline/cache.ts:1177](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1177)
 
 #### Returns
 
@@ -288,7 +288,7 @@ Defined in: [offline/cache.ts:1177](https://github.com/defendicon/POS-Awesome-V1
 
 > **clearStoredItems**(`scope?`): `Promise`\<`void`\>
 
-Defined in: [offline/cache.ts:441](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L441)
+Defined in: [offline/cache.ts:441](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L441)
 
 #### Parameters
 
@@ -306,7 +306,7 @@ Defined in: [offline/cache.ts:441](https://github.com/defendicon/POS-Awesome-V15
 
 > **clearStoredValueSnapshotCache**(): `void`
 
-Defined in: [offline/customers.ts:273](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L273)
+Defined in: [offline/customers.ts:311](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L311)
 
 #### Returns
 
@@ -318,7 +318,7 @@ Defined in: [offline/customers.ts:273](https://github.com/defendicon/POS-Awesome
 
 > **clearSyncResourceState**(`resourceId`): `Promise`\<`void`\>
 
-Defined in: [offline/sync/syncState.ts:96](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/syncState.ts#L96)
+Defined in: [offline/sync/syncState.ts:96](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/syncState.ts#L96)
 
 #### Parameters
 
@@ -336,7 +336,7 @@ Defined in: [offline/sync/syncState.ts:96](https://github.com/defendicon/POS-Awe
 
 > **clearWriteQueueEntries**(`entityType`, `options?`): `Promise`\<`void`\>
 
-Defined in: [offline/writeQueue.ts:410](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L410)
+Defined in: [offline/writeQueue.ts:410](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L410)
 
 #### Parameters
 
@@ -360,7 +360,7 @@ Defined in: [offline/writeQueue.ts:410](https://github.com/defendicon/POS-Awesom
 
 > **createDefaultSyncCoordinator**(): [`SyncCoordinator`](#synccoordinator)
 
-Defined in: [offline/sync/SyncCoordinator.ts:467](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/SyncCoordinator.ts#L467)
+Defined in: [offline/sync/SyncCoordinator.ts:467](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/SyncCoordinator.ts#L467)
 
 Creates a [SyncCoordinator](#synccoordinator) pre-loaded with the full default resource registry.
 This is the standard factory used by `useSyncCoordinator` at app startup.
@@ -375,7 +375,7 @@ This is the standard factory used by `useSyncCoordinator` at app startup.
 
 > **deleteCustomerStorageByNames**(`names`): `Promise`\<`void`\>
 
-Defined in: [offline/customers.ts:197](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L197)
+Defined in: [offline/customers.ts:235](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L235)
 
 #### Parameters
 
@@ -393,7 +393,7 @@ Defined in: [offline/customers.ts:197](https://github.com/defendicon/POS-Awesome
 
 > **deleteOfflineCashMovement**(`index`): `Promise`\<`void`\>
 
-Defined in: [offline/cash\_movements.ts:43](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cash_movements.ts#L43)
+Defined in: [offline/cash\_movements.ts:43](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cash_movements.ts#L43)
 
 #### Parameters
 
@@ -411,7 +411,7 @@ Defined in: [offline/cash\_movements.ts:43](https://github.com/defendicon/POS-Aw
 
 > **deleteOfflineCustomer**(`index`): `Promise`\<`void`\>
 
-Defined in: [offline/customers.ts:62](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L62)
+Defined in: [offline/customers.ts:62](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L62)
 
 #### Parameters
 
@@ -429,7 +429,7 @@ Defined in: [offline/customers.ts:62](https://github.com/defendicon/POS-Awesome-
 
 > **deleteOfflineInvoice**(`index`): `Promise`\<`void`\>
 
-Defined in: [offline/invoices.ts:242](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoices.ts#L242)
+Defined in: [offline/invoices.ts:242](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoices.ts#L242)
 
 #### Parameters
 
@@ -447,7 +447,7 @@ Defined in: [offline/invoices.ts:242](https://github.com/defendicon/POS-Awesome-
 
 > **deleteOfflinePayment**(`index`): `Promise`\<`void`\>
 
-Defined in: [offline/payments.ts:59](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/payments.ts#L59)
+Defined in: [offline/payments.ts:59](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/payments.ts#L59)
 
 #### Parameters
 
@@ -465,7 +465,7 @@ Defined in: [offline/payments.ts:59](https://github.com/defendicon/POS-Awesome-V
 
 > **deleteStoredItemsByCodes**(`itemCodes?`, `scope?`): `Promise`\<`void`\>
 
-Defined in: [offline/cache.ts:491](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L491)
+Defined in: [offline/cache.ts:491](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L491)
 
 #### Parameters
 
@@ -487,7 +487,7 @@ Defined in: [offline/cache.ts:491](https://github.com/defendicon/POS-Awesome-V15
 
 > **deleteWriteQueueEntry**(`entityType`, `queueId`): `Promise`\<`void`\>
 
-Defined in: [offline/writeQueue.ts:389](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L389)
+Defined in: [offline/writeQueue.ts:389](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L389)
 
 #### Parameters
 
@@ -509,7 +509,7 @@ Defined in: [offline/writeQueue.ts:389](https://github.com/defendicon/POS-Awesom
 
 > **deleteWriteQueueEntryByIndex**(`entityType`, `index`): `Promise`\<`void`\>
 
-Defined in: [offline/writeQueue.ts:398](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L398)
+Defined in: [offline/writeQueue.ts:398](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L398)
 
 #### Parameters
 
@@ -531,7 +531,7 @@ Defined in: [offline/writeQueue.ts:398](https://github.com/defendicon/POS-Awesom
 
 > **enqueueInvoiceOutboxEntry**(`entry`): `Promise`\<`any`\>
 
-Defined in: [offline/invoiceOutbox.ts:88](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L88)
+Defined in: [offline/invoiceOutbox.ts:88](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L88)
 
 #### Parameters
 
@@ -549,7 +549,7 @@ Defined in: [offline/invoiceOutbox.ts:88](https://github.com/defendicon/POS-Awes
 
 > **enqueueWriteQueueEntry**(`entityType`, `payload`, `options?`): `Promise`\<`any`\>
 
-Defined in: [offline/writeQueue.ts:380](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L380)
+Defined in: [offline/writeQueue.ts:380](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L380)
 
 #### Parameters
 
@@ -577,7 +577,7 @@ Defined in: [offline/writeQueue.ts:380](https://github.com/defendicon/POS-Awesom
 
 > **ensureOfflineQueueReady**(): `Promise`\<`void`\>
 
-Defined in: [offline/writeQueue.ts:600](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L600)
+Defined in: [offline/writeQueue.ts:600](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L600)
 
 #### Returns
 
@@ -589,7 +589,7 @@ Defined in: [offline/writeQueue.ts:600](https://github.com/defendicon/POS-Awesom
 
 > **fetchItemStockQuantities**(`items`, `pos_profile`, `chunkSize?`): `Promise`\<`AnyRecord`[] \| `null`\>
 
-Defined in: [offline/stock.ts:6](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/stock.ts#L6)
+Defined in: [offline/stock.ts:6](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/stock.ts#L6)
 
 #### Parameters
 
@@ -615,7 +615,7 @@ Defined in: [offline/stock.ts:6](https://github.com/defendicon/POS-Awesome-V15/b
 
 > **forceClearAllCache**(): `Promise`\<`void`\>
 
-Defined in: [offline/db.ts:715](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L715)
+Defined in: [offline/db.ts:715](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L715)
 
 #### Returns
 
@@ -627,7 +627,7 @@ Defined in: [offline/db.ts:715](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > **getAllStoredItems**(`scope?`): `Promise`\<`any`\>
 
-Defined in: [offline/cache.ts:338](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L338)
+Defined in: [offline/cache.ts:338](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L338)
 
 #### Parameters
 
@@ -645,7 +645,7 @@ Defined in: [offline/cache.ts:338](https://github.com/defendicon/POS-Awesome-V15
 
 > **getBootstrapLimitedMode**(): `boolean`
 
-Defined in: [offline/cache.ts:928](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L928)
+Defined in: [offline/cache.ts:928](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L928)
 
 #### Returns
 
@@ -657,7 +657,7 @@ Defined in: [offline/cache.ts:928](https://github.com/defendicon/POS-Awesome-V15
 
 > **getBootstrapSnapshot**(): `any`
 
-Defined in: [offline/cache.ts:870](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L870)
+Defined in: [offline/cache.ts:870](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L870)
 
 #### Returns
 
@@ -669,7 +669,7 @@ Defined in: [offline/cache.ts:870](https://github.com/defendicon/POS-Awesome-V15
 
 > **getBootstrapSnapshotStatus**(): `any`
 
-Defined in: [offline/cache.ts:913](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L913)
+Defined in: [offline/cache.ts:913](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L913)
 
 #### Returns
 
@@ -681,7 +681,7 @@ Defined in: [offline/cache.ts:913](https://github.com/defendicon/POS-Awesome-V15
 
 > **getCachedCoupons**(): `any`
 
-Defined in: [offline/cache.ts:1267](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1267)
+Defined in: [offline/cache.ts:1267](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1267)
 
 #### Returns
 
@@ -693,7 +693,7 @@ Defined in: [offline/cache.ts:1267](https://github.com/defendicon/POS-Awesome-V1
 
 > **getCachedCurrencyOptions**(`profileName`, `ttlMs?`): `any`
 
-Defined in: [offline/cache.ts:1376](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1376)
+Defined in: [offline/cache.ts:1376](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1376)
 
 #### Parameters
 
@@ -715,7 +715,7 @@ Defined in: [offline/cache.ts:1376](https://github.com/defendicon/POS-Awesome-V1
 
 > **getCachedCustomerAddresses**(`customer`, `ttlMs?`): `any`
 
-Defined in: [offline/cache.ts:1505](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1505)
+Defined in: [offline/cache.ts:1505](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1505)
 
 #### Parameters
 
@@ -737,7 +737,7 @@ Defined in: [offline/cache.ts:1505](https://github.com/defendicon/POS-Awesome-V1
 
 > **getCachedCustomerBalance**(`customer`): `any`
 
-Defined in: [offline/customers.ts:340](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L340)
+Defined in: [offline/customers.ts:379](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L379)
 
 #### Parameters
 
@@ -755,7 +755,7 @@ Defined in: [offline/customers.ts:340](https://github.com/defendicon/POS-Awesome
 
 > **getCachedDeliveryCharges**(`profileName`, `customer`, `ttlMs?`): `any`
 
-Defined in: [offline/cache.ts:1336](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1336)
+Defined in: [offline/cache.ts:1336](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1336)
 
 #### Parameters
 
@@ -781,7 +781,7 @@ Defined in: [offline/cache.ts:1336](https://github.com/defendicon/POS-Awesome-V1
 
 > **getCachedExchangeRate**(`entry?`, `ttlMs?`): `any`
 
-Defined in: [offline/cache.ts:1420](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1420)
+Defined in: [offline/cache.ts:1420](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1420)
 
 #### Parameters
 
@@ -803,7 +803,7 @@ Defined in: [offline/cache.ts:1420](https://github.com/defendicon/POS-Awesome-V1
 
 > **getCachedGiftCardSnapshot**(`giftCardCode`): `any`
 
-Defined in: [offline/customers.ts:300](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L300)
+Defined in: [offline/customers.ts:338](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L338)
 
 #### Parameters
 
@@ -821,7 +821,7 @@ Defined in: [offline/customers.ts:300](https://github.com/defendicon/POS-Awesome
 
 > **getCachedItemDetails**(`profileName`, `priceList`, `itemCodes`, `ttl?`): `Promise`\<\{ `cached`: `any`[]; `missing`: `string`[]; \}\>
 
-Defined in: [offline/cache.ts:724](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L724)
+Defined in: [offline/cache.ts:724](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L724)
 
 Returns cached item details, split into `cached` (fresh) and `missing` (absent or stale)
 groups so callers know exactly which items need a network fetch.
@@ -870,7 +870,7 @@ Cache TTL in milliseconds. Defaults to 15 minutes.
 
 > **getCachedItemGroups**(): `any`
 
-Defined in: [offline/cache.ts:1292](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1292)
+Defined in: [offline/cache.ts:1292](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1292)
 
 #### Returns
 
@@ -882,7 +882,7 @@ Defined in: [offline/cache.ts:1292](https://github.com/defendicon/POS-Awesome-V1
 
 > **getCachedOffers**(): `any`
 
-Defined in: [offline/cache.ts:532](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L532)
+Defined in: [offline/cache.ts:532](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L532)
 
 #### Returns
 
@@ -894,7 +894,7 @@ Defined in: [offline/cache.ts:532](https://github.com/defendicon/POS-Awesome-V15
 
 > **getCachedPaymentMethodCurrencyMap**(`company`, `ttlMs?`): `any`
 
-Defined in: [offline/cache.ts:1545](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1545)
+Defined in: [offline/cache.ts:1545](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1545)
 
 #### Parameters
 
@@ -916,7 +916,7 @@ Defined in: [offline/cache.ts:1545](https://github.com/defendicon/POS-Awesome-V1
 
 > **getCachedPriceListItems**(`priceList`): `any`
 
-Defined in: [offline/cache.ts:562](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L562)
+Defined in: [offline/cache.ts:562](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L562)
 
 #### Parameters
 
@@ -934,7 +934,7 @@ Defined in: [offline/cache.ts:562](https://github.com/defendicon/POS-Awesome-V15
 
 > **getCachedPriceListMeta**(`profileName`, `ttlMs?`): `any`
 
-Defined in: [offline/cache.ts:1465](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1465)
+Defined in: [offline/cache.ts:1465](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1465)
 
 #### Parameters
 
@@ -956,7 +956,7 @@ Defined in: [offline/cache.ts:1465](https://github.com/defendicon/POS-Awesome-V1
 
 > **getCachedPricingRulesSnapshot**(): `object`
 
-Defined in: [offline/cache.ts:1166](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1166)
+Defined in: [offline/cache.ts:1166](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1166)
 
 #### Returns
 
@@ -984,7 +984,7 @@ Defined in: [offline/cache.ts:1166](https://github.com/defendicon/POS-Awesome-V1
 
 > **getCachedStoredValueSnapshot**(`customer`, `company`): `any`
 
-Defined in: [offline/customers.ts:256](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L256)
+Defined in: [offline/customers.ts:294](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L294)
 
 #### Parameters
 
@@ -1006,7 +1006,7 @@ Defined in: [offline/customers.ts:256](https://github.com/defendicon/POS-Awesome
 
 > **getCacheUsageEstimate**(): `Promise`\<\{ `indexedDB`: `number`; `localStorage`: `number`; `percentage`: `number`; `total`: `number`; \}\>
 
-Defined in: [offline/cache.ts:1562](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1562)
+Defined in: [offline/cache.ts:1562](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1562)
 
 #### Returns
 
@@ -1018,7 +1018,7 @@ Defined in: [offline/cache.ts:1562](https://github.com/defendicon/POS-Awesome-V1
 
 > **getCustomersLastSync**(): `any`
 
-Defined in: [offline/cache.ts:1108](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1108)
+Defined in: [offline/cache.ts:1108](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1108)
 
 #### Returns
 
@@ -1030,7 +1030,7 @@ Defined in: [offline/cache.ts:1108](https://github.com/defendicon/POS-Awesome-V1
 
 > **getCustomerStorage**(): `any`
 
-Defined in: [offline/customers.ts:125](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L125)
+Defined in: [offline/customers.ts:125](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L125)
 
 #### Returns
 
@@ -1042,7 +1042,7 @@ Defined in: [offline/customers.ts:125](https://github.com/defendicon/POS-Awesome
 
 > **getCustomerStorageCount**(): `Promise`\<`any`\>
 
-Defined in: [offline/cache.ts:1112](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1112)
+Defined in: [offline/cache.ts:1112](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1112)
 
 #### Returns
 
@@ -1054,7 +1054,7 @@ Defined in: [offline/cache.ts:1112](https://github.com/defendicon/POS-Awesome-V1
 
 > **getInvoiceOutboxMode**(): [`InvoiceOutboxMode`](#invoiceoutboxmode)
 
-Defined in: [offline/invoiceOutbox.ts:65](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L65)
+Defined in: [offline/invoiceOutbox.ts:65](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L65)
 
 #### Returns
 
@@ -1066,7 +1066,7 @@ Defined in: [offline/invoiceOutbox.ts:65](https://github.com/defendicon/POS-Awes
 
 > **getInvoiceOutboxRows**(`options?`): `Promise`\<[`InvoiceOutboxEntry`](#invoiceoutboxentry)[]\>
 
-Defined in: [offline/invoiceOutbox.ts:127](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L127)
+Defined in: [offline/invoiceOutbox.ts:127](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L127)
 
 #### Parameters
 
@@ -1086,7 +1086,7 @@ Defined in: [offline/invoiceOutbox.ts:127](https://github.com/defendicon/POS-Awe
 
 > **getItemsLastSync**(): `any`
 
-Defined in: [offline/cache.ts:1099](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1099)
+Defined in: [offline/cache.ts:1099](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1099)
 
 #### Returns
 
@@ -1098,7 +1098,7 @@ Defined in: [offline/cache.ts:1099](https://github.com/defendicon/POS-Awesome-V1
 
 > **getItemUOMs**(`itemCode`): `any`
 
-Defined in: [offline/cache.ts:470](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L470)
+Defined in: [offline/cache.ts:470](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L470)
 
 #### Parameters
 
@@ -1116,7 +1116,7 @@ Defined in: [offline/cache.ts:470](https://github.com/defendicon/POS-Awesome-V15
 
 > **getLastSyncTotals**(): `any`
 
-Defined in: [offline/invoices.ts:267](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoices.ts#L267)
+Defined in: [offline/invoices.ts:267](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoices.ts#L267)
 
 #### Returns
 
@@ -1128,7 +1128,7 @@ Defined in: [offline/invoices.ts:267](https://github.com/defendicon/POS-Awesome-
 
 > **getLocalStock**(`itemCode`): `any`
 
-Defined in: [offline/stock.ts:150](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/stock.ts#L150)
+Defined in: [offline/stock.ts:150](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/stock.ts#L150)
 
 #### Parameters
 
@@ -1146,7 +1146,7 @@ Defined in: [offline/stock.ts:150](https://github.com/defendicon/POS-Awesome-V15
 
 > **getLocalStockCache**(): `any`
 
-Defined in: [offline/stock.ts:254](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/stock.ts#L254)
+Defined in: [offline/stock.ts:254](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/stock.ts#L254)
 
 #### Returns
 
@@ -1158,7 +1158,7 @@ Defined in: [offline/stock.ts:254](https://github.com/defendicon/POS-Awesome-V15
 
 > **getOfflineCashMovements**(): `any`[]
 
-Defined in: [offline/cash\_movements.ts:35](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cash_movements.ts#L35)
+Defined in: [offline/cash\_movements.ts:35](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cash_movements.ts#L35)
 
 #### Returns
 
@@ -1170,7 +1170,7 @@ Defined in: [offline/cash\_movements.ts:35](https://github.com/defendicon/POS-Aw
 
 > **getOfflineCustomers**(): `any`[]
 
-Defined in: [offline/customers.ts:54](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L54)
+Defined in: [offline/customers.ts:54](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L54)
 
 #### Returns
 
@@ -1182,7 +1182,7 @@ Defined in: [offline/customers.ts:54](https://github.com/defendicon/POS-Awesome-
 
 > **getOfflineInvoices**(): `any`[]
 
-Defined in: [offline/invoices.ts:234](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoices.ts#L234)
+Defined in: [offline/invoices.ts:234](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoices.ts#L234)
 
 #### Returns
 
@@ -1194,7 +1194,7 @@ Defined in: [offline/invoices.ts:234](https://github.com/defendicon/POS-Awesome-
 
 > **getOfflinePayments**(): `any`[]
 
-Defined in: [offline/payments.ts:51](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/payments.ts#L51)
+Defined in: [offline/payments.ts:51](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/payments.ts#L51)
 
 #### Returns
 
@@ -1206,7 +1206,7 @@ Defined in: [offline/payments.ts:51](https://github.com/defendicon/POS-Awesome-V
 
 > **getOpeningDialogStorage**(): `any`
 
-Defined in: [offline/cache.ts:1020](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1020)
+Defined in: [offline/cache.ts:1020](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1020)
 
 #### Returns
 
@@ -1218,7 +1218,7 @@ Defined in: [offline/cache.ts:1020](https://github.com/defendicon/POS-Awesome-V1
 
 > **getOpeningStorage**(): `any`
 
-Defined in: [offline/cache.ts:866](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L866)
+Defined in: [offline/cache.ts:866](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L866)
 
 #### Returns
 
@@ -1230,7 +1230,7 @@ Defined in: [offline/cache.ts:866](https://github.com/defendicon/POS-Awesome-V15
 
 > **getPendingInvoiceOutboxCount**(): `Promise`\<`number`\>
 
-Defined in: [offline/invoiceOutbox.ts:140](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L140)
+Defined in: [offline/invoiceOutbox.ts:140](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L140)
 
 #### Returns
 
@@ -1242,7 +1242,7 @@ Defined in: [offline/invoiceOutbox.ts:140](https://github.com/defendicon/POS-Awe
 
 > **getPendingOfflineCashMovementCount**(): `any`
 
-Defined in: [offline/cash\_movements.ts:47](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cash_movements.ts#L47)
+Defined in: [offline/cash\_movements.ts:47](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cash_movements.ts#L47)
 
 #### Returns
 
@@ -1254,7 +1254,7 @@ Defined in: [offline/cash\_movements.ts:47](https://github.com/defendicon/POS-Aw
 
 > **getPendingOfflineCustomerCount**(): `any`
 
-Defined in: [offline/customers.ts:66](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L66)
+Defined in: [offline/customers.ts:66](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L66)
 
 #### Returns
 
@@ -1266,7 +1266,7 @@ Defined in: [offline/customers.ts:66](https://github.com/defendicon/POS-Awesome-
 
 > **getPendingOfflineInvoiceCount**(): `any`
 
-Defined in: [offline/invoices.ts:246](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoices.ts#L246)
+Defined in: [offline/invoices.ts:246](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoices.ts#L246)
 
 #### Returns
 
@@ -1278,7 +1278,7 @@ Defined in: [offline/invoices.ts:246](https://github.com/defendicon/POS-Awesome-
 
 > **getPendingOfflinePaymentCount**(): `any`
 
-Defined in: [offline/payments.ts:63](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/payments.ts#L63)
+Defined in: [offline/payments.ts:63](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/payments.ts#L63)
 
 #### Returns
 
@@ -1290,7 +1290,7 @@ Defined in: [offline/payments.ts:63](https://github.com/defendicon/POS-Awesome-V
 
 > **getPrintTemplate**(): `any`
 
-Defined in: [offline/cache.ts:1214](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1214)
+Defined in: [offline/cache.ts:1214](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1214)
 
 #### Returns
 
@@ -1302,7 +1302,7 @@ Defined in: [offline/cache.ts:1214](https://github.com/defendicon/POS-Awesome-V1
 
 > **getQueuedPayloadCount**(`entityType`): `any`
 
-Defined in: [offline/writeQueue.ts:622](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L622)
+Defined in: [offline/writeQueue.ts:622](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L622)
 
 #### Parameters
 
@@ -1320,7 +1320,7 @@ Defined in: [offline/writeQueue.ts:622](https://github.com/defendicon/POS-Awesom
 
 > **getQueuedPayloadSnapshots**(`entityType`): `any`[]
 
-Defined in: [offline/writeQueue.ts:615](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L615)
+Defined in: [offline/writeQueue.ts:615](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L615)
 
 #### Parameters
 
@@ -1338,7 +1338,7 @@ Defined in: [offline/writeQueue.ts:615](https://github.com/defendicon/POS-Awesom
 
 > **getQueueEntries**(`entityType`, `options?`): `Promise`\<[`OfflineQueueEntry`](#offlinequeueentry)[]\>
 
-Defined in: [offline/writeQueue.ts:292](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L292)
+Defined in: [offline/writeQueue.ts:292](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L292)
 
 #### Parameters
 
@@ -1366,7 +1366,7 @@ Defined in: [offline/writeQueue.ts:292](https://github.com/defendicon/POS-Awesom
 
 > **getSalesPersonsStorage**(): `any`
 
-Defined in: [offline/cache.ts:850](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L850)
+Defined in: [offline/cache.ts:850](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L850)
 
 #### Returns
 
@@ -1378,7 +1378,7 @@ Defined in: [offline/cache.ts:850](https://github.com/defendicon/POS-Awesome-V15
 
 > **getStoredCustomer**(`customerName`): `Promise`\<`any`\>
 
-Defined in: [offline/customers.ts:152](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L152)
+Defined in: [offline/customers.ts:152](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L152)
 
 #### Parameters
 
@@ -1396,7 +1396,7 @@ Defined in: [offline/customers.ts:152](https://github.com/defendicon/POS-Awesome
 
 > **getStoredItems**(): `Promise`\<`any`\>
 
-Defined in: [offline/cache.ts:252](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L252)
+Defined in: [offline/cache.ts:252](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L252)
 
 #### Returns
 
@@ -1412,7 +1412,7 @@ Avoid unscoped reads. Prefer `getAllStoredItems(scope)` with an explicit scope.
 
 > **getStoredItemsCount**(): `Promise`\<`any`\>
 
-Defined in: [offline/cache.ts:313](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L313)
+Defined in: [offline/cache.ts:313](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L313)
 
 #### Returns
 
@@ -1424,7 +1424,7 @@ Defined in: [offline/cache.ts:313](https://github.com/defendicon/POS-Awesome-V15
 
 > **getStoredItemsCountByScope**(`scope?`): `Promise`\<`any`\>
 
-Defined in: [offline/cache.ts:324](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L324)
+Defined in: [offline/cache.ts:324](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L324)
 
 #### Parameters
 
@@ -1442,7 +1442,7 @@ Defined in: [offline/cache.ts:324](https://github.com/defendicon/POS-Awesome-V15
 
 > **getSyncResourceDefinitions**(): [`SyncResourceDefinition`](#syncresourcedefinition)[]
 
-Defined in: [offline/sync/resourceRegistry.ts:194](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/resourceRegistry.ts#L194)
+Defined in: [offline/sync/resourceRegistry.ts:194](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/resourceRegistry.ts#L194)
 
 Returns a shallow copy of all resource definitions with cloned `triggers` arrays.
 Callers receive mutable copies so that the frozen registry cannot be accidentally mutated.
@@ -1457,7 +1457,7 @@ Callers receive mutable copies so that the frozen registry cannot be accidentall
 
 > **getSyncResourcesByPriority**(`priority`): [`SyncResourceDefinition`](#syncresourcedefinition)[]
 
-Defined in: [offline/sync/resourceRegistry.ts:206](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/resourceRegistry.ts#L206)
+Defined in: [offline/sync/resourceRegistry.ts:206](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/resourceRegistry.ts#L206)
 
 Returns all resource definitions with the given `priority`.
 Used by `SyncCoordinator` to process resources in priority order
@@ -1479,7 +1479,7 @@ Used by `SyncCoordinator` to process resources in priority order
 
 > **getSyncResourcesForTrigger**(`trigger`): [`SyncResourceDefinition`](#syncresourcedefinition)[]
 
-Defined in: [offline/sync/resourceRegistry.ts:219](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/resourceRegistry.ts#L219)
+Defined in: [offline/sync/resourceRegistry.ts:219](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/resourceRegistry.ts#L219)
 
 Returns all resource definitions whose `triggers` array includes `trigger`.
 Used by `SyncCoordinator` at the start of each trigger run to build
@@ -1501,7 +1501,7 @@ the work list for that event.
 
 > **getSyncResourceState**(`resourceId`): `Promise`\<[`SyncResourceState`](#syncresourcestate) \| `null`\>
 
-Defined in: [offline/sync/syncState.ts:74](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/syncState.ts#L74)
+Defined in: [offline/sync/syncState.ts:74](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/syncState.ts#L74)
 
 #### Parameters
 
@@ -1519,7 +1519,7 @@ Defined in: [offline/sync/syncState.ts:74](https://github.com/defendicon/POS-Awe
 
 > **getTaxInclusiveSetting**(): `boolean`
 
-Defined in: [offline/cache.ts:1033](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1033)
+Defined in: [offline/cache.ts:1033](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1033)
 
 #### Returns
 
@@ -1531,7 +1531,7 @@ Defined in: [offline/cache.ts:1033](https://github.com/defendicon/POS-Awesome-V1
 
 > **getTaxTemplate**(`name`): `any`
 
-Defined in: [offline/cache.ts:840](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L840)
+Defined in: [offline/cache.ts:840](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L840)
 
 #### Parameters
 
@@ -1549,7 +1549,7 @@ Defined in: [offline/cache.ts:840](https://github.com/defendicon/POS-Awesome-V15
 
 > **getTermsAndConditions**(): `any`
 
-Defined in: [offline/cache.ts:1234](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1234)
+Defined in: [offline/cache.ts:1234](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1234)
 
 #### Returns
 
@@ -1561,7 +1561,7 @@ Defined in: [offline/cache.ts:1234](https://github.com/defendicon/POS-Awesome-V1
 
 > **getTranslationsCache**(`lang`): `any`
 
-Defined in: [offline/cache.ts:1193](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1193)
+Defined in: [offline/cache.ts:1193](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1193)
 
 #### Parameters
 
@@ -1579,7 +1579,7 @@ Defined in: [offline/cache.ts:1193](https://github.com/defendicon/POS-Awesome-V1
 
 > **initializeStockCache**(`items`, `pos_profile`): `Promise`\<`boolean`\>
 
-Defined in: [offline/stock.ts:48](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/stock.ts#L48)
+Defined in: [offline/stock.ts:48](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/stock.ts#L48)
 
 #### Parameters
 
@@ -1601,7 +1601,7 @@ Defined in: [offline/stock.ts:48](https://github.com/defendicon/POS-Awesome-V15/
 
 > **isManualOffline**(): `any`
 
-Defined in: [offline/db.ts:652](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L652)
+Defined in: [offline/db.ts:652](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L652)
 
 #### Returns
 
@@ -1613,7 +1613,7 @@ Defined in: [offline/db.ts:652](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > **isOffline**(): `any`
 
-Defined in: [offline/db.ts:620](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L620)
+Defined in: [offline/db.ts:620](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L620)
 
 #### Returns
 
@@ -1625,7 +1625,7 @@ Defined in: [offline/db.ts:620](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > **isStockCacheReady**(): `any`
 
-Defined in: [offline/stock.ts:109](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/stock.ts#L109)
+Defined in: [offline/stock.ts:109](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/stock.ts#L109)
 
 #### Returns
 
@@ -1637,7 +1637,7 @@ Defined in: [offline/stock.ts:109](https://github.com/defendicon/POS-Awesome-V15
 
 > **listSyncResourceStates**(): `Promise`\<[`SyncResourceState`](#syncresourcestate)[]\>
 
-Defined in: [offline/sync/syncState.ts:87](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/syncState.ts#L87)
+Defined in: [offline/sync/syncState.ts:87](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/syncState.ts#L87)
 
 #### Returns
 
@@ -1649,7 +1649,7 @@ Defined in: [offline/sync/syncState.ts:87](https://github.com/defendicon/POS-Awe
 
 > **markWriteQueueEntryFailed**(`entityType`, `queueId`, `error`, `expectedLastAttemptAt`): `Promise`\<`any`\>
 
-Defined in: [offline/writeQueue.ts:524](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L524)
+Defined in: [offline/writeQueue.ts:524](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L524)
 
 #### Parameters
 
@@ -1679,7 +1679,7 @@ Defined in: [offline/writeQueue.ts:524](https://github.com/defendicon/POS-Awesom
 
 > **markWriteQueueEntrySynced**(`entityType`, `queueId`, `expectedLastAttemptAt`): `Promise`\<`any`\>
 
-Defined in: [offline/writeQueue.ts:503](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L503)
+Defined in: [offline/writeQueue.ts:503](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L503)
 
 #### Parameters
 
@@ -1705,7 +1705,7 @@ Defined in: [offline/writeQueue.ts:503](https://github.com/defendicon/POS-Awesom
 
 > **mergeCachedPriceListItems**(`priceList`, `items?`): `void`
 
-Defined in: [offline/cache.ts:587](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L587)
+Defined in: [offline/cache.ts:587](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L587)
 
 #### Parameters
 
@@ -1727,7 +1727,7 @@ Defined in: [offline/cache.ts:587](https://github.com/defendicon/POS-Awesome-V15
 
 > **migrateLegacyOfflineQueues**(): `Promise`\<`void`\>
 
-Defined in: [offline/writeQueue.ts:581](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L581)
+Defined in: [offline/writeQueue.ts:581](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L581)
 
 #### Returns
 
@@ -1739,7 +1739,7 @@ Defined in: [offline/writeQueue.ts:581](https://github.com/defendicon/POS-Awesom
 
 > **persist**(`key`, `value?`): `void`
 
-Defined in: [offline/db.ts:577](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L577)
+Defined in: [offline/db.ts:577](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L577)
 
 #### Parameters
 
@@ -1761,7 +1761,7 @@ Defined in: [offline/db.ts:577](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > **pruneOfflineStorage**(`options?`): `Promise`\<[`OfflinePruneResult`](#offlinepruneresult)\>
 
-Defined in: [offline/db.ts:478](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L478)
+Defined in: [offline/db.ts:478](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L478)
 
 #### Parameters
 
@@ -1785,7 +1785,7 @@ Defined in: [offline/db.ts:478](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > **purgeOldQueueEntries**(): `void`
 
-Defined in: [offline/db.ts:825](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L825)
+Defined in: [offline/db.ts:825](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L825)
 
 #### Returns
 
@@ -1797,7 +1797,7 @@ Defined in: [offline/db.ts:825](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > **queueHealthCheck**(): `boolean`
 
-Defined in: [offline/db.ts:815](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L815)
+Defined in: [offline/db.ts:815](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L815)
 
 #### Returns
 
@@ -1809,7 +1809,7 @@ Defined in: [offline/db.ts:815](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > **quickDbHealthCheck**(): `Promise`\<`boolean`\>
 
-Defined in: [offline/db.ts:772](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L772)
+Defined in: [offline/db.ts:772](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L772)
 
 #### Returns
 
@@ -1821,7 +1821,7 @@ Defined in: [offline/db.ts:772](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > **reduceCacheUsage**(): `void`
 
-Defined in: [offline/cache.ts:1056](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1056)
+Defined in: [offline/cache.ts:1056](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1056)
 
 Clears all `memory`-tier caches to free up localStorage space under memory pressure.
 
@@ -1843,7 +1843,7 @@ the relevant sync adapter re-populates the cache.
 
 > **refreshAllQueueMemory**(): `Promise`\<`void`\>
 
-Defined in: [offline/writeQueue.ts:325](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L325)
+Defined in: [offline/writeQueue.ts:325](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L325)
 
 #### Returns
 
@@ -1855,7 +1855,7 @@ Defined in: [offline/writeQueue.ts:325](https://github.com/defendicon/POS-Awesom
 
 > **refreshBootstrapSnapshotFromCacheState**(`cacheState?`): `void`
 
-Defined in: [offline/cache.ts:888](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L888)
+Defined in: [offline/cache.ts:888](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L888)
 
 Re-evaluates the stored bootstrap snapshot against the current cache state and
 persists the updated snapshot.
@@ -1884,7 +1884,7 @@ Partial cache state describing what was just written.
 
 > **refreshQueueMemory**(`entityType`): `Promise`\<`void`\>
 
-Defined in: [offline/writeQueue.ts:318](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L318)
+Defined in: [offline/writeQueue.ts:318](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L318)
 
 #### Parameters
 
@@ -1902,7 +1902,7 @@ Defined in: [offline/writeQueue.ts:318](https://github.com/defendicon/POS-Awesom
 
 > **removeCachedPriceListItems**(`itemCodes?`, `priceList?`): `void`
 
-Defined in: [offline/cache.ts:630](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L630)
+Defined in: [offline/cache.ts:630](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L630)
 
 #### Parameters
 
@@ -1924,7 +1924,7 @@ Defined in: [offline/cache.ts:630](https://github.com/defendicon/POS-Awesome-V15
 
 > **removeItemDetailsCacheEntries**(`profileName`, `itemCodes?`, `priceList?`): `void`
 
-Defined in: [offline/cache.ts:776](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L776)
+Defined in: [offline/cache.ts:776](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L776)
 
 #### Parameters
 
@@ -1950,7 +1950,7 @@ Defined in: [offline/cache.ts:776](https://github.com/defendicon/POS-Awesome-V15
 
 > **removeLocalStockEntries**(`itemCodes`): `void`
 
-Defined in: [offline/stock.ts:187](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/stock.ts#L187)
+Defined in: [offline/stock.ts:187](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/stock.ts#L187)
 
 #### Parameters
 
@@ -1968,7 +1968,7 @@ Defined in: [offline/stock.ts:187](https://github.com/defendicon/POS-Awesome-V15
 
 > **repairDbAfterFailedHealthCheck**(`error?`): `Promise`\<`boolean`\>
 
-Defined in: [offline/db.ts:785](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L785)
+Defined in: [offline/db.ts:785](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L785)
 
 #### Parameters
 
@@ -1986,7 +1986,7 @@ Defined in: [offline/db.ts:785](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > **resetOfflineState**(): `void`
 
-Defined in: [offline/invoices.ts:250](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoices.ts#L250)
+Defined in: [offline/invoices.ts:250](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoices.ts#L250)
 
 #### Returns
 
@@ -1998,7 +1998,7 @@ Defined in: [offline/invoices.ts:250](https://github.com/defendicon/POS-Awesome-
 
 > **resetSyncCoordinatorForTests**(): `void`
 
-Defined in: [offline/sync/useSyncCoordinator.ts:15](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/useSyncCoordinator.ts#L15)
+Defined in: [offline/sync/useSyncCoordinator.ts:15](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/useSyncCoordinator.ts#L15)
 
 #### Returns
 
@@ -2010,7 +2010,7 @@ Defined in: [offline/sync/useSyncCoordinator.ts:15](https://github.com/defendico
 
 > **safeBulkDelete**(`tableName`, `keys`): `Promise`\<`void`\>
 
-Defined in: [offline/db.ts:447](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L447)
+Defined in: [offline/db.ts:447](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L447)
 
 #### Parameters
 
@@ -2032,7 +2032,7 @@ Defined in: [offline/db.ts:447](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > **safeBulkPut**\<`T`\>(`tableName`, `rows`): `Promise`\<`void`\>
 
-Defined in: [offline/db.ts:421](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L421)
+Defined in: [offline/db.ts:421](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L421)
 
 #### Type Parameters
 
@@ -2060,7 +2060,7 @@ Defined in: [offline/db.ts:421](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > **saveCoupons**(`coupons`): `void`
 
-Defined in: [offline/cache.ts:1255](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1255)
+Defined in: [offline/cache.ts:1255](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1255)
 
 #### Parameters
 
@@ -2078,7 +2078,7 @@ Defined in: [offline/cache.ts:1255](https://github.com/defendicon/POS-Awesome-V1
 
 > **saveCurrencyOptionsCache**(`profileName`, `currencies`): `void`
 
-Defined in: [offline/cache.ts:1354](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1354)
+Defined in: [offline/cache.ts:1354](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1354)
 
 #### Parameters
 
@@ -2100,7 +2100,7 @@ Defined in: [offline/cache.ts:1354](https://github.com/defendicon/POS-Awesome-V1
 
 > **saveCustomerAddressesCache**(`customer`, `addresses`): `void`
 
-Defined in: [offline/cache.ts:1482](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1482)
+Defined in: [offline/cache.ts:1482](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1482)
 
 #### Parameters
 
@@ -2120,9 +2120,9 @@ Defined in: [offline/cache.ts:1482](https://github.com/defendicon/POS-Awesome-V1
 
 ### saveCustomerBalance()
 
-> **saveCustomerBalance**(`customer`, `balance`): `void`
+> **saveCustomerBalance**(`customer`, `balance`, `currency?`): `void`
 
-Defined in: [offline/customers.ts:326](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L326)
+Defined in: [offline/customers.ts:364](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L364)
 
 #### Parameters
 
@@ -2134,6 +2134,10 @@ Defined in: [offline/customers.ts:326](https://github.com/defendicon/POS-Awesome
 
 `number`
 
+##### currency?
+
+`string`
+
 #### Returns
 
 `void`
@@ -2144,7 +2148,7 @@ Defined in: [offline/customers.ts:326](https://github.com/defendicon/POS-Awesome
 
 > **saveDeliveryChargesCache**(`profileName`, `customer`, `deliveryCharges`): `void`
 
-Defined in: [offline/cache.ts:1310](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1310)
+Defined in: [offline/cache.ts:1310](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1310)
 
 #### Parameters
 
@@ -2170,7 +2174,7 @@ Defined in: [offline/cache.ts:1310](https://github.com/defendicon/POS-Awesome-V1
 
 > **saveExchangeRateCache**(`entry?`): `void`
 
-Defined in: [offline/cache.ts:1393](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1393)
+Defined in: [offline/cache.ts:1393](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1393)
 
 #### Parameters
 
@@ -2188,7 +2192,7 @@ Defined in: [offline/cache.ts:1393](https://github.com/defendicon/POS-Awesome-V1
 
 > **saveGiftCardSnapshot**(`giftCardCode`, `snapshot`): `void`
 
-Defined in: [offline/customers.ts:282](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L282)
+Defined in: [offline/customers.ts:320](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L320)
 
 #### Parameters
 
@@ -2210,7 +2214,7 @@ Defined in: [offline/customers.ts:282](https://github.com/defendicon/POS-Awesome
 
 > **saveItemDetailsCache**(`profileName`, `priceList`, `items`): `void`
 
-Defined in: [offline/cache.ts:670](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L670)
+Defined in: [offline/cache.ts:670](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L670)
 
 #### Parameters
 
@@ -2236,7 +2240,7 @@ Defined in: [offline/cache.ts:670](https://github.com/defendicon/POS-Awesome-V15
 
 > **saveItemGroups**(`groups`): `void`
 
-Defined in: [offline/cache.ts:1280](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1280)
+Defined in: [offline/cache.ts:1280](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1280)
 
 #### Parameters
 
@@ -2254,7 +2258,7 @@ Defined in: [offline/cache.ts:1280](https://github.com/defendicon/POS-Awesome-V1
 
 > **saveItems**(`items`, `scope?`): `Promise`\<`void`\>
 
-Defined in: [offline/cache.ts:359](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L359)
+Defined in: [offline/cache.ts:359](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L359)
 
 #### Parameters
 
@@ -2276,7 +2280,7 @@ Defined in: [offline/cache.ts:359](https://github.com/defendicon/POS-Awesome-V15
 
 > **saveItemsBulk**(`items`, `scope?`): `Promise`\<`void`\>
 
-Defined in: [offline/cache.ts:355](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L355)
+Defined in: [offline/cache.ts:355](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L355)
 
 #### Parameters
 
@@ -2298,7 +2302,7 @@ Defined in: [offline/cache.ts:355](https://github.com/defendicon/POS-Awesome-V15
 
 > **saveItemUOMs**(`itemCode`, `uoms`): `void`
 
-Defined in: [offline/cache.ts:458](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L458)
+Defined in: [offline/cache.ts:458](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L458)
 
 #### Parameters
 
@@ -2320,7 +2324,7 @@ Defined in: [offline/cache.ts:458](https://github.com/defendicon/POS-Awesome-V15
 
 > **saveOffers**(`offers`): `void`
 
-Defined in: [offline/cache.ts:479](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L479)
+Defined in: [offline/cache.ts:479](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L479)
 
 #### Parameters
 
@@ -2338,7 +2342,7 @@ Defined in: [offline/cache.ts:479](https://github.com/defendicon/POS-Awesome-V15
 
 > **saveOfflineCashMovement**(`entry`): `Promise`\<`any`\>
 
-Defined in: [offline/cash\_movements.ts:23](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cash_movements.ts#L23)
+Defined in: [offline/cash\_movements.ts:23](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cash_movements.ts#L23)
 
 #### Parameters
 
@@ -2356,7 +2360,7 @@ Defined in: [offline/cash\_movements.ts:23](https://github.com/defendicon/POS-Aw
 
 > **saveOfflineCustomer**(`entry`): `Promise`\<`any`\>
 
-Defined in: [offline/customers.ts:20](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L20)
+Defined in: [offline/customers.ts:20](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L20)
 
 #### Parameters
 
@@ -2374,7 +2378,7 @@ Defined in: [offline/customers.ts:20](https://github.com/defendicon/POS-Awesome-
 
 > **saveOfflineInvoice**(`entry`): `Promise`\<`any`\>
 
-Defined in: [offline/invoices.ts:214](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoices.ts#L214)
+Defined in: [offline/invoices.ts:214](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoices.ts#L214)
 
 #### Parameters
 
@@ -2392,7 +2396,7 @@ Defined in: [offline/invoices.ts:214](https://github.com/defendicon/POS-Awesome-
 
 > **saveOfflinePayment**(`entry`): `Promise`\<`any`\>
 
-Defined in: [offline/payments.ts:41](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/payments.ts#L41)
+Defined in: [offline/payments.ts:41](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/payments.ts#L41)
 
 #### Parameters
 
@@ -2410,7 +2414,7 @@ Defined in: [offline/payments.ts:41](https://github.com/defendicon/POS-Awesome-V
 
 > **savePaymentMethodCurrencyCache**(`company`, `mapping`): `void`
 
-Defined in: [offline/cache.ts:1522](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1522)
+Defined in: [offline/cache.ts:1522](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1522)
 
 #### Parameters
 
@@ -2432,7 +2436,7 @@ Defined in: [offline/cache.ts:1522](https://github.com/defendicon/POS-Awesome-V1
 
 > **savePriceListItems**(`priceList`, `items`): `void`
 
-Defined in: [offline/cache.ts:540](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L540)
+Defined in: [offline/cache.ts:540](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L540)
 
 #### Parameters
 
@@ -2454,7 +2458,7 @@ Defined in: [offline/cache.ts:540](https://github.com/defendicon/POS-Awesome-V15
 
 > **savePriceListMetaCache**(`profileName`, `metadata`): `void`
 
-Defined in: [offline/cache.ts:1443](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1443)
+Defined in: [offline/cache.ts:1443](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1443)
 
 #### Parameters
 
@@ -2476,7 +2480,7 @@ Defined in: [offline/cache.ts:1443](https://github.com/defendicon/POS-Awesome-V1
 
 > **savePricingRulesSnapshot**(`snapshot?`, `context?`, `staleAt?`): `void`
 
-Defined in: [offline/cache.ts:1146](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1146)
+Defined in: [offline/cache.ts:1146](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1146)
 
 #### Parameters
 
@@ -2502,7 +2506,7 @@ Defined in: [offline/cache.ts:1146](https://github.com/defendicon/POS-Awesome-V1
 
 > **saveStoredValueSnapshot**(`customer`, `company`, `sources`): `void`
 
-Defined in: [offline/customers.ts:225](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L225)
+Defined in: [offline/customers.ts:263](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L263)
 
 #### Parameters
 
@@ -2528,7 +2532,7 @@ Defined in: [offline/customers.ts:225](https://github.com/defendicon/POS-Awesome
 
 > **saveTaxTemplate**(`name`, `doc`): `void`
 
-Defined in: [offline/cache.ts:826](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L826)
+Defined in: [offline/cache.ts:826](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L826)
 
 #### Parameters
 
@@ -2550,7 +2554,7 @@ Defined in: [offline/cache.ts:826](https://github.com/defendicon/POS-Awesome-V15
 
 > **saveTranslationsCache**(`lang`, `data`): `void`
 
-Defined in: [offline/cache.ts:1203](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1203)
+Defined in: [offline/cache.ts:1203](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1203)
 
 #### Parameters
 
@@ -2572,7 +2576,7 @@ Defined in: [offline/cache.ts:1203](https://github.com/defendicon/POS-Awesome-V1
 
 > **scheduleIdleOfflinePruning**(): `void`
 
-Defined in: [offline/db.ts:560](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L560)
+Defined in: [offline/db.ts:560](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L560)
 
 #### Returns
 
@@ -2584,7 +2588,7 @@ Defined in: [offline/db.ts:560](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > **searchStoredItems**(`__namedParameters?`): `Promise`\<`any`\>
 
-Defined in: [offline/cache.ts:263](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L263)
+Defined in: [offline/cache.ts:263](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L263)
 
 #### Parameters
 
@@ -2620,7 +2624,7 @@ Defined in: [offline/cache.ts:263](https://github.com/defendicon/POS-Awesome-V15
 
 > **setBootstrapLimitedMode**(`state`): `void`
 
-Defined in: [offline/cache.ts:932](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L932)
+Defined in: [offline/cache.ts:932](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L932)
 
 #### Parameters
 
@@ -2638,7 +2642,7 @@ Defined in: [offline/cache.ts:932](https://github.com/defendicon/POS-Awesome-V15
 
 > **setBootstrapSnapshot**(`snapshot`): `void`
 
-Defined in: [offline/cache.ts:901](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L901)
+Defined in: [offline/cache.ts:901](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L901)
 
 #### Parameters
 
@@ -2656,7 +2660,7 @@ Defined in: [offline/cache.ts:901](https://github.com/defendicon/POS-Awesome-V15
 
 > **setBootstrapSnapshotStatus**(`status`): `void`
 
-Defined in: [offline/cache.ts:917](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L917)
+Defined in: [offline/cache.ts:917](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L917)
 
 #### Parameters
 
@@ -2674,7 +2678,7 @@ Defined in: [offline/cache.ts:917](https://github.com/defendicon/POS-Awesome-V15
 
 > **setCustomersLastSync**(`timestamp`): `void`
 
-Defined in: [offline/cache.ts:1103](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1103)
+Defined in: [offline/cache.ts:1103](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1103)
 
 #### Parameters
 
@@ -2692,7 +2696,7 @@ Defined in: [offline/cache.ts:1103](https://github.com/defendicon/POS-Awesome-V1
 
 > **setCustomerStorage**(`customers`): `Promise`\<`void`\>
 
-Defined in: [offline/customers.ts:177](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L177)
+Defined in: [offline/customers.ts:177](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L177)
 
 #### Parameters
 
@@ -2710,7 +2714,7 @@ Defined in: [offline/customers.ts:177](https://github.com/defendicon/POS-Awesome
 
 > **setInvoiceOutboxMode**(`mode`): `void`
 
-Defined in: [offline/invoiceOutbox.ts:70](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L70)
+Defined in: [offline/invoiceOutbox.ts:70](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L70)
 
 #### Parameters
 
@@ -2728,7 +2732,7 @@ Defined in: [offline/invoiceOutbox.ts:70](https://github.com/defendicon/POS-Awes
 
 > **setItemsLastSync**(`timestamp`): `void`
 
-Defined in: [offline/cache.ts:1094](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1094)
+Defined in: [offline/cache.ts:1094](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1094)
 
 #### Parameters
 
@@ -2746,7 +2750,7 @@ Defined in: [offline/cache.ts:1094](https://github.com/defendicon/POS-Awesome-V1
 
 > **setLastSyncTotals**(`totals`): `void`
 
-Defined in: [offline/invoices.ts:258](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoices.ts#L258)
+Defined in: [offline/invoices.ts:258](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoices.ts#L258)
 
 #### Parameters
 
@@ -2774,7 +2778,7 @@ Defined in: [offline/invoices.ts:258](https://github.com/defendicon/POS-Awesome-
 
 > **setLocalStockCache**(`cache`): `void`
 
-Defined in: [offline/stock.ts:258](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/stock.ts#L258)
+Defined in: [offline/stock.ts:258](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/stock.ts#L258)
 
 #### Parameters
 
@@ -2792,7 +2796,7 @@ Defined in: [offline/stock.ts:258](https://github.com/defendicon/POS-Awesome-V15
 
 > **setManualOffline**(`state`): `void`
 
-Defined in: [offline/db.ts:656](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L656)
+Defined in: [offline/db.ts:656](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L656)
 
 #### Parameters
 
@@ -2810,7 +2814,7 @@ Defined in: [offline/db.ts:656](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > **setOpeningDialogStorage**(`data`): `void`
 
-Defined in: [offline/cache.ts:1024](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1024)
+Defined in: [offline/cache.ts:1024](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1024)
 
 #### Parameters
 
@@ -2828,7 +2832,7 @@ Defined in: [offline/cache.ts:1024](https://github.com/defendicon/POS-Awesome-V1
 
 > **setOpeningStorage**(`data`): `void`
 
-Defined in: [offline/cache.ts:995](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L995)
+Defined in: [offline/cache.ts:995](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L995)
 
 #### Parameters
 
@@ -2846,7 +2850,7 @@ Defined in: [offline/cache.ts:995](https://github.com/defendicon/POS-Awesome-V15
 
 > **setPrintTemplate**(`template`): `void`
 
-Defined in: [offline/cache.ts:1222](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1222)
+Defined in: [offline/cache.ts:1222](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1222)
 
 #### Parameters
 
@@ -2864,7 +2868,7 @@ Defined in: [offline/cache.ts:1222](https://github.com/defendicon/POS-Awesome-V1
 
 > **setSalesPersonsStorage**(`data`): `void`
 
-Defined in: [offline/cache.ts:854](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L854)
+Defined in: [offline/cache.ts:854](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L854)
 
 #### Parameters
 
@@ -2882,7 +2886,7 @@ Defined in: [offline/cache.ts:854](https://github.com/defendicon/POS-Awesome-V15
 
 > **setStockCacheReady**(`ready`): `void`
 
-Defined in: [offline/stock.ts:113](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/stock.ts#L113)
+Defined in: [offline/stock.ts:113](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/stock.ts#L113)
 
 #### Parameters
 
@@ -2900,7 +2904,7 @@ Defined in: [offline/stock.ts:113](https://github.com/defendicon/POS-Awesome-V15
 
 > **setSyncResourceState**(`state`): `Promise`\<`void`\>
 
-Defined in: [offline/sync/syncState.ts:41](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/syncState.ts#L41)
+Defined in: [offline/sync/syncState.ts:41](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/syncState.ts#L41)
 
 #### Parameters
 
@@ -2918,7 +2922,7 @@ Defined in: [offline/sync/syncState.ts:41](https://github.com/defendicon/POS-Awe
 
 > **setSyncResourceStates**(`states`): `Promise`\<`void`\>
 
-Defined in: [offline/sync/syncState.ts:58](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/syncState.ts#L58)
+Defined in: [offline/sync/syncState.ts:58](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/syncState.ts#L58)
 
 #### Parameters
 
@@ -2936,7 +2940,7 @@ Defined in: [offline/sync/syncState.ts:58](https://github.com/defendicon/POS-Awe
 
 > **setTaxInclusiveSetting**(`value`): `void`
 
-Defined in: [offline/cache.ts:1037](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1037)
+Defined in: [offline/cache.ts:1037](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1037)
 
 #### Parameters
 
@@ -2954,7 +2958,7 @@ Defined in: [offline/cache.ts:1037](https://github.com/defendicon/POS-Awesome-V1
 
 > **setTermsAndConditions**(`terms`): `void`
 
-Defined in: [offline/cache.ts:1242](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L1242)
+Defined in: [offline/cache.ts:1242](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L1242)
 
 #### Parameters
 
@@ -2972,7 +2976,7 @@ Defined in: [offline/cache.ts:1242](https://github.com/defendicon/POS-Awesome-V1
 
 > **shouldWriteInvoiceOutbox**(): `boolean`
 
-Defined in: [offline/invoiceOutbox.ts:75](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L75)
+Defined in: [offline/invoiceOutbox.ts:75](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L75)
 
 #### Returns
 
@@ -2984,7 +2988,7 @@ Defined in: [offline/invoiceOutbox.ts:75](https://github.com/defendicon/POS-Awes
 
 > **syncBootstrapConfigResource**(`args`): `Promise`\<`ResourceSyncResult`\>
 
-Defined in: [offline/sync/adapters/bootstrapConfig.ts:48](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/adapters/bootstrapConfig.ts#L48)
+Defined in: [offline/sync/adapters/bootstrapConfig.ts:48](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/adapters/bootstrapConfig.ts#L48)
 
 #### Parameters
 
@@ -3002,7 +3006,7 @@ Defined in: [offline/sync/adapters/bootstrapConfig.ts:48](https://github.com/def
 
 > **syncCurrencyMatrixResource**(`args`): `Promise`\<`ResourceSyncResult`\>
 
-Defined in: [offline/sync/adapters/currencyMatrix.ts:34](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/adapters/currencyMatrix.ts#L34)
+Defined in: [offline/sync/adapters/currencyMatrix.ts:34](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/adapters/currencyMatrix.ts#L34)
 
 #### Parameters
 
@@ -3020,7 +3024,7 @@ Defined in: [offline/sync/adapters/currencyMatrix.ts:34](https://github.com/defe
 
 > **syncCustomersResource**(`args`): `Promise`\<`ResourceSyncResult`\>
 
-Defined in: [offline/sync/adapters/customers.ts:61](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/adapters/customers.ts#L61)
+Defined in: [offline/sync/adapters/customers.ts:135](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/adapters/customers.ts#L135)
 
 #### Parameters
 
@@ -3038,7 +3042,7 @@ Defined in: [offline/sync/adapters/customers.ts:61](https://github.com/defendico
 
 > **syncInvoiceOutboxResource**(`callOfflineSyncMethod`): `Promise`\<\{ `acknowledged`: `number`; `consecutiveFailures`: `number`; `lastError`: `string` \| `null`; `lastSyncedAt`: `string`; `pendingCount`: `number`; `resourceId`: `string`; `status`: `string`; `watermark`: `string`; \}\>
 
-Defined in: [offline/invoiceOutbox.ts:198](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L198)
+Defined in: [offline/invoiceOutbox.ts:198](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L198)
 
 #### Parameters
 
@@ -3056,7 +3060,7 @@ Defined in: [offline/invoiceOutbox.ts:198](https://github.com/defendicon/POS-Awe
 
 > **syncItemsResource**(`args`): `Promise`\<`ResourceSyncResult`\>
 
-Defined in: [offline/sync/adapters/items.ts:95](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/adapters/items.ts#L95)
+Defined in: [offline/sync/adapters/items.ts:95](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/adapters/items.ts#L95)
 
 #### Parameters
 
@@ -3074,7 +3078,7 @@ Defined in: [offline/sync/adapters/items.ts:95](https://github.com/defendicon/PO
 
 > **syncOfflineCashMovements**(): `Promise`\<\{ `pending`: `any`; `synced`: `number`; \}\>
 
-Defined in: [offline/cash\_movements.ts:72](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cash_movements.ts#L72)
+Defined in: [offline/cash\_movements.ts:72](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cash_movements.ts#L72)
 
 #### Returns
 
@@ -3086,7 +3090,7 @@ Defined in: [offline/cash\_movements.ts:72](https://github.com/defendicon/POS-Aw
 
 > **syncOfflineCustomers**(): `Promise`\<\{ `pending`: `any`; `synced`: `number`; \}\>
 
-Defined in: [offline/customers.ts:70](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L70)
+Defined in: [offline/customers.ts:70](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L70)
 
 #### Returns
 
@@ -3098,7 +3102,7 @@ Defined in: [offline/customers.ts:70](https://github.com/defendicon/POS-Awesome-
 
 > **syncOfflineInvoices**(): `Promise`\<\{ `drafted`: `number`; `pending`: `any`; `synced`: `number`; \}\>
 
-Defined in: [offline/invoices.ts:271](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoices.ts#L271)
+Defined in: [offline/invoices.ts:271](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoices.ts#L271)
 
 #### Returns
 
@@ -3110,7 +3114,7 @@ Defined in: [offline/invoices.ts:271](https://github.com/defendicon/POS-Awesome-
 
 > **syncOfflinePayments**(): `Promise`\<\{ `pending`: `any`; `synced`: `number`; \}\>
 
-Defined in: [offline/payments.ts:67](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/payments.ts#L67)
+Defined in: [offline/payments.ts:67](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/payments.ts#L67)
 
 #### Returns
 
@@ -3122,7 +3126,7 @@ Defined in: [offline/payments.ts:67](https://github.com/defendicon/POS-Awesome-V
 
 > **syncPaymentMethodCurrenciesResource**(`args`): `Promise`\<`ResourceSyncResult`\>
 
-Defined in: [offline/sync/adapters/paymentMethodCurrencies.ts:24](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/adapters/paymentMethodCurrencies.ts#L24)
+Defined in: [offline/sync/adapters/paymentMethodCurrencies.ts:24](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/adapters/paymentMethodCurrencies.ts#L24)
 
 #### Parameters
 
@@ -3140,7 +3144,7 @@ Defined in: [offline/sync/adapters/paymentMethodCurrencies.ts:24](https://github
 
 > **syncPriceListMetaResource**(`args`): `Promise`\<`ResourceSyncResult`\>
 
-Defined in: [offline/sync/adapters/bootstrapConfig.ts:92](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/adapters/bootstrapConfig.ts#L92)
+Defined in: [offline/sync/adapters/bootstrapConfig.ts:92](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/adapters/bootstrapConfig.ts#L92)
 
 #### Parameters
 
@@ -3158,7 +3162,7 @@ Defined in: [offline/sync/adapters/bootstrapConfig.ts:92](https://github.com/def
 
 > **syncStockResource**(`args`): `Promise`\<`ResourceSyncResult`\>
 
-Defined in: [offline/sync/adapters/stock.ts:55](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/adapters/stock.ts#L55)
+Defined in: [offline/sync/adapters/stock.ts:55](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/adapters/stock.ts#L55)
 
 #### Parameters
 
@@ -3176,7 +3180,7 @@ Defined in: [offline/sync/adapters/stock.ts:55](https://github.com/defendicon/PO
 
 > **toggleManualOffline**(): `void`
 
-Defined in: [offline/db.ts:661](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L661)
+Defined in: [offline/db.ts:661](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L661)
 
 #### Returns
 
@@ -3188,7 +3192,7 @@ Defined in: [offline/db.ts:661](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > **updateLocalStock**(`items`): `void`
 
-Defined in: [offline/stock.ts:121](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/stock.ts#L121)
+Defined in: [offline/stock.ts:121](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/stock.ts#L121)
 
 #### Parameters
 
@@ -3206,7 +3210,7 @@ Defined in: [offline/stock.ts:121](https://github.com/defendicon/POS-Awesome-V15
 
 > **updateLocalStockCache**(`items`): `void`
 
-Defined in: [offline/stock.ts:159](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/stock.ts#L159)
+Defined in: [offline/stock.ts:159](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/stock.ts#L159)
 
 #### Parameters
 
@@ -3224,7 +3228,7 @@ Defined in: [offline/stock.ts:159](https://github.com/defendicon/POS-Awesome-V15
 
 > **updateLocalStockWithActualQuantities**(`invoiceItems`, `serverItems`): `void`
 
-Defined in: [offline/stock.ts:210](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/stock.ts#L210)
+Defined in: [offline/stock.ts:210](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/stock.ts#L210)
 
 #### Parameters
 
@@ -3246,7 +3250,7 @@ Defined in: [offline/stock.ts:210](https://github.com/defendicon/POS-Awesome-V15
 
 > **updateOfflineInvoicesCustomer**(`oldName`, `newName`): `Promise`\<`void`\>
 
-Defined in: [offline/customers.ts:32](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/customers.ts#L32)
+Defined in: [offline/customers.ts:32](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/customers.ts#L32)
 
 #### Parameters
 
@@ -3268,7 +3272,7 @@ Defined in: [offline/customers.ts:32](https://github.com/defendicon/POS-Awesome-
 
 > **updateQueuedPayloads**(`entityType`, `updater`): `Promise`\<`void`\>
 
-Defined in: [offline/writeQueue.ts:553](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L553)
+Defined in: [offline/writeQueue.ts:553](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L553)
 
 #### Parameters
 
@@ -3290,7 +3294,7 @@ Defined in: [offline/writeQueue.ts:553](https://github.com/defendicon/POS-Awesom
 
 > **useSyncCoordinator**(): [`SyncCoordinator`](#synccoordinator)
 
-Defined in: [offline/sync/useSyncCoordinator.ts:8](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/useSyncCoordinator.ts#L8)
+Defined in: [offline/sync/useSyncCoordinator.ts:8](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/useSyncCoordinator.ts#L8)
 
 #### Returns
 
@@ -3302,7 +3306,7 @@ Defined in: [offline/sync/useSyncCoordinator.ts:8](https://github.com/defendicon
 
 > **validateStockForOfflineInvoice**(`items`, `invoice?`): `object`
 
-Defined in: [offline/invoices.ts:62](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoices.ts#L62)
+Defined in: [offline/invoices.ts:62](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoices.ts#L62)
 
 #### Parameters
 
@@ -3336,7 +3340,7 @@ Defined in: [offline/invoices.ts:62](https://github.com/defendicon/POS-Awesome-V
 
 > **withDbTransaction**\<`T`\>(`mode`, `tableNames`, `callback`): `Promise`\<`T`\>
 
-Defined in: [offline/db.ts:410](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L410)
+Defined in: [offline/db.ts:410](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L410)
 
 #### Type Parameters
 
@@ -3366,7 +3370,7 @@ Defined in: [offline/db.ts:410](https://github.com/defendicon/POS-Awesome-V15/bl
 
 ### SyncCoordinator
 
-Defined in: [offline/sync/SyncCoordinator.ts:109](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/SyncCoordinator.ts#L109)
+Defined in: [offline/sync/SyncCoordinator.ts:109](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/SyncCoordinator.ts#L109)
 
 Orchestrates offline background synchronisation for all registered resources.
 
@@ -3389,7 +3393,7 @@ coordinator.runTrigger("boot");
 
 > **new SyncCoordinator**(`options?`): [`SyncCoordinator`](#synccoordinator)
 
-Defined in: [offline/sync/SyncCoordinator.ts:128](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/SyncCoordinator.ts#L128)
+Defined in: [offline/sync/SyncCoordinator.ts:128](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/SyncCoordinator.ts#L128)
 
 ###### Parameters
 
@@ -3407,7 +3411,7 @@ Defined in: [offline/sync/SyncCoordinator.ts:128](https://github.com/defendicon/
 
 > **getLastRunSummary**(): `any`
 
-Defined in: [offline/sync/SyncCoordinator.ts:166](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/SyncCoordinator.ts#L166)
+Defined in: [offline/sync/SyncCoordinator.ts:166](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/SyncCoordinator.ts#L166)
 
 ###### Returns
 
@@ -3417,7 +3421,7 @@ Defined in: [offline/sync/SyncCoordinator.ts:166](https://github.com/defendicon/
 
 > **getResourceState**(`resourceId`): \{ `consecutiveFailures`: `number`; `cooldownMs?`: `number` \| `null`; `lastAttemptAt?`: `string` \| `null`; `lastError`: `string` \| `null`; `lastSuccessHash`: `string` \| `null`; `lastSyncedAt`: `string` \| `null`; `lastTrigger?`: [`SyncTrigger`](#synctrigger) \| `null`; `nextRetryAt?`: `string` \| `null`; `resourceId`: [`SyncResourceId`](#syncresourceid); `schemaVersion`: `string` \| `null`; `scopeSignature`: `string` \| `null`; `status`: [`SyncLifecycleState`](#synclifecyclestate); `watermark`: `string` \| `null`; \} \| `null`
 
-Defined in: [offline/sync/SyncCoordinator.ts:152](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/SyncCoordinator.ts#L152)
+Defined in: [offline/sync/SyncCoordinator.ts:152](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/SyncCoordinator.ts#L152)
 
 Returns a snapshot of the current state for a single resource,
 or `null` if the resource ID is not registered.
@@ -3436,7 +3440,7 @@ or `null` if the resource ID is not registered.
 
 > **getResourceStates**(): `object`[]
 
-Defined in: [offline/sync/SyncCoordinator.ts:160](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/SyncCoordinator.ts#L160)
+Defined in: [offline/sync/SyncCoordinator.ts:160](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/SyncCoordinator.ts#L160)
 
 Returns snapshots of the current state for all registered resources.
 
@@ -3448,7 +3452,7 @@ Returns snapshots of the current state for all registered resources.
 
 > **hydrateResourceStates**(`states`): `void`
 
-Defined in: [offline/sync/SyncCoordinator.ts:176](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/SyncCoordinator.ts#L176)
+Defined in: [offline/sync/SyncCoordinator.ts:176](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/SyncCoordinator.ts#L176)
 
 Replaces in-memory resource states with the supplied values, then emits a state-change
 notification. Used to restore persisted state after a page reload.
@@ -3467,7 +3471,7 @@ notification. Used to restore persisted state after a page reload.
 
 > **runTrigger**(`trigger`): `Promise`\<`void`\>
 
-Defined in: [offline/sync/SyncCoordinator.ts:196](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/SyncCoordinator.ts#L196)
+Defined in: [offline/sync/SyncCoordinator.ts:196](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/SyncCoordinator.ts#L196)
 
 Runs all resources that subscribe to `trigger`, in priority order.
 If a run for the same trigger is already in flight, returns the existing Promise
@@ -3489,7 +3493,7 @@ The event that initiated this sync pass.
 
 ### InvoiceOutboxEntry
 
-Defined in: [offline/invoiceOutbox.ts:13](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L13)
+Defined in: [offline/invoiceOutbox.ts:13](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L13)
 
 #### Properties
 
@@ -3497,91 +3501,91 @@ Defined in: [offline/invoiceOutbox.ts:13](https://github.com/defendicon/POS-Awes
 
 > **acknowledged\_at**: `string` \| `null`
 
-Defined in: [offline/invoiceOutbox.ts:27](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L27)
+Defined in: [offline/invoiceOutbox.ts:27](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L27)
 
 ##### client\_request\_id
 
 > **client\_request\_id**: `string`
 
-Defined in: [offline/invoiceOutbox.ts:15](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L15)
+Defined in: [offline/invoiceOutbox.ts:15](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L15)
 
 ##### created\_at
 
 > **created\_at**: `string`
 
-Defined in: [offline/invoiceOutbox.ts:20](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L20)
+Defined in: [offline/invoiceOutbox.ts:20](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L20)
 
 ##### data
 
 > **data**: `AnyRecord`
 
-Defined in: [offline/invoiceOutbox.ts:19](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L19)
+Defined in: [offline/invoiceOutbox.ts:19](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L19)
 
 ##### invoice
 
 > **invoice**: `AnyRecord`
 
-Defined in: [offline/invoiceOutbox.ts:18](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L18)
+Defined in: [offline/invoiceOutbox.ts:18](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L18)
 
 ##### invoice\_name
 
 > **invoice\_name**: `string` \| `null`
 
-Defined in: [offline/invoiceOutbox.ts:26](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L26)
+Defined in: [offline/invoiceOutbox.ts:26](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L26)
 
 ##### last\_error
 
 > **last\_error**: `string` \| `null`
 
-Defined in: [offline/invoiceOutbox.ts:25](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L25)
+Defined in: [offline/invoiceOutbox.ts:25](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L25)
 
 ##### next\_retry\_at
 
 > **next\_retry\_at**: `string` \| `null`
 
-Defined in: [offline/invoiceOutbox.ts:22](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L22)
+Defined in: [offline/invoiceOutbox.ts:22](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L22)
 
 ##### nextAttemptAt?
 
 > `optional` **nextAttemptAt?**: `string` \| `null`
 
-Defined in: [offline/invoiceOutbox.ts:23](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L23)
+Defined in: [offline/invoiceOutbox.ts:23](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L23)
 
 ##### outbox\_id?
 
 > `optional` **outbox\_id?**: `number`
 
-Defined in: [offline/invoiceOutbox.ts:14](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L14)
+Defined in: [offline/invoiceOutbox.ts:14](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L14)
 
 ##### resource?
 
 > `optional` **resource?**: `"invoice_outbox"`
 
-Defined in: [offline/invoiceOutbox.ts:16](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L16)
+Defined in: [offline/invoiceOutbox.ts:16](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L16)
 
 ##### retry\_count
 
 > **retry\_count**: `number`
 
-Defined in: [offline/invoiceOutbox.ts:24](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L24)
+Defined in: [offline/invoiceOutbox.ts:24](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L24)
 
 ##### status
 
 > **status**: [`InvoiceOutboxStatus`](#invoiceoutboxstatus)
 
-Defined in: [offline/invoiceOutbox.ts:17](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L17)
+Defined in: [offline/invoiceOutbox.ts:17](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L17)
 
 ##### updated\_at
 
 > **updated\_at**: `string`
 
-Defined in: [offline/invoiceOutbox.ts:21](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L21)
+Defined in: [offline/invoiceOutbox.ts:21](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L21)
 
 ***
 
 ### OfflineQueueEntry
 
-Defined in: [offline/writeQueue.ts:22](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L22)
+Defined in: [offline/writeQueue.ts:22](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L22)
 
 #### Properties
 
@@ -3589,73 +3593,73 @@ Defined in: [offline/writeQueue.ts:22](https://github.com/defendicon/POS-Awesome
 
 > **created\_at**: `string`
 
-Defined in: [offline/writeQueue.ts:27](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L27)
+Defined in: [offline/writeQueue.ts:27](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L27)
 
 ##### entity\_type
 
 > **entity\_type**: [`OfflineEntityType`](#offlineentitytype)
 
-Defined in: [offline/writeQueue.ts:24](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L24)
+Defined in: [offline/writeQueue.ts:24](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L24)
 
 ##### idempotency\_key
 
 > **idempotency\_key**: `string`
 
-Defined in: [offline/writeQueue.ts:32](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L32)
+Defined in: [offline/writeQueue.ts:32](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L32)
 
 ##### last\_attempt\_at
 
 > **last\_attempt\_at**: `string` \| `null`
 
-Defined in: [offline/writeQueue.ts:28](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L28)
+Defined in: [offline/writeQueue.ts:28](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L28)
 
 ##### last\_error
 
 > **last\_error**: `string` \| `null`
 
-Defined in: [offline/writeQueue.ts:33](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L33)
+Defined in: [offline/writeQueue.ts:33](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L33)
 
 ##### next\_attempt\_at?
 
 > `optional` **next\_attempt\_at?**: `string` \| `null`
 
-Defined in: [offline/writeQueue.ts:29](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L29)
+Defined in: [offline/writeQueue.ts:29](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L29)
 
 ##### payload
 
 > **payload**: `AnyRecord`
 
-Defined in: [offline/writeQueue.ts:26](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L26)
+Defined in: [offline/writeQueue.ts:26](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L26)
 
 ##### queue\_id?
 
 > `optional` **queue\_id?**: `number`
 
-Defined in: [offline/writeQueue.ts:23](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L23)
+Defined in: [offline/writeQueue.ts:23](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L23)
 
 ##### resource?
 
 > `optional` **resource?**: [`OfflineEntityType`](#offlineentitytype)
 
-Defined in: [offline/writeQueue.ts:25](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L25)
+Defined in: [offline/writeQueue.ts:25](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L25)
 
 ##### retry\_count
 
 > **retry\_count**: `number`
 
-Defined in: [offline/writeQueue.ts:30](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L30)
+Defined in: [offline/writeQueue.ts:30](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L30)
 
 ##### status
 
 > **status**: [`OfflineQueueStatus`](#offlinequeuestatus)
 
-Defined in: [offline/writeQueue.ts:31](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L31)
+Defined in: [offline/writeQueue.ts:31](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L31)
 
 ***
 
 ### SyncResourceDefinition
 
-Defined in: [offline/sync/types.ts:72](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L72)
+Defined in: [offline/sync/types.ts:72](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L72)
 
 Static definition of a single sync resource. Registered in `resourceRegistry.ts`
 and consumed by `SyncCoordinator`.
@@ -3666,7 +3670,7 @@ and consumed by `SyncCoordinator`.
 
 > **fullResyncSupported**: `boolean`
 
-Defined in: [offline/sync/types.ts:88](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L88)
+Defined in: [offline/sync/types.ts:88](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L88)
 
 Whether the adapter supports full-resync (wiping and re-fetching all records).
 
@@ -3674,7 +3678,7 @@ Whether the adapter supports full-resync (wiping and re-fetching all records).
 
 > **id**: [`SyncResourceId`](#syncresourceid)
 
-Defined in: [offline/sync/types.ts:74](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L74)
+Defined in: [offline/sync/types.ts:74](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L74)
 
 Unique identifier.
 
@@ -3682,7 +3686,7 @@ Unique identifier.
 
 > **mode**: [`SyncResourceMode`](#syncresourcemode)
 
-Defined in: [offline/sync/types.ts:78](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L78)
+Defined in: [offline/sync/types.ts:78](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L78)
 
 Fetch strategy.
 
@@ -3690,7 +3694,7 @@ Fetch strategy.
 
 > **priority**: [`SyncResourcePriority`](#syncresourcepriority)
 
-Defined in: [offline/sync/types.ts:80](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L80)
+Defined in: [offline/sync/types.ts:80](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L80)
 
 Execution priority within a trigger run.
 
@@ -3698,7 +3702,7 @@ Execution priority within a trigger run.
 
 > **scope**: `"customer"` \| `"company"` \| `"global"` \| `"profile"`
 
-Defined in: [offline/sync/types.ts:76](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L76)
+Defined in: [offline/sync/types.ts:76](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L76)
 
 Data isolation boundary — determines the scope-signature used for cache invalidation.
 
@@ -3706,7 +3710,7 @@ Data isolation boundary — determines the scope-signature used for cache invali
 
 > **storageKey**: `string`
 
-Defined in: [offline/sync/types.ts:84](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L84)
+Defined in: [offline/sync/types.ts:84](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L84)
 
 IndexedDB/localStorage key prefix used by the adapter.
 
@@ -3714,7 +3718,7 @@ IndexedDB/localStorage key prefix used by the adapter.
 
 > **triggers**: [`SyncTrigger`](#synctrigger)[]
 
-Defined in: [offline/sync/types.ts:82](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L82)
+Defined in: [offline/sync/types.ts:82](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L82)
 
 Which triggers activate this resource.
 
@@ -3722,7 +3726,7 @@ Which triggers activate this resource.
 
 > `optional` **ttlMs?**: `number` \| `null`
 
-Defined in: [offline/sync/types.ts:90](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L90)
+Defined in: [offline/sync/types.ts:90](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L90)
 
 Optional TTL in milliseconds. `null` means no expiry.
 
@@ -3730,7 +3734,7 @@ Optional TTL in milliseconds. `null` means no expiry.
 
 > **watermarkType**: `"none"` \| `"timestamp"` \| `"cursor"`
 
-Defined in: [offline/sync/types.ts:86](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L86)
+Defined in: [offline/sync/types.ts:86](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L86)
 
 Watermark type used for delta syncs. `"none"` means full-resync every time.
 
@@ -3738,7 +3742,7 @@ Watermark type used for delta syncs. `"none"` means full-resync every time.
 
 ### SyncResourceState
 
-Defined in: [offline/sync/types.ts:103](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L103)
+Defined in: [offline/sync/types.ts:103](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L103)
 
 Runtime state of a single sync resource, persisted across page loads.
 Returned by `SyncCoordinator.getResourceState()` and
@@ -3755,85 +3759,85 @@ triggers full resyncs after data-model changes.
 
 > **consecutiveFailures**: `number`
 
-Defined in: [offline/sync/types.ts:110](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L110)
+Defined in: [offline/sync/types.ts:110](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L110)
 
 ##### cooldownMs?
 
 > `optional` **cooldownMs?**: `number` \| `null`
 
-Defined in: [offline/sync/types.ts:113](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L113)
+Defined in: [offline/sync/types.ts:113](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L113)
 
 ##### lastAttemptAt?
 
 > `optional` **lastAttemptAt?**: `string` \| `null`
 
-Defined in: [offline/sync/types.ts:111](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L111)
+Defined in: [offline/sync/types.ts:111](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L111)
 
 ##### lastError
 
 > **lastError**: `string` \| `null`
 
-Defined in: [offline/sync/types.ts:109](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L109)
+Defined in: [offline/sync/types.ts:109](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L109)
 
 ##### lastSuccessHash
 
 > **lastSuccessHash**: `string` \| `null`
 
-Defined in: [offline/sync/types.ts:108](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L108)
+Defined in: [offline/sync/types.ts:108](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L108)
 
 ##### lastSyncedAt
 
 > **lastSyncedAt**: `string` \| `null`
 
-Defined in: [offline/sync/types.ts:106](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L106)
+Defined in: [offline/sync/types.ts:106](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L106)
 
 ##### lastTrigger?
 
 > `optional` **lastTrigger?**: [`SyncTrigger`](#synctrigger) \| `null`
 
-Defined in: [offline/sync/types.ts:114](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L114)
+Defined in: [offline/sync/types.ts:114](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L114)
 
 ##### nextRetryAt?
 
 > `optional` **nextRetryAt?**: `string` \| `null`
 
-Defined in: [offline/sync/types.ts:112](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L112)
+Defined in: [offline/sync/types.ts:112](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L112)
 
 ##### resourceId
 
 > **resourceId**: [`SyncResourceId`](#syncresourceid)
 
-Defined in: [offline/sync/types.ts:104](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L104)
+Defined in: [offline/sync/types.ts:104](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L104)
 
 ##### schemaVersion
 
 > **schemaVersion**: `string` \| `null`
 
-Defined in: [offline/sync/types.ts:116](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L116)
+Defined in: [offline/sync/types.ts:116](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L116)
 
 ##### scopeSignature
 
 > **scopeSignature**: `string` \| `null`
 
-Defined in: [offline/sync/types.ts:115](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L115)
+Defined in: [offline/sync/types.ts:115](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L115)
 
 ##### status
 
 > **status**: [`SyncLifecycleState`](#synclifecyclestate)
 
-Defined in: [offline/sync/types.ts:105](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L105)
+Defined in: [offline/sync/types.ts:105](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L105)
 
 ##### watermark
 
 > **watermark**: `string` \| `null`
 
-Defined in: [offline/sync/types.ts:107](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L107)
+Defined in: [offline/sync/types.ts:107](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L107)
 
 ***
 
 ### SyncTriggerResourceSummary
 
-Defined in: [offline/sync/types.ts:119](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L119)
+Defined in: [offline/sync/types.ts:119](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L119)
 
 #### Properties
 
@@ -3841,37 +3845,37 @@ Defined in: [offline/sync/types.ts:119](https://github.com/defendicon/POS-Awesom
 
 > **error**: `string` \| `null`
 
-Defined in: [offline/sync/types.ts:124](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L124)
+Defined in: [offline/sync/types.ts:124](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L124)
 
 ##### priority
 
 > **priority**: [`SyncResourcePriority`](#syncresourcepriority)
 
-Defined in: [offline/sync/types.ts:121](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L121)
+Defined in: [offline/sync/types.ts:121](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L121)
 
 ##### resourceId
 
 > **resourceId**: [`SyncResourceId`](#syncresourceid)
 
-Defined in: [offline/sync/types.ts:120](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L120)
+Defined in: [offline/sync/types.ts:120](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L120)
 
 ##### skipped
 
 > **skipped**: `boolean`
 
-Defined in: [offline/sync/types.ts:123](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L123)
+Defined in: [offline/sync/types.ts:123](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L123)
 
 ##### status
 
 > **status**: [`SyncLifecycleState`](#synclifecyclestate)
 
-Defined in: [offline/sync/types.ts:122](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L122)
+Defined in: [offline/sync/types.ts:122](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L122)
 
 ***
 
 ### SyncTriggerRunSummary
 
-Defined in: [offline/sync/types.ts:127](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L127)
+Defined in: [offline/sync/types.ts:127](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L127)
 
 #### Properties
 
@@ -3879,13 +3883,13 @@ Defined in: [offline/sync/types.ts:127](https://github.com/defendicon/POS-Awesom
 
 > **bootCriticalFailures**: `number`
 
-Defined in: [offline/sync/types.ts:135](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L135)
+Defined in: [offline/sync/types.ts:135](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L135)
 
 ##### errors
 
 > **errors**: `object`[]
 
-Defined in: [offline/sync/types.ts:136](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L136)
+Defined in: [offline/sync/types.ts:136](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L136)
 
 ###### message
 
@@ -3903,49 +3907,49 @@ Defined in: [offline/sync/types.ts:136](https://github.com/defendicon/POS-Awesom
 
 > **failed**: `number`
 
-Defined in: [offline/sync/types.ts:133](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L133)
+Defined in: [offline/sync/types.ts:133](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L133)
 
 ##### finishedAt
 
 > **finishedAt**: `string`
 
-Defined in: [offline/sync/types.ts:130](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L130)
+Defined in: [offline/sync/types.ts:130](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L130)
 
 ##### resources
 
 > **resources**: [`SyncTriggerResourceSummary`](#synctriggerresourcesummary)[]
 
-Defined in: [offline/sync/types.ts:141](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L141)
+Defined in: [offline/sync/types.ts:141](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L141)
 
 ##### resourcesTotal
 
 > **resourcesTotal**: `number`
 
-Defined in: [offline/sync/types.ts:131](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L131)
+Defined in: [offline/sync/types.ts:131](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L131)
 
 ##### skipped
 
 > **skipped**: `number`
 
-Defined in: [offline/sync/types.ts:134](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L134)
+Defined in: [offline/sync/types.ts:134](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L134)
 
 ##### startedAt
 
 > **startedAt**: `string`
 
-Defined in: [offline/sync/types.ts:129](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L129)
+Defined in: [offline/sync/types.ts:129](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L129)
 
 ##### succeeded
 
 > **succeeded**: `number`
 
-Defined in: [offline/sync/types.ts:132](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L132)
+Defined in: [offline/sync/types.ts:132](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L132)
 
 ##### trigger
 
 > **trigger**: [`SyncTrigger`](#synctrigger)
 
-Defined in: [offline/sync/types.ts:128](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L128)
+Defined in: [offline/sync/types.ts:128](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L128)
 
 ## Type Aliases
 
@@ -3953,7 +3957,7 @@ Defined in: [offline/sync/types.ts:128](https://github.com/defendicon/POS-Awesom
 
 > **InvoiceOutboxMode** = `"off"` \| `"dual_write"` \| `"coordinator"`
 
-Defined in: [offline/invoiceOutbox.ts:5](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L5)
+Defined in: [offline/invoiceOutbox.ts:5](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L5)
 
 ***
 
@@ -3961,7 +3965,7 @@ Defined in: [offline/invoiceOutbox.ts:5](https://github.com/defendicon/POS-Aweso
 
 > **InvoiceOutboxStatus** = `"pending"` \| `"syncing"` \| `"retrying"` \| `"acknowledged"` \| `"dead_letter"`
 
-Defined in: [offline/invoiceOutbox.ts:6](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/invoiceOutbox.ts#L6)
+Defined in: [offline/invoiceOutbox.ts:6](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/invoiceOutbox.ts#L6)
 
 ***
 
@@ -3969,7 +3973,7 @@ Defined in: [offline/invoiceOutbox.ts:6](https://github.com/defendicon/POS-Aweso
 
 > **OfflineEntityType** = `"invoice"` \| `"customer"` \| `"payment"` \| `"cash_movement"`
 
-Defined in: [offline/writeQueue.ts:9](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L9)
+Defined in: [offline/writeQueue.ts:9](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L9)
 
 ***
 
@@ -3977,7 +3981,7 @@ Defined in: [offline/writeQueue.ts:9](https://github.com/defendicon/POS-Awesome-
 
 > **OfflinePruneResult** = `object`
 
-Defined in: [offline/db.ts:470](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L470)
+Defined in: [offline/db.ts:470](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L470)
 
 #### Properties
 
@@ -3985,31 +3989,31 @@ Defined in: [offline/db.ts:470](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > **invoiceOutbox**: `number`
 
-Defined in: [offline/db.ts:471](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L471)
+Defined in: [offline/db.ts:471](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L471)
 
 ##### localTelemetry
 
 > **localTelemetry**: `number`
 
-Defined in: [offline/db.ts:475](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L475)
+Defined in: [offline/db.ts:475](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L475)
 
 ##### syncState
 
 > **syncState**: `number`
 
-Defined in: [offline/db.ts:473](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L473)
+Defined in: [offline/db.ts:473](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L473)
 
 ##### tombstones
 
 > **tombstones**: `number`
 
-Defined in: [offline/db.ts:474](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L474)
+Defined in: [offline/db.ts:474](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L474)
 
 ##### writeQueue
 
 > **writeQueue**: `number`
 
-Defined in: [offline/db.ts:472](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L472)
+Defined in: [offline/db.ts:472](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L472)
 
 ***
 
@@ -4017,7 +4021,7 @@ Defined in: [offline/db.ts:472](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > **OfflineQueueStatus** = `"pending"` \| `"syncing"` \| `"failed"` \| `"dead_letter"` \| `"synced"`
 
-Defined in: [offline/writeQueue.ts:15](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/writeQueue.ts#L15)
+Defined in: [offline/writeQueue.ts:15](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/writeQueue.ts#L15)
 
 ***
 
@@ -4025,7 +4029,7 @@ Defined in: [offline/writeQueue.ts:15](https://github.com/defendicon/POS-Awesome
 
 > **SyncLifecycleState** = `"idle"` \| `"syncing"` \| `"fresh"` \| `"stale"` \| `"error"` \| `"limited"`
 
-Defined in: [offline/sync/types.ts:60](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L60)
+Defined in: [offline/sync/types.ts:60](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L60)
 
 Per-resource lifecycle state exposed to the UI:
 - `"idle"` — not yet synced in this session.
@@ -4041,7 +4045,7 @@ Per-resource lifecycle state exposed to the UI:
 
 > **SyncResourceId** = `"bootstrap_config"` \| `"price_list_meta"` \| `"currency_matrix"` \| `"payment_method_currencies"` \| `"item_groups"` \| `"offers"` \| `"items"` \| `"item_prices"` \| `"stock"` \| `"customers"` \| `"invoice_outbox"` \| `"customer_addresses"` \| `"delivery_charges"`
 
-Defined in: [offline/sync/types.ts:5](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L5)
+Defined in: [offline/sync/types.ts:5](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L5)
 
 All registered offline-sync resource identifiers.
 Each ID maps 1-to-1 with a [SyncResourceDefinition](#syncresourcedefinition) in the resource registry.
@@ -4052,7 +4056,7 @@ Each ID maps 1-to-1 with a [SyncResourceDefinition](#syncresourcedefinition) in 
 
 > **SyncResourceMode** = `"delta"` \| `"scoped"` \| `"on_demand"`
 
-Defined in: [offline/sync/types.ts:26](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L26)
+Defined in: [offline/sync/types.ts:26](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L26)
 
 How a resource is synchronised from the server:
 - `"delta"` — fetch only records changed since the last watermark.
@@ -4065,7 +4069,7 @@ How a resource is synchronised from the server:
 
 > **SyncResourcePriority** = `"boot_critical"` \| `"warm"` \| `"lazy"`
 
-Defined in: [offline/sync/types.ts:34](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L34)
+Defined in: [offline/sync/types.ts:34](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L34)
 
 Controls the order in which resources are processed within a single trigger run:
 - `"boot_critical"` — must succeed before the POS is usable offline.
@@ -4078,7 +4082,7 @@ Controls the order in which resources are processed within a single trigger run:
 
 > **SyncTrigger** = `"boot"` \| `"online_resume"` \| `"timer"` \| `"profile_change"` \| `"user_action"`
 
-Defined in: [offline/sync/types.ts:44](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/sync/types.ts#L44)
+Defined in: [offline/sync/types.ts:44](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/sync/types.ts#L44)
 
 Events that can kick off a sync run:
 - `"boot"` — app startup.
@@ -4093,7 +4097,7 @@ Events that can kick off a sync run:
 
 > `const` **db**: `any`
 
-Defined in: [offline/db.ts:43](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L43)
+Defined in: [offline/db.ts:43](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L43)
 
 ***
 
@@ -4101,7 +4105,7 @@ Defined in: [offline/db.ts:43](https://github.com/defendicon/POS-Awesome-V15/blo
 
 > `const` **DERIVED\_OFFLINE\_CACHE\_KEYS**: readonly `string`[]
 
-Defined in: [offline/db.ts:132](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L132)
+Defined in: [offline/db.ts:132](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L132)
 
 ***
 
@@ -4109,7 +4113,7 @@ Defined in: [offline/db.ts:132](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > `const` **initPromise**: `Promise`\<`void`\>
 
-Defined in: [offline/db.ts:362](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L362)
+Defined in: [offline/db.ts:362](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L362)
 
 ***
 
@@ -4117,7 +4121,7 @@ Defined in: [offline/db.ts:362](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > `const` **KEY\_TABLE\_MAP**: `Record`\<`string`, `string`\>
 
-Defined in: [offline/db.ts:67](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L67)
+Defined in: [offline/db.ts:67](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L67)
 
 ***
 
@@ -4125,7 +4129,7 @@ Defined in: [offline/db.ts:67](https://github.com/defendicon/POS-Awesome-V15/blo
 
 > `const` **memory**: `AnyRecord`
 
-Defined in: [offline/db.ts:294](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L294)
+Defined in: [offline/db.ts:294](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L294)
 
 ***
 
@@ -4133,7 +4137,7 @@ Defined in: [offline/db.ts:294](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > `const` **memoryInitPromise**: `Promise`\<`void`\> = `initPromise`
 
-Defined in: [offline/index.ts:46](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/index.ts#L46)
+Defined in: [offline/index.ts:46](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/index.ts#L46)
 
 ***
 
@@ -4141,7 +4145,7 @@ Defined in: [offline/index.ts:46](https://github.com/defendicon/POS-Awesome-V15/
 
 > `const` **PENDING\_OFFLINE\_QUEUE\_KEYS**: readonly `string`[]
 
-Defined in: [offline/db.ts:125](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/db.ts#L125)
+Defined in: [offline/db.ts:125](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/db.ts#L125)
 
 ***
 
@@ -4149,7 +4153,7 @@ Defined in: [offline/db.ts:125](https://github.com/defendicon/POS-Awesome-V15/bl
 
 > `const` **setTaxTemplate**: (`name`, `doc`) => `void` = `saveTaxTemplate`
 
-Defined in: [offline/cache.ts:838](https://github.com/defendicon/POS-Awesome-V15/blob/7ed6ac335bd2f660fb912d0eaec2fb3bb76a1fea/frontend/src/offline/cache.ts#L838)
+Defined in: [offline/cache.ts:838](https://github.com/defendicon/POS-Awesome-V15/blob/6a7577621a096e30d3a54ef94f08df6b4d9cd53b/frontend/src/offline/cache.ts#L838)
 
 #### Parameters
 
