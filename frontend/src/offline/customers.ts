@@ -176,21 +176,41 @@ export async function getStoredCustomer(customerName: string) {
 
 export async function setCustomerStorage(customers: AnyRecord[]) {
 	try {
-		const clean = customers.map((customer) => ({
-			...customer,
-			name: customer.name || customer.customer,
-			customer_name:
-				customer.customer_name || customer.name || customer.customer,
-			mobile_no: customer.mobile_no,
-			email_id: customer.email_id,
-			primary_address: customer.primary_address,
-			tax_id: customer.tax_id,
-			loyalty_program: customer.loyalty_program,
-			loyalty_points: customer.loyalty_points,
-			conversion_factor: customer.conversion_factor,
-			stored_value_balance: customer.stored_value_balance || 0,
-			stored_value_sources: customer.stored_value_sources || 0,
-		}));
+		const existingByName = new Map<string, AnyRecord>();
+		const existingRows = Array.isArray(memory.customer_storage)
+			? memory.customer_storage
+			: [];
+		existingRows.forEach((row) => {
+			if (row?.name) {
+				existingByName.set(row.name, row);
+			}
+		});
+
+		const clean = customers.map((customer) => {
+			const name = customer.name || customer.customer;
+			const existing = name ? existingByName.get(name) : null;
+			return {
+				...customer,
+				name,
+				customer_name:
+					customer.customer_name || customer.name || customer.customer,
+				mobile_no: customer.mobile_no,
+				email_id: customer.email_id,
+				primary_address: customer.primary_address,
+				tax_id: customer.tax_id,
+				loyalty_program: customer.loyalty_program,
+				loyalty_points:
+					customer.loyalty_points !== undefined
+						? customer.loyalty_points
+						: existing?.loyalty_points,
+				conversion_factor:
+					customer.conversion_factor !== undefined
+						? customer.conversion_factor
+						: existing?.conversion_factor,
+				stored_value_balance: customer.stored_value_balance || 0,
+				stored_value_sources: customer.stored_value_sources || 0,
+			};
+		});
 
 		await db.table("customers").bulkPut(clean);
 		memory.customer_storage = mergeCustomerStorageRows(clean);

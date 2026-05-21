@@ -131,4 +131,43 @@ describe("offline storage ownership", () => {
 			}),
 		);
 	});
+
+	it("preserves cached active-customer loyalty details during summary sync", async () => {
+		const { setCustomerStorage } = await import("../src/offline/customers");
+		const { memory } = await import("../src/offline/db");
+
+		memory.customer_storage = [
+			{
+				name: "CUST-1",
+				customer_name: "Customer 1",
+				loyalty_program: "Retail Loyalty",
+				loyalty_points: 12,
+				conversion_factor: 5,
+			},
+		];
+
+		await setCustomerStorage([
+			{
+				name: "CUST-1",
+				customer_name: "Customer 1",
+				loyalty_program: "Retail Loyalty",
+			},
+		]);
+
+		expect(customersTable.bulkPut).toHaveBeenCalledWith([
+			expect.objectContaining({
+				name: "CUST-1",
+				loyalty_program: "Retail Loyalty",
+				loyalty_points: 12,
+				conversion_factor: 5,
+			}),
+		]);
+		expect(memory.customer_storage[0]).toEqual(
+			expect.objectContaining({
+				name: "CUST-1",
+				loyalty_points: 12,
+				conversion_factor: 5,
+			}),
+		);
+	});
 });

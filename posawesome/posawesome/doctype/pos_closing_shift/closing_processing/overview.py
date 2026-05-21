@@ -261,17 +261,19 @@ def get_closing_shift_overview(pos_opening_shift):
             if rate:
                 currency_entry["exchange_rates"].add(rate)
 
-        loyalty_amount = abs(flt(invoice.get("loyalty_amount") or 0))
-        loyalty_points = abs(flt(invoice.get("loyalty_points") or 0))
+        loyalty_amount = flt(invoice.get("loyalty_amount") or 0)
+        loyalty_points = flt(invoice.get("loyalty_points") or 0)
         if loyalty_amount or loyalty_points:
-            loyalty_base_amount = abs(
-                flt(get_base_value(invoice, "loyalty_amount", "base_loyalty_amount", conversion_rate))
+            loyalty_base_amount = flt(
+                get_base_value(invoice, "loyalty_amount", "base_loyalty_amount", conversion_rate)
             )
             if not loyalty_base_amount and loyalty_amount:
                 loyalty_base_amount = loyalty_amount
+            is_loyalty_redemption = loyalty_amount > 0 or loyalty_points > 0
             loyalty_redeemed_company_currency_total += loyalty_base_amount
             loyalty_redeemed_points += loyalty_points
-            loyalty_redeemed_invoice_count += 1
+            if is_loyalty_redemption:
+                loyalty_redeemed_invoice_count += 1
 
             loyalty_entry = loyalty_redeemed_totals_by_currency.setdefault(
                 invoice_currency,
@@ -287,12 +289,17 @@ def get_closing_shift_overview(pos_opening_shift):
             loyalty_entry["total"] += loyalty_amount
             loyalty_entry["company_currency_total"] += loyalty_base_amount
             loyalty_entry["points"] += loyalty_points
-            loyalty_entry["invoice_count"] += 1
+            if is_loyalty_redemption:
+                loyalty_entry["invoice_count"] += 1
 
             if invoice_currency != company_currency:
                 rate = None
                 if loyalty_amount:
-                    rate = loyalty_base_amount / loyalty_amount if loyalty_base_amount else None
+                    rate = (
+                        abs(loyalty_base_amount) / abs(loyalty_amount)
+                        if loyalty_base_amount
+                        else None
+                    )
                 if not rate and conversion_rate:
                     rate = flt(conversion_rate)
                 if rate:

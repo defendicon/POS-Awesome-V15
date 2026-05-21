@@ -63,31 +63,6 @@ def get_customer_group_condition(pos_profile):
     return cond
 
 
-def _attach_customer_loyalty_details(customers):
-    for customer in customers or []:
-        loyalty_program = customer.get("loyalty_program")
-        customer_name = customer.get("name")
-        customer["loyalty_points"] = None
-        customer["conversion_factor"] = None
-        if not loyalty_program or not customer_name:
-            continue
-        try:
-            lp_details = get_loyalty_program_details_with_points(
-                customer_name,
-                loyalty_program,
-                silent=True,
-                include_expired_entry=False,
-            )
-            customer["loyalty_points"] = lp_details.get("loyalty_points")
-            customer["conversion_factor"] = lp_details.get("conversion_factor")
-        except Exception:
-            frappe.log_error(
-                frappe.get_traceback(),
-                _("Failed to fetch loyalty points for customer {0}").format(customer_name),
-            )
-    return customers
-
-
 @frappe.whitelist()
 def get_customer_balance(customer):
     if not customer:
@@ -165,7 +140,7 @@ def get_customer_names(pos_profile, limit=None, offset=None, start_after=None, m
             limit_start=None if start_after else offset,
             limit_page_length=limit,
         )
-        return _attach_customer_loyalty_details(customers)
+        return customers
 
     if _pos_profile.get("posa_use_server_cache") and not (limit or offset or start_after or modified_after):
         return __get_customer_names(pos_profile, limit, offset, start_after, modified_after)

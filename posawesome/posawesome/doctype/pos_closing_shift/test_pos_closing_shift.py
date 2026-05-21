@@ -322,3 +322,68 @@ class TestPOSClosingShift(unittest.TestCase):
         self.assertEqual(result["loyalty_redemption"]["points"], 2)
         self.assertEqual(result["loyalty_redemption"]["count"], 1)
         self.assertEqual(result["payments_by_mode"][0]["company_currency_total"], 90)
+
+    @patch("posawesome.posawesome.doctype.pos_closing_shift.closing_processing.overview.get_payments_entries")
+    @patch("posawesome.posawesome.doctype.pos_closing_shift.closing_processing.overview.get_pos_invoices")
+    @patch("posawesome.posawesome.doctype.pos_closing_shift.closing_processing.overview.frappe")
+    def test_overview_reports_net_loyalty_redemption_for_returns(
+        self,
+        mock_frappe,
+        mock_get_pos_invoices,
+        mock_get_payments_entries,
+    ):
+        mock_frappe.get_doc.return_value = SimpleNamespace(
+            doctype="POS Opening Shift",
+            name="POS-OPEN-1",
+            pos_profile="POS-PROFILE-1",
+            company="My Co",
+        )
+        mock_frappe.get_cached_value.return_value = "USD"
+        mock_frappe.db.get_value.side_effect = lambda doctype, name, field: (
+            0
+            if (doctype, name, field)
+            == ("POS Profile", "POS-PROFILE-1", "create_pos_invoice_instead_of_sales_invoice")
+            else "Cash"
+        )
+        mock_get_pos_invoices.return_value = [
+            AttrDict(
+                {
+                    "name": "SINV-0001",
+                    "currency": "USD",
+                    "conversion_rate": 1,
+                    "grand_total": 100,
+                    "rounded_total": 100,
+                    "base_grand_total": 100,
+                    "loyalty_amount": 10,
+                    "base_loyalty_amount": 10,
+                    "loyalty_points": 2,
+                    "payments": [],
+                }
+            ),
+            AttrDict(
+                {
+                    "name": "SINV-RET-0001",
+                    "currency": "USD",
+                    "conversion_rate": 1,
+                    "is_return": 1,
+                    "grand_total": -40,
+                    "rounded_total": -40,
+                    "base_grand_total": -40,
+                    "loyalty_amount": -3,
+                    "base_loyalty_amount": -3,
+                    "loyalty_points": -1,
+                    "payments": [],
+                }
+            ),
+        ]
+        mock_get_payments_entries.return_value = []
+        mock_frappe.get_all.return_value = []
+
+        result = overview.get_closing_shift_overview("POS-OPEN-1")
+
+        self.assertEqual(result["loyalty_redemption"]["company_currency_total"], 7)
+        self.assertEqual(result["loyalty_redemption"]["points"], 1)
+        self.assertEqual(result["loyalty_redemption"]["count"], 1)
+        self.assertEqual(result["loyalty_redemption"]["by_currency"][0]["total"], 7)
+        self.assertEqual(result["loyalty_redemption"]["by_currency"][0]["points"], 1)
+        self.assertEqual(result["loyalty_redemption"]["by_currency"][0]["invoice_count"], 1)
