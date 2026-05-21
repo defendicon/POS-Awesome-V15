@@ -703,15 +703,29 @@ def process_pos_payment(payload):
 
                 payment_entry.total_allocated_amount = total_allocated
 
-                # party_amount must be in party currency to match total_allocated (now in party currency)
-                party_amount = (
-                    getattr(payment_entry, "paid_amount", None)
-                    if payment_type == "Receive"
-                    else getattr(payment_entry, "received_amount", None)
-                )
-                party_amount = flt(party_amount or getattr(payment_entry, "amount", 0) or amount, precision)
-                payment_entry.unallocated_amount = flt(party_amount - total_allocated, precision)
-                payment_entry.difference_amount = payment_entry.unallocated_amount
+                # For multi-currency payments, set the party-currency amount
+                # (paid_amount for Receive, received_amount for Pay) to total_allocated
+                # so ERPNext's validate() → set_exchange_gain_loss() creates the
+                # exchange gain/loss deduction row automatically when base amounts
+                # differ due to exchange rate. For single-currency, keep existing behavior.
+                is_multi_currency = party_account_currency != bank_currency
+
+                if payment_type == "Receive":
+                    if is_multi_currency:
+                        payment_entry.paid_amount = flt(total_allocated, precision)
+                        party_amount = flt(total_allocated, precision)
+                        payment_entry.unallocated_amount = 0
+                    else:
+                        party_amount = flt(payment_entry.paid_amount or amount, precision)
+                        payment_entry.unallocated_amount = flt(party_amount - total_allocated, precision)
+                else:  # Pay
+                    if is_multi_currency:
+                        payment_entry.received_amount = flt(total_allocated, precision)
+                        party_amount = flt(total_allocated, precision)
+                        payment_entry.unallocated_amount = 0
+                    else:
+                        party_amount = flt(payment_entry.received_amount or amount, precision)
+                        payment_entry.unallocated_amount = flt(party_amount - total_allocated, precision)
 
                 invoice_exchange_rate = flt(first_inv.get("conversion_rate", 0))
                 ref_names = ", ".join(r.reference_name for r in payment_entry.references)
@@ -734,9 +748,9 @@ def process_pos_payment(payload):
                 )
 
                 pe_exchange_rate = (
-                    getattr(payment_entry, "target_exchange_rate", None)
+                    getattr(payment_entry, "source_exchange_rate", None)
                     if payment_type == "Receive"
-                    else getattr(payment_entry, "source_exchange_rate", None)
+                    else getattr(payment_entry, "target_exchange_rate", None)
                 )
 
                 # Build a map of reference rows by invoice name
