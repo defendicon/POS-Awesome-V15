@@ -39,6 +39,18 @@ describe("resolvePaymentPrintDoctype", () => {
 		expect(result).toBe("Sales Order");
 	});
 
+	it("uses Sales Order when Order is selected and sales orders are allowed", () => {
+		const result = resolvePaymentPrintDoctype({
+			profile: {
+				posa_allow_sales_order: 1,
+				posa_create_only_sales_order: 0,
+			},
+			invoiceType: "Order",
+		});
+
+		expect(result).toBe("Sales Order");
+	});
+
 	it("prefers an explicit doctype override when provided", () => {
 		const result = resolvePaymentPrintDoctype({
 			profile: {

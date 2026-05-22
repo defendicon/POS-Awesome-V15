@@ -4,6 +4,7 @@ import {
 	getCachedCustomerBalance,
 } from "../../../../offline/index";
 import { useDiscounts } from "../../../composables/pos/shared/useDiscounts";
+import { shouldCreateSalesOrder } from "../../../utils/salesOrderMode";
 
 declare const __: (_text: string, _args?: any[]) => string;
 declare const flt: (_value: unknown, _precision?: number) => number;
@@ -193,7 +194,7 @@ export async function load_invoice(
 		}
 	} else if (
 		data.doctype === "Sales Order" &&
-		context.pos_profile?.posa_create_only_sales_order
+		shouldCreateSalesOrder("Order", context.pos_profile)
 	) {
 		context.invoiceType = "Order";
 		if (!context.invoiceTypes.includes("Order")) {

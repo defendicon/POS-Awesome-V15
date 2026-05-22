@@ -4,6 +4,7 @@ import {
 	isOffline,
 } from "../../../../offline/index";
 import { _getPlcConversionRate } from "./currency";
+import { shouldCreateSalesOrder } from "../../../utils/salesOrderMode";
 
 declare const flt: (_value: unknown, _precision?: number) => number;
 declare const frappe: any;
@@ -154,10 +155,7 @@ export function get_invoice_doc(context: any) {
 	// Always set these fields first
 	if (context.invoiceType === "Quotation") {
 		doc.doctype = "Quotation";
-	} else if (
-		context.invoiceType === "Order" &&
-		context.pos_profile?.posa_create_only_sales_order
-	) {
+	} else if (shouldCreateSalesOrder(context.invoiceType, context.pos_profile)) {
 		doc.doctype = "Sales Order";
 	} else if (
 		context.pos_profile?.create_pos_invoice_instead_of_sales_invoice
@@ -185,7 +183,7 @@ export function get_invoice_doc(context: any) {
 				: 1;
 		const isOrderInvoiceFlow =
 			context.invoiceType === "Order" &&
-			!context.pos_profile?.posa_create_only_sales_order;
+			!shouldCreateSalesOrder(context.invoiceType, context.pos_profile);
 		doc.update_stock =
 			explicitFlowUpdateStock === 0 || explicitFlowUpdateStock === 1
 				? explicitFlowUpdateStock

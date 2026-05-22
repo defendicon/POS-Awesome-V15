@@ -8,6 +8,7 @@ import {
 } from "./item_updates"; // _normalizeReturnDocTotals needs extraction or location check
 import { load_invoice } from "./loader";
 import { parseBooleanSetting } from "../../../utils/stock";
+import { shouldCreateSalesOrder } from "../../../utils/salesOrderMode";
 
 declare const __: (_text: string, _args?: any[]) => string;
 declare const frappe: any;
@@ -104,7 +105,7 @@ export async function update_invoice(context: any, doc: any) {
 	}
 
 	const method =
-		doc.doctype === "Sales Order" && context.pos_profile.posa_create_only_sales_order
+		doc.doctype === "Sales Order" && shouldCreateSalesOrder("Order", context.pos_profile)
 			? "posawesome.posawesome.api.sales_orders.update_sales_order"
 			: doc.doctype === "Quotation"
 				? "posawesome.posawesome.api.quotations.update_quotation"
@@ -278,7 +279,7 @@ export async function reload_current_invoice_from_backend(context: any) {
 		if (!doctype) {
 			if (context.invoiceType === "Quotation") {
 				doctype = "Quotation";
-			} else if (context.invoiceType === "Order" && context.pos_profile?.posa_create_only_sales_order) {
+			} else if (shouldCreateSalesOrder(context.invoiceType, context.pos_profile)) {
 				doctype = "Sales Order";
 			} else if (context.pos_profile?.create_pos_invoice_instead_of_sales_invoice) {
 				doctype = "POS Invoice";

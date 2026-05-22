@@ -9,6 +9,7 @@ import {
 import { ensureInvoiceClientRequestId } from "../../../../offline/idempotency";
 import stockCoordinator from "../../../utils/stockCoordinator";
 import { parseBooleanSetting } from "../../../utils/stock";
+import { shouldCreateSalesOrder } from "../../../utils/salesOrderMode";
 
 declare const frappe: any;
 declare const __: (_str: string, _args?: any[]) => string;
@@ -951,7 +952,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 
 			if (!waitForInvoiceProcessing) {
 				const submittedTitle =
-					type === "Order" && profile?.posa_create_only_sales_order
+					shouldCreateSalesOrder(type, profile)
 						? __("Sales Order {0} is Submitted", [r.message.name])
 						: type === "Quotation"
 							? __("Quotation {0} is Submitted", [r.message.name])

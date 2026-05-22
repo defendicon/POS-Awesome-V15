@@ -4,6 +4,7 @@ import {
 	getDefaultDocumentSource,
 	loadDocumentSourceRecord,
 } from "../../../utils/documentSources";
+import { shouldCreateSalesOrder } from "../../../utils/salesOrderMode";
 
 declare const __: (_text: string, _args?: any[]) => string;
 declare const frappe: any;
@@ -46,8 +47,7 @@ export async function show_payment(context: any) {
 
 		let invoice_doc;
 		if (
-			context.invoiceType === "Order" &&
-			context.pos_profile.posa_create_only_sales_order &&
+			shouldCreateSalesOrder(context.invoiceType, context.pos_profile) &&
 			!context.new_delivery_date &&
 			!(context.invoice_doc && context.invoice_doc.posa_delivery_date)
 		) {

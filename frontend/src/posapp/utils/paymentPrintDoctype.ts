@@ -1,4 +1,5 @@
 import { parseBooleanSetting } from "./stock";
+import { shouldCreateSalesOrder } from "./salesOrderMode";
 
 interface ResolvePaymentPrintDoctypeOptions {
 	profile?: Record<string, any> | null;
@@ -19,10 +20,7 @@ export function resolvePaymentPrintDoctype({
 		return "Quotation";
 	}
 
-	if (
-		invoiceType === "Order" &&
-		parseBooleanSetting(profile?.posa_create_only_sales_order)
-	) {
+	if (shouldCreateSalesOrder(invoiceType || "", profile)) {
 		return "Sales Order";
 	}
 

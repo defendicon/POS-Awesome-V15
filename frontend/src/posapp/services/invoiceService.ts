@@ -1,6 +1,7 @@
 import api from "./api";
 import { unwrapApiResult, type ApiEnvelope } from "./api";
 import type { InvoiceDoc, POSProfile } from "../types/models";
+import { shouldCreateSalesOrder } from "../utils/salesOrderMode";
 
 function getSubmitInvoiceCall(
 	data: any,
@@ -9,7 +10,7 @@ function getSubmitInvoiceCall(
 	posProfile: POSProfile,
 ) {
 	const method =
-		invoiceType === "Order" && posProfile.posa_create_only_sales_order
+		shouldCreateSalesOrder(invoiceType, posProfile)
 			? "posawesome.posawesome.api.sales_orders.submit_sales_order"
 			: invoiceType === "Quotation"
 				? "posawesome.posawesome.api.quotations.submit_quotation"
