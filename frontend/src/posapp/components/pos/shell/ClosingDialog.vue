@@ -79,6 +79,7 @@ import { ref, inject, onMounted, onBeforeUnmount, watch } from "vue";
 import { useClosingShift } from "../../../composables/pos/closing/useClosingShift";
 import { useClosingSummary } from "../../../composables/pos/closing/useClosingSummary";
 
+import { useFormat } from "../../../format";
 import ClosingHeader from "../closing/ClosingHeader.vue";
 import ShiftOverview from "../closing/ShiftOverview.vue";
 import PaymentReconciliation from "../closing/PaymentReconciliation.vue";
@@ -107,10 +108,7 @@ export default {
 			submitDialog,
 		} = useClosingShift(eventBus);
 
-		// Formatters
-		const formatCurrency = (v) => window.format_currency(v);
-		const formatFloat = (v, d) => window.flt(v, d);
-		const currencySymbol = (c) => window.get_currency_symbol(c);
+		const { formatCurrency, formatFloat, currencySymbol } = useFormat();
 		const translate = (t) => window.__(t);
 
 		const summaryFormatters = {
@@ -126,7 +124,8 @@ export default {
 			currencySymbol,
 			__: translate,
 		};
-
+		
+		// formatters
 		const summary = useClosingSummary(overview, pos_profile, dialog_data, summaryFormatters);
 
 		const headers = ref([]);
