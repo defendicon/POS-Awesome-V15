@@ -1,0 +1,1362 @@
+POS Awesome,POS Suurepärane
+Fetch Items Directly from Server,Tooge üksused otse serverist
+Menu,Menüü
+Actions,Tegevused
+Close Shift,Sule Shift
+End current session,Lõpeta praegune seanss
+Print Last Invoice,Prindi viimane arve
+Reprint previous transaction,Eelmise tehingu uuesti printimine
+Sync Offline Invoices,Sünkroonige võrguühenduseta arveid
+Upload pending transactions,Laadige üles pooleliolevad tehingud
+Go Online,Minge võrku
+Go Offline,Minge võrguühenduseta
+Disable offline mode,Keela võrguühenduseta režiim
+Work without server connection,Töötage ilma serveriühenduseta
+Clear Cache,Tühjenda vahemälu
+Remove local data and refresh,Eemaldage kohalikud andmed ja värskendage
+About,Umbes
+App information,Rakenduse teave
+Language,Keel
+Change interface language,Muutke liidese keelt
+Light Mode,Valgusrežiim
+Dark Mode,Tume režiim
+Switch theme appearance,Vaheta teema välimust
+Logout,Väljalogimine
+Sign out of session,Logige seansist välja
+Select Language,Valige keel
+Choose your preferred language for the POS interface,Valige POS-liidese jaoks eelistatud keel
+Language will be changed to,Keeleks muudetakse
+Cancel,Tühista
+Change Language,Muuda keelt
+Close,Sule
+Cannot change language - same language selected,Keelt ei saa muuta – valitud on sama keel
+Language changed successfully! Reloading...,Keele muutmine õnnestus! Uuesti laadimine...
+Failed to change language,Keele muutmine ebaõnnestus
+Unknown error,Tundmatu viga
+- Total Unallocated,- Kokku eraldamata
+* Required,* Nõutav
+{0} (Qty: {1}),{0} (kogus: {1})
+{0} actions,{0} toimingut
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} on laos ainult {1}. Taotlesite {2}. Reguleerige kogust või lisage varusid.
+{0} offline invoice{1} pending,{0} võrguühenduseta arve{1} on ootel
+{0} offline invoice{1} saved as draft,{0} võrguühenduseta arve{1} salvestati mustandina
+{0} offline invoice{1} synced,{0} võrguühenduseta arve{1} sünkroonitud
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0} p tagasi
+{0}h ago,{0} h tagasi
+{0}m ago,{0} min tagasi
+A POS supervisor is required for this action.,Selle toimingu jaoks on vaja POS-i järelevaatajat.
+Access,Juurdepääs
+Account,konto
+Account is overdrawn,Konto on ülekoormatud
+Acknowledge the error to resume scanning,Skannimise jätkamiseks kinnitage viga
+Acknowledge the error to resume scanning.,Skannimise jätkamiseks kinnitage viga.
+Across,Üle
+Action,Tegevus
+Active sale,Aktiivne müük
+add,lisada
+Add items from the selector to start building this sale.,Selle müügi alustamiseks lisage valijast üksused.
+Add more value to an existing gift card,Lisage olemasolevale kinkekaardile väärtust
+Add New Address,Lisa uus aadress
+Add new customer,Lisa uus klient
+Add on New Line,Lisage uus rida
+Add Payment,Lisa makse
+Add payment to invoice,Lisa arvele makse
+Add/Edit Coupon Conditions,Lisa/redigeeri kupongi tingimusi
+Additional Discount,Lisaallahindlus
+Additional Discount %,Lisaallahindlus %
+Address Line 1,1. aadressirida
+Address not found,Aadressi ei leitud
+Adjust the quantity or enable negative stock to continue.,Reguleerige kogust või lubage negatiivse laoseisu jätkamine.
+Adjustment,Kohandamine
+After returns,Pärast tagastamist
+Against,Vastu
+Against Name,Nime vastu
+Age Bracket,Vanuseklass
+All,Kõik
+All Caught Up!,Kõik tabatud!
+All invoices are synchronized,Kõik arved on sünkroonitud
+All pending invoices are up to date,Kõik ootel arved on ajakohased
+All Profiles,Kõik profiilid
+All Synchronized,Kõik sünkroonitud
+All visible invoices are fully settled.,Kõik nähtavad arved on täielikult tasutud.
+All Warehouses,Kõik laod
+Allowed UOM is {0},Lubatud UOM on {0}
+Always fetch items from server (ignore local cache),Too üksused alati serverist (eira kohalikku vahemälu)
+Amount,Summa
+Amount already received,Summa juba laekunud
+Amount exceeds profile cash movement max amount.,Summa ületab profiili sularaha liikumise maksimaalset summat.
+Amount must be greater than zero.,Summa peab olema suurem kui null.
+Amount received from customer,Kliendilt saadud summa
+Appearance and user-level preferences for the current session.,Praeguse seansi välimus ja kasutajataseme eelistused.
+Applied,Rakendatud
+Apply,Rakenda
+Apply Gift Card,Rakenda kinkekaart
+Apply Offer,Rakenda pakkumine
+Apply On,Rakenda sees
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,"Rakendage sellele arvele ainult summa, mille soovite lunastada. Ülejäänud saldo jääb kaardile."
+Apply Redemption,Rakenda lunastus
+Applying,Kandideerimine
+Apps,Rakendused
+Are you sure you want to close? All entered data will be lost.,Kas soovite kindlasti sulgeda? Kõik sisestatud andmed lähevad kaotsi.
+Attributes (Size/Color),Atribuudid (suurus/värv)
+Auto Allocate Payment Amount,Maksesumma automaatne eraldamine
+Auto Reconcile,Automaatne kooskõlastamine
+Auto reconciliation completed after payment submit.,Automaatne vastavusse viimine lõpetati pärast makse esitamist.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,Automaatne kooskõlastamine on lõpetatud. Eraldatud: {0}{1}. Järelejäänud tasumata: {0}{2}.
+Available Actions,Saadaolevad toimingud
+Available QTY,Saadaval kogus
+Available:,Saadaval:
+Average Basket,Keskmine korv
+Average Bill,Keskmine arve
+Average Ticket,Keskmine pilet
+Avg Bill,Keskmine arve
+Avg Invoice,Keskmine arve
+Avg Invoice Profit,Keskmine arve kasum
+Avg Invoice Value,Arve keskmine väärtus
+Avg Purchase Frequency,Keskmine ostusagedus
+Awesome,Äge
+Awesome Dashboard,Suurepärane armatuurlaud
+Awesome Dashboard is disabled for the selected POS Profile.,Awesome Dashboard on valitud POS-profiili jaoks keelatud.
+Awesome Dashboard is unavailable for the selected scope.,Awesome Dashboard pole valitud ulatuse jaoks saadaval.
+Awesome Dashboard is visible only to POS supervisors.,Awesome Dashboard on nähtav ainult POS-i juhendajatele.
+Back,Tagasi
+Back Office Cash Account,Back Office sularahakonto
+Back Office Cash Account (Optional Override),Back Office'i sularahakonto (valikuline alistamine)
+Back office cash account is required.,Tagakontori sularahakonto on nõutav.
+Back to {0},Tagasi lehele {0}
+Background processing did not finish in time.,Taustatöötlus ei lõppenud õigeks ajaks.
+Background processing failed for Invoice {0}: {1},Arve {0} taustatöötlus ebaõnnestus: {1}
+Background Submission Failed,Taustal esitamine ebaõnnestus
+Background sync interval (seconds),Taustal sünkroonimise intervall (sekundites)
+Balance,Tasakaal
+Balance will be updated when connection is restored,Saldo värskendatakse pärast ühenduse taastamist
+Balances still pending,Saldo veel ootel
+Barcode,Vöötkood
+Barcode / QR Ready,Vöötkood / QR valmis
+Barcode Label Printing,Vöötkoodi etikettide trükkimine
+Base Paid:,Põhitasuline:
+Base Recv:,Põhivastuvõtt:
+Base:,Alus:
+Basic Information,Põhiteave
+Batch,Partii
+Batch Information,Partii teave
+Before any return workflow,Enne tagasipöördumise töövoogu
+Before returns,Enne naasmist
+Best Day,Parim päev
+Best Seller,Parim müüja
+Book expense or deposit from active shift.,Broneeri kulu või sissemakse aktiivsest vahetusest.
+Branch / Location-wise Report,Filiaal / asukohapõhine aruanne
+Brand-wise,Brändi järgi
+Breakdown,Jaotus
+Browse,Sirvige
+Build Time:,Ehitamise aeg:
+Built with Frappe,Ehitatud koos Frappega
+Bundle,Kimp
+Buying Price,Ostuhind
+Cache cleared successfully,Vahemälu tühjendamine õnnestus
+Cache Usage,Vahemälu kasutamine
+cache used,vahemälu kasutatud
+Calculating...,Arvutamine...
+Camera Access Required,Vajalik juurdepääs kaamerale
+Camera access was aborted. Please try again.,Juurdepääs kaamerale katkestati. Palun proovi uuesti.
+Camera constraints not supported by your device. Trying fallback settings...,Teie seade ei toeta kaamerapiiranguid. Varuseadete proovimine...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,Kaamera on hõivatud või mõne teise rakenduse/vahekaardi poolt blokeeritud. Sulgege teised kaamerarakendused ja proovige uuesti.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,Kaamera luba on keelatud. Lubage oma brauseri seadetes juurdepääs kaamerale ja värskendage lehte.
+Camera scanner is locked until the current error is acknowledged,Kaamera skanner on lukustatud kuni praeguse vea kinnitamiseni
+Camera started but the video stream did not load in time. Please try again.,"Kaamera käivitus, kuid videovoogu ei laaditud õigeaegselt. Palun proovi uuesti."
+Cancel cash movement {0}?,Kas tühistada sularaha liikumine {0}?
+Cancel Payment,Tühista makse
+Cancel Sale,Tühista müük
+Cancel Sale ?,Kas tühistada müük?
+Cancelled,Tühistatud
+Cannot add an item with zero or negative quantity.,Nulli või negatiivse kogusega üksust ei saa lisada.
+Cannot clear cache while offline,Võrguühenduseta vahemälu ei saa tühjendada
+Cannot redeem customer credit more than invoice total,Kliendikrediiti ei saa lunastada rohkem kui arve kogusumma
+Cannot redeem gift cards more than invoice total,Kinkekaarte ei saa lunastada rohkem kui arve kogusumma
+Cannot Save Offline Invoice:,Võrguühenduseta arvet ei saa salvestada:
+Cannot Save Offline Payment:,Võrguühenduseta makseid ei saa salvestada:
+Card,Kaart
+Card / Online,Kaart / Internetis
+Card health after the last live lookup,Kaardi seisund pärast viimast reaalajas otsingut
+Cards,Kaardid
+Cart,Käru
+Cash,sularaha
+Cash back to customers,Raha tagasi klientidele
+Cash Collections,Sularaha kogud
+Cash Deposit is disabled for this POS Profile.,Sularaha sissemakse on selle POS-profiili jaoks keelatud.
+Cash Drawer Snapshot,Kassa sahtli hetktõmmis
+Cash In Hand,Sularaha Käes
+Cash Movement,Sularaha liikumine
+Cash movement cancelled,Sularaha liikumine tühistati
+Cash movement deduction applied,Rakendatud sularaha liikumise mahaarvamine
+Cash movement deleted,Sularaha liikumine kustutatud
+Cash movement is disabled for this POS Profile.,Sularaha liikumine on selle POS-profiili puhul keelatud.
+Cash Movement is disabled in current POS Profile.,Sularaha liikumine on praeguses POS-profiilis keelatud.
+Cash movement saved offline,Sularaha liikumine salvestati võrguühenduseta
+Cash movement submitted,Sularaha liikumine esitatud
+Cash Movements,Sularaha liikumised
+Cash payment cannot be less than invoice total when partial payment is not allowed,"Sularahamakse ei saa olla väiksem kui arve kogusumma, kui osaline tasumine pole lubatud"
+Cash returned after payment,Sularaha tagastatud peale tasumist
+Cashier,Kassapidaja
+Cashier Access,Juurdepääs kassapidajale
+Cashier identity and appearance preferences.,Kassapidaja identiteet ja välimuseelistused.
+Cashier PIN,Kassa PIN-kood
+Cashier PIN saved successfully.,Kassa PIN-koodi salvestamine õnnestus.
+Cashiers,Kassapidajad
+Cashier-wise,Kassa osas
+Categories,Kategooriad
+Category,Kategooria
+Category / Brand / Variant Report,Kategooria / kaubamärgi / variandi aruanne
+Category-wise,Kategooria järgi
+Category-wise Margin,Kategooriapõhine marginaal
+Certificate,tunnistus
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,Sertifikaat puudub või pole usaldusväärne. QZ võib kuvada kinnitusdialooge.
+Certificate is trusted. Silent QZ printing is active.,Sertifikaat on usaldusväärne. Vaikne QZ-printimine on aktiivne.
+Change,Muuda
+Change allocation repaired,Muudatuseraldis parandatud
+Change Price,Muuda hinda
+Change Return,Muuda tagastamist
+Change Returned,Muudatus tagastatud
+Change terminal cashier,Vahetage terminali kassapidaja
+Charge Heads,Laadimispead
+Charges,Tasud
+Charges not found,Tasusid ei leitud
+Check Balance,Kontrolli saldo
+Check balance for any card. Supervisors can issue and top up cards here.,Kontrollige mis tahes kaardi saldot. Juhendajad saavad siin kaarte väljastada ja täiendada.
+Check balance only,Kontrollige ainult saldot
+Check for new commits,Kontrollige uusi kohustusi
+Check for Updates,Kontrollige värskendusi
+Check live balance before applying redemption,Enne lunastamise rakendamist kontrollige reaalajas saldot
+Check live balance before redemption,Enne lunastamist kontrollige reaalajas saldot
+Checking...,Kontrollimine...
+Cheque/Reference Date,Tšekk/viitekuupäev
+Cheque/Reference No,Tšekk/viite nr
+Choose the cashier currently operating this terminal.,"Valige kassapidaja, kes seda terminali praegu töötab."
+City,Linn
+Clear,Selge
+Clear All,Kustuta kõik
+Clear all barcode items,Kustuta kõik vöötkoodi üksused
+Clear all purchase order items,Kustutage kõik ostutellimuse üksused
+Clear Search,Tühjenda otsing
+Clearing local cache...,Kohaliku vahemälu tühjendamine...
+Click to refresh,Klõpsake värskendamiseks
+Client CPU Lag:,Kliendi CPU viivitus:
+Client Memory Usage:,Kliendi mälukasutus:
+Client Metrics,Kliendi mõõdikud
+Close about dialog,Sule dialoogi kohta
+Close cashier switcher,Sulgege kassavahetaja
+Close closing shift dialog,Sulgege nihutamise dialoog
+Close column selector,Sule veeruvalija
+Close Dialog,Sule dialoog
+Close drafts dialog,Sule mustandite dialoog
+Close invoice details dialog,Sulgege arve üksikasjade dialoog
+Close invoice management,Sulgege arvehaldus
+Close offline invoices dialog,Sulgege võrguühenduseta arvete dialoog
+Close packing list dialog,Sulgege pakkimisloendi dialoog
+Close returns dialog,Sule tagastusdialoog
+Close sales orders dialog,Sulgege müügitellimuste dialoog
+Close Scanner,Sulgege skanner
+Close scanner dialog,Sulgege skanneri dialoog
+Close Settings,Sulgege seaded
+Closing Amount,Sulgemissumma
+Closing POS Shift,POS Shift sulgemine
+Closing Snapshot Available,Sulgemise hetktõmmis on saadaval
+Code,Kood
+Code scanned successfully,Koodi skannimine õnnestus
+COGS,COGS
+Collapse item details,Ahenda üksuse üksikasju
+Collected,Kogutud
+Cols,Cols
+Columns,Veerud
+commits,kohustab
+Completed and active sales in this range,Lõpetatud ja aktiivne müük selles vahemikus
+Completed returns will appear here.,Siin kuvatakse lõpetatud tagastus.
+Confirm,Kinnita
+Confirm Close,Kinnitage Sule
+Confirm Mobile Number,Kinnitage mobiilinumber
+Confirm PIN,Kinnitage PIN-kood
+Connect,Ühendage
+Connect printer and manage certificate,Ühendage printer ja hallake sertifikaati
+Connecting to QZ Tray...,Ühenduse loomine QZ-salvega...
+Connection problem while submitting invoice,Ühendusprobleem arve esitamisel
+Connections:,Ühendused:
+Connectivity and cached prerequisite status were rechecked.,Ühenduvus ja vahemällu salvestatud eeltingimuse olek kontrolliti uuesti.
+Continue Editing,Jätka redigeerimist
+Could not fetch latest balance from server,Serverist ei saanud viimast saldot tuua
+Count,Count
+Country,Riik
+Coupon,Kupong
+Coupons,Kupongid
+Cover,Kaas
+CPU Cores:,CPU tuumad:
+Create,Loo
+Create and load a new prepaid card,Looge ja laadige uus ettemaksukaart
+Create and preload a new gift card,Looge ja eellaadige uus kinkekaart
+Create Bill,Loo arve
+Create Customer,Loo klient
+Create New Item,Loo uus üksus
+Create or change your PIN,Looge või muutke oma PIN-kood
+Create PIN,Loo PIN-kood
+Create POS Opening Shift,Loo POS-i avamise nihe
+Create Purchase Order,Loo ostutellimus
+Create Return,Loo tagastus
+Create return from invoice,Loo arvelt tagastus
+Create Supplier,Loo tarnija
+Credit and Output,Krediit ja väljund
+Credit Note,Krediidimärkus
+Credit Outstanding,Krediidi tasumata
+Credit sales remaining to be collected,Krediidimüük jääb sissenõudmiseks
+Critical,Kriitiline
+Currency,Valuuta
+Current,Praegune
+Current Event Loop Lag:,Praeguse sündmuse tsükli viivitus:
+Current Month,Praegune kuu
+Current PIN,Praegune PIN-kood
+Current Profile,Praegune profiil
+Current redeemable value on the gift card,Kinkekaardil olev praegune lunastatav väärtus
+Current User,Praegune kasutaja
+Custom,Kohandatud
+Custom Due Days,Kohandatud tähtpäevad
+Custom items per page,Kohandatud üksused lehel
+Customer,Klient
+Customer already selected,Klient juba valitud
+Customer Balance,Kliendi saldo
+Customer balance unavailable offline,Kliendi saldo pole võrguühenduseta saadaval
+Customer created successfully.,Kliendi loomine õnnestus.
+Customer creation failed.,Kliendi loomine ebaõnnestus.
+Customer Details,Kliendi üksikasjad
+Customer display channel is missing,Kliendi kuvakanal puudub
+Customer display was blocked. Please allow pop-ups for this site.,Kliendikuva blokeeriti. Lubage sellel saidil hüpikaknad.
+Customer group is required,Kliendigrupp on nõutav
+Customer is required to add payment,Klient on kohustatud lisama makse
+Customer Name is required,Kliendi nimi on nõutav
+Customer not selected,Klient pole valitud
+Customer Report,Kliendi aruanne
+Customer saved offline,Klient salvestati võrguühenduseta
+Customer Screen,Kliendi ekraan
+Customer territory is required,Kliendi territoorium on nõutav
+Customer updated successfully.,Kliendi värskendamine õnnestus.
+Customer-facing tools and printer setup.,Kliendile suunatud tööriistad ja printeri seadistamine.
+Customers,Kliendid
+Customers not found,Kliente ei leitud
+Daily cashier actions without scrolling.,Igapäevased kassatoimingud ilma kerimiseta.
+Daily Sales,Igapäevane müük
+Daily Sales Summary,Igapäevane müügi kokkuvõte
+Data loaded in form. Review and submit.,Andmed laaditakse vormile. Vaadake üle ja esitage.
+Database Health,Andmebaasi tervis
+Database health affects overall system speed and reliability.,Andmebaasi seisund mõjutab süsteemi üldist kiirust ja töökindlust.
+Database Info,Andmebaasi teave
+Date,Kuupäev
+Day ?,päev?
+days,päevadel
+Day-wise (MTD),Päevane (MTD)
+Day-wise Movement,Päevatark liikumine
+Dead Stock,Surnud varu
+Dead Stock Items,Surnud laokaubad
+Decrease quantity,Vähenda kogust
+Default,Vaikimisi
+Default:,Vaikimisi:
+Delete,Kustuta
+Delete cancelled cash movement {0}?,Kas kustutada tühistatud sularahaliikumine {0}?
+Delete Draft,Kustuta mustand
+Delete draft invoice,Kustuta arve mustand
+Delete draft invoice {0}?,Kas kustutada arve mustand {0}?
+Delete Invoice,Kustuta arve
+Delete offline invoice,Kustutage võrguühenduseta arve
+Delivered,Tarnitud
+Delivery Charges,Kohaletoimetamise tasud
+Delivery Information,Kohaletoimetamise teave
+Delivery Note {0} created,Saateleht {0} loodud
+Delivery note created,Saateleht loodud
+Deployed Bundle:,Juurutatud pakett:
+Deposit,Deposiit
+Description,Kirjeldus
+Detailed Supplier Breakdown,Üksikasjalik tarnijate jaotus
+Detecting formats:,Vormingute tuvastamine:
+Device Memory:,Seadme mälu:
+Difference,Erinevus
+Difference (In Company Currency),Vahe (ettevõtte valuutas)
+Disable offline mode first to recheck live connectivity.,Reaalajas ühenduvuse uuesti kontrollimiseks keelake esmalt võrguühenduseta režiim.
+Disconnect,Katkesta ühendus
+discount,allahindlust
+Discount %,Allahindlus %
+Discount / Void / Return Report,Allahindlus / tühine / tagastusaruanne
+Discount Amount,Allahindluse summa
+Discount limited by POS Profile,Soodustust piirab POS-profiil
+Discounted Invoices,Soodushinnaga arved
+Discounts,Allahindlused
+Dismiss,Loobu
+Download Certificate,Laadige alla sertifikaat
+Draft,Mustand
+Draft invoice deleted,Arve mustand kustutatud
+Draft source,Mustandi allikas
+Drafts,Mustandid
+Due {0},Tähtaeg {0}
+Due Date,Tähtaeg
+Duplicate,Duplikaat
+Edit customer,Muuda klienti
+Edit discount amount,Muuda allahindluse summat
+Edit discount percentage,Muuda allahindlusprotsenti
+Edit Gift Application,Kingitaotluse redigeerimine
+Edit item name,Muuda üksuse nime
+Edit quantity,Redigeeri kogust
+Edit rate,Muuda määra
+Edit unit of measure,Muutke mõõtühikut
+Edited,Redigeeritud
+Employee,Töötaja
+Enable background sync,Luba taustal sünkroonimine
+Enable Customer Display in POS Profile first.,Esmalt lubage kliendi kuvamine müügikoha profiilis.
+Enter a PIN.,Sisestage PIN-kood.
+Enter a valid grams value,Sisestage kehtiv väärtus grammides
+Enter new price list rate,Sisestage uus hinnakirja hind
+Enter Quantity,Sisesta kogus
+Enter the cashier PIN to continue.,Jätkamiseks sisestage kassapidaja PIN-kood.
+Enter the current PIN first.,Esmalt sisestage praegune PIN-kood.
+"Enter the current PIN, then choose a new one.",Sisestage praegune PIN-kood ja seejärel valige uus.
+Enter valid grams for scale barcode,Sisestage skaala vöötkoodi jaoks kehtivad grammid
+Entries,Sissekanded
+Error accessing camera:,Viga kaamerale juurdepääsul:
+Error calculating prices,Viga hindade arvutamisel
+Error fetching customer balance,Viga kliendi saldo toomisel
+Error in change calculations!,Viga muudatuste arvutamisel!
+Error Loading Data,Viga andmete laadimisel
+Error loading invoice details,Viga arve üksikasjade laadimisel
+Error processing invoice,Viga arve töötlemisel
+Error processing payment,Viga makse töötlemisel
+Error searching invoices,Viga arvete otsimisel
+Error submitting invoice:,Viga arve esitamisel:
+Error submitting invoice: {0},Viga arve esitamisel: {0}
+Error submitting invoice: No response from server,Viga arve esitamisel: serverilt pole vastust
+Error updating currency,Viga valuuta värskendamisel
+Error updating item details,Viga üksuse üksikasjade värskendamisel
+Est. Purchase,Hinnang ostma
+Est. Value,Hinnang Väärtus
+Event-loop lag measures how busy your browser is. Lower is better.,Sündmustsükli viivitus mõõdab teie brauseri hõivatust. Madalam on parem.
+Every,Iga
+Exchange Rate,Vahetuskurss
+Expand item details,Laiendage üksuse üksikasju
+Expected Amount (In Company Currency),Eeldatav summa (ettevõtte valuutas)
+Expected Cash,Eeldatav sularaha
+Expected cash on hand grouped by currency,Eeldatav sularaha kassas valuuta järgi rühmitatud
+Expected vs Actual,Eeldatav vs tegelik
+Expense,Kulu
+Expense Account (Optional Override),Kulukonto (valikuline alistamine)
+Expense account is required.,Kulude konto on nõutav.
+Expenses and deposits posted during this shift,Selle vahetuse ajal kantud kulud ja hoiused
+Expired,Aegunud
+Failed to auto reconcile payments.,Maksete automaatne vastavusse viimine ebaõnnestus.
+Failed to cancel cash movement,Sularaha liikumise tühistamine ebaõnnestus
+Failed to clear cache,Vahemälu tühjendamine ebaõnnestus
+Failed to create item,Üksuse loomine ebaõnnestus
+Failed to create supplier,Tarnija loomine ebaõnnestus
+Failed to delete cash movement,Sularaha liikumise kustutamine ebaõnnestus
+Failed to generate scale barcode. Using item barcode only.,Skaala vöötkoodi genereerimine ebaõnnestus. Kasutades ainult kauba vöötkoodi.
+Failed to load cash movement context.,Sularaha liikumise konteksti laadimine ebaõnnestus.
+Failed to load dashboard data.,Juhtpaneeli andmete laadimine ebaõnnestus.
+Failed to reload invoice from server,Arve uuesti laadimine serverist ebaõnnestus
+Failed to submit cash movement,Sularaha liikumise esitamine ebaõnnestus
+Failed to sync offline cash movements,Võrguühenduseta sularaha liikumise sünkroonimine ebaõnnestus
+Fast cashier actions for active shifts.,Kiired kassatoimingud aktiivseteks vahetusteks.
+Fast Moving Items,Kiiresti liikuvad esemed
+Fees,Tasud
+Fetch the latest offline prerequisite updates,Hankige uusimad võrguühenduseta eeltingimuste värskendused
+Find a sales order quickly and load it into the current sale.,Leidke kiiresti müügitellimus ja laadige see käimasolevasse müüki.
+Fixing payment amounts for return invoice...,Tagastusarve maksesummade fikseerimine...
+Flash Off,Välk väljas
+Flash On,Välklamp sees
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","Tootekomplekti kaupade puhul võetakse tabelist ""Pakkimisloend"" arvesse ladu, seerianumbrit ja partii numbrit. Kui lao ja partii nr on mis tahes tootekomplekti kauba kõikide pakkeartiklite puhul samad, saab need väärtused sisestada kauba põhitabelisse; väärtused kopeeritakse tabelisse ""Pakkimisnimekiri""."
+Free,Tasuta
+Free Qty,Tasuta kogus
+Frequency,Sagedus
+from,alates
+From Date,Alates kuupäevast
+Fulfillment Details,Täitmise üksikasjad
+Full Name,Täisnimi
+Gain,Kasu
+Generate a fresh prepaid card and start it with an opening balance.,Looge uus ettemaksukaart ja alustage seda algsaldoga.
+Generate and install the certificate to allow fully silent printing without trust prompts.,"Looge ja installige sertifikaat, et võimaldada täiesti vaikset printimist ilma usaldusviipadeta."
+Generate Certificate,Looge sertifikaat
+Generated scale barcode: {0},Loodud skaala vöötkood: {0}
+Get Payments,Hankige makseid
+Gift Card,Kinkekaart
+Gift card amount must be greater than zero.,Kinkekaardi summa peab olema suurem kui null.
+Gift Card Code,Kinkekaardi kood
+Gift card code is required for redemption,Lunastamiseks on vaja kinkekaardi koodi
+Gift card code is required.,Kinkekaardi kood on nõutav.
+Gift card issued successfully.,Kinkekaart edukalt väljastatud.
+Gift card loaded successfully.,Kinkekaardi laadimine õnnestus.
+Gift Card Management,Kinkekaartide haldamine
+Gift card payment,Kinkekaardimakse
+Gift card redemption requires an online connection,Kinkekaardi lunastamiseks on vaja võrguühendust
+Gift card topped up successfully.,Kinkekaart edukalt täidetud.
+Gift Cards,Kinkekaardid
+Go to Frappe Desk,Minge Frappe Deski juurde
+Grand Total,Üldsumma
+Gross Margin,Brutomarginaal
+Gross Profit,Brutokasum
+Gross Sales,Brutomüük
+Group not found,Gruppi ei leitud
+"Grouped controls for terminal, UI, and session settings.","Grupeeritud juhtnupud terminali, kasutajaliidese ja seansi seadete jaoks."
+Grouped totals for each payment method and currency,Grupeeritud kogusummad iga makseviisi ja valuuta kohta
+Hide,Peida
+Hide Gift Card,Peida kinkekaart
+Hide Non Essential Fields,Peida ebaolulised väljad
+Hide quantity decimals,Peida koguse kümnendkohad
+Hide search tools,Peida otsingutööriistad
+Hide zero rated items,Peida nullhinnanguga üksused
+High,Kõrge
+History,Ajalugu
+Hourly (Today),Tunni tagant (täna)
+How this section works,Kuidas see jaotis töötab
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","Kui aegunud andmed jäävad alles, avage Seaded > Võrguühenduseta ja sünkroonimine ning käivitage võrguühenduseta andmete taastamine uuesti."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","Kui hoiatus püsib, avage Seaded > Võrguühenduseta ja sünkroonimine ning seejärel käsku Värskenda võrguühenduseta andmeid või Rebuild Offline Data."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Importige sertifikaat QZ-salve ja taaskäivitage QZ-salv igas POS-seadmes.
+In,sisse
+In stock: {0},Laos: {0}
+Include Batch / Serial,Kaasa partii/seeria
+Include Price,Kaasa hind
+Increase quantity,Suurenda kogust
+IndexedDB,IndekseeritudDB
+Initial Amount,Algsumma
+Initialize your shift with opening balances,Alustage oma vahetust algsaldodega
+Initializing application...,Rakenduse lähtestamine...
+"Inspect cache, sync, and prerequisite status","Kontrollige vahemälu, sünkroonimist ja eeltingimuste olekut"
+Installed Applications,Installitud rakendused
+Insufficient stock:\n{0},Ebapiisav laos:\n{0}
+Invalid rate,Kehtetu määr
+Inventory Status Report,Laoseisu aruanne
+Invoice,Arve
+Invoice {0} is Submitted,Arve {0} on esitatud
+Invoice {0} processed successfully,Arve {0} edukalt töödeldud
+Invoice {0} submission failed,Arve {0} esitamine ebaõnnestus
+Invoice {0} was already submitted,Arve {0} on juba esitatud
+Invoice Adjustments,Arve korrigeerimised
+Invoice Change,Arve muutmine
+Invoice Details,Arve üksikasjad
+Invoice is still in draft after background submission.,Arve on pärast taustal esitamist endiselt mustandis.
+Invoice Items,Arve kirjed
+Invoice Management,Arvete haldamine
+Invoice Mgmt,Arve Mgmt
+Invoice saved offline,Arve salvestati võrguühenduseta
+Invoice submission failed,Arve esitamine ebaõnnestus
+Invoice Submitted,Arve esitatud
+"Invoice value settled by loyalty points, not cash collection","Arve väärtus arveldatakse lojaalsuspunktide, mitte sularaha inkasso alusel"
+Invoices,Arved
+Invoices already past due date,Arved on juba tähtaja ületanud
+Invoices saved as POS Invoices,Arved salvestatud POS-arvetena
+Invoices still carrying balances,Arvetel on veel saldo
+Issue Mode,Probleemi režiim
+Issue New Card,Väljasta uus kaart
+Issue Workflow,Probleemi töövoog
+"Issue, top up, and check","Väljasta, lisa ja kontrolli"
+Item,Üksus
+Item / Product Sales Report,Kauba / toote müügiaruanne
+Item {0} added to invoice,Üksus {0} lisati arvele
+Item '{0}' has no barcode,Üksus „{0}” ei sisalda vöötkoodi
+Item Code,Kauba kood
+Item created successfully,Üksuse loomine õnnestus
+Item is out of stock,Kaup on otsas
+Item Name,Kauba nimi
+Item not found,Üksust ei leitud
+Item order updated,Kauba tellimust värskendati
+Item Selector Settings,Üksuse valija sätted
+Items,Üksused
+Items added in POS will appear here automatically.,POS-i lisatud üksused kuvatakse siin automaatselt.
+Items added to invoice,Arvele lisatud kaubad
+Items per page,Üksusi lehel
+Items Sold,Müüdud esemed
+Items/Invoice,Kaubad/arve
+Item-wise Profitability,Kasumlikkus esemete lõikes
+Journal Entry,Päeviku sissekanne
+json,json
+Just now,Just praegu
+Keep offline prerequisites healthy and recover stale data safely.,Hoidke võrguühenduseta eeltingimused korras ja taastage aegunud andmed turvaliselt.
+Labels,Sildid
+"Language, theme, terminal tools, and session controls.","Keel, teema, terminali tööriistad ja seansi juhtelemendid."
+Last,Viimane
+Last 14 Days (Paid vs Pending),Viimased 14 päeva (makstud vs ootel)
+Last 14 Days Activity,Viimase 14 päeva tegevus
+Last 14 Days Gross Profit,Viimase 14 päeva brutokasum
+Last 14 Days Purchases,Viimase 14 päeva ostud
+Last 14 Days Tax/Charges,Viimase 14 päeva maksud/tasud
+Last sync:,Viimane sünkroonimine:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},Viimane sünkroonimine: {0} | ok: {1} | ebaõnnestus: {2} | vahele jäetud: {3}
+Latest entries for current shift,Viimased sissekanded praeguse vahetuse kohta
+Lead Time,Juhtimisaeg
+Limited,Piiratud
+lines,read
+List,Nimekiri
+Live Snapshot,Reaalajas hetktõmmis
+Load a POS profile and cashier first.,Laadige esmalt POS-profiil ja kassapidaja.
+Load More Invoices,Laadige rohkem arveid
+Load previously saved invoices,Laadige varem salvestatud arved
+Load Sale,Koorma müük
+Load Sales Invoice,Laadige müügiarve
+Loading app data...,Rakenduse andmete laadimine...
+Loading customer database...,Kliendi andmebaasi laadimine...
+Loading customers...,Klientide laadimine...
+Loading database stats...,Andmebaasi statistika laadimine...
+Loading details...,Üksikasjade laadimine...
+Loading invoice history...,Arvete ajaloo laadimine...
+Loading items...,Üksuste laadimine...
+Loading product catalog...,Tootekataloogi laadimine...
+Loading return invoices...,Tagastusarvete laadimine...
+Loading server CPU/memory usage...,Serveri protsessori/mälu kasutuse laadimine...
+Loading suppliers...,Tarnijate laadimine...
+Loading unpaid invoices...,Tasumata arvete laadimine...
+Loading view...,Vaate laadimine...
+Loading...,Laadimine...
+Local storage is unavailable. Switching to online-only mode.,Kohalik salvestusruum pole saadaval. Lülitumine ainult võrgurežiimile.
+localStorage,kohalik salvestusruum
+Location Performance,Asukoha jõudlus
+Locations,Asukohad
+Lock Screen,Lukustusekraan
+Lookup Workflow,Otsi töövoog
+Loss,Kaotus
+Low,Madal
+Low Stock,Madal laoseis
+Low Stock Alerts,Madala varude hoiatused
+Low Stock Items,Madala laoseisuga kaubad
+Low Stock Threshold,Madal varude künnis
+Low Stock Total,Laoseis kokku
+Lowest Margin,Madalaim marginaal
+Low-frequency maintenance and system details.,Madalsageduslik hooldus ja süsteemi üksikasjad.
+Loyalty Redeemed,Lojaalsus lunastatud
+Loyalty Redemption,Lojaalsuse lunastamine
+Make New Payment,Tehke uus makse
+Manage all,Hallake kõike
+Manage and synchronize your offline transactions,Hallake ja sünkroonige oma võrguühenduseta tehinguid
+Manage Cashier PIN,Hallake kassa PIN-koodi
+"Manage offline tools, terminal controls, and maintenance from one workspace.","Hallake võrguühenduseta tööriistu, terminali juhtelemente ja hooldust ühest tööruumist."
+manual,manuaal
+"Manual codes, barcode scans, and QR scans work in the same field","Manuaalsed koodid, vöötkoodi skaneerimine ja QR-skannimine töötavad samal väljal"
+Manual offline mode is enabled,Käsitsi võrguühenduseta režiim on lubatud
+Margin,Marginaali
+Maximum available quantity is {0}. Quantity adjusted to match stock.,Maksimaalne saadaolev kogus on {0}. Kogus kohandatud vastavalt laoseisule.
+Maximum discount amount for this offer item is {0}.,Selle pakkumise üksuse maksimaalne allahindluse summa on {0}.
+Maximum discount percentage for this offer item is {0}%.,Selle pakkumise üksuse maksimaalne allahindlusprotsent on {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,Maksimaalne pakkumise kogus on {0}. Kogus on kohandatud lubatud piirini.
+Medium,Keskmine
+Method-wise Collections,Meetodipõhised kogud
+Minimum allowed rate for this offer item is {0}.,Selle pakkumisüksuse minimaalne lubatud hind on {0}.
+Minimum Qty,Minimaalne kogus
+Mobile No,Mobiil nr
+Mode,Režiim
+Mode of Payment,Makseviis
+Month,Kuu
+Month ?,Kuu ?
+Monthly Profit,Kuu kasum
+Monthly Sales,Igakuine müük
+Monthly Sales Summary,Kuu müügikokkuvõte
+Month-wise,Kuu lõikes
+Most Active Cashiers,Aktiivsemad kassapidajad
+Movement Type,Liikumise tüüp
+Movements,Liikumised
+Multi Currency,Mitu valuutat
+N/A,Ei kehti
+Name,Nimi
+Negative Stock,Negatiivne aktsia
+Negative Stock Items,Negatiivsed laokaubad
+Negative values not allowed,Negatiivsed väärtused pole lubatud
+Net,Net
+Net Qty,Netokogus
+Net Sales,Müügitulu
+Net Value,Puhasväärtus
+Never,Mitte kunagi
+New changes are ready to load,Uued muudatused on laadimiseks valmis
+New Item,Uus üksus
+New Offer Available,Saadaval uus pakkumine
+New PIN,Uus PIN-kood
+New rate,Uus määr
+Next unit of measure,Järgmine mõõtühik
+No attribute data found.,Atribuudiandmeid ei leitud.
+No Barcode,Vöötkoodi pole
+No barcode found for UOM '{0}',UOM '{0}' jaoks ei leitud vöötkoodi
+No branch/location data found.,Filiaali/asukoha andmeid ei leitud.
+No brand data found.,Brändiandmeid ei leitud.
+No cached gift card balance is available offline.,Vahemällu salvestatud kinkekaardi saldo pole võrguühenduseta saadaval.
+No camera found on this device. Please ensure your device has a working camera.,"Sellest seadmest ei leitud ühtegi kaamerat. Veenduge, et teie seadmel on töötav kaamera."
+No capability warnings recorded yet.,Võimaluse hoiatusi pole veel salvestatud.
+No cash expected for this shift.,Selle vahetuse eest raha ei oodata.
+No cash mode configured,Sularaharežiim pole konfigureeritud
+No cash movement type is allowed for this POS Profile.,Selle POS-profiili jaoks pole sularaha liikumise tüüp lubatud.
+No cashier PIN is set yet. Create one now.,Kassa PIN-koodi pole veel määratud. Looge see kohe.
+No cashier profiles are available for this POS profile yet.,Selle POS-profiili jaoks pole veel kassaprofiile saadaval.
+No cashier-wise discount/void/return activity.,Ei mingit kassapidajapoolset allahindlus-/tühinemis-/tagastustegevust.
+No category data found.,Kategooriaandmeid ei leitud.
+No category profitability data found.,Kategooria kasumlikkuse andmeid ei leitud.
+No change returned recorded for this shift.,Selle vahetuse kohta ei registreeritud ühtegi muudatust.
+No change-allocation invoices match the current filters.,Ükski muudatuste jaotamise arve ei vasta praegustele filtritele.
+No charge head breakdown found.,Laadimispea riket ei leitud.
+No Company Selected,Ühtegi ettevõtet pole valitud
+No customer sales data found.,Klientide müügiandmeid ei leitud.
+No day-wise discount/void/return trend.,Puudub päevane allahindluse / tühisuse / tagastamise trend.
+No day-wise payment data found.,Päevaseid makseandmeid ei leitud.
+No day-wise profitability trend found.,Päevapõhist kasumlikkuse trendi ei leitud.
+No day-wise purchase data found.,Päevaseid ostuandmeid ei leitud.
+No day-wise sales trend found.,Päevast müügitrendi ei leitud.
+No day-wise tax/charges trend found.,Päevapõhist maksude/tasude trendi ei leitud.
+No dead stock items.,Surnud laokaupu pole.
+No due date,Tähtaega pole
+No exact repair match found for this invoice,Sellele arvele ei leitud täpset remondivastet
+No hourly sales trend found for today.,Tänaseks tunnimüügitrendi ei leitud.
+No invoice activity found.,Arvetega seotud tegevust ei leitud.
+No invoices found,Arveid ei leitud
+No invoices found. Try different search criteria.,Arveid ei leitud. Proovige erinevaid otsingukriteeriume.
+No invoices recorded for this shift.,Selle vahetuse kohta arveid ei salvestatud.
+No item profitability data found.,Kauba tasuvuse andmeid ei leitud.
+No item sales data found for this period.,Selle perioodi kohta kauba müügiandmeid ei leitud.
+No items found,Üksusi ei leitud
+No items in cart,Ostukorvis pole tooteid
+No items with barcodes to print,Printimiseks pole vöötkoodiga üksusi
+No location-wise top item data found.,Asukohapõhiseid parima üksuse andmeid ei leitud.
+No low stock alerts right now.,Hetkel ei ole teateid madala laoseisu kohta.
+No low stock items.,Madala laoseisuga kaupu pole.
+No matching items in cart,Ostukorvis pole sobivaid tooteid
+No month-wise sales trend found.,Kuupõhist müügitrendi ei leitud.
+No negative stock items.,Negatiivseid laokaupu pole.
+No notifications yet,Märguandeid pole veel
+No offline cash movement synced.,Võrguühenduseta sularaha liikumist pole sünkroonitud.
+No offline invoices pending synchronization,Sünkroonimisel pole võrguühenduseta arveid
+No offline sync issues recorded yet.,Võrguühenduseta sünkroonimise probleeme pole veel salvestatud.
+No out-of-stock items.,Pole laost lõppenud kaupa.
+No outstanding credit invoices for this shift.,Selle vahetuse jaoks pole tasumata krediitarveid.
+No payment collection data found.,Makse kogumise andmeid ei leitud.
+No payment rows available on this invoice.,Sellel arvel pole makseridu saadaval.
+No payments registered for this shift.,Selle vahetuse eest pole makseid registreeritud.
+No pending balances in this period.,Sellel perioodil ootel saldot pole.
+No pending offline invoices,Ootel võrguühenduseta arveid pole
+No Print Formats Found,Prindivorminguid ei leitud
+No profiles found for selected scope. Falling back to current profile failed.,Valitud ulatuse jaoks ei leitud profiile. Praegusele profiilile naasmine ebaõnnestus.
+No recent customer activity found.,Ühtegi hiljutist klienditegevust ei leitud.
+No recent stock entries found.,Hiljutisi aktsiakandeid ei leitud.
+No records found,Kirjeid ei leitud
+No reorder suggestions right now.,Praegu pole ümberkorraldussoovitusi.
+No repeat customers in this period.,Sel perioodil pole korduvaid kliente.
+No response from server,Serverilt pole vastust
+No return invoices found,Tagastusarveid ei leitud
+No return item trend found.,Tagastamiskaupade trendi ei leitud.
+No returnable items found for this invoice,Selle arve jaoks ei leitud tagastatavaid tooteid
+No returns were processed in this shift.,Selles vahetuses ei töödeldud ühtegi tagastust.
+No risk activity found.,Riskitegevust ei leitud.
+No sales activity found for this period.,Sellel perioodil müügitegevust ei leitud.
+No slow moving items.,Ei mingeid aeglaselt liikuvaid esemeid.
+No staff sales activity found.,Töötajate müügitegevust ei leitud.
+No stock movement for this period.,Sellel perioodil laosid ei liigu.
+No submitted cash movements in this shift.,Selles vahetuses ei esitatud ühtegi sularaha liikumist.
+No supplier purchases found in this month.,Sel kuul tarnijaoste ei leitud.
+No suppliers found for this period.,Selle perioodi jaoks ei leitud ühtegi tarnijat.
+No sync trigger has run yet in this session.,Sellel seansil pole veel ühtegi sünkroonimispäästikut käivitatud.
+No tax head breakdown found.,Maksupeade jaotust ei leitud.
+No top items found for this location.,Selle asukoha jaoks ei leitud ühtegi populaarseimat üksust.
+No unpaid invoices,Tasumata arveid pole
+No variant data found.,Variantide andmeid ei leitud.
+No week-wise sales trend found.,Ühtegi nädalapõhist müügitrendi ei leitud.
+No.,Ei.
+Nobile Number,Nobile number
+Not available,Ei ole saadaval
+Not checked,Pole kontrollitud
+Not selected,Pole valitud
+Not Set,Pole määratud
+Notifications,Märguanded
+Offer,Pakkuda
+Offer Applied,Pakkumine rakendatud
+Offer criteria exceeded,Pakkumise kriteeriumid ületatud
+Offer Item,Pakkumise element
+Offer item unavailable,Pakkumise üksus pole saadaval
+Offer Removed,Pakkumine eemaldatud
+Offer UOM cannot be changed,Pakkumise UOM-i ei saa muuta
+Offer?,Pakkuda?
+Offers,Pakkumised
+Offline,Võrguühenduseta
+Offline & Sync,Võrguühenduseta ja sünkroonimine
+Offline Capabilities,Võrguühenduseta võimalused
+Offline data status refreshed,Võrguühenduseta andmete olek on värskendatud
+Offline diagnostics,Võrguühenduseta diagnostika
+Offline Invoices,Võrguühenduseta arved
+Offline invoices status,Võrguühenduseta arvete olek
+Offline invoices synced,Võrguühenduseta arved sünkroonitud
+Offline Queue: {0},Võrguühenduseta järjekord: {0}
+Offline rebuild guidance,Võrguühenduseta ümberehitamise juhised
+Offline restore is unavailable for this session.,Võrguühenduseta taastamine pole selle seansi jaoks saadaval.
+Offline selling is available with degraded capabilities.,Võrguühenduseta müük on saadaval halvenenud võimalustega.
+Offline snapshot does not match the current POS state.,Võrguühenduseta hetktõmmis ei vasta praegusele POS-i olekule.
+Offline Status,Võrguühenduseta olek
+"Offline, terminal, and system controls","Võrguühenduseta, terminali ja süsteemi juhtnupud"
+OK,OK
+Online,Internetis
+Open actions menu,Avage toimingute menüü
+Open balance to collect,Kogumiseks avatud saldo
+Open Customer Display,Avage Kliendikuva
+Open drawer,Avage sahtel
+Open invoices,Avatud arved
+Open Payments?,Kas avada maksed?
+Open POS home,Ava POS kodu
+Open this screen from POS Menu -> Open Customer Display.,Avage see ekraan POS-menüüst -> Ava kliendiekraan.
+OpenCV image processing enabled - Enhanced barcode detection,OpenCV pilditöötlus on lubatud – täiustatud vöötkoodi tuvastamine
+OpenCV image processing unavailable on this device,OpenCV pilditöötlus pole selles seadmes saadaval
+OpenCV Off,OpenCV väljas
+OpenCV On,OpenCV sees
+OpenCV processing disabled,OpenCV töötlemine on keelatud
+Opening Amount,Avamissumma
+Opening Cash,Sularaha avamine
+options,valikuid
+Order,Telli
+Original,Originaal
+Other,muud
+Out,Välja
+Out of Stock,Otsas
+Out of Stock Items,Kaubad otsas
+Outstanding,Silmapaistev
+Outstanding Credit by Currency,Tasumata krediit valuuta järgi
+Overdue,Tähtaja ületanud
+Overpayment Change,Enammakse muutus
+Overpayment change deducted: {0},Enammakse muudatus maha arvatud: {0}
+Packing List,Pakkimisnimekiri
+Page Format,Lehekülje vorming
+Page unavailable offline,Leht pole võrguühenduseta saadaval
+Paid,Tasuline
+Paid (orig):,Tasuline (algne):
+Paid Amount,Makstud summa
+Paid change cannot be greater than total change!,Tasuline vahetusraha ei saa olla suurem kogusummast!
+Paid:,Tasutud:
+Parent Item,Emaelement
+Partial,Osaline
+Partly Paid,Osaliselt tasutud
+Party Account,Partei konto
+Party Type,Peo tüüp
+Pause terminal until next cashier,Peatage terminal järgmise kassapidajani
+PAY,MAKSA
+Payment,Makse
+Payment Account,Maksekonto
+Payment entries processed for Invoice {0},Arve {0} maksekanded töödeldud
+Payment Entry Type,Makse kirje tüüp
+Payment History,Makseajalugu
+Payment ID,Makse ID
+Payment Method Report,Makseviisi aruanne
+Payment Methods,Makseviisid
+Payment of {0} received successfully.,Makse summas {0} on edukalt kätte saadud.
+Payment Progress,Makse edenemine
+Payment Reconciliation,Makse ühtlustamine
+Payment request status could not be retrieved. Please try again,Maksetaotluse olekut ei õnnestunud tuua. Palun proovi uuesti
+Payment Request took too long to respond. Please try requesting for payment again,Maksetaotlusele vastamine võttis liiga kaua aega. Proovige uuesti makset taotleda
+Payment saved offline,Makse salvestati võrguühenduseta
+Payment State,Makse olek
+Payment Status,Makse olek
+Payment submitted but print function could not be executed. Payment name not found.,"Makse on esitatud, kuid printimisfunktsiooni ei saanud käivitada. Makse nime ei leitud."
+Payment submitted.,Makse esitatud.
+Payment Summary,Makse kokkuvõte
+Payments,Maksed
+Payments are not open. Do you want to open payments and submit?,Maksed ei ole avatud. Kas soovite maksed avada ja esitada?
+Payments by Mode of Payment,Maksed makseviisi järgi
+PDF,PDF
+Peak Hour,Tipptund
+Peak Memory:,Tippmälu:
+Peak Server:,Peak server:
+Peak:,Tipp:
+Pending,Ootel
+Pending Amount,Ootel summa
+Pending count updated from {0} to {1},Ootel loendit värskendati väärtuselt {0} väärtusele {1}
+Pending Exposure,Ootel kokkupuude
+Pending Invoices,Ootel arved
+Pending Ratio,Ootel suhe
+Pending Sales,Ootel müük
+Pending sales: {0} | Cache usage: {1}%,Ootel müük: {0} | Vahemälu kasutus: {1}%
+Pending Sync,Ootel sünkroonimine
+Pending: {0},Ootel: {0}
+Pending: {0} | Synced: {1} | Draft: {2},Ootel: {0} | Sünkroonitud: {1} | Mustand: {2}
+Per Page,Lehekülje kohta
+Personal,Isiklik
+Personal preferences adjust the current cashier experience without changing the active POS route.,Isiklikud eelistused kohandavad praegust kassakogemust aktiivset POS-marsruuti muutmata.
+PIN confirmation does not match.,PIN-koodi kinnitus ei ühti.
+PIN must be 4 to 8 digits.,PIN-kood peab olema 4–8 numbriline.
+Please add at least one item.,Lisage vähemalt üks üksus.
+Please allow camera access to scan codes,Lubage kaamerale koodide skannimiseks juurdepääs
+Please enter payment amount,Palun sisesta maksesumma
+Please fill all required fields,Palun täitke kõik nõutud väljad
+Please make a payment or select a payment,Palun sooritage makse või valige makse
+Please request phone payment or use another payment method,Taotlege telefonimakset või kasutage mõnda muud makseviisi
+Please select a customer first,Valige esmalt klient
+Please select a party,Valige pidu
+Please select a party before reconciling.,Enne lepitamist valige osapool.
+Please select a valid movement type.,Valige sobiv liikumise tüüp.
+Please select an invoice,Palun valige arve
+Please select company before reconciling.,Enne kooskõlastamist valige ettevõte.
+Please set the customer's mobile number,Palun määrake kliendi mobiilinumber
+Please try again or enter the item manually.,Proovige uuesti või sisestage üksus käsitsi.
+Please verify the barcode or check the item's availability.,Kontrollige vöötkoodi või kauba saadavust.
+Points,Punktid
+Popup blocked. Please allow popups.,Hüpikaken on blokeeritud. Lubage hüpikaknad.
+POS,POS
+POS controls and maintenance,POS juhtimine ja hooldus
+POS Expense is disabled for this POS Profile.,POS-i kulud on selle POS-profiili jaoks keelatud.
+POS is running with limited offline prerequisites.,POS töötab piiratud võrguühenduseta eeltingimustega.
+POS Profile,POS-profiil
+Position the QR code or barcode within the scanning area,Asetage QR-kood või vöötkood skannimisalasse
+Posting,Postitamine
+Posting and Price List,Postitus ja hinnakiri
+Posting Date,Postitamise kuupäev
+Preparing background sync,Taustal sünkroonimise ettevalmistamine
+"Press OK to continue offline with a warning, or Cancel to retry.",Hoiatusega võrguühenduseta jätkamiseks vajutage nuppu OK või uuesti proovimiseks Tühista.
+Previous unit of measure,Eelmine mõõtühik
+Price List,Hinnakiri
+Price List Rate,Hinnakirja määr
+Price list rate updated locally only,Hinnakirja määra uuendatakse ainult kohapeal
+Pricing & Discounts,Hinnakujundus ja allahindlused
+Pricing Rule,Hinnakujunduse reegel
+Print,Prindi
+Print Draft,Prindi mustand
+Print Format (Invoice),Prindivorming (arve)
+Print Format (Order),Prindivorming (tellimus)
+Print invoice,Trüki arve
+Print Purchase Invoice instead of PO,Trüki ostuarve asemel ostuarve
+Printer,Printer
+Processed returns impacting the shift totals,"Töödeldud tulud, mis mõjutavad vahetuse kogusummat"
+Processing Payment,Makse töötlemine
+Processing payment entries for Invoice {0},Arve {0} maksekannete töötlemine
+Profile,Profiil
+Profiles,Profiilid
+Profit,Kasum
+Profit: Invoice Item Estimate,Kasum: arve kauba prognoos
+Profit: Stock Ledger (COGS),Kasum: aktsiaraamat (COGS)
+Profitability Report,Kasumlikkuse aruanne
+Prorated return discount,Proportsionaalse tagastamise allahindlus
+Purchase Amount,Ostusumma
+Purchase Invoices,Ostuarved
+Purchase Order created,Ostutellimus on loodud
+Qty,Kogus
+Qualified,Kvalifitseeritud
+Quantity,Kogus
+Quantity exceeds available stock,Kogus ületab saadaoleva varu
+Quick Actions,Kiired toimingud
+Quotation {0} is Submitted,Hinnapakkumine {0} on esitatud
+Quotation submitted,Hinnapakkumine esitatud
+QZ Tray connected.,QZ salv on ühendatud.
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ-salv on käsitsi lahti ühendatud. Selle uuesti lubamiseks vajutage Ühenda.
+QZ Tray is not connected.,QZ salv pole ühendatud.
+QZ Tray Setup,QZ-salve seadistamine
+Rate,Hinda
+Rate adjusted to maximum allowed discount,Hind on kohandatud maksimaalse lubatud allahindluseni
+Ready,Valmis
+Ready to resume,Valmis jätkama
+Ready!,Valmis!
+Real-time POS insights for retail operations.,Reaalajas POS-teave jaemüügitoimingute jaoks.
+Rebuild Offline Data,Võrguühenduseta andmete taastamine
+Receive,Vastu võtta
+Receive now,Võta kohe vastu
+Received,Vastu võetud
+Received:,Saadud:
+Recent Movement Entries,Viimased liikumise sissekanded
+Recent updates about your invoices,Hiljutised uuendused teie arvete kohta
+Recently Active Customers,Viimasel ajal aktiivsed kliendid
+Rechecking connection,Ühenduse uuesti kontrollimine
+Reconcile payment methods and close shift,Ühildage makseviisid ja sulgege vahetus
+Reconciling Payments,Maksete kooskõlastamine
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","Ühendage see leht uuesti ja avage see üks kord võrgus olles, siis saavad võrguühenduseta värskendused selle taastada."
+Reconnect online to refresh cached offline data from the server.,"Ühendage uuesti võrguga, et värskendada serverist vahemällu salvestatud võrguühenduseta andmeid."
+Recreate local offline prerequisites from scratch,Looge kohalikud võrguühenduseta eeltingimused nullist uuesti
+Recv:,Vastuvõtt:
+Redeem,Lunastada
+Redeem / Scan,Lunastada / skannida
+Redeem Amount,Lunastamissumma
+Redeem Mode,Lunastamisrežiim
+Redeemed Amount,Lunastatud summa
+Redeemed credit cannot be greater than its total.,Lunastatud krediit ei tohi olla suurem kui selle kogusumma.
+Redemption and Totals,Lunastamine ja kogusummad
+Reference,Viide
+Refresh,Värskenda
+Refresh Exchange Rate,Värskenda vahetuskurssi
+Refresh Offline Data,Värskenda võrguühenduseta andmeid
+Refresh Printers,Värskenda printereid
+Refund,Tagasimakse
+Release Notes,Väljalaskemärkmed
+Reload,Laadi uuesti
+Reload customers,Laadige kliente uuesti
+Reload Items,Laadi üksused uuesti
+Reload Now,Laadige kohe uuesti
+Reload to apply the latest changes. Your current session will be refreshed.,"Laadige uuesti, et rakendada uusimaid muudatusi. Teie praegust seanssi värskendatakse."
+Reload Workflow,Laadi töövoog uuesti
+Remarks,Märkused
+Remarks are required.,Märkused on vajalikud.
+Remove,Eemalda
+Remove barcode item,Eemalda vöötkoodi üksus
+Remove cached data and reload the POS app,Eemaldage vahemällu salvestatud andmed ja laadige POS-rakendus uuesti
+Remove item,Eemalda üksus
+Remove Offer,Eemalda pakkumine
+Reorder / Purchase Suggestions,Ümbertellimise / ostusoovitused
+Repair Candidate,Remondikandidaat
+Repair Change Allocation,Remondi muudatuste eraldamine
+Repair requires an online connection,Remont nõuab võrguühendust
+Repaired,Remonditud
+Repairing change allocation,Muudatuste jaotuse parandamine
+Repeat Customers,Korduvad kliendid
+Repeat Rate,Korduskiirus
+Request,Taotlus
+Request ID: {0},Taotluse ID: {0}
+Request Payment,Makse taotlemine
+Requested route: {0},Soovitud marsruut: {0}
+Required columns cannot be hidden,Nõutavaid veerge ei saa peita
+Reset,Lähtesta
+Reset item name,Lähtestage üksuse nimi
+Reset to Default,Lähtestage vaikeseadetele
+Resource Health,Ressursi tervis
+Restricted,Piiratud
+Restricted operational controls for supervisors only.,Piiratud juhtimisseadmed ainult juhendajatele.
+Retry,Proovi uuesti
+Retry route,Proovi marsruuti uuesti
+Return,Tagasi
+Return Amount,Tagastussumma
+Return Count,Tagastusarv
+Return items must have negative quantities,Tagastatavate kaupade kogus peab olema negatiivne
+Return total must be negative,Tagastussumma peab olema negatiivne
+Return Valid Until,Tagastamine kehtib kuni
+Return window passed,Tagastusaken läbitud
+Return without Invoice,Tagastamine ilma arveta
+Returns,Tagastab
+Returns / Voids / Discounts,Tagastamine / tühised / allahindlused
+Returns by Currency,Tagastamine valuuta järgi
+Revenue,Tulu
+Review shift totals before submitting the closing entry,Enne sulgemiskande esitamist vaadake üle vahetuste kogusummad
+Round Off,Ümardada
+Rows,read
+Rows:,read:
+Rule,Reegel
+Sale,Müük
+Sales,Müük
+Sales Order {0} is Submitted,Müügitellimus {0} on esitatud
+Sales Person and Print,Müügipersonal ja trükis
+Sales Person not found,Müügimeest ei leitud
+Sales processed,Müük töödeldud
+Sales Return,Müügi tagastamine
+Sales Trend Report,Müügisuundumuste aruanne
+Save,Salvesta
+Save & Clear,Salvesta ja kustuta
+Save as POS Profile Default,Salvesta POS-i vaikeprofiilina
+Save Settings,Salvesta sätted
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,"Salvestage valitud printer POS-profiili vaikeseadeks, et see kuvatakse selles seadistuses automaatselt."
+Saved as draft because: {0},"Salvestati mustandina, kuna: {0}"
+Saving...,Salvestamine...
+Scale barcode detected. Quantity here is the number of labels to print.,Tuvastati skaala vöötkood. Kogus on prinditavate siltide arv.
+Scale barcode settings are not configured. Using item barcode only.,Skaala vöötkoodi sätteid pole konfigureeritud. Kasutades ainult kauba vöötkoodi.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,Selle üksuse/UOM-i mastaabimalli vöötkood puudub. Kasutades ainult kauba vöötkoodi.
+Scan an existing card and top it up without leaving the payment flow.,Skaneerige olemasolev kaart ja täiendage seda ilma maksevoost lahkumata.
+Scan Error,Skannimise viga
+Scan or enter a gift card code to check balance or redeem.,Saldo kontrollimiseks või lunastamiseks skannige või sisestage kinkekaardi kood.
+Scan or paste the card code below.,Skannige või kleepige allolev kaardikood.
+Scan QR Code/Barcode,QR-koodi/vöötkoodi skannimine
+Scan with camera,Skaneeri kaameraga
+Scan-First Flow,Scan-First Flow
+Scanned Code:,Skaneeritud kood:
+Scanning for: {0},Otsitakse: {0}
+Scanning items,Üksuste skannimine
+Scan-Ready,Skannimiseks valmis
+Scope,Ulatus
+Scope: All Profiles,Ulatus: kõik profiilid
+Scope: Current Profile,Ulatus: praegune profiil
+Scope: Specific Profile,Ulatus: konkreetne profiil
+Search,Otsi
+Search Account,Otsi kontolt
+Search an invoice and continue the return flow without extra steps.,Otsige arvet ja jätkake tagasivoolu ilma täiendavate sammudeta.
+Search customer,Otsige klienti
+Search invoices or customers,Otsige arveid või kliente
+Search item,Otsi üksust
+Search item / code,Otsige üksust / koodi
+Search items or barcode,Otsige üksusi või vöötkoodi
+Search Mpesa Payments,Otsige Mpesa makseid
+Search return invoices or customers,Otsige tagastusarveid või kliente
+Search supplier,Otsige tarnijat
+Search unpaid invoices or customers,Otsige maksmata arveid või kliente
+Secure context (HTTPS or localhost) is required for camera access.,Kaamerale juurdepääsuks on vaja turvalist konteksti (HTTPS või localhost).
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,Kaamerale juurdepääsuks on vajalik turvaline kontekst (HTTPS). Kasutage kaamerale juurdepääsuks HTTPS-i.
+Select,Valige
+Select a cashier first.,Esmalt valige kassapidaja.
+Select a customer,Valige klient
+Select a customer to use coupon,Valige kupongi kasutamiseks klient
+Select a printer to use QZ silent printing.,Valige QZ-vaikse printimise kasutamiseks printer.
+Select Batch,Valige Partii
+Select Columns to Display,Valige Kuvatavad veerud
+Select items to sell,Valige müüdavad kaubad
+Select Payment,Valige Makse
+Select Payment Account,Valige Maksekonto
+Select printer,Valige printer
+Select Return Invoice,Valige Tagasta arve
+Select S.O,Valige S.O
+Select Sales Orders,Valige Müügitellimused
+Select the cashier who is taking over this terminal.,"Valige kassapidaja, kes selle terminali üle võtab."
+Selected,Valitud
+Selected movement type is not allowed by POS Profile.,Valitud liikumistüüp pole POS-profiiliga lubatud.
+Selected Payments,Valitud maksed
+Sensitive actions kept away from quick taps.,Tundlikud toimingud hoitakse eemal kiiretest puudutustest.
+Serial,Sari
+Serial Numbers,Seerianumbrid
+Server CPU Usage:,Serveri protsessori kasutus:
+Server Health,Serveri tervis
+Server Memory Usage:,Serveri mälukasutus:
+Server Metrics,Serveri mõõdikud
+Server Uptime:,Serveri tööaeg:
+Service Charges,Teenustasud
+Session,Seanss
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,Määrake iga kassapidaja PIN-kood kasutajavormil ja säilitage terminali liikmed määratud POS-profiilis Kasutaja.
+Settings,Seaded
+Settings in this section update the POS workspace without changing the current route.,Selle jaotise sätted värskendavad POS-i tööruumi ilma praegust marsruuti muutmata.
+Setup complete!,Seadistamine on lõpetatud!
+Share,Jaga
+Shared terminal,Jagatud terminal
+Shift Closed Snapshot,Shift Suletud hetktõmmis
+Shift Overview,Vahetuste ülevaade
+Show,Näita
+Show cart on customer-facing screen,Kuva ostukorvi kliendile suunatud ekraanil
+Show last invoice rate,Kuva viimase arve määr
+Show rate info,Näita hinnainfot
+Show Repair Candidates,Näita remondikandidaate
+Show search tools,Kuva otsingutööriistad
+Show the active cart on a customer-facing screen,Näidake aktiivset ostukorvi kliendile suunatud ekraanil
+Showing {0}-{1} of {2},Kuvatakse {0}-{1}/{2}
+Showing 0 of 0,Kuvatakse 0 0-st
+Shows the distribution of invoices per currency,Näitab arvete jaotust valuutade kaupa
+Sign out of the current POS session,Logige praegusest POS-seansist välja
+Size:,Suurus:
+Skipped Payments,Vahele jäetud maksed
+Skipping items without barcodes,Üksuste vahelejätmine ilma vöötkoodideta
+Slow Moving,Aeglane liikumine
+Slow Moving Items,Aeglaselt liikuvad üksused
+Slow Queries:,Aeglased päringud:
+Sold,Müüdud
+Source,Allikas
+Source Cash Account (Optional Override),Allika sularahakonto (valikuline alistamine)
+Source Ex. Rate:,Allikas Nt. Hinda:
+Source Rate:,Allika määr:
+Specific Profile,Konkreetne profiil
+Split Invoices,Poolitatud arved
+Staff / Cashier Performance Report,Töötajate / kassapidaja tööaruanne
+Status,Olek
+Stock,Varud
+Stock Information,Laoinformatsioon
+Stock is lower than requested,Laoseis on nõutust väiksem
+Stock is lower than requested:\n{0},Laoseis on nõutust väiksem:\n{0}
+Stock Movement Report,Varude liikumise aruanne
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,Laovärskendus: {0} on saadaval {1}. {2} lisamine viib aktsia alla nulli.
+Submit,Esita
+Submit & Print,Esita ja prindi
+Submit Deposit,Esitage deposiit
+Submit Expense,Esitage kulud
+Submitted,Esitatud
+Submitted Cash Movements,Esitatud sularaha liikumised
+Submitted entries,Saadetud kanded
+Successfully scanned:,Edukalt skannitud:
+Suggested,Soovitatud
+Suggested Qty,Soovitatav kogus
+Supervisor Access,Juhendaja juurdepääs
+Supervisor permissions unlock issuance and reloads,Ülevaataja load avavad väljastamise ja uuesti laadimise
+Supervisor Tools,Juhendaja tööriistad
+Supplier,Tarnija
+Supplier and dates are required.,Tarnija ja kuupäevad on nõutavad.
+Supplier Invoices,Tarnija arved
+Supplier is required.,Tarnija on nõutav.
+Supplier name is required,Tarnija nimi on nõutav
+Supplier Payments,Tarnija maksed
+Supplier Purchase Summary,Tarnija ostude kokkuvõte
+Suppliers,Tarnijad
+Suppliers not found,Tarnijaid ei leitud
+Switch Camera,Vaheta kaamerat
+Switch Cashier,Vaheta kassa
+Switch the POS appearance theme,Vahetage POS-i välimuse teemat
+Switched to:,Lülitati:
+Sync All Invoices,Sünkrooni kõik arved
+Sync Offline Cash Movements ({0}),Võrguühenduseta sularaha liikumise sünkroonimine ({0})
+Sync Offline Sales,Sünkroonige võrguühenduseta müük
+Synced {0} offline cash movement(s).,Sünkroonitud {0} võrguühenduseta sularaha liikumist.
+Syncing items in background,Üksuste sünkroonimine taustal
+System / Diagnostics,Süsteem / Diagnostika
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","Süsteemitoimingud on madala sagedusega hoolduse juhtelemendid, nagu rakenduse teave, tugidiagnostika ja seansi juhtelemendid."
+System Information,Süsteemiteave
+System Status,Süsteemi olek
+Tables:,Tabelid:
+Tap the button below to redeem a gift card during checkout.,Kinkekaardi lunastamiseks kassas puudutage allolevat nuppu.
+Target,Sihtmärk
+Target Ex. Rate:,Sihtmärk nt. Hinda:
+Target Rate:,Sihtmäär:
+Tax,Maksud
+Tax / Charges Report,Maksude/tasude aruanne
+Tax Heads,Maksujuhid
+Taxable Amount,Maksustatav summa
+Tendered,Pakutud
+Terminal,Terminal
+Terminal & Devices,Terminal ja seadmed
+Terminal locked,Terminal lukus
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","Terminali tööriistad mõjutavad seda kassajaama, kliendile suunatud ekraane ja tulevasi printeri/seadme juhtelemente."
+Territory not found,Territooriumi ei leitud
+The amount paid is not complete,Makstud summa ei ole täielik
+The app stores data locally for offline use. This is called cache.,Rakendus salvestab andmed võrguühenduseta kasutamiseks kohapeal. Seda nimetatakse vahemälluks.
+The invoice stayed in draft. Please review and submit it manually.,Arve jäi mustandisse. Vaadake see üle ja esitage see käsitsi.
+The maximum discount allowed is,Maksimaalne lubatud allahindlus on
+The quantity for {0} has been adjusted to the maximum available stock.,Toote {0} kogus on kohandatud maksimaalsele saadaolevale laoseisule.
+The system could not retrieve the item details. Please try again.,Süsteem ei saanud üksuse üksikasju tuua. Palun proovi uuesti.
+These invoices will be synced when connection is restored,"Need arved sünkroonitakse, kui ühendus taastub"
+This action now opens inside the settings workspace.,See toiming avaneb nüüd seadete tööruumis.
+This coupon already used !,See kupong juba kasutatud!
+This invoice does not need change-allocation repair,See arve ei vaja muudatus-jaotuse remonti
+This invoice is already repaired,See arve on juba parandatud
+This is an item template. Please choose a variant.,See on üksuse mall. Valige variant.
+this item,see üksus
+This POS page could not be opened offline because its code was not cached on this terminal yet.,"Seda POS-lehte ei saanud võrguühenduseta avada, kuna selle koodi ei olnud veel selle terminali vahemällu salvestatud."
+This Serial Number {0} has already been added!,See seerianumber {0} on juba lisatud!
+Threshold,Lävi
+Time,Aeg
+Tip: Clear cache regularly to free up space and keep the app fast.,"Nõuanne. Tühjendage regulaarselt vahemälu, et vabastada ruumi ja hoida rakendus kiirena."
+Tip: Close unused tabs or apps to reduce lag.,Nõuanne. Viivituse vähendamiseks sulgege kasutamata vahelehed või rakendused.
+Tip: Monitor slow queries and table size for optimal performance.,Näpunäide. Optimaalse jõudluse tagamiseks jälgige aeglaseid päringuid ja tabeli suurust.
+To Be Paid,Maksta
+To Date,Kuupäevani
+Today,Täna
+Today Profit,Täna kasum
+Today Sales,Täna müük
+Toggle navigation drawer,Lülitage navigeerimissahtel sisse
+Toggle Theme,Lülitage teema sisse
+Tools,Tööriistad
+Tools for customer-facing screens and terminal-specific actions.,Tööriistad kliendile suunatud ekraanide ja terminalispetsiifiliste toimingute jaoks.
+Top Brand,Tippbränd
+Top Category,Ülemine kategooria
+Top Charge Head,Ülemine laadimispea
+Top Customers,Tippkliendid
+Top Discount,Parim allahindlus
+Top Items by Location,Populaarseimad kaubad asukoha järgi
+Top Margin,Ülemine veeris
+Top Pending,Ülemine Ootel
+Top Profit Item,Parim kasumiartikkel
+Top Return Items,Populaarseimad tagastuskaubad
+Top Sales by Cashier,Kassa parimad müüginumbrid
+Top Supplier,Parim tarnija
+Top Suppliers by Spend,Kulutuste järgi parimad tarnijad
+Top Tables,Ülemised tabelid
+Top Tax Head,Kõrgeim maksujuht
+Top Up Amount,Täiendava summa
+Top Up Card,Täitekaart
+Top Up Mode,Täitmise režiim
+Top Variant,Ülemine variant
+Total,Kokku
+Total Amount,Kogusumma
+Total Change,Täielik muutus
+Total Charges,Tasud kokku
+Total In,Kokku sisse
+Total Invoices,Arveid kokku
+Total Items,Üksusi kokku
+Total Mpesa,Kokku Mpesa
+Total Out,Kokku välja
+Total Payments,Maksed kokku
+Total Purchase,Kogu ost
+Total Selected :,Valitud kokku:
+Total Size,Kogusuurus
+Total Stock Qty,Lao kogus kokku
+Total:,Kokku:
+Totals by Invoice Currency,Kogusummad arve valuuta järgi
+Track how much cash was handed back to customers,"Jälgige, kui palju sularaha klientidele tagasi anti"
+"Track recent sales, collect unpaid balances, and reopen saved work","Jälgige hiljutisi müüke, koguge maksmata saldosid ja avage salvestatud tööd uuesti"
+Transaction ID,Tehingu ID
+Transfer,Ülekanne
+Try a different search term or clear the cart search.,Proovige teist otsinguterminit või tühjendage ostukorvi otsing.
+Try adjusting your search or filters,Proovige oma otsingut või filtreid kohandada
+Try another source or refresh the list.,Proovige mõnda muud allikat või värskendage loendit.
+Try changing the date range or status filter.,Proovige muuta kuupäevavahemikku või olekufiltrit.
+Type,Tüüp
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,Kaamerale ei pääse ligi isegi põhiseadetega. Kontrollige oma kaamera õigusi ja seadme ühilduvust.
+Unable to add offer item {0}. Please refresh and try again.,Pakkumise üksust {0} ei saa lisada. Värskendage ja proovige uuesti.
+Unable to add offer item. Please refresh and try again.,Pakkumise üksust ei saa lisada. Värskendage ja proovige uuesti.
+Unable to add scanned item.,Skannitud üksust ei saa lisada.
+Unable to create purchase order,Ostutellimust ei saa luua
+Unable to delete draft invoice,Arve mustandit ei saa kustutada
+Unable to fetch documents,Dokumente ei saa tuua
+Unable to fetch draft orders,Tellimuse mustandeid ei saa tuua
+Unable to fetch invoice history,Arvete ajalugu ei saa tuua
+Unable to fetch M-Pesa payments,M-Pesa makseid ei saa tuua
+Unable to fetch sales orders,Müügitellimusi ei saa tuua
+Unable to fetch unpaid invoices,Tasumata arveid ei saa tuua
+Unable to generate scale barcode,Skaala vöötkoodi ei saa luua
+Unable to issue gift card.,Kinkekaarti ei saa väljastada.
+Unable to load cashier PIN status.,Kassa PIN-koodi olekut ei saa laadida.
+Unable to load document,Dokumenti ei saa laadida
+Unable to load draft invoice,Arve mustandit ei saa laadida
+Unable to load gift card balance.,Kinkekaardi saldot ei saa laadida.
+Unable to load invoice details,Arve üksikasju ei saa laadida
+Unable to load parked order,Parkitud tellimust ei saa laadida
+Unable to load the selected sales order,Valitud müügitellimust ei saa laadida
+Unable to prepare document,Dokumenti ei saa ette valmistada
+Unable to prepare return invoice,Tagastusarvet ei saa koostada
+Unable to print draft invoice,Arve mustandit ei saa printida
+Unable to print submitted invoice,Esitatud arvet ei saa printida
+Unable to process document action,Dokumenditoimingut ei saa töödelda
+Unable to repair change allocation,Muudatuste jaotust ei saa parandada
+Unable to save cashier PIN.,Kassa PIN-koodi ei saa salvestada.
+Unable to save the rate to the backend price list,Kursi ei saa taustaprogrammi hinnakirja salvestada
+Unable to submit invoice,Arvet ei saa esitada
+Unable to submit the selected payment,Valitud makset ei saa esitada
+Unable to top up gift card.,Kinkekaarti ei saa täiendada.
+Unable to verify cashier PIN.,Kassa PIN-koodi ei saa kinnitada.
+Unallocated,Jaotamata
+Unallocated:,Jaotamata:
+Unavailable,Pole saadaval
+Unknown,Tundmatu
+Unknown Item,Tundmatu üksus
+Unknown Warehouse,Tundmatu ladu
+Unlock POS,Avage POS
+Unpaid,Tasumata
+"Unselected payments stay unallocated first, then auto reconcile after submit.","Valimata maksed jäävad esmalt jaotamata, seejärel kooskõlastatakse need automaatselt pärast esitamist."
+UOM,UOM
+UOM not found,UOM-i ei leitud
+Update available,Värskendus saadaval
+Update Customer,Värskenda klienti
+Update PIN,Värskendage PIN-koodi
+Update Price List Rate,Värskendage hinnakirja määra
+Updated,Uuendatud
+Updates and app info that stay out of the cashier flow.,"Värskendused ja rakendusteave, mis jäävad kassavoolust välja."
+Updates automatically,Värskendub automaatselt
+Usage,Kasutamine
+Usage Stats,Kasutusstatistika
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,Kasutage kassa vahetamiseks ja terminali avamiseks 4–8-kohalist PIN-koodi.
+Use Cashier,Kasutage kassat
+Use date range to search for older invoices,Kasutage vanemate arvete otsimiseks kuupäevavahemikku
+"Use one field for manual code entry, barcode scans, or QR scans.","Kasutage ühte välja koodi käsitsi sisestamiseks, vöötkoodi skannimiseks või QR-skannimiseks."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","Kasutage üht töövoogu saldokontrolliks, uuteks väljastusteks ja lisamiste tegemiseks kassast lahkumata."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","Kasutage seda jaotist, kui vahemällu salvestatud eeltingimusandmed vajavad värskendamist, ümberehitamist või diagnostikat."
+Use Western numerals,Kasutage lääne numbreid
+Used:,Kasutatud:
+Using basic camera settings due to device limitations,Kaamera põhiseadete kasutamine seadme piirangute tõttu
+Using cached customer balance,Vahemällu salvestatud kliendi saldo kasutamine
+Valid until,Kehtib kuni
+Variance %,Dispersioon %
+Variants,Variandid
+Variant-wise,Variantide järgi
+Verify closing amounts for each payment method,Kontrollige iga makseviisi sulgemissummasid
+View all,Kuva kõik
+View app information and current build details,Vaadake rakenduse teavet ja praeguse järgu üksikasju
+View Data Diagnostics,Vaadake andmete diagnostikat
+View Details,Kuva üksikasjad
+View invoice details,Vaadake arve üksikasju
+View notifications,Kuva teated
+View offline invoices,Vaadake võrguühenduseta arveid
+View restricted POS insights,Vaadake piiratud müügikohtade statistikat
+Void Amount,Kehtetu summa
+Void Count,Tühjade arv
+Voids,Tühjad
+Waiting for cart items,Ootan ostukorvi esemeid
+Waiting for payment...,Ootan makset...
+Walk-in Customer,Sissepääsu klient
+Warehouse,Ladu
+Warning: High cache usage may affect performance.,Hoiatus: suur vahemälu kasutamine võib jõudlust mõjutada.
+Warning: High lag may indicate heavy processing or browser slowness.,Hoiatus: suur viivitus võib viidata raskele töötlemisele või brauseri aeglusele.
+Week ?,Nädal ?
+Week-wise,Nädala järgi
+Weight (g),Kaal (g)
+Weight (grams),Kaal (grammides)
+We'll let you know if an invoice fails to submit,"Kui arvet ei õnnestu esitada, anname teile teada"
+Workflow,Töövoog
+Write off amount cannot exceed the POS profile maximum of {0},Mahakandmise summa ei tohi ületada POS-profiili maksimumi {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,Mahakandmise summa ületab lubatud limiidi ({0}). Lisage ülejäänud summa makse.
+Yes,Jah
+"Yes, Cancel sale","Jah, tühista müük"
+"Yes, Close","Jah, sule"
+You are not allowed to print draft invoices,Teil ei ole lubatud arvete mustandeid printida
+You are offline. Add Payment will work again when the connection is restored.,"Olete võrguühenduseta. Lisa makse töötab uuesti, kui ühendus taastub."
+You have no notifications right now,Teil pole praegu märguandeid
+Your Cart,Teie ostukorvi

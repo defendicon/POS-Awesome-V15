@@ -1,0 +1,1362 @@
+POS Awesome,POS Awesome
+Fetch Items Directly from Server,Dohvatite stavke direktno sa servera
+Menu,Meni
+Actions,Akcije
+Close Shift,Zatvori Shift
+End current session,Završi trenutnu sesiju
+Print Last Invoice,Odštampaj posljednju fakturu
+Reprint previous transaction,Ponovo odštampajte prethodnu transakciju
+Sync Offline Invoices,Sinhronizacija vanmrežnih faktura
+Upload pending transactions,Otpremite transakcije na čekanju
+Go Online,Go Online
+Go Offline,Idi van mreže
+Disable offline mode,Onemogućite način rada van mreže
+Work without server connection,Rad bez veze sa serverom
+Clear Cache,Obriši Cache
+Remove local data and refresh,Uklonite lokalne podatke i osvježite
+About,O
+App information,Informacije o aplikaciji
+Language,Jezik
+Change interface language,Promijenite jezik interfejsa
+Light Mode,Light Mode
+Dark Mode,Dark Mode
+Switch theme appearance,Promijeni izgled teme
+Logout,Odjava
+Sign out of session,Odjavite se sa sesije
+Select Language,Odaberite Jezik
+Choose your preferred language for the POS interface,Odaberite željeni jezik za POS interfejs
+Language will be changed to,Jezik će se promijeniti u
+Cancel,Otkaži
+Change Language,Promijeni jezik
+Close,Zatvori
+Cannot change language - same language selected,Nije moguće promijeniti jezik - odabran je isti jezik
+Language changed successfully! Reloading...,Jezik je uspješno promijenjen! Ponovno učitavanje...
+Failed to change language,Promjena jezika nije uspjela
+Unknown error,Nepoznata greška
+- Total Unallocated,- Ukupno neraspoređeno
+* Required,* Obavezno
+{0} (Qty: {1}),{0} (Količina: {1})
+{0} actions,{0} radnji
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} ima samo {1} na zalihama. Zatražili ste {2}. Podesite količinu ili popunite zalihe.
+{0} offline invoice{1} pending,{0} vanmrežna faktura{1} na čekanju
+{0} offline invoice{1} saved as draft,{0} vanmrežna faktura{1} sačuvana kao nacrt
+{0} offline invoice{1} synced,{0} vanmrežna faktura{1} sinhronizirana
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,prije {0}d
+{0}h ago,prije {0}h
+{0}m ago,prije {0}m
+A POS supervisor is required for this action.,Za ovu radnju potreban je POS supervizor.
+Access,Pristup
+Account,Račun
+Account is overdrawn,Račun je prekoračen
+Acknowledge the error to resume scanning,Potvrdite grešku da biste nastavili skeniranje
+Acknowledge the error to resume scanning.,Potvrdite grešku da biste nastavili skeniranje.
+Across,Preko puta
+Action,Akcija
+Active sale,Aktivna prodaja
+add,add
+Add items from the selector to start building this sale.,Dodajte stavke iz selektora da započnete graditi ovu rasprodaju.
+Add more value to an existing gift card,Dodajte veću vrijednost postojećoj poklon kartici
+Add New Address,Dodaj novu adresu
+Add new customer,Dodajte novog kupca
+Add on New Line,Dodaj na novu liniju
+Add Payment,Dodaj plaćanje
+Add payment to invoice,Dodajte uplatu na fakturu
+Add/Edit Coupon Conditions,Dodaj/uredi uslove kupona
+Additional Discount,Dodatni popust
+Additional Discount %,Dodatni popust %
+Address Line 1,Adresni red 1
+Address not found,Adresa nije pronađena
+Adjust the quantity or enable negative stock to continue.,Podesite količinu ili omogućite negativnu zalihu da se nastavi.
+Adjustment,Podešavanje
+After returns,Nakon povratka
+Against,Protiv
+Against Name,Protiv imena
+Age Bracket,Age Bracket
+All,Sve
+All Caught Up!,All Caught Up!
+All invoices are synchronized,Sve fakture su sinhronizovane
+All pending invoices are up to date,Sve fakture na čekanju su ažurirane
+All Profiles,Svi profili
+All Synchronized,All Synchronized
+All visible invoices are fully settled.,Svi vidljivi računi su u potpunosti izmireni.
+All Warehouses,Sva skladišta
+Allowed UOM is {0},Dozvoljeni UOM je {0}
+Always fetch items from server (ignore local cache),Uvijek preuzimaj stavke sa servera (ignoriraj lokalnu predmemoriju)
+Amount,Iznos
+Amount already received,Iznos je već primljen
+Amount exceeds profile cash movement max amount.,Iznos premašuje maksimalan iznos kretanja gotovine profila.
+Amount must be greater than zero.,Iznos mora biti veći od nule.
+Amount received from customer,Iznos primljen od kupca
+Appearance and user-level preferences for the current session.,Izgled i postavke na nivou korisnika za trenutnu sesiju.
+Applied,Primijenjeno
+Apply,Prijavite se
+Apply Gift Card,Primijenite poklon karticu
+Apply Offer,Primijeni ponudu
+Apply On,Apply On
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,Primijenite samo iznos koji želite unovčiti na ovoj fakturi. Preostali iznos ostaje na kartici.
+Apply Redemption,Primijeni otkup
+Applying,Primjena
+Apps,Apps
+Are you sure you want to close? All entered data will be lost.,Jeste li sigurni da želite zatvoriti? Svi uneseni podaci će biti izgubljeni.
+Attributes (Size/Color),Atributi (veličina/boja)
+Auto Allocate Payment Amount,Automatska dodjela iznosa plaćanja
+Auto Reconcile,Auto Reconcile
+Auto reconciliation completed after payment submit.,Automatsko usaglašavanje je završeno nakon uplate.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,Automatsko pomirenje je završeno. Dodijeljeno: {0}{1}. Preostalo neriješeno: {0}{2}.
+Available Actions,Dostupne radnje
+Available QTY,Dostupan KOL
+Available:,Dostupan:
+Average Basket,Prosječna košarica
+Average Bill,Average Bill
+Average Ticket,Average Ticket
+Avg Bill,Avg Bill
+Avg Invoice,Avg Invoice
+Avg Invoice Profit,Prosj. profit na fakturi
+Avg Invoice Value,Prosječna vrijednost fakture
+Avg Purchase Frequency,Prosječna učestalost kupovine
+Awesome,Sjajno
+Awesome Dashboard,Awesome Dashboard
+Awesome Dashboard is disabled for the selected POS Profile.,Awesome Dashboard je onemogućen za odabrani POS profil.
+Awesome Dashboard is unavailable for the selected scope.,Awesome Dashboard nije dostupan za odabrani opseg.
+Awesome Dashboard is visible only to POS supervisors.,Sjajna kontrolna tabla vidljiva je samo supervizorima POS-a.
+Back,Nazad
+Back Office Cash Account,Back Office gotovinski račun
+Back Office Cash Account (Optional Override),gotovinski račun za back Office (opciono zamjena)
+Back office cash account is required.,Potreban je gotovinski račun za back office.
+Back to {0},Natrag na {0}
+Background processing did not finish in time.,Pozadinska obrada nije završena na vrijeme.
+Background processing failed for Invoice {0}: {1},Pozadinska obrada nije uspjela za fakturu {0}: {1}
+Background Submission Failed,Slanje u pozadini nije uspjelo
+Background sync interval (seconds),Interval sinhronizacije u pozadini (sekunde)
+Balance,Balans
+Balance will be updated when connection is restored,Stanje će biti ažurirano kada se veza uspostavi
+Balances still pending,Stanja još uvijek na čekanju
+Barcode,Barkod
+Barcode / QR Ready,Barkod / QR Ready
+Barcode Label Printing,Štampanje barkod etiketa
+Base Paid:,Plaćeno osnovno:
+Base Recv:,Base Recv:
+Base:,baza:
+Basic Information,Osnovne informacije
+Batch,Batch
+Batch Information,Informacije o seriji
+Before any return workflow,Prije bilo kakvog povratnog toka posla
+Before returns,Prije povratka
+Best Day,Najbolji dan
+Best Seller,Best Seller
+Book expense or deposit from active shift.,Rezervirajte trošak ili depozit iz aktivne smjene.
+Branch / Location-wise Report,Izvještaj o podružnici / lokaciji
+Brand-wise,Brandwise
+Breakdown,Breakdown
+Browse,Pregledaj
+Build Time:,Vrijeme izrade:
+Built with Frappe,Izgrađen sa Frappeom
+Bundle,Bundle
+Buying Price,Kupovna cijena
+Cache cleared successfully,Cache je uspješno obrisan
+Cache Usage,Cache Usage
+cache used,cache is used
+Calculating...,Izračunavanje...
+Camera Access Required,Potreban je pristup kameri
+Camera access was aborted. Please try again.,Pristup kameri je prekinut. Molimo pokušajte ponovo.
+Camera constraints not supported by your device. Trying fallback settings...,Vaš uređaj ne podržava ograničenja kamere. Pokušavam rezervne postavke...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,Kamera je zauzeta ili blokirana od strane druge aplikacije/kartice. Zatvorite druge aplikacije kamere i pokušajte ponovo.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,Dozvola za kameru je odbijena. Dozvolite pristup kameri u postavkama vašeg pretraživača i osvježite stranicu.
+Camera scanner is locked until the current error is acknowledged,Skener kamere je zaključan dok se trenutna greška ne potvrdi
+Camera started but the video stream did not load in time. Please try again.,"Kamera je pokrenuta, ali video stream se nije učitao na vrijeme. Molimo pokušajte ponovo."
+Cancel cash movement {0}?,Otkazati kretanje gotovine {0}?
+Cancel Payment,Otkaži plaćanje
+Cancel Sale,Cancel Sale
+Cancel Sale ?,Otkazati prodaju?
+Cancelled,Otkazano
+Cannot add an item with zero or negative quantity.,Nije moguće dodati stavku s nultom ili negativnom količinom.
+Cannot clear cache while offline,Nije moguće obrisati keš memoriju dok ste van mreže
+Cannot redeem customer credit more than invoice total,Ne može se iskoristiti kredit klijenta koji je veći od ukupnog iznosa fakture
+Cannot redeem gift cards more than invoice total,Ne možete iskoristiti poklon kartice više od ukupnog iznosa fakture
+Cannot Save Offline Invoice:,Nije moguće sačuvati vanmrežnu fakturu:
+Cannot Save Offline Payment:,Nije moguće sačuvati vanmrežno plaćanje:
+Card,Card
+Card / Online,Kartica / Online
+Card health after the last live lookup,Zdravlje kartice nakon posljednjeg pregleda uživo
+Cards,Karte
+Cart,Cart
+Cash,Cash
+Cash back to customers,Povrat novca kupcima
+Cash Collections,Cash Collections
+Cash Deposit is disabled for this POS Profile.,Gotovinski depozit je onemogućen za ovaj POS profil.
+Cash Drawer Snapshot,Snimak kase
+Cash In Hand,Gotovina u ruci
+Cash Movement,Pokret gotovine
+Cash movement cancelled,Kretanje gotovine je otkazano
+Cash movement deduction applied,Primijenjen je odbitak kretanja gotovine
+Cash movement deleted,Kretanje gotovine je izbrisano
+Cash movement is disabled for this POS Profile.,Kretanje gotovine je onemogućeno za ovaj POS profil.
+Cash Movement is disabled in current POS Profile.,Kretanje gotovine je onemogućeno u trenutnom POS profilu.
+Cash movement saved offline,Kretanje gotovine sačuvano van mreže
+Cash movement submitted,Dostavljeno kretanje gotovine
+Cash Movements,Gotovinski pokreti
+Cash payment cannot be less than invoice total when partial payment is not allowed,Gotovinsko plaćanje ne može biti manje od ukupnog iznosa računa kada nije dozvoljeno djelomično plaćanje
+Cash returned after payment,Gotovina vraćena nakon uplate
+Cashier,Blagajnik
+Cashier Access,Pristup blagajni
+Cashier identity and appearance preferences.,Identitet blagajnika i preferencije izgleda.
+Cashier PIN,PIN blagajne
+Cashier PIN saved successfully.,PIN blagajne je uspješno sačuvan.
+Cashiers,Blagajnici
+Cashier-wise,Blagajnički
+Categories,Kategorije
+Category,Kategorija
+Category / Brand / Variant Report,Izvještaj o kategoriji / Marki / varijanti
+Category-wise,Po kategorijama
+Category-wise Margin,Marža po kategorijama
+Certificate,Certifikat
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,Certifikat nedostaje ili mu se ne vjeruje. QZ može prikazati dijaloge za potvrdu.
+Certificate is trusted. Silent QZ printing is active.,Certifikat je pouzdan. Tiho QZ štampanje je aktivno.
+Change,Promjena
+Change allocation repaired,Promjena alokacije popravljena
+Change Price,Promjena cijene
+Change Return,Promjena Povrat
+Change Returned,Promjena vraćena
+Change terminal cashier,Promijenite blagajnika terminala
+Charge Heads,Charge Heads
+Charges,Naplate
+Charges not found,Naplate nisu pronađene
+Check Balance,Provjerite stanje
+Check balance for any card. Supervisors can issue and top up cards here.,Provjerite stanje bilo koje kartice. Ovdje nadzornici mogu izdati i dopuniti kartice.
+Check balance only,Provjerite samo stanje
+Check for new commits,Provjerite ima li novih urezivanja
+Check for Updates,Provjerite ima li ažuriranja
+Check live balance before applying redemption,Provjerite stanje uživo prije primjene otkupa
+Check live balance before redemption,Provjerite stanje uživo prije isplate
+Checking...,Provjeravam...
+Cheque/Reference Date,Ček/Referentni datum
+Cheque/Reference No,Ček/Referentni br
+Choose the cashier currently operating this terminal.,Odaberite blagajnika koji trenutno radi na ovom terminalu.
+City,Grad
+Clear,Jasno
+Clear All,Obriši sve
+Clear all barcode items,Obrišite sve stavke sa bar kodom
+Clear all purchase order items,Obrišite sve stavke narudžbenice
+Clear Search,Obriši pretragu
+Clearing local cache...,Brisanje lokalne keš memorije...
+Click to refresh,Kliknite da osvježite
+Client CPU Lag:,CPU zaostajanje klijenta:
+Client Memory Usage:,Upotreba klijentske memorije:
+Client Metrics,Client Metrics
+Close about dialog,Zatvori o dijalogu
+Close cashier switcher,Zatvorite menjač blagajne
+Close closing shift dialog,Zatvori dijalog za zatvaranje pomaka
+Close column selector,Zatvori selektor stupaca
+Close Dialog,Zatvorite dijalog
+Close drafts dialog,Zatvorite dijalog nacrta
+Close invoice details dialog,Zatvorite dijalog detalja fakture
+Close invoice management,Zatvorite upravljanje fakturama
+Close offline invoices dialog,Zatvorite dijalog vanmrežnih faktura
+Close packing list dialog,Zatvori dijalog liste pakovanja
+Close returns dialog,Zatvori dijalog vraćanja
+Close sales orders dialog,Zatvorite dijalog prodajnih naloga
+Close Scanner,Zatvorite skener
+Close scanner dialog,Zatvorite dijalog skenera
+Close Settings,Zatvorite Postavke
+Closing Amount,Završni iznos
+Closing POS Shift,Zatvaranje POS Shift
+Closing Snapshot Available,Dostupan je snimak zatvaranja
+Code,Kod
+Code scanned successfully,Kôd je uspješno skeniran
+COGS,COGS
+Collapse item details,Sažmi detalje stavke
+Collected,Prikupljeno
+Cols,Cols
+Columns,Kolone
+commits,obavezuje
+Completed and active sales in this range,Završena i aktivna prodaja u ovom asortimanu
+Completed returns will appear here.,Završeni povrati će se pojaviti ovdje.
+Confirm,Potvrdi
+Confirm Close,Potvrdite Zatvori
+Confirm Mobile Number,Potvrdite broj mobilnog telefona
+Confirm PIN,Potvrdite PIN
+Connect,Povežite se
+Connect printer and manage certificate,Povežite štampač i upravljajte certifikatom
+Connecting to QZ Tray...,Povezivanje na QZ Tray...
+Connection problem while submitting invoice,Problem sa vezom prilikom slanja fakture
+Connections:,Veze:
+Connectivity and cached prerequisite status were rechecked.,Povezivanje i status keširanih preduvjeta su ponovo provjereni.
+Continue Editing,Nastavite sa uređivanjem
+Could not fetch latest balance from server,Nije moguće dohvatiti najnovije stanje sa servera
+Count,Count
+Country,Država
+Coupon,Kupon
+Coupons,Kuponi
+Cover,Cover
+CPU Cores:,CPU jezgra:
+Create,Kreiraj
+Create and load a new prepaid card,Kreirajte i učitajte novu prepaid karticu
+Create and preload a new gift card,Kreirajte i unaprijed učitajte novu poklon karticu
+Create Bill,Kreirajte račun
+Create Customer,Kreirajte kupca
+Create New Item,Kreirajte novu stavku
+Create or change your PIN,Kreirajte ili promijenite svoj PIN
+Create PIN,Kreirajte PIN
+Create POS Opening Shift,Kreirajte smjenu otvaranja POS-a
+Create Purchase Order,Kreirajte narudžbenicu
+Create Return,Kreiraj povratak
+Create return from invoice,Kreirajte povrat sa fakture
+Create Supplier,Kreirajte dobavljača
+Credit and Output,Kredit i izlaz
+Credit Note,Credit Note
+Credit Outstanding,Credit Outstanding
+Credit sales remaining to be collected,Preostala prodaja kredita za naplatu
+Critical,Kritično
+Currency,Valuta
+Current,Current
+Current Event Loop Lag:,Trenutni kašnjenje petlje događaja:
+Current Month,Trenutni mjesec
+Current PIN,Trenutni PIN
+Current Profile,Trenutni profil
+Current redeemable value on the gift card,Trenutna isplativa vrijednost na poklon kartici
+Current User,Trenutni korisnik
+Custom,Custom
+Custom Due Days,Custom Due Days
+Custom items per page,Prilagođene stavke po stranici
+Customer,Kupac
+Customer already selected,Kupac je već odabran
+Customer Balance,Stanje kupaca
+Customer balance unavailable offline,Stanje korisnika nije dostupno van mreže
+Customer created successfully.,Klijent je uspješno kreiran.
+Customer creation failed.,Kreiranje korisnika nije uspjelo.
+Customer Details,Customer Details
+Customer display channel is missing,Nedostaje kanal prikaza korisnika
+Customer display was blocked. Please allow pop-ups for this site.,Prikaz korisnika je blokiran. Dozvolite iskačuće prozore za ovu stranicu.
+Customer group is required,Grupa kupaca je obavezna
+Customer is required to add payment,Kupac je dužan dodati uplatu
+Customer Name is required,Ime klijenta je obavezno
+Customer not selected,Kupac nije odabran
+Customer Report,Customer Report
+Customer saved offline,Klijent je sačuvan van mreže
+Customer Screen,Korisnički ekran
+Customer territory is required,Teritorija korisnika je obavezna
+Customer updated successfully.,Korisnik je uspješno ažuriran.
+Customer-facing tools and printer setup.,Alati za klijente i podešavanje štampača.
+Customers,Kupci
+Customers not found,Kupci nisu pronađeni
+Daily cashier actions without scrolling.,Dnevne akcije blagajnika bez skrolovanja.
+Daily Sales,Daily Sales
+Daily Sales Summary,Dnevni sažetak prodaje
+Data loaded in form. Review and submit.,Podaci učitani u formu. Pregledajte i pošaljite.
+Database Health,Zdravlje baze podataka
+Database health affects overall system speed and reliability.,Zdravlje baze podataka utiče na ukupnu brzinu i pouzdanost sistema.
+Database Info,Podaci o bazi podataka
+Date,Datum
+Day ?,Dan?
+days,dana
+Day-wise (MTD),dnevno (MTD)
+Day-wise Movement,Dnevni pokret
+Dead Stock,Mrtva zaliha
+Dead Stock Items,Mrtve zalihe
+Decrease quantity,Smanjite količinu
+Default,Default
+Default:,Zadano:
+Delete,Izbriši
+Delete cancelled cash movement {0}?,Izbrisati otkazano kretanje gotovine {0}?
+Delete Draft,Izbriši nacrt
+Delete draft invoice,Izbrisati nacrt fakture
+Delete draft invoice {0}?,Izbrisati nacrt fakture {0}?
+Delete Invoice,Izbriši fakturu
+Delete offline invoice,Izbrišite vanmrežnu fakturu
+Delivered,Isporučeno
+Delivery Charges,Troškovi dostave
+Delivery Information,Informacije o dostavi
+Delivery Note {0} created,Napomena o isporuci {0} kreirana
+Delivery note created,Dostavnica kreirana
+Deployed Bundle:,Raspoređeni paket:
+Deposit,Depozit
+Description,Opis
+Detailed Supplier Breakdown,Detaljan pregled dobavljača
+Detecting formats:,Otkrivanje formata:
+Device Memory:,Memorija uređaja:
+Difference,Razlika
+Difference (In Company Currency),Razlika (u valuti kompanije)
+Disable offline mode first to recheck live connectivity.,Prvo onemogućite način rada van mreže da ponovo provjerite vezu uživo.
+Disconnect,Prekini vezu
+discount,popust
+Discount %,Popust %
+Discount / Void / Return Report,Popust / Poništenje / Izvještaj o povratu
+Discount Amount,Iznos popusta
+Discount limited by POS Profile,Popust ograničen POS profilom
+Discounted Invoices,Fakture s popustom
+Discounts,Popusti
+Dismiss,Odbaci
+Download Certificate,Preuzmite certifikat
+Draft,Nacrt
+Draft invoice deleted,Nacrt fakture je izbrisan
+Draft source,Izvor nacrta
+Drafts,Nacrti
+Due {0},Rok {0}
+Due Date,Krajnji rok
+Duplicate,Duplikat
+Edit customer,Uredi kupca
+Edit discount amount,Uredite iznos popusta
+Edit discount percentage,Uredite postotak popusta
+Edit Gift Application,Uredite aplikaciju za poklone
+Edit item name,Uredite naziv stavke
+Edit quantity,Uredite količinu
+Edit rate,Uredi stopu
+Edit unit of measure,Uredite mjernu jedinicu
+Edited,Edited
+Employee,Zaposleni
+Enable background sync,Omogućite pozadinsku sinhronizaciju
+Enable Customer Display in POS Profile first.,Prvo omogućite prikaz korisnika u POS profilu.
+Enter a PIN.,Unesite PIN.
+Enter a valid grams value,Unesite važeću vrijednost u gramima
+Enter new price list rate,Unesite novi cjenovnik cijene
+Enter Quantity,Unesite količinu
+Enter the cashier PIN to continue.,Unesite PIN blagajne da nastavite.
+Enter the current PIN first.,Prvo unesite trenutni PIN.
+"Enter the current PIN, then choose a new one.","Unesite trenutni PIN, a zatim odaberite novi."
+Enter valid grams for scale barcode,Unesite važeće grame za bar kod vage
+Entries,Unosi
+Error accessing camera:,Greška pri pristupu kameri:
+Error calculating prices,Greška pri izračunavanju cijena
+Error fetching customer balance,Greška pri preuzimanju stanja korisnika
+Error in change calculations!,Greška u izračunima promjene!
+Error Loading Data,Greška pri učitavanju podataka
+Error loading invoice details,Greška pri učitavanju detalja fakture
+Error processing invoice,Greška u obradi fakture
+Error processing payment,Greška u obradi plaćanja
+Error searching invoices,Greška u pretraživanju faktura
+Error submitting invoice:,Greška pri slanju fakture:
+Error submitting invoice: {0},Greška pri slanju fakture: {0}
+Error submitting invoice: No response from server,Greška pri slanju fakture: Nema odgovora sa servera
+Error updating currency,Greška pri ažuriranju valute
+Error updating item details,Greška pri ažuriranju detalja stavke
+Est. Purchase,Proc. Kupovina
+Est. Value,Proc. Vrijednost
+Event-loop lag measures how busy your browser is. Lower is better.,Kašnjenje u petlji događaja mjeri koliko je vaš pretraživač zauzet. Niže je bolje.
+Every,Svaki
+Exchange Rate,devizni kurs
+Expand item details,Proširite detalje stavke
+Expected Amount (In Company Currency),Očekivani iznos (u valuti kompanije)
+Expected Cash,Očekivana gotovina
+Expected cash on hand grouped by currency,Očekivana gotovina u blagajni grupirana po valuti
+Expected vs Actual,Očekivano naspram stvarnog
+Expense,Troškovi
+Expense Account (Optional Override),Račun troškova (opcionalno nadjačavanje)
+Expense account is required.,Potreban je račun troškova.
+Expenses and deposits posted during this shift,Troškovi i depoziti knjiženi tokom ove smjene
+Expired,Istekao
+Failed to auto reconcile payments.,Automatsko usklađivanje plaćanja nije uspjelo.
+Failed to cancel cash movement,Otkazivanje kretanja gotovine nije uspjelo
+Failed to clear cache,Brisanje keša nije uspjelo
+Failed to create item,Kreiranje stavke nije uspjelo
+Failed to create supplier,Kreiranje dobavljača nije uspjelo
+Failed to delete cash movement,Brisanje kretanja gotovine nije uspjelo
+Failed to generate scale barcode. Using item barcode only.,Nije uspjelo generiranje skale barkoda. Korištenje samo bar koda artikla.
+Failed to load cash movement context.,Učitavanje konteksta kretanja gotovine nije uspjelo.
+Failed to load dashboard data.,Učitavanje podataka kontrolne table nije uspjelo.
+Failed to reload invoice from server,Ponovno učitavanje fakture sa servera nije uspjelo
+Failed to submit cash movement,Nije uspjelo slanje kretanja gotovine
+Failed to sync offline cash movements,Sinhronizacija kretanja gotovine van mreže nije uspjela
+Fast cashier actions for active shifts.,Brze akcije blagajnika za aktivne smjene.
+Fast Moving Items,Fast Moving Items
+Fees,Naknade
+Fetch the latest offline prerequisite updates,Preuzmite najnovija vanmrežna ažuriranja preduvjeta
+Find a sales order quickly and load it into the current sale.,Brzo pronađite prodajni nalog i učitajte ga u trenutnu prodaju.
+Fixing payment amounts for return invoice...,Fiksiranje iznosa plaćanja za povratnu fakturu...
+Flash Off,Blic isključen
+Flash On,Flash On
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","Za stavke 'Proizvodni paket', skladište, serijski broj i broj serije će se uzeti u obzir iz tabele 'Lista pakovanja'. Ako su skladište i broj serije isti za sve artikle pakovanja za bilo koju stavku 'Proizvodni paket', te vrijednosti se mogu unijeti u glavnu tabelu stavki; vrijednosti će biti kopirane u tablicu 'Packing List'."
+Free,Besplatno
+Free Qty,Free Qty
+Frequency,Frekvencija
+from,od
+From Date,Od datuma
+Fulfillment Details,Detalji ispunjenja
+Full Name,Puno ime
+Gain,Dobitak
+Generate a fresh prepaid card and start it with an opening balance.,Generirajte novu prepaid karticu i započnite je sa početnim stanjem.
+Generate and install the certificate to allow fully silent printing without trust prompts.,Generirajte i instalirajte certifikat kako biste omogućili potpuno tiho štampanje bez upita o povjerenju.
+Generate Certificate,Generiraj certifikat
+Generated scale barcode: {0},Generirani bar kod skale: {0}
+Get Payments,Get Payments
+Gift Card,Poklon kartica
+Gift card amount must be greater than zero.,Iznos poklon kartice mora biti veći od nule.
+Gift Card Code,Kod poklon kartice
+Gift card code is required for redemption,Za otkup je potreban kod poklon kartice
+Gift card code is required.,Potreban je kod poklon kartice.
+Gift card issued successfully.,Poklon kartica uspješno izdata.
+Gift card loaded successfully.,Poklon kartica je uspješno učitana.
+Gift Card Management,Upravljanje poklon karticama
+Gift card payment,Plaćanje poklon karticom
+Gift card redemption requires an online connection,Za otkup poklon kartice potrebna je internetska veza
+Gift card topped up successfully.,Poklon kartica je uspješno dopunjena.
+Gift Cards,Poklon kartice
+Go to Frappe Desk,Idite na Frappe Desk
+Grand Total,Ukupno ukupno
+Gross Margin,Bruto marža
+Gross Profit,bruto dobit
+Gross Sales,Bruto prodaja
+Group not found,Grupa nije pronađena
+"Grouped controls for terminal, UI, and session settings.","Grupirane kontrole za postavke terminala, korisničkog sučelja i sesije."
+Grouped totals for each payment method and currency,Grupirani iznosi za svaki način plaćanja i valutu
+Hide,Sakrij se
+Hide Gift Card,Sakrij poklon karticu
+Hide Non Essential Fields,Sakrij nebitna polja
+Hide quantity decimals,Sakrij decimale za količinu
+Hide search tools,Sakrij alate za pretraživanje
+Hide zero rated items,Sakrij stavke s nultom ocjenom
+High,Visoko
+History,Istorija
+Hourly (Today),Po satu (danas)
+How this section works,Kako ovaj odjeljak funkcionira
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","Ako zastarjeli podaci ostanu, otvorite Postavke > Offline & Sync i pokrenite Rebuild Offline Data ponovo dok ste na mreži."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","Ako se upozorenje i dalje pojavljuje, otvorite Postavke > Offline & Sync, a zatim pokrenite Osvježi vanmrežne podatke ili Ponovo izgradi vanmrežne podatke."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Uvezite certifikat u QZ Tray i ponovo pokrenite QZ Tray na svakom POS uređaju.
+In,U
+In stock: {0},Na zalihama: {0}
+Include Batch / Serial,Uključuje Batch / Serial
+Include Price,Uključuje cijenu
+Increase quantity,Povećajte količinu
+IndexedDB,IndexedDB
+Initial Amount,Početni iznos
+Initialize your shift with opening balances,Inicijalizirajte svoju smjenu početnim bilansima
+Initializing application...,Inicijalizacija aplikacije...
+"Inspect cache, sync, and prerequisite status","Pregledajte keš memoriju, sinhronizaciju i status preduvjeta"
+Installed Applications,Instalirane aplikacije
+Insufficient stock:\n{0},Nedovoljna zaliha:\n{0}
+Invalid rate,Nevažeća stopa
+Inventory Status Report,Izvještaj o stanju inventara
+Invoice,Račun
+Invoice {0} is Submitted,Faktura {0} je poslana
+Invoice {0} processed successfully,Faktura {0} je uspješno obrađena
+Invoice {0} submission failed,Slanje fakture {0} nije uspjelo
+Invoice {0} was already submitted,Faktura {0} je već poslana
+Invoice Adjustments,Korekcije faktura
+Invoice Change,Promjena fakture
+Invoice Details,Detalji računa
+Invoice is still in draft after background submission.,Faktura je još uvijek u nacrtu nakon predaje u pozadini.
+Invoice Items,Stavke fakture
+Invoice Management,Upravljanje fakturama
+Invoice Mgmt,Invoice Mgmt
+Invoice saved offline,Faktura je sačuvana van mreže
+Invoice submission failed,Slanje fakture nije uspjelo
+Invoice Submitted,Faktura dostavljena
+"Invoice value settled by loyalty points, not cash collection","Vrijednost fakture se obračunava bodovima lojalnosti, a ne naplatom gotovine"
+Invoices,Računi
+Invoices already past due date,Fakture već kasne sa rokom dospijeća
+Invoices saved as POS Invoices,Fakture sačuvane kao POS fakture
+Invoices still carrying balances,Fakture još uvijek sadrže stanje
+Issue Mode,Issue Mode
+Issue New Card,Izdajte novu karticu
+Issue Workflow,Problem Tok rada
+"Issue, top up, and check","Izdajte, dopunite i provjerite"
+Item,Stavka
+Item / Product Sales Report,Izvještaj o prodaji artikla/proizvoda
+Item {0} added to invoice,Stavka {0} dodana na fakturu
+Item '{0}' has no barcode,Stavka '{0}' nema bar kod
+Item Code,Šifra artikla
+Item created successfully,Stavka je uspješno kreirana
+Item is out of stock,Artikl nije na zalihama
+Item Name,Naziv stavke
+Item not found,Stavka nije pronađena
+Item order updated,Redoslijed artikala je ažuriran
+Item Selector Settings,Postavke birača stavki
+Items,Predmeti
+Items added in POS will appear here automatically.,Stavke dodate u POS će se automatski pojaviti ovdje.
+Items added to invoice,Stavke dodane na fakturu
+Items per page,Stavke po stranici
+Items Sold,Prodani artikli
+Items/Invoice,Stavke/faktura
+Item-wise Profitability,Profitabilnost po artiklima
+Journal Entry,Dnevnik
+json,json
+Just now,Upravo sada
+Keep offline prerequisites healthy and recover stale data safely.,Održavajte vanmrežne preduslove zdrave i bezbedno oporavite zastarele podatke.
+Labels,Etikete
+"Language, theme, terminal tools, and session controls.","Jezik, tema, terminalski alati i kontrole sesije."
+Last,Last
+Last 14 Days (Paid vs Pending),Zadnjih 14 dana (Plaćeno u odnosu na čekanje)
+Last 14 Days Activity,Aktivnost u posljednjih 14 dana
+Last 14 Days Gross Profit,Bruto profit posljednjih 14 dana
+Last 14 Days Purchases,Kupovina u posljednjih 14 dana
+Last 14 Days Tax/Charges,Porezi/naknade za zadnjih 14 dana
+Last sync:,Zadnja sinhronizacija:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},Zadnja sinhronizacija: {0} | ok: {1} | nije uspjelo: {2} | preskočeno: {3}
+Latest entries for current shift,Najnoviji unosi za trenutnu smjenu
+Lead Time,Lead Time
+Limited,Ograničeno
+lines,linije
+List,Lista
+Live Snapshot,Snimak uživo
+Load a POS profile and cashier first.,Prvo učitajte POS profil i blagajnika.
+Load More Invoices,Učitaj više faktura
+Load previously saved invoices,Učitajte prethodno sačuvane fakture
+Load Sale,Load Sale
+Load Sales Invoice,Učitaj fakturu prodaje
+Loading app data...,Učitavanje podataka aplikacije...
+Loading customer database...,Učitavanje baze podataka klijenata...
+Loading customers...,Učitavanje kupaca...
+Loading database stats...,Učitavanje statistike baze podataka...
+Loading details...,Učitavanje detalja...
+Loading invoice history...,Učitavanje historije faktura...
+Loading items...,Učitavanje stavki...
+Loading product catalog...,Učitavanje kataloga proizvoda...
+Loading return invoices...,Učitavanje povratnih faktura...
+Loading server CPU/memory usage...,Učitavanje upotrebe CPU-a/memorije servera...
+Loading suppliers...,Učitavanje dobavljača...
+Loading unpaid invoices...,Učitavanje neplaćenih faktura...
+Loading view...,Učitavanje pogleda...
+Loading...,Učitavanje...
+Local storage is unavailable. Switching to online-only mode.,Lokalna pohrana nije dostupna. Prelazak na način rada samo na mreži.
+localStorage,localStorage
+Location Performance,Lokacijske performanse
+Locations,Lokacije
+Lock Screen,Zaključavanje ekrana
+Lookup Workflow,Lookup Workflow
+Loss,Gubitak
+Low,Nisko
+Low Stock,Low Stock
+Low Stock Alerts,Upozorenja o niskim zalihama
+Low Stock Items,Low Stock Items
+Low Stock Threshold,Niski prag zaliha
+Low Stock Total,Low Stock Total
+Lowest Margin,Najniža marža
+Low-frequency maintenance and system details.,Niskofrekventno održavanje i detalji sistema.
+Loyalty Redeemed,Loyalty Redeemed
+Loyalty Redemption,Loyalty Redemption
+Make New Payment,Izvršite novo plaćanje
+Manage all,Upravljaj svime
+Manage and synchronize your offline transactions,Upravljajte i sinhronizirajte svoje vanmrežne transakcije
+Manage Cashier PIN,Upravljajte PIN-om blagajnika
+"Manage offline tools, terminal controls, and maintenance from one workspace.","Upravljajte izvanmrežnim alatima, terminalskim kontrolama i održavanjem iz jednog radnog prostora."
+manual,priručnik
+"Manual codes, barcode scans, and QR scans work in the same field","Ručni kodovi, skeniranje bar kodova i QR skeniranje rade u istom polju"
+Manual offline mode is enabled,Ručni način rada van mreže je omogućen
+Margin,Margina
+Maximum available quantity is {0}. Quantity adjusted to match stock.,Maksimalna dostupna količina je {0}. Količina prilagođena zalihama.
+Maximum discount amount for this offer item is {0}.,Maksimalni iznos popusta za ovu stavku ponude je {0}.
+Maximum discount percentage for this offer item is {0}%.,Maksimalni postotak popusta za ovu stavku ponude je {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,Maksimalna količina ponude je {0}. Količina prilagođena dozvoljenoj granici.
+Medium,Srednje
+Method-wise Collections,Metodske zbirke
+Minimum allowed rate for this offer item is {0}.,Minimalna dozvoljena cijena za ovu stavku ponude je {0}.
+Minimum Qty,Minimalna količina
+Mobile No,Mobitel br
+Mode,Mode
+Mode of Payment,Način plaćanja
+Month,Mjesec
+Month ?,Mjesec ?
+Monthly Profit,Monthly Profit
+Monthly Sales,Mjesečna prodaja
+Monthly Sales Summary,Mjesečni sažetak prodaje
+Month-wise,Mjesečno
+Most Active Cashiers,Najaktivniji blagajnici
+Movement Type,Movement Type
+Movements,Pokreti
+Multi Currency,Multi Currency
+N/A,N/A
+Name,Ime
+Negative Stock,Negative Stock
+Negative Stock Items,Negativne zalihe
+Negative values not allowed,Negativne vrijednosti nisu dozvoljene
+Net,Net
+Net Qty,Neto Kol
+Net Sales,Neto Sales
+Net Value,Neto vrijednost
+Never,Nikad
+New changes are ready to load,Nove promjene su spremne za učitavanje
+New Item,Nova stavka
+New Offer Available,Dostupna nova ponuda
+New PIN,Novi PIN
+New rate,Nova stopa
+Next unit of measure,Sljedeća jedinica mjere
+No attribute data found.,Podaci o atributima nisu pronađeni.
+No Barcode,Nema bar koda
+No barcode found for UOM '{0}',Nije pronađen bar kod za UOM '{0}'
+No branch/location data found.,Nisu pronađeni podaci o filijali/lokaciji.
+No brand data found.,Podaci o brendu nisu pronađeni.
+No cached gift card balance is available offline.,Nijedan keširani saldo poklon kartice nije dostupan van mreže.
+No camera found on this device. Please ensure your device has a working camera.,Na ovom uređaju nije pronađena kamera. Uvjerite se da vaš uređaj ima ispravnu kameru.
+No capability warnings recorded yet.,Još uvijek nisu zabilježena upozorenja o mogućnostima.
+No cash expected for this shift.,Ne očekuje se gotovina za ovu smjenu.
+No cash mode configured,Nije konfigurisan režim gotovine
+No cash movement type is allowed for this POS Profile.,Za ovaj POS profil nije dozvoljena vrsta kretanja gotovine.
+No cashier PIN is set yet. Create one now.,PIN blagajne još nije postavljen. Kreirajte ga sada.
+No cashier profiles are available for this POS profile yet.,Još uvek nema dostupnih profila blagajnika za ovaj POS profil.
+No cashier-wise discount/void/return activity.,Nema aktivnosti popusta/poništenja/povrata na blagajni.
+No category data found.,Nisu pronađeni podaci o kategoriji.
+No category profitability data found.,Nisu pronađeni podaci o profitabilnosti kategorije.
+No change returned recorded for this shift.,Za ovu smjenu nije zabilježena vraćena promjena.
+No change-allocation invoices match the current filters.,Nijedna faktura za dodjelu promjena ne odgovara trenutnim filterima.
+No charge head breakdown found.,Nije pronađen kvar punjača.
+No Company Selected,Nije odabrana kompanija
+No customer sales data found.,Nisu pronađeni podaci o prodaji kupaca.
+No day-wise discount/void/return trend.,Nema dnevnog trenda popusta/poništenja/povrata.
+No day-wise payment data found.,Nisu pronađeni podaci o dnevnom plaćanju.
+No day-wise profitability trend found.,Nije pronađen trend dnevnog profitabilnosti.
+No day-wise purchase data found.,Nisu pronađeni podaci o dnevnoj kupovini.
+No day-wise sales trend found.,Nije pronađen dnevni trend prodaje.
+No day-wise tax/charges trend found.,Nije pronađen dnevni trend poreza/naknada.
+No dead stock items.,Nema mrtvih artikala.
+No due date,Nema termina
+No exact repair match found for this invoice,Nije pronađena tačna popravka za ovu fakturu
+No hourly sales trend found for today.,Za danas nije pronađen trend prodaje po satu.
+No invoice activity found.,Nije pronađena aktivnost na fakturi.
+No invoices found,Nisu pronađene fakture
+No invoices found. Try different search criteria.,Nisu pronađene fakture. Isprobajte različite kriterije pretraživanja.
+No invoices recorded for this shift.,Za ovu smjenu nisu evidentirani računi.
+No item profitability data found.,Podaci o profitabilnosti artikla nisu pronađeni.
+No item sales data found for this period.,Nisu pronađeni podaci o prodaji artikala za ovaj period.
+No items found,Nema pronađenih stavki
+No items in cart,Nema artikala u korpi
+No items with barcodes to print,Nema artikala sa bar kodovima za štampanje
+No location-wise top item data found.,Nisu pronađeni podaci o top stavkama u pogledu lokacije.
+No low stock alerts right now.,Trenutno nema upozorenja o niskim zalihama.
+No low stock items.,Nema artikala na malim zalihama.
+No matching items in cart,Nema odgovarajućih artikala u korpi
+No month-wise sales trend found.,Nije pronađen mjesečni trend prodaje.
+No negative stock items.,Nema negativnih artikala na zalihama.
+No notifications yet,Još nema obavještenja
+No offline cash movement synced.,Nema sinhronizovanog kretanja gotovine van mreže.
+No offline invoices pending synchronization,Nema vanmrežnih faktura na čekanju za sinhronizaciju
+No offline sync issues recorded yet.,Još uvijek nisu zabilježeni problemi s vanmrežnom sinhronizacijom.
+No out-of-stock items.,Nema artikala van zaliha.
+No outstanding credit invoices for this shift.,Nema nepodmirenih kreditnih faktura za ovu smjenu.
+No payment collection data found.,Podaci o naplati nisu pronađeni.
+No payment rows available on this invoice.,Nema dostupnih redova za plaćanje na ovoj fakturi.
+No payments registered for this shift.,Za ovu smjenu nisu registrovane uplate.
+No pending balances in this period.,Nema salda na čekanju u ovom periodu.
+No pending offline invoices,Nema vanmrežnih faktura na čekanju
+No Print Formats Found,Formati za štampanje nisu pronađeni
+No profiles found for selected scope. Falling back to current profile failed.,Nisu pronađeni profili za odabrani opseg. Povratak na trenutni profil nije uspio.
+No recent customer activity found.,Nije pronađena nedavna aktivnost korisnika.
+No recent stock entries found.,Nisu pronađeni nedavni unosi dionica.
+No records found,Nema pronađenih zapisa
+No reorder suggestions right now.,Trenutno nema prijedloga za promjenu redoslijeda.
+No repeat customers in this period.,Nema ponovljenih kupaca u ovom periodu.
+No response from server,Nema odgovora sa servera
+No return invoices found,Nisu pronađeni povratni računi
+No return item trend found.,Nije pronađen trend povratne stavke.
+No returnable items found for this invoice,Za ovu fakturu nisu pronađeni artikli za povrat
+No returns were processed in this shift.,Nijedan povrat nije obrađen u ovoj smjeni.
+No risk activity found.,Nije pronađena rizična aktivnost.
+No sales activity found for this period.,Za ovaj period nije pronađena prodajna aktivnost.
+No slow moving items.,Nema sporih predmeta.
+No staff sales activity found.,Nije pronađena prodajna aktivnost osoblja.
+No stock movement for this period.,Nema kretanja zaliha za ovaj period.
+No submitted cash movements in this shift.,Nema dostavljenih kretanja gotovine u ovoj smjeni.
+No supplier purchases found in this month.,U ovom mjesecu nije pronađena nijedna kupovina dobavljača.
+No suppliers found for this period.,Za ovaj period nisu pronađeni dobavljači.
+No sync trigger has run yet in this session.,Nijedan okidač sinhronizacije još nije pokrenut u ovoj sesiji.
+No tax head breakdown found.,Nije pronađen kvar porezne glave.
+No top items found for this location.,Za ovu lokaciju nisu pronađene top stavke.
+No unpaid invoices,Nema neplaćenih faktura
+No variant data found.,Podaci o varijanti nisu pronađeni.
+No week-wise sales trend found.,Nije pronađen trend prodaje po sedmici.
+No.,br.
+Nobile Number,Nobile Number
+Not available,Nije dostupno
+Not checked,Nije provjereno
+Not selected,Nije odabrano
+Not Set,Nije postavljeno
+Notifications,Obavještenja
+Offer,Ponuda
+Offer Applied,Ponuda je primijenjena
+Offer criteria exceeded,Kriterijumi ponude su premašeni
+Offer Item,Ponuda Stavka
+Offer item unavailable,Stavka u ponudi nije dostupna
+Offer Removed,Ponuda je uklonjena
+Offer UOM cannot be changed,UOM ponude se ne može promijeniti
+Offer?,Ponuda?
+Offers,Ponude
+Offline,Offline
+Offline & Sync,Offline & Sync
+Offline Capabilities,Offline Capabilities
+Offline data status refreshed,Status vanmrežnih podataka je osvježen
+Offline diagnostics,Offline dijagnostika
+Offline Invoices,Vanmrežne fakture
+Offline invoices status,Offline status faktura
+Offline invoices synced,Offline fakture su sinhronizirane
+Offline Queue: {0},Red čekanja van mreže: {0}
+Offline rebuild guidance,Smjernice za ponovnu izgradnju van mreže
+Offline restore is unavailable for this session.,Vanmrežno vraćanje nije dostupno za ovu sesiju.
+Offline selling is available with degraded capabilities.,Offline prodaja je dostupna sa smanjenim mogućnostima.
+Offline snapshot does not match the current POS state.,Offline snimak ne odgovara trenutnom stanju POS-a.
+Offline Status,Offline Status
+"Offline, terminal, and system controls","Kontrole van mreže, terminala i sistema"
+OK,OK
+Online,Online
+Open actions menu,Otvorite meni radnji
+Open balance to collect,Otvorite saldo za prikupljanje
+Open Customer Display,Otvorite Prikaz korisnika
+Open drawer,Otvori fioku
+Open invoices,Otvorene fakture
+Open Payments?,Otvoriti plaćanja?
+Open POS home,Otvorite POS home
+Open this screen from POS Menu -> Open Customer Display.,Otvorite ovaj ekran iz POS menija -> Otvorite prikaz korisnika.
+OpenCV image processing enabled - Enhanced barcode detection,Omogućena obrada slike OpenCV - Poboljšana detekcija barkoda
+OpenCV image processing unavailable on this device,OpenCV obrada slika nije dostupna na ovom uređaju
+OpenCV Off,OpenCV Off
+OpenCV On,OpenCV uključen
+OpenCV processing disabled,Obrada OpenCV-a je onemogućena
+Opening Amount,Iznos otvaranja
+Opening Cash,Otvaranje gotovine
+options,opcije
+Order,Red
+Original,Original
+Other,Ostalo
+Out,Van
+Out of Stock,Out of Stock
+Out of Stock Items,Artikli van zalihe
+Outstanding,Izvanredan
+Outstanding Credit by Currency,Neplaćeni kredit po valuti
+Overdue,Zakasnio
+Overpayment Change,Promjena preplate
+Overpayment change deducted: {0},Odbijena promjena za preplatu: {0}
+Packing List,Lista pakovanja
+Page Format,Format stranice
+Page unavailable offline,Stranica nije dostupna van mreže
+Paid,Plaćeno
+Paid (orig):,Plaćeno (orig):
+Paid Amount,Plaćeni iznos
+Paid change cannot be greater than total change!,Plaćena promjena ne može biti veća od ukupne promjene!
+Paid:,Plaćeno:
+Parent Item,Roditeljska stavka
+Partial,Djelomično
+Partly Paid,Delimično plaćeno
+Party Account,Party Account
+Party Type,Vrsta zabave
+Pause terminal until next cashier,Pauzirajte terminal do sljedećeg blagajnika
+PAY,PLATI
+Payment,Plaćanje
+Payment Account,Račun za plaćanje
+Payment entries processed for Invoice {0},Unosi plaćanja obrađeni za fakturu {0}
+Payment Entry Type,Vrsta unosa plaćanja
+Payment History,Istorija plaćanja
+Payment ID,ID plaćanja
+Payment Method Report,Izvještaj o načinu plaćanja
+Payment Methods,Načini plaćanja
+Payment of {0} received successfully.,Uspješno je primljena uplata od {0}.
+Payment Progress,Napredak plaćanja
+Payment Reconciliation,Usklađivanje plaćanja
+Payment request status could not be retrieved. Please try again,Status zahtjeva za plaćanje nije moguće preuzeti. Molimo pokušajte ponovo
+Payment Request took too long to respond. Please try requesting for payment again,Odgovor na zahtjev za plaćanje trajao je predugo. Pokušajte ponovo zatražiti plaćanje
+Payment saved offline,Plaćanje je sačuvano van mreže
+Payment State,Država plaćanja
+Payment Status,Status plaćanja
+Payment submitted but print function could not be executed. Payment name not found.,"Plaćanje je poslano, ali funkcija printanja nije mogla biti izvršena. Naziv plaćanja nije pronađen."
+Payment submitted.,Uplata dostavljena.
+Payment Summary,Sažetak plaćanja
+Payments,Plaćanja
+Payments are not open. Do you want to open payments and submit?,Uplate nisu otvorene. Želite li otvoriti uplate i poslati?
+Payments by Mode of Payment,Plaćanja po načinu plaćanja
+PDF,PDF
+Peak Hour,Peak Hour
+Peak Memory:,Vrhunska memorija:
+Peak Server:,Vrhunski server:
+Peak:,vrh:
+Pending,Na čekanju
+Pending Amount,Iznos na čekanju
+Pending count updated from {0} to {1},Broj čekanja ažuriran sa {0} na {1}
+Pending Exposure,Izlaganje na čekanju
+Pending Invoices,Fakture na čekanju
+Pending Ratio,Omjer čekanja
+Pending Sales,Na čekanju za prodaju
+Pending sales: {0} | Cache usage: {1}%,Prodaja na čekanju: {0} | Upotreba keš memorije: {1}%
+Pending Sync,Sinhronizacija na čekanju
+Pending: {0},Na čekanju: {0}
+Pending: {0} | Synced: {1} | Draft: {2},Na čekanju: {0} | Sinhronizirano: {1} | Nacrt: {2}
+Per Page,Po stranici
+Personal,Personal
+Personal preferences adjust the current cashier experience without changing the active POS route.,Lične postavke prilagođavaju trenutno iskustvo blagajnika bez promjene aktivne POS rute.
+PIN confirmation does not match.,PIN potvrda ne odgovara.
+PIN must be 4 to 8 digits.,PIN mora imati 4 do 8 cifara.
+Please add at least one item.,Molimo dodajte barem jednu stavku.
+Please allow camera access to scan codes,Molimo dozvolite pristup kameri za skeniranje kodova
+Please enter payment amount,Unesite iznos uplate
+Please fill all required fields,Molimo popunite sva obavezna polja
+Please make a payment or select a payment,Molimo izvršite uplatu ili odaberite plaćanje
+Please request phone payment or use another payment method,Zatražite plaćanje putem telefona ili koristite drugi način plaćanja
+Please select a customer first,Molimo prvo odaberite kupca
+Please select a party,Molimo odaberite zabavu
+Please select a party before reconciling.,Molimo odaberite stranku prije pomirenja.
+Please select a valid movement type.,Molimo odaberite važeći tip kretanja.
+Please select an invoice,Molimo odaberite fakturu
+Please select company before reconciling.,Molimo odaberite kompaniju prije pomirenja.
+Please set the customer's mobile number,Molimo postavite broj mobilnog telefona kupca
+Please try again or enter the item manually.,Molimo pokušajte ponovo ili unesite stavku ručno.
+Please verify the barcode or check the item's availability.,Molimo provjerite bar kod ili provjerite dostupnost artikla.
+Points,Poeni
+Popup blocked. Please allow popups.,Skočni prozor blokiran. Molimo dozvolite iskačuće prozore.
+POS,POS
+POS controls and maintenance,POS kontrole i održavanje
+POS Expense is disabled for this POS Profile.,POS trošak je onemogućen za ovaj POS profil.
+POS is running with limited offline prerequisites.,POS radi uz ograničene vanmrežne preduslove.
+POS Profile,POS profil
+Position the QR code or barcode within the scanning area,Postavite QR kod ili bar kod unutar područja skeniranja
+Posting,Objavljivanje
+Posting and Price List,Knjiženje i cenovnik
+Posting Date,Datum objavljivanja
+Preparing background sync,Priprema pozadinske sinhronizacije
+"Press OK to continue offline with a warning, or Cancel to retry.",Pritisnite OK da nastavite van mreže uz upozorenje ili Otkaži da pokušate ponovo.
+Previous unit of measure,Prethodna jedinica mjere
+Price List,Cjenik
+Price List Rate,Cenovnik Rate
+Price list rate updated locally only,Cenovnik se ažurira samo lokalno
+Pricing & Discounts,Cijene i popusti
+Pricing Rule,Pravilo određivanja cijena
+Print,Print
+Print Draft,Print Draft
+Print Format (Invoice),Format štampanja (faktura)
+Print Format (Order),Format štampe (Narudžba)
+Print invoice,Štampaj fakturu
+Print Purchase Invoice instead of PO,Štampajte fakturu o kupovini umjesto narudžbenice
+Printer,Štampač
+Processed returns impacting the shift totals,Obrađeni prinosi koji utječu na ukupne smjene
+Processing Payment,Obrada plaćanja
+Processing payment entries for Invoice {0},Obrada unosa plaćanja za fakturu {0}
+Profile,Profil
+Profiles,Profili
+Profit,Profit
+Profit: Invoice Item Estimate,Profit: Procjena stavke fakture
+Profit: Stock Ledger (COGS),Dobit: knjiga dionica (COGS)
+Profitability Report,Izvještaj o profitabilnosti
+Prorated return discount,Proporcionalni popust na povrat
+Purchase Amount,Iznos kupovine
+Purchase Invoices,Kupovina faktura
+Purchase Order created,Narudžbenica kreirana
+Qty,Kol
+Qualified,Kvalificirani
+Quantity,Količina
+Quantity exceeds available stock,Količina premašuje raspoložive zalihe
+Quick Actions,Brze akcije
+Quotation {0} is Submitted,Ponuda {0} je poslana
+Quotation submitted,Ponuda dostavljena
+QZ Tray connected.,QZ Tray povezan.
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ Tray je ručno isključen. Pritisnite Connect kako biste ga ponovo omogućili.
+QZ Tray is not connected.,QZ Tray nije povezan.
+QZ Tray Setup,QZ Tray Setup
+Rate,Rate
+Rate adjusted to maximum allowed discount,Stopa prilagođena maksimalno dozvoljenom popustu
+Ready,Spreman
+Ready to resume,Spreman za nastavak
+Ready!,Spremni!
+Real-time POS insights for retail operations.,Uvid u POS u realnom vremenu za maloprodajne operacije.
+Rebuild Offline Data,Ponovo izgradi vanmrežne podatke
+Receive,Primi
+Receive now,Primite sada
+Received,Primljeno
+Received:,Primljeno:
+Recent Movement Entries,Nedavni unosi kretanja
+Recent updates about your invoices,Nedavna ažuriranja o vašim fakturama
+Recently Active Customers,Nedavno aktivni kupci
+Rechecking connection,Ponovna provjera veze
+Reconcile payment methods and close shift,Uskladite načine plaćanja i zatvorite smjenu
+Reconciling Payments,Usklađivanje plaćanja
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","Ponovo se povežite i otvorite ovu stranicu jednom dok ste na mreži, a zatim će je vanmrežno osvježavanje moći vratiti."
+Reconnect online to refresh cached offline data from the server.,Ponovo se povežite na mreži da osvježite keširane vanmrežne podatke sa servera.
+Recreate local offline prerequisites from scratch,Ponovo kreirajte lokalne vanmrežne preduvjete od nule
+Recv:,Recv:
+Redeem,Otkupiti
+Redeem / Scan,Iskoristi / Skeniraj
+Redeem Amount,Otkupite iznos
+Redeem Mode,Redeem Mode
+Redeemed Amount,Otkupljeni iznos
+Redeemed credit cannot be greater than its total.,Otkupljeni kredit ne može biti veći od ukupnog iznosa.
+Redemption and Totals,Otkup i ukupni iznos
+Reference,Referenca
+Refresh,Osvježi
+Refresh Exchange Rate,Osvježi tečaj
+Refresh Offline Data,Osvježite vanmrežne podatke
+Refresh Printers,Osvježi štampače
+Refund,Povrat novca
+Release Notes,Bilješke o izdanju
+Reload,Ponovo učitaj
+Reload customers,Ponovo učitajte kupce
+Reload Items,Reload Items
+Reload Now,Ponovo učitaj sada
+Reload to apply the latest changes. Your current session will be refreshed.,Učitajte ponovo da primijenite najnovije promjene. Vaša trenutna sesija će biti osvježena.
+Reload Workflow,Reload Workflow
+Remarks,Napomene
+Remarks are required.,Napomene su obavezne.
+Remove,Ukloni
+Remove barcode item,Uklonite stavku sa bar kodom
+Remove cached data and reload the POS app,Uklonite keširane podatke i ponovo učitajte POS aplikaciju
+Remove item,Ukloni stavku
+Remove Offer,Ukloni ponudu
+Reorder / Purchase Suggestions,Prijedlozi za ponovnu narudžbu/kupovinu
+Repair Candidate,Repair Candidate
+Repair Change Allocation,Dodjela promjene popravke
+Repair requires an online connection,Za popravku je potrebna internetska veza
+Repaired,Popravljeno
+Repairing change allocation,Popravak alokacije promjena
+Repeat Customers,Ponovljeni kupci
+Repeat Rate,Stopa ponavljanja
+Request,Zahtjev
+Request ID: {0},ID zahtjeva: {0}
+Request Payment,Zahtjev za plaćanje
+Requested route: {0},Tražena ruta: {0}
+Required columns cannot be hidden,Obavezne kolone se ne mogu sakriti
+Reset,Reset
+Reset item name,Poništi naziv stavke
+Reset to Default,Vrati na zadano
+Resource Health,Resource Health
+Restricted,Ograničeno
+Restricted operational controls for supervisors only.,Ograničene operativne kontrole samo za nadzornike.
+Retry,Pokušaj ponovo
+Retry route,Ponovite rutu
+Return,Povratak
+Return Amount,Povratni iznos
+Return Count,Return Count
+Return items must have negative quantities,Povratni artikli moraju imati negativne količine
+Return total must be negative,Ukupan iznos povrata mora biti negativan
+Return Valid Until,Povratak Vrijedi do
+Return window passed,Povratni prozor je prošao
+Return without Invoice,Povrat bez fakture
+Returns,Povratak
+Returns / Voids / Discounts,Povrati / Poništenja / Popusti
+Returns by Currency,Povrati po valuti
+Revenue,Prihod
+Review shift totals before submitting the closing entry,Pregledajte ukupne smjene prije podnošenja završnog unosa
+Round Off,Round Off
+Rows,Redovi
+Rows:,redovi:
+Rule,Pravilo
+Sale,Prodaja
+Sales,Prodaja
+Sales Order {0} is Submitted,Prodajna narudžba {0} je poslana
+Sales Person and Print,Prodajno lice i štampa
+Sales Person not found,Prodajna osoba nije pronađena
+Sales processed,Prodaja obrađena
+Sales Return,Sales Return
+Sales Trend Report,Izvještaj o trendu prodaje
+Save,Sačuvaj
+Save & Clear,Sačuvaj & Obriši
+Save as POS Profile Default,Sačuvaj kao zadani POS profil
+Save Settings,Sačuvaj postavke
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,Sačuvajte izabrani štampač kao podrazumevani POS profil kako bi se automatski prikazao u ovom podešavanju.
+Saved as draft because: {0},Sačuvano kao nacrt jer: {0}
+Saving...,Spremanje...
+Scale barcode detected. Quantity here is the number of labels to print.,Otkriven je bar kod skale. Količina ovdje je broj etiketa za štampanje.
+Scale barcode settings are not configured. Using item barcode only.,Postavke barkoda razmjera nisu konfigurirane. Korištenje samo bar koda artikla.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,Nedostaje bar kod predloška skale za ovu stavku/UOM. Korištenje samo bar koda artikla.
+Scan an existing card and top it up without leaving the payment flow.,Skenirajte postojeću karticu i dopunite je bez napuštanja toka plaćanja.
+Scan Error,Greška pri skeniranju
+Scan or enter a gift card code to check balance or redeem.,Skenirajte ili unesite kod poklon kartice da provjerite stanje ili iskoristite.
+Scan or paste the card code below.,Skenirajte ili zalijepite kod kartice ispod.
+Scan QR Code/Barcode,Skenirajte QR kod/barkod
+Scan with camera,Skenirajte kamerom
+Scan-First Flow,Scan-First Flow
+Scanned Code:,Skenirani kod:
+Scanning for: {0},Skeniranje za: {0}
+Scanning items,Skeniranje stavki
+Scan-Ready,Spreman za skeniranje
+Scope,Obim
+Scope: All Profiles,Opseg: Svi profili
+Scope: Current Profile,Opseg: Trenutni profil
+Scope: Specific Profile,Opseg: Specifični profil
+Search,Traži
+Search Account,Pretraži račun
+Search an invoice and continue the return flow without extra steps.,Pretražite fakturu i nastavite povratni tok bez dodatnih koraka.
+Search customer,Traži kupca
+Search invoices or customers,Pretražite fakture ili kupce
+Search item,Pretražite stavku
+Search item / code,Pretražite stavku/šifru
+Search items or barcode,Pretražite stavke ili bar kod
+Search Mpesa Payments,Pretražite Mpesa plaćanja
+Search return invoices or customers,Pretražite povratne fakture ili kupce
+Search supplier,Traži dobavljača
+Search unpaid invoices or customers,Pretražite neplaćene fakture ili kupce
+Secure context (HTTPS or localhost) is required for camera access.,Za pristup kameri potreban je siguran kontekst (HTTPS ili localhost).
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,Za pristup kameri potreban je siguran kontekst (HTTPS). Molimo koristite HTTPS za pristup kameri.
+Select,Odaberite
+Select a cashier first.,Prvo odaberite blagajnika.
+Select a customer,Odaberite kupca
+Select a customer to use coupon,Odaberite kupca za korištenje kupona
+Select a printer to use QZ silent printing.,Odaberite štampač koji će koristiti QZ tiho štampanje.
+Select Batch,Odaberite Batch
+Select Columns to Display,Odaberite Kolone za prikaz
+Select items to sell,Odaberite artikle za prodaju
+Select Payment,Odaberite Plaćanje
+Select Payment Account,Odaberite Račun za plaćanje
+Select printer,Odaberite štampač
+Select Return Invoice,Odaberite Povrat fakture
+Select S.O,Odaberite S.O
+Select Sales Orders,Odaberite Prodajni nalozi
+Select the cashier who is taking over this terminal.,Odaberite blagajnika koji preuzima ovaj terminal.
+Selected,Odabrano
+Selected movement type is not allowed by POS Profile.,Odabrani tip kretanja nije dozvoljen u POS profilu.
+Selected Payments,Odabrana plaćanja
+Sensitive actions kept away from quick taps.,Osjećajne radnje su podalje od brzih dodira.
+Serial,Serial
+Serial Numbers,Serijski brojevi
+Server CPU Usage:,Upotreba CPU servera:
+Server Health,Zdravlje servera
+Server Memory Usage:,Upotreba memorije servera:
+Server Metrics,Server Metrics
+Server Uptime:,Vrijeme rada servera:
+Service Charges,Troškovi usluge
+Session,Sjednica
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,Postavite svaki PIN blagajne u Korisničkom obrascu i zadržite članove terminala dodijeljene u POS Profile User.
+Settings,Postavke
+Settings in this section update the POS workspace without changing the current route.,Postavke u ovom odjeljku ažuriraju POS radni prostor bez promjene trenutne rute.
+Setup complete!,Postavljanje završeno!
+Share,Dijeli
+Shared terminal,Zajednički terminal
+Shift Closed Snapshot,Shift Closed Snapshot
+Shift Overview,Shift Overview
+Show,Pokaži
+Show cart on customer-facing screen,Prikaži kolica na ekranu okrenutom klijentu
+Show last invoice rate,Prikaži stopu posljednje fakture
+Show rate info,Prikaži informacije o cijeni
+Show Repair Candidates,Prikaži kandidate za popravke
+Show search tools,Prikaži alate za pretraživanje
+Show the active cart on a customer-facing screen,Prikažite aktivnu kolica na ekranu okrenutom klijentu
+Showing {0}-{1} of {2},Prikaz {0}-{1} od {2}
+Showing 0 of 0,Prikazujem 0 od 0
+Shows the distribution of invoices per currency,Prikazuje distribuciju faktura po valuti
+Sign out of the current POS session,Odjavite se iz trenutne POS sesije
+Size:,Veličina:
+Skipped Payments,Preskočena plaćanja
+Skipping items without barcodes,Preskakanje artikala bez bar kodova
+Slow Moving,Sporo kretanje
+Slow Moving Items,Sporo pokretne stavke
+Slow Queries:,Spori upiti:
+Sold,Prodano
+Source,Izvor
+Source Cash Account (Optional Override),Izvorni gotovinski račun (opcionalno nadjačavanje)
+Source Ex. Rate:,Izvor Ex. Ocijeni:
+Source Rate:,Izvorna brzina:
+Specific Profile,Specifični profil
+Split Invoices,Split Invoices
+Staff / Cashier Performance Report,Izvještaj o učinku osoblja / blagajnika
+Status,Status
+Stock,Stock
+Stock Information,Informacije o zalihama
+Stock is lower than requested,Zaliha je manja od tražene
+Stock is lower than requested:\n{0},Zaliha je manja od tražene:\n{0}
+Stock Movement Report,Izvještaj o kretanju dionica
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,Ažuriranje zaliha: {0} ima na raspolaganju {1}. Dodavanjem {2} dionica će biti ispod nule.
+Submit,Submit
+Submit & Print,Pošalji i štampaj
+Submit Deposit,Pošaljite depozit
+Submit Expense,Submit Expense
+Submitted,Poslano
+Submitted Cash Movements,Dostavljena gotovinska kretanja
+Submitted entries,Submitted entries
+Successfully scanned:,Uspješno skenirano:
+Suggested,Predloženo
+Suggested Qty,Preporučena količina
+Supervisor Access,Supervisor Access
+Supervisor permissions unlock issuance and reloads,Dozvole nadzornika otključavaju izdavanje i ponovno učitavanje
+Supervisor Tools,Alati za nadzor
+Supplier,Dobavljač
+Supplier and dates are required.,Dobavljač i datumi su obavezni.
+Supplier Invoices,Računi dobavljača
+Supplier is required.,Potreban je dobavljač.
+Supplier name is required,Ime dobavljača je obavezno
+Supplier Payments,Supplier Payments
+Supplier Purchase Summary,Sažetak nabavke dobavljača
+Suppliers,Dobavljači
+Suppliers not found,Dobavljači nisu pronađeni
+Switch Camera,Promijeni kameru
+Switch Cashier,Prebacite blagajnika
+Switch the POS appearance theme,Promijenite temu izgleda POS-a
+Switched to:,Prebačeno na:
+Sync All Invoices,Sinhroniziraj sve fakture
+Sync Offline Cash Movements ({0}),Sinhroniziraj vanmrežne gotovinske pokrete ({0})
+Sync Offline Sales,Sinhronizacija vanmrežne prodaje
+Synced {0} offline cash movement(s).,Sinhronizirano {0} kretanja gotovine van mreže.
+Syncing items in background,Sinhroniziranje stavki u pozadini
+System / Diagnostics,Sistem / Dijagnostika
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","Radnje sistema su kontrole niskofrekventnog održavanja kao što su informacije o aplikaciji, dijagnostika podrške i kontrole sesije."
+System Information,Informacije o sistemu
+System Status,Status sistema
+Tables:,stolovi:
+Tap the button below to redeem a gift card during checkout.,Dodirnite dugme ispod da iskoristite poklon karticu tokom plaćanja.
+Target,Target
+Target Ex. Rate:,Target Ex. Ocijeni:
+Target Rate:,Ciljna stopa:
+Tax,Porez
+Tax / Charges Report,Izvještaj o porezima/troškovima
+Tax Heads,Tax Heads
+Taxable Amount,Oporezivi iznos
+Tendered,Tendered
+Terminal,Terminal
+Terminal & Devices,Terminal i uređaji
+Terminal locked,Terminal zaključan
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","Alati terminala utiču na ovu odjavnu stanicu, ekrane okrenute klijentima i buduće kontrole štampača/uređaja."
+Territory not found,Teritorija nije pronađena
+The amount paid is not complete,Uplaćeni iznos nije potpun
+The app stores data locally for offline use. This is called cache.,Aplikacija pohranjuje podatke lokalno za upotrebu van mreže. Ovo se zove keš memorija.
+The invoice stayed in draft. Please review and submit it manually.,Faktura je ostala na nacrtu. Pregledajte i pošaljite ga ručno.
+The maximum discount allowed is,Maksimalni dozvoljeni popust je
+The quantity for {0} has been adjusted to the maximum available stock.,Količina za {0} je prilagođena maksimalnoj dostupnoj zalihi.
+The system could not retrieve the item details. Please try again.,Sistem nije mogao dohvatiti detalje stavke. Molimo pokušajte ponovo.
+These invoices will be synced when connection is restored,Ove fakture će se sinkronizirati kada se veza uspostavi
+This action now opens inside the settings workspace.,Ova radnja se sada otvara unutar radnog prostora postavki.
+This coupon already used !,Ovaj kupon je već iskorišten!
+This invoice does not need change-allocation repair,Ovoj fakturi nije potrebna popravka alokacije promjena
+This invoice is already repaired,Ova faktura je već popravljena
+This is an item template. Please choose a variant.,Ovo je predložak stavke. Molimo odaberite varijantu.
+this item,ovu stavku
+This POS page could not be opened offline because its code was not cached on this terminal yet.,Ova POS stranica nije mogla biti otvorena van mreže jer njen kod još nije keširan na ovom terminalu.
+This Serial Number {0} has already been added!,Ovaj serijski broj {0} je već dodan!
+Threshold,Prag
+Time,Vrijeme
+Tip: Clear cache regularly to free up space and keep the app fast.,Savjet: Redovno čistite keš memoriju kako biste oslobodili prostor i zadržali aplikaciju brzom.
+Tip: Close unused tabs or apps to reduce lag.,Savjet: Zatvorite nekorištene kartice ili aplikacije da smanjite kašnjenje.
+Tip: Monitor slow queries and table size for optimal performance.,Savjet: Pratite spore upite i veličinu tablice za optimalne performanse.
+To Be Paid,To Be Paid
+To Date,To Date
+Today,Danas
+Today Profit,Today Profit
+Today Sales,Today Sales
+Toggle navigation drawer,Uključi ladicu za navigaciju
+Toggle Theme,Prebaci temu
+Tools,Alati
+Tools for customer-facing screens and terminal-specific actions.,Alati za ekrane okrenute klijentima i akcije specifične za terminal.
+Top Brand,Top Brand
+Top Category,Top Category
+Top Charge Head,Top Charge Head
+Top Customers,Top Customers
+Top Discount,Top Discount
+Top Items by Location,Najpopularniji artikli po lokaciji
+Top Margin,Gornja margina
+Top Pending,Vrh Na čekanju
+Top Profit Item,Top profitna stavka
+Top Return Items,Vrhunske stavke za povrat
+Top Sales by Cashier,Vrhunska prodaja od strane blagajnika
+Top Supplier,Vrhunski dobavljač
+Top Suppliers by Spend,Najbolji dobavljači prema potrošnji
+Top Tables,Top Tables
+Top Tax Head,Top Tax Head
+Top Up Amount,Iznos dopune
+Top Up Card,Kartica dopune
+Top Up Mode,Način dopune
+Top Variant,Top Variant
+Total,Ukupno
+Total Amount,Ukupan iznos
+Total Change,Total Change
+Total Charges,Total Charges
+Total In,Total In
+Total Invoices,Total Invoices
+Total Items,Total Items
+Total Mpesa,Total Mpesa
+Total Out,Total Out
+Total Payments,Total Payments
+Total Purchase,Total Purchase
+Total Selected :,Ukupno odabrano:
+Total Size,Ukupna veličina
+Total Stock Qty,Ukupna količina zaliha
+Total:,Ukupno:
+Totals by Invoice Currency,Ukupno prema valuti fakture
+Track how much cash was handed back to customers,Pratite koliko je gotovine vraćeno kupcima
+"Track recent sales, collect unpaid balances, and reopen saved work","Pratite nedavne prodaje, prikupite neplaćena stanja i ponovo otvorite sačuvani rad"
+Transaction ID,ID transakcije
+Transfer,Transfer
+Try a different search term or clear the cart search.,Pokušajte s drugim pojmom za pretraživanje ili obrišite pretragu u košarici.
+Try adjusting your search or filters,Pokušajte prilagoditi pretragu ili filtere
+Try another source or refresh the list.,Pokušajte s drugim izvorom ili osvježite listu.
+Try changing the date range or status filter.,Pokušajte promijeniti raspon datuma ili filter statusa.
+Type,Tip
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,Nije moguće pristupiti kameri čak ni sa osnovnim postavkama. Provjerite dozvole za kameru i kompatibilnost uređaja.
+Unable to add offer item {0}. Please refresh and try again.,Nije moguće dodati stavku ponude {0}. Osvježite i pokušajte ponovo.
+Unable to add offer item. Please refresh and try again.,Nije moguće dodati stavku ponude. Osvježite i pokušajte ponovo.
+Unable to add scanned item.,Nije moguće dodati skeniranu stavku.
+Unable to create purchase order,Nije moguće kreirati narudžbenicu
+Unable to delete draft invoice,Nije moguće izbrisati nacrt fakture
+Unable to fetch documents,Nije moguće preuzeti dokumente
+Unable to fetch draft orders,Nije moguće preuzeti nacrte naloga
+Unable to fetch invoice history,Nije moguće preuzeti historiju faktura
+Unable to fetch M-Pesa payments,Nije moguće preuzeti M-Pesa uplate
+Unable to fetch sales orders,Nije moguće preuzeti prodajne narudžbe
+Unable to fetch unpaid invoices,Nije moguće preuzeti neplaćene fakture
+Unable to generate scale barcode,Nije moguće generirati skali bar kod
+Unable to issue gift card.,Nije moguće izdati poklon karticu.
+Unable to load cashier PIN status.,Nije moguće učitati PIN status blagajnika.
+Unable to load document,Nije moguće učitati dokument
+Unable to load draft invoice,Nije moguće učitati nacrt fakture
+Unable to load gift card balance.,Nije moguće učitati stanje poklon kartice.
+Unable to load invoice details,Nije moguće učitati detalje fakture
+Unable to load parked order,Nije moguće učitati parkirani nalog
+Unable to load the selected sales order,Nije moguće učitati odabrani prodajni nalog
+Unable to prepare document,Nije moguće pripremiti dokument
+Unable to prepare return invoice,Nije moguće pripremiti povratnu fakturu
+Unable to print draft invoice,Nije moguće ispisati nacrt fakture
+Unable to print submitted invoice,Nije moguće ispisati dostavljenu fakturu
+Unable to process document action,Nije moguće obraditi radnju dokumenta
+Unable to repair change allocation,Nije moguće popraviti dodjelu promjena
+Unable to save cashier PIN.,Nije moguće sačuvati PIN blagajne.
+Unable to save the rate to the backend price list,Nije moguće sačuvati cijenu na pozadinskom cjeniku
+Unable to submit invoice,Nije moguće predati fakturu
+Unable to submit the selected payment,Nije moguće poslati odabranu uplatu
+Unable to top up gift card.,Nije moguće dopuniti poklon karticu.
+Unable to verify cashier PIN.,Nije moguće potvrditi PIN kod blagajnika.
+Unallocated,Neraspoređeno
+Unallocated:,Neraspoređeno:
+Unavailable,Nedostupno
+Unknown,Nepoznato
+Unknown Item,Nepoznata stavka
+Unknown Warehouse,Nepoznato skladište
+Unlock POS,Otključajte POS
+Unpaid,Neplaćeno
+"Unselected payments stay unallocated first, then auto reconcile after submit.","Neodabrana plaćanja prvo ostaju neraspoređena, a zatim se automatski usklađuju nakon slanja."
+UOM,UOM
+UOM not found,UOM nije pronađen
+Update available,Dostupno je ažuriranje
+Update Customer,Update Customer
+Update PIN,Ažurirajte PIN
+Update Price List Rate,Ažuriraj cijenu cjenika
+Updated,Ažurirano
+Updates and app info that stay out of the cashier flow.,Ažuriranja i informacije o aplikacijama koje ostaju izvan toka blagajne.
+Updates automatically,Ažurira se automatski
+Usage,Upotreba
+Usage Stats,Usage Stats
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,Koristite PIN od 4 do 8 cifara za prebacivanje blagajne i otključavanje terminala.
+Use Cashier,Koristite blagajnu
+Use date range to search for older invoices,Koristite raspon datuma za traženje starijih faktura
+"Use one field for manual code entry, barcode scans, or QR scans.","Koristite jedno polje za ručni unos koda, skeniranje bar kodova ili QR skeniranje."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","Koristite jedan radni tok za provjere stanja, novo izdavanje i dopune bez napuštanja POS-a."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","Koristite ovaj odjeljak kada keširani preduvjetni podaci trebaju osvježenje, ponovnu izgradnju ili dijagnostički pregled."
+Use Western numerals,Koristite zapadne brojeve
+Used:,Korišteno:
+Using basic camera settings due to device limitations,Korištenje osnovnih postavki kamere zbog ograničenja uređaja
+Using cached customer balance,Korištenje keširanog stanja korisnika
+Valid until,Vrijedi do
+Variance %,Varijanca %
+Variants,Varijante
+Variant-wise,Varijantno
+Verify closing amounts for each payment method,Provjerite zaključne iznose za svaki način plaćanja
+View all,Pogledaj sve
+View app information and current build details,Pregledajte informacije o aplikaciji i trenutne detalje izrade
+View Data Diagnostics,Pogledajte dijagnostiku podataka
+View Details,Pogledajte detalje
+View invoice details,Pogledajte detalje računa
+View notifications,Pogledajte obavještenja
+View offline invoices,Pregledajte vanmrežne fakture
+View restricted POS insights,Pogledajte ograničene uvide u POS
+Void Amount,Void Amount
+Void Count,Void Count
+Voids,Praznine
+Waiting for cart items,Čekaju se artikli u korpi
+Waiting for payment...,Čeka se uplata...
+Walk-in Customer,Walk-in Customer
+Warehouse,Skladište
+Warning: High cache usage may affect performance.,Upozorenje: Velika upotreba keš memorije može uticati na performanse.
+Warning: High lag may indicate heavy processing or browser slowness.,Upozorenje: Visoko kašnjenje može ukazivati ​​na tešku obradu ili sporost pretraživača.
+Week ?,Sedmica?
+Week-wise,Sedmično
+Weight (g),Težina (g)
+Weight (grams),Težina (grami)
+We'll let you know if an invoice fails to submit,Obavijestit ćemo vas ako faktura ne bude dostavljena
+Workflow,Workflow
+Write off amount cannot exceed the POS profile maximum of {0},Iznos otpisa ne može premašiti maksimum POS profila od {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,Iznos otpisa premašuje dozvoljeni limit ({0}). Dodajte uplatu za preostali iznos.
+Yes,Da
+"Yes, Cancel sale","Da, otkažite prodaju"
+"Yes, Close","Da, Zatvori"
+You are not allowed to print draft invoices,Nije vam dozvoljeno štampati nacrte faktura
+You are offline. Add Payment will work again when the connection is restored.,Vi ste van mreže. Dodaj plaćanje će ponovo raditi kada se veza uspostavi.
+You have no notifications right now,Trenutno nemate obavještenja
+Your Cart,Vaša korpa

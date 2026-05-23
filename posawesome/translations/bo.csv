@@ -1,0 +1,1362 @@
+POS Awesome,POS ཧ་ལས་པ།
+Fetch Items Directly from Server,ཐད་ཀར་གསབ་ལེན་ནས་དངོས་པོ་ལེན་པ།
+Menu,དཀར་ཆག
+Actions,བྱ་སྤྱོད།
+Close Shift,བརྗེ་སྒྱུར་ཁ་རྒྱག་པ།
+End current session,ད་ལྟའི་ཚོགས་ཐུན་མཇུག་སྒྲིལ།
+Print Last Invoice,བྱུང་འཛིན་མཐའ་མ་པར་ཤོག
+Reprint previous transaction,སྔོན་གྱི་ཚོང་དོན་བསྐྱར་པར་བཤུས།
+Sync Offline Invoices,དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་བྱུང་འཛིན་མཉམ་སྒྲིག་བྱེད་པ།
+Upload pending transactions,སྒུག་བཞིན་པའི་ཚོང་དོན་ཡར་བསྐུར་བ།
+Go Online,དྲ་ཐོག་ཏུ་སོང་།
+Go Offline,དྲ་རྒྱ་ལས་ཕྱིར་འགྲོ།
+Disable offline mode,དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་ཐབས་ལམ་ལྕོགས་མེད་བཟོས།
+Work without server connection,ཞབས་ཞུའི་མཐུད་ཁ་མེད་པར་ལས་ཀ་བྱེད་པ།
+Clear Cache,མཛོད་བསུབ་པ།
+Remove local data and refresh,ས་གནས་ཀྱི་གཞི་གྲངས་མེད་པར་བཟོས་ནས་གསར་བསྒྱུར།
+About,སྐོར།
+App information,མཉེན་ཆས་ཀྱི་ཆ་འཕྲིན།
+Language,སྐད་ཡིག།
+Change interface language,མཐུད་ཁའི་སྐད་ཡིག་བསྒྱུར་བ།
+Light Mode,འོད་ཀྱི་ཐབས་ལམ།
+Dark Mode,མུན་ནག་གི་ཐབས་ལམ།
+Switch theme appearance,བརྗོད་བྱའི་རྣམ་པ་བརྗེ་སྤོ།
+Logout,ཕྱིར་ཐོན་པ།
+Sign out of session,ཚོགས་ཐེངས་ནས་ཕྱིར་ཐོན་པ།
+Select Language,སྐད་ཡིག་འདེམས།
+Choose your preferred language for the POS interface,POS མཐུད་ཁའི་ཆེད་དུ་ཁྱེད་རང་འདོད་པའི་སྐད་ཡིག་འདེམས།
+Language will be changed to,སྐད་ཡིག་ལ་བསྒྱུར་རྒྱུ།
+Cancel,ཆ་མེད་གཏོང་བ།
+Change Language,སྐད་ཡིག་བསྒྱུར་བ།
+Close,སྒོ་བརྒྱབ།
+Cannot change language - same language selected,སྐད་ཡིག་བསྒྱུར་མི་ཐུབ། སྐད་ཡིག་གཅིག་པ་བདམས།
+Language changed successfully! Reloading...,སྐད་ཡིག་བརྗེ་སྒྱུར་ལེགས་འགྲུབ་བྱུང་། བསྐྱར་དུ་བླུགས་བཞིན་ཡོད།
+Failed to change language,སྐད་ཡིག་བསྒྱུར་ཐུབ་མ་སོང་།
+Unknown error,མ་ཤེས་པའི་ནོར་འཁྲུལ།
+- Total Unallocated,- བསྡོམས་པས་བགོ་འགྲེམས་བྱས་མེད།
+* Required,* དགོས་མཁོ།
+{0} (Qty: {1}),{0} (གྲངས་འབོར་: {1})
+{0} actions,{0} བྱ་སྤྱོད།
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} ལ་ {1} ལས་མེད། ཁྱེད་ཀྱིས་ {2} རེ་སྐུལ་བྱས། གྲངས་ཚད་སྙོམ་སྒྲིག་བྱེད་པའམ་ཡང་ན་བསྐྱར་དུ་མཛོད་ཁང་།
+{0} offline invoice{1} pending,{0} དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་བྱུང་འཛིན་{1} སྒུག་བཞིན་ཡོད།
+{0} offline invoice{1} saved as draft,{0} དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་བྱུང་འཛིན་{1} ཟིན་བྲིས་ལྟར་ཉར་ཚགས་བྱས།
+{0} offline invoice{1} synced,{0}དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་བྱུང་འཛིན་{1}མཉམ་སྒྲིག་བྱས།
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0}ཉིན་སྔོན་ལ།
+{0}h ago,{0}ཆུ་ཚོད་སྔོན་ལ།
+{0}m ago,{0}m སྔོན་ལ།
+A POS supervisor is required for this action.,བྱ་སྤྱོད་འདི་ལ་POSལྟ་རྟོག་པ་དགོས།
+Access,ཐོབ་ཐང་།
+Account,རྩིས་ཁྲ།
+Account is overdrawn,རྱིས་ཁྲ་ལས་བརྒལ་བའྱི་ཐད།
+Acknowledge the error to resume scanning,བཤེར་བཤེར་སླར་གསོ་བྱེད་པར་ནོར་འཁྲུལ་ངོས་ལེན་བྱེད་པ།
+Acknowledge the error to resume scanning.,པར་བཤུས་བསྐྱར་དུ་འགོ་འཛུགས་པའི་ནོར་འཁྲུལ་ངོས་ལེན་བྱེད་དགོས།
+Across,ཕར་བརྒལ་ནས།
+Action,བྱ་སྤྱོད།
+Active sale,ཧུར་བརྩོན་གྱིས་ཚོང་འགྲེམས།
+add,ཁ་སྣོན།
+Add items from the selector to start building this sale.,ཚོང་དོན་འདི་བཟོ་འགོ་ཚུགས་ཆེད་འདེམས་སྒྲུག་བྱེད་མཁན་ནས་ཅ་ལག་ཁ་སྣོན་བྱེད་དགོས།
+Add more value to an existing gift card,ད་ཡོད་ཀྱི་ལག་རྟགས་ལ་རིན་ཐང་མང་བ་སྣོན་དགོས།
+Add New Address,ཁ་བྱང་གསར་པ་ཁ་སྣོན།
+Add new customer,ཚོང་ཤག་གསར་པ་ཁ་སྣོན།
+Add on New Line,ཐིག་གསར་པའི་ཐོག་ཁ་སྣོན་བྱེད་པ།
+Add Payment,སྤྲོད་དངུལ་ཁ་སྣོན་བྱེད་པ།
+Add payment to invoice,བྱུང་འཛིན་ལ་དངུལ་ཁ་སྣོན་བྱེད་པ།
+Add/Edit Coupon Conditions,ཁུག་མ་ཆ་རྐྱེན་ཁ་སྣོན/རྩོམ་སྒྲིག
+Additional Discount,ཁ་སྣོན་ཆག་ཡང་།
+Additional Discount %,ཁ་སྣོན་ཆག་ཡང་%
+Address Line 1,ཁ་བྱང་གྲལ་ཐིག་དང་པོ།
+Address not found,ཁ་བྱང་རྙེད་མ་སོང་།
+Adjust the quantity or enable negative stock to continue.,གྲངས་ཚད་སྙོམ་སྒྲིག་བྱེད་པའམ་ཡང་ན་ལོག་པའི་རྒྱུ་ནོར་མུ་མཐུད་དུ་བྱེད་ཐུབ།
+Adjustment,སྙོམ་སྒྲིག་བྱེད་པ།
+After returns,ཕྱིར་ལོག་རྗེས།
+Against,ངོ་རྒོལ།
+Against Name,མིང་ལ་ངོ་རྒོལ།
+Age Bracket,ལོ་ཚད།
+All,ཚང་མ།
+All Caught Up!,ཚང་མ་འཛིན་བཟུང་བྱས།
+All invoices are synchronized,བྱུང་འཛིན་ཚང་མ་དུས་མཉམ་དུ་བཟོས་ཡོད།
+All pending invoices are up to date,བསྒུག་ཟིན་པའི་བྱུང་འཛིན་ཚང་མ་དུས་བསྟུན་ཡིན།
+All Profiles,ངོ་སྤྲོད་ཚང་མ།
+All Synchronized,ཚང་མ་མཉམ་སྒྲིག་བྱས།
+All visible invoices are fully settled.,མཐོང་ཐུབ་པའི་བྱུང་འཛིན་ཚང་མ་ཆ་ཚང་རྩིས་སྤྲོད་བྱས་ཟིན།
+All Warehouses,མཛོད་ཁང་ཚང་མ།
+Allowed UOM is {0},ཆོག་པའི་UOMནི་{0}ཡིན།
+Always fetch items from server (ignore local cache),ག་དུས་ཡིན་ཡང་སར་བར་ནས་ཅ་ལག་འཁྱེར་ཤོག (ས་གནས་ཀྱི་མཛོད་ཁང་ལ་ཁ་ཡ་མི་བྱེད།)
+Amount,དངུལ་འབོར།
+Amount already received,ཐོབ་ཟིན་པའི་དངུལ་འབོར།
+Amount exceeds profile cash movement max amount.,དངུལ་འབོར་དེ་དངུལ་འབབ་ཀྱི་ཆེས་མཐོའི་དངུལ་འབོར་ལས་བརྒལ་ཡོད།
+Amount must be greater than zero.,གྲངས་འབོར་ཀླད་ཀོར་ལས་ཆེ་བ་དགོས།
+Amount received from customer,ཚོང་ཤག་ནས་ཐོབ་པའི་དངུལ་འབོར།
+Appearance and user-level preferences for the current session.,མིག་སྔའི་ཚོགས་ཐུན་གྱི་ཕྱི་ཚུལ་དང་སྤྱོད་མཁན་རིམ་པའི་དགའ་མོས།
+Applied,བཀོལ་སྤྱོད་བྱས།
+Apply,འཇུག་པ།
+Apply Gift Card,ལག་རྟགས་སྤྱོད་པ།
+Apply Offer,འབུལ་བ་འཇུག་པ།
+Apply On,ཞུ་གཏུག་བྱེད་པ།
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,ཁྱོད་ཀྱིས་བྱུང་འཛིན་འདིའི་སྟེང་དུ་བསྐྱར་ལེན་བྱེད་འདོད་པའི་དངུལ་འབོར་ཁོ་ན་བཀོལ་སྤྱོད་བྱེད་དགོས། ལྷག་མ་དེ་ཤོག་བྱང་སྟེང་དུ་བསྡད་ཡོད།
+Apply Redemption,བླུ་ཐབས་སྤྱོད་པ།
+Applying,ཞུ་གཏུག་བྱེད་པ།
+Apps,མཉེན་ཆས།
+Are you sure you want to close? All entered data will be lost.,ཁྱེད་རང་ཁ་རྒྱག་འདོད་ཡོད་པ་ངེས་བརྟན་ཡིན་ནམ། ནང་འཇུག་བྱས་པའི་གཞི་གྲངས་ཚང་མ་བརླག་འགྲོ་གི་རེད།
+Attributes (Size/Color),ཁྱད་ཆོས། (ཆེ་ཆུང་། ཁ་དོག)
+Auto Allocate Payment Amount,རང་འགུལ་གྱིས་སྤྲོད་པའི་དངུལ་གྲངས།
+Auto Reconcile,རང་འགུལ་མཐུན་སྒྲིལ།
+Auto reconciliation completed after payment submit.,དངུལ་སྤྲོད་རྗེས་རང་འགུལ་གྱི་མཐུན་སྒྲིལ་མཇུག་སྒྲིལ་ཡོད།
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,རང་འགུལ་གྱིས་འདུམ་འགྲིག་ལེགས་འགྲུབ་བྱུང་ཡོད། བགོ་འགྲེམས་བྱས་པ། {0}{1}. ལྷག་མའི་ཕུལ་བྱུང་: {0}{2}.
+Available Actions,བྱ་སྤྱོད་ཡོད་པ།
+Available QTY,ཐོབ་པའི་གྲངས་འབོར།
+Available:,ཡོད་པ།
+Average Basket,ཆ་སྙོམས་སྒམ།
+Average Bill,ཆ་སྙོམས་བྱུང་འཛིན།
+Average Ticket,ཆ་སྙོམས་འཛིན་བྱང་།
+Avg Bill,ཆ་སྙོམས་བྱུང་འཛིན།
+Avg Invoice,ཆ་སྙོམས།
+Avg Invoice Profit,བྱུང་འཛིན་ཁེ་སྤོགས།
+Avg Invoice Value,ཆ་སྙོམས་བྱུང་འཛིན་རིན་ཐང་།
+Avg Purchase Frequency,ཆ་སྙོམས་ཉོ་སྒྲུབ་ཀྱི་བསྐྱར་ཟློས།
+Awesome,ཧ་ལས་པ།
+Awesome Dashboard,མཛུབ་སྟོན་སྒྲོམ་གཞི་ཡག་པོ་འདུག
+Awesome Dashboard is disabled for the selected POS Profile.,འདེམས་སྒྲུག་བྱས་པའི་POSགསལ་སྡུད་ཀྱི་ཆེད་དུ་ཨེ་ཝེ་སོམ་གྱི་མཛུབ་ཁྲིད་སྒྲོམ་དེ་ལྕོགས་མིན་བཟོས་ཡོད།
+Awesome Dashboard is unavailable for the selected scope.,འདེམས་སྒྲུག་བྱས་པའི་ཁྱབ་ཁོངས་ལ་འཇིགས་སུ་རུང་བའི་མཛུབ་ཁྲིད་སྒྲོམ་མེད་པ་རེད།
+Awesome Dashboard is visible only to POS supervisors.,མཛེས་སྡུག་ལྡན་པའི་མཛུབ་ཁྲིད་སྒྲོམ་དེ་POSལྟ་རྟོག་པ་ཁོ་ནར་མཐོང་ཐུབ།
+Back,ཕྱིར་ལོག
+Back Office Cash Account,ཡིག་ཚང་རྒྱབ་དངུལ་རྩིས་ཁྲ།
+Back Office Cash Account (Optional Override),ཡིག་ཚང་རྒྱབ་ཀྱི་དངུལ་རྩིས་ཁྲ། (འདམ་ཀའི་བཀག་འགོག)
+Back office cash account is required.,ཡིག་ཚང་རྒྱབ་ཀྱི་དངུལ་རྩིས་ཁྲ་དགོས།
+Back to {0},{0} ལ་ལོག་དགོས།
+Background processing did not finish in time.,རྒྱབ་ལྗོངས་ལས་སྣོན་དུས་ཐོག་ཏུ་མཇུག་སྒྲིལ་མེད།
+Background processing failed for Invoice {0}: {1},བྱུང་འཛིན་ {0}: {1} ལ་རྒྱབ་ལྗོངས་ལས་སྣོན་འཐུས་ཤོར་བྱུང་ཡོད།
+Background Submission Failed,རྒྱབ་ལྗོངས་འབུལ་ལམ་འཐུས་ཤོར་ཕྱིན་པ།
+Background sync interval (seconds),རྒྱབ་ལྗོངས་མཉམ་སྒྲིག་བར་མཚམས་(སྐར་ཆ)
+Balance,ལྷག་མ།
+Balance will be updated when connection is restored,མཐུད་ཁ་སླར་གསོ་བྱས་རྗེས་ལྷག་མ་གསར་བརྗེ་བྱ་རྒྱུ་རེད།
+Balances still pending,ལྷག་འཕྲོ་ད་དུང་བསྡད་མེད།
+Barcode,ཐིག་ཁྲམ།
+Barcode / QR Ready,ཐིག་ཁྲམ་/QRགྲ་སྒྲིག
+Barcode Label Printing,ཐིག་རིས་མཚོན་རྟགས་པར་སྐྲུན།
+Base Paid:,གཞི་རྩའི་གླ་ཆ་སྤྲད་ཡོད།
+Base Recv:,གཞི་གྲངས་བསྐྱར་བཟོ།
+Base:,གཞི་རྟེན།
+Basic Information,གཞི་རྩའི་ཆ་འཕྲིན།
+Batch,སྡེ་ཚན།
+Batch Information,སྡེ་ཚན་གྱི་ཆ་འཕྲིན།
+Before any return workflow,ཕྱིར་ལོག་ལས་ཀའི་འགྲོ་ལུགས་གང་རུང་མ་བྱུང་གོང་།
+Before returns,ཕྱིར་ལོག་མ་བྱས་གོང་།
+Best Day,ཉིན་མོ་ཡག་ཤོས།
+Best Seller,ཚོང་ཤག་ཡག་ཤོས།
+Book expense or deposit from active shift.,ལས་ཀའི་དུས་ཚོད་ནས་དེབ་ཀྱི་འགྲོ་གྲོན་ཡང་ན་དངུལ་བུན་བཙུགས།
+Branch / Location-wise Report,ཡན་ལག/ས་གནས་སོ་སོའི་སྙན་ཞུ།
+Brand-wise,ཚོང་རྟགས་ཀྱི་ཐད་ནས།
+Breakdown,ཆག་གྲུབ།
+Browse,ལྟ་བཤེར་བྱེད་པ།
+Build Time:,བཟོ་སྐྲུན་དུས་ཚོད།
+Built with Frappe,ཕྲེ་པེ་དང་མཉམ་དུ་བཟོས།
+Bundle,སྦྲེལ་མཐུད།
+Buying Price,ཉོ་སྒྲུབ་རིན་གོང་།
+Cache cleared successfully,མཛོད་ལམ་ལྷོང་ངང་གཙང་སེལ་བྱས།
+Cache Usage,མཛོད་བེད་སྤྱོད།
+cache used,མཛོད་བེད་སྤྱོད་བྱས།
+Calculating...,རྩིས་རྒྱག་པ།
+Camera Access Required,པར་ཆས་འཛུལ་སྤྱོད་དགོས་པ།
+Camera access was aborted. Please try again.,པར་ཆས་འཛུལ་སྤྱོད་མཚམས་འཇོག་བྱས། ཡང་བསྐྱར་ཚོད་ལྟ་གནང་རོགས།
+Camera constraints not supported by your device. Trying fallback settings...,ཁྱེད་ཀྱི་ཡོ་ཆས་ཀྱིས་པར་ཆས་ཀྱི་ཚད་བཀག་ལ་རྒྱབ་སྐྱོར་བྱེད་ཀྱི་མེད། ཕྱིར་ལོག་སྒྲིག་སྟངས་ཚོད་ལྟ་བྱེད་བཞིན་ཡོད།
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,པར་ཆས་བྲེལ་འཚུབ་ཆེ་བའམ་ཡང་ན་མཉེན་ཆས་གཞན་ཞིག་གིས་བཀག་ཡོད། པར་ཆས་མཉེན་ཆས་གཞན་ཁ་རྒྱབ་ནས་བསྐྱར་དུ་ཚོད་ལྟ་བྱོས།
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,པར་ཆས་ཀྱི་ཆོག་མཆན་མ་སྤྲད་པ་རེད། ཁྱེད་རང་གི་དྲ་ངོས་སྒྲིག་སྟངས་ནང་པར་ཆས་ལ་འཛུལ་ཞུགས་བྱེད་དུ་འཇུག་པ་དང་ཤོག་ངོས་གསར་པ་བསྐྲུན་རོགས།
+Camera scanner is locked until the current error is acknowledged,མིག་སྔའི་ནོར་འཁྲུལ་ངོས་ལེན་མ་བྱས་བར་དུ་པར་ཆས་བཤེར་ཆས་བཀག་ཡོད།
+Camera started but the video stream did not load in time. Please try again.,པར་ཆས་འགོ་འཛུགས་བྱས་ཀྱང་བརྙན་འཕྲིན་རྒྱུན་ལམ་དུས་ཐོག་ཏུ་མངོན་ཐུབ་ཀྱི་མིན་འདུག ཡང་བསྐྱར་ཚོད་ལྟ་གནང་རོགས།
+Cancel cash movement {0}?,དངུལ་གྱི་འགུལ་སྐྱོད་{0}ཆ་མེད་གཏོང་ངམ།
+Cancel Payment,དངུལ་སྤྲོད་ཆ་མེད་གཏོང་བ།
+Cancel Sale,ཕྱིར་འཚོང་ཕྱིར་འཐེན།
+Cancel Sale ?,བཙོངས་པ་ཕྱིར་འཐེན་བྱེད་དམ།
+Cancelled,ཕྱིར་འཐེན་བྱས།
+Cannot add an item with zero or negative quantity.,ཀླད་ཀོར་ཡང་ན་ལོག་གྲངས་ཡོད་པའི་རྣམ་གྲངས་ཁ་སྣོན་བྱེད་མི་ཐུབ།
+Cannot clear cache while offline,དྲ་རྒྱ་མེད་པའི་སྐབས་སུ་མཛོད་བསུབ་མི་ཐུབ།
+Cannot redeem customer credit more than invoice total,ཚོང་ཤག་གི་བུ་ལོན་དེ་བྱུང་འཛིན་བསྡོམས་འབོར་ལས་མང་བ་བླངས་མི་ཐུབ།
+Cannot redeem gift cards more than invoice total,ལག་རྟགས་བྱང་བུའི་བྱུང་འཛིན་བསྡོམས་འབོར་ལས་མང་བ་བླངས་མི་ཐུབ།
+Cannot Save Offline Invoice:,དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་བྱུང་འཛིན་ཉར་ཚགས་བྱེད་མི་ཐུབ།
+Cannot Save Offline Payment:,དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་དངུལ་སྤྲོད་རྒྱུ་གསོག་འཇོག་བྱེད་མི་ཐུབ།
+Card,ཤོག་བྱང་།
+Card / Online,ཤོག་བྱང་། དྲ་ཐོག
+Card health after the last live lookup,མཐའ་མའི་ཐད་གཏོང་ལྟ་ཞིབ་རྗེས་ཀྱི་ཤོག་བྱང་འཕྲོད་བསྟེན།
+Cards,ཤོག་བྱང་།
+Cart,ཤིང་རྟ།
+Cash,དངུལ་དངུལ།
+Cash back to customers,ཚོང་ཤག་ལ་དངུལ་ཕྱིར་སྤྲོད།
+Cash Collections,དངུལ་བསྡུ་རུབ།
+Cash Deposit is disabled for this POS Profile.,POS གསལ་སྡུད་འདིའི་ཆེད་དུ་དངུལ་འཇོག་བྱེད་མི་ཐུབ།
+Cash Drawer Snapshot,དངུལ་ཁུག་སྒམ་གྱི་པར་རིས།
+Cash In Hand,ལག་ཏུ་དངུལ་ཡོད།
+Cash Movement,དངུལ་གྱི་འགུལ་སྐྱོད།
+Cash movement cancelled,དངུལ་གྱི་སྤོ་བཤུད་མེད་པར་བཟོས་པ།
+Cash movement deduction applied,དངུལ་འབབ་གཅོག་འཕྲི་ལག་བསྟར་བྱས་པ།
+Cash movement deleted,དངུལ་གྱི་འགུལ་སྐྱོད་བསུབ་པ།
+Cash movement is disabled for this POS Profile.,POS གསལ་སྡུད་འདིའི་ཆེད་དུ་དངུལ་འབབ་འགུལ་སྐྱོད་བྱེད་མི་ཐུབ།
+Cash Movement is disabled in current POS Profile.,ད་ལྟའི་POSགསལ་སྡུད་ནང་དངུལ་གྱི་འགུལ་སྐྱོད་བཀག་ཡོད།
+Cash movement saved offline,དངུལ་གྱི་འགུལ་སྐྱོད་དྲ་རྒྱའི་ཕྱི་རོལ་དུ་ཉར་ཚགས་བྱས།
+Cash movement submitted,དངུལ་གྱི་འགུལ་སྐྱོད་ཕུལ་ཡོད།
+Cash Movements,དངུལ་གྱི་སྤོ་སྒྱུར།
+Cash payment cannot be less than invoice total when partial payment is not allowed,ཆ་ཤས་སྤྲོད་མི་ཆོག་པའི་སྐབས་དངུལ་སྤྲོད་རྒྱུ་དེ་བྱུང་འཛིན་བསྡོམས་འབོར་ལས་ཉུང་བ་བྱེད་མི་ཆོག
+Cash returned after payment,དངུལ་སྤྲད་རྗེས་ཕྱིར་སློག་བྱས་པ།
+Cashier,དངུལ་འཛིན་པ།
+Cashier Access,དངུལ་གཉེར་འགྲོ་ལུགས།
+Cashier identity and appearance preferences.,དངུལ་ཁང་གི་ངོ་བོ་དང་ཕྱི་ཚུལ་གྱི་དགའ་མོས།
+Cashier PIN,དངུལ་གཉེར་པ་PIN
+Cashier PIN saved successfully.,དངུལ་ཁང་གི་PINལེགས་འགྲུབ་བྱུང་ནས་ཉར་ཚགས་བྱས།
+Cashiers,དངུལ་འཛིན་པ།
+Cashier-wise,དངུལ་གཉེར་མཁས་པ།
+Categories,སྡེ་ཚན།
+Category,སྡེ་ཚན།
+Category / Brand / Variant Report,དབྱེ་ཁག / ཚོང་རྟགས། / འགྱུར་ལྡོག་སྙན་ཞུ།
+Category-wise,རིགས་དབྱེའི་ཆ་ནས།
+Category-wise Margin,དབྱེ་ཁག་ལྟར་མཐའ་ཚད།
+Certificate,ལག་ཁྱེར།
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,ལག་འཁྱེར་མེད་པའམ་ཡིད་ཆེས་མེད་པ། QZ ཡིས་གཏན་འཁེལ་གྱི་ཌའི་ལོག་སྟོན་སྲིད།
+Certificate is trusted. Silent QZ printing is active.,ལག་ཁྱེར་ལ་ཡིད་ཆེས་ཡོད། ཁུ་སིམ་མེའི་QZཔར་སྐྲུན་བྱེད་བཞིན་ཡོད།
+Change,འགྱུར་བ།
+Change allocation repaired,འགྱུར་ལྡོག་བགོ་བཤའ་བཅོས་སྒྲིག་བྱས།
+Change Price,རིན་གོང་བསྒྱུར་བ།
+Change Return,བརྗེ་སྒྱུར་ཕྱིར་ལོག
+Change Returned,བསྒྱུར་བཅོས་ཕྱིར་ལོག་བྱས།
+Change terminal cashier,མཐའ་མཚམས་དངུལ་འཛིན་བརྗེ་དགོས།
+Charge Heads,གློག་ཁུར་མགོ།
+Charges,རིན་པ།
+Charges not found,གླ་ཆ་རྙེད་མ་སོང་།
+Check Balance,དངུལ་ལྷག་བརྟག་དཔྱད།
+Check balance for any card. Supervisors can issue and top up cards here.,ཤོག་བྱང་གང་རུང་ལ་ལྷག་མ་ལྟ་ཞིབ་བྱོས། ལྟ་རྟོག་པ་ཚོས་འདིར་ཤོག་བྱང་སྤྲོད་ཐུབ་པ་དང་ཁ་གསབ་བྱེད་ཐུབ།
+Check balance only,ལྷག་མ་ཁོ་ནར་ཞིབ་བཤེར་བྱེད་དགོས།
+Check for new commits,ཁས་ལེན་གསར་བ་ཞིབ་བཤེར་བྱེད་པ།
+Check for Updates,གསར་བཅོས་ལ་ཞིབ་བཤེར།
+Check live balance before applying redemption,བསྐྱར་ལེན་མ་བྱེད་གོང་དངུལ་ལྷག་མ་ཞིབ་བཤེར་བྱེད་དགོས།
+Check live balance before redemption,བསྐྱར་ལེན་མ་བྱས་གོང་དངུལ་ལྷག་མ་ཞིབ་བཤེར་བྱེད་དགོས།
+Checking...,ཞིབ་བཤེར་བྱེད་བཞིན་ཡོད།
+Cheque/Reference Date,དངུལ་འཛིན་/གཞི་གྲངས་ཚེས་གྲངས།
+Cheque/Reference No,དངུལ་འཛིན་/གཞི་གྲངས་ཨང་།
+Choose the cashier currently operating this terminal.,ད་ལྟ་མཐུད་ཁང་འདི་བཀོལ་སྤྱོད་བྱེད་བཞིན་པའི་དངུལ་ཁང་འདེམས།
+City,གྲོང་ཁྱེར།
+Clear,གསལ་བ།
+Clear All,ཚང་མ་གཙང་བཟོ།
+Clear all barcode items,ཐིག་རིས་རྣམ་གྲངས་ཚང་མ་བསུབ་དགོས།
+Clear all purchase order items,ཉོ་སྒྲུབ་མངགས་ཐོའི་རྣམ་གྲངས་ཚང་མ་གཙང་སེལ་བྱེད་པ།
+Clear Search,འཚོལ་བཤེར་གསལ་བ།
+Clearing local cache...,ས་གནས་ཀྱི་འདྲ་མཛོད་བསུབ་བཞིན་ཡོད།
+Click to refresh,གསར་བརྗེ་བྱེད་པར་སྣུན།
+Client CPU Lag:,མཁོ་སྤྲོད་བྱེད་མཁན་གྱི་CPU Lag:
+Client Memory Usage:,མཁོ་སྤྲོད་པའི་དྲན་ཤེས་བེད་སྤྱོད།
+Client Metrics,མཁོ་སྤྲོད་ཚད་གཞི།
+Close about dialog,གླེང་མོལ་སྐོར་ཁ་རྒྱག་པ།
+Close cashier switcher,དངུལ་ཁང་བརྗེ་སྒྱུར་ཁ་རྒྱག་པ།
+Close closing shift dialog,སྒོ་བརྒྱབ་པའི་བརྗེ་སྒྱུར་གླེང་མོལ།
+Close column selector,ཀེར་ཐིག་འདེམས་བྱེད་ཁ་རྒྱབ།
+Close Dialog,གླེང་མོལ་ཁ་རྒྱག་པ།
+Close drafts dialog,ཟིན་བྲིས་གླེང་མོལ་ཁ་རྒྱག་པ།
+Close invoice details dialog,བྱུང་འཛིན་ཞིབ་ཕྲའི་གླེང་མོལ་ཁ་རྒྱག་པ།
+Close invoice management,བྱུང་འཛིན་དོ་དམ་ཁ་རྒྱག་པ།
+Close offline invoices dialog,དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་བྱུང་འཛིན་ཌའི་ལོག་ཁ་རྒྱག་པ།
+Close packing list dialog,ཐུམ་སྒྲིལ་ཐོ་གཞུང་གླེང་མོལ་ཁ་རྒྱག་པ།
+Close returns dialog,ཕྱིར་ལོག་ཌའི་ལོག་ཁ་རྒྱབ།
+Close sales orders dialog,ཚོང་མངགས་གླེང་མོལ་ཁ་རྒྱག་པ།
+Close Scanner,བཤེར་ཆས་ཁ་རྒྱག་པ།
+Close scanner dialog,བཤེར་ཆས་ཌའི་ལོག་ཁ་རྒྱག་པ།
+Close Settings,སྒྲིག་སྟངས་ཁ་རྒྱབ།
+Closing Amount,མཇུག་བསྡུའི་དངུལ་འབོར།
+Closing POS Shift,POS བརྗེ་སྒྱུར་ཁ་རྒྱག་པ།
+Closing Snapshot Available,མཇུག་སྒྲིལ་གྱི་པར་ལེན་ཡོད།
+Code,ཨང་རྟགས།
+Code scanned successfully,གསང་གྲངས་ལེགས་འགྲུབ་བྱུང་།
+COGS,COGS
+Collapse item details,རྣམ་གྲངས་ཀྱི་ཞིབ་ཕྲ།
+Collected,བསྡུ་རུབ་བྱས།
+Cols,ཀོལ་སི།
+Columns,ཀ་རིལ།
+commits,ཁས་ལེན།
+Completed and active sales in this range,ཁྱབ་ཁོངས་འདིའི་ནང་ཚོང་གཉེར་མཇུག་སྒྲིལ་བ་དང་བྱེད་སྒོ་སྤེལ་བ།
+Completed returns will appear here.,མཇུག་སྒྲིལ་བའི་ཕྱིར་ལོག་འདིར་མངོན་རྒྱུ་རེད།
+Confirm,གཏན་འཁེལ་བྱེད་པ།
+Confirm Close,གཏན་འཁེལ་བྱེད་པ།
+Confirm Mobile Number,ཁ་པར་ཨང་གྲངས་གཏན་འཁེལ།
+Confirm PIN,PIN ངེས་གཏན་བཟོས།
+Connect,མཐུད་པ།
+Connect printer and manage certificate,དཔར་འཕྲུལ་སྦྲེལ་མཐུད་དང་དཔང་ཡིག་དོ་དམ།
+Connecting to QZ Tray...,QZ སྒམ་ལ་མཐུད་བཞིན་ཡོད།
+Connection problem while submitting invoice,འཛིན་ཤོག་འབུལ་སྐབས་འབྲེལ་མཐུད་དཀའ་ངལ།
+Connections:,འབྲེལ་མཐུད།
+Connectivity and cached prerequisite status were rechecked.,མཐུད་སྣེ་དང་མཛོད་དུ་བཞག་པའི་སྔོན་འགྲོའི་ཆ་རྐྱེན་གནས་ཚུལ་ཡང་བསྐྱར་ཞིབ་བཤེར་བྱས།
+Continue Editing,མུ་མཐུད་རྩོམ་སྒྲིག་བྱེད་པ།
+Could not fetch latest balance from server,སར་བར་ནས་ལྷག་མ་གསར་ཤོས་ལེན་མ་ཐུབ།
+Count,གྲངས།
+Country,རྒྱལ་ཁབ།
+Coupon,ཀོ་པོན།
+Coupons,ཁེ་སྤོགས།
+Cover,འགེབས་ཤོག
+CPU Cores:,སི་པི་ཡུ་ལྟེ་བ།
+Create,གསར་སྐྲུན།
+Create and load a new prepaid card,སྔོན་སྤྲོད་བྱང་བུ་གསར་པ་བཟོས་ནས་བླུགས།
+Create and preload a new gift card,ལག་རྟགས་གསར་བ་གསར་བཟོ་དང་སྔོན་འཇུག་བྱེད་པ།
+Create Bill,དངུལ་འཛིན་བཟོས།
+Create Customer,ཚོང་ཤག་གསར་བཟོ།
+Create New Item,རྣམ་གྲངས་གསར་པ་བཟོས།
+Create or change your PIN,PIN བཟོ་བའམ་ཡང་ན་བསྒྱུར་བ།
+Create PIN,PIN བཟོས།
+Create POS Opening Shift,POS ཁ་ཕྱེ་བའི་བརྗེ་སྒྱུར་གསར་བཟོ།
+Create Purchase Order,ཉོ་སྒྲུབ་མངགས་ཐོ་བཟོས།
+Create Return,ཕྱིར་ལོག་གསར་བཟོ།
+Create return from invoice,བྱུང་འཛིན་ནས་ཕྱིར་ལོག་བཟོས།
+Create Supplier,མཁོ་སྤྲོད་པ་གསར་འཛུགས་བྱས།
+Credit and Output,ཡིད་རྟོན་དང་ཐོན་སྐྱེད།
+Credit Note,བུ་ལོན་དྲན་ཐོ།
+Credit Outstanding,བུ་ལོན་ལྷག་འཕྲོ།
+Credit sales remaining to be collected,བུ་ལོན་ཕྱིར་འཚོང་ལྷག་མ་བསྡུ་ལེན་བྱ་རྒྱུ།
+Critical,གནད་འགག་ཅན།
+Currency,དངུལ་ལོར།
+Current,ད་ལྟའི་ཆར།
+Current Event Loop Lag:,ད་ལྟའི་བྱུང་རིམ་གྱི་བསྐྱར་ལོག་འགོར་འགྱངས།
+Current Month,ད་ལྟའི་ཟླ་བ།
+Current PIN,ད་ལྟའི་PIN
+Current Profile,ད་ལྟའི་གནས་ཚུལ།
+Current redeemable value on the gift card,ལག་རྟགས་བྱང་བུའི་ཐོག་གི་མིག་སྔའི་བསྐྱར་ལེན་ཐུབ་པའི་རིན་ཐང་།
+Current User,ད་ལྟའི་སྤྱོད་མཁན།
+Custom,ལུགས་སྲོལ།
+Custom Due Days,རང་མོས་ཉིན་མོ།
+Custom items per page,ཤོག་ངོས་རེར་རང་མོས་རྣམ་གྲངས།
+Customer,ཉོ་མཁན།
+Customer already selected,ཚོང་ཤག་འདེམས་ཟིན་ཟིན།
+Customer Balance,ཚོང་ཤག་ལྷག་མ།
+Customer balance unavailable offline,ཚོང་ཤག་གི་ལྷག་དངུལ་དྲ་རྒྱའི་ཕྱི་རོལ་དུ་ཐོབ་མི་ཐུབ།
+Customer created successfully.,ཚོང་ཤག་གིས་ལེགས་འགྲུབ་བྱུང་ཡོད།
+Customer creation failed.,ཚོང་ཤག་གསར་བཟོ་བྱེད་མ་ཐུབ།
+Customer Details,ཚོང་ཤག་གི་ཞིབ་ཕྲ།
+Customer display channel is missing,ཚོང་ཤག་གི་འགྲེམས་སྟོན་རྒྱུ་ལམ་མེད་པ།
+Customer display was blocked. Please allow pop-ups for this site.,ཚོང་ཤག་གི་འགྲེམས་སྟོན་བཀག་ཡོད། དྲ་ཚིགས་འདིའི་ཆེད་དུ་འཕྱུར་ཡོང་ཆོག་པ་གནང་རོགས།
+Customer group is required,ཚོང་ཤག་སྡེ་ཚན་དགོས།
+Customer is required to add payment,ཚོང་ཤག་གིས་དངུལ་ཁ་སྣོན་བྱེད་དགོས།
+Customer Name is required,ཚོང་ཤག་གི་མིང་དགོས།
+Customer not selected,ཚོང་ཤག་བདམས་མེད།
+Customer Report,ཚོང་ཤག་གི་སྙན་ཞུ།
+Customer saved offline,ཚོང་ཤག་གིས་དྲ་རྒྱའི་ཕྱི་རོལ་དུ་ཉར་ཚགས་བྱས།
+Customer Screen,ཚོང་ཤག་གི་བརྙན་ཤེལ།
+Customer territory is required,ཚོང་ཤག་གི་མངའ་ཁོངས་དགོས།
+Customer updated successfully.,ཚོང་ཤག་གིས་ལེགས་འགྲུབ་བྱུང་བའི་གསར་བརྗེ་བྱས།
+Customer-facing tools and printer setup.,ཚོང་ཤག་ལ་ཁ་གཏད་པའི་ལག་ཆ་དང་པར་འཕྲུལ་སྒྲིག་བཀོད།
+Customers,ཚོང་ཤག
+Customers not found,ཚོང་ཤག་མ་རྙེད།
+Daily cashier actions without scrolling.,ཉིན་ལྟར་དངུལ་ཁང་གི་བྱ་སྤྱོད།
+Daily Sales,ཉིན་རེའི་ཚོང་འགྲེམས།
+Daily Sales Summary,ཉིན་རེའི་ཚོང་དོན་ཕྱོགས་བསྡུས།
+Data loaded in form. Review and submit.,གཞི་གྲངས་འབྲི་ཤོག་ནང་བླུགས་ཡོད། བསྐྱར་ཞིབ་དང་འབུལ་དགོས།
+Database Health,གཞི་གྲངས་མཛོད་འཕྲོད་བསྟེན།
+Database health affects overall system speed and reliability.,གཞི་གྲངས་མཛོད་ཀྱི་འཕྲོད་བསྟེན་གྱིས་སྤྱིར་བཏང་གི་མ་ལག་གི་མགྱོགས་ཚད་དང་བློ་གཏད་ཆོག་ཚད་ལ་ཤུགས་རྐྱེན་ཐེབས་ཡོད།
+Database Info,གཞི་གྲངས་མཛོད་ཀྱི་ཆ་འཕྲིན།
+Date,ཚེས་གྲངས།
+Day ?,ཉིན་མོ།
+days,ཉིན།
+Day-wise (MTD),ཉིན་ལྟར་(MTD)
+Day-wise Movement,ཉིན་ལྟར་འགུལ་སྐྱོད།
+Dead Stock,རྒྱུ་ནོར་ཤི་བ།
+Dead Stock Items,ཅ་ལག་ཤི་ཟིན་པ།
+Decrease quantity,གྲངས་ཚད་ཉུང་དུ་གཏོང་བ།
+Default,སྔོན་སྒྲིག
+Default:,སྔོན་སྒྲིག:
+Delete,སུབ་པ།
+Delete cancelled cash movement {0}?,ཆ་མེད་དུ་བཏང་བའི་དངུལ་གྱི་འགུལ་སྐྱོད་{0}བསུབས་དགོས་སམ།
+Delete Draft,ཟིན་བྲིས་སུབ་པ།
+Delete draft invoice,བྱུང་འཛིན་ཟིན་བྲིས་སུབ་པ།
+Delete draft invoice {0}?,ཟིན་བྲིས་བྱུང་འཛིན་ {0} བསུབས་དགོས་སམ།
+Delete Invoice,བྱུང་འཛིན་སུབ་པ།
+Delete offline invoice,དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་བྱུང་འཛིན་སུབ་པ།
+Delivered,སྐྱེལ་འདྲེན་བྱས།
+Delivery Charges,སྐྱེལ་འདྲེན་རིན་པ།
+Delivery Information,སྐྱེལ་འདྲེན་ཆ་འཕྲིན།
+Delivery Note {0} created,སྐྱེལ་འདྲེན་དྲན་ཐོ་{0}བཟོས་ཡོད།
+Delivery note created,སྐྱེལ་འདྲེན་ཟིན་ཐོ་བཟོས་ཡོད།
+Deployed Bundle:,བཀོལ་སྤྱོད་བྱས་པའི་སྦྲེལ་མཐུད།
+Deposit,གཏའ་འཇོག་།
+Description,འགྲེལ་བཤད།
+Detailed Supplier Breakdown,མཁོ་སྤྲོད་བྱེད་མཁན་གྱི་ཞིབ་ཕྲའི་ཁ་གསབ།
+Detecting formats:,རྩ་སྒྲིག་ཤེས་རྟོགས་བྱེད་པ།
+Device Memory:,ཡོ་ཆས་དྲན་ཤེས།
+Difference,ཁྱད་པར།
+Difference (In Company Currency),ཁྱད་པར་(ཀུང་སིའི་དངུལ་ལོར་ནང་)
+Disable offline mode first to recheck live connectivity.,ཐད་གཏོང་མཐུད་ལམ་བསྐྱར་དུ་བརྟག་དཔྱད་བྱེད་པར་ཐོག་མར་དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་ཐབས་ལམ་མེད་པར་བཟོས།
+Disconnect,མཐུད་མཚམས་བཅད་པ།
+discount,ཆག་ཡང་།
+Discount %,ཆག་ཡང་%།
+Discount / Void / Return Report,ཆག་ཡང་ / སྟོང་ཆ / ཕྱིར་ལོག་སྙན་ཞུ།
+Discount Amount,ཆག་ཡང་དངུལ་འབོར།
+Discount limited by POS Profile,ཆག་ཡང་དེ་POSགསལ་སྡུད་ཀྱིས་ཚད་བཀག་བྱས།
+Discounted Invoices,རིན་གོང་ཆག་ཡང་བཏང་བའི་འཛིན་བྱང་།
+Discounts,ཆག་ཡང་།
+Dismiss,གནས་དབྱུང་བཏང་བ།
+Download Certificate,ལག་ཁྱེར་ཕབ་ལེན།
+Draft,ཟིན་བྲིས།
+Draft invoice deleted,བྱུང་འཛིན་ཟིན་བྲིས་སུབ་པ།
+Draft source,ཟིན་བྲིས་ཀྱི་ཡོང་ཁུངས།
+Drafts,ཟིན་བྲིས།
+Due {0},རྒྱུ་མཚན་ {0}
+Due Date,དུས་ཚོད།
+Duplicate,འདྲ་བཤུས།
+Edit customer,ཚོང་ཤག་རྩོམ་སྒྲིག།
+Edit discount amount,ཆག་ཡང་དངུལ་གྲངས་རྩོམ་སྒྲིག་བྱེད་པ།
+Edit discount percentage,ཆག་ཡང་བརྒྱ་ཆ་བཟོ་བཅོས།
+Edit Gift Application,ལེགས་སྐྱེས་ཞུ་ཡིག་རྩོམ་སྒྲིག་བྱེད་པ།
+Edit item name,རྣམ་གྲངས་ཀྱི་མིང་སྒྲིག་བཅོས།
+Edit quantity,གྲངས་ཚད་རྩོམ་སྒྲིག་བྱེད་པ།
+Edit rate,རྩོམ་སྒྲིག་ཚད།
+Edit unit of measure,ཚད་གཞིའི་ཚད་གཞི་རྩོམ་སྒྲིག།
+Edited,སྒྲིག་འཇུག་བྱས།
+Employee,ལས་བྱེད་པ།
+Enable background sync,རྒྱབ་ལྗོངས་དུས་མཉམ་ལྕོགས་ཅན་བཟོས།
+Enable Customer Display in POS Profile first.,དང་པོ་POSགསལ་སྡུད་ནང་ཚོང་ཤག་མངོན་ཚུལ་ལྕོགས་ཅན་བཟོས།
+Enter a PIN.,PIN བླུགས།
+Enter a valid grams value,ནུས་ལྡན་གྱི་གྷ་རམ་གྱི་རིན་ཐང་ནང་འཇུག་བྱེད།
+Enter new price list rate,རིན་གོང་རེའུ་མིག་གི་རིན་གོང་གསར་པ་བླུགས།
+Enter Quantity,གྲངས་ཚད་བླུགས།
+Enter the cashier PIN to continue.,མུ་མཐུད་དུ་དངུལ་ཁང་གི་PINབླུགས།
+Enter the current PIN first.,ད་ལྟའི་PINདེ་སྔོན་ལ་བླུགས།
+"Enter the current PIN, then choose a new one.",ད་ལྟའི་PINབླུགས་རྗེས་གསར་པ་ཞིག་འདེམས།
+Enter valid grams for scale barcode,ཚད་གཞིའི་ཐིག་རིས་ཆེད་དུ་ནུས་ལྡན་གྱི་གྷ་རམ་བླུགས།
+Entries,ཐོ་འགོད།
+Error accessing camera:,པར་ཆས་འཛུལ་སྤྱོད་ནོར་འཁྲུལ།
+Error calculating prices,རིན་གོང་རྩིས་རྒྱག་ནོར་འཁྲུལ།
+Error fetching customer balance,ཚོང་ཤག་གི་ལྷག་དངུལ་ལེན་སྐབས་ནོར་འཁྲུལ་བྱུང་བ།
+Error in change calculations!,བསྒྱུར་བཅོས་རྩིས་རྒྱག་ནང་ནོར་འཁྲུལ་བྱུང་ཡོད།
+Error Loading Data,གྲངས་ཐོའི་ནང་འཇུག་ནོར་འཁྲུལ།
+Error loading invoice details,བྱུང་འཛིན་ཞིབ་ཕྲ་མངོན་པར་ནོར་འཁྲུལ་བྱུང་བ།
+Error processing invoice,བྱུང་འཛིན་ལས་སྣོན་ནོར་འཁྲུལ།
+Error processing payment,ནོར་འཁྲུལ་ཅན་གྱི་ལས་སྣོན་དངུལ་སྤྲོད་པ།
+Error searching invoices,བྱུང་འཛིན་འཚོལ་བཤེར་ནོར་འཁྲུལ།
+Error submitting invoice:,བྱུང་འཛིན་འབུལ་བའི་ནོར་འཁྲུལ།
+Error submitting invoice: {0},བྱུང་འཛིན་འབུལ་བའི་ནོར་འཁྲུལ། {0}
+Error submitting invoice: No response from server,བྱུང་འཛིན་འབུལ་བའི་ནོར་འཁྲུལ། སར་བར་ནས་ལན་མ་ཐོབ།
+Error updating currency,དངུལ་ལོར་གསར་བཅོས་བྱེད་སྐབས་ནོར་འཁྲུལ།
+Error updating item details,རྣམ་གྲངས་ཀྱི་ཞིབ་ཕྲའི་དུས་བསྟུན་ནོར་འཁྲུལ།
+Est. Purchase,Est. ཉོ་སྒྲུབ།
+Est. Value,Est. རིན་ཐང་།
+Event-loop lag measures how busy your browser is. Lower is better.,བྱུང་རིམ་གྱི་བསྐྱར་ལོག་འགོར་འགྱངས་ཀྱིས་ཁྱེད་ཀྱི་དྲ་ལྗོངས་ག་ཚོད་བྲེལ་ཚུབ་ཡོད་མེད་ཚད་འཇལ་གྱི་ཡོད། དམའ་བ་ཡག་ཤོས་རེད།
+Every,རེ་རེ།
+Exchange Rate,བརྗེ་རེས་རིན་གོང་།
+Expand item details,རྣམ་གྲངས་ཞིབ་ཕྲ་རྒྱ་བསྐྱེད།
+Expected Amount (In Company Currency),རེ་བ་བྱས་པའི་དངུལ་འབོར། (ཀུང་སིའི་དངུལ་ལོར།)
+Expected Cash,རེ་བ་དངུལ་འབབ།
+Expected cash on hand grouped by currency,དངུལ་ལོར་ལ་གཞིགས་ནས་སྡེ་ཚན་དུ་བགོས་པའི་ལག་ཐོག་གི་དངུལ་ལོར་ཚོད་དཔག་བྱེད་པ།
+Expected vs Actual,རེ་བ་དང་དངོས་ཡོད་
+Expense,འགྲོ་གྲོན།
+Expense Account (Optional Override),འགྲོ་གྲོན་རྩིས་ཁྲ་(གདམ་ཀའི་བཀག་འགོག)
+Expense account is required.,འགྲོ་གྲོན་རྩིས་ཁྲ་དགོས།
+Expenses and deposits posted during this shift,ལས་རེས་སྐབས་འདིར་སྤེལ་བའི་འགྲོ་གྲོན་དང་བཅོལ་དངུལ་།
+Expired,དུས་ཚོད་རྫོགས་སོང༌།
+Failed to auto reconcile payments.,དངུལ་སྤྲོད་ལེན་རང་འགུལ་གྱིས་མཐུན་སྒྲིལ་བྱེད་མ་ཐུབ།
+Failed to cancel cash movement,དངུལ་གྱི་འགྲོ་འོང་རྩིས་མེད་གཏོང་མ་ཐུབ་པ།
+Failed to clear cache,མཛོད་གསོག་ཐུབ་མ་སོང་།
+Failed to create item,རྣམ་གྲངས་གསར་བཟོ་བྱེད་མ་ཐུབ།
+Failed to create supplier,མཁོ་སྤྲོད་བྱེད་མཁན་གསར་འཛུགས་བྱེད་མ་ཐུབ།
+Failed to delete cash movement,དངུལ་གྱི་འགུལ་སྐྱོད་བསུབ་མ་ཐུབ་པ།
+Failed to generate scale barcode. Using item barcode only.,ཚད་གཞིའི་ཐིག་རིས་བཟོ་ཐུབ་མ་སོང་། རྣམ་གྲངས་ཀྱི་ཐིག་ཁྲམ་ཁོ་ན་བེད་སྤྱོད་བྱེད་པ།
+Failed to load cash movement context.,དངུལ་གྱི་འགུལ་སྐྱོད་སྐབས་དོན་མངོན་ཐུབ་མ་སོང་།
+Failed to load dashboard data.,མཛུབ་ཁྲིད་སྒྲོམ་གྱི་གཞི་གྲངས་མངོན་འགྱུར་བྱེད་མ་ཐུབ།
+Failed to reload invoice from server,སར་བར་ནས་བྱུང་འཛིན་བསྐྱར་དུ་བླུགས་མ་ཐུབ།
+Failed to submit cash movement,དངུལ་འབབ་སྤོ་སོར་འབུལ་མ་ཐུབ་པའྱི་ཐད།
+Failed to sync offline cash movements,དྲ་ཕྱིའི་དངུལ་གྱི་འགྲོ་འོང་མཉམ་སྒྲིག་བྱེད་མ་ཐུབ།
+Fast cashier actions for active shifts.,ལས་ཀའི་དུས་ཚོད་ལ་དངུལ་ཁང་གི་བྱ་སྤྱོད་མགྱོགས་པོ།
+Fast Moving Items,འགུལ་སྐྱོད་མགྱོགས་པའི་དངོས་པོ།
+Fees,རིན་པ།
+Fetch the latest offline prerequisite updates,དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་སྔོན་འགྲོའི་ཆ་རྐྱེན་གསར་ཤོས་ལེན་དགོས།
+Find a sales order quickly and load it into the current sale.,ཚོང་དོན་བཀའ་མངགས་མགྱོགས་པོ་འཚོལ་ནས་ད་ལྟའི་ཚོང་དོན་ནང་དུ་བླུགས།
+Fixing payment amounts for return invoice...,ཕྱིར་ལོག་བྱུང་འཛིན་གྱི་དངུལ་སྤྲོད་ཚད་གཏན་འཁེལ་བྱེད་པ།
+Flash Off,འོད་འཚེར།
+Flash On,འོད་འཚེར།
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.",'ཐོན་རྫས་སྒྲིག་ཆས་' ཅ་ལག་ལ་མཛོད་ཁང་དང་། རིམ་པ་ཨང་གྲངས། དེ་བཞིན་སྒྲིག་ཆས་སྒྲིག་ཆས་ཨང་གྲངས་བཅས་'ཐུམ་སྒྲིལ་ཐོ་གཞུང་' ཐིག་ཁྲམ་ནས་བསམ་གཞིག་བྱ་རྒྱུ་རེད། གལ་ཏེ་མཛོད་ཁང་དང་ཐོན་རྫས་སྒྲིག་ཆས་གང་རུང་ཞིག་གི་ཐུམ་སྒྲིལ་ཅ་ལག་ཚང་མར་གཅིག་པ་ཡིན་ན། རིན་ཐང་དེ་དག་ཅ་ལག་གཙོ་བོའི་ཐིག་ཁྲམ་ནང་བླུགས་ཐུབ། རིན་ཐང་རྣམས་'ཐུམ་སྒྲིལ་ཐོ་གཞུང་'རེའུ་མིག་ལ་འདྲ་བཤུས་བྱེད།
+Free,རིན་མེད།
+Free Qty,རིན་མེད་གྲངས།
+Frequency,བསྐྱར་འབྱུང་།
+from,ནས།
+From Date,ཚེས་གྲངས་ནས་བཟུང་།
+Fulfillment Details,སྒྲུབ་པའི་ཞིབ་ཕྲ།
+Full Name,མིང་ཆ་ཚང་།
+Gain,ཁེ་ཕན།
+Generate a fresh prepaid card and start it with an opening balance.,སྔོན་སྤྲོད་བྱས་པའི་ཤོག་བྱང་གསར་པ་ཞིག་བཟོས་ནས་དེ་ཁ་ཕྱེ་བའི་ལྷག་མ་ནས་འགོ་འཛུགས།
+Generate and install the certificate to allow fully silent printing without trust prompts.,ཡིད་ཆེས་ཀྱི་བརྡ་སྟོན་མེད་པར་ཁུ་སིམ་ངང་པར་སྐྲུན་བྱེད་ཆོག་པའི་ལག་ཁྱེར་དེ་བཟོས་ནས་སྒྲིག་འཇུག་བྱེད།
+Generate Certificate,ལག་ཁྱེར་བཟོས།
+Generated scale barcode: {0},བཟོས་པའི་ཚད་གཞིའི་ཐིག་ཁྲམ་: {0}
+Get Payments,དངུལ་སྤྲོད་ལེན།
+Gift Card,ལག་རྟགས་བྱང་བུ།
+Gift card amount must be greater than zero.,ལག་རྟགས་ཤོག་བྱང་གི་དངུལ་འབོར་ཀླད་ཀོར་ལས་ཆེ་བ་དགོས།
+Gift Card Code,ལག་རྟགས་ཨང་རྟགས།
+Gift card code is required for redemption,ལག་རྟགས་བྱང་བུའི་ཨང་གྲངས་བསྐྱར་ལེན་བྱེད་པར་དགོས།
+Gift card code is required.,ལག་རྟགས་བྱང་བུའི་ཨང་རྟགས་དགོས།
+Gift card issued successfully.,ལག་རྟགས་བྱང་བུ་ལེགས་འགྲུབ་བྱུང་ཡོད།
+Gift card loaded successfully.,ལག་རྟགས་བྱང་བུ་ལེགས་འགྲུབ་བྱུང་།
+Gift Card Management,ལག་རྟགས་དོ་དམ།
+Gift card payment,ལག་རྟགས་སྤྲོད་པ།
+Gift card redemption requires an online connection,ལག་རྟགས་ཕྱིར་ལེན་བྱེད་པར་དྲ་ཐོག་ནས་མཐུད་དགོས།
+Gift card topped up successfully.,ལག་རྟགས་བྱང་བུ་ལེགས་འགྲུབ་བྱུང་།
+Gift Cards,ལག་རྟགས་བྱང་བུ།
+Go to Frappe Desk,ཕྲེབ་པི་ཡིག་ཅོག་ལ་འགྲོ།
+Grand Total,སྤྱིའི་བསྡོམས་འབོར།
+Gross Margin,སྤྱིའི་ཁེ་སྤོགས།
+Gross Profit,ཁེ་སྤོགས།
+Gross Sales,ཚོང་འབོར།
+Group not found,སྡེ་ཚན་རྙེད་མ་སོང་།
+"Grouped controls for terminal, UI, and session settings.",ཊར་མི་ནཱལ་དང་ཡུ་ཨའི་དང་དུས་ཚོད་སྒྲིག་སྟངས་ཀྱི་ཆེད་དུ་སྡེ་ཚན་བཟོས་པའི་ཚོད་འཛིན།
+Grouped totals for each payment method and currency,དངུལ་སྤྲོད་ཐབས་ལམ་དང་དངུལ་ལོར་སོ་སོའི་བསྡོམས་འབོར་སྡེ་ཚན་བཟོས་པ།
+Hide,གསང་བ།
+Hide Gift Card,ལག་རྟགས་སྦས།
+Hide Non Essential Fields,མེད་དུ་མི་རུང་བའི་ཡིག་དུམ་སྦས།
+Hide quantity decimals,གྲངས་ཚད་བཅུ་ཚག་སྦས།
+Hide search tools,འཚོལ་བཤེར་ལག་ཆ་སྦས།
+Hide zero rated items,ཀླད་ཀོར་གྱི་ཚད་གཞི་ཅན་གྱི་རྣམ་གྲངས་སྦས་དགོས།
+High,མཐོ་བ།
+History,ལོ་རྒྱུས།
+Hourly (Today),ཆུ་ཚོད་རེ་རེར་(དེ་རིང་།)
+How this section works,ཚན་པ་འདིའི་ལས་ཀ་བྱེད་སྟངས།
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.",གལ་ཏེ་གནས་ཚུལ་རྙིང་པ་ལྷག་ཡོད་ན། སྒྲིག་སྟངས་> དྲ་རྒྱའི་ཕྱི་རོལ་དང་དུས་མཉམ་ཁ་ཕྱེ་ནས་དྲ་ཐོག་ཡོད་པའི་སྐབས་སུ་དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་གནས་ཚུལ་བསྐྱར་བཟོ་བྱེད་པ་དེ་ཡང་བསྐྱར་གཡོག་བཀོལ་དགོས།
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.",གལ་ཏེ་ཉེན་བརྡ་དེ་མུ་མཐུད་གནས་ན་སྒྲིག་སྟངས་> དྲ་རྒྱའི་ཕྱི་རོལ་དང་དུས་མཉམ་ཁ་ཕྱེ་ནས་དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་གཞི་གྲངས་གསར་པ་བསྐྲུན་པའམ་ཡང་ན་དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་གཞི་གྲངས་བསྐྱར་བཟོ་བྱེད་པ།
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,ལག་ཁྱེར་དེ་QZ Tray ནང་དུ་ནང་འདྲེན་བྱས་ནས་POS འཕྲུལ་ཆས་རེ་རེའི་སྟེང་ལ་QZ Tray བསྐྱར་དུ་འགོ་འཛུགས།
+In,2016ལོར།
+In stock: {0},མཛོད་ཁང་ནང་། {0}
+Include Batch / Serial,སྡེ་ཚན་/རིམ་སྒྲིག་ཚུད་ཡོད།
+Include Price,རིན་གོང་ཚུད་ཡོད།
+Increase quantity,གྲངས་ཚད་ཇེ་མཐོར་གཏོང་བ།
+IndexedDB,ཟུར་ཐོའི་DB
+Initial Amount,ཐོག་མའི་དངུལ་འབོར།
+Initialize your shift with opening balances,ཁྱེད་རང་གི་ལས་ཀའི་དུས་ཚོད་དེ་ཁ་ཕྱེ་བའི་ལྷག་མ་དང་མཉམ་དུ་འགོ་བཙུགས།
+Initializing application...,ལག་ལེན་འགོ་འཛུགས་བྱེད་པ།
+"Inspect cache, sync, and prerequisite status",འདྲ་མཛོད་དང་མཉམ་སྒྲིག་དང་སྔོན་འགྲོའི་གནས་ཚུལ་ལ་ཞིབ་བཤེར་བྱས།
+Installed Applications,མཉེན་ཆས་སྒྲིག་འཇུག་བྱས་ཟིན།
+Insufficient stock:\n{0},མཛོད་ཁང་མི་འདང་བ།:\n{0}
+Invalid rate,ནུས་མེད་རིན་གོང་།
+Inventory Status Report,ཟོག་ཐོ་གནས་ཚུལ་སྙན་ཞུ།
+Invoice,འཛིན་བྱང་།
+Invoice {0} is Submitted,བྱུང་འཛིན་ {0} ཕུལ་ཟིན།
+Invoice {0} processed successfully,བྱུང་འཛིན་ {0} ལས་སྣོན་ལེགས་འགྲུབ་བྱུང་།
+Invoice {0} submission failed,བྱུང་འཛིན་ {0} འབུལ་མ་ཐུབ།
+Invoice {0} was already submitted,བྱུང་འཛིན་ {0} སྔོན་ནས་ཕུལ་ཟིན།
+Invoice Adjustments,བྱུང་འཛིན་སྙོམ་སྒྲིག།
+Invoice Change,བྱུང་འཛིན་བརྗེ་སྒྱུར།
+Invoice Details,བྱུང་འཛིན་ཞིབ་ཕྲ།
+Invoice is still in draft after background submission.,རྒྱབ་ལྗོངས་ཕུལ་རྗེས་བྱུང་འཛིན་ད་དུང་ཟིན་བྲིས་ནང་ཡོད།
+Invoice Items,བྱུང་འཛིན་རྣམ་གྲངས།
+Invoice Management,བྱུང་འཛིན་དོ་དམ།
+Invoice Mgmt,བྱུང་འཛིན་དོ་དམ།
+Invoice saved offline,བྱུང་འཛིན་དྲ་རྒྱའི་ཕྱི་རོལ་དུ་ཉར་ཚགས་བྱས།
+Invoice submission failed,བྱུང་འཛིན་འབུལ་མ་ཐུབ་པ།
+Invoice Submitted,བྱུང་འཛིན་སྤྲད་ཟིན།
+"Invoice value settled by loyalty points, not cash collection",དངུལ་འཛིན་གྱི་རིན་ཐང་དངུལ་བསྡུ་རུབ་མིན་པར་ཤ་ཞེན་གྱི་སྐར་གྲངས་ཀྱིས་ཐག་གཅོད་བྱས།
+Invoices,འཛིན་བྱང་།
+Invoices already past due date,བྱུང་འཛིན་དུས་ཚོད་ལས་བརྒལ་ཟིན།
+Invoices saved as POS Invoices,བྱུང་འཛིན་དེ་POSབྱུང་འཛིན་ལྟར་ཉར་ཚགས་བྱས།
+Invoices still carrying balances,བྱུང་འཛིན་ད་དུང་ལྷག་མ་འཁྱེར་ཡོད།
+Issue Mode,གནད་དོན་ཐབས་ལམ།
+Issue New Card,བྱང་བུ་གསར་པ་སྤྲོད་རྒྱུ།
+Issue Workflow,ལས་ཀའི་འགྲོ་ལུགས་གནད་དོན།
+"Issue, top up, and check",གནད་དོན་དང་། ཁ་གསབ། ཞིབ་བཤེར།
+Item,རྣམ་གྲངས།
+Item / Product Sales Report,ཅ་ལག/ཐོན་རྫས་བཙོངས་པའི་སྙན་ཞུ།
+Item {0} added to invoice,རྣམ་གྲངས་{0}བྱུང་འཛིན་ལ་ཁ་སྣོན་བྱས།
+Item '{0}' has no barcode,རྣམ་གྲངས '{0}' ལ་ཐིག་ཁྲམ་མེད།
+Item Code,རྣམ་གྲངས་ཨང་རྟགས།
+Item created successfully,རྣམ་གྲངས་བདེ་བླག་ངང་གསར་བཟོ་བྱས།
+Item is out of stock,ཅ་ལག་རྫོགས་སོང༌།
+Item Name,རྣམ་གྲངས་ཀྱི་མིང་།
+Item not found,རྣམ་གྲངས་མ་རྙེད།
+Item order updated,རྣམ་གྲངས་མངགས་ཐོ་གསར་བཅོས་བྱས།
+Item Selector Settings,རྣམ་གྲངས་འདེམས་བྱེད་ཀྱི་སྒྲིག་སྟངས།
+Items,རྣམ་གྲངས།
+Items added in POS will appear here automatically.,POSནང་དུ་ཁ་སྣོན་བྱས་པའི་ཅ་ལག་འདིར་རང་འགུལ་གྱིས་མངོན་ཐུབ།
+Items added to invoice,བྱུང་འཛིན་ནང་ཁ་སྣོན་བྱས་པའི་ཅ་དངོས།
+Items per page,ཤོག་ངོས་རེར་རྣམ་གྲངས།
+Items Sold,ཅ་ལག་བཙོངས་ཟིན།
+Items/Invoice,ཅ་ལག/འཛིན་བྱང་།
+Item-wise Profitability,རྣམ་གྲངས་ལྟར་ཁེ་སྤོགས།
+Journal Entry,དུས་དེབ་ཐོ་འགོད།
+json,json
+Just now,ད་ལྟ།
+Keep offline prerequisites healthy and recover stale data safely.,དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་སྔོན་འགྲོའི་ཆ་རྐྱེན་རྣམས་བདེ་ཐང་དང་གནས་ཚུལ་རྙིང་པ་དེ་བདེ་འཇགས་ངང་སླར་གསོ་བྱེད་དགོས།
+Labels,མིང་བྱང་།
+"Language, theme, terminal tools, and session controls.",སྐད་ཡིག་དང་བརྗོད་གཞི་དང་མཐའ་མཚམས་ལག་ཆ་དང་དུས་ཚོད་ཚོད་འཛིན།
+Last,མཐའ་མ།
+Last 14 Days (Paid vs Pending),འདས་པའི་ཉིན་བཅུ་བཞི། (གླ་ཆ་སྤྲད་ཟིན་པ་དང་སྒུག་བཞིན་པ།)
+Last 14 Days Activity,ཉིན་བཅུ་བཞིའི་བྱ་འགུལ།
+Last 14 Days Gross Profit,འདས་པའི་ཉིན་བཅུ་བཞིའི་ཁེ་སྤོགས།
+Last 14 Days Purchases,ཉིན་བཅུ་བཞིའི་རིང་གི་ཉོ་སྒྲུབ།
+Last 14 Days Tax/Charges,མཐའ་མའི་ཉིན་བཅུ་བཞིའི་དཔྱ་ཁྲལ།
+Last sync:,མཐའ་མའི་མཉམ་སྒྲིག།
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},མཐའ་མའི་མཉམ་སྒྲིག: {0} | འགྲིག་གམ། {1} | འཐུས་ཤོར་བྱུང་བ། {2} | བརྒལ་འདུག: {3}
+Latest entries for current shift,ད་ལྟའི་ལས་རེས་ཀྱི་ཐོ་འགོད་གསར་ཤོས།
+Lead Time,སྣེ་ཁྲིད་དུས་ཚོད།
+Limited,ཚད་ཡོད་ཅན།
+lines,ཐིག་རིས།
+List,ཐོ་གཞུང་།
+Live Snapshot,ཐད་གཏོང་པར་རིས།
+Load a POS profile and cashier first.,དང་པོ་POSཡི་གསལ་སྡུད་དང་དངུལ་ཁང་བླུགས།
+Load More Invoices,བྱུང་འཛིན་མང་བ་བླངས།
+Load previously saved invoices,སྔོན་ལ་ཉར་ཚགས་བྱས་པའི་བྱུང་འཛིན་བླུགས།
+Load Sale,ལྗིད་ཐེག་ཚོང་འགྲེམས།
+Load Sales Invoice,ཚོང་དོན་བྱུང་འཛིན་བླུགས།
+Loading app data...,མཉེན་ཆས་གྲངས་ཐོ་མངོན་བཞིན་ཡོད།
+Loading customer database...,ཚོང་ཤག་གི་གྲངས་མཛོད་མངོན་བཞིན་ཡོད།
+Loading customers...,ཚོང་ཤག་བླུགས་བཞིན་ཡོད།
+Loading database stats...,གཞི་གྲངས་མཛོད་ཀྱི་གྲངས་ཐོ་མངོན་བཞིན་ཡོད།
+Loading details...,ཞིབ་ཕྲའི་གནས་ཚུལ་མངོན་བཞིན་ཡོད།
+Loading invoice history...,བྱུང་འཛིན་ལོ་རྒྱུས་མངོན་འཆར་བྱེད་བཞིན་ཡོད།
+Loading items...,ཅ་ལག་བླུགས་བཞིན་པ།
+Loading product catalog...,ཐོན་རྫས་ཀྱི་ཐོ་གཞུང་མངོན་བཞིན་ཡོད།
+Loading return invoices...,ཕྱིར་ལོག་བྱུང་འཛིན་མངོན་འཆར་བྱེད་བཞིན་ཡོད།
+Loading server CPU/memory usage...,སར་བར་གྱི་CPU/དྲན་ཤེས་བེད་སྤྱོད།
+Loading suppliers...,མཁོ་སྤྲོད་བྱེད་མཁན་སྐྱེལ་འདྲེན་བྱེད་བཞིན་པ།
+Loading unpaid invoices...,དངུལ་སྤྲོད་མེད་པའི་བྱུང་འཛིན་མངོན་འགྱུར་བྱེད་བཞིན་ཡོད།
+Loading view...,མངོན་ཚུལ་མངོན་པ།
+Loading...,མངོན་འགྱུར་བྱེད་བཞིན་པ།
+Local storage is unavailable. Switching to online-only mode.,ས་གནས་ཀྱི་གསོག་འཇོག་བྱེད་ཐུབ་ཀྱི་མེད། དྲ་ཐོག་ཁོ་ནའི་ཐབས་ལམ་ལ་བརྗེ་སྒྱུར་བྱེད་བཞིན་ཡོད།
+localStorage,ས་གནས་ཀྱི་མཛོད་ཁང་།
+Location Performance,ས་གནས་འཁྲབ་སྟོན།
+Locations,ས་གནས།
+Lock Screen,ལྡེ་མིག་བརྙན་ཤེལ།
+Lookup Workflow,ལས་ཀའི་འགྲོ་ལུགས་ལྟ་བ།
+Loss,གྱོང་གུད།
+Low,དམའ་བ།
+Low Stock,རྒྱུ་ནོར་དམའ་བ།
+Low Stock Alerts,རྒྱུ་ནོར་དམའ་བའི་ཉེན་བརྡ།
+Low Stock Items,ཚོང་ཟོག་ཉུང་བ།
+Low Stock Threshold,རྒྱུ་ནོར་གྱི་ཚད་གཞི་དམའ་བ།
+Low Stock Total,རྒྱུ་ནོར་བསྡོམས་འབོར་དམའ་བ།
+Lowest Margin,ཁེ་སྤོགས་དམའ་ཤོས།
+Low-frequency maintenance and system details.,བསྐྱར་ཟློས་དམའ་བའི་བདག་གཉེར་དང་མ་ལག་ཞིབ་ཕྲ།
+Loyalty Redeemed,ཤ་ཞེན་བླུ་ཐུབ་པ།
+Loyalty Redemption,ཤ་ཞེན་བླུ་ཐབས།
+Make New Payment,དངུལ་སྤྲོད་གསར་པ།
+Manage all,ཚང་མ་དོ་དམ་བྱེད་པ།
+Manage and synchronize your offline transactions,དྲ་ཕྱིའི་ཉོ་ཚོང་དོ་དམ་དང་དུས་མཚུངས།
+Manage Cashier PIN,དངུལ་གཉེར་གྱི་PINདོ་དམ་བྱེད་པ།
+"Manage offline tools, terminal controls, and maintenance from one workspace.",དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་ལག་ཆ་དང་། མཐའ་མཚམས་སྟངས་འཛིན། ལས་ཀའི་ས་ཆ་གཅིག་ནས་བདག་གཅེས་དོ་དམ་བྱེད།
+manual,ལག་དེབ།
+"Manual codes, barcode scans, and QR scans work in the same field",ལག་ཐོག་གི་ཨང་རྟགས་དང་། ཐིག་རིས་པར་བཤུད། དེ་བཞིན་QRཔར་བཤུས་བཅས་ཀྱིས་ལས་རིགས་གཅིག་ཏུ་ལས་ཀ་བྱེད་ཀྱི་ཡོད།
+Manual offline mode is enabled,ལག་ཐོག་དྲ་རྒྱའི་ཐབས་ལམ་མཁོ་འདོན་བྱས།
+Margin,མཐའ་ཚད།
+Maximum available quantity is {0}. Quantity adjusted to match stock.,མཐོ་ཤོས་ཐོབ་པའི་གྲངས་འབོར་ནི་{0}ཡིན། གྲངས་ཚད་དེ་རྒྱུ་ནོར་དང་མཐུན་པར་བསྒྱུར་ཡོད།
+Maximum discount amount for this offer item is {0}.,མཁོ་སྤྲོད་རྣམ་གྲངས་འདིའི་ཆེས་མཐོའི་ཆག་ཡང་དངུལ་འབོར་ནི་{0}ཡིན།
+Maximum discount percentage for this offer item is {0}%.,མཁོ་སྤྲོད་རྣམ་གྲངས་འདིའི་ཆེས་མཐོའི་ཆག་ཡང་བརྒྱ་ཆ་ནི་{0}%ཡིན།
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,ཆེས་མཐོའི་མཁོ་སྤྲོད་གྲངས་ཚད་ནི་{0}ཡིན། གྲངས་ཚད་དེ་ཆོག་པའི་ཚད་གཞི་ལ་སྙོམ་སྒྲིག་བྱས།
+Medium,འབྲིང་བ།
+Method-wise Collections,ཐབས་ལམ་དང་མཐུན་པའི་བསྡུ་རུབ།
+Minimum allowed rate for this offer item is {0}.,མཁོ་སྤྲོད་རྣམ་གྲངས་འདིའི་ཆེས་དམའ་བའི་རིན་གོང་ནི་{0}ཡིན།
+Minimum Qty,ཉུང་མཐའི་གྲངས་འབོར།
+Mobile No,ཁ་པར་ཨང་གྲངས།
+Mode,ཐབས་ལམ།
+Mode of Payment,དངུལ་སྤྲོད་ཐབས།
+Month,ཟླ་བ།
+Month ?,ཟླ་བ།
+Monthly Profit,ཟླ་རེའི་ཁེ་སྤོགས།
+Monthly Sales,ཟླ་རེའི་ཚོང་འགྲེམས།
+Monthly Sales Summary,ཟླ་རེའི་ཚོང་དོན་ཕྱོགས་བསྡུས།
+Month-wise,ཟླ་བ་རེ་རེ།
+Most Active Cashiers,དངུལ་གཉེར་པ་མང་ཤོས།
+Movement Type,འགུལ་སྐྱོད་རིགས།
+Movements,འགུལ་སྐྱོད།
+Multi Currency,སྣ་མང་དངུལ་ལོར།
+N/A,མེད།
+Name,མིང་།
+Negative Stock,དགག་ཆའི་རྒྱུ་ནོར་།
+Negative Stock Items,ལོག་པའི་རྒྱུ་ནོར་གྱི་ཅ་ལག
+Negative values not allowed,དགག་ཆའི་རིན་ཐང་མི་ཆོག་པ།
+Net,དྲ་བ།
+Net Qty,བསྡོམས་འབོར།
+Net Sales,ཚོང་འབབ་གཙང་མ།
+Net Value,རིན་ཐང་གཙང་མ།
+Never,ནམ་ཡང་མིན།
+New changes are ready to load,བསྒྱུར་བཅོས་གསར་བ་མངོན་པར་གྲ་སྒྲིག་བྱས་ཟིན།
+New Item,རྣམ་གྲངས་གསར་པ།
+New Offer Available,མཁོ་སྤྲོད་གསར་པ་ཡོད།
+New PIN,PINགསར་པ།
+New rate,རིན་གོང་གསར་པ།
+Next unit of measure,འཇལ་ཚད་རྗེས་མ།
+No attribute data found.,ཁྱད་ཆོས་གྲངས་ཐོ་མ་རྙེད།
+No Barcode,ཐིག་ཁྲམ་མེད།
+No barcode found for UOM '{0}',UOM '{0}' ལ་ཐིག་རིས་མ་རྙེད།
+No branch/location data found.,ཡན་ལག་/ས་གནས་ཀྱི་གྲངས་ཐོ་མ་རྙེད།
+No brand data found.,ཚོང་རྟགས་ཀྱི་གྲངས་ཐོ་མ་རྙེད།
+No cached gift card balance is available offline.,དྲ་རྒྱའི་ཕྱི་རོལ་དུ་གསོག་འཇོག་བྱས་པའི་ལག་རྟགས་ཀྱི་ལྷག་མ་མེད།
+No camera found on this device. Please ensure your device has a working camera.,ཡོ་ཆས་འདིའི་ཐོག་པར་ཆས་ཤིག་རྙེད་མ་སོང་། ཁྱེད་རང་གི་འཕྲུལ་ཆས་ལ་ལས་ཀ་བྱེད་བཞིན་པའི་པར་ཆས་ཡོད་པར་ཁག་ཐེག་བྱེད་རོགས།
+No capability warnings recorded yet.,ད་དུང་ནུས་པའི་ཉེན་བརྡ་ཐོ་འགོད་བྱས་མེད།
+No cash expected for this shift.,ལས་སྒྱུར་འདིའི་ཆེད་དུ་དངུལ་གྱི་རེ་བ་མེད།
+No cash mode configured,དངུལ་གྱི་ཐབས་ལམ་སྒྲིག་བཀོད་བྱས་མེད།
+No cash movement type is allowed for this POS Profile.,POS གསལ་སྡུད་འདི་ལ་དངུལ་གྱི་གཡོ་འགུལ་རིགས་གང་ཡང་ཆོག་མཆན་སྤྲོད་ཀྱི་མེད།
+No cashier PIN is set yet. Create one now.,དངུལ་ཁང་གི་PINད་དུང་གཏན་འཁེལ་བྱས་མེད། ད་ལྟ་གཅིག་བཟོས།
+No cashier profiles are available for this POS profile yet.,POS འདིའི་ཆེད་དུ་དངུལ་ཁང་གི་གནས་ཚུལ་ད་དུང་མེད་པ་རེད།
+No cashier-wise discount/void/return activity.,དངུལ་ཁང་གི་ཆག་ཡང་/སྟོང་ཆ་/ཕྱིར་ལོག་བྱེད་སྒོ་མེད།
+No category data found.,སྡེ་ཚན་གྱི་གཞི་གྲངས་མ་རྙེད།
+No category profitability data found.,སྡེ་ཚན་གྱི་ཁེ་སྤོགས་གྲངས་ཐོ་མ་རྙེད།
+No change returned recorded for this shift.,ལས་སྒྱུར་འདིའི་ཆེད་དུ་འགྱུར་བ་གང་ཡང་ཐོ་འགོད་བྱས་མེད།
+No change-allocation invoices match the current filters.,བསྒྱུར་བཅོས་བགོ་འགྲེམས་ཀྱི་བྱུང་འཛིན་གང་ཡང་ད་ལྟའི་ཚགས་རླུང་ལ་མཐུན་མི་ཐུབ།
+No charge head breakdown found.,གློག་ཁུངས་ཆག་པ་རྙེད་མེད།
+No Company Selected,ཀུང་སི་བདམས་མེད།
+No customer sales data found.,ཚོང་ཤག་གི་ཚོང་གྲངས་མ་རྙེད།
+No day-wise discount/void/return trend.,ཉིན་རེར་ཆག་ཡང་/སྟོང་ཆ་/ཕྱིར་ལོག་འགྲོ་ཕྱོགས་མེད།
+No day-wise payment data found.,ཉིན་རེའི་དངུལ་སྤྲོད་གྲངས་ཐོ་མ་རྙེད།
+No day-wise profitability trend found.,ཉིན་རེར་ཁེ་བཟང་གི་འགྲོ་ཕྱོགས་ཤིག་རྙེད་མེད།
+No day-wise purchase data found.,ཉིན་རེའི་ཉོ་སྒྲུབ་གྲངས་ཐོ་མ་རྙེད།
+No day-wise sales trend found.,ཉིན་རེར་ཚོང་གཉེར་གྱི་འགྲོས་ཤིག་རྙེད་མེད།
+No day-wise tax/charges trend found.,ཉིན་རེའི་ཁྲལ་འབབ་ཀྱི་འགྲོས་ཤིག་རྙེད་མ་སོང་།
+No dead stock items.,ཅ་ལག་ཤི་ཟིན་མེད།
+No due date,དུས་ཚེས་མེད།
+No exact repair match found for this invoice,བྱུང་འཛིན་འདི་ལ་བཟོ་བཅོས་དང་མཐུན་པ་ཏག་ཏག་རྙེད་མ་སོང་།
+No hourly sales trend found for today.,དེ་རིང་ཆུ་ཚོད་རེའི་ཚོང་གཉེར་གྱི་འགྲོས་ཤིག་རྙེད་མེད།
+No invoice activity found.,བྱུང་འཛིན་བྱེད་སྒོ་རྙེད་མེད།
+No invoices found,བྱུང་འཛིན་མ་རྙེད།
+No invoices found. Try different search criteria.,བྱུང་འཛིན་རྙེད་མེད། འཚོལ་ཞིབ་ཚད་གཞི་མི་འདྲ་བ་ཚོད་ལྟ་བྱོས།
+No invoices recorded for this shift.,དུས་ཚོད་འདིའི་ཆེད་དུ་བྱུང་འཛིན་ཐོ་འགོད་བྱས་མེད།
+No item profitability data found.,ཅ་ལག་གི་ཁེ་སྤོགས་གྲངས་ཐོ་རྙེད་མེད།
+No item sales data found for this period.,དུས་ཡུན་འདིའི་རིང་ལ་ཅ་ལག་གི་ཚོང་གྲངས་གཞི་གྲངས་གང་ཡང་མཐོང་མ་བྱུང་།
+No items found,ཅ་ལག་རྙེད་མེད།
+No items in cart,རླངས་འཁོར་ནང་ཅ་ལག་མེད།
+No items with barcodes to print,དཔར་རྒྱག་བྱ་རྒྱུའི་ཚོན་རྟགས་ཡོད་པའི་རྣམ་གྲངས་མེད།
+No location-wise top item data found.,ས་ཁོངས་ལྟར་གཙོ་བོའི་རྣམ་གྲངས་ཀྱི་གཞི་གྲངས་མ་རྙེད།
+No low stock alerts right now.,ད་ལྟ་རྒྱུ་ནོར་དམའ་བའི་ཉེན་བརྡ་མེད།
+No low stock items.,ཅ་ལག་དམའ་པོ་མེད།
+No matching items in cart,ཤིང་རྟའི་ནང་ཅ་ལག་མཐུན་པོ་མེད།
+No month-wise sales trend found.,ཟླ་རེའི་ཚོང་གཉེར་འགྲོ་ཕྱོགས་རྙེད་མེད།
+No negative stock items.,དགག་ཆའི་རྒྱུ་ནོར་མེད།
+No notifications yet,ད་དུང་བརྡ་ཁྱབ་བཏང་མེད།
+No offline cash movement synced.,དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་དངུལ་འབབ་མཉམ་སྒྲིག་བྱས་མེད།
+No offline invoices pending synchronization,མཉམ་སྒྲིག་ལ་སྒུག་བཞིན་པའི་དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་བྱུང་འཛིན་མེད།
+No offline sync issues recorded yet.,ད་དུང་དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་དུས་མཉམ་གྱི་གནད་དོན་ཐོ་འགོད་བྱས་མེད།
+No out-of-stock items.,མཛོད་ཁང་ནས་ཐོན་པའི་ཅ་ལག་མེད།
+No outstanding credit invoices for this shift.,དུས་ཚོད་འདིའི་ཆེད་དུ་བུ་ལོན་གྱི་བྱུང་འཛིན་ལྷག་མ་མེད།
+No payment collection data found.,དངུལ་སྤྲོད་བསྡུ་རུབ་ཀྱི་གཞི་གྲངས་རྙེད་མེད།
+No payment rows available on this invoice.,བྱུང་འཛིན་འདིའི་ཐོག་དངུལ་སྤྲོད་གྲལ་རིམ་མེད།
+No payments registered for this shift.,དུས་ཚོད་འདིའི་ཆེད་དུ་དངུལ་སྤྲོད་ཐོ་འགོད་བྱས་མེད།
+No pending balances in this period.,དུས་ཡུན་འདིའི་ནང་ལྷག་མ་མེད།
+No pending offline invoices,དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་བྱུང་འཛིན་སྒུག་མེད་པ།
+No Print Formats Found,པར་ཤུས་རྣམ་གཞག་རྙེད་མེད།
+No profiles found for selected scope. Falling back to current profile failed.,འདེམས་སྒྲུག་བྱས་པའི་ཁྱབ་ཁོངས་ལ་གསལ་སྡུད་གང་ཡང་མཐོང་མ་བྱུང་། ད་ལྟའི་གསལ་སྡུད་ལ་ལོག་རྒྱུ་འཐུས་ཤོར་བྱུང་།
+No recent customer activity found.,ཉེ་ཆར་ཚོང་ཤག་གི་བྱ་འགུལ་གང་ཡང་མཐོང་མ་བྱུང་།
+No recent stock entries found.,ཉེ་ཆར་གྱི་རྒྱུ་ནོར་ཐོ་འགོད་རྙེད་མེད།
+No records found,ཟིན་ཐོ་གང་ཡང་རྙེད་མེད།
+No reorder suggestions right now.,ད་ལྟ་བསྐྱར་དུ་མངགས་ཉོ་བྱེད་པའི་བསམ་འཆར་མེད།
+No repeat customers in this period.,དུས་ཡུན་འདིའི་ནང་ཚོང་ཤག་ཡང་ཡང་མེད།
+No response from server,སར་བར་ནས་ལན་མ་ཐོབ།
+No return invoices found,ཕྱིར་སློག་བྱུང་འཛིན་རྙེད་མེད།
+No return item trend found.,ཕྱིར་ལོག་ཅ་ལག་གི་འགྲོ་ཕྱོགས་ཤིག་རྙེད་མ་སོང་།
+No returnable items found for this invoice,བྱུང་འཛིན་འདིའི་ཕྱིར་སློག་ཆོག་པའི་ཅ་ལག་རྙེད་མེད།
+No returns were processed in this shift.,དུས་ཚོད་འདིའི་ནང་ཕྱིར་ལོག་གང་ཡང་ལས་སྣོན་བྱས་མེད།
+No risk activity found.,ཉེན་ཁའི་བྱ་སྤྱོད་རྙེད་མེད།
+No sales activity found for this period.,དུས་ཡུན་འདིའི་རིང་ལ་ཚོང་དོན་གྱི་བྱ་འགུལ་གང་ཡང་མཐོང་མ་བྱུང་།
+No slow moving items.,དལ་བུར་འགྲོ་བའི་ཅ་ལག་མེད།
+No staff sales activity found.,ལས་བྱེད་པའི་ཚོང་གཉེར་བྱེད་སྒོ་རྙེད་མེད།
+No stock movement for this period.,དུས་ཡུན་འདིའི་རིང་ལ་རྒྱུ་ནོར་གྱི་གཡོ་འགུལ་མེད།
+No submitted cash movements in this shift.,དུས་ཚོད་འདིའི་ནང་དངུལ་གྱི་འགུལ་སྐྱོད་ཕུལ་མེད།
+No supplier purchases found in this month.,ཟླ་བ་འདིའི་ནང་མཁོ་སྤྲོད་བྱེད་མཁན་གྱི་ཉོ་སྒྲུབ་གང་ཡང་མཐོང་མ་བྱུང་།
+No suppliers found for this period.,དུས་ཡུན་འདིའི་རིང་ལ་མཁོ་སྤྲོད་བྱེད་མཁན་རྙེད་མེད།
+No sync trigger has run yet in this session.,ལས་རིམ་འདིའི་ནང་དུ་དུས་མཉམ་གྱི་འབྱུང་ཁུངས་ད་དུང་བཀོལ་སྤྱོད་བྱས་མེད།
+No tax head breakdown found.,ཁྲལ་མགོ་བགོ་བཤའ་རྙེད་མེད།
+No top items found for this location.,ས་ཁུལ་འདིའི་ཆེས་མཐོའི་ཅ་ལག་གང་ཡང་རྙེད་མ་སོང་།
+No unpaid invoices,མ་སྤྲད་པའི་བྱུང་འཛིན་མེད།
+No variant data found.,འགྱུར་ལྡོག་ཅན་གྱི་གྲངས་ཐོ་མ་རྙེད།
+No week-wise sales trend found.,བདུན་ཕྲག་རེའི་ཚོང་དོན་འགྲོ་ཕྱོགས་རྙེད་མེད།
+No.,མེད།
+Nobile Number,ནོ་བྷེལ་ཨང་གྲངས།
+Not available,མེད་པ།
+Not checked,ཞིབ་བཤེར་བྱས་མེད།
+Not selected,བདམས་མེད།
+Not Set,སྒྲིག་མེད།
+Notifications,བརྡ་ཐོ།
+Offer,འབུལ།
+Offer Applied,འབུལ་བ་བཀོལ་སྤྱོད་བྱས།
+Offer criteria exceeded,མཁོ་འདོན་ཚད་གཞི་ལས་བརྒལ་བ།
+Offer Item,འབུལ་བའི་རྣམ་གྲངས།
+Offer item unavailable,འབུལ་བའི་ཅ་ལག་ཐོབ་མི་ཐུབ།
+Offer Removed,འབུལ་བ་མེད་པར་བཟོས།
+Offer UOM cannot be changed,མཁོ་སྤྲོད་UOMབསྒྱུར་མི་ཐུབ།
+Offer?,མཁོ་སྤྲོད།
+Offers,འབུལ།
+Offline,དྲ་རྒྱའི་ཕྱི་རོལ་དུ།
+Offline & Sync,དྲ་རྒྱའི་ཕྱི་རོལ་དང་མཉམ་སྒྲིག
+Offline Capabilities,དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་ནུས་པ།
+Offline data status refreshed,དྲ་ཕྱིའི་གཞི་གྲངས་གནས་ཚུལ་གསར་བརྗེ་བྱས།
+Offline diagnostics,དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་ནད་རྟགས་བརྟག་དཔྱད།
+Offline Invoices,དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་འཛིན་བྱང་།
+Offline invoices status,དྲ་ཕྱིའི་བྱུང་འཛིན་གནས་ཚུལ།
+Offline invoices synced,དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་བྱུང་འཛིན་མཉམ་སྒྲིག་བྱས།
+Offline Queue: {0},དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་བང་རིམ།: {0}
+Offline rebuild guidance,དྲ་ཕྱིའི་བསྐྱར་སྐྲུན་མཛུབ་སྟོན།
+Offline restore is unavailable for this session.,ལས་རིམ་འདིའི་ཆེད་དུ་དྲ་རྒྱའི་ཕྱི་རོལ་དུ་སླར་གསོ་བྱེད་ཐུབ་ཀྱི་མེད།
+Offline selling is available with degraded capabilities.,དྲ་རྒྱའི་ཕྱི་རོལ་དུ་བཙོང་རྒྱུ་དེ་ནུས་པ་ཉམས་པའི་ཐོག་ནས་ཐོབ་ཐུབ།
+Offline snapshot does not match the current POS state.,དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་པར་རིས་དེ་ད་ལྟའི་POSགནས་སྟངས་དང་མཐུན་མི་ཐུབ།
+Offline Status,དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་གནས་ཚུལ།
+"Offline, terminal, and system controls",དྲ་རྒྱའི་ཕྱི་རོལ་དང་མཐའ་མཚམས་དང་མ་ལག་ཚོད་འཛིན།
+OK,འགྲིག་གམ།
+Online,དྲ་ཐོག་ནས།
+Open actions menu,བྱ་བའི་རེའུ་མིག་ཁ་ཕྱེ།
+Open balance to collect,དངུལ་ལྷག་བསྡུ་ལེན་བྱ་རྒྱུ།
+Open Customer Display,ཚོང་ཤག་གི་འགྲེམས་སྟོན་ཁ་ཕྱེ།
+Open drawer,ཤུད་སྒམ་ཁ་ཕྱེ།
+Open invoices,བྱུང་འཛིན་ཁ་ཕྱེ།
+Open Payments?,ཁ་ཕྱེ་བའི་དངུལ་སྤྲོད་དམ།
+Open POS home,POS ཁྱིམ་ཁ་ཕྱེ།
+Open this screen from POS Menu -> Open Customer Display.,POS རེའུ་མིག་ནས་གསལ་གཞི་འདི་ཁ་ཕྱེ། -> ཚོང་ཤག་བརྙན་ཤེལ་ཁ་ཕྱེ།
+OpenCV image processing enabled - Enhanced barcode detection,OpenCVཔར་རིས་ལས་སྣོན་བྱེད་ནུས་ལྡན་པ། - ཐིག་ཁྲམ་ཤེས་རྟོགས་མཐོར་འདེགས་བཏང་བ།
+OpenCV image processing unavailable on this device,ཡོ་ཆས་འདིའི་སྟེང་དུ་OpenCVཔར་རིས་ལས་སྣོན་བྱེད་མི་ཐུབ།
+OpenCV Off,OpenCV ཁ་བསྡམས།
+OpenCV On,OpenCV ཁ་ཕྱེ།
+OpenCV processing disabled,OpenCV ལས་སྦྱོར་ལྕོགས་མིན་བཟོས།
+Opening Amount,སྒོ་འབྱེད་ཀྱི་དངུལ་འབོར།
+Opening Cash,དངུལ་ཁ་ཕྱེ་བ།
+options,གདམ་ག།
+Order,བཀའ་བཀོད།
+Original,མ་དངུལ།
+Other,གཞན།
+Out,ཕྱིར་ཐོན།
+Out of Stock,མཛོད་ཁང་མེད་པ།
+Out of Stock Items,ཟོག་རྫོགས་ཟིན་པའི་ཅ་ལག་།
+Outstanding,ཕུལ་བྱུང་།
+Outstanding Credit by Currency,དངུལ་ལོར་ལྟར་བུ་ལོན་ལྷག་འཕྲོ།
+Overdue,དུས་ལས་བརྒལ་བ།
+Overpayment Change,དངུལ་སྤྲོད་ཚད་བརྒལ་བའི་བསྒྱུར་བཅོས།
+Overpayment change deducted: {0},དངུལ་སྤྲོད་ཚད་ལས་བརྒལ་བའི་འགྱུར་བ་བསྡུ་རུབ་བྱས། {0}
+Packing List,ཐུམ་སྒྲིལ་ཐོ་གཞུང་།
+Page Format,ཤོག་ངོས།
+Page unavailable offline,དྲ་རྒྱའི་ཕྱི་རོལ་དུ་ཤོག་ངོས་མེད།
+Paid,གླ་ཆ་སྤྲད་ཡོད།
+Paid (orig):,གླ་ཆ་སྤྲད་ཡོད།
+Paid Amount,སྤྲད་པའི་དངུལ་འབོར།
+Paid change cannot be greater than total change!,གླ་ཆ་སྤྲད་པའི་འགྱུར་བ་དེ་བསྡོམས་འབོར་གྱི་འགྱུར་བ་ལས་ཆེ་བ་ཆགས་མི་ཐུབ།
+Paid:,གླ་ཆ་སྤྲད་ཡོད།
+Parent Item,ཕ་མའི་རྣམ་གྲངས།
+Partial,ཆ་ཤས།
+Partly Paid,ཆ་ཤས་སྤྲད་ཟིན།
+Party Account,ཏང་གི་རྩིས་ཐོ།
+Party Type,ཏང་གི་རིགས།
+Pause terminal until next cashier,དངུལ་གཉེར་པ་རྗེས་མ་བར་དུ་མཇུག་སྒྲིལ་མཚམས་འཇོག་བྱེད།
+PAY,སྤྲོད་པ།
+Payment,དངུལ་སྤྲོད་པ།
+Payment Account,དངུལ་སྤྲོད་རྩིས་ཁྲ།
+Payment entries processed for Invoice {0},བྱུང་འཛིན་ {0} ལ་དངུལ་སྤྲོད་ཐོ་འགོད་ལས་སྣོན་བྱས།
+Payment Entry Type,དངུལ་སྤྲོད་ཐོ་འགོད་རིགས།
+Payment History,དངུལ་སྤྲོད་ལོ་རྒྱུས།
+Payment ID,དངུལ་སྤྲོད་ལག་ཁྱེར།
+Payment Method Report,སྤྲོད་ཐབས་སྙན་ཞུ།
+Payment Methods,དངུལ་སྤྲོད་ཐབས།
+Payment of {0} received successfully.,{0} ཡི་དངུལ་སྤྲོད་ལམ་ལྷོངས་བྱུང་།
+Payment Progress,དངུལ་སྤྲོད་པའི་འཕེལ་རིམ།
+Payment Reconciliation,དངུལ་སྤྲོད་མཐུན་སྒྲིལ།
+Payment request status could not be retrieved. Please try again,དངུལ་སྤྲོད་དགོས་པའི་རེ་འདུན་གནས་ཚུལ་སླར་ལེན་ཐུབ་མ་སོང་། ཡང་བསྐྱར་ཚོད་ལྟ་གནང་རོགས།
+Payment Request took too long to respond. Please try requesting for payment again,དངུལ་སྤྲོད་པའི་རེ་འདུན་ལ་ལན་འདེབས་བྱེད་པར་དུས་ཚོད་རིང་པོ་འགོར་ཡོད། ཡང་བསྐྱར་དངུལ་སྤྲོད་དགོས་པའི་རེ་འདུན་བཏོན་རོགས།
+Payment saved offline,དྲ་རྒྱའི་ཕྱི་རོལ་དུ་དངུལ་སྤྲོད་ཉར་ཚགས་བྱས།
+Payment State,དངུལ་སྤྲོད་གནས་སྟངས།
+Payment Status,དངུལ་སྤྲོད་གནས་ཚུལ།
+Payment submitted but print function could not be executed. Payment name not found.,དངུལ་སྤྲོད་ཟིན་ཡོད་ཀྱང་པར་ཤུས་བྱེད་ནུས་ལག་བསྟར་བྱེད་ཐུབ་ཀྱི་མིན་འདུག དངུལ་སྤྲོད་མིང་མ་རྙེད།
+Payment submitted.,དངུལ་སྤྲོད་ཕུལ་ཟིན།
+Payment Summary,དངུལ་སྤྲོད་ཕྱོགས་བསྡུས།
+Payments,སྤྲོད་འབབ།
+Payments are not open. Do you want to open payments and submit?,དངུལ་སྤྲོད་སྒོ་ཕྱེ་མེད། ཁྱེད་རང་དངུལ་སྤྲོད་ཁ་ཕྱེ་ནས་འབུལ་དགོས་སམ།
+Payments by Mode of Payment,དངུལ་སྤྲོད་ཐབས་ལྟར་སྤྲོད་པ།
+PDF,PDF
+Peak Hour,ཆེས་མང་བའི་དུས་ཚོད།
+Peak Memory:,དྲན་ཤེས་ཆེ་ཤོས།
+Peak Server:,ཆེས་མཐོའི་ཞབས་ཞུ།
+Peak:,མཐོ་ཚད།
+Pending,སྒུག་བཞིན་པ།
+Pending Amount,སྒུག་བཞིན་པའི་དངུལ་འབོར།
+Pending count updated from {0} to {1},སྒུག་བཞིན་པའི་གྲངས་ཀ་ {0} ནས་ {1} བར་གསར་བཅོས་བྱས།
+Pending Exposure,སྒུག་བཞིན་པའི་ཐེར་འདོན་བྱེད་པ།
+Pending Invoices,བསྒུག་བཞིན་པའི་འཛིན་བྱང་།
+Pending Ratio,སྒུག་བཞིན་པའི་བསྡུར་ཚད།
+Pending Sales,སྒུག་བཞིན་པའི་ཚོང་ཟོག
+Pending sales: {0} | Cache usage: {1}%,ཚོང་འགྲེམས་སྒུག་བཞིན་པ། {0} | མཛོད་བེད་སྤྱོད། {1}%
+Pending Sync,མཉམ་སྒྲིག་སྒུག་བཞིན་པ།
+Pending: {0},སྒུག་བཞིན་པ།: {0}
+Pending: {0} | Synced: {1} | Draft: {2},སྒུག་བཞིན་ཡོད།: {0} | མཉམ་སྒྲིག་བྱས། {1} | ཟིན་བྲིས།{2}
+Per Page,ཤོག་ངོས་རེ་རེ།
+Personal,མི་སྒེར།
+Personal preferences adjust the current cashier experience without changing the active POS route.,སྒེར་གྱི་དགའ་ཕྱོགས་ཀྱིས་ད་ལྟའི་དངུལ་ཁང་གི་ཉམས་མྱོང་དེ་POSལམ་ལུགས་ཤུགས་ལྡན་དེ་བསྒྱུར་མ་དགོས་པར་བསྒྱུར་བཅོས་བྱེད།
+PIN confirmation does not match.,PIN གཏན་འཁེལ་མི་མཐུན་པ།
+PIN must be 4 to 8 digits.,PIN ཨང་གྲངས་ ༤ ནས་ ༨ བར་ཡིན་དགོས།
+Please add at least one item.,ཉུང་མཐར་ཡང་དོན་ཚན་གཅིག་ཁ་སྣོན་གནང་རོགས།
+Please allow camera access to scan codes,སྐུ་མཁྱེན། པར་ཆས་ལ་གསང་གྲངས་པར་བཤུས་བྱེད་དུ་འཇུག་རོགས།
+Please enter payment amount,སྤྲོད་དངུལ་གྲངས་ཐོ་འགོད་རོགས།
+Please fill all required fields,དགོས་མཁོ་ཡོད་ཚད་བཀང་རོགས།
+Please make a payment or select a payment,དངུལ་སྤྲོད་དགོས་པའམ་ཡང་ན་དངུལ་སྤྲོད་འདེམས་དགོས།
+Please request phone payment or use another payment method,ཁ་པར་བརྒྱུད་ནས་དངུལ་སྤྲོད་དགོས་པའི་རེ་འདུན་བཏོན་པའམ་ཡང་ན་དངུལ་སྤྲོད་ཐབས་གཞན་སྤྱད་རོགས།
+Please select a customer first,ཐོག་མར་ཚོང་ཤག་འདེམས་རོགས་གནང་།
+Please select a party,ཚོགས་པ་འདེམས་རོགས་གནང་།
+Please select a party before reconciling.,འདུམ་འགྲིག་མ་བྱས་སྔོན་ལ་ཚོགས་པ་འདེམས་རོགས་གནང་།
+Please select a valid movement type.,ནུས་ལྡན་གྱི་འགུལ་སྐྱོད་རིགས་འདེམས་རོགས།
+Please select an invoice,བྱུང་འཛིན་ཞིག་འདེམས་རོགས་གནང་།
+Please select company before reconciling.,མཐུན་སྒྲིལ་མ་བྱེད་གོང་ཚོང་ཁང་འདེམས་རོགས།
+Please set the customer's mobile number,ཚོང་ཤག་གི་ཁ་པར་ཨང་གྲངས་གཏན་འཁེལ་གནང་རོགས།
+Please try again or enter the item manually.,ཡང་བསྐྱར་ཚོད་ལྟ་བྱེད་པའམ་ཡང་ན་རྣམ་གྲངས་དེ་ལག་ཐོག་ནས་བླུགས་རོགས།
+Please verify the barcode or check the item's availability.,སྐུ་མཁྱེན། ཐིག་ཁྲམ་དེ་བདེན་དཔང་བྱེད་པའམ་ཡང་ན་ཅ་ལག་ཡོད་མེད་ལ་ལྟ་ཞིབ་བྱོས།
+Points,སྐར་མ།
+Popup blocked. Please allow popups.,འཕྱུར་འཕྱུར་བཀག་ཡོད། འཕྱུར་ཡོང་ཆོག་པ་གནང་རོགས།
+POS,POS
+POS controls and maintenance,POS ཚོད་འཛིན་དང་།
+POS Expense is disabled for this POS Profile.,POS གསལ་སྡུད་འདིའི་ཆེད་དུ་POS འགྲོ་སོང་ལྕོགས་མིན་བཟོས་ཡོད།
+POS is running with limited offline prerequisites.,POS ནི་དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་ཆ་རྐྱེན་ཚད་གཞི་ཅན་དང་མཉམ་དུ་གཉེར་བཞིན་ཡོད།
+POS Profile,POS གསལ་སྡུད།
+Position the QR code or barcode within the scanning area,པར་བཤུས་བྱེད་སའི་ས་ཁུལ་ནང་དུ་QRཨང་རྟགས་ཡང་ན་ཐིག་རིས་ཨང་རྟགས་བཀོད་དགོས།
+Posting,སྤེལ་བ།
+Posting and Price List,འགྲེམ་སྤེལ་དང་རིན་གོང་ཐོ་གཞུང་།
+Posting Date,སྤེལ་ཚེས་གྲངས།
+Preparing background sync,རྒྱབ་ལྗོངས་མཉམ་སྒྲིག་གྲ་སྒྲིག་བྱེད་པ།
+"Press OK to continue offline with a warning, or Cancel to retry.",བདེན་པ་ལ་མནན་ནས་མུ་མཐུད་དུ་དྲ་རྒྱའི་ཕྱི་རོལ་དུ་ཉེན་བརྡ་བཏང་བའམ་ཡང་ན་བསྐྱར་དུ་ཚོད་ལྟ་བྱེད་པར་ཆ་མེད་གཏོང་དགོས།
+Previous unit of measure,སྔོན་གྱི་ཚད་གཞིའི་ཚད་གཞི།
+Price List,རིན་གོང་ཐོ་གཞུང་།
+Price List Rate,རིན་གོང་ཐོ་གཞུང་རིན་གོང་།
+Price list rate updated locally only,རིན་གོང་ཐོ་གཞུང་གི་རིན་གོང་ས་གནས་ཁོ་ནར་གསར་བརྗེ་བྱས།
+Pricing & Discounts,རིན་གོང་དང་ཆག་ཡང་།
+Pricing Rule,རིན་གོང་སྒྲིག་གཞི།
+Print,པར་སྐྲུན།
+Print Draft,ཟིན་བྲིས་པར་སྐྲུན།
+Print Format (Invoice),པར་སྐྲུན་རྣམ་གཞག (བྱུང་འཛིན་)
+Print Format (Order),པར་སྐྲུན་རྣམ་གཞག (གོ་རིམ།)
+Print invoice,བྱུང་འཛིན་དཔར་སྐྲུན།
+Print Purchase Invoice instead of PO,POཡི་ཚབ་ཏུ་ཉོ་སྒྲུབ་བྱུང་འཛིན་པར་ཤུས་བྱས།
+Printer,པར་ཆས།
+Processed returns impacting the shift totals,ལས་སྣོན་བྱས་པའི་ཕྱིར་ལོག་གིས་ལས་ཀའི་བསྡོམས་འབོར་ལ་ཤུགས་རྐྱེན་ཐེབས་ཡོད།
+Processing Payment,སྤྲོད་ལེན་ལས་རིམ།
+Processing payment entries for Invoice {0},བྱུང་འཛིན་ {0} ཡི་དངུལ་སྤྲོད་ཐོ་འགོད་ལས་སྣོན་བྱེད་བཞིན་ཡོད།
+Profile,ངོ་སྤྲོད།
+Profiles,ངོ་སྤྲོད།
+Profit,ཁེ་བཟང་།
+Profit: Invoice Item Estimate,ཁེ་ཕན། བྱུང་འཛིན་རྣམ་གྲངས་ཚོད་དཔག
+Profit: Stock Ledger (COGS),ཁེ་ཕན། མ་རྩའི་རྩིས་ཁྲ། (COGS)
+Profitability Report,ཁེ་སྤོགས་སྙན་ཞུ།
+Prorated return discount,ཆ་སྙོམས་ཕྱིར་ལོག་ཆག་ཡང་།
+Purchase Amount,ཉོ་སྒྲུབ་དངུལ་འབོར།
+Purchase Invoices,ཉོ་སྒྲུབ་ཀྱི་འཛིན་བྱང་།
+Purchase Order created,ཉོ་སྒྲུབ་མངགས་ཐོ་བཟོས་ཟིན།
+Qty,གྲངས།
+Qualified,ཆ་རྐྱེན་ཚང་བ།
+Quantity,གྲངས་ཚད།
+Quantity exceeds available stock,གྲངས་ཚད་དེ་རྒྱུ་ཆ་ཡོད་ཚད་ལས་བརྒལ་བ།
+Quick Actions,མགྱོགས་མྱུར་བྱ་སྤྱོད།
+Quotation {0} is Submitted,ལུང་འདྲེན་ {0} ཕུལ་ཟིན།
+Quotation submitted,ལུང་འདྲེན་ཕུལ་བ།
+QZ Tray connected.,QZ ཕོར་པ་མཐུད་ཡོད།
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ སྒམ་དེ་ལག་ཐོག་ནས་ཁ་བྲལ་ཡོད། མཐུད་སྣེ་ལ་མནན་ནས་བསྐྱར་དུ་ལྕོགས་ཅན་བཟོས།
+QZ Tray is not connected.,QZ སྒམ་དེ་མཐུད་མེད།
+QZ Tray Setup,QZ སྒམ་སྒྲིག་སྟངས།
+Rate,རིན་གོང་།
+Rate adjusted to maximum allowed discount,གོང་ཚད་མཐོ་ཤོས་ཆོག་པའི་ཆག་ཡང་ལ་སྙོམ་སྒྲིག་བྱས།
+Ready,གྲ་སྒྲིག།
+Ready to resume,ལས་འགོ་བསྐྱར་འཛུགས་གྲ་སྒྲིག་བྱས་ཡོད།
+Ready!,གྲ་སྒྲིག་ཡིན།
+Real-time POS insights for retail operations.,སིལ་ཚོང་ལས་དོན་གྱི་དུས་ཚོད་ངོ་མའི་POSཤེས་རྟོགས།
+Rebuild Offline Data,དྲ་ཕྱིའི་གཞི་གྲངས་བསྐྱར་བཟོ།
+Receive,ལེན་པ།
+Receive now,ད་ལྟ་འབྱོར།
+Received,འབྱོར་བྱུང་།
+Received:,འབྱོར་བྱུང་།
+Recent Movement Entries,ཉེ་ཆར་འགུལ་སྐྱོད་ཀྱི་ཐོ་འགོད།
+Recent updates about your invoices,ཁྱེད་ཀྱི་བྱུང་འཛིན་སྐོར་གྱི་ཉེ་ཆར་གྱི་གསར་འགྱུར།
+Recently Active Customers,ཉེ་ཆར་ཚོང་ཤག་ཤུགས་ཆེན་པོ།
+Rechecking connection,སྦྲེལ་མཐུད་བསྐྱར་ཞིབ་བྱེད་པ།
+Reconcile payment methods and close shift,དངུལ་སྤྲོད་ཐབས་མཐུན་སྦྱོར་དང་ལས་རེས་སྒོ་བརྒྱབ་པ།
+Reconciling Payments,གླ་ཆ་མཐུན་སྦྱོར་བྱེད་པ།
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.",དྲ་ཐོག་ལ་ཡོད་པའི་སྐབས་ལ་ཤོག་ངོས་འདི་ཐེངས་གཅིག་བསྐྱར་དུ་མཐུད་ནས་ཁ་ཕྱེ་ན་དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་གསར་འགྱུར་གྱིས་དེ་སླར་གསོ་བྱེད་ཐུབ།
+Reconnect online to refresh cached offline data from the server.,གསབ་ལེན་དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་གཞི་གྲངས་གསར་བརྗེ་བྱེད་པར་དྲ་ཐོག་ལ་ཡང་བསྐྱར་མཐུད་དགོས།
+Recreate local offline prerequisites from scratch,ས་གནས་ཀྱི་དྲ་ཕྱིའི་སྔོན་འགྲོའི་ཆ་རྐྱེན་ཐོག་མ་ནས་བསྐྱར་བཟོ།
+Recv:,Recv:
+Redeem,བསྐྱར་ལེན་བྱེད་པ།
+Redeem / Scan,བསྐྱར་ལེན་ / བརྟག་དཔྱད།
+Redeem Amount,བསྐྱར་ལེན་དངུལ་འབོར།
+Redeem Mode,བསྐྱར་ལེན་ཐབས་ལམ།
+Redeemed Amount,བསྐྱར་ལེན་བྱས་པའི་དངུལ་འབོར།
+Redeemed credit cannot be greater than its total.,བསྐྱར་ལེན་བྱས་པའི་བུ་ལོན་དེ་བསྡོམས་འབོར་ལས་ཆེ་བ་ཆགས་མི་ཐུབ།
+Redemption and Totals,བསྐྱར་ལེན་དང་བསྡོམས་འབོར།
+Reference,དཔྱད་གཞི།
+Refresh,གསར་བརྗེ།
+Refresh Exchange Rate,བརྗེ་རེས་རིན་གོང་གསར་བརྗེ།
+Refresh Offline Data,དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་གཞི་གྲངས་གསར་བསྒྱུར།
+Refresh Printers,པར་ཆས་གསར་བརྗེ།
+Refund,དངུལ་ཕྱིར་སློབ།
+Release Notes,འགྲེམ་སྤེལ་མཆན་འགྲེལ།
+Reload,བསྐྱར་དུ་བླུགས།
+Reload customers,ཚོང་ཤག་བསྐྱར་དུ་བླུགས།
+Reload Items,རྣམ་གྲངས་བསྐྱར་དུ་བླུགས།
+Reload Now,ད་ལྟ་བསྐྱར་དུ་བླུགས།
+Reload to apply the latest changes. Your current session will be refreshed.,བསྒྱུར་བཅོས་གསར་ཤོས་འཇུག་སྤྱོད་བྱེད་པར་བསྐྱར་དུ་མངོན་དགོས། ཁྱེད་རང་གི་ད་ལྟའི་ལས་རིམ་དེ་གསར་བརྗེ་བྱ་རྒྱུ་རེད།
+Reload Workflow,ལས་ཀའི་བརྒྱུད་རིམ་ཡང་བསྐྱར་མངོན།
+Remarks,བསམ་ཚུལ།
+Remarks are required.,མཆན་འགོད་དགོས།
+Remove,བཏོན་པ།
+Remove barcode item,ཐིག་ཁྲམ་རྣམ་གྲངས་མེད་པར་བཟོས།
+Remove cached data and reload the POS app,གསོག་འཇོག་བྱས་པའི་གཞི་གྲངས་མེད་པར་བཟོས་ནས་POSམཉེན་ཆས་བསྐྱར་དུ་བླུགས་དགོས།
+Remove item,རྣམ་གྲངས་མེད་པར་བཟོས།
+Remove Offer,འབུལ་བ་མེད་པར་བཟོས།
+Reorder / Purchase Suggestions,བསྐྱར་དུ་མངགས་ཉོ་བྱེད་པ། ཉོ་སྒྲུབ་ཀྱི་བསམ་འཆར།
+Repair Candidate,ཉམས་གསོའི་འོས་མི།
+Repair Change Allocation,བཅོས་སྒྱུར་བགོ་འགྲེམས།
+Repair requires an online connection,བཟོ་བཅོས་བྱེད་པར་དྲ་ཐོག་སྦྲེལ་མཐུད་དགོས།
+Repaired,ཉམས་གསོ་བྱས།
+Repairing change allocation,བསྒྱུར་བཅོས་བགོ་འགྲེམས་བྱེད་པ།
+Repeat Customers,ཡང་བསྐྱར་ཚོང་ཤག
+Repeat Rate,བསྐྱར་ཟློས་ཚད།
+Request,རེ་ཞུ།
+Request ID: {0},རེ་འདུན་ཨང་རྟགས། {0}
+Request Payment,དངུལ་སྤྲོད་དགོས་པའི་རེ་ཞུ།
+Requested route: {0},རེ་ཞུ་བྱས་པའི་ལམ་ཐིག: {0}
+Required columns cannot be hidden,དགོས་མཁོའི་ཐིག་ཕྲེང་སྦས་མི་ཐུབ།
+Reset,བསྐྱར་སྒྲིག་བྱེད་པ།
+Reset item name,རྣམ་གྲངས་ཀྱི་མིང་བསྐྱར་སྒྲིག་བྱེད་པ།
+Reset to Default,སྔོན་སྒྲིག་ལ་སླར་སྒྲིག་བྱེད།
+Resource Health,ཐོན་ཁུངས་འཕྲོད་བསྟེན།
+Restricted,བཀག་རྒྱ།
+Restricted operational controls for supervisors only.,ལྟ་རྟོག་པ་ཁོ་ནའི་ཆེད་དུ་བཀོལ་སྤྱོད་ཚོད་འཛིན་ཚད་བཀག་བྱས་ཡོད།
+Retry,ཡང་བསྐྱར་ཚོད་ལྟ་བྱེད་པ།
+Retry route,ལམ་ཐིག་བསྐྱར་དུ་ཚོད་ལྟ་བྱེད་པ།
+Return,ཕྱིར་ལོག་པ།
+Return Amount,ཕྱིར་སློག་དངུལ་འབོར།
+Return Count,ཕྱིར་ལོག་གྲངས།
+Return items must have negative quantities,ཕྱིར་སློག་བྱས་པའི་ཅ་ལག་ལ་ལྡོག་གྲངས་ཡོད་དགོས།
+Return total must be negative,ཕྱིར་ལོག་བསྡོམས་འབོར་ངེས་པར་དུ་དགག་ཆ་ཡིན་དགོས།
+Return Valid Until,ཕྱིར་ལོག་ནུས་ལྡན་ཡིན།
+Return window passed,ཕྱིར་ལོག་སྒེའུ་ཁུང་འདས་ཟིན།
+Return without Invoice,བྱུང་འཛིན་མེད་པར་ཕྱིར་སློག་བྱེད་པ།
+Returns,ཕྱིར་ལོག་པ།
+Returns / Voids / Discounts,ཕྱིར་ལོག/སྟོང་ཆ་/ཆག་ཡང་།
+Returns by Currency,དངུལ་ལོར་ལྟར་ཕྱིར་སློབ།
+Revenue,ཡོང་འབབ།
+Review shift totals before submitting the closing entry,མཇུག་སྒྲིལ་ཐོ་འགོད་མ་ཕུལ་གོང་ལས་ཀའི་བསྡོམས་རྩིས་ལ་ཞིབ་བཤེར་བྱས།
+Round Off,སྐོར་འཁོར།
+Rows,གྲལ་རིམ།
+Rows:,གྲལ་རིམ།
+Rule,ཁྲིམས་ལུགས།
+Sale,བཙོང་བ།
+Sales,ཚོང་འགྲེམས།
+Sales Order {0} is Submitted,ཚོང་མངགས་{0}བསྐུར་ཟིན།
+Sales Person and Print,ཚོང་གཉེར་མི་སྣ་དང་དཔར་སྐྲུན།
+Sales Person not found,ཚོང་པ་མ་རྙེད།
+Sales processed,ཚོང་གཉེར་ལས་སྣོན་བྱས།
+Sales Return,བཙོངས་པའི་ཕྱིར་ལོགས།
+Sales Trend Report,ཚོང་གཉེར་འགྲོ་ཕྱོགས་སྙན་ཞུ།
+Save,ཉར་ཚགས་བྱེད་པ།
+Save & Clear,ཉར་ཚགས་དང་བསུབ་པ།
+Save as POS Profile Default,POS གསལ་སྡུད་སྔོན་སྒྲིག་ལྟར་ཉར་ཚགས་བྱེད།
+Save Settings,སྒྲིག་སྟངས་ཉར་ཚགས་བྱེད་པ།
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,འདེམས་སྒྲུག་བྱས་པའི་པར་འཕྲུལ་དེ་POS གསལ་སྡུད་སྔོན་སྒྲིག་ལྟར་ཉར་ཚགས་བྱེད་དགོས།
+Saved as draft because: {0},ཟིན་བྲིས་ལྟར་ཉར་ཚགས་བྱས་ཡོད། གང་ལགས་ཤེ་ན། {0}
+Saving...,གསོག་འཇོག...
+Scale barcode detected. Quantity here is the number of labels to print.,ཚད་གཞིའི་ཐིག་རིས་ཤེས་རྟོགས་བྱུང་། འདིར་གྲངས་ཚད་ནི་པར་སྐྲུན་བྱེད་དགོས་པའི་མཚོན་རྟགས་ཀྱི་གྲངས་ཡིན།
+Scale barcode settings are not configured. Using item barcode only.,ཚད་གཞིའི་ཐིག་རིས་སྒྲིག་སྟངས་སྒྲིག་བཀོད་བྱས་མེད། རྣམ་གྲངས་ཀྱི་ཐིག་ཁྲམ་ཁོ་ན་བེད་སྤྱོད་བྱེད་པ།
+Scale template barcode is missing for this item/UOM. Using item barcode only.,རྣམ་གྲངས་འདིའི་ཆེད་དུ་ཚད་གཞིའི་དཔེ་སྒྲོམ་གྱི་ཐིག་རིས་མེད་པ་རེད། རྣམ་གྲངས་ཀྱི་ཐིག་ཁྲམ་ཁོ་ན་བེད་སྤྱོད་བྱེད་པ།
+Scan an existing card and top it up without leaving the payment flow.,ད་ཡོད་ཀྱི་ཤོག་བྱང་དེ་པར་བཤུས་བྱས་ནས་དངུལ་སྤྲོད་པའི་རྒྱུན་རིམ་ལས་མ་ཐོན་པར་དངུལ་སྤྲོད་དགོས།
+Scan Error,པར་བཤུས་ནོར་འཁྲུལ།
+Scan or enter a gift card code to check balance or redeem.,ལག་རྟགས་ཤོག་བྱང་གི་ཨང་གྲངས་དེ་པར་བཤུས་བྱེད་པའམ་ཡང་ན་བླུགས་ནས་ལྷག་མ་ལྟ་ཞིབ་བྱེད་པའམ་ཡང་ན་བསྐྱར་ལེན་བྱེད་དགོས།
+Scan or paste the card code below.,གཤམ་གྱི་ཤོག་བྱང་ཨང་རྟགས་པར་བཤུས་བྱེད་པའམ་ཡང་ན་སྦྱར་དགོས།
+Scan QR Code/Barcode,QRཨང་རྟགས། ཐིག་ཁྲམ་ཨང་རྟགས།
+Scan with camera,པར་ཆས་ཀྱིས་པར་བཤུད།
+Scan-First Flow,བཤེར་འཇོག-ཐོག་མའི་བཞུར་རྒྱུན།
+Scanned Code:,པར་བཤུས་བྱས་པའི་ཨང་གྲངས།
+Scanning for: {0},པར་ལེན་བྱེད་བཞིན་ཡོད། {0}
+Scanning items,རྣམ་གྲངས་པར་ལེན་བྱེད་པ།
+Scan-Ready,པར་ལེན་གྲ་སྒྲིག
+Scope,ཁྱབ་ཁོངས།
+Scope: All Profiles,ཁྱབ་ཁོངས། ངོ་སྤྲོད་ཚང་མ།
+Scope: Current Profile,ཁྱབ་ཁོངས།: ད་ལྟའི་གནས་ཚུལ།
+Scope: Specific Profile,ཁྱབ་ཁོངས། དམིགས་བསལ་གནས་ཚུལ།
+Search,འཚོལ་ཞིབ།
+Search Account,རྩིས་ཁྲ་འཚོལ་ཞིབ།
+Search an invoice and continue the return flow without extra steps.,བྱུང་འཛིན་འཚོལ་ཞིབ་བྱས་ནས་གོམ་པ་ཁ་སྣོན་མེད་པར་ཕྱིར་ལོག་རྒྱུན་འཁྱོངས་བྱེད་དགོས།
+Search customer,ཚོང་ཤག་འཚོལ་ཞིབ།
+Search invoices or customers,བྱུང་འཛིན་འཚོལ་བའམ་ཡང་ན་ཚོང་ཤག་འཚོལ་བ།
+Search item,འཚོལ་བཤེར་རྣམ་གྲངས།
+Search item / code,འཚོལ་བཤེར་རྣམ་གྲངས།/ཨང་རྟགས།
+Search items or barcode,འཚོལ་བཤེར་རྣམ་གྲངས་སམ་ཐིག་རིས་ཨང་རྟགས།
+Search Mpesa Payments,འཚོལ་ཞིབ། Mpesa དངུལ་སྤྲོད།
+Search return invoices or customers,ཕྱིར་ལོག་བྱུང་འཛིན་ཡང་ན་ཚོང་ཤག་འཚོལ་ཞིབ།
+Search supplier,མཁོ་སྤྲོད་བྱེད་མཁན་འཚོལ་བ།
+Search unpaid invoices or customers,མ་སྤྲད་པའི་བྱུང་འཛིན་སམ་ཚོང་ཤག་འཚོལ་བཤེར་བྱེད་པ།
+Secure context (HTTPS or localhost) is required for camera access.,པར་ཆས་ལ་འཛུལ་ཞུགས་བྱེད་པར་བདེ་འཇགས་སྐབས་དོན་(HTTPS ཡང་ན་ས་གནས་ཀྱི་གཙོ་བདག་)དགོས།
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,པར་ཆས་ལ་འཛུལ་ཞུགས་བྱེད་པར་བདེ་འཇགས་སྐབས་དོན་(HTTPS)དགོས། པར་ཆས་ལ་འཛུལ་ཞུགས་བྱེད་པར་HTTPSབེད་སྤྱོད་གནང་རོགས།
+Select,འདེམས།
+Select a cashier first.,སྔོན་ལ་དངུལ་གཉེར་བ་ཞིག་འདེམས།
+Select a customer,ཚོང་ཤག་འདེམས་པ།
+Select a customer to use coupon,ཁེ་སྤོགས་སྤྱོད་མཁན་གྱི་ཚོང་ཤག་འདེམས།
+Select a printer to use QZ silent printing.,QZ སྒྲ་མེད་པར་སྐྲུན་བེད་སྤྱོད་བྱེད་པའི་པར་འཕྲུལ་འདེམས།
+Select Batch,སྡེ་ཚན་འདེམས།
+Select Columns to Display,བཀྲམ་སྟོན་བྱེད་པའི་ཀེར་ཐིག་འདེམས།
+Select items to sell,འཚོང་རྒྱུའི་ཅ་ལག་འདེམས།
+Select Payment,དངུལ་སྤྲོད་འདེམས།
+Select Payment Account,དངུལ་སྤྲོད་རྩིས་ཁྲ་འདེམས།
+Select printer,དཔར་ཆས་འདེམས།
+Select Return Invoice,ཕྱིར་ལོག་བྱུང་འཛིན་འདེམས།
+Select S.O,S.O འདེམས།
+Select Sales Orders,ཚོང་མངགས་འདེམས།
+Select the cashier who is taking over this terminal.,མཐུད་ཁང་འདི་འགན་འཁུར་མཁན་གྱི་དངུལ་གཉེར་དེ་འདེམས།
+Selected,བདམས་ཐོན་བྱུང་།
+Selected movement type is not allowed by POS Profile.,འདེམས་སྒྲུག་བྱས་པའི་གཡོ་འགུལ་རིགས་དེ་POSགསལ་སྡུད་ཀྱིས་ཆོག་མཆན་སྤྲོད་ཀྱི་མེད།
+Selected Payments,བདམས་པའི་སྤྲོད་འབབ།
+Sensitive actions kept away from quick taps.,ཚོར་སྣང་སྐྱེན་པའི་བྱ་སྤྱོད་དེ་མགྱོགས་མྱུར་གྱི་རྡུལ་ཕྲན་ལས་ཐག་རིང་དུ་བཞག་ཡོད།
+Serial,རིམ་སྒྲིག
+Serial Numbers,རིམ་པ་ཨང་གྲངས།
+Server CPU Usage:,སར་བར་གྱི་CPUབེད་སྤྱོད།
+Server Health,སར་བར་འཕྲོད་བསྟེན།
+Server Memory Usage:,གསབ་ལེན་དྲན་ཚད་བེད་སྤྱོད།
+Server Metrics,སར་བར་གྱི་ཚད་གཞི།
+Server Uptime:,གསབ་ལེན་དུས་ཚོད།
+Service Charges,ཞབས་ཞུའི་རིན་པ།
+Session,ཚོགས་ཐུན།
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,དངུལ་ཁང་གི་PINརེ་རེའི་སྤྱོད་མཁན་གྱི་ཡིག་ཆའི་ནང་བཀོད་ནས་POSཡི་གསལ་སྡུད་སྤྱོད་མཁན་གྱི་ནང་དུ་མཐའ་མཚམས་ཚོགས་མི་བཀོད་སྒྲིག་བྱེད་དགོས།
+Settings,སྒྲིག་སྟངས།
+Settings in this section update the POS workspace without changing the current route.,དོན་ཚན་འདིའི་སྒྲིག་སྟངས་ཀྱིས་ད་ལྟའི་འགྲོ་ལམ་བསྒྱུར་མ་དགོས་པར་POSལས་ཀའི་ས་ཁོངས་ཁ་སྐོང་བྱེད།
+Setup complete!,སྒྲིག་ཆས་མཇུག་སྒྲིལ་ཟིན།
+Share,མཉམ་སྤེལ།
+Shared terminal,མཉམ་སྤྱོད་མཐུད་ཁང་།
+Shift Closed Snapshot,བརྗེ་སྒྱུར་ཁ་བརྒྱབ་པའི་པར་རིས།
+Shift Overview,བརྗེ་སྤོར་སྤྱི་བསྡོམས།
+Show,སྟོན་པ།
+Show cart on customer-facing screen,ཚོང་ཤག་ལ་ཁ་གཏད་པའི་བརྙན་ཤེལ་སྟེང་དུ་ཤིང་རྟ་སྟོན།
+Show last invoice rate,བྱུང་འཛིན་རིན་གོང་མཐའ་མ་སྟོན།
+Show rate info,གོང་ཚད་ཆ་འཕྲིན་སྟོན།
+Show Repair Candidates,བཟོ་བཅོས་འོས་མི་སྟོན་པ།
+Show search tools,འཚོལ་བཤེར་ལག་ཆ་སྟོན།
+Show the active cart on a customer-facing screen,ཚོང་ཤག་ལ་ཁ་གཏད་པའི་བརྙན་ཤེལ་སྟེང་དུ་ཤུགས་ལྡན་གྱི་རླངས་འཁོར་སྟོན།
+Showing {0}-{1} of {2},{2} ཡི་ {0}-{1} སྟོན་གྱི་ཡོད།
+Showing 0 of 0,0 ཡི་ 0 སྟོན་པ།
+Shows the distribution of invoices per currency,དངུལ་ལོར་རེ་རེའི་བྱུང་འཛིན་བགོ་འགྲེམས་མཚོན་པ།
+Sign out of the current POS session,ད་ལྟའི་POSལས་རིམ་ནས་ཕྱིར་ཐོན་དགོས།
+Size:,ཆེ་ཆུང་།
+Skipped Payments,སྤྲོད་ལེན་མ་བརྒལ་བ།
+Skipping items without barcodes,ཐིག་རིས་མེད་པའི་རྣམ་གྲངས་མཆོང་རྒྱུ།
+Slow Moving,འགུལ་སྐྱོད་དལ་བ།
+Slow Moving Items,འགུལ་སྐྱོད་དལ་བའི་དངོས་པོ།
+Slow Queries:,འདྲི་རྩད་འགོར་པོ།
+Sold,བཙོངས་ཟིན།
+Source,ཡོང་ཁུངས།
+Source Cash Account (Optional Override),དངུལ་གྱི་རྩིས་ཁྲ་འབྱུང་ཁུངས་(འདམ་ཀའི་བཀག་འགོག)
+Source Ex. Rate:,ཡོང་ཁུངས། རིན་གོང་།
+Source Rate:,ཡོང་ཁུངས་ཚད་གཞི།
+Specific Profile,བྱེ་བྲག་གི་ངོ་སྤྲོད།
+Split Invoices,བྱུང་འཛིན་བགོ་བཤའ་རྒྱག་པ།
+Staff / Cashier Performance Report,ལས་བྱེད་/དངུལ་ཁང་གི་ལས་ཀའི་སྙན་ཞུ།
+Status,གནས་སྟངས།
+Stock,མཛོད་ཁང་།
+Stock Information,རྒྱུ་ནོར་ཆ་འཕྲིན།
+Stock is lower than requested,གསོག་འཇོག་རེ་འདུན་ལས་དམའ་བ།
+Stock is lower than requested:\n{0},མཛོད་ཁང་རེ་འདུན་བྱས་པ་ལས་དམའ་བ།\n{0}
+Stock Movement Report,མ་རྐང་འགུལ་སྐྱོད་སྙན་ཞུ།
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,རྒྱུ་ནོར་གསར་བརྗེ། {0} ལ་{1} ཡོད། {2} བསྣན་ན་མ་རྩ་ཀླད་ཀོར་འོག་ཏུ་འབྱོར་ངེས།
+Submit,སྤྲོད་པ
+Submit & Print,འབུལ་བ་དང་པར་སྐྲུན།
+Submit Deposit,གཏའ་འཇོག་ཕུལ་བ།
+Submit Expense,འགྲོ་གྲོན་ཕུལ་བ།
+Submitted,ཕུལ་ཡོད།
+Submitted Cash Movements,ཕུལ་བའི་དངུལ་གྱི་འགུལ་སྐྱོད།
+Submitted entries,བརྩམས་ཆོས་བསྐུར་ཟིན་པ།
+Successfully scanned:,མཐར་ཕྱིན་ངང་པར་བཤུས་བྱས།
+Suggested,བསམ་འཆར་བཏོན་པ།
+Suggested Qty,བསམ་འཆར་གྱི་གྲངས་འབོར།
+Supervisor Access,ལྟ་རྟོག་པའི་ཐོབ་ཐང་།
+Supervisor permissions unlock issuance and reloads,ལྟ་རྟོག་པའི་ཆོག་མཆན་སྒོ་འབྱེད་སྤྲོད་པ་དང་བསྐྱར་དུ་མངོན་པ།
+Supervisor Tools,ལྟ་རྟོག་པའི་ལག་ཆ།
+Supplier,མཁོ་སྤྲོད་བྱེད་མཁན།
+Supplier and dates are required.,མཁོ་སྤྲོད་བྱེད་མཁན་དང་ཚེས་གྲངས་དགོས།
+Supplier Invoices,མཁོ་སྤྲོད་བྱེད་མཁན་གྱི་འཛིན་བྱང་།
+Supplier is required.,མཁོ་སྤྲོད་བྱེད་མཁན་དགོས།
+Supplier name is required,མཁོ་སྤྲོད་བྱེད་མཁན་གྱི་མིང་དགོས།
+Supplier Payments,མཁོ་སྤྲོད་བྱེད་མཁན་གྱི་སྤྲོད་འབབ།
+Supplier Purchase Summary,མཁོ་སྤྲོད་པས་ཉོ་སྒྲུབ་ཕྱོགས་བསྡུས།
+Suppliers,མཁོ་སྤྲོད་བྱེད་མཁན།
+Suppliers not found,མཁོ་སྤྲོད་བྱེད་མཁན་མ་རྙེད།
+Switch Camera,པར་ཆས་བརྗེ་སྒྱུར།
+Switch Cashier,དངུལ་ཁང་བརྗེ་ལེན་བྱེད་པ།
+Switch the POS appearance theme,POS མངོན་ཚུལ་གྱི་བརྗོད་གཞི་བརྗེ་དགོས།
+Switched to:,ལ་བསྒྱུར།
+Sync All Invoices,བྱུང་འཛིན་ཚང་མ་མཉམ་སྒྲིག་བྱེད།
+Sync Offline Cash Movements ({0}),དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་དངུལ་གྱི་འགུལ་སྐྱོད་དུས་མཉམ་བཟོས། ({0})
+Sync Offline Sales,དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་ཚོང་གཉེར་དུས་མཉམ།
+Synced {0} offline cash movement(s).,མཉམ་སྒྲིག་བྱས་པའི་{0}དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་དངུལ་གྱི་འགུལ་སྐྱོད།
+Syncing items in background,རྒྱབ་ལྗོངས་སུ་རྣམ་གྲངས་དུས་མཉམ་བཟོ་བ།
+System / Diagnostics,མ་ལག/ནད་རྟགས།
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.",མ་ལག་གི་བྱ་སྤྱོད་ནི་མཉེན་ཆས་ཀྱི་གནས་ཚུལ་དང་། རྒྱབ་སྐྱོར་གྱི་ནད་རྟགས། དེ་བཞིན་ལས་རིམ་གྱི་ཚོད་འཛིན་སོགས་བསྐྱར་ཟློས་དམའ་བའི་བདག་གཉེར་ཚོད་འཛིན་ཡིན།
+System Information,མ་ལག་ཆ་འཕྲིན།
+System Status,མ་ལག་གནས་ཚུལ།
+Tables:,རེའུ་མིག
+Tap the button below to redeem a gift card during checkout.,གཤམ་གྱི་མཐེབ་གཞོང་ལ་རྡེབ་ནས་ལག་རྟགས་ཕྱིར་འཐེན་བྱེད་སྐབས་ལག་རྟགས་བླངས་རོགས།
+Target,དམིགས་འབེན།
+Target Ex. Rate:,དམིགས་འབེན་དཔེར་ན། རིན་གོང་།
+Target Rate:,དམིགས་ཚད་ཚད་གཞི།
+Tax,དཔྱ་ཁྲལ།
+Tax / Charges Report,ཁྲལ་/འགྲོ་སོང་སྙན་ཞུ།
+Tax Heads,ཁྲལ་དོན་འགོ་གཙོ།
+Taxable Amount,ཁྲལ་འཇལ་དགོས་པའི་དངུལ་འབོར།
+Tendered,རིན་གོང་འདོན་སྤྲོད་བྱས།
+Terminal,མཐའ་འཁོར།
+Terminal & Devices,མཐའ་མཚམས་དང་སྒྲིག་ཆས།
+Terminal locked,མཐའ་མཚམས་སྒོ་རྒྱག་པ།
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.",མཐའ་མཚམས་ལག་ཆས་དེས་དངུལ་བཤེར་ས་ཚིགས་འདི་དང་། ཚོང་ཤག་ལ་གདོང་གཏད་པའི་བརྙན་ཤེལ། དེ་བཞིན་མ་འོངས་པའི་པར་འཕྲུལ་/ཡོ་ཆས་ཚོད་འཛིན་ལ་ཤུགས་རྐྱེན་ཐེབས་ཡོད།
+Territory not found,མངའ་ཁོངས་མ་རྙེད།
+The amount paid is not complete,སྤྲད་པའི་དངུལ་འབོར་ཆ་ཚང་མེད་པ།
+The app stores data locally for offline use. This is called cache.,མཉེན་ཆས་དེས་དྲ་རྒྱའི་ཕྱི་རོལ་དུ་བེད་སྤྱོད་གཏོང་ཆེད་དུ་ས་གནས་སུ་གནས་ཚུལ་གསོག་འཇོག་བྱེད་ཀྱི་ཡོད། འདི་ལ་ cache ཟེར།
+The invoice stayed in draft. Please review and submit it manually.,བྱུང་འཛིན་དེ་ཟིན་བྲིས་ནང་དུ་བསྡད་ཡོད། བསྐྱར་ཞིབ་དང་ལག་ཐོག་ནས་འབུལ་རོགས་གནང༌།
+The maximum discount allowed is,ཆག་ཡང་གཏོང་ཆོག་པའི་ཆེས་མཐོ་བའི་ཚད་གཞི་ནི།
+The quantity for {0} has been adjusted to the maximum available stock.,{0} ཡི་གྲངས་འབོར་དེ་ཆེས་མཐོའི་ཐོབ་ཐང་ཡོད་པའི་རྒྱུ་ནོར་ལ་སྙོམ་སྒྲིག་བྱས།
+The system could not retrieve the item details. Please try again.,མ་ལག་གིས་རྣམ་གྲངས་ཀྱི་ཞིབ་ཕྲའི་གནས་ཚུལ་ཕྱིར་ལེན་ཐུབ་མ་སོང་། ཡང་བསྐྱར་ཚོད་ལྟ་གནང་རོགས།
+These invoices will be synced when connection is restored,སྦྲེལ་མཐུད་སླར་གསོ་བྱུང་རྗེས་བྱུང་འཛིན་འདི་དག་དུས་མཚུངས་བཟོ་རྒྱུ་རེད།
+This action now opens inside the settings workspace.,བྱ་སྤྱོད་འདི་ད་ལྟ་སྒྲིག་སྟངས་ལས་ཀའི་ས་ཁོངས་ནང་དུ་ཁ་ཕྱེ་བ་རེད།
+This coupon already used !,ཁུག་མ་འདི་སྔོན་ནས་བེད་སྤྱོད་བཏང་ཟིན།
+This invoice does not need change-allocation repair,བྱུང་འཛིན་འདི་ལ་བསྒྱུར་བཅོས་བགོ་འགྲེམས་བཟོ་བཅོས་བྱེད་མི་དགོས།
+This invoice is already repaired,བྱུང་འཛིན་འདི་བཟོ་བཅོས་བྱས་ཟིན།
+This is an item template. Please choose a variant.,འདི་ནི་རྣམ་གྲངས་ཀྱི་དཔེ་སྒྲོམ་ཞིག་རེད། སྐུ་མཁྱེན། མི་འདྲ་བ་ཞིག་འདེམས་རོགས།
+this item,རྣམ་གྲངས་འདི།
+This POS page could not be opened offline because its code was not cached on this terminal yet.,POS ཤོག་ངོས་འདི་དྲ་རྒྱའི་ཕྱི་རོལ་དུ་ཁ་ཕྱེ་ཐུབ་ཀྱི་མེད།
+This Serial Number {0} has already been added!,རིམ་སྒྲིག་ཨང་གྲངས་{0}འདི་སྔོན་ནས་ཁ་སྣོན་བྱས་ཟིན།
+Threshold,ཐེམ་སྐད།
+Time,དུས་ཚོད།
+Tip: Clear cache regularly to free up space and keep the app fast.,བསླབ་བྱ། བར་སྟོང་སྟོང་པར་བྱས་ནས་མཉེན་ཆས་དེ་མགྱོགས་པོ་ཉར་ཆེད་དུ་མཛོད་ཁང་དུས་རྒྱུན་དུ་བསུབ་དགོས།
+Tip: Close unused tabs or apps to reduce lag.,བསླབ་བྱ། བེད་སྤྱོད་མ་བཏང་བའི་མཆོང་ལྡེ་ཡང་ན་མཉེན་ཆས་ཁ་རྒྱག་ནས་འགོར་འགྱངས་ཉུང་དུ་གཏོང་དགོས།
+Tip: Monitor slow queries and table size for optimal performance.,བསླབ་བྱ། ལས་དོན་ཡག་ཤོས་ཆེད་དུ་འདྲི་རྩད་འགོར་པོ་དང་རེའུ་མིག་ཆེ་ཆུང་ལ་ལྟ་རྟོག་བྱེད་དགོས།
+To Be Paid,སྤྲོད་དགོས་པ།
+To Date,དེ་རིང་བར།
+Today,དེ་རིང་།
+Today Profit,དེ་རིང་གི་ཁེ་སྤོགས།
+Today Sales,དེ་རིང་ཚོང་འགྲེམས།
+Toggle navigation drawer,འགྲིམ་འགྲུལ་ཤུད་སྒམ་བསྒྱུར།
+Toggle Theme,བརྗོད་གཞི་བརྗེ་སྒྱུར།
+Tools,ལག་ཆ།
+Tools for customer-facing screens and terminal-specific actions.,ཚོང་ཤག་ལ་ཁ་གཏད་པའི་གློག་བརྙན་དང་མཐའ་མཚམས་དམིགས་བསལ་གྱི་བྱ་སྤྱོད་ཀྱི་ལག་ཆ།
+Top Brand,ཚོང་རྟགས་ཆེ་ཤོས།
+Top Category,སྡེ་ཚན།
+Top Charge Head,ཆེས་མཐོའི་གློག་མགོ།
+Top Customers,ཚོང་ཤག་ཆེ་ཤོས།
+Top Discount,ཆེས་མཐོའི་ཆག་ཡང་།
+Top Items by Location,ས་གནས་ལྟར་གཙོ་གནད་རྣམ་གྲངས།
+Top Margin,མཐོ་སྒང་།
+Top Pending,སྒུག་བཞིན་པའི་ཆེས་མཐོ།
+Top Profit Item,ཁེ་སྤོགས་ཆེ་ཤོས་ཀྱི་རྣམ་གྲངས།
+Top Return Items,ཕྱིར་ལོག་དངོས་ཟོག ཆེས་མཐོ།
+Top Sales by Cashier,དངུལ་ཁང་འགན་འཛིན་གྱིས་བཙོངས་ཚད་མཐོ་ཤོས།
+Top Supplier,མཁོ་སྤྲོད་བྱེད་མཁན་ཆེ་ཤོས།
+Top Suppliers by Spend,འགྲོ་སོང་ལྟར་མཁོ་སྤྲོད་བྱེད་མཁན་གཙོ་བོ།
+Top Tables,ཆེས་མཐོའི་ལྕོག་རྩེ།
+Top Tax Head,དཔྱ་ཁྲལ་མགོ་ཁྲིད་ཆེས་མཐོ།
+Top Up Amount,ཁ་གསབ་དངུལ་འབོར།
+Top Up Card,ཁ་གསབ་བྱང་བུ།
+Top Up Mode,ཁ་གསབ་ཐབས་ལམ།
+Top Variant,ཆེས་མཐོའི་འགྱུར་བ།
+Total,བསྡོམས་པ།
+Total Amount,བསྡོམས་འབོར།
+Total Change,བསྡོམས་འབོར།
+Total Charges,སྤྱིའི་རིན་པ།
+Total In,བསྡོམས་འབོར།
+Total Invoices,བྱུང་འཛིན་བསྡོམས་འབོར།
+Total Items,རྣམ་གྲངས་བསྡོམས་འབོར།
+Total Mpesa,ཁྱོན་བསྡོམས་མེ་པེ་ས།
+Total Out,བསྡོམས་འབོར།
+Total Payments,དངུལ་སྤྲོད་བསྡོམས་འབོར།
+Total Purchase,ཉོ་སྒྲུབ་བསྡོམས་འབོར།
+Total Selected :,བསྡོམས་པས་འདེམས་སྒྲུག་བྱས།
+Total Size,སྤྱིའི་ཆེ་ཆུང་།
+Total Stock Qty,སྤྱིའི་རྒྱུ་ནོར་གྲངས་ཚད།
+Total:,བསྡོམས་པ།
+Totals by Invoice Currency,བྱུང་འཛིན་དངུལ་ལོར་གྱི་བསྡོམས་འབོར།
+Track how much cash was handed back to customers,ཚོང་ཤག་ལ་དངུལ་ག་ཚོད་སྤྲད་ཡོད་མེད་རྗེས་འདེད་བྱེད་དགོས།
+"Track recent sales, collect unpaid balances, and reopen saved work",ཉེ་ཆར་གྱི་ཚོང་ཟོག་རྗེས་འདེད་དང་། དངུལ་མ་སྤྲད་པའི་ལྷག་མ་བསྡུ་རུབ། ཉར་ཚགས་བྱས་པའི་ལས་ཀ་ཡང་བསྐྱར་ཁ་ཕྱེ།
+Transaction ID,ཚོང་དོན་ཨང་རྟགས།
+Transfer,སྤོ་སྒྱུར།
+Try a different search term or clear the cart search.,འཚོལ་ཞིབ་མིང་ཚིག་གཞན་ཞིག་ཚོད་ལྟ་བྱེད་པའམ་ཡང་ན་རླངས་འཁོར་གྱི་འཚོལ་ཞིབ་དེ་བསུབ་རོགས།
+Try adjusting your search or filters,ཁྱེད་རང་གི་འཚོལ་བཤེར་ཡང་ན་ཚགས་རླུང་ལེགས་སྒྲིག་བྱེད་ཐབས་བྱོས།
+Try another source or refresh the list.,ཐོན་ཁུངས་གཞན་ཞིག་ཚོད་ལྟ་བྱེད་པའམ་ཡང་ན་ཐོ་གཞུང་གསར་བརྗེ་བྱེད།
+Try changing the date range or status filter.,ཚེས་གྲངས་ཁྱབ་ཁོངས་ཡང་ན་གནས་ཚད་ཚགས་རླུང་བསྒྱུར་ཐབས་བྱོས།
+Type,རིགས།
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,གཞི་རྩའི་སྒྲིག་སྟངས་ཡོད་ཀྱང་པར་ཆས་ལ་འཛུལ་མི་ཐུབ། ཁྱེད་རང་གི་པར་ཆས་ཀྱི་ཆོག་མཆན་དང་ཡོ་ཆས་ཀྱི་མཐུན་སྒྲིལ་ལ་ཞིབ་བཤེར་གནང་རོགས།
+Unable to add offer item {0}. Please refresh and try again.,འདོན་སྤྲོད་རྣམ་གྲངས་{0}ཁ་སྣོན་བྱེད་མི་ཐུབ། བསྐྱར་གསོ་བྱས་ནས་བསྐྱར་དུ་ཚོད་ལྟ་བྱེད་རོགས།
+Unable to add offer item. Please refresh and try again.,འབུལ་བའི་རྣམ་གྲངས་ཁ་སྣོན་བྱེད་མི་ཐུབ། བསྐྱར་གསོ་བྱས་ནས་བསྐྱར་དུ་ཚོད་ལྟ་བྱེད་རོགས།
+Unable to add scanned item.,པར་བཤུས་བྱས་པའི་རྣམ་གྲངས་ཁ་སྣོན་བྱེད་མི་ཐུབ།
+Unable to create purchase order,ཉོ་སྒྲུབ་མངགས་ཐོ་བཟོ་མི་ཐུབ།
+Unable to delete draft invoice,བྱུང་འཛིན་ཟིན་བྲིས་བསུབ་མི་ཐུབ།
+Unable to fetch documents,ཡིག་ཆ་ལེན་མི་ཐུབ།
+Unable to fetch draft orders,ཟིན་བྲིས་བཀའ་རྒྱ་ལེན་ཐུབ་ཀྱི་མེད།
+Unable to fetch invoice history,བྱུང་འཛིན་ལོ་རྒྱུས་ལེན་མི་ཐུབ།
+Unable to fetch M-Pesa payments,M-Pesa དངུལ་ལེན་ཐུབ་ཀྱི་མེད།
+Unable to fetch sales orders,ཚོང་མངགས་ལེན་ཐུབ་ཀྱི་མེད།
+Unable to fetch unpaid invoices,མ་སྤྲད་པའི་བྱུང་འཛིན་ལེན་ཐུབ་ཀྱི་མེད།
+Unable to generate scale barcode,ཚད་གཞིའི་ཐིག་རིས་བཟོ་མི་ཐུབ།
+Unable to issue gift card.,ལག་རྟགས་སྤྲོད་མི་ཐུབ།
+Unable to load cashier PIN status.,དངུལ་ཁང་གི་PINགནས་ཚུལ་བླུགས་མི་ཐུབ།
+Unable to load document,ཡིག་ཆ་མངོན་འཇུག་བྱེད་མི་ཐུབ།
+Unable to load draft invoice,བྱུང་འཛིན་ཟིན་བྲིས་ནང་འཇུག་བྱེད་མི་ཐུབ།
+Unable to load gift card balance.,ལག་རྟགས་ཤོག་བྱང་ལྷག་མ་བླུགས་མི་ཐུབ།
+Unable to load invoice details,བྱུང་འཛིན་ཞིབ་ཕྲའི་ནང་འཇུག་བྱེད་མི་ཐུབ།
+Unable to load parked order,རླངས་འཁོར་བཞག་པའི་བཀའ་མངགས་བླུགས་མི་ཐུབ།
+Unable to load the selected sales order,བདམས་པའི་བྲིན་ཚོང་མངགས་ཐོ་མངོན་འཇུག་བྱེད་མི་ཐུབ།
+Unable to prepare document,ཡིག་ཆ་བཟོ་མི་ཐུབ་པ།
+Unable to prepare return invoice,ཕྱིར་སློག་གི་བྱུང་འཛིན་གྲ་སྒྲིག་བྱེད་མི་ཐུབ།
+Unable to print draft invoice,བྱུང་འཛིན་ཟིན་བྲིས་དཔར་མི་ཐུབ།
+Unable to print submitted invoice,བསྐུར་ཟིན་པའི་བྱུང་འཛིན་པར་བཤུས་བྱེད་མི་ཐུབ།
+Unable to process document action,ཡིག་ཆའི་བྱ་སྤྱོད་སྒྲུབ་མི་ཐུབ།
+Unable to repair change allocation,བསྒྱུར་བཅོས་བགོ་འགྲེམས་བཟོ་བཅོས་བྱེད་མི་ཐུབ་པ།
+Unable to save cashier PIN.,དངུལ་ཁང་གི་PINཉར་ཚགས་བྱེད་མི་ཐུབ།
+Unable to save the rate to the backend price list,རྒྱབ་ཕྱོགས་ཀྱི་རིན་གོང་ཐོ་གཞུང་ལ་རིན་གོང་ཉར་ཚགས་བྱེད་མི་ཐུབ།
+Unable to submit invoice,འཛིན་ཤོག་འབུལ་མི་ཐུབ།
+Unable to submit the selected payment,བདམས་པའི་གླ་ཆ་སྤྲོད་མི་ཐུབ།
+Unable to top up gift card.,ལག་རྟགས་ཤོག་བྱང་ལ་དངུལ་བླུགས་མི་ཐུབ།
+Unable to verify cashier PIN.,དངུལ་ཁང་གི་PINབདེན་དཔང་བྱེད་མི་ཐུབ།
+Unallocated,བགོ་བཤའ་མ་བརྒྱབ་པ།
+Unallocated:,བགོ་འགྲེམས་བྱས་མེད།
+Unavailable,ཐོབ་མི་ཐུབ།
+Unknown,མ་ཤེས་པ།
+Unknown Item,མ་ཤེས་པའི་རྣམ་གྲངས།
+Unknown Warehouse,མ་ཤེས་པའི་མཛོད་ཁང་།
+Unlock POS,POS ལྡེ་མིག་ཕྱེ།
+Unpaid,གླ་ཆ་མ་སྤྲད་པ།
+"Unselected payments stay unallocated first, then auto reconcile after submit.",འདེམས་སྒྲུག་མ་བྱས་པའི་གླ་ཆ་དེ་སྔོན་ལ་བགོ་འགྲེམས་མེད་པར་བསྡད་རྗེས་ཕུལ་རྗེས་རང་འགུལ་གྱིས་མཐུན་སྒྲིལ་བྱེད་ཀྱི་ཡོད།
+UOM,UOM
+UOM not found,UOM མ་རྙེད།
+Update available,གསར་བཅོས་བྱེད་ཐུབ།
+Update Customer,ཚོང་ཤག་གསར་བསྒྱུར།
+Update PIN,PIN གསར་བརྗེ།
+Update Price List Rate,རིན་གོང་ཐོ་གཞུང་གི་ཚད་གཞི་གསར་བཅོས་བྱེད་པ།
+Updated,གསར་བཅོས་བྱས།
+Updates and app info that stay out of the cashier flow.,དངུལ་ཁང་གི་རྒྱུན་རིང་པོའི་ཕྱི་རོལ་དུ་གནས་པའི་ཁ་སྐོང་དང་མཉེན་ཆས་ཀྱི་གནས་ཚུལ།
+Updates automatically,རང་འགུལ་གྱིས་གསར་བཅོས་བྱེད།
+Usage,བེད་སྤྱོད།
+Usage Stats,བེད་སྤྱོད་གྲངས་གཞི།
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,དངུལ་ཁང་བརྗེ་སྒྱུར་དང་མཐུད་ཁའི་ལྡེ་མིག་ཕྱེ་བར་ཨང་གྲངས་༤ནས་༨བར་གྱི་PINབེད་སྤྱོད་བྱེད་དགོས།
+Use Cashier,དངུལ་འཛིན་བེད་སྤྱོད།
+Use date range to search for older invoices,བྱུང་འཛིན་རྙིང་པ་འཚོལ་ཞིབ་བྱེད་པར་ཚེས་གྲངས་ཁྱབ་ཁོངས་བེད་སྤྱོད་བྱེད།
+"Use one field for manual code entry, barcode scans, or QR scans.",ལག་ཐོག་ནས་གསང་གྲངས་བླུགས་པ་དང་། ཐིག་རིས་པར་བཤུས། ཡང་ན་QRཔར་བཤུས་བྱེད་པར་ས་ཁོངས་གཅིག་བེད་སྤྱོད་བྱེད།
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.",ལས་ཀའི་འགྲོ་ལུགས་གཅིག་བེད་སྤྱོད་བྱས་ནས་དངུལ་ལྷག་མ་ཞིབ་བཤེར་དང་། གསར་པ་བཏོན་པ། དེ་བཞིན་POSནས་མ་ཐོན་པར་ཁ་སྣོན་བྱེད་དགོས།
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.",མཛོད་ཁང་ནང་དུ་ཡོད་པའི་སྔོན་འགྲོའི་གནས་ཚུལ་ལ་གསར་འགྱུར་དང་། བསྐྱར་བཟོ། ཡང་ན་ནད་རྟགས་བསྐྱར་ཞིབ་དགོས་སྐབས་སྡེ་ཚན་འདི་བེད་སྤྱོད་བྱོས།
+Use Western numerals,ནུབ་ཕྱོགས་ཀྱི་ཨང་གྲངས་བེད་སྤྱོད་བྱེད་པ།
+Used:,བེད་སྤྱོད།
+Using basic camera settings due to device limitations,སྒྲིག་ཆས་ཀྱི་ཚད་བཀག་དབང་གིས་གཞི་རྩའི་པར་ཆས་ཀྱི་སྒྲིག་བཀོད་བཀོལ་སྤྱོད་བྱེད་པ།
+Using cached customer balance,ཉར་ཚགས་བྱས་པའི་ཚོང་ཤག་གི་དངུལ་ལྷག་བེད་སྤྱོད་བྱེད་པ།
+Valid until,2020 བར་ནུས་ལྡན་ཡིན།
+Variance %,འགྱུར་ལྡོག་%
+Variants,འགྱུར་ལྡོག་ཅན།
+Variant-wise,འགྱུར་ལྡོག་ཅན།
+Verify closing amounts for each payment method,དངུལ་སྤྲོད་ཐབས་རེ་རེའི་མཇུག་སྒྲིལ་དངུལ་འབོར་ཞིབ་བཤེར་བྱེད་དགོས།
+View all,ཚང་མར་གཟིགས།
+View app information and current build details,མཉེན་ཆས་ཆ་འཕྲིན་དང་ད་ལྟའི་བཟོ་སྐྲུན་ཞིབ་ཕྲ་ལ་གཟིགས།
+View Data Diagnostics,གཞི་གྲངས་ནད་བརྟག་ལ་ལྟ་བ།
+View Details,ཞིབ་ཕྲ་གཟིགས།
+View invoice details,བྱུང་འཛིན་ཞིབ་ཕྲ་ལ་གཟིགས།
+View notifications,བརྡ་ཁྱབ་ལ་ལྟ་བ།
+View offline invoices,དྲ་རྒྱའི་ཕྱི་རོལ་གྱི་བྱུང་འཛིན་ལ་ལྟ་བ།
+View restricted POS insights,ཚད་བཀག་ཅན་གྱི་POSཤེས་རྟོགས་ལ་ལྟོས།
+Void Amount,སྟོང་པའི་དངུལ་འབོར།
+Void Count,སྟོང་པའི་གྲངས།
+Voids,སྟོང་ཆ།
+Waiting for cart items,ཤིང་རྟའི་ཅ་ལག་སྒུག་བཞིན་པ།
+Waiting for payment...,དངུལ་སྤྲོད་རྒྱུར་སྒུག་ཡོད།
+Walk-in Customer,འགྲོ་འོང་ཚོང་ཤག
+Warehouse,མཛོད་ཁང་།
+Warning: High cache usage may affect performance.,ཉེན་བརྡ། མཛོད་བེད་སྤྱོད་མཐོ་པོ་བྱས་ན་ལས་ཀའི་སྤུས་ཚད་ལ་ཤུགས་རྐྱེན་ཐེབས་སྲིད།
+Warning: High lag may indicate heavy processing or browser slowness.,ཉེན་བརྡ། ཕྱིར་འགྱངས་མཐོ་པོས་ལས་སྣོན་ལྗིད་པོའམ་ཡང་ན་དྲ་ངོས་འགོར་པོ་ཡིན་པ་མཚོན་ཐུབ།
+Week ?,གཟའ་འཁོར ?
+Week-wise,བདུན་ཕྲག་རེའི་ཆ་ནས།
+Weight (g),ལྗིད་ཚད་(g)
+Weight (grams),ལྗིད་ཚད།(གྷ་རམ།)
+We'll let you know if an invoice fails to submit,གལ་ཏེ་བྱུང་འཛིན་ཞིག་འབུལ་མ་ཐུབ་ན། ང་ཚོས་ཁྱེད་ལ་ཤེས་སུ་འཇུག་རྒྱུ་ཡིན།
+Workflow,ལས་ཀའི་འགྲོ་ལུགས།
+Write off amount cannot exceed the POS profile maximum of {0},རྩིས་མེད་གཏོང་བའི་དངུལ་འབོར་དེ་POSགསལ་སྡུད་ཆེས་མཐོ་བའི་{0}ལས་བརྒལ་མི་ཐུབ།
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,རྩིས་མེད་གཏོང་བའི་དངུལ་འབོར་ཆོག་པའི་ཚད་གཞི་ལས་བརྒལ་ཡོད། ({0}) ལྷག་མའི་དངུལ་སྤྲོད་རྒྱུ་ཁ་སྣོན་གནང་རོགས།
+Yes,རེད།
+"Yes, Cancel sale",རེད། ཕྱིར་འཚོང་མེད་པར་བཟོས།
+"Yes, Close",རེད། སྒོ་བརྒྱབ།
+You are not allowed to print draft invoices,ཟིན་བྲིས་ཀྱི་བྱུང་འཛིན་དཔར་མི་ཆོག་པ།
+You are offline. Add Payment will work again when the connection is restored.,ཁྱེད་རང་དྲ་རྒྱའི་ཕྱི་རོལ་དུ་ཡོད། མཐུད་སྣེ་སླར་གསོ་བྱུང་རྗེས་དངུལ་སྤྲོད་ཁ་སྣོན་བྱེད་པ་དེས་ཡང་བསྐྱར་ལས་ཀ་བྱེད།
+You have no notifications right now,ད་ལྟ་ཁྱེད་ལ་བརྡ་ཐོ་གང་ཡང་མེད།
+Your Cart,ཁྱེད་ཀྱི་ཤིང་རྟ།

@@ -1,0 +1,1362 @@
+POS Awesome,POS Гайхалтай
+Fetch Items Directly from Server,Серверээс шууд бараа татах
+Menu,Цэс
+Actions,Үйлдлүүд
+Close Shift,Shift-ийг хаах
+End current session,Одоогийн сессийг дуусгах
+Print Last Invoice,Сүүлийн нэхэмжлэхийг хэвлэх
+Reprint previous transaction,Өмнөх гүйлгээг дахин хэвлэх
+Sync Offline Invoices,Офлайн нэхэмжлэхийг синк хийх
+Upload pending transactions,Хүлээгдэж буй гүйлгээг байршуулах
+Go Online,Онлайнаар явах
+Go Offline,Офлайнаар явах
+Disable offline mode,Офлайн горимыг идэвхгүй болгох
+Work without server connection,Сервер холболтгүйгээр ажиллах
+Clear Cache,Кэшийг цэвэрлэх
+Remove local data and refresh,Дотоод өгөгдлийг устгаад дахин сэргээнэ үү
+About,тухай
+App information,Аппликешны мэдээлэл
+Language,Хэл
+Change interface language,Интерфейсийн хэлийг өөрчлөх
+Light Mode,Гэрэл горим
+Dark Mode,Харанхуй горим
+Switch theme appearance,Загварын харагдах байдлыг өөрчлөх
+Logout,Гарах
+Sign out of session,Сешнээс гарах
+Select Language,Хэл сонгоно уу
+Choose your preferred language for the POS interface,POS интерфэйсийн хувьд өөрийн дуртай хэлийг сонгоно уу
+Language will be changed to,Хэл нь өөрчлөгдөнө
+Cancel,Цуцлах
+Change Language,Хэлийг өөрчлөх
+Close,Хаах
+Cannot change language - same language selected,Хэлийг өөрчлөх боломжгүй - ижил хэлийг сонгосон
+Language changed successfully! Reloading...,Хэл амжилттай өөрчлөгдсөн! Дахин ачаалж байна...
+Failed to change language,Хэлийг өөрчилж чадсангүй
+Unknown error,Үл мэдэгдэх алдаа
+- Total Unallocated,- Нийт хуваарилагдаагүй
+* Required,* Шаардлагатай
+{0} (Qty: {1}),{0} (Тоо хэмжээ: {1})
+{0} actions,{0} үйлдэл
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0}-д зөвхөн {1} нөөц бий. Та {2}-г хүссэн. Тоо хэмжээг тохируулах эсвэл нөөцлөх.
+{0} offline invoice{1} pending,{0} офлайн нэхэмжлэх{1} хүлээгдэж байна
+{0} offline invoice{1} saved as draft,{0} офлайн нэхэмжлэхийг{1} ноорог болгон хадгалсан
+{0} offline invoice{1} synced,{0} офлайн нэхэмжлэхийг{1} синк хийсэн
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0} өдрийн өмнө
+{0}h ago,{0}цагийн өмнө
+{0}m ago,{0}минутын өмнө
+A POS supervisor is required for this action.,Энэ үйлдэлд ПОС-ын хянагч шаардлагатай.
+Access,Хандалт
+Account,Данс
+Account is overdrawn,Данс хэтрүүлсэн байна
+Acknowledge the error to resume scanning,Скан хийх ажиллагааг үргэлжлүүлэхийн тулд алдааг хүлээн зөвшөөр
+Acknowledge the error to resume scanning.,Скан хийх ажиллагааг үргэлжлүүлэхийн тулд алдааг хүлээн зөвшөөр.
+Across,Даанч
+Action,Үйлдэл
+Active sale,Идэвхтэй худалдаа
+add,нэмэх
+Add items from the selector to start building this sale.,Энэ борлуулалтыг эхлүүлэхийн тулд сонгогчоос зүйлсийг нэмнэ үү.
+Add more value to an existing gift card,Одоо байгаа бэлгийн картанд илүү үнэ цэнийг нэмээрэй
+Add New Address,Шинэ хаяг нэмэх
+Add new customer,Шинэ үйлчлүүлэгч нэмэх
+Add on New Line,Шинэ мөрөнд нэмнэ үү
+Add Payment,Төлбөр нэмэх
+Add payment to invoice,Нэхэмжлэлд төлбөр нэмэх
+Add/Edit Coupon Conditions,Купоны нөхцөл нэмэх/засах
+Additional Discount,Нэмэлт хөнгөлөлт
+Additional Discount %,Нэмэлт хөнгөлөлт %
+Address Line 1,Хаягийн мөр 1
+Address not found,Хаяг олдсонгүй
+Adjust the quantity or enable negative stock to continue.,Үргэлжлүүлэхийн тулд тоо хэмжээг тохируулах эсвэл сөрөг хувьцааг идэвхжүүлнэ үү.
+Adjustment,Тохируулга
+After returns,Буцаж ирсний дараа
+Against,Эсрэг
+Against Name,Нэрний эсрэг
+Age Bracket,Насны хаалт
+All,Бүгд
+All Caught Up!,Бүгдийг барьж авлаа!
+All invoices are synchronized,Бүх нэхэмжлэх нь синхрончлогдсон
+All pending invoices are up to date,Бүх хүлээгдэж буй нэхэмжлэхүүд шинэчлэгдсэн
+All Profiles,Бүх профайл
+All Synchronized,Бүгд синхрончлогдсон
+All visible invoices are fully settled.,Бүх харагдахуйц нэхэмжлэхийг бүрэн барагдуулсан.
+All Warehouses,Бүх агуулахууд
+Allowed UOM is {0},Зөвшөөрөгдсөн UOM нь {0}
+Always fetch items from server (ignore local cache),Үргэлж серверээс зүйлсийг татаж авах (локал кэшийг үл тоомсорлох)
+Amount,Дүн
+Amount already received,Аль хэдийн хүлээн авсан дүн
+Amount exceeds profile cash movement max amount.,Дүн нь профайлын бэлэн мөнгөний хөдөлгөөний дээд хэмжээнээс хэтэрсэн байна.
+Amount must be greater than zero.,Дүн нь тэгээс их байх ёстой.
+Amount received from customer,Үйлчлүүлэгчээс хүлээн авсан дүн
+Appearance and user-level preferences for the current session.,Одоогийн сессийн харагдах байдал болон хэрэглэгчийн түвшний тохиргоо.
+Applied,Хэрэглэсэн
+Apply,Өргөдөл гаргах
+Apply Gift Card,Бэлгийн карт ашиглах
+Apply Offer,Санал ашиглах
+Apply On,Өргөдөл гаргах
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,Энэ нэхэмжлэх дээр зөвхөн авахыг хүссэн дүнгээ оруулна уу. Үлдсэн үлдэгдэл картанд үлдэнэ.
+Apply Redemption,Эргүүлэх хүсэлт гаргах
+Applying,Өргөдөл гаргаж байна
+Apps,Програмууд
+Are you sure you want to close? All entered data will be lost.,Та хаахдаа итгэлтэй байна уу? Оруулсан бүх өгөгдөл устах болно.
+Attributes (Size/Color),Шинж чанарууд (Хэмжээ/Өнгө)
+Auto Allocate Payment Amount,Төлбөрийн хэмжээг автоматаар хуваарилах
+Auto Reconcile,Автомат эвлэрүүлэх
+Auto reconciliation completed after payment submit.,Төлбөрийг оруулсны дараа автомат тохирол дууссан.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,Автомат тохируулга дууссан. Хуваарилагдсан: {0}{1}. Үлдсэн: {0}{2}.
+Available Actions,Боломжтой үйлдлүүд
+Available QTY,Боломжтой QTY
+Available:,Боломжтой:
+Average Basket,Дундаж сагс
+Average Bill,Дундаж Билл
+Average Ticket,Дундаж тасалбар
+Avg Bill,Дундаж Билл
+Avg Invoice,Дундаж нэхэмжлэх
+Avg Invoice Profit,Нэхэмжлэлийн дундаж ашиг
+Avg Invoice Value,Нэхэмжлэхийн дундаж үнэ
+Avg Purchase Frequency,Худалдан авалтын дундаж давтамж
+Awesome,Гайхалтай
+Awesome Dashboard,Гайхалтай хяналтын самбар
+Awesome Dashboard is disabled for the selected POS Profile.,Сонгогдсон ПОС профайлын хувьд Гайхалтай хяналтын самбарыг идэвхгүй болгосон.
+Awesome Dashboard is unavailable for the selected scope.,Гайхалтай хяналтын самбар нь сонгосон хүрээний хувьд боломжгүй байна.
+Awesome Dashboard is visible only to POS supervisors.,Гайхалтай хяналтын самбар нь зөвхөн ПОС-ын удирдагчдад харагдана.
+Back,Буцах
+Back Office Cash Account,Back Office бэлэн мөнгөний данс
+Back Office Cash Account (Optional Override),Back Office Cash Account (Заавал биш дарах)
+Back office cash account is required.,Арын оффисын бэлэн мөнгөний данс шаардлагатай.
+Back to {0},{0} руу буцах
+Background processing did not finish in time.,Суурь боловсруулалт хугацаандаа дуусаагүй.
+Background processing failed for Invoice {0}: {1},{0} нэхэмжлэхийн арын боловсруулалт амжилтгүй боллоо: {1}
+Background Submission Failed,Суурь мэдээлэл илгээж чадсангүй
+Background sync interval (seconds),Арын синхрончлолын интервал (секунд)
+Balance,Тэнцвэр
+Balance will be updated when connection is restored,Холболт сэргээгдэх үед үлдэгдэл шинэчлэгдэх болно
+Balances still pending,Үлдэгдэл хүлээгдэж байна
+Barcode,Бар код
+Barcode / QR Ready,Бар код / QR бэлэн
+Barcode Label Printing,Бар код шошго хэвлэх
+Base Paid:,Үндсэн төлбөр:
+Base Recv:,Үндсэн Recv:
+Base:,Үндсэн:
+Basic Information,Үндсэн мэдээлэл
+Batch,Багц
+Batch Information,Багцын мэдээлэл
+Before any return workflow,Аливаа буцах ажлын урсгалын өмнө
+Before returns,Буцахаас өмнө
+Best Day,Шилдэг өдөр
+Best Seller,Шилдэг борлуулагч
+Book expense or deposit from active shift.,Идэвхтэй ээлжийн төлбөр эсвэл хадгаламжийн төлбөр.
+Branch / Location-wise Report,Салбар / Байршлын талаархи тайлан
+Brand-wise,Брэндийн хувьд
+Breakdown,Эвдрэл
+Browse,Үзэх
+Build Time:,Бүтээх хугацаа:
+Built with Frappe,Frappe-ээр бүтээгдсэн
+Bundle,Багц
+Buying Price,Худалдан авах үнэ
+Cache cleared successfully,Кэшийг амжилттай арилгалаа
+Cache Usage,Кэшийн хэрэглээ
+cache used,кэш ашигласан
+Calculating...,Тооцож байна...
+Camera Access Required,Камерт хандах шаардлагатай
+Camera access was aborted. Please try again.,Камерын хандалтыг зогсоосон. Дахин оролдоно уу.
+Camera constraints not supported by your device. Trying fallback settings...,Камерын хязгаарлалтыг таны төхөөрөмж дэмждэггүй. Буцах тохиргоог оролдож байна...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,Камер завгүй эсвэл өөр апп/таб блоклосон байна. Бусад камерын програмуудыг хаагаад дахин оролдоно уу.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,Камерын зөвшөөрлийг үгүйсгэв. Хөтөчийнхөө тохиргоонд камерын хандалтыг зөвшөөрч хуудсыг дахин сэргээнэ үү.
+Camera scanner is locked until the current error is acknowledged,Одоогийн алдааг хүлээн зөвшөөрөх хүртэл камерын сканнер түгжигдсэн байна
+Camera started but the video stream did not load in time. Please try again.,Камер эхэлсэн боловч видеоны урсгал цаг хугацаандаа ачаалагдаагүй. Дахин оролдоно уу.
+Cancel cash movement {0}?,Бэлэн мөнгөний шилжүүлгийг {0} цуцлах уу?
+Cancel Payment,Төлбөрийг цуцлах
+Cancel Sale,Борлуулалтыг цуцлах
+Cancel Sale ?,Хямдралыг цуцлах уу?
+Cancelled,Цуцлагдсан
+Cannot add an item with zero or negative quantity.,Тэг эсвэл сөрөг тоо хэмжээ бүхий зүйлийг нэмэх боломжгүй.
+Cannot clear cache while offline,Офлайн үед кэшийг цэвэрлэх боломжгүй
+Cannot redeem customer credit more than invoice total,Нэхэмжлэлийн нийт дүнгээс илүү харилцагчийн зээлийг эргүүлэн авах боломжгүй
+Cannot redeem gift cards more than invoice total,Нэхэмжлэлийн нийт хэмжээнээс илүү бэлгийн картыг зарцуулах боломжгүй
+Cannot Save Offline Invoice:,Офлайн нэхэмжлэхийг хадгалах боломжгүй:
+Cannot Save Offline Payment:,Офлайн төлбөрийг хадгалах боломжгүй:
+Card,Карт
+Card / Online,Карт / Онлайн
+Card health after the last live lookup,Сүүлчийн шууд хайлтын дараа картын эрүүл мэнд
+Cards,Картууд
+Cart,Сагс
+Cash,Бэлэн мөнгө
+Cash back to customers,Үйлчлүүлэгчдэд бэлэн мөнгө буцааж өгөх
+Cash Collections,Бэлэн мөнгөний цуглуулга
+Cash Deposit is disabled for this POS Profile.,Энэ ПОС профайлд бэлэн мөнгөний хадгаламж идэвхгүй байна.
+Cash Drawer Snapshot,Бэлэн мөнгөний шүүгээний агшин зураг
+Cash In Hand,Бэлэн мөнгө
+Cash Movement,Бэлэн мөнгөний хөдөлгөөн
+Cash movement cancelled,Бэлэн мөнгөний хөдөлгөөнийг цуцалсан
+Cash movement deduction applied,Бэлэн мөнгөний шилжүүлгийн суутгал ашигласан
+Cash movement deleted,Бэлэн мөнгөний хөдөлгөөнийг устгасан
+Cash movement is disabled for this POS Profile.,Энэ ПОС профайлд бэлэн мөнгөний хөдөлгөөнийг идэвхгүй болгосон.
+Cash Movement is disabled in current POS Profile.,Одоогийн ПОС профайл дээр бэлэн мөнгөний хөдөлгөөнийг идэвхгүй болгосон.
+Cash movement saved offline,Бэлэн мөнгөний хөдөлгөөнийг офлайнаар хадгалсан
+Cash movement submitted,Бэлэн мөнгөний хөдөлгөөнийг илгээсэн
+Cash Movements,Бэлэн мөнгөний хөдөлгөөн
+Cash payment cannot be less than invoice total when partial payment is not allowed,Хэсэгчилсэн төлбөрийг зөвшөөрөхгүй тохиолдолд бэлэн мөнгөний төлбөр нэхэмжлэхийн нийт дүнгээс бага байж болохгүй
+Cash returned after payment,Төлбөрийн дараа бэлэн мөнгө буцааж өгсөн
+Cashier,Кассчин
+Cashier Access,Кассчин нэвтрэх
+Cashier identity and appearance preferences.,"Кассын хувийн байдал, гадаад төрх байдлын сонголт."
+Cashier PIN,Кассчин ПИН
+Cashier PIN saved successfully.,Кассын ПИН-г амжилттай хадгаллаа.
+Cashiers,Кассчид
+Cashier-wise,Кассын хувьд
+Categories,Ангилал
+Category,Ангилал
+Category / Brand / Variant Report,Ангилал / Брэнд / Хувилбарын тайлан
+Category-wise,Ангилалаар
+Category-wise Margin,Ангилалаар нь маржин
+Certificate,Сертификат
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,Сертификат байхгүй эсвэл итгэлгүй байна. QZ нь баталгаажуулах харилцах цонхыг харуулж болно.
+Certificate is trusted. Silent QZ printing is active.,Сертификат итгэмжлэгдсэн. Чимээгүй QZ хэвлэлт идэвхтэй байна.
+Change,Өөрчлөх
+Change allocation repaired,Хуваарилалтын өөрчлөлтийг зассан
+Change Price,Үнэ өөрчлөх
+Change Return,Буцах хугацааг өөрчлөх
+Change Returned,Өөрчлөлт буцаагдсан
+Change terminal cashier,Терминал кассыг солих
+Charge Heads,Цэнэглэх толгой
+Charges,Төлбөр
+Charges not found,Төлбөр олдсонгүй
+Check Balance,Үлдэгдэл шалгах
+Check balance for any card. Supervisors can issue and top up cards here.,"Аливаа картын үлдэгдлийг шалгана уу. Хянагч нар энд карт гаргаж, цэнэглэх боломжтой."
+Check balance only,Зөвхөн үлдэгдлийг шалгана уу
+Check for new commits,Шинэ амлалтуудыг шалгана уу
+Check for Updates,Шинэчлэлтүүдийг шалгана уу
+Check live balance before applying redemption,Эргүүлэхээс өмнө амьд үлдэгдлийг шалгана уу
+Check live balance before redemption,Эргүүлэхээсээ өмнө амьд үлдэгдлийг шалгана уу
+Checking...,Шалгаж байна...
+Cheque/Reference Date,Чек/лавлагааны огноо
+Cheque/Reference No,Чек/лавлагааны дугаар
+Choose the cashier currently operating this terminal.,Энэ терминалыг ажиллуулж байгаа кассчинаа сонгоно уу.
+City,Хот
+Clear,Тодорхой
+Clear All,Бүгдийг арилгах
+Clear all barcode items,Баркодын бүх зүйлийг арилгана уу
+Clear all purchase order items,Худалдан авах захиалгын бүх зүйлийг арилгана уу
+Clear Search,Хайлтыг арилгах
+Clearing local cache...,Орон нутгийн кэшийг цэвэрлэж байна...
+Click to refresh,Сэргээх бол товшино уу
+Client CPU Lag:,Үйлчлүүлэгчийн CPU-ийн хоцрогдол:
+Client Memory Usage:,Үйлчлүүлэгчийн санах ойн хэрэглээ:
+Client Metrics,Үйлчлүүлэгчийн хэмжүүр
+Close about dialog,Харилцах цонхыг хаах
+Close cashier switcher,Касс солигчийг хаа
+Close closing shift dialog,Хаах ээлжийн харилцах цонхыг хаах
+Close column selector,Багана сонгогчийг хаах
+Close Dialog,Харилцах цонхыг хаах
+Close drafts dialog,Ноорог харилцах цонхыг хаах
+Close invoice details dialog,Нэхэмжлэлийн дэлгэрэнгүй харилцах цонхыг хаах
+Close invoice management,Нэхэмжлэлийн менежментийг хаах
+Close offline invoices dialog,Офлайн нэхэмжлэх харилцах цонхыг хаах
+Close packing list dialog,Сав баглаа боодлын жагсаалтын харилцах цонхыг хаах
+Close returns dialog,Буцах харилцах цонхыг хаах
+Close sales orders dialog,Борлуулалтын захиалгын харилцах цонхыг хаах
+Close Scanner,Сканнерыг хаах
+Close scanner dialog,Сканнерын харилцах цонхыг хаах
+Close Settings,Тохиргоог хаах
+Closing Amount,Хаалтын дүн
+Closing POS Shift,POS Shift-ийг хааж байна
+Closing Snapshot Available,Хаалтын агшин зураг боломжтой
+Code,Код
+Code scanned successfully,Кодыг амжилттай скан хийв
+COGS,COGS
+Collapse item details,Зүйлийн дэлгэрэнгүйг хумих
+Collected,Цуглуулсан
+Cols,Колс
+Columns,Багана
+commits,үйлддэг
+Completed and active sales in this range,"Энэ хүрээнд дууссан, идэвхтэй борлуулалт"
+Completed returns will appear here.,Дууссан өгөгдлүүд энд харагдах болно.
+Confirm,Баталгаажуулах
+Confirm Close,Хаахыг баталгаажуулна уу
+Confirm Mobile Number,Гар утасны дугаараа баталгаажуулна уу
+Confirm PIN,ПИН кодоо баталгаажуулна уу
+Connect,Холбох
+Connect printer and manage certificate,"Принтерийг холбож, гэрчилгээг удирдах"
+Connecting to QZ Tray...,QZ тавиуртай холбогдож байна...
+Connection problem while submitting invoice,Нэхэмжлэх илгээх явцад холболтын асуудал гарлаа
+Connections:,Холболтууд:
+Connectivity and cached prerequisite status were rechecked.,Холболт болон кэшийн урьдчилсан нөхцөл байдлыг дахин шалгасан.
+Continue Editing,Үргэлжлүүлэн засварлах
+Could not fetch latest balance from server,Серверээс хамгийн сүүлийн үлдэгдлийг авч чадсангүй
+Count,Тоол
+Country,Улс
+Coupon,Купон
+Coupons,Купон
+Cover,Хавтас
+CPU Cores:,CPU-ийн цөм:
+Create,Үүсгэх
+Create and load a new prepaid card,"Урьдчилсан төлбөрт шинэ карт үүсгэж, ачаална уу"
+Create and preload a new gift card,"Шинэ бэлгийн карт үүсгэж, урьдчилан ачаална уу"
+Create Bill,Билл үүсгэх
+Create Customer,Хэрэглэгч үүсгэх
+Create New Item,Шинэ зүйл үүсгэх
+Create or change your PIN,ПИН кодоо үүсгэх эсвэл өөрчлөх
+Create PIN,ПИН код үүсгэх
+Create POS Opening Shift,POS Opening Shift үүсгэх
+Create Purchase Order,Худалдан авах захиалга үүсгэх
+Create Return,Буцааж үүсгэх
+Create return from invoice,Нэхэмжлэхээс буцаалт үүсгэх
+Create Supplier,Нийлүүлэгч үүсгэх
+Credit and Output,Зээл ба гарц
+Credit Note,Зээлийн тэмдэглэл
+Credit Outstanding,Зээлийн үлдэгдэл
+Credit sales remaining to be collected,Зээлийн борлуулалтыг цуглуулах шаардлагатай
+Critical,Шүүмжтэй
+Currency,Валют
+Current,Одоогийн
+Current Event Loop Lag:,Одоогийн үйл явдлын давталтын хоцрогдол:
+Current Month,Одоогийн сар
+Current PIN,Одоогийн ПИН
+Current Profile,Одоогийн профайл
+Current redeemable value on the gift card,Бэлгийн карт дээрх одоогийн эргүүлэн авах үнэ
+Current User,Одоогийн хэрэглэгч
+Custom,Захиалгат
+Custom Due Days,Захиалгат төлөх өдрүүд
+Custom items per page,Хуудас бүрт захиалгат зүйлс
+Customer,Хэрэглэгч
+Customer already selected,Хэрэглэгч аль хэдийн сонгогдсон
+Customer Balance,Хэрэглэгчийн үлдэгдэл
+Customer balance unavailable offline,Хэрэглэгчийн үлдэгдлийг офлайнаар ашиглах боломжгүй
+Customer created successfully.,Үйлчлүүлэгчийг амжилттай үүсгэсэн.
+Customer creation failed.,Хэрэглэгчийг үүсгэж чадсангүй.
+Customer Details,Хэрэглэгчийн мэдээлэл
+Customer display channel is missing,Хэрэглэгчийн харуулах суваг байхгүй байна
+Customer display was blocked. Please allow pop-ups for this site.,Хэрэглэгчийн дэлгэцийг хаасан. Энэ сайтын попап цонхыг зөвшөөрнө үү.
+Customer group is required,Хэрэглэгчийн бүлэг шаардлагатай
+Customer is required to add payment,Хэрэглэгч төлбөр нэмэх шаардлагатай
+Customer Name is required,Хэрэглэгчийн нэр шаардлагатай
+Customer not selected,Хэрэглэгч сонгогдоогүй байна
+Customer Report,Хэрэглэгчийн тайлан
+Customer saved offline,Харилцагчийг офлайнаар хадгалсан
+Customer Screen,Хэрэглэгчийн дэлгэц
+Customer territory is required,Үйлчлүүлэгчийн нутаг дэвсгэр шаардлагатай
+Customer updated successfully.,Харилцагчийг амжилттай шинэчилсэн.
+Customer-facing tools and printer setup.,Хэрэглэгчдэд зориулсан хэрэгслүүд болон принтерийн тохиргоо.
+Customers,Үйлчлүүлэгчид
+Customers not found,Үйлчлүүлэгч олдсонгүй
+Daily cashier actions without scrolling.,Гүйлгэхгүйгээр кассын өдөр тутмын үйлдэл.
+Daily Sales,Өдөр тутмын борлуулалт
+Daily Sales Summary,Өдөр тутмын борлуулалтын хураангуй
+Data loaded in form. Review and submit.,"Өгөгдөл хэлбэрээр ачаалагдсан. Шалгаж, илгээнэ үү."
+Database Health,Өгөгдлийн сангийн эрүүл мэнд
+Database health affects overall system speed and reliability.,"Өгөгдлийн сангийн эрүүл мэнд нь системийн ерөнхий хурд, найдвартай байдалд нөлөөлдөг."
+Database Info,Өгөгдлийн сангийн мэдээлэл
+Date,Огноо
+Day ?,Өдөр?
+days,өдрүүд
+Day-wise (MTD),Өдрийн байдлаар (MTD)
+Day-wise Movement,Өдрийн хөдөлгөөн
+Dead Stock,Үхсэн хувьцаа
+Dead Stock Items,Үхсэн хувьцааны эд зүйлс
+Decrease quantity,Тоо хэмжээг багасгах
+Default,Өгөгдмөл
+Default:,Өгөгдмөл:
+Delete,Устгах
+Delete cancelled cash movement {0}?,Цуцлагдсан бэлэн мөнгөний гүйлгээг {0} устгах уу?
+Delete Draft,Ноорог устгах
+Delete draft invoice,Нэхэмжлэлийн төслийг устгах
+Delete draft invoice {0}?,{0} нэхэмжлэхийн ноорог устгах уу?
+Delete Invoice,Нэхэмжлэхийг устгах
+Delete offline invoice,Офлайн нэхэмжлэхийг устгах
+Delivered,Хүргэсэн
+Delivery Charges,Хүргэлтийн хураамж
+Delivery Information,Хүргэлтийн мэдээлэл
+Delivery Note {0} created,Хүргэлтийн тэмдэглэл {0} үүсгэсэн
+Delivery note created,Хүргэлтийн тэмдэглэл үүсгэсэн
+Deployed Bundle:,Байршуулсан багц:
+Deposit,Хадгаламж
+Description,Тодорхойлолт
+Detailed Supplier Breakdown,Нийлүүлэгчийн нарийвчилсан задаргаа
+Detecting formats:,Форматуудыг илрүүлэх:
+Device Memory:,Төхөөрөмжийн санах ой:
+Difference,Ялгаа
+Difference (In Company Currency),Ялгаа (Компанийн мөнгөн тэмдэгтээр)
+Disable offline mode first to recheck live connectivity.,Шууд холболтыг дахин шалгахын тулд эхлээд офлайн горимыг идэвхгүй болго.
+Disconnect,Салга
+discount,хөнгөлөлт
+Discount %,Хямдрал %
+Discount / Void / Return Report,Хөнгөлөлт / хүчингүй болсон / Буцаах тайлан
+Discount Amount,Хөнгөлөлтийн хэмжээ
+Discount limited by POS Profile,Хөнгөлөлтийг ПОС профайлаар хязгаарласан
+Discounted Invoices,Хөнгөлөлттэй нэхэмжлэх
+Discounts,Хөнгөлөлт
+Dismiss,Өгүүлэх
+Download Certificate,Сертификат татаж авах
+Draft,Ноорог
+Draft invoice deleted,Нэхэмжлэлийн төслийг устгасан
+Draft source,Ноорог эх сурвалж
+Drafts,Ноорог
+Due {0},Дуусах хугацаа {0}
+Due Date,Эцсийн хугацаа
+Duplicate,Давхардсан
+Edit customer,Үйлчлүүлэгчийг засах
+Edit discount amount,Хөнгөлөлтийн хэмжээг засах
+Edit discount percentage,Хөнгөлөлтийн хувийг засах
+Edit Gift Application,Бэлэг дурсгалын програмыг засах
+Edit item name,Зүйлийн нэрийг засах
+Edit quantity,Тоо хэмжээг засах
+Edit rate,Үнэлгээ засах
+Edit unit of measure,Хэмжих нэгжийг засах
+Edited,Зассан
+Employee,Ажилтан
+Enable background sync,Арын синхрончлолыг идэвхжүүлэх
+Enable Customer Display in POS Profile first.,Эхлээд POS профайлд хэрэглэгчийн дэлгэцийг идэвхжүүлнэ үү.
+Enter a PIN.,ПИН код оруулна уу.
+Enter a valid grams value,Хүчинтэй грамм утгыг оруулна уу
+Enter new price list rate,Үнийн жагсаалтын шинэ үнийг оруулна уу
+Enter Quantity,Тоо хэмжээг оруулна уу
+Enter the cashier PIN to continue.,Үргэлжлүүлэхийн тулд кассын ПИН кодоо оруулна уу.
+Enter the current PIN first.,Эхлээд одоогийн PIN кодоо оруулна уу.
+"Enter the current PIN, then choose a new one.",Одоогийн ПИН кодоо оруулаад шинийг сонгоно уу.
+Enter valid grams for scale barcode,Хуваарийн бар кодын хүчинтэй граммыг оруулна уу
+Entries,Бичлэгүүд
+Error accessing camera:,Камерт хандахад алдаа гарлаа:
+Error calculating prices,Үнэ тооцоход алдаа гарлаа
+Error fetching customer balance,Харилцагчийн үлдэгдлийг татахад алдаа гарлаа
+Error in change calculations!,Өөрчлөлтийн тооцоонд алдаа гарлаа!
+Error Loading Data,Өгөгдлийг ачаалахад алдаа гарлаа
+Error loading invoice details,Нэхэмжлэхийн дэлгэрэнгүйг ачаалахад алдаа гарлаа
+Error processing invoice,Нэхэмжлэхийг боловсруулахад алдаа гарлаа
+Error processing payment,Төлбөрийг боловсруулахад алдаа гарлаа
+Error searching invoices,Нэхэмжлэх хайхад алдаа гарлаа
+Error submitting invoice:,Нэхэмжлэхийг илгээхэд алдаа гарлаа:
+Error submitting invoice: {0},Нэхэмжлэхийг илгээхэд алдаа гарлаа: {0}
+Error submitting invoice: No response from server,Нэхэмжлэхийг илгээхэд алдаа гарлаа: Серверээс хариу ирээгүй
+Error updating currency,Валютыг шинэчлэхэд алдаа гарлаа
+Error updating item details,Зүйлийн дэлгэрэнгүй мэдээллийг шинэчлэхэд алдаа гарлаа
+Est. Purchase,Тооцоолол. Худалдан авалт
+Est. Value,Тооцоолол. Үнэ цэнэ
+Event-loop lag measures how busy your browser is. Lower is better.,Үйл явдлын давталтын хоцрогдол нь таны хөтөч хэр завгүй байгааг хэмждэг. Доод байх нь дээр.
+Every,Бүр
+Exchange Rate,Валютын ханш
+Expand item details,Зүйлийн дэлгэрэнгүй мэдээллийг өргөжүүлэх
+Expected Amount (In Company Currency),Хүлээгдэж буй дүн (Компанийн валютаар)
+Expected Cash,Хүлээгдэж буй бэлэн мөнгө
+Expected cash on hand grouped by currency,Валютын нэгжээр бүлэглэсэн гар дээрх хүлээгдэж буй бэлэн мөнгө
+Expected vs Actual,Хүлээгдэж буй болон бодит
+Expense,Зардал
+Expense Account (Optional Override),Зардлын данс (заавал биш дарах)
+Expense account is required.,Зардлын данс шаардлагатай.
+Expenses and deposits posted during this shift,"Энэ ээлжинд байршуулсан зардал, хадгаламж"
+Expired,Хугацаа дууссан
+Failed to auto reconcile payments.,Төлбөрийг автоматаар нэгтгэж чадсангүй.
+Failed to cancel cash movement,Бэлэн мөнгөний хөдөлгөөнийг цуцалж чадсангүй
+Failed to clear cache,Кэшийг цэвэрлэж чадсангүй
+Failed to create item,Зүйлийг үүсгэж чадсангүй
+Failed to create supplier,Нийлүүлэгчийг үүсгэж чадсангүй
+Failed to delete cash movement,Бэлэн мөнгөний хөдөлгөөнийг устгаж чадсангүй
+Failed to generate scale barcode. Using item barcode only.,Хэмжээний бар кодыг үүсгэж чадсангүй. Зөвхөн баркод ашиглах.
+Failed to load cash movement context.,Бэлэн мөнгөний хөдөлгөөний контекстийг ачаалж чадсангүй.
+Failed to load dashboard data.,Хяналтын самбарын өгөгдлийг ачаалж чадсангүй.
+Failed to reload invoice from server,Серверээс нэхэмжлэхийг дахин ачаалж чадсангүй
+Failed to submit cash movement,Бэлэн мөнгөний хөдөлгөөнийг илгээж чадсангүй
+Failed to sync offline cash movements,Офлайн бэлэн мөнгөний хөдөлгөөнийг синк хийж чадсангүй
+Fast cashier actions for active shifts.,Идэвхтэй ээлжийн кассын шуурхай үйлдлүүд.
+Fast Moving Items,Хурдан хөдөлж буй эд зүйлс
+Fees,Төлбөр
+Fetch the latest offline prerequisite updates,Хамгийн сүүлийн үеийн офлайн урьдчилсан шинэчлэлтүүдийг татаж авах
+Find a sales order quickly and load it into the current sale.,Борлуулалтын захиалгыг хурдан хайж олоод одоогийн худалдаанд ачаална уу.
+Fixing payment amounts for return invoice...,Буцаах нэхэмжлэхийн төлбөрийн хэмжээг тогтоож байна...
+Flash Off,Флэш унтраалттай
+Flash On,Флэш асаалттай
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","""Бүтээгдэхүүний багц""-ын хувьд ""Баглаа боодлын жагсаалт""-ын хүснэгтээс агуулах, серийн дугаар, багцын дугаарыг авч үзнэ. Хэрэв ""Бүтээгдэхүүний багц""-ын бүх сав баглаа боодлын хувьд агуулах болон багцын дугаар ижил байвал эдгээр утгыг үндсэн зүйлийн хүснэгтэд оруулж болно; утгуудыг 'Баглаа боодлын жагсаалт' хүснэгтэд хуулах болно."
+Free,Үнэгүй
+Free Qty,Үнэгүй тоо
+Frequency,Давтамж
+from,-аас
+From Date,Огнооноос
+Fulfillment Details,Биелэлтийн дэлгэрэнгүй мэдээлэл
+Full Name,Бүтэн нэр
+Gain,Олз
+Generate a fresh prepaid card and start it with an opening balance.,"Урьдчилсан төлбөрт шинэ карт үүсгэж, эхний үлдэгдлээр эхлүүлээрэй."
+Generate and install the certificate to allow fully silent printing without trust prompts.,Итгэмжлэлийн сануулгагүйгээр бүрэн чимээгүй хэвлэхийг зөвшөөрөхийн тулд гэрчилгээг үүсгэж суулгана уу.
+Generate Certificate,Сертификат үүсгэх
+Generated scale barcode: {0},Үүсгэсэн масштабын бар код: {0}
+Get Payments,Төлбөр авах
+Gift Card,Бэлгийн карт
+Gift card amount must be greater than zero.,Бэлгийн картын хэмжээ тэгээс их байх ёстой.
+Gift Card Code,Бэлгийн картын код
+Gift card code is required for redemption,Төлбөр авахын тулд бэлгийн картын код шаардлагатай
+Gift card code is required.,Бэлгийн картын код шаардлагатай.
+Gift card issued successfully.,Бэлгийн карт амжилттай гарлаа.
+Gift card loaded successfully.,Бэлгийн картыг амжилттай ачааллаа.
+Gift Card Management,Бэлгийн картын менежмент
+Gift card payment,Бэлгийн картын төлбөр
+Gift card redemption requires an online connection,Бэлгийн картыг авахын тулд онлайн холболт шаардлагатай
+Gift card topped up successfully.,Бэлгийн картыг амжилттай цэнэглэв.
+Gift Cards,Бэлэг дурсгалын картууд
+Go to Frappe Desk,Frappe Desk руу оч
+Grand Total,Их нийт
+Gross Margin,Нийт ашиг
+Gross Profit,Нийт ашиг
+Gross Sales,Нийт борлуулалт
+Group not found,Бүлэг олдсонгүй
+"Grouped controls for terminal, UI, and session settings.","Терминал, UI болон сессийн тохиргоонд зориулсан бүлэглэсэн удирдлага."
+Grouped totals for each payment method and currency,Төлбөрийн хэрэгсэл болон валют тус бүрийн нийт дүнг бүлэглэсэн
+Hide,Нуух
+Hide Gift Card,Бэлгийн картыг нуух
+Hide Non Essential Fields,Чухал бус талбаруудыг нуух
+Hide quantity decimals,Аравтын бутархай тоог нуух
+Hide search tools,Хайлтын хэрэгслүүдийг нуух
+Hide zero rated items,Үнэлгээгүй зүйлсийг нуух
+High,Өндөр
+History,Түүх
+Hourly (Today),Цаг тутамд (Өнөөдөр)
+How this section works,Энэ хэсэг хэрхэн ажилладаг
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","Хэрэв хуучирсан өгөгдөл хэвээр байвал Тохиргоо > Офлайн ба синхрончлолыг нээж, онлайн байх үедээ Офлайн өгөгдлийг дахин бүтээхийг ажиллуул."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.",Хэрэв анхааруулга хэвээр байвал Тохиргоо > Офлайн ба синхрончлолыг нээгээд Офлайн өгөгдлийг сэргээх эсвэл Офлайн өгөгдлийг дахин бүтээхийг ажиллуул.
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,"Сертификатыг QZ Tray руу оруулж, POS машин бүр дээр QZ Tray-г дахин эхлүүлнэ үү."
+In,онд
+In stock: {0},Нөөцөд байгаа: {0}
+Include Batch / Serial,Багц / Цуврал оруулах
+Include Price,Үнэ багтсан
+Increase quantity,Тоо хэмжээг нэмэгдүүлэх
+IndexedDB,IndexedDB
+Initial Amount,Анхны дүн
+Initialize your shift with opening balances,Нээлтийн балансаар ээлжээ эхлүүлээрэй
+Initializing application...,Аппликешныг эхлүүлж байна...
+"Inspect cache, sync, and prerequisite status","Кэш, синхрончлол болон урьдчилсан нөхцөл байдлыг шалгана уу"
+Installed Applications,Суулгасан програмууд
+Insufficient stock:\n{0},Хангалтгүй нөөц:\n{0}
+Invalid rate,Буруу үнэ
+Inventory Status Report,Бараа материалын төлөв байдлын тайлан
+Invoice,Нэхэмжлэх
+Invoice {0} is Submitted,{0} нэхэмжлэхийг илгээсэн
+Invoice {0} processed successfully,{0} нэхэмжлэхийг амжилттай боловсрууллаа
+Invoice {0} submission failed,{0} нэхэмжлэхийг илгээж чадсангүй
+Invoice {0} was already submitted,{0} нэхэмжлэхийг аль хэдийн илгээсэн байна
+Invoice Adjustments,Нэхэмжлэлийн тохируулга
+Invoice Change,Нэхэмжлэлийн өөрчлөлт
+Invoice Details,Нэхэмжлэхийн дэлгэрэнгүй мэдээлэл
+Invoice is still in draft after background submission.,Нэхэмжлэх нь суурь илгээсний дараа ноорог хэвээр байна.
+Invoice Items,Нэхэмжлэхийн зүйлс
+Invoice Management,Нэхэмжлэхийн менежмент
+Invoice Mgmt,Нэхэмжлэх Mgmt
+Invoice saved offline,Нэхэмжлэхийг офлайнаар хадгалсан
+Invoice submission failed,Нэхэмжлэл илгээж чадсангүй
+Invoice Submitted,Нэхэмжлэх илгээсэн
+"Invoice value settled by loyalty points, not cash collection",Нэхэмжлэхийн үнийг бэлэн мөнгө цуглуулах бус үнэнч цэгээр тооцдог
+Invoices,Нэхэмжлэх
+Invoices already past due date,Нэхэмжлэх хугацаа аль хэдийн дууссан
+Invoices saved as POS Invoices,Нэхэмжлэхийг ПОС-ын нэхэмжлэх хэлбэрээр хадгалсан
+Invoices still carrying balances,Нэхэмжлэлийн үлдэгдэлтэй хэвээр байна
+Issue Mode,Асуудлын горим
+Issue New Card,Шинэ карт гаргах
+Issue Workflow,Ажлын урсгалын асуудал
+"Issue, top up, and check","Асуудал, цэнэглэх, шалгах"
+Item,Зүйл
+Item / Product Sales Report,Бүтээгдэхүүний борлуулалтын тайлан
+Item {0} added to invoice,{0} зүйлийг нэхэмжлэх дээр нэмсэн
+Item '{0}' has no barcode,'{0}' зүйлд бар код байхгүй
+Item Code,Барааны код
+Item created successfully,Зүйлийг амжилттай үүсгэсэн
+Item is out of stock,Барааны нөөц дууссан
+Item Name,Зүйлийн нэр
+Item not found,Зүйл олдсонгүй
+Item order updated,Барааны захиалга шинэчлэгдсэн
+Item Selector Settings,Зүйл сонгогчийн тохиргоо
+Items,Эд зүйлс
+Items added in POS will appear here automatically.,ПОС-д нэмсэн зүйлс энд автоматаар гарч ирнэ.
+Items added to invoice,Нэхэмжлэлд нэмсэн зүйлс
+Items per page,Нэг хуудсанд байгаа зүйлс
+Items Sold,Худалдсан зүйлс
+Items/Invoice,Эд зүйлс/Нэхэмжлэх
+Item-wise Profitability,Зүйлийн хувьд ашигт ажиллагаа
+Journal Entry,Өдрийн тэмдэглэл
+json,json
+Just now,Яг одоо
+Keep offline prerequisites healthy and recover stale data safely.,"Офлайн урьдчилсан нөхцөлийг эрүүл байлгаж, хуучирсан өгөгдлийг аюулгүйгээр сэргээ."
+Labels,Шошго
+"Language, theme, terminal tools, and session controls.","Хэл, сэдэв, терминалын хэрэгсэл, сессийн удирдлага."
+Last,Сүүлийн
+Last 14 Days (Paid vs Pending),Сүүлийн 14 хоног (Төлбөртэй болон хүлээгдэж буй)
+Last 14 Days Activity,Сүүлийн 14 хоногийн үйл ажиллагаа
+Last 14 Days Gross Profit,Сүүлийн 14 хоногийн нийт ашиг
+Last 14 Days Purchases,Сүүлийн 14 хоногийн худалдан авалт
+Last 14 Days Tax/Charges,Сүүлийн 14 хоногийн татвар/төлбөр
+Last sync:,Сүүлийн синк:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},Сүүлийн синк: {0} | зүгээр: {1} | амжилтгүй болсон: {2} | алгассан: {3}
+Latest entries for current shift,Одоогийн ээлжийн хамгийн сүүлийн оруулгууд
+Lead Time,Хүргэлтийн хугацаа
+Limited,Хязгаарлагдмал
+lines,шугамууд
+List,Жагсаалт
+Live Snapshot,Шууд агшин зуурын зураг
+Load a POS profile and cashier first.,Эхлээд ПОС-ын профайл болон кассыг ачаална уу.
+Load More Invoices,Нэмэлт нэхэмжлэх ачаалах
+Load previously saved invoices,Өмнө нь хадгалсан нэхэмжлэхийг ачаалах
+Load Sale,Ачаалах худалдаа
+Load Sales Invoice,Борлуулалтын нэхэмжлэхийг ачаалах
+Loading app data...,Аппын өгөгдлийг ачаалж байна...
+Loading customer database...,Хэрэглэгчийн мэдээллийн санг ачаалж байна...
+Loading customers...,Харилцагчдыг ачаалж байна...
+Loading database stats...,Өгөгдлийн сангийн статистикийг ачаалж байна...
+Loading details...,Дэлгэрэнгүйг ачаалж байна...
+Loading invoice history...,Нэхэмжлэлийн түүхийг ачаалж байна...
+Loading items...,Зүйлс ачаалж байна...
+Loading product catalog...,Бүтээгдэхүүний каталогийг ачаалж байна...
+Loading return invoices...,Буцаах нэхэмжлэхийг ачаалж байна...
+Loading server CPU/memory usage...,Серверийн CPU/санах ойн ашиглалтыг ачаалж байна...
+Loading suppliers...,Нийлүүлэгчдийг ачаалж байна...
+Loading unpaid invoices...,Төлөгдөөгүй нэхэмжлэхийг ачаалж байна...
+Loading view...,Харагдацыг ачаалж байна...
+Loading...,Ачааж байна...
+Local storage is unavailable. Switching to online-only mode.,Дотоод хадгалах сан боломжгүй байна. Зөвхөн онлайн горимд шилжиж байна.
+localStorage,орон нутгийн хадгалах сан
+Location Performance,Байршлын гүйцэтгэл
+Locations,Байршлууд
+Lock Screen,Дэлгэцийг түгжих
+Lookup Workflow,Ажлын урсгалыг хайх
+Loss,Алдагдал
+Low,Бага
+Low Stock,Бага хувьцаа
+Low Stock Alerts,Бага хувьцааны сэрэмжлүүлэг
+Low Stock Items,Бага нөөцтэй зүйлс
+Low Stock Threshold,Хувьцааны босго бага
+Low Stock Total,Бага хувьцааны нийт
+Lowest Margin,Хамгийн бага маржин
+Low-frequency maintenance and system details.,"Бага давтамжийн засвар үйлчилгээ, системийн дэлгэрэнгүй мэдээлэл."
+Loyalty Redeemed,Үнэнч байдлыг эргүүлэн авсан
+Loyalty Redemption,Үнэнч байдлын гэтэлгэл
+Make New Payment,Шинэ төлбөр хийх
+Manage all,Бүгдийг удирдах
+Manage and synchronize your offline transactions,"Офлайн гүйлгээгээ удирдах, синхрончлох"
+Manage Cashier PIN,Кассын PIN кодыг удирдах
+"Manage offline tools, terminal controls, and maintenance from one workspace.","Офлайн хэрэгсэл, терминалын удирдлага, засвар үйлчилгээг нэг ажлын талбараас удирдаарай."
+manual,гарын авлага
+"Manual codes, barcode scans, and QR scans work in the same field","Гарын авлагын код, зураасан код, QR сканнер нь нэг талбарт ажилладаг"
+Manual offline mode is enabled,Гараар офлайн горим идэвхжсэн
+Margin,Маржин
+Maximum available quantity is {0}. Quantity adjusted to match stock.,Боломжтой дээд хэмжээ нь {0}. Тоо хэмжээг нөөцөд тохируулан тохируулсан.
+Maximum discount amount for this offer item is {0}.,Энэ саналын үнийн хөнгөлөлтийн дээд хэмжээ {0} байна.
+Maximum discount percentage for this offer item is {0}%.,Энэ саналын үнийн хөнгөлөлтийн дээд хэмжээ {0}% байна.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,Санал болох дээд хэмжээ {0} байна. Тоо хэмжээг зөвшөөрөгдсөн хязгаарт тохируулсан.
+Medium,Дунд зэрэг
+Method-wise Collections,Арга зүйн цуглуулгууд
+Minimum allowed rate for this offer item is {0}.,Энэ саналын зүйлийн зөвшөөрөгдсөн доод хэмжээ нь {0} байна.
+Minimum Qty,Хамгийн бага тоо хэмжээ
+Mobile No,Гар утасны дугаар
+Mode,Горим
+Mode of Payment,Төлбөрийн хэлбэр
+Month,Сар
+Month ?,Сар?
+Monthly Profit,Сарын ашиг
+Monthly Sales,Сарын борлуулалт
+Monthly Sales Summary,Сарын борлуулалтын хураангуй
+Month-wise,Сарын хувьд
+Most Active Cashiers,Хамгийн идэвхтэй кассчид
+Movement Type,Хөдөлгөөний төрөл
+Movements,Хөдөлгөөн
+Multi Currency,Олон валют
+N/A,Үгүй
+Name,Нэр
+Negative Stock,Сөрөг хувьцаа
+Negative Stock Items,Сөрөг хувьцааны зүйлүүд
+Negative values not allowed,Сөрөг утгыг зөвшөөрөхгүй
+Net,цэвэр
+Net Qty,Цэвэр тоо хэмжээ
+Net Sales,Цэвэр борлуулалт
+Net Value,Цэвэр үнэ цэнэ
+Never,Хэзээ ч үгүй
+New changes are ready to load,Шинэ өөрчлөлтүүдийг ачаалахад бэлэн байна
+New Item,Шинэ зүйл
+New Offer Available,Шинэ санал авах боломжтой
+New PIN,Шинэ ПИН
+New rate,Шинэ ханш
+Next unit of measure,Дараагийн хэмжих нэгж
+No attribute data found.,Атрибутын өгөгдөл олдсонгүй.
+No Barcode,Бар кодгүй
+No barcode found for UOM '{0}',UOM '{0}'-ын бар код олдсонгүй
+No branch/location data found.,Салбар/байршлын өгөгдөл олдсонгүй.
+No brand data found.,Брэндийн мэдээлэл олдсонгүй.
+No cached gift card balance is available offline.,Бэлгийн картын хадгалсан үлдэгдлийг офлайнаар ашиглах боломжгүй.
+No camera found on this device. Please ensure your device has a working camera.,Энэ төхөөрөмж дээр камер олдсонгүй. Таны төхөөрөмж ажиллаж байгаа камертай эсэхийг шалгана уу.
+No capability warnings recorded yet.,Одоогоор ямар ч чадварын анхааруулга бүртгэгдээгүй байна.
+No cash expected for this shift.,Энэ ээлжинд бэлэн мөнгө байхгүй.
+No cash mode configured,Бэлэн мөнгөний горимыг тохируулаагүй байна
+No cash movement type is allowed for this POS Profile.,Энэ ПОС профайлд бэлэн мөнгөний шилжүүлгийн төрлийг зөвшөөрөхгүй.
+No cashier PIN is set yet. Create one now.,Кассын ПИН кодоо хараахан тохируулаагүй байна. Одоо нэгийг үүсгэ.
+No cashier profiles are available for this POS profile yet.,Энэ ПОС профайлд кассын профайл хараахан байхгүй байна.
+No cashier-wise discount/void/return activity.,Кассчинд зориулсан хөнгөлөлт/хүчингүй/буцаах үйл ажиллагаа байхгүй.
+No category data found.,Ангиллын өгөгдөл олдсонгүй.
+No category profitability data found.,Ангиллын ашигт ажиллагааны мэдээлэл олдсонгүй.
+No change returned recorded for this shift.,Энэ ээлжинд ямар ч өөрчлөлт бүртгэгдээгүй.
+No change-allocation invoices match the current filters.,Одоогийн шүүлтүүртэй тохирох өөрчлөлтийн хуваарилалтын нэхэмжлэх байхгүй байна.
+No charge head breakdown found.,Цэнэгийн толгойн гэмтэл олдсонгүй.
+No Company Selected,Сонгосон компани байхгүй
+No customer sales data found.,Хэрэглэгчийн борлуулалтын мэдээлэл олдсонгүй.
+No day-wise discount/void/return trend.,Өдөр тутмын хямдрал/хүчингүй/буцах хандлага байхгүй.
+No day-wise payment data found.,Өдрийн төлбөрийн мэдээлэл олдсонгүй.
+No day-wise profitability trend found.,Өдрийн ашигт ажиллагааны хандлага илэрсэнгүй.
+No day-wise purchase data found.,Өдөр тутмын худалдан авалтын мэдээлэл олдсонгүй.
+No day-wise sales trend found.,Өдөр тутмын борлуулалтын хандлага олдсонгүй.
+No day-wise tax/charges trend found.,Өдөр тутмын татвар/төлбөрийн хандлага илрээгүй.
+No dead stock items.,Үхсэн хувьцаа байхгүй.
+No due date,Эцсийн хугацаа байхгүй
+No exact repair match found for this invoice,Энэ нэхэмжлэхтэй яг таарсан засвар олдсонгүй
+No hourly sales trend found for today.,Өнөөдрийн хувьд цагийн борлуулалтын хандлага олдсонгүй.
+No invoice activity found.,Нэхэмжлэлийн үйл ажиллагаа олдсонгүй.
+No invoices found,Нэхэмжлэх олдсонгүй
+No invoices found. Try different search criteria.,Нэхэмжлэх олдсонгүй. Хайлтын өөр шалгуурыг туршиж үзээрэй.
+No invoices recorded for this shift.,Энэ ээлжинд ямар ч нэхэмжлэх бүртгэгдээгүй.
+No item profitability data found.,Барааны ашигт ажиллагааны мэдээлэл олдсонгүй.
+No item sales data found for this period.,Энэ хугацааны борлуулалтын мэдээлэл олдсонгүй.
+No items found,Ямар ч зүйл олдсонгүй
+No items in cart,Сагсанд зүйл алга
+No items with barcodes to print,Хэвлэх бар кодтой зүйл байхгүй
+No location-wise top item data found.,Байршлын хувьд шилдэг зүйлийн өгөгдөл олдсонгүй.
+No low stock alerts right now.,Одоохондоо хувьцаа багатай байгаа тухай анхааруулга байхгүй байна.
+No low stock items.,Бага нөөцтэй бараа байхгүй.
+No matching items in cart,Сагсанд тохирох зүйл алга
+No month-wise sales trend found.,Сарын борлуулалтын чиг хандлага олдсонгүй.
+No negative stock items.,Сөрөг хувьцаа байхгүй.
+No notifications yet,Одоогоор мэдэгдэл алга
+No offline cash movement synced.,Офлайн бэлэн мөнгөний хөдөлгөөн синк хийгдээгүй.
+No offline invoices pending synchronization,Синк хийх хүлээгдэж буй офлайн нэхэмжлэх байхгүй
+No offline sync issues recorded yet.,Офлайн синк хийх асуудал хараахан бүртгэгдээгүй байна.
+No out-of-stock items.,Нөөцөөгүй бараа байхгүй.
+No outstanding credit invoices for this shift.,Энэ ээлжийн зээлийн төлбөрийн үлдэгдэл байхгүй.
+No payment collection data found.,Төлбөрийн цуглуулгын мэдээлэл олдсонгүй.
+No payment rows available on this invoice.,Энэ нэхэмжлэх дээр төлбөрийн мөр байхгүй.
+No payments registered for this shift.,Энэ ээлжинд ямар ч төлбөр бүртгэгдээгүй.
+No pending balances in this period.,Энэ хугацаанд хүлээгдэж буй үлдэгдэл байхгүй.
+No pending offline invoices,Хүлээгдэж буй офлайн нэхэмжлэх байхгүй
+No Print Formats Found,Хэвлэх формат олдсонгүй
+No profiles found for selected scope. Falling back to current profile failed.,Сонгосон хамрах хүрээний профайл олдсонгүй. Одоогийн профайл руу буцаж орж чадсангүй.
+No recent customer activity found.,Сүүлийн үеийн хэрэглэгчийн үйл ажиллагаа олдсонгүй.
+No recent stock entries found.,Сүүлийн үеийн хувьцаа олдсонгүй.
+No records found,Ямар ч бичлэг олдсонгүй
+No reorder suggestions right now.,Одоогоор дахин захиалах санал алга.
+No repeat customers in this period.,Энэ хугацаанд дахин үйлчлүүлэгч байхгүй.
+No response from server,Серверээс хариу алга
+No return invoices found,Буцаах нэхэмжлэх олдсонгүй
+No return item trend found.,Буцаах барааны тренд олдсонгүй.
+No returnable items found for this invoice,Энэ нэхэмжлэхийн буцаах зүйл олдсонгүй
+No returns were processed in this shift.,Энэ ээлжинд ямар ч өгөөж боловсруулаагүй.
+No risk activity found.,Эрсдлийн үйл ажиллагаа олдсонгүй.
+No sales activity found for this period.,Энэ хугацаанд борлуулалтын үйл ажиллагаа олдсонгүй.
+No slow moving items.,Удаан хөдөлдөг зүйл байхгүй.
+No staff sales activity found.,Ажилтны борлуулалтын үйл ажиллагаа олдсонгүй.
+No stock movement for this period.,Энэ хугацаанд хувьцааны хөдөлгөөн байхгүй.
+No submitted cash movements in this shift.,Энэ ээлжинд бэлэн мөнгөний шилжүүлэг ирүүлээгүй.
+No supplier purchases found in this month.,Энэ сард ханган нийлүүлэгчийн худалдан авалт олдсонгүй.
+No suppliers found for this period.,Энэ хугацаанд ханган нийлүүлэгч олдсонгүй.
+No sync trigger has run yet in this session.,Энэ сессэд синхрончлолын гох хараахан ажиллаагүй байна.
+No tax head breakdown found.,Татварын хэлтсийн задаргаа олдсонгүй.
+No top items found for this location.,Энэ байршлын шилдэг зүйл олдсонгүй.
+No unpaid invoices,Төлбөргүй нэхэмжлэх байхгүй
+No variant data found.,Хувилбарын өгөгдөл олдсонгүй.
+No week-wise sales trend found.,Долоо хоногийн борлуулалтын чиг хандлага олдсонгүй.
+No.,Үгүй
+Nobile Number,Нобилийн дугаар
+Not available,Боломжгүй
+Not checked,Шалгаагүй
+Not selected,Сонгоогүй
+Not Set,Тохируулаагүй
+Notifications,Мэдэгдэл
+Offer,Санал
+Offer Applied,Санал хэрэгжсэн
+Offer criteria exceeded,Саналын шалгуур давсан
+Offer Item,Санал болгох зүйл
+Offer item unavailable,Санал болгох зүйл боломжгүй
+Offer Removed,Саналыг хассан
+Offer UOM cannot be changed,Санал UOM-г өөрчлөх боломжгүй
+Offer?,Санал болгох уу?
+Offers,Санал болгож байна
+Offline,Офлайн
+Offline & Sync,Офлайн & Синк
+Offline Capabilities,Офлайн боломжууд
+Offline data status refreshed,Офлайн өгөгдлийн статусыг шинэчилсэн
+Offline diagnostics,Офлайн оношлогоо
+Offline Invoices,Офлайн нэхэмжлэх
+Offline invoices status,Офлайн нэхэмжлэхийн төлөв
+Offline invoices synced,Офлайн нэхэмжлэхийг синк хийсэн
+Offline Queue: {0},Офлайн дараалал: {0}
+Offline rebuild guidance,Офлайн дахин бүтээх заавар
+Offline restore is unavailable for this session.,Энэ сессийн хувьд офлайн сэргээх боломжгүй.
+Offline selling is available with degraded capabilities.,Чадвар муудсан тохиолдолд офлайн борлуулалт хийх боломжтой.
+Offline snapshot does not match the current POS state.,Офлайн агшин агшин нь одоогийн ПОС-ын төлөвтэй таарахгүй байна.
+Offline Status,Офлайн статус
+"Offline, terminal, and system controls","Офлайн, терминал болон системийн удирдлага"
+OK,OK
+Online,Онлайн
+Open actions menu,Үйлдлийн цэсийг нээнэ үү
+Open balance to collect,Цуглуулах үлдэгдлийг нээнэ үү
+Open Customer Display,Хэрэглэгчийн дэлгэцийг нээнэ үү
+Open drawer,Нээлттэй шүүгээ
+Open invoices,Нээлттэй нэхэмжлэх
+Open Payments?,Төлбөрийг нээх үү?
+Open POS home,POS гэрийг нээх
+Open this screen from POS Menu -> Open Customer Display.,Энэ дэлгэцийг POS цэс -> Нээлттэй хэрэглэгчийн дэлгэцээс нээнэ үү.
+OpenCV image processing enabled - Enhanced barcode detection,OpenCV дүрс боловсруулалтыг идэвхжүүлсэн - Баркод илрүүлэлтийг сайжруулсан
+OpenCV image processing unavailable on this device,Энэ төхөөрөмж дээр OpenCV зураг боловсруулах боломжгүй
+OpenCV Off,OpenCV унтраалттай
+OpenCV On,OpenCV асаалттай
+OpenCV processing disabled,OpenCV боловсруулалтыг идэвхгүй болгосон
+Opening Amount,Нээлтийн дүн
+Opening Cash,Нээлтийн бэлэн мөнгө
+options,сонголтууд
+Order,Захиалга
+Original,Жинхэнэ
+Other,Бусад
+Out,Гадагшаа
+Out of Stock,нөөц дууссан
+Out of Stock Items,нөөцгүй зүйлс
+Outstanding,Гайхалтай
+Outstanding Credit by Currency,Зээлийн үлдэгдэл мөнгөн тэмдэгт
+Overdue,Хугацаа хэтэрсэн
+Overpayment Change,Илүүдэл төлбөрийн өөрчлөлт
+Overpayment change deducted: {0},Илүү төлбөрийн өөрчлөлтийг хассан: {0}
+Packing List,Сав баглаа боодлын жагсаалт
+Page Format,Хуудасны формат
+Page unavailable offline,Хуудсыг офлайнаар ашиглах боломжгүй
+Paid,Төлбөртэй
+Paid (orig):,Төлбөртэй (ориг):
+Paid Amount,Төлбөрийн дүн
+Paid change cannot be greater than total change!,Төлбөртэй өөрчлөлт нь нийт өөрчлөлтөөс их байж болохгүй!
+Paid:,Төлбөртэй:
+Parent Item,Эцэг эхийн зүйл
+Partial,Хэсэгчилсэн
+Partly Paid,Хэсэгчилсэн төлбөртэй
+Party Account,Намын данс
+Party Type,Намын төрөл
+Pause terminal until next cashier,Дараагийн кассчин хүртэл терминалыг түр зогсоо
+PAY,ТӨЛБӨР
+Payment,Төлбөр
+Payment Account,Төлбөрийн данс
+Payment entries processed for Invoice {0},{0} нэхэмжлэхийн төлбөрийн бичилтийг боловсруулсан
+Payment Entry Type,Төлбөрийн оролтын төрөл
+Payment History,Төлбөрийн түүх
+Payment ID,Төлбөрийн ID
+Payment Method Report,Төлбөрийн аргын тайлан
+Payment Methods,Төлбөрийн аргууд
+Payment of {0} received successfully.,{0}-н төлбөрийг амжилттай хүлээн авлаа.
+Payment Progress,Төлбөрийн явц
+Payment Reconciliation,Төлбөрийн тохирол
+Payment request status could not be retrieved. Please try again,Төлбөрийн хүсэлтийн статусыг сэргээж чадсангүй. Дахин оролдоно уу
+Payment Request took too long to respond. Please try requesting for payment again,Төлбөрийн хүсэлтэд хариу өгөхөд хэтэрхий удсан. Төлбөрийн хүсэлтийг дахин тавьж үзнэ үү
+Payment saved offline,Төлбөрийг офлайнаар хадгалсан
+Payment State,Төлбөрийн төлөв
+Payment Status,Төлбөрийн төлөв
+Payment submitted but print function could not be executed. Payment name not found.,Төлбөрийг илгээсэн боловч хэвлэх функцийг гүйцэтгэж чадсангүй. Төлбөрийн нэр олдсонгүй.
+Payment submitted.,Төлбөрийг илгээсэн.
+Payment Summary,Төлбөрийн хураангуй
+Payments,Төлбөр
+Payments are not open. Do you want to open payments and submit?,"Төлбөр нээлттэй биш байна. Та төлбөрөө нээж, илгээхийг хүсч байна уу?"
+Payments by Mode of Payment,Төлбөрийн хэлбэрээр төлбөр хийх
+PDF,PDF
+Peak Hour,Оргил цаг
+Peak Memory:,Хамгийн их санах ой:
+Peak Server:,Оргил сервер:
+Peak:,Оргил:
+Pending,Хүлээгдэж байна
+Pending Amount,Хүлээгдэж буй дүн
+Pending count updated from {0} to {1},Хүлээгдэж буй тоо {0}-с {1} болж шинэчлэгдсэн
+Pending Exposure,Хүлээгдэж буй өртөлт
+Pending Invoices,Хүлээгдэж буй нэхэмжлэхүүд
+Pending Ratio,Хүлээгдэж буй харьцаа
+Pending Sales,Хүлээгдэж буй борлуулалт
+Pending sales: {0} | Cache usage: {1}%,Хүлээгдэж буй борлуулалт: {0} | Кэш ашиглалт: {1}%
+Pending Sync,Хүлээгдэж буй синк
+Pending: {0},Хүлээгдэж буй: {0}
+Pending: {0} | Synced: {1} | Draft: {2},Хүлээгдэж буй: {0} | Синк хийсэн: {1} | Ноорог: {2}
+Per Page,Хуудас бүрт
+Personal,Хувийн
+Personal preferences adjust the current cashier experience without changing the active POS route.,Хувийн сонголтууд нь идэвхтэй ПОС-ын маршрутыг өөрчлөхгүйгээр одоогийн кассын туршлагыг тохируулдаг.
+PIN confirmation does not match.,ПИН баталгаажуулалт таарахгүй байна.
+PIN must be 4 to 8 digits.,ПИН код 4-8 оронтой байх ёстой.
+Please add at least one item.,Дор хаяж нэг зүйл нэмнэ үү.
+Please allow camera access to scan codes,Скан код руу камерт хандахыг зөвшөөрнө үү
+Please enter payment amount,Төлбөрийн хэмжээг оруулна уу
+Please fill all required fields,Шаардлагатай бүх талбарыг бөглөнө үү
+Please make a payment or select a payment,Төлбөр хийх эсвэл төлбөрөө сонгоно уу
+Please request phone payment or use another payment method,Утасны төлбөрийг хүсэх эсвэл өөр төлбөрийн хэрэгсэл ашиглана уу
+Please select a customer first,Эхлээд үйлчлүүлэгчээ сонгоно уу
+Please select a party,Үдэшлэг сонгоно уу
+Please select a party before reconciling.,Эвлэрэхээсээ өмнө намаа сонгоно уу.
+Please select a valid movement type.,Хүчинтэй хөдөлгөөний төрлийг сонгоно уу.
+Please select an invoice,Нэхэмжлэхийг сонгоно уу
+Please select company before reconciling.,Эвлэрэхээсээ өмнө компанийг сонгоно уу.
+Please set the customer's mobile number,Харилцагчийн гар утасны дугаарыг тохируулна уу
+Please try again or enter the item manually.,Дахин оролдох эсвэл зүйлийг гараар оруулна уу.
+Please verify the barcode or check the item's availability.,Бар кодыг баталгаажуулах эсвэл бараа байгаа эсэхийг шалгана уу.
+Points,Оноо
+Popup blocked. Please allow popups.,Попапыг блоклосон. Попап цонхыг зөвшөөрнө үү.
+POS,ПОС
+POS controls and maintenance,"ПОС-ын хяналт, засвар үйлчилгээ"
+POS Expense is disabled for this POS Profile.,Энэ ПОС профайлд POS зардлыг идэвхгүй болгосон.
+POS is running with limited offline prerequisites.,ПОС нь хязгаарлагдмал офлайн урьдчилсан нөхцөлтэйгээр ажиллаж байна.
+POS Profile,POS профайл
+Position the QR code or barcode within the scanning area,QR код эсвэл бар кодыг сканнердах хэсэгт байрлуул
+Posting,Нийтлэх
+Posting and Price List,Нийтлэл ба үнийн жагсаалт
+Posting Date,Нийтэлсэн огноо
+Preparing background sync,Арын синкийг бэлтгэж байна
+"Press OK to continue offline with a warning, or Cancel to retry.","Анхааруулгатайгаар офлайнаар үргэлжлүүлэхийн тулд OK, эсвэл дахин оролдох бол Цуцлах товчийг дарна уу."
+Previous unit of measure,Өмнөх хэмжих нэгж
+Price List,Үнийн жагсаалт
+Price List Rate,Үнийн жагсаалтын ханш
+Price list rate updated locally only,Үнийн жагсаалтын үнийг зөвхөн орон нутагт шинэчилсэн
+Pricing & Discounts,Үнэ болон хөнгөлөлт
+Pricing Rule,Үнийн дүрэм
+Print,Хэвлэх
+Print Draft,Ноорог хэвлэх
+Print Format (Invoice),Хэвлэх формат (Нэхэмжлэх)
+Print Format (Order),Хэвлэх формат (Захиалга)
+Print invoice,Нэхэмжлэх хэвлэх
+Print Purchase Invoice instead of PO,PO-ийн оронд Худалдан авалтын нэхэмжлэх хэвлэх
+Printer,Принтер
+Processed returns impacting the shift totals,Боловсруулсан өгөөж нь ээлжийн нийлбэрт нөлөөлдөг
+Processing Payment,Төлбөрийг боловсруулж байна
+Processing payment entries for Invoice {0},{0} нэхэмжлэхийн төлбөрийн бичилтийг боловсруулж байна
+Profile,Профайл
+Profiles,Профайлууд
+Profit,Ашиг
+Profit: Invoice Item Estimate,Ашиг: Нэхэмжлэлийн зүйлийн тооцоо
+Profit: Stock Ledger (COGS),Ашиг: Хувьцааны дэвтэр (COGS)
+Profitability Report,Ашигт ажиллагааны тайлан
+Prorated return discount,Буцах хөнгөлөлт
+Purchase Amount,Худалдан авалтын дүн
+Purchase Invoices,Худалдан авалтын нэхэмжлэх
+Purchase Order created,Худалдан авах захиалга үүсгэсэн
+Qty,Тоо ширхэг
+Qualified,Мэргэшсэн
+Quantity,Тоо хэмжээ
+Quantity exceeds available stock,Тоо хэмжээ бэлэн нөөцөөс хэтэрсэн байна
+Quick Actions,Шуурхай үйлдэл
+Quotation {0} is Submitted,{0} үнийн санал ирүүлсэн
+Quotation submitted,Үнийн санал ирүүлсэн
+QZ Tray connected.,QZ тавиур холбогдсон.
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ тавиурыг гараар салгасан. Дахин идэвхжүүлэхийн тулд Холболтыг дарна уу.
+QZ Tray is not connected.,QZ тавиур холбогдоогүй байна.
+QZ Tray Setup,QZ тавиурын тохиргоо
+Rate,Үнэлгээ
+Rate adjusted to maximum allowed discount,Хамгийн их зөвшөөрөгдөх хөнгөлөлтөд тохируулсан ханш
+Ready,Бэлэн
+Ready to resume,Үргэлжлүүлэхэд бэлэн байна
+Ready!,Бэлэн!
+Real-time POS insights for retail operations.,Жижиглэн худалдааны үйл ажиллагааны бодит цагийн ПОС-ын мэдээлэл.
+Rebuild Offline Data,Офлайн өгөгдлийг дахин бүтээх
+Receive,Хүлээн авах
+Receive now,Яг одоо хүлээн авна уу
+Received,Хүлээн авсан
+Received:,Хүлээн авсан:
+Recent Movement Entries,Сүүлийн үеийн хөдөлгөөний оруулгууд
+Recent updates about your invoices,Таны нэхэмжлэхийн талаарх сүүлийн үеийн шинэчлэлтүүд
+Recently Active Customers,Саяхан идэвхтэй үйлчлүүлэгчид
+Rechecking connection,Холболтыг дахин шалгаж байна
+Reconcile payment methods and close shift,"Төлбөрийн аргуудыг нэгтгэж, ээлжийг хаа"
+Reconciling Payments,Төлбөрийг нэгтгэх
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","Онлайн байх үедээ энэ хуудсыг нэг удаа холбож, нээвэл офлайн шинэчлэлтүүд үүнийг сэргээх боломжтой болно."
+Reconnect online to refresh cached offline data from the server.,Серверээс кэш хийгдсэн офлайн өгөгдлийг сэргээхийн тулд онлайнаар дахин холбогдоно уу.
+Recreate local offline prerequisites from scratch,Орон нутгийн офлайн урьдчилсан нөхцөлүүдийг эхнээс нь дахин үүсгээрэй
+Recv:,Recv:
+Redeem,Эргүүлэх
+Redeem / Scan,Эргүүлэх / сканнердах
+Redeem Amount,Хэмжээг эргүүлэн авах
+Redeem Mode,Зарцуулах горим
+Redeemed Amount,Зарсан дүн
+Redeemed credit cannot be greater than its total.,Зээл авсан зээлийн нийт хэмжээнээс их байж болохгүй.
+Redemption and Totals,Эргэн төлөлт ба нийт дүн
+Reference,Лавлагаа
+Refresh,Сэргээх
+Refresh Exchange Rate,Валютын ханшийг шинэчлэх
+Refresh Offline Data,Офлайн өгөгдлийг сэргээх
+Refresh Printers,Принтерүүдийг шинэчлэх
+Refund,Буцаан олголт
+Release Notes,Хувилбарын тэмдэглэл
+Reload,Дахин ачаалах
+Reload customers,Харилцагчдыг дахин ачаална уу
+Reload Items,Зүйлүүдийг дахин ачаалах
+Reload Now,Одоо дахин ачаална уу
+Reload to apply the latest changes. Your current session will be refreshed.,Хамгийн сүүлийн өөрчлөлтийг хэрэгжүүлэхийн тулд дахин ачаална уу. Таны одоогийн сесс шинэчлэгдэх болно.
+Reload Workflow,Ажлын урсгалыг дахин ачаалах
+Remarks,Тайлбар
+Remarks are required.,Тайлбар оруулах шаардлагатай.
+Remove,Устгах
+Remove barcode item,Баркодын зүйлийг устгана уу
+Remove cached data and reload the POS app,Кэш хийсэн өгөгдлийг устгаад POS програмыг дахин ачаална уу
+Remove item,Зүйлийг устгах
+Remove Offer,Саналыг устгах
+Reorder / Purchase Suggestions,Дахин захиалах / худалдан авах санал
+Repair Candidate,Засварчин
+Repair Change Allocation,Өөрчлөлтийн хуваарилалтыг засах
+Repair requires an online connection,Засвар хийхэд онлайн холболт шаардлагатай
+Repaired,Зассан
+Repairing change allocation,Өөрчлөлтийн хуваарилалтыг засаж байна
+Repeat Customers,Давтан үйлчлүүлэгчид
+Repeat Rate,Давталтын хурд
+Request,Хүсэлт
+Request ID: {0},Хүсэлтийн ID: {0}
+Request Payment,Төлбөрийг хүсэх
+Requested route: {0},Хүссэн маршрут: {0}
+Required columns cannot be hidden,Шаардлагатай багануудыг нуух боломжгүй
+Reset,Дахин тохируулах
+Reset item name,Зүйлийн нэрийг дахин тохируулах
+Reset to Default,Өгөгдмөл рүү дахин тохируулах
+Resource Health,Нөөцийн эрүүл мэнд
+Restricted,Хязгаарлагдмал
+Restricted operational controls for supervisors only.,Зөвхөн хянагчдад зориулсан хязгаарлагдмал үйл ажиллагааны хяналт.
+Retry,Дахин оролдоно уу
+Retry route,Маршрутыг дахин оролдоно уу
+Return,Буцах
+Return Amount,Буцаах дүн
+Return Count,Буцах тоо
+Return items must have negative quantities,Буцаах зүйлс сөрөг тоотой байх ёстой
+Return total must be negative,Нийт өгөөж нь сөрөг байх ёстой
+Return Valid Until,Буцах хугацаа хүчинтэй
+Return window passed,Буцах цонх өнгөрлөө
+Return without Invoice,Нэхэмжлэхгүйгээр буцаах
+Returns,Буцах
+Returns / Voids / Discounts,Буцаах / хүчингүй болгох / хөнгөлөлт
+Returns by Currency,Валютын нэгжээр буцаана
+Revenue,Орлого
+Review shift totals before submitting the closing entry,Хаалтын бичлэгийг оруулахын өмнө ээлжийн нийлбэр дүнг шалгана уу
+Round Off,Round Off
+Rows,Мөр
+Rows:,Мөр:
+Rule,Дүрэм
+Sale,Борлуулалт
+Sales,Борлуулалт
+Sales Order {0} is Submitted,Борлуулалтын захиалга {0}-г илгээсэн
+Sales Person and Print,Борлуулалтын ажилтан ба хэвлэх
+Sales Person not found,Борлуулалтын ажилтан олдсонгүй
+Sales processed,Борлуулалтыг боловсруулсан
+Sales Return,Борлуулалтын өгөөж
+Sales Trend Report,Борлуулалтын чиг хандлагын тайлан
+Save,Хадгалах
+Save & Clear,"Хадгалах, арилгах"
+Save as POS Profile Default,POS профайлын өгөгдмөл байдлаар хадгалах
+Save Settings,Тохиргоог хадгалах
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,Сонгосон принтерийг POS профайлын өгөгдмөл болгож хадгалснаар энэ тохиргоонд автоматаар харагдах болно.
+Saved as draft because: {0},Ноорог болгон хадгалсан учир нь: {0}
+Saving...,Хадгалж байна...
+Scale barcode detected. Quantity here is the number of labels to print.,Хэмжээний бар код илэрсэн. Энд байгаа тоо хэмжээ нь хэвлэх шошгоны тоо юм.
+Scale barcode settings are not configured. Using item barcode only.,Баркодын масштабын тохиргоо хийгдээгүй байна. Зөвхөн баркод ашиглах.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,Энэ зүйл/UOM-д масштабын загварын бар код байхгүй байна. Зөвхөн баркод ашиглах.
+Scan an existing card and top it up without leaving the payment flow.,"Одоо байгаа картыг сканнердаж, төлбөрийн урсгалыг орхихгүйгээр цэнэглэ."
+Scan Error,Сканнерийн алдаа
+Scan or enter a gift card code to check balance or redeem.,Үлдэгдэл шалгах эсвэл эргүүлэн авахын тулд бэлгийн картын кодыг сканнердах эсвэл оруулна уу.
+Scan or paste the card code below.,Доорх картын кодыг сканнердаж эсвэл буулгана уу.
+Scan QR Code/Barcode,QR код/баркод сканнердах
+Scan with camera,Камераар сканнердах
+Scan-First Flow,Scan-First Flow
+Scanned Code:,Сканнердсан код:
+Scanning for: {0},Скан хийж байна: {0}
+Scanning items,Зүйлүүдийг сканнердаж байна
+Scan-Ready,Скан хийхэд бэлэн
+Scope,Хамрах хүрээ
+Scope: All Profiles,Хамрах хүрээ: Бүх профайл
+Scope: Current Profile,Хамрах хүрээ: Одоогийн профайл
+Scope: Specific Profile,Хамрах хүрээ: Тусгай профайл
+Search,Хайх
+Search Account,Бүртгэл хайх
+Search an invoice and continue the return flow without extra steps.,"Нэхэмжлэхийг хайж, нэмэлт алхамгүйгээр буцаах урсгалыг үргэлжлүүлээрэй."
+Search customer,Үйлчлүүлэгч хайх
+Search invoices or customers,Нэхэмжлэх эсвэл үйлчлүүлэгч хайх
+Search item,Хайлтын зүйл
+Search item / code,Зүйл / код хайх
+Search items or barcode,Зүйлс эсвэл бар код хайх
+Search Mpesa Payments,Mpesa төлбөр хайх
+Search return invoices or customers,Буцаах нэхэмжлэх эсвэл үйлчлүүлэгч хайх
+Search supplier,Нийлүүлэгч хайх
+Search unpaid invoices or customers,Төлбөргүй нэхэмжлэх эсвэл үйлчлүүлэгчдийг хайх
+Secure context (HTTPS or localhost) is required for camera access.,Камерт хандахын тулд аюулгүй контекст (HTTPS эсвэл localhost) шаардлагатай.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,Камерт хандахад аюулгүй контекст (HTTPS) шаардлагатай. Камерт хандахын тулд HTTPS ашиглана уу.
+Select,Сонго
+Select a cashier first.,Эхлээд кассчин сонгоно уу.
+Select a customer,Үйлчлүүлэгч сонгох
+Select a customer to use coupon,Купон ашиглах хэрэглэгчээ сонгоно уу
+Select a printer to use QZ silent printing.,QZ чимээгүй хэвлэхийг ашиглахын тулд хэвлэгчээ сонгоно уу.
+Select Batch,Багцыг сонгоно уу
+Select Columns to Display,Харуулах баганыг сонгоно уу
+Select items to sell,Борлуулах зүйлсийг сонго
+Select Payment,Төлбөрийг сонгоно уу
+Select Payment Account,Төлбөрийн дансыг сонгоно уу
+Select printer,Принтер сонгоно уу
+Select Return Invoice,Нэхэмжлэхийг буцаахыг сонгоно уу
+Select S.O,S.O-г сонгоно уу
+Select Sales Orders,Борлуулалтын захиалгыг сонгоно уу
+Select the cashier who is taking over this terminal.,Энэ терминалыг хүлээж авах кассчинийг сонгоно уу.
+Selected,Сонгосон
+Selected movement type is not allowed by POS Profile.,Сонгосон хөдөлгөөний төрлийг POS профайл зөвшөөрөөгүй.
+Selected Payments,Сонгосон төлбөрүүд
+Sensitive actions kept away from quick taps.,Мэдрэмжтэй үйлдлүүдийг хурдан товшихоос хол байлга.
+Serial,Цуврал
+Serial Numbers,Серийн дугаарууд
+Server CPU Usage:,Серверийн CPU-ийн хэрэглээ:
+Server Health,Серверийн эрүүл мэнд
+Server Memory Usage:,Серверийн санах ойн хэрэглээ:
+Server Metrics,Серверийн хэмжигдэхүүн
+Server Uptime:,Серверийн ажиллах хугацаа:
+Service Charges,Үйлчилгээний төлбөр
+Session,Сессия
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,"Хэрэглэгчийн маягт дээр кассын ПИН код тус бүрийг тохируулж, терминалын гишүүдийг ПОС-ын профайл Хэрэглэгчийн хэсэгт үлдээнэ үү."
+Settings,Тохиргоо
+Settings in this section update the POS workspace without changing the current route.,Энэ хэсгийн тохиргоо нь одоогийн маршрутыг өөрчлөхгүйгээр ПОС-ын ажлын талбарыг шинэчилнэ.
+Setup complete!,Тохиргоо дууссан!
+Share,Хуваалцах
+Shared terminal,Хуваалцсан терминал
+Shift Closed Snapshot,Shift хаалттай хормын хувилбар
+Shift Overview,Shift тойм
+Show,Үзүүлэх
+Show cart on customer-facing screen,Хэрэглэгч рүү чиглэсэн дэлгэц дээр сагсыг харуул
+Show last invoice rate,Сүүлийн нэхэмжлэхийн үнийг харуулах
+Show rate info,Үнийн мэдээллийг харуулах
+Show Repair Candidates,Засварын ажил горилогчдыг харуулах
+Show search tools,Хайлтын хэрэгслүүдийг харуулах
+Show the active cart on a customer-facing screen,Үйлчлүүлэгч рүү чиглэсэн дэлгэц дээр идэвхтэй сагсыг харуул
+Showing {0}-{1} of {2},{2}-н {0}-{1}-г харуулж байна
+Showing 0 of 0,0-ийн 0-г харуулж байна
+Shows the distribution of invoices per currency,Валютын нэгжээр нэхэмжлэхийн хуваарилалтыг харуулна
+Sign out of the current POS session,Одоогийн POS сессээс гарна уу
+Size:,Хэмжээ:
+Skipped Payments,Алгассан төлбөрүүд
+Skipping items without barcodes,Бар кодгүй зүйлсийг алгасах
+Slow Moving,Удаан хөдөлж байна
+Slow Moving Items,Удаан хөдөлж буй зүйлс
+Slow Queries:,Удаан асуулга:
+Sold,Борлуулсан
+Source,Эх сурвалж
+Source Cash Account (Optional Override),Бэлэн мөнгөний эх үүсвэрийн данс (заавал биш)
+Source Ex. Rate:,Эх сурвалж Ex. Үнэлгээ:
+Source Rate:,Эх сурвалжийн хувь:
+Specific Profile,Тодорхой профайл
+Split Invoices,Нэхэмжлэх хуваах
+Staff / Cashier Performance Report,Ажилтнууд / Кассын ажлын тайлан
+Status,Статус
+Stock,Хувьцаа
+Stock Information,Хувьцааны мэдээлэл
+Stock is lower than requested,Хувьцаа хүссэн хэмжээнээс бага байна
+Stock is lower than requested:\n{0},Хувьцаа хүссэн хэмжээнээс бага байна:\n{0}
+Stock Movement Report,Хувьцааны хөдөлгөөний тайлан
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,Хувьцааны шинэчлэлт: {0}-д {1} байгаа. {2}-г нэмбэл хувьцаа тэгээс доош болно.
+Submit,Илгээх
+Submit & Print,"Илгээх, хэвлэх"
+Submit Deposit,Хадгаламж илгээх
+Submit Expense,Зардал оруулах
+Submitted,Илгээсэн
+Submitted Cash Movements,Оруулсан бэлэн мөнгөний хөдөлгөөн
+Submitted entries,Оруулсан бичлэгүүд
+Successfully scanned:,Амжилттай сканнердсан:
+Suggested,Санал болгосон
+Suggested Qty,Санал болгож буй тоо хэмжээ
+Supervisor Access,Супервайзер хандалт
+Supervisor permissions unlock issuance and reloads,Хянагчийн зөвшөөрөл нь олгох болон дахин ачаалах түгжээг тайлж байна
+Supervisor Tools,Хянагч хэрэгсэл
+Supplier,Нийлүүлэгч
+Supplier and dates are required.,Нийлүүлэгч болон огноо шаардлагатай.
+Supplier Invoices,Нийлүүлэгчийн нэхэмжлэх
+Supplier is required.,Нийлүүлэгч шаардлагатай.
+Supplier name is required,Нийлүүлэгчийн нэр шаардлагатай
+Supplier Payments,Нийлүүлэгчийн төлбөр
+Supplier Purchase Summary,Нийлүүлэгчийн худалдан авалтын хураангуй
+Suppliers,Нийлүүлэгчид
+Suppliers not found,Нийлүүлэгч олдсонгүй
+Switch Camera,Камер солих
+Switch Cashier,Касс солих
+Switch the POS appearance theme,ПОС-ын харагдах сэдвийг солих
+Switched to:,Дараах руу шилжсэн:
+Sync All Invoices,Бүх нэхэмжлэхийг синк хийх
+Sync Offline Cash Movements ({0}),Офлайн бэлэн мөнгөний хөдөлгөөнийг синк хийх ({0})
+Sync Offline Sales,Офлайн борлуулалтыг синк хийх
+Synced {0} offline cash movement(s).,Синк хийгдсэн {0} офлайн бэлэн мөнгөний хөдөлгөөн(үүд).
+Syncing items in background,Арын дэвсгэр дээрх зүйлсийг синк хийж байна
+System / Diagnostics,Систем / Оношлогоо
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","Системийн үйлдлүүд нь програмын мэдээлэл, тусламжийн оношлогоо, сессийн хяналт зэрэг бага давтамжийн засвар үйлчилгээний хяналтууд юм."
+System Information,Системийн мэдээлэл
+System Status,Системийн төлөв
+Tables:,Хүснэгтүүд:
+Tap the button below to redeem a gift card during checkout.,Тооцоо хийх явцад бэлгийн карт авахын тулд доорх товчийг товшино уу.
+Target,Зорилтот
+Target Ex. Rate:,Зорилтот Ex. Үнэлгээ:
+Target Rate:,Зорилтот ханш:
+Tax,Татвар
+Tax / Charges Report,Татвар / хураамжийн тайлан
+Tax Heads,Татварын дарга нар
+Taxable Amount,Татвар ногдох хэмжээ
+Tendered,Тендер зарласан
+Terminal,Терминал
+Terminal & Devices,Терминал ба төхөөрөмжүүд
+Terminal locked,Терминал түгжигдсэн
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","Терминал хэрэгслүүд нь энэ тооцооны станц, үйлчлүүлэгчдэд зориулсан дэлгэц, ирээдүйн хэвлэгч/төхөөрөмжийн удирдлагад нөлөөлдөг."
+Territory not found,Нутаг дэвсгэр олдсонгүй
+The amount paid is not complete,Төлсөн дүн нь дуусаагүй байна
+The app stores data locally for offline use. This is called cache.,Аппликешн нь офлайн хэрэглээнд зориулж өгөгдлийг дотооддоо хадгалдаг. Үүнийг кэш гэж нэрлэдэг.
+The invoice stayed in draft. Please review and submit it manually.,"Нэхэмжлэх нь ноорог дээр үлдсэн. Үүнийг хянаж, гараар оруулна уу."
+The maximum discount allowed is,Зөвшөөрөгдсөн хөнгөлөлтийн дээд хэмжээ
+The quantity for {0} has been adjusted to the maximum available stock.,{0}-н хэмжээг боломжит нөөцийн дээд хэмжээнд тохируулсан.
+The system could not retrieve the item details. Please try again.,Систем тухайн зүйлийн дэлгэрэнгүй мэдээллийг авч чадсангүй. Дахин оролдоно уу.
+These invoices will be synced when connection is restored,Холболт сэргээгдэх үед эдгээр нэхэмжлэхийг синк хийнэ
+This action now opens inside the settings workspace.,Энэ үйлдэл одоо тохиргооны ажлын талбар дотор нээгдэнэ.
+This coupon already used !,Энэ купоныг аль хэдийн ашигласан!
+This invoice does not need change-allocation repair,Энэ нэхэмжлэх нь өөрчлөлтийн хуваарилалтыг засах шаардлагагүй
+This invoice is already repaired,Энэ нэхэмжлэхийг аль хэдийн зассан
+This is an item template. Please choose a variant.,Энэ бол зүйлийн загвар юм. Хувилбараа сонгоно уу.
+this item,энэ зүйл
+This POS page could not be opened offline because its code was not cached on this terminal yet.,"Энэ POS хуудсыг офлайнаар нээх боломжгүй, учир нь түүний кодыг энэ терминал дээр хараахан хадгалаагүй байна."
+This Serial Number {0} has already been added!,Энэ серийн дугаар {0} аль хэдийн нэмэгдсэн байна!
+Threshold,Босго
+Time,Цаг хугацаа
+Tip: Clear cache regularly to free up space and keep the app fast.,"Зөвлөмж: Зай чөлөөлж, програмыг хурдан ажиллуулахын тулд кэшийг тогтмол цэвэрлэж байгаарай."
+Tip: Close unused tabs or apps to reduce lag.,Зөвлөмж: Хоцролтыг багасгахын тулд ашиглагдаагүй таб эсвэл програмыг хаа.
+Tip: Monitor slow queries and table size for optimal performance.,Зөвлөмж: Хамгийн оновчтой гүйцэтгэлтэй байхын тулд удаан асуулга болон хүснэгтийн хэмжээг хянах.
+To Be Paid,Төлбөр төлөх
+To Date,Өнөөг хүртэл
+Today,Өнөөдөр
+Today Profit,Өнөөдрийн ашиг
+Today Sales,Өнөөдөр борлуулалт
+Toggle navigation drawer,Навигацийн шүүгээг сэлгэх
+Toggle Theme,Загварыг асаах/унтраах
+Tools,Багаж хэрэгсэл
+Tools for customer-facing screens and terminal-specific actions.,Үйлчлүүлэгчдэд зориулсан дэлгэц болон терминалын тусгай үйлдэлд зориулсан хэрэгслүүд.
+Top Brand,Шилдэг брэнд
+Top Category,Топ ангилал
+Top Charge Head,Дээд цэнэглэгч толгой
+Top Customers,Шилдэг үйлчлүүлэгчид
+Top Discount,Шилдэг хөнгөлөлт
+Top Items by Location,Байршлаар нь шилдэг зүйлс
+Top Margin,Дээд захын зай
+Top Pending,Шилдэг хүлээгдэж буй
+Top Profit Item,Шилдэг ашгийн зүйл
+Top Return Items,Хамгийн их буцаах зүйлс
+Top Sales by Cashier,Кассын шилдэг борлуулалт
+Top Supplier,Шилдэг нийлүүлэгч
+Top Suppliers by Spend,Зардлаар тэргүүлэгч нийлүүлэгчид
+Top Tables,Шилдэг хүснэгтүүд
+Top Tax Head,Татварын дээд дарга
+Top Up Amount,Цэнэглэх дүн
+Top Up Card,Карт цэнэглэх
+Top Up Mode,Цэнэглэх горим
+Top Variant,Топ хувилбар
+Total,Нийт
+Total Amount,Нийт дүн
+Total Change,Нийт өөрчлөлт
+Total Charges,Нийт төлбөр
+Total In,Нийт
+Total Invoices,Нийт нэхэмжлэх
+Total Items,Нийт зүйлс
+Total Mpesa,Нийт Mpesa
+Total Out,Нийт гарсан
+Total Payments,Нийт төлбөр
+Total Purchase,Нийт худалдан авалт
+Total Selected :,Нийт сонгосон:
+Total Size,Нийт хэмжээ
+Total Stock Qty,Нийт хувьцааны тоо
+Total:,Нийт:
+Totals by Invoice Currency,Нэхэмжлэлийн валютаар нийт дүн
+Track how much cash was handed back to customers,Үйлчлүүлэгчдэд хэдий хэмжээний бэлэн мөнгө буцааж өгснийг хянах
+"Track recent sales, collect unpaid balances, and reopen saved work","Сүүлийн үеийн борлуулалтыг хянаж, төлөөгүй үлдэгдлийг цуглуулж, хадгалсан ажлыг дахин нээнэ үү"
+Transaction ID,Гүйлгээний ID
+Transfer,Дамжуулах
+Try a different search term or clear the cart search.,Хайлтын өөр нэр томъёог туршиж үзээрэй эсвэл сагсан дээрх хайлтыг арилгана уу.
+Try adjusting your search or filters,Хайлт эсвэл шүүлтүүрээ тохируулаад үзээрэй
+Try another source or refresh the list.,Өөр эх сурвалжийг туршиж үзэх эсвэл жагсаалтыг шинэчилнэ үү.
+Try changing the date range or status filter.,Огнооны муж эсвэл статус шүүлтүүрийг өөрчлөхийг оролдоно уу.
+Type,Төрөл
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,Үндсэн тохиргоотой байсан ч камер руу нэвтрэх боломжгүй. Камерын зөвшөөрөл болон төхөөрөмжийн нийцтэй байдлыг шалгана уу.
+Unable to add offer item {0}. Please refresh and try again.,{0} саналын зүйлийг нэмэх боломжгүй. Дахин сэргээгээд дахин оролдоно уу.
+Unable to add offer item. Please refresh and try again.,Санал болгож буй зүйлийг нэмэх боломжгүй. Дахин сэргээгээд дахин оролдоно уу.
+Unable to add scanned item.,Сканнердсан зүйлийг нэмэх боломжгүй.
+Unable to create purchase order,Худалдан авах захиалга үүсгэх боломжгүй
+Unable to delete draft invoice,Нэхэмжлэхийн ноорог устгах боломжгүй
+Unable to fetch documents,Баримт бичгийг татах боломжгүй
+Unable to fetch draft orders,Захиалгын төслийг дуудах боломжгүй
+Unable to fetch invoice history,Нэхэмжлэлийн түүхийг дуудах боломжгүй
+Unable to fetch M-Pesa payments,M-Pesa төлбөрийг авах боломжгүй
+Unable to fetch sales orders,Борлуулалтын захиалгыг татах боломжгүй байна
+Unable to fetch unpaid invoices,Төлөгдөөгүй нэхэмжлэхийг авах боломжгүй
+Unable to generate scale barcode,Хэмжээний бар код үүсгэх боломжгүй
+Unable to issue gift card.,Бэлгийн карт гаргах боломжгүй.
+Unable to load cashier PIN status.,Кассын ПИН статусыг ачаалах боломжгүй байна.
+Unable to load document,Баримт бичгийг ачаалах боломжгүй
+Unable to load draft invoice,Нэхэмжлэхийн ноорог ачаалах боломжгүй
+Unable to load gift card balance.,Бэлгийн картын үлдэгдлийг ачаалах боломжгүй.
+Unable to load invoice details,Нэхэмжлэхийн дэлгэрэнгүйг ачаалах боломжгүй
+Unable to load parked order,Зогсоосон захиалгыг ачаалах боломжгүй
+Unable to load the selected sales order,Сонгосон борлуулалтын захиалгыг ачаалах боломжгүй байна
+Unable to prepare document,Баримт бичгийг бэлтгэх боломжгүй байна
+Unable to prepare return invoice,Буцаах нэхэмжлэхийг бэлтгэх боломжгүй байна
+Unable to print draft invoice,Нэхэмжлэхийн ноорог хэвлэх боломжгүй
+Unable to print submitted invoice,Илгээсэн нэхэмжлэхийг хэвлэх боломжгүй
+Unable to process document action,Баримт бичгийн үйлдлийг боловсруулах боломжгүй
+Unable to repair change allocation,Өөрчлөлтийн хуваарилалтыг засах боломжгүй
+Unable to save cashier PIN.,Кассын ПИН кодыг хадгалах боломжгүй.
+Unable to save the rate to the backend price list,Арын үнийн жагсаалтад ханшийг хадгалах боломжгүй
+Unable to submit invoice,Нэхэмжлэхийг илгээх боломжгүй
+Unable to submit the selected payment,Сонгосон төлбөрийг илгээх боломжгүй
+Unable to top up gift card.,Бэлгийн картыг цэнэглэх боломжгүй байна.
+Unable to verify cashier PIN.,Кассын ПИН кодыг баталгаажуулах боломжгүй байна.
+Unallocated,Хуваарилагдаагүй
+Unallocated:,Хуваарилагдаагүй:
+Unavailable,Боломжгүй
+Unknown,Тодорхойгүй
+Unknown Item,Үл мэдэгдэх зүйл
+Unknown Warehouse,Үл мэдэгдэх агуулах
+Unlock POS,ПОС-ын түгжээг тайлах
+Unpaid,Төлбөргүй
+"Unselected payments stay unallocated first, then auto reconcile after submit.","Сонгогдоогүй төлбөрүүд эхлээд хуваарилагдаагүй, дараа нь илгээсний дараа автоматаар тохирно."
+UOM,UOM
+UOM not found,UOM олдсонгүй
+Update available,Шинэчлэлт боломжтой
+Update Customer,Хэрэглэгчийг шинэчлэх
+Update PIN,ПИН кодоо шинэчилнэ үү
+Update Price List Rate,Үнийн жагсаалтын үнийг шинэчлэх
+Updated,Шинэчлэгдсэн
+Updates and app info that stay out of the cashier flow.,Шинэчлэлтүүд болон програмын мэдээлэл кассын урсгалаас гадуур байдаг.
+Updates automatically,Автоматаар шинэчлэгддэг
+Usage,Хэрэглээ
+Usage Stats,Хэрэглээний статистик
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,Касс солих болон терминалын түгжээг тайлахад 4-8 оронтой ПИН код ашиглана уу.
+Use Cashier,Кассчин ашиглана уу
+Use date range to search for older invoices,Хуучны нэхэмжлэхийг хайхын тулд огнооны мужийг ашиглана уу
+"Use one field for manual code entry, barcode scans, or QR scans.","Гараар код оруулах, бар код скан хийх эсвэл QR скан хийхэд нэг талбарыг ашиглана уу."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","ПОС-оос гарахгүйгээр үлдэгдэл шалгах, шинээр олгох, цэнэглэхэд нэг ажлын урсгалыг ашиглаарай."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","Кэшд хадгалагдсан урьдчилсан өгөгдлүүдийг шинэчлэх, дахин бүтээх, оношлох шаардлагатай үед энэ хэсгийг ашиглана уу."
+Use Western numerals,Баруун тоонуудыг ашигла
+Used:,Ашигласан:
+Using basic camera settings due to device limitations,Төхөөрөмжийн хязгаарлалтын улмаас камерын үндсэн тохиргоог ашиглаж байна
+Using cached customer balance,Хэрэглэгчийн хадгалсан үлдэгдлийг ашиглах
+Valid until,хүртэл хүчинтэй
+Variance %,Өөрчлөлт %
+Variants,Хувилбарууд
+Variant-wise,Хувилбарын хувьд
+Verify closing amounts for each payment method,Төлбөрийн хэрэгсэл бүрийн хаалтын дүнг баталгаажуулна уу
+View all,Бүгдийг харах
+View app information and current build details,Аппликешны мэдээлэл болон одоогийн бүтээх дэлгэрэнгүй мэдээллийг харах
+View Data Diagnostics,Өгөгдлийн оношлогоог харах
+View Details,Дэлгэрэнгүйг харах
+View invoice details,Нэхэмжлэлийн дэлгэрэнгүй мэдээллийг харах
+View notifications,Мэдэгдэл харах
+View offline invoices,Офлайн нэхэмжлэхийг харах
+View restricted POS insights,Хязгаарлагдмал ПОС-ын мэдээллийг харах
+Void Amount,Хүчингүй дүн
+Void Count,Хүчингүй тоо
+Voids,Хоосон зай
+Waiting for cart items,Сагсны бараа хүлээж байна
+Waiting for payment...,Төлбөрийг хүлээж байна...
+Walk-in Customer,Хүлээн авагч
+Warehouse,Агуулах
+Warning: High cache usage may affect performance.,Анхааруулга: Өндөр кэш ашиглах нь гүйцэтгэлд нөлөөлж болзошгүй.
+Warning: High lag may indicate heavy processing or browser slowness.,Анхааруулга: Өндөр хоцрогдол нь боловсруулалт ихтэй эсвэл хөтөч удаашралтай байгааг илтгэнэ.
+Week ?,Долоо хоног уу?
+Week-wise,Долоо хоногоор
+Weight (g),Жин (г)
+Weight (grams),Жин (грамм)
+We'll let you know if an invoice fails to submit,Хэрэв нэхэмжлэхийг илгээж чадахгүй бол бид танд мэдэгдэх болно
+Workflow,Ажлын урсгал
+Write off amount cannot exceed the POS profile maximum of {0},Хасах дүн нь ПОС-ын профайлын дээд хэмжээ {0}-с хэтэрч болохгүй.
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,Бүртгэлээс хасах дүн зөвшөөрөгдсөн хязгаараас хэтэрсэн байна ({0}). Үлдсэн дүнгийн төлбөрийг нэмнэ үү.
+Yes,Тиймээ
+"Yes, Cancel sale","Тийм ээ, борлуулалтыг цуцлах"
+"Yes, Close","Тийм ээ, хаах"
+You are not allowed to print draft invoices,Та нэхэмжлэхийн ноорог хэвлэх эрхгүй
+You are offline. Add Payment will work again when the connection is restored.,Та офлайн байна. Холболт сэргээгдэх үед Төлбөр нэмэх нь дахин ажиллана.
+You have no notifications right now,Танд одоогоор мэдэгдэл алга байна
+Your Cart,Таны сагсанд

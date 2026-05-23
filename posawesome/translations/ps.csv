@@ -1,0 +1,1362 @@
+POS Awesome,POS په زړه پوری
+Fetch Items Directly from Server,له سرور څخه مستقیم توکي ترلاسه کړئ
+Menu,مینو
+Actions,کړنې
+Close Shift,شفټ بند کړئ
+End current session,اوسنۍ ناسته پای ته ورسوئ
+Print Last Invoice,وروستی رسید چاپ کړئ
+Reprint previous transaction,پخوانۍ معامله بیا چاپ کړئ
+Sync Offline Invoices,آفلاین رسیدونه همغږي کړئ
+Upload pending transactions,پاتې معاملې اپلوډ کړئ
+Go Online,آنلاین لاړ شئ
+Go Offline,آفلاین لاړ شه
+Disable offline mode,آف لائن حالت غیر فعال کړئ
+Work without server connection,د سرور پیوستون پرته کار وکړئ
+Clear Cache,کیچ پاک کړئ
+Remove local data and refresh,محلي معلومات لرې کړئ او تازه کړئ
+About,په اړه
+App information,د اپلیکیشن معلومات
+Language,ژبه
+Change interface language,د انٹرفیس ژبه بدل کړئ
+Light Mode,د رڼا حالت
+Dark Mode,تیاره حالت
+Switch theme appearance,د موضوع بڼه بدل کړئ
+Logout,ننوتل
+Sign out of session,د غونډې څخه لاسلیک کول
+Select Language,ژبه غوره کړئ
+Choose your preferred language for the POS interface,د POS انٹرفیس لپاره خپله غوره ژبه غوره کړئ
+Language will be changed to,ژبه به بدله شي
+Cancel,لغوه کړئ
+Change Language,ژبه بدله کړه
+Close,تړل
+Cannot change language - same language selected,ژبه نشي بدلولی - ورته ژبه غوره شوې
+Language changed successfully! Reloading...,ژبه په بریالیتوب سره بدله شوه! بیا پورته کول...
+Failed to change language,د ژبې په بدلولو کې پاتې راغلی
+Unknown error,نامعلومه تېروتنه
+- Total Unallocated,- ټول غیر تخصیص شوي
+* Required,* اړین دی
+{0} (Qty: {1}),{0} (قتل: {1})
+{0} actions,{0} کړنې
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} یوازې {1} په ذخیره کې لري. تاسو غوښتنه وکړه {2}. مقدار تنظیم کړئ یا بیا ځای په ځای کړئ.
+{0} offline invoice{1} pending,{0} آفلاین رسید{1} پاتې دی
+{0} offline invoice{1} saved as draft,{0} آفلاین رسید{1} د مسودې په توګه خوندي شوی
+{0} offline invoice{1} synced,{0} آفلاین رسید{1} همغږي شوی
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0} ورځې وړاندې
+{0}h ago,{0}ساعت مخکې
+{0}m ago,{0} دقیقې مخکې
+A POS supervisor is required for this action.,د دې عمل لپاره د POS څارونکي ته اړتیا ده.
+Access,لاسرسی
+Account,حساب
+Account is overdrawn,حساب ډیر شوی دی
+Acknowledge the error to resume scanning,د سکینګ بیا پیلولو لپاره تېروتنه ومنئ
+Acknowledge the error to resume scanning.,د سکینګ بیا پیلولو لپاره تېروتنه ومنئ.
+Across,په پار
+Action,عمل
+Active sale,فعال خرڅلاو
+add,اضافه کول
+Add items from the selector to start building this sale.,د دې پلور جوړولو پیل کولو لپاره د انتخاب کونکي څخه توکي اضافه کړئ.
+Add more value to an existing gift card,موجوده ډالۍ کارت ته نور ارزښت اضافه کړئ
+Add New Address,نوی ادرس اضافه کړئ
+Add new customer,نوي پیرودونکي اضافه کړئ
+Add on New Line,په نوې کرښه کې اضافه کړئ
+Add Payment,تادیه اضافه کړئ
+Add payment to invoice,په رسید کې تادیه اضافه کړئ
+Add/Edit Coupon Conditions,د کوپن شرایط اضافه / ایډیټ کړئ
+Additional Discount,اضافي تخفیف
+Additional Discount %,اضافي تخفیف٪
+Address Line 1,د ادرس کرښه 1
+Address not found,ادرس ونه موندل شو
+Adjust the quantity or enable negative stock to continue.,مقدار تنظیم کړئ یا د دوام لپاره منفي سټاک فعال کړئ.
+Adjustment,سمون
+After returns,د بیرته راستنیدو وروسته
+Against,خلاف
+Against Name,د نوم پر خلاف
+Age Bracket,د عمر بریکٹ
+All,ټول
+All Caught Up!,ټول نیول شوي!
+All invoices are synchronized,ټول رسیدونه همغږي شوي
+All pending invoices are up to date,ټول پاتې رسیدونه تازه دي
+All Profiles,ټول پروفایلونه
+All Synchronized,ټول همغږي شوي
+All visible invoices are fully settled.,ټول لیدل شوي رسیدونه په بشپړ ډول تنظیم شوي.
+All Warehouses,ټول ګودامونه
+Allowed UOM is {0},اجازه ورکړل شوی UOM {0} دی
+Always fetch items from server (ignore local cache),تل له سرور څخه توکي راوړئ (ځایی کیچ له پامه غورځول)
+Amount,مقدار
+Amount already received,هغه مقدار چې دمخه ترلاسه شوی
+Amount exceeds profile cash movement max amount.,مقدار د پروفایل نغدو حرکت د اعظمي مقدار څخه ډیر دی.
+Amount must be greater than zero.,اندازه باید له صفر څخه زیاته وي.
+Amount received from customer,د پیرودونکي څخه ترلاسه شوي مقدار
+Appearance and user-level preferences for the current session.,د اوسنۍ ناستې لپاره ظاهري او د کارونکي کچې غوره توبونه.
+Applied,تطبیق شوی
+Apply,درخواست وکړئ
+Apply Gift Card,د ډالۍ کارت غوښتنه وکړئ
+Apply Offer,د وړاندیز غوښتنه وکړئ
+Apply On,پلي کول
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,یوازې هغه مقدار پلي کړئ چې تاسو غواړئ په دې رسید کې بیرته ترلاسه کړئ. پاتې بیلانس په کارت کې پاتې کیږي.
+Apply Redemption,د خلاصون غوښتنه وکړئ
+Applying,پلي کول
+Apps,ایپس
+Are you sure you want to close? All entered data will be lost.,ایا تاسو ډاډه یاست چې تاسو بندول غواړئ؟ ټول داخل شوي معلومات به ورک شي.
+Attributes (Size/Color),ځانګړتیاوې (سایز/رنګ)
+Auto Allocate Payment Amount,د تادیې مقدار اتومات تخصیص
+Auto Reconcile,اتوماتیک پخلاینه
+Auto reconciliation completed after payment submit.,د تادیې سپارلو وروسته اتوماتیک پخلاینه بشپړه شوه.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,اتوماتیک پخلاینه بشپړه شوه. تخصیص شوی: {0}{1}. پاتې پاتې دي: {0}{2}.
+Available Actions,شته کړنې
+Available QTY,شته QTY
+Available:,شته:
+Average Basket,اوسط ټوکر
+Average Bill,اوسط بیل
+Average Ticket,اوسط ټکټ
+Avg Bill,اوسط بل
+Avg Invoice,اوسط رسید
+Avg Invoice Profit,د اوسط انوائس ګټه
+Avg Invoice Value,د اوسط انوائس ارزښت
+Avg Purchase Frequency,د اوسط پیرود فریکونسی
+Awesome,په زړه پورې
+Awesome Dashboard,په زړه پوری ډشبورډ
+Awesome Dashboard is disabled for the selected POS Profile.,د غوره شوي POS پروفایل لپاره په زړه پوري ډشبورډ غیر فعال دی.
+Awesome Dashboard is unavailable for the selected scope.,په زړه پورې ډشبورډ د ټاکل شوي ساحې لپاره شتون نلري.
+Awesome Dashboard is visible only to POS supervisors.,په زړه پوری ډشبورډ یوازې د POS څارونکو لپاره لیدل کیږي.
+Back,شاته
+Back Office Cash Account,د بیک دفتر نغدي حساب
+Back Office Cash Account (Optional Override),د شاته دفتر نغدي حساب (اختیاري اوورایډ)
+Back office cash account is required.,د بیک دفتر نغدي حساب ته اړتیا ده.
+Back to {0},بېرته {0} ته
+Background processing did not finish in time.,د شالید پروسس په وخت پای ته نه و رسیدلی.
+Background processing failed for Invoice {0}: {1},د انوائس {0} لپاره د پس منظر پروسس ناکام شو: {1}
+Background Submission Failed,د پس منظر سپارل ناکام شو
+Background sync interval (seconds),د شالید همغږي وقفه (ثانوي)
+Balance,بیلانس
+Balance will be updated when connection is restored,بیلانس به تازه شي کله چې پیوستون بحال شي
+Balances still pending,بیلانسونه لاهم پاتې دي
+Barcode,بارکوډ
+Barcode / QR Ready,بارکوډ / QR چمتو دی
+Barcode Label Printing,د بارکوډ لیبل چاپ کول
+Base Paid:,اساسی تادیه:
+Base Recv:,اساسی بیاکتنه:
+Base:,اساس:
+Basic Information,بنسټیز معلومات
+Batch,بسته
+Batch Information,د بست معلومات
+Before any return workflow,د هر ډول راستنیدو کاري فلو دمخه
+Before returns,د بیرته راستنیدو دمخه
+Best Day,غوره ورځ
+Best Seller,غوره پلورونکی
+Book expense or deposit from active shift.,د فعال شفټ څخه د کتاب لګښت یا زیرمه.
+Branch / Location-wise Report,د څانګو/مقام له مخې راپور
+Brand-wise,د برانډ په لحاظ
+Breakdown,ماتول
+Browse,لټون وکړئ
+Build Time:,د جوړولو وخت:
+Built with Frappe,د Frappe سره جوړ شوی
+Bundle,بنډل
+Buying Price,د پیرودلو قیمت
+Cache cleared successfully,زیرمه په بریالیتوب سره پاکه شوه
+Cache Usage,د کیچ کارول
+cache used,زیرمه کارول شوې
+Calculating...,محاسبه کول...
+Camera Access Required,کیمرې ته لاسرسی اړین دی
+Camera access was aborted. Please try again.,د کیمرې لاسرسی لغوه شو. مهرباني وکړئ بیا هڅه وکړئ.
+Camera constraints not supported by your device. Trying fallback settings...,د کیمرې محدودیتونه ستاسو د آلې لخوا نه ملاتړ کیږي. د فال بیک ترتیباتو هڅه کول...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,کیمره د بل اپلیکیشن / ټب لخوا بوخت یا بنده ده. نور کیمرې ایپسونه بند کړئ او بیا هڅه وکړئ.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,د کیمرې اجازه رد شوه. مهرباني وکړئ د خپل براوزر په ترتیباتو کې د کیمرې لاسرسي ته اجازه ورکړئ او پاڼه ریفریش کړئ.
+Camera scanner is locked until the current error is acknowledged,د کیمرې سکینر تر هغه وخته پورې تړل شوی چې اوسنۍ تېروتنه ونه منل شي
+Camera started but the video stream did not load in time. Please try again.,کیمره پیل شوه مګر د ویډیو جریان په وخت کې پورته نه شو. مهرباني وکړئ بیا هڅه وکړئ.
+Cancel cash movement {0}?,د نغدو پیسو حرکت لغوه کړئ {0}؟
+Cancel Payment,تادیه لغوه کړئ
+Cancel Sale,خرڅلاو لغوه کړئ
+Cancel Sale ?,خرڅلاو لغوه کړئ؟
+Cancelled,لغوه شو
+Cannot add an item with zero or negative quantity.,نشي کولی یو شی د صفر یا منفي مقدار سره اضافه کړي.
+Cannot clear cache while offline,د آفلاین په وخت کې زیرمه نشي پاکولی
+Cannot redeem customer credit more than invoice total,نشي کولی د پیرودونکي کریډیټ د رسید مجموعې څخه ډیر ترلاسه کړي
+Cannot redeem gift cards more than invoice total,د انوائس له مجموعې څخه ډیر د ډالۍ کارتونه نشي خلاصولی
+Cannot Save Offline Invoice:,آفلاین انوائس نشي خوندي کولی:
+Cannot Save Offline Payment:,آف لائن تادیه نشي خوندي کولی:
+Card,کارت
+Card / Online,کارت / آنلاین
+Card health after the last live lookup,د وروستي ژوندی لید څخه وروسته د کارت روغتیا
+Cards,کارتونه
+Cart,کارټ
+Cash,نغدې
+Cash back to customers,پیرودونکو ته پیسې بیرته
+Cash Collections,د نغدو راټولول
+Cash Deposit is disabled for this POS Profile.,د دې POS پروفایل لپاره نغدي پیسې غیر فعال دي.
+Cash Drawer Snapshot,د نغدو پیسو اخیستونکي عکس
+Cash In Hand,په لاس کې نغدې پیسې
+Cash Movement,د نغدو حرکت
+Cash movement cancelled,د نغدو پیسو حرکت لغوه شو
+Cash movement deduction applied,د نغدو حرکت کسر تطبیق شوی
+Cash movement deleted,د نغدو پیسو حرکت حذف شوی
+Cash movement is disabled for this POS Profile.,د دې POS پروفایل لپاره د نغدو پیسو حرکت غیر فعال دی.
+Cash Movement is disabled in current POS Profile.,د پیسو حرکت په اوسني POS پروفایل کې غیر فعال دی.
+Cash movement saved offline,د نغدو حرکت آفلاین خوندي شو
+Cash movement submitted,نغدي حرکت سپارل شوی
+Cash Movements,د نغدو حرکت
+Cash payment cannot be less than invoice total when partial payment is not allowed,د نغدو پیسو تادیه نشي کولی د رسید مجموعې څخه کم وي کله چې د جزوي تادیې اجازه نه وي
+Cash returned after payment,پیسې د تادیې وروسته بیرته راستانه شوې
+Cashier,کیشیر
+Cashier Access,کیشیر لاسرسی
+Cashier identity and appearance preferences.,د کیشیر پیژندنه او ظاهري غوره توبونه.
+Cashier PIN,کیشیر PIN
+Cashier PIN saved successfully.,کیشیر PIN په بریالیتوب سره خوندي شو.
+Cashiers,نغدي
+Cashier-wise,د نغدو پیسو خاوند
+Categories,کټګورۍ
+Category,کټګوري
+Category / Brand / Variant Report,کټګورۍ / برانډ / ویرینټ راپور
+Category-wise,په کټګورۍ کې
+Category-wise Margin,د کټګورۍ له مخې مارجن
+Certificate,سند
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,سند ورک دی یا باور نلري. QZ کیدای شي د تایید ډیالوګ وښيي.
+Certificate is trusted. Silent QZ printing is active.,سند د اعتبار وړ دی. خاموش QZ چاپ فعال دی.
+Change,بدلون
+Change allocation repaired,د تخصیص ترمیم ترمیم شو
+Change Price,قیمت بدل کړئ
+Change Return,بیرته راستنیدنه
+Change Returned,بدلون بیرته راستانه شوی
+Change terminal cashier,د ترمینل کیشیر بدل کړئ
+Charge Heads,د چارج سرونه
+Charges,تورونه
+Charges not found,تورونه ونه موندل شول
+Check Balance,بیلانس چیک کړئ
+Check balance for any card. Supervisors can issue and top up cards here.,د هر کارت لپاره بیلانس چیک کړئ. څارونکي کولی شي دلته کارتونه صادر او پورته کړي.
+Check balance only,یوازې توازن چیک کړئ
+Check for new commits,د نویو ژمنو لپاره وګورئ
+Check for Updates,د تازه معلوماتو لپاره وګورئ
+Check live balance before applying redemption,د خلاصون غوښتنه کولو دمخه ژوندی توازن چیک کړئ
+Check live balance before redemption,د خلاصون دمخه ژوندی توازن چیک کړئ
+Checking...,چک کول...
+Cheque/Reference Date,د چک / حوالې نیټه
+Cheque/Reference No,چک/مآخذ نمبر
+Choose the cashier currently operating this terminal.,کیشیر غوره کړئ چې اوس مهال دا ټرمینل چلوي.
+City,ښار
+Clear,روښانه
+Clear All,ټول پاک کړئ
+Clear all barcode items,ټول بارکوډ توکي پاک کړئ
+Clear all purchase order items,د پیرود امر ټول توکي پاک کړئ
+Clear Search,پاک لټون
+Clearing local cache...,د محلي زیرمو پاکول...
+Click to refresh,د تازه کولو لپاره کلیک وکړئ
+Client CPU Lag:,د پیرودونکي CPU لیګ:
+Client Memory Usage:,د پیرودونکي حافظې کارول:
+Client Metrics,د پیرودونکي میټریکونه
+Close about dialog,د ډیالوګ په اړه تړل
+Close cashier switcher,د کیشیر سویچر بند کړئ
+Close closing shift dialog,د بندولو شفټ ډیالوګ بند کړئ
+Close column selector,د کالم انتخاب کوونکی بند کړئ
+Close Dialog,ډیالوګ بند کړئ
+Close drafts dialog,د مسودې ډیالوګ بند کړئ
+Close invoice details dialog,د رسید توضیحاتو ډیالوګ بند کړئ
+Close invoice management,د رسید مدیریت بند کړئ
+Close offline invoices dialog,د آفلاین رسیدونو ډیالوګ بند کړئ
+Close packing list dialog,د بسته بندي لیست ډیالوګ بند کړئ
+Close returns dialog,د راستنیدو ډیالوګ بند کړئ
+Close sales orders dialog,د پلور امرونو ډیالوګ بند کړئ
+Close Scanner,سکینر بند کړئ
+Close scanner dialog,د سکینر ډیالوګ بند کړئ
+Close Settings,ترتیبات بند کړئ
+Closing Amount,د تړلو مقدار
+Closing POS Shift,د POS شفټ بندول
+Closing Snapshot Available,د بندولو سنیپ شاټ شتون لري
+Code,کوډ
+Code scanned successfully,کوډ په بریالیتوب سره سکین شو
+COGS,COGS
+Collapse item details,د توکي توضیحات مات کړئ
+Collected,راټول شوي
+Cols,کولس
+Columns,کالمونه
+commits,ژمنې کوي
+Completed and active sales in this range,په دې سلسله کې بشپړ او فعال پلور
+Completed returns will appear here.,بشپړ شوي بیرته ستنیدل به دلته ښکاره شي.
+Confirm,تایید کړه
+Confirm Close,تړل تایید کړئ
+Confirm Mobile Number,د موبایل شمیره تایید کړئ
+Confirm PIN,PIN تایید کړئ
+Connect,نښلول
+Connect printer and manage certificate,پرنټر وصل کړئ او سند اداره کړئ
+Connecting to QZ Tray...,د QZ ټری سره نښلول ...
+Connection problem while submitting invoice,د رسید سپارلو پرمهال د پیوستون ستونزه
+Connections:,اړیکې:
+Connectivity and cached prerequisite status were rechecked.,ارتباط او د زیرمه شوي شرط حالت بیا وڅیړل شو.
+Continue Editing,ترمیم ته دوام ورکړئ
+Could not fetch latest balance from server,د سرور څخه وروستی بیلانس نشي ترلاسه کولی
+Count,شمېرل
+Country,هیواد
+Coupon,کوپن
+Coupons,کوپن
+Cover,پوښ
+CPU Cores:,د CPU کورونه:
+Create,جوړ کړئ
+Create and load a new prepaid card,یو نوی پری پیډ کارت جوړ او پورته کړئ
+Create and preload a new gift card,یو نوی ډالۍ کارت جوړ او پری لوډ کړئ
+Create Bill,بل جوړ کړئ
+Create Customer,پیرودونکي جوړ کړئ
+Create New Item,نوی توکي جوړ کړئ
+Create or change your PIN,خپل PIN جوړ یا بدل کړئ
+Create PIN,PIN جوړ کړئ
+Create POS Opening Shift,د POS افتتاحی شفټ رامینځته کړئ
+Create Purchase Order,د پیرود امر جوړ کړئ
+Create Return,بیرته راستنیدنه جوړه کړئ
+Create return from invoice,د رسید څخه راستنیدنه رامینځته کړئ
+Create Supplier,عرضه کوونکي جوړ کړئ
+Credit and Output,کریډیټ او محصول
+Credit Note,د کریډیټ یادښت
+Credit Outstanding,کریډیټ بقایا
+Credit sales remaining to be collected,د کریډیټ پلور پاتې دی چې راټول شي
+Critical,انتقادي
+Currency,اسعارو
+Current,اوسنۍ
+Current Event Loop Lag:,د اوسني پیښې لوپ لیګ:
+Current Month,روانه میاشت
+Current PIN,اوسنی PIN
+Current Profile,اوسنی پروفایل
+Current redeemable value on the gift card,د ډالۍ کارت کې اوسنی د بیرته راګرځیدونکي ارزښت
+Current User,اوسنی کارن
+Custom,دودیز
+Custom Due Days,د ګمرک ټاکل شوې ورځې
+Custom items per page,په هره پاڼه کې دودیز توکي
+Customer,پیرودونکي
+Customer already selected,پیرودونکي لا دمخه غوره شوي
+Customer Balance,د پیرودونکي بیلانس
+Customer balance unavailable offline,د پیرودونکي بیلانس په آفلاین کې شتون نلري
+Customer created successfully.,پیرودونکي په بریالیتوب سره جوړ شوي.
+Customer creation failed.,د پیرودونکي جوړول ناکام شول.
+Customer Details,د پیرودونکي توضیحات
+Customer display channel is missing,د پیرودونکي نندارې چینل ورک دی
+Customer display was blocked. Please allow pop-ups for this site.,د پیرودونکي ښودنه بنده شوې وه. مهرباني وکړئ د دې سایټ لپاره پاپ اپ ته اجازه ورکړئ.
+Customer group is required,د پیرودونکي ګروپ ته اړتیا ده
+Customer is required to add payment,پیرودونکي اړ دي چې تادیه اضافه کړي
+Customer Name is required,د پیرودونکي نوم اړین دی
+Customer not selected,پیرودونکی نه دی ټاکل شوی
+Customer Report,د پیرودونکي راپور
+Customer saved offline,پیرودونکي آفلاین خوندي شوي
+Customer Screen,د پیرودونکي سکرین
+Customer territory is required,د پیرودونکي ساحه اړینه ده
+Customer updated successfully.,پیرودونکي په بریالیتوب سره تازه شول.
+Customer-facing tools and printer setup.,د پیرودونکي سره مخ وسیلې او د پرنټر تنظیم کول.
+Customers,پیرودونکي
+Customers not found,پیرودونکي ونه موندل شول
+Daily cashier actions without scrolling.,د کیشیر ورځني کړنې پرته له سکرول کولو.
+Daily Sales,ورځنی خرڅلاو
+Daily Sales Summary,د ورځني خرڅلاو لنډیز
+Data loaded in form. Review and submit.,معلومات په فورمه کې ډک شوي. بیاکتنه او سپارل.
+Database Health,د ډیټابیس روغتیا
+Database health affects overall system speed and reliability.,د ډیټابیس روغتیا د ټول سیسټم سرعت او اعتبار اغیزه کوي.
+Database Info,د ډیټابیس معلومات
+Date,نیټه
+Day ?,ورځ؟
+days,ورځې
+Day-wise (MTD),د ورځې له مخې (MTD)
+Day-wise Movement,ورځنی حرکت
+Dead Stock,مړ سټاک
+Dead Stock Items,مړه سټاک توکي
+Decrease quantity,مقدار کم کړئ
+Default,ډیفالټ
+Default:,ډیفالټ:
+Delete,ړنګول
+Delete cancelled cash movement {0}?,لغوه شوي نغدي حرکت {0} ړنګ کړئ؟
+Delete Draft,مسوده ړنګه کړئ
+Delete draft invoice,د مسودې رسید حذف کړئ
+Delete draft invoice {0}?,د مسودې رسید {0} حذف کړئ؟
+Delete Invoice,انوائس ړنګ کړئ
+Delete offline invoice,آف لائن انوائس ړنګ کړئ
+Delivered,سپارل شوی
+Delivery Charges,د سپارلو لګښتونه
+Delivery Information,د سپارلو معلومات
+Delivery Note {0} created,د تحویلي یادښت {0} جوړ شو
+Delivery note created,د سپارلو یادښت جوړ شو
+Deployed Bundle:,ګمارل شوی بنډل:
+Deposit,جمع
+Description,تفصیل
+Detailed Supplier Breakdown,تفصيلي عرضه کوونکي ماتول
+Detecting formats:,د شکلونو کشف کول:
+Device Memory:,وسیله یادښت:
+Difference,توپیر
+Difference (In Company Currency),توپیر (د شرکت اسعارو کې)
+Disable offline mode first to recheck live connectivity.,د ژوندی ارتباط بیاکتنې لپاره لومړی آفلاین حالت غیر فعال کړئ.
+Disconnect,منحل کول
+discount,تخفیف
+Discount %,تخفیف٪
+Discount / Void / Return Report,تخفیف / باطل / بیرته راستنیدنه
+Discount Amount,د تخفیف اندازه
+Discount limited by POS Profile,تخفیف د POS پروفایل لخوا محدود دی
+Discounted Invoices,رعایت شوي رسیدونه
+Discounts,تخفیف
+Dismiss,ګوښه کول
+Download Certificate,سند ډاونلوډ کړئ
+Draft,مسوده
+Draft invoice deleted,د رسید مسوده ړنګه شوه
+Draft source,د مسودې سرچینه
+Drafts,مسودې
+Due {0},ټاکل شوې {0}
+Due Date,د نیټې نیټه
+Duplicate,نقل
+Edit customer,پیرودونکي ترمیم کړئ
+Edit discount amount,د تخفیف اندازه ترمیم کړئ
+Edit discount percentage,د تخفیف سلنه ایډیټ کړئ
+Edit Gift Application,د ډالۍ غوښتنلیک ایډیټ کړئ
+Edit item name,د توکي نوم سم کړئ
+Edit quantity,مقدار ترمیم کړئ
+Edit rate,د ترمیم نرخ
+Edit unit of measure,د اندازه کولو واحد ترمیم کړئ
+Edited,ترمیم شوی
+Employee,کارمند
+Enable background sync,د شالید ترکیب فعال کړئ
+Enable Customer Display in POS Profile first.,لومړی د POS پروفایل کې د پیرودونکي ښودل فعال کړئ.
+Enter a PIN.,یو PIN داخل کړئ.
+Enter a valid grams value,د اعتبار وړ ګرام ارزښت دننه کړئ
+Enter new price list rate,د نوي نرخ لیست نرخ دننه کړئ
+Enter Quantity,مقدار داخل کړئ
+Enter the cashier PIN to continue.,د دوام لپاره د کیشیر PIN دننه کړئ.
+Enter the current PIN first.,لومړی اوسنی PIN دننه کړئ.
+"Enter the current PIN, then choose a new one.",اوسنی PIN دننه کړئ، بیا یو نوی غوره کړئ.
+Enter valid grams for scale barcode,د پیمانه بارکوډ لپاره معتبر ګرام داخل کړئ
+Entries,ننوتل
+Error accessing camera:,کمرې ته د لاسرسي تېروتنه:
+Error calculating prices,د نرخونو په محاسبه کې تېروتنه
+Error fetching customer balance,د پیرودونکي بیلانس په راوړلو کې تېروتنه
+Error in change calculations!,د بدلون په محاسبه کې تېروتنه!
+Error Loading Data,د معلوماتو په بارولو کې تېروتنه
+Error loading invoice details,د رسید توضیحاتو بارولو کې تېروتنه
+Error processing invoice,د رسید پروسس کولو کې تېروتنه
+Error processing payment,د تادیاتو پروسس کولو کې تېروتنه
+Error searching invoices,د رسیدونو په لټون کې تېروتنه
+Error submitting invoice:,د رسید په سپارلو کې تېروتنه:
+Error submitting invoice: {0},د رسید په سپارلو کې تېروتنه: {0}
+Error submitting invoice: No response from server,د رسید په سپارلو کې تېروتنه: د سرور څخه هیڅ ځواب نشته
+Error updating currency,د اسعارو په تازه کولو کې تېروتنه
+Error updating item details,د توکي د جزیاتو په تازه کولو کې تېروتنه
+Est. Purchase,Est. پیرود
+Est. Value,Est. ارزښت
+Event-loop lag measures how busy your browser is. Lower is better.,د پیښې لوپ لیګ اندازه کوي چې ستاسو براوزر څومره بوخت دی. ښکته غوره ده.
+Every,هر
+Exchange Rate,د تبادلې نرخ
+Expand item details,د توکي توضیحات پراخ کړئ
+Expected Amount (In Company Currency),متوقع مقدار (د شرکت اسعارو کې)
+Expected Cash,د پیسو تمه
+Expected cash on hand grouped by currency,په لاس کې د پیسو تمه شوي پیسې د اسعارو له مخې ګروپ شوي
+Expected vs Actual,متوقع په مقابل کې واقعیا
+Expense,لګښت
+Expense Account (Optional Override),د لګښت حساب (اختیاري اوورایډ)
+Expense account is required.,د لګښت حساب ته اړتیا ده.
+Expenses and deposits posted during this shift,د دې بدلون په جریان کې لګول شوي لګښتونه او زیرمې
+Expired,تېر شو
+Failed to auto reconcile payments.,د تادیاتو په اوتومات ډول پخلا کولو کې پاتې راغلی.
+Failed to cancel cash movement,د نغدو حرکت په لغوه کولو کې پاتې راغلی
+Failed to clear cache,د زیرمې پاکولو کې پاتې راغلی
+Failed to create item,د توکي په جوړولو کې پاتې راغلل
+Failed to create supplier,د عرضه کوونکي په جوړولو کې پاتې راغلی
+Failed to delete cash movement,د نغدو حرکت په حذف کولو کې پاتې راغلی
+Failed to generate scale barcode. Using item barcode only.,د پیمانه بارکوډ په جوړولو کې پاتې راغلی. یوازې د توکي بارکوډ کارول.
+Failed to load cash movement context.,د نغدو حرکت شرایطو په بارولو کې پاتې راغلی.
+Failed to load dashboard data.,د ډشبورډ ډیټا پورته کولو کې پاتې راغلی.
+Failed to reload invoice from server,د سرور څخه د رسید بیا پورته کولو کې پاتې راغلی
+Failed to submit cash movement,د نغدو حرکت په سپارلو کې پاتې راغلی
+Failed to sync offline cash movements,د آف لائن نغدو حرکتونو په ترکیب کې پاتې راغلی
+Fast cashier actions for active shifts.,د فعال بدلونونو لپاره ګړندي کیشیر عملونه.
+Fast Moving Items,د چټک حرکت توکي
+Fees,فیسونه
+Fetch the latest offline prerequisite updates,وروستي آفلاین اړین تازه معلومات ترلاسه کړئ
+Find a sales order quickly and load it into the current sale.,د پلور امر په چټکۍ سره ومومئ او اوسني پلور ته یې پورته کړئ.
+Fixing payment amounts for return invoice...,د بیرته راستنیدو رسید لپاره د تادیاتو مقدار ټاکل ...
+Flash Off,فلش بند
+Flash On,فلش آن
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.",د 'محصول بنډل' توکو لپاره، ګودام، سریال نمبر او د بست نمبر به د 'پیکنګ لیست' جدول څخه په پام کې ونیول شي. که چیرې ګودام او بسته نمبر د هر ډول 'محصول بنډل' توکي لپاره د ټولو بسته کولو توکو لپاره یو شان وي، دا ارزښتونه د اصلي توکي جدول کې دننه کیدی شي؛ ارزښتونه به د 'پیکنګ لیست' جدول ته کاپي شي.
+Free,وړيا
+Free Qty,وړیا اندازه
+Frequency,فریکونسی
+from,څخه
+From Date,له نیټې څخه
+Fulfillment Details,د بشپړولو توضیحات
+Full Name,بشپړ نوم
+Gain,ګټي
+Generate a fresh prepaid card and start it with an opening balance.,یو نوی پری پیډ کارت جوړ کړئ او د پرانیستې بیلانس سره یې پیل کړئ.
+Generate and install the certificate to allow fully silent printing without trust prompts.,سند تولید او نصب کړئ ترڅو د باور غوښتنې پرته په بشپړ ډول خاموش چاپ ته اجازه ورکړئ.
+Generate Certificate,سند تولید کړئ
+Generated scale barcode: {0},تولید شوی پیمانه بارکوډ: {0}
+Get Payments,تادیات ترلاسه کړئ
+Gift Card,د ډالۍ کارت
+Gift card amount must be greater than zero.,د ډالۍ کارت اندازه باید له صفر څخه زیاته وي.
+Gift Card Code,د ډالۍ کارت کوډ
+Gift card code is required for redemption,د ډالۍ کارت کوډ د خلاصون لپاره اړین دی
+Gift card code is required.,د ډالۍ کارت کوډ ته اړتیا ده.
+Gift card issued successfully.,د ډالۍ کارت په بریالیتوب سره صادر شو.
+Gift card loaded successfully.,د ډالۍ کارت په بریالیتوب سره پورته شو.
+Gift Card Management,د ډالۍ کارت مدیریت
+Gift card payment,د ډالۍ کارت تادیه
+Gift card redemption requires an online connection,د ډالۍ کارت خلاصول آنلاین پیوستون ته اړتیا لري
+Gift card topped up successfully.,د ډالۍ کارت په بریالیتوب سره پورته شو.
+Gift Cards,د ډالۍ کارتونه
+Go to Frappe Desk,د Frappe میز ته لاړ شئ
+Grand Total,لوی مجموعه
+Gross Margin,ناخالص حاشیه
+Gross Profit,ناخالصه ګټه
+Gross Sales,ناخالص پلور
+Group not found,ډله ونه موندل شوه
+"Grouped controls for terminal, UI, and session settings.",د ټرمینل، UI، او سیشن ترتیباتو لپاره ډله ایز کنټرولونه.
+Grouped totals for each payment method and currency,د هرې تادیې میتود او اسعارو لپاره ډله ایز مجموعه
+Hide,پټول
+Hide Gift Card,د ډالۍ کارت پټ کړئ
+Hide Non Essential Fields,غیر ضروري ساحې پټ کړئ
+Hide quantity decimals,د مقدار ډیسیمالونه پټ کړئ
+Hide search tools,د لټون وسیلې پټ کړئ
+Hide zero rated items,د صفر درجه شوي توکي پټ کړئ
+High,لوړ
+History,تاریخ
+Hourly (Today),په ساعت کې (نن)
+How this section works,دا برخه څنګه کار کوي
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.",که زاړه ډاټا پاتې وي، ترتیبات> آفلاین او همغږي خلاص کړئ او د آنلاین په وخت کې بیا بیا جوړ شوي آفلاین ډیټا چل کړئ.
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.",که خبرداری دوام ومومي، ترتیبات> آفلاین او همغږي خلاص کړئ، بیا د افلاین ډیټا تازه کول یا د آفلاین ډیټا بیا جوړ کړئ.
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,سند په QZ ټری کې وارد کړئ او په هر POS ماشین کې QZ ټری بیا پیل کړئ.
+In,په
+In stock: {0},په ذخیره کې: {0}
+Include Batch / Serial,بیچ / سریال شامل کړئ
+Include Price,قیمت شامل کړئ
+Increase quantity,مقدار زیات کړئ
+IndexedDB,IndexedDB
+Initial Amount,ابتدايي مقدار
+Initialize your shift with opening balances,خپل بدلون د پرانیستې بیلانس سره پیل کړئ
+Initializing application...,د غوښتنلیک پیل کول...
+"Inspect cache, sync, and prerequisite status",کیچ، همغږي، او د اړتیا حالت معاینه کړئ
+Installed Applications,نصب شوي غوښتنلیکونه
+Insufficient stock:\n{0},کافي ذخیره:\n{0}
+Invalid rate,ناسم نرخ
+Inventory Status Report,د موجودیت وضعیت راپور
+Invoice,رسید
+Invoice {0} is Submitted,رسید {0} سپارل شوی
+Invoice {0} processed successfully,رسید {0} په بریالیتوب سره پروسس شوی
+Invoice {0} submission failed,د رسید {0} سپارل ناکام شو
+Invoice {0} was already submitted,رسید {0} لا دمخه سپارل شوی و
+Invoice Adjustments,د انوائس تعدیلات
+Invoice Change,د رسید بدلول
+Invoice Details,د رسید توضیحات
+Invoice is still in draft after background submission.,رسید د شالید سپارلو وروسته لاهم په مسوده کې دی.
+Invoice Items,د رسید توکي
+Invoice Management,د رسید مدیریت
+Invoice Mgmt,رسید Mgmt
+Invoice saved offline,انوائس آفلاین خوندي شوی
+Invoice submission failed,د رسید سپارل ناکام شول
+Invoice Submitted,رسید سپارل شوی
+"Invoice value settled by loyalty points, not cash collection",د انوائس ارزښت د وفادارۍ ټکو لخوا تنظیم شوی ، نه د نغدو راټولولو
+Invoices,رسیدونه
+Invoices already past due date,رسیدونه دمخه د نیټې نیټې څخه تیر شوي
+Invoices saved as POS Invoices,رسیدونه د POS رسیدونو په توګه خوندي شوي
+Invoices still carrying balances,رسیدونه لاهم بیلانسونه لیږدوي
+Issue Mode,د مسلې حالت
+Issue New Card,نوی کارت صادر کړئ
+Issue Workflow,د کاري جریان مسله
+"Issue, top up, and check",مسله، پورته کول، او چک کول
+Item,توکي
+Item / Product Sales Report,د توکو / محصول پلور راپور
+Item {0} added to invoice,توکي {0} په رسید کې اضافه شوي
+Item '{0}' has no barcode,توکي '{0}' هیڅ بارکوډ نلري
+Item Code,د توکي کوډ
+Item created successfully,توکي په بریالیتوب سره جوړ شو
+Item is out of stock,توکي بهر دي
+Item Name,د توکي نوم
+Item not found,توکي ونه موندل شول
+Item order updated,د توکو امر تازه شو
+Item Selector Settings,د توکي انتخاب کونکي تنظیمات
+Items,توکي
+Items added in POS will appear here automatically.,په POS کې اضافه شوي توکي به دلته په اوتومات ډول څرګند شي.
+Items added to invoice,توکي په رسید کې اضافه شوي
+Items per page,په هره پاڼه کې توکي
+Items Sold,توکي پلورل شوي
+Items/Invoice,توکي / رسید
+Item-wise Profitability,د توکو له مخې ګټورتوب
+Journal Entry,د ژورنال داخلول
+json,json
+Just now,همدا اوس
+Keep offline prerequisites healthy and recover stale data safely.,آفلاین شرطونه سالم وساتئ او په خوندي ډول زاړه معلومات بیرته ترلاسه کړئ.
+Labels,لیبلونه
+"Language, theme, terminal tools, and session controls.",ژبه، موضوع، ترمینل اوزار، او د ناستې کنټرولونه.
+Last,تېر
+Last 14 Days (Paid vs Pending),وروستۍ 14 ورځې (تادیه شوي او پاتې دي)
+Last 14 Days Activity,د تیرو 14 ورځو فعالیت
+Last 14 Days Gross Profit,د تیرو 14 ورځو ناخالصه ګټه
+Last 14 Days Purchases,د وروستي 14 ورځو پیرود
+Last 14 Days Tax/Charges,د تیرو 14 ورځو مالیه / فیسونه
+Last sync:,وروستی همغږي:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},وروستی ترکیب: {0} | سمه ده: {1} | ناکام شوی: {2} | پریښودل: {3}
+Latest entries for current shift,د اوسني بدلون لپاره وروستي ننوتل
+Lead Time,د مشر وخت
+Limited,محدود
+lines,کرښې
+List,لیست
+Live Snapshot,ژوندی عکس
+Load a POS profile and cashier first.,لومړی د POS پروفایل او کیشیر پورته کړئ.
+Load More Invoices,نور رسیدونه پورته کړئ
+Load previously saved invoices,مخکې خوندي شوي رسیدونه پورته کړئ
+Load Sale,د پلورلو بار
+Load Sales Invoice,د پلور انوائس پورته کړئ
+Loading app data...,د اپلیکیشن ډیټا لوډ کول...
+Loading customer database...,د پیرودونکي ډیټابیس پورته کول ...
+Loading customers...,پېرېدونکي بارېږي...
+Loading database stats...,د ډیټابیس احصایې پورته کول...
+Loading details...,توضیحات پورته کول...
+Loading invoice history...,د رسید تاریخ پورته کول...
+Loading items...,توکي پورته کول...
+Loading product catalog...,د محصول کتلاګ پورته کول...
+Loading return invoices...,د راستنیدو رسیدونه پورته کول...
+Loading server CPU/memory usage...,د سرور CPU/میموري کارول پورته کول...
+Loading suppliers...,عرضه کوونکي باریږي...
+Loading unpaid invoices...,نه تادیه شوي رسیدونه پورته کول...
+Loading view...,لید پورته کول...
+Loading...,بار کول...
+Local storage is unavailable. Switching to online-only mode.,ځایی ذخیره شتون نلري. یوازې آنلاین حالت ته بدلول.
+localStorage,ځایی ذخیره
+Location Performance,د موقعیت فعالیت
+Locations,ځایونه
+Lock Screen,لاک سکرین
+Lookup Workflow,د کاري فلو لټون
+Loss,تاوان
+Low,ټیټ
+Low Stock,ټیټ ذخیره
+Low Stock Alerts,د ټیټ سټاک خبرتیاوې
+Low Stock Items,ټیټ سټاک توکي
+Low Stock Threshold,د ټیټ سټاک حد
+Low Stock Total,ټیټ سټاک ټولټال
+Lowest Margin,ټیټ حاشیه
+Low-frequency maintenance and system details.,د ټیټ فریکونسۍ ساتنه او د سیسټم توضیحات.
+Loyalty Redeemed,د وفادارۍ خلاصون
+Loyalty Redemption,د وفادارۍ خلاصون
+Make New Payment,نوې تادیه وکړئ
+Manage all,ټول اداره کړئ
+Manage and synchronize your offline transactions,خپل آفلاین لیږدونه اداره او همغږي کړئ
+Manage Cashier PIN,د کیشیر PIN اداره کړئ
+"Manage offline tools, terminal controls, and maintenance from one workspace.",د یو کاري ځای څخه آفلاین وسیلې، ترمینل کنټرولونه، او ساتنه اداره کړئ.
+manual,لارښود
+"Manual codes, barcode scans, and QR scans work in the same field",لاسي کوډونه، د بارکوډ سکینونه، او QR سکینونه په ورته ساحه کې کار کوي
+Manual offline mode is enabled,لاسي آفلاین حالت فعال دی
+Margin,مارجن
+Maximum available quantity is {0}. Quantity adjusted to match stock.,تر ټولو زیات موجود مقدار {0} دی. مقدار د سټاک سره سمون لپاره تنظیم شوی.
+Maximum discount amount for this offer item is {0}.,د دې وړاندیز توکي لپاره د تخفیف اعظمي اندازه ده {0}.
+Maximum discount percentage for this offer item is {0}%.,د دې وړاندیز توکي لپاره اعظمي تخفیف سلنه {0}٪ ده.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,د وړاندیز اعظمي مقدار {0} دی. مقدار د اجازه شوي حد سره تنظیم شوی.
+Medium,منځنی
+Method-wise Collections,د طریقې له مخې ټولګه
+Minimum allowed rate for this offer item is {0}.,د دې وړاندیز توکي لپاره لږترلږه اجازه ورکړل شوې نرخ {0} دی.
+Minimum Qty,لږ تر لږه اندازه
+Mobile No,موبایل نمبر
+Mode,موډ
+Mode of Payment,د تادیاتو طریقه
+Month,میاشت
+Month ?,میاشت؟
+Monthly Profit,میاشتنۍ ګټه
+Monthly Sales,میاشتنی خرڅلاو
+Monthly Sales Summary,د میاشتني پلور لنډیز
+Month-wise,د میاشتی په لحاظ
+Most Active Cashiers,ډیر فعال کیشیر
+Movement Type,د حرکت ډول
+Movements,حرکتونه
+Multi Currency,څو اسعارو
+N/A,N/A
+Name,نوم
+Negative Stock,منفي سټاک
+Negative Stock Items,منفي سټاک توکي
+Negative values not allowed,منفي ارزښتونه اجازه نه لري
+Net,جال
+Net Qty,خالص مقدار
+Net Sales,خالص پلور
+Net Value,خالص ارزښت
+Never,هیڅکله نه
+New changes are ready to load,نوي بدلونونه د بارولو لپاره چمتو دي
+New Item,نوی توکي
+New Offer Available,نوی وړاندیز شتون لري
+New PIN,نوی پن
+New rate,نوی نرخ
+Next unit of measure,د اندازه کولو بل واحد
+No attribute data found.,د ځانګړتیاو ډاټا ونه موندل شوه.
+No Barcode,بارکوډ نشته
+No barcode found for UOM '{0}',د UOM '{0}' لپاره هیڅ بارکوډ ونه موندل شو
+No branch/location data found.,هیڅ څانګه/مقام معلومات ونه موندل شول.
+No brand data found.,د برانډ ډیټا ونه موندل شوه.
+No cached gift card balance is available offline.,هیڅ زیرمه شوي ډالۍ کارت بیلانس آفلاین شتون نلري.
+No camera found on this device. Please ensure your device has a working camera.,په دې وسیله هیڅ کیمره ونه موندل شوه. مهرباني وکړئ ډاډ ترلاسه کړئ چې ستاسو وسیله کاري کیمره لري.
+No capability warnings recorded yet.,تر اوسه د وړتیا خبرداری نه دی ثبت شوی.
+No cash expected for this shift.,د دې بدلون لپاره د نغدو پیسو تمه نه کیږي.
+No cash mode configured,د نغدو موډ نه دی ترتیب شوی
+No cash movement type is allowed for this POS Profile.,د دې POS پروفایل لپاره د نغدو حرکت ډول اجازه نشته.
+No cashier PIN is set yet. Create one now.,تر اوسه هیڅ کیشیر PIN نه دی ټاکل شوی. اوس یو جوړ کړئ.
+No cashier profiles are available for this POS profile yet.,د دې POS پروفایل لپاره تر اوسه د کیشیر پروفایل شتون نلري.
+No cashier-wise discount/void/return activity.,د نغدو پیسو تخفیف / باطل / بیرته راستنیدونکي فعالیت نشته.
+No category data found.,د کټګورۍ ډاټا ونه موندل شوه.
+No category profitability data found.,د کټګورۍ د ګټو ډاټا ونه موندل شوه.
+No change returned recorded for this shift.,د دې بدلون لپاره هیڅ بدلون ندی ثبت شوی.
+No change-allocation invoices match the current filters.,د بدلون تخصیص رسیدونه د اوسني فلټرونو سره سمون نلري.
+No charge head breakdown found.,د چارج سر ماتول ونه موندل شو.
+No Company Selected,هیڅ شرکت نه دی ټاکل شوی
+No customer sales data found.,د پیرودونکي د پلور معلومات ندي موندل شوي.
+No day-wise discount/void/return trend.,د ورځې له مخې تخفیف / باطل / بیرته ستنیدو رجحان نشته.
+No day-wise payment data found.,د ورځې له مخې د تادیې معلومات ندي موندل شوي.
+No day-wise profitability trend found.,د ورځې له مخې د ګټې اخیستنې هیڅ رجحان ندی موندل شوی.
+No day-wise purchase data found.,د ورځني پیرود ډاټا ونه موندل شوه.
+No day-wise sales trend found.,د ورځې په اساس د پلور رجحان ندی موندل شوی.
+No day-wise tax/charges trend found.,د ورځې له مخې د مالیاتو / لګښتونو رجحان ندی موندل شوی.
+No dead stock items.,هیڅ مړ ذخیره توکي نشته.
+No due date,هیڅ نیټه نشته
+No exact repair match found for this invoice,د دې انوائس لپاره هیڅ دقیق ترمیم میچ ونه موندل شو
+No hourly sales trend found for today.,د نن ورځې لپاره د ساعت پلور رجحان ونه موندل شو.
+No invoice activity found.,هیڅ انوائس فعالیت ونه موندل شو.
+No invoices found,هیڅ رسیدونه ونه موندل شول
+No invoices found. Try different search criteria.,هیڅ رسیدونه ونه موندل شول. د لټون مختلف معیارونه هڅه وکړئ.
+No invoices recorded for this shift.,د دې بدلون لپاره هیڅ رسیدونه ندي ثبت شوي.
+No item profitability data found.,د توکو د ګټې اخیستنې هیڅ ډاټا ونه موندل شوه.
+No item sales data found for this period.,د دې مودې لپاره د توکو د پلور ډاټا ونه موندل شوه.
+No items found,هیڅ توکي ونه موندل شول
+No items in cart,په کارټ کې هیڅ توکي نشته
+No items with barcodes to print,د چاپ لپاره د بارکوډونو سره هیڅ توکي نشته
+No location-wise top item data found.,د موقعیت له مخې د لوړ توکي ډاټا ونه موندل شوه.
+No low stock alerts right now.,اوس مهال د ټیټ سټاک خبرتیا نشته.
+No low stock items.,هیڅ ټیټ ذخیره توکي نشته.
+No matching items in cart,په کارټ کې هیڅ ورته توکي نشته
+No month-wise sales trend found.,د میاشتې په کچه د پلور رجحان ندی موندل شوی.
+No negative stock items.,هیڅ منفي ذخیره توکي نشته.
+No notifications yet,تراوسه هیڅ خبرتیا نشته
+No offline cash movement synced.,هیڅ آفلاین نغدي حرکت همغږي شوی نه دی.
+No offline invoices pending synchronization,هیڅ آفلاین رسیدونه د همغږي کولو پاتې ندي
+No offline sync issues recorded yet.,تر اوسه د آف لائن همغږي کولو کومه ستونزه نه ده ثبت شوې.
+No out-of-stock items.,د ذخیره کولو څخه بهر توکي نشته.
+No outstanding credit invoices for this shift.,د دې بدلون لپاره هیڅ بقایا کریډیټ انوائس نشته.
+No payment collection data found.,د تادیاتو راټولولو هیڅ معلومات ندي موندل شوي.
+No payment rows available on this invoice.,په دې رسید کې د تادیاتو هیڅ قطار شتون نلري.
+No payments registered for this shift.,د دې بدلون لپاره هیڅ تادیه نه ده ثبت شوې.
+No pending balances in this period.,په دې موده کې هیڅ پاتې بیلانسونه.
+No pending offline invoices,هیڅ پاتې آفلاین رسیدونه نشته
+No Print Formats Found,د چاپ بڼه ونه موندل شوه
+No profiles found for selected scope. Falling back to current profile failed.,د ټاکل شوي ساحې لپاره هیڅ پروفایل ونه موندل شو. اوسني پروفایل ته بیرته ستنیدل ناکام شول.
+No recent customer activity found.,د پیرودونکي وروستی فعالیت ندی موندل شوی.
+No recent stock entries found.,هیڅ وروستي سټاک داخلې ندي موندل شوي.
+No records found,هیڅ ریکارډ ونه موندل شو
+No reorder suggestions right now.,اوس مهال د بیا تنظیم کولو وړاندیزونه نشته.
+No repeat customers in this period.,پدې موده کې هیڅ تکرار پیرودونکي نه دي.
+No response from server,د سرور څخه هیڅ ځواب نشته
+No return invoices found,د بیرته راستنیدو هیڅ رسید ونه موندل شو
+No return item trend found.,د بیرته ستنیدو هیڅ رجحان ونه موندل شو.
+No returnable items found for this invoice,د دې رسید لپاره د بیرته راستنیدو وړ توکي ندي موندل شوي
+No returns were processed in this shift.,په دې بدلون کې هیڅ بیرته ستنیدل پروسس شوي ندي.
+No risk activity found.,هیڅ خطر فعالیت ندی موندل شوی.
+No sales activity found for this period.,د دې مودې لپاره د پلور فعالیت ندی موندل شوی.
+No slow moving items.,هیڅ سست حرکت کونکي توکي ندي.
+No staff sales activity found.,د کارمندانو د پلور فعالیت ندی موندل شوی.
+No stock movement for this period.,د دې مودې لپاره هیڅ ذخیره حرکت نه کوي.
+No submitted cash movements in this shift.,په دې بدلون کې د نغدو پیسو هیڅ حرکت ندی سپارل شوی.
+No supplier purchases found in this month.,پدې میاشت کې هیڅ عرضه کونکي پیرود ونه موندل شو.
+No suppliers found for this period.,د دې مودې لپاره هیڅ عرضه کوونکي ونه موندل شول.
+No sync trigger has run yet in this session.,په دې ناسته کې تر اوسه هیڅ همغږي ټرګر نه دی چلیدلی.
+No tax head breakdown found.,د مالیې سر ماتول ونه موندل شو.
+No top items found for this location.,د دې ځای لپاره هیڅ غوره توکي ونه موندل شول.
+No unpaid invoices,نه تادیه شوي رسیدونه
+No variant data found.,هیڅ ډول ډول معلومات ندي موندل شوي.
+No week-wise sales trend found.,په اونۍ کې د پلور رجحان ندی موندل شوی.
+No.,نه
+Nobile Number,د نوبل شمیره
+Not available,شتون نلري
+Not checked,نه چک شوی
+Not selected,نه ټاکل شوی
+Not Set,نه ټاکل شوی
+Notifications,خبرتیاوې
+Offer,وړاندیز
+Offer Applied,وړاندیز تطبیق شوی
+Offer criteria exceeded,د وړاندیز معیارونه تیر شوي
+Offer Item,وړاندیز توکي
+Offer item unavailable,د وړاندیز توکي شتون نلري
+Offer Removed,وړاندیز لرې شو
+Offer UOM cannot be changed,وړاندیز UOM نشي بدلیدلی
+Offer?,وړاندیز؟
+Offers,وړاندیز کوي
+Offline,آفلاین
+Offline & Sync,آف لائن او همغږي
+Offline Capabilities,آفلاین وړتیاوې
+Offline data status refreshed,د آفلاین ډیټا حالت تازه شوی
+Offline diagnostics,آفلاین تشخیص
+Offline Invoices,آفلاین رسیدونه
+Offline invoices status,د آفلاین رسیدونو حالت
+Offline invoices synced,آفلاین رسیدونه همغږي شوي
+Offline Queue: {0},آف لائن کتار: {0}
+Offline rebuild guidance,د آفلاین بیا رغونې لارښود
+Offline restore is unavailable for this session.,د دې ناستې لپاره آف لائن بیا رغونه شتون نلري.
+Offline selling is available with degraded capabilities.,آفلاین پلور د تخریب شوي ظرفیتونو سره شتون لري.
+Offline snapshot does not match the current POS state.,آف لائن سنیپ شاټ د اوسني POS حالت سره سمون نه لري.
+Offline Status,آف لائن حالت
+"Offline, terminal, and system controls",آفلاین، ترمینل، او سیسټم کنټرولونه
+OK,سمه ده
+Online,آنلاین
+Open actions menu,د عمل مینو خلاص کړئ
+Open balance to collect,د راټولولو لپاره بیلانس خلاص کړئ
+Open Customer Display,د پیرودونکي نندارتون خلاص کړئ
+Open drawer,درز خلاص کړئ
+Open invoices,رسیدونه خلاص کړئ
+Open Payments?,تادیات خلاص کړئ؟
+Open POS home,د POS کور خلاص کړئ
+Open this screen from POS Menu -> Open Customer Display.,دا سکرین د POS مینو څخه خلاص کړئ -> د پیرودونکي نندارتون خلاص کړئ.
+OpenCV image processing enabled - Enhanced barcode detection,د OpenCV عکس پروسس کول فعال شوي - د بارکوډ کشف کول
+OpenCV image processing unavailable on this device,په دې وسیله کې د OpenCV عکس پروسس شتون نلري
+OpenCV Off,OpenCV بند
+OpenCV On,OpenCV آن
+OpenCV processing disabled,د OpenCV پروسس غیر فعال شوی
+Opening Amount,د پرانیستلو اندازه
+Opening Cash,د نغدو پیسو پرانیستل
+options,اختیارونه
+Order,امر
+Original,اصلي
+Other,نور
+Out,بهر
+Out of Stock,له سټاک څخه بهر
+Out of Stock Items,له سټاک څخه بهر توکي
+Outstanding,بقایا
+Outstanding Credit by Currency,د اسعارو لخوا د پام وړ کریډیټ
+Overdue,ډیر وخت
+Overpayment Change,د زیاتو تادیاتو بدلون
+Overpayment change deducted: {0},د زیاتو تادیاتو بدلون کم شوی: {0}
+Packing List,د بسته بندي لیست
+Page Format,د پاڼې بڼه
+Page unavailable offline,پاڼه په آفلاین کې شتون نلري
+Paid,ورکړې
+Paid (orig):,تادیه شوی (اصلی):
+Paid Amount,تادیه شوی مقدار
+Paid change cannot be greater than total change!,تادیه شوي بدلون د ټول بدلون څخه لوی نشي کیدی!
+Paid:,تادیه شوي:
+Parent Item,اصلي توکي
+Partial,جزوی
+Partly Paid,په جزوی توګه تادیه شوی
+Party Account,د ګوند حساب
+Party Type,د ګوند ډول
+Pause terminal until next cashier,تر راتلونکي کیشیر پورې ټرمینل ودروئ
+PAY,تادیه
+Payment,تادیه
+Payment Account,د تادیاتو حساب
+Payment entries processed for Invoice {0},د انوائس {0} لپاره د تادیاتو ننوتل پروسس شوي
+Payment Entry Type,د تادیاتو د ننوتلو ډول
+Payment History,د تادیاتو تاریخ
+Payment ID,د تادیې ID
+Payment Method Report,د تادیاتو میتود راپور
+Payment Methods,د تادیاتو میتودونه
+Payment of {0} received successfully.,د {0} تادیه په بریالیتوب سره ترلاسه شوه.
+Payment Progress,د تادیاتو پرمختګ
+Payment Reconciliation,د تادیاتو پخلاینه
+Payment request status could not be retrieved. Please try again,د تادیې غوښتنې حالت بیرته ترلاسه نشو. مهرباني وکړئ بیا هڅه وکړئ
+Payment Request took too long to respond. Please try requesting for payment again,د تادیې غوښتنې ځواب ورکولو لپاره ډیر وخت واخیست. مهرباني وکړئ بیا د پیسو غوښتنه کولو هڅه وکړئ
+Payment saved offline,تادیه په آفلاین کې خوندي شوې
+Payment State,د تادیاتو ریاست
+Payment Status,د تادیاتو حالت
+Payment submitted but print function could not be executed. Payment name not found.,تادیه سپارل شوې مګر د چاپ فعالیت نشي ترسره کیدی. د تادیې نوم ونه موندل شو.
+Payment submitted.,تادیه سپارل شوې.
+Payment Summary,د تادیاتو لنډیز
+Payments,تادیات
+Payments are not open. Do you want to open payments and submit?,تادیات خلاص نه دي. ایا تاسو غواړئ تادیات خلاص کړئ او وسپارئ؟
+Payments by Mode of Payment,د تادیاتو د طریقې له مخې تادیات
+PDF,PDF
+Peak Hour,د لوړ ساعت
+Peak Memory:,لوړ حافظه:
+Peak Server:,لوړ سرور:
+Peak:,چوکۍ:
+Pending,پاتې
+Pending Amount,پاتې اندازه
+Pending count updated from {0} to {1},پاتې شمېرنه له {0} څخه {1} ته تازه شوه
+Pending Exposure,پاتې شونی
+Pending Invoices,پاتې رسیدونه
+Pending Ratio,پاتې تناسب
+Pending Sales,پاتې خرڅلاو
+Pending sales: {0} | Cache usage: {1}%,پاتې خرڅلاو: {0} | د زیرمې کارول: {1}%
+Pending Sync,Pending Sync
+Pending: {0},پاتې دی: {0}
+Pending: {0} | Synced: {1} | Draft: {2},پاتې دی: {0} | همغږي شوی: {1} | مسوده: {2}
+Per Page,هره پاڼه
+Personal,شخصي
+Personal preferences adjust the current cashier experience without changing the active POS route.,شخصي غوره توبونه د فعال POS لارې بدلولو پرته د اوسني کیشیر تجربه تنظیموي.
+PIN confirmation does not match.,د PIN تایید سره سمون نه خوري.
+PIN must be 4 to 8 digits.,PIN باید له 4 څخه تر 8 عددونو پورې وي.
+Please add at least one item.,مهرباني وکړئ لږترلږه یو توکي اضافه کړئ.
+Please allow camera access to scan codes,مهرباني وکړئ د سکین کوډونو ته د کیمرې لاسرسي ته اجازه ورکړئ
+Please enter payment amount,مهرباني وکړئ د تادیې مقدار دننه کړئ
+Please fill all required fields,مهرباني وکړئ ټول اړین ساحې ډک کړئ
+Please make a payment or select a payment,مهرباني وکړئ تادیه وکړئ یا تادیه غوره کړئ
+Please request phone payment or use another payment method,مهرباني وکړئ د تلیفون تادیه غوښتنه وکړئ یا د تادیې بله طریقه وکاروئ
+Please select a customer first,مهرباني وکړئ لومړی یو پیرودونکی وټاکئ
+Please select a party,مهرباني وکړئ یو ګوند وټاکئ
+Please select a party before reconciling.,مهرباني وکړئ د پخلاینې دمخه یو ګوند وټاکئ.
+Please select a valid movement type.,مهرباني وکړئ د اعتبار وړ حرکت ډول وټاکئ.
+Please select an invoice,مهرباني وکړئ یو رسید وټاکئ
+Please select company before reconciling.,مهرباني وکړئ د پخلاینې دمخه شرکت غوره کړئ.
+Please set the customer's mobile number,مهرباني وکړئ د پیرودونکي ګرځنده شمیره تنظیم کړئ
+Please try again or enter the item manually.,مهرباني وکړئ بیا هڅه وکړئ یا توکي په لاسي ډول دننه کړئ.
+Please verify the barcode or check the item's availability.,مهرباني وکړئ بارکوډ تایید کړئ یا د توکو شتون چیک کړئ.
+Points,ټکي
+Popup blocked. Please allow popups.,پاپ اپ بلاک شوی. مهرباني وکړئ پاپ اپ ته اجازه ورکړئ.
+POS,POS
+POS controls and maintenance,د POS کنټرول او ساتنه
+POS Expense is disabled for this POS Profile.,د دې POS پروفایل لپاره د POS لګښت غیر فعال دی.
+POS is running with limited offline prerequisites.,POS د محدود آفلاین شرایطو سره پرمخ ځي.
+POS Profile,د POS پروفایل
+Position the QR code or barcode within the scanning area,د QR کوډ یا بارکوډ د سکین کولو ساحه کې ځای په ځای کړئ
+Posting,پوسټ کول
+Posting and Price List,پوسټ کول او د قیمت لیست
+Posting Date,د پوسټ کولو نیټه
+Preparing background sync,د شالید ترکیب چمتو کول
+"Press OK to continue offline with a warning, or Cancel to retry.",د خبرتیا سره آفلاین ته دوام ورکولو لپاره OK فشار ورکړئ، یا د بیا هڅه کولو لپاره لغوه کړئ.
+Previous unit of measure,د اندازه کولو پخوانی واحد
+Price List,د قیمت لیست
+Price List Rate,د نرخ لیست نرخ
+Price list rate updated locally only,د نرخ لیست نرخ یوازې په محلي توګه تازه شوی
+Pricing & Discounts,نرخونه او تخفیفونه
+Pricing Rule,د نرخ مقررات
+Print,چاپ
+Print Draft,د چاپ مسوده
+Print Format (Invoice),د چاپ بڼه (انوائس)
+Print Format (Order),د چاپ بڼه (ترتیب)
+Print invoice,انوائس چاپ کړئ
+Print Purchase Invoice instead of PO,د PO پرځای د پیرود انوائس چاپ کړئ
+Printer,چاپګر
+Processed returns impacting the shift totals,پروسس شوي بیرته راستنیدنه د بدلون مجموعه اغیزه کوي
+Processing Payment,د تادیاتو پروسس کول
+Processing payment entries for Invoice {0},د رسید {0} لپاره د تادیاتو ننوتلو پروسس کول
+Profile,پروفایل
+Profiles,پروفایلونه
+Profit,ګټه
+Profit: Invoice Item Estimate,ګټه: د رسید توکي اټکل
+Profit: Stock Ledger (COGS),ګټه: سټاک لیجر (COGS)
+Profitability Report,د ګټو راپور
+Prorated return discount,د بیرته راستنیدو تناسب تخفیف
+Purchase Amount,د پیرود اندازه
+Purchase Invoices,د پیرود رسیدونه
+Purchase Order created,د پیرود امر جوړ شو
+Qty,مقدار
+Qualified,وړ
+Quantity,مقدار
+Quantity exceeds available stock,مقدار د شته زیرمو څخه ډیر دی
+Quick Actions,چټک اقدامات
+Quotation {0} is Submitted,اقتباس {0} سپارل شوی
+Quotation submitted,اقتباس سپارل شوی
+QZ Tray connected.,QZ ټری وصل شوی.
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ ټری په لاسي ډول منحل شوی. د دې د بیا فعالولو لپاره نښلول کېکاږئ.
+QZ Tray is not connected.,QZ ټری وصل ندی.
+QZ Tray Setup,د QZ ټری ترتیب
+Rate,نرخ
+Rate adjusted to maximum allowed discount,نرخ د اعظمي اجازه شوي تخفیف سره تنظیم شوی
+Ready,چمتو
+Ready to resume,د بیا پیلولو لپاره چمتو دی
+Ready!,چمتو!
+Real-time POS insights for retail operations.,د پرچون عملیاتو لپاره د ریښتیني وخت POS لیدونه.
+Rebuild Offline Data,د آفلاین ډیټا بیا جوړ کړئ
+Receive,ترلاسه کول
+Receive now,اوس ترلاسه کړئ
+Received,ترلاسه کړ
+Received:,ترلاسه شوي:
+Recent Movement Entries,د وروستي حرکت ننوتل
+Recent updates about your invoices,ستاسو د رسیدونو په اړه وروستي تازه معلومات
+Recently Active Customers,په دې وروستیو کې فعال پیرودونکي
+Rechecking connection,د پیوستون بیاکتنه
+Reconcile payment methods and close shift,د تادیې طریقې سره پخلا کړئ او نږدې بدلون
+Reconciling Payments,د تادیاتو پخلی کول
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.",دا پاڼه د انلاین په وخت کې یو ځل بیا وصل او پرانیزئ، نو آفلاین ریفریشونه به وکوالی شي دا بیرته راولي.
+Reconnect online to refresh cached offline data from the server.,له سرور څخه د کیش شوي آفلاین ډیټا تازه کولو لپاره آنلاین بیا وصل کړئ.
+Recreate local offline prerequisites from scratch,له سکریچ څخه محلي آفلاین شرایط بیا جوړ کړئ
+Recv:,بیاکتنه:
+Redeem,خلاصول
+Redeem / Scan,خلاصول / سکین کول
+Redeem Amount,د خلاصون اندازه
+Redeem Mode,د خلاصون حالت
+Redeemed Amount,بیرته اخیستل شوی مقدار
+Redeemed credit cannot be greater than its total.,خلاص شوی کریډیټ نشي کولی د هغې له مجموعي څخه ډیر وي.
+Redemption and Totals,خلاصون او مجموعه
+Reference,حواله
+Refresh,تازه کړئ
+Refresh Exchange Rate,د تبادلې نرخ تازه کړئ
+Refresh Offline Data,آف لائن ډاټا تازه کړئ
+Refresh Printers,چاپګر تازه کړئ
+Refund,بیرته ورکول
+Release Notes,د خوشې یادښتونه
+Reload,بیا پورته کول
+Reload customers,پیرودونکي بیا پورته کړئ
+Reload Items,توکي بیا پورته کړئ
+Reload Now,اوس بیا پورته کړئ
+Reload to apply the latest changes. Your current session will be refreshed.,د وروستي بدلونونو پلي کولو لپاره بیا پورته کړئ. ستاسو اوسنۍ ناسته به تازه شي.
+Reload Workflow,د کاري جریان بیا پورته کول
+Remarks,څرګندونې
+Remarks are required.,تبصرې اړین دي.
+Remove,لرې کړئ
+Remove barcode item,د بارکوډ توکي لرې کړئ
+Remove cached data and reload the POS app,زیرمه شوي ډاټا لرې کړئ او د POS ایپ بیا پورته کړئ
+Remove item,توکي لرې کړئ
+Remove Offer,وړاندیز لرې کړئ
+Reorder / Purchase Suggestions,بیا ترتیب / پیرود وړاندیزونه
+Repair Candidate,د ترمیم کاندید
+Repair Change Allocation,د ترمیم د بدلون تخصیص
+Repair requires an online connection,ترمیم آنلاین پیوستون ته اړتیا لري
+Repaired,ترمیم شوی
+Repairing change allocation,د بدلون تخصیص ترمیم کول
+Repeat Customers,پیرودونکي تکرار کړئ
+Repeat Rate,د تکرار نرخ
+Request,غوښتنه
+Request ID: {0},د غوښتنې ID: {0}
+Request Payment,د تادیې غوښتنه وکړئ
+Requested route: {0},غوښتنه شوې لار: {0}
+Required columns cannot be hidden,اړین کالمونه نشي پټیدلی
+Reset,بیا تنظیم کړئ
+Reset item name,د توکي نوم بیا تنظیم کړئ
+Reset to Default,ډیفالټ ته بیا تنظیم کړئ
+Resource Health,سرچینې روغتیا
+Restricted,بندیز
+Restricted operational controls for supervisors only.,یوازې د څارونکو لپاره محدود عملیاتي کنټرولونه.
+Retry,بیا هڅه وکړئ
+Retry route,د لارې بیا هڅه وکړئ
+Return,بیرته راګرځي
+Return Amount,د بیرته راستنیدو مقدار
+Return Count,د راستنیدو شمیره
+Return items must have negative quantities,بیرته راستنیدونکي توکي باید منفي مقدار ولري
+Return total must be negative,د بیرته راستنیدنې مجموعه باید منفي وي
+Return Valid Until,بیرته راستنیدنه تر هغه پورې اعتبار لري
+Return window passed,د راستنیدو کړکۍ تیره شوه
+Return without Invoice,د رسید پرته بیرته راستنیدل
+Returns,بیرته راګرځي
+Returns / Voids / Discounts,بیرته راګرځیدل / باطل / تخفیف
+Returns by Currency,د اسعارو له مخې بیرته راګرځي
+Revenue,عواید
+Review shift totals before submitting the closing entry,د تړلو ننوتلو وړاندې کولو دمخه د شفټ مجموعي بیاکتنه وکړئ
+Round Off,راؤنڈ آف
+Rows,قطارونه
+Rows:,قطارونه:
+Rule,قاعده
+Sale,خرڅلاو
+Sales,خرڅلاو
+Sales Order {0} is Submitted,د پلور امر {0} سپارل شوی
+Sales Person and Print,د خرڅلاو شخص او چاپ
+Sales Person not found,د خرڅلاو سړی ونه موندل شو
+Sales processed,پلور پروسس شوی
+Sales Return,د پلور بیرته راګرځیدل
+Sales Trend Report,د پلور رجحان راپور
+Save,خوندي کړئ
+Save & Clear,خوندي او پاک کړئ
+Save as POS Profile Default,د POS پروفایل ډیفالټ په توګه خوندي کړئ
+Save Settings,ترتیبات خوندي کړئ
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,ټاکل شوی پرنټر د POS پروفایل ډیفالټ په توګه خوندي کړئ نو دا په اتوماتيک ډول پدې ترتیب کې ښیې.
+Saved as draft because: {0},د مسودې په توګه خوندي شوی ځکه چې: {0}
+Saving...,خوندي کول...
+Scale barcode detected. Quantity here is the number of labels to print.,د پیمانه بارکوډ کشف شو. مقدار دلته د چاپ لپاره د لیبلونو شمیر دی.
+Scale barcode settings are not configured. Using item barcode only.,د پیمانه بارکوډ ترتیبات ندي تنظیم شوي. یوازې د توکي بارکوډ کارول.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,د دې توکی/UOM لپاره د سکیل ټیمپلیټ بار کوډ ورک دی. یوازې د توکي بارکوډ کارول.
+Scan an existing card and top it up without leaving the payment flow.,موجوده کارت سکین کړئ او د تادیې جریان پریښودلو پرته یې پورته کړئ.
+Scan Error,د سکین تېروتنه
+Scan or enter a gift card code to check balance or redeem.,د بیلانس چیک کولو یا خلاصولو لپاره د ډالۍ کارت کوډ سکین یا دننه کړئ.
+Scan or paste the card code below.,لاندې د کارت کوډ سکین یا پیسټ کړئ.
+Scan QR Code/Barcode,د QR کوډ/بارکوډ سکین کړئ
+Scan with camera,د کیمرې سره سکین کړئ
+Scan-First Flow,سکین - لومړی جریان
+Scanned Code:,سکین شوی کوډ:
+Scanning for: {0},د دې لپاره سکین کول: {0}
+Scanning items,د توکو سکین کول
+Scan-Ready,سکین ته چمتو دی
+Scope,ساحه
+Scope: All Profiles,ساحه: ټول پروفایلونه
+Scope: Current Profile,ساحه: اوسنی پروفایل
+Scope: Specific Profile,ساحه: ځانګړی پروفایل
+Search,لټون
+Search Account,د حساب لټون
+Search an invoice and continue the return flow without extra steps.,انوائس وپلټئ او د اضافي ګامونو پرته د راستنیدو جریان ته دوام ورکړئ.
+Search customer,د پیرودونکي لټون
+Search invoices or customers,رسیدونه یا پیرودونکي وپلټئ
+Search item,توکي وپلټئ
+Search item / code,لټون توکي / کوډ
+Search items or barcode,توکي او بارکوډ وپلټئ
+Search Mpesa Payments,د Mpesa تادیاتو لټون
+Search return invoices or customers,د بیرته راستنیدو رسیدونه یا پیرودونکي وپلټئ
+Search supplier,د عرضه کوونکي لټون
+Search unpaid invoices or customers,د نه تادیه شوي رسیدونو یا پیرودونکو لټون وکړئ
+Secure context (HTTPS or localhost) is required for camera access.,د کیمرې لاسرسي لپاره خوندي شرایط (HTTPS یا لوکل هوسټ) ته اړتیا ده.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,د کیمرې لاسرسي لپاره خوندي شرایط (HTTPS) اړین دي. مهرباني وکړئ کیمرې ته د لاسرسي لپاره HTTPS وکاروئ.
+Select,وټاکئ
+Select a cashier first.,لومړی یو کیشیر غوره کړئ.
+Select a customer,یو پیرودونکی وټاکئ
+Select a customer to use coupon,د کوپن کارولو لپاره یو پیرودونکی وټاکئ
+Select a printer to use QZ silent printing.,د QZ خاموش چاپ کولو کارولو لپاره یو پرنټر غوره کړئ.
+Select Batch,بیچ غوره کړئ
+Select Columns to Display,د ښودلو لپاره کالمونه غوره کړئ
+Select items to sell,د پلور لپاره توکي غوره کړئ
+Select Payment,تادیه غوره کړئ
+Select Payment Account,د تادیې حساب غوره کړئ
+Select printer,پرنټر غوره کړئ
+Select Return Invoice,د راستنیدو رسید وټاکئ
+Select S.O,S.O وټاکئ
+Select Sales Orders,د پلور امرونه غوره کړئ
+Select the cashier who is taking over this terminal.,کیشیر غوره کړئ څوک چې دا ټرمینل اخلي.
+Selected,ټاکل شوی
+Selected movement type is not allowed by POS Profile.,د POS پروفایل لخوا ټاکل شوي حرکت ډول اجازه نلري.
+Selected Payments,ټاکل شوي تادیات
+Sensitive actions kept away from quick taps.,حساس کړنې د چټکو نلونو څخه لرې ساتل.
+Serial,سریال
+Serial Numbers,سیریل نمبرونه
+Server CPU Usage:,د سرور CPU کارول:
+Server Health,د سرور روغتیا
+Server Memory Usage:,د سرور حافظې کارول:
+Server Metrics,د سرور میټریکونه
+Server Uptime:,د سرور وخت:
+Service Charges,د خدماتو لګښتونه
+Session,غونډه
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,د هر کیشیر PIN د کارونکي فورمه کې تنظیم کړئ او د POS پروفایل کارونکي کې ګمارل شوي ټرمینل غړي وساتئ.
+Settings,ترتیبات
+Settings in this section update the POS workspace without changing the current route.,پدې برخه کې ترتیبات د اوسني لارې بدلولو پرته د POS کاري ځای تازه کوي.
+Setup complete!,تنظیم بشپړ شو!
+Share,شریکول
+Shared terminal,شریک ټرمینل
+Shift Closed Snapshot,تړل شوی سنیپ شاټ شفټ کړئ
+Shift Overview,شفټ کتنه
+Show,ښودل
+Show cart on customer-facing screen,د پیرودونکي په مخ سکرین کې کارټ وښایاست
+Show last invoice rate,د وروستي رسید نرخ وښایاست
+Show rate info,د نرخ معلومات ښکاره کړئ
+Show Repair Candidates,د ترمیم کاندیدان وښایاست
+Show search tools,د لټون وسیلې وښایاست
+Show the active cart on a customer-facing screen,فعال کارټ د پیرودونکي مخ په سکرین کې وښایاست
+Showing {0}-{1} of {2},د {2} څخه {0}-{1} ښودل
+Showing 0 of 0,د 0 څخه 0 ښودل
+Shows the distribution of invoices per currency,په هر اسعارو د رسیدونو ویش ښیې
+Sign out of the current POS session,د اوسني POS ناستې څخه لاسلیک وکړئ
+Size:,اندازه:
+Skipped Payments,پریښودل شوي تادیات
+Skipping items without barcodes,د بارکوډونو پرته د توکو پریښودل
+Slow Moving,ورو حرکت
+Slow Moving Items,ورو خوځنده توکي
+Slow Queries:,ورو پوښتنې:
+Sold,پلورل شوي
+Source,سرچینه
+Source Cash Account (Optional Override),د منبع نغدي حساب (اختیاري زیرمه)
+Source Ex. Rate:,سرچینه Ex. نرخ:
+Source Rate:,د منبع نرخ:
+Specific Profile,ځانګړی پروفایل
+Split Invoices,د رسیدو ویش
+Staff / Cashier Performance Report,د کارمندانو / کیشیر د فعالیت راپور
+Status,حالت
+Stock,ذخیره
+Stock Information,د ذخیره کولو معلومات
+Stock is lower than requested,سټاک د غوښتل شوي څخه ټیټ دی
+Stock is lower than requested:\n{0},سټاک د غوښتل شوي څخه ټیټ دی:\n{0}
+Stock Movement Report,د سټاک حرکت راپور
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,د ذخیره تازه کول: {0} لري {1} شتون لري. د {2} اضافه کول به سټاک له صفر څخه ښکته راولي.
+Submit,سپارل
+Submit & Print,سپارل او چاپ کول
+Submit Deposit,جمع جمع کول
+Submit Expense,لګښت وسپاري
+Submitted,سپارل شوی
+Submitted Cash Movements,سپارل شوي نغدي حرکتونه
+Submitted entries,سپارل شوي ننوتل
+Successfully scanned:,په بریالیتوب سره سکین شوی:
+Suggested,وړاندیز شوی
+Suggested Qty,وړاندیز شوی مقدار
+Supervisor Access,څارونکي لاسرسی
+Supervisor permissions unlock issuance and reloads,د نظارت کونکي اجازې خلاصول او بیا بار کول
+Supervisor Tools,د څارونکي وسیلې
+Supplier,عرضه کوونکی
+Supplier and dates are required.,عرضه کوونکي او نیټې اړین دي.
+Supplier Invoices,د عرضه کوونکي رسیدونه
+Supplier is required.,عرضه کوونکي ته اړتیا ده.
+Supplier name is required,د عرضه کوونکي نوم اړین دی
+Supplier Payments,د عرضه کوونکي تادیات
+Supplier Purchase Summary,د عرضه کوونکي پیرود لنډیز
+Suppliers,عرضه کوونکي
+Suppliers not found,عرضه کوونکي ونه موندل شول
+Switch Camera,کیمره بدل کړئ
+Switch Cashier,کیشیر بدل کړئ
+Switch the POS appearance theme,د POS ظاهري موضوع بدل کړئ
+Switched to:,بدل شو:
+Sync All Invoices,ټول رسیدونه همغږي کړئ
+Sync Offline Cash Movements ({0}),د آف لائن نغدو حرکتونو همغږي کول ({0})
+Sync Offline Sales,د آفلاین خرڅلاو همغږي کړئ
+Synced {0} offline cash movement(s).,همغږي شوي {0} آفلاین نغدي حرکتونه.
+Syncing items in background,په شاليد کې توکي همغږي کول
+System / Diagnostics,سیسټم / تشخیص
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.",د سیسټم کړنې د ټیټ فریکونسۍ ساتنې کنټرولونه دي لکه د ایپ معلومات ، ملاتړ تشخیص ، او د ناستې کنټرولونه.
+System Information,د سیسټم معلومات
+System Status,د سیسټم حالت
+Tables:,جدولونه:
+Tap the button below to redeem a gift card during checkout.,د چیک آوټ پرمهال د ډالۍ کارت بیرته ترلاسه کولو لپاره لاندې تڼۍ باندې کلیک وکړئ.
+Target,هدف
+Target Ex. Rate:,هدف Ex. نرخ:
+Target Rate:,د هدف کچه:
+Tax,مالیه
+Tax / Charges Report,د مالیاتو / لګښتونو راپور
+Tax Heads,د مالیاتو مشران
+Taxable Amount,د مالیې وړ مقدار
+Tendered,داوطلبۍ
+Terminal,ترمینل
+Terminal & Devices,ټرمینل او وسایل
+Terminal locked,ټرمینل تړل شوی
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.",د ټرمینل وسیلې د دې چیک آوټ سټیشن، د پیرودونکي سره مخامخ نندارې، او راتلونکي پرنټر/آلې کنټرول اغیزه کوي.
+Territory not found,سیمه ونه موندل شوه
+The amount paid is not complete,تادیه شوی مقدار بشپړ ندی
+The app stores data locally for offline use. This is called cache.,ایپ د آفلاین کارونې لپاره په محلي توګه ډاټا ذخیره کوي. دې ته کیچ ویل کیږي.
+The invoice stayed in draft. Please review and submit it manually.,رسید په مسوده کې پاتې شو. مهرباني وکړئ بیاکتنه وکړئ او په لاسي ډول یې وسپارئ.
+The maximum discount allowed is,اعظمي تخفیف اجازه لري
+The quantity for {0} has been adjusted to the maximum available stock.,د {0} لپاره مقدار د اعظمي موجود ذخیره سره تنظیم شوی.
+The system could not retrieve the item details. Please try again.,سیسټم نشي کولی د توکي توضیحات ترلاسه کړي. مهرباني وکړئ بیا هڅه وکړئ.
+These invoices will be synced when connection is restored,دا رسیدونه به همغږي شي کله چې پیوستون بحال شي
+This action now opens inside the settings workspace.,دا عمل اوس د تنظیماتو کاري ځای کې خلاصیږي.
+This coupon already used !,دا کوپن لا دمخه کارول شوی!
+This invoice does not need change-allocation repair,دا رسید د بدلون تخصیص ترمیم ته اړتیا نلري
+This invoice is already repaired,دا رسید لا دمخه ترمیم شوی
+This is an item template. Please choose a variant.,دا د توکي کينډۍ ده. مهرباني وکړئ یو ډول انتخاب کړئ.
+this item,دا توکي
+This POS page could not be opened offline because its code was not cached on this terminal yet.,دا POS پاڼه په آفلاین نشي پرانیستل کیدی ځکه چې د دې کوډ تر اوسه په دې ټرمینل کې ساتل شوی نه و.
+This Serial Number {0} has already been added!,دا سریال نمبر {0} لا دمخه اضافه شوی!
+Threshold,تخته
+Time,وخت
+Tip: Clear cache regularly to free up space and keep the app fast.,لارښوونه: د ځای خالي کولو او اپلیکیشن ګړندی ساتلو لپاره په منظم ډول کیچ پاک کړئ.
+Tip: Close unused tabs or apps to reduce lag.,لارښوونه: د ځنډ کمولو لپاره نه کارول شوي ټبونه یا ایپس بند کړئ.
+Tip: Monitor slow queries and table size for optimal performance.,لارښوونه: د غوره فعالیت لپاره ورو پوښتنو او د میز اندازه وڅارئ.
+To Be Paid,تادیه کول
+To Date,تر نیټې پورې
+Today,نن
+Today Profit,نن ورځ ګټه
+Today Sales,نن ورځ خرڅلاو
+Toggle navigation drawer,د نیویګیشن دراز ټګل کړئ
+Toggle Theme,موضوع بدلول
+Tools,وسیلې
+Tools for customer-facing screens and terminal-specific actions.,د پیرودونکي سره مخ سکرینونو او د ټرمینل ځانګړي کړنو لپاره وسیلې.
+Top Brand,غوره برانډ
+Top Category,غوره کټګوري
+Top Charge Head,د لوړ چارج سر
+Top Customers,غوره پیرودونکي
+Top Discount,لوړ تخفیف
+Top Items by Location,د موقعیت له مخې غوره توکي
+Top Margin,پورته مارجن
+Top Pending,پورته پاتې
+Top Profit Item,د لوړ ګټې توکي
+Top Return Items,د لوړ بیرته راستنیدونکي توکي
+Top Sales by Cashier,د کیشیر لخوا غوره پلور
+Top Supplier,لوړ عرضه کونکی
+Top Suppliers by Spend,د لګښت له مخې غوره عرضه کوونکي
+Top Tables,پورته میزونه
+Top Tax Head,د مالیاتو لوړ سر
+Top Up Amount,پورته اندازه
+Top Up Card,ټاپ اپ کارت
+Top Up Mode,پورته پورته حالت
+Top Variant,د لوړ ډول
+Total,ټول
+Total Amount,ټول رقم
+Total Change,ټول بدلون
+Total Charges,ټول لګښتونه
+Total In,په ټوله کې
+Total Invoices,ټول رسیدونه
+Total Items,ټول توکي
+Total Mpesa,ټول Mpesa
+Total Out,ټولټال بهر
+Total Payments,ټول تادیات
+Total Purchase,ټول پیرود
+Total Selected :,ټول ټاکل شوي:
+Total Size,ټوله اندازه
+Total Stock Qty,د ټولو سټاک مقدار
+Total:,ټول:
+Totals by Invoice Currency,د انوائس اسعارو مجموعه
+Track how much cash was handed back to customers,تعقیب کړئ چې پیرودونکو ته څومره پیسې بیرته سپارل شوي
+"Track recent sales, collect unpaid balances, and reopen saved work",وروستي پلور تعقیب کړئ ، نه تادیه شوي بیلانسونه راټول کړئ ، او خوندي شوي کار بیرته خلاص کړئ
+Transaction ID,د راکړې ورکړې ID
+Transfer,لیږد
+Try a different search term or clear the cart search.,د لټون مختلف اصطلاح هڅه وکړئ یا د کارټ لټون پاک کړئ.
+Try adjusting your search or filters,هڅه وکړئ خپل لټون یا فلټرونه تنظیم کړئ
+Try another source or refresh the list.,بله سرچینه هڅه وکړئ یا لیست تازه کړئ.
+Try changing the date range or status filter.,د نیټې حد یا د وضعیت فلټر بدلولو هڅه وکړئ.
+Type,ډول
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,حتی د لومړني ترتیباتو سره کیمرې ته لاسرسی نلري. مهرباني وکړئ د خپلې کیمرې اجازې او د وسیلې مطابقت وګورئ.
+Unable to add offer item {0}. Please refresh and try again.,د وړاندیز توکي {0} اضافه کولو توان نلري. مهرباني وکړئ تازه کړئ او بیا هڅه وکړئ.
+Unable to add offer item. Please refresh and try again.,د وړاندیز توکي اضافه کولو توان نلري. مهرباني وکړئ تازه کړئ او بیا هڅه وکړئ.
+Unable to add scanned item.,د سکین شوي توکي اضافه کولو توان نلري.
+Unable to create purchase order,د پیرود امر رامینځته کولو توان نلري
+Unable to delete draft invoice,د مسودې رسید حذف کولو توان نلري
+Unable to fetch documents,د اسنادو ترلاسه کولو توان نلري
+Unable to fetch draft orders,د مسودې امرونو ترلاسه کولو توان نلري
+Unable to fetch invoice history,د رسید تاریخ ترلاسه کولو توان نلري
+Unable to fetch M-Pesa payments,د M-Pesa تادیاتو ترلاسه کولو توان نلري
+Unable to fetch sales orders,د پلور امرونو ترلاسه کولو توان نلري
+Unable to fetch unpaid invoices,د نه تادیه شوي رسیدونو ترلاسه کولو توان نلري
+Unable to generate scale barcode,د پیمانه بارکوډ پیدا کولو توان نلري
+Unable to issue gift card.,د ډالۍ کارت جاري کولو توان نلري.
+Unable to load cashier PIN status.,د کیشیر PIN حالت پورته کولو توان نلري.
+Unable to load document,د سند د پورته کولو توان نلري
+Unable to load draft invoice,د مسودې رسید پورته کولو توان نلري
+Unable to load gift card balance.,د ډالۍ کارت بیلانس پورته کولو توان نلري.
+Unable to load invoice details,د رسید توضیحاتو بارولو توان نلري
+Unable to load parked order,د پارک شوي امر پورته کولو توان نلري
+Unable to load the selected sales order,د ټاکل شوي پلور امر پورته کولو توان نلري
+Unable to prepare document,د سند چمتو کولو توان نلري
+Unable to prepare return invoice,د بیرته راستنیدو رسید چمتو کولو توان نلري
+Unable to print draft invoice,د مسودې رسید چاپ کولو توان نلري
+Unable to print submitted invoice,د سپارل شوي رسید چاپ کولو توان نلري
+Unable to process document action,د اسنادو عمل پروسس کولو توان نلري
+Unable to repair change allocation,د بدلون تخصیص ترمیم کولو توان نلري
+Unable to save cashier PIN.,د کیشیر PIN خوندي کولو توان نلري.
+Unable to save the rate to the backend price list,د شاته قیمت لیست کې نرخ خوندي کولو توان نلري
+Unable to submit invoice,د رسید سپارلو توان نلري
+Unable to submit the selected payment,د ټاکل شوي تادیې سپارلو توان نلري
+Unable to top up gift card.,د ډالۍ کارت پورته کولو توان نلري.
+Unable to verify cashier PIN.,د کیشیر PIN تصدیق کولو توان نلري.
+Unallocated,نه تخصیص شوی
+Unallocated:,نه تخصیص شوی:
+Unavailable,نه شته
+Unknown,نامعلوم
+Unknown Item,نامعلوم توکي
+Unknown Warehouse,نامعلوم ګودام
+Unlock POS,POS خلاص کړئ
+Unpaid,بې معاشه
+"Unselected payments stay unallocated first, then auto reconcile after submit.",غیر انتخاب شوي تادیات لومړی غیر تخصیص پاتې کیږي ، بیا د سپارلو وروسته پخپله پخلا کیږي.
+UOM,UOM
+UOM not found,UOM ونه موندل شو
+Update available,اوسمهال شتون لري
+Update Customer,د پیرودونکي تازه کول
+Update PIN,PIN تازه کړئ
+Update Price List Rate,د نرخ لیست تازه کول
+Updated,تازه شوی
+Updates and app info that stay out of the cashier flow.,تازه معلومات او د اپلیکیشن معلومات چې د کیشیر جریان څخه بهر پاتې کیږي.
+Updates automatically,په اوتومات ډول تازه کیږي
+Usage,کارول
+Usage Stats,د کارولو احصایې
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,د کیشیر بدلولو او ترمینل انلاک کولو لپاره له 4 څخه تر 8 عددي PIN وکاروئ.
+Use Cashier,کیشیر وکاروئ
+Use date range to search for older invoices,د زړو رسیدونو لټون لپاره د نیټې حد وکاروئ
+"Use one field for manual code entry, barcode scans, or QR scans.",د لاسي کوډ داخلولو، بارکوډ سکینونو، یا QR سکینونو لپاره یوه ساحه وکاروئ.
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.",د POS پریښودو پرته د توازن چکونو، نوي جاري کولو، او ټاپ اپونو لپاره یو کاري فلو وکاروئ.
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.",دا برخه وکاروئ کله چې زیرمه شوي لومړني معلومات تازه کولو، بیا جوړونې، یا تشخیص بیاکتنې ته اړتیا ولري.
+Use Western numerals,غربي شمېرې وکاروئ
+Used:,کارول شوي:
+Using basic camera settings due to device limitations,د وسیلې محدودیتونو له امله د لومړني کیمرې تنظیماتو کارول
+Using cached customer balance,د ذخیره شوي پیرودونکي بیلانس کارول
+Valid until,تر هغه پورې اعتبار لري
+Variance %,توپیر٪
+Variants,متغیرات
+Variant-wise,د ډول ډول
+Verify closing amounts for each payment method,د هرې تادیې میتود لپاره د بند مقدار تایید کړئ
+View all,ټول وګورئ
+View app information and current build details,د اپلیکیشن معلومات او د اوسني جوړونې توضیحات وګورئ
+View Data Diagnostics,د ډیټا تشخیص وګورئ
+View Details,تفصيلات وګورئ
+View invoice details,د رسید توضیحات وګورئ
+View notifications,خبرتیاوې وګورئ
+View offline invoices,آفلاین رسیدونه وګورئ
+View restricted POS insights,د POS محدودیتونه وګورئ
+Void Amount,د باطل مقدار
+Void Count,باطل شمیرل
+Voids,voids
+Waiting for cart items,د کارټ توکو ته انتظار کول
+Waiting for payment...,د تادیې په انتظار...
+Walk-in Customer,د پیرودونکی پیرود
+Warehouse,ګودام
+Warning: High cache usage may affect performance.,خبرداری: د لوړې زیرمې کارول ممکن فعالیت اغیزه وکړي.
+Warning: High lag may indicate heavy processing or browser slowness.,خبرتیا: لوړ ځنډ ممکن درانه پروسس یا د براوزر سستوالی په ګوته کړي.
+Week ?,اونۍ؟
+Week-wise,د هفتې وار
+Weight (g),وزن (g)
+Weight (grams),وزن (ګرام)
+We'll let you know if an invoice fails to submit,موږ به تاسو ته خبر درکړو که چیرې رسید په سپارلو کې پاتې راشي
+Workflow,کاري جریان
+Write off amount cannot exceed the POS profile maximum of {0},د لیکلو مقدار نشي کولی د POS پروفایل اعظمي حد څخه زیات شي {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,د لیکلو مقدار د اجازه ورکړل شوي حد څخه ډیر دی ({0}). مهرباني وکړئ د پاتې پیسو لپاره تادیه اضافه کړئ.
+Yes,هو
+"Yes, Cancel sale",هو، پلور لغوه کړئ
+"Yes, Close",هو، تړل
+You are not allowed to print draft invoices,تاسو اجازه نلرئ چې د مسودې رسیدونه چاپ کړئ
+You are offline. Add Payment will work again when the connection is restored.,تاسو آفلاین یاست. د تادیې اضافه کول به بیا کار وکړي کله چې پیوستون بحال شي.
+You have no notifications right now,تاسو اوس هیڅ خبرتیا نلرئ
+Your Cart,ستاسو کارټ

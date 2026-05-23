@@ -1,0 +1,1362 @@
+POS Awesome,POS Nuostabus
+Fetch Items Directly from Server,Gaukite elementus tiesiai iš serverio
+Menu,Meniu
+Actions,Veiksmai
+Close Shift,Uždaryti Shift
+End current session,Baigti dabartinę sesiją
+Print Last Invoice,Spausdinti paskutinę sąskaitą faktūrą
+Reprint previous transaction,Perspausdinti ankstesnę operaciją
+Sync Offline Invoices,Sinchronizuokite sąskaitas faktūras neprisijungus
+Upload pending transactions,Įkelti laukiančias operacijas
+Go Online,Prisijunkite
+Go Offline,Atsijungti
+Disable offline mode,Išjungti režimą neprisijungus
+Work without server connection,Darbas be serverio ryšio
+Clear Cache,Išvalyti talpyklą
+Remove local data and refresh,Pašalinkite vietinius duomenis ir atnaujinkite
+About,Apie
+App information,Programos informacija
+Language,Kalba
+Change interface language,Keisti sąsajos kalbą
+Light Mode,Šviesos režimas
+Dark Mode,Tamsusis režimas
+Switch theme appearance,Perjungti temos išvaizdą
+Logout,Atsijungti
+Sign out of session,Atsijunkite nuo sesijos
+Select Language,Pasirinkite Kalba
+Choose your preferred language for the POS interface,Pasirinkite pageidaujamą POS sąsajos kalbą
+Language will be changed to,Kalba bus pakeista į
+Cancel,Atšaukti
+Change Language,Keisti kalbą
+Close,Uždaryti
+Cannot change language - same language selected,Negalima pakeisti kalbos – pasirinkta ta pati kalba
+Language changed successfully! Reloading...,Kalba sėkmingai pakeista! Įkeliama iš naujo...
+Failed to change language,Nepavyko pakeisti kalbos
+Unknown error,Nežinoma klaida
+- Total Unallocated,- Iš viso nepaskirstyta
+* Required,* Privaloma
+{0} (Qty: {1}),{0} (kiekis: {1})
+{0} actions,{0} veiksmai
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} sandėlyje yra tik {1}. Jūs paprašėte {2}. Koreguokite kiekį arba papildykite atsargas.
+{0} offline invoice{1} pending,Laukiama {0} sąskaitos faktūros neprisijungus{1}
+{0} offline invoice{1} saved as draft,{0} sąskaita faktūra neprisijungus{1} išsaugota kaip juodraštis
+{0} offline invoice{1} synced,Sinchronizuota {0} sąskaita faktūra neprisijungus{1}
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,Prieš {0} d
+{0}h ago,prieš {0} val
+{0}m ago,prieš {0} min
+A POS supervisor is required for this action.,Šiam veiksmui reikalingas POS prižiūrėtojas.
+Access,Prieiga
+Account,sąskaita
+Account is overdrawn,Sąskaita perpildyta
+Acknowledge the error to resume scanning,"Patvirtinkite klaidą, kad atnaujintumėte nuskaitymą"
+Acknowledge the error to resume scanning.,"Patvirtinkite klaidą, kad atnaujintumėte nuskaitymą."
+Across,Skersai
+Action,Veiksmas
+Active sale,Aktyvus pardavimas
+add,pridėti
+Add items from the selector to start building this sale.,"Pridėkite prekių iš parinkiklio, kad pradėtumėte rengti šį išpardavimą."
+Add more value to an existing gift card,Pridėkite daugiau vertės esamai dovanų kortelei
+Add New Address,Pridėti naują adresą
+Add new customer,Pridėti naują klientą
+Add on New Line,Pridėti į naują eilutę
+Add Payment,Pridėti mokėjimą
+Add payment to invoice,Pridėti mokėjimą prie sąskaitos faktūros
+Add/Edit Coupon Conditions,Pridėti / redaguoti kupono sąlygas
+Additional Discount,Papildoma nuolaida
+Additional Discount %,Papildoma nuolaida %
+Address Line 1,1 adreso eilutė
+Address not found,Adresas nerastas
+Adjust the quantity or enable negative stock to continue.,Koreguokite kiekį arba įgalinkite neigiamas atsargas tęsti.
+Adjustment,Koregavimas
+After returns,Po grįžimų
+Against,Prieš
+Against Name,Prieš Vardą
+Age Bracket,Amžiaus grupė
+All,Visi
+All Caught Up!,Visi sugauti!
+All invoices are synchronized,Visos sąskaitos faktūros sinchronizuojamos
+All pending invoices are up to date,Visos laukiančios sąskaitos faktūros yra atnaujintos
+All Profiles,Visi profiliai
+All Synchronized,Viskas sinchronizuota
+All visible invoices are fully settled.,Visos matomos sąskaitos yra pilnai apmokėtos.
+All Warehouses,Visi sandėliai
+Allowed UOM is {0},Leidžiamas UOM yra {0}
+Always fetch items from server (ignore local cache),Visada gauti elementus iš serverio (nepaisyti vietinės talpyklos)
+Amount,Suma
+Amount already received,Suma jau gauta
+Amount exceeds profile cash movement max amount.,Suma viršija profilio grynųjų pinigų judėjimo maksimalią sumą.
+Amount must be greater than zero.,Suma turi būti didesnė už nulį.
+Amount received from customer,Iš kliento gauta suma
+Appearance and user-level preferences for the current session.,Dabartinės sesijos išvaizda ir vartotojo lygio nuostatos.
+Applied,Taikoma
+Apply,Taikyti
+Apply Gift Card,Taikyti dovanų kortelę
+Apply Offer,Taikyti pasiūlymą
+Apply On,Taikyti Įjungta
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,"Šioje sąskaitoje faktūroje taikykite tik tą sumą, kurią norite išpirkti. Likęs likutis lieka kortelėje."
+Apply Redemption,Taikyti išpirkimą
+Applying,Taikymas
+Apps,Programėlės
+Are you sure you want to close? All entered data will be lost.,Ar tikrai norite uždaryti? Visi įvesti duomenys bus prarasti.
+Attributes (Size/Color),Atributai (dydis / spalva)
+Auto Allocate Payment Amount,Automatiškai paskirstykite mokėjimo sumą
+Auto Reconcile,Automatinis suderinimas
+Auto reconciliation completed after payment submit.,Automatinis suderinimas baigtas po mokėjimo pateikimo.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,Automatinis suderinimas baigtas. Paskirta: {0}{1}. Liko neapmokėtų: {0}{2}.
+Available Actions,Galimi veiksmai
+Available QTY,Galimas kiekis
+Available:,Galima:
+Average Basket,Vidutinis krepšelis
+Average Bill,Vidutinis Bill
+Average Ticket,Vidutinis bilietas
+Avg Bill,Vid
+Avg Invoice,Vid. sąskaita faktūra
+Avg Invoice Profit,Vid. sąskaitos faktūros pelnas
+Avg Invoice Value,Vidutinė sąskaitos faktūros vertė
+Avg Purchase Frequency,Vidutinis pirkimo dažnumas
+Awesome,Nuostabu
+Awesome Dashboard,Nuostabus prietaisų skydelis
+Awesome Dashboard is disabled for the selected POS Profile.,„Awesome“ prietaisų skydelis išjungtas pasirinktame POS profilyje.
+Awesome Dashboard is unavailable for the selected scope.,„Awesome“ informacijos suvestinė nepasiekiama pasirinktoje srityje.
+Awesome Dashboard is visible only to POS supervisors.,Awesome Dashboard matoma tik POS prižiūrėtojams.
+Back,Atgal
+Back Office Cash Account,Back Office grynųjų pinigų sąskaita
+Back Office Cash Account (Optional Override),„Back Office“ grynųjų pinigų sąskaita (neprivaloma nepaisyti)
+Back office cash account is required.,Reikalinga „back office“ grynųjų pinigų sąskaita.
+Back to {0},Atgal į {0}
+Background processing did not finish in time.,Fono apdorojimas nebuvo baigtas laiku.
+Background processing failed for Invoice {0}: {1},Foninis sąskaitos faktūros {0} apdorojimas nepavyko: {1}
+Background Submission Failed,Nepavyko pateikti fono
+Background sync interval (seconds),Fono sinchronizavimo intervalas (sekundėmis)
+Balance,Balansas
+Balance will be updated when connection is restored,"Balansas bus atnaujintas, kai ryšys bus atkurtas"
+Balances still pending,Likučiai vis dar laukia
+Barcode,Brūkšninis kodas
+Barcode / QR Ready,Brūkšninis kodas / QR paruoštas
+Barcode Label Printing,Brūkšninio kodo etikečių spausdinimas
+Base Paid:,Bazinė apmokėta:
+Base Recv:,Bazinis gavimas:
+Base:,Bazė:
+Basic Information,Pagrindinė informacija
+Batch,Partija
+Batch Information,Partijos informacija
+Before any return workflow,Prieš bet kokią grąžinimo darbo eigą
+Before returns,Prieš grįžtant
+Best Day,Geriausia diena
+Best Seller,Geriausias pardavėjas
+Book expense or deposit from active shift.,Užsisakykite išlaidas arba užstatą iš aktyvios pamainos.
+Branch / Location-wise Report,Filialo / Vietovės ataskaita
+Brand-wise,Prekės ženklo požiūriu
+Breakdown,Suskirstymas
+Browse,Naršyti
+Build Time:,Sukūrimo laikas:
+Built with Frappe,Pastatyta su Frappe
+Bundle,Bundle
+Buying Price,Pirkimo Kaina
+Cache cleared successfully,Talpykla sėkmingai išvalyta
+Cache Usage,Talpyklos naudojimas
+cache used,naudota talpykla
+Calculating...,Skaičiuojama...
+Camera Access Required,Būtina prieiga prie fotoaparato
+Camera access was aborted. Please try again.,Prieiga prie fotoaparato buvo nutraukta. Bandykite dar kartą.
+Camera constraints not supported by your device. Trying fallback settings...,Jūsų įrenginys nepalaiko fotoaparato apribojimų. Bandomi atsarginiai nustatymai...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,Kamera užimta arba užblokuota kitos programos / skirtuko. Uždarykite kitas fotoaparato programas ir bandykite dar kartą.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,Fotoaparato leidimas atmestas. Leiskite pasiekti fotoaparatą naršyklės nustatymuose ir atnaujinkite puslapį.
+Camera scanner is locked until the current error is acknowledged,"Kameros skaitytuvas užrakinamas, kol nepatvirtinama esama klaida"
+Camera started but the video stream did not load in time. Please try again.,"Fotoaparatas paleistas, bet vaizdo srautas nebuvo įkeltas laiku. Bandykite dar kartą."
+Cancel cash movement {0}?,Atšaukti grynųjų pinigų judėjimą {0}?
+Cancel Payment,Atšaukti mokėjimą
+Cancel Sale,Atšaukti išpardavimą
+Cancel Sale ?,Atšaukti išpardavimą?
+Cancelled,Atšaukta
+Cannot add an item with zero or negative quantity.,Negalima pridėti prekės su nuliu arba neigiamu kiekiu.
+Cannot clear cache while offline,Neįmanoma išvalyti talpyklos neprisijungus
+Cannot redeem customer credit more than invoice total,Kliento kredito negalima išpirkti daugiau nei bendra sąskaita faktūra
+Cannot redeem gift cards more than invoice total,Negalima išpirkti dovanų kortelių daugiau nei bendra sąskaita faktūra
+Cannot Save Offline Invoice:,Neįmanoma išsaugoti sąskaitos faktūros neprisijungus:
+Cannot Save Offline Payment:,Neįmanoma išsaugoti mokėjimo neprisijungus:
+Card,Kort
+Card / Online,Kortelė / Internete
+Card health after the last live lookup,Kortelės būklė po paskutinės tiesioginės peržiūros
+Cards,Kortelės
+Cart,Krepšelis
+Cash,Grynieji pinigai
+Cash back to customers,Grąžinti pinigus klientams
+Cash Collections,Grynųjų pinigų kolekcijos
+Cash Deposit is disabled for this POS Profile.,Grynųjų pinigų įnašas išjungtas šiame POS profilyje.
+Cash Drawer Snapshot,Pinigų stalčiaus momentinė nuotrauka
+Cash In Hand,Pinigai į rankas
+Cash Movement,Pinigų judėjimas
+Cash movement cancelled,Grynųjų pinigų judėjimas atšauktas
+Cash movement deduction applied,Taikomas grynųjų pinigų judėjimo atskaitymas
+Cash movement deleted,Pinigų judėjimas ištrintas
+Cash movement is disabled for this POS Profile.,Grynųjų pinigų judėjimas išjungtas šiame POS profilyje.
+Cash Movement is disabled in current POS Profile.,Grynųjų pinigų judėjimas išjungtas dabartiniame POS profilyje.
+Cash movement saved offline,Grynųjų pinigų judėjimas išsaugotas neprisijungus
+Cash movement submitted,Pateiktas grynųjų pinigų judėjimas
+Cash Movements,Pinigų judėjimas
+Cash payment cannot be less than invoice total when partial payment is not allowed,"Apmokėjimas grynaisiais negali būti mažesnis už bendrą sąskaitos faktūros sumą, kai dalinis apmokėjimas neleidžiamas"
+Cash returned after payment,Grynieji pinigai grąžinti po apmokėjimo
+Cashier,Kasininkė
+Cashier Access,Prieiga prie kasos
+Cashier identity and appearance preferences.,Kasininko tapatybės ir išvaizdos pageidavimai.
+Cashier PIN,Kasos PIN kodas
+Cashier PIN saved successfully.,Kasos PIN sėkmingai išsaugotas.
+Cashiers,Kasininkai
+Cashier-wise,Kasos požiūriu
+Categories,Kategorijos
+Category,Kategorija
+Category / Brand / Variant Report,Kategorijos / prekės ženklo / varianto ataskaita
+Category-wise,Pagal kategoriją
+Category-wise Margin,Kategorijos marža
+Certificate,Sertifikatas
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,Trūksta sertifikato arba juo nepasitiki. QZ gali rodyti patvirtinimo dialogo langus.
+Certificate is trusted. Silent QZ printing is active.,Sertifikatas patikimas. Įjungtas tylus QZ spausdinimas.
+Change,Keisti
+Change allocation repaired,Pakeitimo paskirstymas suremontuotas
+Change Price,Keisti Kainą
+Change Return,Keisti grąžinimą
+Change Returned,Pakeitimas grąžintas
+Change terminal cashier,Pakeiskite terminalo kasininką
+Charge Heads,Įkrovimo galvutės
+Charges,Mokesčiai
+Charges not found,Mokesčiai nerasta
+Check Balance,Patikrinkite balansą
+Check balance for any card. Supervisors can issue and top up cards here.,Patikrinkite bet kurios kortelės likutį. Prižiūrėtojai čia gali išduoti ir papildyti korteles.
+Check balance only,Patikrinkite tik balansą
+Check for new commits,"Patikrinkite, ar nėra naujų įsipareigojimų"
+Check for Updates,"Patikrinkite, ar nėra atnaujinimų"
+Check live balance before applying redemption,Prieš taikydami išpirkimą patikrinkite tiesioginį balansą
+Check live balance before redemption,Prieš išpirkdami patikrinkite tiesioginį balansą
+Checking...,Tikrinama...
+Cheque/Reference Date,Čekis / nuorodos data
+Cheque/Reference No,Čekis/nuorodos Nr
+Choose the cashier currently operating this terminal.,"Pasirinkite kasininkę, kuri šiuo metu valdo šį terminalą."
+City,Miestas
+Clear,Aišku
+Clear All,Išvalyti viską
+Clear all barcode items,Išvalykite visus brūkšninio kodo elementus
+Clear all purchase order items,Išvalykite visas pirkimo užsakymo prekes
+Clear Search,Išvalyti paiešką
+Clearing local cache...,Išvaloma vietinė talpykla...
+Click to refresh,Spustelėkite norėdami atnaujinti
+Client CPU Lag:,Kliento procesoriaus delsa:
+Client Memory Usage:,Kliento atminties naudojimas:
+Client Metrics,Kliento metrika
+Close about dialog,Uždaryti apie dialogą
+Close cashier switcher,Uždarykite kasininko keitiklį
+Close closing shift dialog,Uždaryti perjungimo dialogo langą
+Close column selector,Uždaryti stulpelio parinkiklį
+Close Dialog,Uždaryti dialogo langą
+Close drafts dialog,Uždaryti juodraščių dialogo langą
+Close invoice details dialog,Uždaryti išsamios sąskaitos faktūros dialogo langą
+Close invoice management,Uždaryti sąskaitų faktūrų tvarkymą
+Close offline invoices dialog,Uždaryti sąskaitų faktūrų neprisijungus dialogo langą
+Close packing list dialog,Uždaryti pakavimo sąrašo dialogą
+Close returns dialog,Uždaryti grąžinimo dialogo langą
+Close sales orders dialog,Uždaryti pardavimo užsakymų dialogo langą
+Close Scanner,Uždarykite skaitytuvą
+Close scanner dialog,Uždaryti skaitytuvo dialogo langą
+Close Settings,Uždaryti Nustatymai
+Closing Amount,Uždarymo suma
+Closing POS Shift,POS Shift uždarymas
+Closing Snapshot Available,Galima uždarymo momentinė nuotrauka
+Code,Kodas
+Code scanned successfully,Kodas sėkmingai nuskaitytas
+COGS,COGS
+Collapse item details,Sutraukti išsamią elemento informaciją
+Collected,Surinkta
+Cols,plk
+Columns,Stulpeliai
+commits,įsipareigoja
+Completed and active sales in this range,Užbaigti ir aktyvūs pardavimai šiame diapazone
+Completed returns will appear here.,Užbaigti grąžinimai bus rodomi čia.
+Confirm,Patvirtinti
+Confirm Close,Patvirtinkite Uždaryti
+Confirm Mobile Number,Patvirtinkite mobiliojo telefono numerį
+Confirm PIN,Patvirtinkite PIN kodą
+Connect,Prisijunkite
+Connect printer and manage certificate,Prijunkite spausdintuvą ir tvarkykite sertifikatą
+Connecting to QZ Tray...,Jungiamasi prie QZ dėklo...
+Connection problem while submitting invoice,Ryšio problema pateikiant sąskaitą faktūrą
+Connections:,Jungtys:
+Connectivity and cached prerequisite status were rechecked.,Ryšys ir talpyklos būtinos sąlygos būsena buvo dar kartą patikrintos.
+Continue Editing,Tęsti redagavimą
+Could not fetch latest balance from server,Nepavyko gauti naujausio balanso iš serverio
+Count,Suskaičiuoti
+Country,Šalis
+Coupon,Kuponas
+Coupons,Kuponai
+Cover,Viršelis
+CPU Cores:,CPU branduoliai:
+Create,Sukurti
+Create and load a new prepaid card,Sukurkite ir įkelkite naują išankstinio mokėjimo kortelę
+Create and preload a new gift card,Sukurkite ir iš anksto įkelkite naują dovanų kortelę
+Create Bill,Sukurti sąskaitą
+Create Customer,Sukurti Klientą
+Create New Item,Sukurti naują elementą
+Create or change your PIN,Sukurkite arba pakeiskite PIN kodą
+Create PIN,Sukurti PIN kodą
+Create POS Opening Shift,Sukurkite POS atidarymo pamainą
+Create Purchase Order,Sukurti pirkimo užsakymą
+Create Return,Sukurti grąžinimą
+Create return from invoice,Sukurti grąžinimą iš sąskaitos faktūros
+Create Supplier,Sukurti tiekėją
+Credit and Output,Kreditas ir produkcija
+Credit Note,Kredito pažyma
+Credit Outstanding,Kreditas neapmokėtas
+Credit sales remaining to be collected,Liko surinkti kredito pardavimus
+Critical,Kritinis
+Currency,Valiuta
+Current,Dabartinė
+Current Event Loop Lag:,Dabartinio įvykio ciklo delsa:
+Current Month,Dabartinis mėnuo
+Current PIN,Dabartinis PIN kodas
+Current Profile,Dabartinis profilis
+Current redeemable value on the gift card,Dabartinė dovanų kortelės išperkama vertė
+Current User,Dabartinis vartotojas
+Custom,Pasirinktinis
+Custom Due Days,Individualizuotos mokėjimo dienos
+Custom items per page,Individualūs elementai puslapyje
+Customer,Klientas
+Customer already selected,Klientas jau pasirinktas
+Customer Balance,Kliento balansas
+Customer balance unavailable offline,Kliento balansas nepasiekiamas neprisijungus
+Customer created successfully.,Klientas sėkmingai sukūrė.
+Customer creation failed.,Nepavyko sukurti kliento.
+Customer Details,Kliento informacija
+Customer display channel is missing,Trūksta klientų rodymo kanalo
+Customer display was blocked. Please allow pop-ups for this site.,Kliento ekranas buvo užblokuotas. Leiskite šios svetainės iššokančiuosius langus.
+Customer group is required,Būtina klientų grupė
+Customer is required to add payment,Klientas privalo pridėti mokėjimą
+Customer Name is required,Būtinas kliento vardas
+Customer not selected,Klientas nepasirinktas
+Customer Report,Kliento ataskaita
+Customer saved offline,Klientas išsaugotas neprisijungus
+Customer Screen,Kliento ekranas
+Customer territory is required,Būtina kliento teritorija
+Customer updated successfully.,Klientas sėkmingai atnaujintas.
+Customer-facing tools and printer setup.,Klientui skirti įrankiai ir spausdintuvo sąranka.
+Customers,Klientai
+Customers not found,Klientai nerasta
+Daily cashier actions without scrolling.,Kasdieniai kasos veiksmai be slinkimo.
+Daily Sales,Kasdieniai pardavimai
+Daily Sales Summary,Dienos pardavimų suvestinė
+Data loaded in form. Review and submit.,Duomenys įkelti į formą. Peržiūrėkite ir pateikite.
+Database Health,Duomenų bazės sveikata
+Database health affects overall system speed and reliability.,Duomenų bazės būklė turi įtakos bendram sistemos greičiui ir patikimumui.
+Database Info,Duomenų bazės informacija
+Date,Data
+Day ?,Diena?
+days,dienų
+Day-wise (MTD),Dienos požiūriu (MTD)
+Day-wise Movement,Dienos išmintingas judėjimas
+Dead Stock,Dead Stock
+Dead Stock Items,Negyvos atsargos
+Decrease quantity,Sumažinti kiekį
+Default,Numatytoji
+Default:,Numatytasis:
+Delete,Ištrinti
+Delete cancelled cash movement {0}?,Ištrinti atšauktą grynųjų pinigų judėjimą {0}?
+Delete Draft,Ištrinti juodraštį
+Delete draft invoice,Ištrinti sąskaitos faktūros projektą
+Delete draft invoice {0}?,Ištrinti sąskaitos faktūros juodraštį {0}?
+Delete Invoice,Ištrinti sąskaitą faktūrą
+Delete offline invoice,Ištrinti sąskaitą faktūrą neprisijungus
+Delivered,Pristatyta
+Delivery Charges,Pristatymo mokesčiai
+Delivery Information,Pristatymo informacija
+Delivery Note {0} created,Sukurtas pristatymo lapelis {0}
+Delivery note created,Sukurtas važtaraštis
+Deployed Bundle:,Įdiegtas paketas:
+Deposit,Užstatas
+Description,Aprašymas
+Detailed Supplier Breakdown,Išsamus tiekėjų suskirstymas
+Detecting formats:,Aptikti formatus:
+Device Memory:,Įrenginio atmintis:
+Difference,Skirtumas
+Difference (In Company Currency),Skirtumas (įmonės valiuta)
+Disable offline mode first to recheck live connectivity.,"Pirmiausia išjunkite režimą neprisijungus, kad dar kartą patikrintumėte tiesioginį ryšį."
+Disconnect,Atsijungti
+discount,nuolaida
+Discount %,nuolaida %
+Discount / Void / Return Report,Nuolaida / negalioja / grąžinimo ataskaita
+Discount Amount,Nuolaidos suma
+Discount limited by POS Profile,Nuolaidą riboja POS profilis
+Discounted Invoices,Sąskaitos faktūros su nuolaida
+Discounts,Nuolaidos
+Dismiss,Atsisakyti
+Download Certificate,Atsisiųskite sertifikatą
+Draft,Juodraštis
+Draft invoice deleted,Sąskaitos faktūros projektas ištrintas
+Draft source,Juodraščio šaltinis
+Drafts,Juodraščiai
+Due {0},Terminas {0}
+Due Date,Terminas
+Duplicate,Pasikartoti
+Edit customer,Redaguoti klientą
+Edit discount amount,Redaguoti nuolaidos sumą
+Edit discount percentage,Redaguoti nuolaidos procentą
+Edit Gift Application,Redaguoti dovanų programą
+Edit item name,Redaguoti elemento pavadinimą
+Edit quantity,Redaguoti kiekį
+Edit rate,Redaguoti įkainį
+Edit unit of measure,Redaguoti matavimo vienetą
+Edited,Redaguota
+Employee,Darbuotojas
+Enable background sync,Įgalinti foninį sinchronizavimą
+Enable Customer Display in POS Profile first.,Pirmiausia įgalinkite klientų rodymą POS profilyje.
+Enter a PIN.,Įveskite PIN kodą.
+Enter a valid grams value,Įveskite galiojančią reikšmę gramais
+Enter new price list rate,Įveskite naują kainoraštį
+Enter Quantity,Įveskite kiekį
+Enter the cashier PIN to continue.,"Norėdami tęsti, įveskite kasininko PIN kodą."
+Enter the current PIN first.,Pirmiausia įveskite dabartinį PIN kodą.
+"Enter the current PIN, then choose a new one.","Įveskite dabartinį PIN kodą, tada pasirinkite naują."
+Enter valid grams for scale barcode,Įveskite galiojančius svarstyklių brūkšninio kodo gramus
+Entries,Įrašai
+Error accessing camera:,Klaida pasiekiant fotoaparatą:
+Error calculating prices,Klaida skaičiuojant kainas
+Error fetching customer balance,Gaunant kliento balansą įvyko klaida
+Error in change calculations!,Klaida pakeitimų skaičiavimuose!
+Error Loading Data,Įkeliant duomenis įvyko klaida
+Error loading invoice details,Klaida įkeliant išsamią sąskaitos faktūros informaciją
+Error processing invoice,Apdorojant sąskaitą faktūrą įvyko klaida
+Error processing payment,Klaida apdorojant mokėjimą
+Error searching invoices,Klaida ieškant sąskaitų faktūrų
+Error submitting invoice:,Klaida pateikiant sąskaitą faktūrą:
+Error submitting invoice: {0},Klaida pateikiant sąskaitą faktūrą: {0}
+Error submitting invoice: No response from server,Klaida pateikiant sąskaitą: nėra atsakymo iš serverio
+Error updating currency,Klaida atnaujinant valiutą
+Error updating item details,Klaida atnaujinant išsamią elemento informaciją
+Est. Purchase,Įvert. Pirkimas
+Est. Value,Įvert. Vertė
+Event-loop lag measures how busy your browser is. Lower is better.,Įvykių ciklo delsa įvertina jūsų naršyklės užimtumą. Žemiau yra geriau.
+Every,kas
+Exchange Rate,Valiutos kursas
+Expand item details,Išskleisti detalią elemento informaciją
+Expected Amount (In Company Currency),Numatoma suma (įmonės valiuta)
+Expected Cash,Tikėtini grynieji pinigai
+Expected cash on hand grouped by currency,Tikėtini grynieji pinigai kasoje sugrupuoti pagal valiutą
+Expected vs Actual,Tikėtina vs faktinė
+Expense,Išlaidos
+Expense Account (Optional Override),Išlaidų sąskaita (pasirenkamas nepaisymas)
+Expense account is required.,Reikalinga išlaidų sąskaita.
+Expenses and deposits posted during this shift,Šios pamainos metu paskelbtos išlaidos ir indėliai
+Expired,Baigėsi galiojimo laikas
+Failed to auto reconcile payments.,Nepavyko automatiškai suderinti mokėjimų.
+Failed to cancel cash movement,Nepavyko atšaukti grynųjų pinigų judėjimo
+Failed to clear cache,Nepavyko išvalyti talpyklos
+Failed to create item,Nepavyko sukurti elemento
+Failed to create supplier,Nepavyko sukurti tiekėjo
+Failed to delete cash movement,Nepavyko ištrinti grynųjų pinigų judėjimo
+Failed to generate scale barcode. Using item barcode only.,Nepavyko sugeneruoti mastelio brūkšninio kodo. Naudojant tik prekės brūkšninį kodą.
+Failed to load cash movement context.,Nepavyko įkelti grynųjų pinigų judėjimo konteksto.
+Failed to load dashboard data.,Nepavyko įkelti prietaisų skydelio duomenų.
+Failed to reload invoice from server,Nepavyko iš naujo įkelti sąskaitos faktūros iš serverio
+Failed to submit cash movement,Nepavyko pateikti grynųjų pinigų judėjimo
+Failed to sync offline cash movements,Nepavyko sinchronizuoti grynųjų pinigų judėjimo neprisijungus
+Fast cashier actions for active shifts.,Greiti kasos veiksmai aktyvioms pamainoms.
+Fast Moving Items,Greitai judantys daiktai
+Fees,Mokesčiai
+Fetch the latest offline prerequisite updates,Gaukite naujausius neprisijungus reikalingus naujinimus
+Find a sales order quickly and load it into the current sale.,Greitai raskite pardavimo užsakymą ir įkelkite jį į dabartinį išpardavimą.
+Fixing payment amounts for return invoice...,Tvirtinamos grąžinimo sąskaitos faktūros mokėjimo sumos...
+Flash Off,Blykstė išjungta
+Flash On,Blykstė įjungta
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","„Produktų rinkinio“ prekėms „Pakavimo sąrašo“ lentelėje bus atsižvelgiama į sandėlį, serijos numerį ir partijos numerį. Jei Sandėlio ir Partijos Nr. yra vienodi visoms bet kurios „Produktų rinkinio“ prekės pakuotės prekėms, šias reikšmes galima įvesti į pagrindinę prekių lentelę; reikšmės bus nukopijuotos į lentelę „Pakavimo sąrašas“."
+Free,Nemokama
+Free Qty,Nemokamas kiekis
+Frequency,Dažnis
+from,iš
+From Date,Nuo datos
+Fulfillment Details,Išsami vykdymo informacija
+Full Name,Pilnas vardas
+Gain,Pelnas
+Generate a fresh prepaid card and start it with an opening balance.,Sugeneruokite naują išankstinio mokėjimo kortelę ir pradėkite ją su pradiniu balansu.
+Generate and install the certificate to allow fully silent printing without trust prompts.,"Sugeneruokite ir įdiekite sertifikatą, kad būtų galima visiškai tyliai spausdinti be pasitikėjimo raginimų."
+Generate Certificate,Sukurti sertifikatą
+Generated scale barcode: {0},Sugeneruotas mastelio brūkšninis kodas: {0}
+Get Payments,Gaukite mokėjimus
+Gift Card,Dovanų kortelė
+Gift card amount must be greater than zero.,Dovanų kortelės suma turi būti didesnė už nulį.
+Gift Card Code,Dovanų kortelės kodas
+Gift card code is required for redemption,Dovanų kortelės kodas reikalingas išpirkimui
+Gift card code is required.,Reikalingas dovanų kortelės kodas.
+Gift card issued successfully.,Dovanų kuponas sėkmingai išduotas.
+Gift card loaded successfully.,Dovanų kortelė sėkmingai įkelta.
+Gift Card Management,Dovanų kortelių valdymas
+Gift card payment,Apmokėjimas dovanų kortele
+Gift card redemption requires an online connection,"Norint išpirkti dovanų kortelę, reikalingas internetinis ryšys"
+Gift card topped up successfully.,Dovanų kortelė sėkmingai papildyta.
+Gift Cards,Dovanų kortelės
+Go to Frappe Desk,Eikite į „Frappe“ stalą
+Grand Total,Didžioji suma
+Gross Margin,Bendroji marža
+Gross Profit,Bendrasis pelnas
+Gross Sales,Bendrieji pardavimai
+Group not found,Grupė nerasta
+"Grouped controls for terminal, UI, and session settings.","Sugrupuoti terminalo, vartotojo sąsajos ir seanso nustatymų valdikliai."
+Grouped totals for each payment method and currency,Sugrupuotos kiekvieno mokėjimo metodo ir valiutos sumos
+Hide,Slėpti
+Hide Gift Card,Slėpti dovanų kortelę
+Hide Non Essential Fields,Slėpti neesminius laukus
+Hide quantity decimals,Slėpti skaičių po kablelio
+Hide search tools,Slėpti paieškos įrankius
+Hide zero rated items,Slėpti nuliui įvertintus elementus
+High,Aukštas
+History,Istorija
+Hourly (Today),Kas valandą (šiandien)
+How this section works,Kaip veikia šis skyrius
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","Jei lieka pasenusių duomenų, atidarykite Nustatymai > Neprisijungus ir sinchronizavimas ir dar kartą paleiskite Rebuild Offline Data, kai esate prisijungę."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","Jei įspėjimas išlieka, atidarykite „Nustatymai“ > „Neprisijungus ir sinchronizavimas“, tada paleiskite „Refresh Offline Data“ arba „Rebuild Offline Data“."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Importuokite sertifikatą į QZ dėklą ir iš naujo paleiskite QZ dėklą kiekviename POS aparate.
+In,Į
+In stock: {0},Sandėlyje: {0}
+Include Batch / Serial,Įtraukti partiją / seriją
+Include Price,Įtraukti kainą
+Increase quantity,Padidinti kiekį
+IndexedDB,IndexedDB
+Initial Amount,Pradinė suma
+Initialize your shift with opening balances,Pradėkite savo pamainą pradiniais likučiais
+Initializing application...,Inicijuojama programa...
+"Inspect cache, sync, and prerequisite status","Patikrinkite talpyklą, sinchronizavimą ir būtinų sąlygų būseną"
+Installed Applications,Įdiegtos programos
+Insufficient stock:\n{0},Nepakankamai atsargų:\n{0}
+Invalid rate,Neteisingas tarifas
+Inventory Status Report,Inventoriaus būklės ataskaita
+Invoice,Sąskaita faktūra
+Invoice {0} is Submitted,Sąskaita faktūra {0} pateikta
+Invoice {0} processed successfully,Sąskaita faktūra {0} sėkmingai apdorota
+Invoice {0} submission failed,Nepavyko pateikti sąskaitos faktūros {0}
+Invoice {0} was already submitted,Sąskaita faktūra {0} jau pateikta
+Invoice Adjustments,Sąskaitų faktūrų koregavimai
+Invoice Change,Sąskaitos faktūros keitimas
+Invoice Details,Išsami informacija apie sąskaitą faktūrą
+Invoice is still in draft after background submission.,Po foninio pateikimo sąskaita faktūra vis dar yra juodraštyje.
+Invoice Items,Sąskaitos faktūros elementai
+Invoice Management,Sąskaitų faktūrų valdymas
+Invoice Mgmt,Sąskaita Mgmt
+Invoice saved offline,Sąskaita faktūra išsaugota neprisijungus
+Invoice submission failed,Nepavyko pateikti sąskaitos faktūros
+Invoice Submitted,Sąskaita pateikta
+"Invoice value settled by loyalty points, not cash collection","Sąskaitos faktūros vertė apmokama lojalumo taškais, o ne grynųjų pinigų inkasacija"
+Invoices,Sąskaitos faktūros
+Invoices already past due date,Sąskaitos faktūros jau pavėluotos
+Invoices saved as POS Invoices,Sąskaitos faktūros išsaugotos kaip POS sąskaitos faktūros
+Invoices still carrying balances,Sąskaitose faktūrose vis dar yra likučiai
+Issue Mode,Problemos režimas
+Issue New Card,Išduoti naują kortelę
+Issue Workflow,Problemos darbo eiga
+"Issue, top up, and check","Išduokite, papildykite ir patikrinkite"
+Item,Prekė
+Item / Product Sales Report,Prekės / Produkto pardavimo ataskaita
+Item {0} added to invoice,Prekė {0} pridėta prie sąskaitos faktūros
+Item '{0}' has no barcode,Prekė „{0}“ neturi brūkšninio kodo
+Item Code,Prekės kodas
+Item created successfully,Elementas sėkmingai sukurtas
+Item is out of stock,Prekės nėra sandėlyje
+Item Name,Prekės pavadinimas
+Item not found,Prekė nerasta
+Item order updated,Prekių užsakymas atnaujintas
+Item Selector Settings,Elemento parinkiklio nustatymai
+Items,Daiktai
+Items added in POS will appear here automatically.,"Elementai, pridėti prie POS, čia bus rodomi automatiškai."
+Items added to invoice,Prekės įtrauktos į sąskaitą faktūrą
+Items per page,Prekės puslapyje
+Items Sold,Parduotos prekės
+Items/Invoice,Prekės / sąskaita faktūra
+Item-wise Profitability,Prekės pelningumas
+Journal Entry,Žurnalo įrašas
+json,json
+Just now,Tik dabar
+Keep offline prerequisites healthy and recover stale data safely.,Palaikykite neprisijungus būtinas sąlygas ir saugiai atkurkite pasenusius duomenis.
+Labels,Etiketės
+"Language, theme, terminal tools, and session controls.","Kalba, tema, terminalo įrankiai ir seanso valdikliai."
+Last,Paskutinis
+Last 14 Days (Paid vs Pending),Paskutinės 14 dienų (sumokėta ir laukianti)
+Last 14 Days Activity,Pastarųjų 14 dienų veikla
+Last 14 Days Gross Profit,Pastarųjų 14 dienų bendrasis pelnas
+Last 14 Days Purchases,Pastarųjų 14 dienų pirkiniai
+Last 14 Days Tax/Charges,Pastarųjų 14 dienų mokesčiai / rinkliavos
+Last sync:,Paskutinis sinchronizavimas:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},Paskutinis sinchronizavimas: {0} | gerai: {1} | nepavyko: {2} | praleista: {3}
+Latest entries for current shift,Naujausi dabartinės pamainos įrašai
+Lead Time,Pristatymo laikas
+Limited,Ribotas
+lines,linijos
+List,Sąrašas
+Live Snapshot,Tiesioginė momentinė nuotrauka
+Load a POS profile and cashier first.,Pirmiausia įkelkite POS profilį ir kasą.
+Load More Invoices,Įkelti daugiau sąskaitų faktūrų
+Load previously saved invoices,Įkelti anksčiau išsaugotas sąskaitas faktūras
+Load Sale,Krovinių išpardavimas
+Load Sales Invoice,Įkelti pardavimo sąskaitą faktūrą
+Loading app data...,Įkeliami programos duomenys...
+Loading customer database...,Įkeliama klientų duomenų bazė...
+Loading customers...,Įkeliami klientai...
+Loading database stats...,Įkeliama duomenų bazės statistika...
+Loading details...,Įkeliama informacija...
+Loading invoice history...,Įkeliama sąskaitų faktūrų istorija...
+Loading items...,Įkeliami elementai...
+Loading product catalog...,Įkeliamas prekių katalogas...
+Loading return invoices...,Įkeliamos grąžinimo sąskaitos...
+Loading server CPU/memory usage...,Įkeliamas serverio procesoriaus / atminties naudojimas...
+Loading suppliers...,Įkeliami tiekėjai...
+Loading unpaid invoices...,Įkeliamos neapmokėtos sąskaitos...
+Loading view...,Įkeliamas vaizdas...
+Loading...,Įkeliama...
+Local storage is unavailable. Switching to online-only mode.,Vietinė saugykla nepasiekiama. Perjungimas į tik prisijungimo režimą.
+localStorage,vietinė saugykla
+Location Performance,Vietos našumas
+Locations,Vietos
+Lock Screen,Užrakinimo ekranas
+Lookup Workflow,Paieškos darbo eiga
+Loss,Pralaimėjimas
+Low,Žemas
+Low Stock,Mažos atsargos
+Low Stock Alerts,Įspėjimai dėl mažų atsargų
+Low Stock Items,Mažos atsargos prekės
+Low Stock Threshold,Žemas atsargų slenkstis
+Low Stock Total,Mažos atsargos Iš viso
+Lowest Margin,Mažiausia marža
+Low-frequency maintenance and system details.,Žemo dažnio priežiūra ir sistemos detalės.
+Loyalty Redeemed,Išpirkta lojalumas
+Loyalty Redemption,Lojalumo išpirkimas
+Make New Payment,Atlikite naują mokėjimą
+Manage all,Tvarkyti viską
+Manage and synchronize your offline transactions,Tvarkykite ir sinchronizuokite savo operacijas neprisijungus
+Manage Cashier PIN,Tvarkyti kasos PIN kodą
+"Manage offline tools, terminal controls, and maintenance from one workspace.","Tvarkykite neprisijungus pasiekiamus įrankius, terminalo valdiklius ir priežiūrą vienoje darbo vietoje."
+manual,vadovas
+"Manual codes, barcode scans, and QR scans work in the same field","Rankiniai kodai, brūkšninių kodų nuskaitymai ir QR nuskaitymai veikia tame pačiame lauke"
+Manual offline mode is enabled,Įjungtas rankinis neprisijungus režimas
+Margin,Marža
+Maximum available quantity is {0}. Quantity adjusted to match stock.,"Didžiausias galimas kiekis yra {0}. Kiekis pakoreguotas, kad atitiktų atsargas."
+Maximum discount amount for this offer item is {0}.,Didžiausia šios pasiūlymo prekės nuolaidos suma yra {0}.
+Maximum discount percentage for this offer item is {0}%.,Didžiausia šios pasiūlymo prekės nuolaidos procentinė dalis yra {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,Didžiausias pasiūlymo kiekis yra {0}. Kiekis pakoreguotas iki leidžiamo limito.
+Medium,Vidutinis
+Method-wise Collections,Metodinės kolekcijos
+Minimum allowed rate for this offer item is {0}.,Mažiausia leistina šios pasiūlymo prekės kaina yra {0}.
+Minimum Qty,Minimalus kiekis
+Mobile No,Mobiliojo Nr
+Mode,Režimas
+Mode of Payment,Mokėjimo būdas
+Month,Mėnuo
+Month ?,mėnuo?
+Monthly Profit,Mėnesio pelnas
+Monthly Sales,Mėnesio pardavimai
+Monthly Sales Summary,Mėnesio pardavimų suvestinė
+Month-wise,Mėnesio atžvilgiu
+Most Active Cashiers,Aktyviausi kasininkai
+Movement Type,Judėjimo tipas
+Movements,Judesiai
+Multi Currency,Daugia valiuta
+N/A,N/A
+Name,Vardas
+Negative Stock,Neigiamos atsargos
+Negative Stock Items,Neigiamos atsargos
+Negative values not allowed,Neigiamos reikšmės neleidžiamos
+Net,Grynasis
+Net Qty,Grynasis kiekis
+Net Sales,Grynieji pardavimai
+Net Value,Grynoji vertė
+Never,Niekada
+New changes are ready to load,Nauji pakeitimai paruošti įkelti
+New Item,Nauja prekė
+New Offer Available,Galimas naujas pasiūlymas
+New PIN,Naujas PIN kodas
+New rate,Nauja norma
+Next unit of measure,Kitas matavimo vienetas
+No attribute data found.,Nerasta jokių atributų duomenų.
+No Barcode,Nėra brūkšninio kodo
+No barcode found for UOM '{0}',UOM „{0}“ brūkšninio kodo nerasta
+No branch/location data found.,Filialo / vietos duomenų nerasta.
+No brand data found.,Prekės ženklo duomenų nerasta.
+No cached gift card balance is available offline.,Talpykloje išsaugotas dovanų kortelės balansas nepasiekiamas neprisijungus.
+No camera found on this device. Please ensure your device has a working camera.,"Šiame įrenginyje fotoaparato nerasta. Įsitikinkite, kad jūsų įrenginyje yra veikianti kamera."
+No capability warnings recorded yet.,Kol kas neįrašyta jokių įspėjimų apie galimybes.
+No cash expected for this shift.,Pinigų už šią pamainą nesitikima.
+No cash mode configured,Grynųjų pinigų režimas nesukonfigūruotas
+No cash movement type is allowed for this POS Profile.,Šiam POS profiliui neleidžiamas joks grynųjų pinigų judėjimo tipas.
+No cashier PIN is set yet. Create one now.,Dar nenustatytas kasininko PIN kodas. Sukurkite vieną dabar.
+No cashier profiles are available for this POS profile yet.,Šiam POS profiliui dar nėra kasininko profilių.
+No cashier-wise discount/void/return activity.,Jokių nuolaidų/negaliojimų/grąžinimo veiklos kasoje nėra.
+No category data found.,Kategorijos duomenų nerasta.
+No category profitability data found.,Kategorijos pelningumo duomenų nerasta.
+No change returned recorded for this shift.,Šioje pamainoje neužregistruota jokių pakeitimų.
+No change-allocation invoices match the current filters.,Nė viena pakeitimų paskirstymo sąskaita faktūra neatitinka dabartinių filtrų.
+No charge head breakdown found.,Įkrovimo galvutės gedimas nerastas.
+No Company Selected,Įmonė nepasirinkta
+No customer sales data found.,Klientų pardavimo duomenų nerasta.
+No day-wise discount/void/return trend.,Nėra dienos nuolaidos / negaliojimo / grąžinimo tendencijos.
+No day-wise payment data found.,Dienos mokėjimo duomenų nerasta.
+No day-wise profitability trend found.,Dienos pelningumo tendencijos nerasta.
+No day-wise purchase data found.,Dienos pirkimo duomenų nerasta.
+No day-wise sales trend found.,Dienos pardavimo tendencijos nerasta.
+No day-wise tax/charges trend found.,Dienos mokesčių / rinkliavų tendencijos nerasta.
+No dead stock items.,Nėra mirusių atsargų prekių.
+No due date,Nėra termino
+No exact repair match found for this invoice,Nerasta tikslios šios sąskaitos taisymo atitikties
+No hourly sales trend found for today.,Šiandien valandinių pardavimų tendencijų nerasta.
+No invoice activity found.,Sąskaitų faktūrų veiklos nerasta.
+No invoices found,Sąskaitų faktūrų nerasta
+No invoices found. Try different search criteria.,Sąskaitų faktūrų nerasta. Išbandykite skirtingus paieškos kriterijus.
+No invoices recorded for this shift.,Už šią pamainą neįrašyta jokių sąskaitų faktūrų.
+No item profitability data found.,Prekės pelningumo duomenų nerasta.
+No item sales data found for this period.,Šio laikotarpio prekių pardavimo duomenų nerasta.
+No items found,Elementų nerasta
+No items in cart,Prekių krepšelyje nėra
+No items with barcodes to print,"Nėra elementų su brūkšniniais kodais, kuriuos būtų galima spausdinti"
+No location-wise top item data found.,Nerasta jokių populiariausių elementų duomenų pagal vietą.
+No low stock alerts right now.,Šiuo metu įspėjimų apie mažą atsargų kiekį nėra.
+No low stock items.,Nėra mažos atsargos prekių.
+No matching items in cart,Krepšelyje nėra atitinkamų prekių
+No month-wise sales trend found.,Nerasta mėnesinių pardavimo tendencijų.
+No negative stock items.,Nėra neigiamų atsargų prekių.
+No notifications yet,Pranešimų dar nėra
+No offline cash movement synced.,Nesinchronizuotas joks grynųjų pinigų judėjimas neprisijungus.
+No offline invoices pending synchronization,Neprisijungus laukiančių sąskaitų faktūrų nėra sinchronizavimo
+No offline sync issues recorded yet.,Dar neužfiksuota jokių sinchronizavimo neprisijungus problemų.
+No out-of-stock items.,Nėra sandėlyje pasibaigusių prekių.
+No outstanding credit invoices for this shift.,Šiai pamainai neapmokėtų kredito sąskaitų faktūrų nėra.
+No payment collection data found.,Nerasta jokių mokėjimų surinkimo duomenų.
+No payment rows available on this invoice.,Šioje sąskaitoje faktūroje nėra jokių mokėjimo eilučių.
+No payments registered for this shift.,Už šią pamainą mokėjimų neregistruota.
+No pending balances in this period.,Šiuo laikotarpiu laukiančių likučių nėra.
+No pending offline invoices,Nėra laukiančių sąskaitų faktūrų neprisijungus
+No Print Formats Found,Nerasta jokių spausdinimo formatų
+No profiles found for selected scope. Falling back to current profile failed.,Nerasta jokių pasirinktų sričių profilių. Grįžti į dabartinį profilį nepavyko.
+No recent customer activity found.,Nerasta jokios naujausios klientų veiklos.
+No recent stock entries found.,Nerasta jokių naujausių akcijų įrašų.
+No records found,Įrašų nerasta
+No reorder suggestions right now.,Šiuo metu nėra pasiūlymų dėl pertvarkymo.
+No repeat customers in this period.,Šiuo laikotarpiu pakartotinių klientų nėra.
+No response from server,Nėra atsakymo iš serverio
+No return invoices found,Grąžinimo sąskaitų faktūrų nerasta
+No return item trend found.,Grąžinimo prekių tendencijos nerasta.
+No returnable items found for this invoice,Pagal šią sąskaitą faktūrą grąžinamų prekių nerasta
+No returns were processed in this shift.,Šioje pamainoje grąžinimai nebuvo apdoroti.
+No risk activity found.,Rizikingos veiklos nerasta.
+No sales activity found for this period.,Šiuo laikotarpiu pardavimo veiklos nerasta.
+No slow moving items.,Nėra lėtai judančių daiktų.
+No staff sales activity found.,Darbuotojų pardavimo veiklos nerasta.
+No stock movement for this period.,Šiuo laikotarpiu akcijų judėjimas nėra.
+No submitted cash movements in this shift.,Šioje pamainoje nepateikta jokių grynųjų pinigų judėjimų.
+No supplier purchases found in this month.,Šį mėnesį tiekėjų pirkimų nerasta.
+No suppliers found for this period.,Šiuo laikotarpiu tiekėjų nerasta.
+No sync trigger has run yet in this session.,Šioje sesijoje dar nebuvo paleistas joks sinchronizavimo aktyviklis.
+No tax head breakdown found.,Nerasta mokesčių antraštės suskirstymo.
+No top items found for this location.,Šioje vietoje geriausių prekių nerasta.
+No unpaid invoices,Jokių neapmokėtų sąskaitų faktūrų
+No variant data found.,Variantų duomenų nerasta.
+No week-wise sales trend found.,Nerasta savaitės pardavimo tendencijų.
+No.,Nr.
+Nobile Number,Nobilo numeris
+Not available,Nėra
+Not checked,Nepatikrintas
+Not selected,Nepasirinkta
+Not Set,Nenustatyta
+Notifications,Pranešimai
+Offer,Pasiūlyti
+Offer Applied,Pasiūlymas pritaikytas
+Offer criteria exceeded,Viršyti pasiūlymo kriterijai
+Offer Item,Pasiūlyti prekę
+Offer item unavailable,Pasiūlymo elementas nepasiekiamas
+Offer Removed,Pasiūlymas pašalintas
+Offer UOM cannot be changed,Pasiūlymo UOM pakeisti negalima
+Offer?,Pasiūlyti?
+Offers,Pasiūlymai
+Offline,Neprisijungus
+Offline & Sync,Neprisijungus ir sinchronizuoti
+Offline Capabilities,Galimybės neprisijungus
+Offline data status refreshed,Duomenų neprisijungus būsena atnaujinta
+Offline diagnostics,Diagnostika neprisijungus
+Offline Invoices,Sąskaitos faktūros neprisijungus
+Offline invoices status,Sąskaitų faktūrų neprisijungus būsena
+Offline invoices synced,Sąskaitos faktūros neprisijungus sinchronizuotos
+Offline Queue: {0},Eilė neprisijungus: {0}
+Offline rebuild guidance,Atkūrimo neprisijungus gairės
+Offline restore is unavailable for this session.,Šios sesijos atkūrimas neprisijungus negalimas.
+Offline selling is available with degraded capabilities.,Pardavimas neprisijungus galimas su pablogintomis galimybėmis.
+Offline snapshot does not match the current POS state.,Momentinė nuotrauka neprisijungus neatitinka dabartinės POS būsenos.
+Offline Status,Būsena neprisijungus
+"Offline, terminal, and system controls","Neprisijungus, terminalo ir sistemos valdikliai"
+OK,Gerai
+Online,Prisijungę
+Open actions menu,Atidarykite veiksmų meniu
+Open balance to collect,Atviras likutis rinkti
+Open Customer Display,Atidarykite Kliento ekraną
+Open drawer,Atidarykite stalčių
+Open invoices,Neapmokėtos sąskaitos faktūros
+Open Payments?,Atidaryti mokėjimus?
+Open POS home,Atidarykite POS pagrindinį puslapį
+Open this screen from POS Menu -> Open Customer Display.,Atidarykite šį ekraną iš POS meniu -> Open Customer Display.
+OpenCV image processing enabled - Enhanced barcode detection,OpenCV vaizdo apdorojimas įjungtas – patobulintas brūkšninio kodo aptikimas
+OpenCV image processing unavailable on this device,OpenCV vaizdo apdorojimas šiame įrenginyje nepasiekiamas
+OpenCV Off,OpenCV išjungtas
+OpenCV On,OpenCV įjungtas
+OpenCV processing disabled,OpenCV apdorojimas išjungtas
+Opening Amount,Atidarymo suma
+Opening Cash,Kasos atidarymas
+options,parinktys
+Order,Užsakyti
+Original,Originalus
+Other,Kita
+Out,Išeina
+Out of Stock,Išparduota
+Out of Stock Items,Išparduotos prekės
+Outstanding,Išskirtinis
+Outstanding Credit by Currency,Nemokėtas kreditas pagal valiutą
+Overdue,Pavėluota
+Overpayment Change,Permokos keitimas
+Overpayment change deducted: {0},Išskaitytas permokos pakeitimas: {0}
+Packing List,Pakavimo sąrašas
+Page Format,Puslapio formatas
+Page unavailable offline,Puslapis nepasiekiamas neprisijungus
+Paid,Mokama
+Paid (orig):,Mokama (orig):
+Paid Amount,Sumokėta suma
+Paid change cannot be greater than total change!,Mokamas pakeitimas negali būti didesnis už bendrą pakeitimą!
+Paid:,Mokama:
+Parent Item,Pirminis elementas
+Partial,Dalinis
+Partly Paid,Iš dalies apmokėta
+Party Account,Vakarėlio sąskaita
+Party Type,Vakarėlio tipas
+Pause terminal until next cashier,Pristabdykite terminalą iki kito kasininko
+PAY,MOKĖTI
+Payment,Mokėjimas
+Payment Account,Mokėjimo sąskaita
+Payment entries processed for Invoice {0},Apdoroti sąskaitos faktūros {0} mokėjimo įrašai
+Payment Entry Type,Mokėjimo įrašo tipas
+Payment History,Mokėjimų istorija
+Payment ID,Mokėjimo ID
+Payment Method Report,Mokėjimo būdo ataskaita
+Payment Methods,Mokėjimo būdai
+Payment of {0} received successfully.,Mokėjimas {0} sėkmingai gautas.
+Payment Progress,Mokėjimo eiga
+Payment Reconciliation,Mokėjimų suderinimas
+Payment request status could not be retrieved. Please try again,Nepavyko gauti mokėjimo užklausos būsenos. Bandykite dar kartą
+Payment Request took too long to respond. Please try requesting for payment again,Per ilgai buvo atsakyta į mokėjimo užklausą. Pabandykite dar kartą pateikti mokėjimo užklausą
+Payment saved offline,Mokėjimas išsaugotas neprisijungus
+Payment State,Mokėjimo būsena
+Payment Status,Mokėjimo būsena
+Payment submitted but print function could not be executed. Payment name not found.,"Mokėjimas pateiktas, bet spausdinimo funkcijos atlikti nepavyko. Mokėjimo pavadinimas nerastas."
+Payment submitted.,Mokėjimas pateiktas.
+Payment Summary,Mokėjimo suvestinė
+Payments,Mokėjimai
+Payments are not open. Do you want to open payments and submit?,Mokėjimai neatidaromi. Ar norite atidaryti mokėjimus ir pateikti?
+Payments by Mode of Payment,Mokėjimai pagal mokėjimo būdą
+PDF,PDF
+Peak Hour,Piko valanda
+Peak Memory:,Didžiausia atmintis:
+Peak Server:,Peak serveris:
+Peak:,Didžiausias:
+Pending,Laukiama
+Pending Amount,Laukiama suma
+Pending count updated from {0} to {1},Laukiantis skaičius atnaujintas iš {0} į {1}
+Pending Exposure,Laukiama parodymo
+Pending Invoices,Laukiančios sąskaitos faktūros
+Pending Ratio,Laukiamas santykis
+Pending Sales,Laukiantys pardavimai
+Pending sales: {0} | Cache usage: {1}%,Laukiama pardavimo: {0} | Talpyklos naudojimas: {1} %
+Pending Sync,Laukiama sinchronizavimo
+Pending: {0},Laukiama: {0}
+Pending: {0} | Synced: {1} | Draft: {2},Laukiama: {0} | Sinchronizuota: {1} | Juodraštis: {2}
+Per Page,Puslapyje
+Personal,Asmeninis
+Personal preferences adjust the current cashier experience without changing the active POS route.,Asmeninės nuostatos koreguoja dabartinę kasos patirtį nekeičiant aktyvaus POS maršruto.
+PIN confirmation does not match.,PIN kodo patvirtinimas nesutampa.
+PIN must be 4 to 8 digits.,PIN kodas turi būti 4–8 skaitmenų.
+Please add at least one item.,Pridėkite bent vieną elementą.
+Please allow camera access to scan codes,Leiskite kamerai pasiekti nuskaityti kodus
+Please enter payment amount,Įveskite mokėjimo sumą
+Please fill all required fields,Užpildykite visus privalomus laukus
+Please make a payment or select a payment,Atlikite mokėjimą arba pasirinkite mokėjimą
+Please request phone payment or use another payment method,Prašykite mokėjimo telefonu arba naudokite kitą mokėjimo būdą
+Please select a customer first,Pirmiausia pasirinkite klientą
+Please select a party,Pasirinkite vakarėlį
+Please select a party before reconciling.,Prieš susitaikydami pasirinkite šalį.
+Please select a valid movement type.,Pasirinkite tinkamą judėjimo tipą.
+Please select an invoice,Pasirinkite sąskaitą faktūrą
+Please select company before reconciling.,Prieš derindami pasirinkite įmonę.
+Please set the customer's mobile number,Prašome nustatyti kliento mobiliojo telefono numerį
+Please try again or enter the item manually.,Bandykite dar kartą arba įveskite elementą rankiniu būdu.
+Please verify the barcode or check the item's availability.,Patikrinkite brūkšninį kodą arba prekės prieinamumą.
+Points,Taškai
+Popup blocked. Please allow popups.,Iššokantis langas užblokuotas. Leiskite iššokančiuosius langus.
+POS,POS
+POS controls and maintenance,POS valdymas ir priežiūra
+POS Expense is disabled for this POS Profile.,POS išlaidos išjungtos šiame POS profilyje.
+POS is running with limited offline prerequisites.,POS veikia su ribotomis būtinomis sąlygomis neprisijungus.
+POS Profile,POS profilis
+Position the QR code or barcode within the scanning area,Įdėkite QR kodą arba brūkšninį kodą nuskaitymo srityje
+Posting,Skelbimas
+Posting and Price List,Skelbimas ir kainoraštis
+Posting Date,Paskelbimo data
+Preparing background sync,Ruošiamas sinchronizavimas fone
+"Press OK to continue offline with a warning, or Cancel to retry.","Paspauskite Gerai, jei norite tęsti neprisijungę su įspėjimu, arba Atšaukti, jei norite bandyti dar kartą."
+Previous unit of measure,Ankstesnis matavimo vienetas
+Price List,Kainoraštis
+Price List Rate,Kainoraštis Kaina
+Price list rate updated locally only,Kainoraštis atnaujintas tik vietoje
+Pricing & Discounts,Kainos ir nuolaidos
+Pricing Rule,Kainodaros taisyklė
+Print,Spausdinti
+Print Draft,Spausdinti juodraštį
+Print Format (Invoice),Spausdinimo formatas (sąskaita faktūra)
+Print Format (Order),Spausdinimo formatas (užsakymas)
+Print invoice,Spausdinti sąskaitą faktūrą
+Print Purchase Invoice instead of PO,Spausdinti pirkimo sąskaitą faktūrą vietoj PO
+Printer,Spausdintuvas
+Processed returns impacting the shift totals,"Apdorotos grąžos, turinčios įtakos pamainų sumoms"
+Processing Payment,Mokėjimo apdorojimas
+Processing payment entries for Invoice {0},Apdorojami sąskaitos faktūros {0} mokėjimo įrašai
+Profile,Profilis
+Profiles,Profiliai
+Profit,Pelnas
+Profit: Invoice Item Estimate,Pelnas: sąskaitos faktūros prekės sąmata
+Profit: Stock Ledger (COGS),Pelnas: atsargų knyga (COGS)
+Profitability Report,Pelningumo ataskaita
+Prorated return discount,Proporcinga grąžinimo nuolaida
+Purchase Amount,Pirkimo suma
+Purchase Invoices,Pirkimo sąskaitos faktūros
+Purchase Order created,Pirkimo užsakymas sukurtas
+Qty,Kiekis
+Qualified,Kvalifikuotas
+Quantity,Kiekis
+Quantity exceeds available stock,Kiekis viršija turimas atsargas
+Quick Actions,Greiti veiksmai
+Quotation {0} is Submitted,Citata {0} pateikta
+Quotation submitted,Citata pateikta
+QZ Tray connected.,QZ dėklas prijungtas.
+QZ Tray is manually disconnected. Press Connect to enable it again.,"QZ dėklas atjungtas rankiniu būdu. Paspauskite Prisijungti, kad vėl įjungtumėte."
+QZ Tray is not connected.,QZ dėklas neprijungtas.
+QZ Tray Setup,QZ dėklo sąranka
+Rate,Įvertink
+Rate adjusted to maximum allowed discount,Kaina pakoreguota iki didžiausios leidžiamos nuolaidos
+Ready,Paruošta
+Ready to resume,Paruošta tęsti
+Ready!,Pasiruošę!
+Real-time POS insights for retail operations.,Realaus laiko POS įžvalgos mažmeninės prekybos operacijoms.
+Rebuild Offline Data,Atkurkite duomenis neprisijungus
+Receive,Gauti
+Receive now,Gaukite dabar
+Received,Gauta
+Received:,Gauta:
+Recent Movement Entries,Naujausi judėjimo įrašai
+Recent updates about your invoices,Naujausi naujiniai apie jūsų sąskaitas faktūras
+Recently Active Customers,Pastaruoju metu aktyvūs klientai
+Rechecking connection,Pakartotinis ryšio tikrinimas
+Reconcile payment methods and close shift,Derinkite mokėjimo būdus ir uždarykite pamainą
+Reconciling Payments,Mokėjimų derinimas
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","Prisijunkite ir atidarykite šį puslapį vieną kartą, kai esate prisijungę, tada atnaujinimai neprisijungus galės jį atkurti."
+Reconnect online to refresh cached offline data from the server.,"Prisijunkite iš naujo, kad atnaujintumėte talpykloje saugomus neprisijungus duomenis iš serverio."
+Recreate local offline prerequisites from scratch,Atkurkite vietines būtinas sąlygas neprisijungus nuo nulio
+Recv:,Atv.:
+Redeem,Išpirkti
+Redeem / Scan,Išpirkti / nuskaityti
+Redeem Amount,Išpirkimo suma
+Redeem Mode,Išpirkimo režimas
+Redeemed Amount,Išpirkta suma
+Redeemed credit cannot be greater than its total.,Išpirktas kreditas negali būti didesnis nei jo bendra suma.
+Redemption and Totals,Išpirkimas ir sumos
+Reference,Nuoroda
+Refresh,Atnaujinti
+Refresh Exchange Rate,Atnaujinti valiutos kursą
+Refresh Offline Data,Atnaujinkite duomenis neprisijungus
+Refresh Printers,Atnaujinkite spausdintuvus
+Refund,Grąžinti pinigus
+Release Notes,Išleidimo pastabos
+Reload,Įkelti iš naujo
+Reload customers,Iš naujo įkelkite klientus
+Reload Items,Iš naujo įkelti elementus
+Reload Now,Įkelti iš naujo dabar
+Reload to apply the latest changes. Your current session will be refreshed.,"Įkelkite iš naujo, kad pritaikytumėte naujausius pakeitimus. Jūsų dabartinė sesija bus atnaujinta."
+Reload Workflow,Iš naujo įkelti darbo eigą
+Remarks,Pastabos
+Remarks are required.,Reikalingos pastabos.
+Remove,Pašalinti
+Remove barcode item,Pašalinti brūkšninio kodo elementą
+Remove cached data and reload the POS app,Pašalinkite talpykloje saugomus duomenis ir iš naujo įkelkite POS programą
+Remove item,Pašalinti elementą
+Remove Offer,Pašalinti pasiūlymą
+Reorder / Purchase Suggestions,Pertvarkymo / pirkimo pasiūlymai
+Repair Candidate,Kandidatas į remontą
+Repair Change Allocation,Remonto keitimo paskirstymas
+Repair requires an online connection,Remontui reikalingas internetinis ryšys
+Repaired,Suremontuota
+Repairing change allocation,Pakeitimų paskirstymo taisymas
+Repeat Customers,Pakartotiniai klientai
+Repeat Rate,Pakartojimo dažnis
+Request,Prašymas
+Request ID: {0},Užklausos ID: {0}
+Request Payment,Prašyti mokėjimo
+Requested route: {0},Užklaustas maršrutas: {0}
+Required columns cannot be hidden,Reikalingų stulpelių paslėpti negalima
+Reset,Nustatyti iš naujo
+Reset item name,Iš naujo nustatyti elemento pavadinimą
+Reset to Default,Atstatyti į numatytuosius
+Resource Health,Išteklių sveikata
+Restricted,Apribota
+Restricted operational controls for supervisors only.,Ribotos veikimo kontrolės priemonės taikomos tik prižiūrėtojams.
+Retry,Bandykite dar kartą
+Retry route,Bandyti dar kartą maršrutą
+Return,Grįžti
+Return Amount,Grąžinimo suma
+Return Count,Grąžinimo skaičius
+Return items must have negative quantities,Grąžinamų prekių kiekis turi būti neigiamas
+Return total must be negative,Bendra grąžos suma turi būti neigiama
+Return Valid Until,Grąžinimas galioja iki
+Return window passed,Grįžimo langas praėjo
+Return without Invoice,Grąžinti be sąskaitos faktūros
+Returns,Grąžina
+Returns / Voids / Discounts,Grąžinimai / Tuštumai / Nuolaidos
+Returns by Currency,Grąžinimai pagal valiutą
+Revenue,Pajamos
+Review shift totals before submitting the closing entry,"Prieš pateikdami baigiamąjį įrašą, peržiūrėkite pamainų sumas"
+Round Off,Suapvalinti
+Rows,Eilutės
+Rows:,Eilutės:
+Rule,Taisyklė
+Sale,Išpardavimas
+Sales,Pardavimai
+Sales Order {0} is Submitted,Pardavimo užsakymas {0} pateiktas
+Sales Person and Print,Pardavėjas ir spauda
+Sales Person not found,Pardavėjas nerastas
+Sales processed,Pardavimas apdorotas
+Sales Return,Pardavimų grąžinimas
+Sales Trend Report,Pardavimų tendencijų ataskaita
+Save,Išsaugoti
+Save & Clear,Išsaugoti ir išvalyti
+Save as POS Profile Default,Išsaugoti kaip numatytąjį POS profilį
+Save Settings,Išsaugoti nustatymus
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,"Išsaugokite pasirinktą spausdintuvą kaip numatytąjį POS profilį, kad jis būtų automatiškai rodomas atliekant šią sąranką."
+Saved as draft because: {0},"Išsaugota kaip juodraštis, nes: {0}"
+Saving...,Išsaugoma...
+Scale barcode detected. Quantity here is the number of labels to print.,Aptiktas mastelio brūkšninis kodas. Kiekis čia yra spausdintinų etikečių skaičius.
+Scale barcode settings are not configured. Using item barcode only.,Mastelio brūkšninio kodo nustatymai nesukonfigūruoti. Naudojant tik prekės brūkšninį kodą.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,Trūksta šio elemento / UOM mastelio šablono brūkšninio kodo. Naudojant tik prekės brūkšninį kodą.
+Scan an existing card and top it up without leaving the payment flow.,Nuskaitykite esamą kortelę ir papildykite ją neišeidami iš mokėjimo srauto.
+Scan Error,Nuskaitymo klaida
+Scan or enter a gift card code to check balance or redeem.,"Nuskaitykite arba įveskite dovanų kortelės kodą, kad patikrintumėte likutį arba išpirktumėte."
+Scan or paste the card code below.,Nuskaitykite arba įklijuokite toliau pateiktą kortelės kodą.
+Scan QR Code/Barcode,Nuskaitykite QR kodą / brūkšninį kodą
+Scan with camera,Nuskaitymas fotoaparatu
+Scan-First Flow,Nuskaitymo pirmasis srautas
+Scanned Code:,Nuskaitytas kodas:
+Scanning for: {0},Nuskaitoma: {0}
+Scanning items,Elementų nuskaitymas
+Scan-Ready,Nuskaitymui paruošta
+Scope,Taikymo sritis
+Scope: All Profiles,Taikymo sritis: visi profiliai
+Scope: Current Profile,Taikymo sritis: dabartinis profilis
+Scope: Specific Profile,Taikymo sritis: konkretus profilis
+Search,Ieškoti
+Search Account,Ieškoti paskyros
+Search an invoice and continue the return flow without extra steps.,Ieškokite sąskaitos faktūros ir tęskite grąžinimo srautą be papildomų veiksmų.
+Search customer,Ieškokite kliento
+Search invoices or customers,Ieškokite sąskaitų faktūrų ar klientų
+Search item,Ieškokite elemento
+Search item / code,Ieškokite prekės / kodo
+Search items or barcode,Ieškokite elementų arba brūkšninio kodo
+Search Mpesa Payments,Ieškoti Mpesa Payments
+Search return invoices or customers,Ieškokite grąžinimo sąskaitų faktūrų arba klientų
+Search supplier,Ieškokite tiekėjo
+Search unpaid invoices or customers,Ieškokite neapmokėtų sąskaitų faktūrų arba klientų
+Secure context (HTTPS or localhost) is required for camera access.,"Norint pasiekti kamerą, reikalingas saugus kontekstas (HTTPS arba localhost)."
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,"Norint pasiekti fotoaparatą, reikalingas saugus kontekstas (HTTPS). Norėdami pasiekti kamerą, naudokite HTTPS."
+Select,Pasirinkite
+Select a cashier first.,Pirmiausia pasirinkite kasininką.
+Select a customer,Pasirinkite klientą
+Select a customer to use coupon,"Pasirinkite klientą, kuris naudos kuponą"
+Select a printer to use QZ silent printing.,"Pasirinkite spausdintuvą, kad galėtumėte naudoti tylųjį QZ spausdinimą."
+Select Batch,Pasirinkite Paketas
+Select Columns to Display,Pasirinkite rodytini stulpeliai
+Select items to sell,"Pasirinkite prekes, kurias norite parduoti"
+Select Payment,Pasirinkite Mokėjimas
+Select Payment Account,Pasirinkite Mokėjimo sąskaita
+Select printer,Pasirinkite spausdintuvą
+Select Return Invoice,Pasirinkite Grąžinti sąskaitą faktūrą
+Select S.O,Pasirinkite S.O
+Select Sales Orders,Pasirinkite Pardavimo užsakymai
+Select the cashier who is taking over this terminal.,"Pasirinkite kasininką, kuris perima šį terminalą."
+Selected,Pasirinkta
+Selected movement type is not allowed by POS Profile.,Pasirinkto judėjimo tipo neleidžia POS profilis.
+Selected Payments,Pasirinkti mokėjimai
+Sensitive actions kept away from quick taps.,Jautrūs veiksmai buvo apsaugoti nuo greito bakstelėjimo.
+Serial,Serialas
+Serial Numbers,Serijos numeriai
+Server CPU Usage:,Serverio procesoriaus naudojimas:
+Server Health,Serverio sveikata
+Server Memory Usage:,Serverio atminties naudojimas:
+Server Metrics,Serverio metrika
+Server Uptime:,Serverio veikimo laikas:
+Service Charges,Paslaugos mokesčiai
+Session,Sesija
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,"Vartotojo formoje nustatykite kiekvieną kasininko PIN kodą ir išsaugokite terminalo narius, priskirtus POS profilio naudotojui."
+Settings,Nustatymai
+Settings in this section update the POS workspace without changing the current route.,Šio skyriaus nustatymai atnaujina POS darbo sritį nekeičiant dabartinio maršruto.
+Setup complete!,Sąranka baigta!
+Share,Dalintis
+Shared terminal,Bendras terminalas
+Shift Closed Snapshot,Shift Uždarytas momentinis vaizdas
+Shift Overview,„Shift“ apžvalga
+Show,Rodyti
+Show cart on customer-facing screen,Rodyti krepšelį į klientą nukreiptame ekrane
+Show last invoice rate,Rodyti paskutinės sąskaitos faktūros įkainį
+Show rate info,Rodyti tarifų informaciją
+Show Repair Candidates,Rodyti kandidatus į remontą
+Show search tools,Rodyti paieškos įrankius
+Show the active cart on a customer-facing screen,Rodyti aktyvų krepšelį į klientą nukreiptame ekrane
+Showing {0}-{1} of {2},Rodoma {0}-{1} iš {2}
+Showing 0 of 0,Rodoma 0 iš 0
+Shows the distribution of invoices per currency,Rodo sąskaitų faktūrų pasiskirstymą pagal valiutą
+Sign out of the current POS session,Atsijunkite nuo dabartinės POS sesijos
+Size:,Dydis:
+Skipped Payments,Praleisti mokėjimai
+Skipping items without barcodes,Elementų praleidimas be brūkšninių kodų
+Slow Moving,Lėtas judėjimas
+Slow Moving Items,Lėtai judantys elementai
+Slow Queries:,Lėtos užklausos:
+Sold,Parduota
+Source,Šaltinis
+Source Cash Account (Optional Override),Šaltinio grynųjų pinigų sąskaita (pasirenkamas nepaisymas)
+Source Ex. Rate:,Šaltinis Pvz. Įvertinkite:
+Source Rate:,Šaltinio rodiklis:
+Specific Profile,Konkretus profilis
+Split Invoices,Išskaidytos sąskaitos faktūros
+Staff / Cashier Performance Report,Darbuotojų / kasos veiklos ataskaita
+Status,Būsena
+Stock,Atsargos
+Stock Information,Atsargų informacija
+Stock is lower than requested,Atsargos mažesnės nei prašoma
+Stock is lower than requested:\n{0},Atsargos mažesnės nei prašoma:\n{0}
+Stock Movement Report,Akcijų judėjimo ataskaita
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,Atsargų naujinys: {0} yra {1}. Pridėjus {2} atsargos bus žemiau nulio.
+Submit,Pateikti
+Submit & Print,Pateikti ir spausdinti
+Submit Deposit,Pateikti indėlį
+Submit Expense,Pateikite išlaidas
+Submitted,Pateikta
+Submitted Cash Movements,Pateikti pinigų pervedimai
+Submitted entries,Pateikti įrašai
+Successfully scanned:,Sėkmingai nuskaityta:
+Suggested,Siūloma
+Suggested Qty,Siūlomas kiekis
+Supervisor Access,Prižiūrėtojo prieiga
+Supervisor permissions unlock issuance and reloads,Prižiūrėtojo leidimai atrakina išdavimą ir įkėlimą iš naujo
+Supervisor Tools,Prižiūrėtojo įrankiai
+Supplier,Tiekėjas
+Supplier and dates are required.,Būtina nurodyti tiekėją ir datas.
+Supplier Invoices,Tiekėjo sąskaitos faktūros
+Supplier is required.,Reikalingas tiekėjas.
+Supplier name is required,Reikalingas tiekėjo pavadinimas
+Supplier Payments,Tiekėjo mokėjimai
+Supplier Purchase Summary,Tiekėjo pirkimo suvestinė
+Suppliers,Tiekėjai
+Suppliers not found,Tiekėjai nerasta
+Switch Camera,Perjungti fotoaparatą
+Switch Cashier,Perjungti kasą
+Switch the POS appearance theme,Perjunkite POS išvaizdos temą
+Switched to:,Perjungta į:
+Sync All Invoices,Sinchronizuoti visas sąskaitas faktūras
+Sync Offline Cash Movements ({0}),Sinchronizuoti grynųjų pinigų judėjimą neprisijungus ({0})
+Sync Offline Sales,Sinchronizuoti pardavimą neprisijungus
+Synced {0} offline cash movement(s).,Sinchronizuotas (-i) grynųjų pinigų judėjimas neprisijungus: {0}.
+Syncing items in background,Elementų sinchronizavimas fone
+System / Diagnostics,Sistema / Diagnostika
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","Sistemos veiksmai yra žemo dažnio priežiūros valdikliai, pvz., programos informacija, palaikymo diagnostika ir seanso valdikliai."
+System Information,Sistemos informacija
+System Status,Sistemos būsena
+Tables:,Lentelės:
+Tap the button below to redeem a gift card during checkout.,"Norėdami išpirkti dovanų kortelę, bakstelėkite toliau esantį mygtuką."
+Target,Tikslas
+Target Ex. Rate:,Tikslas Pvz. Įvertinkite:
+Target Rate:,Tikslinė norma:
+Tax,Mokesčiai
+Tax / Charges Report,Mokesčių / rinkliavų ataskaita
+Tax Heads,Mokesčių vadovai
+Taxable Amount,Apmokestinamoji suma
+Tendered,Konkursas
+Terminal,Terminalas
+Terminal & Devices,Terminalas ir įrenginiai
+Terminal locked,Terminalas užrakintas
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","Terminalo įrankiai veikia šią kasos stotį, į klientą nukreiptus ekranus ir būsimus spausdintuvo / įrenginio valdiklius."
+Territory not found,Teritorija nerasta
+The amount paid is not complete,Sumokėta suma nėra pilna
+The app stores data locally for offline use. This is called cache.,"Programa saugo duomenis vietoje, kad būtų galima naudoti neprisijungus. Tai vadinama talpykla."
+The invoice stayed in draft. Please review and submit it manually.,Sąskaita liko juodraštyje. Peržiūrėkite ir pateikite rankiniu būdu.
+The maximum discount allowed is,Didžiausia leistina nuolaida yra
+The quantity for {0} has been adjusted to the maximum available stock.,Kiekis {0} buvo pakoreguotas iki didžiausios turimos atsargos.
+The system could not retrieve the item details. Please try again.,Sistema negalėjo nuskaityti išsamios prekės informacijos. Bandykite dar kartą.
+These invoices will be synced when connection is restored,"Šios sąskaitos faktūros bus sinchronizuojamos, kai ryšys bus atkurtas"
+This action now opens inside the settings workspace.,Šis veiksmas dabar atidaromas nustatymų darbo srityje.
+This coupon already used !,Šis kuponas jau panaudotas!
+This invoice does not need change-allocation repair,Šios sąskaitos faktūros keitimo-paskirstymo taisymo nereikia
+This invoice is already repaired,Ši sąskaita faktūra jau pataisyta
+This is an item template. Please choose a variant.,Tai yra elemento šablonas. Prašome pasirinkti variantą.
+this item,šį elementą
+This POS page could not be opened offline because its code was not cached on this terminal yet.,"Šio POS puslapio nepavyko atidaryti neprisijungus, nes jo kodas dar nebuvo talpykloje šiame terminale."
+This Serial Number {0} has already been added!,Šis serijos numeris {0} jau pridėtas!
+Threshold,Slenkstis
+Time,Laikas
+Tip: Clear cache regularly to free up space and keep the app fast.,"Patarimas: reguliariai išvalykite talpyklą, kad atlaisvintumėte vietos ir programa veiktų greitai."
+Tip: Close unused tabs or apps to reduce lag.,"Patarimas: uždarykite nenaudojamus skirtukus ar programas, kad sumažintumėte delsą."
+Tip: Monitor slow queries and table size for optimal performance.,"Patarimas: stebėkite lėtas užklausas ir lentelės dydį, kad užtikrintumėte optimalų našumą."
+To Be Paid,Kad būtų sumokėta
+To Date,Iki datos
+Today,Šiandien
+Today Profit,Šiandien pelnas
+Today Sales,Šiandien pardavimai
+Toggle navigation drawer,Perjungti naršymo stalčių
+Toggle Theme,Perjungti temą
+Tools,Įrankiai
+Tools for customer-facing screens and terminal-specific actions.,"Įrankiai, skirti į klientą nukreiptiems ekranams ir konkrečiam terminalui atlikti."
+Top Brand,Populiariausias prekės ženklas
+Top Category,Aukščiausia kategorija
+Top Charge Head,Viršutinė įkrovimo galvutė
+Top Customers,Geriausi klientai
+Top Discount,Aukščiausia nuolaida
+Top Items by Location,Populiariausios prekės pagal vietą
+Top Margin,Viršutinė marža
+Top Pending,Į viršų Laukiama
+Top Profit Item,Geriausias pelno elementas
+Top Return Items,Populiariausios grąžinamos prekės
+Top Sales by Cashier,Populiariausi kasos pardavimai
+Top Supplier,Geriausias tiekėjas
+Top Suppliers by Spend,Geriausi tiekėjai pagal išlaidas
+Top Tables,Viršutinės lentelės
+Top Tax Head,Aukščiausias mokesčių vadovas
+Top Up Amount,Papildymo suma
+Top Up Card,Papildymo kortelė
+Top Up Mode,Papildymo režimas
+Top Variant,Aukščiausias variantas
+Total,Iš viso
+Total Amount,Bendra suma
+Total Change,Visiškas pasikeitimas
+Total Charges,Bendri mokesčiai
+Total In,Iš viso In
+Total Invoices,Iš viso sąskaitų faktūrų
+Total Items,Iš viso prekių
+Total Mpesa,Iš viso Mpesa
+Total Out,Total Out
+Total Payments,Iš viso mokėjimų
+Total Purchase,Visas pirkimas
+Total Selected :,Iš viso pasirinkta:
+Total Size,Bendras dydis
+Total Stock Qty,Bendras atsargų kiekis
+Total:,Iš viso:
+Totals by Invoice Currency,Sumos pagal sąskaitos faktūros valiutą
+Track how much cash was handed back to customers,"Stebėkite, kiek grynųjų buvo grąžinta klientams"
+"Track recent sales, collect unpaid balances, and reopen saved work","Stebėkite naujausius pardavimus, rinkkite neapmokėtus likučius ir vėl atidarykite išsaugotus darbus"
+Transaction ID,Operacijos ID
+Transfer,Perdavimas
+Try a different search term or clear the cart search.,Išbandykite kitą paieškos terminą arba išvalykite krepšelio paiešką.
+Try adjusting your search or filters,Pabandykite pakoreguoti paiešką arba filtrus
+Try another source or refresh the list.,Išbandykite kitą šaltinį arba atnaujinkite sąrašą.
+Try changing the date range or status filter.,Pabandykite pakeisti dienų seką arba būsenos filtrą.
+Type,Tipas
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,Neįmanoma pasiekti fotoaparato net su pagrindiniais nustatymais. Patikrinkite fotoaparato leidimus ir įrenginio suderinamumą.
+Unable to add offer item {0}. Please refresh and try again.,Nepavyko pridėti pasiūlymo elemento {0}. Atnaujinkite ir bandykite dar kartą.
+Unable to add offer item. Please refresh and try again.,Nepavyko pridėti pasiūlymo elemento. Atnaujinkite ir bandykite dar kartą.
+Unable to add scanned item.,Nepavyko pridėti nuskaityto elemento.
+Unable to create purchase order,Nepavyko sukurti pirkimo užsakymo
+Unable to delete draft invoice,Nepavyko ištrinti sąskaitos faktūros juodraščio
+Unable to fetch documents,Nepavyko gauti dokumentų
+Unable to fetch draft orders,Nepavyko gauti užsakymų juodraščių
+Unable to fetch invoice history,Nepavyko gauti sąskaitų faktūrų istorijos
+Unable to fetch M-Pesa payments,Nepavyko gauti M-Pesa mokėjimų
+Unable to fetch sales orders,Nepavyko gauti pardavimo užsakymų
+Unable to fetch unpaid invoices,Nepavyko gauti neapmokėtų sąskaitų faktūrų
+Unable to generate scale barcode,Nepavyko sugeneruoti mastelio brūkšninio kodo
+Unable to issue gift card.,Nepavyko išduoti dovanų kortelės.
+Unable to load cashier PIN status.,Nepavyko įkelti kasininko PIN būsenos.
+Unable to load document,Nepavyko įkelti dokumento
+Unable to load draft invoice,Nepavyko įkelti sąskaitos faktūros juodraščio
+Unable to load gift card balance.,Nepavyko įkelti dovanų kortelės balanso.
+Unable to load invoice details,Nepavyko įkelti išsamios sąskaitos faktūros
+Unable to load parked order,Nepavyko įkelti palikto užsakymo
+Unable to load the selected sales order,Nepavyko įkelti pasirinkto pardavimo užsakymo
+Unable to prepare document,Nepavyko parengti dokumento
+Unable to prepare return invoice,Nepavyko parengti grąžinimo sąskaitos
+Unable to print draft invoice,Nepavyko atspausdinti sąskaitos faktūros juodraščio
+Unable to print submitted invoice,Nepavyko atspausdinti pateiktos sąskaitos faktūros
+Unable to process document action,Nepavyko apdoroti dokumento veiksmo
+Unable to repair change allocation,Nepavyko pataisyti pakeitimo paskirstymo
+Unable to save cashier PIN.,Nepavyko išsaugoti kasininko PIN kodo.
+Unable to save the rate to the backend price list,Nepavyko išsaugoti kurso užpakaliniame kainoraštyje
+Unable to submit invoice,Nepavyko pateikti sąskaitos faktūros
+Unable to submit the selected payment,Nepavyko pateikti pasirinkto mokėjimo
+Unable to top up gift card.,Nepavyko papildyti dovanų kortelės.
+Unable to verify cashier PIN.,Nepavyko patvirtinti kasininko PIN kodo.
+Unallocated,Nepaskirstyta
+Unallocated:,Nepaskirstyta:
+Unavailable,Nepasiekiamas
+Unknown,Nežinoma
+Unknown Item,Nežinomas daiktas
+Unknown Warehouse,Nežinomas sandėlis
+Unlock POS,Atrakinkite POS
+Unpaid,Neapmokėta
+"Unselected payments stay unallocated first, then auto reconcile after submit.","Nepasirinkti mokėjimai pirmiausia lieka nepaskirstyti, o po to automatiškai suderinami."
+UOM,UOM
+UOM not found,UOM nerastas
+Update available,Galimas atnaujinimas
+Update Customer,Atnaujinkite klientą
+Update PIN,Atnaujinkite PIN kodą
+Update Price List Rate,Atnaujinti kainoraštį
+Updated,Atnaujinta
+Updates and app info that stay out of the cashier flow.,"Atnaujinimai ir programų informacija, kurios nepatenka į kasos srautą."
+Updates automatically,Atnaujina automatiškai
+Usage,Naudojimas
+Usage Stats,Naudojimo statistika
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,"Naudokite 4–8 skaitmenų PIN kodą, kad perjungtumėte kasą ir atrakintumėte terminalą."
+Use Cashier,Naudokite kasą
+Use date range to search for older invoices,"Jei norite ieškoti senesnių sąskaitų faktūrų, naudokite dienų seką"
+"Use one field for manual code entry, barcode scans, or QR scans.","Naudokite vieną lauką kodo įvedimui rankiniu būdu, brūkšninio kodo nuskaitymui arba QR nuskaitymui."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","Naudokite vieną darbo eigą likučiui tikrinti, naujai išleisti ir papildyti neišeidami iš POS."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","Naudokite šį skyrių, kai reikia atnaujinti, perdaryti arba atlikti diagnostikos peržiūrą talpykloje saugomus būtinų sąlygų duomenis."
+Use Western numerals,Naudokite vakarietiškus skaitmenis
+Used:,Naudota:
+Using basic camera settings due to device limitations,Naudojant pagrindinius fotoaparato nustatymus dėl įrenginio apribojimų
+Using cached customer balance,Talpykloje saugomo kliento balanso naudojimas
+Valid until,Galioja iki
+Variance %,Nuokrypis %
+Variants,Variantai
+Variant-wise,Variantų požiūriu
+Verify closing amounts for each payment method,Patikrinkite kiekvieno mokėjimo metodo uždarymo sumas
+View all,Žiūrėti viską
+View app information and current build details,Peržiūrėkite programos informaciją ir dabartinę kūrimo informaciją
+View Data Diagnostics,Peržiūrėkite duomenų diagnostiką
+View Details,Peržiūrėti išsamią informaciją
+View invoice details,Peržiūrėkite išsamią sąskaitos faktūros informaciją
+View notifications,Peržiūrėkite pranešimus
+View offline invoices,Peržiūrėkite sąskaitas faktūras neprisijungus
+View restricted POS insights,Peržiūrėkite apribotas POS įžvalgas
+Void Amount,Tuščia suma
+Void Count,Tuščiųjų skaičius
+Voids,Tuštumos
+Waiting for cart items,Laukiama krepšelio prekių
+Waiting for payment...,Laukiama apmokėjimo...
+Walk-in Customer,„Walk-in“ klientas
+Warehouse,Sandėlis
+Warning: High cache usage may affect performance.,Įspėjimas: didelis talpyklos naudojimas gali turėti įtakos našumui.
+Warning: High lag may indicate heavy processing or browser slowness.,Įspėjimas: didelė delsa gali rodyti sunkų apdorojimą arba lėtą naršyklę.
+Week ?,Savaitė?
+Week-wise,Savaitės požiūriu
+Weight (g),Svoris (g)
+Weight (grams),Svoris (gramais)
+We'll let you know if an invoice fails to submit,"Informuosime, jei sąskaitos faktūros pateikti nepavyks"
+Workflow,Darbo eiga
+Write off amount cannot exceed the POS profile maximum of {0},Nurašymo suma negali viršyti maksimalios POS profilio {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,Nurašymo suma viršija leistiną limitą ({0}). Prašome pridėti mokėjimą už likusią sumą.
+Yes,Taip
+"Yes, Cancel sale","Taip, atšaukti pardavimą"
+"Yes, Close","Taip, Uždaryti"
+You are not allowed to print draft invoices,Jums neleidžiama spausdinti sąskaitų faktūrų juodraščio
+You are offline. Add Payment will work again when the connection is restored.,"Esate neprisijungęs. Pridėti mokėjimą vėl veiks, kai ryšys bus atkurtas."
+You have no notifications right now,Šiuo metu neturite jokių pranešimų
+Your Cart,Jūsų krepšelis

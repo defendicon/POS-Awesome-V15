@@ -1,0 +1,1362 @@
+POS Awesome,POS страхотно
+Fetch Items Directly from Server,Извличане на артикули директно от сървъра
+Menu,Меню
+Actions,Действия
+Close Shift,Затворете Shift
+End current session,Край на текущата сесия
+Print Last Invoice,Отпечатайте последната фактура
+Reprint previous transaction,Повторно отпечатване на предишна транзакция
+Sync Offline Invoices,Синхронизиране на офлайн фактури
+Upload pending transactions,Качете чакащи транзакции
+Go Online,Отидете онлайн
+Go Offline,Преминете офлайн
+Disable offline mode,Деактивирайте офлайн режима
+Work without server connection,Работете без връзка със сървъра
+Clear Cache,Изчистване на кеша
+Remove local data and refresh,Премахнете локалните данни и опреснете
+About,За
+App information,Информация за приложението
+Language,език
+Change interface language,Промяна на езика на интерфейса
+Light Mode,Светлинен режим
+Dark Mode,Тъмен режим
+Switch theme appearance,Превключване на външния вид на темата
+Logout,Изход
+Sign out of session,Излезте от сесията
+Select Language,Изберете език
+Choose your preferred language for the POS interface,Изберете предпочитания от вас език за POS интерфейса
+Language will be changed to,Езикът ще бъде променен на
+Cancel,Отказ
+Change Language,Промяна на езика
+Close,затвори
+Cannot change language - same language selected,Не може да се промени езикът - избран е същият език
+Language changed successfully! Reloading...,Езикът е сменен успешно! Презарежда се...
+Failed to change language,Неуспешна промяна на езика
+Unknown error,Неизвестна грешка
+- Total Unallocated,- Общо неразпределени
+* Required,* Задължително
+{0} (Qty: {1}),{0} (Брой: {1})
+{0} actions,{0} действия
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} има само {1} на склад. Вие поискахте {2}. Коригирайте количеството или презапасете.
+{0} offline invoice{1} pending,{0} офлайн фактура{1} чака
+{0} offline invoice{1} saved as draft,{0} офлайн фактура{1} запазена като чернова
+{0} offline invoice{1} synced,{0} офлайн фактура{1} е синхронизирана
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,преди {0} дни
+{0}h ago,преди {0} ч
+{0}m ago,преди {0} мин
+A POS supervisor is required for this action.,За това действие е необходим POS супервайзер.
+Access,Достъп
+Account,акаунт
+Account is overdrawn,Сметката е овърдрафт
+Acknowledge the error to resume scanning,"Потвърдете грешката, за да продължите сканирането"
+Acknowledge the error to resume scanning.,"Потвърдете грешката, за да продължите сканирането."
+Across,Напречно
+Action,Действие
+Active sale,Активна продажба
+add,добавете
+Add items from the selector to start building this sale.,"Добавете елементи от селектора, за да започнете да изграждате тази продажба."
+Add more value to an existing gift card,Добавете повече стойност към съществуваща карта за подарък
+Add New Address,Добавете нов адрес
+Add new customer,Добавете нов клиент
+Add on New Line,Добавяне на нов ред
+Add Payment,Добавяне на плащане
+Add payment to invoice,Добавете плащане към фактурата
+Add/Edit Coupon Conditions,Добавяне/редактиране на условия за купони
+Additional Discount,Допълнителна отстъпка
+Additional Discount %,Допълнителна отстъпка %
+Address Line 1,"Адрес, ред 1"
+Address not found,Адресът не е намерен
+Adjust the quantity or enable negative stock to continue.,"Коригирайте количеството или активирайте отрицателния запас, за да продължите."
+Adjustment,Корекция
+After returns,След връщане
+Against,Против
+Against Name,Срещу името
+Age Bracket,Възрастова група
+All,Всички
+All Caught Up!,Всички хванахте!
+All invoices are synchronized,Всички фактури са синхронизирани
+All pending invoices are up to date,Всички чакащи фактури са актуални
+All Profiles,Всички профили
+All Synchronized,Всички синхронизирани
+All visible invoices are fully settled.,Всички видими фактури са напълно уредени.
+All Warehouses,Всички складове
+Allowed UOM is {0},Разрешеният UOM е {0}
+Always fetch items from server (ignore local cache),Винаги извличайте елементи от сървъра (игнорирайте локалния кеш)
+Amount,Сума
+Amount already received,Вече получена сума
+Amount exceeds profile cash movement max amount.,Сумата надвишава максималната сума за движение на парични средства в профила.
+Amount must be greater than zero.,Сумата трябва да е по-голяма от нула.
+Amount received from customer,Получена сума от клиента
+Appearance and user-level preferences for the current session.,Облик и предпочитания на потребителско ниво за текущата сесия.
+Applied,Приложено
+Apply,Кандидатствайте
+Apply Gift Card,Приложете карта за подарък
+Apply Offer,Приложете оферта
+Apply On,Прилагане на
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,"Приложете само сумата, която искате да осребрите върху тази фактура. Оставащият баланс остава на картата."
+Apply Redemption,Прилагане на Redemption
+Applying,Кандидатстване
+Apps,Приложения
+Are you sure you want to close? All entered data will be lost.,"Сигурни ли сте, че искате да затворите? Всички въведени данни ще бъдат загубени."
+Attributes (Size/Color),Атрибути (размер/цвят)
+Auto Allocate Payment Amount,Автоматично разпределяне на сумата за плащане
+Auto Reconcile,Автоматично съгласуване
+Auto reconciliation completed after payment submit.,Автоматичното съгласуване приключи след изпращане на плащането.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,Автоматичното съгласуване завърши. Разпределено: {0}{1}. Оставащи неуредени: {0}{2}.
+Available Actions,Налични действия
+Available QTY,Налични БР
+Available:,Налични:
+Average Basket,Средна кошница
+Average Bill,Средна сметка
+Average Ticket,Среден билет
+Avg Bill,Средна сметка
+Avg Invoice,Средна фактура
+Avg Invoice Profit,Средна печалба от фактура
+Avg Invoice Value,Средна стойност на фактурата
+Avg Purchase Frequency,Средна честота на покупки
+Awesome,страхотно
+Awesome Dashboard,Страхотно табло за управление
+Awesome Dashboard is disabled for the selected POS Profile.,Awesome Dashboard е деактивирано за избрания POS профил.
+Awesome Dashboard is unavailable for the selected scope.,Awesome Dashboard не е достъпно за избрания обхват.
+Awesome Dashboard is visible only to POS supervisors.,Awesome Dashboard се вижда само от POS супервайзорите.
+Back,Назад
+Back Office Cash Account,Парична сметка в Back Office
+Back Office Cash Account (Optional Override),Сметка в брой в бек офис (замяна по избор)
+Back office cash account is required.,Изисква се касова сметка в бек офиса.
+Back to {0},Назад към {0}
+Background processing did not finish in time.,Обработката на заден план не завърши навреме.
+Background processing failed for Invoice {0}: {1},Неуспешна обработка на заден план за фактура {0}: {1}
+Background Submission Failed,Неуспешно изпращане на заден план
+Background sync interval (seconds),Интервал на фоново синхронизиране (секунди)
+Balance,Баланс
+Balance will be updated when connection is restored,"Балансът ще бъде актуализиран, когато връзката бъде възстановена"
+Balances still pending,Салда все още чакат
+Barcode,Баркод
+Barcode / QR Ready,Готов за баркод / QR
+Barcode Label Printing,Печат на баркод етикети
+Base Paid:,Основно платено:
+Base Recv:,Базово приемане:
+Base:,Основа:
+Basic Information,Основна информация
+Batch,Партида
+Batch Information,Информация за партидата
+Before any return workflow,Преди всеки работен процес за връщане
+Before returns,Преди завръщания
+Best Day,Най-добър ден
+Best Seller,Бестселър
+Book expense or deposit from active shift.,Запишете разход или депозит от активна смяна.
+Branch / Location-wise Report,Отчет за клон / местоположение
+Brand-wise,Марково
+Breakdown,Разбивка
+Browse,Прегледайте
+Build Time:,Време за изграждане:
+Built with Frappe,Създаден с Frappe
+Bundle,Пакет
+Buying Price,Покупна цена
+Cache cleared successfully,Кешът е изчистен успешно
+Cache Usage,Използване на кеша
+cache used,използван кеш
+Calculating...,Изчислява се...
+Camera Access Required,Изисква се достъп до камерата
+Camera access was aborted. Please try again.,"Достъпът до камерата беше прекратен. Моля, опитайте отново."
+Camera constraints not supported by your device. Trying fallback settings...,Ограниченията на камерата не се поддържат от вашето устройство. Опит за резервни настройки...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,Камерата е заета или блокирана от друго приложение/раздел. Затворете другите приложения на камерата и опитайте отново.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,"Разрешението за камерата е отказано. Моля, разрешете достъп до камерата в настройките на браузъра си и опреснете страницата."
+Camera scanner is locked until the current error is acknowledged,"Скенерът на камерата е заключен, докато текущата грешка не бъде потвърдена"
+Camera started but the video stream did not load in time. Please try again.,"Камерата стартира, но видеопотокът не се зареди навреме. Моля, опитайте отново."
+Cancel cash movement {0}?,Да отмените движението на пари в брой {0}?
+Cancel Payment,Отказ от плащането
+Cancel Sale,Отказ от продажба
+Cancel Sale ?,Отмяна на продажбата?
+Cancelled,Отменено
+Cannot add an item with zero or negative quantity.,Не може да се добави артикул с нулево или отрицателно количество.
+Cannot clear cache while offline,"Не може да се изчисти кеша, докато сте офлайн"
+Cannot redeem customer credit more than invoice total,Не може да се осребри клиентски кредит повече от общата сума по фактурата
+Cannot redeem gift cards more than invoice total,Не могат да се осребряват карти за подарък повече от общата сума по фактурата
+Cannot Save Offline Invoice:,Не може да се запази офлайн фактура:
+Cannot Save Offline Payment:,Не може да се запази офлайн плащане:
+Card,карта
+Card / Online,Карта / Онлайн
+Card health after the last live lookup,Здраве на картата след последното търсене на живо
+Cards,Карти
+Cart,Количка
+Cash,Парични средства
+Cash back to customers,Връщане на пари на клиентите
+Cash Collections,Парични събирания
+Cash Deposit is disabled for this POS Profile.,Депозитът в брой е деактивиран за този POS профил.
+Cash Drawer Snapshot,Моментна снимка на чекмеджето за пари
+Cash In Hand,Пари в ръка
+Cash Movement,Парично движение
+Cash movement cancelled,Движението на пари е отменено
+Cash movement deduction applied,Прилага се приспадане при движение на пари в брой
+Cash movement deleted,Движението на пари в брой е изтрито
+Cash movement is disabled for this POS Profile.,Движението на пари в брой е деактивирано за този POS профил.
+Cash Movement is disabled in current POS Profile.,Движението на пари е деактивирано в текущия POS профил.
+Cash movement saved offline,Паричните движения са запазени офлайн
+Cash movement submitted,Подадено движение на пари в брой
+Cash Movements,Парични движения
+Cash payment cannot be less than invoice total when partial payment is not allowed,"Плащането в брой не може да бъде по-малко от общата сума по фактурата, когато не е разрешено частично плащане"
+Cash returned after payment,Пари се връщат след плащане
+Cashier,Касиер
+Cashier Access,Достъп до каса
+Cashier identity and appearance preferences.,Идентичност на касата и предпочитания за външен вид.
+Cashier PIN,ПИН на касата
+Cashier PIN saved successfully.,ПИН кодът на касата е запазен успешно.
+Cashiers,Касиерите
+Cashier-wise,Касиерски
+Categories,Категории
+Category,Категория
+Category / Brand / Variant Report,Доклад за категория / марка / вариант
+Category-wise,Категорично
+Category-wise Margin,Марж по категория
+Certificate,Сертификат
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,Сертификатът липсва или не е надежден. QZ може да покаже диалогови прозорци за потвърждение.
+Certificate is trusted. Silent QZ printing is active.,Сертификатът е надежден. Безшумният QZ печат е активен.
+Change,промяна
+Change allocation repaired,Промяната на разпределението е коригирана
+Change Price,Промяна на цената
+Change Return,Промяна Връщане
+Change Returned,Промяната е върната
+Change terminal cashier,Сменете касата на терминала
+Charge Heads,Глави за зареждане
+Charges,Такси
+Charges not found,Таксите не са намерени
+Check Balance,Проверка на баланса
+Check balance for any card. Supervisors can issue and top up cards here.,Проверете баланса за всяка карта. Супервайзорите могат да издават и зареждат карти тук.
+Check balance only,Проверете само баланса
+Check for new commits,Проверете за нови ангажименти
+Check for Updates,Проверете за актуализации
+Check live balance before applying redemption,"Проверете баланса на живо, преди да приложите обратно изкупуване"
+Check live balance before redemption,Проверете баланса на живо преди осребряване
+Checking...,Проверка...
+Cheque/Reference Date,Чек/референтна дата
+Cheque/Reference No,Чек/референтен номер
+Choose the cashier currently operating this terminal.,"Изберете касиера, който в момента управлява този терминал."
+City,град
+Clear,ясно
+Clear All,Изчистване на всички
+Clear all barcode items,Изчистете всички елементи с баркод
+Clear all purchase order items,Изчистете всички елементи от поръчката за покупка
+Clear Search,Изчистване на търсенето
+Clearing local cache...,Изчистване на локалния кеш...
+Click to refresh,"Кликнете, за да опресните"
+Client CPU Lag:,Забавяне на процесора на клиента:
+Client Memory Usage:,Използване на паметта на клиента:
+Client Metrics,Клиентски показатели
+Close about dialog,Затваряне на диалоговия прозорец относно
+Close cashier switcher,Затворете превключвателя на касата
+Close closing shift dialog,Затваряне на диалоговия прозорец за затваряне на смени
+Close column selector,Затворете селектора на колони
+Close Dialog,Затваряне на диалоговия прозорец
+Close drafts dialog,Затваряне на диалоговия прозорец с чернови
+Close invoice details dialog,Затваряне на диалоговия прозорец с подробности за фактурата
+Close invoice management,Затворете управлението на фактурите
+Close offline invoices dialog,Затваряне на диалоговия прозорец за офлайн фактури
+Close packing list dialog,Затваряне на диалоговия прозорец на опаковъчния списък
+Close returns dialog,Затворете диалоговия прозорец за връщане
+Close sales orders dialog,Затворете диалоговия прозорец за поръчки за продажба
+Close Scanner,Затваряне на скенера
+Close scanner dialog,Затваряне на диалоговия прозорец на скенера
+Close Settings,Затворете настройките
+Closing Amount,Крайна сума
+Closing POS Shift,Затваряне на POS Shift
+Closing Snapshot Available,Налична е моментна снимка при затваряне
+Code,Код
+Code scanned successfully,Кодът е сканиран успешно
+COGS,COGS
+Collapse item details,Свиване на подробностите за елемента
+Collected,Събрани
+Cols,Cols
+Columns,Колони
+commits,ангажира
+Completed and active sales in this range,Завършени и активни продажби в този асортимент
+Completed returns will appear here.,Завършените връщания ще се показват тук.
+Confirm,Потвърдете
+Confirm Close,Потвърдете затваряне
+Confirm Mobile Number,Потвърдете мобилен номер
+Confirm PIN,Потвърдете PIN
+Connect,Свържете се
+Connect printer and manage certificate,Свържете принтера и управлявайте сертификата
+Connecting to QZ Tray...,Свързване към QZ Tray...
+Connection problem while submitting invoice,Проблем с връзката при изпращане на фактура
+Connections:,Връзки:
+Connectivity and cached prerequisite status were rechecked.,Свързването и състоянието на кешираните предпоставки бяха проверени отново.
+Continue Editing,Продължете с редактирането
+Could not fetch latest balance from server,Не може да се извлече последното салдо от сървъра
+Count,Брой
+Country,държава
+Coupon,Купон
+Coupons,Купони
+Cover,Капак
+CPU Cores:,CPU ядра:
+Create,Създавайте
+Create and load a new prepaid card,Създайте и заредете нова предплатена карта
+Create and preload a new gift card,Създайте и заредете предварително нова карта за подарък
+Create Bill,Създайте Бил
+Create Customer,Създаване на клиент
+Create New Item,Създаване на нов елемент
+Create or change your PIN,Създайте или променете вашия ПИН
+Create PIN,Създайте ПИН
+Create POS Opening Shift,Създайте смяна на отваряне на POS
+Create Purchase Order,Създаване на поръчка за покупка
+Create Return,Създаване на връщане
+Create return from invoice,Създайте връщане от фактура
+Create Supplier,Създаване на доставчик
+Credit and Output,Кредит и изход
+Credit Note,Кредитна бележка
+Credit Outstanding,Неизплатен кредит
+Credit sales remaining to be collected,Продажбите на кредит остават за събиране
+Critical,Критичен
+Currency,Валута
+Current,Текущ
+Current Event Loop Lag:,Текущо забавяне на цикъла на събитията:
+Current Month,Текущ месец
+Current PIN,Актуален ПИН
+Current Profile,Текущ профил
+Current redeemable value on the gift card,Текуща стойност за осребряване на картата за подарък
+Current User,Текущ потребител
+Custom,По поръчка
+Custom Due Days,Персонализирани дни на падеж
+Custom items per page,Персонализирани елементи на страница
+Customer,Клиент
+Customer already selected,Клиентът вече е избран
+Customer Balance,Клиентски баланс
+Customer balance unavailable offline,Клиентският баланс не е наличен офлайн
+Customer created successfully.,Клиентът е създаден успешно.
+Customer creation failed.,Създаването на клиент е неуспешно.
+Customer Details,Данни за клиента
+Customer display channel is missing,Липсва клиентски канал за показване
+Customer display was blocked. Please allow pop-ups for this site.,"Дисплеят на клиента беше блокиран. Моля, разрешете изскачащи прозорци за този сайт."
+Customer group is required,Необходима е клиентска група
+Customer is required to add payment,От клиента се изисква да добави плащане
+Customer Name is required,Необходимо е име на клиента
+Customer not selected,Клиентът не е избран
+Customer Report,Доклад на клиента
+Customer saved offline,Клиентът е запазен офлайн
+Customer Screen,Екран на клиента
+Customer territory is required,Необходима е клиентска територия
+Customer updated successfully.,Клиентът е актуализиран успешно.
+Customer-facing tools and printer setup.,Инструменти за обслужване на клиента и настройка на принтера.
+Customers,Клиенти
+Customers not found,Клиенти не са намерени
+Daily cashier actions without scrolling.,Ежедневни касиерски действия без превъртане.
+Daily Sales,Ежедневни продажби
+Daily Sales Summary,Резюме на ежедневните продажби
+Data loaded in form. Review and submit.,"Данни, заредени във формуляр. Прегледайте и изпратете."
+Database Health,Здраве на базата данни
+Database health affects overall system speed and reliability.,Здравето на базата данни влияе върху цялостната скорост и надеждност на системата.
+Database Info,Информация за база данни
+Date,Дата
+Day ?,Ден?
+days,дни
+Day-wise (MTD),Дневно (MTD)
+Day-wise Movement,Движение през деня
+Dead Stock,Мъртъв запас
+Dead Stock Items,Неизползвани артикули
+Decrease quantity,Намаляване на количеството
+Default,По подразбиране
+Default:,По подразбиране:
+Delete,Изтриване
+Delete cancelled cash movement {0}?,Да се ​​изтрие ли отменено движение на пари {0}?
+Delete Draft,Изтриване на черновата
+Delete draft invoice,Изтриване на чернова на фактура
+Delete draft invoice {0}?,Изтриване на чернова на фактура {0}?
+Delete Invoice,Изтриване на фактура
+Delete offline invoice,Изтриване на офлайн фактура
+Delivered,Доставено
+Delivery Charges,Такси за доставка
+Delivery Information,Информация за доставка
+Delivery Note {0} created,Бележката за доставка {0} е създадена
+Delivery note created,Създадена е бележката за доставка
+Deployed Bundle:,Разположен пакет:
+Deposit,Депозит
+Description,Описание
+Detailed Supplier Breakdown,Подробна разбивка на доставчика
+Detecting formats:,Откриване на формати:
+Device Memory:,Памет на устройството:
+Difference,Разлика
+Difference (In Company Currency),Разлика (във фирмена валута)
+Disable offline mode first to recheck live connectivity.,"Първо деактивирайте офлайн режима, за да проверите отново връзката на живо."
+Disconnect,Прекъснете връзката
+discount,отстъпка
+Discount %,% отстъпка
+Discount / Void / Return Report,Отстъпка/Анулиран/Доклад за връщане
+Discount Amount,Сума на отстъпката
+Discount limited by POS Profile,Отстъпката е ограничена от ПОС профил
+Discounted Invoices,Фактури с отстъпка
+Discounts,Отстъпки
+Dismiss,Отхвърляне
+Download Certificate,Изтегляне на сертификат
+Draft,Чернова
+Draft invoice deleted,Проектофактурата е изтрита
+Draft source,Източник на чернова
+Drafts,Чернови
+Due {0},Краен срок: {0}
+Due Date,Краен срок
+Duplicate,Дубликат
+Edit customer,Редактиране на клиента
+Edit discount amount,Редактиране на размера на отстъпката
+Edit discount percentage,Редактиране на процента на отстъпката
+Edit Gift Application,Редактиране на заявление за подарък
+Edit item name,Редактиране на името на елемента
+Edit quantity,Редактиране на количеството
+Edit rate,Редактиране на процент
+Edit unit of measure,Редактиране на мерната единица
+Edited,Редактирано
+Employee,Служител
+Enable background sync,Активирайте фоновото синхронизиране
+Enable Customer Display in POS Profile first.,Първо активирайте показването на клиента в POS профил.
+Enter a PIN.,Въведете ПИН.
+Enter a valid grams value,Въведете валидна стойност в грамове
+Enter new price list rate,Въведете нова ценова листа
+Enter Quantity,Въведете количество
+Enter the cashier PIN to continue.,"Въведете ПИН кода на касата, за да продължите."
+Enter the current PIN first.,Първо въведете текущия ПИН.
+"Enter the current PIN, then choose a new one.","Въведете текущия ПИН, след което изберете нов."
+Enter valid grams for scale barcode,Въведете валидни грамове за баркод на везната
+Entries,Вписвания
+Error accessing camera:,Грешка при достъпа до камерата:
+Error calculating prices,Грешка при изчисляване на цените
+Error fetching customer balance,Грешка при извличане на клиентския баланс
+Error in change calculations!,Грешка в изчисленията на промените!
+Error Loading Data,Грешка при зареждане на данни
+Error loading invoice details,Грешка при зареждането на данните за фактурата
+Error processing invoice,Грешка при обработката на фактурата
+Error processing payment,Грешка при обработката на плащането
+Error searching invoices,Грешка при търсене на фактури
+Error submitting invoice:,Грешка при изпращане на фактура:
+Error submitting invoice: {0},Грешка при изпращане на фактура: {0}
+Error submitting invoice: No response from server,Грешка при изпращане на фактура: Няма отговор от сървъра
+Error updating currency,Грешка при актуализиране на валутата
+Error updating item details,Грешка при актуализирането на подробностите за артикула
+Est. Purchase,Прогн. Покупка
+Est. Value,Прогн. Стойност
+Event-loop lag measures how busy your browser is. Lower is better.,Забавянето на цикъла на събития измерва колко натоварен е вашият браузър. По-ниско е по-добре.
+Every,Всеки
+Exchange Rate,Обменен курс
+Expand item details,Разгънете подробностите за елемента
+Expected Amount (In Company Currency),Очаквана сума (във фирмена валута)
+Expected Cash,Очаквани пари в брой
+Expected cash on hand grouped by currency,"Очаквани пари в брой, групирани по валута"
+Expected vs Actual,Очаквано срещу действително
+Expense,Разход
+Expense Account (Optional Override),Разходна сметка (замяна по избор)
+Expense account is required.,Необходима е разходна сметка.
+Expenses and deposits posted during this shift,"Разходи и депозити, осчетоводени по време на тази смяна"
+Expired,Изтекъл
+Failed to auto reconcile payments.,Неуспешно автоматично съгласуване на плащанията.
+Failed to cancel cash movement,Неуспешно анулиране на движението на пари в брой
+Failed to clear cache,Неуспешно изчистване на кеша
+Failed to create item,Неуспешно създаване на елемент
+Failed to create supplier,Неуспешно създаване на доставчик
+Failed to delete cash movement,Неуспешно изтриване на движение на пари в брой
+Failed to generate scale barcode. Using item barcode only.,Неуспешно генериране на баркод на везната. Използва се само баркод на артикул.
+Failed to load cash movement context.,Неуспешно зареждане на контекста на движение на пари в брой.
+Failed to load dashboard data.,Неуспешно зареждане на данните от таблото.
+Failed to reload invoice from server,Неуспешно презареждане на фактура от сървъра
+Failed to submit cash movement,Неуспешно изпращане на движение на пари в брой
+Failed to sync offline cash movements,Неуспешно синхронизиране на офлайн парични движения
+Fast cashier actions for active shifts.,Бързи касиерски действия за активни смени.
+Fast Moving Items,Бързо движещи се предмети
+Fees,Такси
+Fetch the latest offline prerequisite updates,Изтеглете най-новите предпоставки за офлайн актуализации
+Find a sales order quickly and load it into the current sale.,Намерете бързо поръчка за продажба и я заредете в текущата продажба.
+Fixing payment amounts for return invoice...,Фиксиране на суми за плащане за фактура за връщане...
+Flash Off,Светкавица изключена
+Flash On,Светкавицата е включена
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","За артикули „Пакет продукти“, склад, сериен номер и партиден номер ще бъдат взети под внимание от таблицата „Опаковъчен списък“. Ако складът и номерът на партида са едни и същи за всички опаковъчни артикули за всеки артикул от „Пакет продукти“, тези стойности могат да бъдат въведени в главната таблица с артикули; стойностите ще бъдат копирани в таблицата „Опаковъчен списък“."
+Free,безплатно
+Free Qty,Безплатно кол
+Frequency,Честота
+from,от
+From Date,От дата
+Fulfillment Details,Подробности за изпълнение
+Full Name,Пълно име
+Gain,печалба
+Generate a fresh prepaid card and start it with an opening balance.,Генерирайте нова предплатена карта и я стартирайте с начален баланс.
+Generate and install the certificate to allow fully silent printing without trust prompts.,"Генерирайте и инсталирайте сертификата, за да позволите напълно безшумен печат без подкани за доверие."
+Generate Certificate,Генериране на сертификат
+Generated scale barcode: {0},Генериран баркод на везната: {0}
+Get Payments,Получавайте плащания
+Gift Card,Подаръчна карта
+Gift card amount must be greater than zero.,Сумата на подаръчната карта трябва да е по-голяма от нула.
+Gift Card Code,Код на подаръчна карта
+Gift card code is required for redemption,Кодът на картата за подарък е необходим за осребряване
+Gift card code is required.,Изисква се код на подаръчна карта.
+Gift card issued successfully.,Картата за подарък е издадена успешно.
+Gift card loaded successfully.,Картата за подарък е заредена успешно.
+Gift Card Management,Управление на подаръчни карти
+Gift card payment,Плащане с подаръчна карта
+Gift card redemption requires an online connection,Осребряването на карта за подарък изисква онлайн връзка
+Gift card topped up successfully.,Картата за подарък е заредена успешно.
+Gift Cards,Подаръчни карти
+Go to Frappe Desk,Отидете до бюрото Frappe
+Grand Total,Обща сума
+Gross Margin,Брутен марж
+Gross Profit,Брутна печалба
+Gross Sales,Брутни продажби
+Group not found,Групата не е намерена
+"Grouped controls for terminal, UI, and session settings.","Групирани контроли за терминал, потребителски интерфейс и настройки на сесията."
+Grouped totals for each payment method and currency,Групирани суми за всеки начин на плащане и валута
+Hide,Скрий се
+Hide Gift Card,Скриване на подаръчна карта
+Hide Non Essential Fields,Скриване на несъществените полета
+Hide quantity decimals,Скриване на десетичните знаци за количеството
+Hide search tools,Скриване на инструментите за търсене
+Hide zero rated items,Скриване на артикули с нулева оценка
+High,високо
+History,История
+Hourly (Today),На час (днес)
+How this section works,Как работи този раздел
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","Ако остарели данни останат, отворете Настройки > Офлайн и синхронизиране и стартирайте Rebuild Offline Data отново, докато сте онлайн."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","Ако предупреждението продължава, отворете Настройки > Офлайн и синхронизиране, след което стартирайте Обновяване на офлайн данни или Възстановяване на офлайн данни."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Импортирайте сертификата в QZ Tray и рестартирайте QZ Tray на всяка POS машина.
+In,в
+In stock: {0},На склад: {0}
+Include Batch / Serial,Включете партида / сериен номер
+Include Price,Включете цена
+Increase quantity,Увеличете количеството
+IndexedDB,Индексирана база данни
+Initial Amount,Първоначална сума
+Initialize your shift with opening balances,Инициализирайте смяната си с начални салда
+Initializing application...,Приложението се инициализира...
+"Inspect cache, sync, and prerequisite status","Проверете състоянието на кеша, синхронизирането и предпоставките"
+Installed Applications,Инсталирани приложения
+Insufficient stock:\n{0},Недостатъчни наличности:\n{0}
+Invalid rate,Невалидна ставка
+Inventory Status Report,Доклад за състоянието на инвентара
+Invoice,Фактура
+Invoice {0} is Submitted,Фактура {0} е изпратена
+Invoice {0} processed successfully,Фактура {0} е обработена успешно
+Invoice {0} submission failed,Неуспешно изпращане на фактура {0}
+Invoice {0} was already submitted,Фактура {0} вече беше изпратена
+Invoice Adjustments,Корекции на фактури
+Invoice Change,Промяна на фактура
+Invoice Details,Данни за фактурата
+Invoice is still in draft after background submission.,Фактурата все още е чернова след изпращане на фона.
+Invoice Items,Фактурни артикули
+Invoice Management,Управление на фактури
+Invoice Mgmt,Управление на фактури
+Invoice saved offline,Фактурата е запазена офлайн
+Invoice submission failed,Неуспешно изпращане на фактура
+Invoice Submitted,Фактурата е изпратена
+"Invoice value settled by loyalty points, not cash collection","Стойността на фактурата се урежда чрез точки за лоялност, а не събиране на пари в брой"
+Invoices,Фактури
+Invoices already past due date,Фактурите вече са с просрочен срок
+Invoices saved as POS Invoices,"Фактури, запазени като POS фактури"
+Invoices still carrying balances,Фактурите все още носят салда
+Issue Mode,Режим на издаване
+Issue New Card,Издаване на нова карта
+Issue Workflow,Издаване на работен процес
+"Issue, top up, and check","Издайте, заредете и проверете"
+Item,Артикул
+Item / Product Sales Report,Отчет за продажби на артикул / продукт
+Item {0} added to invoice,Артикул {0} е добавен към фактурата
+Item '{0}' has no barcode,Артикул „{0}“ няма баркод
+Item Code,Код на артикул
+Item created successfully,Елементът е създаден успешно
+Item is out of stock,Артикулът е изчерпан
+Item Name,Име на елемент
+Item not found,Артикулът не е намерен
+Item order updated,Редът на артикулите е актуализиран
+Item Selector Settings,Настройки за избор на елемент
+Items,Предмети
+Items added in POS will appear here automatically.,"Артикулите, добавени в POS, ще се появят тук автоматично."
+Items added to invoice,"Артикули, добавени към фактурата"
+Items per page,Елементи на страница
+Items Sold,Продадени артикули
+Items/Invoice,Артикули/фактура
+Item-wise Profitability,Рентабилност по артикули
+Journal Entry,Вписване в дневник
+json,json
+Just now,Току-що
+Keep offline prerequisites healthy and recover stale data safely.,Поддържайте офлайн предпоставките здрави и възстановявайте остарели данни безопасно.
+Labels,Етикети
+"Language, theme, terminal tools, and session controls.","Език, тема, терминални инструменти и контроли за сесии."
+Last,Последно
+Last 14 Days (Paid vs Pending),Последните 14 дни (платени срещу чакащи)
+Last 14 Days Activity,Активност за последните 14 дни
+Last 14 Days Gross Profit,Брутна печалба за последните 14 дни
+Last 14 Days Purchases,Покупки от последните 14 дни
+Last 14 Days Tax/Charges,Данъци/такси за последните 14 дни
+Last sync:,Последна синхронизация:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},Последна синхронизация: {0} | добре: {1} | неуспешно: {2} | пропуснати: {3}
+Latest entries for current shift,Последни записи за текущата смяна
+Lead Time,Време за изпълнение
+Limited,Ограничен
+lines,линии
+List,списък
+Live Snapshot,Моментна снимка на живо
+Load a POS profile and cashier first.,Първо заредете POS профил и касиер.
+Load More Invoices,Зареждане на още фактури
+Load previously saved invoices,Заредете предварително запазени фактури
+Load Sale,Заредете разпродажба
+Load Sales Invoice,Заредете фактура за продажба
+Loading app data...,Данните за приложението се зареждат...
+Loading customer database...,Зарежда се клиентска база данни...
+Loading customers...,Клиентите се зареждат...
+Loading database stats...,Статистическите данни за базата данни се зареждат...
+Loading details...,Подробностите се зареждат...
+Loading invoice history...,Историята на фактурите се зарежда...
+Loading items...,Зареждане на елементи...
+Loading product catalog...,Продуктовият каталог се зарежда...
+Loading return invoices...,Фактурите за връщане се зареждат...
+Loading server CPU/memory usage...,Използването на процесора/паметта на сървъра се зарежда...
+Loading suppliers...,Доставчиците се зареждат...
+Loading unpaid invoices...,Неплатените фактури се зареждат...
+Loading view...,Изгледът се зарежда...
+Loading...,Зареждане...
+Local storage is unavailable. Switching to online-only mode.,Локалното хранилище не е налично. Превключване към режим само онлайн.
+localStorage,localStorage
+Location Performance,Ефективност на местоположението
+Locations,Местоположения
+Lock Screen,Заключен екран
+Lookup Workflow,Работен процес за търсене
+Loss,Загуба
+Low,ниско
+Low Stock,Нисък запас
+Low Stock Alerts,Сигнали за ниски запаси
+Low Stock Items,Артикули с ниска наличност
+Low Stock Threshold,Нисък праг на склад
+Low Stock Total,Нисък общ запас
+Lowest Margin,Най-нисък марж
+Low-frequency maintenance and system details.,Нискочестотна поддръжка и подробности за системата.
+Loyalty Redeemed,Изкупена лоялност
+Loyalty Redemption,Откупуване за лоялност
+Make New Payment,Направете ново плащане
+Manage all,Управлявайте всички
+Manage and synchronize your offline transactions,Управлявайте и синхронизирайте вашите офлайн транзакции
+Manage Cashier PIN,Управление на ПИН на касата
+"Manage offline tools, terminal controls, and maintenance from one workspace.","Управлявайте офлайн инструменти, терминални контроли и поддръжка от едно работно пространство."
+manual,ръководство
+"Manual codes, barcode scans, and QR scans work in the same field","Ръчните кодове, сканирането на баркод и QR сканирането работят в едно и също поле"
+Manual offline mode is enabled,Ръчният офлайн режим е активиран
+Margin,Марж
+Maximum available quantity is {0}. Quantity adjusted to match stock.,"Максималното налично количество е {0}. Количеството е коригирано, за да съответства на наличността."
+Maximum discount amount for this offer item is {0}.,Максималната сума на отстъпката за този артикул от офертата е {0}.
+Maximum discount percentage for this offer item is {0}%.,Максималният процент на отстъпка за този артикул от офертата е {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,Максималното количество на офертата е {0}. Количеството е коригирано до разрешената граница.
+Medium,Среден
+Method-wise Collections,Методически колекции
+Minimum allowed rate for this offer item is {0}.,Минималната разрешена цена за този артикул от офертата е {0}.
+Minimum Qty,Минимално кол
+Mobile No,Мобилен номер
+Mode,Режим
+Mode of Payment,Начин на плащане
+Month,месец
+Month ?,месец?
+Monthly Profit,Месечна печалба
+Monthly Sales,Месечни продажби
+Monthly Sales Summary,Обобщение на месечните продажби
+Month-wise,Месечно
+Most Active Cashiers,Най-активните касиери
+Movement Type,Тип движение
+Movements,Движения
+Multi Currency,Мулти валута
+N/A,N/A
+Name,Име
+Negative Stock,Отрицателна наличност
+Negative Stock Items,Отрицателни стокови артикули
+Negative values not allowed,Не се допускат отрицателни стойности
+Net,Нет
+Net Qty,Нетно количество
+Net Sales,Нетни продажби
+Net Value,Нетна стойност
+Never,Никога
+New changes are ready to load,Новите промени са готови за зареждане
+New Item,Нов артикул
+New Offer Available,Налична е нова оферта
+New PIN,Нов ПИН
+New rate,Нова ставка
+Next unit of measure,Следваща мерна единица
+No attribute data found.,Няма намерени атрибутни данни.
+No Barcode,Без баркод
+No barcode found for UOM '{0}',Не е намерен баркод за UOM „{0}“
+No branch/location data found.,Няма намерени данни за клон/местоположение.
+No brand data found.,Няма намерени данни за марката.
+No cached gift card balance is available offline.,"Няма кеширан баланс на подаръчна карта, който да е наличен офлайн."
+No camera found on this device. Please ensure your device has a working camera.,"Няма намерена камера на това устройство. Моля, уверете се, че вашето устройство има работеща камера."
+No capability warnings recorded yet.,Все още няма записани предупреждения за възможности.
+No cash expected for this shift.,Не се очакват пари в брой за тази смяна.
+No cash mode configured,Няма конфигуриран режим на плащане в брой
+No cash movement type is allowed for this POS Profile.,За този POS профил не е разрешен тип движение на пари в брой.
+No cashier PIN is set yet. Create one now.,Все още не е зададен ПИН на касата. Създайте сега.
+No cashier profiles are available for this POS profile yet.,Все още няма профили на касиери за този POS профил.
+No cashier-wise discount/void/return activity.,Няма дейност по отстъпка/анулиране/връщане на касиер.
+No category data found.,Няма намерени данни за категория.
+No category profitability data found.,Няма намерени данни за рентабилността на категорията.
+No change returned recorded for this shift.,Няма записана върната промяна за тази смяна.
+No change-allocation invoices match the current filters.,"Няма фактури за разпределение на промени, които да съответстват на текущите филтри."
+No charge head breakdown found.,Не е открита повреда на зарядната глава.
+No Company Selected,Няма избрана компания
+No customer sales data found.,Няма намерени данни за продажби на клиенти.
+No day-wise discount/void/return trend.,Без тенденция за отстъпка/анулиране/връщане през деня.
+No day-wise payment data found.,Не са открити данни за плащане за деня.
+No day-wise profitability trend found.,Не е открита дневна тенденция на доходност.
+No day-wise purchase data found.,Няма намерени данни за покупките за деня.
+No day-wise sales trend found.,Не е открита дневна тенденция в продажбите.
+No day-wise tax/charges trend found.,Не е открита дневна тенденция за данъци/такси.
+No dead stock items.,Няма мъртви артикули.
+No due date,Няма краен срок
+No exact repair match found for this invoice,Не е намерено точно съвпадение на ремонта за тази фактура
+No hourly sales trend found for today.,Няма открита почасова тенденция на продажби за днес.
+No invoice activity found.,Няма открита дейност по фактура.
+No invoices found,Няма открити фактури
+No invoices found. Try different search criteria.,Няма открити фактури. Опитайте различни критерии за търсене.
+No invoices recorded for this shift.,Няма записани фактури за тази смяна.
+No item profitability data found.,Няма намерени данни за рентабилността на артикулите.
+No item sales data found for this period.,Няма намерени данни за продажби на артикули за този период.
+No items found,Няма намерени елементи
+No items in cart,Няма артикули в количката
+No items with barcodes to print,Няма елементи с баркод за отпечатване
+No location-wise top item data found.,Не са открити данни за топ артикул по отношение на местоположението.
+No low stock alerts right now.,В момента няма сигнали за ниски запаси.
+No low stock items.,Няма артикули с ниска наличност.
+No matching items in cart,Няма съответстващи артикули в количката
+No month-wise sales trend found.,Не е открита месечна тенденция в продажбите.
+No negative stock items.,Няма отрицателни стокови артикули.
+No notifications yet,Все още няма известия
+No offline cash movement synced.,Няма синхронизирано движение на пари в брой офлайн.
+No offline invoices pending synchronization,"Няма офлайн фактури, чакащи синхронизиране"
+No offline sync issues recorded yet.,Все още няма регистрирани проблеми със синхронизирането офлайн.
+No out-of-stock items.,Няма изчерпани артикули.
+No outstanding credit invoices for this shift.,Няма неплатени кредитни фактури за тази смяна.
+No payment collection data found.,Няма намерени данни за събиране на плащания.
+No payment rows available on this invoice.,В тази фактура няма налични редове за плащане.
+No payments registered for this shift.,Няма регистрирани плащания за тази смяна.
+No pending balances in this period.,Няма чакащи салда през този период.
+No pending offline invoices,Няма чакащи офлайн фактури
+No Print Formats Found,Няма намерени формати за печат
+No profiles found for selected scope. Falling back to current profile failed.,Няма намерени профили за избрания обхват. Връщането към текущия профил не бе успешно.
+No recent customer activity found.,Няма намерена скорошна клиентска активност.
+No recent stock entries found.,Няма намерени скорошни записи на склад.
+No records found,Няма намерени записи
+No reorder suggestions right now.,В момента няма предложения за пренареждане.
+No repeat customers in this period.,Няма повторни клиенти през този период.
+No response from server,Няма отговор от сървъра
+No return invoices found,Няма намерени фактури за връщане
+No return item trend found.,Не е открита тенденция за връщане на артикул.
+No returnable items found for this invoice,Няма намерени артикули за връщане за тази фактура
+No returns were processed in this shift.,В тази смяна не са обработени връщания.
+No risk activity found.,Не е открита рискова дейност.
+No sales activity found for this period.,Не е открита търговска дейност за този период.
+No slow moving items.,Без бавно движещи се елементи.
+No staff sales activity found.,Не е намерена търговска дейност на персонала.
+No stock movement for this period.,Няма движение на акциите за този период.
+No submitted cash movements in this shift.,Няма подадени движения на пари в брой през тази смяна.
+No supplier purchases found in this month.,Няма намерени покупки на доставчик през този месец.
+No suppliers found for this period.,Няма намерени доставчици за този период.
+No sync trigger has run yet in this session.,Все още не е стартиран тригер за синхронизиране в тази сесия.
+No tax head breakdown found.,Не е намерена разбивка на данъчната глава.
+No top items found for this location.,Няма намерени топ елементи за това местоположение.
+No unpaid invoices,Без неплатени фактури
+No variant data found.,Няма намерени данни за варианти.
+No week-wise sales trend found.,Не е открита седмична тенденция в продажбите.
+No.,не
+Nobile Number,Nobile номер
+Not available,Не е наличен
+Not checked,Не е проверено
+Not selected,Не е избрано
+Not Set,Не е зададено
+Notifications,Известия
+Offer,Оферта
+Offer Applied,Офертата е приложена
+Offer criteria exceeded,Критериите за оферта са надвишени
+Offer Item,Офертен артикул
+Offer item unavailable,Артикулът от офертата не е наличен
+Offer Removed,Офертата е премахната
+Offer UOM cannot be changed,Офертата UOM не може да бъде променяна
+Offer?,оферта?
+Offers,Оферти
+Offline,Офлайн
+Offline & Sync,Офлайн и синхронизиране
+Offline Capabilities,Офлайн възможности
+Offline data status refreshed,Състоянието на офлайн данните е обновено
+Offline diagnostics,Офлайн диагностика
+Offline Invoices,Офлайн фактури
+Offline invoices status,Състояние на офлайн фактурите
+Offline invoices synced,Синхронизирани офлайн фактури
+Offline Queue: {0},Офлайн опашка: {0}
+Offline rebuild guidance,Офлайн ръководство за възстановяване
+Offline restore is unavailable for this session.,Офлайн възстановяването не е налично за тази сесия.
+Offline selling is available with degraded capabilities.,Офлайн продажбата е достъпна с влошени възможности.
+Offline snapshot does not match the current POS state.,Офлайн моментната снимка не съответства на текущото състояние на POS.
+Offline Status,Офлайн състояние
+"Offline, terminal, and system controls","Офлайн, терминални и системни контроли"
+OK,добре
+Online,Онлайн
+Open actions menu,Отворете менюто с действия
+Open balance to collect,Отворен баланс за събиране
+Open Customer Display,Отворете Customer Display
+Open drawer,Отворено чекмедже
+Open invoices,Отворени фактури
+Open Payments?,Отваряне на плащанията?
+Open POS home,Отворете POS началната страница
+Open this screen from POS Menu -> Open Customer Display.,Отворете този екран от POS Menu -> Open Customer Display.
+OpenCV image processing enabled - Enhanced barcode detection,Активирана OpenCV обработка на изображения - Подобрено откриване на баркод
+OpenCV image processing unavailable on this device,Обработката на OpenCV изображения не е налична на това устройство
+OpenCV Off,OpenCV изключен
+OpenCV On,OpenCV включен
+OpenCV processing disabled,Обработката на OpenCV е деактивирана
+Opening Amount,Начална сума
+Opening Cash,Отваряне на пари в брой
+options,опции
+Order,ред
+Original,Оригинален
+Other,други
+Out,Навън
+Out of Stock,Няма наличност
+Out of Stock Items,Изчерпани артикули
+Outstanding,Изключителен
+Outstanding Credit by Currency,Неизплатен кредит по валута
+Overdue,Просрочени
+Overpayment Change,Промяна на надплащане
+Overpayment change deducted: {0},Приспадната промяна на надплащането: {0}
+Packing List,Опаковъчен лист
+Page Format,Формат на страницата
+Page unavailable offline,Страницата не е достъпна офлайн
+Paid,Платено
+Paid (orig):,Платено (оригинално):
+Paid Amount,Платена сума
+Paid change cannot be greater than total change!,Платената ресто не може да бъде по-голяма от общата ресто!
+Paid:,Платено:
+Parent Item,Родителски елемент
+Partial,Частичен
+Partly Paid,Частично платено
+Party Account,Партиен акаунт
+Party Type,Тип парти
+Pause terminal until next cashier,Пауза на терминала до следващия касиер
+PAY,ПЛАЩАНЕ
+Payment,Плащане
+Payment Account,Разплащателна сметка
+Payment entries processed for Invoice {0},Обработени записи за плащане за фактура {0}
+Payment Entry Type,Тип въвеждане на плащане
+Payment History,История на плащанията
+Payment ID,ID на плащане
+Payment Method Report,Доклад за метода на плащане
+Payment Methods,Начини на плащане
+Payment of {0} received successfully.,Плащането на {0} е получено успешно.
+Payment Progress,Напредък на плащането
+Payment Reconciliation,Съгласуване на плащанията
+Payment request status could not be retrieved. Please try again,"Състоянието на заявката за плащане не можа да бъде извлечено. Моля, опитайте отново"
+Payment Request took too long to respond. Please try requesting for payment again,"Отговорът на искането за плащане отне твърде много време. Моля, опитайте отново да поискате плащане"
+Payment saved offline,Плащането е запазено офлайн
+Payment State,Състояние на плащането
+Payment Status,Състояние на плащането
+Payment submitted but print function could not be executed. Payment name not found.,"Плащането е изпратено, но функцията за печат не може да бъде изпълнена. Името на плащането не е намерено."
+Payment submitted.,Плащането е изпратено.
+Payment Summary,Резюме на плащането
+Payments,Плащания
+Payments are not open. Do you want to open payments and submit?,Плащанията не са отворени. Искате ли да отворите плащанията и да изпратите?
+Payments by Mode of Payment,Плащания по начин на плащане
+PDF,PDF
+Peak Hour,Пиков час
+Peak Memory:,Пикова памет:
+Peak Server:,Пиков сървър:
+Peak:,Пик:
+Pending,В очакване
+Pending Amount,Чакаща сума
+Pending count updated from {0} to {1},Чакащият брой е актуализиран от {0} на {1}
+Pending Exposure,Предстоящо излагане
+Pending Invoices,Чакащи фактури
+Pending Ratio,Чакащо съотношение
+Pending Sales,Предстоящи продажби
+Pending sales: {0} | Cache usage: {1}%,Предстоящи продажби: {0} | Използване на кеша: {1}%
+Pending Sync,Чакащо синхронизиране
+Pending: {0},В очакване: {0}
+Pending: {0} | Synced: {1} | Draft: {2},В очакване: {0} | Синхронизирано: {1} | Чернова: {2}
+Per Page,На страница
+Personal,Лична
+Personal preferences adjust the current cashier experience without changing the active POS route.,"Личните предпочитания коригират текущото изживяване на касата, без да променят активния POS маршрут."
+PIN confirmation does not match.,ПИН потвърждението не съвпада.
+PIN must be 4 to 8 digits.,ПИН трябва да е от 4 до 8 цифри.
+Please add at least one item.,"Моля, добавете поне един артикул."
+Please allow camera access to scan codes,"Моля, разрешете достъп до камерата за сканиране на кодове"
+Please enter payment amount,"Моля, въведете сумата на плащането"
+Please fill all required fields,"Моля, попълнете всички задължителни полета"
+Please make a payment or select a payment,"Моля, направете плащане или изберете плащане"
+Please request phone payment or use another payment method,"Моля, поискайте плащане по телефона или използвайте друг метод на плащане"
+Please select a customer first,"Моля, първо изберете клиент"
+Please select a party,"Моля, изберете партия"
+Please select a party before reconciling.,"Моля, изберете страна преди помирението."
+Please select a valid movement type.,"Моля, изберете валиден тип движение."
+Please select an invoice,"Моля, изберете фактура"
+Please select company before reconciling.,"Моля, изберете компания преди съгласуване."
+Please set the customer's mobile number,"Моля, задайте мобилния номер на клиента"
+Please try again or enter the item manually.,"Моля, опитайте отново или въведете елемента ръчно."
+Please verify the barcode or check the item's availability.,"Моля, проверете баркода или проверете наличността на артикула."
+Points,Точки
+Popup blocked. Please allow popups.,"Изскачащият прозорец е блокиран. Моля, разрешете изскачащи прозорци."
+POS,ПОЗ
+POS controls and maintenance,POS контрол и поддръжка
+POS Expense is disabled for this POS Profile.,POS Expense е деактивиран за този POS профил.
+POS is running with limited offline prerequisites.,POS работи с ограничени офлайн предпоставки.
+POS Profile,POS профил
+Position the QR code or barcode within the scanning area,Позиционирайте QR кода или баркода в зоната за сканиране
+Posting,Публикуване
+Posting and Price List,Публикуване и ценова листа
+Posting Date,Дата на публикуване
+Preparing background sync,Подготвя се фоново синхронизиране
+"Press OK to continue offline with a warning, or Cancel to retry.","Натиснете OK, за да продължите офлайн с предупреждение, или Отказ, за ​​да опитате отново."
+Previous unit of measure,Предишна мерна единица
+Price List,Ценова листа
+Price List Rate,Ценова листа Тарифа
+Price list rate updated locally only,Ценовата листа се актуализира само локално
+Pricing & Discounts,Цени и отстъпки
+Pricing Rule,Правило за ценообразуване
+Print,Печат
+Print Draft,Печат на чернова
+Print Format (Invoice),Формат за печат (фактура)
+Print Format (Order),Формат за печат (поръчка)
+Print invoice,Печат на фактура
+Print Purchase Invoice instead of PO,Отпечатайте фактура за покупка вместо PO
+Printer,Принтер
+Processed returns impacting the shift totals,"Обработени връщания, оказващи влияние върху общите смени"
+Processing Payment,Плащането се обработва
+Processing payment entries for Invoice {0},Обработване на записи за плащане за фактура {0}
+Profile,Профил
+Profiles,Профили
+Profit,печалба
+Profit: Invoice Item Estimate,Печалба: Оценка на позицията на фактурата
+Profit: Stock Ledger (COGS),Печалба: Фондова книга (COGS)
+Profitability Report,Доклад за рентабилността
+Prorated return discount,Пропорционална отстъпка при връщане
+Purchase Amount,Сума на покупката
+Purchase Invoices,Фактури за покупка
+Purchase Order created,Поръчката за покупка е създадена
+Qty,Кол
+Qualified,Квалифицирани
+Quantity,Количество
+Quantity exceeds available stock,Количеството надвишава наличната наличност
+Quick Actions,Бързи действия
+Quotation {0} is Submitted,Офертата {0} е изпратена
+Quotation submitted,Изпратена оферта
+QZ Tray connected.,QZ тавата е свързана.
+QZ Tray is manually disconnected. Press Connect to enable it again.,"QZ тавата е изключена ръчно. Натиснете Свързване, за да го активирате отново."
+QZ Tray is not connected.,QZ тавата не е свързана.
+QZ Tray Setup,Настройка на QZ тава
+Rate,Оценете
+Rate adjusted to maximum allowed discount,Курсът е коригиран до максимално разрешената отстъпка
+Ready,Готови
+Ready to resume,Готов за възобновяване
+Ready!,Готови!
+Real-time POS insights for retail operations.,Прозрения за POS в реално време за операции на дребно.
+Rebuild Offline Data,Възстановяване на офлайн данни
+Receive,Получете
+Receive now,Получете сега
+Received,получено
+Received:,получено:
+Recent Movement Entries,Скорошни записи за движение
+Recent updates about your invoices,Последни актуализации за вашите фактури
+Recently Active Customers,Наскоро активни клиенти
+Rechecking connection,Повторна проверка на връзката
+Reconcile payment methods and close shift,Съгласувайте методите на плащане и затворете смяната
+Reconciling Payments,Съгласуване на плащанията
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","Свържете се отново и отворете тази страница веднъж, докато сте онлайн, след което офлайн опресняванията ще могат да я възстановят."
+Reconnect online to refresh cached offline data from the server.,"Свържете се отново онлайн, за да обновите кешираните офлайн данни от сървъра."
+Recreate local offline prerequisites from scratch,Пресъздайте локални офлайн предпоставки от нулата
+Recv:,Recv:
+Redeem,Откупете
+Redeem / Scan,Осребряване / сканиране
+Redeem Amount,Сума за осребряване
+Redeem Mode,Режим на осребряване
+Redeemed Amount,Изкупена сума
+Redeemed credit cannot be greater than its total.,Изкупеният кредит не може да бъде по-голям от общия му размер.
+Redemption and Totals,Обратно изкупуване и общи суми
+Reference,справка
+Refresh,Опресняване
+Refresh Exchange Rate,Обновяване на обменния курс
+Refresh Offline Data,Опресняване на офлайн данни
+Refresh Printers,Обновяване на принтери
+Refund,Възстановяване на средства
+Release Notes,Бележки по изданието
+Reload,Презареди
+Reload customers,Презаредете клиенти
+Reload Items,Презареждане на елементи
+Reload Now,Презареди сега
+Reload to apply the latest changes. Your current session will be refreshed.,"Презаредете, за да приложите последните промени. Вашата текуща сесия ще бъде обновена."
+Reload Workflow,Презареждане на работния процес
+Remarks,Забележки
+Remarks are required.,Забележките са задължителни.
+Remove,Премахнете
+Remove barcode item,Премахване на баркод елемент
+Remove cached data and reload the POS app,Премахнете кешираните данни и презаредете POS приложението
+Remove item,Премахване на елемент
+Remove Offer,Премахване на оферта
+Reorder / Purchase Suggestions,Предложения за повторна поръчка/закупуване
+Repair Candidate,Кандидат за ремонт
+Repair Change Allocation,Ремонт Промяна на разпределението
+Repair requires an online connection,Ремонтът изисква онлайн връзка
+Repaired,Ремонтиран
+Repairing change allocation,Поправяне на промяна на разпределението
+Repeat Customers,Повтарящи се клиенти
+Repeat Rate,Честота на повторение
+Request,Заявка
+Request ID: {0},ID на заявката: {0}
+Request Payment,Поискайте плащане
+Requested route: {0},Искан маршрут: {0}
+Required columns cannot be hidden,Задължителните колони не могат да бъдат скрити
+Reset,Нулиране
+Reset item name,Нулирайте името на елемента
+Reset to Default,Възстановяване на настройките по подразбиране
+Resource Health,Здраве на ресурсите
+Restricted,Ограничен
+Restricted operational controls for supervisors only.,Ограничен оперативен контрол само за надзорни органи.
+Retry,Опитайте отново
+Retry route,Повторен опит за маршрут
+Return,Връщане
+Return Amount,Сума за връщане
+Return Count,Брой връщания
+Return items must have negative quantities,Върнатите артикули трябва да имат отрицателни количества
+Return total must be negative,Общата сума за връщане трябва да е отрицателна
+Return Valid Until,Връщане Валидно до
+Return window passed,Прозорецът за връщане премина
+Return without Invoice,Връщане без фактура
+Returns,Връща се
+Returns / Voids / Discounts,Връщане/Анулиране/Отстъпки
+Returns by Currency,Връщания по валута
+Revenue,приходи
+Review shift totals before submitting the closing entry,"Прегледайте общите смени, преди да изпратите заключителния запис"
+Round Off,Закръглете
+Rows,Редове
+Rows:,Редове:
+Rule,правило
+Sale,Разпродажба
+Sales,Продажби
+Sales Order {0} is Submitted,Поръчката за продажба {0} е изпратена
+Sales Person and Print,Лице по продажбите и печат
+Sales Person not found,Продавач не е намерен
+Sales processed,Обработени продажби
+Sales Return,Връщане на продажбите
+Sales Trend Report,Доклад за тенденциите в продажбите
+Save,Запазване
+Save & Clear,Запазване и изчистване
+Save as POS Profile Default,Запазване като POS профил по подразбиране
+Save Settings,Запазване на настройките
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,"Запазете избрания принтер като POS профил по подразбиране, така че да се показва автоматично при тази настройка."
+Saved as draft because: {0},"Запазено като чернова, защото: {0}"
+Saving...,Запазва се...
+Scale barcode detected. Quantity here is the number of labels to print.,Открит е баркод на везната. Количеството тук е броят етикети за печат.
+Scale barcode settings are not configured. Using item barcode only.,Настройките за баркод на скалата не са конфигурирани. Използва се само баркод на артикул.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,Липсва баркод на шаблон за мащаб за този артикул/UOM. Използва се само баркод на артикул.
+Scan an existing card and top it up without leaving the payment flow.,"Сканирайте съществуваща карта и я попълнете, без да напускате платежния поток."
+Scan Error,Грешка при сканиране
+Scan or enter a gift card code to check balance or redeem.,"Сканирайте или въведете код на подаръчна карта, за да проверите баланса или да осребрите."
+Scan or paste the card code below.,Сканирайте или поставете кода на картата по-долу.
+Scan QR Code/Barcode,Сканирайте QR код/баркод
+Scan with camera,Сканиране с камера
+Scan-First Flow,Scan-First Flow
+Scanned Code:,Сканиран код:
+Scanning for: {0},Сканиране за: {0}
+Scanning items,Сканиране на елементи
+Scan-Ready,Готов за сканиране
+Scope,Обхват
+Scope: All Profiles,Обхват: Всички профили
+Scope: Current Profile,Обхват: Текущ профил
+Scope: Specific Profile,Обхват: Специфичен профил
+Search,Търсене
+Search Account,Търсене на акаунт
+Search an invoice and continue the return flow without extra steps.,Потърсете фактура и продължете връщането без допълнителни стъпки.
+Search customer,Търсете клиент
+Search invoices or customers,Търсете фактури или клиенти
+Search item,Търсене на елемент
+Search item / code,Търсене на елемент/код
+Search items or barcode,Търсете елементи или баркод
+Search Mpesa Payments,Търсете Mpesa Payments
+Search return invoices or customers,Търсете върнати фактури или клиенти
+Search supplier,Търсене на доставчик
+Search unpaid invoices or customers,Търсете неплатени фактури или клиенти
+Secure context (HTTPS or localhost) is required for camera access.,За достъп до камерата е необходим защитен контекст (HTTPS или локален хост).
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,"За достъп до камерата е необходим защитен контекст (HTTPS). Моля, използвайте HTTPS за достъп до камерата."
+Select,Изберете
+Select a cashier first.,Първо изберете касиер.
+Select a customer,Изберете клиент
+Select a customer to use coupon,Изберете клиент за използване на купон
+Select a printer to use QZ silent printing.,"Изберете принтер, за да използвате безшумен печат QZ."
+Select Batch,Изберете Пакет
+Select Columns to Display,Изберете Колони за показване
+Select items to sell,Изберете артикули за продажба
+Select Payment,Изберете Плащане
+Select Payment Account,Изберете Разплащателна сметка
+Select printer,Изберете принтер
+Select Return Invoice,Изберете Връщане на фактура
+Select S.O,Изберете S.O
+Select Sales Orders,Изберете Поръчки за продажба
+Select the cashier who is taking over this terminal.,"Изберете касиера, който ще поеме този терминал."
+Selected,Избрано
+Selected movement type is not allowed by POS Profile.,Избраният тип движение не е разрешен от POS профил.
+Selected Payments,Избрани плащания
+Sensitive actions kept away from quick taps.,Чувствителните действия се пазят от бързи докосвания.
+Serial,Сериен
+Serial Numbers,Серийни номера
+Server CPU Usage:,Използване на процесора на сървъра:
+Server Health,Здраве на сървъра
+Server Memory Usage:,Използване на паметта на сървъра:
+Server Metrics,Сървърни показатели
+Server Uptime:,Време на работа на сървъра:
+Service Charges,Такси за обслужване
+Session,Сесия
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,"Задайте ПИН на всеки касиер във формуляра за потребител и запазете членовете на терминала, зададени в потребител на POS профил."
+Settings,Настройки
+Settings in this section update the POS workspace without changing the current route.,"Настройките в този раздел актуализират работното пространство на POS, без да променят текущия маршрут."
+Setup complete!,Настройката е завършена!
+Share,Споделете
+Shared terminal,Споделен терминал
+Shift Closed Snapshot,Shift Closed Snapshot
+Shift Overview,Преглед на смяната
+Show,Покажи
+Show cart on customer-facing screen,"Показване на количката на екрана, обърнат към клиента"
+Show last invoice rate,Показване на курса на последната фактура
+Show rate info,Показване на информация за тарифата
+Show Repair Candidates,Показване на кандидати за ремонт
+Show search tools,Показване на инструменти за търсене
+Show the active cart on a customer-facing screen,"Покажете активната количка на екран, обърнат към клиента"
+Showing {0}-{1} of {2},Показани са {0}-{1} от {2}
+Showing 0 of 0,Показани са 0 от 0
+Shows the distribution of invoices per currency,Показва разпределението на фактурите по валута
+Sign out of the current POS session,Излезте от текущата POS сесия
+Size:,размер:
+Skipped Payments,Пропуснати плащания
+Skipping items without barcodes,Пропускане на елементи без баркод
+Slow Moving,Бавно движение
+Slow Moving Items,Бавно движещи се предмети
+Slow Queries:,Бавни заявки:
+Sold,Продаден
+Source,Източник
+Source Cash Account (Optional Override),Изходна парична сметка (замяна по избор)
+Source Ex. Rate:,Източник Пр. Оценете:
+Source Rate:,Изходна скорост:
+Specific Profile,Специфичен профил
+Split Invoices,Разделени фактури
+Staff / Cashier Performance Report,Доклад за работата на персонала/касиера
+Status,Статус
+Stock,Наличност
+Stock Information,Информация за запасите
+Stock is lower than requested,Наличността е по-ниска от заявената
+Stock is lower than requested:\n{0},Наличността е по-ниска от заявената:\n{0}
+Stock Movement Report,Отчет за движението на акциите
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,Актуализация на борсата: {0} има налични {1}. Добавянето на {2} ще доведе до нула под нулата.
+Submit,Изпратете
+Submit & Print,Изпращане и печат
+Submit Deposit,Изпратете депозит
+Submit Expense,Подаване на разходи
+Submitted,Изпратено
+Submitted Cash Movements,Подадени парични движения
+Submitted entries,Изпратени записи
+Successfully scanned:,Успешно сканирани:
+Suggested,Предложено
+Suggested Qty,Предложено кол
+Supervisor Access,Достъп на надзорник
+Supervisor permissions unlock issuance and reloads,Разрешенията на надзорника отключват издаване и презареждания
+Supervisor Tools,Инструменти за надзорник
+Supplier,Доставчик
+Supplier and dates are required.,Изискват се доставчик и дати.
+Supplier Invoices,Фактури на доставчици
+Supplier is required.,Изисква се доставчик.
+Supplier name is required,Изисква се име на доставчик
+Supplier Payments,Плащания на доставчика
+Supplier Purchase Summary,Резюме на покупките на доставчика
+Suppliers,Доставчици
+Suppliers not found,Доставчици не са намерени
+Switch Camera,Превключване на камерата
+Switch Cashier,Превключване на касиер
+Switch the POS appearance theme,Превключете темата за външен вид на POS
+Switched to:,Превключен на:
+Sync All Invoices,Синхронизиране на всички фактури
+Sync Offline Cash Movements ({0}),Синхронизиране на офлайн парични движения ({0})
+Sync Offline Sales,Синхронизиране на офлайн продажби
+Synced {0} offline cash movement(s).,Синхронизирани са {0} офлайн парични движения.
+Syncing items in background,Синхронизиране на елементи във фонов режим
+System / Diagnostics,Система / Диагностика
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","Системните действия са нискочестотни контроли за поддръжка, като например информация за приложението, диагностика на поддръжката и контроли на сесии."
+System Information,Системна информация
+System Status,Състояние на системата
+Tables:,Маси:
+Tap the button below to redeem a gift card during checkout.,"Докоснете бутона по-долу, за да осребрите карта за подарък по време на плащане."
+Target,Цел
+Target Ex. Rate:,Целеви Пр. Оценете:
+Target Rate:,Целева ставка:
+Tax,Данък
+Tax / Charges Report,Отчет за данъци/такси
+Tax Heads,Данъчни ръководители
+Taxable Amount,Данъчна основа
+Tendered,Търг
+Terminal,Терминал
+Terminal & Devices,Терминал и устройства
+Terminal locked,Терминалът е заключен
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","Терминалните инструменти засягат тази касова станция, дисплеите, обърнати към клиента, и бъдещите контроли на принтер/устройство."
+Territory not found,Територията не е намерена
+The amount paid is not complete,Платената сума не е пълна
+The app stores data locally for offline use. This is called cache.,Приложението съхранява данни локално за използване офлайн. Това се нарича кеш.
+The invoice stayed in draft. Please review and submit it manually.,"Фактурата остана чернова. Моля, прегледайте и го изпратете ръчно."
+The maximum discount allowed is,Максималната разрешена отстъпка е
+The quantity for {0} has been adjusted to the maximum available stock.,Количеството за {0} е коригирано до максималния наличен склад.
+The system could not retrieve the item details. Please try again.,"Системата не можа да извлече подробностите за артикула. Моля, опитайте отново."
+These invoices will be synced when connection is restored,"Тези фактури ще бъдат синхронизирани, когато връзката бъде възстановена"
+This action now opens inside the settings workspace.,Това действие сега се отваря в работното пространство за настройки.
+This coupon already used !,Този купон вече е използван!
+This invoice does not need change-allocation repair,Тази фактура не се нуждае от поправка при промяна на разпределението
+This invoice is already repaired,Тази фактура вече е поправена
+This is an item template. Please choose a variant.,"Това е шаблон за артикул. Моля, изберете вариант."
+this item,този артикул
+This POS page could not be opened offline because its code was not cached on this terminal yet.,"Тази POS страница не можа да бъде отворена офлайн, тъй като нейният код все още не е кеширан на този терминал."
+This Serial Number {0} has already been added!,Този сериен номер {0} вече е добавен!
+Threshold,Праг
+Time,време
+Tip: Clear cache regularly to free up space and keep the app fast.,"Съвет: Изчиствайте редовно кеша, за да освободите място и да поддържате приложението бързо."
+Tip: Close unused tabs or apps to reduce lag.,"Съвет: Затворете неизползваните раздели или приложения, за да намалите забавянето."
+Tip: Monitor slow queries and table size for optimal performance.,Съвет: Наблюдавайте бавните заявки и размера на таблицата за оптимална производителност.
+To Be Paid,За да бъде платено
+To Date,Към днешна дата
+Today,Днес
+Today Profit,Печалба днес
+Today Sales,Днес Продажби
+Toggle navigation drawer,Превключване на навигационното чекмедже
+Toggle Theme,Превключване на темата
+Tools,Инструменти
+Tools for customer-facing screens and terminal-specific actions.,"Инструменти за екрани, обърнати към клиента, и специфични за терминала действия."
+Top Brand,Топ марка
+Top Category,Топ категория
+Top Charge Head,Горна глава за зареждане
+Top Customers,Топ клиенти
+Top Discount,Топ Намаление
+Top Items by Location,Топ артикули по местоположение
+Top Margin,Горен марж
+Top Pending,Топ в очакване
+Top Profit Item,Топ печалба
+Top Return Items,Топ артикули за връщане
+Top Sales by Cashier,Топ продажби от касиер
+Top Supplier,Топ доставчик
+Top Suppliers by Spend,Топ доставчици по разходи
+Top Tables,Горни маси
+Top Tax Head,Топ данъчен ръководител
+Top Up Amount,Сума за допълване
+Top Up Card,Карта за допълване
+Top Up Mode,Режим на допълване
+Top Variant,Топ Вариант
+Total,Общо
+Total Amount,Обща сума
+Total Change,Пълна промяна
+Total Charges,Общо такси
+Total In,Общо в
+Total Invoices,Общо фактури
+Total Items,Общо елементи
+Total Mpesa,Общо Mpesa
+Total Out,Total Out
+Total Payments,Общо плащания
+Total Purchase,Пълна покупка
+Total Selected :,Общо избрано:
+Total Size,Общ размер
+Total Stock Qty,Общо складово количество
+Total:,Общо:
+Totals by Invoice Currency,Общо по валута на фактурата
+Track how much cash was handed back to customers,Проследете колко пари са върнати на клиентите
+"Track recent sales, collect unpaid balances, and reopen saved work","Проследявайте последните продажби, събирайте неплатени салда и отваряйте отново запазена работа"
+Transaction ID,ID на транзакцията
+Transfer,Трансфер
+Try a different search term or clear the cart search.,Опитайте с друга дума за търсене или изчистете търсенето на количката.
+Try adjusting your search or filters,Опитайте да коригирате търсенето или филтрите си
+Try another source or refresh the list.,Опитайте друг източник или обновете списъка.
+Try changing the date range or status filter.,Опитайте да промените периода от време или филтъра за състояние.
+Type,Тип
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,"Няма достъп до камерата дори с основни настройки. Моля, проверете разрешенията на вашата камера и съвместимостта на устройството."
+Unable to add offer item {0}. Please refresh and try again.,"Не може да се добави оферта {0}. Моля, опреснете и опитайте отново."
+Unable to add offer item. Please refresh and try again.,"Не може да се добави артикул от офертата. Моля, опреснете и опитайте отново."
+Unable to add scanned item.,Не може да се добави сканиран елемент.
+Unable to create purchase order,Не може да се създаде поръчка за покупка
+Unable to delete draft invoice,Не може да се изтрие чернова на фактура
+Unable to fetch documents,Не могат да се извлекат документи
+Unable to fetch draft orders,Не може да се извлекат чернови на поръчки
+Unable to fetch invoice history,Не може да се извлече история на фактурите
+Unable to fetch M-Pesa payments,Не могат да се извлекат плащания от M-Pesa
+Unable to fetch sales orders,Не могат да се извлекат поръчки за продажба
+Unable to fetch unpaid invoices,Невъзможно извличане на неплатени фактури
+Unable to generate scale barcode,Не може да се генерира баркод на везната
+Unable to issue gift card.,Не може да се издаде подаръчна карта.
+Unable to load cashier PIN status.,Не може да се зареди ПИН статус на касата.
+Unable to load document,Не може да се зареди документ
+Unable to load draft invoice,Не може да се зареди чернова на фактура
+Unable to load gift card balance.,Не може да се зареди балансът на картата за подарък.
+Unable to load invoice details,Не може да се заредят подробности за фактурата
+Unable to load parked order,Не може да се зареди паркирана поръчка
+Unable to load the selected sales order,Не може да се зареди избраната поръчка за продажба
+Unable to prepare document,Не може да се подготви документ
+Unable to prepare return invoice,Не може да се подготви фактура за връщане
+Unable to print draft invoice,Не може да се отпечата чернова на фактура
+Unable to print submitted invoice,Не може да се отпечата изпратената фактура
+Unable to process document action,Не може да се обработи действието на документа
+Unable to repair change allocation,Не може да се поправи промяната на разпределението
+Unable to save cashier PIN.,ПИН кодът на касата не може да бъде запазен.
+Unable to save the rate to the backend price list,Не може да се запише тарифата в ценовата листа на бекенда
+Unable to submit invoice,Не може да се изпрати фактура
+Unable to submit the selected payment,Избраното плащане не може да бъде изпратено
+Unable to top up gift card.,Не може да се презареди подаръчна карта.
+Unable to verify cashier PIN.,ПИН кодът на касата не може да бъде потвърден.
+Unallocated,Неразпределени
+Unallocated:,Неразпределени:
+Unavailable,Недостъпен
+Unknown,неизвестен
+Unknown Item,Неизвестен елемент
+Unknown Warehouse,Неизвестен склад
+Unlock POS,Отключете POS
+Unpaid,Неплатени
+"Unselected payments stay unallocated first, then auto reconcile after submit.","Неизбраните плащания първо остават неразпределени, след което се съгласуват автоматично след изпращане."
+UOM,UOM
+UOM not found,UOM не е намерен
+Update available,Налична актуализация
+Update Customer,Актуализиране на клиента
+Update PIN,Актуализиране на ПИН
+Update Price List Rate,Актуализиране на цената на ценова листа
+Updated,Актуализиран
+Updates and app info that stay out of the cashier flow.,"Актуализации и информация за приложения, които остават извън потока на касата."
+Updates automatically,Актуализира се автоматично
+Usage,Използване
+Usage Stats,Статистика за използване
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,Използвайте ПИН от 4 до 8 цифри за смяна на касиер и отключване на терминала.
+Use Cashier,Използвайте Каса
+Use date range to search for older invoices,Използвайте диапазон от дати за търсене на по-стари фактури
+"Use one field for manual code entry, barcode scans, or QR scans.","Използвайте едно поле за ръчно въвеждане на код, сканиране на баркод или QR сканиране."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","Използвайте един работен процес за проверки на баланс, ново издаване и допълване, без да напускате POS."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","Използвайте този раздел, когато кешираните предварителни данни се нуждаят от опресняване, повторно изграждане или диагностичен преглед."
+Use Western numerals,Използвайте западни цифри
+Used:,Използвано:
+Using basic camera settings due to device limitations,Използване на основни настройки на камерата поради ограничения на устройството
+Using cached customer balance,Използване на кеширан клиентски баланс
+Valid until,Валидна до
+Variance %,Дисперсия %
+Variants,Варианти
+Variant-wise,Вариантно
+Verify closing amounts for each payment method,Проверете сумите за затваряне за всеки метод на плащане
+View all,Вижте всички
+View app information and current build details,Вижте информация за приложението и текущи подробности за компилация
+View Data Diagnostics,Преглед на диагностика на данни
+View Details,Вижте подробности
+View invoice details,Вижте подробности за фактурата
+View notifications,Преглед на известията
+View offline invoices,Преглед на офлайн фактури
+View restricted POS insights,Преглед на ограничена информация за POS
+Void Amount,Невалидна сума
+Void Count,Брой празноти
+Voids,Празнини
+Waiting for cart items,Изчакване на артикули от количката
+Waiting for payment...,Очаква се плащане...
+Walk-in Customer,Входен клиент
+Warehouse,Склад
+Warning: High cache usage may affect performance.,Предупреждение: Голямото използване на кеша може да повлияе на производителността.
+Warning: High lag may indicate heavy processing or browser slowness.,Предупреждение: Голямото забавяне може да означава тежка обработка или бавност на браузъра.
+Week ?,седмица?
+Week-wise,Седмично
+Weight (g),Тегло (g)
+Weight (grams),Тегло (грамове)
+We'll let you know if an invoice fails to submit,"Ще ви уведомим, ако не успеете да изпратите фактура"
+Workflow,Работен процес
+Write off amount cannot exceed the POS profile maximum of {0},Сумата за отписване не може да надвишава максимума на POS профила от {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,"Сумата за отписване надвишава разрешената граница ({0}). Моля, добавете плащане за оставащата сума."
+Yes,да
+"Yes, Cancel sale","Да, отмени продажбата"
+"Yes, Close","Да, затвори"
+You are not allowed to print draft invoices,Нямате право да отпечатвате чернови на фактури
+You are offline. Add Payment will work again when the connection is restored.,"Вие сте офлайн. Добавянето на плащане ще работи отново, когато връзката бъде възстановена."
+You have no notifications right now,В момента нямате известия
+Your Cart,Вашата количка

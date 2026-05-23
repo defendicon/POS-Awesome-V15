@@ -1,0 +1,1362 @@
+POS Awesome,POS නියමයි
+Fetch Items Directly from Server,භාණ්ඩ සෘජුවම සේවාදායකයෙන් ලබා ගන්න
+Menu,මෙනුව
+Actions,ක්රියාවන්
+Close Shift,Shift වසන්න
+End current session,වත්මන් සැසිය අවසන් කරන්න
+Print Last Invoice,අවසන් ඉන්වොයිසිය මුද්‍රණය කරන්න
+Reprint previous transaction,පෙර ගනුදෙනුව නැවත මුද්‍රණය කරන්න
+Sync Offline Invoices,නොබැඳි ඉන්වොයිසි සමමුහුර්ත කරන්න
+Upload pending transactions,පොරොත්තු ගනුදෙනු උඩුගත කරන්න
+Go Online,ඔන්ලයින් යන්න
+Go Offline,නොබැඳි යන්න
+Disable offline mode,නොබැඳි මාදිලිය අබල කරන්න
+Work without server connection,සේවාදායක සම්බන්ධතාවයකින් තොරව වැඩ කරන්න
+Clear Cache,හැඹිලිය හිස් කරන්න
+Remove local data and refresh,දේශීය දත්ත ඉවත් කර නැවුම් කරන්න
+About,ගැන
+App information,යෙදුම් තොරතුරු
+Language,භාෂාව
+Change interface language,අතුරු මුහුණත භාෂාව වෙනස් කරන්න
+Light Mode,ආලෝක මාදිලිය
+Dark Mode,අඳුරු මාදිලිය
+Switch theme appearance,තේමා පෙනුම මාරු කරන්න
+Logout,පිටවීම
+Sign out of session,සැසියෙන් වරන්න
+Select Language,භාෂාව තෝරන්න
+Choose your preferred language for the POS interface,POS අතුරුමුහුණත සඳහා ඔබ කැමති භාෂාව තෝරන්න
+Language will be changed to,භාෂාව වෙනස් වනු ඇත
+Cancel,අවලංගු කරන්න
+Change Language,භාෂාව වෙනස් කරන්න
+Close,වසන්න
+Cannot change language - same language selected,භාෂාව වෙනස් කළ නොහැක - එකම භාෂාව තෝරා ඇත
+Language changed successfully! Reloading...,භාෂාව සාර්ථකව වෙනස් විය! නැවත පූරණය කරමින්...
+Failed to change language,භාෂාව වෙනස් කිරීමට අසමත් විය
+Unknown error,නොදන්නා දෝෂයකි
+- Total Unallocated,- සම්පූර්ණ වෙන් නොකළ
+* Required,*අවශ්‍යයි
+{0} (Qty: {1}),{0} (Qty: {1})
+{0} actions,{0} ක්‍රියා
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} සතුව ඇත්තේ {1} පමණි. ඔබ {2} ඉල්ලුවා. ප්‍රමාණය හෝ නැවත සකසන්න.
+{0} offline invoice{1} pending,{0} නොබැඳි ඉන්වොයිසිය{1} පොරොත්තුවෙන්
+{0} offline invoice{1} saved as draft,{0} නොබැඳි ඉන්වොයිසිය{1} කෙටුම්පතක් ලෙස සුරකින ලදී
+{0} offline invoice{1} synced,{0} නොබැඳි ඉන්වොයිසිය{1} සමමුහුර්ත කර ඇත
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,දින {0}කට පෙර
+{0}h ago,පැ {0}කට පෙර
+{0}m ago,මි {0}කට පෙර
+A POS supervisor is required for this action.,මෙම ක්‍රියාව සඳහා POS අධීක්ෂකවරයෙකු අවශ්‍ය වේ.
+Access,ප්රවේශය
+Account,ගිණුම
+Account is overdrawn,ගිණුම ඉක්මවා ඇත
+Acknowledge the error to resume scanning,ස්කෑන් කිරීම නැවත ආරම්භ කිරීමේ දෝෂය පිළිගන්න
+Acknowledge the error to resume scanning.,ස්කෑන් කිරීම නැවත ආරම්භ කිරීමේ දෝෂය පිළිගන්න.
+Across,හරහා
+Action,ක්‍රියාව
+Active sale,සක්රිය විකිණීම
+add,එකතු කරන්න
+Add items from the selector to start building this sale.,මෙම අලෙවිය ගොඩනැගීම ආරම්භ කිරීමට තේරීම්කාරකයෙන් අයිතම එක් කරන්න.
+Add more value to an existing gift card,පවතින තෑගි කාඩ්පතකට වැඩි වටිනාකමක් එක් කරන්න
+Add New Address,නව ලිපිනය එක් කරන්න
+Add new customer,නව පාරිභෝගිකයෙකු එක් කරන්න
+Add on New Line,නව රේඛාවට එකතු කරන්න
+Add Payment,ගෙවීම් එකතු කරන්න
+Add payment to invoice,ඉන්වොයිසියට ගෙවීම එක් කරන්න
+Add/Edit Coupon Conditions,කූපන් කොන්දේසි එකතු කරන්න/සංස්කරණය කරන්න
+Additional Discount,අමතර වට්ටම්
+Additional Discount %,අමතර වට්ටම් %
+Address Line 1,ලිපින පේළිය 1
+Address not found,ලිපිනය හමු නොවීය
+Adjust the quantity or enable negative stock to continue.,ප්‍රමාණය සීරුමාරු කරන්න හෝ සෘණ කොටස් දිගටම කරගෙන යාමට සබල කරන්න.
+Adjustment,ගැලපීම
+After returns,ආපසු පැමිණීමෙන් පසු
+Against,එරෙහිව
+Against Name,නමට එරෙහිව
+Age Bracket,වයස් සීමාව
+All,සියල්ල
+All Caught Up!,සියල්ල අල්ලා!
+All invoices are synchronized,සියලුම ඉන්වොයිසි සමමුහුර්ත කර ඇත
+All pending invoices are up to date,සියලුම පොරොත්තු ඉන්වොයිසි යාවත්කාලීන වේ
+All Profiles,සියලුම පැතිකඩ
+All Synchronized,සියල්ල සමමුහුර්ත කර ඇත
+All visible invoices are fully settled.,සියලුම දෘශ්‍ය ඉන්වොයිසි සම්පූර්ණයෙන්ම පියවා ඇත.
+All Warehouses,සියලුම ගබඩා
+Allowed UOM is {0},අවසර ලත් UOM යනු {0}
+Always fetch items from server (ignore local cache),සෑම විටම සේවාදායකයෙන් අයිතම ලබා ගන්න (දේශීය හැඹිලිය නොසලකා හරින්න)
+Amount,මුදල
+Amount already received,දැනටමත් ලැබී ඇති මුදල
+Amount exceeds profile cash movement max amount.,මුදල පැතිකඩ මුදල් සංචලන උපරිම මුදල ඉක්මවයි.
+Amount must be greater than zero.,මුදල බිංදුවට වඩා වැඩි විය යුතුය.
+Amount received from customer,පාරිභෝගිකයාගෙන් ලැබුණු මුදල
+Appearance and user-level preferences for the current session.,වත්මන් සැසිය සඳහා පෙනුම සහ පරිශීලක මට්ටමේ මනාප.
+Applied,අයදුම් කළා
+Apply,අයදුම් කරන්න
+Apply Gift Card,තෑගි කාඩ්පත අයදුම් කරන්න
+Apply Offer,පිරිනැමීම අයදුම් කරන්න
+Apply On,අයදුම් කරන්න
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,මෙම ඉන්වොයිසිය මත ඔබට මුදා ගැනීමට අවශ්‍ය මුදල පමණක් යොදන්න. ඉතිරි ශේෂය කාඩ්පත මත පවතී.
+Apply Redemption,Redemption යොදන්න
+Applying,අයදුම් කිරීම
+Apps,යෙදුම්
+Are you sure you want to close? All entered data will be lost.,ඔබට වසා දැමීමට අවශ්‍ය බව විශ්වාසද? ඇතුළත් කළ සියලුම දත්ත නැති වී යයි.
+Attributes (Size/Color),ගුණාංග (ප්‍රමාණය/වර්ණය)
+Auto Allocate Payment Amount,ගෙවීම් මුදල ස්වයංක්‍රීයව වෙන් කරන්න
+Auto Reconcile,ස්වයංක්‍රීය සංහිඳියාව
+Auto reconciliation completed after payment submit.,ගෙවීම් ඉදිරිපත් කිරීමෙන් පසු ස්වයං ප්‍රතිසන්ධානය සම්පූර්ණ විය.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,ස්වයං ප්‍රතිසන්ධානය සම්පූර්ණ විය. වෙන් කර ඇත: {0}{1}. ඉතිරිව ඇති කැපී පෙනෙන: {0}{2}.
+Available Actions,පවතින ක්‍රියා
+Available QTY,QTY තිබේ
+Available:,තිබේ:
+Average Basket,සාමාන්ය කූඩය
+Average Bill,සාමාන්‍ය බිල්පත
+Average Ticket,සාමාන්ය ටිකට්
+Avg Bill,සාමාන්‍ය බිල්පත
+Avg Invoice,සාමාන්‍ය ඉන්වොයිසිය
+Avg Invoice Profit,සාමාන්‍ය ඉන්වොයිස් ලාභය
+Avg Invoice Value,සාමාන්‍ය ඉන්වොයිස් අගය
+Avg Purchase Frequency,සාමාන්‍ය මිලදී ගැනීමේ සංඛ්‍යාතය
+Awesome,නියමයි
+Awesome Dashboard,නියම උපකරණ පුවරුව
+Awesome Dashboard is disabled for the selected POS Profile.,තෝරන ලද POS පැතිකඩ සඳහා Awesome Dashboard අබල කර ඇත.
+Awesome Dashboard is unavailable for the selected scope.,තෝරාගත් විෂය පථය සඳහා නියම උපකරණ පුවරුව නොමැත.
+Awesome Dashboard is visible only to POS supervisors.,Awesome Dashboard දෘශ්‍යමාන වන්නේ POS අධීක්ෂකවරුන්ට පමණි.
+Back,ආපසු
+Back Office Cash Account,පසු කාර්යාල මුදල් ගිණුම
+Back Office Cash Account (Optional Override),පසු කාර්යාල මුදල් ගිණුම (විකල්ප අභිබවා යාම)
+Back office cash account is required.,පසු කාර්යාල මුදල් ගිණුමක් අවශ්‍ය වේ.
+Back to {0},ආපසු {0} වෙත
+Background processing did not finish in time.,පසුබිම සැකසීම නියමිත වේලාවට අවසන් නොවීය.
+Background processing failed for Invoice {0}: {1},ඉන්වොයිසිය සඳහා පසුබිම සැකසීම අසාර්ථක විය {0}: {1}
+Background Submission Failed,පසුබිම් ඉදිරිපත් කිරීම අසාර්ථක විය
+Background sync interval (seconds),පසුබිම් සමමුහුර්ත පරතරය (තත්පර)
+Balance,ශේෂය
+Balance will be updated when connection is restored,සම්බන්ධතාවය ප්‍රතිසාධනය කළ විට ශේෂය යාවත්කාලීන වේ
+Balances still pending,ශේෂයන් තවමත් පොරොත්තුවෙන්
+Barcode,තීරු කේතය
+Barcode / QR Ready,තීරු කේතය / QR සූදානම්
+Barcode Label Printing,තීරු කේත ලේබල් මුද්‍රණය
+Base Paid:,මූලික ගෙවූ:
+Base Recv:,මූලික Recv:
+Base:,පදනම:
+Basic Information,මූලික තොරතුරු
+Batch,කණ්ඩායම
+Batch Information,කණ්ඩායම් තොරතුරු
+Before any return workflow,ඕනෑම ආපසු වැඩ ප්‍රවාහයකට පෙර
+Before returns,ආපසු පැමිණීමට පෙර
+Best Day,හොඳම දිනය
+Best Seller,හොඳම විකුණුම්කරු
+Book expense or deposit from active shift.,සක්‍රීය මාරුවෙන් පොත් වියදම් හෝ තැන්පතු.
+Branch / Location-wise Report,ශාඛාව / ස්ථානය අනුව වාර්තාව
+Brand-wise,වෙළඳ නාමය අනුව
+Breakdown,බිඳවැටීම
+Browse,බ්‍රවුස් කරන්න
+Build Time:,ගොඩනැගීමේ කාලය:
+Built with Frappe,Frappe සමඟ ගොඩනගා ඇත
+Bundle,බණ්ඩලය
+Buying Price,මිලදී ගැනීමේ මිල
+Cache cleared successfully,හැඹිලිය සාර්ථකව හිස් කරන ලදී
+Cache Usage,හැඹිලි භාවිතය
+cache used,භාවිතා කළ හැඹිලිය
+Calculating...,ගණනය කරමින්...
+Camera Access Required,කැමරා ප්‍රවේශය අවශ්‍යයි
+Camera access was aborted. Please try again.,කැමරා ප්‍රවේශය නවත්වන ලදී. කරුණාකර නැවත උත්සාහ කරන්න.
+Camera constraints not supported by your device. Trying fallback settings...,කැමරා සීමා ඔබගේ උපාංගයෙන් සහාය නොදක්වයි. පසුබැසීමේ සැකසීම් උත්සාහ කරමින්...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,කැමරාව කාර්යබහුල හෝ වෙනත් යෙදුමක්/ටැබ් එකකින් අවහිර කර ඇත. වෙනත් කැමරා යෙදුම් වසා නැවත උත්සාහ කරන්න.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,කැමරා අවසරය ප්‍රතික්ෂේප විය. කරුණාකර ඔබගේ බ්‍රවුසර සැකසීම් තුළ කැමරා ප්‍රවේශයට ඉඩ දී පිටුව නැවුම් කරන්න.
+Camera scanner is locked until the current error is acknowledged,වත්මන් දෝෂය පිළිගන්නා තෙක් කැමරා ස්කෑනරය අගුලු දමා ඇත
+Camera started but the video stream did not load in time. Please try again.,කැමරාව ආරම්භ වූ නමුත් වීඩියෝ ප්‍රවාහය නියමිත වේලාවට පූරණය නොවීය. කරුණාකර නැවත උත්සාහ කරන්න.
+Cancel cash movement {0}?,මුදල් චලනය අවලංගු කරන්න {0}?
+Cancel Payment,ගෙවීම අවලංගු කරන්න
+Cancel Sale,විකිණීම අවලංගු කරන්න
+Cancel Sale ?,විකිණීම අවලංගු කරන්නද?
+Cancelled,අවලංගු කළා
+Cannot add an item with zero or negative quantity.,ශුන්‍ය හෝ සෘණ ප්‍රමාණය සහිත අයිතමයක් එක් කළ නොහැක.
+Cannot clear cache while offline,නොබැඳිව සිටියදී හැඹිලිය හිස් කළ නොහැක
+Cannot redeem customer credit more than invoice total,ඉන්වොයිසි එකතුවට වඩා පාරිභෝගික ණය ලබා ගත නොහැක
+Cannot redeem gift cards more than invoice total,ඉන්වොයිසි එකතුවට වඩා තෑගි කාඩ්පත් මුදවා ගත නොහැක
+Cannot Save Offline Invoice:,නොබැඳි ඉන්වොයිසිය සුරැකිය නොහැක:
+Cannot Save Offline Payment:,නොබැඳි ගෙවීම් සුරැකිය නොහැක:
+Card,කාඩ්පත
+Card / Online,කාඩ්පත / මාර්ගගත
+Card health after the last live lookup,අවසාන සජීවී සෙවීමෙන් පසු කාඩ්පත් සෞඛ්‍යය
+Cards,කාඩ්පත්
+Cart,කරත්තය
+Cash,මුදල්
+Cash back to customers,ගනුදෙනුකරුවන්ට මුදල් ආපසු
+Cash Collections,මුදල් එකතු කිරීම්
+Cash Deposit is disabled for this POS Profile.,මෙම POS පැතිකඩ සඳහා මුදල් තැන්පතු අක්‍රිය කර ඇත.
+Cash Drawer Snapshot,මුදල් ලාච්චු ස්නැප්ෂොට්
+Cash In Hand,අතේ මුදල්
+Cash Movement,මුදල් චලනය
+Cash movement cancelled,මුදල් හුවමාරුව අවලංගු කර ඇත
+Cash movement deduction applied,මුදල් සංචලනය අඩු කිරීම යොදන ලදී
+Cash movement deleted,මුදල් චලනය මකා දමන ලදී
+Cash movement is disabled for this POS Profile.,මෙම POS පැතිකඩ සඳහා මුදල් චලනය අබල කර ඇත.
+Cash Movement is disabled in current POS Profile.,වත්මන් POS පැතිකඩෙහි මුදල් චලනය අබල කර ඇත.
+Cash movement saved offline,මුදල් චලනය නොබැඳිව සුරකින ලදී
+Cash movement submitted,මුදල් චලනය ඉදිරිපත් කරන ලදී
+Cash Movements,මුදල් චලනයන්
+Cash payment cannot be less than invoice total when partial payment is not allowed,අර්ධ ගෙවීමට ඉඩ නොදෙන විට මුදල් ගෙවීම ඉන්වොයිසි එකතුවට වඩා අඩු විය නොහැක
+Cash returned after payment,ගෙවීමෙන් පසු මුදල් ආපසු
+Cashier,මුදල් අයකැමි
+Cashier Access,මුදල් අයකැමි ප්රවේශය
+Cashier identity and appearance preferences.,මුදල් අයකැමි අනන්‍යතාවය සහ පෙනුම මනාප.
+Cashier PIN,මුදල් අයකැමි PIN
+Cashier PIN saved successfully.,අයකැමි PIN අංකය සාර්ථකව සුරකින ලදී.
+Cashiers,මුදල් අයකැමියන්
+Cashier-wise,මුදල් අයකැමි අනුව
+Categories,වර්ග
+Category,ප්රවර්ගය
+Category / Brand / Variant Report,ප්‍රවර්ගය / වෙළඳ නාමය / ප්‍රභේද වාර්තාව
+Category-wise,වර්ග අනුව
+Category-wise Margin,කාණ්ඩ අනුව ආන්තිකය
+Certificate,සහතිකය
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,සහතිකය අතුරුදහන් හෝ විශ්වාස නැත. QZ තහවුරු කිරීමේ සංවාද පෙන්විය හැක.
+Certificate is trusted. Silent QZ printing is active.,සහතිකය විශ්වාසයි. නිහඬ QZ මුද්‍රණය සක්‍රීයයි.
+Change,වෙනස් කරන්න
+Change allocation repaired,වෙනස් කිරීමේ වෙන් කිරීම අලුත්වැඩියා කර ඇත
+Change Price,මිල වෙනස් කරන්න
+Change Return,ආපසු හැරීම වෙනස් කරන්න
+Change Returned,වෙනස් කිරීම ආපසු ලබා දෙන ලදී
+Change terminal cashier,ටර්මිනල් කැෂියර් වෙනස් කරන්න
+Charge Heads,ආරෝපණ ප්රධානීන්
+Charges,අයකිරීම්
+Charges not found,ගාස්තු හමු නොවීය
+Check Balance,ශේෂය පරීක්ෂා කරන්න
+Check balance for any card. Supervisors can issue and top up cards here.,ඕනෑම කාඩ්පතක් සඳහා ශේෂය පරීක්ෂා කරන්න. සුපරීක්ෂකවරුන්ට මෙහි කාඩ්පත් නිකුත් කිරීමට සහ පිරවීමට හැකිය.
+Check balance only,ශේෂය පමණක් පරීක්ෂා කරන්න
+Check for new commits,නව කැපවීම් සඳහා පරීක්ෂා කරන්න
+Check for Updates,යාවත්කාලීන සඳහා පරීක්ෂා කරන්න
+Check live balance before applying redemption,මිදීම අයදුම් කිරීමට පෙර සජීවී ශේෂය පරීක්ෂා කරන්න
+Check live balance before redemption,මුදා හැරීමට පෙර සජීවී ශේෂය පරීක්ෂා කරන්න
+Checking...,පරීක්ෂා කරමින්...
+Cheque/Reference Date,චෙක්පත්/යොමු දිනය
+Cheque/Reference No,චෙක්පත/යොමු අංකය
+Choose the cashier currently operating this terminal.,දැනට මෙම පර්යන්තය ක්‍රියාත්මක වන අයකැමි තෝරන්න.
+City,නගරය
+Clear,පැහැදිලියි
+Clear All,සියල්ල හිස් කරන්න
+Clear all barcode items,සියලුම තීරු කේත අයිතම හිස් කරන්න
+Clear all purchase order items,සියලුම මිලදී ගැනීමේ ඇණවුම් අයිතම ඉවත් කරන්න
+Clear Search,සෙවීම හිස් කරන්න
+Clearing local cache...,දේශීය හැඹිලිය හිස් කරමින්...
+Click to refresh,නැවුම් කිරීමට ක්ලික් කරන්න
+Client CPU Lag:,සේවාදායක CPU ප්‍රමාදය:
+Client Memory Usage:,සේවාලාභී මතක භාවිතය:
+Client Metrics,සේවාලාභී මිනුම්
+Close about dialog,සංවාදය ගැන වසන්න
+Close cashier switcher,මුදල් අයකැමි මාරු කරන්නා වසන්න
+Close closing shift dialog,වසා දැමීමේ මාරු සංවාදය වසන්න
+Close column selector,තීරු තේරීම්කාරකය වසන්න
+Close Dialog,ඩයලොග් වසන්න
+Close drafts dialog,කෙටුම්පත් සංවාදය වසන්න
+Close invoice details dialog,ඉන්වොයිස් විස්තර සංවාදය වසන්න
+Close invoice management,ඉන්වොයිස් කළමනාකරණය වසන්න
+Close offline invoices dialog,නොබැඳි ඉන්වොයිසි සංවාදය වසන්න
+Close packing list dialog,ඇසුරුම් ලැයිස්තු සංවාදය වසන්න
+Close returns dialog,ආපසු ලබා දීමේ සංවාදය වසන්න
+Close sales orders dialog,විකුණුම් ඇණවුම් සංවාදය වසන්න
+Close Scanner,ස්කෑනරය වසන්න
+Close scanner dialog,ස්කෑනර් සංවාදය වසන්න
+Close Settings,සැකසීම් වසන්න
+Closing Amount,අවසන් මුදල
+Closing POS Shift,POS Shift වසා දමයි
+Closing Snapshot Available,අවසන් ස්නැප්ෂොට් තිබේ
+Code,කේතය
+Code scanned successfully,කේතය සාර්ථකව පරිලෝකනය කරන ලදී
+COGS,COGS
+Collapse item details,අයිතම විස්තර හකුළන්න
+Collected,එකතු කරන ලදී
+Cols,කොල්ස්
+Columns,තීරු
+commits,කැප කරයි
+Completed and active sales in this range,මෙම පරාසය තුළ සම්පූර්ණ කරන ලද සහ ක්රියාකාරී විකුණුම්
+Completed returns will appear here.,සම්පූර්ණ කළ ප්‍රතිලාභ මෙහි දිස්වනු ඇත.
+Confirm,තහවුරු කරන්න
+Confirm Close,වසා දැමීම තහවුරු කරන්න
+Confirm Mobile Number,ජංගම දුරකථන අංකය තහවුරු කරන්න
+Confirm PIN,PIN තහවුරු කරන්න
+Connect,සම්බන්ධ කරන්න
+Connect printer and manage certificate,මුද්‍රණ යන්ත්‍රය සම්බන්ධ කර සහතිකය කළමනාකරණය කරන්න
+Connecting to QZ Tray...,QZ තැටි වෙත සම්බන්ධ වෙමින්...
+Connection problem while submitting invoice,ඉන්වොයිසිය ඉදිරිපත් කිරීමේදී සම්බන්ධතා ගැටලුවක්
+Connections:,සම්බන්ධතා:
+Connectivity and cached prerequisite status were rechecked.,සම්බන්ධතාවය සහ හැඹිලිගත පූර්ව අවශ්‍යතා තත්ත්වය නැවත පරීක්ෂා කරන ලදී.
+Continue Editing,දිගටම සංස්කරණය කරන්න
+Could not fetch latest balance from server,සේවාදායකයෙන් නවතම ශේෂය ලබා ගැනීමට නොහැකි විය
+Count,ගණන් කරන්න
+Country,රට
+Coupon,කූපනය
+Coupons,කූපන් පත්
+Cover,ආවරණය කරන්න
+CPU Cores:,CPU Cores:
+Create,නිර්මාණය කරන්න
+Create and load a new prepaid card,නව පෙරගෙවුම් කාඩ්පතක් සාදා පූරණය කරන්න
+Create and preload a new gift card,නව තෑගි කාඩ්පතක් සාදා පූර්ව පූරණය කරන්න
+Create Bill,බිල්පත සාදන්න
+Create Customer,පාරිභෝගිකයා සාදන්න
+Create New Item,නව අයිතමයක් සාදන්න
+Create or change your PIN,ඔබගේ PIN අංකය සාදන්න හෝ වෙනස් කරන්න
+Create PIN,PIN සාදන්න
+Create POS Opening Shift,POS විවෘත කිරීමේ Shift සාදන්න
+Create Purchase Order,මිලදී ගැනීමේ ඇණවුම සාදන්න
+Create Return,Return සාදන්න
+Create return from invoice,ඉන්වොයිසියෙන් ප්රතිලාභයක් සාදන්න
+Create Supplier,සැපයුම්කරු සාදන්න
+Credit and Output,ණය සහ ප්රතිදානය
+Credit Note,ණය සටහන
+Credit Outstanding,කැපී පෙනෙන ණය
+Credit sales remaining to be collected,එකතු කිරීමට ඉතිරිව ඇති ණය විකුණුම්
+Critical,විවේචනාත්මක
+Currency,මුදල්
+Current,වත්මන්
+Current Event Loop Lag:,වත්මන් සිදුවීම් ලූප් ප්‍රමාදය:
+Current Month,වත්මන් මාසය
+Current PIN,වත්මන් PIN අංකය
+Current Profile,වත්මන් පැතිකඩ
+Current redeemable value on the gift card,තෑගි කාඩ්පතෙහි වත්මන් මුදවා ගත හැකි වටිනාකම
+Current User,වත්මන් පරිශීලක
+Custom,අභිරුචි
+Custom Due Days,අභිරුචි නියමිත දින
+Custom items per page,පිටුවකට අභිරුචි අයිතම
+Customer,පාරිභෝගිකයා
+Customer already selected,පාරිභෝගිකයා දැනටමත් තෝරාගෙන ඇත
+Customer Balance,පාරිභෝගික ශේෂය
+Customer balance unavailable offline,පාරිභෝගික ශේෂය නොබැඳිව නොමැත
+Customer created successfully.,පාරිභෝගිකයා සාර්ථකව නිර්මාණය කරන ලදී.
+Customer creation failed.,පාරිභෝගික නිර්මාණය අසාර්ථක විය.
+Customer Details,පාරිභෝගික විස්තර
+Customer display channel is missing,පාරිභෝගික සංදර්ශක නාලිකාව අස්ථානගත වී ඇත
+Customer display was blocked. Please allow pop-ups for this site.,පාරිභෝගික සංදර්ශකය අවහිර කර ඇත. කරුණාකර මෙම අඩවිය සඳහා pop-ups ඉඩ දෙන්න.
+Customer group is required,පාරිභෝගික කණ්ඩායමක් අවශ්‍යයි
+Customer is required to add payment,ගෙවීම එක් කිරීමට පාරිභෝගිකයා අවශ්‍ය වේ
+Customer Name is required,පාරිභෝගික නම අවශ්‍යයි
+Customer not selected,පාරිභෝගිකයා තෝරාගෙන නැත
+Customer Report,පාරිභෝගික වාර්තාව
+Customer saved offline,පාරිභෝගිකයා නොබැඳිව සුරකින ලදී
+Customer Screen,පාරිභෝගික තිරය
+Customer territory is required,පාරිභෝගික භූමිය අවශ්‍යයි
+Customer updated successfully.,පාරිභෝගිකයා සාර්ථකව යාවත්කාලීන කරන ලදී.
+Customer-facing tools and printer setup.,පාරිභෝගිකයින් මුහුණ දෙන මෙවලම් සහ මුද්‍රණ යන්ත්‍ර සැකසීම.
+Customers,පාරිභෝගිකයන්
+Customers not found,ගනුදෙනුකරුවන් හමු නොවීය
+Daily cashier actions without scrolling.,අනුචලනයකින් තොරව දෛනික මුදල් අයකැමි ක්‍රියා.
+Daily Sales,දෛනික විකුණුම්
+Daily Sales Summary,දෛනික විකුණුම් සාරාංශය
+Data loaded in form. Review and submit.,පෝරමයේ දත්ත පටවා ඇත. සමාලෝචනය කර ඉදිරිපත් කරන්න.
+Database Health,දත්ත සමුදා සෞඛ්යය
+Database health affects overall system speed and reliability.,දත්ත සමුදා සෞඛ්‍යය සමස්ත පද්ධතියේ වේගය සහ විශ්වසනීයත්වයට බලපායි.
+Database Info,දත්ත සමුදා තොරතුරු
+Date,දිනය
+Day ?,දවස?
+days,දින
+Day-wise (MTD),දින අනුව (MTD)
+Day-wise Movement,දින අනුව චලනය
+Dead Stock,මළ කොටස්
+Dead Stock Items,මළ කොටස් අයිතම
+Decrease quantity,ප්‍රමාණය අඩු කරන්න
+Default,පෙරනිමිය
+Default:,පෙරනිමිය:
+Delete,මකන්න
+Delete cancelled cash movement {0}?,අවලංගු කළ මුදල් චලනය මකන්න {0}?
+Delete Draft,කෙටුම්පත මකන්න
+Delete draft invoice,කෙටුම්පත් ඉන්වොයිසිය මකන්න
+Delete draft invoice {0}?,කෙටුම්පත් ඉන්වොයිසිය {0} මකන්නද?
+Delete Invoice,ඉන්වොයිසිය මකන්න
+Delete offline invoice,නොබැඳි ඉන්වොයිසිය මකන්න
+Delivered,භාර දුන්නා
+Delivery Charges,බෙදාහැරීමේ ගාස්තු
+Delivery Information,බෙදාහැරීමේ තොරතුරු
+Delivery Note {0} created,බෙදා හැරීමේ සටහන {0} සාදන ලදී
+Delivery note created,බෙදා හැරීමේ සටහනක් සාදන ලදී
+Deployed Bundle:,යොදවා ඇති බණ්ඩලය:
+Deposit,තැන්පත් කරන්න
+Description,විස්තරය
+Detailed Supplier Breakdown,සවිස්තරාත්මක සැපයුම්කරු බිඳවැටීම
+Detecting formats:,ආකෘති හඳුනාගැනීම:
+Device Memory:,උපාංග මතකය:
+Difference,වෙනස
+Difference (In Company Currency),වෙනස (සමාගමේ මුදලින්)
+Disable offline mode first to recheck live connectivity.,සජීවී සම්බන්ධතාව නැවත පරීක්ෂා කිරීමට පළමුව නොබැඳි මාදිලිය අබල කරන්න.
+Disconnect,විසන්ධි කරන්න
+discount,වට්ටම්
+Discount %,වට්ටම් %
+Discount / Void / Return Report,වට්ටම් / අවලංගු / ආපසු වාර්තාව
+Discount Amount,වට්ටම් මුදල
+Discount limited by POS Profile,වට්ටම් POS පැතිකඩෙන් සීමා වේ
+Discounted Invoices,වට්ටම් සහිත ඉන්වොයිසි
+Discounts,වට්ටම්
+Dismiss,අස් කරන්න
+Download Certificate,සහතිකය බාගන්න
+Draft,කෙටුම්පත
+Draft invoice deleted,කෙටුම්පත් ඉන්වොයිසිය මකා ඇත
+Draft source,කෙටුම්පත් මූලාශ්රය
+Drafts,කෙටුම්පත්
+Due {0},නියමිත {0}
+Due Date,නියමිත දිනය
+Duplicate,අනුපිටපත් කරන්න
+Edit customer,පාරිභෝගිකයා සංස්කරණය කරන්න
+Edit discount amount,වට්ටම් මුදල සංස්කරණය කරන්න
+Edit discount percentage,වට්ටම් ප්‍රතිශතය සංස්කරණය කරන්න
+Edit Gift Application,තෑගි අයදුම්පත සංස්කරණය කරන්න
+Edit item name,අයිතමයේ නම සංස්කරණය කරන්න
+Edit quantity,ප්‍රමාණය සංස්කරණය කරන්න
+Edit rate,අනුපාතය සංස්කරණය කරන්න
+Edit unit of measure,මිනුම් ඒකකය සංස්කරණය කරන්න
+Edited,සංස්කරණය කළා
+Employee,සේවකයා
+Enable background sync,පසුබිම් සමමුහුර්තකරණය සබල කරන්න
+Enable Customer Display in POS Profile first.,පළමුව POS පැතිකඩෙහි පාරිභෝගික සංදර්ශකය සබල කරන්න.
+Enter a PIN.,PIN එකක් ඇතුල් කරන්න.
+Enter a valid grams value,වලංගු ග්රෑම් අගයක් ඇතුළත් කරන්න
+Enter new price list rate,නව මිල ලැයිස්තු අනුපාතය ඇතුළත් කරන්න
+Enter Quantity,ප්‍රමාණය ඇතුලත් කරන්න
+Enter the cashier PIN to continue.,ඉදිරියට යාමට මුදල් අයකැමි PIN ඇතුලත් කරන්න.
+Enter the current PIN first.,මුලින්ම වත්මන් PIN එක ඇතුල් කරන්න.
+"Enter the current PIN, then choose a new one.","වත්මන් PIN ඇතුලත් කරන්න, පසුව අලුත් එකක් තෝරන්න."
+Enter valid grams for scale barcode,පරිමාණ තීරු කේතය සඳහා වලංගු ග්රෑම් ඇතුළත් කරන්න
+Entries,ඇතුළත් කිරීම්
+Error accessing camera:,කැමරාවට පිවිසීමේ දෝෂය:
+Error calculating prices,මිල ගණන් ගණනය කිරීමේ දෝෂයකි
+Error fetching customer balance,පාරිභෝගික ශේෂය ලබා ගැනීමේ දෝෂයකි
+Error in change calculations!,වෙනස් ගණනය කිරීම් වල දෝෂයක්!
+Error Loading Data,දත්ත පූරණය කිරීමේ දෝෂයකි
+Error loading invoice details,ඉන්වොයිස් විස්තර පූරණය කිරීමේ දෝෂයකි
+Error processing invoice,ඉන්වොයිසිය සැකසීමේ දෝෂයකි
+Error processing payment,ගෙවීම සැකසීමේ දෝෂයකි
+Error searching invoices,ඉන්වොයිසි සෙවීමේ දෝෂයකි
+Error submitting invoice:,ඉන්වොයිසිය ඉදිරිපත් කිරීමේ දෝෂය:
+Error submitting invoice: {0},ඉන්වොයිසිය ඉදිරිපත් කිරීමේ දෝෂයකි: {0}
+Error submitting invoice: No response from server,ඉන්වොයිසිය ඉදිරිපත් කිරීමේ දෝෂයකි: සේවාදායකයෙන් ප්‍රතිචාරයක් නොමැත
+Error updating currency,මුදල් යාවත්කාලීන කිරීමේ දෝෂයකි
+Error updating item details,අයිතම විස්තර යාවත්කාලීන කිරීමේ දෝෂයකි
+Est. Purchase,ඇස්තමේන්තුගත මිලදී ගැනීම
+Est. Value,ඇස්තමේන්තුගත වටිනාකම
+Event-loop lag measures how busy your browser is. Lower is better.,Event-loop ප්‍රමාදය ඔබගේ බ්‍රවුසරය කෙතරම් කාර්යබහුලද යන්න මනිනු ලබයි. පහළ වඩා හොඳයි.
+Every,සෑම
+Exchange Rate,විනිමය අනුපාතය
+Expand item details,අයිතම විස්තර පුළුල් කරන්න
+Expected Amount (In Company Currency),අපේක්ෂිත මුදල (සමාගමේ මුදලින්)
+Expected Cash,අපේක්ෂිත මුදල්
+Expected cash on hand grouped by currency,මුදල් මගින් කාණ්ඩගත කර ඇති අපේක්ෂිත මුදල්
+Expected vs Actual,අපේක්ෂිත එදිරිව සැබෑ
+Expense,වියදම්
+Expense Account (Optional Override),වියදම් ගිණුම (විකල්ප අභිබවා යාම)
+Expense account is required.,වියදම් ගිණුමක් අවශ්‍යයි.
+Expenses and deposits posted during this shift,මෙම මාරුව තුළ පළ කරන ලද වියදම් සහ තැන්පතු
+Expired,කල් ඉකුත් වී ඇත
+Failed to auto reconcile payments.,ගෙවීම් ස්වයංක්‍රීයව සමථයකට පත් කිරීමට අසමත් විය.
+Failed to cancel cash movement,මුදල් චලනය අවලංගු කිරීමට අසමත් විය
+Failed to clear cache,හැඹිලිය හිස් කිරීමට අසමත් විය
+Failed to create item,අයිතමය සෑදීමට අසමත් විය
+Failed to create supplier,සැපයුම්කරු නිර්මාණය කිරීමට අසමත් විය
+Failed to delete cash movement,මුදල් චලනය මැකීමට අසමත් විය
+Failed to generate scale barcode. Using item barcode only.,පරිමාණ තීරු කේතය උත්පාදනය කිරීමට අසමත් විය. අයිතම තීරු කේතය පමණක් භාවිතා කිරීම.
+Failed to load cash movement context.,මුදල් සංචලන සන්දර්භය පූරණය කිරීමට අසමත් විය.
+Failed to load dashboard data.,උපකරණ පුවරු දත්ත පූරණය කිරීමට අසමත් විය.
+Failed to reload invoice from server,සේවාදායකයෙන් ඉන්වොයිසිය නැවත පූරණය කිරීමට අසමත් විය
+Failed to submit cash movement,මුදල් චලනය ඉදිරිපත් කිරීමට අපොහොසත් විය
+Failed to sync offline cash movements,නොබැඳි මුදල් චලනයන් සමමුහුර්ත කිරීමට අසමත් විය
+Fast cashier actions for active shifts.,සක්‍රිය මාරුවීම් සඳහා වේගවත් මුදල් අයකැමි ක්‍රියා.
+Fast Moving Items,වේගයෙන් චලනය වන අයිතම
+Fees,ගාස්තු
+Fetch the latest offline prerequisite updates,නවතම නොබැඳි පූර්ව අවශ්‍යතා යාවත්කාලීන ලබා ගන්න
+Find a sales order quickly and load it into the current sale.,ඉක්මනින් විකුණුම් ඇණවුමක් සොයාගෙන එය වත්මන් අලෙවියට පටවන්න.
+Fixing payment amounts for return invoice...,ආපසු ඉන්වොයිසිය සඳහා ගෙවීම් මුදල් නියම කරමින්...
+Flash Off,ෆ්ලෑෂ් ඕෆ්
+Flash On,ෆ්ලෑෂ් ඔන්
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","'නිෂ්පාදන බණ්ඩල්' අයිතම සඳහා, ගබඩාව, අනුක්‍රමික අංකය සහ කණ්ඩායම් අංකය 'ඇසුරුම් ලැයිස්තුව' වගුවෙන් සලකා බලනු ලැබේ. ඕනෑම 'නිෂ්පාදන බණ්ඩල්' අයිතමයක් සඳහා සියලුම ඇසුරුම් අයිතම සඳහා ගබඩාව සහ කාණ්ඩ අංකය සමාන නම්, එම අගයන් ප්‍රධාන අයිතම වගුවේ ඇතුළත් කළ හැක; අගයන් 'ඇසුරුම් ලැයිස්තුව' වගුව වෙත පිටපත් කරනු ලැබේ."
+Free,නොමිලේ
+Free Qty,නොමිලේ Qty
+Frequency,සංඛ්යාතය
+from,සිට
+From Date,දින සිට
+Fulfillment Details,ඉටුකිරීමේ විස්තර
+Full Name,සම්පූර්ණ නම
+Gain,ලබාගන්න
+Generate a fresh prepaid card and start it with an opening balance.,නැවුම් පෙරගෙවුම් කාඩ්පතක් ජනනය කර එය ආරම්භක ශේෂයකින් ආරම්භ කරන්න.
+Generate and install the certificate to allow fully silent printing without trust prompts.,විශ්වාස ප්‍රේරකයකින් තොරව සම්පූර්ණයෙන්ම නිශ්ශබ්ද මුද්‍රණයට ඉඩ දීම සඳහා සහතිකය ජනනය කර ස්ථාපනය කරන්න.
+Generate Certificate,සහතිකය ජනනය කරන්න
+Generated scale barcode: {0},ජනනය කරන ලද පරිමාණ තීරු කේතය: {0}
+Get Payments,ගෙවීම් ලබා ගන්න
+Gift Card,තෑගි කාඩ්පත
+Gift card amount must be greater than zero.,තෑගි කාඩ්පත් මුදල බිංදුවට වඩා වැඩි විය යුතුය.
+Gift Card Code,තෑගි කාඩ්පත් කේතය
+Gift card code is required for redemption,මිදීම සඳහා තෑගි කාඩ්පත් කේතය අවශ්‍ය වේ
+Gift card code is required.,තෑගි කාඩ්පත් කේතය අවශ්ය වේ.
+Gift card issued successfully.,තෑගි කාඩ්පත සාර්ථකව නිකුත් කරන ලදී.
+Gift card loaded successfully.,තෑගි කාඩ්පත සාර්ථකව පූරණය විය.
+Gift Card Management,තෑගි කාඩ්පත් කළමනාකරණය
+Gift card payment,තෑගි කාඩ්පත් ගෙවීම
+Gift card redemption requires an online connection,තෑගි කාඩ්පත් මුදාගැනීම සඳහා සබැඳි සම්බන්ධතාවයක් අවශ්‍ය වේ
+Gift card topped up successfully.,තෑගි කාඩ්පත සාර්ථකව ඉහළට ගෙන ඇත.
+Gift Cards,තෑගි කාඩ්පත්
+Go to Frappe Desk,Frappe Desk වෙත යන්න
+Grand Total,ග්රෑන්ඩ් ටෝටල්
+Gross Margin,දළ ආන්තිකය
+Gross Profit,දළ ලාභය
+Gross Sales,දළ විකුණුම්
+Group not found,කණ්ඩායම හමු නොවීය
+"Grouped controls for terminal, UI, and session settings.","පර්යන්තය, UI, සහ සැසි සැකසීම් සඳහා සමූහගත පාලන."
+Grouped totals for each payment method and currency,එක් එක් ගෙවීම් ක්‍රමය සහ මුදල් සඳහා සමූහගත එකතුව
+Hide,සඟවන්න
+Hide Gift Card,තෑගි කාඩ්පත සඟවන්න
+Hide Non Essential Fields,අත්‍යවශ්‍ය නොවන ක්ෂේත්‍ර සඟවන්න
+Hide quantity decimals,ප්‍රමාණ දශම සඟවන්න
+Hide search tools,සෙවුම් මෙවලම් සඟවන්න
+Hide zero rated items,ශුන්‍ය ශ්‍රේණිගත අයිතම සඟවන්න
+High,ඉහළ
+History,ඉතිහාසය
+Hourly (Today),පැයකට (අද)
+How this section works,මෙම කොටස ක්රියා කරන ආකාරය
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","යල් පැන ගිය දත්ත තිබේ නම්, සැකසීම් > නොබැඳි සහ සමමුහුර්ත කිරීම විවෘත කර සබැඳිව සිටින විට නැවත නොබැඳි දත්ත යළි ගොඩනැගීම ධාවනය කරන්න."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","අනතුරු ඇඟවීම දිගටම පවතින්නේ නම්, සැකසීම් > නොබැඳි සහ සමමුහුර්ත කිරීම විවෘත කරන්න, ඉන්පසු නොබැඳි දත්ත නැවුම් කරන්න හෝ නොබැඳි දත්ත නැවත සාදන්න."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,සහතිකය QZ තැටි වෙත ආයාත කර සෑම POS යන්ත්‍රයකම QZ තැටි නැවත ආරම්භ කරන්න.
+In,තුළ
+In stock: {0},තොගයේ: {0}
+Include Batch / Serial,Batch / Serial ඇතුලත් කරන්න
+Include Price,මිල ඇතුළත් කරන්න
+Increase quantity,ප්‍රමාණය වැඩි කරන්න
+IndexedDB,IndexedDB
+Initial Amount,ආරම්භක මුදල
+Initialize your shift with opening balances,විවෘත ශේෂයන් සමඟ ඔබේ මාරුව ආරම්භ කරන්න
+Initializing application...,යෙදුම ආරම්භ කරමින්...
+"Inspect cache, sync, and prerequisite status","හැඹිලිය, සමමුහුර්තකරණය සහ පූර්ව අවශ්‍යතා තත්ත්වය පරීක්ෂා කරන්න"
+Installed Applications,ස්ථාපිත යෙදුම්
+Insufficient stock:\n{0},තොග ප්‍රමාණවත් නැත:\n{0}
+Invalid rate,වලංගු නොවන අනුපාතය
+Inventory Status Report,ඉන්වෙන්ටරි තත්ත්ව වාර්තාව
+Invoice,ඉන්වොයිසිය
+Invoice {0} is Submitted,ඉන්වොයිසිය {0} ඉදිරිපත් කර ඇත
+Invoice {0} processed successfully,ඉන්වොයිසිය {0} සාර්ථකව සකසන ලදී
+Invoice {0} submission failed,ඉන්වොයිසිය {0} ඉදිරිපත් කිරීම අසාර්ථක විය
+Invoice {0} was already submitted,ඉන්වොයිසිය {0} දැනටමත් ඉදිරිපත් කර ඇත
+Invoice Adjustments,ඉන්වොයිස් ගැලපීම්
+Invoice Change,ඉන්වොයිස් වෙනස් කිරීම
+Invoice Details,ඉන්වොයිස් විස්තර
+Invoice is still in draft after background submission.,පසුබිම් ඉදිරිපත් කිරීමෙන් පසුව ඉන්වොයිසිය තවමත් කෙටුම්පතේ ඇත.
+Invoice Items,ඉන්වොයිස් අයිතම
+Invoice Management,ඉන්වොයිස් කළමනාකරණය
+Invoice Mgmt,ඉන්වොයිසිය Mgmt
+Invoice saved offline,ඉන්වොයිසිය නොබැඳිව සුරකින ලදී
+Invoice submission failed,ඉන්වොයිසිය ඉදිරිපත් කිරීම අසාර්ථක විය
+Invoice Submitted,ඉන්වොයිසිය ඉදිරිපත් කරන ලදී
+"Invoice value settled by loyalty points, not cash collection","ඉන්වොයිසි වටිනාකම මුදල් එකතු කිරීම නොව, පක්ෂපාති ලකුණු මගින් පියවා ඇත"
+Invoices,ඉන්වොයිසි
+Invoices already past due date,ඉන්වොයිසි දැනටමත් නියමිත දිනය ඉක්මවා ඇත
+Invoices saved as POS Invoices,ඉන්වොයිසි POS ඉන්වොයිසි ලෙස සුරකින ලදී
+Invoices still carrying balances,ඉන්වොයිසි තවමත් ශේෂයන් දරයි
+Issue Mode,නිකුත් කිරීමේ මාදිලිය
+Issue New Card,නව කාඩ්පතක් නිකුත් කරන්න
+Issue Workflow,වැඩ ප්‍රවාහය නිකුත් කරන්න
+"Issue, top up, and check","නිකුත් කරන්න, ඉහළට සහ පරීක්ෂා කරන්න"
+Item,අයිතමය
+Item / Product Sales Report,අයිතමය / නිෂ්පාදන විකුණුම් වාර්තාව
+Item {0} added to invoice,{0} අයිතමය ඉන්වොයිසියට එක් කරන ලදී
+Item '{0}' has no barcode,'{0}' අයිතමයට තීරු කේතයක් නොමැත
+Item Code,අයිතම කේතය
+Item created successfully,අයිතමය සාර්ථකව සාදන ලදී
+Item is out of stock,අයිතමය තොග ඉවරයි
+Item Name,අයිතමයේ නම
+Item not found,අයිතමය හමු නොවීය
+Item order updated,අයිතම අනුපිළිවෙල යාවත්කාලීන කරන ලදී
+Item Selector Settings,අයිතම තේරීම් සැකසුම්
+Items,අයිතම
+Items added in POS will appear here automatically.,POS හි එක් කළ අයිතම ස්වයංක්‍රීයව මෙහි දිස් වනු ඇත.
+Items added to invoice,ඉන්වොයිසියට එකතු කරන ලද අයිතම
+Items per page,පිටුවකට අයිතම
+Items Sold,විකුණන ලද භාණ්ඩ
+Items/Invoice,අයිතම/ඉන්වොයිසිය
+Item-wise Profitability,අයිතම අනුව ලාභය
+Journal Entry,ජර්නල ප්රවේශය
+json,json
+Just now,දැන් තමයි
+Keep offline prerequisites healthy and recover stale data safely.,නොබැඳි පූර්වාවශ්‍යතා සෞඛ්‍ය සම්පන්නව තබාගෙන පරණ දත්ත ආරක්ෂිතව ප්‍රතිසාධනය කරන්න.
+Labels,ලේබල්
+"Language, theme, terminal tools, and session controls.","භාෂාව, තේමාව, පර්යන්ත මෙවලම් සහ සැසි පාලන."
+Last,අන්තිම
+Last 14 Days (Paid vs Pending),පසුගිය දින 14 (ගෙවූ එදිරිව පොරොත්තුවෙන්)
+Last 14 Days Activity,පසුගිය දින 14 ක්‍රියාකාරකම්
+Last 14 Days Gross Profit,පසුගිය දින 14 දළ ලාභය
+Last 14 Days Purchases,පසුගිය දින 14 මිලදී ගැනීම්
+Last 14 Days Tax/Charges,පසුගිය දින 14 බදු/ගාස්තු
+Last sync:,අවසන් සමමුහුර්ත කිරීම:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},අවසන් සමමුහුර්ත කිරීම: {0} | හරි: {1} | අසාර්ථකයි: {2} | මඟ හැරිය: {3}
+Latest entries for current shift,වත්මන් මාරුව සඳහා නවතම ඇතුළත් කිරීම්
+Lead Time,ඉදිරි කාලය
+Limited,සීමා සහිතයි
+lines,රේඛා
+List,ලැයිස්තුව
+Live Snapshot,සජීවී ස්නැප්ෂොට්
+Load a POS profile and cashier first.,පළමුව POS පැතිකඩක් සහ මුදල් අයකැමියක් පූරණය කරන්න.
+Load More Invoices,තවත් ඉන්වොයිසි පූරණය කරන්න
+Load previously saved invoices,කලින් සුරකින ලද ඉන්වොයිසි පූරණය කරන්න
+Load Sale,අලෙවිය පැටවීම
+Load Sales Invoice,විකුණුම් ඉන්වොයිසිය පූරණය කරන්න
+Loading app data...,යෙදුම් දත්ත පූරණය කරමින්...
+Loading customer database...,පාරිභෝගික දත්ත සමුදාය පූරණය කරමින්...
+Loading customers...,පාරිභෝගිකයින් පූරණය කරමින්...
+Loading database stats...,දත්ත සමුදා සංඛ්‍යාලේඛන පූරණය වෙමින්...
+Loading details...,විස්තර පූරණය කරමින්...
+Loading invoice history...,ඉන්වොයිස් ඉතිහාසය පූරණය කරමින්...
+Loading items...,අයිතම පූරණය කරමින්...
+Loading product catalog...,නිෂ්පාදන නාමාවලිය පූරණය කරමින්...
+Loading return invoices...,ආපසු ඉන්වොයිසි පූරණය කරමින්...
+Loading server CPU/memory usage...,සේවාදායක CPU/මතක භාවිතය පූරණය කරමින්...
+Loading suppliers...,සැපයුම්කරුවන් පූරණය කරමින්...
+Loading unpaid invoices...,නොගෙවූ ඉන්වොයිසි පූරණය කරමින්...
+Loading view...,දසුන පූරණය වෙමින්...
+Loading...,පූරණය වෙමින්...
+Local storage is unavailable. Switching to online-only mode.,දේශීය ගබඩාව නොමැත. සබැඳි-පමණි මාදිලියට මාරු වීම.
+localStorage,දේශීය ගබඩාව
+Location Performance,ස්ථාන කාර්ය සාධනය
+Locations,ස්ථාන
+Lock Screen,අගුළු තිරය
+Lookup Workflow,කාර්ය ප්‍රවාහය බලන්න
+Loss,පාඩුයි
+Low,අඩුයි
+Low Stock,අඩු තොග
+Low Stock Alerts,අඩු තොග ඇඟවීම්
+Low Stock Items,අඩු තොග අයිතම
+Low Stock Threshold,අඩු කොටස් සීමාව
+Low Stock Total,අඩු තොග එකතුව
+Lowest Margin,අඩුම මායිම
+Low-frequency maintenance and system details.,අඩු සංඛ්‍යාත නඩත්තු සහ පද්ධති විස්තර.
+Loyalty Redeemed,පක්ෂපාතිත්වය මුදා හරින ලදී
+Loyalty Redemption,ලෝයල්ටි මිදීම
+Make New Payment,නව ගෙවීමක් කරන්න
+Manage all,සියල්ල කළමනාකරණය කරන්න
+Manage and synchronize your offline transactions,ඔබගේ නොබැඳි ගනුදෙනු කළමනාකරණය සහ සමමුහුර්ත කරන්න
+Manage Cashier PIN,මුදල් අයකැමි PIN කළමනාකරණය කරන්න
+"Manage offline tools, terminal controls, and maintenance from one workspace.","එක් වැඩ ඉඩකින් නොබැඳි මෙවලම්, පර්යන්ත පාලන සහ නඩත්තු කළමනාකරණය කරන්න."
+manual,අත්පොත
+"Manual codes, barcode scans, and QR scans work in the same field","හස්තීය කේත, තීරු කේත ස්කෑන් සහ QR ස්කෑන් එකම ක්ෂේත්‍රයේ ක්‍රියා කරයි"
+Manual offline mode is enabled,අතින් නොබැඳි මාදිලිය සබල කර ඇත
+Margin,ආන්තිකය
+Maximum available quantity is {0}. Quantity adjusted to match stock.,ලබා ගත හැකි උපරිම ප්‍රමාණය {0} වේ. තොගයට ගැලපෙන පරිදි ප්‍රමාණය සකස් කර ඇත.
+Maximum discount amount for this offer item is {0}.,මෙම පිරිනැමීමේ අයිතමය සඳහා උපරිම වට්ටම් මුදල {0} වේ.
+Maximum discount percentage for this offer item is {0}%.,මෙම පිරිනැමීමේ අයිතමය සඳහා උපරිම වට්ටම් ප්‍රතිශතය {0}% කි.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,උපරිම පිරිනැමීම් ප්‍රමාණය {0} වේ. අවසර ලත් සීමාවට ප්‍රමාණය සකස් කරන ලදී.
+Medium,මධ්යම
+Method-wise Collections,ක්‍රමානුකූලව එකතු කිරීම්
+Minimum allowed rate for this offer item is {0}.,මෙම පිරිනැමීමේ අයිතමය සඳහා අවසර දී ඇති අවම ගාස්තුව {0} වේ.
+Minimum Qty,අවම Qty
+Mobile No,ජංගම අංකය
+Mode,මාදිලිය
+Mode of Payment,ගෙවීම් ආකාරය
+Month,මාසය
+Month ?,මාසය?
+Monthly Profit,මාසික ලාභය
+Monthly Sales,මාසික විකුණුම්
+Monthly Sales Summary,මාසික විකුණුම් සාරාංශය
+Month-wise,මාසය අනුව
+Most Active Cashiers,වඩාත්ම ක්රියාකාරී මුදල් අයකැමියන්
+Movement Type,චලන වර්ගය
+Movements,චලනයන්
+Multi Currency,බහු මුදල්
+N/A,N/A
+Name,නම
+Negative Stock,සෘණ කොටස්
+Negative Stock Items,සෘණ කොටස් අයිතම
+Negative values not allowed,සෘණ අගයන් ඉඩ නොදේ
+Net,ශුද්ධ
+Net Qty,ශුද්ධ Qty
+Net Sales,ශුද්ධ විකුණුම්
+Net Value,ශුද්ධ වටිනාකම
+Never,කවදාවත් නැහැ
+New changes are ready to load,නව වෙනස්කම් පූරණය කිරීමට සූදානම්
+New Item,නව අයිතමය
+New Offer Available,නව පිරිනැමීමක් තිබේ
+New PIN,නව PIN
+New rate,නව අනුපාතය
+Next unit of measure,ඊළඟ මිනුම් ඒකකය
+No attribute data found.,ගුණාංග දත්ත හමු නොවීය.
+No Barcode,තීරු කේතය නැත
+No barcode found for UOM '{0}',UOM '{0}' සඳහා තීරු කේතයක් හමු නොවීය
+No branch/location data found.,ශාඛාව/ස්ථාන දත්ත හමු නොවීය.
+No brand data found.,සන්නාම දත්ත හමු නොවීය.
+No cached gift card balance is available offline.,හැඹිලිගත තෑගි කාඩ්පත් ශේෂයක් නොබැඳිව නොමැත.
+No camera found on this device. Please ensure your device has a working camera.,මෙම උපාංගයේ කැමරාවක් හමු නොවීය. කරුණාකර ඔබගේ උපාංගයේ ක්‍රියාකාරී කැමරාවක් ඇති බවට සහතික වන්න.
+No capability warnings recorded yet.,තවමත් හැකියාවන් අනතුරු ඇඟවීම් වාර්තා කර නොමැත.
+No cash expected for this shift.,මෙම මාරුව සඳහා මුදල් බලාපොරොත්තු නොවේ.
+No cash mode configured,මුදල් මාදිලියක් වින්‍යාස කර නැත
+No cash movement type is allowed for this POS Profile.,මෙම POS පැතිකඩ සඳහා මුදල් සංචලන වර්ගයකට ඉඩ නොදේ.
+No cashier PIN is set yet. Create one now.,මුදල් අයකැමි PIN අංකය තවම සකසා නැත. දැන් එකක් සාදන්න.
+No cashier profiles are available for this POS profile yet.,මෙම POS පැතිකඩ සඳහා තවමත් මුදල් අයකැමි පැතිකඩ නොමැත.
+No cashier-wise discount/void/return activity.,අයකැමි අනුව වට්ටම්/නිෂ්ප්‍රභ/ප්‍රතිලාභ ක්‍රියාකාරකම් නොමැත.
+No category data found.,ප්‍රවර්ග දත්ත හමු නොවීය.
+No category profitability data found.,ප්‍රවර්ග ලාභදායිතා දත්ත හමු නොවීය.
+No change returned recorded for this shift.,මෙම මාරුව සඳහා කිසිදු වෙනසක් වාර්තා කර නැත.
+No change-allocation invoices match the current filters.,වත්මන් ෆිල්ටරවලට වෙනස් කිරීම්-වෙන්කිරීම් ඉන්වොයිසි නොගැලපේ.
+No charge head breakdown found.,ආරෝපණ හිස බිඳවැටීමක් හමු නොවීය.
+No Company Selected,සමාගමක් තෝරාගෙන නැත
+No customer sales data found.,පාරිභෝගික විකුණුම් දත්ත හමු නොවීය.
+No day-wise discount/void/return trend.,දින අනුව වට්ටම්/නිෂ්ප්‍රභ/ප්‍රතිලාභ ප්‍රවණතාවක් නොමැත.
+No day-wise payment data found.,දින අනුව ගෙවීම් දත්ත හමු නොවීය.
+No day-wise profitability trend found.,දින අනුව ලාභ ප්‍රවණතාවක් හමු නොවීය.
+No day-wise purchase data found.,දින අනුව මිලදී ගැනීමේ දත්ත හමු නොවීය.
+No day-wise sales trend found.,දින අනුව විකුණුම් ප්‍රවණතාවක් හමු නොවීය.
+No day-wise tax/charges trend found.,දින අනුව බදු/ගාස්තු ප්‍රවණතාවක් හමු නොවීය.
+No dead stock items.,මළ කොටස් අයිතම නොමැත.
+No due date,නියමිත දිනයක් නොමැත
+No exact repair match found for this invoice,මෙම ඉන්වොයිසිය සඳහා නිවැරදි අලුත්වැඩියා ගැලපීමක් හමු නොවීය
+No hourly sales trend found for today.,අද සඳහා පැයක විකුණුම් ප්‍රවණතාවක් හමු නොවීය.
+No invoice activity found.,ඉන්වොයිස් ක්‍රියාකාරකම් කිසිවක් හමු නොවීය.
+No invoices found,ඉන්වොයිසි හමු නොවීය
+No invoices found. Try different search criteria.,ඉන්වොයිසි හමු නොවීය. විවිධ සෙවුම් නිර්ණායක උත්සාහ කරන්න.
+No invoices recorded for this shift.,මෙම මාරුව සඳහා ඉන්වොයිසි වාර්තා කර නැත.
+No item profitability data found.,අයිතම ලාභදායිතා දත්ත හමු නොවීය.
+No item sales data found for this period.,මෙම කාල සීමාව සඳහා අයිතම විකුණුම් දත්ත හමු නොවීය.
+No items found,අයිතම කිසිවක් හමු නොවීය
+No items in cart,කරත්තයේ අයිතම නැත
+No items with barcodes to print,මුද්‍රණය කිරීමට තීරු කේත සහිත අයිතම නැත
+No location-wise top item data found.,ස්ථාන අනුව ඉහළ අයිතම දත්ත හමු නොවීය.
+No low stock alerts right now.,දැනට අඩු කොටස් ඇඟවීම් නොමැත.
+No low stock items.,අඩු තොග අයිතම නොමැත.
+No matching items in cart,කරත්තයේ ගැළපෙන අයිතම නැත
+No month-wise sales trend found.,මාසිකව විකුණුම් ප්‍රවණතාවක් හමු නොවීය.
+No negative stock items.,සෘණ කොටස් අයිතම නැත.
+No notifications yet,තවම දැනුම්දීම් නැත
+No offline cash movement synced.,නොබැඳි මුදල් චලනය සමමුහුර්ත කර නැත.
+No offline invoices pending synchronization,සමමුහුර්ත කිරීම පොරොත්තුවෙන් නොබැඳි ඉන්වොයිසි නැත
+No offline sync issues recorded yet.,තවමත් නොබැඳි සමමුහුර්ත ගැටළු කිසිවක් වාර්තා කර නොමැත.
+No out-of-stock items.,තොගයෙන් බැහැර අයිතම නැත.
+No outstanding credit invoices for this shift.,මෙම මාරුව සඳහා කැපී පෙනෙන ණය ඉන්වොයිසි නොමැත.
+No payment collection data found.,ගෙවීම් එකතු කිරීමේ දත්ත හමු නොවීය.
+No payment rows available on this invoice.,මෙම ඉන්වොයිසිය මත ගෙවීම් පේළි නොමැත.
+No payments registered for this shift.,මෙම මාරුව සඳහා ගෙවීම් ලියාපදිංචි කර නොමැත.
+No pending balances in this period.,මෙම කාල සීමාව තුළ පොරොත්තු ශේෂයන් නොමැත.
+No pending offline invoices,පොරොත්තු නොබැඳි ඉන්වොයිසි නැත
+No Print Formats Found,මුද්‍රණ ආකෘති හමු නොවිණි
+No profiles found for selected scope. Falling back to current profile failed.,තෝරාගත් විෂය පථය සඳහා පැතිකඩක් හමු නොවීය. වත්මන් පැතිකඩ වෙත ආපසු වැටීම අසාර්ථක විය.
+No recent customer activity found.,මෑත කාලීන පාරිභෝගික ක්‍රියාකාරකම් කිසිවක් හමු නොවීය.
+No recent stock entries found.,මෑත කොටස් ඇතුළත් කිරීම් හමු නොවිණි.
+No records found,වාර්තා හමු නොවීය
+No reorder suggestions right now.,දැන් නැවත ඇණවුම් යෝජනා නැත.
+No repeat customers in this period.,මෙම කාල සීමාව තුළ නැවත පාරිභෝගිකයන් නොමැත.
+No response from server,සේවාදායකයෙන් ප්‍රතිචාරයක් නොමැත
+No return invoices found,ආපසු ඉන්වොයිසි හමු නොවීය
+No return item trend found.,ආපසු අයිතම ප්‍රවණතාවක් හමු නොවීය.
+No returnable items found for this invoice,මෙම ඉන්වොයිසිය සඳහා ආපසු ලබා දිය හැකි අයිතම කිසිවක් හමු නොවීය
+No returns were processed in this shift.,මෙම මාරුව තුළ ප්‍රතිලාභ කිසිවක් සකස් කර නොමැත.
+No risk activity found.,අවදානම් ක්‍රියාකාරකම් කිසිවක් හමු නොවීය.
+No sales activity found for this period.,මෙම කාල සීමාව සඳහා විකුණුම් ක්‍රියාකාරකම් කිසිවක් හමු නොවීය.
+No slow moving items.,සෙමින් චලනය වන අයිතම නොමැත.
+No staff sales activity found.,කාර්ය මණ්ඩල විකුණුම් ක්‍රියාකාරකමක් හමු නොවීය.
+No stock movement for this period.,මෙම කාල සීමාව සඳහා කොටස් චලනය නොමැත.
+No submitted cash movements in this shift.,මෙම මාරුව තුළ ඉදිරිපත් කළ මුදල් චලනයන් නොමැත.
+No supplier purchases found in this month.,මෙම මාසය තුළ සැපයුම්කරු මිලදී ගැනීම් හමු නොවීය.
+No suppliers found for this period.,මෙම කාල සීමාව සඳහා සැපයුම්කරුවන් හමු නොවීය.
+No sync trigger has run yet in this session.,මෙම සැසියේ සමමුහුර්ත ප්‍රේරකයක් තවම ක්‍රියාත්මක වී නොමැත.
+No tax head breakdown found.,බදු ශීර්ෂ බිඳවැටීමක් හමු නොවීය.
+No top items found for this location.,මෙම ස්ථානය සඳහා ඉහළ අයිතම කිසිවක් හමු නොවීය.
+No unpaid invoices,නොගෙවූ ඉන්වොයිසි නැත
+No variant data found.,ප්‍රභේද දත්ත හමු නොවිණි.
+No week-wise sales trend found.,සතිපතා විකුණුම් ප්‍රවණතාවක් හමු නොවීය.
+No.,නැත.
+Nobile Number,නොබිල් අංකය
+Not available,ලබා ගත නොහැක
+Not checked,පරීක්ෂා කර නැත
+Not selected,තෝරා නැත
+Not Set,සකසා නැත
+Notifications,දැනුම්දීම්
+Offer,පිරිනැමීම
+Offer Applied,පිරිනැමීම යෙදී ඇත
+Offer criteria exceeded,පිරිනැමීමේ නිර්ණායක ඉක්මවා ඇත
+Offer Item,පිරිනැමීමේ අයිතමය
+Offer item unavailable,පිරිනැමීමේ අයිතමය නොමැත
+Offer Removed,පිරිනැමීම ඉවත් කරන ලදී
+Offer UOM cannot be changed,පිරිනැමීම UOM වෙනස් කළ නොහැක
+Offer?,පිරිනැමීම?
+Offers,පිරිනැමීම්
+Offline,නොබැඳි
+Offline & Sync,නොබැඳි සහ සමමුහුර්ත කරන්න
+Offline Capabilities,නොබැඳි හැකියාවන්
+Offline data status refreshed,නොබැඳි දත්ත තත්ත්වය නැවුම් කරන ලදී
+Offline diagnostics,නොබැඳි රෝග විනිශ්චය
+Offline Invoices,නොබැඳි ඉන්වොයිසි
+Offline invoices status,නොබැඳි ඉන්වොයිසි තත්ත්වය
+Offline invoices synced,නොබැඳි ඉන්වොයිසි සමමුහුර්ත කර ඇත
+Offline Queue: {0},නොබැඳි පෝලිම: {0}
+Offline rebuild guidance,නොබැඳි නැවත ගොඩනැගීමේ මාර්ගෝපදේශය
+Offline restore is unavailable for this session.,මෙම සැසිය සඳහා නොබැඳි ප්‍රතිසාධනය නොමැත.
+Offline selling is available with degraded capabilities.,පිරිහුණු හැකියාවන් සමඟ නොබැඳි විකිණීම ලබා ගත හැකිය.
+Offline snapshot does not match the current POS state.,නොබැඳි ස්නැප්ෂොට් වත්මන් POS තත්වයට නොගැලපේ.
+Offline Status,නොබැඳි තත්ත්වය
+"Offline, terminal, and system controls","නොබැඳි, පර්යන්ත සහ පද්ධති පාලන"
+OK,හරි
+Online,ඔන්ලයින්
+Open actions menu,ක්‍රියා මෙනුව විවෘත කරන්න
+Open balance to collect,එකතු කිරීමට ශේෂය විවෘත කරන්න
+Open Customer Display,පාරිභෝගික සංදර්ශකය විවෘත කරන්න
+Open drawer,විවෘත ලාච්චුව
+Open invoices,ඉන්වොයිසි විවෘත කරන්න
+Open Payments?,ගෙවීම් විවෘත කරන්නද?
+Open POS home,POS නිවස විවෘත කරන්න
+Open this screen from POS Menu -> Open Customer Display.,POS මෙනුවෙන් මෙම තිරය විවෘත කරන්න -> පාරිභෝගික සංදර්ශකය විවෘත කරන්න.
+OpenCV image processing enabled - Enhanced barcode detection,OpenCV රූප සැකසීම සබල කර ඇත - වැඩි දියුණු කළ තීරු කේත හඳුනාගැනීම
+OpenCV image processing unavailable on this device,OpenCV රූප සැකසීම මෙම උපාංගයේ නොමැත
+OpenCV Off,OpenCV අක්‍රියයි
+OpenCV On,OpenCV ක්‍රියාත්මකයි
+OpenCV processing disabled,OpenCV සැකසුම් අබල කර ඇත
+Opening Amount,ආරම්භක මුදල
+Opening Cash,මුදල් විවෘත කිරීම
+options,විකල්ප
+Order,ඇණවුම් කරන්න
+Original,මුල්
+Other,වෙනත්
+Out,පිටතට
+Out of Stock,තොග ඉවරයි
+Out of Stock Items,තොග පිට අයිතම
+Outstanding,කැපී පෙනෙන
+Outstanding Credit by Currency,මුදල් මගින් කැපී පෙනෙන ණය
+Overdue,කල් ඉකුත් වී ඇත
+Overpayment Change,වැඩිපුර ගෙවීමේ වෙනසක්
+Overpayment change deducted: {0},වැඩිපුර ගෙවීමේ වෙනසක් අඩු කරන ලදී: {0}
+Packing List,ඇසුරුම් ලැයිස්තුව
+Page Format,පිටු ආකෘතිය
+Page unavailable offline,පිටුව නොබැඳිව නොමැත
+Paid,ගෙවා ඇත
+Paid (orig):,ගෙවූ (මුල):
+Paid Amount,ගෙවූ මුදල
+Paid change cannot be greater than total change!,ගෙවූ වෙනස සම්පූර්ණ වෙනසට වඩා වැඩි විය නොහැක!
+Paid:,ගෙවූ:
+Parent Item,මාපිය අයිතමය
+Partial,අර්ධ
+Partly Paid,අර්ධ වශයෙන් ගෙවනු ලැබේ
+Party Account,පක්ෂ ගිණුම
+Party Type,පක්ෂ වර්ගය
+Pause terminal until next cashier,ඊළඟ අයකැමිය තෙක් පර්යන්තය විරාම කරන්න
+PAY,ගෙවන්න
+Payment,ගෙවීම
+Payment Account,ගෙවීම් ගිණුම
+Payment entries processed for Invoice {0},ඉන්වොයිසිය {0} සඳහා ගෙවීම් ඇතුළත් කිරීම් සකසන ලදී
+Payment Entry Type,ගෙවීම් ඇතුළත් කිරීමේ වර්ගය
+Payment History,ගෙවීම් ඉතිහාසය
+Payment ID,ගෙවීම් හැඳුනුම්පත
+Payment Method Report,ගෙවීම් ක්‍රම වාර්තාව
+Payment Methods,ගෙවීම් ක්රම
+Payment of {0} received successfully.,{0} ගෙවීම සාර්ථකව ලැබිණි.
+Payment Progress,ගෙවීම් ප්‍රගතිය
+Payment Reconciliation,ගෙවීම් ප්රතිසන්ධානය
+Payment request status could not be retrieved. Please try again,ගෙවීම් ඉල්ලීම් තත්ත්වය ලබා ගැනීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න
+Payment Request took too long to respond. Please try requesting for payment again,ගෙවීම් ඉල්ලීමට ප්‍රතිචාර දැක්වීමට වැඩි කාලයක් ගත විය. කරුණාකර නැවත ගෙවීම සඳහා ඉල්ලීමට උත්සාහ කරන්න
+Payment saved offline,ගෙවීම නොබැඳිව සුරකින ලදී
+Payment State,ගෙවීම් තත්ත්වය
+Payment Status,ගෙවීම් තත්ත්වය
+Payment submitted but print function could not be executed. Payment name not found.,ගෙවීම ඉදිරිපත් කළ නමුත් මුද්‍රණ කාර්යය ක්‍රියාත්මක කළ නොහැකි විය. ගෙවීමේ නම හමු නොවීය.
+Payment submitted.,ගෙවීම ඉදිරිපත් කරන ලදී.
+Payment Summary,ගෙවීම් සාරාංශය
+Payments,ගෙවීම්
+Payments are not open. Do you want to open payments and submit?,ගෙවීම් විවෘත නැත. ඔබට ගෙවීම් විවෘත කර ඉදිරිපත් කිරීමට අවශ්‍යද?
+Payments by Mode of Payment,ගෙවීම් ක්‍රමය මගින් ගෙවීම්
+PDF,PDF
+Peak Hour,උපරිම පැය
+Peak Memory:,උච්ච මතකය:
+Peak Server:,උච්ච සේවාදායකය:
+Peak:,උච්ච:
+Pending,පොරොත්තුවෙන්
+Pending Amount,පොරොත්තු මුදල
+Pending count updated from {0} to {1},පොරොත්තු ගණන {0} සිට {1} දක්වා යාවත්කාලීන කරන ලදී
+Pending Exposure,පොරොත්තු නිරාවරණය
+Pending Invoices,පොරොත්තු ඉන්වොයිසි
+Pending Ratio,පොරොත්තු අනුපාතය
+Pending Sales,පොරොත්තු විකුණුම්
+Pending sales: {0} | Cache usage: {1}%,අපේක්ෂිත විකුණුම්: {0} | හැඹිලි භාවිතය: {1}%
+Pending Sync,පොරොත්තු සමමුහුර්ත කිරීම
+Pending: {0},පොරොත්තුවෙන්: {0}
+Pending: {0} | Synced: {1} | Draft: {2},පොරොත්තුවෙන්: {0} | සමමුහුර්ත: {1} | කෙටුම්පත: {2}
+Per Page,පිටුවකට
+Personal,පුද්ගලික
+Personal preferences adjust the current cashier experience without changing the active POS route.,පුද්ගලික මනාපයන් සක්‍රිය POS මාර්ගය වෙනස් නොකර වත්මන් මුදල් අයකැමි අත්දැකීම සීරුමාරු කරයි.
+PIN confirmation does not match.,PIN තහවුරු කිරීම නොගැලපේ.
+PIN must be 4 to 8 digits.,PIN අංකය ඉලක්කම් 4 සිට 8 දක්වා විය යුතුය.
+Please add at least one item.,කරුණාකර අවම වශයෙන් එක් අයිතමයක් වත් එක් කරන්න.
+Please allow camera access to scan codes,කරුණාකර කේත ස්කෑන් කිරීමට කැමරා ප්‍රවේශයට ඉඩ දෙන්න
+Please enter payment amount,කරුණාකර ගෙවීම් මුදල ඇතුළත් කරන්න
+Please fill all required fields,කරුණාකර අවශ්‍ය සියලුම ක්ෂේත්‍ර පුරවන්න
+Please make a payment or select a payment,කරුණාකර ගෙවීමක් කරන්න හෝ ගෙවීමක් තෝරන්න
+Please request phone payment or use another payment method,කරුණාකර දුරකථන ගෙවීමක් ඉල්ලන්න හෝ වෙනත් ගෙවීමේ ක්‍රමයක් භාවිතා කරන්න
+Please select a customer first,කරුණාකර පළමුව පාරිභෝගිකයෙකු තෝරන්න
+Please select a party,කරුණාකර පක්ෂයක් තෝරන්න
+Please select a party before reconciling.,කරුණාකර ප්‍රතිසන්ධානයට පෙර පාර්ශවයක් තෝරන්න.
+Please select a valid movement type.,කරුණාකර වලංගු චලන වර්ගයක් තෝරන්න.
+Please select an invoice,කරුණාකර ඉන්වොයිසියක් තෝරන්න
+Please select company before reconciling.,ප්‍රතිසන්ධානයට පෙර කරුණාකර සමාගම තෝරන්න.
+Please set the customer's mobile number,කරුණාකර පාරිභෝගිකයාගේ ජංගම දුරකථන අංකය සකසන්න
+Please try again or enter the item manually.,කරුණාකර නැවත උත්සාහ කරන්න හෝ අයිතමය අතින් ඇතුල් කරන්න.
+Please verify the barcode or check the item's availability.,කරුණාකර තීරු කේතය සත්‍යාපනය කරන්න හෝ අයිතමයේ තිබේදැයි පරීක්ෂා කරන්න.
+Points,ලකුණු
+Popup blocked. Please allow popups.,උත්පතන අවහිර කරන ලදී. කරුණාකර උත්පතන වලට ඉඩ දෙන්න.
+POS,POS
+POS controls and maintenance,POS පාලන සහ නඩත්තු
+POS Expense is disabled for this POS Profile.,මෙම POS පැතිකඩ සඳහා POS වියදම් අක්‍රිය කර ඇත.
+POS is running with limited offline prerequisites.,POS සීමිත නොබැඳි පූර්වාවශ්‍යතා සහිතව ධාවනය වේ.
+POS Profile,POS පැතිකඩ
+Position the QR code or barcode within the scanning area,ස්කෑන් කරන ප්‍රදේශය තුළ QR කේතය හෝ තීරු කේතය ස්ථානගත කරන්න
+Posting,පළ කිරීම
+Posting and Price List,පළ කිරීම සහ මිල ලැයිස්තුව
+Posting Date,පළකිරීමේ දිනය
+Preparing background sync,පසුබිම් සමමුහුර්තකරණය සූදානම් කරමින්
+"Press OK to continue offline with a warning, or Cancel to retry.","අනතුරු ඇඟවීමක් සමඟ නොබැඳිව ඉදිරියට යාමට OK ඔබන්න, නැතහොත් නැවත උත්සාහ කිරීමට අවලංගු කරන්න."
+Previous unit of measure,පෙර මිනුම් ඒකකය
+Price List,මිල ලැයිස්තුව
+Price List Rate,මිල ලැයිස්තු අනුපාතය
+Price list rate updated locally only,මිල ලැයිස්තු ගාස්තු දේශීයව පමණක් යාවත්කාලීන වේ
+Pricing & Discounts,මිල සහ වට්ටම්
+Pricing Rule,මිල නියම කිරීමේ රීතිය
+Print,මුද්‍රණය කරන්න
+Print Draft,කෙටුම්පත මුද්රණය කරන්න
+Print Format (Invoice),මුද්‍රණ ආකෘතිය (ඉන්වොයිසිය)
+Print Format (Order),මුද්‍රණ ආකෘතිය (ඇණවුම)
+Print invoice,ඉන්වොයිසිය මුද්‍රණය කරන්න
+Print Purchase Invoice instead of PO,PO වෙනුවට මිලදී ගැනීමේ ඉන්වොයිසිය මුද්‍රණය කරන්න
+Printer,මුද්‍රණ යන්ත්‍රය
+Processed returns impacting the shift totals,මුර එකතුවට බලපාන සැකසූ ප්‍රතිලාභ
+Processing Payment,ගෙවීම් සැකසීම
+Processing payment entries for Invoice {0},ඉන්වොයිසිය {0} සඳහා ගෙවීම් ඇතුළත් කිරීම් සැකසීම
+Profile,පැතිකඩ
+Profiles,පැතිකඩ
+Profit,ලාභය
+Profit: Invoice Item Estimate,ලාභය: ඉන්වොයිස් අයිතම ඇස්තමේන්තුව
+Profit: Stock Ledger (COGS),ලාභය: කොටස් ලෙජරය (COGS)
+Profitability Report,ලාභදායිතා වාර්තාව
+Prorated return discount,ප්‍රෝටඩ් ප්‍රතිලාභ වට්ටමක්
+Purchase Amount,මිලදී ගැනීමේ මුදල
+Purchase Invoices,ඉන්වොයිසි මිලදී ගන්න
+Purchase Order created,මිලදී ගැනීමේ ඇණවුම සාදන ලදී
+Qty,Qty
+Qualified,සුදුසුකම් ලබා ඇත
+Quantity,ප්රමාණය
+Quantity exceeds available stock,ප්‍රමාණය පවතින තොග ඉක්මවයි
+Quick Actions,ඉක්මන් ක්‍රියා
+Quotation {0} is Submitted,උපුටා ගැනීම {0} ඉදිරිපත් කර ඇත
+Quotation submitted,මිල ගණන් ඉදිරිපත් කරන ලදී
+QZ Tray connected.,QZ තැටි සම්බන්ධ කර ඇත.
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ තැටි අතින් විසන්ධි කර ඇත. එය නැවත සබල කිරීමට Connect ඔබන්න.
+QZ Tray is not connected.,QZ තැටි සම්බන්ධ නොවේ.
+QZ Tray Setup,QZ තැටි සැකසුම
+Rate,අගය කරන්න
+Rate adjusted to maximum allowed discount,අවසර ලත් උපරිම වට්ටම් වලට අනුපාත සකස් කරන ලදී
+Ready,සූදානම්
+Ready to resume,නැවත ආරම්භ කිරීමට සූදානම්
+Ready!,සූදානම්!
+Real-time POS insights for retail operations.,සිල්ලර මෙහෙයුම් සඳහා තත්‍ය කාලීන POS විදසුන්.
+Rebuild Offline Data,නොබැඳි දත්ත නැවත ගොඩනඟන්න
+Receive,ලබාගන්න
+Receive now,දැන් ලබා ගන්න
+Received,ලැබුනා
+Received:,ලැබුණු:
+Recent Movement Entries,මෑත චලනයන් ඇතුළත් කිරීම්
+Recent updates about your invoices,ඔබගේ ඉන්වොයිසි පිළිබඳ මෑත යාවත්කාලීන
+Recently Active Customers,මෑතකදී ක්රියාකාරී පාරිභෝගිකයින්
+Rechecking connection,සම්බන්ධතාවය නැවත පරීක්ෂා කිරීම
+Reconcile payment methods and close shift,ගෙවීම් ක්‍රම සමථයකට පත් කිරීම සහ මාරු කිරීම වසා දමන්න
+Reconciling Payments,ගෙවීම් සමථයකට පත් කිරීම
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","සබැඳිව සිටියදී එක් වරක් මෙම පිටුව නැවත සම්බන්ධ කර විවෘත කරන්න, එවිට නොබැඳි නැවුම් කිරීම්වලට එය ප්‍රතිසාධන කිරීමට හැකි වනු ඇත."
+Reconnect online to refresh cached offline data from the server.,සේවාදායකයෙන් හැඹිලිගත නොබැඳි දත්ත නැවුම් කිරීමට සබැඳිව නැවත සම්බන්ධ කරන්න.
+Recreate local offline prerequisites from scratch,මුල සිටම දේශීය නොබැඳි පූර්ව අවශ්‍යතා ප්‍රතිනිර්මාණය කරන්න
+Recv:,Recv:
+Redeem,මුදවා ගන්න
+Redeem / Scan,මුදා ගන්න / ස්කෑන් කරන්න
+Redeem Amount,මුදල මුදා ගන්න
+Redeem Mode,මුදාගැනීමේ මාදිලිය
+Redeemed Amount,මුදාගත් මුදල
+Redeemed credit cannot be greater than its total.,මුදාගත් ණය එහි එකතුවට වඩා වැඩි විය නොහැක.
+Redemption and Totals,මිදීම සහ එකතුව
+Reference,යොමුව
+Refresh,නැවුම් කරන්න
+Refresh Exchange Rate,Refresh Exchange Rate
+Refresh Offline Data,නොබැඳි දත්ත නැවුම් කරන්න
+Refresh Printers,මුද්‍රණ යන්ත්‍ර නැවුම් කරන්න
+Refund,ආපසු ගෙවීම
+Release Notes,නිකුත් කිරීමේ සටහන්
+Reload,නැවත පූරණය කරන්න
+Reload customers,පාරිභෝගිකයින් නැවත පූරණය කරන්න
+Reload Items,අයිතම නැවත පූරණය කරන්න
+Reload Now,දැන් නැවත පූරණය කරන්න
+Reload to apply the latest changes. Your current session will be refreshed.,නවතම වෙනස්කම් යෙදීමට නැවත පූරණය කරන්න. ඔබගේ වත්මන් සැසිය නැවුම් වනු ඇත.
+Reload Workflow,කාර්ය ප්‍රවාහය නැවත පූරණය කරන්න
+Remarks,අදහස්
+Remarks are required.,අදහස් දැක්වීම අවශ්ය වේ.
+Remove,ඉවත් කරන්න
+Remove barcode item,තීරු කේතය ඉවත් කරන්න
+Remove cached data and reload the POS app,හැඹිලිගත දත්ත ඉවත් කර POS යෙදුම නැවත පූරණය කරන්න
+Remove item,අයිතමය ඉවත් කරන්න
+Remove Offer,පිරිනැමීම ඉවත් කරන්න
+Reorder / Purchase Suggestions,නැවත ඇණවුම් කිරීම / මිලදී ගැනීමේ යෝජනා
+Repair Candidate,අලුත්වැඩියා අපේක්ෂකයා
+Repair Change Allocation,අලුත්වැඩියා වෙනස් කිරීම වෙන් කිරීම
+Repair requires an online connection,අළුත්වැඩියා කිරීමට සබැඳි සම්බන්ධතාවයක් අවශ්‍ය වේ
+Repaired,අලුත්වැඩියා කළා
+Repairing change allocation,වෙනස් කිරීම් වෙන් කිරීම අලුත්වැඩියා කිරීම
+Repeat Customers,නැවත නැවතත් පාරිභෝගිකයින්
+Repeat Rate,Repeat Rate
+Request,ඉල්ලීම
+Request ID: {0},ඉල්ලීම් ID: {0}
+Request Payment,ගෙවීම් ඉල්ලන්න
+Requested route: {0},ඉල්ලූ මාර්ගය: {0}
+Required columns cannot be hidden,අවශ්‍ය තීරු සැඟවිය නොහැක
+Reset,යළි පිහිටුවන්න
+Reset item name,අයිතමයේ නම නැවත සකසන්න
+Reset to Default,පෙරනිමියට යළි පිහිටුවන්න
+Resource Health,සම්පත් සෞඛ්ය
+Restricted,සීමා කර ඇත
+Restricted operational controls for supervisors only.,අධීක්ෂකවරුන් සඳහා පමණක් සීමා කර ඇති මෙහෙයුම් පාලනය.
+Retry,නැවත උත්සාහ කරන්න
+Retry route,මාර්ගය නැවත උත්සාහ කරන්න
+Return,ආපසු
+Return Amount,ආපසු පැමිණීමේ මුදල
+Return Count,ආපසු ගණනය කිරීම
+Return items must have negative quantities,ආපසු ලබා දෙන අයිතමවල සෘණ අගයන් තිබිය යුතුය
+Return total must be negative,ප්‍රතිලාභ එකතුව ඍණ විය යුතුය
+Return Valid Until,ආපසු යැවීම තෙක් වලංගු වේ
+Return window passed,ආපසු එන කවුළුව සමත් විය
+Return without Invoice,ඉන්වොයිසිය නොමැතිව ආපසු යන්න
+Returns,ආපසු පැමිණේ
+Returns / Voids / Discounts,ආපසු / හිස් / වට්ටම්
+Returns by Currency,මුදල් මගින් ආපසු
+Revenue,ආදායම
+Review shift totals before submitting the closing entry,අවසන් ප්‍රවේශය ඉදිරිපත් කිරීමට පෙර මුර එකතුව සමාලෝචනය කරන්න
+Round Off,රවුන්ඩ් ඕෆ්
+Rows,පේළි
+Rows:,පේළි:
+Rule,රීතිය
+Sale,විකිණීම
+Sales,විකුණුම්
+Sales Order {0} is Submitted,විකුණුම් ඇණවුම {0} ඉදිරිපත් කර ඇත
+Sales Person and Print,විකුණුම් පුද්ගලයා සහ මුද්රණය
+Sales Person not found,විකුණුම් පුද්ගලයා හමු නොවීය
+Sales processed,විකුණුම් සකස් කර ඇත
+Sales Return,විකුණුම් ප්රතිලාභය
+Sales Trend Report,විකුණුම් ප්‍රවණතා වාර්තාව
+Save,සුරකින්න
+Save & Clear,සුරකින්න සහ හිස් කරන්න
+Save as POS Profile Default,POS පැතිකඩ පෙරනිමිය ලෙස සුරකින්න
+Save Settings,සැකසුම් සුරකින්න
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,"තෝරාගත් මුද්‍රණ යන්ත්‍රය POS පැතිකඩ පෙරනිමිය ලෙස සුරකින්න, එවිට එය මෙම සැකසුමේදී ස්වයංක්‍රීයව පෙන්වයි."
+Saved as draft because: {0},කෙටුම්පතක් ලෙස සුරකින ලද්දේ මන්ද: {0}
+Saving...,සුරකිමින්...
+Scale barcode detected. Quantity here is the number of labels to print.,පරිමාණ තීරු කේතය අනාවරණය විය. මෙහි ප්‍රමාණය මුද්‍රණය කළ යුතු ලේබල් ගණනයි.
+Scale barcode settings are not configured. Using item barcode only.,පරිමාණ තීරු කේත සැකසීම් වින්‍යාස කර නොමැත. අයිතම තීරු කේතය පමණක් භාවිතා කිරීම.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,මෙම අයිතමය/UOM සඳහා පරිමාණ අච්චු තීරු කේතය නොමැත. අයිතම තීරු කේතය පමණක් භාවිතා කිරීම.
+Scan an existing card and top it up without leaving the payment flow.,පවතින කාඩ්පතක් පරිලෝකනය කර ගෙවීම් ප්‍රවාහයෙන් ඉවත් නොවී එය ඉහළට දමන්න.
+Scan Error,ස්කෑන් දෝෂය
+Scan or enter a gift card code to check balance or redeem.,ශේෂය පරීක්ෂා කිරීමට හෝ මුදා ගැනීමට තෑගි කාඩ්පත් කේතයක් පරිලෝකනය කරන්න හෝ ඇතුළත් කරන්න.
+Scan or paste the card code below.,පහත කාඩ්පත් කේතය ස්කෑන් කරන්න හෝ අලවන්න.
+Scan QR Code/Barcode,QR කේතය/තීරු කේතය පරිලෝකනය කරන්න
+Scan with camera,කැමරාව සමඟ ස්කෑන් කරන්න
+Scan-First Flow,ස්කෑන්-පළමු ප්රවාහය
+Scanned Code:,ස්කෑන් කළ කේතය:
+Scanning for: {0},ස්කෑන් කරමින්: {0}
+Scanning items,අයිතම ස්කෑන් කිරීම
+Scan-Ready,ස්කෑන්-සූදානම්
+Scope,විෂය පථය
+Scope: All Profiles,විෂය පථය: සියලුම පැතිකඩ
+Scope: Current Profile,විෂය පථය: වත්මන් පැතිකඩ
+Scope: Specific Profile,විෂය පථය: විශේෂිත පැතිකඩ
+Search,සොයන්න
+Search Account,ගිණුම සොයන්න
+Search an invoice and continue the return flow without extra steps.,ඉන්වොයිසියක් සොයන්න සහ අමතර පියවරකින් තොරව ආපසු ප්‍රවාහය දිගටම කරගෙන යන්න.
+Search customer,පාරිභෝගිකයා සොයන්න
+Search invoices or customers,ඉන්වොයිසි හෝ පාරිභෝගිකයන් සොයන්න
+Search item,අයිතමය සොයන්න
+Search item / code,අයිතමය / කේතය සොයන්න
+Search items or barcode,අයිතම හෝ තීරු කේතය සොයන්න
+Search Mpesa Payments,Mpesa ගෙවීම් සොයන්න
+Search return invoices or customers,ආපසු ඉන්වොයිසි හෝ පාරිභෝගිකයන් සොයන්න
+Search supplier,සෙවුම් සැපයුම්කරු
+Search unpaid invoices or customers,නොගෙවූ ඉන්වොයිසි හෝ පාරිභෝගිකයන් සොයන්න
+Secure context (HTTPS or localhost) is required for camera access.,කැමරා ප්‍රවේශය සඳහා ආරක්ෂිත සන්දර්භය (HTTPS හෝ localhost) අවශ්‍ය වේ.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,කැමරා ප්‍රවේශය සඳහා ආරක්ෂිත සන්දර්භය (HTTPS) අවශ්‍ය වේ. කැමරාවට ප්‍රවේශ වීමට කරුණාකර HTTPS භාවිතා කරන්න.
+Select,තෝරන්න
+Select a cashier first.,මුලින්ම මුදල් අයකැමියෙකු තෝරන්න.
+Select a customer,පාරිභෝගිකයෙකු තෝරන්න
+Select a customer to use coupon,කූපනය භාවිතා කිරීමට පාරිභෝගිකයෙකු තෝරන්න
+Select a printer to use QZ silent printing.,QZ නිහඬ මුද්‍රණය භාවිතා කිරීමට මුද්‍රණ යන්ත්‍රයක් තෝරන්න.
+Select Batch,කණ්ඩායම තෝරන්න
+Select Columns to Display,ප්රදර්ශනය කිරීමට තීරු තෝරන්න
+Select items to sell,විකිණීමට අයිතම තෝරන්න
+Select Payment,ගෙවීම් තෝරන්න
+Select Payment Account,ගෙවීම් ගිණුම තෝරන්න
+Select printer,මුද්රකය තෝරන්න
+Select Return Invoice,ආපසු ඉන්වොයිසිය තෝරන්න
+Select S.O,S.O තෝරන්න
+Select Sales Orders,විකුණුම් ඇණවුම් තෝරන්න
+Select the cashier who is taking over this terminal.,මෙම පර්යන්තය භාර ගන්නා අයකැමි තෝරන්න.
+Selected,තෝරා ගන්නා ලදී
+Selected movement type is not allowed by POS Profile.,තෝරාගත් චලන වර්ගය POS පැතිකඩ මඟින් ඉඩ නොදේ.
+Selected Payments,තෝරාගත් ගෙවීම්
+Sensitive actions kept away from quick taps.,සංවේදී ක්‍රියා ඉක්මන් තට්ටු කිරීම් වලින් ඈත් කර ඇත.
+Serial,මාලාව
+Serial Numbers,අනුක්රමික අංක
+Server CPU Usage:,සේවාදායක CPU භාවිතය:
+Server Health,සේවාදායක සෞඛ්‍යය
+Server Memory Usage:,සේවාදායක මතක භාවිතය:
+Server Metrics,සේවාදායක මෙට්රික්ස්
+Server Uptime:,සේවාදායක මෙහෙයුම් කාලය:
+Service Charges,සේවා ගාස්තු
+Session,සැසිය
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,සෑම අයකැමි PIN එකක්ම පරිශීලක පෝරමයේ සකසන්න සහ POS පැතිකඩ පරිශීලකයා තුළ පවරා ඇති ටර්මිනල් සාමාජිකයින් තබා ගන්න.
+Settings,සැකසීම්
+Settings in this section update the POS workspace without changing the current route.,මෙම කොටසේ ඇති සැකසීම් වත්මන් මාර්ගය වෙනස් නොකර POS වැඩබිම යාවත්කාලීන කරයි.
+Setup complete!,පිහිටුවීම සම්පූර්ණයි!
+Share,බෙදාගන්න
+Shared terminal,හවුල් පර්යන්තය
+Shift Closed Snapshot,Shift Closed Snapshot
+Shift Overview,මාරු දළ විශ්ලේෂණය
+Show,පෙන්වන්න
+Show cart on customer-facing screen,පාරිභෝගික මුහුණත තිරය මත කරත්තය පෙන්වන්න
+Show last invoice rate,අවසාන ඉන්වොයිස් ගාස්තුව පෙන්වන්න
+Show rate info,ගාස්තු තොරතුරු පෙන්වන්න
+Show Repair Candidates,අලුත්වැඩියා අපේක්ෂකයින් පෙන්වන්න
+Show search tools,සෙවුම් මෙවලම් පෙන්වන්න
+Show the active cart on a customer-facing screen,සක්‍රිය කරත්තය පාරිභෝගිකයින්ට මුහුණ දෙන තිරයක් මත පෙන්වන්න
+Showing {0}-{1} of {2},{2} න් {0}-{1} පෙන්වමින්
+Showing 0 of 0,0 හි 0 පෙන්වයි
+Shows the distribution of invoices per currency,මුදල් ඒකකයකට ඉන්වොයිසි බෙදා හැරීම පෙන්වයි
+Sign out of the current POS session,වත්මන් POS සැසියෙන් වරන්න
+Size:,ප්‍රමාණය:
+Skipped Payments,මඟ හැරිය ගෙවීම්
+Skipping items without barcodes,තීරු කේත නොමැතිව අයිතම මඟ හැරීම
+Slow Moving,Slow Moving
+Slow Moving Items,සෙමින් චලනය වන අයිතම
+Slow Queries:,මන්දගාමී විමසුම්:
+Sold,විකුණුවා
+Source,මූලාශ්රය
+Source Cash Account (Optional Override),මූලාශ්‍ර මුදල් ගිණුම (විකල්ප අභිබවා යාම)
+Source Ex. Rate:,මූලාශ්රය Ex. අගය:
+Source Rate:,මූලාශ්ර අනුපාතය:
+Specific Profile,විශේෂිත පැතිකඩ
+Split Invoices,ඉන්වොයිසි බෙදන්න
+Staff / Cashier Performance Report,කාර්ය මණ්ඩලය / අයකැමි කාර්ය සාධන වාර්තාව
+Status,තත්ත්වය
+Stock,තොග
+Stock Information,කොටස් තොරතුරු
+Stock is lower than requested,තොග ඉල්ලුමට වඩා අඩුය
+Stock is lower than requested:\n{0},තොගය ඉල්ලුවාට වඩා අඩුයි:\n{0}
+Stock Movement Report,කොටස් චලන වාර්තාව
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,කොටස් යාවත්කාලීන: {0} සතුව {1} තිබේ. {2} එකතු කිරීමෙන් කොටස් බිංදුවට වඩා පහළට ගෙන එනු ඇත.
+Submit,ඉදිරිපත් කරන්න
+Submit & Print,ඉදිරිපත් කර මුද්‍රණය කරන්න
+Submit Deposit,තැන්පතු ඉදිරිපත් කරන්න
+Submit Expense,වියදම් ඉදිරිපත් කරන්න
+Submitted,ඉදිරිපත් කළා
+Submitted Cash Movements,ඉදිරිපත් කළ මුදල් චලනයන්
+Submitted entries,ඉදිරිපත් කළ ඇතුළත් කිරීම්
+Successfully scanned:,සාර්ථකව ස්කෑන් කරන ලදී:
+Suggested,යෝජනා කර ඇත
+Suggested Qty,යෝජිත Qty
+Supervisor Access,අධීක්ෂක ප්රවේශය
+Supervisor permissions unlock issuance and reloads,අධීක්ෂක අවසර නිකුත් කිරීම අගුළු හැරීම සහ නැවත පූරණය කිරීම
+Supervisor Tools,අධීක්ෂක මෙවලම්
+Supplier,සැපයුම්කරු
+Supplier and dates are required.,සැපයුම්කරු සහ දිනයන් අවශ්ය වේ.
+Supplier Invoices,සැපයුම්කරුගේ ඉන්වොයිසි
+Supplier is required.,සැපයුම්කරු අවශ්ය වේ.
+Supplier name is required,සැපයුම්කරුගේ නම අවශ්ය වේ
+Supplier Payments,සැපයුම්කරුගේ ගෙවීම්
+Supplier Purchase Summary,සැපයුම්කරු මිලදී ගැනීමේ සාරාංශය
+Suppliers,සැපයුම්කරුවන්
+Suppliers not found,සැපයුම්කරුවන් හමු නොවීය
+Switch Camera,කැමරාව මාරු කරන්න
+Switch Cashier,මුදල් අයකැමි මාරු කරන්න
+Switch the POS appearance theme,POS පෙනුම තේමාව මාරු කරන්න
+Switched to:,වෙත මාරු විය:
+Sync All Invoices,සියලුම ඉන්වොයිසි සමමුහුර්ත කරන්න
+Sync Offline Cash Movements ({0}),නොබැඳි මුදල් චලනයන් සමමුහුර්ත කරන්න ({0})
+Sync Offline Sales,නොබැඳි විකුණුම් සමමුහුර්ත කරන්න
+Synced {0} offline cash movement(s).,{0} නොබැඳි මුදල් චලනය(ය) සමමුහුර්ත කරන ලදී.
+Syncing items in background,පසුබිමේ අයිතම සමමුහුර්ත කිරීම
+System / Diagnostics,පද්ධතිය / රෝග විනිශ්චය
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","පද්ධති ක්‍රියා යනු යෙදුම් තොරතුරු, සහාය රෝග විනිශ්චය සහ සැසි පාලන වැනි අඩු සංඛ්‍යාත නඩත්තු පාලන වේ."
+System Information,පද්ධති තොරතුරු
+System Status,පද්ධති තත්ත්වය
+Tables:,වගු:
+Tap the button below to redeem a gift card during checkout.,පිටවීම අතරතුර තෑගි කාඩ්පතක් ලබා ගැනීමට පහත බොත්තම තට්ටු කරන්න.
+Target,ඉලක්කය
+Target Ex. Rate:,ඉලක්කය Ex. අගය:
+Target Rate:,ඉලක්ක අනුපාතය:
+Tax,බදු
+Tax / Charges Report,බදු / ගාස්තු වාර්තාව
+Tax Heads,බදු ප්රධානීන්
+Taxable Amount,බදු ගෙවිය හැකි මුදල
+Tendered,ටෙන්ඩර් කළා
+Terminal,පර්යන්තය
+Terminal & Devices,පර්යන්තය සහ උපාංග
+Terminal locked,පර්යන්තය අගුලු දමා ඇත
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","පර්යන්ත මෙවලම් මෙම පිටවීමේ ස්ථානයට, පාරිභෝගිකයින්ට මුහුණ දෙන සංදර්ශකවලට සහ අනාගත මුද්‍රණ යන්ත්‍ර/උපාංග පාලනවලට බලපායි."
+Territory not found,භූමිය හමු නොවීය
+The amount paid is not complete,ගෙවූ මුදල සම්පූර්ණ නැත
+The app stores data locally for offline use. This is called cache.,යෙදුම නොබැඳි භාවිතය සඳහා දේශීයව දත්ත ගබඩා කරයි. මෙය හැඹිලි ලෙස හැඳින්වේ.
+The invoice stayed in draft. Please review and submit it manually.,ඉන්වොයිසිය කෙටුම්පතේ පැවතුනි. කරුණාකර එය සමාලෝචනය කර අතින් ඉදිරිපත් කරන්න.
+The maximum discount allowed is,අවසර දී ඇති උපරිම වට්ටම් වේ
+The quantity for {0} has been adjusted to the maximum available stock.,{0} සඳහා ප්‍රමාණය පවතින උපරිම තොගයට සකස් කර ඇත.
+The system could not retrieve the item details. Please try again.,පද්ධතියට අයිතම විස්තර ලබා ගැනීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න.
+These invoices will be synced when connection is restored,සම්බන්ධතාවය ප්‍රතිසාධනය කරන විට මෙම ඉන්වොයිසි සමමුහුර්ත වනු ඇත
+This action now opens inside the settings workspace.,මෙම ක්‍රියාව දැන් සිටුවම් වැඩබිම තුළ විවෘත වේ.
+This coupon already used !,මෙම කූපනය දැනටමත් භාවිතා කර ඇත!
+This invoice does not need change-allocation repair,මෙම ඉන්වොයිසිය වෙනස් කිරීම-විසර්ජන අලුත්වැඩියා කිරීම අවශ්ය නොවේ
+This invoice is already repaired,මෙම ඉන්වොයිසිය දැනටමත් අලුත්වැඩියා කර ඇත
+This is an item template. Please choose a variant.,මෙය අයිතම අච්චුවකි. කරුණාකර ප්‍රභේදයක් තෝරන්න.
+this item,මෙම අයිතමය
+This POS page could not be opened offline because its code was not cached on this terminal yet.,එහි කේතය තවමත් මෙම පර්යන්තයේ හැඹිලිගත කර නොමැති නිසා මෙම POS පිටුව නොබැඳිව විවෘත කළ නොහැක.
+This Serial Number {0} has already been added!,මෙම අනුක්‍රමික අංකය {0} දැනටමත් එක් කර ඇත!
+Threshold,එළිපත්ත
+Time,කාලය
+Tip: Clear cache regularly to free up space and keep the app fast.,ඉඟිය: ඉඩ නිදහස් කර ගැනීමට සහ යෙදුම වේගවත්ව තබා ගැනීමට නිතිපතා හැඹිලිය හිස් කරන්න.
+Tip: Close unused tabs or apps to reduce lag.,ඉඟිය: ප්‍රමාදය අඩු කිරීමට භාවිත නොකළ ටැබ් හෝ යෙදුම් වසන්න.
+Tip: Monitor slow queries and table size for optimal performance.,ඉඟිය: ප්‍රශස්ත කාර්ය සාධනය සඳහා මන්දගාමී විමසුම් සහ වගු ප්‍රමාණය නිරීක්ෂණය කරන්න.
+To Be Paid,ගෙවීමට
+To Date,අද දක්වා
+Today,අද
+Today Profit,අද ලාභය
+Today Sales,අද විකුණුම්
+Toggle navigation drawer,සංචාලන ලාච්චුව ටොගල් කරන්න
+Toggle Theme,තේමාව ටොගල් කරන්න
+Tools,මෙවලම්
+Tools for customer-facing screens and terminal-specific actions.,පාරිභෝගිකයන් මුහුණ දෙන තිර සහ පර්යන්ත-විශේෂිත ක්‍රියා සඳහා මෙවලම්.
+Top Brand,ඉහළම වෙළඳ නාමය
+Top Category,ඉහළම කාණ්ඩය
+Top Charge Head,Top Charge Head
+Top Customers,ඉහළම පාරිභෝගිකයින්
+Top Discount,ඉහළම වට්ටම්
+Top Items by Location,ස්ථානය අනුව ඉහළම අයිතම
+Top Margin,ඉහළ මායිම
+Top Pending,ඉහළ පොරොත්තු
+Top Profit Item,ඉහළම ලාභ අයිතමය
+Top Return Items,ඉහළම ප්‍රතිලාභ අයිතම
+Top Sales by Cashier,මුදල් අයකැමි විසින් ඉහළම විකුණුම්
+Top Supplier,ඉහළම සැපයුම්කරු
+Top Suppliers by Spend,වියදම් අනුව ඉහළම සැපයුම්කරුවන්
+Top Tables,ඉහළ වගු
+Top Tax Head,ඉහළ බදු ප්රධානියා
+Top Up Amount,Top Up මුදල
+Top Up Card,Top Up කාඩ්පත
+Top Up Mode,Top Up Mode
+Top Variant,ඉහළම ප්රභේදය
+Total,මුළු
+Total Amount,මුළු මුදල
+Total Change,සම්පූර්ණ වෙනස
+Total Charges,මුළු ගාස්තු
+Total In,මුළු ඇතුළත
+Total Invoices,මුළු ඉන්වොයිසි
+Total Items,මුළු අයිතම
+Total Mpesa,සම්පූර්ණ Mpesa
+Total Out,සම්පුර්ණයෙන් පිටතට
+Total Payments,මුළු ගෙවීම්
+Total Purchase,සම්පූර්ණ මිලදී ගැනීම
+Total Selected :,තෝරාගත් එකතුව:
+Total Size,මුළු ප්රමාණය
+Total Stock Qty,මුළු තොග ප්‍රමාණය
+Total:,එකතුව:
+Totals by Invoice Currency,ඉන්වොයිස් මුදල් අනුව එකතුව
+Track how much cash was handed back to customers,ගනුදෙනුකරුවන්ට ආපසු ලබා දුන් මුදල් ප්‍රමාණය නිරීක්ෂණය කරන්න
+"Track recent sales, collect unpaid balances, and reopen saved work","මෑත විකුණුම් නිරීක්ෂණය කරන්න, නොගෙවූ ශේෂ එකතු කරන්න, සහ සුරැකි වැඩ නැවත විවෘත කරන්න"
+Transaction ID,ගනුදෙනු හැඳුනුම්පත
+Transfer,මාරු කරන්න
+Try a different search term or clear the cart search.,වෙනත් සෙවුම් පදයක් උත්සාහ කරන්න හෝ කරත්ත සෙවීම ඉවත් කරන්න.
+Try adjusting your search or filters,ඔබගේ සෙවීම් හෝ පෙරහන් සීරුමාරු කිරීමට උත්සාහ කරන්න
+Try another source or refresh the list.,වෙනත් මූලාශ්‍රයක් උත්සාහ කරන්න හෝ ලැයිස්තුව නැවුම් කරන්න.
+Try changing the date range or status filter.,දින පරාසය හෝ තත්ව පෙරහන වෙනස් කිරීමට උත්සාහ කරන්න.
+Type,ටයිප් කරන්න
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,මූලික සැකසුම් සමඟ පවා කැමරාවට ප්‍රවේශ විය නොහැක. කරුණාකර ඔබගේ කැමරා අවසර සහ උපාංග ගැළපුම පරීක්ෂා කරන්න.
+Unable to add offer item {0}. Please refresh and try again.,පිරිනැමීම් අයිතමය {0} එක් කිරීමට නොහැක. කරුණාකර නැවුම් කර නැවත උත්සාහ කරන්න.
+Unable to add offer item. Please refresh and try again.,පිරිනැමීම් අයිතමය එක් කිරීමට නොහැකිය. කරුණාකර නැවුම් කර නැවත උත්සාහ කරන්න.
+Unable to add scanned item.,ස්කෑන් කළ අයිතමය එක් කළ නොහැක.
+Unable to create purchase order,මිලදී ගැනීමේ ඇණවුම නිර්මාණය කළ නොහැක
+Unable to delete draft invoice,කෙටුම්පත් ඉන්වොයිසිය මැකීමට නොහැකිය
+Unable to fetch documents,ලේඛන ලබා ගැනීමට නොහැකි විය
+Unable to fetch draft orders,කෙටුම්පත් ඇණවුම් ලබා ගැනීමට නොහැකි විය
+Unable to fetch invoice history,ඉන්වොයිස් ඉතිහාසය ලබා ගැනීමට නොහැකි විය
+Unable to fetch M-Pesa payments,M-Pesa ගෙවීම් ලබා ගැනීමට නොහැකි විය
+Unable to fetch sales orders,විකුණුම් ඇණවුම් ලබා ගැනීමට නොහැකි විය
+Unable to fetch unpaid invoices,නොගෙවූ ඉන්වොයිසි ලබා ගැනීමට නොහැකි විය
+Unable to generate scale barcode,පරිමාණ තීරු කේතය ජනනය කළ නොහැක
+Unable to issue gift card.,තෑගි කාඩ්පත නිකුත් කළ නොහැක.
+Unable to load cashier PIN status.,මුදල් අයකැමි PIN තත්ත්වය පූරණය කළ නොහැක.
+Unable to load document,ලේඛනය පූරණය කළ නොහැක
+Unable to load draft invoice,කෙටුම්පත් ඉන්වොයිසිය පූරණය කළ නොහැක
+Unable to load gift card balance.,තෑගි කාඩ්පත් ශේෂය පූරණය කළ නොහැක.
+Unable to load invoice details,ඉන්වොයිස් විස්තර පූරණය කළ නොහැක
+Unable to load parked order,නවතා ඇති ඇණවුම පූරණය කළ නොහැක
+Unable to load the selected sales order,තෝරාගත් විකුණුම් ඇණවුම පූරණය කළ නොහැක
+Unable to prepare document,ලේඛනය සකස් කිරීමට නොහැකි විය
+Unable to prepare return invoice,ආපසු ඉන්වොයිසිය සකස් කිරීමට නොහැකි විය
+Unable to print draft invoice,කෙටුම්පත් ඉන්වොයිසිය මුද්‍රණය කළ නොහැක
+Unable to print submitted invoice,ඉදිරිපත් කළ ඉන්වොයිසිය මුද්‍රණය කළ නොහැක
+Unable to process document action,ලේඛන ක්‍රියාව සැකසීමට නොහැක
+Unable to repair change allocation,වෙනස් කිරීමේ වෙන් කිරීම අලුත්වැඩියා කිරීමට නොහැකි විය
+Unable to save cashier PIN.,මුදල් අයකැමි PIN සුරැකීමට නොහැක.
+Unable to save the rate to the backend price list,පසුපෙළ මිල ලැයිස්තුවට අනුපාතය සුරැකීමට නොහැකි විය
+Unable to submit invoice,ඉන්වොයිසිය ඉදිරිපත් කළ නොහැක
+Unable to submit the selected payment,තෝරාගත් ගෙවීම ඉදිරිපත් කළ නොහැක
+Unable to top up gift card.,තෑගි කාඩ්පත පිරවීමට නොහැකිය.
+Unable to verify cashier PIN.,මුදල් අයකැමි PIN සත්‍යාපනය කළ නොහැක.
+Unallocated,වෙන් නොකළ
+Unallocated:,වෙන් නොකළ:
+Unavailable,ලබා ගත නොහැක
+Unknown,නොදන්නා
+Unknown Item,නොදන්නා අයිතමය
+Unknown Warehouse,නොදන්නා ගබඩාව
+Unlock POS,POS අගුළු හරින්න
+Unpaid,නොගෙවූ
+"Unselected payments stay unallocated first, then auto reconcile after submit.","තෝරා නොගත් ගෙවීම් ප්‍රථමයෙන් වෙන් නොකර පවතිනු ඇත, පසුව ඉදිරිපත් කිරීමෙන් පසු ස්වයංක්‍රීයව ප්‍රතිසන්ධාන කරන්න."
+UOM,UOM
+UOM not found,UOM හමු නොවීය
+Update available,යාවත්කාලීන ලබා ගත හැක
+Update Customer,පාරිභෝගිකයා යාවත්කාලීන කරන්න
+Update PIN,PIN යාවත්කාලීන කරන්න
+Update Price List Rate,මිල ලැයිස්තු අනුපාතය යාවත්කාලීන කරන්න
+Updated,යාවත්කාලීන කරන ලදී
+Updates and app info that stay out of the cashier flow.,අයකැමි ප්‍රවාහයෙන් බැහැරව පවතින යාවත්කාලීන සහ යෙදුම් තොරතුරු.
+Updates automatically,ස්වයංක්‍රීයව යාවත්කාලීන වේ
+Usage,භාවිතය
+Usage Stats,භාවිත සංඛ්යාලේඛන
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,මුදල් අයකැමි මාරු කිරීම සහ පර්යන්ත අගුලු හැරීම සඳහා ඉලක්කම් 4 සිට 8 දක්වා PIN එකක් භාවිතා කරන්න.
+Use Cashier,මුදල් අයකැමි භාවිතා කරන්න
+Use date range to search for older invoices,පැරණි ඉන්වොයිසි සෙවීමට දින පරාසය භාවිතා කරන්න
+"Use one field for manual code entry, barcode scans, or QR scans.","අතින් කේත ඇතුළත් කිරීම, තීරු කේත ස්කෑන් කිරීම හෝ QR ස්කෑන් කිරීම සඳහා එක් ක්ෂේත්‍රයක් භාවිත කරන්න."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","POS හැර යාමෙන් තොරව ශේෂ පිරික්සුම්, නව නිකුත් කිරීම් සහ ටොප්-අප් සඳහා එක් කාර්ය ප්‍රවාහයක් භාවිතා කරන්න."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","හැඹිලිගත පූර්ව අවශ්‍යතා දත්ත නැවුම් කිරීම, නැවත ගොඩනැගීම හෝ රෝග විනිශ්චය සමාලෝචනයක් අවශ්‍ය වූ විට මෙම කොටස භාවිතා කරන්න."
+Use Western numerals,බටහිර ඉලක්කම් භාවිතා කරන්න
+Used:,භාවිතා කළේ:
+Using basic camera settings due to device limitations,උපාංග සීමාවන් හේතුවෙන් මූලික කැමරා සැකසුම් භාවිතා කිරීම
+Using cached customer balance,හැඹිලිගත පාරිභෝගික ශේෂය භාවිතා කිරීම
+Valid until,දක්වා වලංගු වේ
+Variance %,විචලනය %
+Variants,ප්රභේද
+Variant-wise,ප්රභේද අනුව
+Verify closing amounts for each payment method,එක් එක් ගෙවීමේ ක්‍රමය සඳහා අවසන් මුදල් සත්‍යාපනය කරන්න
+View all,සියල්ල බලන්න
+View app information and current build details,යෙදුම් තොරතුරු සහ වත්මන් ගොඩනැගීමේ විස්තර බලන්න
+View Data Diagnostics,දත්ත රෝග විනිශ්චය බලන්න
+View Details,විස්තර බලන්න
+View invoice details,ඉන්වොයිස් විස්තර බලන්න
+View notifications,දැනුම්දීම් බලන්න
+View offline invoices,නොබැඳි ඉන්වොයිසි බලන්න
+View restricted POS insights,සීමා කළ POS විදසුන් බලන්න
+Void Amount,අවලංගු මුදල
+Void Count,හිස් ගණන
+Voids,හිස්තැන්
+Waiting for cart items,කරත්ත අයිතම සඳහා රැඳී සිටීම
+Waiting for payment...,ගෙවීම සඳහා රැඳී සිටිමින්...
+Walk-in Customer,ඇවිදින පාරිභෝගිකයා
+Warehouse,ගබඩාව
+Warning: High cache usage may affect performance.,අවවාදයයි: ඉහළ හැඹිලි භාවිතය කාර්ය සාධනයට බලපෑ හැකිය.
+Warning: High lag may indicate heavy processing or browser slowness.,අවවාදයයි: අධික ප්‍රමාදය අධික සැකසුම් හෝ බ්‍රවුසරයේ මන්දගාමී බව පෙන්නුම් කරයි.
+Week ?,සතිය?
+Week-wise,සතිපතා
+Weight (g),බර (g)
+Weight (grams),බර (ග්‍රෑම්)
+We'll let you know if an invoice fails to submit,ඉන්වොයිසියක් ඉදිරිපත් කිරීමට අපොහොසත් වුවහොත් අපි ඔබට දන්වන්නෙමු
+Workflow,කාර්ය ප්රවාහය
+Write off amount cannot exceed the POS profile maximum of {0},කපා හැරීමේ මුදල POS පැතිකඩ උපරිම {0} ඉක්මවිය නොහැක
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,කපා හැරීමේ මුදල අවසර ලත් සීමාව ඉක්මවයි ({0}). කරුණාකර ඉතිරි මුදල සඳහා ගෙවීම එක් කරන්න.
+Yes,ඔව්
+"Yes, Cancel sale","ඔව්, විකිණීම අවලංගු කරන්න"
+"Yes, Close","ඔව්, වසන්න"
+You are not allowed to print draft invoices,කෙටුම්පත් ඉන්වොයිසි මුද්‍රණය කිරීමට ඔබට අවසර නැත
+You are offline. Add Payment will work again when the connection is restored.,ඔබ නොබැඳිය. සම්බන්ධතාවය ප්‍රතිසාධනය කළ විට Add Payment නැවත ක්‍රියා කරයි.
+You have no notifications right now,ඔබට දැන් දැනුම්දීම් නැත
+Your Cart,ඔබේ කරත්තය

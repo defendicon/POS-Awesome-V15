@@ -1,0 +1,1362 @@
+POS Awesome,POS Harika
+Fetch Items Directly from Server,Öğeleri Doğrudan Sunucudan Getir
+Menu,Menü
+Actions,Eylemler
+Close Shift,Vardiyayı Kapat
+End current session,Geçerli oturumu sonlandır
+Print Last Invoice,Son Faturayı Yazdır
+Reprint previous transaction,Önceki işlemi yeniden yazdır
+Sync Offline Invoices,Çevrimdışı Faturaları Senkronize Et
+Upload pending transactions,Bekleyen işlemleri yükle
+Go Online,Çevrimiçi Olun
+Go Offline,Çevrimdışı Ol
+Disable offline mode,Çevrimdışı modu devre dışı bırak
+Work without server connection,Sunucu bağlantısı olmadan çalışın
+Clear Cache,Önbelleği Temizle
+Remove local data and refresh,Yerel verileri kaldırın ve yenileyin
+About,Hakkında
+App information,Uygulama bilgileri
+Language,Dil
+Change interface language,Arayüz dilini değiştir
+Light Mode,Işık Modu
+Dark Mode,Karanlık Mod
+Switch theme appearance,Tema görünümünü değiştir
+Logout,Oturumu kapat
+Sign out of session,Oturumdan çıkış yap
+Select Language,Dil Seçiniz
+Choose your preferred language for the POS interface,POS arayüzü için tercih ettiğiniz dili seçin
+Language will be changed to,Dil olarak değiştirilecek
+Cancel,İptal
+Change Language,Dili Değiştir
+Close,Kapat
+Cannot change language - same language selected,Dil değiştirilemiyor - aynı dil seçildi
+Language changed successfully! Reloading...,Dil başarıyla değiştirildi! Yeniden yükleniyor...
+Failed to change language,Dil değiştirilemedi
+Unknown error,Bilinmeyen hata
+- Total Unallocated,- Toplam Dağıtılmamış
+* Required,* Gerekli
+{0} (Qty: {1}),{0} (Adet: {1})
+{0} actions,{0} işlem
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} stokta yalnızca {1} var. {2} talebinde bulundunuz. Miktarı ayarlayın veya yeniden stoklayın.
+{0} offline invoice{1} pending,{0}çevrimdışı fatura{1} beklemede
+{0} offline invoice{1} saved as draft,{0}çevrimdışı fatura{1} taslak olarak kaydedildi
+{0} offline invoice{1} synced,{0}çevrimdışı fatura{1} senkronize edildi
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0} gün önce
+{0}h ago,{0} saat önce
+{0}m ago,{0} dakika önce
+A POS supervisor is required for this action.,Bu işlem için bir POS sorumlusu gereklidir.
+Access,Erişim
+Account,Hesap
+Account is overdrawn,Hesapta limit aşımı var
+Acknowledge the error to resume scanning,Taramaya devam etmek için hatayı kabul edin
+Acknowledge the error to resume scanning.,Taramaya devam etmek için hatayı kabul edin.
+Across,karşısında
+Action,Eylem
+Active sale,Aktif satış
+add,ekle
+Add items from the selector to start building this sale.,Bu satışı oluşturmaya başlamak için seçiciden öğeler ekleyin.
+Add more value to an existing gift card,Mevcut bir hediye kartına daha fazla değer katın
+Add New Address,Yeni Adres Ekle
+Add new customer,Yeni müşteri ekle
+Add on New Line,Yeni Satıra Ekle
+Add Payment,Ödeme Ekle
+Add payment to invoice,Faturaya ödeme ekle
+Add/Edit Coupon Conditions,Kupon Koşullarını Ekle/Düzenle
+Additional Discount,Ek İndirim
+Additional Discount %,Ek İndirim %'si
+Address Line 1,Adres Satırı 1
+Address not found,Adres bulunamadı
+Adjust the quantity or enable negative stock to continue.,Miktarı ayarlayın veya negatif stoğun devam etmesini sağlayın.
+Adjustment,Ayarlama
+After returns,Dönüşlerden sonra
+Against,Karşı
+Against Name,İsme Karşı
+Age Bracket,Yaş Aralığı
+All,Hepsi
+All Caught Up!,Hepsi Yakalandı!
+All invoices are synchronized,Tüm faturalar senkronize edilir
+All pending invoices are up to date,Bekleyen tüm faturalar güncel
+All Profiles,Tüm Profiller
+All Synchronized,Hepsi Senkronize Edildi
+All visible invoices are fully settled.,Görünen tüm faturalar tamamen kapatılmıştır.
+All Warehouses,Tüm Depolar
+Allowed UOM is {0},İzin verilen UOM: {0}
+Always fetch items from server (ignore local cache),Öğeleri her zaman sunucudan getir (yerel önbelleği yoksay)
+Amount,Tutar
+Amount already received,Zaten alınan tutar
+Amount exceeds profile cash movement max amount.,"Tutar, profil nakit hareketi maksimum tutarını aşıyor."
+Amount must be greater than zero.,Tutar sıfırdan büyük olmalıdır.
+Amount received from customer,Müşteriden alınan tutar
+Appearance and user-level preferences for the current session.,Geçerli oturum için görünüm ve kullanıcı düzeyindeki tercihler.
+Applied,Uygulandı
+Apply,Uygula
+Apply Gift Card,Hediye Kartını Uygula
+Apply Offer,Teklifi Uygula
+Apply On,Uygula
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,Bu faturada yalnızca kullanmak istediğiniz tutarı uygulayın. Kalan bakiye kartta kalır.
+Apply Redemption,Teklifi Kullanmayı Uygula
+Applying,Başvuruyor
+Apps,Uygulamalar
+Are you sure you want to close? All entered data will be lost.,Kapatmak istediğinizden emin misiniz? Girilen tüm veriler kaybolacaktır.
+Attributes (Size/Color),Nitelikler (Boyut/Renk)
+Auto Allocate Payment Amount,Ödeme Tutarını Otomatik Tahsis Et
+Auto Reconcile,Otomatik Mutabakat
+Auto reconciliation completed after payment submit.,Ödeme gönderildikten sonra otomatik mutabakat tamamlandı.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,Otomatik mutabakat tamamlandı. Ayrılan: {0}{1}. Geriye kalan: {0}{2}.
+Available Actions,Mevcut Eylemler
+Available QTY,Mevcut Adet
+Available:,Mevcut:
+Average Basket,Ortalama Sepet
+Average Bill,Ortalama Fatura
+Average Ticket,Ortalama Bilet
+Avg Bill,Ortalama Fatura
+Avg Invoice,Ortalama Fatura
+Avg Invoice Profit,Ort. Fatura Kârı
+Avg Invoice Value,Ort. Fatura Değeri
+Avg Purchase Frequency,Ortalama Satın Alma Sıklığı
+Awesome,harika
+Awesome Dashboard,Harika Kontrol Paneli
+Awesome Dashboard is disabled for the selected POS Profile.,Seçilen POS Profili için Awesome Kontrol Paneli devre dışı bırakıldı.
+Awesome Dashboard is unavailable for the selected scope.,Harika Kontrol Paneli seçilen kapsam için kullanılamıyor.
+Awesome Dashboard is visible only to POS supervisors.,Müthiş Kontrol Paneli yalnızca POS denetçileri tarafından görülebilir.
+Back,Geri
+Back Office Cash Account,Arka Ofis Nakit Hesabı
+Back Office Cash Account (Optional Override),Arka Ofis Nakit Hesabı (İsteğe Bağlı Geçersiz Kılma)
+Back office cash account is required.,Arka ofis kasa hesabı gereklidir.
+Back to {0},{0}'a geri dön
+Background processing did not finish in time.,Arka planda işleme zamanında tamamlanmadı.
+Background processing failed for Invoice {0}: {1},{0}: {1} Faturası için arka planda işleme başarısız oldu
+Background Submission Failed,Arka Plan Gönderimi Başarısız
+Background sync interval (seconds),Arka planda senkronizasyon aralığı (saniye)
+Balance,Bakiye
+Balance will be updated when connection is restored,Bağlantı yeniden kurulduğunda bakiye güncellenecek
+Balances still pending,Bakiyeler hâlâ beklemede
+Barcode,Barkod
+Barcode / QR Ready,Barkod / QR Hazır
+Barcode Label Printing,Barkod Etiket Baskısı
+Base Paid:,Baz Ücretli:
+Base Recv:,Temel Alıntı:
+Base:,Temel:
+Basic Information,Temel Bilgiler
+Batch,Toplu
+Batch Information,Parti Bilgileri
+Before any return workflow,Herhangi bir iade iş akışından önce
+Before returns,Geri dönmeden önce
+Best Day,En İyi Gün
+Best Seller,En Çok Satan
+Book expense or deposit from active shift.,Aktif vardiyadan gider veya depozito rezervasyonu yapın.
+Branch / Location-wise Report,Şube / Lokasyon Bazında Rapor
+Brand-wise,Marka bazında
+Breakdown,Arıza
+Browse,Göz at
+Build Time:,Yapım Süresi:
+Built with Frappe,Frappe ile oluşturuldu
+Bundle,Paket
+Buying Price,Alış Fiyatı
+Cache cleared successfully,Önbellek başarıyla temizlendi
+Cache Usage,Önbellek Kullanımı
+cache used,kullanılan önbellek
+Calculating...,Hesaplanıyor...
+Camera Access Required,Kamera Erişimi Gerekli
+Camera access was aborted. Please try again.,Kamera erişimi iptal edildi. Lütfen tekrar deneyin.
+Camera constraints not supported by your device. Trying fallback settings...,Cihazınız tarafından desteklenmeyen kamera kısıtlamaları. Yedek ayarlar deneniyor...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,Kamera meşgul veya başka bir uygulama/sekme tarafından engelleniyor. Diğer kamera uygulamalarını kapatıp tekrar deneyin.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,Kamera izni reddedildi. Lütfen tarayıcı ayarlarınızdan kamera erişimine izin verin ve sayfayı yenileyin.
+Camera scanner is locked until the current error is acknowledged,Mevcut hata onaylanana kadar kamera tarayıcısı kilitlenir
+Camera started but the video stream did not load in time. Please try again.,Kamera başladı ancak video akışı zamanında yüklenmedi. Lütfen tekrar deneyin.
+Cancel cash movement {0}?,{0} nakit hareketi iptal edilsin mi?
+Cancel Payment,Ödemeyi İptal Et
+Cancel Sale,Satışı İptal Et
+Cancel Sale ?,Satış İptal Edilsin mi?
+Cancelled,İptal edildi
+Cannot add an item with zero or negative quantity.,Sıfır veya negatif miktara sahip bir öğe eklenemez.
+Cannot clear cache while offline,Çevrimdışıyken önbellek temizlenemiyor
+Cannot redeem customer credit more than invoice total,Fatura toplamından daha fazla müşteri kredisi kullanılamaz
+Cannot redeem gift cards more than invoice total,Fatura toplamından daha fazla hediye kartı kullanılamaz
+Cannot Save Offline Invoice:,Çevrimdışı Fatura Kaydedilemiyor:
+Cannot Save Offline Payment:,Çevrimdışı Ödeme Kaydedilemiyor:
+Card,Kart
+Card / Online,Kart / Çevrimiçi
+Card health after the last live lookup,Son canlı aramadan sonra kart sağlığı
+Cards,Kartlar
+Cart,Sepet
+Cash,Nakit
+Cash back to customers,Müşterilere nakit iadesi
+Cash Collections,Nakit Tahsilatlar
+Cash Deposit is disabled for this POS Profile.,Bu POS Profili için Nakit Para Yatırma devre dışı bırakıldı.
+Cash Drawer Snapshot,Para Çekmecesi Anlık Görüntüsü
+Cash In Hand,Eldeki Nakit
+Cash Movement,Nakit Hareketi
+Cash movement cancelled,Nakit hareketi iptal edildi
+Cash movement deduction applied,Nakit hareketi kesintisi uygulandı
+Cash movement deleted,Nakit hareketi silindi
+Cash movement is disabled for this POS Profile.,Bu POS Profili için nakit hareketi devre dışı bırakıldı.
+Cash Movement is disabled in current POS Profile.,Mevcut POS Profilinde Nakit Hareketi devre dışı.
+Cash movement saved offline,Nakit hareketi çevrimdışına kaydedildi
+Cash movement submitted,Nakit hareketi gönderildi
+Cash Movements,Nakit Hareketleri
+Cash payment cannot be less than invoice total when partial payment is not allowed,Kısmi ödemeye izin verilmeyen durumlarda nakit ödeme fatura toplamından az olamaz
+Cash returned after payment,Ödeme yapıldıktan sonra iade edilen nakit
+Cashier,Kasiyer
+Cashier Access,Kasiyer Erişimi
+Cashier identity and appearance preferences.,Kasiyer kimliği ve görünüm tercihleri.
+Cashier PIN,Kasiyer PIN'i
+Cashier PIN saved successfully.,Kasiyer PIN'i başarıyla kaydedildi.
+Cashiers,Kasiyerler
+Cashier-wise,Kasiyer açısından
+Categories,Kategoriler
+Category,Kategori
+Category / Brand / Variant Report,Kategori / Marka / Varyant Raporu
+Category-wise,Kategori bazında
+Category-wise Margin,Kategori Bazında Marj
+Certificate,Sertifika
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,Sertifika eksik veya güvenilir değil. QZ onay diyaloglarını gösterebilir.
+Certificate is trusted. Silent QZ printing is active.,Sertifika güvenilirdir. Sessiz QZ yazdırma etkin.
+Change,Değiştir
+Change allocation repaired,Değişiklik tahsisi onarıldı
+Change Price,Fiyatı Değiştir
+Change Return,İadeyi Değiştir
+Change Returned,Değişiklik Geri Döndü
+Change terminal cashier,Terminal kasiyerini değiştir
+Charge Heads,Şarj Başlıkları
+Charges,Masraflar
+Charges not found,Ücretler bulunamadı
+Check Balance,Bakiyeyi Kontrol Et
+Check balance for any card. Supervisors can issue and top up cards here.,Herhangi bir kartın bakiyesini kontrol edin. Denetçiler burada kart düzenleyebilir ve yükleme yapabilir.
+Check balance only,Yalnızca bakiyeyi kontrol et
+Check for new commits,Yeni taahhütleri kontrol edin
+Check for Updates,Güncellemeleri Kontrol Et
+Check live balance before applying redemption,Kullanmadan önce canlı bakiyeyi kontrol edin
+Check live balance before redemption,Kullanmadan önce canlı bakiyeyi kontrol edin
+Checking...,Kontrol ediliyor...
+Cheque/Reference Date,Çek/Referans Tarihi
+Cheque/Reference No,Çek/Referans No
+Choose the cashier currently operating this terminal.,Şu anda bu terminali işleten kasiyeri seçin.
+City,Şehir
+Clear,Temizle
+Clear All,Tümünü Temizle
+Clear all barcode items,Tüm barkod öğelerini temizle
+Clear all purchase order items,Tüm satın alma siparişi öğelerini temizle
+Clear Search,Aramayı Temizle
+Clearing local cache...,Yerel önbellek temizleniyor...
+Click to refresh,Yenilemek için tıklayın
+Client CPU Lag:,İstemci CPU Gecikmesi:
+Client Memory Usage:,İstemci Bellek Kullanımı:
+Client Metrics,Müşteri Metrikleri
+Close about dialog,Hakkında iletişim kutusunu kapat
+Close cashier switcher,Kasiyer değiştiriciyi kapat
+Close closing shift dialog,Vardiya iletişim kutusunu kapat
+Close column selector,Sütun seçiciyi kapat
+Close Dialog,İletişim Kutusunu Kapat
+Close drafts dialog,Taslaklar iletişim kutusunu kapat
+Close invoice details dialog,Fatura ayrıntıları iletişim kutusunu kapat
+Close invoice management,Fatura yönetimini kapat
+Close offline invoices dialog,Çevrimdışı faturalar iletişim kutusunu kapat
+Close packing list dialog,Paketleme listesi iletişim kutusunu kapat
+Close returns dialog,İade iletişim kutusunu kapat
+Close sales orders dialog,Satış siparişleri iletişim kutusunu kapat
+Close Scanner,Tarayıcıyı Kapat
+Close scanner dialog,Tarayıcı iletişim kutusunu kapat
+Close Settings,Ayarları Kapat
+Closing Amount,Kapanış Tutarı
+Closing POS Shift,POS Vardiyasını Kapatma
+Closing Snapshot Available,Kapanış Anlık Görüntüsü Mevcut
+Code,Kod
+Code scanned successfully,Kod başarıyla tarandı
+COGS,SMM'ler
+Collapse item details,Öğe ayrıntılarını daralt
+Collected,Toplanan
+Cols,Sütunlar
+Columns,Sütunlar
+commits,taahhüt eder
+Completed and active sales in this range,Bu aralıkta tamamlanmış ve aktif satışlar
+Completed returns will appear here.,Tamamlanan iadeler burada görünecektir.
+Confirm,Onayla
+Confirm Close,Kapatmayı Onayla
+Confirm Mobile Number,Cep Numarasını Doğrula
+Confirm PIN,PIN'i onayla
+Connect,Bağlan
+Connect printer and manage certificate,Yazıcıyı bağlayın ve sertifikayı yönetin
+Connecting to QZ Tray...,QZ Tepsisine bağlanılıyor...
+Connection problem while submitting invoice,Fatura gönderirken bağlantı sorunu
+Connections:,Bağlantılar:
+Connectivity and cached prerequisite status were rechecked.,Bağlantı ve önbelleğe alınmış önkoşul durumu yeniden kontrol edildi.
+Continue Editing,Düzenlemeye Devam Et
+Could not fetch latest balance from server,Sunucudan en son bakiye alınamadı
+Count,Sayım
+Country,Ülke
+Coupon,Kupon
+Coupons,Kuponlar
+Cover,Kapak
+CPU Cores:,CPU Çekirdekleri:
+Create,Oluştur
+Create and load a new prepaid card,Yeni bir ön ödemeli kart oluşturun ve yükleyin
+Create and preload a new gift card,Yeni bir hediye kartı oluşturun ve önceden yükleyin
+Create Bill,Fatura Oluştur
+Create Customer,Müşteri Oluştur
+Create New Item,Yeni Öğe Oluştur
+Create or change your PIN,PIN'inizi oluşturun veya değiştirin
+Create PIN,PIN oluştur
+Create POS Opening Shift,POS Açılış Vardiyası Oluştur
+Create Purchase Order,Satınalma Siparişi Oluştur
+Create Return,İade Oluştur
+Create return from invoice,Faturadan iade oluştur
+Create Supplier,Tedarikçi Oluştur
+Credit and Output,Kredi ve Çıktı
+Credit Note,Kredi Notu
+Credit Outstanding,Kredi Ödenmemiş
+Credit sales remaining to be collected,Tahsil edilecek kredili satışlar
+Critical,Kritik
+Currency,Para birimi
+Current,Mevcut
+Current Event Loop Lag:,Güncel Olay Döngüsü Gecikmesi:
+Current Month,Geçerli Ay
+Current PIN,Geçerli PIN
+Current Profile,Mevcut Profil
+Current redeemable value on the gift card,Hediye kartındaki mevcut kullanılabilir değer
+Current User,Mevcut Kullanıcı
+Custom,Özel
+Custom Due Days,Özel Vade Günleri
+Custom items per page,Sayfa başına özel öğeler
+Customer,Müşteri
+Customer already selected,Müşteri zaten seçilmiş
+Customer Balance,Müşteri Bakiyesi
+Customer balance unavailable offline,Müşteri bakiyesi çevrimdışı kullanılamıyor
+Customer created successfully.,Müşteri başarıyla oluşturuldu.
+Customer creation failed.,Müşteri oluşturma başarısız oldu.
+Customer Details,Müşteri Detayları
+Customer display channel is missing,Müşteri görüntüleme kanalı eksik
+Customer display was blocked. Please allow pop-ups for this site.,Müşteri ekranı engellendi. Lütfen bu site için pop-up'lara izin verin.
+Customer group is required,Müşteri grubu gerekli
+Customer is required to add payment,Müşterinin ödeme eklemesi gerekiyor
+Customer Name is required,Müşteri Adı gerekli
+Customer not selected,Müşteri seçilmedi
+Customer Report,Müşteri Raporu
+Customer saved offline,Müşteri çevrimdışına kaydedildi
+Customer Screen,Müşteri Ekranı
+Customer territory is required,Müşteri bölgesi gerekli
+Customer updated successfully.,Müşteri başarıyla güncellendi.
+Customer-facing tools and printer setup.,Müşteriye yönelik araçlar ve yazıcı kurulumu.
+Customers,Müşteriler
+Customers not found,Müşteri bulunamadı
+Daily cashier actions without scrolling.,Kaydırmadan günlük kasiyer işlemleri.
+Daily Sales,Günlük Satışlar
+Daily Sales Summary,Günlük Satış Özeti
+Data loaded in form. Review and submit.,Veriler forma yüklendi. İnceleyin ve gönderin.
+Database Health,Veritabanı Sağlığı
+Database health affects overall system speed and reliability.,"Veritabanı sağlığı, genel sistem hızını ve güvenilirliğini etkiler."
+Database Info,Veritabanı Bilgisi
+Date,Tarih
+Day ?,Gün mü?
+days,günler
+Day-wise (MTD),Gün bazında (MTD)
+Day-wise Movement,Gün Bazında Hareket
+Dead Stock,Ölü Stok
+Dead Stock Items,Ölü Stok Öğeleri
+Decrease quantity,Miktarı azalt
+Default,Varsayılan
+Default:,Varsayılan:
+Delete,Sil
+Delete cancelled cash movement {0}?,İptal edilen nakit hareketi {0} silinsin mi?
+Delete Draft,Taslağı Sil
+Delete draft invoice,Taslak faturayı sil
+Delete draft invoice {0}?,{0} fatura taslağı silinsin mi?
+Delete Invoice,Faturayı Sil
+Delete offline invoice,Çevrimdışı faturayı sil
+Delivered,teslim edildi
+Delivery Charges,Teslimat Ücretleri
+Delivery Information,Teslimat Bilgileri
+Delivery Note {0} created,Teslimat Notu {0} oluşturuldu
+Delivery note created,Teslimat notu oluşturuldu
+Deployed Bundle:,Dağıtılan Paket:
+Deposit,Mevduat
+Description,Açıklama
+Detailed Supplier Breakdown,Detaylı Tedarikçi Dağılımı
+Detecting formats:,Formatların algılanması:
+Device Memory:,Cihaz Belleği:
+Difference,Fark
+Difference (In Company Currency),Fark (Şirket Para Birimi Cinsinden)
+Disable offline mode first to recheck live connectivity.,Canlı bağlantıyı yeniden kontrol etmek için önce çevrimdışı modu devre dışı bırakın.
+Disconnect,Bağlantıyı kes
+discount,indirim
+Discount %,İndirim %'si
+Discount / Void / Return Report,İndirim / İptal / İade Raporu
+Discount Amount,İndirim Tutarı
+Discount limited by POS Profile,İndirim POS Profiliyle sınırlıdır
+Discounted Invoices,İndirimli Faturalar
+Discounts,İndirimler
+Dismiss,Reddet
+Download Certificate,Sertifikayı İndir
+Draft,Taslak
+Draft invoice deleted,Taslak fatura silindi
+Draft source,Taslak kaynağı
+Drafts,Taslaklar
+Due {0},Vadesi {0}
+Due Date,Son Tarih
+Duplicate,Çoğalt
+Edit customer,Müşteriyi düzenle
+Edit discount amount,İndirim tutarını düzenle
+Edit discount percentage,İndirim yüzdesini düzenle
+Edit Gift Application,Hediye Başvurusunu Düzenle
+Edit item name,Öğe adını düzenle
+Edit quantity,Miktarı düzenle
+Edit rate,Ücreti düzenle
+Edit unit of measure,Ölçü birimini düzenle
+Edited,Düzenlendi
+Employee,Çalışan
+Enable background sync,Arka planda senkronizasyonu etkinleştir
+Enable Customer Display in POS Profile first.,Önce POS Profilinde Müşteri Görüntülemeyi etkinleştirin.
+Enter a PIN.,Bir PIN girin.
+Enter a valid grams value,Geçerli bir gram değeri girin
+Enter new price list rate,Yeni fiyat listesi ücretini girin
+Enter Quantity,Miktarı Girin
+Enter the cashier PIN to continue.,Devam etmek için kasiyer PIN'ini girin.
+Enter the current PIN first.,Önce mevcut PIN'i girin.
+"Enter the current PIN, then choose a new one.",Geçerli PIN'i girin ve yenisini seçin.
+Enter valid grams for scale barcode,Terazi barkodu için geçerli gramı girin
+Entries,Girişler
+Error accessing camera:,Kameraya erişim hatası:
+Error calculating prices,Fiyatlar hesaplanırken hata oluştu
+Error fetching customer balance,Müşteri bakiyesi alınırken hata oluştu
+Error in change calculations!,Değişiklik hesaplamalarında hata!
+Error Loading Data,Veri Yükleme Hatası
+Error loading invoice details,Fatura ayrıntıları yüklenirken hata oluştu
+Error processing invoice,Fatura işlenirken hata oluştu
+Error processing payment,Ödeme işlenirken hata oluştu
+Error searching invoices,Fatura arama hatası
+Error submitting invoice:,Fatura gönderilirken hata oluştu:
+Error submitting invoice: {0},Fatura gönderilirken hata oluştu: {0}
+Error submitting invoice: No response from server,Fatura gönderilirken hata oluştu: Sunucudan yanıt yok
+Error updating currency,Para birimi güncellenirken hata oluştu
+Error updating item details,Öğe ayrıntıları güncellenirken hata oluştu
+Est. Purchase,Tahmini Satın alma
+Est. Value,Tahmini Değer
+Event-loop lag measures how busy your browser is. Lower is better.,"Olay döngüsü gecikmesi, tarayıcınızın ne kadar meşgul olduğunu ölçer. Daha düşük olması daha iyidir."
+Every,Her
+Exchange Rate,Döviz Kuru
+Expand item details,Öğe ayrıntılarını genişlet
+Expected Amount (In Company Currency),Beklenen Tutar (Şirket Para Birimi Cinsinden)
+Expected Cash,Beklenen Nakit
+Expected cash on hand grouped by currency,Para birimine göre gruplandırılmış eldeki beklenen nakit
+Expected vs Actual,Beklenen ve Gerçekleşen
+Expense,Gider
+Expense Account (Optional Override),Gider Hesabı (İsteğe Bağlı Geçersiz Kılma)
+Expense account is required.,Gider hesabı gereklidir.
+Expenses and deposits posted during this shift,Bu vardiya sırasında kaydedilen giderler ve depozitolar
+Expired,Süresi dolmuş
+Failed to auto reconcile payments.,Ödemelerin otomatik mutabakatı başarısız oldu.
+Failed to cancel cash movement,Nakit hareketi iptal edilemedi
+Failed to clear cache,Önbellek temizlenemedi
+Failed to create item,Öğe oluşturulamadı
+Failed to create supplier,Tedarikçi oluşturulamadı
+Failed to delete cash movement,Nakit hareketi silinemedi
+Failed to generate scale barcode. Using item barcode only.,Terazi barkodu oluşturulamadı. Yalnızca öğe barkodu kullanılıyor.
+Failed to load cash movement context.,Nakit hareketi bağlamı yüklenemedi.
+Failed to load dashboard data.,Kontrol paneli verileri yüklenemedi.
+Failed to reload invoice from server,Fatura sunucudan yeniden yüklenemedi
+Failed to submit cash movement,Nakit hareketi gönderilemedi
+Failed to sync offline cash movements,Çevrimdışı nakit hareketleri senkronize edilemedi
+Fast cashier actions for active shifts.,Aktif vardiyalar için hızlı kasiyer işlemleri.
+Fast Moving Items,Hızlı Hareket Eden Öğeler
+Fees,Ücretler
+Fetch the latest offline prerequisite updates,En son çevrimdışı önkoşul güncellemelerini getir
+Find a sales order quickly and load it into the current sale.,Hızlı bir şekilde bir satış siparişi bulun ve mevcut satışa yükleyin.
+Fixing payment amounts for return invoice...,İade faturasının ödeme tutarları düzeltiliyor...
+Flash Off,Flaş Kapalı
+Flash On,Flaş Açık
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","'Ürün Paketi' kalemleri için 'Paketleme Listesi' tablosundan Depo, Seri No ve Parti No dikkate alınacaktır. Herhangi bir 'Ürün Paketi' kalemi için tüm paketleme kalemleri için Depo ve Parti Numarası aynıysa, bu değerler ana Kalem tablosuna girilebilir; değerler 'Paketleme Listesi' tablosuna kopyalanacaktır."
+Free,Ücretsiz
+Free Qty,Serbest Adet
+Frequency,Frekans
+from,itibaren
+From Date,Başlangıç Tarihi
+Fulfillment Details,Yerine Getirme Ayrıntıları
+Full Name,Tam Ad
+Gain,Kazanç
+Generate a fresh prepaid card and start it with an opening balance.,Yeni bir ön ödemeli kart oluşturun ve açılış bakiyesiyle başlatın.
+Generate and install the certificate to allow fully silent printing without trust prompts.,Güven istemleri olmadan tamamen sessiz yazdırmaya izin vermek için sertifikayı oluşturun ve yükleyin.
+Generate Certificate,Sertifika Oluştur
+Generated scale barcode: {0},Oluşturulan ölçek barkodu: {0}
+Get Payments,Ödemeleri Alın
+Gift Card,Hediye Kartı
+Gift card amount must be greater than zero.,Hediye kartı tutarı sıfırdan büyük olmalıdır.
+Gift Card Code,Hediye Kartı Kodu
+Gift card code is required for redemption,Ödeme için hediye kartı kodu gereklidir
+Gift card code is required.,Hediye kartı kodu gerekli.
+Gift card issued successfully.,Hediye kartı başarıyla düzenlendi.
+Gift card loaded successfully.,Hediye kartı başarıyla yüklendi.
+Gift Card Management,Hediye Kartı Yönetimi
+Gift card payment,Hediye kartı ödemesi
+Gift card redemption requires an online connection,Hediye kartı kullanımı çevrimiçi bağlantı gerektirir
+Gift card topped up successfully.,Hediye kartına başarıyla yükleme yapıldı.
+Gift Cards,Hediye Kartları
+Go to Frappe Desk,Frappe Desk'e git
+Grand Total,Genel Toplam
+Gross Margin,Brüt Marj
+Gross Profit,Brüt Kar
+Gross Sales,Brüt Satışlar
+Group not found,Grup bulunamadı
+"Grouped controls for terminal, UI, and session settings.","Terminal, kullanıcı arayüzü ve oturum ayarları için gruplandırılmış kontroller."
+Grouped totals for each payment method and currency,Her ödeme yöntemi ve para birimi için gruplandırılmış toplamlar
+Hide,Gizle
+Hide Gift Card,Hediye Kartını Gizle
+Hide Non Essential Fields,Temel Olmayan Alanları Gizle
+Hide quantity decimals,Miktar ondalıklarını gizle
+Hide search tools,Arama araçlarını gizle
+Hide zero rated items,Sıfır derecelendirilmiş öğeleri gizle
+High,Yüksek
+History,Tarih
+Hourly (Today),Saatlik (Bugün)
+How this section works,Bu bölüm nasıl çalışır?
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.",Eski veriler kalırsa Ayarlar > Çevrimdışı ve Senkronizasyon'u açın ve çevrimiçiyken Çevrimdışı Verileri Yeniden Oluştur'u yeniden çalıştırın.
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","Uyarı devam ederse Ayarlar > Çevrimdışı ve Senkronizasyon'u açın, ardından Çevrimdışı Verileri Yenile veya Çevrimdışı Verileri Yeniden Oluştur'u çalıştırın."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Sertifikayı QZ Tepsisine aktarın ve her POS makinesinde QZ Tepsisini yeniden başlatın.
+In,içinde
+In stock: {0},Stokta var: {0}
+Include Batch / Serial,Toplu / Seri Ekle
+Include Price,Fiyatı Dahil Et
+Increase quantity,Miktarı arttır
+IndexedDB,İndekslenmişDB
+Initial Amount,Başlangıç Tutarı
+Initialize your shift with opening balances,Vardiyanızı açılış bakiyeleriyle başlatın
+Initializing application...,Uygulama başlatılıyor...
+"Inspect cache, sync, and prerequisite status","Önbelleği, senkronizasyonu ve önkoşul durumunu inceleyin"
+Installed Applications,Yüklü Uygulamalar
+Insufficient stock:\n{0},Yetersiz stok:\n{0}
+Invalid rate,Geçersiz ücret
+Inventory Status Report,Envanter Durum Raporu
+Invoice,Fatura
+Invoice {0} is Submitted,{0} Faturası Gönderildi
+Invoice {0} processed successfully,{0} numaralı fatura başarıyla işlendi
+Invoice {0} submission failed,Fatura {0} gönderimi başarısız oldu
+Invoice {0} was already submitted,{0} numaralı fatura zaten gönderildi
+Invoice Adjustments,Fatura Düzenlemeleri
+Invoice Change,Fatura Değişikliği
+Invoice Details,Fatura Detayları
+Invoice is still in draft after background submission.,"Fatura, arka plan gönderiminden sonra hala taslak halindedir."
+Invoice Items,Fatura Öğeleri
+Invoice Management,Fatura Yönetimi
+Invoice Mgmt,Fatura Yönetimi
+Invoice saved offline,Fatura çevrimdışına kaydedildi
+Invoice submission failed,Fatura gönderimi başarısız oldu
+Invoice Submitted,Fatura Gönderildi
+"Invoice value settled by loyalty points, not cash collection",Fatura değeri nakit tahsilatına göre değil sadakat puanlarına göre belirlenir
+Invoices,Faturalar
+Invoices already past due date,Son ödeme tarihi geçmiş faturalar
+Invoices saved as POS Invoices,POS Faturaları olarak kaydedilen faturalar
+Invoices still carrying balances,Faturalar hâlâ bakiye taşıyor
+Issue Mode,Sorun Modu
+Issue New Card,Yeni Kart Ver
+Issue Workflow,Sorun İş Akışı
+"Issue, top up, and check","Sorunu giderin, tamamlayın ve kontrol edin"
+Item,Öğe
+Item / Product Sales Report,Ürün / Ürün Satış Raporu
+Item {0} added to invoice,{0} öğesi faturaya eklendi
+Item '{0}' has no barcode,'{0}' öğesinin barkodu yok
+Item Code,Ürün Kodu
+Item created successfully,Öğe başarıyla oluşturuldu
+Item is out of stock,Ürün stokta yok
+Item Name,Öğe Adı
+Item not found,Öğe bulunamadı
+Item order updated,Öğe sırası güncellendi
+Item Selector Settings,Öğe Seçici Ayarları
+Items,Öğeler
+Items added in POS will appear here automatically.,POS'a eklenen öğeler burada otomatik olarak görünecektir.
+Items added to invoice,Faturaya eklenen öğeler
+Items per page,Sayfa başına öğe sayısı
+Items Sold,Satılan Ürünler
+Items/Invoice,Öğeler/Fatura
+Item-wise Profitability,Ürün Bazında Karlılık
+Journal Entry,Günlük Girişi
+json,json
+Just now,Az önce
+Keep offline prerequisites healthy and recover stale data safely.,Çevrimdışı önkoşulları sağlıklı tutun ve eski verileri güvenli bir şekilde kurtarın.
+Labels,Etiketler
+"Language, theme, terminal tools, and session controls.","Dil, tema, terminal araçları ve oturum kontrolleri."
+Last,Son
+Last 14 Days (Paid vs Pending),Son 14 Gün (Ücretli ve Beklemede)
+Last 14 Days Activity,Son 14 Günün Etkinliği
+Last 14 Days Gross Profit,Son 14 Gün Brüt Kârı
+Last 14 Days Purchases,Son 14 Gündeki Alımlar
+Last 14 Days Tax/Charges,Son 14 Günün Vergisi/Ücretleri
+Last sync:,Son senkronizasyon:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},Son senkronizasyon: {0} | tamam: {1} | başarısız oldu: {2} | atlandı: {3}
+Latest entries for current shift,Mevcut vardiya için son girişler
+Lead Time,Teslim Süresi
+Limited,Sınırlı
+lines,çizgiler
+List,Liste
+Live Snapshot,Canlı Anlık Görüntü
+Load a POS profile and cashier first.,Önce bir POS profili ve kasiyer yükleyin.
+Load More Invoices,Daha Fazla Fatura Yükle
+Load previously saved invoices,Daha önce kaydedilmiş faturaları yükle
+Load Sale,Yük Satışı
+Load Sales Invoice,Satış Faturasını Yükle
+Loading app data...,Uygulama verileri yükleniyor...
+Loading customer database...,Müşteri veritabanı yükleniyor...
+Loading customers...,Müşteriler yükleniyor...
+Loading database stats...,Veritabanı istatistikleri yükleniyor...
+Loading details...,Ayrıntılar yükleniyor...
+Loading invoice history...,Fatura geçmişi yükleniyor...
+Loading items...,Öğeler yükleniyor...
+Loading product catalog...,Ürün kataloğu yükleniyor...
+Loading return invoices...,İade faturaları yükleniyor...
+Loading server CPU/memory usage...,Sunucu CPU/bellek kullanımı yükleniyor...
+Loading suppliers...,Tedarikçiler yükleniyor...
+Loading unpaid invoices...,Ödenmemiş faturalar yükleniyor...
+Loading view...,Görünüm yükleniyor...
+Loading...,Yükleniyor...
+Local storage is unavailable. Switching to online-only mode.,Yerel depolama kullanılamıyor. Yalnızca çevrimiçi moduna geçiliyor.
+localStorage,yerelDepolama
+Location Performance,Konum Performansı
+Locations,Konumlar
+Lock Screen,Kilit Ekranı
+Lookup Workflow,Arama İş Akışı
+Loss,Kayıp
+Low,Düşük
+Low Stock,Düşük Stok
+Low Stock Alerts,Düşük Stok Uyarıları
+Low Stock Items,Düşük Stoklu Ürünler
+Low Stock Threshold,Düşük Stok Eşiği
+Low Stock Total,Düşük Stok Toplamı
+Lowest Margin,En Düşük Marj
+Low-frequency maintenance and system details.,Düşük frekanslı bakım ve sistem ayrıntıları.
+Loyalty Redeemed,Sadakat Kullanıldı
+Loyalty Redemption,Sadakat Kazanımı
+Make New Payment,Yeni Ödeme Yap
+Manage all,Tümünü yönet
+Manage and synchronize your offline transactions,Çevrimdışı işlemlerinizi yönetin ve senkronize edin
+Manage Cashier PIN,Kasiyer PIN'ini Yönet
+"Manage offline tools, terminal controls, and maintenance from one workspace.","Çevrimdışı araçları, terminal kontrollerini ve bakımı tek bir çalışma alanından yönetin."
+manual,manuel
+"Manual codes, barcode scans, and QR scans work in the same field","Manuel kodlar, barkod taramaları ve QR taramaları aynı alanda çalışır"
+Manual offline mode is enabled,Manuel çevrimdışı mod etkin
+Margin,Marj
+Maximum available quantity is {0}. Quantity adjusted to match stock.,Kullanılabilir maksimum miktar: {0}. Miktar stoğa uyacak şekilde ayarlandı.
+Maximum discount amount for this offer item is {0}.,Bu teklif öğesi için maksimum indirim tutarı {0}'dır.
+Maximum discount percentage for this offer item is {0}%.,Bu teklif öğesi için maksimum indirim yüzdesi %{0}'dir.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,Maksimum teklif miktarı {0}'dır. Miktar izin verilen sınıra ayarlandı.
+Medium,Orta
+Method-wise Collections,Yöntemsel Koleksiyonlar
+Minimum allowed rate for this offer item is {0}.,Bu teklif öğesi için izin verilen minimum ücret {0}'dir.
+Minimum Qty,Minimum Adet
+Mobile No,Cep No
+Mode,Mod
+Mode of Payment,Ödeme Şekli
+Month,Ay
+Month ?,Ay mı?
+Monthly Profit,Aylık Kâr
+Monthly Sales,Aylık Satışlar
+Monthly Sales Summary,Aylık Satış Özeti
+Month-wise,Ay bazında
+Most Active Cashiers,En Aktif Kasiyerler
+Movement Type,Hareket Türü
+Movements,Hareketler
+Multi Currency,Çoklu Para Birimi
+N/A,Yok
+Name,İsim
+Negative Stock,Negatif Stok
+Negative Stock Items,Negatif Stok Kalemleri
+Negative values not allowed,Negatif değerlere izin verilmiyor
+Net,ağ
+Net Qty,Net Adet
+Net Sales,Net Satışlar
+Net Value,Net Değer
+Never,Asla
+New changes are ready to load,Yeni değişiklikler yüklenmeye hazır
+New Item,Yeni Ürün
+New Offer Available,Yeni Teklif Mevcut
+New PIN,Yeni PIN
+New rate,Yeni oran
+Next unit of measure,Sonraki ölçü birimi
+No attribute data found.,Özellik verisi bulunamadı.
+No Barcode,Barkod Yok
+No barcode found for UOM '{0}',UOM '{0}' için barkod bulunamadı
+No branch/location data found.,Şube/konum verisi bulunamadı.
+No brand data found.,Marka verisi bulunamadı.
+No cached gift card balance is available offline.,Önbelleğe alınmış hediye kartı bakiyesi çevrimdışı olarak kullanılamaz.
+No camera found on this device. Please ensure your device has a working camera.,Bu cihazda kamera bulunamadı. Lütfen cihazınızın çalışan bir kamerası olduğundan emin olun.
+No capability warnings recorded yet.,Henüz hiçbir yetenek uyarısı kaydedilmedi.
+No cash expected for this shift.,Bu vardiya için nakit beklenmiyor.
+No cash mode configured,Nakit modu yapılandırılmadı
+No cash movement type is allowed for this POS Profile.,Bu POS Profili için hiçbir nakit hareketi türüne izin verilmiyor.
+No cashier PIN is set yet. Create one now.,Henüz kasiyer PIN'i belirlenmedi. Şimdi bir tane oluşturun.
+No cashier profiles are available for this POS profile yet.,Bu POS profili için henüz kasiyer profili mevcut değil.
+No cashier-wise discount/void/return activity.,Kasiyer açısından indirim/iptal/iade faaliyeti yoktur.
+No category data found.,Kategori verisi bulunamadı.
+No category profitability data found.,Kategori kârlılığı verisi bulunamadı.
+No change returned recorded for this shift.,Bu vardiya için herhangi bir değişiklik kaydedilmedi.
+No change-allocation invoices match the current filters.,Geçerli filtrelerle eşleşen değişiklik tahsisi faturası yok.
+No charge head breakdown found.,Şarj başlığı arızası bulunamadı.
+No Company Selected,Firma Seçilmedi
+No customer sales data found.,Müşteri satış verisi bulunamadı.
+No day-wise discount/void/return trend.,Gün bazında indirim/boşluk/iade trendi yok.
+No day-wise payment data found.,Gün bazında ödeme verisi bulunamadı.
+No day-wise profitability trend found.,Gün bazında kârlılık eğilimi bulunamadı.
+No day-wise purchase data found.,Günlük satın alma verisi bulunamadı.
+No day-wise sales trend found.,Gün bazında satış eğilimi bulunamadı.
+No day-wise tax/charges trend found.,Gün bazında vergi/masraf eğilimi bulunamadı.
+No dead stock items.,Ölü stok öğesi yok.
+No due date,Son tarih yok
+No exact repair match found for this invoice,Bu fatura için tam onarım eşleşmesi bulunamadı
+No hourly sales trend found for today.,Bugün için saatlik satış trendi bulunamadı.
+No invoice activity found.,Fatura etkinliği bulunamadı.
+No invoices found,Fatura bulunamadı
+No invoices found. Try different search criteria.,Fatura bulunamadı. Farklı arama kriterlerini deneyin.
+No invoices recorded for this shift.,Bu vardiya için kayıtlı fatura yok.
+No item profitability data found.,Hiçbir öğe kârlılığı verisi bulunamadı.
+No item sales data found for this period.,Bu döneme ait ürün satış verisi bulunamadı.
+No items found,Hiçbir öğe bulunamadı
+No items in cart,Sepette ürün yok
+No items with barcodes to print,Yazdırılacak barkodlu öğe yok
+No location-wise top item data found.,Konum bazında en iyi öğe verisi bulunamadı.
+No low stock alerts right now.,Şu anda düşük stok uyarısı yok.
+No low stock items.,Düşük stoklu ürün yok.
+No matching items in cart,Sepette eşleşen ürün yok
+No month-wise sales trend found.,Ay bazında satış eğilimi bulunamadı.
+No negative stock items.,Negatif stok kalemi yok.
+No notifications yet,Henüz bildirim yok
+No offline cash movement synced.,Hiçbir çevrimdışı nakit hareketi senkronize edilmedi.
+No offline invoices pending synchronization,Senkronizasyon bekleyen çevrimdışı fatura yok
+No offline sync issues recorded yet.,Henüz çevrimdışı senkronizasyon sorunu kaydedilmedi.
+No out-of-stock items.,Stokta olmayan ürün yok.
+No outstanding credit invoices for this shift.,Bu vardiya için ödenmemiş kredi faturası yok.
+No payment collection data found.,Ödeme tahsilatı verisi bulunamadı.
+No payment rows available on this invoice.,Bu faturada ödeme satırı yok.
+No payments registered for this shift.,Bu vardiya için kayıtlı ödeme yok.
+No pending balances in this period.,Bu dönemde bekleyen bakiye yok.
+No pending offline invoices,Bekleyen çevrimdışı fatura yok
+No Print Formats Found,Yazdırma Formatı Bulunamadı
+No profiles found for selected scope. Falling back to current profile failed.,Seçilen kapsam için profil bulunamadı. Mevcut profile geri dönüş başarısız oldu.
+No recent customer activity found.,Yakın zamanda müşteri etkinliği bulunamadı.
+No recent stock entries found.,Güncel stok girişi bulunamadı.
+No records found,Hiçbir kayıt bulunamadı
+No reorder suggestions right now.,Şu anda yeniden sıralama önerisi yok.
+No repeat customers in this period.,Bu dönemde tekrar müşteri yok.
+No response from server,Sunucudan yanıt yok
+No return invoices found,İade faturası bulunamadı
+No return item trend found.,İade öğesi eğilimi bulunamadı.
+No returnable items found for this invoice,Bu faturada iade edilebilir ürün bulunamadı
+No returns were processed in this shift.,Bu vardiyada iade işlemi yapılmadı.
+No risk activity found.,Risk etkinliği bulunamadı.
+No sales activity found for this period.,Bu döneme ait herhangi bir satış faaliyeti bulunamadı.
+No slow moving items.,Yavaş hareket eden öğeler yok.
+No staff sales activity found.,Personel satış faaliyeti bulunamadı.
+No stock movement for this period.,Bu dönemde stok hareketi yok.
+No submitted cash movements in this shift.,Bu vardiyada gönderilen nakit hareketi yok.
+No supplier purchases found in this month.,Bu ay tedarikçi alımı bulunamadı.
+No suppliers found for this period.,Bu dönem için tedarikçi bulunamadı.
+No sync trigger has run yet in this session.,Bu oturumda henüz senkronizasyon tetikleyicisi çalıştırılmadı.
+No tax head breakdown found.,Vergi başlığı dökümü bulunamadı.
+No top items found for this location.,Bu konum için en popüler öğe bulunamadı.
+No unpaid invoices,Ödenmemiş fatura yok
+No variant data found.,Varyant verisi bulunamadı.
+No week-wise sales trend found.,Hafta bazında satış eğilimi bulunamadı.
+No.,Hayır.
+Nobile Number,Asil Sayı
+Not available,Mevcut değil
+Not checked,İşaretlenmedi
+Not selected,Seçilmedi
+Not Set,Ayarlanmadı
+Notifications,Bildirimler
+Offer,Teklif
+Offer Applied,Teklif Uygulandı
+Offer criteria exceeded,Teklif kriterleri aşıldı
+Offer Item,Teklif Öğesi
+Offer item unavailable,Teklif öğesi kullanılamıyor
+Offer Removed,Teklif Kaldırıldı
+Offer UOM cannot be changed,Teklif UOM değiştirilemez
+Offer?,Teklif mi?
+Offers,Teklifler
+Offline,Çevrimdışı
+Offline & Sync,Çevrimdışı ve Senkronizasyon
+Offline Capabilities,Çevrimdışı Yetenekler
+Offline data status refreshed,Çevrimdışı veri durumu yenilendi
+Offline diagnostics,Çevrimdışı teşhis
+Offline Invoices,Çevrimdışı Faturalar
+Offline invoices status,Çevrimdışı fatura durumu
+Offline invoices synced,Çevrimdışı faturalar senkronize edildi
+Offline Queue: {0},Çevrimdışı Sıra: {0}
+Offline rebuild guidance,Çevrimdışı yeniden oluşturma kılavuzu
+Offline restore is unavailable for this session.,Bu oturum için çevrimdışı geri yükleme kullanılamıyor.
+Offline selling is available with degraded capabilities.,"Çevrimdışı satış, azaltılmış yeteneklerle mümkündür."
+Offline snapshot does not match the current POS state.,Çevrimdışı anlık görüntü mevcut POS durumuyla eşleşmiyor.
+Offline Status,Çevrimdışı Durum
+"Offline, terminal, and system controls","Çevrimdışı, terminal ve sistem kontrolleri"
+OK,tamam
+Online,Çevrimiçi
+Open actions menu,İşlemler menüsünü aç
+Open balance to collect,Tahsilat için açık bakiye
+Open Customer Display,Müşteri Ekranını Aç
+Open drawer,Çekmeceyi aç
+Open invoices,Faturaları aç
+Open Payments?,Ödemeler açılsın mı?
+Open POS home,POS ana sayfasını aç
+Open this screen from POS Menu -> Open Customer Display.,Bu ekranı POS Menüsü -> Müşteri Ekranını Aç'tan açın.
+OpenCV image processing enabled - Enhanced barcode detection,OpenCV görüntü işleme etkin - Gelişmiş barkod algılama
+OpenCV image processing unavailable on this device,OpenCV görüntü işleme bu cihazda kullanılamıyor
+OpenCV Off,OpenCV Kapalı
+OpenCV On,OpenCV Açık
+OpenCV processing disabled,OpenCV işleme devre dışı bırakıldı
+Opening Amount,Açılış Tutarı
+Opening Cash,Açılış Kasası
+options,seçenekler
+Order,Sipariş
+Original,Orijinal
+Other,Diğer
+Out,Dışarı
+Out of Stock,Stokta Yok
+Out of Stock Items,Stokta Olmayan Ürünler
+Outstanding,Olağanüstü
+Outstanding Credit by Currency,Para Birimi Bazında Ödenmemiş Kredi
+Overdue,vadesi geçmiş
+Overpayment Change,Fazla Ödeme Değişikliği
+Overpayment change deducted: {0},Fazla ödeme değişikliği düşüldü: {0}
+Packing List,Paketleme Listesi
+Page Format,Sayfa Formatı
+Page unavailable offline,Sayfa çevrimdışı kullanılamıyor
+Paid,Ücretli
+Paid (orig):,Ücretli (orijinal):
+Paid Amount,Ödenen Tutar
+Paid change cannot be greater than total change!,Ücretli değişim toplam değişimden büyük olamaz!
+Paid:,Ücretli:
+Parent Item,Ana Öğe
+Partial,Kısmi
+Partly Paid,Kısmen Ödendi
+Party Account,Parti Hesabı
+Party Type,Parti Türü
+Pause terminal until next cashier,Terminali bir sonraki kasiyere kadar duraklat
+PAY,ÖDEME
+Payment,Ödeme
+Payment Account,Ödeme Hesabı
+Payment entries processed for Invoice {0},{0} Faturası için ödeme girişleri işlendi
+Payment Entry Type,Ödeme Giriş Türü
+Payment History,Ödeme Geçmişi
+Payment ID,Ödeme Kimliği
+Payment Method Report,Ödeme Yöntemi Raporu
+Payment Methods,Ödeme Yöntemleri
+Payment of {0} received successfully.,{0} tutarındaki ödeme başarıyla alındı.
+Payment Progress,Ödeme İlerlemesi
+Payment Reconciliation,Ödeme Mutabakatı
+Payment request status could not be retrieved. Please try again,Ödeme talebi durumu alınamadı. Lütfen tekrar deneyin
+Payment Request took too long to respond. Please try requesting for payment again,Ödeme İsteğinin yanıtlanması çok uzun sürdü. Lütfen tekrar ödeme talebinde bulunmayı deneyin
+Payment saved offline,Ödeme çevrimdışına kaydedildi
+Payment State,Ödeme Durumu
+Payment Status,Ödeme Durumu
+Payment submitted but print function could not be executed. Payment name not found.,Ödeme gönderildi ancak yazdırma işlevi yürütülemedi. Ödeme adı bulunamadı.
+Payment submitted.,Ödeme gönderildi.
+Payment Summary,Ödeme Özeti
+Payments,Ödemeler
+Payments are not open. Do you want to open payments and submit?,Ödemeler açık değil. Ödemeleri açıp göndermek istiyor musunuz?
+Payments by Mode of Payment,Ödeme Şekline Göre Ödemeler
+PDF,PDF'ler
+Peak Hour,Yoğun Saat
+Peak Memory:,En Yüksek Bellek:
+Peak Server:,Tepe Sunucusu:
+Peak:,Zirve:
+Pending,Beklemede
+Pending Amount,Bekleyen Tutar
+Pending count updated from {0} to {1},Bekleme sayısı {0} iken {1} olarak güncellendi
+Pending Exposure,Bekleyen Temas
+Pending Invoices,Bekleyen Faturalar
+Pending Ratio,Bekleyen Oran
+Pending Sales,Bekleyen Satışlar
+Pending sales: {0} | Cache usage: {1}%,Bekleyen satışlar: {0} | Önbellek kullanımı: %{1}
+Pending Sync,Senkronizasyon Bekleniyor
+Pending: {0},Beklemede: {0}
+Pending: {0} | Synced: {1} | Draft: {2},Beklemede: {0} | Senkronize edildi: {1} | Taslak: {2}
+Per Page,Sayfa Başına
+Personal,Kişisel
+Personal preferences adjust the current cashier experience without changing the active POS route.,"Kişisel tercihler, etkin POS rotasını değiştirmeden mevcut kasiyer deneyimini ayarlar."
+PIN confirmation does not match.,PIN onayı eşleşmiyor.
+PIN must be 4 to 8 digits.,PIN 4 ila 8 haneli olmalıdır.
+Please add at least one item.,Lütfen en az bir öğe ekleyin.
+Please allow camera access to scan codes,Lütfen kameranın tarama kodlarına erişmesine izin verin
+Please enter payment amount,Lütfen ödeme tutarını girin
+Please fill all required fields,Lütfen gerekli tüm alanları doldurun
+Please make a payment or select a payment,Lütfen bir ödeme yapın veya bir ödeme seçin
+Please request phone payment or use another payment method,Lütfen telefonla ödeme isteğinde bulunun veya başka bir ödeme yöntemi kullanın
+Please select a customer first,Lütfen önce bir müşteri seçin
+Please select a party,Lütfen bir parti seçin
+Please select a party before reconciling.,Uzlaşmadan önce lütfen bir taraf seçin.
+Please select a valid movement type.,Lütfen geçerli bir hareket türü seçin.
+Please select an invoice,Lütfen bir fatura seçin
+Please select company before reconciling.,Mutabakat yapmadan önce lütfen şirketi seçin.
+Please set the customer's mobile number,Lütfen müşterinin cep telefonu numarasını ayarlayın
+Please try again or enter the item manually.,Lütfen tekrar deneyin veya öğeyi manuel olarak girin.
+Please verify the barcode or check the item's availability.,Lütfen barkodu doğrulayın veya ürünün stok durumunu kontrol edin.
+Points,Puanlar
+Popup blocked. Please allow popups.,Açılır pencere engellendi. Lütfen açılır pencerelere izin verin.
+POS,POS
+POS controls and maintenance,POS kontrolleri ve bakımı
+POS Expense is disabled for this POS Profile.,Bu POS Profili için POS Gideri devre dışı bırakıldı.
+POS is running with limited offline prerequisites.,POS sınırlı çevrimdışı önkoşullarla çalışıyor.
+POS Profile,POS Profili
+Position the QR code or barcode within the scanning area,QR kodunu veya barkodu tarama alanına yerleştirin
+Posting,Gönderme
+Posting and Price List,İlan ve Fiyat Listesi
+Posting Date,İlan Tarihi
+Preparing background sync,Arka plan senkronizasyonu hazırlanıyor
+"Press OK to continue offline with a warning, or Cancel to retry.","Bir uyarıyla çevrimdışına devam etmek için Tamam'a, yeniden denemek için İptal'e basın."
+Previous unit of measure,Önceki ölçü birimi
+Price List,Fiyat Listesi
+Price List Rate,Fiyat Listesi Oranı
+Price list rate updated locally only,Fiyat listesi ücreti yalnızca yerel olarak güncellenir
+Pricing & Discounts,Fiyatlandırma ve İndirimler
+Pricing Rule,Fiyatlandırma Kuralı
+Print,Yazdır
+Print Draft,Taslağı Yazdır
+Print Format (Invoice),Yazdırma Formatı (Fatura)
+Print Format (Order),Yazdırma Formatı (Sipariş)
+Print invoice,Faturayı yazdır
+Print Purchase Invoice instead of PO,PO yerine Satın Alma Faturasını Yazdır
+Printer,Yazıcı
+Processed returns impacting the shift totals,Vardiya toplamlarını etkileyen işlenmiş iadeler
+Processing Payment,Ödeme İşleniyor
+Processing payment entries for Invoice {0},{0} Faturasına ilişkin ödeme girişleri işleniyor
+Profile,Profil
+Profiles,Profiller
+Profit,Kâr
+Profit: Invoice Item Estimate,Kâr: Fatura Kalemi Tahmini
+Profit: Stock Ledger (COGS),Kâr: Stok Defteri (COGS)
+Profitability Report,Kârlılık Raporu
+Prorated return discount,Orantılı iade indirimi
+Purchase Amount,Satın Alma Tutarı
+Purchase Invoices,Satın Alma Faturaları
+Purchase Order created,Satınalma Siparişi oluşturuldu
+Qty,Adet
+Qualified,Nitelikli
+Quantity,miktar
+Quantity exceeds available stock,Miktar mevcut stoğu aşıyor
+Quick Actions,Hızlı Eylemler
+Quotation {0} is Submitted,{0}. Fiyat Teklifi Gönderildi
+Quotation submitted,Teklif gönderildi
+QZ Tray connected.,QZ Tepsisi bağlı.
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ Tepsisinin bağlantısı manuel olarak kesildi. Tekrar etkinleştirmek için Bağlan'a basın.
+QZ Tray is not connected.,QZ Tepsisi bağlı değil.
+QZ Tray Setup,QZ Tepsi Kurulumu
+Rate,Oran
+Rate adjusted to maximum allowed discount,"Oran, izin verilen maksimum indirime ayarlandı"
+Ready,Hazır
+Ready to resume,Devam etmeye hazır
+Ready!,Hazır!
+Real-time POS insights for retail operations.,Perakende operasyonları için gerçek zamanlı POS bilgileri.
+Rebuild Offline Data,Çevrimdışı Verileri Yeniden Oluşturun
+Receive,Al
+Receive now,Şimdi al
+Received,Alındı
+Received:,Alınan:
+Recent Movement Entries,Son Hareket Girişleri
+Recent updates about your invoices,Faturalarınızla ilgili son güncellemeler
+Recently Active Customers,Son Zamanlarda Aktif Olan Müşteriler
+Rechecking connection,Bağlantı yeniden kontrol ediliyor
+Reconcile payment methods and close shift,Ödeme yöntemlerini uzlaştırın ve vardiyayı kapatın
+Reconciling Payments,Ödemelerin Uzlaştırılması
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.",Çevrimiçiyken bu sayfayı bir kez yeniden bağlayıp açın; ardından çevrimdışı yenilemeler sayfayı geri yükleyebilir.
+Reconnect online to refresh cached offline data from the server.,Önbelleğe alınmış çevrimdışı verileri sunucudan yenilemek için çevrimiçi olarak yeniden bağlanın.
+Recreate local offline prerequisites from scratch,Yerel çevrimdışı önkoşulları sıfırdan yeniden oluşturun
+Recv:,Alıntı:
+Redeem,Kullan
+Redeem / Scan,Kullan / Tara
+Redeem Amount,Tutarı Kullan
+Redeem Mode,Modu Kullan
+Redeemed Amount,Kullanılan Tutar
+Redeemed credit cannot be greater than its total.,Kullanılan kredi toplamından fazla olamaz.
+Redemption and Totals,Geri Ödeme ve Toplamlar
+Reference,Referans
+Refresh,Yenile
+Refresh Exchange Rate,Döviz Kurunu Yenile
+Refresh Offline Data,Çevrimdışı Verileri Yenile
+Refresh Printers,Yazıcıları Yenile
+Refund,Geri ödeme
+Release Notes,Sürüm Notları
+Reload,Yeniden yükle
+Reload customers,Müşterileri yeniden yükle
+Reload Items,Öğeleri Yeniden Yükle
+Reload Now,Şimdi Yeniden Yükle
+Reload to apply the latest changes. Your current session will be refreshed.,En son değişiklikleri uygulamak için yeniden yükleyin. Mevcut oturumunuz yenilenecektir.
+Reload Workflow,İş Akışını Yeniden Yükle
+Remarks,Açıklamalar
+Remarks are required.,Açıklamalar gerekli.
+Remove,Kaldır
+Remove barcode item,Barkod öğesini kaldır
+Remove cached data and reload the POS app,Önbelleğe alınmış verileri kaldırın ve POS uygulamasını yeniden yükleyin
+Remove item,Öğeyi kaldır
+Remove Offer,Teklifi Kaldır
+Reorder / Purchase Suggestions,Yeniden Sipariş Verme / Satın Alma Önerileri
+Repair Candidate,Onarım Adayı
+Repair Change Allocation,Onarım Tahsisini Değiştir
+Repair requires an online connection,Onarım çevrimiçi bağlantı gerektirir
+Repaired,Onarıldı
+Repairing change allocation,Değişiklik tahsisinin onarılması
+Repeat Customers,Tekrarlanan Müşteriler
+Repeat Rate,Tekrar Oranı
+Request,Talep
+Request ID: {0},İstek Kimliği: {0}
+Request Payment,Ödeme İste
+Requested route: {0},İstenen rota: {0}
+Required columns cannot be hidden,Gerekli sütunlar gizlenemez
+Reset,Sıfırla
+Reset item name,Öğe adını sıfırla
+Reset to Default,Varsayılana Sıfırla
+Resource Health,Kaynak Durumu
+Restricted,Kısıtlı
+Restricted operational controls for supervisors only.,Yalnızca denetçiler için sınırlı operasyonel kontroller.
+Retry,Yeniden dene
+Retry route,Rotayı yeniden dene
+Return,Dönüş
+Return Amount,İade Tutarı
+Return Count,İade Sayısı
+Return items must have negative quantities,İade öğelerinin negatif adetleri olmalıdır
+Return total must be negative,İade toplamı negatif olmalıdır
+Return Valid Until,Geçerlilik Tarihi:
+Return window passed,İade aralığı geçildi
+Return without Invoice,Faturasız İade
+Returns,İade
+Returns / Voids / Discounts,İadeler / İptaller / İndirimler
+Returns by Currency,Para Birimi Bazında İadeler
+Revenue,Gelir
+Review shift totals before submitting the closing entry,Kapanış girişini göndermeden önce vardiya toplamlarını gözden geçirin
+Round Off,Yuvarlama
+Rows,Satırlar
+Rows:,Satırlar:
+Rule,Kural
+Sale,Satış
+Sales,Satış
+Sales Order {0} is Submitted,{0} Müşteri Siparişi Gönderildi
+Sales Person and Print,Satış Elemanı ve Baskı
+Sales Person not found,Satış Elemanı bulunamadı
+Sales processed,Satışlar işlendi
+Sales Return,Satış İadesi
+Sales Trend Report,Satış Trend Raporu
+Save,Kaydet
+Save & Clear,Kaydet ve Temizle
+Save as POS Profile Default,POS Profili Varsayılanı olarak kaydet
+Save Settings,Ayarları Kaydet
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,"Seçilen yazıcıyı varsayılan POS Profili olarak kaydedin, böylece bu kurulumda otomatik olarak gösterilir."
+Saved as draft because: {0},Taslak olarak kaydedildi çünkü: {0}
+Saving...,Kaydediliyor...
+Scale barcode detected. Quantity here is the number of labels to print.,"Terazi barkodu algılandı. Buradaki miktar, yazdırılacak etiketlerin sayısıdır."
+Scale barcode settings are not configured. Using item barcode only.,Terazi barkodu ayarları yapılandırılmamış. Yalnızca öğe barkodu kullanılıyor.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,Bu öğe/UOM için ölçek şablonu barkodu eksik. Yalnızca öğe barkodu kullanılıyor.
+Scan an existing card and top it up without leaving the payment flow.,Mevcut bir kartı tarayın ve ödeme akışından ayrılmadan yükleme yapın.
+Scan Error,Tarama Hatası
+Scan or enter a gift card code to check balance or redeem.,Bakiyeyi kontrol etmek veya kullanmak için hediye kartı kodunu tarayın veya girin.
+Scan or paste the card code below.,Aşağıdaki kart kodunu tarayın veya yapıştırın.
+Scan QR Code/Barcode,QR Kodunu/Barkodunu Tarayın
+Scan with camera,Kamerayla tarayın
+Scan-First Flow,Önce Tarama Akışı
+Scanned Code:,Taranan Kod:
+Scanning for: {0},Şunun için taranıyor: {0}
+Scanning items,Öğeler taranıyor
+Scan-Ready,Taramaya Hazır
+Scope,Kapsam
+Scope: All Profiles,Kapsam: Tüm Profiller
+Scope: Current Profile,Kapsam: Mevcut Profil
+Scope: Specific Profile,Kapsam: Spesifik Profil
+Search,Ara
+Search Account,Hesap Ara
+Search an invoice and continue the return flow without extra steps.,Bir faturayı arayın ve ekstra adımlara gerek kalmadan iade akışına devam edin.
+Search customer,Müşteri ara
+Search invoices or customers,Faturaları veya müşterileri arayın
+Search item,Öğeyi ara
+Search item / code,Öğeyi / kodu arayın
+Search items or barcode,Öğeleri veya barkodu arayın
+Search Mpesa Payments,Mpesa Ödemelerini Ara
+Search return invoices or customers,İade faturalarını veya müşterileri arayın
+Search supplier,Tedarikçi ara
+Search unpaid invoices or customers,Ödenmemiş faturaları veya müşterileri arayın
+Secure context (HTTPS or localhost) is required for camera access.,Kamera erişimi için güvenli içerik (HTTPS veya localhost) gereklidir.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,Kamera erişimi için güvenli içerik (HTTPS) gereklidir. Kameraya erişmek için lütfen HTTPS kullanın.
+Select,Seç
+Select a cashier first.,Önce bir kasiyer seçin.
+Select a customer,Bir müşteri seçin
+Select a customer to use coupon,Kuponu kullanacak müşteriyi seçin
+Select a printer to use QZ silent printing.,QZ sessiz yazdırmayı kullanmak için bir yazıcı seçin.
+Select Batch,Toplu Seç
+Select Columns to Display,Görüntülenecek Sütunları Seçin
+Select items to sell,Satılacak ürünleri seçin
+Select Payment,Ödemeyi Seçin
+Select Payment Account,Ödeme Hesabını Seçin
+Select printer,Yazıcıyı seçin
+Select Return Invoice,İade Faturasını Seçin
+Select S.O,S.O'yu seçin
+Select Sales Orders,Satış Siparişlerini Seçin
+Select the cashier who is taking over this terminal.,Bu terminali devralacak kasiyeri seçin.
+Selected,Seçildi
+Selected movement type is not allowed by POS Profile.,Seçilen hareket türüne POS Profili izin vermiyor.
+Selected Payments,Seçilen Ödemeler
+Sensitive actions kept away from quick taps.,Hızlı dokunuşlardan uzak tutulan hassas eylemler.
+Serial,Seri
+Serial Numbers,Seri Numaraları
+Server CPU Usage:,Sunucu CPU Kullanımı:
+Server Health,Sunucu Sağlığı
+Server Memory Usage:,Sunucu Belleği Kullanımı:
+Server Metrics,Sunucu Metrikleri
+Server Uptime:,Sunucu Çalışma Süresi:
+Service Charges,Servis Ücretleri
+Session,Oturum
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,Her kasiyer PIN'ini Kullanıcı formunda ayarlayın ve terminal üyelerini POS Profil Kullanıcısında atanmış halde tutun.
+Settings,Ayarlar
+Settings in this section update the POS workspace without changing the current route.,Bu bölümdeki ayarlar mevcut rotayı değiştirmeden POS çalışma alanını günceller.
+Setup complete!,Kurulum tamamlandı!
+Share,Paylaş
+Shared terminal,Paylaşılan terminal
+Shift Closed Snapshot,Shift Kapalı Anlık Görüntü
+Shift Overview,Vardiyaya Genel Bakış
+Show,Göster
+Show cart on customer-facing screen,Sepeti müşteriye yönelik ekranda göster
+Show last invoice rate,Son fatura ücretini göster
+Show rate info,Ücret bilgilerini göster
+Show Repair Candidates,Onarım Adaylarını Göster
+Show search tools,Arama araçlarını göster
+Show the active cart on a customer-facing screen,Aktif sepeti müşteriye yönelik bir ekranda gösterin
+Showing {0}-{1} of {2},{0}-{1} / {2} gösteriliyor
+Showing 0 of 0,0 / 0 gösteriliyor
+Shows the distribution of invoices per currency,Faturaların para birimine göre dağılımını gösterir
+Sign out of the current POS session,Mevcut POS oturumundan çıkış yapın
+Size:,Boyut:
+Skipped Payments,Atlanan Ödemeler
+Skipping items without barcodes,Barkodsuz öğeleri atlama
+Slow Moving,Yavaş Hareket Eden
+Slow Moving Items,Yavaş Hareket Eden Öğeler
+Slow Queries:,Yavaş Sorgular:
+Sold,Satıldı
+Source,Kaynak
+Source Cash Account (Optional Override),Kaynak Nakit Hesabı (İsteğe Bağlı Geçersiz Kılma)
+Source Ex. Rate:,Kaynak Örn. Oran:
+Source Rate:,Kaynak Hızı:
+Specific Profile,Özel Profil
+Split Invoices,Faturaları Böl
+Staff / Cashier Performance Report,Personel / Kasiyer Performans Raporu
+Status,Durum
+Stock,Stok
+Stock Information,Stok Bilgileri
+Stock is lower than requested,Stok istenilenden düşük
+Stock is lower than requested:\n{0},Stok istenenden düşük:\n{0}
+Stock Movement Report,Stok Hareket Raporu
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,Stok güncellemesi: {0}'da {1} mevcut. {2} eklemek stoku sıfırın altına getirecektir.
+Submit,Göndermek
+Submit & Print,Gönder ve Yazdır
+Submit Deposit,Depozito Gönder
+Submit Expense,Gider Gönder
+Submitted,Gönderildi
+Submitted Cash Movements,Gönderilen Nakit Hareketleri
+Submitted entries,Gönderilen girişler
+Successfully scanned:,Başarıyla tarandı:
+Suggested,Önerilen
+Suggested Qty,Önerilen Adet
+Supervisor Access,Yönetici Erişimi
+Supervisor permissions unlock issuance and reloads,"Denetçi izinleri, düzenleme ve yeniden yüklemelerin kilidini açar"
+Supervisor Tools,Denetleyici Araçları
+Supplier,Tedarikçi
+Supplier and dates are required.,Tedarikçi ve tarihler gereklidir.
+Supplier Invoices,Tedarikçi Faturaları
+Supplier is required.,Tedarikçi gereklidir.
+Supplier name is required,Tedarikçi adı gerekli
+Supplier Payments,Tedarikçi Ödemeleri
+Supplier Purchase Summary,Tedarikçi Satın Alma Özeti
+Suppliers,Tedarikçiler
+Suppliers not found,Tedarikçi bulunamadı
+Switch Camera,Kamerayı Değiştir
+Switch Cashier,Kasiyeri Değiştir
+Switch the POS appearance theme,POS görünüm temasını değiştirme
+Switched to:,Şuraya geçildi:
+Sync All Invoices,Tüm Faturaları Senkronize Et
+Sync Offline Cash Movements ({0}),Çevrimdışı Nakit Hareketlerini Senkronize Et ({0})
+Sync Offline Sales,Çevrimdışı Satışları Senkronize Et
+Synced {0} offline cash movement(s).,{0} çevrimdışı nakit hareketi senkronize edildi.
+Syncing items in background,Öğeler arka planda senkronize ediliyor
+System / Diagnostics,Sistem / Teşhis
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","Sistem eylemleri; uygulama bilgileri, destek tanılamaları ve oturum kontrolleri gibi düşük frekanslı bakım kontrolleridir."
+System Information,Sistem Bilgileri
+System Status,Sistem Durumu
+Tables:,Tablolar:
+Tap the button below to redeem a gift card during checkout.,Ödeme sırasında hediye kartını kullanmak için aşağıdaki düğmeye dokunun.
+Target,Hedef
+Target Ex. Rate:,Hedef Örn. Oran:
+Target Rate:,Hedef Oran:
+Tax,Vergi
+Tax / Charges Report,Vergi/Harç Raporu
+Tax Heads,Vergi Başkanları
+Taxable Amount,Vergiye Tabi Tutar
+Tendered,İhale edildi
+Terminal,terminali
+Terminal & Devices,Terminal ve Cihazlar
+Terminal locked,Terminal kilitli
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","Terminal araçları bu ödeme istasyonunu, müşteriye yönelik ekranları ve gelecekteki yazıcı/cihaz kontrollerini etkiler."
+Territory not found,Bölge bulunamadı
+The amount paid is not complete,Ödenen tutar tam değil
+The app stores data locally for offline use. This is called cache.,"Uygulama, çevrimdışı kullanım için verileri yerel olarak depolar. Buna önbellek denir."
+The invoice stayed in draft. Please review and submit it manually.,Fatura taslakta kaldı. Lütfen manuel olarak inceleyin ve gönderin.
+The maximum discount allowed is,İzin verilen maksimum indirim:
+The quantity for {0} has been adjusted to the maximum available stock.,"{0} miktarı, mevcut maksimum stoka göre ayarlandı."
+The system could not retrieve the item details. Please try again.,Sistem öğe ayrıntılarını alamadı. Lütfen tekrar deneyin.
+These invoices will be synced when connection is restored,Bağlantı yeniden kurulduğunda bu faturalar senkronize edilecek
+This action now opens inside the settings workspace.,Bu eylem artık ayarlar çalışma alanında açılıyor.
+This coupon already used !,Bu kupon zaten kullanıldı!
+This invoice does not need change-allocation repair,Bu faturanın değişiklik tahsisi onarımına ihtiyacı yok
+This invoice is already repaired,Bu fatura zaten onarılmış
+This is an item template. Please choose a variant.,Bu bir öğe şablonudur. Lütfen bir varyant seçin.
+this item,bu öğe
+This POS page could not be opened offline because its code was not cached on this terminal yet.,"Bu POS sayfası, kodu henüz bu terminalde önbelleğe alınmadığından çevrimdışı olarak açılamadı."
+This Serial Number {0} has already been added!,Bu Seri Numarası {0} zaten eklenmiş!
+Threshold,Eşik
+Time,Zaman
+Tip: Clear cache regularly to free up space and keep the app fast.,İpucu: Yer açmak ve uygulamanın hızlı kalmasını sağlamak için önbelleği düzenli olarak temizleyin.
+Tip: Close unused tabs or apps to reduce lag.,İpucu: Gecikmeyi azaltmak için kullanılmayan sekmeleri veya uygulamaları kapatın.
+Tip: Monitor slow queries and table size for optimal performance.,İpucu: Optimum performans için yavaş sorguları ve tablo boyutunu izleyin.
+To Be Paid,Ödenecek
+To Date,Bugüne Kadar
+Today,Bugün
+Today Profit,Bugünkü Kâr
+Today Sales,Bugünkü Satışlar
+Toggle navigation drawer,Gezinme çekmecesini değiştir
+Toggle Theme,Temayı Değiştir
+Tools,Araçlar
+Tools for customer-facing screens and terminal-specific actions.,Müşteriye yönelik ekranlar ve terminale özel eylemler için araçlar.
+Top Brand,En İyi Marka
+Top Category,Üst Kategori
+Top Charge Head,Üst Şarj Başlığı
+Top Customers,En İyi Müşteriler
+Top Discount,En İyi İndirim
+Top Items by Location,Konuma Göre En Popüler Öğeler
+Top Margin,Üst Marj
+Top Pending,En Çok Bekleyenler
+Top Profit Item,En Çok Kazandıran Öğe
+Top Return Items,En Çok İade Edilen Ürünler
+Top Sales by Cashier,Kasiyer Bazında En Çok Satış
+Top Supplier,En İyi Tedarikçi
+Top Suppliers by Spend,Harcamaya Göre En İyi Tedarikçiler
+Top Tables,En İyi Tablolar
+Top Tax Head,En İyi Vergi Müdürü
+Top Up Amount,Yükleme Tutarı
+Top Up Card,Yükleme Kartı
+Top Up Mode,Yükleme Modu
+Top Variant,En İyi Varyant
+Total,Toplam
+Total Amount,Toplam Tutar
+Total Change,Toplam Değişim
+Total Charges,Toplam Ücretler
+Total In,Toplam Giriş
+Total Invoices,Toplam Faturalar
+Total Items,Toplam Öğeler
+Total Mpesa,Toplam Mpesa
+Total Out,Toplam Çıkış
+Total Payments,Toplam Ödemeler
+Total Purchase,Toplam Satın Alma
+Total Selected :,Toplam Seçilen :
+Total Size,Toplam Boyut
+Total Stock Qty,Toplam Stok Adeti
+Total:,Toplam:
+Totals by Invoice Currency,Fatura Para Birimine Göre Toplamlar
+Track how much cash was handed back to customers,Müşterilere ne kadar nakit iade edildiğini takip edin
+"Track recent sales, collect unpaid balances, and reopen saved work","Son satışları takip edin, ödenmemiş bakiyeleri toplayın ve kaydedilen çalışmaları yeniden açın"
+Transaction ID,İşlem Kimliği
+Transfer,Aktarım
+Try a different search term or clear the cart search.,Farklı bir arama terimi deneyin veya sepet aramasını temizleyin.
+Try adjusting your search or filters,Aramanızı veya filtrelerinizi ayarlamayı deneyin
+Try another source or refresh the list.,Başka bir kaynağı deneyin veya listeyi yenileyin.
+Try changing the date range or status filter.,Tarih aralığını veya durum filtresini değiştirmeyi deneyin.
+Type,Tür
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,Temel ayarlarla bile kameraya erişilemiyor. Lütfen kamera izinlerinizi ve cihaz uyumluluğunuzu kontrol edin.
+Unable to add offer item {0}. Please refresh and try again.,{0} teklif öğesi eklenemiyor. Lütfen yenileyin ve tekrar deneyin.
+Unable to add offer item. Please refresh and try again.,Teklif öğesi eklenemiyor. Lütfen yenileyin ve tekrar deneyin.
+Unable to add scanned item.,Taranan öğe eklenemiyor.
+Unable to create purchase order,Satınalma siparişi oluşturulamıyor
+Unable to delete draft invoice,Taslak fatura silinemiyor
+Unable to fetch documents,Belgeler getirilemiyor
+Unable to fetch draft orders,Taslak siparişler getirilemiyor
+Unable to fetch invoice history,Fatura geçmişi getirilemiyor
+Unable to fetch M-Pesa payments,M-Pesa ödemeleri alınamıyor
+Unable to fetch sales orders,Satış siparişleri alınamıyor
+Unable to fetch unpaid invoices,Ödenmemiş faturalar alınamıyor
+Unable to generate scale barcode,Terazi barkodu oluşturulamıyor
+Unable to issue gift card.,Hediye kartı düzenlenemiyor.
+Unable to load cashier PIN status.,Kasiyer PIN durumu yüklenemiyor.
+Unable to load document,Belge yüklenemiyor
+Unable to load draft invoice,Taslak fatura yüklenemiyor
+Unable to load gift card balance.,Hediye kartı bakiyesi yüklenemiyor.
+Unable to load invoice details,Fatura ayrıntıları yüklenemiyor
+Unable to load parked order,Bekletilmiş sipariş yüklenemiyor
+Unable to load the selected sales order,Seçilen satış siparişi yüklenemiyor
+Unable to prepare document,Belge hazırlanamadı
+Unable to prepare return invoice,İade faturası düzenlenemiyor
+Unable to print draft invoice,Taslak fatura yazdırılamıyor
+Unable to print submitted invoice,Gönderilen fatura yazdırılamıyor
+Unable to process document action,Belge eylemi işlenemiyor
+Unable to repair change allocation,Değişiklik tahsisi onarılamadı
+Unable to save cashier PIN.,Kasiyer PIN'i kaydedilemiyor.
+Unable to save the rate to the backend price list,"Fiyat, arka uç fiyat listesine kaydedilemiyor"
+Unable to submit invoice,Fatura gönderilemiyor
+Unable to submit the selected payment,Seçilen ödeme gönderilemiyor
+Unable to top up gift card.,Hediye kartına yükleme yapılamıyor.
+Unable to verify cashier PIN.,Kasiyer PIN'i doğrulanamıyor.
+Unallocated,Ayrılmamış
+Unallocated:,Ayrılmamış:
+Unavailable,Kullanılamıyor
+Unknown,Bilinmiyor
+Unknown Item,Bilinmeyen Öğe
+Unknown Warehouse,Bilinmeyen Depo
+Unlock POS,POS'un kilidini aç
+Unpaid,ödenmemiş
+"Unselected payments stay unallocated first, then auto reconcile after submit.","Seçilmeyen ödemeler önce ayrılmadan kalır, ardından gönderildikten sonra otomatik olarak mutabakata varılır."
+UOM,UOM
+UOM not found,UOM bulunamadı
+Update available,Güncelleme mevcut
+Update Customer,Müşteriyi Güncelle
+Update PIN,PIN'i güncelle
+Update Price List Rate,Fiyat Listesi Fiyatını Güncelle
+Updated,Güncellendi
+Updates and app info that stay out of the cashier flow.,Kasiyer akışının dışında kalan güncellemeler ve uygulama bilgileri.
+Updates automatically,Otomatik olarak güncellenir
+Usage,Kullanım
+Usage Stats,Kullanım İstatistikleri
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,Kasiyer geçişi ve terminal kilidini açmak için 4 ila 8 haneli bir PIN kullanın.
+Use Cashier,Kasiyer Kullan
+Use date range to search for older invoices,Daha eski faturaları aramak için tarih aralığını kullanın
+"Use one field for manual code entry, barcode scans, or QR scans.","Manuel kod girişi, barkod taramaları veya QR taramaları için bir alan kullanın."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","POS'tan ayrılmadan bakiye kontrolleri, yeni düzenleme ve yüklemeler için tek bir iş akışı kullanın."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","Önbelleğe alınan önkoşul verilerinin yenilenmesi, yeniden oluşturulması veya tanılama incelemesi gerektiğinde bu bölümü kullanın."
+Use Western numerals,Batı rakamlarını kullanın
+Used:,Kullanılan:
+Using basic camera settings due to device limitations,Cihaz sınırlamaları nedeniyle temel kamera ayarlarının kullanılması
+Using cached customer balance,Önbelleğe alınmış müşteri bakiyesini kullanma
+Valid until,Şu tarihe kadar geçerlidir:
+Variance %,Fark %'si
+Variants,Varyantlar
+Variant-wise,Varyant bazında
+Verify closing amounts for each payment method,Her ödeme yöntemi için kapanış tutarlarını doğrulayın
+View all,Tümünü görüntüle
+View app information and current build details,Uygulama bilgilerini ve mevcut derleme ayrıntılarını görüntüleyin
+View Data Diagnostics,Veri Teşhislerini Görüntüle
+View Details,Ayrıntıları Görüntüle
+View invoice details,Fatura ayrıntılarını görüntüle
+View notifications,Bildirimleri görüntüle
+View offline invoices,Çevrimdışı faturaları görüntüle
+View restricted POS insights,Kısıtlanmış POS öngörülerini görüntüleyin
+Void Amount,İptal Tutarı
+Void Count,Geçersiz Sayım
+Voids,Boşluklar
+Waiting for cart items,Sepetteki ürünler bekleniyor
+Waiting for payment...,Ödeme bekleniyor...
+Walk-in Customer,Gelen Müşteri
+Warehouse,Depo
+Warning: High cache usage may affect performance.,Uyarı: Yüksek önbellek kullanımı performansı etkileyebilir.
+Warning: High lag may indicate heavy processing or browser slowness.,"Uyarı: Yüksek gecikme, yoğun işlem veya tarayıcı yavaşlığının göstergesi olabilir."
+Week ?,Hafta ?
+Week-wise,Hafta bazında
+Weight (g),Ağırlık (g)
+Weight (grams),Ağırlık (gram)
+We'll let you know if an invoice fails to submit,Fatura gönderilemezse size haber vereceğiz
+Workflow,İş akışı
+Write off amount cannot exceed the POS profile maximum of {0},"Silinme tutarı, POS profili maksimumu olan {0}'ı aşamaz"
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,Silinme tutarı izin verilen sınırı ({0}) aşıyor. Lütfen kalan tutar için ödeme ekleyin.
+Yes,Evet
+"Yes, Cancel sale","Evet, Satışı iptal et"
+"Yes, Close",Evet Kapat
+You are not allowed to print draft invoices,Taslak faturaları yazdırmanıza izin verilmiyor
+You are offline. Add Payment will work again when the connection is restored.,Çevrimdışısınız. Bağlantı yeniden kurulduğunda Ödeme Ekle tekrar çalışacaktır.
+You have no notifications right now,Şu anda hiçbir bildiriminiz yok
+Your Cart,Sepetiniz

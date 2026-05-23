@@ -28,7 +28,7 @@ Custom Field - label: POS Profile-posa_display_items_in_stock,Hide Unavailable I
 Custom Field - label: POS Profile-posa_hide_variants_items,Hide Variants Items
 Custom Field - label: Sales Invoice Item-posa_is_offer,Is Offer
 Custom Field - label: Sales Invoice Item-posa_is_replace,Is Offer Replace For item Row ID
-Custom Field - label: POS Profile-posa_max_discount_allowed,Max Discount Percentage Allowed 
+Custom Field - label: POS Profile-posa_max_discount_allowed,Max Discount Percentage Allowed
 Custom Field - label: POS Profile-posa_pos_awesome_advance_settings,POS Awesome Advance Settings
 Custom Field - label: POS Profile-posa_pos_awesome_settings,POS Awesome Settings
 Custom Field - label: Sales Invoice Item-posa_offers,POS Offers
@@ -46,7 +46,7 @@ Custom Field - label: POS Profile-posa_local_storage,Use Browser Local Storage
 Custom Field - label: POS Profile-posa_force_server_items,Fetch Items Directly from Server
 Custom Field - label: POS Profile-use_cashback,Use Cashback
 Custom Field - label: POS Profile-use_customer_credit,Use Customer Credit
-Menu,Menu
+Menu,Cardápio
 Actions,Ações
 Close Shift,Fechar Turno
 End current session,Finalizar sessão atual
@@ -226,7 +226,7 @@ Invoice {0} does not exist,A fatura {0} nao existe
 Invoices already past due date,Faturas com data de vencimento passada
 Invoices saved as POS Invoices,Faturas salvas como Faturas POS
 Invoices still carrying balances,Faturas ainda com saldos
-Item,Item
+Item,Artigo
 Item Name,Nome do Item
 Item Search,Buscar Item
 Item Selector,Seletor de Itens
@@ -316,16 +316,16 @@ Offer UOM cannot be changed,A UOM da oferta nao pode ser alterada
 Offer criteria exceeded,Criterios de oferta excedidos
 Offer item unavailable,Item de oferta indisponivel
 Offer?,Oferta?
-Offline,Offline
+Offline,Off-line
 Offline invoices status,Status de faturas offline
 Offline invoices synced,Faturas offline sincronizadas
-Online,Online
+Online,On-line
 Open Customer Display,Abrir Tela do Cliente
 Open Payments?,Abrir Pagamentos?
 Open balance to collect,Saldo aberto para cobrar
 Open invoices,Faturas abertas
 Opening Cash,Dinheiro de Abertura
-Original,Original
+Original,Originais
 Other,Outro
 Out,Saida
 Out of Stock,Sem Estoque
@@ -484,7 +484,7 @@ Select Batch,Selecionar Lote
 Select a printer to use QZ silent printing.,Selecione uma impressora para impressao silenciosa do QZ.
 Select an option on the left to view its settings.,Selecione uma opcao a esquerda para ver suas configuracoes.
 Select printer,Selecionar impressora
-Serial,Serial
+Serial,Série
 Server CPU Usage:,Uso de CPU do Servidor:
 Server Memory Usage:,Uso de Memoria do Servidor:
 Server Uptime:,Tempo de Atividade do Servidor:
@@ -562,7 +562,7 @@ Total Charges,Encargos Totais
 Total In,Total Entrada
 Total Invoices:,Total de Faturas:
 Total Items,Total de Itens
-Total Mpesa:,Total Mpesa:
+Total Mpesa:,Peso total:
 Total Out,Total Saida
 Total Payments:,Total de Pagamentos:
 Total Purchase,Total de Compra
@@ -649,7 +649,7 @@ You have no notifications right now,Voce nao tem notificacoes agora
 Your Cart,Seu Carrinho
 actual_qty,qtd_real
 cache used,cache usado
-commits,commits
+commits,compromete
 days,dias
 modified_after must be a valid ISO datetime,modified_after deve ser uma data ISO valida
 sales,vendas
@@ -664,7 +664,7 @@ Account,Conta
 Acknowledge the error to resume scanning,Reconheça o erro para retomar a digitalização
 Across,Através
 Action,Ação
-Add New Address,Add New Address
+Add New Address,Adicionar novo endereço
 Add on New Line,Adicionar em Nova Linha
 Address Line 1,Endereço Linha 1
 Address not found,Endereço não encontrado
@@ -685,13 +685,13 @@ Amount already received,Valor já recebido
 Amount exceeds POS Profile cash movement max amount.,O valor excede o valor máximo de movimento de dinheiro do perfil POS.
 Amount exceeds profile cash movement max amount.,O valor excede o valor máximo de movimento de dinheiro do perfil.
 Amount received from customer,Valor recebido do cliente
-Applied,Applied
+Applied,Aplicado
 Apply,Aplicar
-Apply On,Apply On
+Apply On,Aplicar em
 Apps,Aplicativos
 Are you sure you want to close? All entered data will be lost.,Tem certeza de que deseja fechar? Todos os dados inseridos serão perdidos.
 Attributes (Size/Color),Atributos (Tamanho/Cor)
-Available QTY,Available QTY
+Available QTY,Quantidade disponível
 Available:,Disponível:
 Average Basket,Média de Carrinho
 Average Bill,Fatura Média
@@ -705,7 +705,7 @@ Awesome,Incrível
 Awesome Dashboard,Painel Awesome
 Awesome Dashboard is disabled in POS Settings.,O Painel Awesome está desabilitado nas configurações de POS.
 Awesome Dashboard is disabled in global settings or for the selected scope.,O Painel Awesome está des configurações globais ou para o escopoabilitado em selecionado.
-Back,Back
+Back,Voltar
 Back Office Cash Account,Conta de Dinheiro do Escritório
 Back Office Cash Account (Optional Override),Conta de Dinheiro do Escritório (Substituição Opcional)
 Back Office Cash Account is fixed by POS Profile and cannot be overridden.,A conta de dinheiro do escritório é fixada pelo perfil POS e não pode ser substituída.
@@ -730,7 +730,7 @@ Breakdown,Detalhamento
 Build Time:,Tempo de Construção:
 Built with Frappe,Construído com Frappe
 Bundle,Pacote
-COGS,COGS
+COGS,CPV
 CPU Cores:,Núcleos de CPU:
 CPU Load,Carga de CPU
 Cache Usage,Uso de Cache
@@ -741,8 +741,8 @@ Cancel Payment,Cancelar Pagamento
 Cancel Sale,Cancelar Venda
 Cancelled,Cancelado
 Cancelling submitted cash movements is disabled for this POS Profile.,Cancelar movimentos de dinheiro enviados está desabilitado para este perfil POS.
-Cannot Save Offline Invoice: ,Cannot Save Offline Invoice: 
-Cannot Save Offline Payment: ,Cannot Save Offline Payment: 
+Cannot Save Offline Invoice:,Não é possível salvar a fatura off-line:
+Cannot Save Offline Payment:,Não é possível salvar o pagamento offline:
 Cannot clear cache while offline,Não é possível limpar cache enquanto offline
 Cannot redeem customer credit more than invoice total,Não é possível resgatar crédito do cliente mais que o total da fatura
 Card,Cartão
@@ -781,8 +781,8 @@ Client CPU Lag:,Atraso de CPU do Cliente:
 Client Memory Usage:,Uso de Memória do Cliente:
 Client Metrics,Métricas do Cliente
 Close Scanner,Fechar Scanner
-Closing Amount,Closing Amount
-Closing POS Shift,Closing POS Shift
+Closing Amount,Valor de fechamento
+Closing POS Shift,Fechando turno de PDV
 Closing Snapshot Available,Instantânea de Fechamento Disponível
 Code,Código
 Code scanned successfully,Código escaneado com sucesso
@@ -807,7 +807,7 @@ Coupon,Cupom
 Coupons,Cupons
 Cover,Capa
 Create Customer,Criar Cliente
-Create POS Opening Shift,Create POS Opening Shift
+Create POS Opening Shift,Criar turno de abertura de PDV
 Create items,Criar itens
 Create suppliers,Criar fornecedores
 Credit Note {0} has no remaining balance to allocate.,A nota de crédito {0} não tem saldo restante para alocar.
@@ -854,11 +854,11 @@ Detailed Supplier Breakdown,Detalhamento de Fornecedor
 Difference (In Company Currency),Diferença (Em Moeda da Empresa)
 Discount %,Desconto %
 Discount / Void / Return Report,Relatório de Desconto/Anulação/Devolução
-Discount Amount,Discount Amount
+Discount Amount,Valor do desconto
 Discount limited by POS Profile,Desconto limitado pelo perfil POS
 Discounted Invoices,Faturas com Desconto
 Draft,Rascunho
-Due Date,Due Date
+Due Date,Data de vencimento
 Enable Customer Display in POS Profile first.,Habilite a tela do cliente no perfil POS primeiro.
 Enter a valid grams value,Digite um valor válido em gramas
 Enter new price list rate,Digite nova taxa de lista de preços
@@ -869,7 +869,7 @@ Error calculating prices,Erro ao calcular preços
 Error fetching customer balance,Erro ao obter saldo do cliente
 Error processing payment,Erro ao processar pagamento
 Error searching invoices,Erro ao buscar faturas
-Error submitting invoice: ,Error submitting invoice: 
+Error submitting invoice:,Erro ao enviar fatura:
 Error updating item details,Erro ao atualizar detalhes do item
 Est. Purchase,Compra Est.
 Est. Value,Valor Est.
@@ -907,7 +907,7 @@ Hide zero rated items,Ocultar itens com taxa zero
 Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Importe o certificado para o QZ Tray e reinicie o QZ Tray em cada máquina POS.
 Include Batch / Serial,Incluir Lote / Serial
 Include Price,Incluir Preço
-IndexedDB,IndexedDB
+IndexedDB,Banco de dados indexado
 Initialize your shift with opening balances,Inicie seu turno com saldos de abertura
 Initializing application...,Inicializando aplicação...
 Installed Applications,Aplicativos Instalados
@@ -971,128 +971,128 @@ Name,Nome
 Negative Stock Items,Itens com Estoque Negativo
 Negative values not allowed,Valores negativos não permitidos
 Net Total,Total Líquido
-New Offer Available,New Offer Available
+New Offer Available,Nova oferta disponível
 No allocation made for credit note {0},Nenhuma alocação feita para nota de crédito {0}
 No allocation made for payment {0},Nenhuma alocação feita para pagamento {0}
 No allocation was recorded for Credit Note {0}.,Nenhuma alocação foi registrada para nota de crédito {0}.
 No allocation was recorded for Journal Entry {0}.,Nenhuma alocação foi registrada para lançamento {0}.
 No allocation was recorded for Payment Entry {0}.,Nenhuma alocação foi registrada para entrada de pagamento {0}.
 No allocations were made.,Nenhuma alocação foi feita.
-No batches available in {0} for {1}.,No batches available in {0} for {1}.
-No branch/location data found.,No branch/location data found.
-No brand data found.,No brand data found.
-No cash movement type is allowed for this POS Profile.,No cash movement type is allowed for this POS Profile.
-No cashier-wise discount/void/return activity.,No cashier-wise discount/void/return activity.
-No category data found.,No category data found.
-No category profitability data found.,No category profitability data found.
-No change returned recorded for this shift.,No change returned recorded for this shift.
-No charge head breakdown found.,No charge head breakdown found.
-No customer sales data found.,No customer sales data found.
-No day-wise discount/void/return trend.,No day-wise discount/void/return trend.
-No day-wise payment data found.,No day-wise payment data found.
-No day-wise profitability trend found.,No day-wise profitability trend found.
-No day-wise purchase data found.,No day-wise purchase data found.
-No day-wise sales trend found.,No day-wise sales trend found.
-No day-wise tax/charges trend found.,No day-wise tax/charges trend found.
-No dead stock items.,No dead stock items.
-No hourly sales trend found for today.,No hourly sales trend found for today.
-No invoices found,No invoices found
-No invoices found. Try different search criteria.,No invoices found. Try different search criteria.
-No item profitability data found.,No item profitability data found.
-No item sales data found for this period.,No item sales data found for this period.
-No items found,No items found
-No items in cart,No items in cart
-No items with barcodes to print,No items with barcodes to print
-No location-wise top item data found.,No location-wise top item data found.
-No low stock alerts right now.,No low stock alerts right now.
-No low stock items.,No low stock items.
-No month-wise sales trend found.,No month-wise sales trend found.
-No negative stock items.,No negative stock items.
-No offline cash movement synced.,No offline cash movement synced.
-No offline invoices pending synchronization,No offline invoices pending synchronization
-No out-of-stock items.,No out-of-stock items.
-No outstanding credit invoices for this shift.,No outstanding credit invoices for this shift.
-No payment collection data found.,No payment collection data found.
-No payment rows available on this invoice.,No payment rows available on this invoice.
-No payments registered for this shift.,No payments registered for this shift.
-No pending balances in this period.,No pending balances in this period.
-No pending offline invoices,No pending offline invoices
-No profiles found for selected scope. Falling back to current profile failed.,No profiles found for selected scope. Falling back to current profile failed.
-No recent customer activity found.,No recent customer activity found.
-No recent stock entries found.,No recent stock entries found.
-No reorder suggestions right now.,No reorder suggestions right now.
-No repeat customers in this period.,No repeat customers in this period.
-No return item trend found.,No return item trend found.
-No returnable items found for this invoice,No returnable items found for this invoice
-No returns were processed in this shift.,No returns were processed in this shift.
-No risk activity found.,No risk activity found.
-No sales activity found for this period.,No sales activity found for this period.
-No slow moving items.,No slow moving items.
-No staff sales activity found.,No staff sales activity found.
-No stock movement for this period.,No stock movement for this period.
-No submitted cash movements in this shift.,No submitted cash movements in this shift.
-No supplier purchases found in this month.,No supplier purchases found in this month.
-No suppliers found for this period.,No suppliers found for this period.
-No tax head breakdown found.,No tax head breakdown found.
-No top items found for this location.,No top items found for this location.
-No unallocated payments were available for reconciliation.,No unallocated payments were available for reconciliation.
-No unpaid invoices,No unpaid invoices
-No valid batches available in {0} for {1}.,No valid batches available in {0} for {1}.
-No variant data found.,No variant data found.
-No week-wise sales trend found.,No week-wise sales trend found.
-No.,No.
-Nobile Number,Nobile Number
-Offer,Offer
-Offer Applied,Offer Applied
-Offers,Offers
-Offline Invoices,Offline Invoices
-Only cancelled POS Cash Movement records can be deleted.,Only cancelled POS Cash Movement records can be deleted.
-Only cancelled cash movements can be deleted.,Only cancelled cash movements can be deleted.
-Only submitted cash movements can be cancelled.,Only submitted cash movements can be cancelled.
-Only submitted or cancelled cash movements can be duplicated.,Only submitted or cancelled cash movements can be duplicated.
-Only the shift owner can create cash movement entries.,Only the shift owner can create cash movement entries.
-Open this screen from POS Menu -> Open Customer Display.,Open this screen from POS Menu -> Open Customer Display.
-OpenCV Off,OpenCV Off
-OpenCV On,OpenCV On
-OpenCV image processing enabled - Enhanced barcode detection,OpenCV image processing enabled - Enhanced barcode detection
-OpenCV image processing unavailable on this device,OpenCV image processing unavailable on this device
-OpenCV processing disabled,OpenCV processing disabled
-Opening Amount,Opening Amount
-Order,Order
-Out of Stock Items,Out of Stock Items
-Outstanding,Outstanding
-Outstanding Credit by Currency,Outstanding Credit by Currency
-Overpayment Change,Overpayment Change
-PAY,PAY
+No batches available in {0} for {1}.,Nenhum lote disponível em {0} para {1}.
+No branch/location data found.,Nenhum dado de filial/local encontrado.
+No brand data found.,Nenhum dado de marca encontrado.
+No cash movement type is allowed for this POS Profile.,Nenhum tipo de movimentação de dinheiro é permitido para este perfil de PDV.
+No cashier-wise discount/void/return activity.,Nenhuma atividade de desconto/anulação/devolução no caixa.
+No category data found.,Nenhum dado de categoria encontrado.
+No category profitability data found.,Nenhum dado de rentabilidade da categoria encontrado.
+No change returned recorded for this shift.,Nenhuma alteração retornada registrada para este turno.
+No charge head breakdown found.,Nenhuma quebra do cabeçote de carga foi encontrada.
+No customer sales data found.,Nenhum dado de vendas do cliente encontrado.
+No day-wise discount/void/return trend.,Nenhuma tendência diária de desconto/anulação/devolução.
+No day-wise payment data found.,Nenhum dado de pagamento diário encontrado.
+No day-wise profitability trend found.,Nenhuma tendência de lucratividade diária encontrada.
+No day-wise purchase data found.,Nenhum dado de compra diário encontrado.
+No day-wise sales trend found.,Nenhuma tendência de vendas diária encontrada.
+No day-wise tax/charges trend found.,Nenhuma tendência diária de impostos/cobranças foi encontrada.
+No dead stock items.,Nenhum item de estoque morto.
+No hourly sales trend found for today.,Nenhuma tendência de vendas por hora encontrada para hoje.
+No invoices found,Nenhuma fatura encontrada
+No invoices found. Try different search criteria.,Nenhuma fatura encontrada. Experimente diferentes critérios de pesquisa.
+No item profitability data found.,Nenhum dado de rentabilidade do item encontrado.
+No item sales data found for this period.,Nenhum dado de vendas de itens encontrado neste período.
+No items found,Nenhum item encontrado
+No items in cart,Nenhum item no carrinho
+No items with barcodes to print,Nenhum item com código de barras para imprimir
+No location-wise top item data found.,Nenhum dado de item principal em termos de localização foi encontrado.
+No low stock alerts right now.,Nenhum alerta de estoque baixo no momento.
+No low stock items.,Não há itens com estoque baixo.
+No month-wise sales trend found.,Nenhuma tendência de vendas mensal encontrada.
+No negative stock items.,Nenhum item de estoque negativo.
+No offline cash movement synced.,Nenhum movimento de dinheiro offline sincronizado.
+No offline invoices pending synchronization,Nenhuma fatura off-line com sincronização pendente
+No out-of-stock items.,Não há itens fora de estoque.
+No outstanding credit invoices for this shift.,Nenhuma fatura de crédito pendente para esta mudança.
+No payment collection data found.,Nenhum dado de cobrança de pagamento encontrado.
+No payment rows available on this invoice.,Nenhuma linha de pagamento disponível nesta fatura.
+No payments registered for this shift.,Nenhum pagamento registrado para este turno.
+No pending balances in this period.,Não há saldos pendentes neste período.
+No pending offline invoices,Nenhuma fatura off-line pendente
+No profiles found for selected scope. Falling back to current profile failed.,Nenhum perfil encontrado para o escopo selecionado. Falha ao retornar ao perfil atual.
+No recent customer activity found.,Nenhuma atividade recente do cliente encontrada.
+No recent stock entries found.,Nenhuma entrada de estoque recente encontrada.
+No reorder suggestions right now.,Nenhuma sugestão de novo pedido no momento.
+No repeat customers in this period.,Não há clientes recorrentes neste período.
+No return item trend found.,Nenhuma tendência de devolução de itens encontrada.
+No returnable items found for this invoice,Nenhum item retornável encontrado para esta fatura
+No returns were processed in this shift.,Nenhuma devolução foi processada neste turno.
+No risk activity found.,Nenhuma atividade de risco encontrada.
+No sales activity found for this period.,Nenhuma atividade de vendas encontrada para este período.
+No slow moving items.,Sem itens de movimento lento.
+No staff sales activity found.,Nenhuma atividade de vendas da equipe encontrada.
+No stock movement for this period.,Não houve movimentação de estoque neste período.
+No submitted cash movements in this shift.,Não foram apresentados movimentos de numerário neste turno.
+No supplier purchases found in this month.,Nenhuma compra de fornecedor encontrada neste mês.
+No suppliers found for this period.,Nenhum fornecedor encontrado para este período.
+No tax head breakdown found.,Nenhuma discriminação de carga fiscal encontrada.
+No top items found for this location.,Nenhum item principal encontrado para este local.
+No unallocated payments were available for reconciliation.,Nenhum pagamento não alocado estava disponível para reconciliação.
+No unpaid invoices,Sem faturas não pagas
+No valid batches available in {0} for {1}.,Nenhum lote válido disponível em {0} para {1}.
+No variant data found.,Nenhum dado de variante encontrado.
+No week-wise sales trend found.,Nenhuma tendência de vendas semanal encontrada.
+No.,Não.
+Nobile Number,Número Nobile
+Offer,Oferecer
+Offer Applied,Oferta aplicada
+Offers,Ofertas
+Offline Invoices,Faturas off-line
+Only cancelled POS Cash Movement records can be deleted.,Somente registros de movimentação de dinheiro em PDV cancelados podem ser excluídos.
+Only cancelled cash movements can be deleted.,Somente movimentos de dinheiro cancelados podem ser excluídos.
+Only submitted cash movements can be cancelled.,Apenas os movimentos de numerário submetidos podem ser cancelados.
+Only submitted or cancelled cash movements can be duplicated.,Apenas movimentos de numerário submetidos ou cancelados podem ser duplicados.
+Only the shift owner can create cash movement entries.,Somente o proprietário do turno pode criar lançamentos de movimentação de dinheiro.
+Open this screen from POS Menu -> Open Customer Display.,Abra esta tela no Menu POS -> Abrir Tela do Cliente.
+OpenCV Off,OpenCV desativado
+OpenCV On,OpenCV ativado
+OpenCV image processing enabled - Enhanced barcode detection,Processamento de imagem OpenCV ativado - Detecção aprimorada de código de barras
+OpenCV image processing unavailable on this device,Processamento de imagem OpenCV indisponível neste dispositivo
+OpenCV processing disabled,Processamento OpenCV desativado
+Opening Amount,Valor de abertura
+Order,Ordem
+Out of Stock Items,Itens fora de estoque
+Outstanding,Fora do comum
+Outstanding Credit by Currency,Crédito pendente por moeda
+Overpayment Change,Alteração de pagamento a maior
+PAY,PAGAR
 PDF,PDF
-POS,POS
-POS Awesome,POS Awesome
-POS Awesome Payments is not enabled for this POS Profile,POS Awesome Payments is not enabled for this POS Profile
-POS Awesome credit redemption for Sales Invoice {0},POS Awesome credit redemption for Sales Invoice {0}
-POS Cash Movement,POS Cash Movement
-POS Offer is disable.,POS Offer is disable.
-POS Opening Shift is required,POS Opening Shift is required
-POS Opening Shift is required to compute the overview.,POS Opening Shift is required to compute the overview.
-POS Opening Shift is required.,POS Opening Shift is required.
-POS Opening Shift must be submitted and open.,POS Opening Shift must be submitted and open.
-POS Opening Shift not found.,POS Opening Shift not found.
-POS Opening Shift {0} is not for the same POS Profile,POS Opening Shift {0} is not for the same POS Profile
-POS Opening Shift {0} is not for the same company,POS Opening Shift {0} is not for the same company
-POS Profile,POS Profile
-POS Profile company must match active POS Opening Shift company.,POS Profile company must match active POS Opening Shift company.
-POS Profile is required,POS Profile is required
-POS Profile is required to create purchase documents.,POS Profile is required to create purchase documents.
-POS Profile is required.,POS Profile is required.
-POS Profile must match the active POS Opening Shift profile.,POS Profile must match the active POS Opening Shift profile.
-POS Profile must match the selected POS Opening Shift profile.,POS Profile must match the selected POS Opening Shift profile.
-POS Profile {0} does not belong to company {1}.,POS Profile {0} does not belong to company {1}.
-POS Profile {0} does not exist.,POS Profile {0} does not exist.
-POS Shift {0} is not open,POS Shift {0} is not open
-POS lock is not available yet,POS lock is not available yet
-POS profile data is missing or invalid.,POS profile data is missing or invalid.
-Paid,Paid
-Paid Amount,Paid Amount
-Paid change cannot be greater than total change!,Paid change cannot be greater than total change!
+POS,PDV
+POS Awesome,PDV incrível
+POS Awesome Payments is not enabled for this POS Profile,O POS Awesome Payments não está habilitado para este perfil de PDV
+POS Awesome credit redemption for Sales Invoice {0},Resgate de crédito incrível de PDV para fatura de vendas {0}
+POS Cash Movement,Movimentação de dinheiro em PDV
+POS Offer is disable.,A oferta de PDV está desativada.
+POS Opening Shift is required,O turno de abertura do PDV é obrigatório
+POS Opening Shift is required to compute the overview.,O turno de abertura do PDV é necessário para calcular a visão geral.
+POS Opening Shift is required.,O turno de abertura do PDV é obrigatório.
+POS Opening Shift must be submitted and open.,O turno de abertura do PDV deve ser enviado e aberto.
+POS Opening Shift not found.,Turno de abertura do PDV não encontrado.
+POS Opening Shift {0} is not for the same POS Profile,O turno de abertura do PDV {0} não é para o mesmo perfil do PDV
+POS Opening Shift {0} is not for the same company,O turno de abertura do PDV {0} não é da mesma empresa
+POS Profile,Perfil PDV
+POS Profile company must match active POS Opening Shift company.,A empresa com perfil de PDV deve corresponder à empresa ativa do turno de abertura de PDV.
+POS Profile is required,O perfil PDV é obrigatório
+POS Profile is required to create purchase documents.,O perfil POS é necessário para criar documentos de compra.
+POS Profile is required.,O perfil PDV é obrigatório.
+POS Profile must match the active POS Opening Shift profile.,O perfil de PDV deve corresponder ao perfil de turno de abertura de PDV ativo.
+POS Profile must match the selected POS Opening Shift profile.,O perfil de PDV deve corresponder ao perfil de turno de abertura de PDV selecionado.
+POS Profile {0} does not belong to company {1}.,O perfil POS {0} não pertence à empresa {1}.
+POS Profile {0} does not exist.,O perfil PDV {0} não existe.
+POS Shift {0} is not open,O PDV Shift {0} não está aberto
+POS lock is not available yet,O bloqueio do PDV ainda não está disponível
+POS profile data is missing or invalid.,Os dados do perfil PDV estão ausentes ou são inválidos.
+Paid,Pago
+Paid Amount,Valor pago
+Paid change cannot be greater than total change!,O troco pago não pode ser maior que o troco total!
 Payment Entry {0} has no unallocated amount remaining.,A entrada de pagamento {0} não tem valor não alocado restante.
 Payment ID,ID de Pagamento
 Payment Methods,Métodos de Pagamento
@@ -1175,7 +1175,7 @@ Source account override is disabled for this POS Profile.,A substituição de co
 Source and target accounts are required.,Contas de origem e destino são necessárias.
 Source and target accounts cannot be the same for cash deposit.,As contas de origem e destino não podem ser iguais para depósito em dinheiro.
 Staff / Cashier Performance Report,Relatório de Desempenho de Pessoal/Caixa
-Status,Status
+Status,Estado
 Status must be one of {0},O status deve ser um de {0}
 Stock Movement Report,Relatório de Movimento de Estoque
 Submit,Enviar
@@ -1184,7 +1184,7 @@ Supplier Purchase Summary,Resumo de Compra de Fornecedor
 Supplier name is required.,Nome do fornecedor é obrigatório.
 Suppliers not found,Fornecedores não encontrados
 Switch Camera,Trocar Câmera
-Switched to: ,Trocado para: 
+Switched to:,Trocado para:
 System Information,Informações do Sistema
 Target account must belong to the selected company.,A conta de destino deve pertencer à empresa selecionada.
 Taxes,Impostos
@@ -1225,7 +1225,7 @@ Warehouse,Armazém
 Week Δ,Semana Δ
 Yes,Sim
 add,adicionar
-localStorage,localStorage
+localStorage,armazenamento local
 Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,Atualização de estoque: {0} tem {1} disponível. Adicionar {2}ará o estoque ficar negativo.
 {0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} tem apenas {1} em estoque. Você solicitou {2}. Ajuste a quantidade ou reabasteça.
 Account Head,Conta Principal
@@ -1410,7 +1410,7 @@ Taking longer than expected...,Levando mais tempo que o esperado...
 Tax ID,ID de Imposto
 Title,Título
 To Sync,Para Sincronizar
-Total Mpesa,Total Mpesa
+Total Mpesa,Peso total
 Total Outstanding,Total Pendente
 Total Payments,Total de Pagamentos
 Total Selected,Total Selecionado
@@ -1428,7 +1428,7 @@ Waiting for payment,Esperando pagamento
 Warning High cache usage may affect performance.,Aviso: Alto uso de cache pode afetar o desempenho.
 Warning High lag may indicate heavy processing or browser slowness.,Aviso: Alto atraso pode indicar processamento pesado ou lentidão do navegador.
 his item,este item
-ms,ms
+ms,EM
 Additional Discount,Desconto Adicional
 Customer Name,Nome do Cliente
 Difference,Diferença
@@ -1440,14 +1440,430 @@ Items Discounts,Descontos de Itens
 Items Group,Grupo de Itens
 Loyalty Point Offer Applied,Oferta de Ponto de Fidelidade Aplicada
 Loyalty Points,Pontos de Fidelidade
-Max Discount Percentage Allowed ,Percentagem Máxima de Desconto Permitida
+Max Discount Percentage Allowed,Percentagem Máxima de Desconto Permitida
 POS Offers,Ofertas POS
-Price Discount Scheme ,Esquema de Desconto de Preço
+Price Discount Scheme,Esquema de Desconto de Preço
 Sorry,Desculpe
 Tip Clear cache regularly to free up space and keep the app fast.,Dica: Limpe o cache regularmente para liberar espaço e manter o aplicativo rápido.
 Tip Close unused tabs or apps to reduce lag.,Dica: Feche abas ou aplicativos não utilizados para reduzir o atraso.
 Tip Monitor slow queries and table size for optimal performance.,Dica: Monitore consultas lentas e tamanho de tabelas para um desempenho ideal.
 Total Qty,Qtd Total
-Total Selected ,Total Selecionado
+Total Selected,Total Selecionado
 Search Items,Buscar Itens
 Tax and Charges,Impostos e Taxas
+{0} (Qty: {1}),{0} (Quantidade: {1})
+{0} actions,{0} ações
+{0} offline invoice{1} pending,{0} fatura off-line{1} pendente
+{0} offline invoice{1} saved as draft,{0}fatura off-line{1} salva como rascunho
+{0} offline invoice{1} synced,{0} fatura off-line{1} sincronizada
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0} dias atrás
+{0}h ago,{0}h atrás
+{0}m ago,{0}m atrás
+A POS supervisor is required for this action.,Um supervisor de PDV é necessário para esta ação.
+Access,Acesso
+Account is overdrawn,A conta está a descoberto
+Acknowledge the error to resume scanning.,Reconheça o erro para retomar a digitalização.
+Active sale,Venda ativa
+Add items from the selector to start building this sale.,Adicione itens do seletor para começar a construir esta venda.
+Add more value to an existing gift card,Agregue mais valor a um vale-presente existente
+Add new customer,Adicionar novo cliente
+Add payment to invoice,Adicionar pagamento à fatura
+Additional Discount %,% de desconto adicional
+Adjust the quantity or enable negative stock to continue.,Ajuste a quantidade ou permita que o estoque negativo continue.
+Allowed UOM is {0},A UOM permitida é {0}
+Appearance and user-level preferences for the current session.,Aparência e preferências de nível de usuário para a sessão atual.
+Apply Gift Card,Aplicar vale-presente
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,Aplique apenas o valor que deseja resgatar nesta fatura. O saldo restante permanece no cartão.
+Apply Redemption,Aplicar resgate
+Applying,Candidatura
+Auto Allocate Payment Amount,Alocar automaticamente o valor do pagamento
+Auto reconciliation completed after payment submit.,Reconciliação automática concluída após o envio do pagamento.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,Reconciliação automática concluída. Alocado: {0}{1}. Restantes pendentes: {0}{2}.
+Available Actions,Ações disponíveis
+Awesome Dashboard is disabled for the selected POS Profile.,O Awesome Dashboard está desabilitado para o perfil de PDV selecionado.
+Awesome Dashboard is unavailable for the selected scope.,O Awesome Dashboard não está disponível para o escopo selecionado.
+Awesome Dashboard is visible only to POS supervisors.,O Awesome Dashboard é visível apenas para supervisores de PDV.
+Back to {0},Voltar para {0}
+Background processing did not finish in time.,O processamento em segundo plano não terminou a tempo.
+Background processing failed for Invoice {0}: {1},Falha no processamento em segundo plano da fatura {0}: {1}
+Balance,Equilíbrio
+Barcode / QR Ready,Código de barras / QR pronto
+Base Paid:,Base paga:
+Base Recv:,Receita básica:
+Base:,Base:
+Browse,Navegar
+Camera constraints not supported by your device. Trying fallback settings...,Restrições de câmera não suportadas pelo seu dispositivo. Tentando configurações alternativas...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,A câmera está ocupada ou bloqueada por outro aplicativo/guia. Feche outros aplicativos de câmera e tente novamente.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,Permissão da câmera negada. Permita o acesso à câmera nas configurações do seu navegador e atualize a página.
+Camera scanner is locked until the current error is acknowledged,O scanner da câmera fica bloqueado até que o erro atual seja reconhecido
+Camera started but the video stream did not load in time. Please try again.,"A câmera foi iniciada, mas o fluxo de vídeo não foi carregado a tempo. Por favor, tente novamente."
+Cancel cash movement {0}?,Cancelar movimentação de dinheiro {0}?
+Cannot add an item with zero or negative quantity.,Não é possível adicionar um item com quantidade zero ou negativa.
+Cannot redeem gift cards more than invoice total,Não é possível resgatar vales-presente acima do total da fatura
+Card health after the last live lookup,Integridade do cartão após a última pesquisa ao vivo
+Cart,Carrinho
+Cash payment cannot be less than invoice total when partial payment is not allowed,O pagamento em dinheiro não pode ser inferior ao total da fatura quando o pagamento parcial não for permitido
+Cashier Access,Acesso ao caixa
+Cashier identity and appearance preferences.,Identidade do caixa e preferências de aparência.
+Cashier PIN,PIN do caixa
+Cashier PIN saved successfully.,PIN do caixa salvo com sucesso.
+Categories,Categorias
+Change allocation repaired,Alterar alocação reparada
+Change terminal cashier,Alterar caixa do terminal
+Check Balance,Verifique o saldo
+Check balance for any card. Supervisors can issue and top up cards here.,Verifique o saldo de qualquer cartão. Os supervisores podem emitir e recarregar cartões aqui.
+Check balance only,Consultar saldo apenas
+Check live balance before applying redemption,Verifique o saldo ao vivo antes de aplicar o resgate
+Check live balance before redemption,Verifique o saldo ao vivo antes do resgate
+Checking...,Verificando...
+Cheque/Reference Date,Data do Cheque/Referência
+Cheque/Reference No,Cheque/Nº de referência
+Choose the cashier currently operating this terminal.,Escolha o caixa que atualmente opera este terminal.
+Clear all barcode items,Limpar todos os itens do código de barras
+Clear all purchase order items,Limpar todos os itens do pedido de compra
+Close about dialog,Fechar sobre a caixa de diálogo
+Close cashier switcher,Fechar comutador de caixa
+Close closing shift dialog,Fechar caixa de diálogo de fechamento do turno
+Close column selector,Fechar seletor de coluna
+Close drafts dialog,Caixa de diálogo Fechar rascunhos
+Close invoice details dialog,Fechar caixa de diálogo de detalhes da fatura
+Close invoice management,Fechar gerenciamento de faturas
+Close offline invoices dialog,Caixa de diálogo Fechar faturas off-line
+Close packing list dialog,Fechar caixa de diálogo da lista de embalagem
+Close returns dialog,Fechar caixa de diálogo de devoluções
+Close sales orders dialog,Caixa de diálogo Fechar pedidos de vendas
+Close scanner dialog,Fechar caixa de diálogo do scanner
+Collapse item details,Recolher detalhes do item
+Confirm,Confirmar
+Confirm PIN,Confirmar PIN
+Connection problem while submitting invoice,Problema de conexão ao enviar fatura
+Connectivity and cached prerequisite status were rechecked.,A conectividade e o status dos pré-requisitos armazenados em cache foram verificados novamente.
+Create and load a new prepaid card,Crie e carregue um novo cartão pré-pago
+Create and preload a new gift card,Crie e pré-carregue um novo vale-presente
+Create or change your PIN,Crie ou altere seu PIN
+Create PIN,Criar PIN
+Create return from invoice,Criar devolução da fatura
+Current PIN,PIN atual
+Current redeemable value on the gift card,Valor resgatável atual no vale-presente
+Custom,Personalizado
+Customer display was blocked. Please allow pop-ups for this site.,A exibição do cliente foi bloqueada. Por favor permita pop-ups para este site.
+Customer-facing tools and printer setup.,Ferramentas voltadas para o cliente e configuração da impressora.
+Daily cashier actions without scrolling.,Ações diárias do caixa sem rolagem.
+Day ?,Dia ?
+Default:,Padrão:
+Delete cancelled cash movement {0}?,Excluir movimentação de dinheiro cancelada {0}?
+Delete draft invoice,Excluir rascunho de fatura
+Delete draft invoice {0}?,Excluir rascunho de fatura {0}?
+Delete offline invoice,Excluir fatura off-line
+Delivered,Entregue
+Delivery Note {0} created,Nota de entrega {0} criada
+Delivery note created,Nota de entrega criada
+Deployed Bundle:,Pacote implantado:
+Disable offline mode first to recheck live connectivity.,Desative o modo offline primeiro para verificar novamente a conectividade ao vivo.
+discount,desconto
+Draft source,Fonte do rascunho
+Due {0},Vencimento {0}
+Edit customer,Editar cliente
+Edit Gift Application,Editar pedido de presente
+Employee,Funcionário
+Enter a PIN.,Insira um PIN.
+Enter the cashier PIN to continue.,Digite o PIN do caixa para continuar.
+Enter the current PIN first.,Insira primeiro o PIN atual.
+"Enter the current PIN, then choose a new one.",Insira o PIN atual e escolha um novo.
+Error submitting invoice: {0},Erro ao enviar fatura: {0}
+Error submitting invoice: No response from server,Erro ao enviar fatura: Nenhuma resposta do servidor
+Expand item details,Expandir detalhes do item
+Fast cashier actions for active shifts.,Ações rápidas de caixa para turnos ativos.
+Fetch the latest offline prerequisite updates,Obtenha as atualizações de pré-requisitos off-line mais recentes
+Find a sales order quickly and load it into the current sale.,Encontre um pedido de venda rapidamente e carregue-o na venda atual.
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","Para itens do 'Pacote de Produtos', o Armazém, o Nº de Série e o Nº do Lote serão considerados na tabela 'Lista de Embalagem'. Se o Armazém e o Número do Lote forem iguais para todos os itens de embalagem de qualquer item do 'Pacote de Produtos', esses valores poderão ser inseridos na tabela de Itens principal; os valores serão copiados para a tabela 'Packing List'."
+from,de
+Gain,Ganho
+Generate a fresh prepaid card and start it with an opening balance.,Gere um novo cartão pré-pago e inicie-o com um saldo inicial.
+Generate and install the certificate to allow fully silent printing without trust prompts.,"Gere e instale o certificado para permitir impressão totalmente silenciosa, sem solicitações de confiança."
+Generated scale barcode: {0},Código de barras da balança gerado: {0}
+Gift Card,Vale-presente
+Gift card amount must be greater than zero.,O valor do vale-presente deve ser maior que zero.
+Gift Card Code,Código do vale-presente
+Gift card code is required for redemption,O código do vale-presente é necessário para o resgate
+Gift card code is required.,O código do vale-presente é obrigatório.
+Gift card issued successfully.,Cartão-presente emitido com sucesso.
+Gift card loaded successfully.,Cartão-presente carregado com sucesso.
+Gift Card Management,Gerenciamento de vale-presente
+Gift card payment,Pagamento com vale-presente
+Gift card redemption requires an online connection,O resgate do vale-presente requer uma conexão on-line
+Gift card topped up successfully.,Vale-presente carregado com sucesso.
+Gift Cards,Cartões-presente
+"Grouped controls for terminal, UI, and session settings.","Controles agrupados para configurações de terminal, UI e sessão."
+Hide,Esconder
+Hide Gift Card,Ocultar vale-presente
+Hide search tools,Ocultar ferramentas de pesquisa
+How this section works,Como esta seção funciona
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","Se os dados desatualizados permanecerem, abra Configurações > Off-line e sincronização e execute Reconstruir dados off-line novamente enquanto estiver on-line."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","Se o aviso persistir, abra Configurações > Off-line e sincronização e execute Atualizar dados off-line ou Reconstruir dados off-line."
+In stock: {0},Em estoque: {0}
+Initial Amount,Valor Inicial
+"Inspect cache, sync, and prerequisite status","Inspecione o status do cache, da sincronização e dos pré-requisitos"
+Insufficient stock:\n{0},Estoque insuficiente:\n{0}
+Invoice {0} is Submitted,A fatura {0} foi enviada
+Invoice {0} processed successfully,Fatura {0} processada com sucesso
+Invoice {0} submission failed,Falha no envio da fatura {0}
+Invoice {0} was already submitted,A fatura {0} já foi enviada
+"Invoice value settled by loyalty points, not cash collection","Valor da fatura liquidado por pontos de fidelidade, não por cobrança de dinheiro"
+Issue Mode,Modo de problema
+Issue New Card,Emitir novo cartão
+Issue Workflow,Fluxo de trabalho de problemas
+"Issue, top up, and check","Emitir, recarregar e verificar"
+Item {0} added to invoice,Item {0} adicionado à fatura
+Item '{0}' has no barcode,O item '{0}' não possui código de barras
+json,JSON
+Just now,Agora mesmo
+Keep offline prerequisites healthy and recover stale data safely.,Mantenha os pré-requisitos offline saudáveis ​​e recupere dados obsoletos com segurança.
+"Language, theme, terminal tools, and session controls.","Idioma, tema, ferramentas de terminal e controles de sessão."
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},Última sincronização: {0} | ok: {1} | falhou: {2} | ignorado: {3}
+lines,linhas
+Load a POS profile and cashier first.,Carregue primeiro um perfil de PDV e um caixa.
+Loading view...,Carregando visualização...
+Local storage is unavailable. Switching to online-only mode.,O armazenamento local não está disponível. Mudando para o modo somente online.
+Lock Screen,Tela de bloqueio
+Lookup Workflow,Fluxo de trabalho de pesquisa
+Loss,Perda
+Low-frequency maintenance and system details.,Manutenção de baixa frequência e detalhes do sistema.
+Loyalty Redeemed,Lealdade resgatada
+Loyalty Redemption,Resgate de Lealdade
+Make New Payment,Faça novo pagamento
+Manage all,Gerenciar tudo
+Manage Cashier PIN,Gerenciar PIN do caixa
+"Manage offline tools, terminal controls, and maintenance from one workspace.","Gerencie ferramentas off-line, controles de terminal e manutenção em um único espaço de trabalho."
+manual,manual
+"Manual codes, barcode scans, and QR scans work in the same field","Códigos manuais, leituras de código de barras e leituras QR funcionam no mesmo campo"
+Manual offline mode is enabled,O modo off-line manual está ativado
+Maximum available quantity is {0}. Quantity adjusted to match stock.,A quantidade máxima disponível é {0}. Quantidade ajustada de acordo com o estoque.
+Maximum discount amount for this offer item is {0}.,O valor máximo do desconto para este item da oferta é {0}.
+Maximum discount percentage for this offer item is {0}%.,A porcentagem máxima de desconto para este item da oferta é de {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,A quantidade máxima de oferta é {0}. Quantidade ajustada ao limite permitido.
+Minimum allowed rate for this offer item is {0}.,A taxa mínima permitida para este item de oferta é {0}.
+Month ?,Mês ?
+New PIN,Novo PIN
+No barcode found for UOM '{0}',Nenhum código de barras encontrado para UOM '{0}'
+No cached gift card balance is available offline.,Nenhum saldo de cartão-presente em cache está disponível off-line.
+No camera found on this device. Please ensure your device has a working camera.,Nenhuma câmera encontrada neste dispositivo. Certifique-se de que seu dispositivo tenha uma câmera funcionando.
+No capability warnings recorded yet.,Nenhum aviso de capacidade registrado ainda.
+No cashier PIN is set yet. Create one now.,Nenhum PIN do caixa foi definido ainda. Crie um agora.
+No cashier profiles are available for this POS profile yet.,Ainda não há perfis de caixa disponíveis para este perfil de PDV.
+No change-allocation invoices match the current filters.,Nenhuma fatura de alocação de alteração corresponde aos filtros atuais.
+No Company Selected,Nenhuma empresa selecionada
+No exact repair match found for this invoice,Nenhuma correspondência exata de reparo encontrada para esta fatura
+No matching items in cart,Não há itens correspondentes no carrinho
+No offline sync issues recorded yet.,Nenhum problema de sincronização offline registrado ainda.
+No records found,Nenhum registro encontrado
+No sync trigger has run yet in this session.,Nenhum gatilho de sincronização foi executado ainda nesta sessão.
+Not available,Não disponível
+Not checked,Não verificado
+Not selected,Não selecionado
+Offline & Sync,Off-line e sincronização
+Offline Capabilities,Capacidades off-line
+Offline data status refreshed,Status dos dados off-line atualizado
+Offline diagnostics,Diagnóstico off-line
+Offline Queue: {0},Fila off-line: {0}
+Offline rebuild guidance,Orientação de reconstrução offline
+Offline restore is unavailable for this session.,A restauração offline não está disponível para esta sessão.
+Offline selling is available with degraded capabilities.,A venda offline está disponível com recursos degradados.
+Offline snapshot does not match the current POS state.,O instantâneo offline não corresponde ao estado atual do PDV.
+Offline Status,Status off-line
+"Offline, terminal, and system controls","Controles off-line, de terminal e de sistema"
+Open actions menu,Abrir menu de ações
+Open drawer,Gaveta aberta
+Open POS home,Abra a página inicial do PDV
+options,opções
+Overpayment change deducted: {0},Alteração de pagamento a maior deduzida: {0}
+Page unavailable offline,Página indisponível off-line
+Paid (orig):,Pago (orig):
+Paid:,Pago:
+Party Account,Conta do partido
+Party Type,Tipo de festa
+Pause terminal until next cashier,Pausar terminal até o próximo caixa
+Payment Account,Conta de pagamento
+Payment entries processed for Invoice {0},Entradas de pagamento processadas para fatura {0}
+Payment Entry Type,Tipo de entrada de pagamento
+Payment of {0} received successfully.,Pagamento de {0} recebido com sucesso.
+Payment request status could not be retrieved. Please try again,"Não foi possível recuperar o status da solicitação de pagamento. Por favor, tente novamente"
+Payment submitted.,Pagamento enviado.
+Pending count updated from {0} to {1},Contagem pendente atualizada de {0} para {1}
+Pending Sales,Vendas pendentes
+Pending sales: {0} | Cache usage: {1}%,Vendas pendentes: {0} | Uso de cache: {1}%
+Pending: {0},Pendente: {0}
+Pending: {0} | Synced: {1} | Draft: {2},Pendente: {0} | Sincronizado: {1} | Rascunho: {2}
+Personal,Pessoal
+Personal preferences adjust the current cashier experience without changing the active POS route.,As preferências pessoais ajustam a experiência atual do caixa sem alterar a rota ativa do PDV.
+PIN confirmation does not match.,A confirmação do PIN não corresponde.
+PIN must be 4 to 8 digits.,O PIN deve ter de 4 a 8 dígitos.
+Please make a payment or select a payment,"Por favor, efetue um pagamento ou selecione um pagamento"
+Please select a party,Selecione uma festa
+Please select a party before reconciling.,Selecione uma parte antes de reconciliar.
+Please verify the barcode or check the item's availability.,Por favor verifique o código de barras ou verifique a disponibilidade do item.
+Points,Pontos
+POS controls and maintenance,Controles e manutenção de PDV
+POS is running with limited offline prerequisites.,O PDV está funcionando com pré-requisitos off-line limitados.
+Preparing background sync,Preparando sincronização em segundo plano
+"Press OK to continue offline with a warning, or Cancel to retry.",Pressione OK para continuar off-line com um aviso ou Cancelar para tentar novamente.
+Price List,Lista de preços
+Price list rate updated locally only,Tarifa da lista de preços atualizada apenas localmente
+Print invoice,Imprimir fatura
+Processing payment entries for Invoice {0},Processando entradas de pagamento da fatura {0}
+Quotation {0} is Submitted,A cotação {0} foi enviada
+Quotation submitted,Cotação enviada
+QZ Tray is manually disconnected. Press Connect to enable it again.,A bandeja QZ está desconectada manualmente. Pressione Conectar para habilitá-lo novamente.
+Ready to resume,Pronto para retomar
+Rebuild Offline Data,Reconstruir dados off-line
+Receive,Receber
+Received:,Recebido:
+Rechecking connection,Verificando novamente a conexão
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","Reconecte e abra esta página uma vez enquanto estiver online, então as atualizações offline poderão restaurá-la."
+Reconnect online to refresh cached offline data from the server.,Reconecte-se online para atualizar os dados offline armazenados em cache do servidor.
+Recreate local offline prerequisites from scratch,Recrie os pré-requisitos off-line locais do zero
+Recv:,Recebido:
+Redeem,Resgatar
+Redeem / Scan,Resgatar / Digitalizar
+Redeem Amount,Valor de resgate
+Redeem Mode,Modo de resgate
+Redeemed Amount,Valor resgatado
+Refresh Offline Data,Atualizar dados off-line
+Refund,Reembolso
+Release Notes,Notas de versão
+Reload,Recarregar
+Reload customers,Recarregar clientes
+Reload Workflow,Recarregar fluxo de trabalho
+Remove barcode item,Remover item do código de barras
+Remove cached data and reload the POS app,Remova os dados armazenados em cache e recarregue o aplicativo POS
+Repair Candidate,Candidato a reparo
+Repair Change Allocation,Alocação de alteração de reparo
+Repair requires an online connection,O reparo requer uma conexão online
+Repaired,Reparado
+Repairing change allocation,Reparando a alocação de alterações
+Request ID: {0},ID da solicitação: {0}
+Requested route: {0},Rota solicitada: {0}
+Reset to Default,Redefinir para o padrão
+Resource Health,Saúde dos recursos
+Restricted,Restrito
+Restricted operational controls for supervisors only.,Controles operacionais restritos apenas para supervisores.
+Retry route,Tentar rota novamente
+Return items must have negative quantities,Os itens devolvidos devem ter quantidades negativas
+Return total must be negative,O total do retorno deve ser negativo
+Sales Order {0} is Submitted,O pedido de venda {0} foi enviado
+Save as POS Profile Default,Salvar como perfil de PDV padrão
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,Salve a impressora selecionada como o perfil POS padrão para que ela seja exibida automaticamente nesta configuração.
+Saved as draft because: {0},Salvo como rascunho porque: {0}
+Saving...,Salvando...
+Scale barcode settings are not configured. Using item barcode only.,As configurações do código de barras da balança não estão configuradas. Usando apenas código de barras do item.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,O código de barras do modelo de balança está faltando para este item/UOM. Usando apenas código de barras do item.
+Scan an existing card and top it up without leaving the payment flow.,Digitalize um cartão existente e recarregue-o sem sair do fluxo de pagamento.
+Scan or enter a gift card code to check balance or redeem.,Digitalize ou insira um código de cartão-presente para verificar o saldo ou resgatar.
+Scan or paste the card code below.,Digitalize ou cole o código do cartão abaixo.
+Scan with camera,Digitalize com câmera
+Scan-First Flow,Fluxo de digitalização primeiro
+Scanning for: {0},Procurando por: {0}
+Scan-Ready,Pronto para digitalização
+Search Account,Pesquisar conta
+Search an invoice and continue the return flow without extra steps.,Pesquise uma fatura e continue o fluxo de devolução sem etapas extras.
+Secure context (HTTPS or localhost) is required for camera access.,Contexto seguro (HTTPS ou localhost) é necessário para acesso à câmera.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,Contexto seguro (HTTPS) necessário para acesso à câmera. Use HTTPS para acessar a câmera.
+Select a cashier first.,Selecione um caixa primeiro.
+Select a customer,Selecione um cliente
+Select items to sell,Selecione itens para vender
+Select Payment Account,Selecione conta de pagamento
+Select the cashier who is taking over this terminal.,Selecione o caixa que está assumindo este terminal.
+Selected,Selecionado
+Selected Payments,Pagamentos selecionados
+Sensitive actions kept away from quick taps.,Ações sensíveis evitam toques rápidos.
+Session,Sessão
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,Defina cada PIN do caixa no formulário Usuário e mantenha os membros do terminal atribuídos no Usuário do perfil POS.
+Settings in this section update the POS workspace without changing the current route.,As configurações nesta seção atualizam o espaço de trabalho do PDV sem alterar a rota atual.
+Shared terminal,Terminal compartilhado
+Show,Mostrar
+Show rate info,Mostrar informações de taxa
+Show Repair Candidates,Mostrar candidatos a reparos
+Show search tools,Mostrar ferramentas de pesquisa
+Show the active cart on a customer-facing screen,Mostrar o carrinho ativo em uma tela voltada para o cliente
+Showing {0}-{1} of {2},Mostrando {0}-{1} de {2}
+Sign out of the current POS session,Sair da sessão atual do PDV
+Source Ex. Rate:,Fonte Ex. Avaliar:
+Source Rate:,Taxa de origem:
+Stock is lower than requested,O estoque é inferior ao solicitado
+Stock is lower than requested:\n{0},O estoque é inferior ao solicitado:\n{0}
+Supervisor Access,Acesso de supervisor
+Supervisor permissions unlock issuance and reloads,As permissões do supervisor desbloqueiam a emissão e recarregam
+Supervisor Tools,Ferramentas de supervisão
+Supplier Invoices,Faturas de Fornecedores
+Supplier Payments,Pagamentos de fornecedores
+Switch Cashier,Trocar de caixa
+Switch the POS appearance theme,Mudar o tema da aparência do PDV
+Sync Offline Cash Movements ({0}),Sincronizar movimentos de dinheiro off-line ({0})
+Sync Offline Sales,Sincronizar vendas off-line
+Synced {0} offline cash movement(s).,{0} movimentos de dinheiro off-line sincronizados.
+Syncing items in background,Sincronizando itens em segundo plano
+System / Diagnostics,Sistema / Diagnóstico
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","As ações do sistema são controles de manutenção de baixa frequência, como informações de aplicativos, diagnósticos de suporte e controles de sessão."
+Tap the button below to redeem a gift card during checkout.,Toque no botão abaixo para resgatar um vale-presente durante a finalização da compra.
+Target Ex. Rate:,Alvo Ex. Avaliar:
+Target Rate:,Taxa alvo:
+Terminal,terminal
+Terminal & Devices,Terminais e Dispositivos
+Terminal locked,Terminal bloqueado
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","As ferramentas de terminal afetam esta estação de checkout, as telas voltadas para o cliente e os futuros controles de impressoras/dispositivos."
+The quantity for {0} has been adjusted to the maximum available stock.,A quantidade de {0} foi ajustada ao estoque máximo disponível.
+The system could not retrieve the item details. Please try again.,"O sistema não conseguiu recuperar os detalhes do item. Por favor, tente novamente."
+This action now opens inside the settings workspace.,Esta ação agora abre dentro do espaço de trabalho de configurações.
+This invoice does not need change-allocation repair,Esta fatura não precisa de reparo de alocação de alterações
+This invoice is already repaired,Esta fatura já foi reparada
+This POS page could not be opened offline because its code was not cached on this terminal yet.,Esta página de PDV não pôde ser aberta offline porque seu código ainda não estava armazenado em cache neste terminal.
+This Serial Number {0} has already been added!,Este número de série {0} já foi adicionado!
+Toggle Theme,Alternar tema
+Tools,Ferramentas
+Tools for customer-facing screens and terminal-specific actions.,Ferramentas para telas voltadas para o cliente e ações específicas do terminal.
+Top Up Amount,Valor de recarga
+Top Up Card,Cartão de recarga
+Top Up Mode,Modo de recarga
+Transaction ID,ID da transação
+Try a different search term or clear the cart search.,Experimente um termo de pesquisa diferente ou limpe a pesquisa do carrinho.
+Try another source or refresh the list.,Tente outra fonte ou atualize a lista.
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,Não é possível acessar a câmera mesmo com configurações básicas. Verifique as permissões da sua câmera e a compatibilidade do dispositivo.
+Unable to add offer item {0}. Please refresh and try again.,Não foi possível adicionar o item de oferta {0}. Atualize e tente novamente.
+Unable to fetch documents,Não foi possível buscar documentos
+Unable to issue gift card.,Não foi possível emitir o vale-presente.
+Unable to load cashier PIN status.,Não foi possível carregar o status do PIN do caixa.
+Unable to load document,Não foi possível carregar o documento
+Unable to load gift card balance.,Não foi possível carregar o saldo do vale-presente.
+Unable to load parked order,Não foi possível carregar o pedido estacionado
+Unable to prepare document,Não foi possível preparar o documento
+Unable to print submitted invoice,Não foi possível imprimir a fatura enviada
+Unable to process document action,Não foi possível processar a ação do documento
+Unable to repair change allocation,Não foi possível reparar a alocação de alterações
+Unable to save cashier PIN.,Não foi possível salvar o PIN do caixa.
+Unable to save the rate to the backend price list,Não foi possível salvar a tarifa na lista de preços de back-end
+Unable to submit invoice,Não foi possível enviar a fatura
+Unable to top up gift card.,Não foi possível recarregar o vale-presente.
+Unable to verify cashier PIN.,Não foi possível verificar o PIN do caixa.
+Unallocated:,Não alocado:
+Unavailable,Indisponível
+Unlock POS,Desbloquear PDV
+"Unselected payments stay unallocated first, then auto reconcile after submit.",Os pagamentos não selecionados permanecem não alocados primeiro e depois são reconciliados automaticamente após o envio.
+Update PIN,Atualizar PIN
+Updates and app info that stay out of the cashier flow.,Atualizações e informações do app que ficam fora do fluxo de caixa.
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,Use um PIN de 4 a 8 dígitos para troca de caixa e desbloqueio de terminal.
+Use Cashier,Usar Caixa
+"Use one field for manual code entry, barcode scans, or QR scans.","Use um campo para entrada manual de código, leitura de código de barras ou leitura QR."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","Use um fluxo de trabalho para verificações de saldo, novas emissões e recargas sem sair do PDV."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","Use esta seção quando os dados de pré-requisito armazenados em cache precisarem de atualização, reconstrução ou revisão de diagnóstico."
+Valid until,Válido até
+View all,Ver tudo
+View app information and current build details,Veja informações do aplicativo e detalhes da versão atual
+View Data Diagnostics,Ver diagnóstico de dados
+View invoice details,Ver detalhes da fatura
+View restricted POS insights,Ver insights de PDV restritos
+Week ?,Semana ?
+We'll let you know if an invoice fails to submit,Avisaremos você se uma fatura não for enviada
+Workflow,Fluxo de trabalho
+Write off amount cannot exceed the POS profile maximum of {0},O valor da baixa não pode exceder o máximo do perfil de PDV de {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,O valor da baixa excede o limite permitido ({0}). Adicione o pagamento do valor restante.

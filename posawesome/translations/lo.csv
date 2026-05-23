@@ -1,0 +1,1362 @@
+POS Awesome,POS Awesome
+Fetch Items Directly from Server,ດຶງເອົາລາຍການໂດຍກົງຈາກເຊີບເວີ
+Menu,ເມນູ
+Actions,ການກະທໍາ
+Close Shift,ປິດ Shift
+End current session,ສິ້ນສຸດເຊດຊັນປັດຈຸບັນ
+Print Last Invoice,ພິມໃບເກັບເງິນຫຼ້າສຸດ
+Reprint previous transaction,ພິມທຸລະກຳທີ່ຜ່ານມາຄືນໃໝ່
+Sync Offline Invoices,Sync ໃບແຈ້ງໜີ້ອອບໄລນ໌
+Upload pending transactions,ອັບໂຫຼດທຸລະກໍາທີ່ຍັງຄ້າງຢູ່
+Go Online,ໄປອອນໄລນ໌
+Go Offline,ໄປອອບລາຍ
+Disable offline mode,ປິດການນຳໃຊ້ໂໝດອອບລາຍ
+Work without server connection,ເຮັດວຽກໂດຍບໍ່ມີການເຊື່ອມຕໍ່ເຄື່ອງແມ່ຂ່າຍ
+Clear Cache,ລຶບລ້າງແຄດ
+Remove local data and refresh,ເອົາຂໍ້ມູນທ້ອງຖິ່ນອອກ ແລະໂຫຼດຂໍ້ມູນຄືນໃໝ່
+About,ກ່ຽວກັບ
+App information,ຂໍ້ມູນແອັບ
+Language,ພາສາ
+Change interface language,ປ່ຽນພາສາໃນການໂຕ້ຕອບ
+Light Mode,ໂໝດແສງ
+Dark Mode,ໂໝດມືດ
+Switch theme appearance,ສະຫຼັບຮູບແບບສີສັນ
+Logout,ອອກຈາກລະບົບ
+Sign out of session,ອອກຈາກເຊດຊັນ
+Select Language,ເລືອກພາສາ
+Choose your preferred language for the POS interface,ເລືອກພາສາທີ່ທ່ານຕ້ອງການສໍາລັບການໂຕ້ຕອບ POS
+Language will be changed to,ພາສາຈະຖືກປ່ຽນເປັນ
+Cancel,ຍົກເລີກ
+Change Language,ປ່ຽນພາສາ
+Close,ປິດ
+Cannot change language - same language selected,ບໍ່ສາມາດປ່ຽນພາສາໄດ້ - ເລືອກພາສາດຽວກັນ
+Language changed successfully! Reloading...,ປ່ຽນພາສາສຳເລັດແລ້ວ! ກຳລັງໂຫຼດໃໝ່...
+Failed to change language,ປ່ຽນພາສາບໍ່ສຳເລັດ
+Unknown error,ຄວາມຜິດພາດທີ່ບໍ່ຮູ້ຈັກ
+- Total Unallocated,- ບໍ່ໄດ້ຈັດສັນທັງໝົດ
+* Required,* ຕ້ອງການ
+{0} (Qty: {1}),{0} (ຈຳນວນ: {1})
+{0} actions,{0} ການກະທຳ
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} ມີພຽງແຕ່ {1} ໃນຫຼັກຊັບ. ທ່ານໄດ້ຮ້ອງຂໍ {2}. ປັບ​ປະ​ລິ​ມານ​ຫຼື restock​.
+{0} offline invoice{1} pending,{0} ໃບແຈ້ງໜີ້ອອບລາຍ{1} ລໍຖ້າຢູ່
+{0} offline invoice{1} saved as draft,ບັນທຶກ {0} ໃບແຈ້ງໜີ້ອອບລາຍ{1} ເປັນສະບັບຮ່າງແລ້ວ
+{0} offline invoice{1} synced,ຊິງຄ໌ {0} ໃບເກັບເງິນອອບໄລນ໌{1} ແລ້ວ
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0}ມື້ກ່ອນ
+{0}h ago,{0}ຊມ ກ່ອນ
+{0}m ago,{0}ນທ ກ່ອນ
+A POS supervisor is required for this action.,ຕ້ອງມີຜູ້ຄຸມ POS ສໍາລັບການປະຕິບັດນີ້.
+Access,ການເຂົ້າເຖິງ
+Account,ບັນຊີ
+Account is overdrawn,ບັນຊີຖືກຖອນເກີນ
+Acknowledge the error to resume scanning,ຮັບຮູ້ຄວາມຜິດພາດເພື່ອສືບຕໍ່ການສະແກນ
+Acknowledge the error to resume scanning.,ຮັບຮູ້ຄວາມຜິດພາດເພື່ອສືບຕໍ່ການສະແກນ.
+Across,ຂ້າມ
+Action,ການປະຕິບັດ
+Active sale,ຂາຍຢ່າງຫ້າວຫັນ
+add,ເພີ່ມ
+Add items from the selector to start building this sale.,ເພີ່ມລາຍການຈາກຕົວເລືອກເພື່ອເລີ່ມຕົ້ນການສ້າງການຂາຍນີ້.
+Add more value to an existing gift card,ເພີ່ມມູນຄ່າໃຫ້ກັບບັດຂອງຂວັນທີ່ມີຢູ່ແລ້ວ
+Add New Address,ເພີ່ມທີ່ຢູ່ໃໝ່
+Add new customer,ເພີ່ມລູກຄ້າໃຫມ່
+Add on New Line,ຕື່ມໃສ່ໃນແຖວໃໝ່
+Add Payment,ເພີ່ມການຈ່າຍເງິນ
+Add payment to invoice,ເພີ່ມການຈ່າຍເງິນໃສ່ໃບແຈ້ງໜີ້
+Add/Edit Coupon Conditions,ເພີ່ມ/ແກ້ໄຂເງື່ອນໄຂຄູປອງ
+Additional Discount,ສ່ວນຫຼຸດເພີ່ມເຕີມ
+Additional Discount %,ສ່ວນຫຼຸດເພີ່ມເຕີມ %
+Address Line 1,ແຖວທີ່ຢູ່ 1
+Address not found,ບໍ່ພົບທີ່ຢູ່
+Adjust the quantity or enable negative stock to continue.,ປັບປະລິມານຫຼືເຮັດໃຫ້ຫຼັກຊັບລົບສືບຕໍ່.
+Adjustment,ການປັບຕົວ
+After returns,ຫຼັງຈາກກັບຄືນມາ
+Against,ຕ້ານ
+Against Name,ຕໍ່ຕ້ານຊື່
+Age Bracket,ວົງເລັບອາຍຸ
+All,ທັງໝົດ
+All Caught Up!,ຈັບໄດ້ທັງໝົດ!
+All invoices are synchronized,ໃບແຈ້ງໜີ້ທັງໝົດຖືກຊິ້ງ
+All pending invoices are up to date,ໃບຮຽກເກັບເງິນທີ່ຍັງຄ້າງທັງໝົດແມ່ນອັບເດດແລ້ວ
+All Profiles,ໂປຣໄຟລ໌ທັງໝົດ
+All Synchronized,ທັງ​ຫມົດ synchronized
+All visible invoices are fully settled.,ໃບແຈ້ງໜີ້ທີ່ເຫັນໄດ້ທັງໝົດແມ່ນໄດ້ຕົກລົງຢ່າງສົມບູນ.
+All Warehouses,ສາງທັງໝົດ
+Allowed UOM is {0},ອະນຸຍາດ UOM ແມ່ນ {0}
+Always fetch items from server (ignore local cache),ດຶງເອົາລາຍການຈາກເຊີບເວີສະເໝີ (ບໍ່ສົນໃຈແຄດທ້ອງຖິ່ນ)
+Amount,ຈໍານວນ
+Amount already received,ຈຳນວນທີ່ໄດ້ຮັບແລ້ວ
+Amount exceeds profile cash movement max amount.,ຈຳນວນເງິນເກີນການເຄື່ອນໄຫວເງິນສົດໃນໂປຣໄຟລ໌.
+Amount must be greater than zero.,ຈຳນວນຈະຕ້ອງຫຼາຍກວ່າສູນ.
+Amount received from customer,ຈໍານວນທີ່ໄດ້ຮັບຈາກລູກຄ້າ
+Appearance and user-level preferences for the current session.,ຮູບ​ລັກ​ສະ​ນະ​ແລະ​ຄວາມ​ມັກ​ໃນ​ລະ​ດັບ​ຜູ້​ໃຊ້​ສໍາ​ລັບ​ການ​ປະ​ຈຸ​ບັນ​.
+Applied,ນຳໃຊ້ແລ້ວ
+Apply,ສະໝັກ
+Apply Gift Card,ສະໝັກບັດຂອງຂວັນ
+Apply Offer,ສະໝັກຂໍ້ສະເໜີ
+Apply On,ນຳໃຊ້ຢູ່
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,ນຳໃຊ້ພຽງແຕ່ຈຳນວນທີ່ທ່ານຕ້ອງການແລກໃນໃບແຈ້ງໜີ້ນີ້. ຍອດຍັງເຫຼືອຢູ່ໃນບັດ.
+Apply Redemption,ນຳໃຊ້ການໄຖ່
+Applying,ກຳລັງນຳໃຊ້
+Apps,ແອັບ
+Are you sure you want to close? All entered data will be lost.,ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການປິດ? ຂໍ້​ມູນ​ທີ່​ປ້ອນ​ເຂົ້າ​ທັງ​ຫມົດ​ຈະ​ສູນ​ເສຍ​ໄປ​.
+Attributes (Size/Color),ຄຸນສົມບັດ (ຂະໜາດ/ສີ)
+Auto Allocate Payment Amount,ອັດຕະໂນມັດຈັດສັນຈໍານວນການຈ່າຍເງິນ
+Auto Reconcile,Auto Reconcile
+Auto reconciliation completed after payment submit.,ການຄືນດີອັດຕະໂນມັດສຳເລັດຫຼັງຈາກສົ່ງເງິນ.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,ການຄືນດີອັດຕະໂນມັດສຳເລັດແລ້ວ. ຈັດສັນ: {0}{1}. ຍັງຄົງຄ້າງຢູ່: {0}{2}.
+Available Actions,ການປະຕິບັດທີ່ມີຢູ່
+Available QTY,ມີໃຫ້ QTY
+Available:,ມີໃຫ້:
+Average Basket,ກະຕ່າສະເລ່ຍ
+Average Bill,ໃບເກັບເງິນສະເລ່ຍ
+Average Ticket,ປີ້ສະເລ່ຍ
+Avg Bill,ໃບບິນສະເລ່ຍ
+Avg Invoice,ໃບເກັບເງິນສະເລ່ຍ
+Avg Invoice Profit,ກໍາໄລຂອງໃບເກັບເງິນສະເລ່ຍ
+Avg Invoice Value,ຄ່າໃບເກັບເງິນສະເລ່ຍ
+Avg Purchase Frequency,ຄວາມຖີ່ການຊື້ສະເລ່ຍ
+Awesome,ສຸດຍອດ
+Awesome Dashboard,Dashboard ທີ່ດີເລີດ
+Awesome Dashboard is disabled for the selected POS Profile.,Awesome Dashboard ຖືກປິດການນຳໃຊ້ສຳລັບໂປຣໄຟລ໌ POS ທີ່ເລືອກ.
+Awesome Dashboard is unavailable for the selected scope.,Awesome Dashboard ບໍ່ສາມາດໃຊ້ໄດ້ກັບຂອບເຂດທີ່ເລືອກ.
+Awesome Dashboard is visible only to POS supervisors.,Awesome Dashboard ແມ່ນເບິ່ງເຫັນໄດ້ຕໍ່ກັບຜູ້ຄຸມ POS ເທົ່ານັ້ນ.
+Back,ກັບຄືນໄປບ່ອນ
+Back Office Cash Account,ບັນຊີເງິນສົດໃນຫ້ອງການ
+Back Office Cash Account (Optional Override),ບັນຊີເງິນສົດໃນ Back Office (ຍົກເລີກທາງເລືອກ)
+Back office cash account is required.,ບັນຊີເງິນສົດຂອງຫ້ອງການກັບຄືນໄປບ່ອນແມ່ນຕ້ອງການ.
+Back to {0},ກັບໄປທີ່ {0}
+Background processing did not finish in time.,ການປະມວນຜົນພື້ນຫຼັງບໍ່ສຳເລັດຕາມເວລາ.
+Background processing failed for Invoice {0}: {1},ການປະມວນຜົນພື້ນຫຼັງລົ້ມເຫລວສຳລັບໃບແຈ້ງໜີ້ {0}: {1}
+Background Submission Failed,ການສົ່ງຂໍ້ມູນພື້ນຫຼັງລົ້ມເຫລວ
+Background sync interval (seconds),ໄລຍະການຊິ້ງພື້ນຫຼັງ (ວິນາທີ)
+Balance,ຍອດເງິນ
+Balance will be updated when connection is restored,ຍອດຄົງເຫຼືອຈະຖືກອັບເດດເມື່ອການເຊື່ອມຕໍ່ຄືນມາ
+Balances still pending,ຍອດຍັງຄ້າງຢູ່
+Barcode,ບາໂຄດ
+Barcode / QR Ready,Barcode / QR ພ້ອມ
+Barcode Label Printing,ການພິມປ້າຍ Barcode
+Base Paid:,ຈ່າຍພື້ນຖານ:
+Base Recv:,ຂໍ້ມູນພື້ນຖານ:
+Base:,ຖານ:
+Basic Information,ຂໍ້ມູນພື້ນຖານ
+Batch,ຊຸດ
+Batch Information,ຂໍ້ມູນຊຸດ
+Before any return workflow,ກ່ອນຂັ້ນຕອນການເຮັດວຽກກັບຄືນມາ
+Before returns,ກ່ອນທີ່ຈະກັບຄືນມາ
+Best Day,ມື້ທີ່ດີທີ່ສຸດ
+Best Seller,ຜູ້ຂາຍດີທີ່ສຸດ
+Book expense or deposit from active shift.,ຄ່າ​ໃຊ້​ຈ່າຍ​ໃນ​ປື້ມ​ບັນ​ທຶກ​ຫຼື​ເງິນ​ຝາກ​ຈາກ​ການ​ເຄື່ອນ​ໄຫວ​.
+Branch / Location-wise Report,ສາຂາ / ບົດລາຍງານທີ່ສະຫລາດ
+Brand-wise,ຍີ່ຫໍ້ສະຫລາດ
+Breakdown,ການແບ່ງແຍກ
+Browse,ຄົ້ນຫາ
+Build Time:,ເວລາສ້າງ:
+Built with Frappe,ສ້າງຂຶ້ນດ້ວຍ Frappe
+Bundle,ມັດ
+Buying Price,ລາຄາຊື້
+Cache cleared successfully,ລ້າງແຄດສຳເລັດແລ້ວ
+Cache Usage,ການ​ນໍາ​ໃຊ້​ຖານ​ຄວາມ​ຈໍາ​
+cache used,cache ໃຊ້
+Calculating...,ກຳລັງຄິດໄລ່...
+Camera Access Required,ຕ້ອງມີການເຂົ້າເຖິງກ້ອງຖ່າຍຮູບ
+Camera access was aborted. Please try again.,ການເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຖືກຍົກເລີກ. ກະລຸນາລອງອີກຄັ້ງ.
+Camera constraints not supported by your device. Trying fallback settings...,ອຸປະກອນຂອງທ່ານບໍ່ຮອງຮັບຂໍ້ຈຳກັດຂອງກ້ອງ. ກຳລັງລອງການຕັ້ງຄ່າທາງເລືອກ...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,ກ້ອງຖ່າຍຮູບບໍ່ຫວ່າງ ຫຼືຖືກບລັອກໂດຍແອັບ/ແຖບອື່ນ. ປິດແອັບກ້ອງຖ່າຍຮູບອື່ນແລ້ວລອງໃໝ່ອີກຄັ້ງ.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,ການອະນຸຍາດກ້ອງຖ່າຍຮູບຖືກປະຕິເສດ. ກະລຸນາອະນຸຍາດໃຫ້ເຂົ້າເຖິງກ້ອງຖ່າຍຮູບໃນການຕັ້ງຄ່າບຣາວເຊີຂອງທ່ານແລະໂຫຼດໜ້ານີ້ຄືນໃໝ່.
+Camera scanner is locked until the current error is acknowledged,ເຄື່ອງສະແກນກ້ອງຖ່າຍຮູບຖືກລັອກຈົນກວ່າຈະຮັບຮູ້ຄວາມຜິດພາດໃນປະຈຸບັນ
+Camera started but the video stream did not load in time. Please try again.,ກ້ອງຖ່າຍຮູບເລີ່ມຕົ້ນແຕ່ການຖ່າຍທອດວິດີໂອບໍ່ໄດ້ໂຫຼດໃນເວລາ. ກະລຸນາລອງອີກຄັ້ງ.
+Cancel cash movement {0}?,ຍົກເລີກການເຄື່ອນໄຫວເງິນສົດ {0} ບໍ?
+Cancel Payment,ຍົກເລີກການຈ່າຍເງິນ
+Cancel Sale,ຍົກເລີກການຂາຍ
+Cancel Sale ?,ຍົກເລີກການຂາຍ?
+Cancelled,ຍົກເລີກ
+Cannot add an item with zero or negative quantity.,ບໍ່ສາມາດເພີ່ມລາຍການທີ່ມີຈໍານວນສູນ ຫຼືລົບໄດ້.
+Cannot clear cache while offline,ບໍ່ສາມາດລຶບລ້າງແຄດໃນຂະນະທີ່ອອບລາຍໄດ້
+Cannot redeem customer credit more than invoice total,ບໍ່ສາມາດແລກເຄຣດິດຂອງລູກຄ້າຫຼາຍກວ່າຍອດໃບແຈ້ງໜີ້ໄດ້
+Cannot redeem gift cards more than invoice total,ບໍ່ສາມາດແລກບັດຂອງຂວັນໄດ້ຫຼາຍກວ່າຈຳນວນໃບແຈ້ງໜີ້
+Cannot Save Offline Invoice:,ບໍ່ສາມາດບັນທຶກໃບແຈ້ງໜີ້ອອບລາຍໄດ້:
+Cannot Save Offline Payment:,ບໍ່ສາມາດບັນທຶກການຈ່າຍເງິນອອບໄລນ໌ໄດ້:
+Card,ບັດ
+Card / Online,ບັດ / ອອນລາຍ
+Card health after the last live lookup,ສຸຂະພາບບັດຫຼັງຈາກການຊອກຫາສົດຄັ້ງສຸດທ້າຍ
+Cards,ບັດ
+Cart,ກະຕ່າ
+Cash,ເງິນສົດ
+Cash back to customers,ເງິນຄືນໃຫ້ລູກຄ້າ
+Cash Collections,ການເກັບເງິນ
+Cash Deposit is disabled for this POS Profile.,ການຝາກເງິນຖືກປິດໄວ້ສໍາລັບໂປຣໄຟລ໌ POS ນີ້.
+Cash Drawer Snapshot,ພາບລວມຂອງຕູ້ເກັບເງິນ
+Cash In Hand,ເງິນສົດໃນມື
+Cash Movement,ການເຄື່ອນໄຫວເງິນສົດ
+Cash movement cancelled,ຍົກເລີກການເຄື່ອນໄຫວເງິນສົດ
+Cash movement deduction applied,ນຳໃຊ້ການຫັກການເຄື່ອນໄຫວເງິນສົດແລ້ວ
+Cash movement deleted,ລຶບການເຄື່ອນໄຫວເງິນສົດແລ້ວ
+Cash movement is disabled for this POS Profile.,ການເຄື່ອນໄຫວເງິນສົດຖືກປິດໄວ້ສໍາລັບໂປຣໄຟລ໌ POS ນີ້.
+Cash Movement is disabled in current POS Profile.,ການເຄື່ອນໄຫວເງິນສົດຖືກປິດຢູ່ໃນໂປຣໄຟລ໌ POS ປັດຈຸບັນ.
+Cash movement saved offline,ການ​ເຄື່ອນ​ໄຫວ​ເງິນ​ສົດ​ໄດ້​ບັນ​ທຶກ​ອ​ອ​ຟ​ໄລ​
+Cash movement submitted,ສົ່ງການເຄື່ອນໄຫວເງິນສົດແລ້ວ
+Cash Movements,ການເຄື່ອນໄຫວເງິນສົດ
+Cash payment cannot be less than invoice total when partial payment is not allowed,ການຈ່າຍເງິນສົດບໍ່ສາມາດໜ້ອຍກວ່າຈຳນວນໃບແຈ້ງໜີ້ໄດ້ ເມື່ອບໍ່ອະນຸຍາດໃຫ້ຈ່າຍເງິນບາງສ່ວນ
+Cash returned after payment,ເງິນສົດກັບຄືນມາຫຼັງຈາກການຈ່າຍເງິນ
+Cashier,ພະນັກງານເກັບເງິນ
+Cashier Access,ການເຂົ້າເຖິງພະນັກງານເກັບເງິນ
+Cashier identity and appearance preferences.,ຕົວຕົນຂອງພະນັກງານເກັບເງິນ ແລະລັກສະນະທີ່ມັກ.
+Cashier PIN,PIN ຂອງພະນັກງານເກັບເງິນ
+Cashier PIN saved successfully.,ບັນທຶກ PIN Cashier ສຳເລັດແລ້ວ.
+Cashiers,ພະນັກງານເກັບເງິນ
+Cashier-wise,Cashier-wise
+Categories,ໝວດໝູ່
+Category,ປະເພດ
+Category / Brand / Variant Report,ປະເພດ / ຍີ່ຫໍ້ / variant ບົດລາຍງານ
+Category-wise,ໝວດໝູ່
+Category-wise Margin,ຂອບປະເພດທີ່ສະຫລາດ
+Certificate,ໃບຢັ້ງຢືນ
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,ໃບຢັ້ງຢືນຂາດຫາຍໄປ ຫຼື ບໍ່ເຊື່ອຖືໄດ້. QZ ອາດຈະສະແດງກ່ອງໂຕ້ຕອບການຢືນຢັນ.
+Certificate is trusted. Silent QZ printing is active.,ໃບຢັ້ງຢືນແມ່ນເຊື່ອຖືໄດ້. ການພິມ QZ ງຽບແມ່ນເຮັດວຽກ.
+Change,ປ່ຽນແປງ
+Change allocation repaired,ປ່ຽນແປງຈັດສັນສ້ອມແປງ
+Change Price,ປ່ຽນລາຄາ
+Change Return,ປ່ຽນຜົນຕອບແທນ
+Change Returned,ການປ່ຽນແປງກັບຄືນມາ
+Change terminal cashier,ປ່ຽນຜູ້ເກັບເງິນຢູ່ປາຍທາງ
+Charge Heads,ຫົວສາກ
+Charges,ຄ່າບໍລິການ
+Charges not found,ບໍ່ພົບຄ່າບໍລິການ
+Check Balance,ກວດສອບຍອດເງິນ
+Check balance for any card. Supervisors can issue and top up cards here.,ກວດເບິ່ງຍອດເງິນສໍາລັບບັດໃດໆ. ຜູ້ຄຸມງານສາມາດອອກບັດ ແລະເຕີມເງິນໄດ້ທີ່ນີ້.
+Check balance only,ກວດສອບຍອດເງິນເທົ່ານັ້ນ
+Check for new commits,ກວດ​ສອບ​ສໍາ​ລັບ​ຄໍາ​ຫມັ້ນ​ສັນ​ຍາ​ໃຫມ່​
+Check for Updates,ກວດສອບການອັບເດດ
+Check live balance before applying redemption,ກວດເບິ່ງຍອດເງິນສົດກ່ອນທີ່ຈະໃຊ້ການແລກ
+Check live balance before redemption,ກວດເບິ່ງຍອດເງິນສົດກ່ອນການແລກ
+Checking...,ກຳລັງກວດສອບ...
+Cheque/Reference Date,ວັນທີເຊັກ/ອ້າງອີງ
+Cheque/Reference No,ໝາຍເລກເຊັກ/ອ້າງອີງ
+Choose the cashier currently operating this terminal.,ເລືອກພະນັກງານເກັບເງິນທີ່ກຳລັງປະຕິບັດການຢູ່ສະຖານີນີ້.
+City,ເມືອງ
+Clear,ຈະແຈ້ງ
+Clear All,ລຶບລ້າງທັງໝົດ
+Clear all barcode items,ລຶບລ້າງລາຍການບາໂຄດທັງໝົດ
+Clear all purchase order items,ລຶບລ້າງລາຍການສັ່ງຊື້ທັງໝົດ
+Clear Search,ລຶບການຊອກຫາ
+Clearing local cache...,ກຳລັງລຶບລ້າງແຄສໃນເຄື່ອງ...
+Click to refresh,ຄລິກເພື່ອໂຫຼດຂໍ້ມູນຄືນໃໝ່
+Client CPU Lag:,Client CPU Lag:
+Client Memory Usage:,ການ​ນໍາ​ໃຊ້​ຫນ່ວຍ​ຄວາມ​ຈໍາ​ລູກ​ຄ້າ​:
+Client Metrics,ຕົວວັດແທກລູກຄ້າ
+Close about dialog,ປິດກ່ຽວກັບກ່ອງໂຕ້ຕອບ
+Close cashier switcher,ປິດຕົວປ່ຽນເງິນເກັບເງິນ
+Close closing shift dialog,ປິດກ່ອງໂຕ້ຕອບການປ່ຽນແປງ
+Close column selector,ປິດຕົວເລືອກຖັນ
+Close Dialog,ປິດກ່ອງໂຕ້ຕອບ
+Close drafts dialog,ປິດກ່ອງໂຕ້ຕອບສະບັບຮ່າງ
+Close invoice details dialog,ປິດກ່ອງໂຕ້ຕອບລາຍລະອຽດຂອງໃບເກັບເງິນ
+Close invoice management,ປິດການຈັດການໃບແຈ້ງໜີ້
+Close offline invoices dialog,ປິດກ່ອງໃບແຈ້ງໜີ້ອອບລາຍ
+Close packing list dialog,ປິດກ່ອງລາຍການບັນຈຸ
+Close returns dialog,ປິດກ່ອງໂຕ້ຕອບຄືນ
+Close sales orders dialog,ປິດກ່ອງຄຳສັ່ງການຂາຍ
+Close Scanner,ປິດເຄື່ອງສະແກນ
+Close scanner dialog,ປິດກ່ອງໂຕ້ຕອບເຄື່ອງສະແກນ
+Close Settings,ປິດການຕັ້ງຄ່າ
+Closing Amount,ຈໍານວນປິດ
+Closing POS Shift,ກຳລັງປິດ POS Shift
+Closing Snapshot Available,ການປິດ Snapshot ມີໃຫ້
+Code,ລະຫັດ
+Code scanned successfully,ສະແກນລະຫັດສຳເລັດແລ້ວ
+COGS,COGS
+Collapse item details,ຫຍໍ້ລາຍລະອຽດລາຍການ
+Collected,ເກັບກໍາ
+Cols,Cols
+Columns,ຖັນ
+commits,ຄໍາຫມັ້ນສັນຍາ
+Completed and active sales in this range,ສໍາເລັດການຂາຍແລະການເຄື່ອນໄຫວໃນຂອບເຂດນີ້
+Completed returns will appear here.,ຜົນຕອບແທນທີ່ສໍາເລັດຈະປາກົດຢູ່ທີ່ນີ້.
+Confirm,ຢືນຢັນ
+Confirm Close,ຢືນຢັນປິດ
+Confirm Mobile Number,ຢືນຢັນເບີໂທລະສັບ
+Confirm PIN,ຢືນຢັນ PIN
+Connect,ເຊື່ອມຕໍ່
+Connect printer and manage certificate,ເຊື່ອມຕໍ່ເຄື່ອງພິມ ແລະຈັດການໃບຢັ້ງຢືນ
+Connecting to QZ Tray...,ກຳລັງເຊື່ອມຕໍ່ຫາຖາດ QZ...
+Connection problem while submitting invoice,ບັນຫາການເຊື່ອມຕໍ່ໃນຂະນະທີ່ສົ່ງໃບແຈ້ງໜີ້
+Connections:,ການເຊື່ອມຕໍ່:
+Connectivity and cached prerequisite status were rechecked.,ການ​ເຊື່ອມ​ຕໍ່​ແລະ​ສະ​ຖາ​ນະ​ພາບ​ທີ່​ຕ້ອງ​ການ​ໃນ​ຖານ​ຄວາມ​ຈໍາ​ໄວ້​ກ່ອນ​ແມ່ນ​ໄດ້​ຮັບ​ການ​ກວດ​ສອບ​.
+Continue Editing,ສືບຕໍ່ການແກ້ໄຂ
+Could not fetch latest balance from server,ບໍ່ສາມາດດຶງຍອດເງິນຫຼ້າສຸດຈາກເຊີບເວີໄດ້
+Count,ນັບ
+Country,ປະເທດ
+Coupon,ຄູປ໋ອງ
+Coupons,ຄູປ໋ອງ
+Cover,ກວມເອົາ
+CPU Cores:,CPU Cores:
+Create,ສ້າງ
+Create and load a new prepaid card,ສ້າງ ແລະໂຫຼດບັດເຕີມເງິນໃໝ່
+Create and preload a new gift card,ສ້າງ ແລະໂຫຼດບັດຂອງຂວັນໃໝ່ລ່ວງໜ້າ
+Create Bill,ສ້າງບັນຊີລາຍການ
+Create Customer,ສ້າງລູກຄ້າ
+Create New Item,ສ້າງລາຍການໃຫມ່
+Create or change your PIN,ສ້າງ ຫຼືປ່ຽນ PIN ຂອງທ່ານ
+Create PIN,ສ້າງ PIN
+Create POS Opening Shift,ສ້າງ Shift ເປີດ POS
+Create Purchase Order,ສ້າງ​ຄໍາ​ສັ່ງ​ຊື້​
+Create Return,ສ້າງຜົນຕອບແທນ
+Create return from invoice,ສ້າງຜົນຕອບແທນຈາກໃບແຈ້ງໜີ້
+Create Supplier,ສ້າງຜູ້ສະຫນອງ
+Credit and Output,ສິນເຊື່ອ ແລະຜົນຜະລິດ
+Credit Note,ຫມາຍເຫດສິນເຊື່ອ
+Credit Outstanding,ສິນເຊື່ອດີເດັ່ນ
+Credit sales remaining to be collected,ການຂາຍສິນເຊື່ອທີ່ຍັງເຫຼືອທີ່ຈະເກັບກໍາ
+Critical,ສຳຄັນ
+Currency,ສະກຸນເງິນ
+Current,ປະຈຸບັນ
+Current Event Loop Lag:,ເຫດການປັດຈຸບັນ Loop Lag:
+Current Month,ເດືອນປະຈຸບັນ
+Current PIN,PIN ປັດຈຸບັນ
+Current Profile,ໂປຣໄຟລ໌ປັດຈຸບັນ
+Current redeemable value on the gift card,ມູນຄ່າທີ່ແລກໄດ້ໃນປັດຈຸບັນຢູ່ໃນບັດຂອງຂວັນ
+Current User,ຜູ້ໃຊ້ປະຈຸບັນ
+Custom,ກຳນົດເອງ
+Custom Due Days,ວັນຄົບກຳນົດກຳນົດເອງ
+Custom items per page,ລາຍການແບບກຳນົດເອງຕໍ່ໜ້າ
+Customer,ລູກຄ້າ
+Customer already selected,ລູກຄ້າເລືອກແລ້ວ
+Customer Balance,ຍອດເງິນລູກຄ້າ
+Customer balance unavailable offline,ຍອດເງິນຂອງລູກຄ້າບໍ່ສາມາດໃຊ້ໄດ້ອອບລາຍ
+Customer created successfully.,ສ້າງລູກຄ້າສຳເລັດແລ້ວ.
+Customer creation failed.,ການສ້າງລູກຄ້າລົ້ມເຫລວ.
+Customer Details,ລາຍລະອຽດລູກຄ້າ
+Customer display channel is missing,ຊ່ອງສະແດງລູກຄ້າຂາດຫາຍໄປ
+Customer display was blocked. Please allow pop-ups for this site.,ການສະແດງຜົນຂອງລູກຄ້າຖືກບລັອກ. ກະລຸນາອະນຸຍາດໃຫ້ປ໊ອບອັບສໍາລັບເວັບໄຊທ໌ນີ້.
+Customer group is required,ຕ້ອງການກຸ່ມລູກຄ້າ
+Customer is required to add payment,ລູກຄ້າຈໍາເປັນຕ້ອງເພີ່ມການຈ່າຍເງິນ
+Customer Name is required,ຕ້ອງລະບຸຊື່ລູກຄ້າ
+Customer not selected,ລູກຄ້າບໍ່ໄດ້ເລືອກ
+Customer Report,ລາຍງານລູກຄ້າ
+Customer saved offline,ລູກຄ້າບັນທຶກອອບລາຍແລ້ວ
+Customer Screen,ຫນ້າຈໍລູກຄ້າ
+Customer territory is required,ຕ້ອງໃຊ້ພື້ນທີ່ລູກຄ້າ
+Customer updated successfully.,ອັບເດດລູກຄ້າສຳເລັດແລ້ວ.
+Customer-facing tools and printer setup.,ເຄື່ອງມືທີ່ລູກຄ້າປະເຊີນ ​​ແລະການຕິດຕັ້ງເຄື່ອງພິມ.
+Customers,ລູກຄ້າ
+Customers not found,ບໍ່ພົບລູກຄ້າ
+Daily cashier actions without scrolling.,ການກະທໍາຂອງ cashier ປະຈໍາວັນໂດຍບໍ່ມີການເລື່ອນພາບ.
+Daily Sales,ການຂາຍປະຈໍາວັນ
+Daily Sales Summary,ສະຫຼຸບຍອດຂາຍປະຈໍາວັນ
+Data loaded in form. Review and submit.,ໂຫຼດຂໍ້ມູນໃນຮູບແບບ. ທົບທວນແລະສົ່ງ.
+Database Health,ສຸຂະພາບຖານຂໍ້ມູນ
+Database health affects overall system speed and reliability.,ສຸຂະພາບຂອງຖານຂໍ້ມູນມີຜົນກະທົບຕໍ່ຄວາມໄວແລະຄວາມຫນ້າເຊື່ອຖືຂອງລະບົບໂດຍລວມ.
+Database Info,ຂໍ້ມູນຖານຂໍ້ມູນ
+Date,ວັນທີ
+Day ?,ມື້ ?
+days,ມື້
+Day-wise (MTD),ວັນເວລາ (MTD)
+Day-wise Movement,ການ​ເຄື່ອນ​ໄຫວ​ໃນ​ວັນ​
+Dead Stock,ຫຸ້ນຕາຍ
+Dead Stock Items,ລາຍການຫຼັກຊັບຕາຍ
+Decrease quantity,ຫຼຸດລົງປະລິມານ
+Default,ຄ່າເລີ່ມຕົ້ນ
+Default:,ຄ່າເລີ່ມຕົ້ນ:
+Delete,ລຶບ
+Delete cancelled cash movement {0}?,ລຶບການເຄື່ອນໄຫວເງິນສົດທີ່ຍົກເລີກແລ້ວ {0} ບໍ?
+Delete Draft,ລຶບສະບັບຮ່າງ
+Delete draft invoice,ລຶບໃບແຈ້ງໜີ້ສະບັບຮ່າງ
+Delete draft invoice {0}?,ລຶບໃບແຈ້ງໜີ້ສະບັບຮ່າງ {0} ບໍ?
+Delete Invoice,ລຶບໃບແຈ້ງໜີ້
+Delete offline invoice,ລຶບໃບແຈ້ງໜີ້ອອບລາຍ
+Delivered,ຈັດສົ່ງແລ້ວ
+Delivery Charges,ຄ່າຈັດສົ່ງ
+Delivery Information,ຂໍ້ມູນການຈັດສົ່ງ
+Delivery Note {0} created,ສ້າງບັນທຶກການຈັດສົ່ງ {0} ແລ້ວ
+Delivery note created,ສ້າງບັນທຶກການຈັດສົ່ງແລ້ວ
+Deployed Bundle:,ຊຸດທີ່ນຳໃຊ້ແລ້ວ:
+Deposit,ຝາກ
+Description,ລາຍລະອຽດ
+Detailed Supplier Breakdown,ລາຍລະອຽດຜູ້ສະຫນອງການແບ່ງສ່ວນ
+Detecting formats:,ການ​ຊອກ​ຫາ​ຮູບ​ແບບ​:
+Device Memory:,ໜ່ວຍຄວາມຈຳອຸປະກອນ:
+Difference,ຄວາມແຕກຕ່າງ
+Difference (In Company Currency),ຄວາມແຕກຕ່າງ (ໃນສະກຸນເງິນຂອງບໍລິສັດ)
+Disable offline mode first to recheck live connectivity.,ປິດການນຳໃຊ້ໂໝດອອບລາຍກ່ອນເພື່ອກວດເບິ່ງການເຊື່ອມຕໍ່ສົດ.
+Disconnect,ຕັດການເຊື່ອມຕໍ່
+discount,ສ່ວນຫຼຸດ
+Discount %,ສ່ວນຫຼຸດ %
+Discount / Void / Return Report,ສ່ວນຫຼຸດ / ຂາດແຄນ / ລາຍງານຄືນ
+Discount Amount,ຈຳນວນສ່ວນຫຼຸດ
+Discount limited by POS Profile,ສ່ວນຫຼຸດຖືກຈຳກັດໂດຍ POS Profile
+Discounted Invoices,ໃບເກັບເງິນຫຼຸດ
+Discounts,ສ່ວນຫຼຸດ
+Dismiss,ປິດ
+Download Certificate,ດາວໂຫລດໃບຢັ້ງຢືນ
+Draft,ຮ່າງ
+Draft invoice deleted,ລຶບໃບຮຽກເກັບເງິນສະບັບຮ່າງແລ້ວ
+Draft source,ແຫຼ່ງຮ່າງ
+Drafts,ຮ່າງ
+Due {0},ຮອດກຳນົດ {0}
+Due Date,ວັນທີຄົບກຳນົດ
+Duplicate,ຊໍ້າກັນ
+Edit customer,ແກ້ໄຂລູກຄ້າ
+Edit discount amount,ແກ້ໄຂຈຳນວນສ່ວນຫຼຸດ
+Edit discount percentage,ແກ້ໄຂສ່ວນຫຼຸດ
+Edit Gift Application,ແກ້ໄຂແອັບພລິເຄຊັນຂອງຂວັນ
+Edit item name,ແກ້ໄຂຊື່ລາຍການ
+Edit quantity,ແກ້ໄຂປະລິມານ
+Edit rate,ອັດ​ຕາ​ການ​ແກ້​ໄຂ​
+Edit unit of measure,ແກ້ໄຂຫົວໜ່ວຍວັດແທກ
+Edited,ດັດແກ້
+Employee,ພະນັກງານ
+Enable background sync,ເປີດໃຊ້ການຊິ້ງພື້ນຫຼັງ
+Enable Customer Display in POS Profile first.,ເປີດໃຊ້ການສະແດງຜົນຂອງລູກຄ້າໃນໂປຣໄຟລ໌ POS ກ່ອນ.
+Enter a PIN.,ປ້ອນ PIN.
+Enter a valid grams value,ລະບຸຄ່າກຼາມທີ່ຖືກຕ້ອງ
+Enter new price list rate,ໃສ່ອັດຕາລາຍການລາຄາໃໝ່
+Enter Quantity,ໃສ່ປະລິມານ
+Enter the cashier PIN to continue.,ປ້ອນ PIN ຂອງ cashier ເພື່ອສືບຕໍ່.
+Enter the current PIN first.,ປ້ອນ PIN ປັດຈຸບັນກ່ອນ.
+"Enter the current PIN, then choose a new one.","ໃສ່ລະຫັດ PIN ປັດຈຸບັນ, ຈາກນັ້ນເລືອກອັນໃໝ່."
+Enter valid grams for scale barcode,ໃສ່ g ທີ່ຖືກຕ້ອງສໍາລັບ barcode ຂະຫນາດ
+Entries,ລາຍການ
+Error accessing camera:,ເກີດຄວາມຜິດພາດໃນການເຂົ້າເຖິງກ້ອງຖ່າຍຮູບ:
+Error calculating prices,ການຄິດໄລ່ລາຄາຜິດພາດ
+Error fetching customer balance,ເກີດຄວາມຜິດພາດໃນການດຶງຍອດເງິນຂອງລູກຄ້າ
+Error in change calculations!,ຜິດພາດໃນການຄິດໄລ່ການປ່ຽນແປງ!
+Error Loading Data,ເກີດຄວາມຜິດພາດໃນການໂຫຼດຂໍ້ມູນ
+Error loading invoice details,ເກີດຄວາມຜິດພາດໃນການໂຫລດລາຍລະອຽດໃບແຈ້ງໜີ້
+Error processing invoice,ການປະມວນຜົນໃບແຈ້ງໜີ້ຜິດພາດ
+Error processing payment,ການປະມວນຜົນການຈ່າຍເງິນຜິດພາດ
+Error searching invoices,ເກີດຄວາມຜິດພາດໃນການຊອກຫາໃບແຈ້ງໜີ້
+Error submitting invoice:,ເກີດຄວາມຜິດພາດໃນການສົ່ງໃບແຈ້ງໜີ້:
+Error submitting invoice: {0},ການສົ່ງໃບແຈ້ງໜີ້ຜິດພາດ: {0}
+Error submitting invoice: No response from server,ການສົ່ງໃບແຈ້ງໜີ້ຜິດພາດ: ບໍ່ມີການຕອບສະໜອງຈາກເຊີບເວີ
+Error updating currency,ເກີດຄວາມຜິດພາດໃນການອັບເດດສະກຸນເງິນ
+Error updating item details,ເກີດຄວາມຜິດພາດໃນການອັບເດດລາຍລະອຽດລາຍການ
+Est. Purchase,ຄາດຄະເນ ຊື້
+Est. Value,ຄາດຄະເນ ມູນຄ່າ
+Event-loop lag measures how busy your browser is. Lower is better.,Event-loop lag ວັດແທກວ່າບຼາວເຊີຂອງທ່ານບໍ່ຫວ່າງປານໃດ. ຕ່ໍາແມ່ນດີກວ່າ.
+Every,ທຸກໆ
+Exchange Rate,ອັດຕາແລກປ່ຽນ
+Expand item details,ຂະຫຍາຍລາຍລະອຽດລາຍການ
+Expected Amount (In Company Currency),ຈຳນວນທີ່ຄາດໄວ້ (ເປັນສະກຸນເງິນຂອງບໍລິສັດ)
+Expected Cash,ເງິນສົດທີ່ຄາດໄວ້
+Expected cash on hand grouped by currency,ເງິນສົດທີ່ຄາດໄວ້ຢູ່ໃນມືຈັດກຸ່ມຕາມສະກຸນເງິນ
+Expected vs Actual,ຄາດຫວັງທຽບກັບຕົວຈິງ
+Expense,ຄ່າໃຊ້ຈ່າຍ
+Expense Account (Optional Override),ບັນຊີລາຍຈ່າຍ (ຍົກເລີກທາງເລືອກ)
+Expense account is required.,ບັນຊີລາຍຈ່າຍແມ່ນຕ້ອງການ.
+Expenses and deposits posted during this shift,ຄ່າ​ໃຊ້​ຈ່າຍ​ແລະ​ເງິນ​ຝາກ​ປະ​ກາດ​ໃນ​ລະ​ຫວ່າງ​ການ​ປ່ຽນ​ແປງ​ນີ້​
+Expired,ໝົດອາຍຸແລ້ວ
+Failed to auto reconcile payments.,ລົ້ມເຫລວໃນການແກ້ໄຂການຈ່າຍເງິນອັດຕະໂນມັດ.
+Failed to cancel cash movement,ຍົກເລີກການເຄື່ອນໄຫວເງິນສົດບໍ່ສຳເລັດ
+Failed to clear cache,ລຶບລ້າງແຄສບໍ່ສຳເລັດ
+Failed to create item,ລົ້ມເຫລວໃນການສ້າງລາຍການ
+Failed to create supplier,ລົ້ມເຫລວໃນການສ້າງຜູ້ສະຫນອງ
+Failed to delete cash movement,ລຶບການເຄື່ອນໄຫວເງິນສົດບໍ່ສຳເລັດ
+Failed to generate scale barcode. Using item barcode only.,ສ້າງບາໂຄດຂະໜາດບໍ່ສຳເລັດ. ການ​ນໍາ​ໃຊ້ barcode ລາຍ​ການ​ເທົ່າ​ນັ້ນ​.
+Failed to load cash movement context.,ໂຫຼດບໍລິບົດການເຄື່ອນໄຫວເງິນສົດບໍ່ສຳເລັດ.
+Failed to load dashboard data.,ໂຫຼດຂໍ້ມູນ dashboard ບໍ່ສຳເລັດ.
+Failed to reload invoice from server,ໂຫຼດໃບແຈ້ງໜີ້ຄືນໃໝ່ຈາກເຊີບເວີບໍ່ສຳເລັດ
+Failed to submit cash movement,ສົ່ງການເຄື່ອນໄຫວເງິນສົດບໍ່ສຳເລັດ
+Failed to sync offline cash movements,ລົ້ມເຫລວໃນການຊິງຄ໌ການເຄື່ອນໄຫວເງິນສົດອອຟລາຍ
+Fast cashier actions for active shifts.,ການດໍາເນີນການ cashier ໄວສໍາລັບການປ່ຽນການເຄື່ອນໄຫວ.
+Fast Moving Items,ລາຍການເຄື່ອນທີ່ໄວ
+Fees,ຄ່າທຳນຽມ
+Fetch the latest offline prerequisite updates,ດຶງເອົາການອັບເດດທີ່ຈຳເປັນເບື້ອງຕົ້ນແບບອອບລາຍຫຼ້າສຸດ
+Find a sales order quickly and load it into the current sale.,ຊອກຫາຄໍາສັ່ງຂາຍຢ່າງໄວວາແລະໂຫລດມັນເຂົ້າໄປໃນການຂາຍໃນປະຈຸບັນ.
+Fixing payment amounts for return invoice...,ກຳລັງແກ້ໄຂຈຳນວນການຈ່າຍເງິນສຳລັບໃບແຈ້ງໜີ້ຄືນ...
+Flash Off,ປິດແຟລດ
+Flash On,ເປີດ Flash
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","ສໍາລັບລາຍການ 'ຊຸດຜະລິດຕະພັນ', Warehouse, Serial No ແລະ Batch No ຈະຖືກພິຈາລະນາຈາກຕາຕະລາງ 'Packing List'. ຖ້າ Warehouse ແລະ batch No ແມ່ນອັນດຽວກັນສຳລັບລາຍການບັນຈຸທັງໝົດສຳລັບລາຍການ 'Product Bundle', ຄ່າເຫຼົ່ານັ້ນສາມາດຖືກໃສ່ໃນຕາຕະລາງລາຍການຫຼັກ; ຄ່າຈະຖືກສຳເນົາໃສ່ຕາຕະລາງ 'ລາຍການບັນຈຸ'."
+Free,ຟຣີ
+Free Qty,ຈໍານວນຟຣີ
+Frequency,ຄວາມຖີ່
+from,ຈາກ
+From Date,ຈາກວັນທີ
+Fulfillment Details,ລາຍລະອຽດການຕື່ມຂໍ້ມູນ
+Full Name,ຊື່ເຕັມ
+Gain,ໄດ້ຮັບ
+Generate a fresh prepaid card and start it with an opening balance.,ສ້າງບັດເຕີມເງິນສົດ ແລະເລີ່ມຕົ້ນດ້ວຍຍອດເງິນທີ່ເປີດ.
+Generate and install the certificate to allow fully silent printing without trust prompts.,ສ້າງ ແລະຕິດຕັ້ງໃບຮັບຮອງເພື່ອອະນຸຍາດໃຫ້ພິມງຽບໄດ້ໂດຍບໍ່ມີການເຕືອນຄວາມໄວ້ວາງໃຈ.
+Generate Certificate,ສ້າງໃບຢັ້ງຢືນ
+Generated scale barcode: {0},ບາໂຄດຂະໜາດທີ່ສ້າງຂຶ້ນ: {0}
+Get Payments,ຮັບການຈ່າຍເງິນ
+Gift Card,ບັດຂອງຂວັນ
+Gift card amount must be greater than zero.,ຈຳນວນບັດຂອງຂວັນຈະຕ້ອງຫຼາຍກວ່າສູນ.
+Gift Card Code,ລະຫັດບັດຂອງຂວັນ
+Gift card code is required for redemption,ລະຫັດບັດຂອງຂວັນແມ່ນຕ້ອງການສໍາລັບການແລກ
+Gift card code is required.,ຕ້ອງໃຊ້ລະຫັດບັດຂອງຂວັນ.
+Gift card issued successfully.,ອອກບັດຂອງຂວັນສຳເລັດແລ້ວ.
+Gift card loaded successfully.,ໂຫຼດບັດຂອງຂວັນສຳເລັດແລ້ວ.
+Gift Card Management,ການຄຸ້ມຄອງບັດຂອງຂວັນ
+Gift card payment,ການຈ່າຍເງິນບັດຂອງຂວັນ
+Gift card redemption requires an online connection,ການແລກບັດຂອງຂວັນຮຽກຮ້ອງໃຫ້ມີການເຊື່ອມຕໍ່ອອນໄລນ໌
+Gift card topped up successfully.,ຕື່ມເງິນບັດຂອງຂວັນສຳເລັດແລ້ວ.
+Gift Cards,ບັດຂອງຂວັນ
+Go to Frappe Desk,ໄປທີ່ Frappe Desk
+Grand Total,Grand Total
+Gross Margin,Gross Margin
+Gross Profit,ກໍາໄລລວມ
+Gross Sales,ຍອດຂາຍລວມ
+Group not found,ບໍ່ພົບກຸ່ມ
+"Grouped controls for terminal, UI, and session settings.","ການ​ຄວບ​ຄຸມ​ກຸ່ມ​ສໍາ​ລັບ​ການ​ຕັ້ງ​ຄ່າ terminal​, UI​, ແລະ​ການ​ຕັ້ງ​ຄ່າ​."
+Grouped totals for each payment method and currency,ຮວມເປັນກຸ່ມສຳລັບແຕ່ລະວິທີການຈ່າຍເງິນ ແລະສະກຸນເງິນ
+Hide,ເຊື່ອງ
+Hide Gift Card,ເຊື່ອງບັດຂອງຂວັນ
+Hide Non Essential Fields,ເຊື່ອງຊ່ອງຂໍ້ມູນທີ່ບໍ່ຈໍາເປັນ
+Hide quantity decimals,ເຊື່ອງຕົວເລກທົດສະນິຍົມ
+Hide search tools,ເຊື່ອງເຄື່ອງມືຄົ້ນຫາ
+Hide zero rated items,ເຊື່ອງລາຍການໃຫ້ຄະແນນເປັນສູນ
+High,ສູງ
+History,ປະຫວັດສາດ
+Hourly (Today),ທຸກໆຊົ່ວໂມງ (ມື້ນີ້)
+How this section works,ພາກສ່ວນນີ້ເຮັດວຽກແນວໃດ
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","ຖ້າຂໍ້ມູນເກົ່າຍັງຄົງຢູ່, ເປີດ ການຕັ້ງຄ່າ > ອອບໄລນ໌ & ຊິງຄ໌ ແລະເປີດໃຊ້ການສ້າງຂໍ້ມູນອອບໄລນ໌ຄືນໃໝ່ອີກຄັ້ງໃນຂະນະທີ່ອອນລາຍ."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","ຖ້າການເຕືອນຍັງຄົງຢູ່, ເປີດການຕັ້ງຄ່າ > ອອບໄລນ໌ & ຊິງຄ໌, ຈາກນັ້ນເປີດໃຊ້ການໂຫຼດຂໍ້ມູນອອບລາຍຄືນໃໝ່ ຫຼືສ້າງຂໍ້ມູນອອບລາຍຄືນໃໝ່."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,ນໍາເຂົ້າໃບຢັ້ງຢືນເຂົ້າໄປໃນ QZ Tray ແລະ restart QZ Tray ໃນແຕ່ລະເຄື່ອງ POS.
+In,ໃນ
+In stock: {0},ມີຢູ່ໃນສະຕັອກ: {0}
+Include Batch / Serial,ລວມ Batch / Serial
+Include Price,ລວມລາຄາ
+Increase quantity,ເພີ່ມປະລິມານ
+IndexedDB,IndexedDB
+Initial Amount,ຈໍານວນເບື້ອງຕົ້ນ
+Initialize your shift with opening balances,ເລີ່ມຕົ້ນການປ່ຽນແປງຂອງທ່ານດ້ວຍການເປີດຍອດເງິນ
+Initializing application...,ກຳລັງເລີ່ມແອັບພລິເຄຊັນ...
+"Inspect cache, sync, and prerequisite status","ກວດສອບ cache, sync, ແລະສະຖານະ prerequisite"
+Installed Applications,ແອັບພລິເຄຊັນທີ່ຕິດຕັ້ງແລ້ວ
+Insufficient stock:\n{0},ຫຼັກຊັບບໍ່ພຽງພໍ:\n{0}
+Invalid rate,ອັດຕາບໍ່ຖືກຕ້ອງ
+Inventory Status Report,ລາຍງານສະຖານະສິນຄ້າຄົງຄັງ
+Invoice,ໃບເກັບເງິນ
+Invoice {0} is Submitted,ໃບແຈ້ງໜີ້ {0} ຖືກສົ່ງແລ້ວ
+Invoice {0} processed successfully,ໃບເກັບເງິນ {0} ປະມວນຜົນສຳເລັດແລ້ວ
+Invoice {0} submission failed,ການຍື່ນໃບແຈ້ງໜີ້ {0} ລົ້ມເຫລວ
+Invoice {0} was already submitted,ໃບເກັບເງິນ {0} ຖືກສົ່ງໄປກ່ອນແລ້ວ
+Invoice Adjustments,ການປັບໃບເກັບເງິນ
+Invoice Change,ການປ່ຽນແປງໃບເກັບເງິນ
+Invoice Details,ລາຍລະອຽດໃບເກັບເງິນ
+Invoice is still in draft after background submission.,ໃບເກັບເງິນຍັງຢູ່ໃນສະບັບຮ່າງຫຼັງຈາກການສົ່ງຂໍ້ມູນເບື້ອງຕົ້ນ.
+Invoice Items,ລາຍການໃບແຈ້ງໜີ້
+Invoice Management,ການຄຸ້ມຄອງໃບເກັບເງິນ
+Invoice Mgmt,ໃບເກັບເງິນ Mgmt
+Invoice saved offline,ໃບເກັບເງິນຖືກບັນທຶກອອບລາຍ
+Invoice submission failed,ການຍື່ນໃບແຈ້ງໜີ້ລົ້ມເຫລວ
+Invoice Submitted,ສົ່ງໃບແຈ້ງໜີ້ແລ້ວ
+"Invoice value settled by loyalty points, not cash collection","ມູນຄ່າໃບເກັບເງິນຖືກແກ້ໄຂໂດຍຈຸດຄວາມສັດຊື່, ບໍ່ແມ່ນການເກັບເງິນສົດ"
+Invoices,ໃບແຈ້ງໜີ້
+Invoices already past due date,ໃບແຈ້ງໜີ້ຜ່ານມື້ກຳນົດແລ້ວ
+Invoices saved as POS Invoices,ບັນທຶກໃບແຈ້ງໜີ້ເປັນໃບແຈ້ງໜີ້ POS ແລ້ວ
+Invoices still carrying balances,ໃບແຈ້ງໜີ້ຍັງຖືຍອດຄົງເຫຼືອຢູ່
+Issue Mode,ຮູບແບບບັນຫາ
+Issue New Card,ອອກບັດໃໝ່
+Issue Workflow,ບັນຫາຂັ້ນຕອນການເຮັດວຽກ
+"Issue, top up, and check","ບັນຫາ, ຕື່ມເງິນ, ແລະກວດສອບ"
+Item,ລາຍການ
+Item / Product Sales Report,ລາຍການ / ບົດລາຍງານການຂາຍຜະລິດຕະພັນ
+Item {0} added to invoice,ເພີ່ມລາຍການ {0} ໃສ່ໃບແຈ້ງໜີ້ແລ້ວ
+Item '{0}' has no barcode,ລາຍການ '{0}' ບໍ່ມີບາໂຄດ
+Item Code,ລະຫັດລາຍການ
+Item created successfully,ສ້າງລາຍການສຳເລັດແລ້ວ
+Item is out of stock,ສິນຄ້າໝົດແລ້ວ
+Item Name,ຊື່ລາຍການ
+Item not found,ບໍ່ພົບລາຍການ
+Item order updated,ອັບເດດຄຳສັ່ງຊື້ລາຍການແລ້ວ
+Item Selector Settings,ການຕັ້ງຄ່າຕົວເລືອກລາຍການ
+Items,ລາຍການ
+Items added in POS will appear here automatically.,ລາຍການທີ່ເພີ່ມເຂົ້າໃນ POS ຈະປາກົດຢູ່ບ່ອນນີ້ໂດຍອັດຕະໂນມັດ.
+Items added to invoice,ເພີ່ມລາຍການໃສ່ໃບແຈ້ງໜີ້ແລ້ວ
+Items per page,ລາຍການຕໍ່ຫນ້າ
+Items Sold,ລາຍການຂາຍ
+Items/Invoice,ລາຍການ/ໃບແຈ້ງໜີ້
+Item-wise Profitability,ການເຮັດກຳໄລຕາມລາຍການ
+Journal Entry,ວາລະສານ
+json,json
+Just now,ດຽວນີ້
+Keep offline prerequisites healthy and recover stale data safely.,ຮັກສາເງື່ອນໄຂເບື້ອງຕົ້ນແບບອອບໄລນ໌ໃຫ້ມີສຸຂະພາບດີ ແລະກູ້ຂໍ້ມູນເກົ່າຄືນມາໄດ້ຢ່າງປອດໄພ.
+Labels,ປ້າຍກຳກັບ
+"Language, theme, terminal tools, and session controls.","ພາສາ, ຮູບແບບສີສັນ, ເຄື່ອງມືຢູ່ປາຍຍອດ, ແລະການຄວບຄຸມເຊດຊັນ."
+Last,ສຸດທ້າຍ
+Last 14 Days (Paid vs Pending),14 ມື້ທີ່ຜ່ານມາ (ຈ່າຍທຽບກັບລໍຖ້າຢູ່)
+Last 14 Days Activity,ກິດຈະກໍາ 14 ມື້ທີ່ຜ່ານມາ
+Last 14 Days Gross Profit,ກໍາໄລລວມ 14 ມື້ທີ່ຜ່ານມາ
+Last 14 Days Purchases,ການຊື້ 14 ມື້ສຸດທ້າຍ
+Last 14 Days Tax/Charges,ພາສີ/ຄ່າບໍລິການ 14 ມື້ທີ່ຜ່ານມາ
+Last sync:,ຊິງຄ໌ຄັ້ງສຸດທ້າຍ:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},ຊິງຄ໌ຄັ້ງສຸດທ້າຍ: {0} | ຕົກລົງ: {1} | ລົ້ມເຫລວ: {2} | ຂ້າມ: {3}
+Latest entries for current shift,ລາຍການຫຼ້າສຸດສໍາລັບການປ່ຽນແປງໃນປະຈຸບັນ
+Lead Time,ເວລານໍາ
+Limited,ຈຳກັດ
+lines,ສາຍ
+List,ລາຍການ
+Live Snapshot,ພາບຖ່າຍສົດ
+Load a POS profile and cashier first.,ໂຫລດໂປຣໄຟລ໌ POS ແລະ cashier ກ່ອນ.
+Load More Invoices,ໂຫຼດໃບແຈ້ງໜີ້ເພີ່ມເຕີມ
+Load previously saved invoices,ໂຫຼດໃບແຈ້ງໜີ້ທີ່ບັນທຶກໄວ້ໃນເມື່ອກ່ອນ
+Load Sale,ໂຫຼດການຂາຍ
+Load Sales Invoice,ໂຫຼດໃບແຈ້ງໜີ້ການຂາຍ
+Loading app data...,ກຳລັງໂຫຼດຂໍ້ມູນແອັບ...
+Loading customer database...,ກຳລັງໂຫຼດຖານຂໍ້ມູນລູກຄ້າ...
+Loading customers...,ກຳລັງໂຫຼດລູກຄ້າ...
+Loading database stats...,ກຳລັງໂຫຼດສະຖິຕິຖານຂໍ້ມູນ...
+Loading details...,ກຳລັງໂຫລດລາຍລະອຽດ...
+Loading invoice history...,ກຳລັງໂຫຼດປະຫວັດໃບແຈ້ງໜີ້...
+Loading items...,ກຳລັງໂຫຼດລາຍການ...
+Loading product catalog...,ກຳລັງໂຫລດລາຍການສິນຄ້າ...
+Loading return invoices...,ກຳລັງໂຫຼດໃບແຈ້ງໜີ້...
+Loading server CPU/memory usage...,ກຳລັງໂຫລດເຊີບເວີ CPU/ການໃຊ້ຄວາມຈຳ...
+Loading suppliers...,ກຳລັງໂຫຼດຜູ້ສະໜອງ...
+Loading unpaid invoices...,ກຳລັງໂຫຼດໃບແຈ້ງໜີ້ທີ່ຍັງບໍ່ໄດ້ຈ່າຍ...
+Loading view...,ກຳລັງໂຫຼດມຸມມອງ...
+Loading...,ກຳລັງໂຫລດ...
+Local storage is unavailable. Switching to online-only mode.,ບ່ອນຈັດເກັບຂໍ້ມູນທ້ອງຖິ່ນບໍ່ສາມາດໃຊ້ໄດ້. ກຳລັງປ່ຽນເປັນໂໝດອອນລາຍເທົ່ານັ້ນ.
+localStorage,ການເກັບຮັກສາທ້ອງຖິ່ນ
+Location Performance,ການປະຕິບັດສະຖານທີ່
+Locations,ສະຖານທີ່
+Lock Screen,ໜ້າຈໍລັອກ
+Lookup Workflow,ຊອກຫາຂັ້ນຕອນການເຮັດວຽກ
+Loss,ການສູນເສຍ
+Low,ຕໍ່າ
+Low Stock,ຫຼັກຊັບຕໍ່າ
+Low Stock Alerts,ແຈ້ງເຕືອນຫຼັກຊັບຕໍ່າ
+Low Stock Items,ລາຍການຫຼັກຊັບຕໍ່າ
+Low Stock Threshold,ເກນຫຼັກຊັບຕໍ່າ
+Low Stock Total,ຈໍານວນຫຼັກຊັບຕໍ່າ
+Lowest Margin,ຂອບຕ່ຳສຸດ
+Low-frequency maintenance and system details.,ການບໍາລຸງຮັກສາຄວາມຖີ່ຕ່ໍາແລະລາຍລະອຽດລະບົບ.
+Loyalty Redeemed,ຄວາມສັດຊື່ຖືກໄຖ່ແລ້ວ
+Loyalty Redemption,ການໄຖ່ຄວາມສັດຊື່
+Make New Payment,ຈ່າຍເງິນໃໝ່
+Manage all,ຈັດການທັງໝົດ
+Manage and synchronize your offline transactions,ຈັດການແລະ synchronize ທຸລະກໍາອອຟໄລຂອງທ່ານ
+Manage Cashier PIN,ຈັດການ PIN Cashier
+"Manage offline tools, terminal controls, and maintenance from one workspace.","ຈັດ​ການ​ເຄື່ອງ​ມື​ອ​ອ​ຟ​ໄລ​ນ​໌​, ການ​ຄວບ​ຄຸມ​ຢູ່​ປາຍ​ຍອດ​, ແລະ​ການ​ບໍາ​ລຸງ​ຮັກ​ສາ​ຈາກ​ບ່ອນ​ເຮັດ​ວຽກ​ຫນຶ່ງ​."
+manual,ຄູ່ມື
+"Manual codes, barcode scans, and QR scans work in the same field","ລະຫັດຄູ່ມື, ການສະແກນບາໂຄດ, ແລະການສະແກນ QR ເຮັດວຽກຢູ່ໃນພາກສະຫນາມດຽວກັນ"
+Manual offline mode is enabled,ໂໝດອອບໄລນ໌ດ້ວຍຕົນເອງຖືກເປີດໃຊ້ແລ້ວ
+Margin,ຂອບ
+Maximum available quantity is {0}. Quantity adjusted to match stock.,ປະລິມານສູງສຸດທີ່ມີຢູ່ແມ່ນ {0}. ປັບປະລິມານໃຫ້ກົງກັບຫຼັກຊັບ.
+Maximum discount amount for this offer item is {0}.,ຈຳນວນສ່ວນຫຼຸດສູງສຸດສຳລັບລາຍການຂໍ້ສະເໜີນີ້ແມ່ນ {0}.
+Maximum discount percentage for this offer item is {0}%.,ເປີເຊັນສ່ວນຫຼຸດສູງສຸດສຳລັບລາຍການຂໍ້ສະເໜີນີ້ແມ່ນ {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,ປະລິມານຂໍ້ສະເໜີສູງສຸດແມ່ນ {0}. ປັບປະລິມານຕາມຂີດຈຳກັດທີ່ອະນຸຍາດ.
+Medium,ຂະຫນາດກາງ
+Method-wise Collections,ການເກັບກໍາວິທີການທີ່ສະຫລາດ
+Minimum allowed rate for this offer item is {0}.,ອັດຕາອະນຸຍາດຂັ້ນຕ່ຳສຳລັບລາຍການຂໍ້ສະເໜີນີ້ແມ່ນ {0}.
+Minimum Qty,ຈໍານວນຕໍາ່ສຸດທີ່
+Mobile No,ເບີໂທລະສັບມືຖື
+Mode,ໂໝດ
+Mode of Payment,ຮູບແບບການຈ່າຍເງິນ
+Month,ເດືອນ
+Month ?,ເດືອນ ?
+Monthly Profit,ກໍາໄລປະຈໍາເດືອນ
+Monthly Sales,ການຂາຍລາຍເດືອນ
+Monthly Sales Summary,ສະຫຼຸບຍອດຂາຍປະຈໍາເດືອນ
+Month-wise,ປະຈໍາເດືອນ
+Most Active Cashiers,ພະນັກງານເກັບເງິນທີ່ຫ້າວຫັນຫຼາຍທີ່ສຸດ
+Movement Type,ປະເພດການເຄື່ອນໄຫວ
+Movements,ການເຄື່ອນໄຫວ
+Multi Currency,ຫຼາຍສະກຸນເງິນ
+N/A,ບໍ່ມີ
+Name,ຊື່
+Negative Stock,ຫຸ້ນລົບ
+Negative Stock Items,ລາຍການຫຼັກຊັບທາງລົບ
+Negative values not allowed,ບໍ່ອະນຸຍາດໃຫ້ມີຄ່າທາງລົບ
+Net,ສຸດທິ
+Net Qty,ຈຳນວນສຸດທິ
+Net Sales,ການຂາຍສຸດທິ
+Net Value,ມູນຄ່າສຸດທິ
+Never,ບໍ່ເຄີຍ
+New changes are ready to load,ການປ່ຽນແປງໃຫມ່ແມ່ນພ້ອມທີ່ຈະໂຫລດ
+New Item,ລາຍການໃໝ່
+New Offer Available,ມີຂໍ້ສະເໜີໃໝ່
+New PIN,PIN ໃໝ່
+New rate,ອັດຕາໃຫມ່
+Next unit of measure,ຫົວໜ່ວຍວັດແທກຕໍ່ໄປ
+No attribute data found.,ບໍ່ພົບຂໍ້ມູນຄຸນສົມບັດ.
+No Barcode,ບໍ່ມີ Barcode
+No barcode found for UOM '{0}',ບໍ່ພົບບາໂຄດສຳລັບ UOM '{0}'
+No branch/location data found.,ບໍ່ພົບຂໍ້ມູນສາຂາ/ສະຖານທີ່.
+No brand data found.,ບໍ່ພົບຂໍ້ມູນຍີ່ຫໍ້.
+No cached gift card balance is available offline.,ບໍ່ມີຍອດຄົງເຫຼືອບັດຂອງຂວັນທີ່ເກັບໄວ້ໃນພື້ນທີ່ອອບລາຍ.
+No camera found on this device. Please ensure your device has a working camera.,ບໍ່ພົບກ້ອງຖ່າຍຮູບໃນອຸປະກອນນີ້. ກະລຸນາກວດສອບໃຫ້ແນ່ໃຈວ່າອຸປະກອນຂອງທ່ານມີກ້ອງຖ່າຍຮູບທີ່ເຮັດວຽກໄດ້.
+No capability warnings recorded yet.,ຍັງບໍ່ມີການບັນທຶກການເຕືອນກ່ຽວກັບຄວາມສາມາດເທື່ອ.
+No cash expected for this shift.,ບໍ່ມີເງິນສົດຄາດວ່າຈະມີສໍາລັບການປ່ຽນແປງນີ້.
+No cash mode configured,ບໍ່ມີການກຳນົດຄ່າໂໝດເງິນສົດ
+No cash movement type is allowed for this POS Profile.,ບໍ່ອະນຸຍາດໃຫ້ໃຊ້ປະເພດການເຄື່ອນໄຫວເງິນສົດສຳລັບໂປຣໄຟລ໌ POS ນີ້.
+No cashier PIN is set yet. Create one now.,ຍັງບໍ່ທັນໄດ້ຕັ້ງ PIN ຂອງ cashier ເທື່ອ. ສ້າງອັນດຽວດຽວນີ້.
+No cashier profiles are available for this POS profile yet.,ບໍ່ມີໂປຣໄຟລ໌ພະນັກງານເກັບເງິນສຳລັບໂປຣໄຟລ໌ POS ນີ້ເທື່ອ.
+No cashier-wise discount/void/return activity.,ບໍ່ມີສ່ວນຫຼຸດ/ກິດຈະກຳທີ່ເປັນໂມຄະ/ການຄືນເງິນທີ່ສະຫລາດຂອງຜູ້ຮັບເງິນ.
+No category data found.,ບໍ່ພົບຂໍ້ມູນໝວດໝູ່.
+No category profitability data found.,ບໍ່ພົບຂໍ້ມູນຜົນກຳໄລໃນໝວດໝູ່.
+No change returned recorded for this shift.,ບໍ່ໄດ້ບັນທຶກການປ່ຽນແປງກັບຄືນມາສໍາລັບການປ່ຽນແປງນີ້.
+No change-allocation invoices match the current filters.,ບໍ່ມີໃບແຈ້ງໜີ້ການປ່ຽນແປງທີ່ກົງກັບຕົວກອງປັດຈຸບັນ.
+No charge head breakdown found.,ບໍ່ພົບການແຍກຫົວຄ່າບໍລິການ.
+No Company Selected,ບໍ່ມີບໍລິສັດໃດຖືກເລືອກ
+No customer sales data found.,ບໍ່ພົບຂໍ້ມູນການຂາຍຂອງລູກຄ້າ.
+No day-wise discount/void/return trend.,ບໍ່ມີສ່ວນຫຼຸດ/ເປັນໂມຄະ/ທ່າອ່ຽງກັບຄືນມາ.
+No day-wise payment data found.,ບໍ່ພົບຂໍ້ມູນການຊໍາລະຕາມມື້.
+No day-wise profitability trend found.,ບໍ່ພົບທ່າອ່ຽງຜົນກຳໄລທີ່ສະຫຼາດໃນແຕ່ລະມື້.
+No day-wise purchase data found.,ບໍ່ພົບຂໍ້ມູນການຊື້ໃນມື້.
+No day-wise sales trend found.,ບໍ່ພົບທ່າອ່ຽງການຂາຍທີ່ສະຫລາດໃນທຸກວັນ.
+No day-wise tax/charges trend found.,ບໍ່ພົບທ່າອ່ຽງການເກັບພາສີ/ຄ່າບໍລິການໃນແຕ່ລະມື້.
+No dead stock items.,ບໍ່ມີລາຍການທີ່ຕາຍແລ້ວ.
+No due date,ບໍ່ມີວັນຄົບກຳນົດ
+No exact repair match found for this invoice,ບໍ່ພົບການສ້ອມແປງທີ່ກົງກັນກັບໃບແຈ້ງໜີ້ນີ້
+No hourly sales trend found for today.,ບໍ່ພົບແນວໂນ້ມການຂາຍລາຍຊົ່ວໂມງສຳລັບມື້ນີ້.
+No invoice activity found.,ບໍ່ພົບການເຄື່ອນໄຫວໃບແຈ້ງໜີ້.
+No invoices found,ບໍ່ພົບໃບແຈ້ງໜີ້
+No invoices found. Try different search criteria.,ບໍ່ພົບໃບແຈ້ງໜີ້. ລອງເງື່ອນໄຂການຊອກຫາທີ່ແຕກຕ່າງກັນ.
+No invoices recorded for this shift.,ບໍ່ມີໃບເກັບເງິນທີ່ບັນທຶກໄວ້ສໍາລັບການປ່ຽນແປງນີ້.
+No item profitability data found.,ບໍ່ພົບຂໍ້ມູນກໍາໄລຂອງລາຍການ.
+No item sales data found for this period.,ບໍ່ພົບຂໍ້ມູນການຂາຍລາຍການສໍາລັບໄລຍະເວລານີ້.
+No items found,ບໍ່ພົບລາຍການ
+No items in cart,ບໍ່ມີລາຍການຢູ່ໃນກະຕ່າ
+No items with barcodes to print,ບໍ່ມີລາຍການທີ່ມີບາໂຄດເພື່ອພິມ
+No location-wise top item data found.,ບໍ່ພົບຂໍ້ມູນລາຍການອັນດັບຕົ້ນຕາມສະຖານທີ່.
+No low stock alerts right now.,ບໍ່ມີການແຈ້ງເຕືອນຫຼັກຊັບຕໍ່າໃນຕອນນີ້.
+No low stock items.,ບໍ່ມີລາຍການສິນຄ້າຕໍ່າ.
+No matching items in cart,ບໍ່ມີລາຍການທີ່ກົງກັນໃນກະຕ່າ
+No month-wise sales trend found.,ບໍ່ພົບແນວໂນ້ມການຂາຍປະຈໍາເດືອນ.
+No negative stock items.,ບໍ່ມີລາຍການຫຼັກຊັບລົບ.
+No notifications yet,ບໍ່ມີການແຈ້ງເຕືອນເທື່ອ
+No offline cash movement synced.,ບໍ່ມີການຊິງຄ໌ການເຄື່ອນໄຫວເງິນສົດອອຟລາຍ.
+No offline invoices pending synchronization,ບໍ່ມີໃບແຈ້ງໜີ້ອອບລາຍທີ່ລໍຖ້າການຊິ້ງຂໍ້ມູນ
+No offline sync issues recorded yet.,ບໍ່ມີບັນທຶກບັນຫາການຊິງຄ໌ອອຟລາຍເທື່ອ.
+No out-of-stock items.,ບໍ່ມີສິນຄ້າໝົດ.
+No outstanding credit invoices for this shift.,ບໍ່ມີໃບເກັບເງິນສິນເຊື່ອທີ່ຍັງຄ້າງຄາສໍາລັບການປ່ຽນແປງນີ້.
+No payment collection data found.,ບໍ່ພົບຂໍ້ມູນການເກັບເງິນ.
+No payment rows available on this invoice.,ບໍ່ມີແຖວການຈ່າຍເງິນທີ່ມີຢູ່ໃນໃບແຈ້ງໜີ້ນີ້.
+No payments registered for this shift.,ບໍ່ມີການຈ່າຍເງິນທີ່ລົງທະບຽນສໍາລັບການປ່ຽນແປງນີ້.
+No pending balances in this period.,ບໍ່ມີຍອດຄ້າງຈ່າຍໃນຊ່ວງນີ້.
+No pending offline invoices,ບໍ່ມີໃບແຈ້ງໜີ້ອອບລາຍທີ່ຍັງຄ້າງຢູ່
+No Print Formats Found,ບໍ່ພົບຮູບແບບການພິມ
+No profiles found for selected scope. Falling back to current profile failed.,ບໍ່ພົບໂປຣໄຟລ໌ສຳລັບຂອບເຂດທີ່ເລືອກ. ກັບຄືນໄປຫາໂປຣໄຟລ໌ປັດຈຸບັນບໍ່ສຳເລັດ.
+No recent customer activity found.,ບໍ່ພົບການເຄື່ອນໄຫວຂອງລູກຄ້າຫຼ້າສຸດ.
+No recent stock entries found.,ບໍ່ພົບລາຍການຫຼັກຊັບຫຼ້າສຸດ.
+No records found,ບໍ່ພົບບັນທຶກ
+No reorder suggestions right now.,ບໍ່ມີການແນະນຳການສັ່ງຄືນໃໝ່ໃນຕອນນີ້.
+No repeat customers in this period.,ບໍ່ມີລູກຄ້າຊ້ຳໃນຊ່ວງນີ້.
+No response from server,ບໍ່ມີການຕອບສະໜອງຈາກເຊີບເວີ
+No return invoices found,ບໍ່ພົບໃບເກັບເງິນຄືນ
+No return item trend found.,ບໍ່ພົບແນວໂນ້ມລາຍການຄືນ.
+No returnable items found for this invoice,ບໍ່ພົບລາຍການທີ່ສົ່ງຄືນໄດ້ສໍາລັບໃບແຈ້ງໜີ້ນີ້
+No returns were processed in this shift.,ບໍ່ມີການປະມວນຜົນຜົນຕອບແທນໃນການປ່ຽນແປງນີ້.
+No risk activity found.,ບໍ່ພົບກິດຈະກໍາຄວາມສ່ຽງ.
+No sales activity found for this period.,ບໍ່ພົບກິດຈະກໍາການຂາຍສໍາລັບໄລຍະເວລານີ້.
+No slow moving items.,ບໍ່ມີລາຍການເຄື່ອນທີ່ຊ້າ.
+No staff sales activity found.,ບໍ່ພົບກິດຈະກໍາການຂາຍຂອງພະນັກງານ.
+No stock movement for this period.,ບໍ່ມີການເຄື່ອນໄຫວຫຼັກຊັບສໍາລັບໄລຍະເວລານີ້.
+No submitted cash movements in this shift.,ບໍ່ມີການສົ່ງເງິນສົດໃນການປ່ຽນແປງນີ້.
+No supplier purchases found in this month.,ບໍ່ພົບການຊື້ຂອງຜູ້ສະໜອງໃນເດືອນນີ້.
+No suppliers found for this period.,ບໍ່ພົບຜູ້ສະໜອງສຳລັບໄລຍະນີ້.
+No sync trigger has run yet in this session.,ບໍ່ມີຕົວກະຕຸ້ນການຊິງຄ໌ໄດ້ແລ່ນເທື່ອໃນເຊດຊັນນີ້.
+No tax head breakdown found.,ບໍ່ພົບການແບ່ງຫົວພາສີ.
+No top items found for this location.,ບໍ່ພົບລາຍການອັນດັບຕົ້ນສໍາລັບສະຖານທີ່ນີ້.
+No unpaid invoices,ບໍ່ມີໃບແຈ້ງໜີ້ທີ່ຍັງບໍ່ໄດ້ຈ່າຍ
+No variant data found.,ບໍ່ພົບຂໍ້ມູນຕົວແປ.
+No week-wise sales trend found.,ບໍ່ພົບທ່າອ່ຽງການຂາຍໃນອາທິດ.
+No.,ບໍ່.
+Nobile Number,ໝາຍເລກ Nobile
+Not available,ບໍ່ມີໃຫ້
+Not checked,ບໍ່ໄດ້ກວດສອບ
+Not selected,ບໍ່ໄດ້ເລືອກ
+Not Set,ບໍ່ໄດ້ຕັ້ງ
+Notifications,ການແຈ້ງເຕືອນ
+Offer,ຂໍ້ສະເໜີ
+Offer Applied,ນຳໃຊ້ຂໍ້ສະເໜີແລ້ວ
+Offer criteria exceeded,ເກີນເງື່ອນໄຂຂໍ້ສະເໜີ
+Offer Item,ລາຍການຂໍ້ສະເໜີ
+Offer item unavailable,ລາຍການຂໍ້ສະເໜີບໍ່ສາມາດໃຊ້ໄດ້
+Offer Removed,ລຶບຂໍ້ສະເໜີອອກແລ້ວ
+Offer UOM cannot be changed,ຂໍ້ສະເໜີ UOM ບໍ່ສາມາດປ່ຽນແປງໄດ້
+Offer?,ຂໍ້ສະເໜີ?
+Offers,ຂໍ້ສະເໜີ
+Offline,ອອບໄລນ໌
+Offline & Sync,Offline & Sync
+Offline Capabilities,ຄວາມສາມາດອອຟໄລ
+Offline data status refreshed,ໂຫຼດສະຖານະຂໍ້ມູນອອບລາຍຄືນໃໝ່ແລ້ວ
+Offline diagnostics,ການວິນິດໄສແບບອອບໄລນ໌
+Offline Invoices,ໃບແຈ້ງໜີ້ອອບໄລນ໌
+Offline invoices status,ສະຖານະໃບແຈ້ງໜີ້ອອບໄລນ໌
+Offline invoices synced,ຊິງຄ໌ໃບຮຽກເກັບເງິນອອບໄລນ໌ແລ້ວ
+Offline Queue: {0},ຄິວອອບລາຍ: {0}
+Offline rebuild guidance,ການແນະນຳສ້າງໃໝ່ແບບອອບໄລນ໌
+Offline restore is unavailable for this session.,ການກູ້ຂໍ້ມູນແບບອອບໄລນ໌ບໍ່ສາມາດໃຊ້ໄດ້ສຳລັບເຊດຊັນນີ້.
+Offline selling is available with degraded capabilities.,ການຂາຍອອບໄລນ໌ແມ່ນມີໃຫ້ດ້ວຍຄວາມສາມາດທີ່ຊຸດໂຊມ.
+Offline snapshot does not match the current POS state.,ພາບຖ່າຍແບບອອບໄລນ໌ບໍ່ກົງກັບສະຖານະ POS ໃນປັດຈຸບັນ.
+Offline Status,ສະຖານະອອບໄລນ໌
+"Offline, terminal, and system controls","Offline, terminal, ແລະການຄວບຄຸມລະບົບ"
+OK,ຕົກລົງ
+Online,ອອນລາຍ
+Open actions menu,ເປີດເມນູຄຳສັ່ງ
+Open balance to collect,ເປີດຍອດເງິນເພື່ອເກັບກໍາ
+Open Customer Display,ເປີດການສະແດງລູກຄ້າ
+Open drawer,ເປີດລິ້ນຊັກ
+Open invoices,ເປີດໃບແຈ້ງໜີ້
+Open Payments?,ເປີດການຈ່າຍເງິນບໍ?
+Open POS home,ເປີດ POS ເຮືອນ
+Open this screen from POS Menu -> Open Customer Display.,ເປີດໜ້າຈໍນີ້ຈາກເມນູ POS -> ເປີດຈໍສະແດງຜົນລູກຄ້າ.
+OpenCV image processing enabled - Enhanced barcode detection,ເປີດການນຳໃຊ້ການປະມວນຜົນຮູບພາບ OpenCV - ປັບປຸງການກວດຫາບາໂຄດ
+OpenCV image processing unavailable on this device,ການປະມວນຜົນຮູບພາບ OpenCV ບໍ່ສາມາດໃຊ້ໄດ້ໃນອຸປະກອນນີ້
+OpenCV Off,ເປີດCV ປິດ
+OpenCV On,ເປີດCV
+OpenCV processing disabled,ການປະມວນຜົນ OpenCV ປິດໃຊ້ງານ
+Opening Amount,ຈໍານວນເປີດ
+Opening Cash,ເປີດເງິນສົດ
+options,ທາງເລືອກ
+Order,ສັ່ງ
+Original,ຕົ້ນສະບັບ
+Other,ອື່ນໆ
+Out,ອອກ
+Out of Stock,ສິນຄ້າໝົດ
+Out of Stock Items,ສິນຄ້າໝົດ
+Outstanding,ໂດດເດັ່ນ
+Outstanding Credit by Currency,ສິນເຊື່ອທີ່ໂດດເດັ່ນໂດຍສະກຸນເງິນ
+Overdue,ເກີນກຳນົດ
+Overpayment Change,ການປ່ຽນແປງການຈ່າຍເງິນເກີນ
+Overpayment change deducted: {0},ຫັກການປ່ຽນແປງການຈ່າຍເງິນເກີນ: {0}
+Packing List,ລາຍການບັນຈຸ
+Page Format,ຮູບແບບໜ້າ
+Page unavailable offline,ໜ້າບໍ່ສາມາດໃຊ້ໄດ້ອອບລາຍ
+Paid,ຈ່າຍແລ້ວ
+Paid (orig):,ຈ່າຍ (ຕົ້ນທາງ):
+Paid Amount,ຈໍານວນທີ່ຈ່າຍ
+Paid change cannot be greater than total change!,ການປ່ຽນແປງທີ່ຈ່າຍບໍ່ສາມາດໃຫຍ່ກວ່າການປ່ຽນແປງທັງຫມົດ!
+Paid:,ຈ່າຍແລ້ວ:
+Parent Item,ລາຍການຫຼັກ
+Partial,ບາງສ່ວນ
+Partly Paid,ຈ່າຍບາງສ່ວນ
+Party Account,ບັນຊີພັກ
+Party Type,ປະເພດພັກ
+Pause terminal until next cashier,ຢຸດເຄື່ອງຈ່າຍເງິນໄວ້ຊົ່ວຄາວຈົນກວ່າຈະມີພະນັກງານເກັບເງິນຕໍ່ໄປ
+PAY,ຈ່າຍ
+Payment,ການຈ່າຍເງິນ
+Payment Account,ບັນຊີການຈ່າຍເງິນ
+Payment entries processed for Invoice {0},ປະມວນຜົນລາຍການການຈ່າຍເງິນສຳລັບໃບແຈ້ງໜີ້ {0} ແລ້ວ
+Payment Entry Type,ປະເພດການຈ່າຍເງິນ
+Payment History,ປະຫວັດການຈ່າຍເງິນ
+Payment ID,ID ການຈ່າຍເງິນ
+Payment Method Report,ລາຍງານວິທີການຊໍາລະ
+Payment Methods,ວິທີການຊໍາລະເງິນ
+Payment of {0} received successfully.,ໄດ້ຮັບການຈ່າຍເງິນ {0} ສຳເລັດແລ້ວ.
+Payment Progress,ຄວາມຄືບຫນ້າການຈ່າຍເງິນ
+Payment Reconciliation,ການຄືນດີການຈ່າຍເງິນ
+Payment request status could not be retrieved. Please try again,ບໍ່ສາມາດດຶງຂໍ້ມູນສະຖານະຄຳຮ້ອງຂໍການຈ່າຍເງິນໄດ້. ກະລຸນາລອງອີກຄັ້ງ
+Payment Request took too long to respond. Please try requesting for payment again,ການຮ້ອງຂໍການຈ່າຍເງິນໃຊ້ເວລາດົນເກີນໄປທີ່ຈະຕອບສະຫນອງ. ກະລຸນາລອງຮ້ອງຂໍການຈ່າຍເງິນອີກຄັ້ງ
+Payment saved offline,ບັນທຶກການຈ່າຍເງິນແບບອອບລາຍແລ້ວ
+Payment State,ລັດການຈ່າຍເງິນ
+Payment Status,ສະຖານະການຈ່າຍເງິນ
+Payment submitted but print function could not be executed. Payment name not found.,ສົ່ງການຈ່າຍເງິນແລ້ວ ແຕ່ຟັງຊັນການພິມບໍ່ສາມາດປະຕິບັດໄດ້. ບໍ່ພົບຊື່ການຈ່າຍເງິນ.
+Payment submitted.,ສົ່ງການຈ່າຍເງິນແລ້ວ.
+Payment Summary,ສະຫຼຸບການຈ່າຍເງິນ
+Payments,ການຈ່າຍເງິນ
+Payments are not open. Do you want to open payments and submit?,ການຈ່າຍເງິນບໍ່ເປີດ. ທ່ານຕ້ອງການເປີດການຈ່າຍເງິນ ແລະສົ່ງບໍ?
+Payments by Mode of Payment,ການຈ່າຍເງິນຕາມຮູບແບບການຈ່າຍເງິນ
+PDF,PDF
+Peak Hour,ຊົ່ວໂມງສູງສຸດ
+Peak Memory:,ຄວາມຈຳສູງສຸດ:
+Peak Server:,ເຊີບເວີສູງສຸດ:
+Peak:,ສູງສຸດ:
+Pending,ລໍຖ້າຢູ່
+Pending Amount,ຈໍານວນທີ່ຍັງຄ້າງຢູ່
+Pending count updated from {0} to {1},ອັບເດດຈຳນວນທີ່ຄ້າງຢູ່ຈາກ {0} ເປັນ {1}
+Pending Exposure,ລໍຖ້າຮັບແສງ
+Pending Invoices,ໃບແຈ້ງໜີ້ທີ່ຍັງຄ້າງຢູ່
+Pending Ratio,ອັດຕາສ່ວນລໍຖ້າ
+Pending Sales,ການຂາຍທີ່ຍັງຄ້າງຢູ່
+Pending sales: {0} | Cache usage: {1}%,ການຂາຍທີ່ຍັງຄ້າງ: {0} | ການນຳໃຊ້ແຄດ: {1}%
+Pending Sync,ລໍຖ້າການຊິງຄ໌
+Pending: {0},ລໍຖ້າຢູ່: {0}
+Pending: {0} | Synced: {1} | Draft: {2},ລໍຖ້າຢູ່: {0} | ຊິງຄ໌ແລ້ວ: {1} | ສະບັບຮ່າງ: {2}
+Per Page,ຕໍ່ຫນ້າ
+Personal,ສ່ວນບຸກຄົນ
+Personal preferences adjust the current cashier experience without changing the active POS route.,ຄວາມມັກສ່ວນຕົວຈະປັບປະສົບການຂອງຜູ້ຮັບເງິນໃນປະຈຸບັນໂດຍບໍ່ປ່ຽນເສັ້ນທາງ POS ທີ່ໃຊ້ວຽກ.
+PIN confirmation does not match.,ການຢືນຢັນ PIN ບໍ່ກົງກັນ.
+PIN must be 4 to 8 digits.,PIN ຕ້ອງມີ 4 ຫາ 8 ຕົວເລກ.
+Please add at least one item.,ກະລຸນາເພີ່ມຢ່າງໜ້ອຍໜຶ່ງລາຍການ.
+Please allow camera access to scan codes,ກະລຸນາອະນຸຍາດໃຫ້ກ້ອງຖ່າຍຮູບເຂົ້າເຖິງເພື່ອສະແກນລະຫັດ
+Please enter payment amount,ກະລຸນາໃສ່ຈໍານວນການຈ່າຍເງິນ
+Please fill all required fields,ກະລຸນາຕື່ມຂໍ້ມູນໃສ່ທຸກຊ່ອງທີ່ຕ້ອງການ
+Please make a payment or select a payment,ກະລຸນາຈ່າຍເງິນ ຫຼືເລືອກການຈ່າຍເງິນ
+Please request phone payment or use another payment method,ກະລຸນາຮ້ອງຂໍການຈ່າຍເງິນທາງໂທລະສັບ ຫຼືໃຊ້ວິທີຊໍາລະອື່ນ
+Please select a customer first,ກະລຸນາເລືອກລູກຄ້າກ່ອນ
+Please select a party,ກະລຸນາເລືອກງານລ້ຽງ
+Please select a party before reconciling.,ກະລຸນາເລືອກງານລ້ຽງກ່ອນການຄືນດີ.
+Please select a valid movement type.,ກະລຸນາເລືອກປະເພດການເຄື່ອນໄຫວທີ່ຖືກຕ້ອງ.
+Please select an invoice,ກະລຸນາເລືອກໃບແຈ້ງໜີ້
+Please select company before reconciling.,ກະລຸນາເລືອກບໍລິສັດກ່ອນທີ່ຈະຄືນດີ.
+Please set the customer's mobile number,ກະລຸນາຕັ້ງເບີໂທລະສັບຂອງລູກຄ້າ
+Please try again or enter the item manually.,ກະລຸນາລອງອີກຄັ້ງ ຫຼືໃສ່ລາຍການດ້ວຍຕົນເອງ.
+Please verify the barcode or check the item's availability.,ກະ​ລຸ​ນາ​ກວດ​ສອບ barcode ຫຼື​ກວດ​ສອບ​ການ​ມີ​ຢູ່​ຂອງ​ລາຍ​ການ​.
+Points,ຄະແນນ
+Popup blocked. Please allow popups.,ບລັອກປັອບອັບແລ້ວ. ກະລຸນາອະນຸຍາດໃຫ້ປັອບອັບ.
+POS,POS
+POS controls and maintenance,ການຄວບຄຸມແລະບໍາລຸງຮັກສາ POS
+POS Expense is disabled for this POS Profile.,ຄ່າໃຊ້ຈ່າຍ POS ຖືກປິດໃຊ້ງານສໍາລັບໂປຣໄຟລ໌ POS ນີ້.
+POS is running with limited offline prerequisites.,POS ເຮັດວຽກໂດຍມີເງື່ອນໄຂເບື້ອງຕົ້ນແບບອອບໄລນ໌ທີ່ຈຳກັດ.
+POS Profile,ໂປຣໄຟລ໌ POS
+Position the QR code or barcode within the scanning area,ວາງລະຫັດ QR ຫຼື barcode ພາຍໃນພື້ນທີ່ສະແກນ
+Posting,ປະກາດ
+Posting and Price List,ປະກາດແລະລາຍການລາຄາ
+Posting Date,ວັນທີປະກາດ
+Preparing background sync,ກຳລັງກະກຽມການຊິ້ງພື້ນຫຼັງ
+"Press OK to continue offline with a warning, or Cancel to retry.","ກົດຕົກລົງເພື່ອສືບຕໍ່ອອຟໄລດ້ວຍການເຕືອນ, ຫຼືຍົກເລີກເພື່ອລອງໃໝ່."
+Previous unit of measure,ຫົວໜ່ວຍວັດແທກກ່ອນໜ້າ
+Price List,ລາຍການລາຄາ
+Price List Rate,ອັດຕາລາຍການລາຄາ
+Price list rate updated locally only,ອັດຕາລາຍການລາຄາປັບປຸງຢູ່ໃນທ້ອງຖິ່ນເທົ່ານັ້ນ
+Pricing & Discounts,ລາຄາ & ສ່ວນຫຼຸດ
+Pricing Rule,ກົດລະບຽບລາຄາ
+Print,ພິມ
+Print Draft,ພິມຮ່າງ
+Print Format (Invoice),ຮູບແບບການພິມ (ໃບແຈ້ງໜີ້)
+Print Format (Order),ຮູບແບບການພິມ (ຄໍາສັ່ງ)
+Print invoice,ພິມໃບແຈ້ງໜີ້
+Print Purchase Invoice instead of PO,ພິມໃບເກັບເງິນຊື້ແທນ PO
+Printer,ເຄື່ອງພິມ
+Processed returns impacting the shift totals,ຜົນຕອບແທນທີ່ປະມວນຜົນແລ້ວສົ່ງຜົນກະທົບຕໍ່ການປ່ຽນແປງທັງໝົດ
+Processing Payment,ກຳລັງປະມວນຜົນການຈ່າຍເງິນ
+Processing payment entries for Invoice {0},ກຳລັງປະມວນຜົນລາຍການການຈ່າຍເງິນສຳລັບໃບແຈ້ງໜີ້ {0}
+Profile,ໂປຣໄຟລ໌
+Profiles,ໂປຣໄຟລ໌
+Profit,ກໍາໄລ
+Profit: Invoice Item Estimate,ກໍາໄລ: ການຄາດຄະເນລາຍການໃບເກັບເງິນ
+Profit: Stock Ledger (COGS),ຜົນກໍາໄລ: ບັນຊີບັນຊີຫຼັກຊັບ (COGS)
+Profitability Report,ບົດລາຍງານຜົນກໍາໄລ
+Prorated return discount,ສ່ວນຫຼຸດກັບຄືນຕາມອັດຕາສ່ວນ
+Purchase Amount,ຈໍານວນການຊື້
+Purchase Invoices,ໃບເກັບເງິນຊື້
+Purchase Order created,ສ້າງຄໍາສັ່ງສັ່ງຊື້
+Qty,ຈຳນວນ
+Qualified,ມີຄຸນວຸດທິ
+Quantity,ປະລິມານ
+Quantity exceeds available stock,ປະລິມານເກີນຫຼັກຊັບທີ່ມີຢູ່
+Quick Actions,ການປະຕິບັດດ່ວນ
+Quotation {0} is Submitted,ວົງຢືມ {0} ຖືກສົ່ງແລ້ວ
+Quotation submitted,ສົ່ງໃບສະເໜີລາຄາແລ້ວ
+QZ Tray connected.,ຖາດ QZ ເຊື່ອມຕໍ່ແລ້ວ.
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ Tray ຖືກຕັດການເຊື່ອມຕໍ່ດ້ວຍຕົນເອງ. ກົດເຊື່ອມຕໍ່ເພື່ອເປີດໃຊ້ມັນອີກຄັ້ງ.
+QZ Tray is not connected.,QZ Tray ບໍ່ໄດ້ເຊື່ອມຕໍ່.
+QZ Tray Setup,ການຕິດຕັ້ງຖາດ QZ
+Rate,ອັດຕາ
+Rate adjusted to maximum allowed discount,ອັດຕາຖືກປັບເປັນສ່ວນຫຼຸດສູງສຸດທີ່ອະນຸຍາດ
+Ready,ພ້ອມ
+Ready to resume,ພ້ອມທີ່ຈະສືບຕໍ່
+Ready!,ພ້ອມແລ້ວ!
+Real-time POS insights for retail operations.,ຂໍ້ມູນ POS ໃນເວລາຈິງສໍາລັບການດໍາເນີນງານຂາຍຍ່ອຍ.
+Rebuild Offline Data,ສ້າງຂໍ້ມູນອອບລາຍຄືນໃໝ່
+Receive,ຮັບ
+Receive now,ຮັບດຽວນີ້
+Received,ໄດ້ຮັບ
+Received:,ໄດ້ຮັບ:
+Recent Movement Entries,ການເຄື່ອນໄຫວທີ່ຜ່ານມາ
+Recent updates about your invoices,ອັບເດດຫຼ້າສຸດກ່ຽວກັບໃບແຈ້ງໜີ້ຂອງທ່ານ
+Recently Active Customers,ລູກຄ້າທີ່ເຄື່ອນໄຫວບໍ່ດົນມານີ້
+Rechecking connection,ກຳລັງກວດສອບການເຊື່ອມຕໍ່ຄືນໃໝ່
+Reconcile payment methods and close shift,Reconcile ວິ​ທີ​ການ​ຊໍາ​ລະ​ເງິນ​ແລະ​ການ​ປິດ​ການ​ປ່ຽນ​ແປງ​
+Reconciling Payments,Reconciling ການຈ່າຍເງິນ
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","ເຊື່ອມຕໍ່ຄືນໃໝ່ ແລະເປີດໜ້ານີ້ຄັ້ງດຽວໃນຂະນະທີ່ອອນລາຍ, ຈາກນັ້ນການໂຫຼດຂໍ້ມູນຄືນໃໝ່ແບບອອບລາຍຈະສາມາດກູ້ມັນຄືນມາໄດ້."
+Reconnect online to refresh cached offline data from the server.,ເຊື່ອມຕໍ່ອິນເຕີເນັດຄືນໃໝ່ເພື່ອໂຫຼດຂໍ້ມູນອອບໄລນ໌ທີ່ແຄສໄວ້ຄືນໃໝ່ຈາກເຊີບເວີ.
+Recreate local offline prerequisites from scratch,ສ້າງເງື່ອນໄຂເບື້ອງຕົ້ນແບບອອບໄລນ໌ໃນທ້ອງຖິ່ນຄືນໃໝ່ຕັ້ງແຕ່ເລີ່ມຕົ້ນ
+Recv:,ບັນທຶກ:
+Redeem,ແລກ
+Redeem / Scan,ແລກ/ສະແກນ
+Redeem Amount,ແລກເອົາຈຳນວນເງິນ
+Redeem Mode,ໂໝດແລກ
+Redeemed Amount,ຈຳນວນທີ່ແລກແລ້ວ
+Redeemed credit cannot be greater than its total.,ເຄຣດິດທີ່ແລກເອົາບໍ່ສາມາດໃຫຍ່ກວ່າຈຳນວນທັງໝົດຂອງມັນໄດ້.
+Redemption and Totals,ການໄຖ່ແລະຈໍານວນທັງຫມົດ
+Reference,ອ້າງອິງ
+Refresh,ໂຫຼດຂໍ້ມູນຄືນໃໝ່
+Refresh Exchange Rate,ປັບປຸງອັດຕາແລກປ່ຽນ
+Refresh Offline Data,ໂຫຼດຂໍ້ມູນອອບລາຍຄືນໃໝ່
+Refresh Printers,ໂຫຼດເຄື່ອງພິມຄືນໃໝ່
+Refund,ເງິນຄືນ
+Release Notes,ບັນທຶກການປ່ອຍ
+Reload,ໂຫຼດໃໝ່
+Reload customers,ໂຫຼດລູກຄ້າຄືນໃໝ່
+Reload Items,ໂຫຼດລາຍການຄືນໃໝ່
+Reload Now,ໂຫຼດໃໝ່ດຽວນີ້
+Reload to apply the latest changes. Your current session will be refreshed.,ໂຫຼດຄືນໃໝ່ເພື່ອນຳໃຊ້ການປ່ຽນແປງຫຼ້າສຸດ. ເຊດຊັນປັດຈຸບັນຂອງເຈົ້າຈະຖືກປັບປຸງໃໝ່.
+Reload Workflow,ໂຫຼດຂັ້ນຕອນການເຮັດວຽກຄືນໃໝ່
+Remarks,ຂໍ້ສັງເກດ
+Remarks are required.,ຂໍ້ສັງເກດແມ່ນຕ້ອງການ.
+Remove,ເອົາອອກ
+Remove barcode item,ເອົາລາຍການບາໂຄດອອກ
+Remove cached data and reload the POS app,ເອົາຂໍ້ມູນແຄດໄວ້ແລ້ວໂຫຼດແອັບ POS ຄືນໃໝ່
+Remove item,ເອົາລາຍການອອກ
+Remove Offer,ເອົາຂໍ້ສະເໜີອອກ
+Reorder / Purchase Suggestions,ສັ່ງຄືນ / ຊື້ຄໍາແນະນໍາ
+Repair Candidate,ສ້ອມແປງຜູ້ສະໝັກ
+Repair Change Allocation,ການ​ສ້ອມ​ແປງ​ການ​ຈັດ​ສັນ​ການ​ປ່ຽນ​ແປງ​
+Repair requires an online connection,ການສ້ອມແປງຕ້ອງການການເຊື່ອມຕໍ່ອອນໄລນ໌
+Repaired,ສ້ອມແປງ
+Repairing change allocation,ການສ້ອມແປງການຈັດສັນການປ່ຽນແປງ
+Repeat Customers,ຊໍ້າຄືນລູກຄ້າ
+Repeat Rate,ອັດຕາການເຮັດຊ້ຳ
+Request,ຮ້ອງຂໍ
+Request ID: {0},ຂໍ ID: {0}
+Request Payment,ຮ້ອງຂໍການຈ່າຍເງິນ
+Requested route: {0},ເສັ້ນທາງທີ່ຮ້ອງຂໍ: {0}
+Required columns cannot be hidden,ບໍ່ສາມາດເຊື່ອງຖັນທີ່ຕ້ອງການໄດ້
+Reset,ຣີເຊັດ
+Reset item name,ຣີເຊັດຊື່ລາຍການ
+Reset to Default,ຣີເຊັດເປັນຄ່າເລີ່ມຕົ້ນ
+Resource Health,ຊັບພະຍາກອນສຸຂະພາບ
+Restricted,ຈຳກັດ
+Restricted operational controls for supervisors only.,ການຄວບຄຸມການດໍາເນີນງານທີ່ຈໍາກັດສໍາລັບຜູ້ເບິ່ງແຍງເທົ່ານັ້ນ.
+Retry,ລອງໃໝ່
+Retry route,ລອງເສັ້ນທາງໃໝ່
+Return,ກັບຄືນ
+Return Amount,ຈໍານວນຄືນ
+Return Count,ຈຳນວນກັບຄືນ
+Return items must have negative quantities,ລາຍການທີ່ສົ່ງຄືນຕ້ອງມີປະລິມານລົບ
+Return total must be negative,ຜົນຕອບແທນທັງໝົດຕ້ອງເປັນລົບ
+Return Valid Until,ກັບຄືນມາໃຊ້ໄດ້ຈົນກ່ວາ
+Return window passed,ກັບຄືນປ່ອງຢ້ຽມຜ່ານ
+Return without Invoice,ສົ່ງຄືນໂດຍບໍ່ມີໃບເກັບເງິນ
+Returns,ກັບຄືນ
+Returns / Voids / Discounts,ກັບຄືນ / Voids / ສ່ວນຫຼຸດ
+Returns by Currency,ສົ່ງຄືນດ້ວຍສະກຸນເງິນ
+Revenue,ລາຍຮັບ
+Review shift totals before submitting the closing entry,ກວດເບິ່ງການປ່ຽນແປງທັງໝົດກ່ອນທີ່ຈະສົ່ງລາຍການປິດ
+Round Off,ຮອບປິດ
+Rows,ແຖວ
+Rows:,ແຖວ:
+Rule,ກົດລະບຽບ
+Sale,ຂາຍ
+Sales,ການຂາຍ
+Sales Order {0} is Submitted,ຄຳສັ່ງຂາຍ {0} ຖືກສົ່ງແລ້ວ
+Sales Person and Print,ພະນັກງານຂາຍແລະພິມ
+Sales Person not found,ບໍ່ພົບພະນັກງານຂາຍ
+Sales processed,ຂະບວນການຂາຍ
+Sales Return,ການຂາຍຄືນ
+Sales Trend Report,ບົດລາຍງານແນວໂນ້ມການຂາຍ
+Save,ບັນທຶກ
+Save & Clear,ບັນທຶກ & ລ້າງ
+Save as POS Profile Default,ບັນທຶກເປັນ POS Profile Default
+Save Settings,ບັນທຶກການຕັ້ງຄ່າ
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,ບັນທຶກເຄື່ອງພິມທີ່ເລືອກໄວ້ເປັນຄ່າເລີ່ມຕົ້ນຂອງ POS Profile ດັ່ງນັ້ນມັນຈະສະແດງອັດຕະໂນມັດໃນການຕິດຕັ້ງນີ້.
+Saved as draft because: {0},ບັນທຶກເປັນສະບັບຮ່າງເນື່ອງຈາກ: {0}
+Saving...,ກຳລັງບັນທຶກ...
+Scale barcode detected. Quantity here is the number of labels to print.,ກວດພົບບາໂຄດຂະໜາດ. ປະລິມານນີ້ແມ່ນຈໍານວນປ້າຍທີ່ຈະພິມ.
+Scale barcode settings are not configured. Using item barcode only.,ການ​ຕັ້ງ​ຄ່າ barcode ຂະ​ຫນາດ​ບໍ່​ໄດ້​ກໍາ​ນົດ​ຄ່າ​. ການ​ນໍາ​ໃຊ້ barcode ລາຍ​ການ​ເທົ່າ​ນັ້ນ​.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,ບາໂຄດແມ່ແບບຂະໜາດຂາດສຳລັບລາຍການນີ້/UOM. ການ​ນໍາ​ໃຊ້ barcode ລາຍ​ການ​ເທົ່າ​ນັ້ນ​.
+Scan an existing card and top it up without leaving the payment flow.,ສະແກນບັດທີ່ມີຢູ່ແລ້ວຕື່ມເງິນໂດຍບໍ່ປ່ອຍໃຫ້ກະແສການຈ່າຍເງິນ.
+Scan Error,ສະແກນຜິດພາດ
+Scan or enter a gift card code to check balance or redeem.,ສະແກນ ຫຼືໃສ່ລະຫັດບັດຂອງຂວັນເພື່ອກວດສອບຍອດເງິນ ຫຼື ແລກ.
+Scan or paste the card code below.,ສະແກນ ຫຼືວາງລະຫັດບັດຂ້າງລຸ່ມນີ້.
+Scan QR Code/Barcode,ສະແກນລະຫັດ QR / Barcode
+Scan with camera,ສະແກນດ້ວຍກ້ອງຖ່າຍຮູບ
+Scan-First Flow,Scan-First Flow
+Scanned Code:,ລະຫັດສະແກນ:
+Scanning for: {0},ກຳລັງສະແກນຫາ: {0}
+Scanning items,ກຳລັງສະແກນລາຍການ
+Scan-Ready,ສະແກນພ້ອມ
+Scope,ຂອບເຂດ
+Scope: All Profiles,ຂອບເຂດ: ໂປຣໄຟລ໌ທັງໝົດ
+Scope: Current Profile,ຂອບເຂດ: ໂປຣໄຟລ໌ປັດຈຸບັນ
+Scope: Specific Profile,ຂອບເຂດ: ຂໍ້ມູນສະເພາະ
+Search,ຊອກຫາ
+Search Account,ຊອກຫາບັນຊີ
+Search an invoice and continue the return flow without extra steps.,ຄົ້ນຫາໃບແຈ້ງຫນີ້ແລະສືບຕໍ່ການໄຫຼຄືນໂດຍບໍ່ມີຂັ້ນຕອນເພີ່ມເຕີມ.
+Search customer,ຄົ້ນຫາລູກຄ້າ
+Search invoices or customers,ຄົ້ນຫາໃບແຈ້ງຫນີ້ຫຼືລູກຄ້າ
+Search item,ຄົ້ນຫາລາຍການ
+Search item / code,ຄົ້ນຫາລາຍການ / ລະຫັດ
+Search items or barcode,ຊອກຫາລາຍການ ຫຼື barcode
+Search Mpesa Payments,ຊອກຫາການຈ່າຍເງິນ Mpesa
+Search return invoices or customers,ຊອກຫາໃບແຈ້ງໜີ້ ຫຼື ລູກຄ້າ
+Search supplier,ຄົ້ນຫາຜູ້ສະຫນອງ
+Search unpaid invoices or customers,ຊອກຫາໃບແຈ້ງໜີ້ ຫຼືລູກຄ້າທີ່ຍັງບໍ່ໄດ້ຈ່າຍ
+Secure context (HTTPS or localhost) is required for camera access.,ບໍລິບົດທີ່ປອດໄພ (HTTPS ຫຼື localhost) ແມ່ນຈໍາເປັນສໍາລັບການເຂົ້າເຖິງກ້ອງຖ່າຍຮູບ.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,ຕ້ອງການບໍລິບົດທີ່ປອດໄພ (HTTPS) ສໍາລັບການເຂົ້າເຖິງກ້ອງຖ່າຍຮູບ. ກະລຸນາໃຊ້ HTTPS ເພື່ອເຂົ້າເຖິງກ້ອງຖ່າຍຮູບ.
+Select,ເລືອກ
+Select a cashier first.,ເລືອກພະນັກງານເກັບເງິນກ່ອນ.
+Select a customer,ເລືອກລູກຄ້າ
+Select a customer to use coupon,ເລືອກລູກຄ້າທີ່ຈະໃຊ້ຄູປອງ
+Select a printer to use QZ silent printing.,ເລືອກເຄື່ອງພິມເພື່ອໃຊ້ການພິມແບບງຽບ QZ.
+Select Batch,ເລືອກ Batch
+Select Columns to Display,ເລືອກຖັນທີ່ຈະສະແດງ
+Select items to sell,ເລືອກລາຍການທີ່ຈະຂາຍ
+Select Payment,ເລືອກການຈ່າຍເງິນ
+Select Payment Account,ເລືອກບັນຊີການຈ່າຍເງິນ
+Select printer,ເລືອກເຄື່ອງພິມ
+Select Return Invoice,ເລືອກ Return Invoice
+Select S.O,ເລືອກ S.O
+Select Sales Orders,ເລືອກຄໍາສັ່ງຂາຍ
+Select the cashier who is taking over this terminal.,ເລືອກພະນັກງານເກັບເງິນທີ່ກໍາລັງຄອບຄອງສະຖານີນີ້.
+Selected,ເລືອກແລ້ວ
+Selected movement type is not allowed by POS Profile.,ປະເພດການເຄື່ອນໄຫວທີ່ເລືອກແມ່ນບໍ່ອະນຸຍາດໃຫ້ໃຊ້ໂດຍ POS Profile.
+Selected Payments,ການຈ່າຍເງິນທີ່ເລືອກ
+Sensitive actions kept away from quick taps.,ການປະຕິບັດທີ່ລະອຽດອ່ອນຮັກສາໄວ້ຫ່າງຈາກການແຕະໄວ.
+Serial,ລໍາດັບ
+Serial Numbers,ເລກລໍາດັບ
+Server CPU Usage:,ການໃຊ້ CPU ຂອງເຊີບເວີ:
+Server Health,ສຸຂະພາບເຊີບເວີ
+Server Memory Usage:,ການນຳໃຊ້ໜ່ວຍຄວາມຈຳຂອງເຊີບເວີ:
+Server Metrics,ຕົວວັດແທກເຊີບເວີ
+Server Uptime:,ເວລາເຊີບເວີ:
+Service Charges,ຄ່າບໍລິການ
+Session,ເຊດຊັນ
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,ຕັ້ງແຕ່ລະ PIN ຂອງ cashier ໃນແບບຟອມຜູ້ໃຊ້ ແລະຮັກສາສະມາຊິກຢູ່ປາຍທາງທີ່ຖືກມອບໝາຍໄວ້ໃນ POS Profile User.
+Settings,ການຕັ້ງຄ່າ
+Settings in this section update the POS workspace without changing the current route.,ການຕັ້ງຄ່າໃນສ່ວນນີ້ປັບປຸງພື້ນທີ່ເຮັດວຽກ POS ໂດຍບໍ່ຕ້ອງປ່ຽນເສັ້ນທາງປະຈຸບັນ.
+Setup complete!,ການ​ຕັ້ງ​ຄ່າ​ສໍາ​ເລັດ​!
+Share,ແບ່ງປັນ
+Shared terminal,ສະຖານີທີ່ໃຊ້ຮ່ວມກັນ
+Shift Closed Snapshot,Shift Closed Snapshot
+Shift Overview,Shift ພາບລວມ
+Show,ສະແດງ
+Show cart on customer-facing screen,ສະ​ແດງ​ໂຄງ​ຮ່າງ​ການ​ໃນ​ຫນ້າ​ຈໍ​ສໍາ​ລັບ​ລູກ​ຄ້າ​
+Show last invoice rate,ສະແດງອັດຕາໃບແຈ້ງໜີ້ຫຼ້າສຸດ
+Show rate info,ສະແດງຂໍ້ມູນອັດຕາ
+Show Repair Candidates,ສະແດງຜູ້ສະຫມັກການສ້ອມແປງ
+Show search tools,ສະແດງເຄື່ອງມືຄົ້ນຫາ
+Show the active cart on a customer-facing screen,ສະ​ແດງ​ໂຄງ​ຮ່າງ​ການ​ເຄື່ອນ​ໄຫວ​ຢູ່​ໃນ​ຫນ້າ​ຈໍ​ສໍາ​ລັບ​ລູກ​ຄ້າ​
+Showing {0}-{1} of {2},ກຳລັງສະແດງ {0}-{1} ຈາກທັງໝົດ {2}
+Showing 0 of 0,ກຳລັງສະແດງ 0 ຈາກທັງໝົດ 0
+Shows the distribution of invoices per currency,ສະແດງການແຈກຢາຍໃບແຈ້ງໜີ້ຕໍ່ສະກຸນເງິນ
+Sign out of the current POS session,ອອກຈາກເຊດຊັນ POS ປັດຈຸບັນ
+Size:,ຂະໜາດ:
+Skipped Payments,ຂ້າມການຈ່າຍເງິນ
+Skipping items without barcodes,ຂ້າມລາຍການໂດຍບໍ່ມີ barcodes
+Slow Moving,ການເຄື່ອນໄຫວຊ້າ
+Slow Moving Items,ລາຍການເຄື່ອນທີ່ຊ້າໆ
+Slow Queries:,ຄຳຖາມຊ້າ:
+Sold,ຂາຍແລ້ວ
+Source,ທີ່ມາ
+Source Cash Account (Optional Override),ແຫຼ່ງບັນຊີເງິນສົດ (ຍົກເລີກທາງເລືອກ)
+Source Ex. Rate:,ແຫຼ່ງຂໍ້ມູນ Ex. ອັດຕາ:
+Source Rate:,ອັດຕາແຫຼ່ງທີ່ມາ:
+Specific Profile,ຂໍ້ມູນສະເພາະ
+Split Invoices,ແຍກໃບແຈ້ງໜີ້
+Staff / Cashier Performance Report,ບົດລາຍງານການປະຕິບັດພະນັກງານ / Cashier
+Status,ສະຖານະ
+Stock,ຫຸ້ນ
+Stock Information,ຂໍ້ມູນຫຼັກຊັບ
+Stock is lower than requested,ຫຼັກຊັບຕ່ໍາກວ່າການຮ້ອງຂໍ
+Stock is lower than requested:\n{0},ຫຸ້ນຕ່ຳກວ່າທີ່ຮ້ອງຂໍ:\n{0}
+Stock Movement Report,ບົດລາຍງານການເຄື່ອນໄຫວຫຼັກຊັບ
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,ອັບເດດຫຼັກຊັບ: {0} ມີ {1} ຫວ່າງ. ການເພີ່ມ {2} ຈະເຮັດໃຫ້ຮຸ້ນຕໍ່າກວ່າສູນ.
+Submit,ສົ່ງ
+Submit & Print,ສົ່ງ & ພິມ
+Submit Deposit,ສົ່ງເງິນຝາກ
+Submit Expense,ສົ່ງຄ່າໃຊ້ຈ່າຍ
+Submitted,ສົ່ງແລ້ວ
+Submitted Cash Movements,ສົ່ງການເຄື່ອນໄຫວເງິນສົດ
+Submitted entries,ສົ່ງລາຍການ
+Successfully scanned:,ສະແກນສຳເລັດແລ້ວ:
+Suggested,ແນະນຳ
+Suggested Qty,ຈຳນວນທີ່ແນະນຳ
+Supervisor Access,ການເຂົ້າເຖິງຜູ້ຄຸມງານ
+Supervisor permissions unlock issuance and reloads,ການອະນຸຍາດຂອງຜູ້ຄຸມງານປົດລັອກການອອກ ແລະໂຫຼດຄືນໃໝ່
+Supervisor Tools,ເຄື່ອງມືຜູ້ຄຸມງານ
+Supplier,ຜູ້ສະຫນອງ
+Supplier and dates are required.,ຜູ້ສະຫນອງແລະວັນທີແມ່ນຕ້ອງການ.
+Supplier Invoices,ໃບແຈ້ງໜີ້ຜູ້ສະໜອງ
+Supplier is required.,ຕ້ອງການຜູ້ສະຫນອງ.
+Supplier name is required,ຕ້ອງລະບຸຊື່ຜູ້ສະໜອງ
+Supplier Payments,ການຈ່າຍເງິນຂອງຜູ້ສະຫນອງ
+Supplier Purchase Summary,ສະຫຼຸບການຊື້ຂອງຜູ້ສະໜອງ
+Suppliers,ຜູ້ສະຫນອງ
+Suppliers not found,ບໍ່ພົບຜູ້ສະໜອງ
+Switch Camera,ສະຫຼັບກ້ອງຖ່າຍຮູບ
+Switch Cashier,ປ່ຽນ Cashier
+Switch the POS appearance theme,ປ່ຽນຮູບແບບສີສັນ POS
+Switched to:,ປ່ຽນເປັນ:
+Sync All Invoices,Sync ໃບແຈ້ງໜີ້ທັງໝົດ
+Sync Offline Cash Movements ({0}),ຊິ້ງຂໍ້ມູນການເຄື່ອນໄຫວເງິນສົດອອຟໄລ ({0})
+Sync Offline Sales,ຊິ້ງການຂາຍອອບໄລນ໌
+Synced {0} offline cash movement(s).,ຊິງຄ໌ {0} ການເຄື່ອນໄຫວເງິນສົດອອຟລາຍ.
+Syncing items in background,ກຳລັງຊິ້ງຂໍ້ມູນລາຍການໃນພື້ນຫຼັງ
+System / Diagnostics,ລະບົບ / ການວິນິດໄສ
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","ການກະທຳຂອງລະບົບແມ່ນການຄວບຄຸມການບຳລຸງຮັກສາຄວາມຖີ່ຕ່ຳເຊັ່ນ: ຂໍ້ມູນແອັບ, ການວິນິໄສການສະໜັບສະໜູນ ແລະການຄວບຄຸມເຊສຊັນ."
+System Information,ຂໍ້ມູນລະບົບ
+System Status,ສະຖານະລະບົບ
+Tables:,ຕາຕະລາງ:
+Tap the button below to redeem a gift card during checkout.,ແຕະທີ່ປຸ່ມຂ້າງລຸ່ມນີ້ເພື່ອແລກບັດຂອງຂວັນໃນລະຫວ່າງການຈ່າຍເງິນ.
+Target,ເປົ້າໝາຍ
+Target Ex. Rate:,ເປົ້າໝາຍ Ex. ອັດຕາ:
+Target Rate:,ອັດຕາເປົ້າໝາຍ:
+Tax,ພາສີ
+Tax / Charges Report,ລາຍງານພາສີ/ຄ່າບໍລິການ
+Tax Heads,ຫົວຫນ້າພາສີ
+Taxable Amount,ຈໍານວນພາສີ
+Tendered,ອ່ອນໂຍນ
+Terminal,ສະຖານີ
+Terminal & Devices,ສະຖານີ ແລະອຸປະກອນ
+Terminal locked,ສະຖານີຈອດຖືກລັອກ
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","ເຄື່ອງ​ມື​ຢູ່​ປາຍ​ຍອດ​ມີ​ຜົນ​ກະ​ທົບ​ສະ​ຖາ​ນີ​ຊໍາ​ລະ​ເງິນ​ນີ້​, ການ​ສະ​ແດງ​ໃຫ້​ເຫັນ​ລູກ​ຄ້າ​, ແລະ​ການ​ຄວບ​ຄຸມ​ເຄື່ອງ​ພິມ / ອຸ​ປະ​ກອນ​ໃນ​ອະ​ນາ​ຄົດ​."
+Territory not found,ບໍ່ພົບອານາເຂດ
+The amount paid is not complete,ຈໍານວນເງິນທີ່ຈ່າຍບໍ່ຄົບຖ້ວນ
+The app stores data locally for offline use. This is called cache.,ແອັບເກັບຂໍ້ມູນຢູ່ໃນເຄື່ອງເພື່ອໃຊ້ແບບອອບລາຍ. ອັນນີ້ເອີ້ນວ່າ cache.
+The invoice stayed in draft. Please review and submit it manually.,ໃບເກັບເງິນຢູ່ໃນສະບັບຮ່າງ. ກະລຸນາກວດສອບ ແລະສົ່ງມັນດ້ວຍຕົນເອງ.
+The maximum discount allowed is,ສ່ວນຫຼຸດສູງສຸດທີ່ອະນຸຍາດແມ່ນ
+The quantity for {0} has been adjusted to the maximum available stock.,ປະລິມານສໍາລັບ {0} ໄດ້ຖືກປັບເປັນຫຼັກຊັບສູງສຸດທີ່ມີຢູ່.
+The system could not retrieve the item details. Please try again.,ລະບົບບໍ່ສາມາດດຶງຂໍ້ມູນລາຍລະອຽດລາຍການໄດ້. ກະລຸນາລອງອີກຄັ້ງ.
+These invoices will be synced when connection is restored,ໃບເກັບເງິນເຫຼົ່ານີ້ຈະຖືກຊິງຄ໌ເມື່ອການເຊື່ອມຕໍ່ຄືນມາ
+This action now opens inside the settings workspace.,ດຽວນີ້ການກະທຳນີ້ຈະເປີດຢູ່ໃນພື້ນທີ່ເຮັດວຽກຂອງການຕັ້ງຄ່າ.
+This coupon already used !,ຄູປ໋ອງນີ້ໃຊ້ແລ້ວ!
+This invoice does not need change-allocation repair,ໃບເກັບເງິນນີ້ບໍ່ຈໍາເປັນຕ້ອງມີການສ້ອມແປງການຈັດສັນການປ່ຽນແປງ
+This invoice is already repaired,ໃບແຈ້ງໜີ້ນີ້ຖືກສ້ອມແປງແລ້ວ
+This is an item template. Please choose a variant.,ນີ້ແມ່ນແມ່ແບບລາຍການ. ກະລຸນາເລືອກຕົວແປ.
+this item,ລາຍການນີ້
+This POS page could not be opened offline because its code was not cached on this terminal yet.,ໜ້າ POS ນີ້ບໍ່ສາມາດເປີດອອຟໄລໄດ້ເນື່ອງຈາກລະຫັດຂອງມັນບໍ່ໄດ້ຖືກເກັບໄວ້ໃນເຄື່ອງນີ້ເທື່ອ.
+This Serial Number {0} has already been added!,ໝາຍເລກ Serial Number {0} ນີ້ໄດ້ຖືກເພີ່ມແລ້ວ!
+Threshold,ເກນ
+Time,ເວລາ
+Tip: Clear cache regularly to free up space and keep the app fast.,ເຄັດ​ລັບ​: ລຶບ​ຖານ​ຄວາມ​ຈໍາ​ເປັນ​ປົກ​ກະ​ຕິ​ເພື່ອ​ສ້າງ​ພື້ນ​ທີ່​ຫວ່າງ​ແລະ​ຮັກ​ສາ app ໄດ້​ໄວ​.
+Tip: Close unused tabs or apps to reduce lag.,ເຄັດລັບ: ປິດແຖບ ຫຼື ແອັບທີ່ບໍ່ໄດ້ໃຊ້ເພື່ອຫຼຸດການຊັກຊ້າ.
+Tip: Monitor slow queries and table size for optimal performance.,ຄໍາແນະນໍາ: ຕິດຕາມການສອບຖາມຊ້າໆແລະຂະຫນາດຕາຕະລາງສໍາລັບການປະຕິບັດທີ່ດີທີ່ສຸດ.
+To Be Paid,ທີ່ຈະໄດ້ຮັບຄ່າຈ້າງ
+To Date,ເຖິງວັນທີ
+Today,ມື້ນີ້
+Today Profit,ມື້ນີ້ກຳໄລ
+Today Sales,ການຂາຍມື້ນີ້
+Toggle navigation drawer,ສະຫຼັບແຖບນຳທາງ
+Toggle Theme,ສະຫຼັບຮູບແບບສີສັນ
+Tools,ເຄື່ອງມື
+Tools for customer-facing screens and terminal-specific actions.,ເຄື່ອງ​ມື​ສໍາ​ລັບ​ຫນ້າ​ຈໍ​ທີ່​ປະ​ເຊີນ​ກັບ​ລູກ​ຄ້າ​ແລະ​ການ​ປະ​ຕິ​ບັດ​ສະ​ເພາະ​ຢູ່​ປາຍ​ຍອດ​.
+Top Brand,ຍີ່ຫໍ້ຍອດນິຍົມ
+Top Category,ປະເພດເທິງ
+Top Charge Head,ຫົວສາກສູງສຸດ
+Top Customers,ລູກຄ້າສູງສຸດ
+Top Discount,ສ່ວນຫຼຸດສູງສຸດ
+Top Items by Location,ລາຍການຍອດນິຍົມຕາມສະຖານທີ່
+Top Margin,ຂອບເທິງ
+Top Pending,ຍອດຄ້າງຢູ່
+Top Profit Item,ລາຍການກໍາໄລສູງສຸດ
+Top Return Items,ລາຍການກັບຄືນຍອດນິຍົມ
+Top Sales by Cashier,ຍອດຂາຍໂດຍ Cashier
+Top Supplier,ຜູ້ຜະລິດຊັ້ນນໍາ
+Top Suppliers by Spend,ຜູ້ຜະລິດຍອດນິຍົມໂດຍ Spend
+Top Tables,ຕາຕະລາງເທິງ
+Top Tax Head,ຫົວຫນ້າພາສີສູງສຸດ
+Top Up Amount,ຍອດເງິນ
+Top Up Card,ບັດເຕີມເງິນ
+Top Up Mode,ໂໝດເຕີມເງິນ
+Top Variant,ຕົວປ່ຽນຍອດນິຍົມ
+Total,ທັງໝົດ
+Total Amount,ຈໍານວນທັງຫມົດ
+Total Change,ການປ່ຽນແປງທັງໝົດ
+Total Charges,ຄ່າບໍລິການທັງໝົດ
+Total In,ທັງໝົດໃນ
+Total Invoices,ໃບແຈ້ງໜີ້ທັງໝົດ
+Total Items,ລາຍການທັງໝົດ
+Total Mpesa,Mpesa ທັງໝົດ
+Total Out,ທັງໝົດ
+Total Payments,ການຈ່າຍເງິນທັງໝົດ
+Total Purchase,ການຊື້ທັງໝົດ
+Total Selected :,ທັງໝົດທີ່ເລືອກ:
+Total Size,ຂະໜາດທັງໝົດ
+Total Stock Qty,ຈຳນວນຫຸ້ນທັງໝົດ
+Total:,ທັງໝົດ:
+Totals by Invoice Currency,ຈໍານວນທັງຫມົດໂດຍສະກຸນເງິນໃບແຈ້ງຫນີ້
+Track how much cash was handed back to customers,ຕິດຕາມຈໍານວນເງິນສົດທີ່ຖືກສົ່ງຄືນໃຫ້ລູກຄ້າ
+"Track recent sales, collect unpaid balances, and reopen saved work","ຕິດ​ຕາມ​ການ​ຂາຍ​ທີ່​ຜ່ານ​ມາ​, ເກັບ​ກໍາ​ຂໍ້​ມູນ​ທີ່​ຍັງ​ບໍ່​ໄດ້​ຈ່າຍ​, ແລະ​ເປີດ​ຄືນ​ການ​ເຮັດ​ວຽກ​ທີ່​ບັນ​ທຶກ​ໄວ້​"
+Transaction ID,ID ທຸລະກຳ
+Transfer,ໂອນ
+Try a different search term or clear the cart search.,ລອງໃຊ້ຄຳຊອກຫາອື່ນ ຫຼືລຶບການຊອກຫາໃນກະຕ່າ.
+Try adjusting your search or filters,ລອງປັບການຊອກຫາ ຫຼືຕົວກອງຂອງທ່ານ
+Try another source or refresh the list.,ລອງແຫຼ່ງອື່ນ ຫຼືໂຫຼດລາຍຊື່ຄືນໃໝ່.
+Try changing the date range or status filter.,ລອງປ່ຽນຊ່ວງວັນທີ ຫຼືຕົວກັ່ນຕອງສະຖານະ.
+Type,ປະເພດ
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,ບໍ່ສາມາດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບໄດ້ເຖິງແມ່ນວ່າມີການຕັ້ງຄ່າພື້ນຖານ. ກະລຸນາກວດສອບການອະນຸຍາດກ້ອງຖ່າຍຮູບ ແລະອຸປະກອນທີ່ເຂົ້າກັນໄດ້ຂອງທ່ານ.
+Unable to add offer item {0}. Please refresh and try again.,ບໍ່ສາມາດເພີ່ມລາຍການຂໍ້ສະເໜີ {0} ໄດ້. ກະລຸນາໂຫຼດຂໍ້ມູນຄືນໃໝ່ແລ້ວລອງອີກຄັ້ງ.
+Unable to add offer item. Please refresh and try again.,ບໍ່ສາມາດເພີ່ມລາຍການຂໍ້ສະເໜີໄດ້. ກະລຸນາໂຫຼດຂໍ້ມູນຄືນໃໝ່ແລ້ວລອງອີກຄັ້ງ.
+Unable to add scanned item.,ບໍ່ສາມາດເພີ່ມລາຍການທີ່ສະແກນໄດ້.
+Unable to create purchase order,ບໍ່ສາມາດສ້າງການສັ່ງຊື້ໄດ້
+Unable to delete draft invoice,ບໍ່ສາມາດລຶບໃບແຈ້ງໜີ້ສະບັບຮ່າງໄດ້
+Unable to fetch documents,ບໍ່ສາມາດດຶງເອກະສານໄດ້
+Unable to fetch draft orders,ບໍ່ສາມາດໂຫຼດຄຳສັ່ງສະບັບຮ່າງໄດ້
+Unable to fetch invoice history,ບໍ່ສາມາດດຶງຂໍ້ມູນປະຫວັດໃບແຈ້ງໜີ້ໄດ້
+Unable to fetch M-Pesa payments,ບໍ່ສາມາດດຶງເອົາການຈ່າຍເງິນ M-Pesa ໄດ້
+Unable to fetch sales orders,ບໍ່ສາມາດດຶງເອົາຄໍາສັ່ງຂາຍໄດ້
+Unable to fetch unpaid invoices,ບໍ່ສາມາດດຶງເອົາໃບແຈ້ງໜີ້ທີ່ຍັງບໍ່ໄດ້ຈ່າຍ
+Unable to generate scale barcode,ບໍ່ສາມາດສ້າງບາໂຄດຂະໜາດໄດ້
+Unable to issue gift card.,ບໍ່ສາມາດອອກບັດຂອງຂວັນໄດ້.
+Unable to load cashier PIN status.,ບໍ່ສາມາດໂຫຼດສະຖານະ PIN ຂອງ cashier ໄດ້.
+Unable to load document,ບໍ່ສາມາດໂຫຼດເອກະສານໄດ້
+Unable to load draft invoice,ບໍ່ສາມາດໂຫຼດໃບແຈ້ງໜີ້ສະບັບຮ່າງໄດ້
+Unable to load gift card balance.,ບໍ່ສາມາດໂຫຼດຍອດຄົງເຫຼືອບັດຂອງຂວັນໄດ້.
+Unable to load invoice details,ບໍ່ສາມາດໂຫຼດລາຍລະອຽດໃບແຈ້ງໜີ້ໄດ້
+Unable to load parked order,ບໍ່ສາມາດໂຫຼດຄໍາສັ່ງທີ່ຈອດໄວ້ໄດ້
+Unable to load the selected sales order,ບໍ່ສາມາດໂຫຼດຄໍາສັ່ງຂາຍທີ່ເລືອກໄດ້
+Unable to prepare document,ບໍ່ສາມາດກະກຽມເອກະສານໄດ້
+Unable to prepare return invoice,ບໍ່ສາມາດກະກຽມໃບແຈ້ງໜີ້ຄືນໄດ້
+Unable to print draft invoice,ບໍ່ສາມາດພິມໃບແຈ້ງໜີ້ສະບັບຮ່າງໄດ້
+Unable to print submitted invoice,ບໍ່ສາມາດພິມໃບແຈ້ງໜີ້ທີ່ສົ່ງມາໄດ້
+Unable to process document action,ບໍ່ສາມາດປະມວນຜົນຄຳສັ່ງເອກະສານໄດ້
+Unable to repair change allocation,ບໍ່ສາມາດສ້ອມແປງການຈັດສັນການປ່ຽນແປງໄດ້
+Unable to save cashier PIN.,ບໍ່ສາມາດບັນທຶກ PIN ຂອງ cashier ໄດ້.
+Unable to save the rate to the backend price list,ບໍ່ສາມາດບັນທຶກອັດຕາໃສ່ລາຍການລາຄາ backend ໄດ້
+Unable to submit invoice,ບໍ່ສາມາດສົ່ງໃບແຈ້ງໜີ້ໄດ້
+Unable to submit the selected payment,ບໍ່ສາມາດສົ່ງການຈ່າຍເງິນທີ່ເລືອກໄດ້
+Unable to top up gift card.,ບໍ່ສາມາດເຕີມເງິນບັດຂອງຂວັນໄດ້.
+Unable to verify cashier PIN.,ບໍ່ສາມາດຢັ້ງຢືນ PIN ຂອງ cashier ໄດ້.
+Unallocated,ບໍ່ໄດ້ຈັດສັນ
+Unallocated:,ບໍ່ໄດ້ຈັດສັນ:
+Unavailable,ບໍ່ສາມາດໃຊ້ໄດ້
+Unknown,ບໍ່ຮູ້ຈັກ
+Unknown Item,ລາຍການທີ່ບໍ່ຮູ້ຈັກ
+Unknown Warehouse,ສາງທີ່ບໍ່ຮູ້ຈັກ
+Unlock POS,ປົດລັອກ POS
+Unpaid,ບໍ່ໄດ້ຈ່າຍ
+"Unselected payments stay unallocated first, then auto reconcile after submit.","ການຈ່າຍເງິນທີ່ບໍ່ໄດ້ເລືອກຈະບໍ່ຖືກຈັດສັນກ່ອນ, ຈາກນັ້ນຄືນດີອັດຕະໂນມັດຫຼັງຈາກສົ່ງ."
+UOM,UOM
+UOM not found,ບໍ່ພົບ UOM
+Update available,ມີອັບເດດ
+Update Customer,ອັບເດດລູກຄ້າ
+Update PIN,ອັບເດດ PIN
+Update Price List Rate,ອັບເດດລາຄາລາຍການລາຄາ
+Updated,ອັບເດດ
+Updates and app info that stay out of the cashier flow.,ການອັບເດດ ແລະຂໍ້ມູນແອັບທີ່ຢູ່ນອກກະແສເງິນສົດ.
+Updates automatically,ອັບເດດອັດຕະໂນມັດ
+Usage,ການນໍາໃຊ້
+Usage Stats,ສະຖິຕິການນໍາໃຊ້
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,ໃຊ້ລະຫັດ PIN 4 ຫາ 8 ຕົວເລກສຳລັບການສະຫຼັບພະນັກງານເກັບເງິນ ແລະ ປົດລັອກເຄື່ອງຈ່າຍເງິນ.
+Use Cashier,ໃຊ້ Cashier
+Use date range to search for older invoices,ໃຊ້ຊ່ວງວັນທີເພື່ອຊອກຫາໃບແຈ້ງໜີ້ເກົ່າ
+"Use one field for manual code entry, barcode scans, or QR scans.","ໃຊ້ຊ່ອງຂໍ້ມູນຫນຶ່ງສໍາລັບການປ້ອນລະຫັດຄູ່ມື, ການສະແກນບາໂຄດ, ຫຼືການສະແກນ QR."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","ໃຊ້ຂັ້ນຕອນການເຮັດວຽກອັນດຽວສໍາລັບການກວດສອບຍອດເງິນ, ການອອກໃຫມ່, ແລະການເຕີມເງິນໂດຍບໍ່ຕ້ອງອອກຈາກ POS."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","ໃຊ້ພາກສ່ວນນີ້ເມື່ອຂໍ້ມູນເບື້ອງຕົ້ນທີ່ເກັບໄວ້ໃນຖານຄວາມຈໍາຕ້ອງການການໂຫຼດຫນ້າຈໍຄືນ, ສ້າງໃຫມ່, ຫຼືການກວດສອບການວິນິດໄສ."
+Use Western numerals,ໃຊ້ຕົວເລກຕາເວັນຕົກ
+Used:,ໃຊ້:
+Using basic camera settings due to device limitations,ການນໍາໃຊ້ການຕັ້ງຄ່າກ້ອງຖ່າຍຮູບພື້ນຖານເນື່ອງຈາກຂໍ້ຈໍາກັດຂອງອຸປະກອນ
+Using cached customer balance,ການ​ນໍາ​ໃຊ້​ຍອດ​ເງິນ​ລູກ​ຄ້າ​ທີ່​ເກັບ​ໄວ້​
+Valid until,ໃຊ້ໄດ້ຈົນກ່ວາ
+Variance %,ຄວາມແຕກຕ່າງ %
+Variants,ຕົວແປ
+Variant-wise,variant-wise
+Verify closing amounts for each payment method,ຢືນຢັນຈໍານວນປິດສໍາລັບແຕ່ລະວິທີການຊໍາລະເງິນ
+View all,ເບິ່ງທັງໝົດ
+View app information and current build details,ເບິ່ງຂໍ້ມູນ app ແລະລາຍລະອຽດການກໍ່ສ້າງໃນປະຈຸບັນ
+View Data Diagnostics,ເບິ່ງການວິເຄາະຂໍ້ມູນ
+View Details,ເບິ່ງລາຍລະອຽດ
+View invoice details,ເບິ່ງລາຍລະອຽດໃບແຈ້ງໜີ້
+View notifications,ເບິ່ງການແຈ້ງເຕືອນ
+View offline invoices,ເບິ່ງໃບແຈ້ງໜີ້ອອບລາຍ
+View restricted POS insights,ເບິ່ງຂໍ້ມູນ POS ທີ່ຖືກຈໍາກັດ
+Void Amount,ຈໍານວນທີ່ບໍ່ມີປະໂຫຍດ
+Void Count,ນັບເປັນໂມຄະ
+Voids,ຫວ່າງເປົ່າ
+Waiting for cart items,ກຳລັງລໍຖ້າລາຍການກະຕ່າ
+Waiting for payment...,ກຳລັງລໍຖ້າການຈ່າຍເງິນ...
+Walk-in Customer,ຍ່າງເຂົ້າລູກຄ້າ
+Warehouse,ສາງ
+Warning: High cache usage may affect performance.,ຄໍາເຕືອນ: ການນໍາໃຊ້ cache ສູງອາດຈະສົ່ງຜົນກະທົບຕໍ່ປະສິດທິພາບ.
+Warning: High lag may indicate heavy processing or browser slowness.,ຄຳເຕືອນ: ຄວາມຊ້າສູງອາດສະແດງເຖິງການປະມວນຜົນໜັກ ຫຼືຄວາມຊ້າຂອງບຣາວເຊີ.
+Week ?,ອາທິດ ?
+Week-wise,ປະຈໍາອາທິດ
+Weight (g),ນ້ຳໜັກ (g)
+Weight (grams),ນ້ຳໜັກ (ກຣາມ)
+We'll let you know if an invoice fails to submit,ພວກເຮົາຈະແຈ້ງໃຫ້ເຈົ້າຮູ້ຖ້າໃບແຈ້ງໜີ້ບໍ່ສາມາດສົ່ງໄດ້
+Workflow,ຂະບວນການເຮັດວຽກ
+Write off amount cannot exceed the POS profile maximum of {0},ຈໍານວນທີ່ຂຽນອອກບໍ່ສາມາດເກີນ profile POS ສູງສຸດຂອງ {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,ຈໍານວນທີ່ຂຽນອອກເກີນຂອບເຂດທີ່ອະນຸຍາດ ({0}). ກະລຸນາເພີ່ມການຈ່າຍເງິນສໍາລັບຈໍານວນທີ່ຍັງເຫຼືອ.
+Yes,ແມ່ນແລ້ວ
+"Yes, Cancel sale","ແມ່ນແລ້ວ, ຍົກເລີກການຂາຍ"
+"Yes, Close","ແມ່ນແລ້ວ, ປິດ"
+You are not allowed to print draft invoices,ທ່ານບໍ່ໄດ້ຮັບອະນຸຍາດໃຫ້ພິມໃບແຈ້ງໜີ້ສະບັບຮ່າງ
+You are offline. Add Payment will work again when the connection is restored.,ທ່ານອອບລາຍຢູ່. ເພີ່ມການຈ່າຍເງິນຈະເຮັດວຽກອີກຄັ້ງເມື່ອການເຊື່ອມຕໍ່ຄືນມາ.
+You have no notifications right now,ທ່ານບໍ່ມີການແຈ້ງເຕືອນໃນຂະນະນີ້
+Your Cart,ກະຕ່າຂອງເຈົ້າ

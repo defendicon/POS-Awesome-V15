@@ -1,0 +1,1362 @@
+POS Awesome,很棒的POS
+Fetch Items Directly from Server,直接从服务器获取项目
+Menu,菜单
+Actions,行动
+Close Shift,关闭班次
+End current session,结束当前会话
+Print Last Invoice,打印最后一张发票
+Reprint previous transaction,重印之前的交易
+Sync Offline Invoices,同步离线发票
+Upload pending transactions,上传待处理交易
+Go Online,上网
+Go Offline,离线
+Disable offline mode,禁用离线模式
+Work without server connection,无需服务器连接即可工作
+Clear Cache,清除缓存
+Remove local data and refresh,删除本地数据并刷新
+About,关于
+App information,应用信息
+Language,语言
+Change interface language,更改界面语言
+Light Mode,灯光模式
+Dark Mode,深色模式
+Switch theme appearance,切换主题外观
+Logout,退出
+Sign out of session,退出会话
+Select Language,选择语言
+Choose your preferred language for the POS interface,选择您喜欢的 POS 界面语言
+Language will be changed to,语言将更改为
+Cancel,取消
+Change Language,更改语言
+Close,关闭
+Cannot change language - same language selected,无法更改语言 - 选择相同的语言
+Language changed successfully! Reloading...,语言更改成功！正在重新加载...
+Failed to change language,更改语言失败
+Unknown error,未知错误
+- Total Unallocated,- 未分配总额
+* Required,* 必填
+{0} (Qty: {1}),{0}（数量：{1}）
+{0} actions,{0} 个操作
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} 只有 {1} 库存。您请求了{2}。调整数量或补货。
+{0} offline invoice{1} pending,{0}离线发票{1}待处理
+{0} offline invoice{1} saved as draft,{0}离线发票{1}保存为草稿
+{0} offline invoice{1} synced,{0} 离线发票{1}已同步
+{0}: {1} {2},{0}：{1} {2}
+{0}d ago,{0}天前
+{0}h ago,{0} 小时前
+{0}m ago,{0} 分钟前
+A POS supervisor is required for this action.,此操作需要 POS 主管。
+Access,访问
+Account,账户
+Account is overdrawn,账户已透支
+Acknowledge the error to resume scanning,确认错误以恢复扫描
+Acknowledge the error to resume scanning.,确认错误以恢复扫描。
+Across,跨越
+Action,行动
+Active sale,积极销售
+add,添加
+Add items from the selector to start building this sale.,从选择器中添加商品以开始构建此销售。
+Add more value to an existing gift card,为现有礼品卡增加更多价值
+Add New Address,添加新地址
+Add new customer,添加新客户
+Add on New Line,添加新行
+Add Payment,添加付款方式
+Add payment to invoice,将付款添加到发票
+Add/Edit Coupon Conditions,添加/编辑优惠券条件
+Additional Discount,额外折扣
+Additional Discount %,额外折扣%
+Address Line 1,地址行 1
+Address not found,找不到地址
+Adjust the quantity or enable negative stock to continue.,调整数量或使负库存继续存在。
+Adjustment,调整
+After returns,返回后
+Against,反对
+Against Name,反对名字
+Age Bracket,年龄范围
+All,全部
+All Caught Up!,全部都被抓住了！
+All invoices are synchronized,所有发票均同步
+All pending invoices are up to date,所有待处理的发票都是最新的
+All Profiles,所有配置文件
+All Synchronized,全部同步
+All visible invoices are fully settled.,所有可见发票均已全额结算。
+All Warehouses,所有仓库
+Allowed UOM is {0},允许的 UOM 为 {0}
+Always fetch items from server (ignore local cache),始终从服务器获取项目（忽略本地缓存）
+Amount,金额
+Amount already received,已收到金额
+Amount exceeds profile cash movement max amount.,金额超过个人资料现金流动最大金额。
+Amount must be greater than zero.,金额必须大于零。
+Amount received from customer,从客户收到的金额
+Appearance and user-level preferences for the current session.,当前会话的外观和用户级别首选项。
+Applied,应用
+Apply,申请
+Apply Gift Card,申请礼品卡
+Apply Offer,申请优惠
+Apply On,申请于
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,仅应用您想要在此发票上兑换的金额。剩余余额保留在卡上。
+Apply Redemption,申请兑换
+Applying,正在申请
+Apps,应用程序
+Are you sure you want to close? All entered data will be lost.,您确定要关闭吗？所有输入的数据都将丢失。
+Attributes (Size/Color),属性（尺寸/颜色）
+Auto Allocate Payment Amount,自动分配付款金额
+Auto Reconcile,自动协调
+Auto reconciliation completed after payment submit.,付款提交后自动对账完成。
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,自动对账完成。已分配：{0}{1}。剩余未完成：{0}{2}。
+Available Actions,可用的操作
+Available QTY,可用数量
+Available:,可用：
+Average Basket,平均篮子
+Average Bill,平均账单
+Average Ticket,平均票价
+Avg Bill,平均账单
+Avg Invoice,平均发票
+Avg Invoice Profit,平均发票利润
+Avg Invoice Value,平均发票价值
+Avg Purchase Frequency,平均购买频率
+Awesome,太棒了
+Awesome Dashboard,很棒的仪表板
+Awesome Dashboard is disabled for the selected POS Profile.,所选 POS 配置文件的 Awesome Dashboard 已禁用。
+Awesome Dashboard is unavailable for the selected scope.,Awesome Dashboard 对于所选范围不可用。
+Awesome Dashboard is visible only to POS supervisors.,Awesome Dashboard 仅对 POS 主管可见。
+Back,返回
+Back Office Cash Account,后台现金账户
+Back Office Cash Account (Optional Override),后台现金账户（可选覆盖）
+Back office cash account is required.,需要后台现金账户。
+Back to {0},返回{0}
+Background processing did not finish in time.,后台处理未及时完成。
+Background processing failed for Invoice {0}: {1},发票 {0} 的后台处理失败：{1}
+Background Submission Failed,后台提交失败
+Background sync interval (seconds),后台同步间隔（秒）
+Balance,平衡
+Balance will be updated when connection is restored,连接恢复后余额将更新
+Balances still pending,余额仍待处理
+Barcode,条码
+Barcode / QR Ready,条形码/QR 就绪
+Barcode Label Printing,条码标签打印
+Base Paid:,基本付费：
+Base Recv:,基本接收：
+Base:,基地：
+Basic Information,基本信息
+Batch,批次
+Batch Information,批次信息
+Before any return workflow,在任何退货工作流程之前
+Before returns,退货前
+Best Day,最好的一天
+Best Seller,畅销书
+Book expense or deposit from active shift.,登记活动班次的费用或押金。
+Branch / Location-wise Report,分行/地点报告
+Brand-wise,品牌明智
+Breakdown,故障
+Browse,浏览
+Build Time:,构建时间：
+Built with Frappe,用冰沙建造
+Bundle,捆绑包
+Buying Price,购买价格
+Cache cleared successfully,缓存清除成功
+Cache Usage,缓存使用情况
+cache used,使用缓存
+Calculating...,正在计算...
+Camera Access Required,需要访问相机
+Camera access was aborted. Please try again.,相机访问被中止。请再试一次。
+Camera constraints not supported by your device. Trying fallback settings...,您的设备不支持相机限制。正在尝试后备设置...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,相机正忙或被其他应用程序/选项卡阻止。关闭其他相机应用程序并重试。
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,相机权限被拒绝。请在浏览器设置中允许相机访问并刷新页面。
+Camera scanner is locked until the current error is acknowledged,相机扫描仪将被锁定，直到当前错误得到确认
+Camera started but the video stream did not load in time. Please try again.,相机已启动，但视频流未及时加载。请再试一次。
+Cancel cash movement {0}?,取消现金转移{0}？
+Cancel Payment,取消付款
+Cancel Sale,取消销售
+Cancel Sale ?,取消销售？
+Cancelled,取消
+Cannot add an item with zero or negative quantity.,无法添加数量为零或负数的项目。
+Cannot clear cache while offline,离线时无法清除缓存
+Cannot redeem customer credit more than invoice total,兑换客户积分的金额不得超过发票总额
+Cannot redeem gift cards more than invoice total,兑换礼品卡的金额不得超过发票总额
+Cannot Save Offline Invoice:,无法保存离线发票：
+Cannot Save Offline Payment:,无法保存离线付款：
+Card,卡
+Card / Online,卡/网上
+Card health after the last live lookup,上次实时查找后的卡健康状况
+Cards,卡片
+Cart,购物车
+Cash,现金
+Cash back to customers,现金返还给客户
+Cash Collections,现金托收
+Cash Deposit is disabled for this POS Profile.,此 POS 配置文件禁用现金存款。
+Cash Drawer Snapshot,现金抽屉快照
+Cash In Hand,手头现金
+Cash Movement,现金流动
+Cash movement cancelled,现金流动取消
+Cash movement deduction applied,适用现金流动扣除
+Cash movement deleted,现金流动已删除
+Cash movement is disabled for this POS Profile.,此 POS 配置文件禁用现金移动。
+Cash Movement is disabled in current POS Profile.,当前 POS 配置文件中禁用现金移动。
+Cash movement saved offline,离线保存现金流动
+Cash movement submitted,已提交现金变动
+Cash Movements,现金流动
+Cash payment cannot be less than invoice total when partial payment is not allowed,不允许部分付款时，现金支付不能少于发票总额
+Cash returned after payment,付款后返还现金
+Cashier,收银员
+Cashier Access,出纳通道
+Cashier identity and appearance preferences.,收银员的身份和外表偏好。
+Cashier PIN,收银员密码
+Cashier PIN saved successfully.,收银员密码已成功保存。
+Cashiers,收银员
+Cashier-wise,收银员明智
+Categories,类别
+Category,类别
+Category / Brand / Variant Report,类别/品牌/变体报告
+Category-wise,按类别分类
+Category-wise Margin,类别利润率
+Certificate,证书
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,证书丢失或不可信。 QZ 可能会显示确认对话框。
+Certificate is trusted. Silent QZ printing is active.,证书是可信的。静默 QZ 打印已激活。
+Change,改变
+Change allocation repaired,更改分配已修复
+Change Price,更改价格
+Change Return,更改退货
+Change Returned,零钱退回
+Change terminal cashier,变更航站楼收银员
+Charge Heads,充电头
+Charges,收费
+Charges not found,未找到费用
+Check Balance,检查余额
+Check balance for any card. Supervisors can issue and top up cards here.,检查任何卡的余额。主管可以在这里发卡和充值。
+Check balance only,仅检查余额
+Check for new commits,检查新的提交
+Check for Updates,检查更新
+Check live balance before applying redemption,申请兑换前检查实时余额
+Check live balance before redemption,兑换前检查实时余额
+Checking...,正在检查...
+Cheque/Reference Date,支票/参考日期
+Cheque/Reference No,支票/参考号
+Choose the cashier currently operating this terminal.,选择当前操作该终端的收银员。
+City,城市
+Clear,清除
+Clear All,全部清除
+Clear all barcode items,清除所有条码项目
+Clear all purchase order items,清除所有采购订单项目
+Clear Search,清除搜索
+Clearing local cache...,正在清除本地缓存...
+Click to refresh,点击刷新
+Client CPU Lag:,客户端 CPU 延迟：
+Client Memory Usage:,客户端内存使用情况：
+Client Metrics,客户指标
+Close about dialog,关闭关于对话框
+Close cashier switcher,关闭收银台开关
+Close closing shift dialog,关闭关闭班次对话框
+Close column selector,关闭列选择器
+Close Dialog,关闭对话框
+Close drafts dialog,关闭草稿对话框
+Close invoice details dialog,关闭发票详细信息对话框
+Close invoice management,关闭发票管理
+Close offline invoices dialog,关闭离线发票对话框
+Close packing list dialog,关闭装箱单对话框
+Close returns dialog,关闭退货对话框
+Close sales orders dialog,关闭销售订单对话框
+Close Scanner,关闭扫描仪
+Close scanner dialog,关闭扫描仪对话框
+Close Settings,关闭设置
+Closing Amount,平仓金额
+Closing POS Shift,关闭 POS 班次
+Closing Snapshot Available,关闭快照可用
+Code,代码
+Code scanned successfully,扫码成功
+COGS,销货成本
+Collapse item details,折叠项目详细信息
+Collected,已收集
+Cols,科尔斯
+Columns,专栏
+commits,提交
+Completed and active sales in this range,该范围内已完成且活跃的销售
+Completed returns will appear here.,已完成的退货将显示在此处。
+Confirm,确认
+Confirm Close,确认关闭
+Confirm Mobile Number,确认手机号码
+Confirm PIN,确认密码
+Connect,连接
+Connect printer and manage certificate,连接打印机并管理证书
+Connecting to QZ Tray...,正在连接到 QZ 托盘...
+Connection problem while submitting invoice,提交发票时出现连接问题
+Connections:,连接：
+Connectivity and cached prerequisite status were rechecked.,重新检查连接和缓存的先决条件状态。
+Continue Editing,继续编辑
+Could not fetch latest balance from server,无法从服务器获取最新余额
+Count,计数
+Country,国家
+Coupon,优惠券
+Coupons,优惠券
+Cover,封面
+CPU Cores:,CPU核心：
+Create,创建
+Create and load a new prepaid card,创建并加载新的预付卡
+Create and preload a new gift card,创建并预加载新的礼品卡
+Create Bill,创建账单
+Create Customer,创建客户
+Create New Item,创建新项目
+Create or change your PIN,创建或更改您的 PIN
+Create PIN,创建 PIN 码
+Create POS Opening Shift,创建 POS 开放班次
+Create Purchase Order,创建采购订单
+Create Return,创建回报
+Create return from invoice,从发票创建退货
+Create Supplier,创建供应商
+Credit and Output,信用与产出
+Credit Note,贷方票据
+Credit Outstanding,信用状况良好
+Credit sales remaining to be collected,尚待收取的赊销
+Critical,关键
+Currency,货币
+Current,当前
+Current Event Loop Lag:,当前事件循环滞后：
+Current Month,当月
+Current PIN,当前密码
+Current Profile,当前简介
+Current redeemable value on the gift card,礼品卡当前的可兑换价值
+Current User,当前用户
+Custom,定制
+Custom Due Days,自定义到期日
+Custom items per page,每页自定义项目
+Customer,客户
+Customer already selected,客户已选择
+Customer Balance,客户余额
+Customer balance unavailable offline,客户余额离线不可用
+Customer created successfully.,客户创建成功。
+Customer creation failed.,客户创建失败。
+Customer Details,客户详情
+Customer display channel is missing,客户显示通道缺失
+Customer display was blocked. Please allow pop-ups for this site.,客户显示屏被屏蔽。请允许该网站弹出窗口。
+Customer group is required,客户群为必填项
+Customer is required to add payment,客户需添加付款
+Customer Name is required,客户姓名为必填项
+Customer not selected,未选择客户
+Customer Report,客户报告
+Customer saved offline,客户离线保存
+Customer Screen,客户屏幕
+Customer territory is required,需要客户区域
+Customer updated successfully.,客户更新成功。
+Customer-facing tools and printer setup.,面向客户的工具和打印机设置。
+Customers,客户
+Customers not found,未找到客户
+Daily cashier actions without scrolling.,日常收银操作，无需滚动。
+Daily Sales,每日销售额
+Daily Sales Summary,每日销售总结
+Data loaded in form. Review and submit.,数据以表单形式加载。审核并提交。
+Database Health,数据库健康状况
+Database health affects overall system speed and reliability.,数据库的健康状况会影响整个系统的速度和可靠性。
+Database Info,数据库信息
+Date,日期
+Day ?,日？
+days,天
+Day-wise (MTD),按日计算 (MTD)
+Day-wise Movement,每日运动
+Dead Stock,滞销库存
+Dead Stock Items,滞销商品
+Decrease quantity,减少数量
+Default,默认
+Default:,默认值：
+Delete,删除
+Delete cancelled cash movement {0}?,删除已取消的现金流动 {0}？
+Delete Draft,删除草稿
+Delete draft invoice,删除草稿发票
+Delete draft invoice {0}?,删除草稿发票 {0}？
+Delete Invoice,删除发票
+Delete offline invoice,删除离线发票
+Delivered,已交付
+Delivery Charges,运费
+Delivery Information,配送信息
+Delivery Note {0} created,交货单 {0} 已创建
+Delivery note created,交货单已创建
+Deployed Bundle:,部署的捆绑包：
+Deposit,押金
+Description,描述
+Detailed Supplier Breakdown,详细的供应商分类
+Detecting formats:,检测格式：
+Device Memory:,设备内存：
+Difference,差异
+Difference (In Company Currency),差异（以公司货币计）
+Disable offline mode first to recheck live connectivity.,首先禁用离线模式以重新检查实时连接。
+Disconnect,断开连接
+discount,折扣
+Discount %,折扣%
+Discount / Void / Return Report,折扣/作废/退货报告
+Discount Amount,折扣金额
+Discount limited by POS Profile,折扣受 POS 配置文件限制
+Discounted Invoices,折扣发票
+Discounts,折扣
+Dismiss,解雇
+Download Certificate,下载证书
+Draft,吃水
+Draft invoice deleted,草稿发票已删除
+Draft source,草稿来源
+Drafts,草稿
+Due {0},截止日期：{0}
+Due Date,截止日期
+Duplicate,重复
+Edit customer,编辑客户
+Edit discount amount,编辑折扣金额
+Edit discount percentage,编辑折扣百分比
+Edit Gift Application,编辑礼物申请
+Edit item name,编辑项目名称
+Edit quantity,编辑数量
+Edit rate,编辑率
+Edit unit of measure,编辑计量单位
+Edited,已编辑
+Employee,员工
+Enable background sync,启用后台同步
+Enable Customer Display in POS Profile first.,首先在 POS 配置文件中启用客户显示。
+Enter a PIN.,输入 PIN 码。
+Enter a valid grams value,输入有效的克值
+Enter new price list rate,输入新价目表费率
+Enter Quantity,输入数量
+Enter the cashier PIN to continue.,输入收银员 PIN 码以继续。
+Enter the current PIN first.,首先输入当前的 PIN。
+"Enter the current PIN, then choose a new one.",输入当前的 PIN 码，然后选择一个新的 PIN 码。
+Enter valid grams for scale barcode,输入秤条形码的有效克数
+Entries,参赛作品
+Error accessing camera:,访问相机时出错：
+Error calculating prices,计算价格时出错
+Error fetching customer balance,获取客户余额时出错
+Error in change calculations!,变化计算错误！
+Error Loading Data,加载数据时出错
+Error loading invoice details,加载发票详细信息时出错
+Error processing invoice,处理发票时出错
+Error processing payment,处理付款时出错
+Error searching invoices,搜索发票时出错
+Error submitting invoice:,提交发票时出错：
+Error submitting invoice: {0},提交发票时出错：{0}
+Error submitting invoice: No response from server,提交发票时出错：服务器没有响应
+Error updating currency,更新货币时出错
+Error updating item details,更新商品详细信息时出错
+Est. Purchase,预计。购买
+Est. Value,预计。价值
+Event-loop lag measures how busy your browser is. Lower is better.,事件循环延迟衡量浏览器的繁忙程度。越低越好。
+Every,每个
+Exchange Rate,汇率
+Expand item details,展开项目详细信息
+Expected Amount (In Company Currency),预期金额（以公司货币计）
+Expected Cash,预期现金
+Expected cash on hand grouped by currency,按货币分组的预期手头现金
+Expected vs Actual,预期与实际
+Expense,费用
+Expense Account (Optional Override),费用账户（可选覆盖）
+Expense account is required.,需要费用账户。
+Expenses and deposits posted during this shift,本班次期间过帐的费用和押金
+Expired,已过期
+Failed to auto reconcile payments.,无法自动核对付款。
+Failed to cancel cash movement,取消现金流动失败
+Failed to clear cache,清除缓存失败
+Failed to create item,创建项目失败
+Failed to create supplier,创建供应商失败
+Failed to delete cash movement,删除现金流动失败
+Failed to generate scale barcode. Using item barcode only.,生成秤条形码失败。仅使用商品条形码。
+Failed to load cash movement context.,无法加载现金移动上下文。
+Failed to load dashboard data.,无法加载仪表板数据。
+Failed to reload invoice from server,无法从服务器重新加载发票
+Failed to submit cash movement,无法提交现金变动
+Failed to sync offline cash movements,无法同步离线现金变动
+Fast cashier actions for active shifts.,快速收银行动，实现主动轮班。
+Fast Moving Items,快速移动的物品
+Fees,费用
+Fetch the latest offline prerequisite updates,获取最新的离线先决条件更新
+Find a sales order quickly and load it into the current sale.,快速查找销售订单并将其加载到当前销售中。
+Fixing payment amounts for return invoice...,修复退货发票的付款金额...
+Flash Off,闪光灯关闭
+Flash On,闪光灯开启
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.",对于“产品捆绑”项目，将从“装箱单”表中考虑仓库、序列号和批次号。如果任何“产品捆绑”项目的所有包装项目的仓库和批次号都相同，则可以在主项目表中输入这些值；值将被复制到“装箱单”表中。
+Free,免费
+Free Qty,免费数量
+Frequency,频率
+from,来自
+From Date,开始日期
+Fulfillment Details,履行详情
+Full Name,全名
+Gain,增益
+Generate a fresh prepaid card and start it with an opening balance.,生成一张新的预付卡并以期初余额开始。
+Generate and install the certificate to allow fully silent printing without trust prompts.,生成并安装证书以允许完全静默打印，无需信任提示。
+Generate Certificate,生成证书
+Generated scale barcode: {0},生成的秤条形码：{0}
+Get Payments,获取付款
+Gift Card,礼品卡
+Gift card amount must be greater than zero.,礼品卡金额必须大于零。
+Gift Card Code,礼品卡代码
+Gift card code is required for redemption,兑换时需要礼品卡代码
+Gift card code is required.,需要礼品卡代码。
+Gift card issued successfully.,礼品卡发放成功。
+Gift card loaded successfully.,礼品卡加载成功。
+Gift Card Management,礼品卡管理
+Gift card payment,礼品卡支付
+Gift card redemption requires an online connection,礼品卡兑换需要在线连接
+Gift card topped up successfully.,礼品卡充值成功。
+Gift Cards,礼品卡
+Go to Frappe Desk,前往冰沙柜台
+Grand Total,总计
+Gross Margin,毛利率
+Gross Profit,毛利
+Gross Sales,销售总额
+Group not found,找不到组
+"Grouped controls for terminal, UI, and session settings.",用于终端、UI 和会话设置的分组控件。
+Grouped totals for each payment method and currency,每种付款方式和货币的分组总计
+Hide,隐藏
+Hide Gift Card,隐藏礼品卡
+Hide Non Essential Fields,隐藏非必需字段
+Hide quantity decimals,隐藏数量小数点
+Hide search tools,隐藏搜索工具
+Hide zero rated items,隐藏零评级项目
+High,高
+History,历史
+Hourly (Today),每小时（今天）
+How this section works,本部分如何运作
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.",如果仍然存在过时数据，请打开“设置”>“离线和同步”，然后在在线时再次运行“重建离线数据”。
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.",如果警告仍然存在，请打开“设置”>“离线和同步”，然后运行“刷新离线数据”或“重建离线数据”。
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,将证书导入到QZ Tray中，并在每台POS机上重新启动QZ Tray。
+In,在
+In stock: {0},库存：{0}
+Include Batch / Serial,包括批量/串行
+Include Price,包含价格
+Increase quantity,增加数量
+IndexedDB,索引数据库
+Initial Amount,初始金额
+Initialize your shift with opening balances,使用期初余额初始化您的班次
+Initializing application...,正在初始化应用程序...
+"Inspect cache, sync, and prerequisite status",检查缓存、同步和先决条件状态
+Installed Applications,已安装的应用程序
+Insufficient stock:\n{0},库存不足：\n{0}
+Invalid rate,无效率
+Inventory Status Report,库存状态报告
+Invoice,发票
+Invoice {0} is Submitted,发票 {0} 已提交
+Invoice {0} processed successfully,发票 {0} 已成功处理
+Invoice {0} submission failed,发票 {0} 提交失败
+Invoice {0} was already submitted,发票 {0} 已提交
+Invoice Adjustments,发票调整
+Invoice Change,发票变更
+Invoice Details,发票详情
+Invoice is still in draft after background submission.,后台提交后发票仍处于草稿状态。
+Invoice Items,发票项目
+Invoice Management,发票管理
+Invoice Mgmt,发票管理
+Invoice saved offline,发票离线保存
+Invoice submission failed,发票提交失败
+Invoice Submitted,发票已提交
+"Invoice value settled by loyalty points, not cash collection",发票价值通过忠诚度积分结算，而不是现金收取
+Invoices,发票
+Invoices already past due date,发票已逾期
+Invoices saved as POS Invoices,发票另存为 POS 发票
+Invoices still carrying balances,发票仍有余额
+Issue Mode,发行模式
+Issue New Card,发行新卡
+Issue Workflow,问题工作流程
+"Issue, top up, and check",发行、充值、检查
+Item,项目
+Item / Product Sales Report,项目/产品销售报告
+Item {0} added to invoice,项目 {0} 已添加到发票中
+Item '{0}' has no barcode,商品“{0}”没有条形码
+Item Code,商品代码
+Item created successfully,项目创建成功
+Item is out of stock,商品缺货
+Item Name,商品名称
+Item not found,未找到项目
+Item order updated,商品订单已更新
+Item Selector Settings,项目选择器设置
+Items,项目
+Items added in POS will appear here automatically.,POS 中添加的商品将自动显示在此处。
+Items added to invoice,添加到发票的项目
+Items per page,每页项目数
+Items Sold,售出物品
+Items/Invoice,物品/发票
+Item-wise Profitability,逐项盈利能力
+Journal Entry,日记条目
+json,json
+Just now,刚才
+Keep offline prerequisites healthy and recover stale data safely.,保持离线先决条件的健康并安全地恢复过时的数据。
+Labels,标签
+"Language, theme, terminal tools, and session controls.",语言、主题、终端工具和会话控件。
+Last,最后
+Last 14 Days (Paid vs Pending),过去 14 天（已付费与待处理）
+Last 14 Days Activity,过去 14 天的活动
+Last 14 Days Gross Profit,最近 14 天毛利润
+Last 14 Days Purchases,过去 14 天的购买记录
+Last 14 Days Tax/Charges,过去 14 天税费/费用
+Last sync:,上次同步：
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},上次同步：{0} |好的：{1} |失败：{2} |跳过：{3}
+Latest entries for current shift,当前班次的最新条目
+Lead Time,交货时间
+Limited,有限公司
+lines,线
+List,列表
+Live Snapshot,实时快照
+Load a POS profile and cashier first.,首先加载 POS 配置文件和收银员。
+Load More Invoices,加载更多发票
+Load previously saved invoices,加载以前保存的发票
+Load Sale,加载销售
+Load Sales Invoice,加载销售发票
+Loading app data...,正在加载应用程序数据...
+Loading customer database...,正在加载客户数据库...
+Loading customers...,正在加载客户...
+Loading database stats...,正在加载数据库统计信息...
+Loading details...,正在加载详细信息...
+Loading invoice history...,正在加载发票历史记录...
+Loading items...,正在加载项目...
+Loading product catalog...,正在加载产品目录...
+Loading return invoices...,正在加载退货发票...
+Loading server CPU/memory usage...,正在加载服务器 CPU/内存使用情况...
+Loading suppliers...,正在加载供应商...
+Loading unpaid invoices...,正在加载未付发票...
+Loading view...,正在加载视图...
+Loading...,正在加载...
+Local storage is unavailable. Switching to online-only mode.,本地存储不可用。切换到仅在线模式。
+localStorage,本地存储
+Location Performance,位置表现
+Locations,地点
+Lock Screen,锁屏
+Lookup Workflow,查找工作流程
+Loss,损失
+Low,低
+Low Stock,库存不足
+Low Stock Alerts,库存不足警报
+Low Stock Items,库存不足的商品
+Low Stock Threshold,库存门槛低
+Low Stock Total,库存总量低
+Lowest Margin,最低保证金
+Low-frequency maintenance and system details.,低频维护和系统细节。
+Loyalty Redeemed,忠诚度得到回报
+Loyalty Redemption,忠诚度兑换
+Make New Payment,进行新付款
+Manage all,管理全部
+Manage and synchronize your offline transactions,管理和同步您的离线交易
+Manage Cashier PIN,管理收银员 PIN
+"Manage offline tools, terminal controls, and maintenance from one workspace.",从一个工作区管理离线工具、终端控制和维护。
+manual,手册
+"Manual codes, barcode scans, and QR scans work in the same field",手动编码、条形码扫描和 QR 扫描在同一领域工作
+Manual offline mode is enabled,手动离线模式已启用
+Margin,保证金
+Maximum available quantity is {0}. Quantity adjusted to match stock.,最大可用数量为{0}。调整数量以匹配库存。
+Maximum discount amount for this offer item is {0}.,此优惠商品的最大折扣金额为 {0}。
+Maximum discount percentage for this offer item is {0}%.,此优惠商品的最大折扣百分比为 {0}%。
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,最大报价数量为 {0}。数量调整至允许限度。
+Medium,中等
+Method-wise Collections,方法明智的集合
+Minimum allowed rate for this offer item is {0}.,此优惠项目允许的最低价格为 {0}。
+Minimum Qty,最小数量
+Mobile No,手机号码
+Mode,模式
+Mode of Payment,付款方式
+Month,月份
+Month ?,月？
+Monthly Profit,每月利润
+Monthly Sales,每月销售额
+Monthly Sales Summary,每月销售总结
+Month-wise,按月计算
+Most Active Cashiers,最活跃的收银员
+Movement Type,运动类型
+Movements,动作
+Multi Currency,多币种
+N/A,不适用
+Name,名称
+Negative Stock,负库存
+Negative Stock Items,负库存商品
+Negative values not allowed,不允许使用负值
+Net,网络
+Net Qty,净数量
+Net Sales,净销售额
+Net Value,净值
+Never,从来没有
+New changes are ready to load,新的更改已准备好加载
+New Item,新商品
+New Offer Available,新优惠推出
+New PIN,新密码
+New rate,新率
+Next unit of measure,下一个测量单位
+No attribute data found.,未找到属性数据。
+No Barcode,无条形码
+No barcode found for UOM '{0}',未找到 UOM“{0}”的条形码
+No branch/location data found.,未找到分行/位置数据。
+No brand data found.,未找到品牌数据。
+No cached gift card balance is available offline.,离线时无法使用缓存的礼品卡余额。
+No camera found on this device. Please ensure your device has a working camera.,在此设备上找不到相机。请确保您的设备有可用的摄像头。
+No capability warnings recorded yet.,尚未记录任何能力警告。
+No cash expected for this shift.,这一转变预计不会有现金。
+No cash mode configured,未配置现金模式
+No cash movement type is allowed for this POS Profile.,此 POS 配置文件不允许现金移动类型。
+No cashier PIN is set yet. Create one now.,尚未设置收银员密码。立即创建一个。
+No cashier profiles are available for this POS profile yet.,此 POS 配置文件尚无可用的收银员配置文件。
+No cashier-wise discount/void/return activity.,没有收银员折扣/作废/退货活动。
+No category data found.,未找到类别数据。
+No category profitability data found.,未找到类别盈利能力数据。
+No change returned recorded for this shift.,此班次没有返回任何更改记录。
+No change-allocation invoices match the current filters.,没有与当前过滤器匹配的变更分配发票。
+No charge head breakdown found.,未发现充电头故障。
+No Company Selected,未选择公司
+No customer sales data found.,未找到客户销售数据。
+No day-wise discount/void/return trend.,没有每日折扣/作废/退货趋势。
+No day-wise payment data found.,未找到每日付款数据。
+No day-wise profitability trend found.,未发现每日盈利趋势。
+No day-wise purchase data found.,未找到每日购买数据。
+No day-wise sales trend found.,未发现每日销售趋势。
+No day-wise tax/charges trend found.,未发现每日税收/费用趋势。
+No dead stock items.,没有滞销商品。
+No due date,无截止日期
+No exact repair match found for this invoice,找不到与此发票完全匹配的维修
+No hourly sales trend found for today.,没有发现今天每小时的销售趋势。
+No invoice activity found.,未发现发票活动。
+No invoices found,没有找到发票
+No invoices found. Try different search criteria.,没有找到发票。尝试不同的搜索条件。
+No invoices recorded for this shift.,此班次没有记录任何发票。
+No item profitability data found.,未找到商品盈利能力数据。
+No item sales data found for this period.,没有找到该期间的商品销售数据。
+No items found,没有找到物品
+No items in cart,购物车中没有商品
+No items with barcodes to print,没有带条形码的物品可供打印
+No location-wise top item data found.,未找到按位置排序的顶级项目数据。
+No low stock alerts right now.,目前没有库存不足警报。
+No low stock items.,没有库存不足的商品。
+No matching items in cart,购物车中没有匹配的商品
+No month-wise sales trend found.,未发现按月计算的销售趋势。
+No negative stock items.,无负库存商品。
+No notifications yet,还没有通知
+No offline cash movement synced.,没有同步离线现金流动。
+No offline invoices pending synchronization,没有待同步的离线发票
+No offline sync issues recorded yet.,尚未记录离线同步问题。
+No out-of-stock items.,没有缺货的商品。
+No outstanding credit invoices for this shift.,此班次没有未清信用发票。
+No payment collection data found.,未找到收款数据。
+No payment rows available on this invoice.,此发票上没有可用的付款行。
+No payments registered for this shift.,没有登记此班次的付款。
+No pending balances in this period.,此期间无待结余额。
+No pending offline invoices,没有待处理的离线发票
+No Print Formats Found,未找到打印格式
+No profiles found for selected scope. Falling back to current profile failed.,未找到所选范围的配置文件。回退到当前配置文件失败。
+No recent customer activity found.,未找到最近的客户活动。
+No recent stock entries found.,没有找到最近的股票条目。
+No records found,没有找到记录
+No reorder suggestions right now.,目前没有重新订购建议。
+No repeat customers in this period.,期间没有回头客。
+No response from server,服务器没有响应
+No return invoices found,未找到退货发票
+No return item trend found.,未发现退货趋势。
+No returnable items found for this invoice,未找到此发票的可退货商品
+No returns were processed in this shift.,本班次未处理任何退货。
+No risk activity found.,未发现风险活动。
+No sales activity found for this period.,在此期间未发现任何销售活动。
+No slow moving items.,没有缓慢移动的物品。
+No staff sales activity found.,未发现员工销售活动。
+No stock movement for this period.,此期间没有库存变动。
+No submitted cash movements in this shift.,本班次没有提交现金变动。
+No supplier purchases found in this month.,本月未发现供应商采购。
+No suppliers found for this period.,此期间未找到供应商。
+No sync trigger has run yet in this session.,此会话中尚未运行同步触发器。
+No tax head breakdown found.,未发现税头明细。
+No top items found for this location.,没有找到该位置的热门商品。
+No unpaid invoices,没有未付发票
+No variant data found.,未找到变体数据。
+No week-wise sales trend found.,未发现每周销售趋势。
+No.,不。
+Nobile Number,贵族号码
+Not available,不可用
+Not checked,未检查
+Not selected,未选择
+Not Set,未设置
+Notifications,通知
+Offer,优惠
+Offer Applied,已申请优惠
+Offer criteria exceeded,超出报价标准
+Offer Item,优惠项目
+Offer item unavailable,优惠商品不可用
+Offer Removed,优惠已删除
+Offer UOM cannot be changed,报价单位无法更改
+Offer?,报价？
+Offers,优惠
+Offline,离线
+Offline & Sync,离线和同步
+Offline Capabilities,离线能力
+Offline data status refreshed,离线数据状态刷新
+Offline diagnostics,离线诊断
+Offline Invoices,离线发票
+Offline invoices status,离线发票状态
+Offline invoices synced,离线发票已同步
+Offline Queue: {0},离线队列：{0}
+Offline rebuild guidance,离线重建指导
+Offline restore is unavailable for this session.,此会话无法进行脱机恢复。
+Offline selling is available with degraded capabilities.,离线销售可在功能降级的情况下使用。
+Offline snapshot does not match the current POS state.,离线快照与当前 POS 状态不匹配。
+Offline Status,离线状态
+"Offline, terminal, and system controls",离线、终端和系统控制
+OK,好的
+Online,在线
+Open actions menu,打开操作菜单
+Open balance to collect,待收未结余额
+Open Customer Display,打开客户展示
+Open drawer,打开抽屉
+Open invoices,开具发票
+Open Payments?,开放支付？
+Open POS home,打开 POS 主页
+Open this screen from POS Menu -> Open Customer Display.,从 POS 菜单 -> 打开客户显示屏打开此屏幕。
+OpenCV image processing enabled - Enhanced barcode detection,启用 OpenCV 图像处理 - 增强条形码检测
+OpenCV image processing unavailable on this device,OpenCV 图像处理在此设备上不可用
+OpenCV Off,OpenCV 关闭
+OpenCV On,OpenCV 开启
+OpenCV processing disabled,OpenCV 处理已禁用
+Opening Amount,开仓金额
+Opening Cash,开仓现金
+options,选项
+Order,订单
+Original,原创
+Other,其他
+Out,出
+Out of Stock,缺货
+Out of Stock Items,缺货商品
+Outstanding,杰出
+Outstanding Credit by Currency,按币种划分的未偿信贷
+Overdue,逾期
+Overpayment Change,超额付款变更
+Overpayment change deducted: {0},扣除多付款项变更：{0}
+Packing List,装箱单
+Page Format,页面格式
+Page unavailable offline,页面离线不可用
+Paid,付费
+Paid (orig):,付费（原）：
+Paid Amount,支付金额
+Paid change cannot be greater than total change!,付费找零不能大于总找零！
+Paid:,付费：
+Parent Item,父项
+Partial,部分
+Partly Paid,部分付费
+Party Account,当事人账户
+Party Type,派对类型
+Pause terminal until next cashier,暂停终端直至下一个收银员
+PAY,支付
+Payment,付款方式
+Payment Account,支付账户
+Payment entries processed for Invoice {0},已处理发票 {0} 的付款条目
+Payment Entry Type,付款条目类型
+Payment History,付款记录
+Payment ID,付款ID
+Payment Method Report,付款方式报告
+Payment Methods,付款方式
+Payment of {0} received successfully.,成功收到{0}的付款。
+Payment Progress,付款进度
+Payment Reconciliation,付款对账
+Payment request status could not be retrieved. Please try again,无法检索付款请求状态。请重试
+Payment Request took too long to respond. Please try requesting for payment again,付款请求响应时间过长。请尝试再次请求付款
+Payment saved offline,离线保存付款
+Payment State,付款状态
+Payment Status,付款状态
+Payment submitted but print function could not be executed. Payment name not found.,付款已提交，但无法执行打印功能。未找到付款名称。
+Payment submitted.,付款已提交。
+Payment Summary,付款摘要
+Payments,付款方式
+Payments are not open. Do you want to open payments and submit?,付款方式尚未开放。您想打开付款并提交吗？
+Payments by Mode of Payment,按付款方式付款
+PDF,PDF
+Peak Hour,高峰时段
+Peak Memory:,峰值内存：
+Peak Server:,峰值服务器：
+Peak:,峰值：
+Pending,待定
+Pending Amount,待处理金额
+Pending count updated from {0} to {1},待处理计数从 {0} 更新为 {1}
+Pending Exposure,待曝光
+Pending Invoices,待处理的发票
+Pending Ratio,待处理比率
+Pending Sales,待售
+Pending sales: {0} | Cache usage: {1}%,待售：{0} |缓存使用率：{1}%
+Pending Sync,待同步
+Pending: {0},待处理：{0}
+Pending: {0} | Synced: {1} | Draft: {2},待处理：{0} |已同步：{1} |草稿：{2}
+Per Page,每页
+Personal,个人
+Personal preferences adjust the current cashier experience without changing the active POS route.,个人喜好调整当前的收银体验，而不改变活动的 POS 路线。
+PIN confirmation does not match.,PIN 确认不匹配。
+PIN must be 4 to 8 digits.,PIN 码必须为 4 至 8 位数字。
+Please add at least one item.,请至少添加一项。
+Please allow camera access to scan codes,请允许相机访问扫码
+Please enter payment amount,请输入付款金额
+Please fill all required fields,请填写所有必填字段
+Please make a payment or select a payment,请付款或选择付款方式
+Please request phone payment or use another payment method,请申请电话付款或使用其他付款方式
+Please select a customer first,请先选择客户
+Please select a party,请选择派对
+Please select a party before reconciling.,请在和解前选择一方。
+Please select a valid movement type.,请选择有效的移动类型。
+Please select an invoice,请选择发票
+Please select company before reconciling.,请在对账前选择公司。
+Please set the customer's mobile number,请设置客户手机号码
+Please try again or enter the item manually.,请重试或手动输入该项目。
+Please verify the barcode or check the item's availability.,请验证条形码或检查商品的可用性。
+Points,积分
+Popup blocked. Please allow popups.,弹出窗口被阻止。请允许弹出窗口。
+POS,销售点
+POS controls and maintenance,POS 控制和维护
+POS Expense is disabled for this POS Profile.,此 POS 配置文件禁用 POS 费用。
+POS is running with limited offline prerequisites.,POS 正在运行，但离线先决条件有限。
+POS Profile,POS简介
+Position the QR code or barcode within the scanning area,将 QR 码或条形码放置在扫描区域内
+Posting,发帖
+Posting and Price List,发布和价目表
+Posting Date,发布日期
+Preparing background sync,准备后台同步
+"Press OK to continue offline with a warning, or Cancel to retry.",按“确定”继续脱机并出现警告，或按“取消”重试。
+Previous unit of measure,以前的计量单位
+Price List,价目表
+Price List Rate,价目表费率
+Price list rate updated locally only,价目表费率仅在本地更新
+Pricing & Discounts,定价和折扣
+Pricing Rule,定价规则
+Print,打印
+Print Draft,打印草稿
+Print Format (Invoice),打印格式（发票）
+Print Format (Order),打印格式（订单）
+Print invoice,打印发票
+Print Purchase Invoice instead of PO,打印采购发票而不是 PO
+Printer,打印机
+Processed returns impacting the shift totals,处理后的退货会影响轮班总数
+Processing Payment,处理付款
+Processing payment entries for Invoice {0},处理发票 {0} 的付款条目
+Profile,公司简介
+Profiles,型材
+Profit,利润
+Profit: Invoice Item Estimate,利润：发票项目估算
+Profit: Stock Ledger (COGS),利润：库存分类账 (COGS)
+Profitability Report,盈利报告
+Prorated return discount,按比例退货折扣
+Purchase Amount,购买金额
+Purchase Invoices,采购发票
+Purchase Order created,已创建采购订单
+Qty,数量
+Qualified,合格
+Quantity,数量
+Quantity exceeds available stock,数量超过可用库存
+Quick Actions,快速行动
+Quotation {0} is Submitted,报价{0}已提交
+Quotation submitted,报价已提交
+QZ Tray connected.,QZ 托盘已连接。
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ 托盘被手动断开。按“连接”以再次启用它。
+QZ Tray is not connected.,QZ 托盘未连接。
+QZ Tray Setup,QZ 托盘设置
+Rate,率
+Rate adjusted to maximum allowed discount,费率调整至允许的最大折扣
+Ready,准备好
+Ready to resume,准备恢复
+Ready!,准备好了！
+Real-time POS insights for retail operations.,针对零售运营的实时 POS 洞察。
+Rebuild Offline Data,重建离线数据
+Receive,接收
+Receive now,立即接收
+Received,已收到
+Received:,收到：
+Recent Movement Entries,最近的运动条目
+Recent updates about your invoices,有关您发票的最新更新
+Recently Active Customers,最近活跃客户
+Rechecking connection,重新检查连接
+Reconcile payment methods and close shift,协调付款方式并关闭班次
+Reconciling Payments,核对付款
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.",在线时重新连接并打开此页面一次，然后离线刷新即可恢复。
+Reconnect online to refresh cached offline data from the server.,重新在线连接以刷新服务器缓存的离线数据。
+Recreate local offline prerequisites from scratch,从头开始重新创建本地离线先决条件
+Recv:,接收：
+Redeem,兑换
+Redeem / Scan,兑换/扫描
+Redeem Amount,兑换金额
+Redeem Mode,兑换模式
+Redeemed Amount,兑换金额
+Redeemed credit cannot be greater than its total.,兑换的积分不能大于其总额。
+Redemption and Totals,赎回及总数
+Reference,参考
+Refresh,刷新
+Refresh Exchange Rate,刷新汇率
+Refresh Offline Data,刷新离线数据
+Refresh Printers,刷新打印机
+Refund,退款
+Release Notes,发行说明
+Reload,重新加载
+Reload customers,重新加载客户
+Reload Items,重新加载物品
+Reload Now,立即重新加载
+Reload to apply the latest changes. Your current session will be refreshed.,重新加载以应用最新更改。您当前的会话将被刷新。
+Reload Workflow,重新加载工作流程
+Remarks,备注
+Remarks are required.,需要备注。
+Remove,删除
+Remove barcode item,删除条形码项目
+Remove cached data and reload the POS app,删除缓存数据并重新加载 POS 应用程序
+Remove item,删除项目
+Remove Offer,删除优惠
+Reorder / Purchase Suggestions,重新订购/购买建议
+Repair Candidate,维修候选者
+Repair Change Allocation,维修变更分配
+Repair requires an online connection,修复需要在线连接
+Repaired,已修复
+Repairing change allocation,修复变更分配
+Repeat Customers,回头客
+Repeat Rate,重复率
+Request,请求
+Request ID: {0},请求 ID：{0}
+Request Payment,请求付款
+Requested route: {0},请求的路线：{0}
+Required columns cannot be hidden,无法隐藏必填列
+Reset,重置
+Reset item name,重置项目名称
+Reset to Default,重置为默认值
+Resource Health,资源健康
+Restricted,受限
+Restricted operational controls for supervisors only.,仅对主管进行有限的操作控制。
+Retry,重试
+Retry route,重试路线
+Return,返回
+Return Amount,退货金额
+Return Count,返回计数
+Return items must have negative quantities,退货商品数量必须为负数
+Return total must be negative,返回总计必须为负数
+Return Valid Until,返回有效期至
+Return window passed,退货窗口已过
+Return without Invoice,无发票退货
+Returns,退货
+Returns / Voids / Discounts,退货/无效/折扣
+Returns by Currency,按货币分类的回报
+Revenue,收入
+Review shift totals before submitting the closing entry,在提交结账条目之前查看班次总计
+Round Off,四舍五入
+Rows,行数
+Rows:,行：
+Rule,规则
+Sale,销售
+Sales,销售
+Sales Order {0} is Submitted,销售订单 {0} 已提交
+Sales Person and Print,销售人员和印刷品
+Sales Person not found,未找到销售人员
+Sales processed,销售处理
+Sales Return,销售退货
+Sales Trend Report,销售趋势报告
+Save,保存
+Save & Clear,保存并清除
+Save as POS Profile Default,另存为 POS 配置文件默认值
+Save Settings,保存设置
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,将选定的打印机保存为 POS 配置文件默认值，以便它自动显示在此设置中。
+Saved as draft because: {0},保存为草稿，因为：{0}
+Saving...,正在保存...
+Scale barcode detected. Quantity here is the number of labels to print.,检测到秤条形码。这里的数量是要打印的标签数量。
+Scale barcode settings are not configured. Using item barcode only.,未配置秤条形码设置。仅使用商品条形码。
+Scale template barcode is missing for this item/UOM. Using item barcode only.,该商品/计量单位缺少秤模板条形码。仅使用商品条形码。
+Scan an existing card and top it up without leaving the payment flow.,扫描现有卡并充值，无需离开支付流程。
+Scan Error,扫描错误
+Scan or enter a gift card code to check balance or redeem.,扫描或输入礼品卡代码以检查余额或兑换。
+Scan or paste the card code below.,扫描或粘贴下面的卡代码。
+Scan QR Code/Barcode,扫描二维码/条形码
+Scan with camera,用相机扫描
+Scan-First Flow,扫描优先流程
+Scanned Code:,扫描码：
+Scanning for: {0},正在扫描：{0}
+Scanning items,扫描物品
+Scan-Ready,扫描就绪
+Scope,适用范围
+Scope: All Profiles,范围：所有配置文件
+Scope: Current Profile,范围：当前简介
+Scope: Specific Profile,范围：具体简介
+Search,搜索
+Search Account,搜索帐户
+Search an invoice and continue the return flow without extra steps.,搜索发票并继续退货流程，无需额外步骤。
+Search customer,搜寻客户
+Search invoices or customers,搜索发票或客户
+Search item,搜索项目
+Search item / code,搜索项目/代码
+Search items or barcode,搜索商品或条形码
+Search Mpesa Payments,搜索 Mpesa 支付
+Search return invoices or customers,搜索退货发票或客户
+Search supplier,搜寻供应商
+Search unpaid invoices or customers,搜索未付发票或客户
+Secure context (HTTPS or localhost) is required for camera access.,相机访问需要安全上下文（HTTPS 或本地主机）。
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,摄像头访问所需的安全上下文 (HTTPS)。请使用HTTPS访问相机。
+Select,选择
+Select a cashier first.,首先选择收银员。
+Select a customer,选择客户
+Select a customer to use coupon,选择使用优惠券的顾客
+Select a printer to use QZ silent printing.,选择打印机以使用 QZ 静音打印。
+Select Batch,选择批次
+Select Columns to Display,选择要显示的列
+Select items to sell,选择要出售的商品
+Select Payment,选择付款方式
+Select Payment Account,选择付款账户
+Select printer,选择打印机
+Select Return Invoice,选择退货发票
+Select S.O,选择 S.O.
+Select Sales Orders,选择销售订单
+Select the cashier who is taking over this terminal.,选择接管该终端的收银员。
+Selected,已选择
+Selected movement type is not allowed by POS Profile.,POS 配置文件不允许选择的移动类型。
+Selected Payments,选定的付款方式
+Sensitive actions kept away from quick taps.,敏感动作远离快速点击。
+Serial,串行
+Serial Numbers,序列号
+Server CPU Usage:,服务器CPU使用率：
+Server Health,服务器健康状况
+Server Memory Usage:,服务器内存使用情况：
+Server Metrics,服务器指标
+Server Uptime:,服务器正常运行时间：
+Service Charges,服务费
+Session,会议
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,在用户表单中设置每个收银员 PIN，并在 POS 配置文件用户中保留分配的终端成员。
+Settings,设置
+Settings in this section update the POS workspace without changing the current route.,此部分中的设置会更新 POS 工作区，而不更改当前路线。
+Setup complete!,设置完成！
+Share,分享
+Shared terminal,共享终端
+Shift Closed Snapshot,班次关闭快照
+Shift Overview,班次概览
+Show,显示
+Show cart on customer-facing screen,在面向客户的屏幕上显示购物车
+Show last invoice rate,显示上次发票费率
+Show rate info,显示费率信息
+Show Repair Candidates,显示维修候选者
+Show search tools,显示搜索工具
+Show the active cart on a customer-facing screen,在面向客户的屏幕上显示活动购物车
+Showing {0}-{1} of {2},显示第 {0}-{1} 个（共 {2} 个）
+Showing 0 of 0,显示 0 个，共 0 个
+Shows the distribution of invoices per currency,显示每种货币的发票分布
+Sign out of the current POS session,退出当前 POS 会话
+Size:,尺寸：
+Skipped Payments,跳过付款
+Skipping items without barcodes,跳过没有条形码的物品
+Slow Moving,缓慢移动
+Slow Moving Items,缓慢移动的物品
+Slow Queries:,慢查询：
+Sold,已售出
+Source,来源
+Source Cash Account (Optional Override),来源现金账户（可选覆盖）
+Source Ex. Rate:,来源Ex。率：
+Source Rate:,来源率：
+Specific Profile,具体简介
+Split Invoices,拆分发票
+Staff / Cashier Performance Report,员工/出纳绩效报告
+Status,状态
+Stock,库存
+Stock Information,股票信息
+Stock is lower than requested,库存低于要求
+Stock is lower than requested:\n{0},库存低于要求：\n{0}
+Stock Movement Report,库存变动报告
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,库存更新：{0} 有 {1} 可用。添加 {2} 将使库存低于零。
+Submit,提交
+Submit & Print,提交并打印
+Submit Deposit,提交存款
+Submit Expense,提交费用
+Submitted,已提交
+Submitted Cash Movements,提交的现金变动
+Submitted entries,提交的参赛作品
+Successfully scanned:,扫描成功：
+Suggested,建议
+Suggested Qty,建议数量
+Supervisor Access,主管访问
+Supervisor permissions unlock issuance and reloads,主管权限解锁发放和重装
+Supervisor Tools,主管工具
+Supplier,供应商
+Supplier and dates are required.,供应商和日期为必填项。
+Supplier Invoices,供应商发票
+Supplier is required.,供应商为必填项。
+Supplier name is required,供应商名称为必填项
+Supplier Payments,供应商付款
+Supplier Purchase Summary,供应商采购汇总
+Suppliers,供应商
+Suppliers not found,未找到供应商
+Switch Camera,切换相机
+Switch Cashier,切换收银台
+Switch the POS appearance theme,切换POS外观主题
+Switched to:,切换到：
+Sync All Invoices,同步所有发票
+Sync Offline Cash Movements ({0}),同步离线现金流动 ({0})
+Sync Offline Sales,同步线下销售
+Synced {0} offline cash movement(s).,已同步 {0} 笔离线现金流动。
+Syncing items in background,在后台同步项目
+System / Diagnostics,系统/诊断
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.",系统操作是低频维护控制，例如应用程序信息、支持诊断和会话控制。
+System Information,系统信息
+System Status,系统状态
+Tables:,表格：
+Tap the button below to redeem a gift card during checkout.,结帐时点击下面的按钮即可兑换礼品卡。
+Target,目标
+Target Ex. Rate:,目标Ex。率：
+Target Rate:,目标率：
+Tax,税
+Tax / Charges Report,税费报告
+Tax Heads,税头
+Taxable Amount,应税金额
+Tendered,已招标
+Terminal,终端
+Terminal & Devices,终端设备
+Terminal locked,终端已锁定
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.",终端工具会影响结账站、面向客户的显示器以及未来的打印机/设备控制。
+Territory not found,未找到领土
+The amount paid is not complete,支付金额不完整
+The app stores data locally for offline use. This is called cache.,该应用程序将数据存储在本地以供离线使用。这称为缓存。
+The invoice stayed in draft. Please review and submit it manually.,发票仍处于草稿状态。请手动审核并提交。
+The maximum discount allowed is,允许的最大折扣为
+The quantity for {0} has been adjusted to the maximum available stock.,{0} 的数量已调整为最大可用库存。
+The system could not retrieve the item details. Please try again.,系统无法检索该项目的详细信息。请再试一次。
+These invoices will be synced when connection is restored,连接恢复后，这些发票将同步
+This action now opens inside the settings workspace.,此操作现在在设置工作区中打开。
+This coupon already used !,此优惠券已使用！
+This invoice does not need change-allocation repair,此发票不需要变更分配修复
+This invoice is already repaired,此发票已修复
+This is an item template. Please choose a variant.,这是一个项目模板。请选择一个变体。
+this item,这个项目
+This POS page could not be opened offline because its code was not cached on this terminal yet.,该 POS 页面无法离线打开，因为该终端上尚未缓存其代码。
+This Serial Number {0} has already been added!,此序列号 {0} 已添加！
+Threshold,阈值
+Time,时间
+Tip: Clear cache regularly to free up space and keep the app fast.,提示：定期清除缓存以释放空间并保持应用程序快速运行。
+Tip: Close unused tabs or apps to reduce lag.,提示：关闭未使用的选项卡或应用程序以减少延迟。
+Tip: Monitor slow queries and table size for optimal performance.,提示：监视慢速查询和表大小以获得最佳性能。
+To Be Paid,待付款
+To Date,迄今为止
+Today,今天
+Today Profit,今日盈利
+Today Sales,今日销售
+Toggle navigation drawer,切换抽屉式导航
+Toggle Theme,切换主题
+Tools,工具
+Tools for customer-facing screens and terminal-specific actions.,用于面向客户的屏幕和终端特定操作的工具。
+Top Brand,顶级品牌
+Top Category,顶级类别
+Top Charge Head,顶部充电头
+Top Customers,顶级客户
+Top Discount,最高折扣
+Top Items by Location,按地点排列的热门商品
+Top Margin,上边距
+Top Pending,热门待处理
+Top Profit Item,利润最高的项目
+Top Return Items,热门退货商品
+Top Sales by Cashier,按收银员列出的最高销售额
+Top Supplier,顶级供应商
+Top Suppliers by Spend,按支出排名的顶级供应商
+Top Tables,热门表
+Top Tax Head,最高税务主管
+Top Up Amount,充值金额
+Top Up Card,充值卡
+Top Up Mode,充值模式
+Top Variant,顶级变体
+Total,总计
+Total Amount,总额
+Total Change,总体变化
+Total Charges,总费用
+Total In,总投入
+Total Invoices,发票总数
+Total Items,总项目
+Total Mpesa,总MPesa
+Total Out,全面出局
+Total Payments,付款总额
+Total Purchase,购买总额
+Total Selected :,已选总数：
+Total Size,总尺寸
+Total Stock Qty,库存总量
+Total:,总计：
+Totals by Invoice Currency,按发票币种划分的总计
+Track how much cash was handed back to customers,跟踪返还给客户的现金数量
+"Track recent sales, collect unpaid balances, and reopen saved work",跟踪最近的销售、收集未付余额并重新打开保存的工作
+Transaction ID,交易ID
+Transfer,转乘
+Try a different search term or clear the cart search.,尝试不同的搜索词或清除购物车搜索。
+Try adjusting your search or filters,尝试调整您的搜索或过滤器
+Try another source or refresh the list.,尝试其他来源或刷新列表。
+Try changing the date range or status filter.,尝试更改日期范围或状态过滤器。
+Type,类型
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,即使进行基本设置也无法访问相机。请检查您的相机权限和设备兼容性。
+Unable to add offer item {0}. Please refresh and try again.,无法添加优惠项目 {0}。请刷新并重试。
+Unable to add offer item. Please refresh and try again.,无法添加优惠项目。请刷新并重试。
+Unable to add scanned item.,无法添加扫描项目。
+Unable to create purchase order,无法创建采购订单
+Unable to delete draft invoice,无法删除草稿发票
+Unable to fetch documents,无法获取文档
+Unable to fetch draft orders,无法获取草稿订单
+Unable to fetch invoice history,无法获取发票历史记录
+Unable to fetch M-Pesa payments,无法获取 M-Pesa 付款
+Unable to fetch sales orders,无法获取销售订单
+Unable to fetch unpaid invoices,无法获取未付款发票
+Unable to generate scale barcode,无法生成秤条形码
+Unable to issue gift card.,无法签发礼​​品卡。
+Unable to load cashier PIN status.,无法加载收银员 PIN 状态。
+Unable to load document,无法加载文档
+Unable to load draft invoice,无法加载草稿发票
+Unable to load gift card balance.,无法加载礼品卡余额。
+Unable to load invoice details,无法加载发票详细信息
+Unable to load parked order,无法加载停放订单
+Unable to load the selected sales order,无法加载选定的销售订单
+Unable to prepare document,无法准备文件
+Unable to prepare return invoice,无法准备退货发票
+Unable to print draft invoice,无法打印草稿发票
+Unable to print submitted invoice,无法打印提交的发票
+Unable to process document action,无法处理文档操作
+Unable to repair change allocation,无法修复更改分配
+Unable to save cashier PIN.,无法保存收银员 PIN 码。
+Unable to save the rate to the backend price list,无法将费率保存到后端价目表
+Unable to submit invoice,无法提交发票
+Unable to submit the selected payment,无法提交所选付款
+Unable to top up gift card.,无法为礼品卡充值。
+Unable to verify cashier PIN.,无法验证收银员 PIN。
+Unallocated,未分配
+Unallocated:,未分配：
+Unavailable,不可用
+Unknown,未知
+Unknown Item,未知物品
+Unknown Warehouse,未知仓库
+Unlock POS,解锁 POS
+Unpaid,未付款
+"Unselected payments stay unallocated first, then auto reconcile after submit.",未选择的付款首先保持未分配状态，然后在提交后自动对账。
+UOM,墨尔本大学
+UOM not found,未找到计量单位
+Update available,可用更新
+Update Customer,更新客户
+Update PIN,更新个人识别码
+Update Price List Rate,更新价目表费率
+Updated,已更新
+Updates and app info that stay out of the cashier flow.,不影响收银流程的更新和应用程序信息。
+Updates automatically,自动更新
+Usage,用途
+Usage Stats,使用统计
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,使用 4 至 8 位 PIN 码进行收银台切换和终端解锁。
+Use Cashier,使用收银台
+Use date range to search for older invoices,使用日期范围搜索较旧的发票
+"Use one field for manual code entry, barcode scans, or QR scans.",使用一个字段进行手动代码输入、条形码扫描或 QR 扫描。
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.",使用一个工作流程即可进行余额检查、新发行和充值，无需离开 POS。
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.",当缓存的必备数据需要刷新、重建或诊断检查时，请使用此部分。
+Use Western numerals,使用西方数字
+Used:,使用：
+Using basic camera settings due to device limitations,由于设备限制，使用基本相机设置
+Using cached customer balance,使用缓存的客户余额
+Valid until,有效期至
+Variance %,方差%
+Variants,变体
+Variant-wise,变体方面
+Verify closing amounts for each payment method,验证每种付款方式的结算金额
+View all,查看全部
+View app information and current build details,查看应用程序信息和当前构建详细信息
+View Data Diagnostics,查看数据诊断
+View Details,查看详情
+View invoice details,查看发票详细信息
+View notifications,查看通知
+View offline invoices,查看离线发票
+View restricted POS insights,查看受限 POS 见解
+Void Amount,无效金额
+Void Count,无效计数
+Voids,空隙
+Waiting for cart items,等待购物车商品
+Waiting for payment...,等待付款...
+Walk-in Customer,上门顾客
+Warehouse,仓库
+Warning: High cache usage may affect performance.,警告：高速缓存使用率过高可能会影响性能。
+Warning: High lag may indicate heavy processing or browser slowness.,警告：高延迟可能表示处理繁重或浏览器速度缓慢。
+Week ?,星期 ？
+Week-wise,每周
+Weight (g),重量（克）
+Weight (grams),重量（克）
+We'll let you know if an invoice fails to submit,如果发票未能提交，我们会通知您
+Workflow,工作流程
+Write off amount cannot exceed the POS profile maximum of {0},注销金额不能超过 POS 配置文件最大值 {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,注销金额超出允许的限额 ({0})。请添加剩余金额的付款。
+Yes,是的
+"Yes, Cancel sale",是的，取消销售
+"Yes, Close",是的，关闭
+You are not allowed to print draft invoices,您不得打印草稿发票
+You are offline. Add Payment will work again when the connection is restored.,您已离线。连接恢复后，“添加付款”将再次起作用。
+You have no notifications right now,您现在没有任何通知
+Your Cart,您的购物车

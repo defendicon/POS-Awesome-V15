@@ -1,0 +1,1362 @@
+POS Awesome,POS အရမ်းကောင်းတယ်။
+Fetch Items Directly from Server,ဆာဗာမှ ပစ္စည်းများကို တိုက်ရိုက်ရယူပါ။
+Menu,မီနူး
+Actions,လုပ်ဆောင်ချက်များ
+Close Shift,Shift ကိုပိတ်ပါ။
+End current session,လက်ရှိစက်ရှင်ကို အဆုံးသတ်ပါ။
+Print Last Invoice,နောက်ဆုံး ငွေတောင်းခံလွှာကို ပရင့်ထုတ်ပါ။
+Reprint previous transaction,ယခင်ငွေပေးငွေယူကို ပြန်လည်ပုံနှိပ်ပါ။
+Sync Offline Invoices,အော့ဖ်လိုင်းငွေတောင်းခံလွှာများကို စင့်ခ်လုပ်ပါ။
+Upload pending transactions,ဆိုင်းငံ့ထားသော ငွေပေးငွေယူများကို အပ်လုဒ်လုပ်ပါ။
+Go Online,အွန်လိုင်းသွားပါ။
+Go Offline,အော့ဖ်လိုင်းသွားပါ။
+Disable offline mode,အော့ဖ်လိုင်းမုဒ်ကို ပိတ်ပါ။
+Work without server connection,ဆာဗာချိတ်ဆက်မှုမရှိဘဲ အလုပ်လုပ်ပါ။
+Clear Cache,Cache ကိုရှင်းလင်းပါ။
+Remove local data and refresh,ဒေသတွင်းဒေတာကို ဖယ်ရှားပြီး ပြန်လည်စတင်ပါ။
+About,အကြောင်း
+App information,အက်ပ်အချက်အလက်
+Language,ဘာသာစကား
+Change interface language,ကြားခံဘာသာစကားကို ပြောင်းပါ။
+Light Mode,အလင်းမုဒ်
+Dark Mode,အမှောင်မုဒ်
+Switch theme appearance,အပြင်အဆင်အသွင်အပြင်ကို ပြောင်းပါ။
+Logout,ထွက်လိုက်ပါ။
+Sign out of session,စက်ရှင်မှ ထွက်ပါ။
+Select Language,ဘာသာစကားကို ရွေးပါ။
+Choose your preferred language for the POS interface,POS မျက်နှာပြင်အတွက် သင်နှစ်သက်ရာဘာသာစကားကို ရွေးချယ်ပါ။
+Language will be changed to,ဘာသာစကားသို့ ပြောင်းလဲသွားမည်ဖြစ်သည်။
+Cancel,မလုပ်တော့
+Change Language,ဘာသာစကားပြောင်းပါ။
+Close,ပိတ်လိုက်
+Cannot change language - same language selected,ဘာသာစကားကို ပြောင်းလဲ၍မရပါ - တူညီသောဘာသာစကားကို ရွေးချယ်ထားသည်။
+Language changed successfully! Reloading...,ဘာသာစကားကို အောင်မြင်စွာ ပြောင်းလဲလိုက်ပါပြီ။ ပြန်လည်စတင်နေသည်...
+Failed to change language,ဘာသာစကားပြောင်းရန် မအောင်မြင်ပါ။
+Unknown error,အမည်မသိ အမှား
+- Total Unallocated,- စုစုပေါင်း Unallocated
+* Required,* လိုအပ်သည်
+{0} (Qty: {1}),{0} (အရေအတွက်- {1})
+{0} actions,လုပ်ဆောင်ချက် {0} ခု
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} တွင် {1} သာရှိသည်။ သင်သည် {2} ကို တောင်းဆိုခဲ့သည်။ ပမာဏကို ချိန်ညှိပါ သို့မဟုတ် ပြန်စတော့ပါ။
+{0} offline invoice{1} pending,{0} အော့ဖ်လိုင်းပြေစာ{1} ကို ဆိုင်းငံ့ထားသည်။
+{0} offline invoice{1} saved as draft,{0} အော့ဖ်လိုင်းပြေစာ{1} ကို မူကြမ်းအဖြစ် သိမ်းဆည်းထားသည်။
+{0} offline invoice{1} synced,{0} အော့ဖ်လိုင်းပြေစာ{1} ကို စင့်ခ်လုပ်ထားသည်။
+{0}: {1} {2},{0}- {1} {2}
+{0}d ago,လွန်ခဲ့သော {0}ရက်
+{0}h ago,လွန်ခဲ့သော {0}နာရီက
+{0}m ago,လွန်ခဲ့သော {0}မိနစ်က
+A POS supervisor is required for this action.,ဤလုပ်ဆောင်ချက်အတွက် POS ကြီးကြပ်ရေးမှူးတစ်ဦး လိုအပ်ပါသည်။
+Access,သုံးစွဲခွင့်
+Account,အကောင့်
+Account is overdrawn,အကောင့်ကို ကျော်လွန်သွားပါပြီ။
+Acknowledge the error to resume scanning,စကင်ဖတ်ခြင်းကို ပြန်လည်စတင်ရန် အမှားအယွင်းကို အသိအမှတ်ပြုပါ။
+Acknowledge the error to resume scanning.,စကင်ဖတ်ခြင်းကို ပြန်လည်စတင်ရန် အမှားအယွင်းကို အသိအမှတ်ပြုပါ။
+Across,ခွင်
+Action,အက်ရှင်
+Active sale,အရောင်းသွက်သည်။
+add,ထည့်ပါ။
+Add items from the selector to start building this sale.,ဤရောင်းချမှုကို စတင်တည်ဆောက်ရန် ရွေးချယ်သည့်ကိရိယာမှ အရာများကို ထည့်ပါ။
+Add more value to an existing gift card,ရှိပြီးသားလက်ဆောင်ကတ်တစ်ခုသို့ တန်ဖိုးပိုထည့်ပါ။
+Add New Address,လိပ်စာအသစ်ထည့်ပါ။
+Add new customer,ဖောက်သည်အသစ်ထည့်ပါ။
+Add on New Line,လိုင်းအသစ်တွင်ထည့်ပါ။
+Add Payment,ငွေပေးချေမှုထည့်ပါ။
+Add payment to invoice,ငွေပေးချေမှုကို ပြေစာသို့ ထည့်ပါ။
+Add/Edit Coupon Conditions,ကူပွန်အခြေအနေများကို ထည့်/ပြင်ဆင်ပါ။
+Additional Discount,အပိုလျှော့စျေး
+Additional Discount %,အပိုလျှော့စျေး %
+Address Line 1,လိပ်စာလိုင်း ၁
+Address not found,လိပ်စာမတွေ့ပါ။
+Adjust the quantity or enable negative stock to continue.,ပမာဏကို ချိန်ညှိပါ သို့မဟုတ် ဆက်လုပ်ရန် အနုတ်လက္ခဏာစတော့ကို ဖွင့်ပါ။
+Adjustment,များတော့
+After returns,ပြန်လာပြီးနောက်
+Against,ဆန့်ကျင်ဘက်
+Against Name,ဆန့်ကျင်ဘက်အမည်
+Age Bracket,ခေတ်ကွင်းပိတ်
+All,အားလုံး
+All Caught Up!,အားလုံးဖမ်းမိ။
+All invoices are synchronized,ငွေတောင်းခံလွှာအားလုံးကို တစ်ပြိုင်တည်းလုပ်ဆောင်သည်။
+All pending invoices are up to date,ဆိုင်းငံ့ထားသည့် ငွေတောင်းခံလွှာများအားလုံးသည် ခေတ်မီနေပါသည်။
+All Profiles,Profiles အားလုံး
+All Synchronized,အားလုံးထပ်တူကျသည်။
+All visible invoices are fully settled.,မြင်နိုင်သော ပြေစာများအားလုံးကို အပြည့်အ၀ ဖြေရှင်းထားပါသည်။
+All Warehouses,ဂိုဒေါင်အားလုံး
+Allowed UOM is {0},ခွင့်ပြုထားသည့် UOM မှာ {0}
+Always fetch items from server (ignore local cache),ဆာဗာမှ အရာများကို အမြဲယူပါ (ဒေသခံ ကက်ရှ်ကို လျစ်လျူရှုပါ)
+Amount,ပမာဏ
+Amount already received,လက်ခံရရှိပြီးသားပမာဏ
+Amount exceeds profile cash movement max amount.,ပမာဏသည် ပရိုဖိုင် ငွေသားလှုပ်ရှားမှု အမြင့်ဆုံးပမာဏထက် ကျော်လွန်နေပါသည်။
+Amount must be greater than zero.,ပမာဏသည် သုညထက် ပိုနေရပါမည်။
+Amount received from customer,ဖောက်သည်ထံမှ လက်ခံရရှိသည့်ပမာဏ
+Appearance and user-level preferences for the current session.,လက်ရှိစက်ရှင်အတွက် အသွင်အပြင်နှင့် အသုံးပြုသူအဆင့် ဦးစားပေးမှုများ။
+Applied,အသုံးချပါ။
+Apply,လျှောက်ထားပါ။
+Apply Gift Card,လက်ဆောင်ကတ်ကို လျှောက်ထားပါ။
+Apply Offer,ကမ်းလှမ်းချက်ကို လျှောက်ထားပါ။
+Apply On,ဖွင့်ပါ။
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,ဤငွေတောင်းခံလွှာတွင် သင်ကူယူလိုသော ပမာဏကိုသာ အသုံးပြုပါ။ ကျန်လက်ကျန်ငွေသည် ကတ်တွင်ရှိနေပါသည်။
+Apply Redemption,ရွေးနှုတ်ခြင်းကို လျှောက်ထားပါ။
+Applying,လျှောက်ထားခြင်း။
+Apps,အက်ပ်များ
+Are you sure you want to close? All entered data will be lost.,ပိတ်လိုသည်မှာ သေချာပါသလား။ ထည့်သွင်းထားသောဒေတာအားလုံး ဆုံးရှုံးသွားပါမည်။
+Attributes (Size/Color),ရည်ညွှန်းချက်များ (အရွယ်အစား/အရောင်)
+Auto Allocate Payment Amount,ငွေပေးချေမှုပမာဏကို အလိုအလျောက် ခွဲဝေသတ်မှတ်ပါ။
+Auto Reconcile,အလိုအလျောက် ပြန်လည်သင့်မြတ်ရေး
+Auto reconciliation completed after payment submit.,ငွေပေးချေပြီးနောက် အလိုအလျောက် ပြန်လည်ညှိနှိုင်းမှု ပြီးမြောက်သည်။
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,အလိုအလျောက် ပြန်လည်သင့်မြတ်ရေး ပြီးသွားပါပြီ။ ခွဲဝေထားသည်- {0}{1}။ ကျန်ရှိနေသော ထူးခြားချက်- {0}{2}။
+Available Actions,ရနိုင်သောလုပ်ဆောင်ချက်များ
+Available QTY,ရနိုင်သော QTY
+Available:,ရနိုင်သည်-
+Average Basket,ပျမ်းမျှခြင်းတောင်း
+Average Bill,ပျမ်းမျှ ဘေလ်
+Average Ticket,ပျမ်းမျှလက်မှတ်
+Avg Bill,ပျမ်းမျှ ဘေလ်
+Avg Invoice,ပျမ်းမျှ ပြေစာ
+Avg Invoice Profit,Avg Invoice အမြတ်
+Avg Invoice Value,ပျမ်းမျှ ငွေတောင်းခံလွှာတန်ဖိုး
+Avg Purchase Frequency,ပျမ်းမျှဝယ်ယူမှုအကြိမ်ရေ
+Awesome,အရမ်းကောင်းတယ်။
+Awesome Dashboard,အမိုက်စား ဒက်ရှ်ဘုတ်
+Awesome Dashboard is disabled for the selected POS Profile.,ရွေးချယ်ထားသော POS Profile အတွက် Awesome Dashboard ကို ပိတ်ထားသည်။
+Awesome Dashboard is unavailable for the selected scope.,ရွေးချယ်ထားသော နယ်ပယ်အတွက် Awesome Dashboard ကို မရနိုင်ပါ။
+Awesome Dashboard is visible only to POS supervisors.,Awesome Dashboard ကို POS ကြီးကြပ်သူများသာ မြင်နိုင်သည်။
+Back,ကျော
+Back Office Cash Account,Back Office Cash အကောင့်
+Back Office Cash Account (Optional Override),Back Office Cash အကောင့် (ချန်လှပ်ထားနိုင်သည်)
+Back office cash account is required.,Back office ငွေသားအကောင့် လိုအပ်ပါသည်။
+Back to {0},{0} သို့ ပြန်သွားရန်
+Background processing did not finish in time.,နောက်ခံလုပ်ဆောင်မှုကို အချိန်မီ မပြီးမြောက်ခဲ့ပါ။
+Background processing failed for Invoice {0}: {1},ငွေတောင်းခံလွှာ {0} အတွက် နောက်ခံလုပ်ဆောင်ခြင်း မအောင်မြင်ပါ- {1}
+Background Submission Failed,နောက်ခံတင်ပြမှု မအောင်မြင်ပါ။
+Background sync interval (seconds),နောက်ခံ စင့်ခ်လုပ်ချိန် (စက္ကန့်)
+Balance,လက်ကျန်
+Balance will be updated when connection is restored,ချိတ်ဆက်မှုကို ပြန်လည်ရယူသည့်အခါ လက်ကျန်ငွေကို အပ်ဒိတ်လုပ်ပါမည်။
+Balances still pending,လက်ကျန်များကို ဆိုင်းငံ့ထားဆဲဖြစ်သည်။
+Barcode,ဘားကုဒ်
+Barcode / QR Ready,ဘားကုဒ် / QR အဆင်သင့်
+Barcode Label Printing,ဘားကုဒ်တံဆိပ်ရိုက်နှိပ်ခြင်း။
+Base Paid:,အခြေခံပေးချေသည်-
+Base Recv:,အခြေခံ Recv-
+Base:,အခြေခံ-
+Basic Information,အခြေခံအချက်အလက်
+Batch,သုတ်
+Batch Information,Batch အချက်အလက်
+Before any return workflow,အလုပ်အသွားအလာ ပြန်မလာခင်
+Before returns,ပြန်မလာခင်
+Best Day,အကောင်းဆုံးနေ့
+Best Seller,အရောင်းရဆုံး
+Book expense or deposit from active shift.,တက်ကြွသောအပြောင်းအရွှေ့မှ စာအုပ်ကုန်ကျစရိတ် သို့မဟုတ် အပ်ငွေ။
+Branch / Location-wise Report,ဘဏ်ခွဲ/တည်နေရာအလိုက် အစီရင်ခံပါ။
+Brand-wise,Brand-wise
+Breakdown,ပြိုကွဲခြင်း။
+Browse,လိုက်ကြည့်သည်။
+Build Time:,တည်ဆောက်ချိန်-
+Built with Frappe,Frappe ဖြင့်တည်ဆောက်ထားသည်။
+Bundle,အတွဲ
+Buying Price,ဝယ်ဈေး
+Cache cleared successfully,Cache ကို အောင်မြင်စွာ ရှင်းလင်းပြီးပါပြီ။
+Cache Usage,ကက်ရှ်အသုံးပြုမှု
+cache used,cache ကိုသုံးတယ်။
+Calculating...,တွက်ချက်နေသည်...
+Camera Access Required,ကင်မရာအသုံးပြုခွင့် လိုအပ်ပါသည်။
+Camera access was aborted. Please try again.,ကင်မရာအသုံးပြုခွင့်ကို ဖျက်သိမ်းထားသည်။ ထပ်စမ်းကြည့်ပါ။
+Camera constraints not supported by your device. Trying fallback settings...,သင့်စက်ပစ္စည်းမှ ကင်မရာကန့်သတ်ချက်များကို မပံ့ပိုးပါ။ ပြန်ပြောင်းဆက်တင်များကို ကြိုးစားနေသည်...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,ကင်မရာသည် အလုပ်များနေပါသည် သို့မဟုတ် အခြားအက်ပ်/တဘ်က ပိတ်ဆို့ထားသည်။ အခြားကင်မရာအက်ပ်များကို ပိတ်ပြီး ထပ်စမ်းကြည့်ပါ။
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,ကင်မရာခွင့်ပြုချက်ကို ငြင်းဆိုထားသည်။ သင့်ဘရောက်ဆာဆက်တင်များတွင် ကင်မရာဝင်ရောက်ခွင့်ကို ခွင့်ပြုပြီး စာမျက်နှာကို ပြန်လည်စတင်ပါ။
+Camera scanner is locked until the current error is acknowledged,လက်ရှိအမှားကို အသိအမှတ်မပြုမချင်း ကင်မရာစကင်နာကို လော့ခ်ချထားသည်။
+Camera started but the video stream did not load in time. Please try again.,ကင်မရာ စတင်ခဲ့သော်လည်း ဗီဒီယိုစီးကြောင်း အချိန်မီ မတင်နိုင်ခဲ့ပါ။ ထပ်စမ်းကြည့်ပါ။
+Cancel cash movement {0}?,ငွေသားလှုပ်ရှားမှု {0} ကို ပယ်ဖျက်လိုပါသလား။
+Cancel Payment,ငွေပေးချေမှုကို ပယ်ဖျက်ပါ။
+Cancel Sale,ရောင်းချခြင်းကို ပယ်ဖျက်ပါ။
+Cancel Sale ?,ရောင်းချမှုကို ပယ်ဖျက်မလား။
+Cancelled,ဖျက်သိမ်းလိုက်သည်။
+Cannot add an item with zero or negative quantity.,သုည သို့မဟုတ် အနှုတ်ပမာဏရှိသော အရာတစ်ခုကို ထည့်၍မရပါ။
+Cannot clear cache while offline,အော့ဖ်လိုင်းဖြစ်နေစဉ် ကက်ရှ်ကို ရှင်းလင်း၍မရပါ။
+Cannot redeem customer credit more than invoice total,ပြေစာစုစုပေါင်းထက် ဝယ်ယူသူခရက်ဒစ်ကို ထုတ်ယူ၍မရပါ။
+Cannot redeem gift cards more than invoice total,ငွေတောင်းခံလွှာစုစုပေါင်းထက် လက်ဆောင်ကတ်များကို ထုတ်ယူ၍မရပါ။
+Cannot Save Offline Invoice:,အော့ဖ်လိုင်းပြေစာ သိမ်းဆည်း၍မရပါ
+Cannot Save Offline Payment:,အော့ဖ်လိုင်းငွေပေးချေမှုကို မသိမ်းဆည်းနိုင်ပါ-
+Card,ကတ်
+Card / Online,ကတ်/အွန်လိုင်း
+Card health after the last live lookup,နောက်ဆုံး တိုက်ရိုက်ကြည့်ရှုမှုပြီးနောက် ကတ်ကျန်းမာရေး
+Cards,ကတ်များ
+Cart,လှည်း
+Cash,ငွေသား
+Cash back to customers,ဖောက်သည်များကို ငွေပြန်အမ်းပေးသည်။
+Cash Collections,ငွေသားစုဆောင်းမှုများ
+Cash Deposit is disabled for this POS Profile.,ဤ POS ပရိုဖိုင်အတွက် ငွေသားအပ်ငွေကို ပိတ်ထားသည်။
+Cash Drawer Snapshot,Cash Drawer လျှပ်တစ်ပြက်
+Cash In Hand,လက်ထဲတွင် ငွေသား
+Cash Movement,ငွေသားလှုပ်ရှားမှု
+Cash movement cancelled,ငွေသားလှုပ်ရှားမှုကို ဖျက်သိမ်းလိုက်သည်။
+Cash movement deduction applied,ငွေသားလှုပ်ရှားမှု ဖြတ်တောက်ခြင်းကို ထည့်သွင်းထားသည်။
+Cash movement deleted,ငွေသားလှုပ်ရှားမှုကို ဖျက်လိုက်ပါပြီ။
+Cash movement is disabled for this POS Profile.,ဤ POS ပရိုဖိုင်အတွက် ငွေသားလှုပ်ရှားမှုကို ပိတ်ထားသည်။
+Cash Movement is disabled in current POS Profile.,လက်ရှိ POS ပရိုဖိုင်တွင် Cash Movement ကို ပိတ်ထားသည်။
+Cash movement saved offline,ငွေသားလှုပ်ရှားမှုကို အော့ဖ်လိုင်းတွင် သိမ်းဆည်းထားသည်။
+Cash movement submitted,ငွေသားလှုပ်ရှားမှုကို တင်ပြခဲ့သည်။
+Cash Movements,ငွေသားလှုပ်ရှားမှုများ
+Cash payment cannot be less than invoice total when partial payment is not allowed,တစ်စိတ်တစ်ပိုင်းပေးချေမှုကို ခွင့်မပြုပါက ငွေပေးချေမှုမှာ ပြေစာစုစုပေါင်းထက် မနည်းနိုင်ပါ။
+Cash returned after payment,ငွေပေးချေပြီးနောက် ငွေပြန်အမ်းသည်။
+Cashier,ငွေကိုင်
+Cashier Access,ငွေကိုင်သုံးခွင့်
+Cashier identity and appearance preferences.,ငွေကိုင် အထောက်အထား နှင့် အသွင်အပြင် ဦးစားပေး။
+Cashier PIN,ငွေကိုင် PIN
+Cashier PIN saved successfully.,ငွေကိုင် PIN ကို အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ။
+Cashiers,ငွေကိုင်
+Cashier-wise,ငွေကိုင်ပညာရှိ
+Categories,အမျိုးအစားများ
+Category,အမျိုးအစား
+Category / Brand / Variant Report,အမျိုးအစား/အမှတ်တံဆိပ်/မူကွဲ အစီရင်ခံစာ
+Category-wise,အမျိုးအစားအလိုက်
+Category-wise Margin,အမျိုးအစားအလိုက် အနားသတ်
+Certificate,လက်မှတ်
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,လက်မှတ်ပျောက်ဆုံးနေသည် သို့မဟုတ် မယုံကြည်ပါ။ QZ သည် အတည်ပြုချက် ဒိုင်ယာလော့ခ်များကို ပြသနိုင်သည်။
+Certificate is trusted. Silent QZ printing is active.,Certificate ကို ယုံကြည်ပါသည်။ အသံတိတ် QZ ပရင့်ထုတ်ခြင်း လုပ်ဆောင်နေပါသည်။
+Change,ပြောင်းလဲပါ။
+Change allocation repaired,ခွဲဝေ ပြုပြင် ပြောင်းလဲခြင်း။
+Change Price,ဈေးနှုန်းပြောင်းပါ။
+Change Return,Return ပြောင်းပါ။
+Change Returned,အပြောင်းအလဲ ပြန်လာခဲ့သည်။
+Change terminal cashier,Terminal ငွေကိုင်ကို ပြောင်းပါ။
+Charge Heads,တာဝန်ခံခေါင်းများ
+Charges,ဘယ်နိုင်ငံကလဲ။
+Charges not found,စွဲချက်မတွေ့ရှိရပါ။
+Check Balance,လက်ကျန်ကို စစ်ဆေးပါ။
+Check balance for any card. Supervisors can issue and top up cards here.,မည်သည့်ကတ်အတွက် လက်ကျန်ငွေကို စစ်ဆေးပါ။ ကြီးကြပ်သူများသည် ဤနေရာတွင် ကတ်များထုတ်ပေးပြီး ငွေဖြည့်နိုင်သည်။
+Check balance only,လက်ကျန်ငွေကိုသာ စစ်ဆေးပါ။
+Check for new commits,ကွန်မန့်အသစ်များ စစ်ဆေးပါ။
+Check for Updates,အပ်ဒိတ်များအတွက် စစ်ဆေးပါ။
+Check live balance before applying redemption,ရွေးနှုတ်မှုမလျှောက်ထားမီ တိုက်ရိုက်လက်ကျန်ကို စစ်ဆေးပါ။
+Check live balance before redemption,ရွေးနှုတ်ခြင်းမပြုမီ တိုက်ရိုက်လက်ကျန်ကို စစ်ဆေးပါ။
+Checking...,စစ်ဆေးနေသည်...
+Cheque/Reference Date,ချက်လက်မှတ်/အကိုးအကား ရက်စွဲ
+Cheque/Reference No,ချက်/အကိုးအကား အမှတ်
+Choose the cashier currently operating this terminal.,ဤ terminal ကို လက်ရှိ လုပ်ဆောင်နေသော ငွေကိုင်သူကို ရွေးပါ။
+City,မြို
+Clear,ရှင်းပါတယ်။
+Clear All,အားလုံးကို ရှင်းလင်းပါ။
+Clear all barcode items,ဘားကုဒ်အရာအားလုံးကို ရှင်းလင်းပါ။
+Clear all purchase order items,မှာယူမှု ပစ္စည်းများအားလုံးကို ရှင်းလင်းပါ။
+Clear Search,ရှာဖွေမှုကို ရှင်းလင်းပါ။
+Clearing local cache...,စက်တွင်းကက်ရှ်များကို ရှင်းလင်းနေသည်...
+Click to refresh,ပြန်လည်စတင်ရန် နှိပ်ပါ။
+Client CPU Lag:,သုံးစွဲသူ CPU နောက်ကျနေသည်-
+Client Memory Usage:,Client Memory အသုံးပြုမှု-
+Client Metrics,သုံးစွဲသူ မက်ထရစ်များ
+Close about dialog,ဒိုင်ယာလော့ခ်အကြောင်း ပိတ်ပါ။
+Close cashier switcher,ငွေကိုင်လွှဲကိရိယာကို ပိတ်ပါ။
+Close closing shift dialog,အပိတ်အဆိုင်းဒိုင်ယာလော့ခ်ကို ပိတ်ပါ။
+Close column selector,ကော်လံရွေးချယ်မှုအား ပိတ်ပါ။
+Close Dialog,Dialog ကိုပိတ်ပါ။
+Close drafts dialog,မူကြမ်းဒိုင်ယာလော့ခ်ကို ပိတ်ပါ။
+Close invoice details dialog,ပြေစာအသေးစိတ် ဒိုင်ယာလော့ခ်ကို ပိတ်ပါ။
+Close invoice management,ငွေတောင်းခံလွှာစီမံခန့်ခွဲမှုကို ပိတ်ပါ။
+Close offline invoices dialog,အော့ဖ်လိုင်း ငွေတောင်းခံလွှာများ ဒိုင်ယာလော့ခ်ကို ပိတ်ပါ။
+Close packing list dialog,ထုပ်ပိုးမှုစာရင်း ဒိုင်ယာလော့ခ်ကို ပိတ်ပါ။
+Close returns dialog,ပြန်လာသော ဒိုင်ယာလော့ခ်ကို ပိတ်ပါ။
+Close sales orders dialog,အရောင်းအော်ဒါဒိုင်ယာလော့ခ်ကို ပိတ်ပါ။
+Close Scanner,စကင်နာကို ပိတ်ပါ။
+Close scanner dialog,စကင်နာ ဒိုင်ယာလော့ခ်ကို ပိတ်ပါ။
+Close Settings,ဆက်တင်များကို ပိတ်ပါ။
+Closing Amount,ပိတ်သည့်ပမာဏ
+Closing POS Shift,POS Shift ပိတ်ခြင်း။
+Closing Snapshot Available,ပိတ်ခြင်း လျှပ်တစ်ပြက်ကို ရနိုင်သည်။
+Code,ကုတ်
+Code scanned successfully,ကုဒ်ကို အောင်မြင်စွာ စကင်န်ဖတ်ပြီးပါပြီ။
+COGS,COGS
+Collapse item details,အကြောင်းအရာအသေးစိတ်ကို ခေါက်သိမ်းပါ။
+Collected,စုဆောင်းထားသည်။
+Cols,Cols
+Columns,ကော်လံများ
+commits,ကျူးလွန်သည်။
+Completed and active sales in this range,ဤအကွာအဝေးတွင် ပြီးမြောက်ပြီး အသက်ဝင်သော အရောင်းများ
+Completed returns will appear here.,ပြီးပြည့်စုံသော ပြန်လာမှုများကို ဤနေရာတွင် ပေါ်လာပါမည်။
+Confirm,အတည်ပြုပါ။
+Confirm Close,ပိတ်ရန် အတည်ပြုပါ။
+Confirm Mobile Number,မိုဘိုင်းနံပါတ်ကို အတည်ပြုပါ။
+Confirm PIN,ပင်နံပါတ်ကို အတည်ပြုပါ။
+Connect,ချိတ်ဆက်ပါ။
+Connect printer and manage certificate,ပရင်တာကို ချိတ်ဆက်ပြီး လက်မှတ်ကို စီမံပါ။
+Connecting to QZ Tray...,QZ Tray သို့ ချိတ်ဆက်နေသည်...
+Connection problem while submitting invoice,ပြေစာပေးပို့နေစဉ် ချိတ်ဆက်မှုပြဿနာ
+Connections:,ချိတ်ဆက်မှုများ-
+Connectivity and cached prerequisite status were rechecked.,ချိတ်ဆက်မှု နှင့် ကက်ရှ်လုပ်ထားသော ကြိုတင်လိုအပ်ချက် အခြေအနေကို ပြန်လည်စစ်ဆေးခဲ့သည်။
+Continue Editing,ဆက်လက်တည်းဖြတ်ပါ။
+Could not fetch latest balance from server,ဆာဗာမှ နောက်ဆုံးလက်ကျန်ငွေကို မရယူနိုင်ပါ။
+Count,ရေတွက်ပါ။
+Country,တိုင်းပြည်
+Coupon,ကူပွန်
+Coupons,ကူပွန်များ
+Cover,ကာဗာ
+CPU Cores:,CPU Core များ-
+Create,ဖန်တီးပါ။
+Create and load a new prepaid card,ကြိုတင်ငွေပေးကတ်အသစ်တစ်ခုကို ဖန်တီးပြီး တင်ပါ။
+Create and preload a new gift card,လက်ဆောင်ကတ်အသစ်တစ်ခုကို ဖန်တီးပြီး ကြိုတင်တင်ပါ။
+Create Bill,Bill ကိုဖန်တီးပါ။
+Create Customer,ဖောက်သည်ဖန်တီးပါ။
+Create New Item,ပစ္စည်းအသစ်ဖန်တီးပါ။
+Create or change your PIN,သင့်ပင်နံပါတ်ကို ဖန်တီးပါ သို့မဟုတ် ပြောင်းလဲပါ။
+Create PIN,ပင်နံပါတ် ဖန်တီးပါ။
+Create POS Opening Shift,POS Opening Shift ဖန်တီးပါ။
+Create Purchase Order,ဝယ်ယူမှုအမှာစာဖန်တီးပါ။
+Create Return,Return ကိုဖန်တီးပါ။
+Create return from invoice,ပြေစာမှ ပြန်လာခြင်းကို ဖန်တီးပါ။
+Create Supplier,ပေးသွင်းသူ ဖန်တီးပါ။
+Credit and Output,Credit နှင့် Output
+Credit Note,ခရက်ဒစ်မှတ်ချက်
+Credit Outstanding,Credit ထူးချွန်
+Credit sales remaining to be collected,ကောက်ခံရန်ကျန်ရှိသော အကြွေးများရောင်းချခြင်း။
+Critical,ဝေဖန်ပိုင်းခြားပါ။
+Currency,ငွေကြေး
+Current,လက်ရှိ
+Current Event Loop Lag:,လက်ရှိ Event Loop Lag-
+Current Month,လက်ရှိလ
+Current PIN,လက်ရှိ PIN
+Current Profile,လက်ရှိ Profile
+Current redeemable value on the gift card,လက်ဆောင်ကတ်တွင် လက်ရှိ ထုတ်ယူနိုင်သော တန်ဖိုး
+Current User,လက်ရှိအသုံးပြုသူ
+Custom,စိတ်ကြိုက်
+Custom Due Days,စိတ်ကြိုက်သတ်မှတ်ရက်များ
+Custom items per page,စာမျက်နှာအလိုက် စိတ်ကြိုက်ပစ္စည်းများ
+Customer,ဖောက်သည်
+Customer already selected,ဖောက်သည် ရွေးထားပြီးသား
+Customer Balance,ဖောက်သည်လက်ကျန်
+Customer balance unavailable offline,ဝယ်ယူသူလက်ကျန်ကို အော့ဖ်လိုင်းတွင် မရနိုင်ပါ။
+Customer created successfully.,ဝယ်ယူသူ အောင်မြင်စွာ ဖန်တီးခဲ့သည်။
+Customer creation failed.,ဝယ်ယူသူဖန်တီးမှု မအောင်မြင်ပါ။
+Customer Details,ဖောက်သည်အသေးစိတ်
+Customer display channel is missing,ဝယ်ယူသူပြသသည့်ချန်နယ် ပျောက်ဆုံးနေပါသည်။
+Customer display was blocked. Please allow pop-ups for this site.,ဝယ်ယူသူပြသမှုကို ပိတ်ဆို့ထားသည်။ ဤဆိုက်အတွက် ပေါ့ပ်အပ်များကို ခွင့်ပြုပါ။
+Customer group is required,ဖောက်သည်အဖွဲ့ လိုအပ်သည်။
+Customer is required to add payment,ငွေပေးချေမှုကို ထည့်သွင်းရန် ဝယ်ယူသူ လိုအပ်ပါသည်။
+Customer Name is required,ဝယ်ယူသူအမည် လိုအပ်ပါသည်။
+Customer not selected,ဖောက်သည်မရွေးပါ။
+Customer Report,ဖောက်သည်အစီရင်ခံစာ
+Customer saved offline,ဝယ်ယူသူသည် အော့ဖ်လိုင်းတွင် သိမ်းဆည်းထားသည်။
+Customer Screen,ဖောက်သည် မျက်နှာပြင်
+Customer territory is required,ဖောက်သည် နယ်မြေ လိုအပ်သည်။
+Customer updated successfully.,ဝယ်ယူသူအား အောင်မြင်စွာ အပ်ဒိတ်လုပ်ပါ။
+Customer-facing tools and printer setup.,သုံးစွဲသူမျက်နှာစာ ကိရိယာများနှင့် ပရင်တာ စနစ်ထည့်သွင်းမှု။
+Customers,ဖောက်သည်များ
+Customers not found,ဖောက်သည်များကို ရှာမတွေ့ပါ။
+Daily cashier actions without scrolling.,လှိမ့်ခြင်းမရှိဘဲ နေ့စဉ် ငွေကိုင်လုပ်ဆောင်မှုများ။
+Daily Sales,နေ့စဉ်အရောင်း
+Daily Sales Summary,နေ့စဉ်အရောင်းအကျဉ်းချုပ်
+Data loaded in form. Review and submit.,ဒေတာကို ပုံစံတွင် တင်ထားသည်။ သုံးသပ်ပြီး တင်ပြပါ။
+Database Health,ဒေတာဘေ့စ်ကျန်းမာရေး
+Database health affects overall system speed and reliability.,ဒေတာဘေ့စ်ကျန်းမာရေးသည် စနစ်တစ်ခုလုံး၏ မြန်နှုန်းနှင့် ယုံကြည်စိတ်ချရမှုကို သက်ရောက်မှုရှိသည်။
+Database Info,ဒေတာဘေ့စ်အချက်အလက်
+Date,ရက်စွဲ
+Day ?,နေ့ ?
+days,နေ့ရက်များ
+Day-wise (MTD),နေ့အလိုက် (MTD)
+Day-wise Movement,နေ့စဥ်လှုပ်ရှားမှု
+Dead Stock,Dead Stock
+Dead Stock Items,Dead Stock ပစ္စည်းများ
+Decrease quantity,ပမာဏကို လျှော့ချပါ။
+Default,ပုံသေ
+Default:,မူရင်း-
+Delete,ဖျက်ပါ။
+Delete cancelled cash movement {0}?,ပယ်ဖျက်ထားသော ငွေသားလှုပ်ရှားမှု {0} ကို ဖျက်မလား။
+Delete Draft,Draft ကို ဖျက်ပါ။
+Delete draft invoice,ပြေစာမူကြမ်းကို ဖျက်ပါ။
+Delete draft invoice {0}?,ပြေစာမူကြမ်း {0} ကို ဖျက်မလား။
+Delete Invoice,ငွေတောင်းခံလွှာကို ဖျက်ပါ။
+Delete offline invoice,အော့ဖ်လိုင်းပြေစာ ဖျက်ပါ။
+Delivered,ပေးပို့ခဲ့သည်။
+Delivery Charges,ပို့ဆောင်ခ
+Delivery Information,ပေးပို့မှုအချက်အလက်
+Delivery Note {0} created,ပေးပို့မှုမှတ်စု {0} ကို ဖန်တီးထားသည်။
+Delivery note created,ပေးပို့မှုမှတ်စုကို ဖန်တီးထားသည်။
+Deployed Bundle:,အသုံးပြုထားသောအတွဲ-
+Deposit,အပ်ငွေ
+Description,ဖော်ပြချက်
+Detailed Supplier Breakdown,အသေးစိတ်ပေးသွင်းသူခွဲခြမ်းစိတ်ဖြာ
+Detecting formats:,ဖော်မတ်များကို ရှာဖွေခြင်း-
+Device Memory:,စက်ပစ္စည်းမှတ်ဉာဏ်-
+Difference,ကွာခြားမှု
+Difference (In Company Currency),ကွာခြားမှု (ကုမ္ပဏီငွေကြေးဖြင့်)
+Disable offline mode first to recheck live connectivity.,တိုက်ရိုက်ချိတ်ဆက်မှုကို ပြန်လည်စစ်ဆေးရန် အော့ဖ်လိုင်းမုဒ်ကို ဦးစွာပိတ်ပါ။
+Disconnect,အဆက်ဖြတ်ပါ။
+discount,လျှော့စျေး
+Discount %,လျှော့စျေး %
+Discount / Void / Return Report,လျှော့စျေး / ပျက်ပြယ် / ပြန်အစီရင်ခံ
+Discount Amount,လျှော့စျေးပမာဏ
+Discount limited by POS Profile,POS Profile မှ ကန့်သတ်ထားသော လျှော့စျေး
+Discounted Invoices,လျှော့စျေးငွေတောင်းခံလွှာများ
+Discounts,လျှော့စျေးများ
+Dismiss,ပယ်ရန်
+Download Certificate,လက်မှတ်ကို ဒေါင်းလုဒ်လုပ်ပါ။
+Draft,အကြမ်း
+Draft invoice deleted,ပြေစာမူကြမ်းကို ဖျက်လိုက်ပါပြီ။
+Draft source,မူကြမ်းအရင်းအမြစ်
+Drafts,ကြမ်းတယ်။
+Due {0},ပေးရမည့်ရက် {0}
+Due Date,သတ်မှတ်ရက်
+Duplicate,ပွား
+Edit customer,ဖောက်သည်ကို တည်းဖြတ်ပါ။
+Edit discount amount,လျှော့စျေးပမာဏကို တည်းဖြတ်ပါ။
+Edit discount percentage,လျှော့စျေး ရာခိုင်နှုန်းကို တည်းဖြတ်ပါ။
+Edit Gift Application,လက်ဆောင်လျှောက်လွှာကို တည်းဖြတ်ပါ။
+Edit item name,အကြောင်းအရာအမည်ကို တည်းဖြတ်ပါ။
+Edit quantity,ပမာဏကို တည်းဖြတ်ပါ။
+Edit rate,တည်းဖြတ်မှုနှုန်း
+Edit unit of measure,အတိုင်းအတာယူနစ်ကို တည်းဖြတ်ပါ။
+Edited,တည်းဖြတ်သည်။
+Employee,ဝန်ထမ်း
+Enable background sync,နောက်ခံစင့်ခ်လုပ်ခြင်းကို ဖွင့်ပါ။
+Enable Customer Display in POS Profile first.,POS Profile တွင် Customer Display ကို ဦးစွာဖွင့်ပါ။
+Enter a PIN.,ပင်နံပါတ်ထည့်ပါ။
+Enter a valid grams value,မှန်ကန်သောဂရမ်တန်ဖိုးကို ထည့်ပါ။
+Enter new price list rate,စျေးနှုန်းစာရင်း နှုန်းထားအသစ်ကို ထည့်သွင်းပါ။
+Enter Quantity,Quantity ထည့်ပါ။
+Enter the cashier PIN to continue.,ရှေ့ဆက်ရန် ငွေကိုင် PIN ကိုထည့်ပါ။
+Enter the current PIN first.,လက်ရှိ PIN ကို အရင်ထည့်ပါ။
+"Enter the current PIN, then choose a new one.",လက်ရှိ ပင်နံပါတ်ကို ထည့်ပါ၊ ထို့နောက် အသစ်တစ်ခုကို ရွေးချယ်ပါ။
+Enter valid grams for scale barcode,စကေးဘားကုဒ်အတွက် မှန်ကန်သောဂရမ်ကို ထည့်ပါ။
+Entries,ထည့်သွင်းမှုများ
+Error accessing camera:,ကင်မရာကို အသုံးပြုရာတွင် အမှားအယွင်းရှိနေသည်-
+Error calculating prices,စျေးနှုန်းတွက်ချက်ရာတွင် အမှားအယွင်းရှိသည်။
+Error fetching customer balance,ဖောက်သည်လက်ကျန်ကို ရယူရာတွင် အမှားအယွင်းရှိသည်။
+Error in change calculations!,အပြောင်းအလဲ တွက်ချက်မှုတွင် အမှားအယွင်းရှိသည်။
+Error Loading Data,ဒေတာကို တင်ရာတွင် အမှားအယွင်းရှိသည်။
+Error loading invoice details,ပြေစာအသေးစိတ်အချက်အလက်များကို ဖွင့်ရာတွင် အမှားအယွင်းရှိနေသည်။
+Error processing invoice,ငွေတောင်းခံလွှာကို လုပ်ဆောင်ရာတွင် အမှားအယွင်းရှိနေသည်။
+Error processing payment,ငွေပေးချေမှု လုပ်ဆောင်ရာတွင် အမှားအယွင်းရှိနေသည်။
+Error searching invoices,ငွေတောင်းခံလွှာများကို ရှာဖွေရာတွင် အမှားအယွင်းရှိသည်။
+Error submitting invoice:,ပြေစာပေးပို့ရာတွင် အမှားအယွင်းရှိနေသည်-
+Error submitting invoice: {0},ပြေစာပေးပို့ရာတွင် အမှားအယွင်းရှိနေသည်- {0}
+Error submitting invoice: No response from server,ပြေစာပေးပို့ရာတွင် အမှားအယွင်းရှိသည်- ဆာဗာမှ တုံ့ပြန်မှုမရှိပါ။
+Error updating currency,ငွေကြေးကို အပ်ဒိတ်လုပ်ရာတွင် အမှားအယွင်းရှိနေသည်။
+Error updating item details,အကြောင်းအရာအသေးစိတ်ကို အပ်ဒိတ်လုပ်ရာတွင် အမှားအယွင်းရှိနေသည်။
+Est. Purchase,ခန့်မှန်း ဝယ်ယူပါ။
+Est. Value,ခန့်မှန်း တန်ဖိုး
+Event-loop lag measures how busy your browser is. Lower is better.,Event-loop lag သည် သင့်ဘရောက်ဆာမည်မျှအလုပ်ရှုပ်သည်ကို တိုင်းတာသည်။ အောက်ခြေက ပိုကောင်းပါတယ်။
+Every,တိုင်း၊
+Exchange Rate,ငွေလဲနှုန်း
+Expand item details,အကြောင်းအရာအသေးစိတ်ကို ချဲ့ပါ။
+Expected Amount (In Company Currency),မျှော်လင့်ထားသည့်ပမာဏ (ကုမ္ပဏီငွေကြေးဖြင့်)
+Expected Cash,မျှော်လင့်ထားသောငွေ
+Expected cash on hand grouped by currency,လက်ပေါ်ရှိ မျှော်လင့်ထားသော ငွေသားကို ငွေကြေးဖြင့် အုပ်စုဖွဲ့သည်။
+Expected vs Actual,မျှော်မှန်းထားသည်နှင့် အစစ်အမှန်
+Expense,ကုန်ကျစရိတ်
+Expense Account (Optional Override),ကုန်ကျစရိတ်အကောင့် (ချန်လှပ်ထားနိုင်သည်)
+Expense account is required.,ကုန်ကျစရိတ်အကောင့် လိုအပ်ပါသည်။
+Expenses and deposits posted during this shift,ဤအပြောင်းအရွှေ့ကာလတွင် ကုန်ကျစရိတ်များနှင့် အပ်ငွေများကို ကြော်ငြာထားသည်။
+Expired,သက်တမ်းကုန်သွားပြီ
+Failed to auto reconcile payments.,ငွေပေးချေမှုများကို အလိုအလျောက် ပြန်လည်ညှိနှိုင်းရန် မအောင်မြင်ပါ။
+Failed to cancel cash movement,ငွေသားလှုပ်ရှားမှုကို ပယ်ဖျက်၍မရပါ။
+Failed to clear cache,ကက်ရှ်ကို ရှင်းလင်းရန် မအောင်မြင်ပါ။
+Failed to create item,အကြောင်းအရာကို ဖန်တီး၍မရပါ။
+Failed to create supplier,ပေးသွင်းသူကို ဖန်တီး၍မရပါ။
+Failed to delete cash movement,ငွေသားလှုပ်ရှားမှုကို ဖျက်၍မရပါ။
+Failed to generate scale barcode. Using item barcode only.,စကေးဘားကုဒ်ကို ထုတ်လုပ်၍မရပါ။ ပစ္စည်းဘားကုဒ်ကိုသာ အသုံးပြုခြင်း။
+Failed to load cash movement context.,ငွေသားလှုပ်ရှားမှု အကြောင်းအရာကို တင်၍မရပါ။
+Failed to load dashboard data.,ဒက်ရှ်ဘုတ်ဒေတာကို တင်ရန် မအောင်မြင်ပါ။
+Failed to reload invoice from server,ဆာဗာမှ ပြေစာအား ပြန်လည်စတင်ရန် မအောင်မြင်ပါ။
+Failed to submit cash movement,ငွေသားလှုပ်ရှားမှုကို တင်ပြရန် မအောင်မြင်ပါ။
+Failed to sync offline cash movements,အော့ဖ်လိုင်းငွေသားလှုပ်ရှားမှုများကို စင့်ခ်လုပ်၍မရပါ။
+Fast cashier actions for active shifts.,တက်ကြွသောအပြောင်းအရွှေ့များအတွက် မြန်ဆန်သော ငွေကိုင်လုပ်ဆောင်ချက်များ။
+Fast Moving Items,လျင်မြန်သောရွေ့လျားပစ္စည်းများ
+Fees,အဖိုးအခ
+Fetch the latest offline prerequisite updates,နောက်ဆုံးအော့ဖ်လိုင်းအတွက် လိုအပ်သောအပ်ဒိတ်များကို ရယူပါ။
+Find a sales order quickly and load it into the current sale.,အရောင်းအမှာစာတစ်ခုကို အမြန်ရှာပြီး လက်ရှိရောင်းချမှုတွင် ထည့်သွင်းပါ။
+Fixing payment amounts for return invoice...,ပြန်ပြေစာအတွက် ငွေပေးချေမှုပမာဏကို ပြင်ဆင်နေသည်...
+Flash Off,Flash Off
+Flash On,Flash On ပါ။
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.",'ကုန်ပစ္စည်းအစုအဝေး' ပစ္စည်းများအတွက်၊ ဂိုဒေါင်၊ အမှတ်စဉ်နံပါတ်နှင့် အတွဲလိုက်အမှတ်တို့ကို 'ထုပ်ပိုးမှုစာရင်း' ဇယားမှ ထည့်သွင်းစဉ်းစားမည်ဖြစ်သည်။ Warehouse နှင့် Batch No သည် မည်သည့် 'Product Bundle' item အတွက် ထုပ်ပိုးထားသော ပစ္စည်းအားလုံးအတွက် တူညီပါက၊ ထိုတန်ဖိုးများကို ပင်မပစ္စည်းဇယားတွင် ထည့်သွင်းနိုင်သည်။ တန်ဖိုးများကို 'ထုပ်ပိုးမှုစာရင်း' ဇယားသို့ ကူးယူမည်ဖြစ်သည်။
+Free,အခမဲ့
+Free Qty,အခမဲ့အရေအတွက်
+Frequency,အကြိမ်ရေ
+from,ထံမှ
+From Date,Date မှ
+Fulfillment Details,ပြည့်စုံမှုအသေးစိတ်
+Full Name,နာမည်အပြည့်အစုံ
+Gain,အမြတ်
+Generate a fresh prepaid card and start it with an opening balance.,လတ်ဆတ်သော ကြိုတင်ငွေပေးကတ်ကို ဖန်တီးပြီး အဖွင့်လက်ကျန်ငွေဖြင့် စတင်ပါ။
+Generate and install the certificate to allow fully silent printing without trust prompts.,ယုံကြည်စိတ်ချရသောသတိပေးချက်များမပါဘဲ အပြည့်အ၀ အသံတိတ်ပုံနှိပ်ခြင်းကို ခွင့်ပြုရန် လက်မှတ်ကို ဖန်တီးပြီး ထည့်သွင်းပါ။
+Generate Certificate,လက်မှတ်ထုတ်ပေးပါ။
+Generated scale barcode: {0},ထုတ်လုပ်ထားသော စကေးဘားကုဒ်- {0}
+Get Payments,ငွေပေးချေမှုများကို ရယူပါ။
+Gift Card,လက်ဆောင်ကတ်
+Gift card amount must be greater than zero.,လက်ဆောင်ကတ် ပမာဏသည် သုညထက် ပိုနေရပါမည်။
+Gift Card Code,လက်ဆောင်ကတ်ကုဒ်
+Gift card code is required for redemption,လက်ဆောင်ကတ်ကုဒ်ကို ရွေးယူရန်အတွက် လိုအပ်ပါသည်။
+Gift card code is required.,လက်ဆောင်ကတ်ကုဒ် လိုအပ်ပါသည်။
+Gift card issued successfully.,လက်ဆောင်ကတ်ကို အောင်မြင်စွာ ထုတ်ပေးခဲ့သည်။
+Gift card loaded successfully.,လက်ဆောင်ကတ်ကို အောင်မြင်စွာ တင်နိုင်ပါပြီ။
+Gift Card Management,လက်ဆောင်ကတ်စီမံခန့်ခွဲမှု
+Gift card payment,လက်ဆောင်ကတ်ငွေပေးချေမှု
+Gift card redemption requires an online connection,လက်ဆောင်ကတ်ကို ရွေးနှုတ်ခြင်းသည် အွန်လိုင်းချိတ်ဆက်မှုတစ်ခု လိုအပ်သည်။
+Gift card topped up successfully.,လက်ဆောင်ကတ်ကို ငွေဖြည့်သွင်းပြီးပါပြီ။
+Gift Cards,လက်ဆောင်ကတ်များ
+Go to Frappe Desk,Frappe Desk သို့သွားပါ။
+Grand Total,Grand Total
+Gross Margin,စုစုပေါင်း Margin
+Gross Profit,စုစုပေါင်းအမြတ်
+Gross Sales,စုစုပေါင်းရောင်းအား
+Group not found,အဖွဲ့ကို ရှာမတွေ့ပါ။
+"Grouped controls for terminal, UI, and session settings.",terminal၊ UI နှင့် စက်ရှင်ဆက်တင်များအတွက် အုပ်စုဖွဲ့ထိန်းချုပ်မှုများ။
+Grouped totals for each payment method and currency,ငွေပေးချေမှုနည်းလမ်းနှင့် ငွေကြေးတစ်ခုစီအတွက် စုစုပေါင်း စုစုပေါင်းများကို အုပ်စုဖွဲ့ထားသည်။
+Hide,ဖျောက်ပါ။
+Hide Gift Card,လက်ဆောင်ကတ်ကို ဝှက်ထားပါ။
+Hide Non Essential Fields,မရှိမဖြစ် အကွက်များကို ဖျောက်ပါ။
+Hide quantity decimals,အရေအတွက် ဒဿမများကို ဝှက်ပါ။
+Hide search tools,ရှာဖွေရေးကိရိယာများကို ဝှက်ထားပါ။
+Hide zero rated items,သုည အဆင့်သတ်မှတ်ထားသော အရာများကို ဝှက်ထားပါ။
+High,မြင့်သည်။
+History,သမိုင်း
+Hourly (Today),နာရီအလိုက် (ယနေ့)
+How this section works,ဒီပုဒ်မ ဘယ်လိုအလုပ်လုပ်လဲ။
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.",ဒေတာပျက်သွားပါက၊ ဆက်တင်များ > အော့ဖ်လိုင်းနှင့် စင့်ခ်လုပ်ခြင်းကိုဖွင့်ပြီး အွန်လိုင်းတွင် အော့ဖ်လိုင်းဒေတာကို ပြန်လည်တည်ဆောက်ရန် ထပ်မံလုပ်ဆောင်ပါ။
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.",သတိပေးချက် ဆက်လက်ရှိနေပါက ဆက်တင်များ > အော့ဖ်လိုင်းနှင့် စင့်ခ်လုပ်ခြင်းကို ဖွင့်ပါ၊ ထို့နောက် အော့ဖ်လိုင်းဒေတာကို ပြန်လည်စတင်ပါ သို့မဟုတ် အော့ဖ်လိုင်းဒေတာကို ပြန်လည်တည်ဆောက်ပါ။
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,လက်မှတ်ကို QZ Tray ထဲသို့ ထည့်သွင်းပြီး POS စက်တစ်ခုစီတွင် QZ Tray ကို ပြန်လည်စတင်ပါ။
+In,၌
+In stock: {0},လက်ကျန်- {0}
+Include Batch / Serial,Batch / Serial ပါဝင်ပါသည်။
+Include Price,စျေးနှုန်းပါဝင်ပါသည်။
+Increase quantity,ပမာဏတိုးပါ။
+IndexedDB,IndexedDB
+Initial Amount,ကနဦးပမာဏ
+Initialize your shift with opening balances,အဖွင့်လက်ကျန်များဖြင့် သင်၏အပြောင်းအရွှေ့ကို စတင်ပါ။
+Initializing application...,လျှောက်လွှာကို စတင်နေသည်...
+"Inspect cache, sync, and prerequisite status",ကက်ရှ်၊ စင့်ခ်လုပ်ခြင်း နှင့် ကြိုတင်လိုအပ်ချက် အခြေအနေကို စစ်ဆေးပါ။
+Installed Applications,ထည့်သွင်းထားသော အပလီကေးရှင်းများ
+Insufficient stock:\n{0},စတော့ မလုံလောက်ပါ-\n{0}
+Invalid rate,မမှန်ကန်သောနှုန်း
+Inventory Status Report,စာရင်းဇယားအခြေအနေအစီရင်ခံစာ
+Invoice,ပြေ
+Invoice {0} is Submitted,ပြေစာ {0} ကို တင်သွင်းထားပါသည်။
+Invoice {0} processed successfully,ပြေစာ {0} ကို အောင်မြင်စွာ လုပ်ဆောင်ပြီးပါပြီ။
+Invoice {0} submission failed,ပြေစာ {0} တင်သွင်းမှု မအောင်မြင်ပါ။
+Invoice {0} was already submitted,ပြေစာ {0} ကို တင်သွင်းပြီးဖြစ်သည်။
+Invoice Adjustments,ပြေစာ ပြုပြင်ပြောင်းလဲမှုများ
+Invoice Change,ပြေစာပြောင်းခြင်း။
+Invoice Details,ပြေစာအသေးစိတ်
+Invoice is still in draft after background submission.,နောက်ခံတင်ပြပြီးနောက် ပြေစာသည် မူကြမ်းတွင် ရှိနေဆဲဖြစ်သည်။
+Invoice Items,ပြေစာများ
+Invoice Management,ငွေတောင်းခံလွှာစီမံခန့်ခွဲမှု
+Invoice Mgmt,ပြေ Mgmt
+Invoice saved offline,ပြေစာအား အော့ဖ်လိုင်းတွင် သိမ်းဆည်းထားသည်။
+Invoice submission failed,ပြေစာပေးပို့မှု မအောင်မြင်ပါ။
+Invoice Submitted,ပြေစာတင်ပြီးပါပြီ။
+"Invoice value settled by loyalty points, not cash collection",ငွေသားစုဆောင်းခြင်းမဟုတ်ဘဲ သစ္စာရှိအမှတ်များဖြင့် ဖြေရှင်းသည့် ပြေစာတန်ဖိုး
+Invoices,ပြေစာများ
+Invoices already past due date,ပြေစာများသည် သတ်မှတ်ရက်ကျော်လွန်ပြီးဖြစ်သည်။
+Invoices saved as POS Invoices,ငွေတောင်းခံလွှာများကို POS ငွေတောင်းခံလွှာများအဖြစ် သိမ်းဆည်းထားသည်။
+Invoices still carrying balances,ပြေစာများသည် လက်ကျန်များကို သယ်ဆောင်နေဆဲဖြစ်သည်။
+Issue Mode,ထုတ်ပေးပါခင်ဗျာ။
+Issue New Card,ကတ်အသစ်ထုတ်ပေးသည်။
+Issue Workflow,အလုပ်အသွားအလာကိစ္စ
+"Issue, top up, and check",ပြဿနာ၊ ငွေဖြည့်သွင်းပြီး စစ်ဆေးပါ။
+Item,ကုသိုလ်ကံ
+Item / Product Sales Report,ပစ္စည်း/ထုတ်ကုန် အရောင်းအစီရင်ခံစာ
+Item {0} added to invoice,ပစ္စည်း {0} ကို ငွေတောင်းခံလွှာသို့ ထည့်ခဲ့သည်။
+Item '{0}' has no barcode,ပစ္စည်း '{0}' တွင် ဘားကုဒ်မရှိပါ။
+Item Code,ပစ္စည်းကုဒ်
+Item created successfully,ပစ္စည်းကို အောင်မြင်စွာ ဖန်တီးပြီးပါပြီ။
+Item is out of stock,ပစ္စည်းပြတ်သွားပါပြီ။
+Item Name,ပစ္စည်းအမည်
+Item not found,ပစ္စည်းမတွေ့ပါ။
+Item order updated,ပစ္စည်းမှာယူမှုကို အပ်ဒိတ်လုပ်ထားသည်။
+Item Selector Settings,အကြောင်းအရာ ရွေးချယ်မှု ဆက်တင်များ
+Items,ပစ္စည်းများ
+Items added in POS will appear here automatically.,POS တွင် ထည့်ထားသော အရာများသည် ဤနေရာတွင် အလိုအလျောက် ပေါ်လာပါမည်။
+Items added to invoice,ပြေစာသို့ ပစ္စည်းများ ထည့်ထားသည်။
+Items per page,စာမျက်နှာအလိုက် ပစ္စည်းများ
+Items Sold,ရောင်းချပြီးသောပစ္စည်းများ
+Items/Invoice,ပစ္စည်း/ပြေစာ
+Item-wise Profitability,ပစ္စည်းအလိုက် အမြတ်အစွန်း
+Journal Entry,ဂျာနယ်ဝင်ခွင့်
+json,json
+Just now,အခုပဲ
+Keep offline prerequisites healthy and recover stale data safely.,အော့ဖ်လိုင်းတွင် လိုအပ်ချက်များကို ကျန်းမာစွာ ထားရှိကာ ပျက်ယွင်းနေသော ဒေတာများကို ဘေးကင်းစွာ ပြန်လည်ရယူပါ။
+Labels,တံဆိပ်များ
+"Language, theme, terminal tools, and session controls.",ဘာသာစကား၊ အပြင်အဆင်၊ terminal ကိရိယာများနှင့် စက်ရှင်ထိန်းချုပ်မှုများ။
+Last,နောက်ဆုံး
+Last 14 Days (Paid vs Pending),နောက်ဆုံး 14 ရက် (အခကြေးငွေနှင့် ဆိုင်းငံ့ထားသည်)
+Last 14 Days Activity,နောက်ဆုံး ၁၄ ရက် လုပ်ဆောင်ချက်
+Last 14 Days Gross Profit,နောက်ဆုံး 14 ရက် စုစုပေါင်းအမြတ်
+Last 14 Days Purchases,နောက်ဆုံး 14 ရက်ဝယ်ယူမှုများ
+Last 14 Days Tax/Charges,လွန်ခဲ့သည့် 14 ရက်အတွင်း အခွန်/ကောက်ခံမှုများ
+Last sync:,နောက်ဆုံး စင့်ခ်လုပ်သည်-
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},နောက်ဆုံး စင့်ခ်လုပ်ခြင်း- {0} | ok- {1} | မအောင်မြင်ပါ- {2} | ကျော်သွားသည်- {3}
+Latest entries for current shift,လက်ရှိအပြောင်းအရွှေ့အတွက် နောက်ဆုံးထွက်စာရင်းများ
+Lead Time,ပို့ဆောင်ချိန်
+Limited,ကန့်သတ်ချက်
+lines,လိုင်းများ
+List,စာရင်း
+Live Snapshot,တိုက်ရိုက်လျှပ်တစ်ပြက်
+Load a POS profile and cashier first.,POS ပရိုဖိုင်နှင့် ငွေကိုင်ကို ဦးစွာ တင်ပါ။
+Load More Invoices,နောက်ထပ် ငွေတောင်းခံလွှာများကို တင်ပါ။
+Load previously saved invoices,ယခင်သိမ်းဆည်းထားသည့် ငွေတောင်းခံလွှာများကို တင်ပါ။
+Load Sale,ရောင်းရန်
+Load Sales Invoice,အရောင်းပြေစာတင်ပါ။
+Loading app data...,အက်ပ်ဒေတာကို ဖွင့်နေသည်...
+Loading customer database...,ဖောက်သည်ဒေတာဘေ့စ်ကို ဖွင့်နေသည်...
+Loading customers...,ဖောက်သည်များကို ဖွင့်နေသည်...
+Loading database stats...,ဒေတာဘေ့စ်စာရင်းများကို ဖွင့်နေသည်...
+Loading details...,အသေးစိတ်အချက်အလက်များကို ဖွင့်နေသည်...
+Loading invoice history...,ပြေစာမှတ်တမ်းကို ဖွင့်နေသည်...
+Loading items...,ပစ္စည်းများ တင်နေသည်...
+Loading product catalog...,ထုတ်ကုန်ကတ်တလောက်ကို ဖွင့်နေသည်...
+Loading return invoices...,ပြန်ပို့ငွေတောင်းခံလွှာများကို ဖွင့်နေသည်...
+Loading server CPU/memory usage...,ဆာဗာ CPU/မမ်မိုရီအသုံးပြုမှုကို ဖွင့်နေသည်...
+Loading suppliers...,ပေးသွင်းသူများကို ဖွင့်နေသည်...
+Loading unpaid invoices...,အခပေးမရသေးသော ငွေတောင်းခံလွှာများကို ဖွင့်နေသည်...
+Loading view...,မြင်ကွင်းကို ဖွင့်နေသည်...
+Loading...,ဖွင့်နေသည်...
+Local storage is unavailable. Switching to online-only mode.,စက်တွင်းသိုလှောင်မှု မရနိုင်ပါ။ အွန်လိုင်းသီးသန့်မုဒ်သို့ ပြောင်းနေသည်။
+localStorage,localStorage
+Location Performance,တည်နေရာစွမ်းဆောင်ရည်
+Locations,နေရာများ
+Lock Screen,သော့ခတ်မျက်နှာပြင်
+Lookup Workflow,အလုပ်အသွားအလာကို ရှာဖွေပါ။
+Loss,ဆုံးရှုံးမှု
+Low,နိမ့်သည်။
+Low Stock,Low Stock
+Low Stock Alerts,စတော့နည်းသော သတိပေးချက်များ
+Low Stock Items,စတော့နည်းသောပစ္စည်းများ
+Low Stock Threshold,Low Stock Threshold
+Low Stock Total,Low Stock Total
+Lowest Margin,အနိမ့်ဆုံး Margin
+Low-frequency maintenance and system details.,ကြိမ်နှုန်းနည်းသော ပြုပြင်ထိန်းသိမ်းမှုနှင့် စနစ်အသေးစိတ်။
+Loyalty Redeemed,သစ္စာစောင့်သိမှု ရွေးနှုတ်ခဲ့သည်။
+Loyalty Redemption,သစ္စာစောင့်သိမှု ရွေးနှုတ်ခြင်း။
+Make New Payment,ငွေပေးချေမှုအသစ်လုပ်ပါ။
+Manage all,အားလုံးကို စီမံပါ။
+Manage and synchronize your offline transactions,သင်၏အော့ဖ်လိုင်းငွေပေးငွေယူများကို စီမံခန့်ခွဲပြီး တစ်ပြိုင်တည်းလုပ်ဆောင်ပါ။
+Manage Cashier PIN,Cashier PIN ကို စီမံပါ။
+"Manage offline tools, terminal controls, and maintenance from one workspace.",အော့ဖ်လိုင်းတူးလ်များ၊ ဂိတ်ထိန်းချုပ်မှုများနှင့် ပြုပြင်ထိန်းသိမ်းမှုများကို အလုပ်နေရာတစ်ခုမှ စီမံခန့်ခွဲပါ။
+manual,လက်စွဲ
+"Manual codes, barcode scans, and QR scans work in the same field",လူကိုယ်တိုင်ကုဒ်များ၊ ဘားကုဒ်စကင်န်ဖတ်ခြင်းနှင့် QR စကင်န်ဖတ်ခြင်းများသည် တူညီသောအကွက်တွင် အလုပ်လုပ်ပါသည်။
+Manual offline mode is enabled,လူကိုယ်တိုင် အော့ဖ်လိုင်းမုဒ်ကို ဖွင့်ထားသည်။
+Margin,အနားသတ်
+Maximum available quantity is {0}. Quantity adjusted to match stock.,အများဆုံးရရှိနိုင်သည့်ပမာဏမှာ {0} ဖြစ်သည်။ အရေအတွက်ကို စတော့နှင့် ကိုက်ညီအောင် ချိန်ညှိထားသည်။
+Maximum discount amount for this offer item is {0}.,ဤကမ်းလှမ်းချက်အကြောင်းအရာအတွက် အများဆုံးလျှော့စျေးမှာ {0} ဖြစ်သည်။
+Maximum discount percentage for this offer item is {0}%.,ဤကမ်းလှမ်းချက်အကြောင်းအရာအတွက် အများဆုံးလျှော့စျေးရာခိုင်နှုန်းမှာ {0}% ဖြစ်သည်။
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,အများဆုံးကမ်းလှမ်းမှုပမာဏမှာ {0} ဖြစ်သည်။ ခွင့်ပြုကန့်သတ်ချက်ဖြင့် ပမာဏကို ချိန်ညှိထားသည်။
+Medium,လတ်
+Method-wise Collections,နည်းလမ်းအလိုက် စုစည်းမှု
+Minimum allowed rate for this offer item is {0}.,ဤကမ်းလှမ်းချက်အကြောင်းအရာအတွက် အနည်းဆုံးခွင့်ပြုနှုန်းမှာ {0} ဖြစ်သည်။
+Minimum Qty,အနည်းဆုံး အရေအတွက်
+Mobile No,မိုဘိုင်းနံပါတ်
+Mode,မုဒ်
+Mode of Payment,ငွေပေးချေမှုပုံစံ
+Month,လ
+Month ?,လ ?
+Monthly Profit,လစဉ်အမြတ်
+Monthly Sales,လစဉ်အရောင်း
+Monthly Sales Summary,လစဉ်အရောင်းအကျဉ်းချုပ်
+Month-wise,လအလိုက်
+Most Active Cashiers,အတက်ကြွဆုံး ငွေကိုင်များ
+Movement Type,လှုပ်ရှားမှုအမျိုးအစား
+Movements,လှုပ်ရှားမှုများ
+Multi Currency,ငွေကြေးမျိုးစုံ
+N/A,မရှိ
+Name,နာမည်
+Negative Stock,အနုတ်လက္ခဏာစတော့
+Negative Stock Items,အနုတ်လက္ခဏာစတော့ခ်ပစ္စည်းများ
+Negative values not allowed,အနုတ်လက္ခဏာတန်ဖိုးများကို ခွင့်မပြုပါ။
+Net,ပိုက်ကွန်
+Net Qty,Net Qty
+Net Sales,အသားတင် အရောင်း
+Net Value,အသားတင်တန်ဖိုး
+Never,ဘယ်တော့မှ
+New changes are ready to load,အပြောင်းအလဲအသစ်များကို တင်ရန် အသင့်ဖြစ်နေပါပြီ။
+New Item,ပစ္စည်းအသစ်
+New Offer Available,ကမ်းလှမ်းချက်အသစ် ရနိုင်ပါသည်။
+New PIN,ပင်နံပါတ်အသစ်
+New rate,အသစ်နှုန်း
+Next unit of measure,နောက်တစ်ခုက အတိုင်းအတာယူနစ်
+No attribute data found.,ရည်ညွှန်းချက်ဒေတာ မတွေ့ပါ။
+No Barcode,ဘားကုဒ်မရှိပါ။
+No barcode found for UOM '{0}',UOM '{0}' အတွက် ဘားကုဒ်မတွေ့ပါ
+No branch/location data found.,ဌာနခွဲ/တည်နေရာဒေတာကို ရှာမတွေ့ပါ။
+No brand data found.,အမှတ်တံဆိပ်ဒေတာမတွေ့ပါ။
+No cached gift card balance is available offline.,သိမ်းဆည်းထားသော လက်ဆောင်ကတ် လက်ကျန်ကို အော့ဖ်လိုင်းတွင် မရနိုင်ပါ။
+No camera found on this device. Please ensure your device has a working camera.,ဤစက်ပစ္စည်းတွင် ကင်မရာမတွေ့ပါ။ သင့်စက်တွင် အလုပ်လုပ်သော ကင်မရာပါရှိကြောင်း သေချာပါစေ။
+No capability warnings recorded yet.,လုပ်ဆောင်နိုင်စွမ်းသတိပေးချက်များကို မှတ်တမ်းတင်ထားခြင်းမရှိသေးပါ။
+No cash expected for this shift.,ဤအပြောင်းအရွှေ့အတွက် မျှော်မှန်းထားသော ငွေကြေးမရှိပါ။
+No cash mode configured,ငွေသားမုဒ်ကို ပြင်ဆင်သတ်မှတ်ထားခြင်းမရှိပါ။
+No cash movement type is allowed for this POS Profile.,ဤ POS ပရိုဖိုင်အတွက် ငွေသားလှုပ်ရှားမှုအမျိုးအစားကို ခွင့်မပြုပါ။
+No cashier PIN is set yet. Create one now.,ငွေကိုင် PIN ကို မသတ်မှတ်ရသေးပါ။ ယခုတစ်ခုဖန်တီးပါ။
+No cashier profiles are available for this POS profile yet.,ဤ POS ပရိုဖိုင်အတွက် ငွေကိုင်ပရိုဖိုင်များကို မရရှိနိုင်သေးပါ။
+No cashier-wise discount/void/return activity.,ငွေကိုင်ဖြင့် လျှော့စျေး/ပျက်ပြယ်/ပြန်ပေးသည့် လုပ်ဆောင်ချက်မရှိပါ။
+No category data found.,အမျိုးအစားဒေတာမတွေ့ပါ။
+No category profitability data found.,အမျိုးအစားအလိုက် အမြတ်အစွန်းရရှိမှုဒေတာကို ရှာမတွေ့ပါ။
+No change returned recorded for this shift.,ဤအပြောင်းအရွှေ့အတွက် မှတ်တမ်းတင်ထားသော အပြောင်းအလဲမရှိပါ။
+No change-allocation invoices match the current filters.,လက်ရှိ စစ်ထုတ်မှုများနှင့် ကိုက်ညီသော ပြောင်းလဲမှု-ခွဲဝေပေးချေမှု မရှိပါ။
+No charge head breakdown found.,အခကြေးငွေ ပြတ်တောက်မှု မတွေ့ရှိရပါ။
+No Company Selected,မည်သည့်ကုမ္ပဏီမှ ရွေးချယ်ထားခြင်းမရှိပါ။
+No customer sales data found.,ဖောက်သည်အရောင်းဒေတာကို ရှာမတွေ့ပါ။
+No day-wise discount/void/return trend.,နေ့အလိုက် လျှော့စျေး/ပျက်ပြယ်/ပြန်သွားမည့် လမ်းကြောင်းမရှိပါ။
+No day-wise payment data found.,နေ့အလိုက် ငွေပေးချေမှုဒေတာ မတွေ့ပါ။
+No day-wise profitability trend found.,နေ့အလိုက် အမြတ်အစွန်းထွက်နိုင်မှုလမ်းကြောင်းကို ရှာမတွေ့ပါ။
+No day-wise purchase data found.,နေ့အလိုက် ဝယ်ယူမှုဒေတာ မတွေ့ပါ။
+No day-wise sales trend found.,နေ့အလိုက် အရောင်းလမ်းကြောင်း မတွေ့ပါ။
+No day-wise tax/charges trend found.,နေ့အလိုက် အခွန်/ကောက်ခံမှုများ လမ်းကြောင်းကို ရှာမတွေ့ပါ။
+No dead stock items.,အသေအပျောက်ပစ္စည်းများမရှိပါ။
+No due date,သတ်မှတ်ရက် မရှိပါ။
+No exact repair match found for this invoice,ဤငွေတောင်းခံလွှာအတွက် ပြုပြင်ရန် အတိအကျကိုက်ညီမှု မတွေ့ပါ။
+No hourly sales trend found for today.,ယနေ့အတွက် နာရီအလိုက် အရောင်းလမ်းကြောင်းကို ရှာမတွေ့ပါ။
+No invoice activity found.,ပြေစာ လုပ်ဆောင်ချက် မတွေ့ပါ။
+No invoices found,ပြေစာမတွေ့ပါ။
+No invoices found. Try different search criteria.,ပြေစာမတွေ့ပါ။ မတူညီသော ရှာဖွေမှုစံနှုန်းများကို စမ်းကြည့်ပါ။
+No invoices recorded for this shift.,ဤအပြောင်းအရွှေ့အတွက် ငွေတောင်းခံလွှာများကို မှတ်တမ်းတင်ထားခြင်းမရှိပါ။
+No item profitability data found.,မည်သည့်အရာမှ အမြတ်အစွန်းရရှိမှုဒေတာကို ရှာမတွေ့ပါ။
+No item sales data found for this period.,ဤကာလအတွက် ကုန်ပစ္စည်းအရောင်းဒေတာကို ရှာမတွေ့ပါ။
+No items found,မည်သည့်အရာမှ ရှာမတွေ့ပါ။
+No items in cart,လှည်းထဲတွင် ပစ္စည်းမရှိပါ။
+No items with barcodes to print,ပရင့်ထုတ်ရန် ဘားကုဒ်များပါသည့် အရာများမရှိပါ။
+No location-wise top item data found.,တည်နေရာအလိုက် ထိပ်တန်းအရာဒေတာကို ရှာမတွေ့ပါ။
+No low stock alerts right now.,လောလောဆယ် စတော့နည်းသော သတိပေးချက်များ မရှိပါ။
+No low stock items.,စျေးနည်းသောပစ္စည်းများမရှိပါ။
+No matching items in cart,လှည်းထဲတွင် ကိုက်ညီသည့်အရာများမရှိပါ။
+No month-wise sales trend found.,လအလိုက် အရောင်းလမ်းကြောင်း မတွေ့ပါ။
+No negative stock items.,အနုတ်လက္ခဏာစတော့ရှယ်ယာပစ္စည်းများမရှိပါ။
+No notifications yet,အကြောင်းကြားချက်များ မရှိသေးပါ။
+No offline cash movement synced.,အော့ဖ်လိုင်းငွေသားလှုပ်ရှားမှုကို စင့်ခ်လုပ်ထားခြင်းမရှိပါ။
+No offline invoices pending synchronization,အော့ဖ်လိုင်း ပြေစာများ ထပ်တူပြုခြင်း ဆိုင်းငံ့ထားခြင်း မရှိပါ။
+No offline sync issues recorded yet.,အော့ဖ်လိုင်းစင့်ခ်လုပ်ခြင်းပြဿနာများကို မှတ်တမ်းတင်ထားခြင်းမရှိသေးပါ။
+No out-of-stock items.,လက်ကျန်ပစ္စည်းများမရှိပါ။
+No outstanding credit invoices for this shift.,ဤအပြောင်းအရွှေ့အတွက် ထူးခြားသော ခရက်ဒစ်ပြေစာများ မရှိပါ။
+No payment collection data found.,ငွေပေးချေမှု ကောက်ခံမှုဒေတာ မတွေ့ပါ။
+No payment rows available on this invoice.,ဤငွေတောင်းခံလွှာတွင် ငွေပေးချေမှုအတန်းများ မရရှိနိုင်ပါ။
+No payments registered for this shift.,ဤအပြောင်းအရွှေ့အတွက် ငွေပေးချေမှုစာရင်းသွင်းထားခြင်းမရှိပါ။
+No pending balances in this period.,ဤကာလအတွင်း ဆိုင်းငံ့ထားသော လက်ကျန်ငွေများ မရှိပါ။
+No pending offline invoices,အော့ဖ်လိုင်း ဆိုင်းငံ့ထားသော ငွေတောင်းခံလွှာများ မရှိပါ။
+No Print Formats Found,ပရင့်ဖော်မတ်များ မတွေ့ပါ။
+No profiles found for selected scope. Falling back to current profile failed.,ရွေးချယ်ထားသော နယ်ပယ်အတွက် ပရိုဖိုင်များကို ရှာမတွေ့ပါ။ လက်ရှိပရိုဖိုင်သို့ ပြန်သွားရန် မအောင်မြင်ပါ။
+No recent customer activity found.,မကြာသေးမီက ဖောက်သည် လုပ်ဆောင်ချက်ကို ရှာမတွေ့ပါ။
+No recent stock entries found.,လတ်တလော စတော့ရှယ်ယာများ မတွေ့ပါ။
+No records found,မှတ်တမ်းများ မတွေ့ပါ။
+No reorder suggestions right now.,ယခု ပြန်လည်မှာယူရန် အကြံပြုချက်များ မရှိပါ။
+No repeat customers in this period.,ဤကာလတွင် ထပ်ခါတလဲလဲ ဖောက်သည်မရှိ။
+No response from server,ဆာဗာမှ တုံ့ပြန်မှုမရှိပါ။
+No return invoices found,ပြန်ပေးသည့် ပြေစာမတွေ့ပါ။
+No return item trend found.,ပြန်လာမည့်အရာလမ်းကြောင်းကို ရှာမတွေ့ပါ။
+No returnable items found for this invoice,ဤငွေတောင်းခံလွှာအတွက် ပြန်နိုင်သော အရာများ မတွေ့ပါ။
+No returns were processed in this shift.,ဤအပြောင်းအရွှေ့တွင် ပြန်အမ်းငွေ မလုပ်ဆောင်ခဲ့ပါ။
+No risk activity found.,အန္တရာယ်ရှိသော လုပ်ဆောင်ချက်ကို မတွေ့ပါ။
+No sales activity found for this period.,ဤကာလအတွင်း အရောင်းလှုပ်ရှားမှု မတွေ့ပါ။
+No slow moving items.,နှေးကွေးသော ရွေ့လျားနေသော အရာများ မရှိပါ။
+No staff sales activity found.,ဝန်ထမ်းများ အရောင်းလှုပ်ရှားမှု မတွေ့ပါ။
+No stock movement for this period.,ဤကာလအတွင်း စတော့ရှယ်ယာလှုပ်ရှားမှုမရှိပါ။
+No submitted cash movements in this shift.,ဤအပြောင်းအရွှေ့တွင် တင်သွင်းထားသော ငွေသားလှုပ်ရှားမှုမရှိပါ။
+No supplier purchases found in this month.,ပေးသွင်းသူ ဝယ်ယူမှုများကို ယခုလတွင် မတွေ့ပါ။
+No suppliers found for this period.,ဤကာလအတွင်း ပေးသွင်းသူများကို မတွေ့ပါ။
+No sync trigger has run yet in this session.,ဤစက်ရှင်တွင် စင့်ခ်လုပ်ခြင်း အစပျိုးခြင်း မရှိသေးပါ။
+No tax head breakdown found.,အခွန်စည်းကြပ်မှု ပျက်ပြားမှု မတွေ့ရ။
+No top items found for this location.,ဤတည်နေရာအတွက် ထိပ်တန်းအရာများ မတွေ့ပါ။
+No unpaid invoices,အခကြေးငွေမယူရသေးသော ငွေတောင်းခံလွှာများ မရှိပါ။
+No variant data found.,မူကွဲဒေတာမတွေ့ပါ။
+No week-wise sales trend found.,ရက်သတ္တပတ်အလိုက် အရောင်းလမ်းကြောင်း မတွေ့ပါ။
+No.,မရှိ
+Nobile Number,Nobile Number
+Not available,မရရှိနိုင်ပါ။
+Not checked,မစစ်ဆေးပါ။
+Not selected,မရွေးချယ်ပါ။
+Not Set,မသတ်မှတ်ပါ။
+Notifications,အသိပေးချက်များ
+Offer,ဝေငှခြင်း။
+Offer Applied,ကမ်းလှမ်းချက်ကို အသုံးပြုထားသည်။
+Offer criteria exceeded,ကမ်းလှမ်းချက်သတ်မှတ်ချက်ကို ကျော်လွန်သွားပါပြီ။
+Offer Item,ကမ်းလှမ်းချက်
+Offer item unavailable,ကမ်းလှမ်းချက်ကို မရနိုင်ပါ။
+Offer Removed,ကမ်းလှမ်းချက်ကို ဖယ်ရှားခဲ့သည်။
+Offer UOM cannot be changed,ကမ်းလှမ်းချက် UOM ကို ပြောင်းလဲ၍မရပါ။
+Offer?,ကမ်းလှမ်းမှုလား?
+Offers,ကမ်းလှမ်းမှုများ
+Offline,အော့ဖ်လိုင်း
+Offline & Sync,အော့ဖ်လိုင်းနှင့် စင့်ခ်လုပ်ခြင်း။
+Offline Capabilities,အော့ဖ်လိုင်းစွမ်းဆောင်ရည်များ
+Offline data status refreshed,အော့ဖ်လိုင်းဒေတာအခြေအနေကို ပြန်လည်စတင်ခဲ့သည်။
+Offline diagnostics,အော့ဖ်လိုင်းရောဂါရှာဖွေမှုများ
+Offline Invoices,အော့ဖ်လိုင်း ပြေစာများ
+Offline invoices status,အော့ဖ်လိုင်း ငွေတောင်းခံလွှာ အခြေအနေ
+Offline invoices synced,အော့ဖ်လိုင်း ပြေစာများကို စင့်ခ်လုပ်ထားသည်။
+Offline Queue: {0},အော့ဖ်လိုင်းစာရင်း- {0}
+Offline rebuild guidance,အော့ဖ်လိုင်း ပြန်လည်တည်ဆောက်ရန် လမ်းညွှန်ချက်
+Offline restore is unavailable for this session.,အော့ဖ်လိုင်းပြန်လည်ရယူခြင်းကို ဤစက်ရှင်အတွက် မရနိုင်ပါ။
+Offline selling is available with degraded capabilities.,အော့ဖ်လိုင်းရောင်းချခြင်းကို ယုတ်ညံ့သောစွမ်းရည်များဖြင့် ရရှိနိုင်သည်။
+Offline snapshot does not match the current POS state.,အော့ဖ်လိုင်းလျှပ်တစ်ပြက်ရိုက်ချက်သည် လက်ရှိ POS အခြေအနေနှင့် မကိုက်ညီပါ။
+Offline Status,အော့ဖ်လိုင်းအခြေအနေ
+"Offline, terminal, and system controls",အော့ဖ်လိုင်း၊ Terminal နှင့် စနစ်ထိန်းချုပ်မှုများ
+OK,အိုကေ
+Online,အွန်လိုင်း
+Open actions menu,လုပ်ဆောင်ချက်များမီနူးကိုဖွင့်ပါ။
+Open balance to collect,စုဆောင်းရန် လက်ကျန်ကို ဖွင့်ပါ။
+Open Customer Display,Customer Display ကိုဖွင့်ပါ။
+Open drawer,အံဆွဲဖွင့်ပါ။
+Open invoices,ငွေတောင်းခံလွှာများကို ဖွင့်ပါ။
+Open Payments?,ငွေပေးချေမှုများကို ဖွင့်မလား။
+Open POS home,POS home ကိုဖွင့်ပါ။
+Open this screen from POS Menu -> Open Customer Display.,POS Menu -> Open Customer Display မှ ဤစခရင်ကိုဖွင့်ပါ။
+OpenCV image processing enabled - Enhanced barcode detection,OpenCV ရုပ်ပုံလုပ်ဆောင်ခြင်းကို ဖွင့်ထားသည် - အဆင့်မြှင့်တင်ထားသော ဘားကုဒ်ထောက်လှမ်းခြင်း။
+OpenCV image processing unavailable on this device,OpenCV ရုပ်ပုံလုပ်ဆောင်ခြင်းကို ဤစက်ပစ္စည်းတွင် မရရှိနိုင်ပါ။
+OpenCV Off,OpenCV Off
+OpenCV On,OpenCV ကိုဖွင့်ပါ။
+OpenCV processing disabled,OpenCV လုပ်ဆောင်ခြင်းကို ပိတ်ထားသည်။
+Opening Amount,အဖွင့်ပမာဏ
+Opening Cash,ငွေသားဖွင့်ခြင်း။
+options,ရွေးချယ်စရာများ
+Order,အော်
+Original,မူရင်း
+Other,တခြား
+Out,အဲ
+Out of Stock,ပစ္စည်းပြတ်သွားပြီ
+Out of Stock Items,ပစ္စည်းပြတ်သွားပြီ
+Outstanding,ထူးချွန်သည်။
+Outstanding Credit by Currency,ငွေကြေးအားဖြင့် ထူးချွန်သော ခရက်ဒစ်
+Overdue,ရက်လွန်ပြီ။
+Overpayment Change,ငွေပိုပေးချေမှု ပြောင်းလဲခြင်း။
+Overpayment change deducted: {0},ငွေပိုပေးချေမှု အပြောင်းအလဲကို နုတ်ယူထားသည်- {0}
+Packing List,ထုပ်ပိုးမှုစာရင်း
+Page Format,စာမျက်နှာပုံစံ
+Page unavailable offline,စာမျက်နှာကို အော့ဖ်လိုင်း မရနိုင်ပါ။
+Paid,အခကြေးငွေ
+Paid (orig):,ပေးချေသည် (ရင်းမြစ်):
+Paid Amount,ပေးဆောင်သည့်ပမာဏ
+Paid change cannot be greater than total change!,အခပေး အပြောင်းအလဲသည် စုစုပေါင်းပြောင်းလဲမှုထက် မကြီးနိုင်ပါ။
+Paid:,ပေးဆောင်သည်-
+Parent Item,မိဘအရာ
+Partial,တပိုင်းတစ
+Partly Paid,တစ်စိတ်တစ်ပိုင်းပေးချေသည်။
+Party Account,ပါတီအကောင့်
+Party Type,ပါတီအမျိုးအစား
+Pause terminal until next cashier,နောက် ငွေကိုင်သည်အထိ ဂိတ်ကို ခဏရပ်ပါ။
+PAY,ငွေပေးချေပါ။
+Payment,ငွေပေးချေမှု
+Payment Account,ငွေပေးချေမှုအကောင့်
+Payment entries processed for Invoice {0},ပြေစာ {0} အတွက် ငွေပေးချေမှု ထည့်သွင်းမှုများကို လုပ်ဆောင်ပြီးပါပြီ
+Payment Entry Type,ငွေပေးချေမှု အမျိုးအစား
+Payment History,ငွေပေးချေမှုမှတ်တမ်း
+Payment ID,ငွေပေးချေမှု ID
+Payment Method Report,ငွေပေးချေမှုနည်းလမ်းအစီရင်ခံစာ
+Payment Methods,ငွေပေးချေမှုနည်းလမ်းများ
+Payment of {0} received successfully.,{0} ၏ပေးချေမှုကို အောင်မြင်စွာလက်ခံရရှိခဲ့သည်။
+Payment Progress,ငွေပေးချေမှု တိုးတက်မှု
+Payment Reconciliation,ငွေပေးချေမှု ပြန်လည်ညှိနှိုင်းရေး
+Payment request status could not be retrieved. Please try again,ငွေပေးချေမှုတောင်းဆိုမှု အခြေအနေအား ပြန်လည်ရယူ၍မရပါ။ ထပ်စမ်းကြည့်ပါ။
+Payment Request took too long to respond. Please try requesting for payment again,ငွေပေးချေမှုတောင်းဆိုမှုကို တုံ့ပြန်ရန် အလွန်ကြာပါသည်။ ကျေးဇူးပြု၍ ငွေပေးချေရန် ထပ်မံတောင်းဆိုကြည့်ပါ။
+Payment saved offline,ငွေပေးချေမှုကို အော့ဖ်လိုင်းတွင် သိမ်းဆည်းထားသည်။
+Payment State,ငွေပေးချေမှုအခြေအနေ
+Payment Status,ငွေပေးချေမှုအခြေအနေ
+Payment submitted but print function could not be executed. Payment name not found.,ငွေပေးချေမှုကို တင်ပြသော်လည်း ပရင့်လုပ်ဆောင်ချက်ကို လုပ်ဆောင်၍မရပါ။ ငွေပေးချေမှုအမည်ကို ရှာမတွေ့ပါ။
+Payment submitted.,ပေးသွင်းပြီးပါပြီ။
+Payment Summary,ငွေပေးချေမှု အကျဉ်းချုပ်
+Payments,ငွေပေးချေမှုများ
+Payments are not open. Do you want to open payments and submit?,ငွေပေးချေမှုများကို မဖွင့်ပါ။ ငွေပေးချေမှုများကို ဖွင့်ပြီး တင်သွင်းလိုပါသလား။
+Payments by Mode of Payment,ငွေပေးချေမှုပုံစံဖြင့် ငွေပေးချေမှုများ
+PDF,PDF
+Peak Hour,အမြင့်ဆုံးနာရီ
+Peak Memory:,အမြင့်ဆုံးမှတ်ဉာဏ်-
+Peak Server:,Peak ဆာဗာ-
+Peak:,အထွတ်အထိပ်-
+Pending,ဆိုင်းငံ့ထားသည်။
+Pending Amount,စောင့်ဆိုင်းနေသော ပမာဏ
+Pending count updated from {0} to {1},စောင့်ဆိုင်းနေသော အရေအတွက်ကို {0} မှ {1} သို့ အပ်ဒိတ်လုပ်ထားသည်
+Pending Exposure,အလင်းဝင်မှုကို ဆိုင်းငံ့ထားသည်။
+Pending Invoices,ဆိုင်းငံ့ထားသော ငွေတောင်းခံလွှာများ
+Pending Ratio,Pending Ratio
+Pending Sales,ဆိုင်းငံ့ထားသော အရောင်း
+Pending sales: {0} | Cache usage: {1}%,ဆိုင်းငံ့ရောင်းချမှု- {0} | ကက်ရှ်အသုံးပြုမှု- {1}%
+Pending Sync,စင့်ခ်လုပ်ခြင်းကို ဆိုင်းငံ့ထားသည်။
+Pending: {0},ဆိုင်းငံ့ထားသည်- {0}
+Pending: {0} | Synced: {1} | Draft: {2},ဆိုင်းငံ့ထားသည်- {0} | စင့်ခ်လုပ်ထားသည်- {1} | မူကြမ်း- {2}
+Per Page,စာမျက်နှာတစ်ခုစီ
+Personal,ပုဂ္ဂိုလ်ရေး
+Personal preferences adjust the current cashier experience without changing the active POS route.,လက်ရှိ POS လမ်းကြောင်းကို မပြောင်းလဲဘဲ ကိုယ်ရေးကိုယ်တာ ဦးစားပေးမှုများသည် လက်ရှိ ငွေကိုင်အတွေ့အကြုံကို ချိန်ညှိပါသည်။
+PIN confirmation does not match.,ပင်နံပါတ်အတည်ပြုချက်နှင့် မကိုက်ညီပါ။
+PIN must be 4 to 8 digits.,ပင်နံပါတ်သည် ဂဏန်း ၄ လုံးမှ ၈ လုံးဖြစ်ရမည်။
+Please add at least one item.,ကျေးဇူးပြု၍ အနည်းဆုံးတစ်ခုထည့်ပါ။
+Please allow camera access to scan codes,ကျေးဇူးပြု၍ ကုဒ်များကို စကင်န်ဖတ်ရန် ကင်မရာဝင်ရောက်ခွင့်ကို ခွင့်ပြုပါ။
+Please enter payment amount,ကျေးဇူးပြု၍ ငွေပေးချေမှုပမာဏကို ထည့်သွင်းပါ။
+Please fill all required fields,လိုအပ်သောအကွက်များအားလုံးကို ဖြည့်စွက်ပါ။
+Please make a payment or select a payment,ကျေးဇူးပြု၍ ငွေပေးချေမှုပြုလုပ်ပါ သို့မဟုတ် ငွေပေးချေမှုတစ်ခုကို ရွေးချယ်ပါ။
+Please request phone payment or use another payment method,ကျေးဇူးပြု၍ ဖုန်းငွေပေးချေမှုကို တောင်းဆိုပါ သို့မဟုတ် အခြားငွေပေးချေမှုနည်းလမ်းကို အသုံးပြုပါ။
+Please select a customer first,ကျေးဇူးပြု၍ ဖောက်သည်တစ်ဦးကို ဦးစွာရွေးချယ်ပါ။
+Please select a party,ပါတီတစ်ခုကို ရွေးချယ်ပါ။
+Please select a party before reconciling.,ပြန်လည်သင့်မြတ်ခြင်းမပြုမီ ပါတီတစ်ခုကို ရွေးချယ်ပါ။
+Please select a valid movement type.,ကျေးဇူးပြု၍ မှန်ကန်သော လှုပ်ရှားမှုအမျိုးအစားကို ရွေးချယ်ပါ။
+Please select an invoice,ငွေတောင်းခံလွှာကို ရွေးချယ်ပါ။
+Please select company before reconciling.,မညှိနှိုင်းမီ ကုမ္ပဏီကို ရွေးချယ်ပါ။
+Please set the customer's mobile number,ကျေးဇူးပြု၍ သုံးစွဲသူ၏ မိုဘိုင်းနံပါတ်ကို သတ်မှတ်ပါ။
+Please try again or enter the item manually.,ကျေးဇူးပြု၍ ထပ်စမ်းကြည့်ပါ သို့မဟုတ် ၎င်းကို ကိုယ်တိုင်ထည့်ပါ။
+Please verify the barcode or check the item's availability.,ကျေးဇူးပြု၍ ဘားကုဒ်ကို အတည်ပြုပါ သို့မဟုတ် ပစ္စည်း၏ရရှိနိုင်မှုကို စစ်ဆေးပါ။
+Points,အမှတ်များ
+Popup blocked. Please allow popups.,ပေါ့ပ်အပ်ကို ပိတ်ဆို့ထားသည်။ ပေါ့ပ်အပ်များကို ခွင့်ပြုပါ။
+POS,POS
+POS controls and maintenance,POS ထိန်းချုပ်မှုနှင့် ပြုပြင်ထိန်းသိမ်းမှု
+POS Expense is disabled for this POS Profile.,ဤ POS ပရိုဖိုင်အတွက် POS ကုန်ကျစရိတ်ကို ပိတ်ထားသည်။
+POS is running with limited offline prerequisites.,အကန့်အသတ်ရှိသော အော့ဖ်လိုင်းကြိုတင်လိုအပ်ချက်များဖြင့် POS ကို လုပ်ဆောင်နေပါသည်။
+POS Profile,POS Profile
+Position the QR code or barcode within the scanning area,စကင်န်ဖတ်ဧရိယာအတွင်း QR ကုဒ် သို့မဟုတ် ဘားကုဒ်ကို နေရာချပါ။
+Posting,တင်လိုက်တယ်။
+Posting and Price List,တင်ခြင်းနှင့်စျေးနှုန်းစာရင်း
+Posting Date,ပို့စ်တင်ရက်စွဲ
+Preparing background sync,နောက်ခံစင့်ခ်လုပ်ခြင်းကို ပြင်ဆင်နေသည်။
+"Press OK to continue offline with a warning, or Cancel to retry.",သတိပေးချက်ဖြင့် အော့ဖ်လိုင်းဆက်လုပ်ရန် OK ကိုနှိပ်ပါ သို့မဟုတ် ထပ်ကြိုးစားရန် Cancel။
+Previous unit of measure,ယခင်တိုင်းတာမှုယူနစ်
+Price List,စျေးနှုန်းစာရင်း
+Price List Rate,စျေးနှုန်းစာရင်းနှုန်း
+Price list rate updated locally only,ဈေးနှုန်းစာရင်း နှုန်းထားများကို ပြည်တွင်း၌သာ အပ်ဒိတ်လုပ်ထားသည်။
+Pricing & Discounts,စျေးနှုန်းနှင့် လျှော့စျေးများ
+Pricing Rule,စျေးနှုန်းစည်းမျဉ်း
+Print,ညောင်ပင်
+Print Draft,ပုံနှိပ်မူကြမ်း
+Print Format (Invoice),ပရင့်ဖော်မတ် (ပြေစာ)
+Print Format (Order),ပရင့်ဖော်မတ် (အမှာစာ)
+Print invoice,ပြေစာထုတ်ယူပါ။
+Print Purchase Invoice instead of PO,PO အစား ဝယ်ယူမှုပြေစာအား ပရင့်ထုတ်ပါ။
+Printer,ပုံနှိပ်စက်
+Processed returns impacting the shift totals,အပြောင်းအရွှေ့ စုစုပေါင်းအပေါ် သက်ရောက်မှုရှိသော စီမံပြီးသော ရလဒ်များ
+Processing Payment,ငွေပေးချေမှုကို လုပ်ဆောင်နေသည်။
+Processing payment entries for Invoice {0},ပြေစာ {0} အတွက် ငွေပေးချေမှု ထည့်သွင်းမှုများကို လုပ်ဆောင်နေသည်
+Profile,ကိုယ်ရေးအကျဉ်း
+Profiles,ကိုယ်ရေးအကျဉ်းများ
+Profit,အမြတ်
+Profit: Invoice Item Estimate,အမြတ်- ပြေစာ ပစ္စည်း ခန့်မှန်းခြေ
+Profit: Stock Ledger (COGS),အမြတ်- စတော့စာရင်းရှင်းတမ်း (COGS)
+Profitability Report,အမြတ်အစွန်းအစီရင်ခံစာ
+Prorated return discount,အချိုးကျ ပြန်လျှော့စျေး
+Purchase Amount,ဝယ်ယူမှုပမာဏ
+Purchase Invoices,ငွေတောင်းခံလွှာများ ဝယ်ယူပါ။
+Purchase Order created,အဝယ်အမှာစာ ဖန်တီးထားသည်။
+Qty,အရေအတွက်
+Qualified,အရည်အချင်းပြည့်မီသည်။
+Quantity,အရေအတွက်
+Quantity exceeds available stock,အရေအတွက်သည် ရနိုင်သောစတော့ရှယ်ယာထက် ကျော်လွန်နေပါသည်။
+Quick Actions,အမြန်လုပ်ဆောင်မှုများ
+Quotation {0} is Submitted,ကိုးကားချက် {0} ကို တင်ပြထားပါသည်။
+Quotation submitted,ကိုးကားတင်သွင်းခဲ့သည်။
+QZ Tray connected.,QZ Tray ချိတ်ဆက်ထားသည်။
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ Tray ကို ကိုယ်တိုင် ဖြုတ်ထားသည်။ ပြန်ဖွင့်ရန် ချိတ်ဆက်ရန် နှိပ်ပါ။
+QZ Tray is not connected.,QZ Tray ကို မချိတ်ဆက်ပါ။
+QZ Tray Setup,QZ Tray စနစ်ထည့်သွင်းခြင်း။
+Rate,နှုန်းထား
+Rate adjusted to maximum allowed discount,နှုန်းထားကို အများဆုံးခွင့်ပြုထားသော လျှော့စျေးသို့ ချိန်ညှိထားသည်။
+Ready,အဆင်သင့်
+Ready to resume,ပြန်လည်စတင်ရန် အဆင်သင့်ဖြစ်နေပါပြီ။
+Ready!,အဆင်သင့်။
+Real-time POS insights for retail operations.,လက်လီလုပ်ငန်းများအတွက် အချိန်နှင့်တပြေးညီ POS ထိုးထွင်းသိမြင်မှု။
+Rebuild Offline Data,အော့ဖ်လိုင်းဒေတာကို ပြန်လည်တည်ဆောက်ပါ။
+Receive,လက်ခံသည်။
+Receive now,ယခုလက်ခံပါ။
+Received,ရရှိခဲ့သည်။
+Received:,လက်ခံရရှိသည်-
+Recent Movement Entries,လတ်တလော လှုပ်ရှားမှုများ
+Recent updates about your invoices,သင့်ငွေတောင်းခံလွှာများအကြောင်း မကြာသေးမီက အပ်ဒိတ်များ
+Recently Active Customers,လတ်တလော အသုံးပြုနေသော Customers
+Rechecking connection,ချိတ်ဆက်မှုကို ပြန်လည်စစ်ဆေးနေသည်။
+Reconcile payment methods and close shift,ငွေပေးချေမှုနည်းလမ်းများကို ပြန်လည်ညှိနှိုင်းပြီး အပြောင်းအရွှေ့ကို ပိတ်ပါ။
+Reconciling Payments,ပေးချေမှုများ ပြန်လည်ညှိနှိုင်းခြင်း။
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.",အွန်လိုင်းတွင် တစ်ကြိမ် ပြန်လည်ချိတ်ဆက်ပြီး ဤစာမျက်နှာကို ဖွင့်ပါ၊ ထို့နောက် အော့ဖ်လိုင်း ပြန်လည်ဆန်းသစ်မှုများက ၎င်းကို ပြန်လည်ရယူနိုင်မည်ဖြစ်သည်။
+Reconnect online to refresh cached offline data from the server.,ဆာဗာမှ သိမ်းဆည်းထားသော အော့ဖ်လိုင်းဒေတာကို ပြန်လည်စတင်ရန်အတွက် အွန်လိုင်းကို ပြန်လည်ချိတ်ဆက်ပါ။
+Recreate local offline prerequisites from scratch,ဒေသတွင်း အော့ဖ်လိုင်း ကြိုတင်လိုအပ်ချက်များကို အစမှ ပြန်လည်ဖန်တီးပါ။
+Recv:,Recv-
+Redeem,ရွေးပါ။
+Redeem / Scan,ရွေး/စကင်ဖတ်ပါ။
+Redeem Amount,ပမာဏကို ရွေးပါ။
+Redeem Mode,မုဒ်ကို ရွေးပါ။
+Redeemed Amount,ရွေးနှုတ်ထားသောပမာဏ
+Redeemed credit cannot be greater than its total.,ရွေးနှုတ်ထားသော ခရက်ဒစ်သည် ၎င်း၏စုစုပေါင်းထက် မပိုနိုင်ပါ။
+Redemption and Totals,ရွေးနှုတ်ခြင်းနှင့် စုစုပေါင်းများ
+Reference,အကိုးအကား
+Refresh,ပြန်လည်စတင်ပါ။
+Refresh Exchange Rate,လဲလှယ်နှုန်းကို ပြန်လည်စတင်ပါ။
+Refresh Offline Data,အော့ဖ်လိုင်းဒေတာကို ပြန်လည်စတင်ပါ။
+Refresh Printers,ပရင်တာများကို ပြန်လည်စတင်ပါ။
+Refund,ပြန်အမ်းငွေ
+Release Notes,ထုတ်ဝေမှုမှတ်စုများ
+Reload,ပြန်တင်ပါ။
+Reload customers,ဖောက်သည်များကို ပြန်တင်ပါ။
+Reload Items,အရာများကို ပြန်လည်စတင်ပါ။
+Reload Now,ယခု ပြန်လည်စတင်ပါ။
+Reload to apply the latest changes. Your current session will be refreshed.,နောက်ဆုံးပြောင်းလဲမှုများကို အသုံးပြုရန် ပြန်လည်စတင်ပါ။ သင်၏လက်ရှိစက်ရှင်ကို ပြန်လည်စတင်ပါမည်။
+Reload Workflow,အလုပ်အသွားအလာကို ပြန်လည်စတင်ပါ။
+Remarks,ပြီလေ။
+Remarks are required.,မှတ်ချက်များ လိုအပ်ပါသည်။
+Remove,ဖယ်ရှားပါ။
+Remove barcode item,ဘားကုဒ်ကို ဖယ်ရှားပါ။
+Remove cached data and reload the POS app,သိမ်းဆည်းထားသော ဒေတာများကို ဖယ်ရှားပြီး POS အက်ပ်ကို ပြန်လည်စတင်ပါ။
+Remove item,ပစ္စည်းကို ဖယ်ရှားပါ။
+Remove Offer,ကမ်းလှမ်းချက်ကို ဖယ်ရှားပါ။
+Reorder / Purchase Suggestions,ပြန်လည်မှာယူ/ဝယ်ယူမှု အကြံပြုချက်များ
+Repair Candidate,ပြုပြင်ရေး ကိုယ်စားလှယ်လောင်း
+Repair Change Allocation,ပြုပြင် ပြောင်းလဲခြင်း ခွဲဝေပေးခြင်း
+Repair requires an online connection,ပြုပြင်ရန် အွန်လိုင်းချိတ်ဆက်မှု လိုအပ်သည်။
+Repaired,ပြုပြင်သည်။
+Repairing change allocation,ခွဲဝေပြောင်းလဲ ပြုပြင်ခြင်း။
+Repeat Customers,ဖောက်သည်များ ပြန်လုပ်ပါ။
+Repeat Rate,အဆင့်သတ်မှတ်ပါ။
+Request,တောင်းဆိုခြင်း။
+Request ID: {0},တောင်းဆိုချက် ID- {0}
+Request Payment,ငွေပေးချေမှုကို တောင်းဆိုပါ။
+Requested route: {0},တောင်းဆိုထားသော လမ်းကြောင်း- {0}
+Required columns cannot be hidden,လိုအပ်သောကော်လံများကို ဝှက်၍မရပါ။
+Reset,ပြန်လည်သတ်မှတ်ပါ။
+Reset item name,ပစ္စည်းအမည်ကို ပြန်လည်သတ်မှတ်ပါ။
+Reset to Default,မူရင်းသို့ ပြန်လည်သတ်မှတ်ပါ။
+Resource Health,အရင်းအမြစ်ကျန်းမာရေး
+Restricted,ကန့်သတ်ထားသည်။
+Restricted operational controls for supervisors only.,ကြီးကြပ်ရေးမှူးများအတွက်သာ ကန့်သတ်ထားသော လည်ပတ်ထိန်းချုပ်မှုများ။
+Retry,ပြန်ကြိုးစားပါ။
+Retry route,လမ်းကြောင်းကို ပြန်စမ်းကြည့်ပါ။
+Return,ပြန်လာ
+Return Amount,ပြန်ပေးငွေပမာဏ
+Return Count,Return Count
+Return items must have negative quantities,ပြန်ပို့သည့်ပစ္စည်းများတွင် အနုတ်ပမာဏများ ရှိရမည်။
+Return total must be negative,ပြန်အမ်းငွေစုစုပေါင်းသည် အနှုတ်ဖြစ်ရပါမည်။
+Return Valid Until,ပြန်လာသည်အထိ အကျုံးဝင်သည်။
+Return window passed,Return window ကျော်သွားပါပြီ။
+Return without Invoice,ပြေစာမပါဘဲ ပြန်လာပါ။
+Returns,ပြန်လာသည်
+Returns / Voids / Discounts,ပြန်ပေးသည် / ပျက်ပြယ် / လျှော့စျေးများ
+Returns by Currency,ငွေကြေးဖြင့် ပြန်ပေးသည်။
+Revenue,ဝင်ငွေ
+Review shift totals before submitting the closing entry,နိဂုံးချုပ်စာရင်းကို မတင်သွင်းမီ ဆိုင်းငံ့ထားမှု စုစုပေါင်းကို ပြန်လည်သုံးသပ်ပါ။
+Round Off,အလှည့်ကျ
+Rows,အတန်းလိုက်
+Rows:,အတန်းများ-
+Rule,စည်းကမ်း
+Sale,ရောင်းရန်
+Sales,အရောင်း
+Sales Order {0} is Submitted,အရောင်းအမှာစာ {0} ကို တင်ပြထားပါသည်။
+Sales Person and Print,အရောင်းဝန်ထမ်းနှင့် ပုံနှိပ်ခြင်း။
+Sales Person not found,အရောင်းဝန်ထမ်းမတွေ့ပါ။
+Sales processed,ရောင်းချခြင်းများ ဆောင်ရွက်ပြီးဖြစ်သည်။
+Sales Return,အရောင်းပြန်
+Sales Trend Report,အရောင်းလမ်းကြောင်း အစီရင်ခံစာ
+Save,သိမ်းဆည်းပါ။
+Save & Clear,သိမ်းဆည်းပြီး ရှင်းလင်းပါ။
+Save as POS Profile Default,POS Profile မူရင်းအဖြစ် သိမ်းဆည်းပါ။
+Save Settings,ဆက်တင်များကို သိမ်းဆည်းပါ။
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,ရွေးချယ်ထားသော ပရင်တာအား POS Profile ပုံသေအဖြစ် သိမ်းဆည်းထားသောကြောင့် ၎င်းသည် ဤတပ်ဆင်မှုတွင် အလိုအလျောက်ပြသသည်။
+Saved as draft because: {0},အကြမ်းအဖြစ် သိမ်းဆည်းထားသောကြောင့်- {0}
+Saving...,သိမ်းဆည်းနေသည်...
+Scale barcode detected. Quantity here is the number of labels to print.,စကေးဘားကုဒ်ကို တွေ့ရှိခဲ့သည်။ ဤနေရာတွင် အရေအတွက်သည် ပုံနှိပ်ရန် အညွှန်းအရေအတွက်ဖြစ်သည်။
+Scale barcode settings are not configured. Using item barcode only.,စကေးဘားကုဒ်ဆက်တင်များကို ပြင်ဆင်မထားပါ။ ပစ္စည်းဘားကုဒ်ကိုသာ အသုံးပြုခြင်း။
+Scale template barcode is missing for this item/UOM. Using item barcode only.,ဤအရာ/UOM အတွက် စကေးပုံစံ ဘားကုဒ် ပျောက်ဆုံးနေပါသည်။ ပစ္စည်းဘားကုဒ်ကိုသာ အသုံးပြုခြင်း။
+Scan an existing card and top it up without leaving the payment flow.,ရှိပြီးသားကတ်ကို စကင်ဖတ်ပြီး ငွေပေးချေမှုလမ်းကြောင်းကို ချန်မထားဘဲ ငွေဖြည့်ပါ။
+Scan Error,စကင်န်အမှား
+Scan or enter a gift card code to check balance or redeem.,လက်ကျန်ငွေကို စစ်ဆေးရန် သို့မဟုတ် ကူပွန်ဖြင့် ဝယ်ယူရန် လက်ဆောင်ကတ်ကုဒ်ကို စကင်ဖတ်ပါ သို့မဟုတ် ထည့်ပါ။
+Scan or paste the card code below.,အောက်ပါကတ်ကုဒ်ကို စကင်ဖတ်ပါ သို့မဟုတ် ကူးထည့်ပါ။
+Scan QR Code/Barcode,QR ကုဒ်/ဘားကုဒ် စကင်န်ဖတ်ပါ။
+Scan with camera,ကင်မရာဖြင့် စကင်န်ဖတ်ပါ။
+Scan-First Flow,Scan-First Flow
+Scanned Code:,စကင်ဖတ်ထားသော ကုဒ်-
+Scanning for: {0},ရှာဖွေနေသည်- {0}
+Scanning items,ပစ္စည်းများကို စကင်န်ဖတ်ခြင်း။
+Scan-Ready,စကင်န်ဖတ်ရန်
+Scope,အတိုင်းအတာ
+Scope: All Profiles,နယ်ပယ်- ပရိုဖိုင်များအားလုံး
+Scope: Current Profile,နယ်ပယ်- လက်ရှိ ပရိုဖိုင်
+Scope: Specific Profile,နယ်ပယ်- သီးခြားပရိုဖိုင်
+Search,ရှာရန်
+Search Account,အကောင့်ရှာပါ။
+Search an invoice and continue the return flow without extra steps.,ပြေစာတစ်စောင်ကို ရှာဖွေပြီး အပိုအဆင့်များမပါဘဲ ပြန်လာမှုကို ဆက်လက်လုပ်ဆောင်ပါ။
+Search customer,ဖောက်သည်ရှာပါ။
+Search invoices or customers,ပြေစာများ သို့မဟုတ် ဖောက်သည်များကို ရှာဖွေပါ။
+Search item,အကြောင်းအရာကို ရှာပါ။
+Search item / code,ပစ္စည်း/ကုဒ်ကို ရှာပါ။
+Search items or barcode,အရာများ သို့မဟုတ် ဘားကုဒ်ကို ရှာဖွေပါ။
+Search Mpesa Payments,Mpesa ငွေပေးချေမှုများကို ရှာပါ။
+Search return invoices or customers,ပြန်ပို့ငွေတောင်းခံလွှာများ သို့မဟုတ် ဖောက်သည်များကို ရှာဖွေပါ။
+Search supplier,ပေးသွင်းသူကို ရှာပါ။
+Search unpaid invoices or customers,အခပေးမထားသော ငွေတောင်းခံလွှာများ သို့မဟုတ် ဖောက်သည်များကို ရှာဖွေပါ။
+Secure context (HTTPS or localhost) is required for camera access.,ကင်မရာအသုံးပြုခွင့်အတွက် လုံခြုံသောအကြောင်းအရာ (HTTPS သို့မဟုတ် localhost) လိုအပ်သည်။
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,ကင်မရာဝင်ရောက်ခွင့်အတွက် လုံခြုံသောအကြောင်းအရာ (HTTPS) လိုအပ်သည်။ ကင်မရာကိုဝင်ရောက်ရန် HTTPS ကိုသုံးပါ။
+Select,ရွေးချယ်ပါ။
+Select a cashier first.,ငွေကိုင်တစ်ဦးကို ဦးစွာရွေးချယ်ပါ။
+Select a customer,ဖောက်သည်တစ်ဦးကို ရွေးချယ်ပါ။
+Select a customer to use coupon,ကူပွန်အသုံးပြုရန် ဝယ်ယူသူအား ရွေးချယ်ပါ။
+Select a printer to use QZ silent printing.,QZ အသံတိတ်ပုံနှိပ်ခြင်းကို အသုံးပြုရန် ပရင်တာတစ်ခုကို ရွေးပါ။
+Select Batch,Batch ကို ရွေးပါ။
+Select Columns to Display,ပြသရန် ကော်လံများကို ရွေးပါ။
+Select items to sell,ရောင်းချမည့်ပစ္စည်းများကို ရွေးချယ်ပါ။
+Select Payment,ငွေပေးချေမှုကို ရွေးချယ်ပါ။
+Select Payment Account,ငွေပေးချေမှုအကောင့်ကို ရွေးပါ။
+Select printer,ပုံနှိပ်စက်ကို ရွေးပါ။
+Select Return Invoice,Return Invoice ကို ရွေးပါ။
+Select S.O,S.O ကိုရွေးပါ။
+Select Sales Orders,အရောင်းအမှာစာများကို ရွေးပါ။
+Select the cashier who is taking over this terminal.,ဤ terminal ကို တာဝန်ယူမည့် ငွေကိုင်သူကို ရွေးပါ။
+Selected,ရွေးချယ်ခဲ့သည်။
+Selected movement type is not allowed by POS Profile.,ရွေးချယ်ထားသော လှုပ်ရှားမှုအမျိုးအစားကို POS Profile မှ ခွင့်မပြုပါ။
+Selected Payments,ရွေးချယ်ထားသော ငွေပေးချေမှုများ
+Sensitive actions kept away from quick taps.,ထိလွယ်ရှလွယ်သော လုပ်ဆောင်ချက်များသည် အမြန်ထိခြင်းမှ ကင်းဝေးသည်။
+Serial,အမှတ်စဉ်
+Serial Numbers,နံပါတ်စဉ်များ
+Server CPU Usage:,ဆာဗာ CPU အသုံးပြုမှု-
+Server Health,ဆာဗာကျန်းမာရေး
+Server Memory Usage:,ဆာဗာမှတ်ဉာဏ်အသုံးပြုမှု-
+Server Metrics,ဆာဗာမက်ထရစ်များ
+Server Uptime:,ဆာဗာဖွင့်ချိန်-
+Service Charges,ဝန်ဆောင်ခများ
+Session,အပိုင်း
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,ငွေကိုင် PIN တစ်ခုစီကို အသုံးပြုသူပုံစံတွင် သတ်မှတ်ပြီး POS ပရိုဖိုင်အသုံးပြုသူတွင် သတ်မှတ်ထားသော terminal အဖွဲ့ဝင်များကို ထားရှိပါ။
+Settings,ဆက်တင်များ
+Settings in this section update the POS workspace without changing the current route.,ဤကဏ္ဍရှိ ဆက်တင်များသည် လက်ရှိလမ်းကြောင်းကို မပြောင်းလဲဘဲ POS အလုပ်ခွင်ကို အပ်ဒိတ်လုပ်ပါ။
+Setup complete!,စနစ်ထည့်သွင်းမှု ပြီးပါပြီ။
+Share,မျှဝေပါ။
+Shared terminal,Shared terminal
+Shift Closed Snapshot,Shift Closed Snapshot
+Shift Overview,Shift Overview
+Show,ရှိုး
+Show cart on customer-facing screen,ဖောက်သည်မျက်နှာစာ မျက်နှာပြင်တွင် လှည်းကို ပြပါ။
+Show last invoice rate,နောက်ဆုံး ပြေစာနှုန်းထားကို ပြပါ။
+Show rate info,နှုန်းထားအချက်အလက်ကို ပြပါ။
+Show Repair Candidates,ပြုပြင်ရေး ကိုယ်စားလှယ်လောင်းများကို ပြပါ။
+Show search tools,ရှာဖွေရေးကိရိယာများကို ပြသပါ။
+Show the active cart on a customer-facing screen,ဖောက်သည်မျက်နှာစာ မျက်နှာပြင်ပေါ်တွင် လက်ရှိ တွန်းလှည်းကို ပြသပါ။
+Showing {0}-{1} of {2},{2} မှ {0}-{1} ကို ပြသသည်
+Showing 0 of 0,၀ အပါအ၀င် ဖေါ်ပြသည်။
+Shows the distribution of invoices per currency,ငွေကြေးတစ်ခုစီအတွက် ငွေတောင်းခံလွှာများ ဖြန့်ဖြူးမှုကို ပြသသည်။
+Sign out of the current POS session,လက်ရှိ POS စက်ရှင်မှ ထွက်ပါ။
+Size:,အရွယ်အစား-
+Skipped Payments,ကျော်သွားသော ငွေပေးချေမှုများ
+Skipping items without barcodes,ဘားကုဒ်မပါသော အရာများကို ကျော်ခြင်း။
+Slow Moving,နှေးကွေးစွာ ရွေ့လျားခြင်း။
+Slow Moving Items,နှေးကွေးသော အရာများ ရွေ့လျားခြင်း။
+Slow Queries:,နှေးကွေးသော မေးခွန်းများ-
+Sold,ရောင်းတယ်။
+Source,အရင်းအမြစ်
+Source Cash Account (Optional Override),အရင်းအမြစ် ငွေသားအကောင့် (ချန်လှပ်ထားနိုင်သည်)
+Source Ex. Rate:,အရင်းအမြစ်ထွ အဆင့်-
+Source Rate:,အရင်းအမြစ်အဆင့်-
+Specific Profile,တိကျသော Profile
+Split Invoices,ပြေစာများ ခွဲထုတ်ပါ။
+Staff / Cashier Performance Report,ဝန်ထမ်း/ငွေကိုင်လုပ်ငန်းဆောင်ရွက်မှုအစီရင်ခံစာ
+Status,အဆင့်အတန်း
+Stock,စတော့
+Stock Information,စတော့ရှယ်ယာအချက်အလက်
+Stock is lower than requested,စတော့က တောင်းဆိုထားတာထက် နိမ့်တယ်။
+Stock is lower than requested:\n{0},စတော့က တောင်းဆိုထားသည်ထက် နိမ့်သည်-\n{0}
+Stock Movement Report,စတော့ရှယ်ယာလှုပ်ရှားမှုအစီရင်ခံစာ
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,စတော့ခ်အပ်ဒိတ်- {0} တွင် {1} ရနိုင်သည်။ {2} ကို ထည့်ခြင်းဖြင့် စတော့ကို သုညအောက် ရောက်စေလိမ့်မည်။
+Submit,တင်ပြပါ။
+Submit & Print,တင်သွင်း & ပုံနှိပ်ပါ။
+Submit Deposit,Deposit တင်ပါ။
+Submit Expense,ကုန်ကျစရိတ်တင်ပြပါ။
+Submitted,တင်ပြလိုက်ပါသည်။
+Submitted Cash Movements,ငွေသားလှုပ်ရှားမှုများကို တင်သွင်းခဲ့သည်။
+Submitted entries,တင်သွင်းမှုများ
+Successfully scanned:,အောင်မြင်စွာ စကင်ဖတ်ပြီးပါပြီ-
+Suggested,အကြံပြုသည်။
+Suggested Qty,အကြံပြုထားသော အရေအတွက်
+Supervisor Access,Supervisor Access
+Supervisor permissions unlock issuance and reloads,ကြီးကြပ်ရေးမှူး၏ ခွင့်ပြုချက်သည် ထုတ်ပေးခြင်းနှင့် ပြန်လည်စတင်ခြင်းများကို လော့ခ်ဖွင့်ပေးသည်။
+Supervisor Tools,ကြီးကြပ်ရေးကိရိယာများ
+Supplier,ပေးသွင်းသည်။
+Supplier and dates are required.,ပေးသွင်းသူနှင့် ရက်စွဲများ လိုအပ်ပါသည်။
+Supplier Invoices,ပေးသွင်းသူ ငွေတောင်းခံလွှာများ
+Supplier is required.,ပေးသွင်းရန် လိုအပ်ပါသည်။
+Supplier name is required,ပေးသွင်းသူအမည် လိုအပ်ပါသည်။
+Supplier Payments,ပေးသွင်းသူ ငွေပေးချေမှုများ
+Supplier Purchase Summary,ပေးသွင်းသူ ဝယ်ယူမှု အကျဉ်းချုပ်
+Suppliers,ရောင်းချသူများ
+Suppliers not found,ပေးသွင်းသူများကို ရှာမတွေ့ပါ။
+Switch Camera,ကင်မရာပြောင်းပါ။
+Switch Cashier,ငွေကိုင်ပြောင်းပါ။
+Switch the POS appearance theme,POS အသွင်အပြင် အပြင်အဆင်ကို ပြောင်းပါ။
+Switched to:,သို့ပြောင်းထားသည်-
+Sync All Invoices,ငွေတောင်းခံလွှာအားလုံးကို စင့်ခ်လုပ်ပါ။
+Sync Offline Cash Movements ({0}),အော့ဖ်လိုင်း ငွေသားလှုပ်ရှားမှုများကို စင့်ခ်လုပ်ပါ ({0})
+Sync Offline Sales,အော့ဖ်လိုင်း အရောင်းကို စင့်ခ်လုပ်ပါ။
+Synced {0} offline cash movement(s).,အော့ဖ်လိုင်းငွေသားလှုပ်ရှားမှု(များ) {0} ကို စင့်ခ်လုပ်ထားသည်။
+Syncing items in background,နောက်ခံရှိ အရာများကို စင့်ခ်လုပ်ခြင်း။
+System / Diagnostics,စနစ်/ရောဂါရှာဖွေရေး
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.",စနစ်လုပ်ဆောင်ချက်များသည် အက်ပ်အချက်အလက်၊ ပံ့ပိုးမှု အဖြေရှာခြင်းနှင့် စက်ရှင်ထိန်းချုပ်မှုများကဲ့သို့သော ကြိမ်နှုန်းနည်းသော ထိန်းသိမ်းမှုထိန်းချုပ်မှုများဖြစ်သည်။
+System Information,စနစ်အချက်အလက်
+System Status,စနစ်အခြေအနေ
+Tables:,ဇယားများ-
+Tap the button below to redeem a gift card during checkout.,ငွေရှင်းစဉ်အတွင်း လက်ဆောင်ကတ်ကို ကူပွန်ဖြင့် ကူပွန်ဖြင့် ကူပွန်ဖြင့် လဲလှယ်ရန် အောက်ပါခလုတ်ကို တို့ပါ။
+Target,ပစ်မှတ်
+Target Ex. Rate:,ပစ်မှတ် Ex. အဆင့်-
+Target Rate:,ပစ်မှတ်နှုန်း-
+Tax,ခွန်
+Tax / Charges Report,အခွန်/အခကြေးငွေ အစီရင်ခံစာ
+Tax Heads,အခွန်အကြီးအကဲများ
+Taxable Amount,အခွန်ဆောင်ရမည့်ပမာဏ
+Tendered,နုသည်။
+Terminal,ဂိတ်
+Terminal & Devices,Terminal နှင့် စက်များ
+Terminal locked,Terminal သော့ခတ်ထားသည်။
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.",Terminal ကိရိယာများသည် ဤငွေရှင်းသည့်နေရာ၊ သုံးစွဲသူမျက်နှာစာ မျက်နှာပြင်များ နှင့် အနာဂတ်ပရင်တာ/စက်ပစ္စည်းထိန်းချုပ်မှုများကို အကျိုးသက်ရောက်သည်။
+Territory not found,နယ်မြေ မတွေ့
+The amount paid is not complete,ပေးရတဲ့ငွေပမာဏက မပြည့်စုံပါဘူး။
+The app stores data locally for offline use. This is called cache.,အက်ပ်သည် အော့ဖ်လိုင်းအသုံးပြုရန်အတွက် စက်တွင်းရှိ ဒေတာများကို သိမ်းဆည်းထားသည်။ ဒါကို cache လို့ခေါ်တယ်။
+The invoice stayed in draft. Please review and submit it manually.,ပြေစာသည် မူကြမ်းတွင် ရှိနေသည်။ ကျေးဇူးပြု၍ စစ်ဆေးပြီး ၎င်းကို ကိုယ်တိုင်တင်ပြပါ။
+The maximum discount allowed is,အများဆုံး လျှော့စျေးက ခွင့်ပြုပါတယ်။
+The quantity for {0} has been adjusted to the maximum available stock.,{0} အတွက် ပမာဏကို အများဆုံးရရှိနိုင်သော စတော့ရှယ်ယာအဖြစ် ချိန်ညှိထားပါသည်။
+The system could not retrieve the item details. Please try again.,စနစ်သည် အကြောင်းအရာအသေးစိတ်အချက်အလက်များကို ထုတ်ယူ၍မရပါ။ ထပ်စမ်းကြည့်ပါ။
+These invoices will be synced when connection is restored,ချိတ်ဆက်မှုကို ပြန်လည်ရယူသည့်အခါ ဤငွေတောင်းခံလွှာများကို စင့်ခ်လုပ်ပါမည်။
+This action now opens inside the settings workspace.,ဤလုပ်ဆောင်ချက်သည် ဆက်တင်များ အလုပ်ခွင်အတွင်းတွင် ယခုပွင့်သွားပါပြီ။
+This coupon already used !,ဒီကူပွန်က သုံးပြီးသား။
+This invoice does not need change-allocation repair,ဤပြေစာသည် အပြောင်းအလဲ-ခွဲဝေမှုကို ပြုပြင်ရန် မလိုအပ်ပါ။
+This invoice is already repaired,ဤငွေတောင်းခံလွှာကို ပြုပြင်ပြီးဖြစ်သည်။
+This is an item template. Please choose a variant.,ဤအရာသည် နမူနာပုံစံတစ်ခုဖြစ်သည်။ အမျိုးအစားတစ်ခုကို ရွေးပါ။
+this item,ဤအရာ
+This POS page could not be opened offline because its code was not cached on this terminal yet.,၎င်း၏ကုဒ်ကို ဤစက်စက်တွင် သိမ်းဆည်းထားခြင်းမရှိသေးသောကြောင့် ဤ POS စာမျက်နှာကို အော့ဖ်လိုင်းဖွင့်၍မရပါ။
+This Serial Number {0} has already been added!,ဤနံပါတ်စဉ် {0} ကို ထည့်သွင်းပြီးဖြစ်သည်။
+Threshold,တံခါးခုံ
+Time,အချိန်
+Tip: Clear cache regularly to free up space and keep the app fast.,အကြံပြုချက်- နေရာလွတ်များ ကင်းစင်စေရန်နှင့် အက်ပ်ကို မြန်ဆန်စွာ ထိန်းသိမ်းထားရန် ကက်ရှ်ကို ပုံမှန်ရှင်းလင်းပါ။
+Tip: Close unused tabs or apps to reduce lag.,အကြံပြုချက်- နောက်ကျခြင်းကို လျှော့ချရန် အသုံးမပြုသော တဘ်များ သို့မဟုတ် အက်ပ်များကို ပိတ်ပါ။
+Tip: Monitor slow queries and table size for optimal performance.,အကြံပြုချက်- အကောင်းဆုံးစွမ်းဆောင်ရည်အတွက် နှေးကွေးသောမေးခွန်းများနှင့် ဇယားအရွယ်အစားကို စောင့်ကြည့်ပါ။
+To Be Paid,ပေးဆပ်ရန်
+To Date,ယနေ့အထိ
+Today,ဒီနေ့
+Today Profit,ဒီနေ့ အမြတ်
+Today Sales,ယနေ့ အရောင်း
+Toggle navigation drawer,လမ်းညွှန်အံဆွဲကို ပြောင်းပါ။
+Toggle Theme,အပြင်အဆင်ကို ပြောင်းပါ။
+Tools,ကိရိယာများ
+Tools for customer-facing screens and terminal-specific actions.,ဖောက်သည်မျက်နှာစာ မျက်နှာပြင်များနှင့် terminal သီးသန့်လုပ်ဆောင်ချက်များအတွက် ကိရိယာများ။
+Top Brand,ထိပ်တန်းအမှတ်တံဆိပ်
+Top Category,ထိပ်တန်းအမျိုးအစား
+Top Charge Head,ထိပ်တန်းအားသွင်းခေါင်း
+Top Customers,ထိပ်တန်းဖောက်သည်များ
+Top Discount,ထိပ်တန်းလျှော့စျေး
+Top Items by Location,တည်နေရာအလိုက် ထိပ်တန်းအရာများ
+Top Margin,ထိပ်တန်းအနားသတ်
+Top Pending,ထိပ်တန်း ဆိုင်းငံ့ထားသည်။
+Top Profit Item,အမြတ်အများဆုံး ပစ္စည်း
+Top Return Items,ထိပ်တန်းပြန်ပို့သောအရာများ
+Top Sales by Cashier,Cashier မှ အရောင်းရဆုံး
+Top Supplier,ထိပ်တန်းရောင်းချသူ
+Top Suppliers by Spend,သုံးစွဲခြင်းဖြင့် ထိပ်တန်းပေးသွင်းသူများ
+Top Tables,ထိပ်တန်းဇယားများ
+Top Tax Head,ထိပ်တန်းအခွန်ဌာနမှူး
+Top Up Amount,ငွေဖြည့်ပမာဏ
+Top Up Card,ငွေဖြည့်ကတ်
+Top Up Mode,ငွေဖြည့်မုဒ်
+Top Variant,ထိပ်တန်းဗားရှင်း
+Total,စုစုပေါင်း
+Total Amount,စုစုပေါင်းပမာဏ
+Total Change,စုစုပေါင်းပြောင်းလဲမှု
+Total Charges,စုစုပေါင်းကောက်ခံမှုများ
+Total In,စုစုပေါင်း
+Total Invoices,စုစုပေါင်း ငွေတောင်းခံလွှာများ
+Total Items,စုစုပေါင်းပစ္စည်းများ
+Total Mpesa,စုစုပေါင်း Mpesa
+Total Out,စုစုပေါင်းထွက်
+Total Payments,စုစုပေါင်းငွေပေးချေမှုများ
+Total Purchase,စုစုပေါင်းဝယ်ယူမှု
+Total Selected :,စုစုပေါင်း ရွေးချယ်ထားသည်-
+Total Size,စုစုပေါင်းအရွယ်အစား
+Total Stock Qty,စုစုပေါင်းစတော့ အရေအတွက်
+Total:,စုစုပေါင်း-
+Totals by Invoice Currency,Invoice Currency ဖြင့် စုစုပေါင်း
+Track how much cash was handed back to customers,ဖောက်သည်များထံ ငွေမည်မျှ ပြန်လည်ပေးအပ်ခဲ့သည်ကို ခြေရာခံပါ။
+"Track recent sales, collect unpaid balances, and reopen saved work",မကြာသေးမီက ရောင်းချမှုများကို ခြေရာခံပါ၊ အခကြေးငွေမယူရသေးသော လက်ကျန်များကို စုဆောင်းကာ သိမ်းဆည်းထားသော အလုပ်များကို ပြန်လည်ဖွင့်ပါ။
+Transaction ID,ငွေပေးငွေယူ ID
+Transfer,အပြောင်းအရွှေ့
+Try a different search term or clear the cart search.,အခြားရှာဖွေမှုအသုံးအနှုန်းတစ်ခုကို စမ်းကြည့်ပါ သို့မဟုတ် စျေးဝယ်လှည်းရှာဖွေမှုကို ရှင်းလင်းပါ။
+Try adjusting your search or filters,သင်၏ရှာဖွေမှု သို့မဟုတ် စစ်ထုတ်မှုများကို ချိန်ညှိကြည့်ပါ။
+Try another source or refresh the list.,အခြားအရင်းအမြစ်ကို စမ်းကြည့်ပါ သို့မဟုတ် စာရင်းကို ပြန်လည်စတင်ပါ။
+Try changing the date range or status filter.,ရက်အပိုင်းအခြား သို့မဟုတ် အခြေအနေ စစ်ထုတ်မှုကို ပြောင်းလဲကြည့်ပါ။
+Type,ရိုက်ပါ။
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,အခြေခံဆက်တင်များဖြင့်ပင် ကင်မရာကို ဝင်သုံး၍မရပါ။ ကျေးဇူးပြု၍ သင့်ကင်မရာခွင့်ပြုချက်များနှင့် စက်ပစ္စည်း၏ လိုက်ဖက်ညီမှုကို စစ်ဆေးပါ။
+Unable to add offer item {0}. Please refresh and try again.,ကမ်းလှမ်းချက် အကြောင်းအရာ {0} ကို ထည့်၍မရပါ။ ကျေးဇူးပြု၍ ပြန်လည်ဆန်းသစ်ပြီး ထပ်စမ်းကြည့်ပါ။
+Unable to add offer item. Please refresh and try again.,ကမ်းလှမ်းချက်ကို ထည့်၍မရပါ။ ကျေးဇူးပြု၍ ပြန်လည်ဆန်းသစ်ပြီး ထပ်စမ်းကြည့်ပါ။
+Unable to add scanned item.,စကင်ဖတ်ထားသော အကြောင်းအရာကို ထည့်၍မရပါ။
+Unable to create purchase order,ဝယ်ယူမှုအမှာစာ ဖန်တီး၍မရပါ။
+Unable to delete draft invoice,ပြေစာမူကြမ်းကို ဖျက်၍မရပါ။
+Unable to fetch documents,စာရွက်စာတမ်းများကို ထုတ်ယူ၍မရပါ။
+Unable to fetch draft orders,အမှာစာမူကြမ်းကို ရယူ၍မရပါ။
+Unable to fetch invoice history,ပြေစာမှတ်တမ်းကို ရယူ၍မရပါ။
+Unable to fetch M-Pesa payments,M-Pesa ငွေပေးချေမှုများကို မရယူနိုင်ပါ။
+Unable to fetch sales orders,အရောင်းအော်ဒါများကို ရယူ၍မရပါ။
+Unable to fetch unpaid invoices,အခပေးမရသေးသော ပြေစာများကို ထုတ်ယူ၍မရပါ။
+Unable to generate scale barcode,စကေးဘားကုဒ်ကို ထုတ်လုပ်၍မရပါ။
+Unable to issue gift card.,လက်ဆောင်ကတ်ကို ထုတ်မပေးနိုင်ပါ။
+Unable to load cashier PIN status.,ငွေကိုင် ပင်နံပါတ် အခြေအနေကို တင်၍မရပါ။
+Unable to load document,စာရွက်စာတမ်းကို တင်၍မရပါ။
+Unable to load draft invoice,ပြေစာမူကြမ်းကို တင်၍မရပါ။
+Unable to load gift card balance.,လက်ဆောင်ကတ် လက်ကျန်ကို တင်၍မရပါ။
+Unable to load invoice details,ပြေစာအသေးစိတ်အချက်အလက်များကို ဖွင့်၍မရပါ။
+Unable to load parked order,ရပ်ထားသည့်အမိန့်ကို တင်၍မရပါ။
+Unable to load the selected sales order,ရွေးချယ်ထားသော အရောင်းအမှာစာကို တင်၍မရပါ။
+Unable to prepare document,စာရွက်စာတမ်းကို ပြင်ဆင်၍မရပါ။
+Unable to prepare return invoice,ပြန်ပို့လွှာကို ပြင်ဆင်၍မရပါ။
+Unable to print draft invoice,ပြေစာမူကြမ်းကို ပရင့်ထုတ်၍မရပါ။
+Unable to print submitted invoice,တင်သွင်းထားသော ပြေစာအား ပရင့်ထုတ်၍မရပါ။
+Unable to process document action,စာရွက်စာတမ်းလုပ်ဆောင်ချက်ကို မလုပ်ဆောင်နိုင်ပါ။
+Unable to repair change allocation,ပြောင်းလဲမှုခွဲဝေမှုကို ပြုပြင်၍မရပါ။
+Unable to save cashier PIN.,ငွေကိုင် PIN ကို သိမ်းဆည်း၍မရပါ။
+Unable to save the rate to the backend price list,နောက်တန်းစျေးနှုန်းစာရင်းတွင် နှုန်းထားကို မသိမ်းဆည်းနိုင်ပါ။
+Unable to submit invoice,ပြေစာပေးပို့၍မရပါ။
+Unable to submit the selected payment,ရွေးချယ်ထားသော ငွေပေးချေမှုကို တင်သွင်း၍မရပါ။
+Unable to top up gift card.,လက်ဆောင်ကတ်ကို ငွေဖြည့်၍မရပါ။
+Unable to verify cashier PIN.,ငွေကိုင် PIN ကို အတည်ပြု၍မရပါ။
+Unallocated,ခွဲဝေမပေး
+Unallocated:,ခွဲဝေမထားသော-
+Unavailable,မရနိုင်ပါ။
+Unknown,မသိ
+Unknown Item,အမည်မသိ ပစ္စည်း
+Unknown Warehouse,အမည်မသိ ဂိုဒေါင်
+Unlock POS,POS လော့ခ်ဖွင့်ပါ။
+Unpaid,အခကြေးငွေမယူရသေး
+"Unselected payments stay unallocated first, then auto reconcile after submit.",မရွေးချယ်ထားသော ငွေပေးချေမှုများကို ဦးစွာခွဲဝေမထားဘဲ ဆက်လက်ထားရှိကာ တင်သွင်းပြီးနောက် အလိုအလျောက် ပြန်လည်ညှိနှိုင်းပါ။
+UOM,UOM
+UOM not found,UOM မတွေ့ပါ။
+Update available,အပ်ဒိတ်ရနိုင်သည်။
+Update Customer,အပ်ဒိတ်ဖောက်သည်
+Update PIN,ပင်နံပါတ်ကို အပ်ဒိတ်လုပ်ပါ။
+Update Price List Rate,စျေးနှုန်းစာရင်းနှုံးကို အပ်ဒိတ်လုပ်ပါ။
+Updated,မွမ်းမံထားသည်။
+Updates and app info that stay out of the cashier flow.,အပ်ဒိတ်များနှင့် ငွေကိုင်လည်ပတ်မှုမှ ကင်းဝေးသော အက်ပ်အချက်အလက်။
+Updates automatically,အလိုအလျောက် အပ်ဒိတ်များ
+Usage,အသုံးပြုမှု
+Usage Stats,အသုံးပြုမှုအခြေနေ
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,ငွေကိုင်လွှဲခြင်းနှင့် terminal လော့ခ်ဖွင့်ရန်အတွက် ဂဏန်း 4 လုံးမှ 8 လုံး PIN ကို အသုံးပြုပါ။
+Use Cashier,Cashier ကိုသုံးပါ။
+Use date range to search for older invoices,ငွေတောင်းခံလွှာအဟောင်းများကို ရှာဖွေရန် ရက်အပိုင်းအခြားကို အသုံးပြုပါ။
+"Use one field for manual code entry, barcode scans, or QR scans.",ကိုယ်တိုင်ကုဒ်ထည့်သွင်းခြင်း၊ ဘားကုဒ်စကင်န်ဖတ်ခြင်း သို့မဟုတ် QR စကင်ဖတ်ခြင်းအတွက် အကွက်တစ်ခုကို အသုံးပြုပါ။
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.",လက်ကျန်ငွေစစ်ဆေးခြင်း၊ ထုတ်ပေးခြင်းနှင့် ငွေဖြည့်ခြင်းများအတွက် အလုပ်အသွားအလာတစ်ခုအား အသုံးပြုပါ။
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.",ကက်ရှ်လုပ်ထားသော ကြိုတင်လိုအပ်သည့်ဒေတာကို ပြန်လည်ဆန်းသစ်ရန်၊ ပြန်လည်တည်ဆောက်ရန် သို့မဟုတ် ရောဂါရှာဖွေရေး ပြန်လည်သုံးသပ်မှု လိုအပ်သည့်အခါ ဤကဏ္ဍကို အသုံးပြုပါ။
+Use Western numerals,အနောက်တိုင်းဂဏန်းများကိုသုံးပါ။
+Used:,အသုံးပြုသည်-
+Using basic camera settings due to device limitations,စက်ကန့်သတ်ချက်များကြောင့် အခြေခံကင်မရာဆက်တင်များကို အသုံးပြုခြင်း။
+Using cached customer balance,သိမ်းဆည်းထားသော ဖောက်သည်လက်ကျန်ကို အသုံးပြုခြင်း။
+Valid until,သည်အထိ အကျုံးဝင်သည်။
+Variance %,ကွဲလွဲမှု %
+Variants,မျိုးကွဲများ
+Variant-wise,မူကွဲအလိုက်
+Verify closing amounts for each payment method,ငွေပေးချေမှုနည်းလမ်းတစ်ခုစီအတွက် အပိတ်ပမာဏများကို အတည်ပြုပါ။
+View all,အားလုံးကိုကြည့်ရှုပါ။
+View app information and current build details,အက်ပ်အချက်အလက်နှင့် လက်ရှိတည်ဆောက်မှုအသေးစိတ်အချက်အလက်များကို ကြည့်ရှုပါ။
+View Data Diagnostics,Data Diagnostics ကိုကြည့်ပါ။
+View Details,အသေးစိတ်ကို ကြည့်ပါ။
+View invoice details,ငွေတောင်းခံလွှာအသေးစိတ်အချက်အလက်များကို ကြည့်ရှုပါ။
+View notifications,အကြောင်းကြားချက်များကို ကြည့်ပါ။
+View offline invoices,အော့ဖ်လိုင်း ပြေစာများကို ကြည့်ပါ။
+View restricted POS insights,ကန့်သတ်ထားသော POS သိကောင်းစရာများကို ကြည့်ပါ။
+Void Amount,ပျက်ပြယ်သောပမာဏ
+Void Count,ပျက်ပြယ်သောအရေအတွက်
+Voids,ပျက်ပြယ်သည်။
+Waiting for cart items,လှည်းပစ္စည်းများကို စောင့်နေသည်။
+Waiting for payment...,ငွေပေးချေမှုကို စောင့်ဆိုင်းနေသည်...
+Walk-in Customer,ဝင်ရောက်ဝယ်ယူသူ
+Warehouse,ဂိုဒေါင်
+Warning: High cache usage may affect performance.,သတိပေးချက်- မြင့်မားသော ကက်ရှ်အသုံးပြုမှုသည် စွမ်းဆောင်ရည်ကို ထိခိုက်စေနိုင်သည်။
+Warning: High lag may indicate heavy processing or browser slowness.,သတိပေးချက်- အလွန်နှေးကွေးခြင်းသည် ပြင်းထန်သော လုပ်ဆောင်မှု သို့မဟုတ် ဘရောက်ဆာနှေးခြင်းကို ညွှန်ပြနိုင်သည်။
+Week ?,တစ်ပတ် ?
+Week-wise,အပတ်စဉ် ပညာရှိ
+Weight (g),အလေးချိန် (ဆ)
+Weight (grams),အလေးချိန် (ဂရမ်)
+We'll let you know if an invoice fails to submit,ပြေစာတစ်ခု တင်ပြရန် ပျက်ကွက်ပါက သင့်အား ကျွန်ုပ်တို့ အသိပေးပါမည်။
+Workflow,အလုပ်အသွားအလာ
+Write off amount cannot exceed the POS profile maximum of {0},ရေးပယ်ထားသော ပမာဏသည် POS ပရိုဖိုင်၏ အများဆုံး {0} ထက် မကျော်လွန်နိုင်ပါ။
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,ရေးသွင်းသည့်ပမာဏသည် ခွင့်ပြုထားသောကန့်သတ်ချက်ထက်ကျော်လွန်နေသည် ({0})။ ကျန်ငွေပမာဏအတွက် ငွေပေးချေမှုကို ထည့်ပါ။
+Yes,ဟုတ်ကဲ့
+"Yes, Cancel sale",ဟုတ်ကဲ့၊ ရောင်းချမှုကို ပယ်ဖျက်ပါ။
+"Yes, Close",ဟုတ်ကဲ့ ပိတ်ပါ။
+You are not allowed to print draft invoices,ငွေတောင်းခံလွှာမူကြမ်းများကို ပုံနှိပ်ထုတ်ဝေခွင့်မပြုပါ။
+You are offline. Add Payment will work again when the connection is restored.,သင်သည် အော့ဖ်လိုင်းဖြစ်နေသည်။ ချိတ်ဆက်မှုကို ပြန်လည်ရယူသောအခါတွင် ငွေပေးချေမှုကို ထည့်ပါ ထပ်မံလုပ်ဆောင်ပါမည်။
+You have no notifications right now,သင့်တွင် ယခု အကြောင်းကြားချက်များ မရှိပါ။
+Your Cart,သင်၏လှည်း

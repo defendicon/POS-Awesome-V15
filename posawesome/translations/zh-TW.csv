@@ -1,0 +1,1362 @@
+POS Awesome,很棒的POS
+Fetch Items Directly from Server,直接從伺服器取得項目
+Menu,選單
+Actions,行動
+Close Shift,關閉班次
+End current session,結束目前會話
+Print Last Invoice,列印最後一張發票
+Reprint previous transaction,重印之前的交易
+Sync Offline Invoices,同步離線發票
+Upload pending transactions,上傳待處理交易
+Go Online,上網
+Go Offline,離線
+Disable offline mode,停用離線模式
+Work without server connection,無需伺服器連接即可工作
+Clear Cache,清除快取
+Remove local data and refresh,刪除本地資料並刷新
+About,關於
+App information,應用程式資訊
+Language,語言
+Change interface language,變更介面語言
+Light Mode,燈光模式
+Dark Mode,深色模式
+Switch theme appearance,切換主題外觀
+Logout,退出
+Sign out of session,退出會話
+Select Language,選擇語言
+Choose your preferred language for the POS interface,選擇您喜歡的 POS 介面語言
+Language will be changed to,語言將更改為
+Cancel,取消
+Change Language,更改語言
+Close,關閉
+Cannot change language - same language selected,無法更改語言 - 選擇相同的語言
+Language changed successfully! Reloading...,語言更改成功！正在重新加載...
+Failed to change language,更改語言失敗
+Unknown error,未知錯誤
+- Total Unallocated,- 未分配總額
+* Required,* 必填
+{0} (Qty: {1}),{0}（數量：{1}）
+{0} actions,{0} 操作
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} 只有 {1} 庫存。您請求了{2}。調整數量或補貨。
+{0} offline invoice{1} pending,{0}離線發票{1}待處理
+{0} offline invoice{1} saved as draft,{0}離線發票{1}儲存為草稿
+{0} offline invoice{1} synced,{0} 離線發票{1}已同步
+{0}: {1} {2},{0}：{1} {2}
+{0}d ago,{0}天前
+{0}h ago,{0} 小時前
+{0}m ago,{0} 分鐘前
+A POS supervisor is required for this action.,此操作需要 POS 主管。
+Access,訪問
+Account,帳戶
+Account is overdrawn,帳戶已透支
+Acknowledge the error to resume scanning,確認錯誤以恢復掃描
+Acknowledge the error to resume scanning.,確認錯誤以恢復掃描。
+Across,跨越
+Action,行動
+Active sale,積極銷售
+add,添加
+Add items from the selector to start building this sale.,從選擇器中新增商品以開始建立此銷售。
+Add more value to an existing gift card,為現有禮品卡增加更多價值
+Add New Address,新增地址
+Add new customer,新增客戶
+Add on New Line,新增行
+Add Payment,新增付款方式
+Add payment to invoice,將付款新增至發票
+Add/Edit Coupon Conditions,新增/編輯優惠券條件
+Additional Discount,額外折扣
+Additional Discount %,額外折扣%
+Address Line 1,地址行 1
+Address not found,找不到地址
+Adjust the quantity or enable negative stock to continue.,調整數量或使負庫存持續存在。
+Adjustment,調整
+After returns,返回後
+Against,反對
+Against Name,反對名字
+Age Bracket,年齡範圍
+All,全部
+All Caught Up!,全部都被抓住了！
+All invoices are synchronized,所有發票均同步
+All pending invoices are up to date,所有待處理的發票都是最新的
+All Profiles,所有設定檔
+All Synchronized,全部同步
+All visible invoices are fully settled.,所有可見發票均已全額結算。
+All Warehouses,所有倉庫
+Allowed UOM is {0},允許的 UOM 為 {0}
+Always fetch items from server (ignore local cache),始終從伺服器取得項目（忽略本機快取）
+Amount,金額
+Amount already received,已收到金額
+Amount exceeds profile cash movement max amount.,金額超過個人資料現金流動最大金額。
+Amount must be greater than zero.,金額必須大於零。
+Amount received from customer,從客戶收到的金額
+Appearance and user-level preferences for the current session.,目前會話的外觀和使用者等級首選項。
+Applied,應用
+Apply,申請
+Apply Gift Card,申請禮品卡
+Apply Offer,申請優惠
+Apply On,申請於
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,僅套用您想要在此發票上兌換的金額。剩餘餘額保留在卡片上。
+Apply Redemption,申請兌換
+Applying,正在申請
+Apps,應用程式
+Are you sure you want to close? All entered data will be lost.,您確定要關閉嗎？所有輸入的資料都將遺失。
+Attributes (Size/Color),屬性（尺寸/顏色）
+Auto Allocate Payment Amount,自動分配付款金額
+Auto Reconcile,自動協調
+Auto reconciliation completed after payment submit.,付款提交後自動對帳完成。
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,自動對帳完成。已指派：{0}{1}。剩餘未完成：{0}{2}。
+Available Actions,可用的操作
+Available QTY,可用數量
+Available:,可用：
+Average Basket,平均籃子
+Average Bill,平均帳單
+Average Ticket,平均票價
+Avg Bill,平均帳單
+Avg Invoice,平均發票
+Avg Invoice Profit,平均發票利潤
+Avg Invoice Value,平均發票價值
+Avg Purchase Frequency,平均購買頻率
+Awesome,太棒了
+Awesome Dashboard,很棒的儀表板
+Awesome Dashboard is disabled for the selected POS Profile.,所選 POS 設定檔的 Awesome Dashboard 已停用。
+Awesome Dashboard is unavailable for the selected scope.,Awesome Dashboard 對於所選範圍不可用。
+Awesome Dashboard is visible only to POS supervisors.,Awesome Dashboard 僅對 POS 主管可見。
+Back,返回
+Back Office Cash Account,後台現金帳戶
+Back Office Cash Account (Optional Override),後台現金帳戶（可選覆蓋）
+Back office cash account is required.,需要後台現金帳戶。
+Back to {0},返回{0}
+Background processing did not finish in time.,後台處理未及時完成。
+Background processing failed for Invoice {0}: {1},發票 {0} 的後台處理失敗：{1}
+Background Submission Failed,後台提交失敗
+Background sync interval (seconds),後台同步間隔（秒）
+Balance,平衡
+Balance will be updated when connection is restored,連線恢復後餘額將更新
+Balances still pending,餘額仍待處理
+Barcode,條碼
+Barcode / QR Ready,條碼/QR 就緒
+Barcode Label Printing,條碼標籤列印
+Base Paid:,基本付費：
+Base Recv:,基本接收：
+Base:,基地：
+Basic Information,基本訊息
+Batch,批次
+Batch Information,批次資訊
+Before any return workflow,在任何退貨工作流程之前
+Before returns,退貨前
+Best Day,最好的一天
+Best Seller,暢銷書
+Book expense or deposit from active shift.,登記活動班次的費用或押金。
+Branch / Location-wise Report,分行/地點報告
+Brand-wise,品牌明智
+Breakdown,故障
+Browse,瀏覽
+Build Time:,建置時間：
+Built with Frappe,用冰沙建造
+Bundle,捆綁包
+Buying Price,購買價格
+Cache cleared successfully,快取清除成功
+Cache Usage,快取使用情況
+cache used,使用快取
+Calculating...,正在計算...
+Camera Access Required,需要訪問相機
+Camera access was aborted. Please try again.,相機訪問被中止。請再試一次。
+Camera constraints not supported by your device. Trying fallback settings...,您的裝置不支援相機限制。正在嘗試後備設定...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,相機正忙或被其他應用程式/選項卡阻止。關閉其他相機應用程式並重試。
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,相機權限被拒絕。請在瀏覽器設定中允許相機存取並刷新頁面。
+Camera scanner is locked until the current error is acknowledged,相機掃描器將被鎖定，直到目前錯誤得到確認
+Camera started but the video stream did not load in time. Please try again.,相機已啟動，但視訊串流未及時載入。請再試一次。
+Cancel cash movement {0}?,取消現金轉移{0}？
+Cancel Payment,取消付款
+Cancel Sale,取消銷售
+Cancel Sale ?,取消銷售？
+Cancelled,取消
+Cannot add an item with zero or negative quantity.,無法新增數量為零或負數的項目。
+Cannot clear cache while offline,離線時無法清除快取
+Cannot redeem customer credit more than invoice total,兌換客戶積分的金額不得超過發票總額
+Cannot redeem gift cards more than invoice total,兌換禮品卡的金額不得超過發票總額
+Cannot Save Offline Invoice:,無法儲存離線發票：
+Cannot Save Offline Payment:,無法儲存離線付款：
+Card,卡
+Card / Online,卡/網上
+Card health after the last live lookup,上次即時查找後的卡片健康狀況
+Cards,卡片
+Cart,購物車
+Cash,現金
+Cash back to customers,現金回饋給客戶
+Cash Collections,現金託收
+Cash Deposit is disabled for this POS Profile.,此 POS 設定檔停用現金存款。
+Cash Drawer Snapshot,現金抽屜快照
+Cash In Hand,手頭現金
+Cash Movement,現金流動
+Cash movement cancelled,現金流動取消
+Cash movement deduction applied,適用現金流動扣除
+Cash movement deleted,現金流動已刪除
+Cash movement is disabled for this POS Profile.,此 POS 設定檔停用現金移動。
+Cash Movement is disabled in current POS Profile.,目前 POS 設定檔中停用現金移動。
+Cash movement saved offline,離線保存現金流動
+Cash movement submitted,已提交現金變動
+Cash Movements,現金流動
+Cash payment cannot be less than invoice total when partial payment is not allowed,不允許部分付款時，現金支付不能少於發票總額
+Cash returned after payment,付款後退還現金
+Cashier,收銀員
+Cashier Access,出納頻道
+Cashier identity and appearance preferences.,收銀員的身份和外表偏好。
+Cashier PIN,收銀員密碼
+Cashier PIN saved successfully.,收銀員密碼已成功保存。
+Cashiers,收銀員
+Cashier-wise,收銀員明智
+Categories,類別
+Category,類別
+Category / Brand / Variant Report,類別/品牌/變體報告
+Category-wise,按類別分類
+Category-wise Margin,類別利潤率
+Certificate,證書
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,證書遺失或不可信。 QZ 可能會顯示確認對話方塊。
+Certificate is trusted. Silent QZ printing is active.,證書是可信的。靜默 QZ 列印已啟動。
+Change,改變
+Change allocation repaired,更改分配已修復
+Change Price,更改價格
+Change Return,更改退貨
+Change Returned,零錢退回
+Change terminal cashier,變更航廈收銀員
+Charge Heads,充電頭
+Charges,收費
+Charges not found,未找到費用
+Check Balance,檢查餘額
+Check balance for any card. Supervisors can issue and top up cards here.,檢查任何卡片的餘額。主管可以在這裡發卡和儲值。
+Check balance only,僅檢查餘額
+Check for new commits,檢查新的提交
+Check for Updates,檢查更新
+Check live balance before applying redemption,申請兌換前檢查即時餘額
+Check live balance before redemption,兌換前檢查即時餘額
+Checking...,正在檢查...
+Cheque/Reference Date,支票/參考日期
+Cheque/Reference No,支票/參考號
+Choose the cashier currently operating this terminal.,選擇目前操作該終端的收銀員。
+City,城市
+Clear,清除
+Clear All,全部清除
+Clear all barcode items,清除所有條碼項目
+Clear all purchase order items,清除所有採購訂單項目
+Clear Search,清除搜尋
+Clearing local cache...,正在清除本機快取...
+Click to refresh,點擊刷新
+Client CPU Lag:,客戶端 CPU 延遲：
+Client Memory Usage:,客戶端記憶體使用情況：
+Client Metrics,客戶指標
+Close about dialog,關閉關於對話框
+Close cashier switcher,關閉收銀台開關
+Close closing shift dialog,關閉關閉班次對話框
+Close column selector,關閉列選擇器
+Close Dialog,關閉對話框
+Close drafts dialog,關閉草稿對話框
+Close invoice details dialog,關閉發票詳細資料對話框
+Close invoice management,關閉發票管理
+Close offline invoices dialog,關閉離線發票對話框
+Close packing list dialog,關閉裝箱單對話框
+Close returns dialog,關閉退貨對話框
+Close sales orders dialog,關閉銷售訂單對話框
+Close Scanner,關閉掃描儀
+Close scanner dialog,關閉掃描器對話框
+Close Settings,關閉設定
+Closing Amount,平倉金額
+Closing POS Shift,關閉 POS 班次
+Closing Snapshot Available,關閉快照可用
+Code,程式碼
+Code scanned successfully,掃碼成功
+COGS,銷貨成本
+Collapse item details,折疊項目詳細信息
+Collected,已收集
+Cols,科爾斯
+Columns,專欄
+commits,提交
+Completed and active sales in this range,該範圍內已完成且活躍的銷售
+Completed returns will appear here.,已完成的退貨將顯示在此。
+Confirm,確認
+Confirm Close,確認關閉
+Confirm Mobile Number,確認手機號碼
+Confirm PIN,確認密碼
+Connect,連接
+Connect printer and manage certificate,連接印表機並管理證書
+Connecting to QZ Tray...,正在連接到 QZ 托盤...
+Connection problem while submitting invoice,提交發票時出現連線問題
+Connections:,連接：
+Connectivity and cached prerequisite status were rechecked.,重新檢查連線和快取的先決條件狀態。
+Continue Editing,繼續編輯
+Could not fetch latest balance from server,無法從伺服器取得最新餘額
+Count,計數
+Country,國家
+Coupon,優惠券
+Coupons,優惠券
+Cover,封面
+CPU Cores:,CPU核心：
+Create,創建
+Create and load a new prepaid card,建立並載入新的預付卡
+Create and preload a new gift card,建立並預先載入新的禮品卡
+Create Bill,建立帳單
+Create Customer,創建客戶
+Create New Item,建立新項目
+Create or change your PIN,建立或變更您的 PIN
+Create PIN,建立 PIN 碼
+Create POS Opening Shift,創建 POS 開放班次
+Create Purchase Order,建立採購訂單
+Create Return,創造回報
+Create return from invoice,從發票建立退貨
+Create Supplier,創建供應商
+Credit and Output,信用與產出
+Credit Note,貸方票據
+Credit Outstanding,信用狀況良好
+Credit sales remaining to be collected,尚待收取的賒銷
+Critical,關鍵
+Currency,貨幣
+Current,目前
+Current Event Loop Lag:,當前事件循環滯後：
+Current Month,當月
+Current PIN,目前密碼
+Current Profile,目前簡介
+Current redeemable value on the gift card,禮品卡目前的可兌換價值
+Current User,目前用戶
+Custom,客製化
+Custom Due Days,自訂到期日
+Custom items per page,每頁自訂項目
+Customer,客戶
+Customer already selected,客戶已選擇
+Customer Balance,客戶餘額
+Customer balance unavailable offline,客戶餘額離線不可用
+Customer created successfully.,客戶創建成功。
+Customer creation failed.,客戶創建失敗。
+Customer Details,客戶詳情
+Customer display channel is missing,客戶顯示通道缺失
+Customer display was blocked. Please allow pop-ups for this site.,客戶顯示器被屏蔽。請允許該網站彈出視窗。
+Customer group is required,客戶群為必填項
+Customer is required to add payment,客戶需新增付款
+Customer Name is required,客戶姓名為必填項
+Customer not selected,未選擇客戶
+Customer Report,客戶報告
+Customer saved offline,客戶離線保存
+Customer Screen,客戶螢幕
+Customer territory is required,需要客戶區域
+Customer updated successfully.,客戶更新成功。
+Customer-facing tools and printer setup.,面向客戶的工具和印表機設定。
+Customers,客戶
+Customers not found,未找到客戶
+Daily cashier actions without scrolling.,日常收銀操作，無需滾動。
+Daily Sales,每日銷售額
+Daily Sales Summary,每日銷售總結
+Data loaded in form. Review and submit.,資料以表單形式載入。審核並提交。
+Database Health,資料庫健康狀況
+Database health affects overall system speed and reliability.,資料庫的健康狀況會影響整個系統的速度和可靠性。
+Database Info,資料庫資訊
+Date,日期
+Day ?,日？
+days,天
+Day-wise (MTD),以日計算 (MTD)
+Day-wise Movement,每日運動
+Dead Stock,滯銷庫存
+Dead Stock Items,滯銷商品
+Decrease quantity,減少數量
+Default,預設
+Default:,預設值：
+Delete,刪除
+Delete cancelled cash movement {0}?,刪除已取消的現金流動 {0}？
+Delete Draft,刪除草稿
+Delete draft invoice,刪除草稿發票
+Delete draft invoice {0}?,刪除草稿發票 {0}？
+Delete Invoice,刪除發票
+Delete offline invoice,刪除離線發票
+Delivered,已交付
+Delivery Charges,運費
+Delivery Information,配送資訊
+Delivery Note {0} created,交貨單 {0} 已創建
+Delivery note created,交貨單已創建
+Deployed Bundle:,部署的捆綁包：
+Deposit,押金
+Description,描述
+Detailed Supplier Breakdown,詳細的供應商分類
+Detecting formats:,檢測格式：
+Device Memory:,設備內存：
+Difference,差異
+Difference (In Company Currency),差異（以公司貨幣計）
+Disable offline mode first to recheck live connectivity.,首先停用離線模式以重新檢查即時連線。
+Disconnect,斷開連接
+discount,折扣
+Discount %,折扣%
+Discount / Void / Return Report,折扣/作廢/退貨報告
+Discount Amount,折扣金額
+Discount limited by POS Profile,折扣受 POS 設定檔限制
+Discounted Invoices,折扣發票
+Discounts,折扣
+Dismiss,解僱
+Download Certificate,下載證書
+Draft,吃水
+Draft invoice deleted,草稿發票已刪除
+Draft source,草稿來源
+Drafts,草稿
+Due {0},截止日期：{0}
+Due Date,截止日期
+Duplicate,重複
+Edit customer,編輯客戶
+Edit discount amount,編輯折扣金額
+Edit discount percentage,編輯折扣百分比
+Edit Gift Application,編輯禮物申請
+Edit item name,編輯項目名稱
+Edit quantity,編輯數量
+Edit rate,編輯率
+Edit unit of measure,編輯計量單位
+Edited,已編輯
+Employee,員工
+Enable background sync,啟用背景同步
+Enable Customer Display in POS Profile first.,首先在 POS 設定檔中啟用客戶顯示。
+Enter a PIN.,輸入 PIN 碼。
+Enter a valid grams value,輸入有效的克值
+Enter new price list rate,輸入新價目表費率
+Enter Quantity,輸入數量
+Enter the cashier PIN to continue.,輸入收銀員 PIN 碼以繼續。
+Enter the current PIN first.,首先輸入目前的 PIN。
+"Enter the current PIN, then choose a new one.",輸入目前的 PIN 碼，然後選擇新的 PIN 碼。
+Enter valid grams for scale barcode,輸入秤條碼的有效克數
+Entries,參賽作品
+Error accessing camera:,訪問相機時發生錯誤：
+Error calculating prices,計算價格時出錯
+Error fetching customer balance,取得客戶餘額時出錯
+Error in change calculations!,變化計算錯誤！
+Error Loading Data,載入資料時出錯
+Error loading invoice details,加載發票詳細資訊時出錯
+Error processing invoice,處理發票時發生錯誤
+Error processing payment,處理付款時出錯
+Error searching invoices,搜尋發票時發生錯誤
+Error submitting invoice:,提交發票時發生錯誤：
+Error submitting invoice: {0},提交發票時發生錯誤：{0}
+Error submitting invoice: No response from server,提交發票時發生錯誤：伺服器沒有回應
+Error updating currency,更新貨幣時出錯
+Error updating item details,更新商品詳細資訊時出錯
+Est. Purchase,預計。購買
+Est. Value,預計。價值
+Event-loop lag measures how busy your browser is. Lower is better.,事件循環延遲衡量瀏覽器的繁忙程度。越低越好。
+Every,每個
+Exchange Rate,匯率
+Expand item details,展開項目詳細信息
+Expected Amount (In Company Currency),預期金額（以公司貨幣計）
+Expected Cash,預期現金
+Expected cash on hand grouped by currency,按貨幣分組的預期手頭現金
+Expected vs Actual,預期與實際
+Expense,費用
+Expense Account (Optional Override),費用帳戶（可選覆蓋）
+Expense account is required.,需要費用帳戶。
+Expenses and deposits posted during this shift,本班次期間過帳的費用和押金
+Expired,已過期
+Failed to auto reconcile payments.,無法自動核對付款。
+Failed to cancel cash movement,取消現金流動失敗
+Failed to clear cache,清除快取失敗
+Failed to create item,建立專案失敗
+Failed to create supplier,創建供應商失敗
+Failed to delete cash movement,刪除現金流動失敗
+Failed to generate scale barcode. Using item barcode only.,產生秤條碼失敗。僅使用商品條碼。
+Failed to load cash movement context.,無法載入現金移動上下文。
+Failed to load dashboard data.,無法載入儀表板資料。
+Failed to reload invoice from server,無法從伺服器重新載入發票
+Failed to submit cash movement,無法提交現金變動
+Failed to sync offline cash movements,無法同步離線現金變動
+Fast cashier actions for active shifts.,快速收銀行動，實現主動輪班。
+Fast Moving Items,快速移動的物品
+Fees,費用
+Fetch the latest offline prerequisite updates,取得最新的離線先決條件更新
+Find a sales order quickly and load it into the current sale.,快速尋找銷售訂單並將其加載到當前銷售中。
+Fixing payment amounts for return invoice...,修復退貨發票的付款金額...
+Flash Off,閃光燈關閉
+Flash On,閃光燈開啟
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.",對於「產品捆綁」項目，將從「裝箱單」表中考慮倉庫、序號和批次號。如果任何「產品捆綁」項目的所有包裝項目的倉庫和批次號碼都相同，則可以在主項目表中輸入這些值；值將複製到「裝箱單」表中。
+Free,免費
+Free Qty,免費數量
+Frequency,頻率
+from,來自
+From Date,開始日期
+Fulfillment Details,履行詳情
+Full Name,全名
+Gain,增益
+Generate a fresh prepaid card and start it with an opening balance.,產生一張新的預付卡並以期初餘額開始。
+Generate and install the certificate to allow fully silent printing without trust prompts.,產生並安裝憑證以允許完全靜默列印，無需信任提示。
+Generate Certificate,產生證書
+Generated scale barcode: {0},產生的秤條碼：{0}
+Get Payments,獲取付款
+Gift Card,禮品卡
+Gift card amount must be greater than zero.,禮品卡金額必須大於零。
+Gift Card Code,禮品卡代碼
+Gift card code is required for redemption,兌換時需要禮品卡代碼
+Gift card code is required.,需要禮品卡代碼。
+Gift card issued successfully.,禮品卡發放成功。
+Gift card loaded successfully.,禮品卡加載成功。
+Gift Card Management,禮品卡管理
+Gift card payment,禮品卡支付
+Gift card redemption requires an online connection,禮品卡兌換需要線上連接
+Gift card topped up successfully.,禮品卡儲值成功。
+Gift Cards,禮品卡
+Go to Frappe Desk,前往冰沙櫃檯
+Grand Total,總計
+Gross Margin,毛利率
+Gross Profit,毛利
+Gross Sales,銷售總額
+Group not found,找不到組
+"Grouped controls for terminal, UI, and session settings.",用於終端機、UI 和會話設定的分組控制項。
+Grouped totals for each payment method and currency,每種付款方式和貨幣的分組總計
+Hide,隱藏
+Hide Gift Card,隱藏禮品卡
+Hide Non Essential Fields,隱藏非必需字段
+Hide quantity decimals,隱藏數量小數點
+Hide search tools,隱藏搜尋工具
+Hide zero rated items,隱藏零評級項目
+High,高
+History,歷史
+Hourly (Today),每小時（今天）
+How this section works,本部分如何運作
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.",如果仍然存在過時數據，請開啟“設定”>“離線和同步”，然後在線上時再次執行“重建離線資料”。
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.",如果警告仍然存在，請開啟“設定”>“離線和同步”，然後執行“刷新離線資料”或“重建離線資料”。
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,將憑證匯入QZ Tray中，並在每台POS機上重新啟動QZ Tray。
+In,在
+In stock: {0},庫存：{0}
+Include Batch / Serial,包括批量/串行
+Include Price,包含價格
+Increase quantity,增加數量
+IndexedDB,索引資料庫
+Initial Amount,初始金額
+Initialize your shift with opening balances,使用期初餘額初始化您的班次
+Initializing application...,正在初始化應用程式...
+"Inspect cache, sync, and prerequisite status",檢查快取、同步和先決條件狀態
+Installed Applications,已安裝的應用程式
+Insufficient stock:\n{0},庫存不足：\n{0}
+Invalid rate,無效率
+Inventory Status Report,庫存狀態報告
+Invoice,發票
+Invoice {0} is Submitted,發票 {0} 已提交
+Invoice {0} processed successfully,發票 {0} 已成功處理
+Invoice {0} submission failed,發票 {0} 提交失敗
+Invoice {0} was already submitted,發票 {0} 已提交
+Invoice Adjustments,發票調整
+Invoice Change,發票變更
+Invoice Details,發票詳情
+Invoice is still in draft after background submission.,後台提交後發票仍處於草稿狀態。
+Invoice Items,發票項目
+Invoice Management,發票管理
+Invoice Mgmt,發票管理
+Invoice saved offline,發票離線保存
+Invoice submission failed,發票提交失敗
+Invoice Submitted,發票已提交
+"Invoice value settled by loyalty points, not cash collection",發票價值透過忠誠度積分結算，而不是現金收取
+Invoices,發票
+Invoices already past due date,發票已逾期
+Invoices saved as POS Invoices,發票另存為 POS 發票
+Invoices still carrying balances,發票仍有餘額
+Issue Mode,發行模式
+Issue New Card,發行新卡
+Issue Workflow,問題工作流程
+"Issue, top up, and check",發行、儲值、檢查
+Item,專案
+Item / Product Sales Report,項目/產品銷售報告
+Item {0} added to invoice,項目 {0} 已加入發票中
+Item '{0}' has no barcode,商品「{0}」沒有條碼
+Item Code,商品代碼
+Item created successfully,專案創建成功
+Item is out of stock,商品缺貨
+Item Name,商品名稱
+Item not found,未找到項目
+Item order updated,商品訂單已更新
+Item Selector Settings,項目選擇器設定
+Items,專案
+Items added in POS will appear here automatically.,POS 中新增的商品將自動顯示在此。
+Items added to invoice,新增到發票的項目
+Items per page,每頁項目數
+Items Sold,售出物品
+Items/Invoice,物品/發票
+Item-wise Profitability,逐項獲利能力
+Journal Entry,日記條目
+json,json
+Just now,剛才
+Keep offline prerequisites healthy and recover stale data safely.,保持離線先決條件的健康並安全地恢復過時的資料。
+Labels,標籤
+"Language, theme, terminal tools, and session controls.",語言、主題、終端工具和會話控制。
+Last,最後
+Last 14 Days (Paid vs Pending),過去 14 天（已付費與待處理）
+Last 14 Days Activity,過去 14 天的活動
+Last 14 Days Gross Profit,最近 14 天毛利潤
+Last 14 Days Purchases,過去 14 天的購買紀錄
+Last 14 Days Tax/Charges,過去 14 天稅金/費用
+Last sync:,上次同步：
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},上次同步：{0} |好的：{1} |失敗：{2} |跳過：{3}
+Latest entries for current shift,目前班次的最新條目
+Lead Time,交貨時間
+Limited,有限公司
+lines,線
+List,清單
+Live Snapshot,即時快照
+Load a POS profile and cashier first.,首先載入 POS 設定檔和收銀員。
+Load More Invoices,載入更多發票
+Load previously saved invoices,載入先前儲存的發票
+Load Sale,載入銷售
+Load Sales Invoice,載入銷售發票
+Loading app data...,正在載入應用程式資料...
+Loading customer database...,正在載入客戶資料庫...
+Loading customers...,正在加載客戶...
+Loading database stats...,正在載入資料庫統計資料...
+Loading details...,正在加載詳細資訊...
+Loading invoice history...,正在載入發票記錄...
+Loading items...,正在加載項目...
+Loading product catalog...,正在載入產品目錄...
+Loading return invoices...,正在載入退貨發票...
+Loading server CPU/memory usage...,正在載入伺服器 CPU/記憶體使用情況...
+Loading suppliers...,正在載入供應商...
+Loading unpaid invoices...,正在加載未付發票...
+Loading view...,正在載入視圖...
+Loading...,正在加載...
+Local storage is unavailable. Switching to online-only mode.,本地儲存不可用。切換到僅在線模式。
+localStorage,本地儲存
+Location Performance,位置表現
+Locations,地點
+Lock Screen,鎖定畫面
+Lookup Workflow,尋找工作流程
+Loss,損失
+Low,低
+Low Stock,庫存不足
+Low Stock Alerts,庫存不足警報
+Low Stock Items,庫存不足的商品
+Low Stock Threshold,庫存門檻低
+Low Stock Total,庫存總量低
+Lowest Margin,最低保證金
+Low-frequency maintenance and system details.,低頻維護和系統細節。
+Loyalty Redeemed,忠誠度得到回報
+Loyalty Redemption,忠誠度兌換
+Make New Payment,進行新付款
+Manage all,管理全部
+Manage and synchronize your offline transactions,管理和同步您的離線交易
+Manage Cashier PIN,管理收銀員 PIN
+"Manage offline tools, terminal controls, and maintenance from one workspace.",從一個工作區管理離線工具、終端控制和維護。
+manual,手冊
+"Manual codes, barcode scans, and QR scans work in the same field",手動編碼、條碼掃描和 QR 掃描在同一領域工作
+Manual offline mode is enabled,手動離線模式已啟用
+Margin,保證金
+Maximum available quantity is {0}. Quantity adjusted to match stock.,最大可用數量為{0}。調整數量以匹配庫存。
+Maximum discount amount for this offer item is {0}.,此優惠商品的最大折扣金額為 {0}。
+Maximum discount percentage for this offer item is {0}%.,此優惠商品的最大折扣百分比為 {0}%。
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,最大報價數量為 {0}。數量調整至容許限值。
+Medium,中等
+Method-wise Collections,方法明智的集合
+Minimum allowed rate for this offer item is {0}.,此優惠項目允許的最低價格為 {0}。
+Minimum Qty,最小數量
+Mobile No,手機號碼
+Mode,模式
+Mode of Payment,付款方式
+Month,月
+Month ?,月？
+Monthly Profit,每月利潤
+Monthly Sales,每月銷售額
+Monthly Sales Summary,每月銷售總結
+Month-wise,按月計算
+Most Active Cashiers,最活躍的收銀員
+Movement Type,運動類型
+Movements,動作
+Multi Currency,多幣種
+N/A,不適用
+Name,名稱
+Negative Stock,負庫存
+Negative Stock Items,負庫存商品
+Negative values not allowed,不允許使用負值
+Net,網路
+Net Qty,淨數量
+Net Sales,淨銷售額
+Net Value,淨值
+Never,從來沒有
+New changes are ready to load,新的更改已準備好加載
+New Item,新商品
+New Offer Available,新優惠推出
+New PIN,新密碼
+New rate,新率
+Next unit of measure,下一個測量單位
+No attribute data found.,未找到屬性資料。
+No Barcode,無條碼
+No barcode found for UOM '{0}',未找到 UOM“{0}”的條碼
+No branch/location data found.,未找到分行/位置資料。
+No brand data found.,未找到品牌數據。
+No cached gift card balance is available offline.,離線時無法使用快取的禮品卡餘額。
+No camera found on this device. Please ensure your device has a working camera.,在此裝置上找不到相機。請確保您的設備有可用的攝影機。
+No capability warnings recorded yet.,尚未記錄任何能力警告。
+No cash expected for this shift.,這一轉變預計不會有現金。
+No cash mode configured,未配置現金模式
+No cash movement type is allowed for this POS Profile.,此 POS 設定檔不允許現金移動類型。
+No cashier PIN is set yet. Create one now.,尚未設定收銀員密碼。立即建立一個。
+No cashier profiles are available for this POS profile yet.,此 POS 設定檔尚無可用的收銀員設定檔。
+No cashier-wise discount/void/return activity.,沒有收銀員折扣/作廢/退貨活動。
+No category data found.,未找到類別資料。
+No category profitability data found.,未找到類別獲利能力數據。
+No change returned recorded for this shift.,此班次沒有傳回任何更改記錄。
+No change-allocation invoices match the current filters.,沒有與目前過濾器相符的變更分配發票。
+No charge head breakdown found.,未發現充電頭故障。
+No Company Selected,未選擇公司
+No customer sales data found.,未找到客戶銷售資料。
+No day-wise discount/void/return trend.,沒有每日折扣/作廢/退貨趨勢。
+No day-wise payment data found.,未找到每日付款資料。
+No day-wise profitability trend found.,未發現每日獲利趨勢。
+No day-wise purchase data found.,未找到每日購買資料。
+No day-wise sales trend found.,未發現每日銷售趨勢。
+No day-wise tax/charges trend found.,未發現每日稅金/費用趨勢。
+No dead stock items.,沒有滯銷商品。
+No due date,無截止日期
+No exact repair match found for this invoice,找不到與此發票完全匹配的維修
+No hourly sales trend found for today.,沒有發現今天每小時的銷售趨勢。
+No invoice activity found.,未發現發票活動。
+No invoices found,沒有找到發票
+No invoices found. Try different search criteria.,沒有找到發票。嘗試不同的搜尋條件。
+No invoices recorded for this shift.,此班次沒有記錄任何發票。
+No item profitability data found.,未找到商品獲利能力資料。
+No item sales data found for this period.,沒有找到該期間的商品銷售數據。
+No items found,沒有找到物品
+No items in cart,購物車中沒有商品
+No items with barcodes to print,沒有條碼的物品可供列印
+No location-wise top item data found.,未找到按位置排序的頂級項目資料。
+No low stock alerts right now.,目前沒有庫存不足警報。
+No low stock items.,沒有庫存不足的商品。
+No matching items in cart,購物車中沒有配對的商品
+No month-wise sales trend found.,未發現按月計算的銷售趨勢。
+No negative stock items.,無負庫存商品。
+No notifications yet,還沒有通知
+No offline cash movement synced.,沒有同步離線現金流動。
+No offline invoices pending synchronization,沒有待同步的離線發票
+No offline sync issues recorded yet.,尚未記錄離線同步問題。
+No out-of-stock items.,沒有缺貨的商品。
+No outstanding credit invoices for this shift.,此班次沒有未清信用發票。
+No payment collection data found.,未找到收款資料。
+No payment rows available on this invoice.,此發票上沒有可用的付款行。
+No payments registered for this shift.,沒有登記此班次的付款。
+No pending balances in this period.,此期間無待結餘額。
+No pending offline invoices,沒有待處理的離線發票
+No Print Formats Found,未找到列印格式
+No profiles found for selected scope. Falling back to current profile failed.,未找到所選範圍的設定檔。回退到目前設定檔失敗。
+No recent customer activity found.,未找到最近的客戶活動。
+No recent stock entries found.,沒有找到最近的股票條目。
+No records found,沒有找到記錄
+No reorder suggestions right now.,目前沒有重新訂購建議。
+No repeat customers in this period.,期間沒有回頭客。
+No response from server,伺服器沒有回應
+No return invoices found,未找到退貨發票
+No return item trend found.,未發現退貨趨勢。
+No returnable items found for this invoice,未找到此發票的可退貨商品
+No returns were processed in this shift.,本班次未處理任何退貨。
+No risk activity found.,未發現風險活動。
+No sales activity found for this period.,在此期間未發現任何銷售活動。
+No slow moving items.,沒有緩慢移動的物品。
+No staff sales activity found.,未發現員工銷售活動。
+No stock movement for this period.,此期間沒有庫存變動。
+No submitted cash movements in this shift.,本班次沒有提交現金變動。
+No supplier purchases found in this month.,本月未發現供應商採購。
+No suppliers found for this period.,此期間未找到供應商。
+No sync trigger has run yet in this session.,此會話中尚未執行同步觸發器。
+No tax head breakdown found.,未發現稅頭明細。
+No top items found for this location.,沒有找到該地點的熱門商品。
+No unpaid invoices,沒有未付發票
+No variant data found.,未找到變體數據。
+No week-wise sales trend found.,未發現每週銷售趨勢。
+No.,不。
+Nobile Number,貴族號碼
+Not available,不可用
+Not checked,未檢查
+Not selected,未選擇
+Not Set,未設定
+Notifications,通知
+Offer,優惠
+Offer Applied,已申請優惠
+Offer criteria exceeded,超出報價標準
+Offer Item,優惠項目
+Offer item unavailable,優惠商品不可用
+Offer Removed,優惠已刪除
+Offer UOM cannot be changed,報價單位無法更改
+Offer?,報價？
+Offers,優惠
+Offline,離線
+Offline & Sync,離線和同步
+Offline Capabilities,離線能力
+Offline data status refreshed,離線資料狀態刷新
+Offline diagnostics,離線診斷
+Offline Invoices,離線發票
+Offline invoices status,離線發票狀態
+Offline invoices synced,離線發票已同步
+Offline Queue: {0},離線佇列：{0}
+Offline rebuild guidance,離線重建指導
+Offline restore is unavailable for this session.,此會話無法進行離線恢復。
+Offline selling is available with degraded capabilities.,離線銷售可在功能降級的情況下使用。
+Offline snapshot does not match the current POS state.,離線快照與目前 POS 狀態不符。
+Offline Status,離線狀態
+"Offline, terminal, and system controls",離線、終端和系統控制
+OK,好的
+Online,網路
+Open actions menu,開啟操作選單
+Open balance to collect,待收未結餘額
+Open Customer Display,打開客戶展示
+Open drawer,打開抽屜
+Open invoices,開立發票
+Open Payments?,開放支付？
+Open POS home,開啟 POS 首頁
+Open this screen from POS Menu -> Open Customer Display.,從 POS 選單 -> 開啟客戶顯示器開啟此畫面。
+OpenCV image processing enabled - Enhanced barcode detection,啟用 OpenCV 影像處理 - 增強條碼偵測
+OpenCV image processing unavailable on this device,OpenCV 影像處理在此裝置上不可用
+OpenCV Off,OpenCV 關閉
+OpenCV On,OpenCV 開啟
+OpenCV processing disabled,OpenCV 處理已停用
+Opening Amount,開倉金額
+Opening Cash,開倉現金
+options,選項
+Order,訂單
+Original,原創
+Other,其他
+Out,出
+Out of Stock,缺貨
+Out of Stock Items,缺貨商品
+Outstanding,傑出
+Outstanding Credit by Currency,按幣種劃分的未償信貸
+Overdue,逾期
+Overpayment Change,超額付款變更
+Overpayment change deducted: {0},扣除多付款項變更：{0}
+Packing List,裝箱單
+Page Format,頁面格式
+Page unavailable offline,頁面離線不可用
+Paid,付費
+Paid (orig):,付費（原）：
+Paid Amount,支付金額
+Paid change cannot be greater than total change!,付費找零不能大於總找零！
+Paid:,付費：
+Parent Item,父項
+Partial,部分
+Partly Paid,部分付費
+Party Account,當事人帳戶
+Party Type,派對類型
+Pause terminal until next cashier,暫停終端直至下一位收銀員
+PAY,支付
+Payment,付款方式
+Payment Account,支付帳戶
+Payment entries processed for Invoice {0},已處理發票 {0} 的付款條目
+Payment Entry Type,付款條目類型
+Payment History,付款記錄
+Payment ID,付款ID
+Payment Method Report,付款方式報告
+Payment Methods,付款方式
+Payment of {0} received successfully.,成功收到{0}的付款。
+Payment Progress,付款進度
+Payment Reconciliation,付款對帳
+Payment request status could not be retrieved. Please try again,無法檢索付款請求狀態。請重試
+Payment Request took too long to respond. Please try requesting for payment again,付款請求回應時間過長。請嘗試再次請求付款
+Payment saved offline,離線保存付款
+Payment State,付款狀態
+Payment Status,付款狀態
+Payment submitted but print function could not be executed. Payment name not found.,付款已提交，但無法執行列印功能。未找到付款名稱。
+Payment submitted.,付款已提交。
+Payment Summary,付款摘要
+Payments,付款方式
+Payments are not open. Do you want to open payments and submit?,付款方式尚未開放。您想打開付款並提交嗎？
+Payments by Mode of Payment,按付款方式付款
+PDF,PDF
+Peak Hour,尖峰時段
+Peak Memory:,峰值記憶體：
+Peak Server:,峰值伺服器：
+Peak:,峰值：
+Pending,待定
+Pending Amount,待處理金額
+Pending count updated from {0} to {1},待處理計數從 {0} 更新為 {1}
+Pending Exposure,待曝光
+Pending Invoices,待處理的發票
+Pending Ratio,待處理比率
+Pending Sales,待售
+Pending sales: {0} | Cache usage: {1}%,出售：{0} |快取使用率：{1}%
+Pending Sync,待同步
+Pending: {0},待處理：{0}
+Pending: {0} | Synced: {1} | Draft: {2},待處理：{0} |已同步：{1} |草稿：{2}
+Per Page,每頁
+Personal,個人
+Personal preferences adjust the current cashier experience without changing the active POS route.,個人喜好調整目前的收銀體驗，而不改變活動的 POS 路線。
+PIN confirmation does not match.,PIN 確認不符。
+PIN must be 4 to 8 digits.,PIN 碼必須為 4 至 8 位數。
+Please add at least one item.,請至少添加一項。
+Please allow camera access to scan codes,請允許相機存取掃碼
+Please enter payment amount,請輸入付款金額
+Please fill all required fields,請填寫所有必填字段
+Please make a payment or select a payment,請付款或選擇付款方式
+Please request phone payment or use another payment method,請申請電話付款或使用其他付款方式
+Please select a customer first,請先選擇客戶
+Please select a party,請選擇派對
+Please select a party before reconciling.,請在和解前選擇一方。
+Please select a valid movement type.,請選擇有效的移動類型。
+Please select an invoice,請選擇發票
+Please select company before reconciling.,請在對帳前選擇公司。
+Please set the customer's mobile number,請設定客戶手機號碼
+Please try again or enter the item manually.,請重試或手動輸入該項目。
+Please verify the barcode or check the item's availability.,請驗證條碼或檢查商品的可用性。
+Points,積分
+Popup blocked. Please allow popups.,彈出視窗被阻止。請允許彈出視窗。
+POS,銷售點
+POS controls and maintenance,POS 控制與維護
+POS Expense is disabled for this POS Profile.,此 POS 設定檔停用 POS 費用。
+POS is running with limited offline prerequisites.,POS 正在運行，但離線先決條件有限。
+POS Profile,POS簡介
+Position the QR code or barcode within the scanning area,將 QR 碼或條碼放置在掃描區域內
+Posting,發文
+Posting and Price List,發布和價目表
+Posting Date,發布日期
+Preparing background sync,準備後台同步
+"Press OK to continue offline with a warning, or Cancel to retry.",按「確定」繼續脫機並出現警告，或按「取消」重試。
+Previous unit of measure,以前的計量單位
+Price List,價目表
+Price List Rate,價目表費率
+Price list rate updated locally only,價目表費率僅在本地更新
+Pricing & Discounts,定價和折扣
+Pricing Rule,定價規則
+Print,列印
+Print Draft,列印草稿
+Print Format (Invoice),列印格式（發票）
+Print Format (Order),列印格式（訂單）
+Print invoice,列印發票
+Print Purchase Invoice instead of PO,列印採購發票而不是 PO
+Printer,印表機
+Processed returns impacting the shift totals,處理後的退貨會影響輪班總數
+Processing Payment,處理付款
+Processing payment entries for Invoice {0},處理發票 {0} 的付款條目
+Profile,公司簡介
+Profiles,型材
+Profit,利潤
+Profit: Invoice Item Estimate,利潤：發票項目估算
+Profit: Stock Ledger (COGS),利潤：庫存分類帳 (COGS)
+Profitability Report,獲利報告
+Prorated return discount,按比例退貨折扣
+Purchase Amount,購買金額
+Purchase Invoices,採購發票
+Purchase Order created,已建立採購訂單
+Qty,數量
+Qualified,合格
+Quantity,數量
+Quantity exceeds available stock,數量超過可用庫存
+Quick Actions,快速行動
+Quotation {0} is Submitted,報價{0}已提交
+Quotation submitted,報價已提交
+QZ Tray connected.,QZ 托盤已連接。
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ 托盤被手動斷開。按“連接”以再次啟用它。
+QZ Tray is not connected.,QZ 托盤未連接。
+QZ Tray Setup,QZ 托盤設置
+Rate,率
+Rate adjusted to maximum allowed discount,費率調整至允許的最大折扣
+Ready,準備好
+Ready to resume,準備恢復
+Ready!,準備好了！
+Real-time POS insights for retail operations.,針對零售營運的即時 POS 洞察。
+Rebuild Offline Data,重建離線數據
+Receive,接收
+Receive now,立即接收
+Received,已收到
+Received:,收到：
+Recent Movement Entries,最近的運動條目
+Recent updates about your invoices,有關您發票的最新更新
+Recently Active Customers,最近活躍客戶
+Rechecking connection,重新檢查連接
+Reconcile payment methods and close shift,協調付款方式並關閉班次
+Reconciling Payments,核對付款
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.",在線時重新連接並打開此頁面一次，然後離線刷新即可恢復。
+Reconnect online to refresh cached offline data from the server.,重新線上連線以刷新伺服器快取的離線資料。
+Recreate local offline prerequisites from scratch,從頭開始重新建立本機離線先決條件
+Recv:,接收：
+Redeem,兌換
+Redeem / Scan,兌換/掃描
+Redeem Amount,兌換金額
+Redeem Mode,兌換模式
+Redeemed Amount,兌換金額
+Redeemed credit cannot be greater than its total.,兌換的積分不能大於其總額。
+Redemption and Totals,贖回及總數
+Reference,參考
+Refresh,重新整理
+Refresh Exchange Rate,重新整理匯率
+Refresh Offline Data,刷新離線數據
+Refresh Printers,重新整理印表機
+Refund,退款
+Release Notes,發行說明
+Reload,重新載入
+Reload customers,重新加載客戶
+Reload Items,重新加載物品
+Reload Now,立即重新載入
+Reload to apply the latest changes. Your current session will be refreshed.,重新加載以應用最新更改。您目前的會話將會被刷新。
+Reload Workflow,重新載入工作流程
+Remarks,備註
+Remarks are required.,需要備註。
+Remove,刪除
+Remove barcode item,刪除條碼項目
+Remove cached data and reload the POS app,刪除快取資料並重新載入 POS 應用程式
+Remove item,刪除項目
+Remove Offer,刪除優惠
+Reorder / Purchase Suggestions,重新訂購/購買建議
+Repair Candidate,維修候選者
+Repair Change Allocation,維修變更分配
+Repair requires an online connection,修復需要在線連接
+Repaired,已修復
+Repairing change allocation,修復變更分配
+Repeat Customers,回頭客
+Repeat Rate,重複率
+Request,請求
+Request ID: {0},請求 ID：{0}
+Request Payment,請求付款
+Requested route: {0},請求的路線：{0}
+Required columns cannot be hidden,無法隱藏必填列
+Reset,重置
+Reset item name,重置項目名稱
+Reset to Default,重設為預設值
+Resource Health,資源健康
+Restricted,受限
+Restricted operational controls for supervisors only.,僅對主管進行有限的操作控制。
+Retry,重試
+Retry route,重試路線
+Return,返回
+Return Amount,退貨金額
+Return Count,返回計數
+Return items must have negative quantities,退貨商品數量必須為負數
+Return total must be negative,傳回總計必須為負數
+Return Valid Until,返回有效期限至
+Return window passed,退貨窗口已過
+Return without Invoice,無發票退貨
+Returns,退貨
+Returns / Voids / Discounts,退貨/無效/折扣
+Returns by Currency,按貨幣分類的回報
+Revenue,收入
+Review shift totals before submitting the closing entry,在提交結帳條目之前查看班次總計
+Round Off,四捨五入
+Rows,行數
+Rows:,行：
+Rule,規則
+Sale,銷售
+Sales,銷售
+Sales Order {0} is Submitted,銷售訂單 {0} 已提交
+Sales Person and Print,銷售人員和印刷品
+Sales Person not found,未找到銷售人員
+Sales processed,銷售處理
+Sales Return,銷售退貨
+Sales Trend Report,銷售趨勢報告
+Save,儲存
+Save & Clear,儲存並清除
+Save as POS Profile Default,另存為 POS 設定檔預設值
+Save Settings,儲存設定
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,將選定的印表機儲存為 POS 設定檔預設值，以便它自動顯示在此設定中。
+Saved as draft because: {0},儲存為草稿，因為：{0}
+Saving...,正在儲存...
+Scale barcode detected. Quantity here is the number of labels to print.,偵測到秤條碼。這裡的數量是要列印的標籤數量。
+Scale barcode settings are not configured. Using item barcode only.,未配置秤條碼設定。僅使用商品條碼。
+Scale template barcode is missing for this item/UOM. Using item barcode only.,此商品/計量單位缺少秤模板條碼。僅使用商品條碼。
+Scan an existing card and top it up without leaving the payment flow.,掃描現有卡片並充值，無需離開支付流程。
+Scan Error,掃描錯誤
+Scan or enter a gift card code to check balance or redeem.,掃描或輸入禮品卡代碼以檢查餘額或兌換。
+Scan or paste the card code below.,掃描或貼上下面的卡片代碼。
+Scan QR Code/Barcode,掃描二維碼/條碼
+Scan with camera,用相機掃描
+Scan-First Flow,掃描優先流程
+Scanned Code:,掃描碼：
+Scanning for: {0},正在掃描：{0}
+Scanning items,掃描物品
+Scan-Ready,掃描就緒
+Scope,適用範圍
+Scope: All Profiles,範圍：所有設定檔
+Scope: Current Profile,範圍：目前簡介
+Scope: Specific Profile,範圍：具體簡介
+Search,搜尋
+Search Account,搜尋帳戶
+Search an invoice and continue the return flow without extra steps.,搜尋發票並繼續退貨流程，無需額外步驟。
+Search customer,搜尋客戶
+Search invoices or customers,搜尋發票或客戶
+Search item,搜尋項目
+Search item / code,搜尋項目/代碼
+Search items or barcode,搜尋商品或條碼
+Search Mpesa Payments,搜尋 Mpesa 支付
+Search return invoices or customers,搜尋退貨發票或客戶
+Search supplier,搜尋供應商
+Search unpaid invoices or customers,搜尋未付發票或客戶
+Secure context (HTTPS or localhost) is required for camera access.,相機存取需要安全上下文（HTTPS 或本機）。
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,攝影機存取所需的安全上下文 (HTTPS)。請使用HTTPS訪問相機。
+Select,選擇
+Select a cashier first.,首先選擇收銀員。
+Select a customer,選擇客戶
+Select a customer to use coupon,選擇使用優惠券的顧客
+Select a printer to use QZ silent printing.,選擇印表機以使用 QZ 靜音列印。
+Select Batch,選擇批次
+Select Columns to Display,選擇要顯示的列
+Select items to sell,選擇要出售的商品
+Select Payment,選擇付款方式
+Select Payment Account,選擇付款帳戶
+Select printer,選擇印表機
+Select Return Invoice,選擇退貨發票
+Select S.O,選擇 S.O.
+Select Sales Orders,選擇銷售訂單
+Select the cashier who is taking over this terminal.,選擇接管該終端的收銀員。
+Selected,已選擇
+Selected movement type is not allowed by POS Profile.,POS 設定檔不允許選擇的移動類型。
+Selected Payments,選定的付款方式
+Sensitive actions kept away from quick taps.,敏感動作遠離快速點擊。
+Serial,序列
+Serial Numbers,序號
+Server CPU Usage:,伺服器CPU使用率：
+Server Health,伺服器健康狀況
+Server Memory Usage:,伺服器記憶體使用情況：
+Server Metrics,伺服器指標
+Server Uptime:,伺服器正常運作時間：
+Service Charges,服務費
+Session,會議
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,在使用者表單中設定每位收銀員 PIN，並在 POS 設定檔使用者中保留已指派的終端成員。
+Settings,設定
+Settings in this section update the POS workspace without changing the current route.,此部分中的設定會更新 POS 工作區，而不會變更目前路線。
+Setup complete!,設定完成！
+Share,分享
+Shared terminal,共享終端
+Shift Closed Snapshot,班次關閉快照
+Shift Overview,班次概覽
+Show,顯示
+Show cart on customer-facing screen,在面對客戶的螢幕上顯示購物車
+Show last invoice rate,顯示上次發票費率
+Show rate info,顯示費率資訊
+Show Repair Candidates,顯示維修候選者
+Show search tools,顯示搜尋工具
+Show the active cart on a customer-facing screen,在面對客戶的螢幕上顯示活動購物車
+Showing {0}-{1} of {2},顯示第 {0}-{1} 個（共 {2} 個）
+Showing 0 of 0,顯示 0 個，共 0 個
+Shows the distribution of invoices per currency,顯示每種貨幣的發票分佈
+Sign out of the current POS session,退出目前 POS 會話
+Size:,尺寸：
+Skipped Payments,跳過付款
+Skipping items without barcodes,跳過沒有條碼的物品
+Slow Moving,緩慢移動
+Slow Moving Items,緩慢移動的物品
+Slow Queries:,慢查詢：
+Sold,已售出
+Source,來源
+Source Cash Account (Optional Override),來源現金帳戶（可選保障）
+Source Ex. Rate:,來源Ex。率：
+Source Rate:,來源率：
+Specific Profile,具體簡介
+Split Invoices,拆分發票
+Staff / Cashier Performance Report,員工/出納績效報告
+Status,狀態
+Stock,庫存
+Stock Information,股票資訊
+Stock is lower than requested,庫存低於要求
+Stock is lower than requested:\n{0},庫存低於要求：\n{0}
+Stock Movement Report,庫存變動報告
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,庫存更新：{0} 有 {1} 可用。添加 {2} 將使庫存低於零。
+Submit,提交
+Submit & Print,提交並列印
+Submit Deposit,提交存款
+Submit Expense,提交費用
+Submitted,已提交
+Submitted Cash Movements,提交的現金變動
+Submitted entries,提交的參賽作品
+Successfully scanned:,掃描成功：
+Suggested,建議
+Suggested Qty,建議數量
+Supervisor Access,主管訪問
+Supervisor permissions unlock issuance and reloads,主管權限解鎖發放和重裝
+Supervisor Tools,主管工具
+Supplier,供應商
+Supplier and dates are required.,供應商和日期為必填項。
+Supplier Invoices,供應商發票
+Supplier is required.,供應商為必填項。
+Supplier name is required,供應商名稱為必填項
+Supplier Payments,供應商付款
+Supplier Purchase Summary,供應商採購匯總
+Suppliers,供應商
+Suppliers not found,未找到供應商
+Switch Camera,切換相機
+Switch Cashier,切換收銀台
+Switch the POS appearance theme,切換POS外觀主題
+Switched to:,切換到：
+Sync All Invoices,同步所有發票
+Sync Offline Cash Movements ({0}),同步離線現金流 ({0})
+Sync Offline Sales,同步線下銷售
+Synced {0} offline cash movement(s).,已同步 {0} 筆離線現金流動。
+Syncing items in background,在背景同步項目
+System / Diagnostics,系統/診斷
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.",系統操作是低頻維護控制，例如應用程式資訊、支援診斷和會話控制。
+System Information,系統資訊
+System Status,系統狀態
+Tables:,表格：
+Tap the button below to redeem a gift card during checkout.,結帳時點擊下面的按鈕即可兌換禮品卡。
+Target,目標
+Target Ex. Rate:,目標Ex。率：
+Target Rate:,目標率：
+Tax,稅
+Tax / Charges Report,稅費報告
+Tax Heads,稅頭
+Taxable Amount,應稅金額
+Tendered,已招標
+Terminal,終端
+Terminal & Devices,終端設備
+Terminal locked,終端已鎖定
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.",終端工具會影響結帳站、面向客戶的顯示器以及未來的印表機/設備控制。
+Territory not found,未找到領土
+The amount paid is not complete,支付金額不完整
+The app stores data locally for offline use. This is called cache.,該應用程式將資料儲存在本地以供離線使用。這稱為緩存。
+The invoice stayed in draft. Please review and submit it manually.,發票仍處於草稿狀態。請手動審核並提交。
+The maximum discount allowed is,允許的最大折扣為
+The quantity for {0} has been adjusted to the maximum available stock.,{0} 的數量已調整為最大可用庫存。
+The system could not retrieve the item details. Please try again.,系統無法檢索該項目的詳細資訊。請再試一次。
+These invoices will be synced when connection is restored,連線恢復後，這些發票將同步
+This action now opens inside the settings workspace.,此操作現在在設定工作區中開啟。
+This coupon already used !,此優惠券已使用！
+This invoice does not need change-allocation repair,此發票不需要變更分配修復
+This invoice is already repaired,此發票已修復
+This is an item template. Please choose a variant.,這是一個專案模板。請選擇一個變體。
+this item,這個項目
+This POS page could not be opened offline because its code was not cached on this terminal yet.,該 POS 頁面無法離線打開，因為該終端上尚未快取其代碼。
+This Serial Number {0} has already been added!,此序號 {0} 已新增！
+Threshold,閾值
+Time,時間
+Tip: Clear cache regularly to free up space and keep the app fast.,提示：定期清除快取以釋放空間並保持應用程式快速運行。
+Tip: Close unused tabs or apps to reduce lag.,提示：關閉未使用的選項卡或應用程式以減少延遲。
+Tip: Monitor slow queries and table size for optimal performance.,提示：監視慢速查詢和表格大小以獲得最佳效能。
+To Be Paid,待付款
+To Date,迄今
+Today,今天
+Today Profit,今日獲利
+Today Sales,今日銷售
+Toggle navigation drawer,切換抽屜式導航
+Toggle Theme,切換主題
+Tools,工具
+Tools for customer-facing screens and terminal-specific actions.,用於面向客戶的螢幕和終端特定操作的工具。
+Top Brand,頂級品牌
+Top Category,頂級類別
+Top Charge Head,頂部充電頭
+Top Customers,頂級客戶
+Top Discount,最高折扣
+Top Items by Location,按地點排列的熱門商品
+Top Margin,上邊距
+Top Pending,熱門待處理
+Top Profit Item,利潤最高的項目
+Top Return Items,熱門退貨商品
+Top Sales by Cashier,按收銀員列出的最高銷售額
+Top Supplier,頂級供應商
+Top Suppliers by Spend,按支出排名的頂級供應商
+Top Tables,熱門錶
+Top Tax Head,最高稅務主管
+Top Up Amount,儲值金額
+Top Up Card,儲值卡
+Top Up Mode,儲值模式
+Top Variant,頂級變體
+Total,總計
+Total Amount,總額
+Total Change,整體變化
+Total Charges,總費用
+Total In,總投入
+Total Invoices,發票總數
+Total Items,總項目
+Total Mpesa,總MPesa
+Total Out,全面出局
+Total Payments,付款總額
+Total Purchase,購買總額
+Total Selected :,已選總數：
+Total Size,總尺寸
+Total Stock Qty,庫存總量
+Total:,總計：
+Totals by Invoice Currency,按發票幣種劃分的總計
+Track how much cash was handed back to customers,追蹤返還給客戶的現金數量
+"Track recent sales, collect unpaid balances, and reopen saved work",追蹤最近的銷售、收集未付餘額並重新打開已儲存的工作
+Transaction ID,交易ID
+Transfer,轉乘
+Try a different search term or clear the cart search.,嘗試不同的搜尋字詞或清除購物車搜尋。
+Try adjusting your search or filters,嘗試調整您的搜尋或篩選器
+Try another source or refresh the list.,嘗試其他來源或刷新清單。
+Try changing the date range or status filter.,嘗試變更日期範圍或狀態篩選器。
+Type,類型
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,即使進行基本設定也無法存取相機。請檢查您的相機權限和設備相容性。
+Unable to add offer item {0}. Please refresh and try again.,無法新增優惠項目 {0}。請刷新並重試。
+Unable to add offer item. Please refresh and try again.,無法新增優惠項目。請刷新並重試。
+Unable to add scanned item.,無法新增掃描項目。
+Unable to create purchase order,無法建立採購訂單
+Unable to delete draft invoice,無法刪除草稿發票
+Unable to fetch documents,無法取得文檔
+Unable to fetch draft orders,無法取得草稿訂單
+Unable to fetch invoice history,無法取得發票記錄
+Unable to fetch M-Pesa payments,無法取得 M-Pesa 付款
+Unable to fetch sales orders,無法取得銷售訂單
+Unable to fetch unpaid invoices,無法取得未付款發票
+Unable to generate scale barcode,無法產生秤條碼
+Unable to issue gift card.,無法簽發禮品卡。
+Unable to load cashier PIN status.,無法載入收銀員 PIN 狀態。
+Unable to load document,無法載入文檔
+Unable to load draft invoice,無法載入草稿發票
+Unable to load gift card balance.,無法加載禮品卡餘額。
+Unable to load invoice details,無法加載發票詳細信息
+Unable to load parked order,無法載入停放訂單
+Unable to load the selected sales order,無法載入選定的銷售訂單
+Unable to prepare document,無法準備文件
+Unable to prepare return invoice,無法準備退貨發票
+Unable to print draft invoice,無法列印草稿發票
+Unable to print submitted invoice,無法列印提交的發票
+Unable to process document action,無法處理文件操作
+Unable to repair change allocation,無法修復更改分配
+Unable to save cashier PIN.,無法儲存收銀員 PIN 碼。
+Unable to save the rate to the backend price list,無法將費率儲存到後端價目表
+Unable to submit invoice,無法提交發票
+Unable to submit the selected payment,無法提交所選付款
+Unable to top up gift card.,無法為禮品卡充值。
+Unable to verify cashier PIN.,無法驗證收銀員 PIN。
+Unallocated,未分配
+Unallocated:,未分配：
+Unavailable,不可用
+Unknown,未知
+Unknown Item,未知物品
+Unknown Warehouse,未知倉庫
+Unlock POS,解鎖 POS
+Unpaid,未付款
+"Unselected payments stay unallocated first, then auto reconcile after submit.",未選擇的付款首先保持未分配狀態，然後在提交後自動對帳。
+UOM,墨爾本大學
+UOM not found,未找到計量單位
+Update available,可用更新
+Update Customer,更新客戶
+Update PIN,更新個人識別碼
+Update Price List Rate,更新價目表費率
+Updated,已更新
+Updates and app info that stay out of the cashier flow.,不影響收銀流程的更新和應用程式資訊。
+Updates automatically,自動更新
+Usage,用途
+Usage Stats,使用統計
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,使用 4 至 8 位元 PIN 碼進行收銀台切換和終端解鎖。
+Use Cashier,使用收銀台
+Use date range to search for older invoices,使用日期範圍搜尋較舊的發票
+"Use one field for manual code entry, barcode scans, or QR scans.",使用一個欄位進行手動代碼輸入、條碼掃描或 QR 掃描。
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.",使用一個工作流程即可進行餘額檢查、新發行和充值，無需離開 POS。
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.",當快取的必備資料需要刷新、重建或診斷檢查時，請使用此部分。
+Use Western numerals,使用西方數字
+Used:,使用：
+Using basic camera settings due to device limitations,由於設備限制，使用基本相機設置
+Using cached customer balance,使用快取的客戶餘額
+Valid until,有效期限至
+Variance %,變異數%
+Variants,變體
+Variant-wise,變體方面
+Verify closing amounts for each payment method,驗證每種付款方式的結算金額
+View all,看全部
+View app information and current build details,查看應用程式資訊和當前構建詳細信息
+View Data Diagnostics,查看數據診斷
+View Details,看詳情
+View invoice details,查看發票詳細信息
+View notifications,查看通知
+View offline invoices,查看離線發票
+View restricted POS insights,查看受限 POS 見解
+Void Amount,無效金額
+Void Count,無效計數
+Voids,空隙
+Waiting for cart items,等待購物車商品
+Waiting for payment...,等待付款...
+Walk-in Customer,上門顧客
+Warehouse,倉庫
+Warning: High cache usage may affect performance.,警告：高速緩存使用率過高可能會影響效能。
+Warning: High lag may indicate heavy processing or browser slowness.,警告：高延遲可能表示處理繁重或瀏覽器速度緩慢。
+Week ?,星期 ？
+Week-wise,每週
+Weight (g),重量（克）
+Weight (grams),重量（克）
+We'll let you know if an invoice fails to submit,如果發票未能提交，我們會通知您
+Workflow,工作流程
+Write off amount cannot exceed the POS profile maximum of {0},註銷金額不能超過 POS 設定檔最大值 {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,註銷金額超出允許的限額 ({0})。請新增剩餘金額的付款。
+Yes,是的
+"Yes, Cancel sale",是的，取消銷售
+"Yes, Close",是的，關閉
+You are not allowed to print draft invoices,您不得列印草稿發票
+You are offline. Add Payment will work again when the connection is restored.,您已離線。連線恢復後，「新增付款」將再次起作用。
+You have no notifications right now,您現在沒有任何通知
+Your Cart,您的購物車

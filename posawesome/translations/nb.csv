@@ -1,0 +1,1362 @@
+POS Awesome,POS Fantastisk
+Fetch Items Directly from Server,Hent elementer direkte fra server
+Menu,Meny
+Actions,Handlinger
+Close Shift,Lukk Shift
+End current session,Avslutt gjeldende økt
+Print Last Invoice,Skriv ut siste faktura
+Reprint previous transaction,Skriv ut forrige transaksjon på nytt
+Sync Offline Invoices,Synkroniser frakoblede fakturaer
+Upload pending transactions,Last opp ventende transaksjoner
+Go Online,Gå på nett
+Go Offline,Gå frakoblet
+Disable offline mode,Deaktiver frakoblet modus
+Work without server connection,Arbeid uten servertilkobling
+Clear Cache,Tøm buffer
+Remove local data and refresh,Fjern lokale data og oppdater
+About,Om
+App information,Appinformasjon
+Language,Språk
+Change interface language,Endre grensesnittspråk
+Light Mode,Lysmodus
+Dark Mode,Mørk modus
+Switch theme appearance,Bytt temautseende
+Logout,Logg ut
+Sign out of session,Logg av økten
+Select Language,Velg Språk
+Choose your preferred language for the POS interface,Velg ditt foretrukne språk for POS-grensesnittet
+Language will be changed to,Språket vil bli endret til
+Cancel,Avbryt
+Change Language,Endre språk
+Close,Lukk
+Cannot change language - same language selected,Kan ikke endre språk - samme språk valgt
+Language changed successfully! Reloading...,Språket ble endret! Laster inn på nytt...
+Failed to change language,Kunne ikke endre språk
+Unknown error,Ukjent feil
+- Total Unallocated,- Totalt ikke tildelt
+* Required,* Obligatorisk
+{0} (Qty: {1}),{0} (Antall: {1})
+{0} actions,{0} handlinger
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} har bare {1} på lager. Du ba om {2}. Juster mengde eller fyll på lager.
+{0} offline invoice{1} pending,{0} frakoblet faktura{1} venter
+{0} offline invoice{1} saved as draft,{0} frakoblet faktura{1} lagret som utkast
+{0} offline invoice{1} synced,{0} frakoblet faktura{1} synkronisert
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,for {0}d siden
+{0}h ago,{0}t siden
+{0}m ago,{0}m siden
+A POS supervisor is required for this action.,Det kreves en POS-ansvarlig for denne handlingen.
+Access,Tilgang
+Account,Konto
+Account is overdrawn,Kontoen er overtrukket
+Acknowledge the error to resume scanning,Bekreft feilen for å gjenoppta skanningen
+Acknowledge the error to resume scanning.,Bekreft feilen for å gjenoppta skanningen.
+Across,På tvers
+Action,Handling
+Active sale,Aktivt salg
+add,legge til
+Add items from the selector to start building this sale.,Legg til varer fra velgeren for å begynne å bygge dette salget.
+Add more value to an existing gift card,Legg til mer verdi til et eksisterende gavekort
+Add New Address,Legg til ny adresse
+Add new customer,Legg til ny kunde
+Add on New Line,Legg til på ny linje
+Add Payment,Legg til betaling
+Add payment to invoice,Legg til betaling på faktura
+Add/Edit Coupon Conditions,Legg til/rediger kupongbetingelser
+Additional Discount,Ekstra rabatt
+Additional Discount %,Ekstra rabatt %
+Address Line 1,Adresselinje 1
+Address not found,Adressen ble ikke funnet
+Adjust the quantity or enable negative stock to continue.,Juster antallet eller aktiver negativ beholdning for å fortsette.
+Adjustment,Justering
+After returns,Etter returer
+Against,Mot
+Against Name,Mot Navn
+Age Bracket,Aldersgruppe
+All,Alle
+All Caught Up!,Alle fanget opp!
+All invoices are synchronized,Alle fakturaer er synkronisert
+All pending invoices are up to date,Alle ventende fakturaer er oppdatert
+All Profiles,Alle profiler
+All Synchronized,Alt synkronisert
+All visible invoices are fully settled.,Alle synlige fakturaer er fullt oppgjort.
+All Warehouses,Alle varehus
+Allowed UOM is {0},Tillatt UOM er {0}
+Always fetch items from server (ignore local cache),Hent alltid elementer fra serveren (ignorer lokal cache)
+Amount,Beløp
+Amount already received,Beløp allerede mottatt
+Amount exceeds profile cash movement max amount.,Beløp overstiger profilen kontantbevegelse maks. beløp.
+Amount must be greater than zero.,Beløpet må være større enn null.
+Amount received from customer,Beløp mottatt fra kunde
+Appearance and user-level preferences for the current session.,Utseende og preferanser på brukernivå for gjeldende økt.
+Applied,Påført
+Apply,Søk
+Apply Gift Card,Bruk gavekort
+Apply Offer,Bruk tilbudet
+Apply On,Søk på
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,Bruk kun beløpet du ønsker å løse inn på denne fakturaen. Den resterende saldoen forblir på kortet.
+Apply Redemption,Bruk innløsning
+Applying,Søker
+Apps,Apper
+Are you sure you want to close? All entered data will be lost.,Er du sikker på at du vil lukke? Alle inntastede data vil gå tapt.
+Attributes (Size/Color),Attributter (størrelse/farge)
+Auto Allocate Payment Amount,Automatisk allokering av betalingsbeløp
+Auto Reconcile,Automatisk avstemming
+Auto reconciliation completed after payment submit.,Automatisk avstemming fullført etter innsending av betaling.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,Automatisk avstemming fullført. Tildelt: {0}{1}. Gjenstående utestående: {0}{2}.
+Available Actions,Tilgjengelige handlinger
+Available QTY,Tilgjengelig QTY
+Available:,Tilgjengelig:
+Average Basket,Gjennomsnittlig kurv
+Average Bill,Gjennomsnittlig regning
+Average Ticket,Gjennomsnittlig billett
+Avg Bill,Gj.sn. regning
+Avg Invoice,Gj.sn. faktura
+Avg Invoice Profit,Gj.sn. fakturafortjeneste
+Avg Invoice Value,Gj.sn. fakturaverdi
+Avg Purchase Frequency,Gjennomsnittlig kjøpsfrekvens
+Awesome,Fantastisk
+Awesome Dashboard,Fantastisk dashbord
+Awesome Dashboard is disabled for the selected POS Profile.,Awesome Dashboard er deaktivert for den valgte POS-profilen.
+Awesome Dashboard is unavailable for the selected scope.,Awesome Dashboard er utilgjengelig for det valgte omfanget.
+Awesome Dashboard is visible only to POS supervisors.,Awesome Dashboard er bare synlig for POS-veiledere.
+Back,Tilbake
+Back Office Cash Account,Back Office Kontantkonto
+Back Office Cash Account (Optional Override),Back Office Kontantkonto (valgfri overstyring)
+Back office cash account is required.,Kontantkonto på bakkontoret er påkrevd.
+Back to {0},Tilbake til {0}
+Background processing did not finish in time.,Bakgrunnsbehandlingen ble ikke ferdig i tide.
+Background processing failed for Invoice {0}: {1},Bakgrunnsbehandling mislyktes for faktura {0}: {1}
+Background Submission Failed,Bakgrunnsinnsending mislyktes
+Background sync interval (seconds),Bakgrunnssynkroniseringsintervall (sekunder)
+Balance,Balanse
+Balance will be updated when connection is restored,Saldoen vil bli oppdatert når tilkoblingen er gjenopprettet
+Balances still pending,Saldoer venter fortsatt
+Barcode,Strekkode
+Barcode / QR Ready,Strekkode / QR-klar
+Barcode Label Printing,Utskrift av strekkodeetiketter
+Base Paid:,Grunnbetalt:
+Base Recv:,Base Recv:
+Base:,Base:
+Basic Information,Grunnleggende informasjon
+Batch,Batch
+Batch Information,Batchinformasjon
+Before any return workflow,Før enhver returarbeidsflyt
+Before returns,Før retur
+Best Day,Beste dagen
+Best Seller,Bestselger
+Book expense or deposit from active shift.,Bokføre utgift eller depositum fra aktivt skift.
+Branch / Location-wise Report,Bransje / Stedsmessig rapport
+Brand-wise,Merkemessig
+Breakdown,Sammenbrudd
+Browse,Bla gjennom
+Build Time:,Byggetid:
+Built with Frappe,Bygget med Frappe
+Bundle,Bunt
+Buying Price,Kjøpspris
+Cache cleared successfully,Bufferen ble tømt
+Cache Usage,Bufferbruk
+cache used,cache brukt
+Calculating...,Beregner...
+Camera Access Required,Kameratilgang kreves
+Camera access was aborted. Please try again.,Kameratilgang ble avbrutt. Vennligst prøv igjen.
+Camera constraints not supported by your device. Trying fallback settings...,Kamerabegrensninger støttes ikke av enheten. Prøver reserveinnstillinger ...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,Kameraet er opptatt eller blokkert av en annen app/fane. Lukk andre kameraapper og prøv igjen.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,Kameratillatelse nektet. Tillat kameratilgang i nettleserinnstillingene og oppdater siden.
+Camera scanner is locked until the current error is acknowledged,Kameraskanneren er låst til den gjeldende feilen er bekreftet
+Camera started but the video stream did not load in time. Please try again.,"Kameraet startet, men videostrømmen lastet ikke inn i tide. Vennligst prøv igjen."
+Cancel cash movement {0}?,Vil du avbryte kontantbevegelsen {0}?
+Cancel Payment,Avbryt betaling
+Cancel Sale,Avbryt salg
+Cancel Sale ?,Kansellere salg?
+Cancelled,Kansellert
+Cannot add an item with zero or negative quantity.,Kan ikke legge til en vare med null eller negativt antall.
+Cannot clear cache while offline,Kan ikke tømme bufferen mens du er frakoblet
+Cannot redeem customer credit more than invoice total,Kan ikke løse inn kundekreditt mer enn fakturasummen
+Cannot redeem gift cards more than invoice total,Kan ikke løse inn gavekort mer enn fakturasummen
+Cannot Save Offline Invoice:,Kan ikke lagre frakoblet faktura:
+Cannot Save Offline Payment:,Kan ikke lagre betaling uten nett:
+Card,Kort
+Card / Online,Kort / Online
+Card health after the last live lookup,Korthelse etter siste direkteoppslag
+Cards,Kort
+Cart,Handlevogn
+Cash,Kontanter
+Cash back to customers,Penger tilbake til kundene
+Cash Collections,Kontantinnsamlinger
+Cash Deposit is disabled for this POS Profile.,Kontantinnskudd er deaktivert for denne POS-profilen.
+Cash Drawer Snapshot,Øyeblikksbilde av kontantskuffen
+Cash In Hand,Penger i hånden
+Cash Movement,Kontantbevegelse
+Cash movement cancelled,Kontantbevegelse kansellert
+Cash movement deduction applied,Kontantbevegelsesfradrag benyttet
+Cash movement deleted,Kontantbevegelse slettet
+Cash movement is disabled for this POS Profile.,Kontantbevegelse er deaktivert for denne POS-profilen.
+Cash Movement is disabled in current POS Profile.,Cash Movement er deaktivert i gjeldende POS-profil.
+Cash movement saved offline,Kontantbevegelse lagret offline
+Cash movement submitted,Kontantbevegelse sendt inn
+Cash Movements,Kontantbevegelser
+Cash payment cannot be less than invoice total when partial payment is not allowed,Kontantbetaling kan ikke være mindre enn fakturasummen når delbetaling ikke er tillatt
+Cash returned after payment,Kontanter returnert etter betaling
+Cashier,Kasserer
+Cashier Access,Kassetilgang
+Cashier identity and appearance preferences.,Kasseidentitet og utseendepreferanser.
+Cashier PIN,Kasserer PIN
+Cashier PIN saved successfully.,Kassererens PIN-kode er lagret.
+Cashiers,Kasserere
+Cashier-wise,Kassemessig sett
+Categories,Kategorier
+Category,Kategori
+Category / Brand / Variant Report,Kategori / merkevare / variantrapport
+Category-wise,Kategorimessig
+Category-wise Margin,Kategorimessig Margin
+Certificate,Sertifikat
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,Sertifikatet mangler eller er ikke klarert. QZ kan vise bekreftelsesdialoger.
+Certificate is trusted. Silent QZ printing is active.,Sertifikatet er klarert. Stille QZ-utskrift er aktiv.
+Change,Endre
+Change allocation repaired,Endringstildeling reparert
+Change Price,Endre pris
+Change Return,Endre retur
+Change Returned,Endring returnert
+Change terminal cashier,Bytt terminalkasse
+Charge Heads,Ladehoder
+Charges,Avgifter
+Charges not found,Finner ikke belastninger
+Check Balance,Sjekk saldo
+Check balance for any card. Supervisors can issue and top up cards here.,Sjekk saldoen for et hvilket som helst kort. Veiledere kan utstede og fylle på kort her.
+Check balance only,Sjekk kun saldoen
+Check for new commits,Se etter nye forpliktelser
+Check for Updates,Se etter oppdateringer
+Check live balance before applying redemption,Sjekk live-saldoen før du bruker innløsning
+Check live balance before redemption,Sjekk live-saldoen før innløsning
+Checking...,Sjekker...
+Cheque/Reference Date,Sjekk/referansedato
+Cheque/Reference No,Sjekk/referansenr
+Choose the cashier currently operating this terminal.,Velg kassereren som driver denne terminalen.
+City,By
+Clear,Klart
+Clear All,Fjern alle
+Clear all barcode items,Fjern alle strekkodeelementer
+Clear all purchase order items,Fjern alle innkjøpsordreelementer
+Clear Search,Fjern søk
+Clearing local cache...,Tømmer lokal buffer ...
+Click to refresh,Klikk for å oppdatere
+Client CPU Lag:,Klient CPU Lag:
+Client Memory Usage:,Klientminnebruk:
+Client Metrics,Klientberegninger
+Close about dialog,Lukk om dialog
+Close cashier switcher,Lukk kassereren
+Close closing shift dialog,Lukk lukkende skiftdialog
+Close column selector,Lukk kolonnevelgeren
+Close Dialog,Lukk dialog
+Close drafts dialog,Lukk dialogboksen for utkast
+Close invoice details dialog,Lukk dialogboksen for fakturadetaljer
+Close invoice management,Lukk fakturahåndtering
+Close offline invoices dialog,Lukk dialogboksen for frakoblede fakturaer
+Close packing list dialog,Lukk pakkelistedialogen
+Close returns dialog,Lukk returdialogen
+Close sales orders dialog,Lukk salgsordredialogen
+Close Scanner,Lukk skanner
+Close scanner dialog,Lukk skannerdialogen
+Close Settings,Lukk Innstillinger
+Closing Amount,Sluttbeløp
+Closing POS Shift,Lukke POS Shift
+Closing Snapshot Available,Avsluttende øyeblikksbilde tilgjengelig
+Code,Kode
+Code scanned successfully,Koden ble skannet
+COGS,COGS
+Collapse item details,Skjul elementdetaljer
+Collected,Samlet
+Cols,Cols
+Columns,Kolonner
+commits,forplikter seg
+Completed and active sales in this range,Gjennomført og aktivt salg i dette sortimentet
+Completed returns will appear here.,Fullførte returer vil vises her.
+Confirm,Bekreft
+Confirm Close,Bekreft Lukk
+Confirm Mobile Number,Bekreft mobilnummer
+Confirm PIN,Bekreft PIN
+Connect,Koble til
+Connect printer and manage certificate,Koble til skriveren og administrer sertifikatet
+Connecting to QZ Tray...,Kobler til QZ Tray...
+Connection problem while submitting invoice,Tilkoblingsproblem under innsending av faktura
+Connections:,Tilkoblinger:
+Connectivity and cached prerequisite status were rechecked.,Tilkobling og bufret forutsetningsstatus ble sjekket på nytt.
+Continue Editing,Fortsett redigering
+Could not fetch latest balance from server,Kunne ikke hente siste saldo fra serveren
+Count,Telle
+Country,Land
+Coupon,Kupong
+Coupons,Kuponger
+Cover,Dekke
+CPU Cores:,CPU-kjerner:
+Create,Opprett
+Create and load a new prepaid card,Opprett og last inn et nytt forhåndsbetalt kort
+Create and preload a new gift card,Opprett og forhåndslast et nytt gavekort
+Create Bill,Opprett regning
+Create Customer,Opprett kunde
+Create New Item,Opprett nytt element
+Create or change your PIN,Opprett eller endre PIN-koden din
+Create PIN,Opprett PIN-kode
+Create POS Opening Shift,Opprett POS-åpningsskift
+Create Purchase Order,Opprett innkjøpsordre
+Create Return,Opprett retur
+Create return from invoice,Opprett retur fra faktura
+Create Supplier,Opprett leverandør
+Credit and Output,Kreditt og utgang
+Credit Note,Kredittnota
+Credit Outstanding,Kreditt utestående
+Credit sales remaining to be collected,Kredittsalg gjenstår å samle inn
+Critical,Kritisk
+Currency,Valuta
+Current,Gjeldende
+Current Event Loop Lag:,Gjeldende hendelsessløyfelag:
+Current Month,Gjeldende måned
+Current PIN,Gjeldende PIN-kode
+Current Profile,Gjeldende profil
+Current redeemable value on the gift card,Gjeldende innløselig verdi på gavekortet
+Current User,Nåværende bruker
+Custom,Egendefinert
+Custom Due Days,Egendefinerte forfallsdager
+Custom items per page,Egendefinerte elementer per side
+Customer,Kunde
+Customer already selected,Kunden er allerede valgt
+Customer Balance,Kundesaldo
+Customer balance unavailable offline,Kundesaldo er utilgjengelig offline
+Customer created successfully.,Kunden ble opprettet.
+Customer creation failed.,Kundeoppretting mislyktes.
+Customer Details,Kundedetaljer
+Customer display channel is missing,Kundevisningskanal mangler
+Customer display was blocked. Please allow pop-ups for this site.,Kundevisning ble blokkert. Vennligst tillat popup-vinduer for dette nettstedet.
+Customer group is required,Kundegruppe er påkrevd
+Customer is required to add payment,Kunden må legge til betaling
+Customer Name is required,Kundenavn er påkrevd
+Customer not selected,Kunde ikke valgt
+Customer Report,Kunderapport
+Customer saved offline,Kunde lagret offline
+Customer Screen,Kundeskjerm
+Customer territory is required,Kundeområde er påkrevd
+Customer updated successfully.,Kunden ble oppdatert.
+Customer-facing tools and printer setup.,Kundevendt verktøy og skriveroppsett.
+Customers,Kunder
+Customers not found,Kunder ikke funnet
+Daily cashier actions without scrolling.,Daglige kassererhandlinger uten å rulle.
+Daily Sales,Daglig salg
+Daily Sales Summary,Daglig salgssammendrag
+Data loaded in form. Review and submit.,Data lastet i skjema. Se gjennom og send inn.
+Database Health,Database helse
+Database health affects overall system speed and reliability.,Databasehelse påvirker den generelle systemets hastighet og pålitelighet.
+Database Info,Database info
+Date,Dato
+Day ?,dag?
+days,dager
+Day-wise (MTD),Dagsvis (MTD)
+Day-wise Movement,Daglig bevegelse
+Dead Stock,Død aksje
+Dead Stock Items,Døde lagervarer
+Decrease quantity,Reduser mengde
+Default,Standard
+Default:,Standard:
+Delete,Slett
+Delete cancelled cash movement {0}?,Vil du slette avbrutt kontantbevegelse {0}?
+Delete Draft,Slett utkast
+Delete draft invoice,Slett utkast til faktura
+Delete draft invoice {0}?,Vil du slette utkast til faktura {0}?
+Delete Invoice,Slett faktura
+Delete offline invoice,Slett frakoblet faktura
+Delivered,Levert
+Delivery Charges,Leveringskostnader
+Delivery Information,Leveringsinformasjon
+Delivery Note {0} created,Følgeseddel {0} opprettet
+Delivery note created,Følgeseddel opprettet
+Deployed Bundle:,Utplassert pakke:
+Deposit,Innskudd
+Description,Beskrivelse
+Detailed Supplier Breakdown,Detaljert leverandøroppdeling
+Detecting formats:,Finner formater:
+Device Memory:,Enhetsminne:
+Difference,Forskjell
+Difference (In Company Currency),Differanse (i selskapets valuta)
+Disable offline mode first to recheck live connectivity.,Deaktiver frakoblet modus først for å sjekke live-tilkoblingen på nytt.
+Disconnect,Koble fra
+discount,rabatt
+Discount %,rabatt %
+Discount / Void / Return Report,Rabatt / ugyldig / returrapport
+Discount Amount,Rabattbeløp
+Discount limited by POS Profile,Rabatt begrenset av POS-profil
+Discounted Invoices,Rabatterte fakturaer
+Discounts,Rabatter
+Dismiss,Avvis
+Download Certificate,Last ned sertifikat
+Draft,Utkast
+Draft invoice deleted,Fakturautkast slettet
+Draft source,Utkast til kilde
+Drafts,Utkast
+Due {0},Frist {0}
+Due Date,Forfallsdato
+Duplicate,Duplikat
+Edit customer,Rediger kunde
+Edit discount amount,Rediger rabattbeløp
+Edit discount percentage,Rediger rabattprosent
+Edit Gift Application,Rediger gavesøknad
+Edit item name,Rediger elementnavn
+Edit quantity,Rediger antall
+Edit rate,Rediger rate
+Edit unit of measure,Rediger måleenhet
+Edited,Redigert
+Employee,Ansatt
+Enable background sync,Aktiver bakgrunnssynkronisering
+Enable Customer Display in POS Profile first.,Aktiver kundevisning i POS-profil først.
+Enter a PIN.,Skriv inn en PIN-kode.
+Enter a valid grams value,Angi en gyldig gramverdi
+Enter new price list rate,Angi ny prislistetakst
+Enter Quantity,Angi mengde
+Enter the cashier PIN to continue.,Skriv inn kasse-PIN-en for å fortsette.
+Enter the current PIN first.,Skriv inn gjeldende PIN-kode først.
+"Enter the current PIN, then choose a new one.","Skriv inn gjeldende PIN-kode, og velg deretter en ny."
+Enter valid grams for scale barcode,Skriv inn gyldige gram for skalastrekkode
+Entries,Oppføringer
+Error accessing camera:,Feil ved tilgang til kamera:
+Error calculating prices,Feil ved beregning av priser
+Error fetching customer balance,Feil ved henting av kundesaldo
+Error in change calculations!,Feil i endringsberegninger!
+Error Loading Data,Feil ved lasting av data
+Error loading invoice details,Feil ved innlasting av fakturadetaljer
+Error processing invoice,Feil ved behandling av faktura
+Error processing payment,Feil ved behandling av betaling
+Error searching invoices,Feil ved søk etter fakturaer
+Error submitting invoice:,Feil ved innsending av faktura:
+Error submitting invoice: {0},Feil ved innsending av faktura: {0}
+Error submitting invoice: No response from server,Feil ved innsending av faktura: Ingen respons fra server
+Error updating currency,Feil under oppdatering av valuta
+Error updating item details,Feil under oppdatering av varedetaljer
+Est. Purchase,Est. Kjøp
+Est. Value,Est. Verdi
+Event-loop lag measures how busy your browser is. Lower is better.,Event-loop lag måler hvor opptatt nettleseren din er. Lavere er bedre.
+Every,Hver
+Exchange Rate,Valutakurs
+Expand item details,Utvid varedetaljer
+Expected Amount (In Company Currency),Forventet beløp (i selskapets valuta)
+Expected Cash,Forventet kontanter
+Expected cash on hand grouped by currency,Forventet kontantbeholdning gruppert etter valuta
+Expected vs Actual,Forventet vs faktisk
+Expense,Utgift
+Expense Account (Optional Override),Utgiftskonto (valgfri overstyring)
+Expense account is required.,Utgiftskonto kreves.
+Expenses and deposits posted during this shift,Utgifter og innskudd bokført under dette skiftet
+Expired,Utløpt
+Failed to auto reconcile payments.,Kunne ikke automatisk avstemme betalinger.
+Failed to cancel cash movement,Kunne ikke avbryte kontantbevegelsen
+Failed to clear cache,Kunne ikke tømme bufferen
+Failed to create item,Kunne ikke opprette elementet
+Failed to create supplier,Kunne ikke opprette leverandør
+Failed to delete cash movement,Kunne ikke slette kontantbevegelse
+Failed to generate scale barcode. Using item barcode only.,Kunne ikke generere skaleringsstrekkode. Bruker kun varestrekkode.
+Failed to load cash movement context.,Kunne ikke laste inn kontantbevegelseskontekst.
+Failed to load dashboard data.,Kunne ikke laste dashborddata.
+Failed to reload invoice from server,Kunne ikke laste inn faktura på nytt fra serveren
+Failed to submit cash movement,Kunne ikke sende inn kontantbevegelse
+Failed to sync offline cash movements,Kunne ikke synkronisere kontantbevegelser uten nett
+Fast cashier actions for active shifts.,Raske kassererhandlinger for aktive skift.
+Fast Moving Items,Varer i rask bevegelse
+Fees,Gebyrer
+Fetch the latest offline prerequisite updates,Hent de siste frakoblede forutsetningsoppdateringene
+Find a sales order quickly and load it into the current sale.,Finn en salgsordre raskt og last den inn i det gjeldende salget.
+Fixing payment amounts for return invoice...,Fastsettelse av betalingsbeløp for returfaktura...
+Flash Off,Blits av
+Flash On,Blits på
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","For 'Produktpakke'-varer vil lager, serienummer og batchnr bli vurdert fra 'pakkeliste'-tabellen. Hvis Warehouse og Batch No er like for alle pakkeelementer for en 'Produktpakke'-vare, kan disse verdiene legges inn i hovedartikkeltabellen; verdiene vil bli kopiert til 'Pakkeliste'-tabellen."
+Free,Gratis
+Free Qty,Gratis antall
+Frequency,Frekvens
+from,fra
+From Date,Fra dato
+Fulfillment Details,Oppfyllelsesdetaljer
+Full Name,Fullt navn
+Gain,Gevinst
+Generate a fresh prepaid card and start it with an opening balance.,Generer et nytt forhåndsbetalt kort og start det med en åpningssaldo.
+Generate and install the certificate to allow fully silent printing without trust prompts.,Generer og installer sertifikatet for å tillate fullstendig lydløs utskrift uten pålitelige meldinger.
+Generate Certificate,Generer sertifikat
+Generated scale barcode: {0},Generert strekkode i skala: {0}
+Get Payments,Få betalinger
+Gift Card,Gavekort
+Gift card amount must be greater than zero.,Gavekortbeløpet må være større enn null.
+Gift Card Code,Gavekortkode
+Gift card code is required for redemption,Gavekortkode kreves for innløsning
+Gift card code is required.,Gavekortkode kreves.
+Gift card issued successfully.,Gavekortet er utstedt.
+Gift card loaded successfully.,Gavekortet ble lastet inn.
+Gift Card Management,Håndtering av gavekort
+Gift card payment,Betaling med gavekort
+Gift card redemption requires an online connection,Innløsning av gavekort krever en nettforbindelse
+Gift card topped up successfully.,Gavekortet ble fullført.
+Gift Cards,Gavekort
+Go to Frappe Desk,Gå til Frappe Desk
+Grand Total,Grand Total
+Gross Margin,Bruttomargin
+Gross Profit,Bruttofortjeneste
+Gross Sales,Bruttosalg
+Group not found,Finner ikke gruppen
+"Grouped controls for terminal, UI, and session settings.","Grupperte kontroller for terminal-, brukergrensesnitt- og øktinnstillinger."
+Grouped totals for each payment method and currency,Grupperte totaler for hver betalingsmåte og valuta
+Hide,Skjul
+Hide Gift Card,Skjul gavekort
+Hide Non Essential Fields,Skjul ikke-essensielle felt
+Hide quantity decimals,Skjul antall desimaler
+Hide search tools,Skjul søkeverktøy
+Hide zero rated items,Skjul elementer med null rangering
+High,Høy
+History,Historie
+Hourly (Today),Hver time (i dag)
+How this section works,Hvordan denne delen fungerer
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","Hvis foreldede data gjenstår, åpne Innstillinger > Frakoblet og synkronisering og kjør Rebuild Offline Data igjen mens du er tilkoblet."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","Hvis advarselen vedvarer, åpne Innstillinger > Frakoblet og synkronisering, og kjør deretter Oppdater frakoblede data eller Gjenoppbygg frakoblede data."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Importer sertifikatet til QZ Tray og start QZ Tray på nytt på hver POS-maskin.
+In,I
+In stock: {0},På lager: {0}
+Include Batch / Serial,Inkluder batch / seriell
+Include Price,Inkluder pris
+Increase quantity,Øk mengde
+IndexedDB,IndeksertDB
+Initial Amount,Opprinnelig beløp
+Initialize your shift with opening balances,Initialiser skiftet med åpningssaldoer
+Initializing application...,Initialiserer applikasjon...
+"Inspect cache, sync, and prerequisite status","Inspiser cache, synkronisering og forutsetningsstatus"
+Installed Applications,Installerte applikasjoner
+Insufficient stock:\n{0},Ikke nok lager:\n{0}
+Invalid rate,Ugyldig pris
+Inventory Status Report,Rapport om lagerstatus
+Invoice,Faktura
+Invoice {0} is Submitted,Faktura {0} er sendt
+Invoice {0} processed successfully,Faktura {0} ble behandlet
+Invoice {0} submission failed,Innsending av faktura {0} mislyktes
+Invoice {0} was already submitted,Faktura {0} er allerede sendt
+Invoice Adjustments,Fakturajusteringer
+Invoice Change,Endring av faktura
+Invoice Details,Fakturadetaljer
+Invoice is still in draft after background submission.,Faktura er fortsatt i utkast etter bakgrunnsinnlevering.
+Invoice Items,Fakturavarer
+Invoice Management,Fakturahåndtering
+Invoice Mgmt,Faktura Mgmt
+Invoice saved offline,Faktura lagret offline
+Invoice submission failed,Innsending av faktura mislyktes
+Invoice Submitted,Faktura sendt
+"Invoice value settled by loyalty points, not cash collection","Fakturaverdi avregnes med lojalitetspoeng, ikke kontantinnkreving"
+Invoices,Fakturaer
+Invoices already past due date,Fakturaer allerede forfalt
+Invoices saved as POS Invoices,Fakturaer lagret som POS-fakturaer
+Invoices still carrying balances,Fakturaer har fortsatt saldo
+Issue Mode,Problemmodus
+Issue New Card,Utsted nytt kort
+Issue Workflow,Problem arbeidsflyt
+"Issue, top up, and check","Utsted, fyll på og sjekk"
+Item,Vare
+Item / Product Sales Report,Vare-/produktsalgsrapport
+Item {0} added to invoice,Varen {0} er lagt til på fakturaen
+Item '{0}' has no barcode,Element '{0}' har ingen strekkode
+Item Code,Varekode
+Item created successfully,Elementet ble opprettet
+Item is out of stock,Varen er utsolgt
+Item Name,Varenavn
+Item not found,Varen ble ikke funnet
+Item order updated,Varebestilling oppdatert
+Item Selector Settings,Innstillinger for elementvelger
+Items,Varer
+Items added in POS will appear here automatically.,Elementer lagt til i POS vil vises her automatisk.
+Items added to invoice,Varer lagt til faktura
+Items per page,Elementer per side
+Items Sold,Gjenstander solgt
+Items/Invoice,Varer/Faktura
+Item-wise Profitability,Varemessig lønnsomhet
+Journal Entry,Journaloppføring
+json,json
+Just now,Akkurat nå
+Keep offline prerequisites healthy and recover stale data safely.,Hold frakoblede forutsetninger sunne og gjenopprett foreldede data trygt.
+Labels,Etiketter
+"Language, theme, terminal tools, and session controls.","Språk, tema, terminalverktøy og øktkontroller."
+Last,Sist
+Last 14 Days (Paid vs Pending),Siste 14 dager (betalt vs ventende)
+Last 14 Days Activity,Siste 14 dagers aktivitet
+Last 14 Days Gross Profit,Siste 14 dagers bruttofortjeneste
+Last 14 Days Purchases,Siste 14 dagers kjøp
+Last 14 Days Tax/Charges,Siste 14 dager skatt/avgifter
+Last sync:,Siste synkronisering:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},Siste synkronisering: {0} | ok: {1} | mislyktes: {2} | hoppet over: {3}
+Latest entries for current shift,Siste oppføringer for gjeldende skift
+Lead Time,Ledetid
+Limited,Begrenset
+lines,linjer
+List,Liste
+Live Snapshot,Live Snapshot
+Load a POS profile and cashier first.,Last inn en POS-profil og kasserer først.
+Load More Invoices,Last inn flere fakturaer
+Load previously saved invoices,Last inn tidligere lagrede fakturaer
+Load Sale,Last Salg
+Load Sales Invoice,Last inn salgsfaktura
+Loading app data...,Laster inn appdata ...
+Loading customer database...,Laster kundedatabase...
+Loading customers...,Laster inn kunder...
+Loading database stats...,Laster inn databasestatistikk...
+Loading details...,Laster inn detaljer ...
+Loading invoice history...,Laster inn fakturahistorikk...
+Loading items...,Laster inn elementer ...
+Loading product catalog...,Laster produktkatalog...
+Loading return invoices...,Laster inn returfakturaer...
+Loading server CPU/memory usage...,Laster server CPU/minnebruk...
+Loading suppliers...,Laster leverandører...
+Loading unpaid invoices...,Laster inn ubetalte fakturaer...
+Loading view...,Laster inn visning...
+Loading...,Laster inn...
+Local storage is unavailable. Switching to online-only mode.,Lokal lagring er utilgjengelig. Bytter til bare online-modus.
+localStorage,lokal lagring
+Location Performance,Plasseringsytelse
+Locations,Steder
+Lock Screen,Låseskjerm
+Lookup Workflow,Arbeidsflyt for oppslag
+Loss,Tap
+Low,Lavt
+Low Stock,Lite lager
+Low Stock Alerts,Varsler om lavt lager
+Low Stock Items,Lite lagervarer
+Low Stock Threshold,Lav lagerterskel
+Low Stock Total,Lavt lager totalt
+Lowest Margin,Laveste margin
+Low-frequency maintenance and system details.,Lavfrekvent vedlikehold og systemdetaljer.
+Loyalty Redeemed,Lojalitet innløst
+Loyalty Redemption,Lojalitetsinnløsning
+Make New Payment,Foreta ny betaling
+Manage all,Administrer alle
+Manage and synchronize your offline transactions,Administrer og synkroniser dine offline-transaksjoner
+Manage Cashier PIN,Administrer Cashier PIN
+"Manage offline tools, terminal controls, and maintenance from one workspace.","Administrer offline verktøy, terminalkontroller og vedlikehold fra ett arbeidsområde."
+manual,manuell
+"Manual codes, barcode scans, and QR scans work in the same field","Manuelle koder, strekkodeskanninger og QR-skanninger fungerer i samme felt"
+Manual offline mode is enabled,Manuell frakoblet modus er aktivert
+Margin,Margin
+Maximum available quantity is {0}. Quantity adjusted to match stock.,Maksimalt tilgjengelig antall er {0}. Mengde tilpasset lagerbeholdning.
+Maximum discount amount for this offer item is {0}.,Maksimalt rabattbeløp for denne tilbudsvaren er {0}.
+Maximum discount percentage for this offer item is {0}%.,Maksimal rabattprosent for denne tilbudsvaren er {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,Maksimalt tilbudsantall er {0}. Mengde justert til tillatt grense.
+Medium,Middels
+Method-wise Collections,Metodemessige Samlinger
+Minimum allowed rate for this offer item is {0}.,Minste tillatte pris for dette tilbudselementet er {0}.
+Minimum Qty,Minimum antall
+Mobile No,Mobilnr
+Mode,Modus
+Mode of Payment,Betalingsmåte
+Month,Måned
+Month ?,Måned?
+Monthly Profit,Månedlig fortjeneste
+Monthly Sales,Månedlig salg
+Monthly Sales Summary,Månedlig salgssammendrag
+Month-wise,Månedsmessig
+Most Active Cashiers,Mest aktive kasserere
+Movement Type,Bevegelsestype
+Movements,Bevegelser
+Multi Currency,Multivaluta
+N/A,N/A
+Name,Navn
+Negative Stock,Negativ aksje
+Negative Stock Items,Negative lagervarer
+Negative values not allowed,Negative verdier er ikke tillatt
+Net,Netto
+Net Qty,Netto kvantum
+Net Sales,Netto salg
+Net Value,Nettoverdi
+Never,Aldri
+New changes are ready to load,Nye endringer er klare til å lastes inn
+New Item,Nytt element
+New Offer Available,Nytt tilbud tilgjengelig
+New PIN,Ny PIN-kode
+New rate,Ny takst
+Next unit of measure,Neste måleenhet
+No attribute data found.,Fant ingen attributtdata.
+No Barcode,Ingen strekkode
+No barcode found for UOM '{0}',Ingen strekkode funnet for UOM '{0}'
+No branch/location data found.,Fant ingen filial-/steddata.
+No brand data found.,Fant ingen merkevaredata.
+No cached gift card balance is available offline.,Ingen bufret gavekortsaldo er tilgjengelig offline.
+No camera found on this device. Please ensure your device has a working camera.,Finner ikke noe kamera på denne enheten. Sørg for at enheten din har et fungerende kamera.
+No capability warnings recorded yet.,Ingen kapasitetsadvarsler registrert ennå.
+No cash expected for this shift.,Ingen penger forventet for dette skiftet.
+No cash mode configured,Ingen kontantmodus er konfigurert
+No cash movement type is allowed for this POS Profile.,Ingen kontantbevegelsestype er tillatt for denne POS-profilen.
+No cashier PIN is set yet. Create one now.,Ingen kasserer-PIN er angitt ennå. Lag en nå.
+No cashier profiles are available for this POS profile yet.,Ingen kasseprofiler er tilgjengelige for denne POS-profilen ennå.
+No cashier-wise discount/void/return activity.,Ingen kassemessig rabatt/ugyldig/returaktivitet.
+No category data found.,Fant ingen kategoridata.
+No category profitability data found.,Ingen kategorilønnsomhetsdata funnet.
+No change returned recorded for this shift.,Ingen endringer returnert registrert for dette skiftet.
+No change-allocation invoices match the current filters.,Ingen endrings-allokeringsfakturaer samsvarer med gjeldende filtre.
+No charge head breakdown found.,Fant ingen sammenbrudd i ladehodet.
+No Company Selected,Ingen selskap valgt
+No customer sales data found.,Fant ingen kundesalgsdata.
+No day-wise discount/void/return trend.,Ingen dagsvis rabatt/void/retur trend.
+No day-wise payment data found.,Fant ingen betalingsdata per dag.
+No day-wise profitability trend found.,Ingen dagmessig lønnsomhetstrend funnet.
+No day-wise purchase data found.,Ingen dagvise kjøpsdata funnet.
+No day-wise sales trend found.,Fant ingen dagsvis salgstrend.
+No day-wise tax/charges trend found.,Fant ingen trend for skatt/avgifter per dag.
+No dead stock items.,Ingen døde lagervarer.
+No due date,Ingen forfallsdato
+No exact repair match found for this invoice,Fant ingen eksakt reparasjonsmatch for denne fakturaen
+No hourly sales trend found for today.,Fant ingen salgstrend per time for i dag.
+No invoice activity found.,Fant ingen fakturaaktivitet.
+No invoices found,Fant ingen fakturaer
+No invoices found. Try different search criteria.,Fant ingen fakturaer. Prøv forskjellige søkekriterier.
+No invoices recorded for this shift.,Ingen fakturaer registrert for dette skiftet.
+No item profitability data found.,Ingen varelønnsomhetsdata ble funnet.
+No item sales data found for this period.,Fant ingen varesalgsdata for denne perioden.
+No items found,Ingen varer funnet
+No items in cart,Ingen varer i handlekurven
+No items with barcodes to print,Ingen varer med strekkoder å skrive ut
+No location-wise top item data found.,Fant ingen stedsmessig toppvaredata.
+No low stock alerts right now.,Ingen varsler om lavt lager akkurat nå.
+No low stock items.,Ingen varer med lite lager.
+No matching items in cart,Ingen samsvarende varer i handlekurven
+No month-wise sales trend found.,Ingen månedlig salgstrend funnet.
+No negative stock items.,Ingen negative lagervarer.
+No notifications yet,Ingen varsler ennå
+No offline cash movement synced.,Ingen offline kontantbevegelse synkronisert.
+No offline invoices pending synchronization,Ingen frakoblede fakturaer som venter på synkronisering
+No offline sync issues recorded yet.,Ingen offline synkroniseringsproblemer registrert ennå.
+No out-of-stock items.,Ingen utsolgte varer.
+No outstanding credit invoices for this shift.,Ingen utestående kredittfakturaer for dette skiftet.
+No payment collection data found.,Fant ingen betalingsinnkrevingsdata.
+No payment rows available on this invoice.,Ingen betalingsrader tilgjengelig på denne fakturaen.
+No payments registered for this shift.,Ingen betalinger registrert for dette skiftet.
+No pending balances in this period.,Ingen utestående saldoer i denne perioden.
+No pending offline invoices,Ingen ventende frakoblede fakturaer
+No Print Formats Found,Ingen utskriftsformater funnet
+No profiles found for selected scope. Falling back to current profile failed.,Finner ingen profiler for det valgte omfanget. Fall tilbake til gjeldende profil mislyktes.
+No recent customer activity found.,Fant ingen nylig kundeaktivitet.
+No recent stock entries found.,Ingen nyere aksjeoppføringer funnet.
+No records found,Ingen poster funnet
+No reorder suggestions right now.,Ingen forslag til ombestilling akkurat nå.
+No repeat customers in this period.,Ingen gjentakende kunder i denne perioden.
+No response from server,Ingen respons fra server
+No return invoices found,Finner ingen returfakturaer
+No return item trend found.,Ingen trend for returvarer funnet.
+No returnable items found for this invoice,Fant ingen returvarer for denne fakturaen
+No returns were processed in this shift.,Ingen returer ble behandlet i dette skiftet.
+No risk activity found.,Ingen risikoaktivitet funnet.
+No sales activity found for this period.,Fant ingen salgsaktivitet for denne perioden.
+No slow moving items.,Ingen sakte bevegelige gjenstander.
+No staff sales activity found.,Fant ingen salgsaktivitet for ansatte.
+No stock movement for this period.,Ingen aksjebevegelse for denne perioden.
+No submitted cash movements in this shift.,Ingen innsendte kontantbevegelser i dette skiftet.
+No supplier purchases found in this month.,Ingen leverandørkjøp funnet denne måneden.
+No suppliers found for this period.,Ingen leverandører funnet for denne perioden.
+No sync trigger has run yet in this session.,Ingen synkroniseringsutløser har kjørt ennå i denne økten.
+No tax head breakdown found.,Fant ingen skatteoppdeling.
+No top items found for this location.,Ingen toppvarer funnet for denne plasseringen.
+No unpaid invoices,Ingen ubetalte fakturaer
+No variant data found.,Fant ingen variantdata.
+No week-wise sales trend found.,Fant ingen ukesmessig salgstrend.
+No.,Nei.
+Nobile Number,Adelsnummer
+Not available,Ikke tilgjengelig
+Not checked,Ikke sjekket
+Not selected,Ikke valgt
+Not Set,Ikke satt
+Notifications,Varsler
+Offer,Tilbud
+Offer Applied,Tilbudet gjelder
+Offer criteria exceeded,Tilbudskriteriene er overskredet
+Offer Item,Tilbudsartikkel
+Offer item unavailable,Tilbudselementet er ikke tilgjengelig
+Offer Removed,Tilbudet er fjernet
+Offer UOM cannot be changed,Tilbuds-UOM kan ikke endres
+Offer?,Tilbud?
+Offers,Tilbud
+Offline,Frakoblet
+Offline & Sync,Frakoblet og synkroniser
+Offline Capabilities,Offline-funksjoner
+Offline data status refreshed,Frakoblet datastatus er oppdatert
+Offline diagnostics,Frakoblet diagnostikk
+Offline Invoices,Offline fakturaer
+Offline invoices status,Frakoblet fakturastatus
+Offline invoices synced,Frakoblede fakturaer synkronisert
+Offline Queue: {0},Frakoblet kø: {0}
+Offline rebuild guidance,Offline veiledning for gjenoppbygging
+Offline restore is unavailable for this session.,Frakoblet gjenoppretting er utilgjengelig for denne økten.
+Offline selling is available with degraded capabilities.,Offlinesalg er tilgjengelig med degraderte funksjoner.
+Offline snapshot does not match the current POS state.,Frakoblet øyeblikksbilde samsvarer ikke med gjeldende POS-status.
+Offline Status,Frakoblet status
+"Offline, terminal, and system controls","Offline-, terminal- og systemkontroller"
+OK,OK
+Online,Online
+Open actions menu,Åpne handlingsmenyen
+Open balance to collect,Åpen saldo å samle inn
+Open Customer Display,Åpne kundevisning
+Open drawer,Åpne skuff
+Open invoices,Åpne fakturaer
+Open Payments?,Åpne betalinger?
+Open POS home,Åpne POS-hjemmet
+Open this screen from POS Menu -> Open Customer Display.,Åpne denne skjermen fra POS-menyen -> Åpne kundevisning.
+OpenCV image processing enabled - Enhanced barcode detection,OpenCV-bildebehandling aktivert - Forbedret strekkodegjenkjenning
+OpenCV image processing unavailable on this device,OpenCV-bildebehandling er utilgjengelig på denne enheten
+OpenCV Off,OpenCV av
+OpenCV On,OpenCV på
+OpenCV processing disabled,OpenCV-behandling er deaktivert
+Opening Amount,Åpningsbeløp
+Opening Cash,Åpningskontanter
+options,alternativer
+Order,Bestill
+Original,Original
+Other,Annet
+Out,Ut
+Out of Stock,Ikke på lager
+Out of Stock Items,Utsolgte varer
+Outstanding,Enestående
+Outstanding Credit by Currency,Utestående kreditt etter valuta
+Overdue,Forfalt
+Overpayment Change,Endring av overbetaling
+Overpayment change deducted: {0},For mye betaling er trukket fra: {0}
+Packing List,Pakkeliste
+Page Format,Sideformat
+Page unavailable offline,Siden er ikke tilgjengelig uten nett
+Paid,Betalt
+Paid (orig):,Betalt (opprinnelig):
+Paid Amount,Betalt beløp
+Paid change cannot be greater than total change!,Betalt endring kan ikke være større enn total endring!
+Paid:,Betalt:
+Parent Item,Overordnet element
+Partial,Delvis
+Partly Paid,Delvis betalt
+Party Account,Partikonto
+Party Type,Party Type
+Pause terminal until next cashier,Pause terminal til neste kasserer
+PAY,BETAL
+Payment,Betaling
+Payment Account,Betalingskonto
+Payment entries processed for Invoice {0},Betalingsoppføringer behandlet for faktura {0}
+Payment Entry Type,Betalingsoppføringstype
+Payment History,Betalingshistorikk
+Payment ID,Betalings-ID
+Payment Method Report,Rapport om betalingsmåte
+Payment Methods,Betalingsmetoder
+Payment of {0} received successfully.,Betaling på {0} mottatt.
+Payment Progress,Betalingsfremgang
+Payment Reconciliation,Betalingsavstemming
+Payment request status could not be retrieved. Please try again,Status for betalingsforespørsel kunne ikke hentes. Vennligst prøv igjen
+Payment Request took too long to respond. Please try requesting for payment again,Det tok for lang tid å svare på betalingsforespørselen. Prøv å be om betaling på nytt
+Payment saved offline,Betaling lagret offline
+Payment State,Betalingsstat
+Payment Status,Betalingsstatus
+Payment submitted but print function could not be executed. Payment name not found.,"Betaling sendt, men utskriftsfunksjonen kunne ikke utføres. Finner ikke betalingsnavn."
+Payment submitted.,Betaling sendt inn.
+Payment Summary,Betalingssammendrag
+Payments,Betalinger
+Payments are not open. Do you want to open payments and submit?,Betalinger er ikke åpne. Vil du åpne betalinger og sende inn?
+Payments by Mode of Payment,Betalinger etter betalingsmåte
+PDF,PDF
+Peak Hour,Peak Hour
+Peak Memory:,Topp minne:
+Peak Server:,Toppserver:
+Peak:,Topp:
+Pending,Venter
+Pending Amount,Ventende beløp
+Pending count updated from {0} to {1},Ventende antall oppdatert fra {0} til {1}
+Pending Exposure,Venter på eksponering
+Pending Invoices,Ventende fakturaer
+Pending Ratio,Ventende forhold
+Pending Sales,Ventende salg
+Pending sales: {0} | Cache usage: {1}%,Ventende salg: {0} | Bufferbruk: {1}%
+Pending Sync,Venter på synkronisering
+Pending: {0},Venter: {0}
+Pending: {0} | Synced: {1} | Draft: {2},Venter: {0} | Synkronisert: {1} | Utkast: {2}
+Per Page,Per side
+Personal,Personlig
+Personal preferences adjust the current cashier experience without changing the active POS route.,Personlige preferanser justerer gjeldende kassereropplevelse uten å endre den aktive POS-ruten.
+PIN confirmation does not match.,PIN-bekreftelsen stemmer ikke overens.
+PIN must be 4 to 8 digits.,PIN-koden må bestå av 4 til 8 sifre.
+Please add at least one item.,Vennligst legg til minst ett element.
+Please allow camera access to scan codes,Gi kameratilgang for å skanne koder
+Please enter payment amount,Vennligst skriv inn betalingsbeløp
+Please fill all required fields,Fyll ut alle obligatoriske felt
+Please make a payment or select a payment,Vennligst foreta en betaling eller velg en betaling
+Please request phone payment or use another payment method,Vennligst be om telefonbetaling eller bruk en annen betalingsmetode
+Please select a customer first,Velg en kunde først
+Please select a party,Velg et parti
+Please select a party before reconciling.,Velg en part før avstemming.
+Please select a valid movement type.,Velg en gyldig bevegelsestype.
+Please select an invoice,Velg en faktura
+Please select company before reconciling.,Velg selskap før avstemming.
+Please set the customer's mobile number,Vennligst angi kundens mobilnummer
+Please try again or enter the item manually.,Vennligst prøv igjen eller skriv inn elementet manuelt.
+Please verify the barcode or check the item's availability.,Vennligst bekreft strekkoden eller sjekk varens tilgjengelighet.
+Points,Poeng
+Popup blocked. Please allow popups.,Popup blokkert. Vennligst tillat popup-vinduer.
+POS,POS
+POS controls and maintenance,POS kontroller og vedlikehold
+POS Expense is disabled for this POS Profile.,POS-utgifter er deaktivert for denne POS-profilen.
+POS is running with limited offline prerequisites.,POS kjører med begrensede frakoblede forutsetninger.
+POS Profile,POS-profil
+Position the QR code or barcode within the scanning area,Plasser QR-koden eller strekkoden innenfor skanneområdet
+Posting,Innlegg
+Posting and Price List,Oppslag og prisliste
+Posting Date,Innleggsdato
+Preparing background sync,Forbereder bakgrunnssynkronisering
+"Press OK to continue offline with a warning, or Cancel to retry.","Trykk OK for å fortsette offline med en advarsel, eller Avbryt for å prøve på nytt."
+Previous unit of measure,Tidligere måleenhet
+Price List,Prisliste
+Price List Rate,Prisliste Pris
+Price list rate updated locally only,Prislistepris oppdatert kun lokalt
+Pricing & Discounts,Priser og rabatter
+Pricing Rule,Prisregel
+Print,Skriv ut
+Print Draft,Skriv ut utkast
+Print Format (Invoice),Utskriftsformat (faktura)
+Print Format (Order),Utskriftsformat (bestilling)
+Print invoice,Skriv ut faktura
+Print Purchase Invoice instead of PO,Skriv ut kjøpsfaktura i stedet for PO
+Printer,Skriver
+Processed returns impacting the shift totals,Behandlede returer som påvirker skifttotalene
+Processing Payment,Behandler betaling
+Processing payment entries for Invoice {0},Behandler betalingsoppføringer for faktura {0}
+Profile,Profil
+Profiles,Profiler
+Profit,Fortjeneste
+Profit: Invoice Item Estimate,Fortjeneste: Fakturavareanslag
+Profit: Stock Ledger (COGS),Fortjeneste: Stock Ledger (COGS)
+Profitability Report,Lønnsomhetsrapport
+Prorated return discount,Forholdsmessig returrabatt
+Purchase Amount,Kjøpsbeløp
+Purchase Invoices,Kjøpsfakturaer
+Purchase Order created,Innkjøpsordre opprettet
+Qty,Antall
+Qualified,Kvalifisert
+Quantity,Mengde
+Quantity exceeds available stock,Mengden overstiger tilgjengelig lager
+Quick Actions,Raske handlinger
+Quotation {0} is Submitted,Tilbud {0} er sendt inn
+Quotation submitted,Tilbud innsendt
+QZ Tray connected.,QZ-skuff tilkoblet.
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ-skuffen kobles fra manuelt. Trykk på Koble til for å aktivere den igjen.
+QZ Tray is not connected.,QZ-skuffen er ikke tilkoblet.
+QZ Tray Setup,QZ-skuffoppsett
+Rate,Vurder
+Rate adjusted to maximum allowed discount,Pris justert til maksimal tillatt rabatt
+Ready,Klar
+Ready to resume,Klar til å fortsette
+Ready!,Klar!
+Real-time POS insights for retail operations.,Sanntids POS-innsikt for detaljhandel.
+Rebuild Offline Data,Gjenoppbygg frakoblede data
+Receive,Motta
+Receive now,Motta nå
+Received,Mottatt
+Received:,Mottatt:
+Recent Movement Entries,Nylige bevegelsesoppføringer
+Recent updates about your invoices,Nylige oppdateringer om fakturaene dine
+Recently Active Customers,Nylig aktive kunder
+Rechecking connection,Kontrollerer tilkoblingen på nytt
+Reconcile payment methods and close shift,Avstem betalingsmåter og lukk skiftet
+Reconciling Payments,Avstemming av betalinger
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","Koble til på nytt og åpne denne siden én gang mens du er tilkoblet, så vil frakoblede oppdateringer kunne gjenopprette den."
+Reconnect online to refresh cached offline data from the server.,Koble til på nytt for å oppdatere bufrede frakoblede data fra serveren.
+Recreate local offline prerequisites from scratch,Gjenskap lokale frakoblede forutsetninger fra bunnen av
+Recv:,Recv:
+Redeem,Løs inn
+Redeem / Scan,Løs inn / skann
+Redeem Amount,Løs inn beløp
+Redeem Mode,Løs inn-modus
+Redeemed Amount,Innløst beløp
+Redeemed credit cannot be greater than its total.,Innløst kreditt kan ikke være større enn totalen.
+Redemption and Totals,Innløsning og totaler
+Reference,Referanse
+Refresh,Oppdater
+Refresh Exchange Rate,Oppdater valutakurs
+Refresh Offline Data,Oppdater frakoblet data
+Refresh Printers,Oppdater skrivere
+Refund,Refusjon
+Release Notes,Utgivelsesnotater
+Reload,Last inn på nytt
+Reload customers,Last inn kunder på nytt
+Reload Items,Last inn elementer på nytt
+Reload Now,Last inn på nytt nå
+Reload to apply the latest changes. Your current session will be refreshed.,Last inn på nytt for å bruke de siste endringene. Din nåværende økt vil bli oppdatert.
+Reload Workflow,Last inn arbeidsflyt på nytt
+Remarks,Merknader
+Remarks are required.,Merknader kreves.
+Remove,Fjern
+Remove barcode item,Fjern strekkodeelementet
+Remove cached data and reload the POS app,Fjern bufrede data og last inn POS-appen på nytt
+Remove item,Fjern elementet
+Remove Offer,Fjern tilbudet
+Reorder / Purchase Suggestions,Ombestilling / kjøpsforslag
+Repair Candidate,Reparasjonskandidat
+Repair Change Allocation,Reparasjon Endre tildeling
+Repair requires an online connection,Reparasjon krever en nettforbindelse
+Repaired,Reparert
+Repairing change allocation,Reparasjon av endringstildeling
+Repeat Customers,Gjenta kunder
+Repeat Rate,Gjenta rate
+Request,Forespørsel
+Request ID: {0},Forespørsels-ID: {0}
+Request Payment,Be om betaling
+Requested route: {0},Forespurt rute: {0}
+Required columns cannot be hidden,Nødvendige kolonner kan ikke skjules
+Reset,Tilbakestill
+Reset item name,Tilbakestill elementnavnet
+Reset to Default,Tilbakestill til standard
+Resource Health,Ressurshelse
+Restricted,Begrenset
+Restricted operational controls for supervisors only.,Begrensede operasjonelle kontroller for veiledere.
+Retry,Prøv på nytt
+Retry route,Prøv ruten på nytt
+Return,Retur
+Return Amount,Returbeløp
+Return Count,Tilbaketelling
+Return items must have negative quantities,Returvarer må ha negativt antall
+Return total must be negative,Retursummen må være negativ
+Return Valid Until,Retur Gyldig til
+Return window passed,Returvinduet passert
+Return without Invoice,Retur uten faktura
+Returns,Returnerer
+Returns / Voids / Discounts,Returer / ugyldigheter / rabatter
+Returns by Currency,Returer etter valuta
+Revenue,Inntekter
+Review shift totals before submitting the closing entry,Gjennomgå skifttotaler før du sender inn den avsluttende oppføringen
+Round Off,Rund av
+Rows,Rader
+Rows:,Rader:
+Rule,Regel
+Sale,Salg
+Sales,Salg
+Sales Order {0} is Submitted,Salgsordre {0} er sendt
+Sales Person and Print,Selger og trykk
+Sales Person not found,Selger ikke funnet
+Sales processed,Salg behandlet
+Sales Return,Salgsretur
+Sales Trend Report,Salgstrendrapport
+Save,Lagre
+Save & Clear,Lagre og slett
+Save as POS Profile Default,Lagre som standard for POS-profil
+Save Settings,Lagre innstillinger
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,"Lagre den valgte skriveren som standard POS-profil, slik at den vises automatisk på dette oppsettet."
+Saved as draft because: {0},Lagret som utkast fordi: {0}
+Saving...,Lagrer...
+Scale barcode detected. Quantity here is the number of labels to print.,Skala strekkode oppdaget. Antall her er antall etiketter som skal skrives ut.
+Scale barcode settings are not configured. Using item barcode only.,Skaleringsstrekkodeinnstillinger er ikke konfigurert. Bruker kun varestrekkode.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,Strekkode for skalamal mangler for denne varen/UOM. Bruker kun varestrekkode.
+Scan an existing card and top it up without leaving the payment flow.,Skann et eksisterende kort og fyll det på uten å forlate betalingsflyten.
+Scan Error,Skannefeil
+Scan or enter a gift card code to check balance or redeem.,Skann eller skriv inn en gavekortkode for å sjekke saldo eller løse inn.
+Scan or paste the card code below.,Skann eller lim inn kortkoden nedenfor.
+Scan QR Code/Barcode,Skann QR-kode/strekkode
+Scan with camera,Skann med kamera
+Scan-First Flow,Scan-First Flow
+Scanned Code:,Skannet kode:
+Scanning for: {0},Skanner etter: {0}
+Scanning items,Skanner elementer
+Scan-Ready,Skanne-klar
+Scope,Omfang
+Scope: All Profiles,Omfang: Alle profiler
+Scope: Current Profile,Omfang: Gjeldende profil
+Scope: Specific Profile,Omfang: Spesifikk profil
+Search,Søk
+Search Account,Søk i konto
+Search an invoice and continue the return flow without extra steps.,Søk etter en faktura og fortsett returflyten uten ekstra trinn.
+Search customer,Søk kunde
+Search invoices or customers,Søk etter fakturaer eller kunder
+Search item,Søk element
+Search item / code,Søk element / kode
+Search items or barcode,Søk etter varer eller strekkode
+Search Mpesa Payments,Søk i Mpesa Payments
+Search return invoices or customers,Søk etter returfakturaer eller kunder
+Search supplier,Søk etter leverandør
+Search unpaid invoices or customers,Søk etter ubetalte fakturaer eller kunder
+Secure context (HTTPS or localhost) is required for camera access.,Sikker kontekst (HTTPS eller localhost) kreves for kameratilgang.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,Sikker kontekst (HTTPS) kreves for kameratilgang. Bruk HTTPS for å få tilgang til kameraet.
+Select,Velg
+Select a cashier first.,Velg en kasserer først.
+Select a customer,Velg en kunde
+Select a customer to use coupon,Velg en kunde for å bruke kupong
+Select a printer to use QZ silent printing.,Velg en skriver for å bruke stillegående QZ-utskrift.
+Select Batch,Velg Batch
+Select Columns to Display,Velg kolonner som skal vises
+Select items to sell,Velg varer som skal selges
+Select Payment,Velg Betaling
+Select Payment Account,Velg Betalingskonto
+Select printer,Velg skriver
+Select Return Invoice,Velg Returfaktura
+Select S.O,Velg S.O
+Select Sales Orders,Velg Salgsordrer
+Select the cashier who is taking over this terminal.,Velg kassereren som tar over denne terminalen.
+Selected,Valgt
+Selected movement type is not allowed by POS Profile.,Valgt bevegelsestype er ikke tillatt av POS-profilen.
+Selected Payments,Valgte betalinger
+Sensitive actions kept away from quick taps.,Sensitive handlinger holdt unna raske trykk.
+Serial,Seriell
+Serial Numbers,Serienumre
+Server CPU Usage:,Server CPU-bruk:
+Server Health,Serverhelse
+Server Memory Usage:,Serverminnebruk:
+Server Metrics,Serverberegninger
+Server Uptime:,Serveroppetid:
+Service Charges,Servicegebyrer
+Session,Sesjon
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,Angi hver kasserer-PIN i brukerskjemaet og behold terminalmedlemmer tildelt i POS-profilbruker.
+Settings,Innstillinger
+Settings in this section update the POS workspace without changing the current route.,Innstillinger i denne delen oppdaterer POS-arbeidsområdet uten å endre gjeldende rute.
+Setup complete!,Oppsettet er fullført!
+Share,Del
+Shared terminal,Delt terminal
+Shift Closed Snapshot,Skift lukket øyeblikksbilde
+Shift Overview,Skiftoversikt
+Show,Vis
+Show cart on customer-facing screen,Vis handlekurven på kundevendt skjerm
+Show last invoice rate,Vis siste fakturasats
+Show rate info,Vis prisinformasjon
+Show Repair Candidates,Vis reparasjonskandidater
+Show search tools,Vis søkeverktøy
+Show the active cart on a customer-facing screen,Vis den aktive handlekurven på en kundevendt skjerm
+Showing {0}-{1} of {2},Viser {0}-{1} av {2}
+Showing 0 of 0,Viser 0 av 0
+Shows the distribution of invoices per currency,Viser fordelingen av fakturaer per valuta
+Sign out of the current POS session,Logg av gjeldende POS-økt
+Size:,Størrelse:
+Skipped Payments,Hoppet over betalinger
+Skipping items without barcodes,Hopp over varer uten strekkoder
+Slow Moving,Slow Moving
+Slow Moving Items,Sakte bevegelige elementer
+Slow Queries:,Langsomme søk:
+Sold,Solgt
+Source,Kilde
+Source Cash Account (Optional Override),Kildekontantkonto (valgfri overstyring)
+Source Ex. Rate:,Kilde Eks. Pris:
+Source Rate:,Kildefrekvens:
+Specific Profile,Spesifikk profil
+Split Invoices,Del fakturaer
+Staff / Cashier Performance Report,Personal / kasserer resultatrapport
+Status,Status
+Stock,Lager
+Stock Information,Lagerinformasjon
+Stock is lower than requested,Lagerbeholdningen er lavere enn forespurt
+Stock is lower than requested:\n{0},Lagerbeholdningen er lavere enn forespurt:\n{0}
+Stock Movement Report,Aksjebevegelsesrapport
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,Lageroppdatering: {0} har {1} tilgjengelig. Å legge til {2} vil bringe aksjen under null.
+Submit,Send inn
+Submit & Print,Send inn og skriv ut
+Submit Deposit,Send inn innskudd
+Submit Expense,Send inn utgift
+Submitted,Sendt inn
+Submitted Cash Movements,Innsendte kontantbevegelser
+Submitted entries,Innsendte bidrag
+Successfully scanned:,Vellykket skannet:
+Suggested,Foreslått
+Suggested Qty,Foreslått antall
+Supervisor Access,Veiledertilgang
+Supervisor permissions unlock issuance and reloads,Supervisor-tillatelser låser opp utstedelse og laster inn på nytt
+Supervisor Tools,Veilederverktøy
+Supplier,Leverandør
+Supplier and dates are required.,Leverandør og datoer er påkrevd.
+Supplier Invoices,Leverandørfakturaer
+Supplier is required.,Leverandør er påkrevd.
+Supplier name is required,Leverandørnavn er påkrevd
+Supplier Payments,Leverandørbetalinger
+Supplier Purchase Summary,Sammendrag av leverandørkjøp
+Suppliers,Leverandører
+Suppliers not found,Finner ikke leverandører
+Switch Camera,Bytt kamera
+Switch Cashier,Bytt kasserer
+Switch the POS appearance theme,Bytt POS-utseendetema
+Switched to:,Byttet til:
+Sync All Invoices,Synkroniser alle fakturaer
+Sync Offline Cash Movements ({0}),Synkroniser kontantbevegelser uten nett ({0})
+Sync Offline Sales,Synkroniser salg uten nett
+Synced {0} offline cash movement(s).,Synkroniserte {0} kontantbevegelse(r) uten nett.
+Syncing items in background,Synkroniserer elementer i bakgrunnen
+System / Diagnostics,System / Diagnostikk
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","Systemhandlinger er lavfrekvente vedlikeholdskontroller som appinformasjon, støttediagnostikk og øktkontroller."
+System Information,Systeminformasjon
+System Status,Systemstatus
+Tables:,Tabeller:
+Tap the button below to redeem a gift card during checkout.,Trykk på knappen nedenfor for å løse inn et gavekort under kassen.
+Target,Mål
+Target Ex. Rate:,Mål Eks. Pris:
+Target Rate:,Målfrekvens:
+Tax,Skatt
+Tax / Charges Report,Skatt / avgiftsrapport
+Tax Heads,Skattehoder
+Taxable Amount,Skattepliktig beløp
+Tendered,Tilbudt
+Terminal,Terminal
+Terminal & Devices,Terminal og enheter
+Terminal locked,Terminal låst
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","Terminalverktøy påvirker denne utsjekkingsstasjonen, kundevendte skjermer og fremtidige skriver-/enhetskontroller."
+Territory not found,Område ikke funnet
+The amount paid is not complete,Beløpet som er betalt er ikke fullstendig
+The app stores data locally for offline use. This is called cache.,Appen lagrer data lokalt for offline bruk. Dette kalles cache.
+The invoice stayed in draft. Please review and submit it manually.,Fakturaen ble stående i utkast. Se gjennom og send den inn manuelt.
+The maximum discount allowed is,Maksimal rabatt tillatt er
+The quantity for {0} has been adjusted to the maximum available stock.,Antallet for {0} er justert til maksimalt tilgjengelig lager.
+The system could not retrieve the item details. Please try again.,Systemet kunne ikke hente varedetaljene. Vennligst prøv igjen.
+These invoices will be synced when connection is restored,Disse fakturaene vil bli synkronisert når tilkoblingen gjenopprettes
+This action now opens inside the settings workspace.,Denne handlingen åpnes nå i arbeidsområdet for innstillinger.
+This coupon already used !,Denne kupongen er allerede brukt!
+This invoice does not need change-allocation repair,Denne fakturaen trenger ikke reparasjon av endringsallokering
+This invoice is already repaired,Denne fakturaen er allerede reparert
+This is an item template. Please choose a variant.,Dette er en varemal. Velg en variant.
+this item,denne varen
+This POS page could not be opened offline because its code was not cached on this terminal yet.,Denne POS-siden kunne ikke åpnes frakoblet fordi koden ikke var bufret på denne terminalen ennå.
+This Serial Number {0} has already been added!,Dette serienummeret {0} er allerede lagt til!
+Threshold,Terskel
+Time,Tid
+Tip: Clear cache regularly to free up space and keep the app fast.,Tips: Tøm hurtigbufferen regelmessig for å frigjøre plass og holde appen rask.
+Tip: Close unused tabs or apps to reduce lag.,Tips: Lukk ubrukte faner eller apper for å redusere etterslep.
+Tip: Monitor slow queries and table size for optimal performance.,Tips: Overvåk trege spørringer og tabellstørrelse for optimal ytelse.
+To Be Paid,Å bli betalt
+To Date,Til dags dato
+Today,I dag
+Today Profit,Dagens overskudd
+Today Sales,Salg i dag
+Toggle navigation drawer,Veksle på navigasjonsskuffen
+Toggle Theme,Bytt tema
+Tools,Verktøy
+Tools for customer-facing screens and terminal-specific actions.,Verktøy for kundevendte skjermer og terminalspesifikke handlinger.
+Top Brand,Topp merke
+Top Category,Toppkategori
+Top Charge Head,Topp ladehode
+Top Customers,Toppkunder
+Top Discount,Topp rabatt
+Top Items by Location,Toppartikler etter plassering
+Top Margin,Toppmargin
+Top Pending,Topp Venter
+Top Profit Item,Toppfortjenesteelement
+Top Return Items,Topp returvarer
+Top Sales by Cashier,Toppsalg av kasserer
+Top Supplier,Topp leverandør
+Top Suppliers by Spend,Toppleverandører etter Spend
+Top Tables,Topp tabeller
+Top Tax Head,Topp skattesjef
+Top Up Amount,Påfyllingsbeløp
+Top Up Card,Toppkort
+Top Up Mode,Påfyllingsmodus
+Top Variant,Toppvariant
+Total,Totalt
+Total Amount,Totalt beløp
+Total Change,Total endring
+Total Charges,Totale kostnader
+Total In,Totalt inn
+Total Invoices,Totale fakturaer
+Total Items,Totalt antall varer
+Total Mpesa,Totalt Mpesa
+Total Out,Totalt ut
+Total Payments,Totale betalinger
+Total Purchase,Totalt kjøp
+Total Selected :,Totalt valgt:
+Total Size,Total størrelse
+Total Stock Qty,Totalt lagerantall
+Total:,Totalt:
+Totals by Invoice Currency,Totaler etter fakturavaluta
+Track how much cash was handed back to customers,Spor hvor mye kontanter som ble levert tilbake til kundene
+"Track recent sales, collect unpaid balances, and reopen saved work","Spor nylige salg, samle inn ubetalte saldoer og åpne lagret arbeid på nytt"
+Transaction ID,Transaksjons-ID
+Transfer,Overføring
+Try a different search term or clear the cart search.,Prøv et annet søkeord eller tøm handlekurvsøket.
+Try adjusting your search or filters,Prøv å justere søket eller filtrene
+Try another source or refresh the list.,Prøv en annen kilde eller oppdater listen.
+Try changing the date range or status filter.,Prøv å endre datoperioden eller statusfilteret.
+Type,Type
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,Får ikke tilgang til kameraet selv med grunnleggende innstillinger. Vennligst sjekk kameratillatelsene og enhetskompatibiliteten.
+Unable to add offer item {0}. Please refresh and try again.,Kan ikke legge til tilbudselementet {0}. Vennligst oppdater og prøv igjen.
+Unable to add offer item. Please refresh and try again.,Kan ikke legge til tilbudselement. Vennligst oppdater og prøv igjen.
+Unable to add scanned item.,Kan ikke legge til skannet element.
+Unable to create purchase order,Kan ikke opprette innkjøpsordre
+Unable to delete draft invoice,Kan ikke slette utkast til faktura
+Unable to fetch documents,Kan ikke hente dokumenter
+Unable to fetch draft orders,Kan ikke hente utkast til bestillinger
+Unable to fetch invoice history,Kan ikke hente fakturahistorikk
+Unable to fetch M-Pesa payments,Kan ikke hente M-Pesa-betalinger
+Unable to fetch sales orders,Kan ikke hente salgsordrer
+Unable to fetch unpaid invoices,Kan ikke hente ubetalte fakturaer
+Unable to generate scale barcode,Kan ikke generere skaleringsstrekkode
+Unable to issue gift card.,Kan ikke utstede gavekort.
+Unable to load cashier PIN status.,Kan ikke laste inn kasserers PIN-status.
+Unable to load document,Kan ikke laste dokumentet
+Unable to load draft invoice,Kan ikke laste utkast til faktura
+Unable to load gift card balance.,Kan ikke laste gavekortsaldoen.
+Unable to load invoice details,Kan ikke laste inn fakturadetaljer
+Unable to load parked order,Kan ikke laste inn parkert ordre
+Unable to load the selected sales order,Kan ikke laste den valgte salgsordren
+Unable to prepare document,Kan ikke klargjøre dokumentet
+Unable to prepare return invoice,Kan ikke utarbeide returfaktura
+Unable to print draft invoice,Kan ikke skrive ut fakturautkast
+Unable to print submitted invoice,Kan ikke skrive ut innsendt faktura
+Unable to process document action,Kan ikke behandle dokumenthandlingen
+Unable to repair change allocation,Kan ikke reparere endringstildeling
+Unable to save cashier PIN.,Kan ikke lagre PIN-koden til kassereren.
+Unable to save the rate to the backend price list,Kan ikke lagre prisen i backend-prislisten
+Unable to submit invoice,Kan ikke sende inn faktura
+Unable to submit the selected payment,Kan ikke sende inn den valgte betalingen
+Unable to top up gift card.,Kan ikke fylle på gavekort.
+Unable to verify cashier PIN.,Kan ikke bekrefte PIN-koden til kassereren.
+Unallocated,Ikke tildelt
+Unallocated:,Ikke tildelt:
+Unavailable,Utilgjengelig
+Unknown,Ukjent
+Unknown Item,Ukjent element
+Unknown Warehouse,Ukjent lager
+Unlock POS,Lås opp POS
+Unpaid,Ubetalt
+"Unselected payments stay unallocated first, then auto reconcile after submit.","Ikke-valgte betalinger forblir uallokerte først, og deretter automatisk avstemming etter innsending."
+UOM,UOM
+UOM not found,UOM ikke funnet
+Update available,Oppdatering tilgjengelig
+Update Customer,Oppdater kunde
+Update PIN,Oppdater PIN-koden
+Update Price List Rate,Oppdater prisliste
+Updated,Oppdatert
+Updates and app info that stay out of the cashier flow.,Oppdateringer og appinformasjon som holder seg utenfor kassestrømmen.
+Updates automatically,Oppdaterer automatisk
+Usage,Bruk
+Usage Stats,Bruksstatistikk
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,Bruk en 4- til 8-sifret PIN-kode for å bytte kasse og låse opp terminalen.
+Use Cashier,Bruk Cashier
+Use date range to search for older invoices,Bruk datoperiode for å søke etter eldre fakturaer
+"Use one field for manual code entry, barcode scans, or QR scans.","Bruk ett felt for manuell kodeinntasting, strekkodeskanning eller QR-skanning."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","Bruk én arbeidsflyt for saldokontroller, nye utstedelser og påfyll uten å forlate POS."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","Bruk denne delen når bufrede forutsetningsdata trenger en oppdatering, ombygging eller diagnostikkgjennomgang."
+Use Western numerals,Bruk vestlige tall
+Used:,Brukt:
+Using basic camera settings due to device limitations,Bruker grunnleggende kamerainnstillinger på grunn av enhetsbegrensninger
+Using cached customer balance,Bruker bufret kundesaldo
+Valid until,Gyldig til kl
+Variance %,varians %
+Variants,Varianter
+Variant-wise,Variantmessig
+Verify closing amounts for each payment method,Bekreft avsluttende beløp for hver betalingsmåte
+View all,Se alle
+View app information and current build details,Se appinformasjon og gjeldende byggedetaljer
+View Data Diagnostics,Se datadiagnostikk
+View Details,Se detaljer
+View invoice details,Se fakturadetaljer
+View notifications,Se varsler
+View offline invoices,Se offline-fakturaer
+View restricted POS insights,Se begrenset POS-innsikt
+Void Amount,Ugyldig beløp
+Void Count,Tomtall
+Voids,Tomrom
+Waiting for cart items,Venter på varer i handlekurven
+Waiting for payment...,Venter på betaling...
+Walk-in Customer,Inngående kunde
+Warehouse,Lager
+Warning: High cache usage may affect performance.,Advarsel: Høy hurtigbufferbruk kan påvirke ytelsen.
+Warning: High lag may indicate heavy processing or browser slowness.,Advarsel: Høy etterslep kan indikere tung prosessering eller treg nettleser.
+Week ?,Uke?
+Week-wise,Ukemessig
+Weight (g),Vekt (g)
+Weight (grams),Vekt (gram)
+We'll let you know if an invoice fails to submit,Vi gir deg beskjed hvis en faktura ikke sendes inn
+Workflow,Arbeidsflyt
+Write off amount cannot exceed the POS profile maximum of {0},Avskrivningsbeløpet kan ikke overstige POS-profilens maksimum på {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,Avskrivningsbeløpet overskrider den tillatte grensen ({0}). Vennligst legg til betaling for det resterende beløpet.
+Yes,Ja
+"Yes, Cancel sale","Ja, avbryt salg"
+"Yes, Close","Ja, Lukk"
+You are not allowed to print draft invoices,Du har ikke lov til å skrive ut fakturautkast
+You are offline. Add Payment will work again when the connection is restored.,Du er frakoblet. Legg til betaling vil fungere igjen når tilkoblingen er gjenopprettet.
+You have no notifications right now,Du har ingen varsler akkurat nå
+Your Cart,Din handlekurv

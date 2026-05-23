@@ -1,0 +1,1362 @@
+POS Awesome,POS عالی
+Fetch Items Directly from Server,موارد را مستقیماً از سرور واکشی کنید
+Menu,منو
+Actions,اقدامات
+Close Shift,Shift را ببندید
+End current session,پایان جلسه جاری
+Print Last Invoice,چاپ آخرین فاکتور
+Reprint previous transaction,تراکنش قبلی را دوباره چاپ کنید
+Sync Offline Invoices,همگام سازی فاکتورهای آفلاین
+Upload pending transactions,بارگذاری تراکنش های معلق
+Go Online,برو آنلاین
+Go Offline,آفلاین شوید
+Disable offline mode,غیرفعال کردن حالت آفلاین
+Work without server connection,بدون اتصال به سرور کار کنید
+Clear Cache,کش را پاک کنید
+Remove local data and refresh,داده های محلی را حذف کرده و به روز کنید
+About,درباره
+App information,اطلاعات برنامه
+Language,زبان
+Change interface language,تغییر زبان رابط
+Light Mode,حالت نور
+Dark Mode,حالت تاریک
+Switch theme appearance,تغییر ظاهر تم
+Logout,خروج از سیستم
+Sign out of session,از جلسه خارج شوید
+Select Language,زبان را انتخاب کنید
+Choose your preferred language for the POS interface,زبان مورد نظر خود را برای رابط POS انتخاب کنید
+Language will be changed to,زبان به تغییر خواهد کرد
+Cancel,لغو کنید
+Change Language,تغییر زبان
+Close,بستن
+Cannot change language - same language selected,زبان را نمی توان تغییر داد - همان زبان انتخاب شده است
+Language changed successfully! Reloading...,زبان با موفقیت تغییر کرد! در حال بارگیری مجدد...
+Failed to change language,تغییر زبان انجام نشد
+Unknown error,خطای ناشناخته
+- Total Unallocated,- مجموع تخصیص نیافته
+* Required,* الزامی است
+{0} (Qty: {1}),{0} (تعداد: {1})
+{0} actions,{0} اقدام
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} فقط {1} در انبار دارد. شما {2} را درخواست کردید. مقدار را تنظیم کنید یا دوباره ذخیره کنید.
+{0} offline invoice{1} pending,{0} فاکتور آفلاین{1} در انتظار
+{0} offline invoice{1} saved as draft,{0} فاکتور آفلاین{1} به عنوان پیش نویس ذخیره شد
+{0} offline invoice{1} synced,{0} فاکتور آفلاین{1} همگام‌سازی شد
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0} روز پیش
+{0}h ago,{0}ساعت قبل
+{0}m ago,{0} دقیقه قبل
+A POS supervisor is required for this action.,برای این اقدام به یک ناظر POS نیاز است.
+Access,دسترسی داشته باشید
+Account,حساب
+Account is overdrawn,حساب اضافه برداشت شده است
+Acknowledge the error to resume scanning,برای از سرگیری اسکن، خطا را تأیید کنید
+Acknowledge the error to resume scanning.,برای از سرگیری اسکن، خطا را تأیید کنید.
+Across,در سراسر
+Action,اقدام
+Active sale,فروش فعال
+add,اضافه کردن
+Add items from the selector to start building this sale.,برای شروع ساخت این فروش، موارد را از انتخابگر اضافه کنید.
+Add more value to an existing gift card,ارزش بیشتری به کارت هدیه موجود اضافه کنید
+Add New Address,اضافه کردن آدرس جدید
+Add new customer,مشتری جدید اضافه کنید
+Add on New Line,اضافه کردن در خط جدید
+Add Payment,پرداخت را اضافه کنید
+Add payment to invoice,پرداخت را به فاکتور اضافه کنید
+Add/Edit Coupon Conditions,افزودن/ویرایش شرایط کوپن
+Additional Discount,تخفیف اضافی
+Additional Discount %,% تخفیف اضافی
+Address Line 1,آدرس خط 1
+Address not found,آدرس پیدا نشد
+Adjust the quantity or enable negative stock to continue.,مقدار را تنظیم کنید یا سهام منفی را فعال کنید تا ادامه یابد.
+Adjustment,تنظیم
+After returns,پس از بازگشت
+Against,در مقابل
+Against Name,در مقابل نام
+Age Bracket,گروه سنی
+All,همه
+All Caught Up!,همه گرفتار شدند!
+All invoices are synchronized,تمام فاکتورها هماهنگ هستند
+All pending invoices are up to date,تمام فاکتورهای معلق به روز هستند
+All Profiles,همه پروفایل ها
+All Synchronized,همه همگام شده
+All visible invoices are fully settled.,تمام فاکتورهای قابل مشاهده به طور کامل تسویه شده است.
+All Warehouses,کلیه انبارها
+Allowed UOM is {0},UOM مجاز {0} است
+Always fetch items from server (ignore local cache),همیشه موارد را از سرور واکشی کنید (از کش محلی صرف نظر کنید)
+Amount,مقدار
+Amount already received,مبلغ قبلاً دریافت شده است
+Amount exceeds profile cash movement max amount.,مقدار از حداکثر مقدار حرکت نقدی نمایه بیشتر است.
+Amount must be greater than zero.,مقدار باید بیشتر از صفر باشد.
+Amount received from customer,مبلغ دریافتی از مشتری
+Appearance and user-level preferences for the current session.,تنظیمات ظاهری و سطح کاربر برای جلسه فعلی.
+Applied,اعمال شد
+Apply,درخواست کنید
+Apply Gift Card,درخواست کارت هدیه
+Apply Offer,درخواست پیشنهاد
+Apply On,درخواست روشن
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,فقط مبلغی را که می خواهید بازخرید کنید در این فاکتور اعمال کنید. باقی مانده موجودی روی کارت باقی می ماند.
+Apply Redemption,Redemption را اعمال کنید
+Applying,اعمال کردن
+Apps,برنامه ها
+Are you sure you want to close? All entered data will be lost.,آیا مطمئن هستید که می خواهید ببندید؟ تمام داده های وارد شده از بین خواهند رفت.
+Attributes (Size/Color),ویژگی ها (اندازه/رنگ)
+Auto Allocate Payment Amount,تخصیص خودکار مبلغ پرداخت
+Auto Reconcile,آشتی خودکار
+Auto reconciliation completed after payment submit.,تطبیق خودکار پس از ارسال پرداخت تکمیل شد.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,تطبیق خودکار تکمیل شد. اختصاص داده شده: {0}{1}. برجسته باقی مانده است: {0}{2}.
+Available Actions,اقدامات موجود
+Available QTY,QTY موجود است
+Available:,موجود:
+Average Basket,میانگین سبد
+Average Bill,صورت حساب متوسط
+Average Ticket,بلیط متوسط
+Avg Bill,میانگین بیل
+Avg Invoice,میانگین فاکتور
+Avg Invoice Profit,میانگین سود فاکتور
+Avg Invoice Value,میانگین ارزش فاکتور
+Avg Purchase Frequency,میانگین فرکانس خرید
+Awesome,عالیه
+Awesome Dashboard,داشبورد عالی
+Awesome Dashboard is disabled for the selected POS Profile.,داشبورد عالی برای نمایه POS انتخاب شده غیرفعال است.
+Awesome Dashboard is unavailable for the selected scope.,داشبورد عالی برای محدوده انتخابی در دسترس نیست.
+Awesome Dashboard is visible only to POS supervisors.,داشبورد عالی فقط برای سرپرستان POS قابل مشاهده است.
+Back,برگشت
+Back Office Cash Account,حساب بک آفیس نقدی
+Back Office Cash Account (Optional Override),حساب بک آفیس نقدی (نسخ اختیاری)
+Back office cash account is required.,حساب بک آفیس نقدی مورد نیاز است.
+Back to {0},بازگشت به {0}
+Background processing did not finish in time.,پردازش پس‌زمینه به موقع تمام نشد.
+Background processing failed for Invoice {0}: {1},پردازش پس‌زمینه برای فاکتور {0} ناموفق بود: {1}
+Background Submission Failed,ارسال پس‌زمینه انجام نشد
+Background sync interval (seconds),فاصله همگام سازی پس زمینه (ثانیه)
+Balance,تعادل
+Balance will be updated when connection is restored,با بازیابی اتصال، موجودی به‌روزرسانی می‌شود
+Balances still pending,مانده ها هنوز معلق است
+Barcode,بارکد
+Barcode / QR Ready,بارکد / QR آماده است
+Barcode Label Printing,چاپ لیبل بارکد
+Base Paid:,پایه پرداختی:
+Base Recv:,رکورد پایه:
+Base:,پایه:
+Basic Information,اطلاعات پایه
+Batch,دسته ای
+Batch Information,اطلاعات دسته ای
+Before any return workflow,قبل از هر گردش کار بازگشت
+Before returns,قبل از بازگشت
+Best Day,بهترین روز
+Best Seller,پرفروش ترین
+Book expense or deposit from active shift.,هزینه کتاب یا واریز از شیفت فعال.
+Branch / Location-wise Report,گزارش شعبه / موقعیت مکانی
+Brand-wise,برند عاقلانه
+Breakdown,خرابی
+Browse,مرور کنید
+Build Time:,زمان ساخت:
+Built with Frappe,ساخته شده با فراپه
+Bundle,بسته نرم افزاری
+Buying Price,قیمت خرید
+Cache cleared successfully,کش با موفقیت پاک شد
+Cache Usage,استفاده از کش
+cache used,کش استفاده شده است
+Calculating...,در حال محاسبه...
+Camera Access Required,دسترسی به دوربین مورد نیاز است
+Camera access was aborted. Please try again.,دسترسی به دوربین قطع شد. لطفا دوباره امتحان کنید.
+Camera constraints not supported by your device. Trying fallback settings...,محدودیت های دوربین توسط دستگاه شما پشتیبانی نمی شود. در حال امتحان تنظیمات بازگشتی...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,دوربین توسط برنامه/برگه دیگری مشغول یا مسدود شده است. سایر برنامه های دوربین را ببندید و دوباره امتحان کنید.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,اجازه دوربین رد شد. لطفاً اجازه دسترسی به دوربین را در تنظیمات مرورگر خود بدهید و صفحه را بازخوانی کنید.
+Camera scanner is locked until the current error is acknowledged,اسکنر دوربین تا زمانی که خطای فعلی تایید نشود قفل می شود
+Camera started but the video stream did not load in time. Please try again.,دوربین شروع به کار کرد اما پخش جریانی ویدیو به موقع بارگیری نشد. لطفا دوباره امتحان کنید.
+Cancel cash movement {0}?,حرکت نقدی {0} لغو شود؟
+Cancel Payment,لغو پرداخت
+Cancel Sale,لغو فروش
+Cancel Sale ?,لغو فروش؟
+Cancelled,لغو شد
+Cannot add an item with zero or negative quantity.,نمی توان یک مورد با مقدار صفر یا منفی اضافه کرد.
+Cannot clear cache while offline,هنگام آفلاین نمی توان حافظه پنهان را پاک کرد
+Cannot redeem customer credit more than invoice total,نمی توان اعتبار مشتری را بیش از کل فاکتور بازخرید کرد
+Cannot redeem gift cards more than invoice total,نمی‌توان کارت‌های هدیه را بیش از کل فاکتور بازخرید کرد
+Cannot Save Offline Invoice:,فاکتور آفلاین ذخیره نمی شود:
+Cannot Save Offline Payment:,نمی توان پرداخت آفلاین را ذخیره کرد:
+Card,کارت
+Card / Online,کارت / آنلاین
+Card health after the last live lookup,سلامت کارت پس از آخرین جستجوی زنده
+Cards,کارت ها
+Cart,سبد خرید
+Cash,پول نقد
+Cash back to customers,برگشت پول نقد به مشتریان
+Cash Collections,مجموعه های نقدی
+Cash Deposit is disabled for this POS Profile.,سپرده نقدی برای این نمایه POS غیرفعال است.
+Cash Drawer Snapshot,عکس فوری کشو نقدی
+Cash In Hand,پول نقد در دست
+Cash Movement,جنبش نقدی
+Cash movement cancelled,حرکت نقدی لغو شد
+Cash movement deduction applied,کسر حرکت نقدی اعمال شد
+Cash movement deleted,حرکت نقدی حذف شد
+Cash movement is disabled for this POS Profile.,جابجایی پول نقد برای این نمایه POS غیرفعال است.
+Cash Movement is disabled in current POS Profile.,حرکت نقدی در نمایه POS فعلی غیرفعال است.
+Cash movement saved offline,حرکت پول نقد به صورت آفلاین ذخیره شد
+Cash movement submitted,حرکت نقدی ارسال شد
+Cash Movements,حرکات نقدی
+Cash payment cannot be less than invoice total when partial payment is not allowed,در صورتی که پرداخت جزئی مجاز نباشد، پرداخت نقدی نمی تواند کمتر از کل فاکتور باشد
+Cash returned after payment,پول نقد پس از پرداخت برگشت داده می شود
+Cashier,صندوقدار
+Cashier Access,دسترسی صندوقدار
+Cashier identity and appearance preferences.,هویت صندوقدار و ترجیحات ظاهری.
+Cashier PIN,پین صندوقدار
+Cashier PIN saved successfully.,پین صندوقدار با موفقیت ذخیره شد.
+Cashiers,صندوقدارها
+Cashier-wise,صندوقدار
+Categories,دسته بندی ها
+Category,دسته بندی
+Category / Brand / Variant Report,گزارش رده / نام تجاری / متغیر
+Category-wise,از نظر دسته بندی
+Category-wise Margin,حاشیه از نظر دسته بندی
+Certificate,گواهی
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,گواهی مفقود است یا قابل اعتماد نیست. QZ ممکن است گفتگوهای تأیید را نشان دهد.
+Certificate is trusted. Silent QZ printing is active.,گواهی قابل اعتماد است. چاپ QZ خاموش فعال است.
+Change,تغییر دهید
+Change allocation repaired,تخصیص تغییر تعمیر شد
+Change Price,تغییر قیمت
+Change Return,تغییر بازگشت
+Change Returned,تغییر برگشت
+Change terminal cashier,صندوق ترمینال را عوض کنید
+Charge Heads,سر شارژ
+Charges,اتهامات
+Charges not found,اتهامات پیدا نشد
+Check Balance,تعادل را بررسی کنید
+Check balance for any card. Supervisors can issue and top up cards here.,موجودی هر کارت را بررسی کنید. سرپرستان می‌توانند در اینجا کارت صادر و شارژ کنند.
+Check balance only,فقط موجودی را بررسی کنید
+Check for new commits,کامیت های جدید را بررسی کنید
+Check for Updates,به روز رسانی ها را بررسی کنید
+Check live balance before applying redemption,قبل از اعمال بازخرید، تعادل زنده را بررسی کنید
+Check live balance before redemption,قبل از بازخرید موجودی زنده را بررسی کنید
+Checking...,در حال بررسی...
+Cheque/Reference Date,تاریخ چک / مرجع
+Cheque/Reference No,شماره چک/مرجع
+Choose the cashier currently operating this terminal.,صندوقدار را انتخاب کنید که در حال حاضر این پایانه را اداره می کند.
+City,شهر
+Clear,پاک کردن
+Clear All,پاک کردن همه
+Clear all barcode items,تمام موارد بارکد را پاک کنید
+Clear all purchase order items,تمام موارد سفارش خرید را پاک کنید
+Clear Search,جستجو را پاک کنید
+Clearing local cache...,در حال پاک کردن حافظه پنهان محلی...
+Click to refresh,برای بازخوانی کلیک کنید
+Client CPU Lag:,تاخیر CPU مشتری:
+Client Memory Usage:,استفاده از حافظه مشتری:
+Client Metrics,معیارهای مشتری
+Close about dialog,بستن درباره گفتگو
+Close cashier switcher,تعویض صندوقدار را ببندید
+Close closing shift dialog,بستن گفتگوی shift
+Close column selector,انتخابگر ستون را ببندید
+Close Dialog,بستن دیالوگ
+Close drafts dialog,بستن گفتگوی پیش نویس ها
+Close invoice details dialog,بستن گفتگوی جزئیات فاکتور
+Close invoice management,مدیریت فاکتور را ببندید
+Close offline invoices dialog,گفتگوی فاکتورهای آفلاین را ببندید
+Close packing list dialog,بستن گفتگوی لیست بسته بندی
+Close returns dialog,بستن گفتگوی بازگشت
+Close sales orders dialog,بستن گفتگوی سفارشات فروش
+Close Scanner,بستن اسکنر
+Close scanner dialog,بستن گفتگوی اسکنر
+Close Settings,تنظیمات را ببندید
+Closing Amount,مبلغ بسته شدن
+Closing POS Shift,بستن POS Shift
+Closing Snapshot Available,بسته شدن عکس فوری موجود است
+Code,کد
+Code scanned successfully,کد با موفقیت اسکن شد
+COGS,COGS
+Collapse item details,کوچک کردن جزئیات مورد
+Collected,جمع آوری شد
+Cols,سرهنگ ها
+Columns,ستون ها
+commits,متعهد می شود
+Completed and active sales in this range,فروش کامل و فعال در این محدوده
+Completed returns will appear here.,بازگشت های تکمیل شده در اینجا ظاهر می شود.
+Confirm,تایید کنید
+Confirm Close,بستن را تایید کنید
+Confirm Mobile Number,شماره موبایل را تایید کنید
+Confirm PIN,پین را تایید کنید
+Connect,اتصال
+Connect printer and manage certificate,چاپگر را وصل کنید و گواهی را مدیریت کنید
+Connecting to QZ Tray...,در حال اتصال به سینی QZ...
+Connection problem while submitting invoice,مشکل اتصال هنگام ارسال فاکتور
+Connections:,اتصالات:
+Connectivity and cached prerequisite status were rechecked.,اتصال و وضعیت پیش نیاز حافظه پنهان مجدداً بررسی شد.
+Continue Editing,ادامه ویرایش
+Could not fetch latest balance from server,آخرین موجودی از سرور دریافت نشد
+Count,بشمار
+Country,کشور
+Coupon,کوپن
+Coupons,کوپن
+Cover,پوشش
+CPU Cores:,هسته های CPU:
+Create,ایجاد کنید
+Create and load a new prepaid card,یک کارت اعتباری جدید ایجاد و بارگیری کنید
+Create and preload a new gift card,یک کارت هدیه جدید ایجاد و از قبل بارگیری کنید
+Create Bill,بیل ایجاد کنید
+Create Customer,مشتری ایجاد کنید
+Create New Item,آیتم جدید ایجاد کنید
+Create or change your PIN,پین خود را ایجاد یا تغییر دهید
+Create PIN,پین ایجاد کنید
+Create POS Opening Shift,Pos Opening Shift را ایجاد کنید
+Create Purchase Order,ایجاد سفارش خرید
+Create Return,ایجاد بازگشت
+Create return from invoice,ایجاد بازگشت از فاکتور
+Create Supplier,تامین کننده ایجاد کنید
+Credit and Output,اعتبار و خروجی
+Credit Note,یادداشت اعتباری
+Credit Outstanding,اعتبار معوق
+Credit sales remaining to be collected,فروش اعتباری باقی مانده است که باید جمع آوری شود
+Critical,انتقادی
+Currency,ارز
+Current,فعلی
+Current Event Loop Lag:,تاخیر حلقه رویداد فعلی:
+Current Month,ماه جاری
+Current PIN,پین فعلی
+Current Profile,نمایه فعلی
+Current redeemable value on the gift card,ارزش قابل بازخرید فعلی در کارت هدیه
+Current User,کاربر فعلی
+Custom,سفارشی
+Custom Due Days,روزهای سررسید سفارشی
+Custom items per page,موارد سفارشی در هر صفحه
+Customer,مشتری
+Customer already selected,مشتری قبلاً انتخاب شده است
+Customer Balance,موجودی مشتری
+Customer balance unavailable offline,موجودی مشتری به صورت آفلاین در دسترس نیست
+Customer created successfully.,مشتری با موفقیت ایجاد شد.
+Customer creation failed.,ایجاد مشتری ناموفق بود.
+Customer Details,جزئیات مشتری
+Customer display channel is missing,کانال نمایش مشتری وجود ندارد
+Customer display was blocked. Please allow pop-ups for this site.,نمایش مشتری مسدود شد. لطفاً پنجره های بازشو را برای این سایت مجاز کنید.
+Customer group is required,گروه مشتری الزامی است
+Customer is required to add payment,مشتری ملزم به اضافه کردن پرداخت است
+Customer Name is required,نام مشتری الزامی است
+Customer not selected,مشتری انتخاب نشده است
+Customer Report,گزارش مشتری
+Customer saved offline,مشتری به صورت آفلاین ذخیره شد
+Customer Screen,صفحه نمایش مشتری
+Customer territory is required,قلمرو مشتری مورد نیاز است
+Customer updated successfully.,مشتری با موفقیت به روز شد.
+Customer-facing tools and printer setup.,ابزارهای رو به مشتری و تنظیم چاپگر.
+Customers,مشتریان
+Customers not found,مشتریان پیدا نشد
+Daily cashier actions without scrolling.,اقدامات صندوقدار روزانه بدون پیمایش.
+Daily Sales,فروش روزانه
+Daily Sales Summary,خلاصه فروش روزانه
+Data loaded in form. Review and submit.,داده ها در فرم بارگذاری شده اند. بررسی و ارسال کنید.
+Database Health,پایگاه داده سلامت
+Database health affects overall system speed and reliability.,سلامت پایگاه داده بر سرعت و قابلیت اطمینان کلی سیستم تأثیر می گذارد.
+Database Info,اطلاعات پایگاه داده
+Date,تاریخ
+Day ?,روز؟
+days,روز
+Day-wise (MTD),روزانه (MTD)
+Day-wise Movement,جنبش روزانه
+Dead Stock,سهام مرده
+Dead Stock Items,اقلام سهام مرده
+Decrease quantity,مقدار را کاهش دهید
+Default,پیش فرض
+Default:,پیش فرض:
+Delete,حذف کنید
+Delete cancelled cash movement {0}?,حرکت نقدی لغو شده {0} حذف شود؟
+Delete Draft,حذف پیش نویس
+Delete draft invoice,حذف پیش نویس فاکتور
+Delete draft invoice {0}?,پیش نویس فاکتور {0} حذف شود؟
+Delete Invoice,حذف فاکتور
+Delete offline invoice,فاکتور آفلاین را حذف کنید
+Delivered,تحویل داده شد
+Delivery Charges,هزینه های تحویل
+Delivery Information,اطلاعات تحویل
+Delivery Note {0} created,یادداشت تحویل {0} ایجاد شد
+Delivery note created,یادداشت تحویل ایجاد شد
+Deployed Bundle:,بسته توسعه یافته:
+Deposit,سپرده گذاری
+Description,توضیحات
+Detailed Supplier Breakdown,تفکیک تامین کننده
+Detecting formats:,تشخیص فرمت ها:
+Device Memory:,حافظه دستگاه:
+Difference,تفاوت
+Difference (In Company Currency),تفاوت (در واحد پول شرکت)
+Disable offline mode first to recheck live connectivity.,برای بررسی مجدد اتصال زنده ابتدا حالت آفلاین را غیرفعال کنید.
+Disconnect,قطع کن
+discount,تخفیف
+Discount %,درصد تخفیف
+Discount / Void / Return Report,گزارش تخفیف / باطل / بازگشت
+Discount Amount,مبلغ تخفیف
+Discount limited by POS Profile,تخفیف با نمایه POS محدود شده است
+Discounted Invoices,فاکتورهای تخفیف دار
+Discounts,تخفیف ها
+Dismiss,رد کردن
+Download Certificate,دانلود گواهی
+Draft,پیش نویس
+Draft invoice deleted,پیش نویس فاکتور حذف شد
+Draft source,منبع پیش نویس
+Drafts,پیش نویس ها
+Due {0},سررسید {0}
+Due Date,سررسید
+Duplicate,تکراری
+Edit customer,مشتری را ویرایش کنید
+Edit discount amount,مبلغ تخفیف را ویرایش کنید
+Edit discount percentage,درصد تخفیف را ویرایش کنید
+Edit Gift Application,ویرایش برنامه هدیه
+Edit item name,نام مورد را ویرایش کنید
+Edit quantity,کمیت را ویرایش کنید
+Edit rate,نرخ ویرایش
+Edit unit of measure,ویرایش واحد اندازه گیری
+Edited,ویرایش شد
+Employee,کارمند
+Enable background sync,همگام سازی پس زمینه را فعال کنید
+Enable Customer Display in POS Profile first.,ابتدا نمایش مشتری را در نمایه POS فعال کنید.
+Enter a PIN.,یک پین وارد کنید.
+Enter a valid grams value,یک مقدار گرم معتبر وارد کنید
+Enter new price list rate,نرخ جدید لیست قیمت را وارد کنید
+Enter Quantity,مقدار را وارد کنید
+Enter the cashier PIN to continue.,برای ادامه، پین صندوقدار را وارد کنید.
+Enter the current PIN first.,ابتدا پین فعلی را وارد کنید.
+"Enter the current PIN, then choose a new one.",پین فعلی را وارد کنید، سپس یک پین جدید انتخاب کنید.
+Enter valid grams for scale barcode,گرم های معتبر را برای بارکد مقیاس وارد کنید
+Entries,ورودی ها
+Error accessing camera:,خطا در دسترسی به دوربین:
+Error calculating prices,خطا در محاسبه قیمت ها
+Error fetching customer balance,خطا در واکشی موجودی مشتری
+Error in change calculations!,خطا در محاسبات تغییر!
+Error Loading Data,خطا در بارگیری داده ها
+Error loading invoice details,خطا در بارگیری جزئیات فاکتور
+Error processing invoice,خطا در پردازش فاکتور
+Error processing payment,خطا در پردازش پرداخت
+Error searching invoices,خطا در جستجوی فاکتورها
+Error submitting invoice:,خطا در ارسال فاکتور:
+Error submitting invoice: {0},خطا در ارسال فاکتور: {0}
+Error submitting invoice: No response from server,خطا در ارسال فاکتور: پاسخی از طرف سرور دریافت نشد
+Error updating currency,خطا در به‌روزرسانی ارز
+Error updating item details,خطا در به‌روزرسانی جزئیات مورد
+Est. Purchase,برآورد خرید
+Est. Value,برآورد ارزش
+Event-loop lag measures how busy your browser is. Lower is better.,تاخیر حلقه رویداد میزان شلوغی مرورگر شما را اندازه گیری می کند. پایین تر بهتر است
+Every,هر
+Exchange Rate,نرخ ارز
+Expand item details,جزئیات مورد را بزرگ کنید
+Expected Amount (In Company Currency),مبلغ مورد انتظار (به واحد پول شرکت)
+Expected Cash,پول نقد مورد انتظار
+Expected cash on hand grouped by currency,وجه نقد مورد انتظار دسته بندی شده بر اساس ارز
+Expected vs Actual,مورد انتظار در مقابل واقعی
+Expense,هزینه
+Expense Account (Optional Override),حساب هزینه (نسخ اختیاری)
+Expense account is required.,حساب هزینه مورد نیاز است.
+Expenses and deposits posted during this shift,هزینه ها و سپرده های ثبت شده در این شیفت
+Expired,منقضی شده است
+Failed to auto reconcile payments.,تطبیق خودکار پرداخت ها انجام نشد.
+Failed to cancel cash movement,حرکت نقدی لغو نشد
+Failed to clear cache,حافظه پنهان پاک نشد
+Failed to create item,مورد ایجاد نشد
+Failed to create supplier,تامین کننده ایجاد نشد
+Failed to delete cash movement,حرکت پول نقد حذف نشد
+Failed to generate scale barcode. Using item barcode only.,بارکد مقیاس تولید نشد. فقط با استفاده از بارکد مورد.
+Failed to load cash movement context.,زمینه حرکت نقدی بارگیری نشد.
+Failed to load dashboard data.,داده های داشبورد بارگیری نشد.
+Failed to reload invoice from server,بارگیری مجدد فاکتور از سرور انجام نشد
+Failed to submit cash movement,حرکت نقدی ارسال نشد
+Failed to sync offline cash movements,همگام سازی حرکات نقدی آفلاین انجام نشد
+Fast cashier actions for active shifts.,اقدامات صندوقدار سریع برای شیفت های فعال.
+Fast Moving Items,اقلام با حرکت سریع
+Fees,هزینه ها
+Fetch the latest offline prerequisite updates,آخرین به‌روزرسانی‌های پیش‌نیاز آفلاین را دریافت کنید
+Find a sales order quickly and load it into the current sale.,یک سفارش فروش را به سرعت پیدا کنید و آن را در فروش فعلی بارگذاری کنید.
+Fixing payment amounts for return invoice...,تثبیت مبالغ پرداخت برای فاکتور برگشتی...
+Flash Off,فلاش خاموش
+Flash On,فلاش روشن
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","برای اقلام ""دسته محصول""، انبار، شماره سریال و شماره دسته از جدول ""لیست بسته بندی"" در نظر گرفته می شود. اگر انبار و شماره دسته‌ای برای همه اقلام بسته‌بندی برای هر یک از آیتم‌های «بسته محصول» یکسان باشد، این مقادیر می‌توانند در جدول کالای اصلی وارد شوند. مقادیر به جدول ""لیست بسته بندی"" کپی می شود."
+Free,رایگان
+Free Qty,تعداد رایگان
+Frequency,فرکانس
+from,از
+From Date,از تاریخ
+Fulfillment Details,جزئیات تحقق
+Full Name,نام کامل
+Gain,به دست آوردن
+Generate a fresh prepaid card and start it with an opening balance.,یک کارت پیش‌پرداخت تازه ایجاد کنید و آن را با موجودی افتتاحیه شروع کنید.
+Generate and install the certificate to allow fully silent printing without trust prompts.,گواهی را ایجاد و نصب کنید تا امکان چاپ کاملا بی صدا و بدون درخواست اعتماد فراهم شود.
+Generate Certificate,تولید گواهی
+Generated scale barcode: {0},بارکد مقیاس تولید شده: {0}
+Get Payments,پرداخت ها را دریافت کنید
+Gift Card,کارت هدیه
+Gift card amount must be greater than zero.,مبلغ کارت هدیه باید بیشتر از صفر باشد.
+Gift Card Code,کد کارت هدیه
+Gift card code is required for redemption,کد کارت هدیه برای بازخرید الزامی است
+Gift card code is required.,کد کارت هدیه الزامی است.
+Gift card issued successfully.,کارت هدیه با موفقیت صادر شد.
+Gift card loaded successfully.,کارت هدیه با موفقیت بارگیری شد.
+Gift Card Management,مدیریت کارت هدیه
+Gift card payment,پرداخت کارت هدیه
+Gift card redemption requires an online connection,بازخرید کارت هدیه نیاز به اتصال آنلاین دارد
+Gift card topped up successfully.,کارت هدیه با موفقیت تکمیل شد.
+Gift Cards,کارت های هدیه
+Go to Frappe Desk,به میز فراپه بروید
+Grand Total,کل بزرگ
+Gross Margin,حاشیه ناخالص
+Gross Profit,سود ناخالص
+Gross Sales,فروش ناخالص
+Group not found,گروه پیدا نشد
+"Grouped controls for terminal, UI, and session settings.",کنترل‌های گروه‌بندی شده برای تنظیمات ترمینال، رابط کاربری و تنظیمات جلسه.
+Grouped totals for each payment method and currency,مجموع گروه بندی شده برای هر روش پرداخت و ارز
+Hide,پنهان کردن
+Hide Gift Card,پنهان کردن کارت هدیه
+Hide Non Essential Fields,فیلدهای غیر ضروری را مخفی کنید
+Hide quantity decimals,مخفی کردن اعشار کمیت
+Hide search tools,پنهان کردن ابزارهای جستجو
+Hide zero rated items,موارد دارای رتبه صفر را پنهان کنید
+High,بالا
+History,تاریخچه
+Hourly (Today),ساعتی (امروز)
+How this section works,نحوه کار این بخش
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.",اگر داده‌های قدیمی باقی می‌مانند، تنظیمات > آفلاین و همگام‌سازی را باز کنید و دوباره در حالت آنلاین، Rebuild Offline Data را اجرا کنید.
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.",اگر هشدار ادامه داشت، تنظیمات > آفلاین و همگام‌سازی را باز کنید، سپس Refresh Offline Data یا Rebuild Offline Data را اجرا کنید.
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,گواهی را به سینی QZ وارد کنید و سینی QZ را در هر دستگاه POS راه اندازی مجدد کنید.
+In,در
+In stock: {0},موجود در انبار: {0}
+Include Batch / Serial,شامل دسته / سریال
+Include Price,شامل قیمت
+Increase quantity,مقدار را افزایش دهید
+IndexedDB,IndexedDB
+Initial Amount,مبلغ اولیه
+Initialize your shift with opening balances,شیفت خود را با ترازهای اولیه آغاز کنید
+Initializing application...,در حال راه اندازی برنامه...
+"Inspect cache, sync, and prerequisite status",حافظه پنهان، همگام سازی و وضعیت پیش نیاز را بررسی کنید
+Installed Applications,برنامه های کاربردی نصب شده
+Insufficient stock:\n{0},موجودی کافی نیست:\n{0}
+Invalid rate,نرخ نامعتبر است
+Inventory Status Report,گزارش وضعیت موجودی
+Invoice,فاکتور
+Invoice {0} is Submitted,فاکتور {0} ارسال شد
+Invoice {0} processed successfully,فاکتور {0} با موفقیت پردازش شد
+Invoice {0} submission failed,فاکتور {0} ارسال نشد
+Invoice {0} was already submitted,فاکتور {0} قبلا ارسال شده بود
+Invoice Adjustments,تنظیمات فاکتور
+Invoice Change,تغییر فاکتور
+Invoice Details,جزئیات فاکتور
+Invoice is still in draft after background submission.,فاکتور پس از ارسال پیش‌زمینه هنوز در پیش‌نویس است.
+Invoice Items,اقلام فاکتور
+Invoice Management,مدیریت فاکتور
+Invoice Mgmt,فاکتور Mgmt
+Invoice saved offline,فاکتور به صورت آفلاین ذخیره شد
+Invoice submission failed,فاکتور ارسال نشد
+Invoice Submitted,فاکتور ارسال شد
+"Invoice value settled by loyalty points, not cash collection",ارزش فاکتور با امتیازات وفاداری تسویه می شود، نه جمع آوری نقدی
+Invoices,فاکتورها
+Invoices already past due date,فاکتورها از قبل تاریخ سررسید گذشته است
+Invoices saved as POS Invoices,فاکتورها به عنوان فاکتورهای POS ذخیره می شوند
+Invoices still carrying balances,فاکتورها همچنان دارای موجودی هستند
+Issue Mode,حالت مشکل
+Issue New Card,صدور کارت جدید
+Issue Workflow,موضوع گردش کار
+"Issue, top up, and check",صادر کنید، شارژ کنید و بررسی کنید
+Item,مورد
+Item / Product Sales Report,گزارش فروش اقلام / محصول
+Item {0} added to invoice,مورد {0} به فاکتور اضافه شد
+Item '{0}' has no barcode,"مورد ""{0}"" بدون بارکد است"
+Item Code,کد مورد
+Item created successfully,مورد با موفقیت ایجاد شد
+Item is out of stock,موجودی کالا تمام شده است
+Item Name,نام مورد
+Item not found,مورد پیدا نشد
+Item order updated,سفارش کالا به روز شد
+Item Selector Settings,تنظیمات انتخابگر مورد
+Items,موارد
+Items added in POS will appear here automatically.,موارد اضافه شده در POS به طور خودکار در اینجا ظاهر می شوند.
+Items added to invoice,موارد اضافه شده به فاکتور
+Items per page,موارد در هر صفحه
+Items Sold,اقلام فروخته شده
+Items/Invoice,اقلام / فاکتور
+Item-wise Profitability,سودآوری از نظر آیتم
+Journal Entry,ورودی مجله
+json,json
+Just now,همین الان
+Keep offline prerequisites healthy and recover stale data safely.,پیش نیازهای آفلاین را سالم نگه دارید و اطلاعات قدیمی را با خیال راحت بازیابی کنید.
+Labels,برچسب ها
+"Language, theme, terminal tools, and session controls.",زبان، موضوع، ابزار ترمینال و کنترل‌های جلسه.
+Last,آخرین
+Last 14 Days (Paid vs Pending),14 روز گذشته (پرداخت در مقابل معلق)
+Last 14 Days Activity,فعالیت 14 روز گذشته
+Last 14 Days Gross Profit,سود ناخالص 14 روز گذشته
+Last 14 Days Purchases,خریدهای 14 روز گذشته
+Last 14 Days Tax/Charges,مالیات / هزینه های 14 روز گذشته
+Last sync:,آخرین همگام سازی:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},آخرین همگام سازی: {0} | خوب: {1} | ناموفق: {2} | رد شد: {3}
+Latest entries for current shift,آخرین ورودی ها برای شیفت فعلی
+Lead Time,زمان سرب
+Limited,محدود
+lines,خطوط
+List,فهرست کنید
+Live Snapshot,عکس لحظه ای زنده
+Load a POS profile and cashier first.,ابتدا یک نمایه POS و صندوقدار بارگیری کنید.
+Load More Invoices,فاکتورهای بیشتر را بارگیری کنید
+Load previously saved invoices,فاکتورهای ذخیره شده قبلی را بارگیری کنید
+Load Sale,فروش بار
+Load Sales Invoice,بارگذاری فاکتور فروش
+Loading app data...,در حال بارگیری داده های برنامه...
+Loading customer database...,در حال بارگیری پایگاه داده مشتریان...
+Loading customers...,در حال بارگیری مشتریان...
+Loading database stats...,در حال بارگیری آمار پایگاه داده...
+Loading details...,در حال بارگیری جزئیات...
+Loading invoice history...,در حال بارگیری سابقه فاکتور...
+Loading items...,در حال بارگیری موارد...
+Loading product catalog...,در حال بارگیری کاتالوگ محصولات...
+Loading return invoices...,در حال بارگیری فاکتورهای برگشتی...
+Loading server CPU/memory usage...,در حال بارگیری استفاده از CPU/حافظه سرور...
+Loading suppliers...,بارگیری تامین کنندگان...
+Loading unpaid invoices...,در حال بارگیری فاکتورهای پرداخت نشده...
+Loading view...,در حال بارگیری نمای...
+Loading...,در حال بارگیری...
+Local storage is unavailable. Switching to online-only mode.,فضای ذخیره‌سازی محلی در دسترس نیست. تغییر به حالت فقط آنلاین
+localStorage,محل ذخیره سازی
+Location Performance,عملکرد مکان
+Locations,مکان ها
+Lock Screen,صفحه قفل
+Lookup Workflow,جستجوی گردش کار
+Loss,از دست دادن
+Low,کم
+Low Stock,موجودی کم
+Low Stock Alerts,هشدارهای سهام کم
+Low Stock Items,اقلام کم موجودی
+Low Stock Threshold,آستانه سهام پایین
+Low Stock Total,کل سهام کم
+Lowest Margin,کمترین حاشیه
+Low-frequency maintenance and system details.,تعمیر و نگهداری فرکانس پایین و جزئیات سیستم.
+Loyalty Redeemed,وفاداری بازخرید شد
+Loyalty Redemption,رستگاری وفاداری
+Make New Payment,پرداخت جدید انجام دهید
+Manage all,همه را مدیریت کنید
+Manage and synchronize your offline transactions,معاملات آفلاین خود را مدیریت و همگام کنید
+Manage Cashier PIN,پین صندوقدار را مدیریت کنید
+"Manage offline tools, terminal controls, and maintenance from one workspace.",ابزارهای آفلاین، کنترل های ترمینال و نگهداری را از یک فضای کاری مدیریت کنید.
+manual,کتابچه راهنمای کاربر
+"Manual codes, barcode scans, and QR scans work in the same field",کدهای دستی، اسکن بارکد و اسکن QR در یک زمینه کار می کنند
+Manual offline mode is enabled,حالت آفلاین دستی فعال است
+Margin,حاشیه
+Maximum available quantity is {0}. Quantity adjusted to match stock.,حداکثر مقدار موجود {0} است. مقدار برای مطابقت با سهام تنظیم شده است.
+Maximum discount amount for this offer item is {0}.,حداکثر مقدار تخفیف برای این مورد پیشنهادی {0} است.
+Maximum discount percentage for this offer item is {0}%.,حداکثر درصد تخفیف برای این مورد پیشنهادی {0}٪ است.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,حداکثر مقدار پیشنهاد {0} است. مقدار به حد مجاز تنظیم شده است.
+Medium,متوسط
+Method-wise Collections,مجموعه های روش عاقلانه
+Minimum allowed rate for this offer item is {0}.,حداقل نرخ مجاز برای این مورد پیشنهادی {0} است.
+Minimum Qty,حداقل تعداد
+Mobile No,شماره موبایل
+Mode,حالت
+Mode of Payment,نحوه پرداخت
+Month,ماه
+Month ?,ماه؟
+Monthly Profit,سود ماهانه
+Monthly Sales,فروش ماهانه
+Monthly Sales Summary,خلاصه فروش ماهانه
+Month-wise,ماهانه
+Most Active Cashiers,فعال ترین صندوقداران
+Movement Type,نوع حرکت
+Movements,حرکات
+Multi Currency,چند ارز
+N/A,N/A
+Name,نام
+Negative Stock,سهام منفی
+Negative Stock Items,اقلام سهام منفی
+Negative values not allowed,مقادیر منفی مجاز نیست
+Net,خالص
+Net Qty,تعداد خالص
+Net Sales,فروش خالص
+Net Value,ارزش خالص
+Never,هرگز
+New changes are ready to load,تغییرات جدید آماده بارگیری هستند
+New Item,آیتم جدید
+New Offer Available,پیشنهاد جدید موجود است
+New PIN,پین جدید
+New rate,نرخ جدید
+Next unit of measure,واحد اندازه گیری بعدی
+No attribute data found.,هیچ داده مشخصه ای یافت نشد.
+No Barcode,بدون بارکد
+No barcode found for UOM '{0}',"بارکدی برای UOM ""{0}"" یافت نشد"
+No branch/location data found.,هیچ داده شعبه/مکانی یافت نشد.
+No brand data found.,هیچ داده برندی پیدا نشد.
+No cached gift card balance is available offline.,موجودی کارت هدیه ذخیره شده به صورت آفلاین در دسترس نیست.
+No camera found on this device. Please ensure your device has a working camera.,دوربینی در این دستگاه یافت نشد. لطفاً مطمئن شوید که دستگاه شما دارای یک دوربین در حال کار است.
+No capability warnings recorded yet.,هنوز هیچ هشداری درباره قابلیت ثبت نشده است.
+No cash expected for this shift.,برای این تغییر وجه نقدی پیش بینی نمی شود.
+No cash mode configured,هیچ حالت نقدی پیکربندی نشده است
+No cash movement type is allowed for this POS Profile.,هیچ نوع جابجایی وجه نقد برای این نمایه POS مجاز نیست.
+No cashier PIN is set yet. Create one now.,هنوز پین صندوقدار تنظیم نشده است. اکنون یکی ایجاد کنید.
+No cashier profiles are available for this POS profile yet.,هنوز هیچ نمایه صندوقدار برای این نمایه POS موجود نیست.
+No cashier-wise discount/void/return activity.,هیچ فعالیتی برای تخفیف/باطل/بازگشت نقدی وجود ندارد.
+No category data found.,هیچ داده دسته ای یافت نشد.
+No category profitability data found.,هیچ داده سودآوری دسته یافت نشد.
+No change returned recorded for this shift.,هیچ تغییری برای این تغییر ثبت نشده است.
+No change-allocation invoices match the current filters.,هیچ فاکتور تخصیص تغییری با فیلترهای فعلی مطابقت ندارد.
+No charge head breakdown found.,هیچ خرابی سر شارژ پیدا نشد.
+No Company Selected,هیچ شرکتی انتخاب نشده است
+No customer sales data found.,هیچ داده فروش مشتری یافت نشد.
+No day-wise discount/void/return trend.,بدون تخفیف روزانه / باطل / روند بازگشت.
+No day-wise payment data found.,هیچ داده پرداخت روزانه یافت نشد.
+No day-wise profitability trend found.,روند سودآوری روزانه یافت نشد.
+No day-wise purchase data found.,هیچ داده خرید روزانه یافت نشد.
+No day-wise sales trend found.,روند فروش روزانه یافت نشد.
+No day-wise tax/charges trend found.,روند روزانه مالیات/هزینه یافت نشد.
+No dead stock items.,بدون اقلام موجودی مرده
+No due date,بدون تاریخ سررسید
+No exact repair match found for this invoice,هیچ منطبق تعمیر دقیقی برای این فاکتور یافت نشد
+No hourly sales trend found for today.,هیچ روند فروش ساعتی برای امروز یافت نشد.
+No invoice activity found.,هیچ فعالیت فاکتوری یافت نشد.
+No invoices found,فاکتوری پیدا نشد
+No invoices found. Try different search criteria.,فاکتوری پیدا نشد معیارهای جستجوی مختلف را امتحان کنید.
+No invoices recorded for this shift.,هیچ فاکتوری برای این شیفت ثبت نشده است.
+No item profitability data found.,هیچ داده سودآوری موردی یافت نشد.
+No item sales data found for this period.,هیچ داده فروش موردی برای این دوره یافت نشد.
+No items found,هیچ موردی یافت نشد
+No items in cart,کالایی در سبد خرید وجود ندارد
+No items with barcodes to print,هیچ موردی با بارکد برای چاپ وجود ندارد
+No location-wise top item data found.,هیچ داده اقلام برتر از نظر مکان یافت نشد.
+No low stock alerts right now.,در حال حاضر هیچ هشداری برای سهام کم وجود ندارد.
+No low stock items.,بدون اقلام کم موجودی
+No matching items in cart,هیچ مورد منطبقی در سبد خرید وجود ندارد
+No month-wise sales trend found.,روند فروش ماهانه یافت نشد.
+No negative stock items.,بدون اقلام منفی سهام
+No notifications yet,هنوز اطلاعیه ای وجود ندارد
+No offline cash movement synced.,هیچ حرکت نقدی آفلاین همگام سازی نشده است.
+No offline invoices pending synchronization,هیچ فاکتور آفلاینی در انتظار همگام سازی نیست
+No offline sync issues recorded yet.,هنوز مشکلی برای همگام سازی آفلاین ثبت نشده است.
+No out-of-stock items.,بدون اقلام خارج از انبار
+No outstanding credit invoices for this shift.,هیچ صورت حساب اعتباری معوقی برای این تغییر وجود ندارد.
+No payment collection data found.,هیچ داده جمع آوری پرداخت یافت نشد.
+No payment rows available on this invoice.,هیچ ردیف پرداختی در این فاکتور موجود نیست.
+No payments registered for this shift.,هیچ پرداختی برای این تغییر ثبت نشده است.
+No pending balances in this period.,موجودی معلق در این دوره وجود ندارد.
+No pending offline invoices,فاکتورهای آفلاین معلق وجود ندارد
+No Print Formats Found,هیچ فرمت چاپی یافت نشد
+No profiles found for selected scope. Falling back to current profile failed.,هیچ نمایه ای برای محدوده انتخاب شده یافت نشد. بازگشت به نمایه فعلی انجام نشد.
+No recent customer activity found.,هیچ فعالیت اخیر مشتری پیدا نشد.
+No recent stock entries found.,هیچ ورودی اخیر سهام پیدا نشد.
+No records found,هیچ رکوردی یافت نشد
+No reorder suggestions right now.,در حال حاضر پیشنهادی برای سفارش مجدد وجود ندارد.
+No repeat customers in this period.,هیچ مشتری تکراری در این دوره وجود ندارد.
+No response from server,بدون پاسخ از سرور
+No return invoices found,هیچ فاکتور برگشتی یافت نشد
+No return item trend found.,هیچ روند بازگشتی یافت نشد.
+No returnable items found for this invoice,هیچ مورد قابل برگشتی برای این فاکتور یافت نشد
+No returns were processed in this shift.,هیچ بازگشتی در این شیفت پردازش نشد.
+No risk activity found.,هیچ فعالیت ریسکی یافت نشد.
+No sales activity found for this period.,هیچ فعالیت فروش برای این دوره یافت نشد.
+No slow moving items.,هیچ آیتم آهسته حرکت می کند.
+No staff sales activity found.,هیچ فعالیت فروش کارکنان یافت نشد.
+No stock movement for this period.,حرکت سهام برای این دوره وجود ندارد.
+No submitted cash movements in this shift.,هیچ حرکت نقدی ارسالی در این شیفت وجود ندارد.
+No supplier purchases found in this month.,هیچ خریدی از تامین کننده در این ماه یافت نشد.
+No suppliers found for this period.,هیچ تامین کننده ای برای این دوره پیدا نشد.
+No sync trigger has run yet in this session.,هیچ ماشه همگام‌سازی هنوز در این جلسه اجرا نشده است.
+No tax head breakdown found.,هیچ تفکیک سر مالیات یافت نشد.
+No top items found for this location.,هیچ مورد برتر برای این مکان یافت نشد.
+No unpaid invoices,بدون فاکتور پرداخت نشده
+No variant data found.,هیچ گونه داده ای یافت نشد.
+No week-wise sales trend found.,هیچ روند فروش هفته ای یافت نشد.
+No.,خیر
+Nobile Number,شماره نوبیل
+Not available,در دسترس نیست
+Not checked,بررسی نشده است
+Not selected,انتخاب نشده است
+Not Set,تنظیم نشده است
+Notifications,اطلاعیه ها
+Offer,پیشنهاد
+Offer Applied,پیشنهاد اعمال شد
+Offer criteria exceeded,از معیارهای پیشنهاد فراتر رفت
+Offer Item,مورد پیشنهاد
+Offer item unavailable,مورد پیشنهاد در دسترس نیست
+Offer Removed,پیشنهاد حذف شد
+Offer UOM cannot be changed,پیشنهاد UOM قابل تغییر نیست
+Offer?,پیشنهاد؟
+Offers,ارائه می دهد
+Offline,آفلاین
+Offline & Sync,آفلاین و همگام سازی
+Offline Capabilities,قابلیت های آفلاین
+Offline data status refreshed,وضعیت داده های آفلاین به روز شد
+Offline diagnostics,تشخیص آفلاین
+Offline Invoices,فاکتورهای آفلاین
+Offline invoices status,وضعیت فاکتورهای آفلاین
+Offline invoices synced,فاکتورهای آفلاین همگام سازی شدند
+Offline Queue: {0},صف آفلاین: {0}
+Offline rebuild guidance,راهنمای بازسازی آفلاین
+Offline restore is unavailable for this session.,بازیابی آفلاین برای این جلسه در دسترس نیست.
+Offline selling is available with degraded capabilities.,فروش آفلاین با قابلیت‌های ضعیف در دسترس است.
+Offline snapshot does not match the current POS state.,عکس فوری آفلاین با وضعیت فعلی POS مطابقت ندارد.
+Offline Status,وضعیت آفلاین
+"Offline, terminal, and system controls",کنترل های آفلاین، ترمینال و سیستم
+OK,باشه
+Online,آنلاین
+Open actions menu,منوی اقدامات را باز کنید
+Open balance to collect,باز کردن موجودی برای جمع آوری
+Open Customer Display,نمایش مشتری را باز کنید
+Open drawer,کشو را باز کنید
+Open invoices,فاکتورها را باز کنید
+Open Payments?,پرداخت ها را باز کنید؟
+Open POS home,خانه POS را باز کنید
+Open this screen from POS Menu -> Open Customer Display.,این صفحه را از منوی POS -> صفحه نمایش مشتری را باز کنید.
+OpenCV image processing enabled - Enhanced barcode detection,پردازش تصویر OpenCV فعال شد - تشخیص بارکد پیشرفته
+OpenCV image processing unavailable on this device,پردازش تصویر OpenCV در این دستگاه در دسترس نیست
+OpenCV Off,OpenCV خاموش
+OpenCV On,OpenCV روشن است
+OpenCV processing disabled,پردازش OpenCV غیرفعال شد
+Opening Amount,مبلغ افتتاحیه
+Opening Cash,باز کردن پول نقد
+options,گزینه ها
+Order,سفارش دهید
+Original,اصل
+Other,دیگر
+Out,بیرون
+Out of Stock,موجود نیست
+Out of Stock Items,اقلام خارج از انبار
+Outstanding,برجسته
+Outstanding Credit by Currency,اعتبار معوق بر اساس ارز
+Overdue,عقب افتاده
+Overpayment Change,تغییر اضافه پرداخت
+Overpayment change deducted: {0},تغییر اضافه پرداخت کسر شد: {0}
+Packing List,لیست بسته بندی
+Page Format,فرمت صفحه
+Page unavailable offline,صفحه آفلاین در دسترس نیست
+Paid,پرداخت شده است
+Paid (orig):,پرداخت شده (منشا):
+Paid Amount,مبلغ پرداخت شده
+Paid change cannot be greater than total change!,تغییر پرداختی نمی تواند بیشتر از کل تغییر باشد!
+Paid:,پرداخت شده:
+Parent Item,مورد والدین
+Partial,جزئی
+Partly Paid,تا حدی پرداخت شده
+Party Account,حساب حزب
+Party Type,نوع مهمانی
+Pause terminal until next cashier,توقف پایانه تا صندوقدار بعدی
+PAY,پرداخت کنید
+Payment,پرداخت
+Payment Account,حساب پرداخت
+Payment entries processed for Invoice {0},ورودی‌های پرداخت برای فاکتور {0} پردازش شد
+Payment Entry Type,نوع ورودی پرداخت
+Payment History,تاریخچه پرداخت
+Payment ID,شناسه پرداخت
+Payment Method Report,گزارش روش پرداخت
+Payment Methods,روش های پرداخت
+Payment of {0} received successfully.,پرداخت {0} با موفقیت دریافت شد.
+Payment Progress,پیشرفت پرداخت
+Payment Reconciliation,تطبیق پرداخت
+Payment request status could not be retrieved. Please try again,وضعیت درخواست پرداخت بازیابی نشد. لطفا دوباره امتحان کنید
+Payment Request took too long to respond. Please try requesting for payment again,پاسخ درخواست پرداخت خیلی طول کشید. لطفاً دوباره درخواست پرداخت کنید
+Payment saved offline,پرداخت به صورت آفلاین ذخیره شد
+Payment State,وضعیت پرداخت
+Payment Status,وضعیت پرداخت
+Payment submitted but print function could not be executed. Payment name not found.,پرداخت ارسال شد اما عملکرد چاپ اجرا نشد. نام پرداخت پیدا نشد.
+Payment submitted.,پرداخت ارسال شد.
+Payment Summary,خلاصه پرداخت
+Payments,پرداخت ها
+Payments are not open. Do you want to open payments and submit?,پرداخت ها باز نیست آیا می خواهید پرداخت ها را باز کنید و ارسال کنید؟
+Payments by Mode of Payment,پرداخت بر اساس روش پرداخت
+PDF,PDF
+Peak Hour,ساعت اوج
+Peak Memory:,اوج حافظه:
+Peak Server:,سرور اوج:
+Peak:,اوج:
+Pending,در انتظار
+Pending Amount,مبلغ معلق
+Pending count updated from {0} to {1},تعداد معلق از {0} به {1} به روز شد
+Pending Exposure,قرار گرفتن در معرض انتظار
+Pending Invoices,فاکتورهای معلق
+Pending Ratio,نسبت معلق
+Pending Sales,فروش معلق
+Pending sales: {0} | Cache usage: {1}%,فروش معلق: {0} | استفاده از حافظه پنهان: {1}%
+Pending Sync,در انتظار همگام سازی
+Pending: {0},در انتظار: {0}
+Pending: {0} | Synced: {1} | Draft: {2},در انتظار: {0} | همگام سازی شده: {1} | پیش نویس: {2}
+Per Page,در هر صفحه
+Personal,شخصی
+Personal preferences adjust the current cashier experience without changing the active POS route.,تنظیمات برگزیده شخصی، تجربه فعلی صندوقدار را بدون تغییر مسیر فعال POS تنظیم می کند.
+PIN confirmation does not match.,تأیید پین مطابقت ندارد.
+PIN must be 4 to 8 digits.,پین باید 4 تا 8 رقمی باشد.
+Please add at least one item.,لطفا حداقل یک مورد اضافه کنید.
+Please allow camera access to scan codes,لطفاً به دوربین اجازه دسترسی به کدهای اسکن را بدهید
+Please enter payment amount,لطفا مبلغ پرداخت را وارد کنید
+Please fill all required fields,لطفا تمام فیلدهای الزامی را پر کنید
+Please make a payment or select a payment,لطفا پرداخت را انجام دهید یا پرداخت را انتخاب کنید
+Please request phone payment or use another payment method,لطفاً پرداخت تلفنی را درخواست کنید یا از روش پرداخت دیگری استفاده کنید
+Please select a customer first,لطفا ابتدا یک مشتری را انتخاب کنید
+Please select a party,لطفا یک حزب را انتخاب کنید
+Please select a party before reconciling.,لطفا قبل از آشتی یک طرف را انتخاب کنید.
+Please select a valid movement type.,لطفاً یک نوع حرکت معتبر انتخاب کنید.
+Please select an invoice,لطفا یک فاکتور انتخاب کنید
+Please select company before reconciling.,لطفاً قبل از تطبیق شرکت را انتخاب کنید.
+Please set the customer's mobile number,لطفا شماره موبایل مشتری را تنظیم کنید
+Please try again or enter the item manually.,لطفاً دوباره امتحان کنید یا مورد را به صورت دستی وارد کنید.
+Please verify the barcode or check the item's availability.,لطفاً بارکد را تأیید کنید یا در دسترس بودن مورد را بررسی کنید.
+Points,امتیاز
+Popup blocked. Please allow popups.,پنجره بازشو مسدود شد. لطفاً به پنجره‌های بازشو اجازه دهید.
+POS,POS
+POS controls and maintenance,کنترل و نگهداری POS
+POS Expense is disabled for this POS Profile.,هزینه POS برای این نمایه POS غیرفعال است.
+POS is running with limited offline prerequisites.,POS با پیش نیازهای آفلاین محدود در حال اجرا است.
+POS Profile,نمایه POS
+Position the QR code or barcode within the scanning area,کد QR یا بارکد را در ناحیه اسکن قرار دهید
+Posting,ارسال کردن
+Posting and Price List,ارسال و لیست قیمت
+Posting Date,تاریخ ارسال
+Preparing background sync,در حال آماده سازی همگام سازی پس زمینه
+"Press OK to continue offline with a warning, or Cancel to retry.",برای ادامه آفلاین با اخطار، OK را فشار دهید یا برای تلاش مجدد، لغو را فشار دهید.
+Previous unit of measure,واحد اندازه گیری قبلی
+Price List,لیست قیمت
+Price List Rate,نرخ لیست قیمت
+Price list rate updated locally only,نرخ لیست قیمت فقط به صورت محلی به روز می شود
+Pricing & Discounts,قیمت و تخفیف
+Pricing Rule,قانون قیمت گذاری
+Print,چاپ کنید
+Print Draft,چاپ پیش نویس
+Print Format (Invoice),فرمت چاپ (فاکتور)
+Print Format (Order),فرمت چاپ (سفارش)
+Print invoice,چاپ فاکتور
+Print Purchase Invoice instead of PO,چاپ فاکتور خرید به جای PO
+Printer,چاپگر
+Processed returns impacting the shift totals,بازده های پردازش شده بر مجموع شیفت ها تأثیر می گذارد
+Processing Payment,پردازش پرداخت
+Processing payment entries for Invoice {0},در حال پردازش ورودی‌های پرداخت برای فاکتور {0}
+Profile,نمایه
+Profiles,پروفایل ها
+Profit,سود
+Profit: Invoice Item Estimate,سود: برآورد مورد فاکتور
+Profit: Stock Ledger (COGS),سود: دفتر کل سهام (COGS)
+Profitability Report,گزارش سودآوری
+Prorated return discount,تخفیف برگشتی متناسب
+Purchase Amount,مبلغ خرید
+Purchase Invoices,فاکتورهای خرید
+Purchase Order created,سفارش خرید ایجاد شد
+Qty,تعداد
+Qualified,واجد شرایط
+Quantity,مقدار
+Quantity exceeds available stock,مقدار از موجودی موجود بیشتر است
+Quick Actions,اقدامات سریع
+Quotation {0} is Submitted,نقل قول {0} ارسال شده است
+Quotation submitted,نقل قول ارسال شد
+QZ Tray connected.,سینی QZ متصل شد.
+QZ Tray is manually disconnected. Press Connect to enable it again.,سینی QZ به صورت دستی قطع می شود. برای فعال کردن دوباره آن را فشار دهید.
+QZ Tray is not connected.,سینی QZ متصل نیست.
+QZ Tray Setup,راه اندازی سینی QZ
+Rate,امتیاز دهید
+Rate adjusted to maximum allowed discount,نرخ با حداکثر تخفیف مجاز تنظیم شده است
+Ready,آماده است
+Ready to resume,آماده از سرگیری
+Ready!,آماده!
+Real-time POS insights for retail operations.,بینش POS در زمان واقعی برای عملیات خرده فروشی.
+Rebuild Offline Data,بازسازی داده های آفلاین
+Receive,دریافت کنید
+Receive now,اکنون دریافت کنید
+Received,دریافت کرد
+Received:,دریافت شده:
+Recent Movement Entries,نوشته های جنبش اخیر
+Recent updates about your invoices,به روز رسانی های اخیر در مورد فاکتورهای شما
+Recently Active Customers,مشتریان فعال اخیر
+Rechecking connection,در حال بررسی مجدد اتصال
+Reconcile payment methods and close shift,روش‌های پرداخت را تطبیق دهید و شیفت را ببندید
+Reconciling Payments,تطبیق پرداخت ها
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.",وقتی آنلاین هستید، مجدداً وصل شوید و این صفحه را باز کنید، سپس رفرش‌های آفلاین می‌توانند آن را بازیابی کنند.
+Reconnect online to refresh cached offline data from the server.,برای بازخوانی داده های آفلاین ذخیره شده از سرور، دوباره به صورت آنلاین متصل شوید.
+Recreate local offline prerequisites from scratch,پیش نیازهای آفلاین محلی را از ابتدا بازآفرینی کنید
+Recv:,Recv:
+Redeem,بازخرید
+Redeem / Scan,بازخرید / اسکن
+Redeem Amount,بازخرید مبلغ
+Redeem Mode,بازخرید حالت
+Redeemed Amount,مبلغ بازخرید شده
+Redeemed credit cannot be greater than its total.,اعتبار بازخرید شده نمی تواند بیشتر از کل آن باشد.
+Redemption and Totals,بازخرید و مجموع
+Reference,مرجع
+Refresh,تازه کردن
+Refresh Exchange Rate,نرخ ارز تازه کردن
+Refresh Offline Data,بازخوانی داده های آفلاین
+Refresh Printers,چاپگرها را تازه کنید
+Refund,بازپرداخت
+Release Notes,یادداشت های انتشار
+Reload,بارگذاری مجدد
+Reload customers,بارگیری مجدد مشتریان
+Reload Items,بارگیری مجدد موارد
+Reload Now,اکنون بارگیری مجدد
+Reload to apply the latest changes. Your current session will be refreshed.,برای اعمال آخرین تغییرات، دوباره بارگیری کنید. جلسه فعلی شما به روز می شود.
+Reload Workflow,بارگیری مجدد گردش کار
+Remarks,اظهارات
+Remarks are required.,تذکر لازم است.
+Remove,حذف کنید
+Remove barcode item,حذف آیتم بارکد
+Remove cached data and reload the POS app,داده های کش را حذف کنید و برنامه POS را دوباره بارگیری کنید
+Remove item,حذف مورد
+Remove Offer,حذف پیشنهاد
+Reorder / Purchase Suggestions,سفارش مجدد / پیشنهادات خرید
+Repair Candidate,کاندید تعمیر
+Repair Change Allocation,تخصیص تغییر تعمیر
+Repair requires an online connection,تعمیر نیاز به اتصال آنلاین دارد
+Repaired,تعمیر شد
+Repairing change allocation,تعمیر تخصیص تغییر
+Repeat Customers,مشتریان تکراری
+Repeat Rate,نرخ تکرار
+Request,درخواست کنید
+Request ID: {0},شناسه درخواست: {0}
+Request Payment,درخواست پرداخت
+Requested route: {0},مسیر درخواستی: {0}
+Required columns cannot be hidden,ستون های مورد نیاز را نمی توان پنهان کرد
+Reset,بازنشانی کنید
+Reset item name,نام مورد را بازنشانی کنید
+Reset to Default,به حالت پیش فرض بازنشانی کنید
+Resource Health,سلامت منابع
+Restricted,محدود شده است
+Restricted operational controls for supervisors only.,کنترل های عملیاتی محدود فقط برای سرپرستان.
+Retry,دوباره امتحان کنید
+Retry route,مسیر را دوباره امتحان کنید
+Return,بازگشت
+Return Amount,مبلغ برگشتی
+Return Count,تعداد بازگشت
+Return items must have negative quantities,اقلام مرجوعی باید دارای مقادیر منفی باشند
+Return total must be negative,کل بازده باید منفی باشد
+Return Valid Until,بازگشت معتبر تا
+Return window passed,پنجره برگشت گذشت
+Return without Invoice,برگشت بدون فاکتور
+Returns,برمی گرداند
+Returns / Voids / Discounts,بازگشت / باطل / تخفیف
+Returns by Currency,بازده بر اساس ارز
+Revenue,درآمد
+Review shift totals before submitting the closing entry,قبل از ارسال ورودی پایانی، مجموع شیفت را مرور کنید
+Round Off,گرد کردن
+Rows,ردیف ها
+Rows:,ردیف ها:
+Rule,قانون
+Sale,فروش
+Sales,فروش
+Sales Order {0} is Submitted,سفارش فروش {0} ارسال شده است
+Sales Person and Print,فروشنده و چاپ
+Sales Person not found,فروشنده پیدا نشد
+Sales processed,فروش پردازش شده است
+Sales Return,بازگشت فروش
+Sales Trend Report,گزارش روند فروش
+Save,ذخیره کنید
+Save & Clear,ذخیره و پاک کردن
+Save as POS Profile Default,ذخیره به‌عنوان پیش‌فرض نمایه POS
+Save Settings,تنظیمات را ذخیره کنید
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,چاپگر انتخابی را به عنوان نمایه POS پیش‌فرض ذخیره کنید تا به‌طور خودکار در این تنظیمات نشان داده شود.
+Saved as draft because: {0},به عنوان پیش نویس ذخیره شد زیرا: {0}
+Saving...,در حال ذخیره...
+Scale barcode detected. Quantity here is the number of labels to print.,بارکد مقیاس شناسایی شد. مقدار در اینجا تعداد برچسب هایی است که باید چاپ شوند.
+Scale barcode settings are not configured. Using item barcode only.,تنظیمات بارکد مقیاس پیکربندی نشده است. فقط با استفاده از بارکد مورد.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,بارکد الگوی مقیاس برای این مورد/UOM وجود ندارد. فقط با استفاده از بارکد مورد.
+Scan an existing card and top it up without leaving the payment flow.,کارت موجود را اسکن کنید و بدون خروج از جریان پرداخت، آن را شارژ کنید.
+Scan Error,خطای اسکن
+Scan or enter a gift card code to check balance or redeem.,برای بررسی موجودی یا پس‌خرید، کد کارت هدیه را اسکن یا وارد کنید.
+Scan or paste the card code below.,کد کارت زیر را اسکن یا جایگذاری کنید.
+Scan QR Code/Barcode,کد QR / بارکد را اسکن کنید
+Scan with camera,اسکن با دوربین
+Scan-First Flow,اسکن-اولین جریان
+Scanned Code:,کد اسکن شده:
+Scanning for: {0},اسکن برای: {0}
+Scanning items,اسکن موارد
+Scan-Ready,اسکن آماده
+Scope,دامنه
+Scope: All Profiles,محدوده: همه پروفایل ها
+Scope: Current Profile,محدوده: نمایه فعلی
+Scope: Specific Profile,محدوده: نمایه خاص
+Search,جستجو کنید
+Search Account,جستجوی حساب
+Search an invoice and continue the return flow without extra steps.,یک فاکتور جستجو کنید و جریان برگشت را بدون مراحل اضافی ادامه دهید.
+Search customer,جستجوی مشتری
+Search invoices or customers,فاکتورها یا مشتریان را جستجو کنید
+Search item,جستجوی مورد
+Search item / code,جستجوی مورد / کد
+Search items or barcode,موارد یا بارکد را جستجو کنید
+Search Mpesa Payments,پرداخت های Mpesa را جستجو کنید
+Search return invoices or customers,فاکتورهای برگشتی یا مشتریان را جستجو کنید
+Search supplier,جستجوی تامین کننده
+Search unpaid invoices or customers,فاکتورهای پرداخت نشده یا مشتریان را جستجو کنید
+Secure context (HTTPS or localhost) is required for camera access.,زمینه ایمن (HTTPS یا میزبان محلی) برای دسترسی به دوربین مورد نیاز است.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,زمینه امن (HTTPS) برای دسترسی به دوربین مورد نیاز است. لطفاً برای دسترسی به دوربین از HTTPS استفاده کنید.
+Select,انتخاب کنید
+Select a cashier first.,ابتدا یک صندوقدار انتخاب کنید.
+Select a customer,یک مشتری انتخاب کنید
+Select a customer to use coupon,مشتری را برای استفاده از کوپن انتخاب کنید
+Select a printer to use QZ silent printing.,چاپگری را برای استفاده از چاپ بی صدا QZ انتخاب کنید.
+Select Batch,دسته را انتخاب کنید
+Select Columns to Display,ستون ها را برای نمایش انتخاب کنید
+Select items to sell,مواردی را برای فروش انتخاب کنید
+Select Payment,پرداخت را انتخاب کنید
+Select Payment Account,حساب پرداخت را انتخاب کنید
+Select printer,چاپگر را انتخاب کنید
+Select Return Invoice,بازگشت فاکتور را انتخاب کنید
+Select S.O,S.O را انتخاب کنید
+Select Sales Orders,سفارشات فروش را انتخاب کنید
+Select the cashier who is taking over this terminal.,صندوقدار را انتخاب کنید که این ترمینال را تحویل می گیرد.
+Selected,انتخاب شده است
+Selected movement type is not allowed by POS Profile.,نوع حرکت انتخابی توسط نمایه POS مجاز نیست.
+Selected Payments,پرداخت های انتخاب شده
+Sensitive actions kept away from quick taps.,اقدامات حساس به دور از ضربه سریع.
+Serial,سریال
+Serial Numbers,شماره های سریال
+Server CPU Usage:,استفاده از CPU سرور:
+Server Health,سلامت سرور
+Server Memory Usage:,میزان استفاده از حافظه سرور:
+Server Metrics,معیارهای سرور
+Server Uptime:,Uptime سرور:
+Service Charges,هزینه های خدمات
+Session,جلسه
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,هر پین صندوقدار را در فرم کاربر تنظیم کنید و اعضای ترمینال را در پروفایل کاربری POS اختصاص دهید.
+Settings,تنظیمات
+Settings in this section update the POS workspace without changing the current route.,تنظیمات این بخش فضای کاری POS را بدون تغییر مسیر فعلی به روز می کند.
+Setup complete!,راه اندازی کامل شد!
+Share,به اشتراک بگذارید
+Shared terminal,ترمینال مشترک
+Shift Closed Snapshot,Shift Closed Snapshot
+Shift Overview,Shift Overview
+Show,نمایش دهید
+Show cart on customer-facing screen,نمایش سبد خرید روی صفحه نمایش مشتری
+Show last invoice rate,نمایش آخرین نرخ فاکتور
+Show rate info,نمایش اطلاعات نرخ
+Show Repair Candidates,نمایش نامزدهای تعمیر
+Show search tools,نمایش ابزارهای جستجو
+Show the active cart on a customer-facing screen,سبد خرید فعال را در یک صفحه رو به مشتری نشان دهید
+Showing {0}-{1} of {2},نمایش {0}-{1} از {2}
+Showing 0 of 0,نمایش 0 از 0
+Shows the distribution of invoices per currency,توزیع فاکتورها را در هر ارز نشان می دهد
+Sign out of the current POS session,از جلسه فعلی POS خارج شوید
+Size:,اندازه:
+Skipped Payments,پرداخت های رد شده
+Skipping items without barcodes,رد شدن از اقلام بدون بارکد
+Slow Moving,حرکت آهسته
+Slow Moving Items,اقلام با حرکت آهسته
+Slow Queries:,پرسش های آهسته:
+Sold,فروخته شد
+Source,منبع
+Source Cash Account (Optional Override),منبع حساب نقدی (نسخ اختیاری)
+Source Ex. Rate:,منبع سابق امتیاز:
+Source Rate:,نرخ منبع:
+Specific Profile,نمایه خاص
+Split Invoices,تقسیم فاکتورها
+Staff / Cashier Performance Report,گزارش عملکرد کارکنان / صندوقدار
+Status,وضعیت
+Stock,سهام
+Stock Information,اطلاعات سهام
+Stock is lower than requested,موجودی کمتر از حد درخواستی است
+Stock is lower than requested:\n{0},سهام کمتر از درخواستی است:\n{0}
+Stock Movement Report,گزارش حرکت سهام
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,به‌روزرسانی سهام: {0} {1} را در دسترس دارد. با افزودن {2} سهام به زیر صفر می رسد.
+Submit,ارسال کنید
+Submit & Print,ارسال و چاپ
+Submit Deposit,ارسال سپرده
+Submit Expense,ارسال هزینه
+Submitted,ارسال شد
+Submitted Cash Movements,تحرکات نقدی ارسال شده
+Submitted entries,ورودی های ارسال شده
+Successfully scanned:,با موفقیت اسکن شد:
+Suggested,پیشنهاد شده است
+Suggested Qty,تعداد پیشنهادی
+Supervisor Access,دسترسی ناظر
+Supervisor permissions unlock issuance and reloads,مجوزهای ناظر قفل صدور و بارگیری مجدد را باز می کند
+Supervisor Tools,ابزارهای ناظر
+Supplier,تامین کننده
+Supplier and dates are required.,تامین کننده و تاریخ مورد نیاز است.
+Supplier Invoices,فاکتورهای تامین کننده
+Supplier is required.,تامین کننده مورد نیاز است.
+Supplier name is required,نام تامین کننده الزامی است
+Supplier Payments,پرداخت های تامین کننده
+Supplier Purchase Summary,خلاصه خرید تامین کننده
+Suppliers,تامین کنندگان
+Suppliers not found,تامین کنندگان پیدا نشد
+Switch Camera,دوربین را تغییر دهید
+Switch Cashier,تعویض صندوقدار
+Switch the POS appearance theme,تم ظاهر POS را تغییر دهید
+Switched to:,تغییر به:
+Sync All Invoices,همگام سازی همه فاکتورها
+Sync Offline Cash Movements ({0}),همگام سازی حرکت های نقدی آفلاین ({0})
+Sync Offline Sales,همگام سازی فروش آفلاین
+Synced {0} offline cash movement(s).,{0} حرکت پول نقد آفلاین همگام‌سازی شد.
+Syncing items in background,همگام سازی موارد در پس زمینه
+System / Diagnostics,سیستم / تشخیص
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.",کنش‌های سیستم کنترل‌های نگهداری با فرکانس پایین مانند اطلاعات برنامه، تشخیص پشتیبانی و کنترل‌های جلسه هستند.
+System Information,اطلاعات سیستم
+System Status,وضعیت سیستم
+Tables:,جداول:
+Tap the button below to redeem a gift card during checkout.,برای بازخرید کارت هدیه در حین تسویه حساب، روی دکمه زیر ضربه بزنید.
+Target,هدف
+Target Ex. Rate:,هدف قبلی امتیاز:
+Target Rate:,نرخ هدف:
+Tax,مالیات
+Tax / Charges Report,گزارش مالیات / هزینه ها
+Tax Heads,رؤسای مالیاتی
+Taxable Amount,مبلغ مشمول مالیات
+Tendered,مناقصه شد
+Terminal,ترمینال
+Terminal & Devices,ترمینال و دستگاه ها
+Terminal locked,ترمینال قفل شده
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.",ابزارهای پایانه روی ایستگاه پرداخت، نمایشگرهای رو به مشتری و کنترل‌های چاپگر/دستگاه آینده تأثیر می‌گذارند.
+Territory not found,قلمرو پیدا نشد
+The amount paid is not complete,مبلغ پرداختی کامل نیست
+The app stores data locally for offline use. This is called cache.,این برنامه داده ها را به صورت محلی برای استفاده آفلاین ذخیره می کند. این کش نامیده می شود.
+The invoice stayed in draft. Please review and submit it manually.,فاکتور در پیش نویس باقی ماند. لطفا بررسی کنید و به صورت دستی ارسال کنید.
+The maximum discount allowed is,حداکثر تخفیف مجاز است
+The quantity for {0} has been adjusted to the maximum available stock.,مقدار برای {0} با حداکثر موجودی موجود تنظیم شده است.
+The system could not retrieve the item details. Please try again.,سیستم نمی تواند جزئیات مورد را بازیابی کند. لطفا دوباره امتحان کنید.
+These invoices will be synced when connection is restored,این فاکتورها با بازیابی اتصال همگام‌سازی می‌شوند
+This action now opens inside the settings workspace.,این عمل اکنون در فضای کاری تنظیمات باز می شود.
+This coupon already used !,این کوپن قبلاً استفاده شده است!
+This invoice does not need change-allocation repair,این فاکتور نیازی به تعمیر تخصیص تغییر ندارد
+This invoice is already repaired,این فاکتور قبلا تعمیر شده است
+This is an item template. Please choose a variant.,این یک الگوی آیتم است. لطفا یک نوع را انتخاب کنید.
+this item,این مورد
+This POS page could not be opened offline because its code was not cached on this terminal yet.,این صفحه POS را نمی توان به صورت آفلاین باز کرد زیرا کد آن هنوز در این پایانه ذخیره نشده است.
+This Serial Number {0} has already been added!,این شماره سریال {0} قبلاً اضافه شده است!
+Threshold,آستانه
+Time,زمان
+Tip: Clear cache regularly to free up space and keep the app fast.,نکته: حافظه پنهان را مرتباً پاک کنید تا فضا آزاد شود و برنامه سریع بماند.
+Tip: Close unused tabs or apps to reduce lag.,نکته: برای کاهش تاخیر، برگه‌ها یا برنامه‌های استفاده نشده را ببندید.
+Tip: Monitor slow queries and table size for optimal performance.,نکته: برای عملکرد بهینه، پرس و جوهای کند و اندازه جدول را بررسی کنید.
+To Be Paid,پرداخت شود
+To Date,به تاریخ
+Today,امروز
+Today Profit,سود امروز
+Today Sales,فروش امروز
+Toggle navigation drawer,کشوی پیمایش را تغییر دهید
+Toggle Theme,تغییر موضوع
+Tools,ابزار
+Tools for customer-facing screens and terminal-specific actions.,ابزارهایی برای نمایشگرهای رو به مشتری و اقدامات خاص ترمینال.
+Top Brand,برند برتر
+Top Category,دسته برتر
+Top Charge Head,سر شارژ بالا
+Top Customers,مشتریان برتر
+Top Discount,تخفیف برتر
+Top Items by Location,موارد برتر بر اساس مکان
+Top Margin,حاشیه بالا
+Top Pending,بالا در انتظار
+Top Profit Item,مورد سود برتر
+Top Return Items,اقلام بازگشتی برتر
+Top Sales by Cashier,فروش برتر توسط صندوقدار
+Top Supplier,تامین کننده برتر
+Top Suppliers by Spend,تامین کنندگان برتر توسط اسپند
+Top Tables,جداول بالا
+Top Tax Head,رئیس مالیات
+Top Up Amount,مبلغ بالا
+Top Up Card,کارت شارژ
+Top Up Mode,حالت بالا
+Top Variant,نوع برتر
+Total,مجموع
+Total Amount,مقدار کل
+Total Change,کل تغییر
+Total Charges,مجموع هزینه ها
+Total In,مجموع در
+Total Invoices,مجموع فاکتورها
+Total Items,مجموع اقلام
+Total Mpesa,مجموع Mpesa
+Total Out,کل خارج شد
+Total Payments,کل پرداخت ها
+Total Purchase,کل خرید
+Total Selected :,مجموع انتخاب شده:
+Total Size,اندازه کل
+Total Stock Qty,تعداد کل سهام
+Total:,مجموع:
+Totals by Invoice Currency,مجموع بر اساس ارز فاکتور
+Track how much cash was handed back to customers,پیگیری کنید که چقدر پول نقد به مشتریان بازگردانده شده است
+"Track recent sales, collect unpaid balances, and reopen saved work",فروش های اخیر را ردیابی کنید، مانده های پرداخت نشده را جمع آوری کنید و کار ذخیره شده را دوباره باز کنید
+Transaction ID,شناسه تراکنش
+Transfer,انتقال
+Try a different search term or clear the cart search.,عبارت جستجوی دیگری را امتحان کنید یا جستجوی سبد خرید را پاک کنید.
+Try adjusting your search or filters,جستجو یا فیلترهای خود را تنظیم کنید
+Try another source or refresh the list.,منبع دیگری را امتحان کنید یا لیست را بازخوانی کنید.
+Try changing the date range or status filter.,محدوده تاریخ یا فیلتر وضعیت را تغییر دهید.
+Type,تایپ کنید
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,دسترسی به دوربین حتی با تنظیمات اولیه امکان پذیر نیست. لطفاً مجوزهای دوربین و سازگاری دستگاه خود را بررسی کنید.
+Unable to add offer item {0}. Please refresh and try again.,امکان افزودن مورد پیشنهاد {0} وجود ندارد. لطفاً بازخوانی کنید و دوباره امتحان کنید.
+Unable to add offer item. Please refresh and try again.,امکان افزودن مورد پیشنهاد وجود ندارد. لطفاً بازخوانی کنید و دوباره امتحان کنید.
+Unable to add scanned item.,امکان افزودن مورد اسکن شده وجود ندارد.
+Unable to create purchase order,امکان ایجاد سفارش خرید وجود ندارد
+Unable to delete draft invoice,پیش نویس فاکتور حذف نشد
+Unable to fetch documents,امکان واکشی اسناد وجود ندارد
+Unable to fetch draft orders,واکشی پیش‌نویس سفارش‌ها ممکن نیست
+Unable to fetch invoice history,واکشی سابقه فاکتور ممکن نیست
+Unable to fetch M-Pesa payments,واکشی پرداخت های M-Pesa امکان پذیر نیست
+Unable to fetch sales orders,واکشی سفارشات فروش ممکن نیست
+Unable to fetch unpaid invoices,فاکتورهای پرداخت نشده واکشی نشد
+Unable to generate scale barcode,قادر به تولید بارکد مقیاس نیست
+Unable to issue gift card.,امکان صدور کارت هدیه وجود ندارد.
+Unable to load cashier PIN status.,وضعیت پین صندوقدار بارگیری نشد.
+Unable to load document,سند بارگیری نمی شود
+Unable to load draft invoice,پیش نویس فاکتور بارگیری نشد
+Unable to load gift card balance.,موجودی کارت هدیه بارگیری نشد.
+Unable to load invoice details,جزئیات فاکتور بارگیری نشد
+Unable to load parked order,بارگیری سفارش پارک شده ممکن نیست
+Unable to load the selected sales order,بارگیری سفارش فروش انتخابی ممکن نیست
+Unable to prepare document,امکان تهیه سند وجود ندارد
+Unable to prepare return invoice,امکان تهیه فاکتور برگشتی وجود ندارد
+Unable to print draft invoice,چاپ پیش نویس فاکتور ممکن نیست
+Unable to print submitted invoice,چاپ فاکتور ارسالی ممکن نیست
+Unable to process document action,پردازش سند امکان پذیر نیست
+Unable to repair change allocation,امکان تعمیر تخصیص تغییر وجود ندارد
+Unable to save cashier PIN.,پین صندوقدار ذخیره نشد.
+Unable to save the rate to the backend price list,امکان ذخیره نرخ در لیست قیمت باطن وجود ندارد
+Unable to submit invoice,امکان ارسال فاکتور وجود ندارد
+Unable to submit the selected payment,پرداخت انتخابی ارسال نشد
+Unable to top up gift card.,شارژ کارت هدیه ممکن نیست.
+Unable to verify cashier PIN.,پین صندوقدار تأیید نشد.
+Unallocated,تخصیص نیافته است
+Unallocated:,تخصیص نیافته:
+Unavailable,در دسترس نیست
+Unknown,ناشناس
+Unknown Item,مورد ناشناس
+Unknown Warehouse,انبار ناشناخته
+Unlock POS,باز کردن قفل POS
+Unpaid,پرداخت نشده
+"Unselected payments stay unallocated first, then auto reconcile after submit.",پرداخت‌های انتخاب‌نشده ابتدا تخصیص داده نمی‌شوند، سپس پس از ارسال، به‌طور خودکار تطبیق داده می‌شوند.
+UOM,UOM
+UOM not found,UOM پیدا نشد
+Update available,به روز رسانی موجود است
+Update Customer,به روز رسانی مشتری
+Update PIN,پین را به روز کنید
+Update Price List Rate,به روز رسانی نرخ لیست قیمت
+Updated,به روز شد
+Updates and app info that stay out of the cashier flow.,به‌روزرسانی‌ها و اطلاعات برنامه‌ای که از جریان صندوق‌دار خارج می‌شوند.
+Updates automatically,به طور خودکار به روز رسانی می شود
+Usage,استفاده
+Usage Stats,آمار استفاده
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,برای تعویض صندوقدار و باز کردن قفل ترمینال از یک پین 4 تا 8 رقمی استفاده کنید.
+Use Cashier,از صندوقدار استفاده کنید
+Use date range to search for older invoices,از محدوده تاریخ برای جستجوی فاکتورهای قدیمی استفاده کنید
+"Use one field for manual code entry, barcode scans, or QR scans.",از یک فیلد برای وارد کردن دستی کد، اسکن بارکد یا اسکن QR استفاده کنید.
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.",از یک گردش کار برای بررسی موجودی، صدور جدید، و شارژ بدون خروج از POS استفاده کنید.
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.",از این بخش زمانی استفاده کنید که داده‌های پیش‌نیاز ذخیره‌شده در حافظه پنهان نیاز به بازنگری، بازسازی یا بررسی عیب‌یابی دارند.
+Use Western numerals,از اعداد غربی استفاده کنید
+Used:,مورد استفاده:
+Using basic camera settings due to device limitations,استفاده از تنظیمات اولیه دوربین به دلیل محدودیت های دستگاه
+Using cached customer balance,استفاده از موجودی ذخیره شده مشتری
+Valid until,معتبر است تا
+Variance %,درصد واریانس
+Variants,انواع
+Variant-wise,از نظر متغیر
+Verify closing amounts for each payment method,مبالغ بسته شدن هر روش پرداخت را تأیید کنید
+View all,مشاهده همه
+View app information and current build details,اطلاعات برنامه و جزئیات ساخت فعلی را مشاهده کنید
+View Data Diagnostics,مشاهده عیب‌یابی داده‌ها
+View Details,مشاهده جزئیات
+View invoice details,مشاهده جزئیات فاکتور
+View notifications,مشاهده اطلاعیه ها
+View offline invoices,فاکتورهای آفلاین را مشاهده کنید
+View restricted POS insights,مشاهده اطلاعات POS محدود شده
+Void Amount,مقدار باطل
+Void Count,تعداد خالی
+Voids,فضاهای خالی
+Waiting for cart items,در انتظار اقلام سبد خرید
+Waiting for payment...,در انتظار پرداخت...
+Walk-in Customer,مشتری متحرک
+Warehouse,انبار
+Warning: High cache usage may affect performance.,هشدار: استفاده زیاد از حافظه پنهان ممکن است بر عملکرد تأثیر بگذارد.
+Warning: High lag may indicate heavy processing or browser slowness.,هشدار: تاخیر زیاد ممکن است نشان دهنده پردازش زیاد یا کندی مرورگر باشد.
+Week ?,هفته؟
+Week-wise,از نظر هفته
+Weight (g),وزن (گرم)
+Weight (grams),وزن (گرم)
+We'll let you know if an invoice fails to submit,اگر فاکتوری ارسال نشد، به شما اطلاع خواهیم داد
+Workflow,گردش کار
+Write off amount cannot exceed the POS profile maximum of {0},مبلغ حذف نمی‌تواند از حداکثر {0} نمایه POS تجاوز کند.
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,مبلغ انصراف از حد مجاز ({0}) بیشتر است. لطفاً مبلغ باقیمانده را اضافه کنید.
+Yes,بله
+"Yes, Cancel sale",بله، لغو فروش
+"Yes, Close",بله، ببند
+You are not allowed to print draft invoices,شما مجاز به چاپ پیش نویس فاکتورها نیستید
+You are offline. Add Payment will work again when the connection is restored.,شما آفلاین هستید. وقتی اتصال بازیابی شد، Add Payment دوباره کار خواهد کرد.
+You have no notifications right now,در حال حاضر هیچ اعلانی ندارید
+Your Cart,سبد خرید شما

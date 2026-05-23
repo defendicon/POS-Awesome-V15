@@ -1,0 +1,1362 @@
+POS Awesome,POS E mrekullueshme
+Fetch Items Directly from Server,Merr artikujt direkt nga serveri
+Menu,Menyja
+Actions,Veprimet
+Close Shift,Mbyll Shift
+End current session,Përfundoni seancën aktuale
+Print Last Invoice,Printoni faturën e fundit
+Reprint previous transaction,Riprintoni transaksionin e mëparshëm
+Sync Offline Invoices,Sinkronizoni faturat jashtë linje
+Upload pending transactions,Ngarko transaksionet në pritje
+Go Online,Shko Online
+Go Offline,Shko jashtë linje
+Disable offline mode,Çaktivizo modalitetin jashtë linje
+Work without server connection,Punoni pa lidhje serveri
+Clear Cache,Pastro cache
+Remove local data and refresh,Hiqni të dhënat lokale dhe rifreskoni
+About,Rreth
+App information,Informacioni i aplikacionit
+Language,Gjuha
+Change interface language,Ndryshoni gjuhën e ndërfaqes
+Light Mode,Modaliteti i dritës
+Dark Mode,Modaliteti i errët
+Switch theme appearance,Ndërro pamjen e temës
+Logout,Dilni
+Sign out of session,Dil nga sesioni
+Select Language,Zgjidhni gjuhën
+Choose your preferred language for the POS interface,Zgjidhni gjuhën tuaj të preferuar për ndërfaqen POS
+Language will be changed to,Gjuha do të ndryshohet në
+Cancel,Anulo
+Change Language,Ndrysho gjuhën
+Close,Mbylle
+Cannot change language - same language selected,Gjuha nuk mund të ndryshohet - e njëjta gjuhë është zgjedhur
+Language changed successfully! Reloading...,Gjuha ndryshoi me sukses! Po ringarkohet...
+Failed to change language,Ndryshimi i gjuhës dështoi
+Unknown error,Gabim i panjohur
+- Total Unallocated,- Gjithsej të pashpërndara
+* Required,* E detyrueshme
+{0} (Qty: {1}),{0} (Sasia: {1})
+{0} actions,{0} veprime
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} ka vetëm {1} në magazinë. Ju kërkuat {2}. Rregulloni sasinë ose rezervoni.
+{0} offline invoice{1} pending,{0} faturë jashtë linje{1} në pritje
+{0} offline invoice{1} saved as draft,{0} faturë jashtë linje{1} u ruajt si draft
+{0} offline invoice{1} synced,{0} faturë jashtë linje{1} u sinkronizua
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0} ditë më parë
+{0}h ago,{0} orë më parë
+{0}m ago,{0} minuta më parë
+A POS supervisor is required for this action.,Për këtë veprim kërkohet një mbikëqyrës POS.
+Access,Qasja
+Account,Llogaria
+Account is overdrawn,Llogaria është e mbitërhequr
+Acknowledge the error to resume scanning,Pranoni gabimin për të rifilluar skanimin
+Acknowledge the error to resume scanning.,Pranoni gabimin për të rifilluar skanimin.
+Across,Përtej
+Action,Veprimi
+Active sale,Shitje aktive
+add,shtoni
+Add items from the selector to start building this sale.,Shto artikuj nga përzgjedhësi për të filluar ndërtimin e kësaj shitje.
+Add more value to an existing gift card,Shtoni më shumë vlerë një karte dhuratë ekzistuese
+Add New Address,Shto adresë të re
+Add new customer,Shto klient të ri
+Add on New Line,Shto në linjën e re
+Add Payment,Shto pagesën
+Add payment to invoice,Shto pagesën në faturë
+Add/Edit Coupon Conditions,Shto/Ndrysho Kushtet e Kuponit
+Additional Discount,Zbritje shtesë
+Additional Discount %,Zbritje shtesë %
+Address Line 1,Rreshti 1 i adresës
+Address not found,Adresa nuk u gjet
+Adjust the quantity or enable negative stock to continue.,Rregulloni sasinë ose mundësoni vazhdimin e stokut negativ.
+Adjustment,Rregullimi
+After returns,Pas kthimeve
+Against,Kundër
+Against Name,Kundër emrit
+Age Bracket,Kllapa e moshës
+All,Të gjitha
+All Caught Up!,Të gjithë të kapur!
+All invoices are synchronized,Të gjitha faturat janë të sinkronizuara
+All pending invoices are up to date,Të gjitha faturat në pritje janë të përditësuara
+All Profiles,Të gjitha profilet
+All Synchronized,Të gjitha të sinkronizuara
+All visible invoices are fully settled.,Të gjitha faturat e dukshme janë shlyer plotësisht.
+All Warehouses,Të gjitha Magazinat
+Allowed UOM is {0},UOM e lejuar është {0}
+Always fetch items from server (ignore local cache),Merr gjithmonë artikuj nga serveri (injoro cache lokale)
+Amount,Shuma
+Amount already received,Shuma e marrë tashmë
+Amount exceeds profile cash movement max amount.,Shuma tejkalon shumën maksimale të lëvizjes së parave të profilit.
+Amount must be greater than zero.,Shuma duhet të jetë më e madhe se zero.
+Amount received from customer,Shuma e marrë nga klienti
+Appearance and user-level preferences for the current session.,Paraqitja dhe preferencat e nivelit të përdoruesit për sesionin aktual.
+Applied,Aplikuar
+Apply,Aplikoni
+Apply Gift Card,Aplikoni kartën e dhuratave
+Apply Offer,Aplikoni Ofertën
+Apply On,Aplikoni në
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,Aplikoni vetëm shumën që dëshironi të shlyeni në këtë faturë. Bilanci i mbetur mbetet në kartë.
+Apply Redemption,Aplikoni Redemption
+Applying,Duke aplikuar
+Apps,Aplikacionet
+Are you sure you want to close? All entered data will be lost.,Je i sigurt që dëshiron ta mbyllësh? Të gjitha të dhënat e futura do të humbasin.
+Attributes (Size/Color),Atributet (Madhësia/Ngjyra)
+Auto Allocate Payment Amount,Shpërndarja automatike e shumës së pagesës
+Auto Reconcile,Pajtimi automatik
+Auto reconciliation completed after payment submit.,Barazimi automatik përfundoi pas dorëzimit të pagesës.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,Përfundoi rakordimi automatik. Alokuar: {0}{1}. E mbetur e pazgjidhur: {0}{2}.
+Available Actions,Veprimet e disponueshme
+Available QTY,Sasia e disponueshme
+Available:,Në dispozicion:
+Average Basket,Shporta mesatare
+Average Bill,Fatura mesatare
+Average Ticket,Bileta mesatare
+Avg Bill,Fatura mesatare
+Avg Invoice,Fatura mesatare
+Avg Invoice Profit,Fitimi mesatar i faturës
+Avg Invoice Value,Vlera mesatare e faturës
+Avg Purchase Frequency,Frekuenca mesatare e blerjeve
+Awesome,I mrekullueshëm
+Awesome Dashboard,Paneli i mrekullueshëm
+Awesome Dashboard is disabled for the selected POS Profile.,Paneli i mrekullueshëm është i çaktivizuar për profilin e zgjedhur POS.
+Awesome Dashboard is unavailable for the selected scope.,Paneli i mrekullueshëm nuk është i disponueshëm për qëllimin e zgjedhur.
+Awesome Dashboard is visible only to POS supervisors.,Paneli i mrekullueshëm është i dukshëm vetëm për mbikëqyrësit e POS.
+Back,Mbrapa
+Back Office Cash Account,Llogaria e parave të dorës së pasme
+Back Office Cash Account (Optional Override),Llogaria e parave të gatshme në zyrën e pasme (Zëvendësim opsional)
+Back office cash account is required.,Kërkohet llogari në para në dorë.
+Back to {0},Kthehu te {0}
+Background processing did not finish in time.,Përpunimi i sfondit nuk përfundoi në kohë.
+Background processing failed for Invoice {0}: {1},Përpunimi në sfond dështoi për faturën {0}: {1}
+Background Submission Failed,Dorëzimi i sfondit dështoi
+Background sync interval (seconds),Intervali i sinkronizimit në sfond (sekonda)
+Balance,Bilanci
+Balance will be updated when connection is restored,Bilanci do të përditësohet kur të rikthehet lidhja
+Balances still pending,Bilancet ende në pritje
+Barcode,Barkodi
+Barcode / QR Ready,Gati me barkod / QR
+Barcode Label Printing,Printimi i etiketës së barkodit
+Base Paid:,Baza e paguar:
+Base Recv:,Rekv. bazë:
+Base:,Baza:
+Basic Information,Informacioni bazë
+Batch,Batch
+Batch Information,Informacioni i grupit
+Before any return workflow,Përpara çdo fluksi pune të kthimit
+Before returns,Para kthimit
+Best Day,Dita më e mirë
+Best Seller,Best Seller
+Book expense or deposit from active shift.,Shpenzimi i rezervimit ose depozitimi nga turni aktiv.
+Branch / Location-wise Report,Raporti i degës / vendndodhjes
+Brand-wise,Sipas markës
+Breakdown,Zbërthimi
+Browse,Shfletoni
+Build Time:,Koha e ndërtimit:
+Built with Frappe,Ndërtuar me Frappe
+Bundle,Pako
+Buying Price,Çmimi i blerjes
+Cache cleared successfully,Cache u pastrua me sukses
+Cache Usage,Përdorimi i cache
+cache used,cache e përdorur
+Calculating...,Po llogaritet...
+Camera Access Required,Kërkohet qasja në kamerë
+Camera access was aborted. Please try again.,Qasja në kamerë u ndërpre. Ju lutemi provoni përsëri.
+Camera constraints not supported by your device. Trying fallback settings...,Kufizimet e kamerës nuk mbështeten nga pajisja juaj. Po provon cilësimet e kthimit...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,Kamera është e zënë ose e bllokuar nga një aplikacion/skedë tjetër. Mbyllni aplikacionet e tjera të kamerës dhe provoni përsëri.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,Leja e kamerës u refuzua. Lejo qasjen e kamerës në cilësimet e shfletuesit dhe rifresko faqen.
+Camera scanner is locked until the current error is acknowledged,Skaneri i kamerës është i kyçur derisa të pranohet gabimi aktual
+Camera started but the video stream did not load in time. Please try again.,Kamera filloi por transmetimi i videos nuk u ngarkua në kohë. Ju lutemi provoni përsëri.
+Cancel cash movement {0}?,Të anulohet lëvizja e parave të gatshme {0}?
+Cancel Payment,Anuloni pagesën
+Cancel Sale,Anulo shitjen
+Cancel Sale ?,Anuloni shitjen?
+Cancelled,Anuluar
+Cannot add an item with zero or negative quantity.,Nuk mund të shtohet një artikull me sasi zero ose negative.
+Cannot clear cache while offline,Nuk mund të pastrohet memoria e memories kur është jashtë linje
+Cannot redeem customer credit more than invoice total,Nuk mund të blihet krediti i klientit më shumë se totali i faturës
+Cannot redeem gift cards more than invoice total,Kartat e dhuratave nuk mund të përdoren më shumë se totali i faturës
+Cannot Save Offline Invoice:,Nuk mund të ruhet fatura jashtë linje:
+Cannot Save Offline Payment:,Nuk mund të ruhet pagesa jashtë linje:
+Card,Kartelë
+Card / Online,Kartelë / Online
+Card health after the last live lookup,Shëndeti i kartës pas kërkimit të fundit të drejtpërdrejtë
+Cards,Kartat
+Cart,Karrocë
+Cash,Paratë e gatshme
+Cash back to customers,Kthimi i parave tek klientët
+Cash Collections,Koleksionet e parave të gatshme
+Cash Deposit is disabled for this POS Profile.,Depozita e parave të gatshme është e çaktivizuar për këtë profil POS.
+Cash Drawer Snapshot,Foto e sirtarit të parave të gatshme
+Cash In Hand,Para në dorë
+Cash Movement,Lëvizja e parave
+Cash movement cancelled,Lëvizja e parave të gatshme u anulua
+Cash movement deduction applied,Zbritja e lëvizjes së parave të gatshme
+Cash movement deleted,Lëvizja e parave të gatshme u fshi
+Cash movement is disabled for this POS Profile.,Lëvizja e parave është e çaktivizuar për këtë profil POS.
+Cash Movement is disabled in current POS Profile.,Lëvizja e parave është e çaktivizuar në profilin aktual të POS-it.
+Cash movement saved offline,Lëvizja e parave të gatshme u ruajt jashtë linje
+Cash movement submitted,Lëvizja e parave të gatshme është dorëzuar
+Cash Movements,Lëvizjet e parave të gatshme
+Cash payment cannot be less than invoice total when partial payment is not allowed,Pagesa me para në dorë nuk mund të jetë më e vogël se totali i faturës kur pagesa e pjesshme nuk lejohet
+Cash returned after payment,Paratë e gatshme kthehen pas pagesës
+Cashier,Arkëtar
+Cashier Access,Qasja në arkëtar
+Cashier identity and appearance preferences.,Identiteti i arkëtarit dhe preferencat e paraqitjes.
+Cashier PIN,PIN-i i arkës
+Cashier PIN saved successfully.,PIN-i i arkëtarit u ruajt me sukses.
+Cashiers,Arkëtarët
+Cashier-wise,Arkëtar
+Categories,Kategoritë
+Category,Kategoria
+Category / Brand / Variant Report,Raporti i kategorisë / markës / variantit
+Category-wise,Sipas kategorisë
+Category-wise Margin,Marzhi sipas kategorisë
+Certificate,Certifikata
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,Certifikata mungon ose nuk besohet. QZ mund të shfaqë dialogët e konfirmimit.
+Certificate is trusted. Silent QZ printing is active.,Certifikata është e besueshme. Printimi i heshtur QZ është aktiv.
+Change,Ndryshimi
+Change allocation repaired,Riparimi i ndarjes së ndryshimit
+Change Price,Ndrysho Çmimi
+Change Return,Ndrysho Kthimin
+Change Returned,Ndryshimi u kthye
+Change terminal cashier,Ndryshoni arkëtarin e terminalit
+Charge Heads,Kokat e ngarkimit
+Charges,Akuzat
+Charges not found,Tarifat nuk u gjetën
+Check Balance,Kontrolloni bilancin
+Check balance for any card. Supervisors can issue and top up cards here.,Kontrolloni gjendjen për çdo kartë. Mbikëqyrësit mund të lëshojnë dhe plotësojnë kartat këtu.
+Check balance only,Kontrolloni vetëm bilancin
+Check for new commits,Kontrolloni për angazhime të reja
+Check for Updates,Kontrolloni për përditësime
+Check live balance before applying redemption,Kontrollo balancën e drejtpërdrejtë përpara se të aplikosh riblerjen
+Check live balance before redemption,Kontrollo balancën e drejtpërdrejtë përpara se të shpengosh
+Checking...,Po kontrollon...
+Cheque/Reference Date,Çeku/Data e referencës
+Cheque/Reference No,Çeku/Referenca nr
+Choose the cashier currently operating this terminal.,Zgjidhni arkëtarin që operon aktualisht në këtë terminal.
+City,Qyteti
+Clear,E qartë
+Clear All,Pastro të gjitha
+Clear all barcode items,Pastro të gjithë artikujt e barkodit
+Clear all purchase order items,Pastro të gjithë artikujt e porosisë së blerjes
+Clear Search,Pastro kërkimin
+Clearing local cache...,Po pastrohet memoria e memories lokale...
+Click to refresh,Klikoni për të rifreskuar
+Client CPU Lag:,Vonesa e CPU-së së klientit:
+Client Memory Usage:,Përdorimi i memories së klientit:
+Client Metrics,Metrika e klientit
+Close about dialog,Mbyll dialogun rreth
+Close cashier switcher,Mbylle ndërruesin e arkës
+Close closing shift dialog,Mbyll dialogun e mbylljes së ndërrimit
+Close column selector,Mbyll përzgjedhësin e kolonës
+Close Dialog,Mbyll dialogun
+Close drafts dialog,Mbyll dialogun e drafteve
+Close invoice details dialog,Mbyll dialogun e detajeve të faturës
+Close invoice management,Mbyll menaxhimin e faturës
+Close offline invoices dialog,Mbyll dialogun e faturave jashtë linje
+Close packing list dialog,Mbyll dialogun e listës së paketimit
+Close returns dialog,Mbyll dialogun e kthimit
+Close sales orders dialog,Mbyll dialogun e porosive të shitjeve
+Close Scanner,Mbylle skanerin
+Close scanner dialog,Mbyll dialogun e skanerit
+Close Settings,Mbyllni Cilësimet
+Closing Amount,Shuma e mbylljes
+Closing POS Shift,Mbyllja e POS Shift
+Closing Snapshot Available,Disponohet fotografia mbyllëse
+Code,Kodi
+Code scanned successfully,Kodi u skanua me sukses
+COGS,COGS
+Collapse item details,Palos detajet e artikullit
+Collected,Të mbledhura
+Cols,Kolonat
+Columns,Kolonat
+commits,kryen
+Completed and active sales in this range,Shitjet e përfunduara dhe aktive në këtë gamë
+Completed returns will appear here.,Kthimet e përfunduara do të shfaqen këtu.
+Confirm,Konfirmo
+Confirm Close,Konfirmo Mbylljen
+Confirm Mobile Number,Konfirmo numrin e celularit
+Confirm PIN,Konfirmo PIN-in
+Connect,Lidheni
+Connect printer and manage certificate,Lidhni printerin dhe menaxhoni certifikatën
+Connecting to QZ Tray...,Po lidhet me sirtarin QZ...
+Connection problem while submitting invoice,Problem me lidhjen gjatë dërgimit të faturës
+Connections:,Lidhjet:
+Connectivity and cached prerequisite status were rechecked.,Lidhja dhe statusi i parakushteve të ruajtura në memorie të fshehtë u rishikuan.
+Continue Editing,Vazhdo modifikimin
+Could not fetch latest balance from server,Nuk mund të merrej bilanci i fundit nga serveri
+Count,Numëroni
+Country,Vendi
+Coupon,Kupon
+Coupons,Kuponët
+Cover,Mbulesë
+CPU Cores:,Bërthamat e CPU:
+Create,Krijo
+Create and load a new prepaid card,Krijoni dhe ngarkoni një kartë të re me parapagesë
+Create and preload a new gift card,Krijo dhe ngarko një kartë të re dhuratë
+Create Bill,Krijo Bill
+Create Customer,Krijo klient
+Create New Item,Krijo artikull të ri
+Create or change your PIN,Krijoni ose ndryshoni PIN-in tuaj
+Create PIN,Krijo PIN
+Create POS Opening Shift,Krijo Shift hapjeje POS
+Create Purchase Order,Krijo Urdhër Blerje
+Create Return,Krijo kthim
+Create return from invoice,Krijo kthim nga fatura
+Create Supplier,Krijo Furnizues
+Credit and Output,Kredia dhe prodhimi
+Credit Note,Shënim krediti
+Credit Outstanding,Kredia e papaguar
+Credit sales remaining to be collected,Shitjet me kredi të mbetura për t'u mbledhur
+Critical,Kritike
+Currency,Monedha
+Current,Aktuale
+Current Event Loop Lag:,Vonesa aktuale e ciklit të ngjarjes:
+Current Month,Muaji aktual
+Current PIN,PIN-i aktual
+Current Profile,Profili aktual
+Current redeemable value on the gift card,Vlera aktuale e shlyershme në kartën e dhuratës
+Current User,Përdoruesi aktual
+Custom,Me porosi
+Custom Due Days,Ditët e duhura të personalizuara
+Custom items per page,Artikuj të personalizuar për faqe
+Customer,Klienti
+Customer already selected,Klienti është zgjedhur tashmë
+Customer Balance,Bilanci i klientit
+Customer balance unavailable offline,Bilanci i klientit nuk ofrohet jashtë linje
+Customer created successfully.,Klienti u krijua me sukses.
+Customer creation failed.,Krijimi i klientit dështoi.
+Customer Details,Detajet e Klientit
+Customer display channel is missing,Kanali i shfaqjes së klientit mungon
+Customer display was blocked. Please allow pop-ups for this site.,Shfaqja e klientit u bllokua. Ju lutemi lejoni dritaret kërcyese për këtë sajt.
+Customer group is required,Kërkohet grupi i klientëve
+Customer is required to add payment,Klientit i kërkohet të shtojë pagesën
+Customer Name is required,Kërkohet emri i klientit
+Customer not selected,Klienti nuk është zgjedhur
+Customer Report,Raporti i Klientit
+Customer saved offline,Klienti u ruajt jashtë linje
+Customer Screen,Ekrani i klientit
+Customer territory is required,Kërkohet territori i klientit
+Customer updated successfully.,Klienti u përditësua me sukses.
+Customer-facing tools and printer setup.,Mjetet që përballen me klientin dhe konfigurimi i printerit.
+Customers,Konsumatorët
+Customers not found,Klientët nuk u gjetën
+Daily cashier actions without scrolling.,Veprimet e përditshme të arkës pa lëvizje.
+Daily Sales,Shitjet Ditore
+Daily Sales Summary,Përmbledhje e shitjeve ditore
+Data loaded in form. Review and submit.,Të dhënat e ngarkuara në formë. Rishikoni dhe dorëzoni.
+Database Health,Baza e të dhënave Shëndeti
+Database health affects overall system speed and reliability.,Shëndeti i bazës së të dhënave ndikon në shpejtësinë dhe besueshmërinë e përgjithshme të sistemit.
+Database Info,Informacion mbi bazën e të dhënave
+Date,Data
+Day ?,Dita ?
+days,ditë
+Day-wise (MTD),Gjatë ditës (MTD)
+Day-wise Movement,Lëvizja e ditës
+Dead Stock,Stoku i vdekur
+Dead Stock Items,Artikuj të vdekur të aksioneve
+Decrease quantity,Ul sasinë
+Default,E paracaktuar
+Default:,E parazgjedhur:
+Delete,Fshije
+Delete cancelled cash movement {0}?,Të fshihet lëvizja e anuluar e parave të gatshme {0}?
+Delete Draft,Fshi draftin
+Delete draft invoice,Fshi draft faturën
+Delete draft invoice {0}?,Të fshihet projektfatura {0}?
+Delete Invoice,Fshij faturën
+Delete offline invoice,Fshi faturën jashtë linje
+Delivered,Dorëzuar
+Delivery Charges,Tarifat e dorëzimit
+Delivery Information,Informacioni i dorëzimit
+Delivery Note {0} created,U krijua shënimi i dorëzimit {0}
+Delivery note created,Fletën e dorëzimit u krijua
+Deployed Bundle:,Paketa e vendosur:
+Deposit,Depozitë
+Description,Përshkrimi
+Detailed Supplier Breakdown,Përbërja e detajuar e furnizuesit
+Detecting formats:,Zbulimi i formateve:
+Device Memory:,Kujtesa e pajisjes:
+Difference,Diferenca
+Difference (In Company Currency),Diferenca (në monedhën e kompanisë)
+Disable offline mode first to recheck live connectivity.,Çaktivizo fillimisht modalitetin jashtë linje për të kontrolluar sërish lidhjen e drejtpërdrejtë.
+Disconnect,Shkëputeni
+discount,zbritje
+Discount %,Zbritje %
+Discount / Void / Return Report,Raporti i zbritjes / i pavlefshëm / i kthimit
+Discount Amount,Shuma e zbritjes
+Discount limited by POS Profile,Zbritje e kufizuar nga Profili POS
+Discounted Invoices,Fatura me zbritje
+Discounts,Zbritje
+Dismiss,Largoje
+Download Certificate,Shkarko Certifikatën
+Draft,Drafti
+Draft invoice deleted,Projektfatura u fshi
+Draft source,Draft burimi
+Drafts,Draftet
+Due {0},Afati {0}
+Due Date,Data e Afatit
+Duplicate,Dublikatë
+Edit customer,Redakto klientin
+Edit discount amount,Redakto shumën e zbritjes
+Edit discount percentage,Redakto përqindjen e zbritjes
+Edit Gift Application,Redakto aplikacionin e dhuratave
+Edit item name,Redakto emrin e artikullit
+Edit quantity,Redakto sasinë
+Edit rate,Norma e modifikimit
+Edit unit of measure,Redakto njësinë e masës
+Edited,Redaktuar
+Employee,Punonjës
+Enable background sync,Aktivizo sinkronizimin e sfondit
+Enable Customer Display in POS Profile first.,Aktivizo fillimisht shfaqjen e klientit në profilin POS.
+Enter a PIN.,Futni një PIN.
+Enter a valid grams value,Fut një vlerë të vlefshme gram
+Enter new price list rate,Fut tarifën e re të listës së çmimeve
+Enter Quantity,Shkruani Sasinë
+Enter the cashier PIN to continue.,Futni PIN-in e arkëtarit për të vazhduar.
+Enter the current PIN first.,Futni së pari kodin PIN aktual.
+"Enter the current PIN, then choose a new one.",Futni kodin PIN aktual dhe më pas zgjidhni një të ri.
+Enter valid grams for scale barcode,Fut gram të vlefshëm për barkodin e shkallës
+Entries,Regjistrimet
+Error accessing camera:,Gabim gjatë qasjes në kamerë:
+Error calculating prices,Gabim në llogaritjen e çmimeve
+Error fetching customer balance,Gabim gjatë marrjes së bilancit të klientit
+Error in change calculations!,Gabim në llogaritjet e ndryshimit!
+Error Loading Data,Gabim gjatë ngarkimit të të dhënave
+Error loading invoice details,Gabim gjatë ngarkimit të detajeve të faturës
+Error processing invoice,Gabim gjatë përpunimit të faturës
+Error processing payment,Gabim gjatë përpunimit të pagesës
+Error searching invoices,Gabim gjatë kërkimit të faturave
+Error submitting invoice:,Gabim gjatë dërgimit të faturës:
+Error submitting invoice: {0},Gabim gjatë dërgimit të faturës: {0}
+Error submitting invoice: No response from server,Gabim gjatë dërgimit të faturës: Nuk ka përgjigje nga serveri
+Error updating currency,Gabim gjatë përditësimit të monedhës
+Error updating item details,Gabim gjatë përditësimit të detajeve të artikullit
+Est. Purchase,Est. Blerje
+Est. Value,Est. Vlera
+Event-loop lag measures how busy your browser is. Lower is better.,Vonesa e ciklit të ngjarjeve mat se sa i zënë është shfletuesi juaj. Më e ulët është më mirë.
+Every,Çdo
+Exchange Rate,Kursi i këmbimit
+Expand item details,Zgjero detajet e artikullit
+Expected Amount (In Company Currency),Shuma e pritshme (në monedhën e kompanisë)
+Expected Cash,Paratë e pritshme
+Expected cash on hand grouped by currency,Paratë e pritshme në dorë të grupuara sipas monedhës
+Expected vs Actual,E pritshme vs aktuale
+Expense,Shpenzimet
+Expense Account (Optional Override),Llogaria e shpenzimeve (Zëvendësimi opsional)
+Expense account is required.,Kërkohet llogaria e shpenzimeve.
+Expenses and deposits posted during this shift,Shpenzimet dhe depozitat e afishuara gjatë këtij ndërrimi
+Expired,I skaduar
+Failed to auto reconcile payments.,Barazimi automatik i pagesave dështoi.
+Failed to cancel cash movement,Anulimi i lëvizjes së parave dështoi
+Failed to clear cache,Pastrimi i memories së memories dështoi
+Failed to create item,Krijimi i artikullit dështoi
+Failed to create supplier,Krijimi i furnizuesit dështoi
+Failed to delete cash movement,Fshirja e lëvizjes së parave dështoi
+Failed to generate scale barcode. Using item barcode only.,Krijimi i barkodit të shkallës dështoi. Duke përdorur vetëm barkodin e artikullit.
+Failed to load cash movement context.,Ngarkimi i kontekstit të lëvizjes së parave dështoi.
+Failed to load dashboard data.,Ngarkimi i të dhënave të panelit të kontrollit dështoi.
+Failed to reload invoice from server,Ringarkimi i faturës nga serveri dështoi
+Failed to submit cash movement,Lëvizja e parave të gatshme dështoi
+Failed to sync offline cash movements,Sinkronizimi i lëvizjeve të parave jashtë linje dështoi
+Fast cashier actions for active shifts.,Veprime të shpejta arkëtare për turne aktive.
+Fast Moving Items,Artikuj që lëvizin shpejt
+Fees,Tarifat
+Fetch the latest offline prerequisite updates,Merr përditësimet më të fundit të parakushteve jashtë linje
+Find a sales order quickly and load it into the current sale.,Gjeni shpejt një porosi shitje dhe ngarkojeni në shitjen aktuale.
+Fixing payment amounts for return invoice...,Po rregullon shumat e pagesave për faturën e kthimit...
+Flash Off,Flash Off
+Flash On,Blic Aktiv
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","Për artikujt e ""Paketës së produktit"", Magazina, Numri Serial dhe Numri i Serisë do të merren parasysh nga tabela ""Lista e Paketimit"". Nëse magazina dhe numri i grupit janë të njëjta për të gjithë artikujt e paketimit për çdo artikull 'Paketë e produktit', ato vlera mund të futen në tabelën kryesore të artikullit; vlerat do të kopjohen në tabelën ""Lista e paketimit""."
+Free,Falas
+Free Qty,Sasia falas
+Frequency,Frekuenca
+from,nga
+From Date,Nga data
+Fulfillment Details,Detajet e përmbushjes
+Full Name,Emri i plotë
+Gain,Fitimi
+Generate a fresh prepaid card and start it with an opening balance.,Krijoni një kartë të re me parapagesë dhe filloni me një bilanc hapës.
+Generate and install the certificate to allow fully silent printing without trust prompts.,Gjeneroni dhe instaloni certifikatën për të lejuar printim plotësisht të heshtur pa kërkesa besimi.
+Generate Certificate,Krijo Certifikatë
+Generated scale barcode: {0},Barkodi i krijuar në shkallë: {0}
+Get Payments,Merrni pagesa
+Gift Card,Kartë Dhuratë
+Gift card amount must be greater than zero.,Shuma e kartës së dhuratës duhet të jetë më e madhe se zero.
+Gift Card Code,Kodi i kartës së dhuratës
+Gift card code is required for redemption,Kërkohet kodi i kartës së dhuratës për të shlyer
+Gift card code is required.,Kërkohet kodi i kartës së dhuratës.
+Gift card issued successfully.,Karta dhuratë u lëshua me sukses.
+Gift card loaded successfully.,Karta dhuratë u ngarkua me sukses.
+Gift Card Management,Menaxhimi i kartave të dhuratave
+Gift card payment,Pagesa me kartë dhuratë
+Gift card redemption requires an online connection,Shlyerja e kartës së dhuratës kërkon një lidhje në internet
+Gift card topped up successfully.,Karta e dhuratës u mbush me sukses.
+Gift Cards,Kartat e dhuratave
+Go to Frappe Desk,Shkoni te Frappe Desk
+Grand Total,Totali i Madh
+Gross Margin,Marzhi bruto
+Gross Profit,Fitimi bruto
+Gross Sales,Shitjet bruto
+Group not found,Grupi nuk u gjet
+"Grouped controls for terminal, UI, and session settings.","Kontrollet e grupuara për cilësimet e terminalit, ndërfaqes së përdoruesit dhe sesionit."
+Grouped totals for each payment method and currency,Totalet e grupuara për çdo mënyrë pagese dhe monedhë
+Hide,Fshih
+Hide Gift Card,Fshih kartën e dhuratave
+Hide Non Essential Fields,Fshih fushat jo thelbësore
+Hide quantity decimals,Fshih numrat dhjetorë të sasisë
+Hide search tools,Fshih mjetet e kërkimit
+Hide zero rated items,Fshih artikujt me vlerësim zero
+High,Lartë
+History,Historia
+Hourly (Today),Për orë (sot)
+How this section works,Si funksionon ky seksion
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","Nëse të dhënat mbeten të vjetra, hapni Cilësimet > Offline & Sync dhe ekzekutoni sërish Rindërtoni të dhënat jashtë linje kur jeni në linjë."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","Nëse paralajmërimi vazhdon, hapni Cilësimet > Offline & Sync, më pas ekzekutoni Rifresko të dhënat jashtë linje ose Rindërtoni të dhënat jashtë linje."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Importoni certifikatën në sirtarin QZ dhe rinisni QZ Tray në çdo makinë POS.
+In,Në
+In stock: {0},Në magazinë: {0}
+Include Batch / Serial,Përfshi Batch / Serial
+Include Price,Përfshi çmimin
+Increase quantity,Rritja e sasisë
+IndexedDB,Indeksuar DB
+Initial Amount,Shuma fillestare
+Initialize your shift with opening balances,Filloni ndryshimin tuaj me bilancet e hapjes
+Initializing application...,Po inicializon aplikacionin...
+"Inspect cache, sync, and prerequisite status","Inspektoni cache, sinkronizimin dhe statusin parakusht"
+Installed Applications,Aplikacionet e instaluara
+Insufficient stock:\n{0},Stoku i pamjaftueshëm:\n{0}
+Invalid rate,Norma e pavlefshme
+Inventory Status Report,Raporti i gjendjes së inventarit
+Invoice,Fatura
+Invoice {0} is Submitted,Fatura {0} është dorëzuar
+Invoice {0} processed successfully,Fatura {0} u përpunua me sukses
+Invoice {0} submission failed,Dorëzimi i faturës {0} dështoi
+Invoice {0} was already submitted,Fatura {0} është dorëzuar tashmë
+Invoice Adjustments,Rregullimet e faturës
+Invoice Change,Ndryshimi i faturës
+Invoice Details,Detajet e faturës
+Invoice is still in draft after background submission.,Fatura është ende në draft pas dorëzimit të sfondit.
+Invoice Items,Artikujt e faturës
+Invoice Management,Menaxhimi i faturës
+Invoice Mgmt,Faturë Mgmt
+Invoice saved offline,Fatura u ruajt jashtë linje
+Invoice submission failed,Dorëzimi i faturës dështoi
+Invoice Submitted,Fatura e dorëzuar
+"Invoice value settled by loyalty points, not cash collection","Vlera e faturës e shlyer nga pikët e besnikërisë, jo nga arkëtimi i parave të gatshme"
+Invoices,Faturat
+Invoices already past due date,Faturat tashmë kanë kaluar afatin e duhur
+Invoices saved as POS Invoices,Faturat ruhen si Fatura POS
+Invoices still carrying balances,Faturat ende mbajnë bilanc
+Issue Mode,Modaliteti i problemit
+Issue New Card,Lëshoni një kartë të re
+Issue Workflow,Çështja e rrjedhës së punës
+"Issue, top up, and check","Lëshoni, mbushni dhe kontrolloni"
+Item,Artikulli
+Item / Product Sales Report,Raporti i shitjeve të artikullit / produktit
+Item {0} added to invoice,Artikulli {0} u shtua në faturë
+Item '{0}' has no barcode,Artikulli '{0}' nuk ka barkod
+Item Code,Kodi i artikullit
+Item created successfully,Artikulli u krijua me sukses
+Item is out of stock,Artikulli nuk është në gjendje
+Item Name,Emri i artikullit
+Item not found,Artikulli nuk u gjet
+Item order updated,Renditja e artikullit u përditësua
+Item Selector Settings,Cilësimet e përzgjedhësit të artikullit
+Items,Artikuj
+Items added in POS will appear here automatically.,Artikujt e shtuar në POS do të shfaqen këtu automatikisht.
+Items added to invoice,Artikujt e shtuar në faturë
+Items per page,Artikuj për faqe
+Items Sold,Artikujt e shitur
+Items/Invoice,Artikujt/Fatura
+Item-wise Profitability,Përfitueshmëria sipas artikujve
+Journal Entry,Hyrja në ditar
+json,json
+Just now,Vetëm tani
+Keep offline prerequisites healthy and recover stale data safely.,Mbani të shëndetshme parakushtet jashtë linje dhe rikuperoni të dhënat e vjetruara në mënyrë të sigurt.
+Labels,Etiketat
+"Language, theme, terminal tools, and session controls.","Gjuha, tema, mjetet e terminalit dhe kontrollet e sesionit."
+Last,E fundit
+Last 14 Days (Paid vs Pending),14 ditët e fundit (të paguara kundrejt në pritje)
+Last 14 Days Activity,Aktiviteti i 14 ditëve të fundit
+Last 14 Days Gross Profit,Fitimi bruto i 14 ditëve të fundit
+Last 14 Days Purchases,Blerjet e 14 ditëve të fundit
+Last 14 Days Tax/Charges,Taksa/Tarifat e 14 ditëve të fundit
+Last sync:,Sinkronizimi i fundit:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},Sinkronizimi i fundit: {0} | në rregull: {1} | dështoi: {2} | kapërceu: {3}
+Latest entries for current shift,Regjistrimet më të fundit për ndërrimin aktual
+Lead Time,Koha e udhëheqjes
+Limited,I kufizuar
+lines,linjat
+List,Lista
+Live Snapshot,Foto e drejtpërdrejtë
+Load a POS profile and cashier first.,Ngarko fillimisht një profil POS dhe arkëtar.
+Load More Invoices,Ngarko më shumë fatura
+Load previously saved invoices,Ngarko faturat e ruajtura më parë
+Load Sale,Ngarkesë Shitje
+Load Sales Invoice,Ngarko faturën e shitjes
+Loading app data...,Po ngarkon të dhënat e aplikacionit...
+Loading customer database...,Po ngarkohet baza e të dhënave të klientëve...
+Loading customers...,Po ngarkohen klientët...
+Loading database stats...,Po ngarkon statistikat e bazës së të dhënave...
+Loading details...,Detajet po ngarkohen...
+Loading invoice history...,Po ngarkohet historiku i faturave...
+Loading items...,Po ngarkon artikujt...
+Loading product catalog...,Po ngarkohet katalogu i produkteve...
+Loading return invoices...,Po ngarkohen faturat e kthimit...
+Loading server CPU/memory usage...,Përdorimi i CPU/memorjes së serverit po ngarkohet...
+Loading suppliers...,Duke ngarkuar furnizuesit...
+Loading unpaid invoices...,Po ngarkohen faturat e papaguara...
+Loading view...,Po ngarkohet pamja...
+Loading...,Po ngarkohet...
+Local storage is unavailable. Switching to online-only mode.,Hapësira ruajtëse lokale nuk ofrohet. Kalimi në modalitetin vetëm në linjë.
+localStorage,ruajtja lokale
+Location Performance,Performanca e vendndodhjes
+Locations,Vendndodhjet
+Lock Screen,Kyçja e ekranit
+Lookup Workflow,Kërkimi i rrjedhës së punës
+Loss,Humbje
+Low,E ulët
+Low Stock,Stoku i ulët
+Low Stock Alerts,Sinjalizime të ulëta të stokut
+Low Stock Items,Artikuj me stoqe të ulëta
+Low Stock Threshold,Pragu i ulët i aksioneve
+Low Stock Total,Totali i ulët i stokut
+Lowest Margin,Marzhi më i ulët
+Low-frequency maintenance and system details.,Mirëmbajtja me frekuencë të ulët dhe detajet e sistemit.
+Loyalty Redeemed,Besnikëria e shpenguar
+Loyalty Redemption,Shëlbimi i besnikërisë
+Make New Payment,Bëni një pagesë të re
+Manage all,Menaxhoni të gjitha
+Manage and synchronize your offline transactions,Menaxhoni dhe sinkronizoni transaksionet tuaja jashtë linje
+Manage Cashier PIN,Menaxho PIN-in e arkëtarit
+"Manage offline tools, terminal controls, and maintenance from one workspace.","Menaxho mjetet jashtë linje, kontrollet e terminalit dhe mirëmbajtjen nga një hapësirë ​​pune."
+manual,manual
+"Manual codes, barcode scans, and QR scans work in the same field","Kodet manuale, skanimet e barkodit dhe skanimet QR funksionojnë në të njëjtën fushë"
+Manual offline mode is enabled,Modaliteti manual jashtë linje është aktivizuar
+Margin,Marzhi
+Maximum available quantity is {0}. Quantity adjusted to match stock.,Sasia maksimale e disponueshme është {0}. Sasia e rregulluar në përputhje me stokun.
+Maximum discount amount for this offer item is {0}.,Shuma maksimale e zbritjes për këtë artikull oferte është {0}.
+Maximum discount percentage for this offer item is {0}%.,Përqindja maksimale e zbritjes për këtë artikull oferte është {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,Sasia maksimale e ofertës është {0}. Sasia e rregulluar në kufirin e lejuar.
+Medium,E mesme
+Method-wise Collections,Koleksione sipas metodës
+Minimum allowed rate for this offer item is {0}.,Tarifa minimale e lejuar për këtë artikull oferte është {0}.
+Minimum Qty,Sasia minimale
+Mobile No,Nr celulari
+Mode,Modaliteti
+Mode of Payment,Mënyra e pagesës
+Month,muaj
+Month ?,muaj ?
+Monthly Profit,Fitimi mujor
+Monthly Sales,Shitjet mujore
+Monthly Sales Summary,Përmbledhja e Shitjeve Mujore
+Month-wise,Sipas muajit
+Most Active Cashiers,Arkëtarët më aktivë
+Movement Type,Lloji i Lëvizjes
+Movements,Lëvizjet
+Multi Currency,Multimonedha
+N/A,N/A
+Name,Emri
+Negative Stock,Stoku negativ
+Negative Stock Items,Artikuj negativë të aksioneve
+Negative values not allowed,Vlerat negative nuk lejohen
+Net,Net
+Net Qty,Sasia neto
+Net Sales,Shitjet neto
+Net Value,Vlera neto
+Never,kurrë
+New changes are ready to load,Ndryshimet e reja janë gati për t'u ngarkuar
+New Item,Artikull i ri
+New Offer Available,Oferta e re e disponueshme
+New PIN,PIN i ri
+New rate,Norma e re
+Next unit of measure,Njësia tjetër e masës
+No attribute data found.,Nuk u gjetën të dhëna atribute.
+No Barcode,Nuk ka barkod
+No barcode found for UOM '{0}',Nuk u gjet asnjë barkod për UOM '{0}'
+No branch/location data found.,Nuk u gjetën të dhëna për degën/vendndodhjen.
+No brand data found.,Nuk u gjetën të dhëna për markën.
+No cached gift card balance is available offline.,Asnjë bilanc i kartës dhuratë të ruajtur në memorie të fshehtë nuk ofrohet jashtë linje.
+No camera found on this device. Please ensure your device has a working camera.,Nuk u gjet asnjë kamerë në këtë pajisje. Sigurohuni që pajisja juaj të ketë një kamerë që funksionon.
+No capability warnings recorded yet.,Nuk është regjistruar ende asnjë paralajmërim për aftësinë.
+No cash expected for this shift.,Nuk priten para për këtë ndërrim.
+No cash mode configured,Nuk është konfiguruar modaliteti i parave
+No cash movement type is allowed for this POS Profile.,Asnjë lloj lëvizjeje parash nuk lejohet për këtë profil POS.
+No cashier PIN is set yet. Create one now.,Nuk është vendosur ende asnjë kod PIN i arkëtarit. Krijo një tani.
+No cashier profiles are available for this POS profile yet.,Nuk ka ende profile arkëtare për këtë profil POS.
+No cashier-wise discount/void/return activity.,Asnjë aktivitet zbritje/pavlefshmërie/kthimi nga arkëtari.
+No category data found.,Nuk u gjetën të dhëna për kategorinë.
+No category profitability data found.,Nuk u gjetën të dhëna për përfitimin e kategorisë.
+No change returned recorded for this shift.,Asnjë ndryshim i kthyer nuk është regjistruar për këtë ndërrim.
+No change-allocation invoices match the current filters.,Asnjë faturë ndryshimi-alokimi nuk përputhet me filtrat aktualë.
+No charge head breakdown found.,Nuk u gjet asnjë avari e kokës së karikimit.
+No Company Selected,Asnjë kompani e zgjedhur
+No customer sales data found.,Nuk u gjetën të dhëna për shitjet e klientëve.
+No day-wise discount/void/return trend.,Asnjë trend i zbritjes/zvogëlimit/kthimit gjatë ditës.
+No day-wise payment data found.,Nuk u gjetën të dhëna pagesash gjatë ditës.
+No day-wise profitability trend found.,Nuk u gjet asnjë trend i përfitueshmërisë gjatë ditës.
+No day-wise purchase data found.,Nuk u gjetën të dhëna blerjeje gjatë ditës.
+No day-wise sales trend found.,Nuk u gjet asnjë trend i shitjeve gjatë ditës.
+No day-wise tax/charges trend found.,Nuk u gjet asnjë tendencë e taksave/taksave gjatë ditës.
+No dead stock items.,Nuk ka artikuj të aksioneve të vdekur.
+No due date,Asnjë datë afati
+No exact repair match found for this invoice,Nuk u gjet asnjë përputhje e saktë riparimi për këtë faturë
+No hourly sales trend found for today.,Nuk u gjet asnjë trend i shitjeve për orë për sot.
+No invoice activity found.,Nuk u gjet asnjë aktivitet fature.
+No invoices found,Nuk u gjetën fatura
+No invoices found. Try different search criteria.,Nuk u gjetën fatura. Provoni kritere të ndryshme kërkimi.
+No invoices recorded for this shift.,Nuk u regjistruan fatura për këtë ndërrim.
+No item profitability data found.,Nuk u gjetën të dhëna për përfitimin e artikullit.
+No item sales data found for this period.,Nuk u gjetën të dhëna për shitjet e artikujve për këtë periudhë.
+No items found,Nuk u gjet asnjë artikull
+No items in cart,Nuk ka artikuj në shportë
+No items with barcodes to print,Nuk ka artikuj me barkode për të printuar
+No location-wise top item data found.,Nuk u gjetën të dhëna për artikullin kryesor sipas vendndodhjes.
+No low stock alerts right now.,Nuk ka sinjalizime për stokun e ulët për momentin.
+No low stock items.,Nuk ka artikuj të ulët.
+No matching items in cart,Nuk ka artikuj që përputhen në shportë
+No month-wise sales trend found.,Nuk u gjet asnjë trend i shitjeve sipas muajve.
+No negative stock items.,Nuk ka artikuj negativ të aksioneve.
+No notifications yet,Nuk ka ende njoftime
+No offline cash movement synced.,Asnjë lëvizje parash jashtë linje e sinkronizuar.
+No offline invoices pending synchronization,Nuk ka fatura jashtë linje në pritje të sinkronizimit
+No offline sync issues recorded yet.,Nuk është regjistruar ende asnjë problem me sinkronizimin jashtë linje.
+No out-of-stock items.,Nuk ka artikuj që nuk janë në magazinë.
+No outstanding credit invoices for this shift.,Nuk ka fatura krediti të papaguara për këtë zhvendosje.
+No payment collection data found.,Nuk u gjetën të dhëna për mbledhjen e pagesave.
+No payment rows available on this invoice.,Nuk ka rreshta pagese të disponueshme në këtë faturë.
+No payments registered for this shift.,Nuk ka pagesa të regjistruara për këtë ndërrim.
+No pending balances in this period.,Nuk ka bilanc në pritje në këtë periudhë.
+No pending offline invoices,Nuk ka fatura në pritje jashtë linje
+No Print Formats Found,Nuk u gjetën formate printimi
+No profiles found for selected scope. Falling back to current profile failed.,Nuk u gjetën profile për shtrirjen e zgjedhur. Rikthimi në profilin aktual dështoi.
+No recent customer activity found.,Nuk u gjet asnjë aktivitet i fundit i klientit.
+No recent stock entries found.,Nuk u gjet asnjë regjistrim i fundit i aksioneve.
+No records found,Nuk u gjet asnjë regjistrim
+No reorder suggestions right now.,Nuk ka sugjerime për porositje për momentin.
+No repeat customers in this period.,Nuk ka klientë të përsëritur në këtë periudhë.
+No response from server,Asnjë përgjigje nga serveri
+No return invoices found,Nuk u gjetën fatura kthimi
+No return item trend found.,Nuk u gjet asnjë trend i artikullit të kthimit.
+No returnable items found for this invoice,Nuk u gjet asnjë artikull i kthyeshëm për këtë faturë
+No returns were processed in this shift.,Asnjë kthim nuk u përpunua në këtë turn.
+No risk activity found.,Nuk u gjet asnjë aktivitet rreziku.
+No sales activity found for this period.,Nuk u gjet asnjë aktivitet shitjesh për këtë periudhë.
+No slow moving items.,Nuk ka sende që lëvizin ngadalë.
+No staff sales activity found.,Nuk u gjet asnjë aktivitet i shitjes së stafit.
+No stock movement for this period.,Nuk ka lëvizje të aksioneve për këtë periudhë.
+No submitted cash movements in this shift.,Asnjë lëvizje e dorëzuar në para në këtë ndërrim.
+No supplier purchases found in this month.,Nuk u gjetën blerje nga furnizuesit në këtë muaj.
+No suppliers found for this period.,Nuk u gjetën furnizues për këtë periudhë.
+No sync trigger has run yet in this session.,Asnjë aktivizues sinkronizimi nuk është ekzekutuar ende në këtë seancë.
+No tax head breakdown found.,Nuk u gjet asnjë ndarje e kreut tatimor.
+No top items found for this location.,Nuk u gjet asnjë artikull kryesor për këtë vendndodhje.
+No unpaid invoices,Nuk ka fatura të papaguara
+No variant data found.,Nuk u gjetën të dhëna variante.
+No week-wise sales trend found.,Nuk u gjet asnjë trend i shitjeve për javë.
+No.,Nr.
+Nobile Number,Numri Nobile
+Not available,Nuk disponohet
+Not checked,Nuk është kontrolluar
+Not selected,Nuk është zgjedhur
+Not Set,Nuk është caktuar
+Notifications,Njoftimet
+Offer,Oferta
+Offer Applied,Oferta u aplikua
+Offer criteria exceeded,Janë tejkaluar kriteret e ofertës
+Offer Item,Artikull Oferta
+Offer item unavailable,Artikulli i ofertës nuk ofrohet
+Offer Removed,Oferta u hoq
+Offer UOM cannot be changed,Oferta UOM nuk mund të ndryshohet
+Offer?,Oferta?
+Offers,Ofertat
+Offline,Jashtë linje
+Offline & Sync,Jashtë linje dhe sinkronizoj
+Offline Capabilities,Aftësitë jashtë linje
+Offline data status refreshed,Statusi i të dhënave jashtë linje u rifreskua
+Offline diagnostics,Diagnostifikimi jashtë linje
+Offline Invoices,Faturat jashtë linje
+Offline invoices status,Statusi i faturave jashtë linje
+Offline invoices synced,Faturat jashtë linje u sinkronizuan
+Offline Queue: {0},Radha jashtë linje: {0}
+Offline rebuild guidance,Udhëzime për rindërtimin jashtë linje
+Offline restore is unavailable for this session.,Rivendosja jashtë linje nuk ofrohet për këtë sesion.
+Offline selling is available with degraded capabilities.,Shitja jashtë linje ofrohet me aftësi të degraduara.
+Offline snapshot does not match the current POS state.,Fotoja jashtë linje nuk përputhet me gjendjen aktuale të POS-it.
+Offline Status,Statusi jashtë linje
+"Offline, terminal, and system controls","Kontrollet jashtë linje, terminali dhe sistemi"
+OK,OK
+Online,Online
+Open actions menu,Hap menunë e veprimeve
+Open balance to collect,Bilanci i hapur për të mbledhur
+Open Customer Display,Hapni Ekranin e Klientit
+Open drawer,Hap sirtarin
+Open invoices,Faturat e hapura
+Open Payments?,Të hapen pagesat?
+Open POS home,Hapni shtëpinë POS
+Open this screen from POS Menu -> Open Customer Display.,Hapeni këtë ekran nga menyja POS -> Hapni Ekranin e Klientit.
+OpenCV image processing enabled - Enhanced barcode detection,Përpunimi i imazhit OpenCV është aktivizuar - Zbulimi i përmirësuar i barkodit
+OpenCV image processing unavailable on this device,Përpunimi i imazhit OpenCV nuk ofrohet në këtë pajisje
+OpenCV Off,OpenCV joaktive
+OpenCV On,OpenCV Aktiv
+OpenCV processing disabled,Përpunimi i OpenCV është çaktivizuar
+Opening Amount,Shuma e hapjes
+Opening Cash,Hapja e parave të gatshme
+options,opsionet
+Order,Rendit
+Original,Origjinale
+Other,Të tjera
+Out,Jashtë
+Out of Stock,Jashtë gjendjes
+Out of Stock Items,Artikuj jashtë magazinës
+Outstanding,I shquar
+Outstanding Credit by Currency,Kredia e papaguar sipas monedhës
+Overdue,I vonuar
+Overpayment Change,Ndryshimi i mbipagesës
+Overpayment change deducted: {0},Ndryshimi i mbipagesës i zbritur: {0}
+Packing List,Lista e paketimit
+Page Format,Formati i faqes
+Page unavailable offline,Faqja e padisponueshme jashtë linje
+Paid,I paguar
+Paid (orig):,Me pagesë (origjina):
+Paid Amount,Shuma e paguar
+Paid change cannot be greater than total change!,Ndryshimi i paguar nuk mund të jetë më i madh se ndryshimi total!
+Paid:,Me pagesë:
+Parent Item,Artikulli prind
+Partial,I pjesshëm
+Partly Paid,Pjesërisht e paguar
+Party Account,Llogaria e Partisë
+Party Type,Lloji i Partisë
+Pause terminal until next cashier,Ndalo terminalin deri në arkëtarin tjetër
+PAY,PAGUANI
+Payment,Pagesa
+Payment Account,Llogaria e Pagesës
+Payment entries processed for Invoice {0},Regjistrimet e pagesave të përpunuara për faturën {0}
+Payment Entry Type,Lloji i hyrjes së pagesës
+Payment History,Historia e Pagesave
+Payment ID,ID-ja e pagesës
+Payment Method Report,Raporti i mënyrës së pagesës
+Payment Methods,Metodat e pagesës
+Payment of {0} received successfully.,Pagesa prej {0} u pranua me sukses.
+Payment Progress,Progresi i pagesës
+Payment Reconciliation,Barazimi i pagesave
+Payment request status could not be retrieved. Please try again,Statusi i kërkesës për pagesë nuk mund të merrej. Ju lutemi provoni përsëri
+Payment Request took too long to respond. Please try requesting for payment again,Kërkesës për pagesë iu desh shumë kohë për t'u përgjigjur. Ju lutemi provoni të kërkoni përsëri pagesë
+Payment saved offline,Pagesa u ruajt jashtë linje
+Payment State,Shteti i pagesës
+Payment Status,Statusi i pagesës
+Payment submitted but print function could not be executed. Payment name not found.,"Pagesa u dorëzua, por funksioni i printimit nuk mund të ekzekutohej. Emri i pagesës nuk u gjet."
+Payment submitted.,Pagesa e dorëzuar.
+Payment Summary,Përmbledhja e pagesës
+Payments,Pagesat
+Payments are not open. Do you want to open payments and submit?,Pagesat nuk janë të hapura. Dëshiron të hapësh dhe të dorëzosh pagesat?
+Payments by Mode of Payment,Pagesat sipas mënyrës së pagesës
+PDF,PDF
+Peak Hour,Ora e pikut
+Peak Memory:,Kujtesa maksimale:
+Peak Server:,Serveri i pikut:
+Peak:,Maja:
+Pending,Në pritje
+Pending Amount,Shuma në pritje
+Pending count updated from {0} to {1},Numri në pritje u përditësua nga {0} në {1}
+Pending Exposure,Ekspozimi në pritje
+Pending Invoices,Faturat në pritje
+Pending Ratio,Raporti në pritje
+Pending Sales,Shitjet në pritje
+Pending sales: {0} | Cache usage: {1}%,Shitjet në pritje: {0} | Përdorimi i memories: {1}%
+Pending Sync,Sinkronizimi në pritje
+Pending: {0},Në pritje: {0}
+Pending: {0} | Synced: {1} | Draft: {2},Në pritje: {0} | Sinkronizuar: {1} | Drafti: {2}
+Per Page,Për faqe
+Personal,Personale
+Personal preferences adjust the current cashier experience without changing the active POS route.,Preferencat personale rregullojnë përvojën aktuale të arkëtarit pa ndryshuar rrugën aktive të POS-it.
+PIN confirmation does not match.,Konfirmimi PIN nuk përputhet.
+PIN must be 4 to 8 digits.,Kodi PIN duhet të jetë 4 deri në 8 shifra.
+Please add at least one item.,Ju lutemi shtoni të paktën një artikull.
+Please allow camera access to scan codes,Lejo qasjen e kamerës te kodet e skanimit
+Please enter payment amount,Ju lutemi shkruani shumën e pagesës
+Please fill all required fields,Ju lutemi plotësoni të gjitha fushat e kërkuara
+Please make a payment or select a payment,Ju lutemi bëni një pagesë ose zgjidhni një pagesë
+Please request phone payment or use another payment method,Kërkoni pagesë me telefon ose përdorni një mënyrë tjetër pagese
+Please select a customer first,Ju lutemi zgjidhni një klient në fillim
+Please select a party,Ju lutemi zgjidhni një parti
+Please select a party before reconciling.,Ju lutemi zgjidhni një palë përpara se të pajtoheni.
+Please select a valid movement type.,Ju lutemi zgjidhni një lloj lëvizjeje të vlefshme.
+Please select an invoice,Ju lutemi zgjidhni një faturë
+Please select company before reconciling.,Ju lutemi zgjidhni kompaninë përpara se të rakordoni.
+Please set the customer's mobile number,Ju lutemi vendosni numrin celular të klientit
+Please try again or enter the item manually.,Ju lutemi provoni përsëri ose futni artikullin me dorë.
+Please verify the barcode or check the item's availability.,Ju lutemi verifikoni barkodin ose kontrolloni disponueshmërinë e artikullit.
+Points,Pikat
+Popup blocked. Please allow popups.,Dritarja kërcyese u bllokua. Ju lutemi lejoni dritaret kërcyese.
+POS,POS
+POS controls and maintenance,Kontrollet dhe mirëmbajtja e POS
+POS Expense is disabled for this POS Profile.,Shpenzimet POS janë çaktivizuar për këtë profil POS.
+POS is running with limited offline prerequisites.,POS po funksionon me parakushte të kufizuara offline.
+POS Profile,Profili i POS-it
+Position the QR code or barcode within the scanning area,Vendosni kodin QR ose barkodin brenda zonës së skanimit
+Posting,Postimi
+Posting and Price List,Postimi dhe lista e çmimeve
+Posting Date,Data e Postimit
+Preparing background sync,Po përgatit sinkronizimin e sfondit
+"Press OK to continue offline with a warning, or Cancel to retry.",Shtypni OK për të vazhduar jashtë linje me një paralajmërim ose Anulo për të riprovuar.
+Previous unit of measure,Njësia matëse e mëparshme
+Price List,Lista e Çmimeve
+Price List Rate,Norma e Listës së Çmimeve
+Price list rate updated locally only,Tarifa e listës së çmimeve përditësohet vetëm në nivel lokal
+Pricing & Discounts,Çmimet dhe zbritjet
+Pricing Rule,Rregulla e çmimeve
+Print,Printo
+Print Draft,Printo draft
+Print Format (Invoice),Formati i printimit (faturë)
+Print Format (Order),Formati i printimit (porosi)
+Print invoice,Shtypni faturë
+Print Purchase Invoice instead of PO,Printoni faturën e blerjes në vend të PO
+Printer,Printer
+Processed returns impacting the shift totals,Kthimet e përpunuara që ndikojnë në totalet e ndërrimit
+Processing Payment,Përpunimi i pagesës
+Processing payment entries for Invoice {0},Po përpunon hyrjet e pagesave për faturën {0}
+Profile,Profili
+Profiles,Profilet
+Profit,Fitimi
+Profit: Invoice Item Estimate,Fitimi: Vlerësimi i artikullit të faturës
+Profit: Stock Ledger (COGS),Fitimi: Libri i Aksioneve (COGS)
+Profitability Report,Raporti i Rentabilitetit
+Prorated return discount,Zbritje proporcionale e kthimit
+Purchase Amount,Shuma e blerjes
+Purchase Invoices,Faturat e Blerjeve
+Purchase Order created,Urdhri i blerjes u krijua
+Qty,Sasia
+Qualified,I kualifikuar
+Quantity,Sasia
+Quantity exceeds available stock,Sasia tejkalon stokun e disponueshëm
+Quick Actions,Veprimet e shpejta
+Quotation {0} is Submitted,Kuotimi {0} është dorëzuar
+Quotation submitted,Kuotimi i dorëzuar
+QZ Tray connected.,Sibaka QZ e lidhur.
+QZ Tray is manually disconnected. Press Connect to enable it again.,Tray QZ është shkëputur manualisht. Shtypni Connect për ta aktivizuar përsëri.
+QZ Tray is not connected.,Tray QZ nuk është i lidhur.
+QZ Tray Setup,Konfigurimi i tabakasë QZ
+Rate,Vlerësoni
+Rate adjusted to maximum allowed discount,Tarifa e rregulluar në zbritjen maksimale të lejuar
+Ready,Gati
+Ready to resume,Gati për të rifilluar
+Ready!,Gati!
+Real-time POS insights for retail operations.,Vështrime të POS në kohë reale për operacionet me pakicë.
+Rebuild Offline Data,Rindërtoni të dhënat jashtë linje
+Receive,Merrni
+Receive now,Merre tani
+Received,Marrë
+Received:,Marrë:
+Recent Movement Entries,Regjistrimet e Lëvizjes së fundit
+Recent updates about your invoices,Përditësimet e fundit në lidhje me faturat tuaja
+Recently Active Customers,Klientë aktivë së fundmi
+Rechecking connection,Po kontrollohet sërish lidhja
+Reconcile payment methods and close shift,Barazoni mënyrat e pagesës dhe mbyllni turnin
+Reconciling Payments,Barazimi i pagesave
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","Rilidheni dhe hapeni këtë faqe një herë kur jeni në linjë, më pas rifreskimet jashtë linje do të mund ta rivendosin atë."
+Reconnect online to refresh cached offline data from the server.,Lidhu sërish në linjë për të rifreskuar të dhënat e ruajtura jashtë linje nga serveri.
+Recreate local offline prerequisites from scratch,Rikrijoni parakushtet lokale offline nga e para
+Recv:,Recv:
+Redeem,Shlyeje
+Redeem / Scan,Shlyej / Skano
+Redeem Amount,Shlyej shumën
+Redeem Mode,Redeem Mode
+Redeemed Amount,Shuma e shpenguar
+Redeemed credit cannot be greater than its total.,Kredia e shlyer nuk mund të jetë më e madhe se totali i saj.
+Redemption and Totals,Shlyerja dhe Totalet
+Reference,Referenca
+Refresh,Rifresko
+Refresh Exchange Rate,Rifresko kursin e këmbimit
+Refresh Offline Data,Rifresko të dhënat jashtë linje
+Refresh Printers,Rifresko printerët
+Refund,Rimbursimi
+Release Notes,Shënimet e publikimit
+Reload,Ringarko
+Reload customers,Rifresko klientët
+Reload Items,Rifresko artikujt
+Reload Now,Ringarko tani
+Reload to apply the latest changes. Your current session will be refreshed.,Ringarko për të zbatuar ndryshimet më të fundit. Sesioni juaj aktual do të rifreskohet.
+Reload Workflow,Ringarko rrjedhën e punës
+Remarks,Vërejtje
+Remarks are required.,Kërkohen vërejtje.
+Remove,Hiq
+Remove barcode item,Hiq artikullin e barkodit
+Remove cached data and reload the POS app,Hiqni të dhënat e memories dhe ringarkoni aplikacionin POS
+Remove item,Hiq artikullin
+Remove Offer,Hiq ofertën
+Reorder / Purchase Suggestions,Rekomandoni / Sugjerime për blerje
+Repair Candidate,Kandidat për riparim
+Repair Change Allocation,Shpërndarja e ndryshimit të riparimit
+Repair requires an online connection,Riparimi kërkon një lidhje në internet
+Repaired,Riparuar
+Repairing change allocation,Riparimi i alokimit të ndryshimit
+Repeat Customers,Konsumatorë të përsëritur
+Repeat Rate,Shpejtësia e Përsëritjes
+Request,Kërkesa
+Request ID: {0},ID-ja e kërkesës: {0}
+Request Payment,Kërkoni pagesë
+Requested route: {0},Itinerari i kërkuar: {0}
+Required columns cannot be hidden,Kolonat e kërkuara nuk mund të fshihen
+Reset,Rivendos
+Reset item name,Rivendos emrin e artikullit
+Reset to Default,Rivendos në Parazgjedhje
+Resource Health,Shëndeti i burimeve
+Restricted,I kufizuar
+Restricted operational controls for supervisors only.,Kontrolle operacionale të kufizuara vetëm për mbikëqyrësit.
+Retry,Provo sërish
+Retry route,Provo sërish itinerarin
+Return,Kthimi
+Return Amount,Shuma e kthimit
+Return Count,Numërimi i kthimit
+Return items must have negative quantities,Artikujt e kthyer duhet të kenë sasi negative
+Return total must be negative,Totali i kthimit duhet të jetë negativ
+Return Valid Until,Kthimi i vlefshëm deri
+Return window passed,Dritarja e kthimit kaloi
+Return without Invoice,Kthimi pa faturë
+Returns,Kthimet
+Returns / Voids / Discounts,Kthime / Boshllëqe / Zbritje
+Returns by Currency,Kthimet sipas monedhës
+Revenue,Të ardhurat
+Review shift totals before submitting the closing entry,Rishikoni totalet e ndërrimeve përpara se të dorëzoni hyrjen përmbyllëse
+Round Off,Rrumbullakoset
+Rows,Rreshtat
+Rows:,Rreshtat:
+Rule,Rregulli
+Sale,Shitje
+Sales,Shitjet
+Sales Order {0} is Submitted,Urdhri i shitjes {0} është dorëzuar
+Sales Person and Print,Person Shitës dhe Print
+Sales Person not found,Personi i shitjes nuk u gjet
+Sales processed,Shitjet e përpunuara
+Sales Return,Kthimi i shitjeve
+Sales Trend Report,Raporti i Trendit të Shitjeve
+Save,Ruaj
+Save & Clear,Ruaj & Pastro
+Save as POS Profile Default,Ruaj si parazgjedhje të Profilit POS
+Save Settings,Ruaj Cilësimet
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,Ruajeni printerin e zgjedhur si parazgjedhjen e Profilit POS në mënyrë që të shfaqet automatikisht në këtë konfigurim.
+Saved as draft because: {0},Ruajtur si draft sepse: {0}
+Saving...,Po ruan...
+Scale barcode detected. Quantity here is the number of labels to print.,U zbulua barkodi i shkallës. Sasia këtu është numri i etiketave për të printuar.
+Scale barcode settings are not configured. Using item barcode only.,Cilësimet e barkodit të shkallës nuk janë konfiguruar. Duke përdorur vetëm barkodin e artikullit.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,Mungon barkodi i shabllonit të shkallës për këtë artikull/UOM. Duke përdorur vetëm barkodin e artikullit.
+Scan an existing card and top it up without leaving the payment flow.,Skanoni një kartë ekzistuese dhe plotësoni atë pa u larguar nga fluksi i pagesave.
+Scan Error,Gabim skanimi
+Scan or enter a gift card code to check balance or redeem.,Skanoni ose futni një kod të kartës dhuratë për të kontrolluar gjendjen ose për ta përdorur.
+Scan or paste the card code below.,Skanoni ose ngjisni kodin e kartës më poshtë.
+Scan QR Code/Barcode,Skanoni kodin/barkodin QR
+Scan with camera,Skanoni me kamera
+Scan-First Flow,Skanimi-Rrjedha e parë
+Scanned Code:,Kodi i skanuar:
+Scanning for: {0},Po skanon për: {0}
+Scanning items,Skanimi i artikujve
+Scan-Ready,Gati për skanim
+Scope,Fushëveprimi
+Scope: All Profiles,Fushëveprimi: Të gjitha profilet
+Scope: Current Profile,Fushëveprimi: Profili aktual
+Scope: Specific Profile,Fushëveprimi: Profili specifik
+Search,Kërko
+Search Account,Kërko llogari
+Search an invoice and continue the return flow without extra steps.,Kërkoni një faturë dhe vazhdoni rrjedhën e kthimit pa hapa shtesë.
+Search customer,Kërko klient
+Search invoices or customers,Kërkoni fatura ose klientë
+Search item,Kërko artikullin
+Search item / code,Kërko artikullin / kodin
+Search items or barcode,Kërko artikuj ose barkod
+Search Mpesa Payments,Kërkoni Pagesat Mpesa
+Search return invoices or customers,Kërkoni faturat e kthimit ose klientët
+Search supplier,Kërko furnizues
+Search unpaid invoices or customers,Kërkoni fatura të papaguara ose klientë
+Secure context (HTTPS or localhost) is required for camera access.,Konteksti i sigurt (HTTPS ose hosti lokal) kërkohet për qasje në kamerë.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,Kërkohet kontekst i sigurt (HTTPS) për qasje në kamerë. Ju lutemi përdorni HTTPS për të hyrë në kamerë.
+Select,Zgjidhni
+Select a cashier first.,Së pari zgjidhni një arkëtar.
+Select a customer,Zgjidhni një klient
+Select a customer to use coupon,Zgjidhni një klient për të përdorur kupon
+Select a printer to use QZ silent printing.,Zgjidhni një printer për të përdorur printimin e heshtur QZ.
+Select Batch,Zgjidhni Batch
+Select Columns to Display,Zgjidhni Kolonat për të shfaqur
+Select items to sell,Zgjidhni artikujt për të shitur
+Select Payment,Zgjidhni Pagesa
+Select Payment Account,Zgjidhni llogarinë e pagesës
+Select printer,Zgjidhni printerin
+Select Return Invoice,Zgjidhni Faturën e Kthimit
+Select S.O,Zgjidhni S.O
+Select Sales Orders,Zgjidhni porositë e shitjeve
+Select the cashier who is taking over this terminal.,Zgjidhni arkëtarin që merr përsipër këtë terminal.
+Selected,Zgjedhur
+Selected movement type is not allowed by POS Profile.,Lloji i zgjedhur i lëvizjes nuk lejohet nga Profili POS.
+Selected Payments,Pagesat e zgjedhura
+Sensitive actions kept away from quick taps.,Veprimet e ndjeshme mbahen larg goditjeve të shpejta.
+Serial,Seriali
+Serial Numbers,Numrat Serial
+Server CPU Usage:,Përdorimi i CPU-së së serverit:
+Server Health,Shëndeti i serverit
+Server Memory Usage:,Përdorimi i memories së serverit:
+Server Metrics,Metrika e serverit
+Server Uptime:,Koha e funksionimit të serverit:
+Service Charges,Tarifat e Shërbimit
+Session,Sesioni
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,Vendosni çdo PIN të arkëtarit në formularin e Përdoruesit dhe mbani anëtarët e terminalit të caktuar në Përdoruesin e Profilit POS.
+Settings,Cilësimet
+Settings in this section update the POS workspace without changing the current route.,Cilësimet në këtë seksion përditësojnë hapësirën e punës POS pa ndryshuar itinerarin aktual.
+Setup complete!,Konfigurimi përfundoi!
+Share,Shpërndaje
+Shared terminal,Terminali i përbashkët
+Shift Closed Snapshot,Shift fotografi e mbyllur
+Shift Overview,Shift Pasqyrë
+Show,Shfaq
+Show cart on customer-facing screen,Shfaq karrocën në ekranin e drejtuar nga klienti
+Show last invoice rate,Shfaq tarifën e faturës së fundit
+Show rate info,Shfaq informacionin e tarifës
+Show Repair Candidates,Trego kandidatët për riparim
+Show search tools,Shfaq mjetet e kërkimit
+Show the active cart on a customer-facing screen,Shfaq karrocën aktive në një ekran përballë klientit
+Showing {0}-{1} of {2},Po shfaqen {0}-{1} nga {2}
+Showing 0 of 0,Duke shfaqur 0 nga 0
+Shows the distribution of invoices per currency,Tregon shpërndarjen e faturave për monedhë
+Sign out of the current POS session,Dilni nga sesioni aktual i POS-it
+Size:,Madhësia:
+Skipped Payments,Pagesat e anashkaluara
+Skipping items without barcodes,Kapërcimi i artikujve pa barkode
+Slow Moving,Lëvizje e ngadaltë
+Slow Moving Items,Artikuj që lëvizin ngadalë
+Slow Queries:,Pyetje të ngadalta:
+Sold,Shitur
+Source,Burimi
+Source Cash Account (Optional Override),Llogaria burimore e parave të gatshme (Zëvendësimi opsional)
+Source Ex. Rate:,Burimi Shemb. Vlerësimi:
+Source Rate:,Norma e burimit:
+Specific Profile,Profili specifik
+Split Invoices,Faturat e ndara
+Staff / Cashier Performance Report,Raporti i Performancës së Stafit/Arkëtarit
+Status,Statusi
+Stock,Stoku
+Stock Information,Informacioni i aksioneve
+Stock is lower than requested,Stoku është më i ulët se sa kërkohet
+Stock is lower than requested:\n{0},Stoku është më i ulët se sa kërkohet:\n{0}
+Stock Movement Report,Raporti i Lëvizjes së Aksioneve
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,Përditësimi i aksioneve: {0} ka {1} në dispozicion. Shtimi i {2} do ta sjellë stokun nën zero.
+Submit,Paraqisni
+Submit & Print,Dërgo & Printo
+Submit Deposit,Paraqisni një depozitë
+Submit Expense,Paraqisni shpenzimet
+Submitted,dorëzuar
+Submitted Cash Movements,Lëvizjet e parave të dorëzuara
+Submitted entries,Regjistrimet e dorëzuara
+Successfully scanned:,Skanuar me sukses:
+Suggested,Sugjeruar
+Suggested Qty,Sasia e sugjeruar
+Supervisor Access,Qasja e Mbikëqyrësit
+Supervisor permissions unlock issuance and reloads,Lejet e mbikëqyrësit zhbllokojnë lëshimin dhe ringarkojnë
+Supervisor Tools,Mjetet e Mbikëqyrësit
+Supplier,Furnizuesi
+Supplier and dates are required.,Kërkohet furnizuesi dhe datat.
+Supplier Invoices,Faturat e Furnizuesit
+Supplier is required.,Kërkohet furnizuesi.
+Supplier name is required,Kërkohet emri i furnizuesit
+Supplier Payments,Pagesat e furnizuesit
+Supplier Purchase Summary,Përmbledhja e blerjeve nga furnizuesi
+Suppliers,Furnizuesit
+Suppliers not found,Furnizuesit nuk u gjetën
+Switch Camera,Ndërroni kamerën
+Switch Cashier,Ndërroni arkë
+Switch the POS appearance theme,Ndrysho temën e paraqitjes së POS-it
+Switched to:,Kaloi në:
+Sync All Invoices,Sinkronizoni të gjitha faturat
+Sync Offline Cash Movements ({0}),Sinkronizoni lëvizjet e parave jashtë linje ({0})
+Sync Offline Sales,Sinkronizoni shitjet jashtë linje
+Synced {0} offline cash movement(s).,{0} lëvizje të parave jashtë linje të sinkronizuara.
+Syncing items in background,Sinkronizimi i artikujve në sfond
+System / Diagnostics,Sistemi / Diagnostifikimi
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","Veprimet e sistemit janë kontrolle të mirëmbajtjes me frekuencë të ulët, si p.sh. informacioni i aplikacionit, diagnostikimi mbështetës dhe kontrollet e sesionit."
+System Information,Informacioni i Sistemit
+System Status,Statusi i Sistemit
+Tables:,Tabelat:
+Tap the button below to redeem a gift card during checkout.,Trokit butonin më poshtë për të përdorur një kartë dhuratë gjatë blerjes.
+Target,Synimi
+Target Ex. Rate:,Synimi Ex. Vlerësimi:
+Target Rate:,Norma e synuar:
+Tax,Taksa
+Tax / Charges Report,Raporti i Tatimeve / Taksave
+Tax Heads,Kryetarët e taksave
+Taxable Amount,Shuma e tatueshme
+Tendered,Tenderuar
+Terminal,Terminali
+Terminal & Devices,Terminali dhe pajisjet
+Terminal locked,Terminali i kyçur
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","Mjetet e terminalit ndikojnë në këtë stacion arkë, ekranet me pamje nga klientët dhe kontrollet e ardhshme të printerit/pajisjes."
+Territory not found,Territori nuk u gjet
+The amount paid is not complete,Shuma e paguar nuk është e plotë
+The app stores data locally for offline use. This is called cache.,Aplikacioni ruan të dhënat në nivel lokal për përdorim jashtë linje. Kjo quhet cache.
+The invoice stayed in draft. Please review and submit it manually.,Fatura qëndroi në draft. Ju lutemi rishikoni dhe dorëzojeni manualisht.
+The maximum discount allowed is,Zbritja maksimale e lejuar është
+The quantity for {0} has been adjusted to the maximum available stock.,Sasia për {0} është rregulluar në stokun maksimal të disponueshëm.
+The system could not retrieve the item details. Please try again.,Sistemi nuk mund të merrte detajet e artikullit. Ju lutemi provoni përsëri.
+These invoices will be synced when connection is restored,Këto fatura do të sinkronizohen kur të rikthehet lidhja
+This action now opens inside the settings workspace.,Ky veprim tani hapet brenda hapësirës së punës së cilësimeve.
+This coupon already used !,Ky kupon është përdorur tashmë!
+This invoice does not need change-allocation repair,Kjo faturë nuk ka nevojë për riparim ndryshim-alokimi
+This invoice is already repaired,Kjo faturë tashmë është riparuar
+This is an item template. Please choose a variant.,Ky është një shabllon artikulli. Ju lutemi zgjidhni një variant.
+this item,këtë artikull
+This POS page could not be opened offline because its code was not cached on this terminal yet.,Kjo faqe POS nuk mund të hapej jashtë linje sepse kodi i saj nuk ishte ruajtur ende në memorien specifike në këtë terminal.
+This Serial Number {0} has already been added!,Ky numër serial {0} është shtuar tashmë!
+Threshold,Pragu
+Time,Koha
+Tip: Clear cache regularly to free up space and keep the app fast.,Këshillë: Pastro rregullisht cache-në për të liruar hapësirë dhe për ta mbajtur aplikacionin të shpejtë.
+Tip: Close unused tabs or apps to reduce lag.,Këshillë: Mbyllni skedat ose aplikacionet e papërdorura për të zvogëluar vonesën.
+Tip: Monitor slow queries and table size for optimal performance.,Këshillë: Monitoroni pyetjet e ngadalta dhe madhësinë e tabelës për performancë optimale.
+To Be Paid,Për t'u paguar
+To Date,Deri më sot
+Today,Sot
+Today Profit,Sot Fitimi
+Today Sales,Sot Shitjet
+Toggle navigation drawer,Ndrysho sirtarin e navigimit
+Toggle Theme,Ndrysho temën
+Tools,Mjetet
+Tools for customer-facing screens and terminal-specific actions.,Mjete për ekranet e klientëve dhe veprimet specifike të terminalit.
+Top Brand,Marka kryesore
+Top Category,Kategoria kryesore
+Top Charge Head,Kreu i ngarkimit të lartë
+Top Customers,Klientët kryesorë
+Top Discount,Zbritja kryesore
+Top Items by Location,Artikujt kryesorë sipas vendndodhjes
+Top Margin,Marzhi i lartë
+Top Pending,Krye në pritje
+Top Profit Item,Artikulli kryesor i fitimit
+Top Return Items,Artikujt kryesorë të kthimit
+Top Sales by Cashier,Shitjet kryesore nga Arkëtari
+Top Supplier,Furnizuesi kryesor
+Top Suppliers by Spend,Furnizuesit kryesorë sipas shpenzimeve
+Top Tables,Tabelat kryesore
+Top Tax Head,Kreu kryesor i taksave
+Top Up Amount,Shuma e Mbushjes
+Top Up Card,Kartë Mbushëse
+Top Up Mode,Modaliteti i mbushjes
+Top Variant,Top Variant
+Total,Gjithsej
+Total Amount,Shuma totale
+Total Change,Ndryshimi total
+Total Charges,Ngarkesat totale
+Total In,Gjithsej në
+Total Invoices,Totali i Faturave
+Total Items,Totali i artikujve
+Total Mpesa,Totali Mpesa
+Total Out,Gjithsej jashtë
+Total Payments,Totali i pagesave
+Total Purchase,Blerja totale
+Total Selected :,Totali i zgjedhur:
+Total Size,Madhësia totale
+Total Stock Qty,Sasia totale e aksioneve
+Total:,Gjithsej:
+Totals by Invoice Currency,Totalet sipas monedhës së faturës
+Track how much cash was handed back to customers,Gjurmo sa para i janë dorëzuar klientëve
+"Track recent sales, collect unpaid balances, and reopen saved work","Ndiqni shitjet e fundit, mblidhni bilancet e papaguara dhe rihapni punën e ruajtur"
+Transaction ID,ID e transaksionit
+Transfer,Transferimi
+Try a different search term or clear the cart search.,Provoni një term tjetër kërkimi ose pastroni kërkimin e karrocës.
+Try adjusting your search or filters,Provoni të rregulloni kërkimin ose filtrat tuaj
+Try another source or refresh the list.,Provoni një burim tjetër ose rifreskoni listën.
+Try changing the date range or status filter.,Provoni të ndryshoni diapazonin e datave ose filtrin e statusit.
+Type,Lloji
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,Pamundësia për të hyrë në kamerë edhe me cilësimet bazë. Ju lutemi kontrolloni lejet e kamerës dhe përputhshmërinë e pajisjes.
+Unable to add offer item {0}. Please refresh and try again.,Nuk mund të shtohet artikulli i ofertës {0}. Rifresko dhe provo sërish.
+Unable to add offer item. Please refresh and try again.,Nuk mund të shtohet artikulli i ofertës. Rifresko dhe provo sërish.
+Unable to add scanned item.,Nuk mund të shtohet artikulli i skanuar.
+Unable to create purchase order,Nuk mund të krijohet porosia e blerjes
+Unable to delete draft invoice,Projektfatura nuk mund të fshihet
+Unable to fetch documents,Dokumentet nuk mund të merren
+Unable to fetch draft orders,Nuk mund të merret draft-urdhrat
+Unable to fetch invoice history,Historiku i faturave nuk mund të merret
+Unable to fetch M-Pesa payments,Nuk mund të merren pagesat e M-Pesa
+Unable to fetch sales orders,Nuk mund të merren porositë e shitjeve
+Unable to fetch unpaid invoices,Faturat e papaguara nuk mund të merren
+Unable to generate scale barcode,Nuk mund të gjenerohet barkodi në shkallë
+Unable to issue gift card.,Karta dhuratë nuk mund të lëshohet.
+Unable to load cashier PIN status.,Statusi PIN i arkëtarit nuk mund të ngarkohet.
+Unable to load document,Dokumenti nuk mund të ngarkohet
+Unable to load draft invoice,Nuk mund të ngarkohet draft-fatura
+Unable to load gift card balance.,Bilanci i kartës së dhuratës nuk mund të ngarkohet.
+Unable to load invoice details,Detajet e faturës nuk mund të ngarkohen
+Unable to load parked order,Porosia e parkuar nuk mund të ngarkohet
+Unable to load the selected sales order,Nuk mund të ngarkohet porosia e zgjedhur e shitjes
+Unable to prepare document,Nuk mund të përgatitet dokumenti
+Unable to prepare return invoice,Nuk mund të përgatitet fatura e kthimit
+Unable to print draft invoice,Nuk mund të printohet draft-fatura
+Unable to print submitted invoice,Fatura e dorëzuar nuk mund të printohet
+Unable to process document action,Veprimi i dokumentit nuk mund të përpunohet
+Unable to repair change allocation,Nuk mund të riparohet alokimi i ndryshimeve
+Unable to save cashier PIN.,PIN-i i arkëtarit nuk mund të ruhet.
+Unable to save the rate to the backend price list,Tarifa nuk mund të ruhet në listën e çmimeve të fundit
+Unable to submit invoice,Fatura nuk mund të dorëzohet
+Unable to submit the selected payment,Nuk mund të dorëzohet pagesa e zgjedhur
+Unable to top up gift card.,Karta e dhuratës nuk mund të mbushet.
+Unable to verify cashier PIN.,PIN-i i arkëtarit nuk mund të verifikohet.
+Unallocated,Të pashpërndara
+Unallocated:,Të pashpërndara:
+Unavailable,I padisponueshëm
+Unknown,E panjohur
+Unknown Item,Artikull i panjohur
+Unknown Warehouse,Magazina e panjohur
+Unlock POS,Zhbllokoni POS
+Unpaid,E papaguar
+"Unselected payments stay unallocated first, then auto reconcile after submit.","Pagesat e pazgjedhura fillimisht mbeten të pashpërndara, më pas rakordohen automatikisht pas dorëzimit."
+UOM,UOM
+UOM not found,UOM nuk u gjet
+Update available,Ofrohet përditësim
+Update Customer,Përditëso klientin
+Update PIN,Përditëso kodin PIN
+Update Price List Rate,Përditëso normën e listës së çmimeve
+Updated,Përditësuar
+Updates and app info that stay out of the cashier flow.,Përditësimet dhe informacionet e aplikacioneve që qëndrojnë jashtë fluksit të arkëtarëve.
+Updates automatically,Përditësohet automatikisht
+Usage,Përdorimi
+Usage Stats,Statistikat e Përdorimit
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,Përdorni një PIN 4 deri në 8 shifra për ndërrimin e arkës dhe shkyçjen e terminalit.
+Use Cashier,Përdorni arkë
+Use date range to search for older invoices,Përdorni intervalin e datave për të kërkuar fatura më të vjetra
+"Use one field for manual code entry, barcode scans, or QR scans.","Përdorni një fushë për futjen manuale të kodit, skanimet e barkodit ose skanimet QR."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","Përdorni një rrjedhë pune për kontrolle balancash, lëshime të reja dhe rimbushje pa dalë nga POS."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","Përdoreni këtë seksion kur të dhënat e parakushteve të ruajtura në memorie të fshehtë kanë nevojë për rifreskim, rindërtim ose rishikim diagnostikues."
+Use Western numerals,Përdorni numra perëndimor
+Used:,Përdorur:
+Using basic camera settings due to device limitations,Përdorimi i cilësimeve bazë të kamerës për shkak të kufizimeve të pajisjes
+Using cached customer balance,Përdorimi i bilancit të klientit të ruajtur në memorie
+Valid until,E vlefshme deri në
+Variance %,Varianca %
+Variants,Variantet
+Variant-wise,Në variant
+Verify closing amounts for each payment method,Verifikoni shumat e mbylljes për secilën mënyrë pagese
+View all,Shiko të gjitha
+View app information and current build details,Shikoni informacionin e aplikacionit dhe detajet aktuale të ndërtimit
+View Data Diagnostics,Shiko Diagnostifikimin e të Dhënave
+View Details,Shiko Detajet
+View invoice details,Shikoni detajet e faturës
+View notifications,Shikoni njoftimet
+View offline invoices,Shikoni faturat jashtë linje
+View restricted POS insights,Shikoni njohuritë e kufizuara të POS
+Void Amount,Shuma e pavlefshme
+Void Count,Numërimi i zbrazët
+Voids,Boshllëqe
+Waiting for cart items,Në pritje të artikujve të karrocës
+Waiting for payment...,Në pritje të pagesës...
+Walk-in Customer,Klient i përhershëm
+Warehouse,Magazina
+Warning: High cache usage may affect performance.,Paralajmërim: Përdorimi i lartë i cache-it mund të ndikojë në performancën.
+Warning: High lag may indicate heavy processing or browser slowness.,Paralajmërim: Vonesa e lartë mund të tregojë përpunim të rëndë ose ngadalësi të shfletuesit.
+Week ?,Javë ?
+Week-wise,Sipas javës
+Weight (g),Pesha (g)
+Weight (grams),Pesha (gram)
+We'll let you know if an invoice fails to submit,Ne do t'ju njoftojmë nëse një faturë nuk dorëzohet
+Workflow,Rrjedha e punës
+Write off amount cannot exceed the POS profile maximum of {0},Shuma e fshirjes nuk mund të kalojë maksimumin e profilit POS prej {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,Shuma e fshirjes tejkalon kufirin e lejuar ({0}). Ju lutemi shtoni pagesën për shumën e mbetur.
+Yes,po
+"Yes, Cancel sale","Po, anuloni shitjen"
+"Yes, Close","Po, Mbylle"
+You are not allowed to print draft invoices,Nuk ju lejohet të printoni draft fatura
+You are offline. Add Payment will work again when the connection is restored.,Ju jeni jashtë linje. Shto pagesën do të funksionojë përsëri kur lidhja të rikthehet.
+You have no notifications right now,Nuk ke asnjë njoftim për momentin
+Your Cart,Karroca juaj

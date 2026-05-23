@@ -1,0 +1,1362 @@
+POS Awesome,பிஓஎஸ் அருமை
+Fetch Items Directly from Server,சேவையகத்திலிருந்து நேரடியாக பொருட்களைப் பெறவும்
+Menu,மெனு
+Actions,செயல்கள்
+Close Shift,மூடு ஷிப்ட்
+End current session,தற்போதைய அமர்வை முடிக்கவும்
+Print Last Invoice,கடைசி விலைப்பட்டியல் அச்சிடவும்
+Reprint previous transaction,முந்தைய பரிவர்த்தனையை மீண்டும் அச்சிடுக
+Sync Offline Invoices,ஆஃப்லைன் இன்வாய்ஸ்களை ஒத்திசைக்கவும்
+Upload pending transactions,நிலுவையில் உள்ள பரிவர்த்தனைகளைப் பதிவேற்றவும்
+Go Online,ஆன்லைனில் செல்
+Go Offline,ஆஃப்லைனில் செல்லவும்
+Disable offline mode,ஆஃப்லைன் பயன்முறையை முடக்கு
+Work without server connection,சேவையக இணைப்பு இல்லாமல் வேலை செய்யுங்கள்
+Clear Cache,தற்காலிக சேமிப்பை அழிக்கவும்
+Remove local data and refresh,உள்ளூர் தரவை அகற்றி புதுப்பிக்கவும்
+About,பற்றி
+App information,பயன்பாட்டு தகவல்
+Language,மொழி
+Change interface language,இடைமுக மொழியை மாற்றவும்
+Light Mode,ஒளி முறை
+Dark Mode,இருண்ட பயன்முறை
+Switch theme appearance,தீம் தோற்றத்தை மாற்றவும்
+Logout,வெளியேறு
+Sign out of session,அமர்விலிருந்து வெளியேறு
+Select Language,மொழியைத் தேர்ந்தெடுக்கவும்
+Choose your preferred language for the POS interface,பிஓஎஸ் இடைமுகத்திற்கு நீங்கள் விரும்பும் மொழியைத் தேர்ந்தெடுக்கவும்
+Language will be changed to,என மொழி மாற்றப்படும்
+Cancel,ரத்து செய்
+Change Language,மொழியை மாற்றவும்
+Close,மூடு
+Cannot change language - same language selected,மொழியை மாற்ற முடியாது - அதே மொழி தேர்ந்தெடுக்கப்பட்டது
+Language changed successfully! Reloading...,மொழி மாற்றப்பட்டது! மீண்டும் ஏற்றுகிறது...
+Failed to change language,மொழியை மாற்ற முடியவில்லை
+Unknown error,அறியப்படாத பிழை
+- Total Unallocated,- மொத்தமாக ஒதுக்கப்படவில்லை
+* Required,* தேவை
+{0} (Qty: {1}),{0} (அளவு: {1})
+{0} actions,{0} செயல்கள்
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} கையிருப்பில் {1} மட்டுமே உள்ளது. நீங்கள் {2} ஐக் கோரியுள்ளீர்கள். அளவை சரிசெய்யவும் அல்லது மறுதொடக்கம் செய்யவும்.
+{0} offline invoice{1} pending,{0} ஆஃப்லைன் இன்வாய்ஸ்{1} நிலுவையில் உள்ளது
+{0} offline invoice{1} saved as draft,{0} ஆஃப்லைன் இன்வாய்ஸ்{1} வரைவாக சேமிக்கப்பட்டது
+{0} offline invoice{1} synced,{0} ஆஃப்லைன் இன்வாய்ஸ்{1} ஒத்திசைக்கப்பட்டது
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0}நா முன்பு
+{0}h ago,{0}ம முன்பு
+{0}m ago,{0}நி முன்பு
+A POS supervisor is required for this action.,இந்தச் செயலுக்கு POS மேற்பார்வையாளர் தேவை.
+Access,அணுகல்
+Account,கணக்கு
+Account is overdrawn,கணக்கு மிகைப்படுத்தப்பட்டுள்ளது
+Acknowledge the error to resume scanning,ஸ்கேன் செய்வதை மீண்டும் தொடங்க பிழையை ஒப்புக்கொள்ளவும்
+Acknowledge the error to resume scanning.,ஸ்கேன் செய்வதை மீண்டும் தொடங்க பிழையை ஒப்புக்கொள்ளவும்.
+Across,முழுவதும்
+Action,செயல்
+Active sale,செயலில் விற்பனை
+add,சேர்க்க
+Add items from the selector to start building this sale.,"இந்த விற்பனையை உருவாக்க, தேர்வாளரிடமிருந்து பொருட்களைச் சேர்க்கவும்."
+Add more value to an existing gift card,ஏற்கனவே உள்ள கிஃப்ட் கார்டுக்கு கூடுதல் மதிப்பைச் சேர்க்கவும்
+Add New Address,புதிய முகவரியைச் சேர்க்கவும்
+Add new customer,புதிய வாடிக்கையாளரைச் சேர்க்கவும்
+Add on New Line,புதிய வரியில் சேர்க்கவும்
+Add Payment,கட்டணத்தைச் சேர்க்கவும்
+Add payment to invoice,விலைப்பட்டியலில் கட்டணத்தைச் சேர்க்கவும்
+Add/Edit Coupon Conditions,கூப்பன் நிபந்தனைகளைச் சேர்/திருத்து
+Additional Discount,கூடுதல் தள்ளுபடி
+Additional Discount %,கூடுதல் தள்ளுபடி %
+Address Line 1,முகவரி வரி 1
+Address not found,முகவரி கிடைக்கவில்லை
+Adjust the quantity or enable negative stock to continue.,அளவைச் சரிசெய்யவும் அல்லது நெகட்டிவ் ஸ்டாக்கைத் தொடர இயக்கவும்.
+Adjustment,சரிசெய்தல்
+After returns,திரும்பிய பிறகு
+Against,எதிராக
+Against Name,பெயருக்கு எதிராக
+Age Bracket,வயது வரம்பு
+All,அனைத்து
+All Caught Up!,எல்லாம் பிடிபட்டது!
+All invoices are synchronized,அனைத்து விலைப்பட்டியல்களும் ஒத்திசைக்கப்பட்டுள்ளன
+All pending invoices are up to date,நிலுவையில் உள்ள அனைத்து இன்வாய்ஸ்களும் புதுப்பித்த நிலையில் உள்ளன
+All Profiles,அனைத்து சுயவிவரங்கள்
+All Synchronized,அனைத்தும் ஒத்திசைக்கப்பட்டது
+All visible invoices are fully settled.,காணக்கூடிய அனைத்து இன்வாய்ஸ்களும் முழுமையாக செட்டில் செய்யப்பட்டன.
+All Warehouses,அனைத்து கிடங்குகள்
+Allowed UOM is {0},அனுமதிக்கப்படும் UOM: {0}
+Always fetch items from server (ignore local cache),எப்போதும் சேவையகத்திலிருந்து பொருட்களைப் பெறவும் (உள்ளூர் தற்காலிக சேமிப்பை புறக்கணிக்கவும்)
+Amount,தொகை
+Amount already received,ஏற்கனவே பெறப்பட்ட தொகை
+Amount exceeds profile cash movement max amount.,சுயவிவரப் பண இயக்கத்தின் அதிகபட்சத் தொகையைத் தாண்டியது.
+Amount must be greater than zero.,தொகை பூஜ்ஜியத்தை விட அதிகமாக இருக்க வேண்டும்.
+Amount received from customer,வாடிக்கையாளரிடமிருந்து பெறப்பட்ட தொகை
+Appearance and user-level preferences for the current session.,தற்போதைய அமர்விற்கான தோற்றம் மற்றும் பயனர்-நிலை விருப்பத்தேர்வுகள்.
+Applied,விண்ணப்பிக்கப்பட்டது
+Apply,விண்ணப்பிக்கவும்
+Apply Gift Card,பரிசு அட்டையை விண்ணப்பிக்கவும்
+Apply Offer,சலுகையைப் பயன்படுத்தவும்
+Apply On,விண்ணப்பிக்கவும்
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,இந்த இன்வாய்ஸில் நீங்கள் ரிடீம் செய்ய விரும்பும் தொகையை மட்டும் பயன்படுத்தவும். மீதமுள்ள இருப்பு அட்டையில் இருக்கும்.
+Apply Redemption,ரிடெம்ப்ஷனைப் பயன்படுத்தவும்
+Applying,விண்ணப்பிக்கும்
+Apps,பயன்பாடுகள்
+Are you sure you want to close? All entered data will be lost.,நீங்கள் நிச்சயமாக மூட விரும்புகிறீர்களா? உள்ளிட்ட அனைத்து தரவுகளும் இழக்கப்படும்.
+Attributes (Size/Color),பண்புக்கூறுகள் (அளவு/நிறம்)
+Auto Allocate Payment Amount,தானாக ஒதுக்கீடு செலுத்தும் தொகை
+Auto Reconcile,தானாக சமரசம்
+Auto reconciliation completed after payment submit.,பணம் சமர்ப்பித்த பிறகு தானியங்கு சமரசம் முடிந்தது.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,தானியங்கு சமரசம் முடிந்தது. ஒதுக்கப்பட்டது: {0}{1}. மீதமுள்ளவை: {0}{2}.
+Available Actions,கிடைக்கும் செயல்கள்
+Available QTY,QTY கிடைக்கிறது
+Available:,கிடைக்கும்:
+Average Basket,சராசரி கூடை
+Average Bill,சராசரி பில்
+Average Ticket,சராசரி டிக்கெட்
+Avg Bill,சராசரி பில்
+Avg Invoice,சராசரி விலைப்பட்டியல்
+Avg Invoice Profit,சராசரி விலைப்பட்டியல் லாபம்
+Avg Invoice Value,சராசரி விலைப்பட்டியல் மதிப்பு
+Avg Purchase Frequency,சராசரி கொள்முதல் அதிர்வெண்
+Awesome,அருமை
+Awesome Dashboard,அற்புதமான டாஷ்போர்டு
+Awesome Dashboard is disabled for the selected POS Profile.,தேர்ந்தெடுக்கப்பட்ட பிஓஎஸ் சுயவிவரத்திற்கு அற்புதமான டாஷ்போர்டு முடக்கப்பட்டுள்ளது.
+Awesome Dashboard is unavailable for the selected scope.,தேர்ந்தெடுக்கப்பட்ட நோக்கத்திற்கு அற்புதமான டாஷ்போர்டு கிடைக்கவில்லை.
+Awesome Dashboard is visible only to POS supervisors.,அற்புதமான டாஷ்போர்டு POS மேற்பார்வையாளர்களுக்கு மட்டுமே தெரியும்.
+Back,மீண்டும்
+Back Office Cash Account,பின் அலுவலக பணக் கணக்கு
+Back Office Cash Account (Optional Override),பின் அலுவலக பணக் கணக்கு (விரும்பினால் மேலெழுதுதல்)
+Back office cash account is required.,பின் அலுவலக பணக் கணக்கு தேவை.
+Back to {0},{0}க்குத் திரும்பு
+Background processing did not finish in time.,பின்னணி செயலாக்கம் சரியான நேரத்தில் முடிவடையவில்லை.
+Background processing failed for Invoice {0}: {1},விலைப்பட்டியல் {0}: {1}க்கான பின்னணி செயலாக்கம் தோல்வியடைந்தது
+Background Submission Failed,பின்னணி சமர்ப்பிப்பு தோல்வியடைந்தது
+Background sync interval (seconds),பின்னணி ஒத்திசைவு இடைவெளி (வினாடிகள்)
+Balance,இருப்பு
+Balance will be updated when connection is restored,இணைப்பு மீட்டமைக்கப்படும் போது இருப்பு புதுப்பிக்கப்படும்
+Balances still pending,இன்னும் நிலுவையில் உள்ளது
+Barcode,பார்கோடு
+Barcode / QR Ready,பார்கோடு / QR தயார்
+Barcode Label Printing,பார்கோடு லேபிள் அச்சிடுதல்
+Base Paid:,அடிப்படை கட்டணம்:
+Base Recv:,அடிப்படை Recv:
+Base:,அடிப்படை:
+Basic Information,அடிப்படை தகவல்
+Batch,தொகுதி
+Batch Information,தொகுதி தகவல்
+Before any return workflow,திரும்பும் பணிக்கு முன்
+Before returns,திரும்புவதற்கு முன்
+Best Day,சிறந்த நாள்
+Best Seller,சிறந்த விற்பனையாளர்
+Book expense or deposit from active shift.,செயலில் உள்ள மாற்றத்திலிருந்து புத்தக செலவு அல்லது வைப்பு.
+Branch / Location-wise Report,கிளை / இருப்பிடம் வாரியான அறிக்கை
+Brand-wise,பிராண்ட் வாரியாக
+Breakdown,முறிவு
+Browse,உலாவவும்
+Build Time:,உருவாக்க நேரம்:
+Built with Frappe,ஃப்ராப்புடன் கட்டப்பட்டது
+Bundle,மூட்டை
+Buying Price,வாங்கும் விலை
+Cache cleared successfully,தற்காலிக சேமிப்பு வெற்றிகரமாக அழிக்கப்பட்டது
+Cache Usage,தற்காலிக சேமிப்பு பயன்பாடு
+cache used,கேச் பயன்படுத்தப்பட்டது
+Calculating...,கணக்கிடுகிறது...
+Camera Access Required,கேமரா அணுகல் தேவை
+Camera access was aborted. Please try again.,கேமரா அணுகல் நிறுத்தப்பட்டது. மீண்டும் முயற்சிக்கவும்.
+Camera constraints not supported by your device. Trying fallback settings...,கேமரா கட்டுப்பாடுகளை உங்கள் சாதனம் ஆதரிக்கவில்லை. ஃபால்பேக் அமைப்புகளை முயற்சிக்கிறேன்...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,கேமரா பிஸியாக உள்ளது அல்லது மற்றொரு ஆப்ஸ்/தாவினால் தடுக்கப்பட்டது. மற்ற கேமரா பயன்பாடுகளை மூடிவிட்டு மீண்டும் முயலவும்.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,கேமரா அனுமதி மறுக்கப்பட்டது. உங்கள் உலாவி அமைப்புகளில் கேமரா அணுகலை அனுமதித்து பக்கத்தைப் புதுப்பிக்கவும்.
+Camera scanner is locked until the current error is acknowledged,தற்போதைய பிழை அங்கீகரிக்கப்படும் வரை கேமரா ஸ்கேனர் பூட்டப்பட்டுள்ளது
+Camera started but the video stream did not load in time. Please try again.,கேமரா தொடங்கியது ஆனால் வீடியோ ஸ்ட்ரீம் சரியான நேரத்தில் ஏற்றப்படவில்லை. மீண்டும் முயற்சிக்கவும்.
+Cancel cash movement {0}?,பணப் பரிமாற்றத்தை ரத்துசெய்யவா {0}?
+Cancel Payment,கட்டணத்தை ரத்துசெய்
+Cancel Sale,விற்பனையை ரத்து செய்
+Cancel Sale ?,விற்பனையை ரத்து செய்யவா?
+Cancelled,ரத்து செய்யப்பட்டது
+Cannot add an item with zero or negative quantity.,பூஜ்யம் அல்லது எதிர்மறை அளவு கொண்ட உருப்படியைச் சேர்க்க முடியாது.
+Cannot clear cache while offline,ஆஃப்லைனில் இருக்கும்போது தற்காலிக சேமிப்பை அழிக்க முடியாது
+Cannot redeem customer credit more than invoice total,மொத்த விலைப்பட்டியலை விட வாடிக்கையாளர் கிரெடிட்டைப் பெற முடியாது
+Cannot redeem gift cards more than invoice total,மொத்த விலைப்பட்டியலை விட அதிகமாக கிஃப்ட் கார்டுகளை ரிடீம் செய்ய முடியாது
+Cannot Save Offline Invoice:,ஆஃப்லைன் விலைப்பட்டியல் சேமிக்க முடியாது:
+Cannot Save Offline Payment:,ஆஃப்லைன் கட்டணத்தைச் சேமிக்க முடியாது:
+Card,அட்டை
+Card / Online,அட்டை / ஆன்லைன்
+Card health after the last live lookup,கடைசி நேரலைத் தேடலுக்குப் பிறகு கார்டு ஆரோக்கியம்
+Cards,அட்டைகள்
+Cart,வண்டி
+Cash,பணம்
+Cash back to customers,வாடிக்கையாளர்களுக்கு பணத்தை திரும்பப் பெறுங்கள்
+Cash Collections,பண சேகரிப்புகள்
+Cash Deposit is disabled for this POS Profile.,இந்த POS சுயவிவரத்தில் பண வைப்பு முடக்கப்பட்டுள்ளது.
+Cash Drawer Snapshot,பண அலமாரி ஸ்னாப்ஷாட்
+Cash In Hand,கையில் காசு
+Cash Movement,பண இயக்கம்
+Cash movement cancelled,பண பரிமாற்றம் ரத்து செய்யப்பட்டது
+Cash movement deduction applied,பண நகர்வு விலக்கு பயன்படுத்தப்பட்டது
+Cash movement deleted,பண நடமாட்டம் நீக்கப்பட்டது
+Cash movement is disabled for this POS Profile.,இந்த POS சுயவிவரத்தில் பணப் பரிமாற்றம் முடக்கப்பட்டுள்ளது.
+Cash Movement is disabled in current POS Profile.,தற்போதைய பிஓஎஸ் சுயவிவரத்தில் பணப் பரிமாற்றம் முடக்கப்பட்டுள்ளது.
+Cash movement saved offline,பணப் பரிமாற்றம் ஆஃப்லைனில் சேமிக்கப்பட்டது
+Cash movement submitted,பண இயக்கம் சமர்ப்பிக்கப்பட்டது
+Cash Movements,பண இயக்கங்கள்
+Cash payment cannot be less than invoice total when partial payment is not allowed,பகுதியளவு பணம் செலுத்த அனுமதிக்கப்படாதபோது மொத்த விலைப்பட்டியலை விட ரொக்கப் பணம் குறைவாக இருக்கக்கூடாது
+Cash returned after payment,பணம் செலுத்திய பிறகு பணம் திரும்பியது
+Cashier,காசாளர்
+Cashier Access,காசாளர் அணுகல்
+Cashier identity and appearance preferences.,காசாளர் அடையாளம் மற்றும் தோற்ற விருப்பத்தேர்வுகள்.
+Cashier PIN,காசாளர் பின்
+Cashier PIN saved successfully.,காசாளர் பின் வெற்றிகரமாக சேமிக்கப்பட்டது.
+Cashiers,காசாளர்கள்
+Cashier-wise,காசாளர் வாரியாக
+Categories,வகைகள்
+Category,வகை
+Category / Brand / Variant Report,வகை / பிராண்ட் / மாறுபாடு அறிக்கை
+Category-wise,வகை வாரியாக
+Category-wise Margin,வகை வாரியான விளிம்பு
+Certificate,சான்றிதழ்
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,சான்றிதழ் காணவில்லை அல்லது நம்பவில்லை. QZ உறுதிப்படுத்தல் உரையாடல்களைக் காட்டலாம்.
+Certificate is trusted. Silent QZ printing is active.,சான்றிதழ் நம்பகமானது. சைலண்ட் QZ அச்சிடுதல் செயலில் உள்ளது.
+Change,மாற்றம்
+Change allocation repaired,மாற்று ஒதுக்கீடு சரி செய்யப்பட்டது
+Change Price,விலையை மாற்றவும்
+Change Return,வருவாயை மாற்றவும்
+Change Returned,மாற்றம் திரும்பியது
+Change terminal cashier,டெர்மினல் கேஷியரை மாற்றவும்
+Charge Heads,சார்ஜ் ஹெட்ஸ்
+Charges,கட்டணம்
+Charges not found,கட்டணங்கள் காணப்படவில்லை
+Check Balance,இருப்பை சரிபார்க்கவும்
+Check balance for any card. Supervisors can issue and top up cards here.,எந்த அட்டைக்கும் இருப்பைச் சரிபார்க்கவும். மேற்பார்வையாளர்கள் இங்கே கார்டுகளை வழங்கலாம் மற்றும் நிரப்பலாம்.
+Check balance only,இருப்பை மட்டும் சரிபார்க்கவும்
+Check for new commits,புதிய ஒப்பந்தங்களைச் சரிபார்க்கவும்
+Check for Updates,புதுப்பிப்புகளைச் சரிபார்க்கவும்
+Check live balance before applying redemption,மீட்பைப் பயன்படுத்துவதற்கு முன் நேரலை இருப்பைச் சரிபார்க்கவும்
+Check live balance before redemption,ரிடீம் செய்வதற்கு முன் லைவ் பேலன்ஸ் சரிபார்க்கவும்
+Checking...,சரிபார்க்கிறது...
+Cheque/Reference Date,காசோலை/குறிப்பு தேதி
+Cheque/Reference No,காசோலை/குறிப்பு எண்
+Choose the cashier currently operating this terminal.,தற்போது இந்த முனையத்தில் செயல்படும் காசாளரைத் தேர்வு செய்யவும்.
+City,நகரம்
+Clear,தெளிவு
+Clear All,அனைத்தையும் அழி
+Clear all barcode items,அனைத்து பார்கோடு பொருட்களையும் அழிக்கவும்
+Clear all purchase order items,அனைத்து கொள்முதல் ஆர்டர் பொருட்களையும் அழிக்கவும்
+Clear Search,தேடலை அழிக்கவும்
+Clearing local cache...,உள்ளூர் தற்காலிக சேமிப்பை அழிக்கிறது...
+Click to refresh,புதுப்பிக்க கிளிக் செய்யவும்
+Client CPU Lag:,கிளையன்ட் CPU லேக்:
+Client Memory Usage:,கிளையண்ட் மெமரி பயன்பாடு:
+Client Metrics,வாடிக்கையாளர் அளவீடுகள்
+Close about dialog,உரையாடல் பற்றி மூடு
+Close cashier switcher,காசாளர் மாற்றியை மூடு
+Close closing shift dialog,ஷிப்ட் டயலாக்கை மூடவும்
+Close column selector,நெடுவரிசை தேர்வியை மூடு
+Close Dialog,உரையாடலை மூடு
+Close drafts dialog,வரைவு உரையாடலை மூடு
+Close invoice details dialog,விலைப்பட்டியல் விவரங்கள் உரையாடலை மூடு
+Close invoice management,விலைப்பட்டியல் நிர்வாகத்தை மூடவும்
+Close offline invoices dialog,ஆஃப்லைன் இன்வாய்ஸ் உரையாடலை மூடு
+Close packing list dialog,பேக்கிங் பட்டியல் உரையாடலை மூடு
+Close returns dialog,திரும்பும் உரையாடலை மூடு
+Close sales orders dialog,விற்பனை ஆர்டர்கள் உரையாடலை மூடு
+Close Scanner,ஸ்கேனரை மூடு
+Close scanner dialog,ஸ்கேனர் உரையாடலை மூடு
+Close Settings,அமைப்புகளை மூடு
+Closing Amount,இறுதித் தொகை
+Closing POS Shift,பிஓஎஸ் ஷிப்டை மூடுகிறது
+Closing Snapshot Available,க்ளோசிங் ஸ்னாப்ஷாட் கிடைக்கிறது
+Code,குறியீடு
+Code scanned successfully,குறியீடு வெற்றிகரமாக ஸ்கேன் செய்யப்பட்டது
+COGS,COGS
+Collapse item details,உருப்படி விவரங்களைச் சுருக்கவும்
+Collected,சேகரிக்கப்பட்டது
+Cols,கோல்ஸ்
+Columns,நெடுவரிசைகள்
+commits,செய்கிறது
+Completed and active sales in this range,இந்த வரம்பில் முடிந்த மற்றும் செயலில் விற்பனை
+Completed returns will appear here.,முடிக்கப்பட்ட வருமானம் இங்கே தோன்றும்.
+Confirm,உறுதிப்படுத்தவும்
+Confirm Close,மூடுவதை உறுதிப்படுத்தவும்
+Confirm Mobile Number,மொபைல் எண்ணை உறுதிப்படுத்தவும்
+Confirm PIN,பின்னை உறுதிப்படுத்தவும்
+Connect,இணைக்கவும்
+Connect printer and manage certificate,பிரிண்டரை இணைத்து சான்றிதழை நிர்வகிக்கவும்
+Connecting to QZ Tray...,QZ ட்ரேயுடன் இணைக்கிறது...
+Connection problem while submitting invoice,விலைப்பட்டியல் சமர்ப்பிக்கும் போது இணைப்பில் சிக்கல்
+Connections:,இணைப்புகள்:
+Connectivity and cached prerequisite status were rechecked.,இணைப்பு மற்றும் தற்காலிக சேமிப்பு முன்நிபந்தனை நிலை மீண்டும் சரிபார்க்கப்பட்டது.
+Continue Editing,எடிட்டிங் தொடரவும்
+Could not fetch latest balance from server,சர்வரில் இருந்து சமீபத்திய இருப்பைப் பெற முடியவில்லை
+Count,எண்ணு
+Country,நாடு
+Coupon,கூப்பன்
+Coupons,கூப்பன்கள்
+Cover,கவர்
+CPU Cores:,CPU கோர்கள்:
+Create,உருவாக்கு
+Create and load a new prepaid card,புதிய ப்ரீபெய்ட் கார்டை உருவாக்கி ஏற்றவும்
+Create and preload a new gift card,புதிய கிஃப்ட் கார்டை உருவாக்கி முன் ஏற்றவும்
+Create Bill,மசோதாவை உருவாக்கவும்
+Create Customer,வாடிக்கையாளரை உருவாக்குங்கள்
+Create New Item,புதிய பொருளை உருவாக்கவும்
+Create or change your PIN,உங்கள் பின்னை உருவாக்கவும் அல்லது மாற்றவும்
+Create PIN,பின்னை உருவாக்கவும்
+Create POS Opening Shift,பிஓஎஸ் திறப்பு மாற்றத்தை உருவாக்கவும்
+Create Purchase Order,கொள்முதல் ஆர்டரை உருவாக்கவும்
+Create Return,திரும்ப உருவாக்கவும்
+Create return from invoice,விலைப்பட்டியலில் இருந்து வருமானத்தை உருவாக்கவும்
+Create Supplier,சப்ளையரை உருவாக்கவும்
+Credit and Output,கடன் மற்றும் வெளியீடு
+Credit Note,கடன் குறிப்பு
+Credit Outstanding,சிறந்த கடன்
+Credit sales remaining to be collected,மீதமுள்ள கடன் விற்பனை வசூலிக்கப்பட உள்ளது
+Critical,விமர்சனம்
+Currency,நாணயம்
+Current,தற்போதைய
+Current Event Loop Lag:,நடப்பு நிகழ்வு லூப் லேக்:
+Current Month,தற்போதைய மாதம்
+Current PIN,தற்போதைய பின்
+Current Profile,தற்போதைய சுயவிவரம்
+Current redeemable value on the gift card,கிஃப்ட் கார்டில் உள்ள ரிடீம் செய்யக்கூடிய தற்போதைய மதிப்பு
+Current User,தற்போதைய பயனர்
+Custom,தனிப்பயன்
+Custom Due Days,தனிப்பயன் செலுத்த வேண்டிய நாட்கள்
+Custom items per page,ஒரு பக்கத்திற்கு தனிப்பயன் உருப்படிகள்
+Customer,வாடிக்கையாளர்
+Customer already selected,வாடிக்கையாளர் ஏற்கனவே தேர்ந்தெடுக்கப்பட்டுள்ளார்
+Customer Balance,வாடிக்கையாளர் இருப்பு
+Customer balance unavailable offline,வாடிக்கையாளர் இருப்பு ஆஃப்லைனில் இல்லை
+Customer created successfully.,வாடிக்கையாளர் வெற்றிகரமாக உருவாக்கப்பட்டது.
+Customer creation failed.,வாடிக்கையாளர் உருவாக்கம் தோல்வியடைந்தது.
+Customer Details,வாடிக்கையாளர் விவரங்கள்
+Customer display channel is missing,வாடிக்கையாளர் காட்சி சேனல் இல்லை
+Customer display was blocked. Please allow pop-ups for this site.,வாடிக்கையாளர் காட்சி தடுக்கப்பட்டது. இந்தத் தளத்திற்கான பாப்-அப்களை அனுமதிக்கவும்.
+Customer group is required,வாடிக்கையாளர் குழு தேவை
+Customer is required to add payment,வாடிக்கையாளர் கட்டணத்தைச் சேர்க்க வேண்டும்
+Customer Name is required,வாடிக்கையாளர் பெயர் தேவை
+Customer not selected,வாடிக்கையாளர் தேர்ந்தெடுக்கப்படவில்லை
+Customer Report,வாடிக்கையாளர் அறிக்கை
+Customer saved offline,வாடிக்கையாளர் ஆஃப்லைனில் சேமிக்கப்பட்டார்
+Customer Screen,வாடிக்கையாளர் திரை
+Customer territory is required,வாடிக்கையாளர் பிரதேசம் தேவை
+Customer updated successfully.,வாடிக்கையாளர் வெற்றிகரமாக புதுப்பிக்கப்பட்டார்.
+Customer-facing tools and printer setup.,வாடிக்கையாளர் எதிர்கொள்ளும் கருவிகள் மற்றும் பிரிண்டர் அமைப்பு.
+Customers,வாடிக்கையாளர்கள்
+Customers not found,வாடிக்கையாளர்கள் கிடைக்கவில்லை
+Daily cashier actions without scrolling.,ஸ்க்ரோலிங் இல்லாமல் தினசரி காசாளர் நடவடிக்கைகள்.
+Daily Sales,தினசரி விற்பனை
+Daily Sales Summary,தினசரி விற்பனை சுருக்கம்
+Data loaded in form. Review and submit.,வடிவத்தில் தரவு ஏற்றப்பட்டது. மதிப்பாய்வு செய்து சமர்ப்பிக்கவும்.
+Database Health,தரவுத்தள ஆரோக்கியம்
+Database health affects overall system speed and reliability.,தரவுத்தள ஆரோக்கியம் ஒட்டுமொத்த கணினி வேகத்தையும் நம்பகத்தன்மையையும் பாதிக்கிறது.
+Database Info,தரவுத்தள தகவல்
+Date,தேதி
+Day ?,நாள் ?
+days,நாட்கள்
+Day-wise (MTD),நாள் வாரியாக (எம்டிடி)
+Day-wise Movement,நாள் வாரியாக இயக்கம்
+Dead Stock,டெட் ஸ்டாக்
+Dead Stock Items,டெட் ஸ்டாக் பொருட்கள்
+Decrease quantity,அளவைக் குறைக்கவும்
+Default,இயல்புநிலை
+Default:,இயல்புநிலை:
+Delete,நீக்கு
+Delete cancelled cash movement {0}?,ரத்துசெய்யப்பட்ட பணப் பரிமாற்றத்தை {0} நீக்கவா?
+Delete Draft,வரைவை நீக்கு
+Delete draft invoice,வரைவு விலைப்பட்டியலை நீக்கு
+Delete draft invoice {0}?,வரைவு விலைப்பட்டியல் {0}ஐ நீக்கவா?
+Delete Invoice,விலைப்பட்டியலை நீக்கு
+Delete offline invoice,ஆஃப்லைன் இன்வாய்ஸை நீக்கு
+Delivered,வழங்கப்பட்டது
+Delivery Charges,டெலிவரி கட்டணம்
+Delivery Information,டெலிவரி தகவல்
+Delivery Note {0} created,டெலிவரி குறிப்பு {0} உருவாக்கப்பட்டது
+Delivery note created,டெலிவரி குறிப்பு உருவாக்கப்பட்டது
+Deployed Bundle:,வரிசைப்படுத்தப்பட்ட தொகுப்பு:
+Deposit,வைப்பு
+Description,விளக்கம்
+Detailed Supplier Breakdown,விரிவான சப்ளையர் முறிவு
+Detecting formats:,வடிவங்களைக் கண்டறிதல்:
+Device Memory:,சாதன நினைவகம்:
+Difference,வேறுபாடு
+Difference (In Company Currency),வேறுபாடு (நிறுவனத்தின் நாணயத்தில்)
+Disable offline mode first to recheck live connectivity.,நேரடி இணைப்பை மீண்டும் சரிபார்க்க முதலில் ஆஃப்லைன் பயன்முறையை முடக்கவும்.
+Disconnect,துண்டிக்கவும்
+discount,தள்ளுபடி
+Discount %,தள்ளுபடி %
+Discount / Void / Return Report,தள்ளுபடி / செல்லாது / திரும்ப அறிக்கை
+Discount Amount,தள்ளுபடி தொகை
+Discount limited by POS Profile,தள்ளுபடி POS சுயவிவரத்தால் வரையறுக்கப்பட்டுள்ளது
+Discounted Invoices,தள்ளுபடி விலைப்பட்டியல்கள்
+Discounts,தள்ளுபடிகள்
+Dismiss,நிராகரி
+Download Certificate,சான்றிதழைப் பதிவிறக்கவும்
+Draft,வரைவு
+Draft invoice deleted,வரைவு விலைப்பட்டியல் நீக்கப்பட்டது
+Draft source,வரைவு ஆதாரம்
+Drafts,வரைவுகள்
+Due {0},நிலுவை {0}
+Due Date,இறுதி தேதி
+Duplicate,நகல்
+Edit customer,வாடிக்கையாளரைத் திருத்தவும்
+Edit discount amount,தள்ளுபடி தொகையை திருத்தவும்
+Edit discount percentage,தள்ளுபடி சதவீதத்தைத் திருத்தவும்
+Edit Gift Application,பரிசு விண்ணப்பத்தைத் திருத்தவும்
+Edit item name,பொருளின் பெயரைத் திருத்தவும்
+Edit quantity,அளவை திருத்தவும்
+Edit rate,விகிதத்தைத் திருத்தவும்
+Edit unit of measure,அளவீட்டு அலகு திருத்தவும்
+Edited,திருத்தப்பட்டது
+Employee,பணியாளர்
+Enable background sync,பின்னணி ஒத்திசைவை இயக்கு
+Enable Customer Display in POS Profile first.,முதலில் பிஓஎஸ் சுயவிவரத்தில் வாடிக்கையாளர் காட்சியை இயக்கவும்.
+Enter a PIN.,பின்னை உள்ளிடவும்.
+Enter a valid grams value,சரியான கிராம் மதிப்பை உள்ளிடவும்
+Enter new price list rate,புதிய விலைப்பட்டியல் விகிதத்தை உள்ளிடவும்
+Enter Quantity,அளவை உள்ளிடவும்
+Enter the cashier PIN to continue.,தொடர காசாளர் பின்னை உள்ளிடவும்.
+Enter the current PIN first.,முதலில் தற்போதைய பின்னை உள்ளிடவும்.
+"Enter the current PIN, then choose a new one.","தற்போதைய பின்னை உள்ளிட்டு, புதிய ஒன்றைத் தேர்ந்தெடுக்கவும்."
+Enter valid grams for scale barcode,ஸ்கேல் பார்கோடுக்கு சரியான கிராம்களை உள்ளிடவும்
+Entries,உள்ளீடுகள்
+Error accessing camera:,கேமராவை அணுகுவதில் பிழை:
+Error calculating prices,விலைகளைக் கணக்கிடுவதில் பிழை
+Error fetching customer balance,வாடிக்கையாளர் இருப்பைப் பெறுவதில் பிழை
+Error in change calculations!,மாற்றக் கணக்கீடுகளில் பிழை!
+Error Loading Data,தரவை ஏற்றுவதில் பிழை
+Error loading invoice details,விலைப்பட்டியல் விவரங்களை ஏற்றுவதில் பிழை
+Error processing invoice,விலைப்பட்டியல் செயலாக்குவதில் பிழை
+Error processing payment,பணம் செலுத்துவதில் பிழை
+Error searching invoices,இன்வாய்ஸ்களைத் தேடுவதில் பிழை
+Error submitting invoice:,விலைப்பட்டியல் சமர்ப்பிப்பதில் பிழை:
+Error submitting invoice: {0},விலைப்பட்டியல் சமர்ப்பிப்பதில் பிழை: {0}
+Error submitting invoice: No response from server,விலைப்பட்டியல் சமர்ப்பிப்பதில் பிழை: சேவையகத்திலிருந்து பதில் இல்லை
+Error updating currency,நாணயத்தைப் புதுப்பிப்பதில் பிழை
+Error updating item details,உருப்படி விவரங்களைப் புதுப்பிப்பதில் பிழை
+Est. Purchase,Est. கொள்முதல்
+Est. Value,Est. மதிப்பு
+Event-loop lag measures how busy your browser is. Lower is better.,உங்கள் உலாவி எவ்வளவு பிஸியாக இருக்கிறது என்பதை நிகழ்வு-லூப் லேக் அளவிடும். தாழ்வானது சிறந்தது.
+Every,ஒவ்வொரு
+Exchange Rate,மாற்று விகிதம்
+Expand item details,உருப்படி விவரங்களை விரிவாக்குங்கள்
+Expected Amount (In Company Currency),எதிர்பார்க்கப்படும் தொகை (நிறுவனத்தின் நாணயத்தில்)
+Expected Cash,எதிர்பார்த்த பணம்
+Expected cash on hand grouped by currency,நாணயத்தின் அடிப்படையில் குழுவாக எதிர்பார்க்கப்படும் பணம்
+Expected vs Actual,எதிர்பார்க்கப்படுகிறது vs உண்மையானது
+Expense,செலவு
+Expense Account (Optional Override),செலவு கணக்கு (விரும்பினால் மேலெழுதுதல்)
+Expense account is required.,செலவு கணக்கு தேவை.
+Expenses and deposits posted during this shift,இந்த மாற்றத்தின் போது வெளியிடப்பட்ட செலவுகள் மற்றும் வைப்புத்தொகைகள்
+Expired,காலாவதியானது
+Failed to auto reconcile payments.,கட்டணங்களை தானாக சரிசெய்ய முடியவில்லை.
+Failed to cancel cash movement,பணப் பரிமாற்றத்தை ரத்து செய்ய முடியவில்லை
+Failed to clear cache,தற்காலிக சேமிப்பை அழிக்க முடியவில்லை
+Failed to create item,உருப்படியை உருவாக்க முடியவில்லை
+Failed to create supplier,சப்ளையரை உருவாக்க முடியவில்லை
+Failed to delete cash movement,பணப் பரிமாற்றத்தை நீக்க முடியவில்லை
+Failed to generate scale barcode. Using item barcode only.,அளவு பார்கோடு உருவாக்க முடியவில்லை. உருப்படி பார்கோடு மட்டும் பயன்படுத்துகிறது.
+Failed to load cash movement context.,பண நகர்வு சூழலை ஏற்றுவதில் தோல்வி.
+Failed to load dashboard data.,டாஷ்போர்டு தரவை ஏற்றுவதில் தோல்வி.
+Failed to reload invoice from server,சேவையகத்திலிருந்து இன்வாய்ஸை மீண்டும் ஏற்ற முடியவில்லை
+Failed to submit cash movement,பண நகர்வைச் சமர்ப்பிக்க முடியவில்லை
+Failed to sync offline cash movements,ஆஃப்லைன் பணப் பரிமாற்றங்களை ஒத்திசைக்க முடியவில்லை
+Fast cashier actions for active shifts.,செயலில் உள்ள மாற்றங்களுக்கான விரைவான காசாளர் நடவடிக்கைகள்.
+Fast Moving Items,வேகமாக நகரும் பொருட்கள்
+Fees,கட்டணம்
+Fetch the latest offline prerequisite updates,சமீபத்திய ஆஃப்லைன் முன்தேவையான புதுப்பிப்புகளைப் பெறவும்
+Find a sales order quickly and load it into the current sale.,விற்பனை ஆர்டரை விரைவாகக் கண்டுபிடித்து தற்போதைய விற்பனையில் ஏற்றவும்.
+Fixing payment amounts for return invoice...,ரிட்டர்ன் இன்வாய்ஸிற்கான கட்டணத் தொகையை சரிசெய்கிறது...
+Flash Off,ஃபிளாஷ் ஆஃப்
+Flash On,ஃபிளாஷ் ஆன்
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","'தயாரிப்புத் தொகுப்பு' உருப்படிகளுக்கு, கிடங்கு, வரிசை எண் மற்றும் தொகுதி எண் ஆகியவை 'பேக்கிங் பட்டியல்' அட்டவணையில் இருந்து பரிசீலிக்கப்படும். எந்தவொரு 'தயாரிப்புத் தொகுப்பு' உருப்படிக்கான அனைத்து பேக்கிங் பொருட்களுக்கும் கிடங்கு மற்றும் தொகுதி எண் ஒரே மாதிரியாக இருந்தால், அந்த மதிப்புகளை முக்கிய உருப்படி அட்டவணையில் உள்ளிடலாம்; மதிப்புகள் 'பேக்கிங் பட்டியல்' அட்டவணைக்கு நகலெடுக்கப்படும்."
+Free,இலவசம்
+Free Qty,இலவச Qty
+Frequency,அதிர்வெண்
+from,இருந்து
+From Date,தேதியிலிருந்து
+Fulfillment Details,பூர்த்தி விவரங்கள்
+Full Name,முழுப் பெயர்
+Gain,ஆதாயம்
+Generate a fresh prepaid card and start it with an opening balance.,"புதிய ப்ரீபெய்ட் கார்டை உருவாக்கி, தொடக்க இருப்புடன் தொடங்கவும்."
+Generate and install the certificate to allow fully silent printing without trust prompts.,நம்பிக்கைத் தூண்டுதல்கள் இல்லாமல் முழுமையாக அமைதியாக அச்சிட அனுமதிக்க சான்றிதழை உருவாக்கி நிறுவவும்.
+Generate Certificate,சான்றிதழை உருவாக்கவும்
+Generated scale barcode: {0},உருவாக்கப்பட்ட அளவு பார்கோடு: {0}
+Get Payments,கொடுப்பனவுகளைப் பெறுங்கள்
+Gift Card,பரிசு அட்டை
+Gift card amount must be greater than zero.,பரிசு அட்டைத் தொகை பூஜ்ஜியத்தை விட அதிகமாக இருக்க வேண்டும்.
+Gift Card Code,பரிசு அட்டை குறியீடு
+Gift card code is required for redemption,ரிடீம் செய்வதற்கு கிஃப்ட் கார்டு குறியீடு தேவை
+Gift card code is required.,பரிசு அட்டை குறியீடு தேவை.
+Gift card issued successfully.,பரிசு அட்டை வெற்றிகரமாக வழங்கப்பட்டது.
+Gift card loaded successfully.,பரிசு அட்டை வெற்றிகரமாக ஏற்றப்பட்டது.
+Gift Card Management,பரிசு அட்டை மேலாண்மை
+Gift card payment,பரிசு அட்டை கட்டணம்
+Gift card redemption requires an online connection,கிஃப்ட் கார்டைப் பெறுவதற்கு ஆன்லைன் இணைப்பு தேவை
+Gift card topped up successfully.,பரிசு அட்டை வெற்றிகரமாக டாப் அப் செய்யப்பட்டது.
+Gift Cards,பரிசு அட்டைகள்
+Go to Frappe Desk,Frappe Desk க்குச் செல்லவும்
+Grand Total,கிராண்ட் மொத்தம்
+Gross Margin,மொத்த விளிம்பு
+Gross Profit,மொத்த லாபம்
+Gross Sales,மொத்த விற்பனை
+Group not found,குழு காணப்படவில்லை
+"Grouped controls for terminal, UI, and session settings.","முனையம், UI மற்றும் அமர்வு அமைப்புகளுக்கான குழுவாக்கப்பட்ட கட்டுப்பாடுகள்."
+Grouped totals for each payment method and currency,ஒவ்வொரு கட்டண முறை மற்றும் நாணயத்திற்கான மொத்தத் தொகை
+Hide,மறை
+Hide Gift Card,பரிசு அட்டையை மறை
+Hide Non Essential Fields,அத்தியாவசியமற்ற புலங்களை மறை
+Hide quantity decimals,அளவு தசமங்களை மறை
+Hide search tools,தேடல் கருவிகளை மறை
+Hide zero rated items,பூஜ்யம் மதிப்பிடப்பட்ட உருப்படிகளை மறை
+High,உயர்
+History,வரலாறு
+Hourly (Today),மணிநேரம் (இன்று)
+How this section works,இந்த பகுதி எவ்வாறு செயல்படுகிறது
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","பழைய தரவு அப்படியே இருந்தால், அமைப்புகள் > ஆஃப்லைன் & ஒத்திசைவைத் திறந்து, ஆன்லைனில் இருக்கும்போது மீண்டும் ஆஃப்லைன் தரவை மீண்டும் உருவாக்கவும்."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","எச்சரிக்கை தொடர்ந்தால், அமைப்புகள் > ஆஃப்லைன் & ஒத்திசைவைத் திறந்து, ஆஃப்லைன் தரவைப் புதுப்பிக்கவும் அல்லது ஆஃப்லைன் தரவை மீண்டும் உருவாக்கவும்."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,QZ ட்ரேயில் சான்றிதழை இறக்குமதி செய்து ஒவ்வொரு POS இயந்திரத்திலும் QZ ட்ரேயை மறுதொடக்கம் செய்யவும்.
+In,இல்
+In stock: {0},கையிருப்பில்: {0}
+Include Batch / Serial,தொகுதி / தொடர் அடங்கும்
+Include Price,விலையைச் சேர்க்கவும்
+Increase quantity,அளவை அதிகரிக்கவும்
+IndexedDB,IndexedDB
+Initial Amount,ஆரம்ப தொகை
+Initialize your shift with opening balances,தொடக்க நிலுவைகளுடன் உங்கள் மாற்றத்தைத் தொடங்கவும்
+Initializing application...,பயன்பாட்டைத் துவக்குகிறது...
+"Inspect cache, sync, and prerequisite status","தற்காலிக சேமிப்பு, ஒத்திசைவு மற்றும் முன்நிபந்தனை நிலையை ஆய்வு செய்யவும்"
+Installed Applications,நிறுவப்பட்ட பயன்பாடுகள்
+Insufficient stock:\n{0},போதுமான இருப்பு இல்லை:\n{0}
+Invalid rate,தவறான விகிதம்
+Inventory Status Report,இருப்பு நிலை அறிக்கை
+Invoice,விலைப்பட்டியல்
+Invoice {0} is Submitted,இன்வாய்ஸ் {0} சமர்ப்பிக்கப்பட்டது
+Invoice {0} processed successfully,இன்வாய்ஸ் {0} வெற்றிகரமாக செயலாக்கப்பட்டது
+Invoice {0} submission failed,இன்வாய்ஸ் {0} சமர்ப்பிப்பு தோல்வியடைந்தது
+Invoice {0} was already submitted,இன்வாய்ஸ் {0} ஏற்கனவே சமர்ப்பிக்கப்பட்டது
+Invoice Adjustments,விலைப்பட்டியல் சரிசெய்தல்
+Invoice Change,விலைப்பட்டியல் மாற்றம்
+Invoice Details,விலைப்பட்டியல் விவரங்கள்
+Invoice is still in draft after background submission.,பின்னணி சமர்ப்பித்த பிறகும் இன்வாய்ஸ் வரைவில் உள்ளது.
+Invoice Items,விலைப்பட்டியல் பொருட்கள்
+Invoice Management,விலைப்பட்டியல் மேலாண்மை
+Invoice Mgmt,விலைப்பட்டியல் Mgmt
+Invoice saved offline,இன்வாய்ஸ் ஆஃப்லைனில் சேமிக்கப்பட்டது
+Invoice submission failed,விலைப்பட்டியல் சமர்ப்பிக்க முடியவில்லை
+Invoice Submitted,விலைப்பட்டியல் சமர்ப்பிக்கப்பட்டது
+"Invoice value settled by loyalty points, not cash collection","விலைப்பட்டியல் மதிப்பு லாயல்டி புள்ளிகளால் தீர்க்கப்பட்டது, பண சேகரிப்பு அல்ல"
+Invoices,இன்வாய்ஸ்கள்
+Invoices already past due date,இன்வாய்ஸ்கள் ஏற்கனவே நிலுவைத் தேதியை கடந்துவிட்டது
+Invoices saved as POS Invoices,இன்வாய்ஸ்கள் பிஓஎஸ் இன்வாய்ஸ்களாக சேமிக்கப்பட்டன
+Invoices still carrying balances,இன்வாய்ஸ்களில் இன்னும் இருப்பு உள்ளது
+Issue Mode,வெளியீட்டு முறை
+Issue New Card,புதிய அட்டை வழங்கவும்
+Issue Workflow,பணிப்பாய்வு பிரச்சினை
+"Issue, top up, and check","வழங்கவும், நிரப்பவும் மற்றும் சரிபார்க்கவும்"
+Item,பொருள்
+Item / Product Sales Report,பொருள் / தயாரிப்பு விற்பனை அறிக்கை
+Item {0} added to invoice,பொருள் {0} இன்வாய்ஸில் சேர்க்கப்பட்டது
+Item '{0}' has no barcode,'{0}' உருப்படிக்கு பார்கோடு இல்லை
+Item Code,பொருள் குறியீடு
+Item created successfully,உருப்படி வெற்றிகரமாக உருவாக்கப்பட்டது
+Item is out of stock,பொருள் இருப்பில் இல்லை
+Item Name,பொருளின் பெயர்
+Item not found,பொருள் கிடைக்கவில்லை
+Item order updated,பொருள் ஆர்டர் புதுப்பிக்கப்பட்டது
+Item Selector Settings,பொருள் தேர்வி அமைப்புகள்
+Items,பொருட்கள்
+Items added in POS will appear here automatically.,POS இல் சேர்க்கப்பட்ட உருப்படிகள் தானாகவே இங்கே தோன்றும்.
+Items added to invoice,விலைப்பட்டியலில் உருப்படிகள் சேர்க்கப்பட்டன
+Items per page,ஒரு பக்கத்திற்கு உருப்படிகள்
+Items Sold,விற்கப்பட்ட பொருட்கள்
+Items/Invoice,பொருட்கள்/விலைப்பட்டியல்
+Item-wise Profitability,பொருள் வாரியான லாபம்
+Journal Entry,பத்திரிகை நுழைவு
+json,json
+Just now,இப்போதுதான்
+Keep offline prerequisites healthy and recover stale data safely.,ஆஃப்லைன் முன்நிபந்தனைகளை ஆரோக்கியமாக வைத்திருங்கள் மற்றும் பழைய தரவை பாதுகாப்பாக மீட்டெடுக்கவும்.
+Labels,லேபிள்கள்
+"Language, theme, terminal tools, and session controls.","மொழி, தீம், டெர்மினல் கருவிகள் மற்றும் அமர்வு கட்டுப்பாடுகள்."
+Last,கடைசியாக
+Last 14 Days (Paid vs Pending),கடந்த 14 நாட்கள் (பணம் செலுத்தப்பட்டது மற்றும் நிலுவையில் உள்ளது)
+Last 14 Days Activity,கடந்த 14 நாள் செயல்பாடு
+Last 14 Days Gross Profit,கடந்த 14 நாட்களின் மொத்த லாபம்
+Last 14 Days Purchases,கடந்த 14 நாட்கள் கொள்முதல்
+Last 14 Days Tax/Charges,கடந்த 14 நாட்கள் வரி/கட்டணங்கள்
+Last sync:,கடைசி ஒத்திசைவு:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},கடைசி ஒத்திசைவு: {0} | சரி: {1} | தோல்வி: {2} | தவிர்க்கப்பட்டது: {3}
+Latest entries for current shift,தற்போதைய மாற்றத்திற்கான சமீபத்திய உள்ளீடுகள்
+Lead Time,முன்னணி நேரம்
+Limited,வரையறுக்கப்பட்டவை
+lines,வரிகள்
+List,பட்டியல்
+Live Snapshot,நேரலை ஸ்னாப்ஷாட்
+Load a POS profile and cashier first.,முதலில் POS சுயவிவரத்தையும் காசாளரையும் ஏற்றவும்.
+Load More Invoices,மேலும் இன்வாய்ஸ்களை ஏற்றவும்
+Load previously saved invoices,முன்பு சேமித்த இன்வாய்ஸ்களை ஏற்றவும்
+Load Sale,சுமை விற்பனை
+Load Sales Invoice,விற்பனை விலைப்பட்டியல் ஏற்றவும்
+Loading app data...,பயன்பாட்டுத் தரவை ஏற்றுகிறது...
+Loading customer database...,வாடிக்கையாளர் தரவுத்தளத்தை ஏற்றுகிறது...
+Loading customers...,வாடிக்கையாளர்களை ஏற்றுகிறது...
+Loading database stats...,தரவுத்தள புள்ளிவிவரங்களை ஏற்றுகிறது...
+Loading details...,விவரங்களை ஏற்றுகிறது...
+Loading invoice history...,இன்வாய்ஸ் வரலாற்றை ஏற்றுகிறது...
+Loading items...,பொருட்களை ஏற்றுகிறது...
+Loading product catalog...,தயாரிப்பு பட்டியலை ஏற்றுகிறது...
+Loading return invoices...,ரிட்டர்ன் இன்வாய்ஸ்களை ஏற்றுகிறது...
+Loading server CPU/memory usage...,சர்வர் CPU/மெமரி உபயோகத்தை ஏற்றுகிறது...
+Loading suppliers...,சப்ளையர்களை ஏற்றுகிறது...
+Loading unpaid invoices...,செலுத்தப்படாத இன்வாய்ஸ்களை ஏற்றுகிறது...
+Loading view...,காட்சியை ஏற்றுகிறது...
+Loading...,ஏற்றுகிறது...
+Local storage is unavailable. Switching to online-only mode.,உள்ளூர் சேமிப்பிடம் இல்லை. ஆன்லைனில் மட்டும் பயன்முறைக்கு மாறுகிறது.
+localStorage,உள்ளூர் சேமிப்பு
+Location Performance,இருப்பிட செயல்திறன்
+Locations,இடங்கள்
+Lock Screen,பூட்டு திரை
+Lookup Workflow,வேலைப்பாய்வுகளைத் தேடுங்கள்
+Loss,இழப்பு
+Low,குறைந்த
+Low Stock,குறைந்த பங்கு
+Low Stock Alerts,குறைந்த பங்கு எச்சரிக்கைகள்
+Low Stock Items,குறைந்த ஸ்டாக் பொருட்கள்
+Low Stock Threshold,குறைந்த பங்கு வரம்பு
+Low Stock Total,குறைந்த பங்கு மொத்தம்
+Lowest Margin,குறைந்த விளிம்பு
+Low-frequency maintenance and system details.,குறைந்த அதிர்வெண் பராமரிப்பு மற்றும் கணினி விவரங்கள்.
+Loyalty Redeemed,விசுவாசம் மீட்கப்பட்டது
+Loyalty Redemption,விசுவாச மீட்பு
+Make New Payment,புதிய பணம் செலுத்துங்கள்
+Manage all,அனைத்தையும் நிர்வகிக்கவும்
+Manage and synchronize your offline transactions,உங்கள் ஆஃப்லைன் பரிவர்த்தனைகளை நிர்வகிக்கவும் மற்றும் ஒத்திசைக்கவும்
+Manage Cashier PIN,கேஷியர் பின்னை நிர்வகிக்கவும்
+"Manage offline tools, terminal controls, and maintenance from one workspace.","ஒரு பணியிடத்திலிருந்து ஆஃப்லைன் கருவிகள், முனையக் கட்டுப்பாடுகள் மற்றும் பராமரிப்பு ஆகியவற்றை நிர்வகிக்கவும்."
+manual,கையேடு
+"Manual codes, barcode scans, and QR scans work in the same field","கைமுறை குறியீடுகள், பார்கோடு ஸ்கேன்கள் மற்றும் QR ஸ்கேன்கள் ஒரே துறையில் வேலை செய்கின்றன"
+Manual offline mode is enabled,கைமுறை ஆஃப்லைன் பயன்முறை இயக்கப்பட்டது
+Margin,விளிம்பு
+Maximum available quantity is {0}. Quantity adjusted to match stock.,கிடைக்கும் அதிகபட்ச அளவு {0}. பங்குக்கு ஏற்ப அளவு சரிசெய்யப்பட்டது.
+Maximum discount amount for this offer item is {0}.,இந்த ஆஃபர் உருப்படிக்கான அதிகபட்ச தள்ளுபடித் தொகை {0}.
+Maximum discount percentage for this offer item is {0}%.,இந்த ஆஃபர் உருப்படிக்கான அதிகபட்ச தள்ளுபடி சதவீதம் {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,சலுகையின் அதிகபட்ச அளவு {0}. அனுமதிக்கப்பட்ட வரம்புக்கு ஏற்ப அளவு சரிசெய்யப்பட்டது.
+Medium,நடுத்தர
+Method-wise Collections,முறை வாரியான சேகரிப்புகள்
+Minimum allowed rate for this offer item is {0}.,இந்தச் சலுகைக்கான குறைந்தபட்ச அனுமதிக்கப்பட்ட விலை {0}.
+Minimum Qty,குறைந்தபட்ச அளவு
+Mobile No,மொபைல் எண்
+Mode,பயன்முறை
+Mode of Payment,பணம் செலுத்தும் முறை
+Month,மாதம்
+Month ?,மாதம் ?
+Monthly Profit,மாதாந்திர லாபம்
+Monthly Sales,மாதாந்திர விற்பனை
+Monthly Sales Summary,மாதாந்திர விற்பனை சுருக்கம்
+Month-wise,மாத வாரியாக
+Most Active Cashiers,மிகவும் செயலில் உள்ள காசாளர்கள்
+Movement Type,இயக்கம் வகை
+Movements,இயக்கங்கள்
+Multi Currency,பல நாணயம்
+N/A,N/A
+Name,பெயர்
+Negative Stock,எதிர்மறை பங்கு
+Negative Stock Items,எதிர்மறை பங்கு பொருட்கள்
+Negative values not allowed,எதிர்மறை மதிப்புகள் அனுமதிக்கப்படவில்லை
+Net,நிகர
+Net Qty,நிகர அளவு
+Net Sales,நிகர விற்பனை
+Net Value,நிகர மதிப்பு
+Never,ஒருபோதும் இல்லை
+New changes are ready to load,புதிய மாற்றங்கள் ஏற்றுவதற்கு தயாராக உள்ளன
+New Item,புதிய பொருள்
+New Offer Available,புதிய சலுகை கிடைக்கிறது
+New PIN,புதிய பின்
+New rate,புதிய விகிதம்
+Next unit of measure,அடுத்த அளவீட்டு அலகு
+No attribute data found.,பண்புக்கூறு தரவு இல்லை.
+No Barcode,பார்கோடு இல்லை
+No barcode found for UOM '{0}',UOM '{0}'க்கான பார்கோடு இல்லை
+No branch/location data found.,கிளை/இருப்பிடம் தரவு எதுவும் இல்லை.
+No brand data found.,பிராண்ட் தரவு இல்லை.
+No cached gift card balance is available offline.,தற்காலிக சேமிப்பு கிஃப்ட் கார்டு இருப்பு எதுவும் ஆஃப்லைனில் இல்லை.
+No camera found on this device. Please ensure your device has a working camera.,இந்தச் சாதனத்தில் கேமரா இல்லை. உங்கள் சாதனத்தில் இயங்கும் கேமரா இருப்பதை உறுதிசெய்யவும்.
+No capability warnings recorded yet.,திறன் எச்சரிக்கைகள் எதுவும் இதுவரை பதிவு செய்யப்படவில்லை.
+No cash expected for this shift.,இந்த ஷிப்டுக்கு பணம் எதிர்பார்க்கவில்லை.
+No cash mode configured,பணப் பயன்முறை எதுவும் கட்டமைக்கப்படவில்லை
+No cash movement type is allowed for this POS Profile.,இந்த பிஓஎஸ் சுயவிவரத்திற்கு எந்த விதமான பண நடமாட்டமும் அனுமதிக்கப்படவில்லை.
+No cashier PIN is set yet. Create one now.,காசாளர் பின் எதுவும் இன்னும் அமைக்கப்படவில்லை. இப்போது ஒன்றை உருவாக்கவும்.
+No cashier profiles are available for this POS profile yet.,இந்த POS சுயவிவரத்திற்கு இதுவரை காசாளர் சுயவிவரங்கள் எதுவும் கிடைக்கவில்லை.
+No cashier-wise discount/void/return activity.,காசாளர் வாரியான தள்ளுபடி/செல்லாது/திரும்பச் செயல்பாடு இல்லை.
+No category data found.,வகை தரவு எதுவும் இல்லை.
+No category profitability data found.,வகை லாபத் தரவு எதுவும் இல்லை.
+No change returned recorded for this shift.,இந்த மாற்றத்திற்கு எந்த மாற்றமும் பதிவு செய்யப்படவில்லை.
+No change-allocation invoices match the current filters.,தற்போதைய வடிப்பான்களுடன் எந்த மாற்ற-ஒதுக்கீடு இன்வாய்ஸ்களும் பொருந்தவில்லை.
+No charge head breakdown found.,சார்ஜ் தலை முறிவு இல்லை.
+No Company Selected,எந்த நிறுவனமும் தேர்ந்தெடுக்கப்படவில்லை
+No customer sales data found.,வாடிக்கையாளர் விற்பனைத் தரவு எதுவும் இல்லை.
+No day-wise discount/void/return trend.,நாள் வாரியான தள்ளுபடி/செல்லாதது/திரும்பப் போக்கு இல்லை.
+No day-wise payment data found.,நாள் வாரியான கட்டணத் தரவு எதுவும் இல்லை.
+No day-wise profitability trend found.,நாள் வாரியான லாபப் போக்கு காணப்படவில்லை.
+No day-wise purchase data found.,நாள் வாரியான கொள்முதல் தரவு இல்லை.
+No day-wise sales trend found.,நாள் வாரியான விற்பனைப் போக்கு காணப்படவில்லை.
+No day-wise tax/charges trend found.,நாள் வாரியான வரி/கட்டணப் போக்கு எதுவும் இல்லை.
+No dead stock items.,டெட் ஸ்டாக் பொருட்கள் இல்லை.
+No due date,நிலுவைத் தேதி இல்லை
+No exact repair match found for this invoice,இந்த விலைப்பட்டியலுக்கான சரியான பழுதுபார்ப்பு பொருத்தம் எதுவும் இல்லை
+No hourly sales trend found for today.,இன்றைய மணிநேர விற்பனைப் போக்கு இல்லை.
+No invoice activity found.,இன்வாய்ஸ் செயல்பாடு எதுவும் இல்லை.
+No invoices found,இன்வாய்ஸ் எதுவும் இல்லை
+No invoices found. Try different search criteria.,இன்வாய்ஸ் எதுவும் இல்லை. வெவ்வேறு தேடல் அளவுகோல்களை முயற்சிக்கவும்.
+No invoices recorded for this shift.,இந்த மாற்றத்திற்கான இன்வாய்ஸ்கள் எதுவும் பதிவு செய்யப்படவில்லை.
+No item profitability data found.,பொருளின் லாபத் தரவு எதுவும் இல்லை.
+No item sales data found for this period.,இந்தக் காலத்திற்கான பொருள் விற்பனைத் தரவு எதுவும் இல்லை.
+No items found,பொருட்கள் எதுவும் கிடைக்கவில்லை
+No items in cart,வண்டியில் பொருட்கள் இல்லை
+No items with barcodes to print,அச்சிட பார்கோடுகளுடன் உருப்படிகள் இல்லை
+No location-wise top item data found.,இடம் வாரியான மேல் உருப்படி தரவு எதுவும் இல்லை.
+No low stock alerts right now.,தற்போது குறைந்த பங்கு எச்சரிக்கைகள் இல்லை.
+No low stock items.,குறைந்த கையிருப்பு பொருட்கள் இல்லை.
+No matching items in cart,வண்டியில் பொருந்தக்கூடிய பொருட்கள் இல்லை
+No month-wise sales trend found.,மாத வாரியான விற்பனைப் போக்கு காணப்படவில்லை.
+No negative stock items.,எதிர்மறை பங்கு பொருட்கள் இல்லை.
+No notifications yet,இதுவரை எந்த அறிவிப்பும் இல்லை
+No offline cash movement synced.,ஆஃப்லைன் பணப் பரிமாற்றம் ஒத்திசைக்கப்படவில்லை.
+No offline invoices pending synchronization,ஒத்திசைவு நிலுவையில் உள்ள ஆஃப்லைன் இன்வாய்ஸ்கள் இல்லை
+No offline sync issues recorded yet.,ஆஃப்லைன் ஒத்திசைவுச் சிக்கல்கள் எதுவும் இதுவரை பதிவு செய்யப்படவில்லை.
+No out-of-stock items.,கையிருப்பில் இல்லாத பொருட்கள் இல்லை.
+No outstanding credit invoices for this shift.,இந்த மாற்றத்திற்கான நிலுவையிலுள்ள கிரெடிட் இன்வாய்ஸ்கள் இல்லை.
+No payment collection data found.,கட்டண சேகரிப்பு தரவு எதுவும் இல்லை.
+No payment rows available on this invoice.,இந்த இன்வாய்ஸில் கட்டண வரிசைகள் எதுவும் இல்லை.
+No payments registered for this shift.,இந்த ஷிப்டுக்கு பணம் எதுவும் பதிவு செய்யப்படவில்லை.
+No pending balances in this period.,இந்த காலகட்டத்தில் நிலுவையில் உள்ள நிலுவைகள் இல்லை.
+No pending offline invoices,நிலுவையில் உள்ள ஆஃப்லைன் இன்வாய்ஸ்கள் இல்லை
+No Print Formats Found,அச்சு வடிவங்கள் எதுவும் இல்லை
+No profiles found for selected scope. Falling back to current profile failed.,தேர்ந்தெடுக்கப்பட்ட நோக்கத்திற்கான சுயவிவரங்கள் எதுவும் இல்லை. தற்போதைய சுயவிவரத்திற்குத் திரும்புவது தோல்வியடைந்தது.
+No recent customer activity found.,சமீபத்திய வாடிக்கையாளர் செயல்பாடு எதுவும் இல்லை.
+No recent stock entries found.,சமீபத்திய பங்கு உள்ளீடுகள் எதுவும் இல்லை.
+No records found,பதிவுகள் எதுவும் கிடைக்கவில்லை
+No reorder suggestions right now.,தற்போது மறுவரிசை பரிந்துரைகள் எதுவும் இல்லை.
+No repeat customers in this period.,இந்த காலகட்டத்தில் மீண்டும் வாடிக்கையாளர்கள் இல்லை.
+No response from server,சேவையகத்திலிருந்து பதில் இல்லை
+No return invoices found,திரும்பப் பெறும் விலைப்பட்டியல் எதுவும் இல்லை
+No return item trend found.,திரும்பப் பெறும் உருப்படியின் போக்கு எதுவும் இல்லை.
+No returnable items found for this invoice,இந்த விலைப்பட்டியல் திரும்பப்பெறக்கூடிய உருப்படிகள் எதுவும் இல்லை
+No returns were processed in this shift.,இந்த மாற்றத்தில் எந்த வருமானமும் செயலாக்கப்படவில்லை.
+No risk activity found.,ஆபத்து செயல்பாடு எதுவும் கண்டறியப்படவில்லை.
+No sales activity found for this period.,இந்தக் காலக்கட்டத்தில் விற்பனை செயல்பாடு எதுவும் இல்லை.
+No slow moving items.,மெதுவாக நகரும் பொருட்கள் இல்லை.
+No staff sales activity found.,ஊழியர்களின் விற்பனை செயல்பாடு எதுவும் இல்லை.
+No stock movement for this period.,இந்தக் காலக்கட்டத்தில் பங்குகளின் இயக்கம் இல்லை.
+No submitted cash movements in this shift.,இந்த மாற்றத்தில் சமர்ப்பிக்கப்பட்ட பண நகர்வுகள் இல்லை.
+No supplier purchases found in this month.,இந்த மாதத்தில் சப்ளையர் கொள்முதல் எதுவும் இல்லை.
+No suppliers found for this period.,இந்தக் காலத்திற்கு வழங்குநர்கள் யாரும் இல்லை.
+No sync trigger has run yet in this session.,இந்த அமர்வில் இதுவரை எந்த ஒத்திசைவு தூண்டுதலும் இயங்கவில்லை.
+No tax head breakdown found.,வரித் தலையீடு எதுவும் கண்டறியப்படவில்லை.
+No top items found for this location.,இந்த இருப்பிடத்திற்கான சிறந்த உருப்படிகள் எதுவும் இல்லை.
+No unpaid invoices,செலுத்தப்படாத இன்வாய்ஸ்கள் இல்லை
+No variant data found.,மாறுபாடு தரவு எதுவும் இல்லை.
+No week-wise sales trend found.,வார வாரியான விற்பனைப் போக்கு காணப்படவில்லை.
+No.,இல்லை
+Nobile Number,நோபல் எண்
+Not available,கிடைக்கவில்லை
+Not checked,சரிபார்க்கப்படவில்லை
+Not selected,தேர்ந்தெடுக்கப்படவில்லை
+Not Set,அமைக்கப்படவில்லை
+Notifications,அறிவிப்புகள்
+Offer,சலுகை
+Offer Applied,சலுகை பயன்படுத்தப்பட்டது
+Offer criteria exceeded,சலுகை அளவுகோல் மீறப்பட்டுள்ளது
+Offer Item,சலுகை பொருள்
+Offer item unavailable,சலுகை உருப்படி கிடைக்கவில்லை
+Offer Removed,சலுகை அகற்றப்பட்டது
+Offer UOM cannot be changed,சலுகை UOM ஐ மாற்ற முடியாது
+Offer?,சலுகையா?
+Offers,சலுகைகள்
+Offline,ஆஃப்லைன்
+Offline & Sync,ஆஃப்லைன் & ஒத்திசைவு
+Offline Capabilities,ஆஃப்லைன் திறன்கள்
+Offline data status refreshed,ஆஃப்லைன் தரவு நிலை புதுப்பிக்கப்பட்டது
+Offline diagnostics,ஆஃப்லைன் கண்டறிதல்
+Offline Invoices,ஆஃப்லைன் இன்வாய்ஸ்கள்
+Offline invoices status,ஆஃப்லைன் இன்வாய்ஸ் நிலை
+Offline invoices synced,ஆஃப்லைன் இன்வாய்ஸ்கள் ஒத்திசைக்கப்பட்டது
+Offline Queue: {0},ஆஃப்லைன் வரிசை: {0}
+Offline rebuild guidance,ஆஃப்லைன் மறுகட்டமைப்பு வழிகாட்டுதல்
+Offline restore is unavailable for this session.,இந்த அமர்வுக்கு ஆஃப்லைன் மீட்டமைப்பு கிடைக்கவில்லை.
+Offline selling is available with degraded capabilities.,குறைக்கப்பட்ட திறன்களுடன் ஆஃப்லைன் விற்பனை கிடைக்கிறது.
+Offline snapshot does not match the current POS state.,ஆஃப்லைன் ஸ்னாப்ஷாட் தற்போதைய பிஓஎஸ் நிலையுடன் பொருந்தவில்லை.
+Offline Status,ஆஃப்லைன் நிலை
+"Offline, terminal, and system controls","ஆஃப்லைன், டெர்மினல் மற்றும் சிஸ்டம் கட்டுப்பாடுகள்"
+OK,சரி
+Online,ஆன்லைன்
+Open actions menu,செயல்கள் மெனுவைத் திறக்கவும்
+Open balance to collect,வசூலிக்க இருப்பைத் திறக்கவும்
+Open Customer Display,வாடிக்கையாளர் காட்சியைத் திறக்கவும்
+Open drawer,அலமாரியைத் திறக்கவும்
+Open invoices,இன்வாய்ஸ்களைத் திறக்கவும்
+Open Payments?,பேமெண்ட்டுகளைத் திறக்கவா?
+Open POS home,POS வீட்டைத் திறக்கவும்
+Open this screen from POS Menu -> Open Customer Display.,POS மெனுவிலிருந்து இந்தத் திரையைத் திறக்கவும் -> வாடிக்கையாளர் காட்சியைத் திறக்கவும்.
+OpenCV image processing enabled - Enhanced barcode detection,OpenCV பட செயலாக்கம் இயக்கப்பட்டது - மேம்படுத்தப்பட்ட பார்கோடு கண்டறிதல்
+OpenCV image processing unavailable on this device,இந்தச் சாதனத்தில் OpenCV படச் செயலாக்கம் இல்லை
+OpenCV Off,OpenCV ஆஃப்
+OpenCV On,OpenCV ஆன்
+OpenCV processing disabled,OpenCV செயலாக்கம் முடக்கப்பட்டது
+Opening Amount,தொடக்கத் தொகை
+Opening Cash,பணத்தைத் திறக்கிறது
+options,விருப்பங்கள்
+Order,ஆர்டர்
+Original,அசல்
+Other,மற்றவை
+Out,வெளியே
+Out of Stock,கையிருப்பில் இல்லை
+Out of Stock Items,கையிருப்பில் இல்லாத பொருட்கள்
+Outstanding,சிறப்பானது
+Outstanding Credit by Currency,நாணயத்தின் மூலம் சிறந்த கடன்
+Overdue,காலாவதியானது
+Overpayment Change,அதிக கட்டணம் மாற்றம்
+Overpayment change deducted: {0},அதிக கட்டண மாற்றம் கழிக்கப்பட்டது: {0}
+Packing List,பேக்கிங் பட்டியல்
+Page Format,பக்க வடிவம்
+Page unavailable offline,பக்கம் ஆஃப்லைனில் இல்லை
+Paid,செலுத்தப்பட்டது
+Paid (orig):,செலுத்தப்பட்டது (orig):
+Paid Amount,செலுத்திய தொகை
+Paid change cannot be greater than total change!,கட்டண மாற்றம் மொத்த மாற்றத்தை விட அதிகமாக இருக்க முடியாது!
+Paid:,செலுத்தப்பட்டது:
+Parent Item,பெற்றோர் பொருள்
+Partial,பகுதி
+Partly Paid,ஓரளவு செலுத்தப்பட்டது
+Party Account,கட்சி கணக்கு
+Party Type,கட்சி வகை
+Pause terminal until next cashier,அடுத்த காசாளர் வரை முனையத்தை இடைநிறுத்தவும்
+PAY,செலுத்து
+Payment,பணம் செலுத்துதல்
+Payment Account,பணம் செலுத்தும் கணக்கு
+Payment entries processed for Invoice {0},விலைப்பட்டியல் {0}க்கான கட்டண உள்ளீடுகள் செயலாக்கப்பட்டன
+Payment Entry Type,கட்டண நுழைவு வகை
+Payment History,கட்டண வரலாறு
+Payment ID,கட்டண ஐடி
+Payment Method Report,கட்டண முறை அறிக்கை
+Payment Methods,பணம் செலுத்தும் முறைகள்
+Payment of {0} received successfully.,{0} பணம் செலுத்தப்பட்டது.
+Payment Progress,பணம் செலுத்தும் முன்னேற்றம்
+Payment Reconciliation,பணம் சமரசம்
+Payment request status could not be retrieved. Please try again,கட்டண கோரிக்கையின் நிலையை மீட்டெடுக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்
+Payment Request took too long to respond. Please try requesting for payment again,கட்டணக் கோரிக்கை பதிலளிக்க அதிக நேரம் எடுத்தது. மீண்டும் கட்டணத்தைக் கோர முயற்சிக்கவும்
+Payment saved offline,கட்டணம் ஆஃப்லைனில் சேமிக்கப்பட்டது
+Payment State,கட்டணம் செலுத்தும் நிலை
+Payment Status,கட்டண நிலை
+Payment submitted but print function could not be executed. Payment name not found.,"கட்டணம் சமர்ப்பிக்கப்பட்டது, ஆனால் அச்சு செயல்பாட்டைச் செயல்படுத்த முடியவில்லை. கட்டணத்தின் பெயர் கிடைக்கவில்லை."
+Payment submitted.,பணம் சமர்ப்பிக்கப்பட்டது.
+Payment Summary,கட்டணச் சுருக்கம்
+Payments,கொடுப்பனவுகள்
+Payments are not open. Do you want to open payments and submit?,கொடுப்பனவுகள் திறக்கப்படவில்லை. கட்டணத்தைத் திறந்து சமர்ப்பிக்க விரும்புகிறீர்களா?
+Payments by Mode of Payment,பணம் செலுத்தும் முறை மூலம் பணம் செலுத்துதல்
+PDF,PDF
+Peak Hour,பீக் ஹவர்
+Peak Memory:,உச்ச நினைவகம்:
+Peak Server:,உச்ச சேவையகம்:
+Peak:,உச்சம்:
+Pending,நிலுவையில் உள்ளது
+Pending Amount,நிலுவையில் உள்ள தொகை
+Pending count updated from {0} to {1},நிலுவையிலுள்ள எண்ணிக்கை {0} இலிருந்து {1} ஆக புதுப்பிக்கப்பட்டது
+Pending Exposure,நிலுவையில் உள்ள வெளிப்பாடு
+Pending Invoices,நிலுவையில் உள்ள இன்வாய்ஸ்கள்
+Pending Ratio,நிலுவையிலுள்ள விகிதம்
+Pending Sales,நிலுவையில் உள்ள விற்பனை
+Pending sales: {0} | Cache usage: {1}%,நிலுவையில் உள்ள விற்பனை: {0} | தற்காலிக சேமிப்பு பயன்பாடு: {1}%
+Pending Sync,நிலுவையில் உள்ள ஒத்திசைவு
+Pending: {0},நிலுவையில் உள்ளது: {0}
+Pending: {0} | Synced: {1} | Draft: {2},நிலுவையில் உள்ளது: {0} | ஒத்திசைக்கப்பட்டது: {1} | வரைவு: {2}
+Per Page,ஒரு பக்கத்திற்கு
+Personal,தனிப்பட்ட
+Personal preferences adjust the current cashier experience without changing the active POS route.,"செயலில் உள்ள பிஓஎஸ் வழியை மாற்றாமல், தனிப்பட்ட விருப்பத்தேர்வுகள் தற்போதைய காசாளர் அனுபவத்தைச் சரிசெய்யும்."
+PIN confirmation does not match.,பின் உறுதிப்படுத்தல் பொருந்தவில்லை.
+PIN must be 4 to 8 digits.,பின் 4 முதல் 8 இலக்கங்கள் வரை இருக்க வேண்டும்.
+Please add at least one item.,குறைந்தபட்சம் ஒரு பொருளைச் சேர்க்கவும்.
+Please allow camera access to scan codes,குறியீடுகளை ஸ்கேன் செய்ய கேமரா அணுகலை அனுமதிக்கவும்
+Please enter payment amount,கட்டணத் தொகையை உள்ளிடவும்
+Please fill all required fields,தேவையான அனைத்து புலங்களையும் நிரப்பவும்
+Please make a payment or select a payment,பணம் செலுத்தவும் அல்லது கட்டணத்தைத் தேர்ந்தெடுக்கவும்
+Please request phone payment or use another payment method,ஃபோன் கட்டணத்தைக் கோரவும் அல்லது வேறு கட்டண முறையைப் பயன்படுத்தவும்
+Please select a customer first,முதலில் வாடிக்கையாளரைத் தேர்ந்தெடுக்கவும்
+Please select a party,தயவுசெய்து ஒரு கட்சியைத் தேர்ந்தெடுக்கவும்
+Please select a party before reconciling.,சமரசம் செய்வதற்கு முன் ஒரு கட்சியைத் தேர்ந்தெடுக்கவும்.
+Please select a valid movement type.,சரியான இயக்க வகையைத் தேர்ந்தெடுக்கவும்.
+Please select an invoice,விலைப்பட்டியலைத் தேர்ந்தெடுக்கவும்
+Please select company before reconciling.,சமரசம் செய்வதற்கு முன் நிறுவனத்தைத் தேர்ந்தெடுக்கவும்.
+Please set the customer's mobile number,வாடிக்கையாளரின் மொபைல் எண்ணை அமைக்கவும்
+Please try again or enter the item manually.,மீண்டும் முயற்சிக்கவும் அல்லது உருப்படியை கைமுறையாக உள்ளிடவும்.
+Please verify the barcode or check the item's availability.,பார்கோடைச் சரிபார்க்கவும் அல்லது உருப்படியின் இருப்பைச் சரிபார்க்கவும்.
+Points,புள்ளிகள்
+Popup blocked. Please allow popups.,பாப்அப் தடுக்கப்பட்டது. பாப்அப்களை அனுமதிக்கவும்.
+POS,பிஓஎஸ்
+POS controls and maintenance,பிஓஎஸ் கட்டுப்பாடுகள் மற்றும் பராமரிப்பு
+POS Expense is disabled for this POS Profile.,இந்த POS சுயவிவரத்திற்கு POS செலவு முடக்கப்பட்டுள்ளது.
+POS is running with limited offline prerequisites.,POS வரையறுக்கப்பட்ட ஆஃப்லைன் முன்நிபந்தனைகளுடன் இயங்குகிறது.
+POS Profile,பிஓஎஸ் சுயவிவரம்
+Position the QR code or barcode within the scanning area,ஸ்கேனிங் பகுதிக்குள் QR குறியீடு அல்லது பார்கோடு வைக்கவும்
+Posting,இடுகையிடுகிறது
+Posting and Price List,இடுகை மற்றும் விலை பட்டியல்
+Posting Date,இடுகையிடும் தேதி
+Preparing background sync,பின்னணி ஒத்திசைவைத் தயாரிக்கிறது
+"Press OK to continue offline with a warning, or Cancel to retry.",எச்சரிக்கையுடன் ஆஃப்லைனில் தொடர சரி என்பதை அழுத்தவும் அல்லது மீண்டும் முயற்சிக்க ரத்துசெய்.
+Previous unit of measure,முந்தைய அளவீட்டு அலகு
+Price List,விலை பட்டியல்
+Price List Rate,விலை பட்டியல் விகிதம்
+Price list rate updated locally only,விலை பட்டியல் விகிதம் உள்நாட்டில் மட்டுமே புதுப்பிக்கப்பட்டது
+Pricing & Discounts,விலை மற்றும் தள்ளுபடிகள்
+Pricing Rule,விலை விதி
+Print,அச்சிடுக
+Print Draft,வரைவை அச்சிடுங்கள்
+Print Format (Invoice),அச்சு வடிவம் (விலைப்பட்டியல்)
+Print Format (Order),அச்சு வடிவம் (ஆர்டர்)
+Print invoice,அச்சு விலைப்பட்டியல்
+Print Purchase Invoice instead of PO,PO க்கு பதிலாக கொள்முதல் விலைப்பட்டியல் அச்சிடவும்
+Printer,பிரிண்டர்
+Processed returns impacting the shift totals,ஷிப்ட் மொத்தத்தை பாதிக்கும் செயலாக்கப்பட்ட வருமானம்
+Processing Payment,செலுத்துதல் செயலாக்கம்
+Processing payment entries for Invoice {0},இன்வாய்ஸ் {0}க்கான கட்டண உள்ளீடுகளைச் செயலாக்குகிறது
+Profile,சுயவிவரம்
+Profiles,சுயவிவரங்கள்
+Profit,லாபம்
+Profit: Invoice Item Estimate,லாபம்: விலைப்பட்டியல் பொருள் மதிப்பீடு
+Profit: Stock Ledger (COGS),லாபம்: ஸ்டாக் லெட்ஜர் (COGS)
+Profitability Report,லாப அறிக்கை
+Prorated return discount,கணக்கிடப்பட்ட திரும்பும் தள்ளுபடி
+Purchase Amount,கொள்முதல் தொகை
+Purchase Invoices,விலைப்பட்டியல்களை வாங்கவும்
+Purchase Order created,கொள்முதல் ஆர்டர் உருவாக்கப்பட்டது
+Qty,Qty
+Qualified,தகுதி பெற்றவர்
+Quantity,அளவு
+Quantity exceeds available stock,கிடைக்கும் இருப்பை விட அளவு அதிகமாக உள்ளது
+Quick Actions,விரைவான செயல்கள்
+Quotation {0} is Submitted,மேற்கோள் {0} சமர்ப்பிக்கப்பட்டது
+Quotation submitted,மேற்கோள் சமர்ப்பிக்கப்பட்டது
+QZ Tray connected.,QZ தட்டு இணைக்கப்பட்டுள்ளது.
+QZ Tray is manually disconnected. Press Connect to enable it again.,"QZ தட்டு கைமுறையாக துண்டிக்கப்பட்டது. அதை மீண்டும் இயக்க, இணைப்பை அழுத்தவும்."
+QZ Tray is not connected.,QZ தட்டு இணைக்கப்படவில்லை.
+QZ Tray Setup,QZ தட்டு அமைப்பு
+Rate,மதிப்பிடவும்
+Rate adjusted to maximum allowed discount,அனுமதிக்கப்பட்ட அதிகபட்ச தள்ளுபடிக்கு விகிதம் சரி செய்யப்பட்டது
+Ready,தயார்
+Ready to resume,மீண்டும் தொடங்கத் தயார்
+Ready!,தயார்!
+Real-time POS insights for retail operations.,சில்லறை விற்பனை நடவடிக்கைகளுக்கான நிகழ்நேர பிஓஎஸ் நுண்ணறிவு.
+Rebuild Offline Data,ஆஃப்லைன் தரவை மீண்டும் உருவாக்கவும்
+Receive,பெறு
+Receive now,இப்போது பெறுங்கள்
+Received,பெற்றது
+Received:,பெறப்பட்டது:
+Recent Movement Entries,சமீபத்திய இயக்கம் உள்ளீடுகள்
+Recent updates about your invoices,உங்கள் இன்வாய்ஸ்கள் பற்றிய சமீபத்திய புதுப்பிப்புகள்
+Recently Active Customers,சமீபத்தில் செயலில் உள்ள வாடிக்கையாளர்கள்
+Rechecking connection,இணைப்பை மீண்டும் சரிபார்க்கிறது
+Reconcile payment methods and close shift,பணம் செலுத்தும் முறைகள் மற்றும் நெருக்கமான மாற்றத்தை சரிசெய்யவும்
+Reconciling Payments,கொடுப்பனவுகளை சீரமைத்தல்
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","ஆன்லைனில் இருக்கும் போது இந்தப் பக்கத்தை மீண்டும் இணைத்து திறக்கவும், பிறகு ஆஃப்லைன் புதுப்பிப்புகள் அதை மீட்டெடுக்க முடியும்."
+Reconnect online to refresh cached offline data from the server.,சேவையகத்திலிருந்து தற்காலிகமாகச் சேமிக்கப்பட்ட ஆஃப்லைன் தரவைப் புதுப்பிக்க ஆன்லைனில் மீண்டும் இணைக்கவும்.
+Recreate local offline prerequisites from scratch,புதிதாக உள்ளூர் ஆஃப்லைன் முன்நிபந்தனைகளை மீண்டும் உருவாக்கவும்
+Recv:,Recv:
+Redeem,மீட்டுக்கொள்ளுங்கள்
+Redeem / Scan,மீட்டுக்கொள்ளவும் / ஸ்கேன் செய்யவும்
+Redeem Amount,ரிடீம் தொகை
+Redeem Mode,ரிடீம் பயன்முறை
+Redeemed Amount,மீட்டெடுக்கப்பட்ட தொகை
+Redeemed credit cannot be greater than its total.,மீட்டெடுக்கப்பட்ட கடன் அதன் மொத்தத்தை விட அதிகமாக இருக்கக்கூடாது.
+Redemption and Totals,மீட்பு மற்றும் மொத்தங்கள்
+Reference,குறிப்பு
+Refresh,புதுப்பிக்கவும்
+Refresh Exchange Rate,மாற்று விகிதத்தைப் புதுப்பிக்கவும்
+Refresh Offline Data,ஆஃப்லைன் தரவைப் புதுப்பிக்கவும்
+Refresh Printers,அச்சுப்பொறிகளைப் புதுப்பிக்கவும்
+Refund,பணத்தைத் திரும்பப்பெறுதல்
+Release Notes,வெளியீட்டு குறிப்புகள்
+Reload,மீண்டும் ஏற்றவும்
+Reload customers,வாடிக்கையாளர்களை மீண்டும் ஏற்றவும்
+Reload Items,பொருட்களை மீண்டும் ஏற்றவும்
+Reload Now,இப்போது மீண்டும் ஏற்றவும்
+Reload to apply the latest changes. Your current session will be refreshed.,"சமீபத்திய மாற்றங்களைப் பயன்படுத்த, மீண்டும் ஏற்றவும். உங்கள் தற்போதைய அமர்வு புதுப்பிக்கப்படும்."
+Reload Workflow,பணிப்பாய்வுகளை மீண்டும் ஏற்றவும்
+Remarks,கருத்துக்கள்
+Remarks are required.,குறிப்புகள் தேவை.
+Remove,அகற்று
+Remove barcode item,பார்கோடு உருப்படியை அகற்று
+Remove cached data and reload the POS app,"தற்காலிக சேமிப்பில் உள்ள தரவை அகற்றி, பிஓஎஸ் பயன்பாட்டை மீண்டும் ஏற்றவும்"
+Remove item,உருப்படியை அகற்று
+Remove Offer,சலுகையை அகற்று
+Reorder / Purchase Suggestions,மறுவரிசைப்படுத்துதல் / கொள்முதல் பரிந்துரைகள்
+Repair Candidate,பழுதுபார்க்கும் வேட்பாளர்
+Repair Change Allocation,பழுது மாற்ற ஒதுக்கீடு
+Repair requires an online connection,பழுதுபார்ப்பதற்கு ஆன்லைன் இணைப்பு தேவை
+Repaired,பழுதுபட்டது
+Repairing change allocation,மாற்ற ஒதுக்கீட்டை சரிசெய்தல்
+Repeat Customers,மீண்டும் வாடிக்கையாளர்கள்
+Repeat Rate,மீண்டும் விகிதம்
+Request,கோரிக்கை
+Request ID: {0},கோரிக்கை ஐடி: {0}
+Request Payment,கட்டணத்தை கோருங்கள்
+Requested route: {0},கோரிய வழி: {0}
+Required columns cannot be hidden,தேவையான நெடுவரிசைகளை மறைக்க முடியாது
+Reset,மீட்டமை
+Reset item name,பொருளின் பெயரை மீட்டமைக்கவும்
+Reset to Default,இயல்புநிலைக்கு மீட்டமைக்கவும்
+Resource Health,வள ஆரோக்கியம்
+Restricted,கட்டுப்படுத்தப்பட்டது
+Restricted operational controls for supervisors only.,மேற்பார்வையாளர்களுக்கு மட்டுமே கட்டுப்படுத்தப்பட்ட செயல்பாட்டுக் கட்டுப்பாடுகள்.
+Retry,மீண்டும் முயற்சிக்கவும்
+Retry route,பாதையை மீண்டும் முயற்சிக்கவும்
+Return,திரும்பு
+Return Amount,திரும்பும் தொகை
+Return Count,திரும்ப எண்ணிக்கை
+Return items must have negative quantities,திரும்பப் பெறும் பொருட்கள் எதிர்மறை அளவுகளைக் கொண்டிருக்க வேண்டும்
+Return total must be negative,மொத்த வருமானம் எதிர்மறையாக இருக்க வேண்டும்
+Return Valid Until,வரை செல்லுபடியாகும்
+Return window passed,திரும்பும் சாளரம் கடந்துவிட்டது
+Return without Invoice,விலைப்பட்டியல் இல்லாமல் திரும்பவும்
+Returns,திரும்புகிறது
+Returns / Voids / Discounts,வருமானம் / வெற்றிடங்கள் / தள்ளுபடிகள்
+Returns by Currency,நாணயத்தின் மூலம் திரும்பும்
+Revenue,வருவாய்
+Review shift totals before submitting the closing entry,இறுதிப் பதிவைச் சமர்ப்பிக்கும் முன் ஷிப்ட் மொத்தத்தை மதிப்பாய்வு செய்யவும்
+Round Off,ரவுண்ட் ஆஃப்
+Rows,வரிசைகள்
+Rows:,வரிசைகள்:
+Rule,விதி
+Sale,விற்பனை
+Sales,விற்பனை
+Sales Order {0} is Submitted,விற்பனை ஆணை {0} சமர்ப்பிக்கப்பட்டது
+Sales Person and Print,விற்பனை நபர் மற்றும் அச்சு
+Sales Person not found,விற்பனையாளரைக் காணவில்லை
+Sales processed,விற்பனை செயலாக்கப்பட்டது
+Sales Return,விற்பனை வருவாய்
+Sales Trend Report,விற்பனை போக்கு அறிக்கை
+Save,சேமிக்கவும்
+Save & Clear,சேமி & அழி
+Save as POS Profile Default,பிஓஎஸ் சுயவிவர இயல்புநிலையாக சேமிக்கவும்
+Save Settings,அமைப்புகளைச் சேமிக்கவும்
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,"தேர்ந்தெடுக்கப்பட்ட அச்சுப்பொறியை பிஓஎஸ் சுயவிவர இயல்புநிலையாக சேமிக்கவும், அது இந்த அமைப்பில் தானாகவே காண்பிக்கப்படும்."
+Saved as draft because: {0},வரைவாக சேமிக்கப்பட்டது ஏனெனில்: {0}
+Saving...,சேமிக்கிறது...
+Scale barcode detected. Quantity here is the number of labels to print.,அளவு பார்கோடு கண்டறியப்பட்டது. இங்கே அளவு என்பது அச்சிட வேண்டிய லேபிள்களின் எண்ணிக்கை.
+Scale barcode settings are not configured. Using item barcode only.,அளவு பார்கோடு அமைப்புகள் உள்ளமைக்கப்படவில்லை. உருப்படி பார்கோடு மட்டும் பயன்படுத்துகிறது.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,இந்த உருப்படி/UOMக்கான அளவுகோல் டெம்ப்ளேட் பார்கோடு இல்லை. உருப்படி பார்கோடு மட்டும் பயன்படுத்துகிறது.
+Scan an existing card and top it up without leaving the payment flow.,"ஏற்கனவே உள்ள கார்டை ஸ்கேன் செய்து, பணம் செலுத்தும் முறையை விட்டுவிடாமல் டாப் அப் செய்யவும்."
+Scan Error,ஸ்கேன் பிழை
+Scan or enter a gift card code to check balance or redeem.,இருப்பைச் சரிபார்க்க அல்லது ரிடீம் செய்ய பரிசு அட்டைக் குறியீட்டை ஸ்கேன் செய்யவும் அல்லது உள்ளிடவும்.
+Scan or paste the card code below.,கீழே உள்ள கார்டு குறியீட்டை ஸ்கேன் செய்யவும் அல்லது ஒட்டவும்.
+Scan QR Code/Barcode,QR குறியீடு/பார்கோடு ஸ்கேன் செய்யவும்
+Scan with camera,கேமரா மூலம் ஸ்கேன் செய்யவும்
+Scan-First Flow,ஸ்கேன்-முதல் ஓட்டம்
+Scanned Code:,ஸ்கேன் செய்யப்பட்ட குறியீடு:
+Scanning for: {0},இதற்கு ஸ்கேன் செய்கிறது: {0}
+Scanning items,பொருட்களை ஸ்கேன் செய்கிறது
+Scan-Ready,ஸ்கேன் தயார்
+Scope,நோக்கம்
+Scope: All Profiles,நோக்கம்: அனைத்து சுயவிவரங்கள்
+Scope: Current Profile,நோக்கம்: தற்போதைய சுயவிவரம்
+Scope: Specific Profile,நோக்கம்: குறிப்பிட்ட சுயவிவரம்
+Search,தேடு
+Search Account,தேடல் கணக்கு
+Search an invoice and continue the return flow without extra steps.,"விலைப்பட்டியலைத் தேடி, கூடுதல் படிகள் இல்லாமல் திரும்பப் பெறுவதைத் தொடரவும்."
+Search customer,வாடிக்கையாளரைத் தேடுங்கள்
+Search invoices or customers,இன்வாய்ஸ்கள் அல்லது வாடிக்கையாளர்களைத் தேடுங்கள்
+Search item,தேடல் உருப்படி
+Search item / code,தேடல் உருப்படி / குறியீடு
+Search items or barcode,உருப்படிகள் அல்லது பார்கோடு தேடல்
+Search Mpesa Payments,Mpesa கொடுப்பனவுகளைத் தேடுங்கள்
+Search return invoices or customers,திரும்பிய இன்வாய்ஸ்கள் அல்லது வாடிக்கையாளர்களைத் தேடுங்கள்
+Search supplier,தேடல் சப்ளையர்
+Search unpaid invoices or customers,செலுத்தப்படாத இன்வாய்ஸ்கள் அல்லது வாடிக்கையாளர்களைத் தேடுங்கள்
+Secure context (HTTPS or localhost) is required for camera access.,கேமரா அணுகலுக்கு பாதுகாப்பான சூழல் (HTTPS அல்லது லோக்கல் ஹோஸ்ட்) தேவை.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,கேமரா அணுகலுக்கு பாதுகாப்பான சூழல் (HTTPS) தேவை. கேமராவை அணுக HTTPSஐப் பயன்படுத்தவும்.
+Select,தேர்ந்தெடு
+Select a cashier first.,முதலில் ஒரு காசாளரைத் தேர்ந்தெடுக்கவும்.
+Select a customer,வாடிக்கையாளரைத் தேர்ந்தெடுக்கவும்
+Select a customer to use coupon,கூப்பனைப் பயன்படுத்த வாடிக்கையாளரைத் தேர்ந்தெடுக்கவும்
+Select a printer to use QZ silent printing.,QZ அமைதியான அச்சிடலைப் பயன்படுத்த அச்சுப்பொறியைத் தேர்ந்தெடுக்கவும்.
+Select Batch,தொகுப்பைத் தேர்ந்தெடுக்கவும்
+Select Columns to Display,காட்ட வேண்டிய நெடுவரிசைகளைத் தேர்ந்தெடுக்கவும்
+Select items to sell,விற்க வேண்டிய பொருட்களைத் தேர்ந்தெடுக்கவும்
+Select Payment,கட்டணத்தைத் தேர்ந்தெடுக்கவும்
+Select Payment Account,கட்டணக் கணக்கைத் தேர்ந்தெடுக்கவும்
+Select printer,அச்சுப்பொறியைத் தேர்ந்தெடுக்கவும்
+Select Return Invoice,ரிட்டர்ன் இன்வாய்ஸைத் தேர்ந்தெடுக்கவும்
+Select S.O,எஸ்.ஓ
+Select Sales Orders,விற்பனை ஆர்டர்களைத் தேர்ந்தெடுக்கவும்
+Select the cashier who is taking over this terminal.,இந்த டெர்மினலைக் கைப்பற்றும் காசாளரைத் தேர்ந்தெடுக்கவும்.
+Selected,தேர்ந்தெடுக்கப்பட்டது
+Selected movement type is not allowed by POS Profile.,POS சுயவிவரத்தால் தேர்ந்தெடுக்கப்பட்ட இயக்க வகை அனுமதிக்கப்படவில்லை.
+Selected Payments,தேர்ந்தெடுக்கப்பட்ட கொடுப்பனவுகள்
+Sensitive actions kept away from quick taps.,உணர்திறன் செயல்கள் விரைவான தட்டுதல்களிலிருந்து விலக்கி வைக்கப்படுகின்றன.
+Serial,தொடர்
+Serial Numbers,வரிசை எண்கள்
+Server CPU Usage:,சர்வர் CPU பயன்பாடு:
+Server Health,சேவையக ஆரோக்கியம்
+Server Memory Usage:,சர்வர் நினைவக பயன்பாடு:
+Server Metrics,சேவையக அளவீடுகள்
+Server Uptime:,சேவையக இயக்க நேரம்:
+Service Charges,சேவை கட்டணங்கள்
+Session,அமர்வு
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,"ஒவ்வொரு காசாளர் பின்னையும் பயனர் படிவத்தில் அமைத்து, டெர்மினல் உறுப்பினர்களை POS சுயவிவரப் பயனரில் ஒதுக்கி வைக்கவும்."
+Settings,அமைப்புகள்
+Settings in this section update the POS workspace without changing the current route.,இந்தப் பிரிவில் உள்ள அமைப்புகள் தற்போதைய வழியை மாற்றாமல் பிஓஎஸ் பணியிடத்தைப் புதுப்பிக்கும்.
+Setup complete!,அமைவு முடிந்தது!
+Share,பகிரவும்
+Shared terminal,பகிரப்பட்ட முனையம்
+Shift Closed Snapshot,ஷிப்ட் மூடப்பட்ட ஸ்னாப்ஷாட்
+Shift Overview,ஷிப்ட் மேலோட்டம்
+Show,காட்டு
+Show cart on customer-facing screen,வாடிக்கையாளர் எதிர்கொள்ளும் திரையில் வண்டியைக் காட்டு
+Show last invoice rate,கடைசி விலைப்பட்டியல் விகிதத்தைக் காட்டு
+Show rate info,கட்டணத் தகவலைக் காட்டு
+Show Repair Candidates,பழுதுபார்ப்பு வேட்பாளர்களைக் காட்டு
+Show search tools,தேடல் கருவிகளைக் காட்டு
+Show the active cart on a customer-facing screen,வாடிக்கையாளர் எதிர்கொள்ளும் திரையில் செயலில் உள்ள கார்ட்டைக் காட்டு
+Showing {0}-{1} of {2},{2} இல் {0}-{1} ஐக் காட்டுகிறது
+Showing 0 of 0,0 இல் 0 ஐக் காட்டுகிறது
+Shows the distribution of invoices per currency,ஒரு நாணயத்திற்கு இன்வாய்ஸ்களின் விநியோகத்தைக் காட்டுகிறது
+Sign out of the current POS session,தற்போதைய பிஓஎஸ் அமர்விலிருந்து வெளியேறவும்
+Size:,அளவு:
+Skipped Payments,தவிர்க்கப்பட்ட பணம்
+Skipping items without barcodes,பார்கோடுகள் இல்லாமல் பொருட்களைத் தவிர்த்தல்
+Slow Moving,மெதுவாக நகரும்
+Slow Moving Items,மெதுவாக நகரும் பொருட்கள்
+Slow Queries:,மெதுவான கேள்விகள்:
+Sold,விற்கப்பட்டது
+Source,ஆதாரம்
+Source Cash Account (Optional Override),மூல பணக் கணக்கு (விரும்பினால் மேலெழுதுதல்)
+Source Ex. Rate:,ஆதாரம் முன்னாள். விகிதம்:
+Source Rate:,ஆதார விகிதம்:
+Specific Profile,குறிப்பிட்ட சுயவிவரம்
+Split Invoices,இன்வாய்ஸ்களைப் பிரிக்கவும்
+Staff / Cashier Performance Report,ஊழியர்கள் / காசாளர் செயல்திறன் அறிக்கை
+Status,நிலை
+Stock,பங்கு
+Stock Information,பங்கு தகவல்
+Stock is lower than requested,ஸ்டாக் கேட்டதை விட குறைவாக உள்ளது
+Stock is lower than requested:\n{0},கையிருப்பு கோரப்பட்டதை விட குறைவாக உள்ளது:\n{0}
+Stock Movement Report,பங்கு இயக்கம் அறிக்கை
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,பங்கு புதுப்பிப்பு: {0} இல் {1} உள்ளது. {2}ஐச் சேர்ப்பது பங்கு பூஜ்ஜியத்திற்குக் கீழே வரும்.
+Submit,சமர்ப்பிக்கவும்
+Submit & Print,சமர்ப்பிக்கவும் & அச்சிடவும்
+Submit Deposit,வைப்புத்தொகையை சமர்ப்பிக்கவும்
+Submit Expense,செலவை சமர்ப்பிக்கவும்
+Submitted,சமர்ப்பிக்கப்பட்டது
+Submitted Cash Movements,சமர்ப்பிக்கப்பட்ட பண இயக்கங்கள்
+Submitted entries,பதிவுகள் சமர்ப்பிக்கப்பட்டன
+Successfully scanned:,வெற்றிகரமாக ஸ்கேன் செய்யப்பட்டது:
+Suggested,பரிந்துரைக்கப்பட்டது
+Suggested Qty,பரிந்துரைக்கப்பட்ட அளவு
+Supervisor Access,மேற்பார்வையாளர் அணுகல்
+Supervisor permissions unlock issuance and reloads,மேற்பார்வையாளர் அனுமதிகள் வழங்குதல் மற்றும் மறுஏற்றம் ஆகியவற்றைத் திறக்கும்
+Supervisor Tools,மேற்பார்வையாளர் கருவிகள்
+Supplier,சப்ளையர்
+Supplier and dates are required.,சப்ளையர் மற்றும் தேதிகள் தேவை.
+Supplier Invoices,சப்ளையர் இன்வாய்ஸ்கள்
+Supplier is required.,சப்ளையர் தேவை.
+Supplier name is required,சப்ளையர் பெயர் தேவை
+Supplier Payments,சப்ளையர் கொடுப்பனவுகள்
+Supplier Purchase Summary,சப்ளையர் கொள்முதல் சுருக்கம்
+Suppliers,சப்ளையர்கள்
+Suppliers not found,சப்ளையர்கள் கிடைக்கவில்லை
+Switch Camera,கேமராவை மாற்றவும்
+Switch Cashier,கேஷியரை மாற்றவும்
+Switch the POS appearance theme,பிஓஎஸ் தோற்ற தீம் மாறவும்
+Switched to:,இதற்கு மாறியது:
+Sync All Invoices,அனைத்து இன்வாய்ஸ்களையும் ஒத்திசைக்கவும்
+Sync Offline Cash Movements ({0}),ஆஃப்லைன் பண இயக்கங்களை ஒத்திசைக்கவும் ({0})
+Sync Offline Sales,ஆஃப்லைன் விற்பனையை ஒத்திசைக்கவும்
+Synced {0} offline cash movement(s).,{0} ஆஃப்லைன் பண இயக்கம்(கள்) ஒத்திசைக்கப்பட்டது.
+Syncing items in background,பின்னணியில் உருப்படிகளை ஒத்திசைக்கிறது
+System / Diagnostics,அமைப்பு / கண்டறிதல்
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","சிஸ்டம் செயல்கள் என்பது ஆப்ஸ் தகவல், ஆதரவு கண்டறிதல் மற்றும் அமர்வு கட்டுப்பாடுகள் போன்ற குறைந்த அதிர்வெண் பராமரிப்பு கட்டுப்பாடுகள் ஆகும்."
+System Information,கணினி தகவல்
+System Status,கணினி நிலை
+Tables:,அட்டவணைகள்:
+Tap the button below to redeem a gift card during checkout.,செக் அவுட்டின் போது கிஃப்ட் கார்டை ரிடீம் செய்ய கீழே உள்ள பட்டனைத் தட்டவும்.
+Target,இலக்கு
+Target Ex. Rate:,இலக்கு முன்னாள். விகிதம்:
+Target Rate:,இலக்கு விகிதம்:
+Tax,வரி
+Tax / Charges Report,வரி / கட்டண அறிக்கை
+Tax Heads,வரித் தலைவர்கள்
+Taxable Amount,வரி விதிக்கக்கூடிய தொகை
+Tendered,டெண்டர் விடப்பட்டது
+Terminal,முனையம்
+Terminal & Devices,டெர்மினல் & சாதனங்கள்
+Terminal locked,முனையம் பூட்டப்பட்டது
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","டெர்மினல் கருவிகள் இந்த செக்அவுட் நிலையம், வாடிக்கையாளர் எதிர்கொள்ளும் காட்சிகள் மற்றும் எதிர்கால அச்சுப்பொறி/சாதனக் கட்டுப்பாடுகளைப் பாதிக்கின்றன."
+Territory not found,பிரதேசம் காணப்படவில்லை
+The amount paid is not complete,செலுத்திய தொகை முழுமையாக இல்லை
+The app stores data locally for offline use. This is called cache.,ஆப்லைனில் பயன்படுத்துவதற்காக ஆப்ஸ் தரவை உள்ளூரில் சேமிக்கிறது. இது கேச் எனப்படும்.
+The invoice stayed in draft. Please review and submit it manually.,விலைப்பட்டியல் வரைவில் இருந்தது. தயவுசெய்து மதிப்பாய்வு செய்து கைமுறையாகச் சமர்ப்பிக்கவும்.
+The maximum discount allowed is,அனுமதிக்கப்பட்ட அதிகபட்ச தள்ளுபடி
+The quantity for {0} has been adjusted to the maximum available stock.,"{0}க்கான அளவு, கிடைக்கும் அதிகபட்ச இருப்புக்குச் சரிசெய்யப்பட்டது."
+The system could not retrieve the item details. Please try again.,கணினியால் உருப்படி விவரங்களை மீட்டெடுக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.
+These invoices will be synced when connection is restored,இணைப்பு மீட்டமைக்கப்படும் போது இந்த இன்வாய்ஸ்கள் ஒத்திசைக்கப்படும்
+This action now opens inside the settings workspace.,இந்தச் செயல் இப்போது அமைப்புகள் பணியிடத்தில் திறக்கும்.
+This coupon already used !,இந்த கூப்பன் ஏற்கனவே பயன்படுத்தப்பட்டது!
+This invoice does not need change-allocation repair,இந்த விலைப்பட்டியல் மாற்றம்-ஒதுக்கீடு பழுது தேவையில்லை
+This invoice is already repaired,இந்த விலைப்பட்டியல் ஏற்கனவே சரி செய்யப்பட்டுள்ளது
+This is an item template. Please choose a variant.,இது ஒரு உருப்படி டெம்ப்ளேட். தயவுசெய்து ஒரு மாறுபாட்டைத் தேர்ந்தெடுக்கவும்.
+this item,இந்த உருப்படி
+This POS page could not be opened offline because its code was not cached on this terminal yet.,"இந்த POS பக்கத்தை ஆஃப்லைனில் திறக்க முடியவில்லை, ஏனெனில் அதன் குறியீடு இன்னும் இந்த டெர்மினலில் தற்காலிகமாக சேமிக்கப்படவில்லை."
+This Serial Number {0} has already been added!,இந்த வரிசை எண் {0} ஏற்கனவே சேர்க்கப்பட்டுள்ளது!
+Threshold,வாசல்
+Time,நேரம்
+Tip: Clear cache regularly to free up space and keep the app fast.,"உதவிக்குறிப்பு: இடத்தைக் காலியாக்கவும், ஆப்ஸை வேகமாக வைத்திருக்கவும் தற்காலிக சேமிப்பை அடிக்கடி அழிக்கவும்."
+Tip: Close unused tabs or apps to reduce lag.,உதவிக்குறிப்பு: தாமதத்தைக் குறைக்க பயன்படுத்தப்படாத தாவல்கள் அல்லது பயன்பாடுகளை மூடு.
+Tip: Monitor slow queries and table size for optimal performance.,உதவிக்குறிப்பு: உகந்த செயல்திறனுக்காக மெதுவான வினவல்கள் மற்றும் அட்டவணை அளவைக் கண்காணிக்கவும்.
+To Be Paid,பணம் செலுத்த வேண்டும்
+To Date,இன்றுவரை
+Today,இன்று
+Today Profit,இன்று லாபம்
+Today Sales,இன்று விற்பனை
+Toggle navigation drawer,வழிசெலுத்தல் டிராயரை நிலைமாற்று
+Toggle Theme,தீம் மாற்றவும்
+Tools,கருவிகள்
+Tools for customer-facing screens and terminal-specific actions.,வாடிக்கையாளர் எதிர்கொள்ளும் திரைகள் மற்றும் முனையம் சார்ந்த செயல்களுக்கான கருவிகள்.
+Top Brand,சிறந்த பிராண்ட்
+Top Category,சிறந்த வகை
+Top Charge Head,டாப் சார்ஜ் ஹெட்
+Top Customers,சிறந்த வாடிக்கையாளர்கள்
+Top Discount,சிறந்த தள்ளுபடி
+Top Items by Location,இருப்பிடத்தின் அடிப்படையில் சிறந்த பொருட்கள்
+Top Margin,மேல் விளிம்பு
+Top Pending,நிலுவையில் உள்ளது
+Top Profit Item,அதிக லாபம் தரும் பொருள்
+Top Return Items,சிறந்த திரும்பும் பொருட்கள்
+Top Sales by Cashier,காசாளர் மூலம் அதிக விற்பனை
+Top Supplier,சிறந்த சப்ளையர்
+Top Suppliers by Spend,செலவு மூலம் சிறந்த சப்ளையர்கள்
+Top Tables,மேல் அட்டவணைகள்
+Top Tax Head,மேல் வரித் தலைவர்
+Top Up Amount,டாப் அப் தொகை
+Top Up Card,டாப் அப் கார்டு
+Top Up Mode,டாப் அப் பயன்முறை
+Top Variant,டாப் வேரியன்ட்
+Total,மொத்தம்
+Total Amount,மொத்த தொகை
+Total Change,மொத்த மாற்றம்
+Total Charges,மொத்த கட்டணங்கள்
+Total In,மொத்தம்
+Total Invoices,மொத்த விலைப்பட்டியல்கள்
+Total Items,மொத்த பொருட்கள்
+Total Mpesa,மொத்த Mpesa
+Total Out,மொத்த அவுட்
+Total Payments,மொத்த கொடுப்பனவுகள்
+Total Purchase,மொத்த கொள்முதல்
+Total Selected :,தேர்ந்தெடுக்கப்பட்ட மொத்தம்:
+Total Size,மொத்த அளவு
+Total Stock Qty,மொத்த பங்கு அளவு
+Total:,மொத்தம்:
+Totals by Invoice Currency,இன்வாய்ஸ் கரன்சி மூலம் மொத்தம்
+Track how much cash was handed back to customers,வாடிக்கையாளர்களுக்கு எவ்வளவு பணம் திரும்ப ஒப்படைக்கப்பட்டது என்பதைக் கண்காணிக்கவும்
+"Track recent sales, collect unpaid balances, and reopen saved work","சமீபத்திய விற்பனையைக் கண்காணிக்கவும், செலுத்தப்படாத நிலுவைகளைச் சேகரிக்கவும், சேமித்த வேலையை மீண்டும் திறக்கவும்"
+Transaction ID,பரிவர்த்தனை ஐடி
+Transfer,இடமாற்றம்
+Try a different search term or clear the cart search.,வேறு தேடல் சொல்லை முயற்சிக்கவும் அல்லது கார்ட் தேடலை அழிக்கவும்.
+Try adjusting your search or filters,உங்கள் தேடல் அல்லது வடிப்பான்களை சரிசெய்ய முயற்சிக்கவும்
+Try another source or refresh the list.,வேறொரு மூலத்தை முயற்சிக்கவும் அல்லது பட்டியலைப் புதுப்பிக்கவும்.
+Try changing the date range or status filter.,தேதி வரம்பு அல்லது நிலை வடிப்பானை மாற்ற முயற்சிக்கவும்.
+Type,வகை
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,அடிப்படை அமைப்புகளுடன் கூட கேமராவை அணுக முடியவில்லை. உங்கள் கேமரா அனுமதிகள் மற்றும் சாதன இணக்கத்தன்மையை சரிபார்க்கவும்.
+Unable to add offer item {0}. Please refresh and try again.,சலுகை உருப்படியைச் சேர்க்க முடியவில்லை {0}. புதுப்பித்து மீண்டும் முயற்சிக்கவும்.
+Unable to add offer item. Please refresh and try again.,சலுகை உருப்படியைச் சேர்க்க முடியவில்லை. புதுப்பித்து மீண்டும் முயற்சிக்கவும்.
+Unable to add scanned item.,ஸ்கேன் செய்த பொருளைச் சேர்க்க முடியவில்லை.
+Unable to create purchase order,கொள்முதல் ஆர்டரை உருவாக்க முடியவில்லை
+Unable to delete draft invoice,வரைவு விலைப்பட்டியலை நீக்க முடியவில்லை
+Unable to fetch documents,ஆவணங்களைப் பெற முடியவில்லை
+Unable to fetch draft orders,வரைவு ஆர்டர்களைப் பெற முடியவில்லை
+Unable to fetch invoice history,இன்வாய்ஸ் வரலாற்றைப் பெற முடியவில்லை
+Unable to fetch M-Pesa payments,M-Pesa பேமெண்ட்டுகளைப் பெற முடியவில்லை
+Unable to fetch sales orders,விற்பனை ஆர்டர்களைப் பெற முடியவில்லை
+Unable to fetch unpaid invoices,செலுத்தப்படாத இன்வாய்ஸ்களைப் பெற முடியவில்லை
+Unable to generate scale barcode,அளவிலான பார்கோடை உருவாக்க முடியவில்லை
+Unable to issue gift card.,பரிசு அட்டையை வழங்க முடியவில்லை.
+Unable to load cashier PIN status.,காசாளர் பின் நிலையை ஏற்ற முடியவில்லை.
+Unable to load document,ஆவணத்தை ஏற்ற முடியவில்லை
+Unable to load draft invoice,வரைவு விலைப்பட்டியல் ஏற்ற முடியவில்லை
+Unable to load gift card balance.,கிஃப்ட் கார்டு இருப்பை ஏற்ற முடியவில்லை.
+Unable to load invoice details,இன்வாய்ஸ் விவரங்களை ஏற்ற முடியவில்லை
+Unable to load parked order,நிறுத்தப்பட்ட ஆர்டரை ஏற்ற முடியவில்லை
+Unable to load the selected sales order,தேர்ந்தெடுக்கப்பட்ட விற்பனை ஆர்டரை ஏற்ற முடியவில்லை
+Unable to prepare document,ஆவணத்தைத் தயாரிக்க முடியவில்லை
+Unable to prepare return invoice,திரும்பப் பெறுவதற்கான விலைப்பட்டியல் தயாரிக்க முடியவில்லை
+Unable to print draft invoice,வரைவு விலைப்பட்டியல் அச்சிட முடியவில்லை
+Unable to print submitted invoice,சமர்ப்பிக்கப்பட்ட விலைப்பட்டியல் அச்சிட முடியவில்லை
+Unable to process document action,ஆவணச் செயலைச் செயல்படுத்த முடியவில்லை
+Unable to repair change allocation,மாற்ற ஒதுக்கீட்டை சரிசெய்ய முடியவில்லை
+Unable to save cashier PIN.,காசாளர் பின்னைச் சேமிக்க முடியவில்லை.
+Unable to save the rate to the backend price list,பின்தள விலைப் பட்டியலில் விகிதத்தைச் சேமிக்க முடியவில்லை
+Unable to submit invoice,விலைப்பட்டியல் சமர்ப்பிக்க முடியவில்லை
+Unable to submit the selected payment,தேர்ந்தெடுக்கப்பட்ட கட்டணத்தைச் சமர்ப்பிக்க முடியவில்லை
+Unable to top up gift card.,பரிசு அட்டையை நிரப்ப முடியவில்லை.
+Unable to verify cashier PIN.,காசாளர் பின்னைச் சரிபார்க்க முடியவில்லை.
+Unallocated,ஒதுக்கப்படாதது
+Unallocated:,ஒதுக்கப்படாதது:
+Unavailable,கிடைக்கவில்லை
+Unknown,தெரியவில்லை
+Unknown Item,தெரியாத பொருள்
+Unknown Warehouse,தெரியாத கிடங்கு
+Unlock POS,பிஓஎஸ் திறக்கவும்
+Unpaid,செலுத்தப்படாதது
+"Unselected payments stay unallocated first, then auto reconcile after submit.","தேர்ந்தெடுக்கப்படாத பேமெண்ட்கள் முதலில் ஒதுக்கப்படாமல் இருக்கும், பிறகு சமர்ப்பித்த பிறகு தானாகச் சீர்செய்யும்."
+UOM,UOM
+UOM not found,UOM கிடைக்கவில்லை
+Update available,புதுப்பிப்பு கிடைக்கிறது
+Update Customer,வாடிக்கையாளரைப் புதுப்பிக்கவும்
+Update PIN,பின்னைப் புதுப்பிக்கவும்
+Update Price List Rate,விலைப்பட்டியல் விகிதத்தைப் புதுப்பிக்கவும்
+Updated,புதுப்பிக்கப்பட்டது
+Updates and app info that stay out of the cashier flow.,காசாளர் பரிமாற்றத்திற்கு வெளியே இருக்கும் புதுப்பிப்புகள் மற்றும் ஆப்ஸ் தகவல்.
+Updates automatically,தானாகவே புதுப்பிக்கப்படும்
+Usage,பயன்பாடு
+Usage Stats,பயன்பாட்டு புள்ளிவிவரங்கள்
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,காசாளர் மாறுதல் மற்றும் முனையத் திறப்பதற்கு 4 முதல் 8 இலக்க பின்னைப் பயன்படுத்தவும்.
+Use Cashier,காசாளரைப் பயன்படுத்தவும்
+Use date range to search for older invoices,"பழைய இன்வாய்ஸ்களைத் தேட, தேதி வரம்பைப் பயன்படுத்தவும்"
+"Use one field for manual code entry, barcode scans, or QR scans.","கைமுறை குறியீடு உள்ளீடு, பார்கோடு ஸ்கேன் அல்லது QR ஸ்கேன் செய்ய ஒரு புலத்தைப் பயன்படுத்தவும்."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","பிஓஎஸ்ஸை விட்டு வெளியேறாமல் இருப்புச் சோதனைகள், புதிய வெளியீடுகள் மற்றும் டாப் அப்களுக்கு ஒரு பணிப்பாய்வுகளைப் பயன்படுத்தவும்."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","தேக்ககப்படுத்தப்பட்ட முன்தேவையான தரவுக்கு புதுப்பித்தல், மீண்டும் உருவாக்குதல் அல்லது கண்டறியும் மதிப்பாய்வு தேவைப்படும்போது இந்தப் பிரிவைப் பயன்படுத்தவும்."
+Use Western numerals,மேற்கத்திய எண்களைப் பயன்படுத்தவும்
+Used:,பயன்படுத்தப்பட்டது:
+Using basic camera settings due to device limitations,சாதன வரம்புகள் காரணமாக அடிப்படை கேமரா அமைப்புகளைப் பயன்படுத்துதல்
+Using cached customer balance,தேக்ககப்படுத்தப்பட்ட வாடிக்கையாளர் இருப்பைப் பயன்படுத்துதல்
+Valid until,வரை செல்லுபடியாகும்
+Variance %,மாறுபாடு %
+Variants,மாறுபாடுகள்
+Variant-wise,மாறுபாடு வாரியாக
+Verify closing amounts for each payment method,ஒவ்வொரு கட்டண முறைக்கும் இறுதித் தொகையைச் சரிபார்க்கவும்
+View all,அனைத்தையும் பார்க்கவும்
+View app information and current build details,பயன்பாட்டுத் தகவல் மற்றும் தற்போதைய உருவாக்க விவரங்களைக் காண்க
+View Data Diagnostics,தரவு கண்டறிதல்களைப் பார்க்கவும்
+View Details,விவரங்களைக் காண்க
+View invoice details,விலைப்பட்டியல் விவரங்களைக் காண்க
+View notifications,அறிவிப்புகளைப் பார்க்கவும்
+View offline invoices,ஆஃப்லைன் இன்வாய்ஸ்களைக் காண்க
+View restricted POS insights,கட்டுப்படுத்தப்பட்ட பிஓஎஸ் நுண்ணறிவுகளைப் பார்க்கவும்
+Void Amount,செல்லாத தொகை
+Void Count,வெற்றிட எண்ணிக்கை
+Voids,வெற்றிடங்கள்
+Waiting for cart items,வண்டிப் பொருட்களுக்காகக் காத்திருக்கிறது
+Waiting for payment...,கட்டணத்திற்காக காத்திருக்கிறது...
+Walk-in Customer,வாக்-இன் வாடிக்கையாளர்
+Warehouse,கிடங்கு
+Warning: High cache usage may affect performance.,எச்சரிக்கை: அதிக கேச் பயன்பாடு செயல்திறனை பாதிக்கலாம்.
+Warning: High lag may indicate heavy processing or browser slowness.,எச்சரிக்கை: அதிக பின்னடைவு அதிக செயலாக்கம் அல்லது உலாவி மந்தநிலையைக் குறிக்கலாம்.
+Week ?,வாரம் ?
+Week-wise,வாரம் வாரியாக
+Weight (g),எடை (கிராம்)
+Weight (grams),எடை (கிராம்)
+We'll let you know if an invoice fails to submit,விலைப்பட்டியல் சமர்ப்பிக்கத் தவறினால் உங்களுக்குத் தெரிவிப்போம்
+Workflow,பணிப்பாய்வு
+Write off amount cannot exceed the POS profile maximum of {0},பிஓஎஸ் சுயவிவரத்தின் அதிகபட்சம் {0}ஐத் தாண்டக்கூடாது
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,அனுமதிக்கப்பட்ட வரம்பை ({0}) மீறும் தொகையை தள்ளுபடி செய்ய வேண்டும். மீதமுள்ள தொகைக்கான கட்டணத்தைச் சேர்க்கவும்.
+Yes,ஆம்
+"Yes, Cancel sale","ஆம், விற்பனையை ரத்துசெய்"
+"Yes, Close","ஆம், மூடு"
+You are not allowed to print draft invoices,வரைவு விலைப்பட்டியல்களை அச்சிட உங்களுக்கு அனுமதி இல்லை
+You are offline. Add Payment will work again when the connection is restored.,ஆஃப்லைனில் உள்ளீர்கள். இணைப்பு மீட்டமைக்கப்படும் போது சேர் பேமெண்ட் மீண்டும் வேலை செய்யும்.
+You have no notifications right now,உங்களிடம் தற்போது எந்த அறிவிப்பும் இல்லை
+Your Cart,உங்கள் வண்டி

@@ -1,0 +1,1362 @@
+POS Awesome,POS tuyệt vời
+Fetch Items Directly from Server,Tìm nạp các mục trực tiếp từ máy chủ
+Menu,Thực đơn
+Actions,hành động
+Close Shift,Đóng ca
+End current session,Kết thúc phiên hiện tại
+Print Last Invoice,In hóa đơn cuối cùng
+Reprint previous transaction,In lại giao dịch trước đó
+Sync Offline Invoices,Đồng bộ hoá đơn ngoại tuyến
+Upload pending transactions,Tải lên các giao dịch đang chờ xử lý
+Go Online,Lên mạng
+Go Offline,Đi ngoại tuyến
+Disable offline mode,Tắt chế độ ngoại tuyến
+Work without server connection,Làm việc mà không cần kết nối máy chủ
+Clear Cache,Xóa bộ nhớ đệm
+Remove local data and refresh,Xóa dữ liệu cục bộ và làm mới
+About,Giới thiệu
+App information,Thông tin ứng dụng
+Language,Ngôn ngữ
+Change interface language,Thay đổi ngôn ngữ giao diện
+Light Mode,Chế độ ánh sáng
+Dark Mode,Chế độ tối
+Switch theme appearance,Chuyển đổi giao diện chủ đề
+Logout,Đăng xuất
+Sign out of session,Đăng xuất khỏi phiên
+Select Language,Chọn ngôn ngữ
+Choose your preferred language for the POS interface,Chọn ngôn ngữ ưa thích của bạn cho giao diện POS
+Language will be changed to,Ngôn ngữ sẽ được thay đổi thành
+Cancel,Hủy bỏ
+Change Language,Thay đổi ngôn ngữ
+Close,Đóng
+Cannot change language - same language selected,Không thể thay đổi ngôn ngữ - đã chọn cùng một ngôn ngữ
+Language changed successfully! Reloading...,Ngôn ngữ đã thay đổi thành công! Đang tải lại...
+Failed to change language,Không thể thay đổi ngôn ngữ
+Unknown error,Lỗi không xác định
+- Total Unallocated,- Tổng số chưa phân bổ
+* Required,* Bắt buộc
+{0} (Qty: {1}),{0} (Số lượng: {1})
+{0} actions,{0} hành động
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} chỉ có {1} trong kho. Bạn đã yêu cầu {2}. Điều chỉnh số lượng hoặc bổ sung.
+{0} offline invoice{1} pending,{0} hoá đơn ngoại tuyến{1} đang chờ xử lý
+{0} offline invoice{1} saved as draft,{0} hoá đơn ngoại tuyến{1} được lưu dưới dạng bản nháp
+{0} offline invoice{1} synced,{0} hóa đơn ngoại tuyến{1} đã được đồng bộ hóa
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0} ngày trước
+{0}h ago,{0} giờ trước
+{0}m ago,{0} phút trước
+A POS supervisor is required for this action.,Cần có người giám sát POS cho hành động này.
+Access,Truy cập
+Account,Tài khoản
+Account is overdrawn,Tài khoản bị rút quá mức
+Acknowledge the error to resume scanning,Xác nhận lỗi để tiếp tục quét
+Acknowledge the error to resume scanning.,Xác nhận lỗi để tiếp tục quét.
+Across,Bên kia
+Action,hành động
+Active sale,Bán hàng tích cực
+add,thêm
+Add items from the selector to start building this sale.,Thêm các mặt hàng từ bộ chọn để bắt đầu xây dựng chương trình giảm giá này.
+Add more value to an existing gift card,Thêm nhiều giá trị hơn cho thẻ quà tặng hiện có
+Add New Address,Thêm địa chỉ mới
+Add new customer,Thêm khách hàng mới
+Add on New Line,Thêm vào dòng mới
+Add Payment,Thêm thanh toán
+Add payment to invoice,Thêm khoản thanh toán vào hóa đơn
+Add/Edit Coupon Conditions,Thêm/Chỉnh sửa Điều kiện Phiếu giảm giá
+Additional Discount,Giảm giá bổ sung
+Additional Discount %,% chiết khấu bổ sung
+Address Line 1,Dòng địa chỉ 1
+Address not found,Không tìm thấy địa chỉ
+Adjust the quantity or enable negative stock to continue.,Điều chỉnh số lượng hoặc cho phép tiếp tục tồn kho âm.
+Adjustment,Điều chỉnh
+After returns,Sau khi trở về
+Against,chống lại
+Against Name,Chống lại tên
+Age Bracket,Khung tuổi
+All,Tất cả
+All Caught Up!,Tất cả đã bắt kịp!
+All invoices are synchronized,Tất cả hóa đơn được đồng bộ hóa
+All pending invoices are up to date,Tất cả các hóa đơn đang chờ xử lý đều được cập nhật
+All Profiles,Tất cả hồ sơ
+All Synchronized,Tất cả được đồng bộ hóa
+All visible invoices are fully settled.,Tất cả các hóa đơn có thể nhìn thấy được giải quyết đầy đủ.
+All Warehouses,Tất cả các kho
+Allowed UOM is {0},UOM được phép là {0}
+Always fetch items from server (ignore local cache),Luôn tìm nạp các mục từ máy chủ (bỏ qua bộ đệm cục bộ)
+Amount,Số tiền
+Amount already received,Số tiền đã nhận được
+Amount exceeds profile cash movement max amount.,Số tiền vượt quá số tiền tối đa của chuyển động tiền mặt trong hồ sơ.
+Amount must be greater than zero.,Số tiền phải lớn hơn 0.
+Amount received from customer,Số tiền nhận được từ khách hàng
+Appearance and user-level preferences for the current session.,Tùy chọn giao diện và cấp độ người dùng cho phiên hiện tại.
+Applied,Đã áp dụng
+Apply,Áp dụng
+Apply Gift Card,Áp dụng thẻ quà tặng
+Apply Offer,Áp dụng ưu đãi
+Apply On,Đăng ký vào
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,Chỉ áp dụng số tiền bạn muốn đổi trên hóa đơn này. Số dư còn lại vẫn nằm trong thẻ.
+Apply Redemption,Áp dụng quy đổi
+Applying,Áp dụng
+Apps,Ứng dụng
+Are you sure you want to close? All entered data will be lost.,Bạn có chắc chắn muốn đóng không? Tất cả dữ liệu đã nhập sẽ bị mất.
+Attributes (Size/Color),Thuộc tính (Kích thước/Màu sắc)
+Auto Allocate Payment Amount,Tự động phân bổ số tiền thanh toán
+Auto Reconcile,Tự động đối chiếu
+Auto reconciliation completed after payment submit.,Tự động đối chiếu hoàn tất sau khi gửi thanh toán.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,Tự động điều chỉnh đã hoàn tất. Đã phân bổ: {0}{1}. Còn lại chưa thanh toán: {0}{2}.
+Available Actions,Hành động có sẵn
+Available QTY,QTY có sẵn
+Available:,Có sẵn:
+Average Basket,Giỏ trung bình
+Average Bill,Hóa đơn trung bình
+Average Ticket,Vé trung bình
+Avg Bill,Hóa đơn trung bình
+Avg Invoice,Hóa đơn trung bình
+Avg Invoice Profit,Lợi nhuận hóa đơn trung bình
+Avg Invoice Value,Giá trị hóa đơn trung bình
+Avg Purchase Frequency,Tần suất mua trung bình
+Awesome,Tuyệt vời
+Awesome Dashboard,Trang tổng quan tuyệt vời
+Awesome Dashboard is disabled for the selected POS Profile.,Trang tổng quan tuyệt vời đã bị tắt đối với Hồ sơ POS đã chọn.
+Awesome Dashboard is unavailable for the selected scope.,Trang tổng quan tuyệt vời không có sẵn cho phạm vi đã chọn.
+Awesome Dashboard is visible only to POS supervisors.,Bảng điều khiển tuyệt vời chỉ hiển thị với người giám sát POS.
+Back,Quay lại
+Back Office Cash Account,Tài khoản tiền mặt tại văn phòng hỗ trợ
+Back Office Cash Account (Optional Override),Tài khoản tiền mặt của Back Office (Ghi đè tùy chọn)
+Back office cash account is required.,Cần có tài khoản tiền mặt ở văn phòng hỗ trợ.
+Back to {0},Quay lại {0}
+Background processing did not finish in time.,Quá trình xử lý nền không hoàn thành kịp thời.
+Background processing failed for Invoice {0}: {1},Xử lý nền không thành công cho Hóa đơn {0}: {1}
+Background Submission Failed,Gửi nền không thành công
+Background sync interval (seconds),Khoảng thời gian đồng bộ hóa nền (giây)
+Balance,Số dư
+Balance will be updated when connection is restored,Số dư sẽ được cập nhật khi kết nối được khôi phục
+Balances still pending,Số dư vẫn đang chờ xử lý
+Barcode,Mã vạch
+Barcode / QR Ready,Mã vạch / QR đã sẵn sàng
+Barcode Label Printing,In nhãn mã vạch
+Base Paid:,Cơ sở được trả:
+Base Recv:,Recv cơ sở:
+Base:,Cơ sở:
+Basic Information,Thông tin cơ bản
+Batch,Lô
+Batch Information,Thông tin lô
+Before any return workflow,Trước bất kỳ quy trình làm việc trả lại nào
+Before returns,Trước khi trở về
+Best Day,Ngày tuyệt vời nhất
+Best Seller,Bán chạy nhất
+Book expense or deposit from active shift.,Ghi sổ chi phí hoặc đặt cọc từ ca làm việc hiện tại.
+Branch / Location-wise Report,Báo cáo chi nhánh/địa điểm
+Brand-wise,Thương hiệu khôn ngoan
+Breakdown,Sự cố
+Browse,Duyệt qua
+Build Time:,Thời gian xây dựng:
+Built with Frappe,Được xây dựng bằng Frappe
+Bundle,Gói
+Buying Price,Giá mua
+Cache cleared successfully,Đã xóa bộ nhớ đệm thành công
+Cache Usage,Sử dụng bộ đệm
+cache used,bộ đệm được sử dụng
+Calculating...,Đang tính...
+Camera Access Required,Yêu cầu truy cập máy ảnh
+Camera access was aborted. Please try again.,Quyền truy cập máy ảnh đã bị hủy bỏ. Vui lòng thử lại.
+Camera constraints not supported by your device. Trying fallback settings...,Các ràng buộc về máy ảnh không được thiết bị của bạn hỗ trợ. Đang thử cài đặt dự phòng...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,Máy ảnh đang bận hoặc bị chặn bởi ứng dụng/tab khác. Đóng các ứng dụng máy ảnh khác và thử lại.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,Quyền sử dụng máy ảnh bị từ chối. Vui lòng cho phép truy cập máy ảnh trong cài đặt trình duyệt của bạn và làm mới trang.
+Camera scanner is locked until the current error is acknowledged,Máy quét camera bị khóa cho đến khi lỗi hiện tại được xác nhận
+Camera started but the video stream did not load in time. Please try again.,Camera đã khởi động nhưng luồng video không tải kịp thời. Vui lòng thử lại.
+Cancel cash movement {0}?,Hủy chuyển tiền mặt {0}?
+Cancel Payment,Hủy thanh toán
+Cancel Sale,Hủy giảm giá
+Cancel Sale ?,Hủy bán hàng?
+Cancelled,Đã hủy
+Cannot add an item with zero or negative quantity.,Không thể thêm một mặt hàng có số lượng bằng 0 hoặc âm.
+Cannot clear cache while offline,Không thể xóa bộ nhớ đệm khi ngoại tuyến
+Cannot redeem customer credit more than invoice total,Không thể đổi tín dụng của khách hàng nhiều hơn tổng hóa đơn
+Cannot redeem gift cards more than invoice total,Không thể đổi thẻ quà tặng nhiều hơn tổng hóa đơn
+Cannot Save Offline Invoice:,Không thể lưu hóa đơn ngoại tuyến:
+Cannot Save Offline Payment:,Không thể lưu thanh toán ngoại tuyến:
+Card,Thẻ
+Card / Online,Thẻ / Trực tuyến
+Card health after the last live lookup,Tình trạng thẻ sau lần tra cứu trực tiếp cuối cùng
+Cards,Thẻ
+Cart,Giỏ hàng
+Cash,Tiền mặt
+Cash back to customers,Hoàn tiền cho khách hàng
+Cash Collections,Bộ sưu tập tiền mặt
+Cash Deposit is disabled for this POS Profile.,Việc gửi tiền mặt bị vô hiệu hóa đối với Hồ sơ POS này.
+Cash Drawer Snapshot,Ảnh chụp ngăn kéo tiền mặt
+Cash In Hand,Tiền mặt trong tay
+Cash Movement,Phong trào tiền mặt
+Cash movement cancelled,Phong trào tiền mặt bị hủy bỏ
+Cash movement deduction applied,Áp dụng khấu trừ chuyển động tiền mặt
+Cash movement deleted,Chuyển động tiền mặt đã bị xóa
+Cash movement is disabled for this POS Profile.,Chuyển động tiền mặt bị vô hiệu hóa đối với Hồ sơ POS này.
+Cash Movement is disabled in current POS Profile.,Chuyển tiền mặt bị vô hiệu hóa trong Hồ sơ POS hiện tại.
+Cash movement saved offline,Chuyển tiền được lưu ngoại tuyến
+Cash movement submitted,Đã gửi chuyển động tiền mặt
+Cash Movements,Chuyển động tiền mặt
+Cash payment cannot be less than invoice total when partial payment is not allowed,Thanh toán bằng tiền mặt không thể ít hơn tổng hóa đơn khi không được phép thanh toán một phần
+Cash returned after payment,Tiền mặt được trả lại sau khi thanh toán
+Cashier,thu ngân
+Cashier Access,Truy cập thu ngân
+Cashier identity and appearance preferences.,Nhận dạng nhân viên thu ngân và sở thích ngoại hình.
+Cashier PIN,PIN thu ngân
+Cashier PIN saved successfully.,Đã lưu thành công mã PIN thu ngân.
+Cashiers,Nhân viên thu ngân
+Cashier-wise,Thu ngân khôn ngoan
+Categories,Danh mục
+Category,Danh mục
+Category / Brand / Variant Report,Báo cáo Danh mục / Thương hiệu / Biến thể
+Category-wise,Thể loại khôn ngoan
+Category-wise Margin,Ký quỹ theo danh mục
+Certificate,Giấy chứng nhận
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,Chứng chỉ bị thiếu hoặc không đáng tin cậy. QZ có thể hiển thị hộp thoại xác nhận.
+Certificate is trusted. Silent QZ printing is active.,Chứng chỉ được tin cậy. Tính năng in QZ im lặng đang hoạt động.
+Change,Thay đổi
+Change allocation repaired,Đã sửa chữa thay đổi phân bổ
+Change Price,Thay đổi giá
+Change Return,Thay đổi Trả lại
+Change Returned,Thay đổi được trả lại
+Change terminal cashier,Thay đổi nhân viên thu ngân thiết bị đầu cuối
+Charge Heads,Đầu sạc
+Charges,Phí
+Charges not found,Không tìm thấy khoản phí
+Check Balance,Kiểm tra số dư
+Check balance for any card. Supervisors can issue and top up cards here.,Kiểm tra số dư cho bất kỳ thẻ nào. Giám sát viên có thể phát hành và nạp thẻ tại đây.
+Check balance only,Chỉ kiểm tra số dư
+Check for new commits,Kiểm tra các cam kết mới
+Check for Updates,Kiểm tra cập nhật
+Check live balance before applying redemption,Kiểm tra số dư trực tiếp trước khi áp dụng quy đổi
+Check live balance before redemption,Kiểm tra số dư trực tiếp trước khi đổi quà
+Checking...,Đang kiểm tra...
+Cheque/Reference Date,Séc/Ngày tham chiếu
+Cheque/Reference No,Séc/Số tham chiếu
+Choose the cashier currently operating this terminal.,Chọn nhân viên thu ngân hiện đang vận hành thiết bị đầu cuối này.
+City,Thành phố
+Clear,Xóa
+Clear All,Xóa tất cả
+Clear all barcode items,Xóa tất cả các mục mã vạch
+Clear all purchase order items,Xóa tất cả các mặt hàng trong đơn đặt hàng
+Clear Search,Xóa tìm kiếm
+Clearing local cache...,Đang xóa bộ nhớ đệm cục bộ...
+Click to refresh,Bấm để làm mới
+Client CPU Lag:,Độ trễ CPU của máy khách:
+Client Memory Usage:,Sử dụng bộ nhớ máy khách:
+Client Metrics,Số liệu khách hàng
+Close about dialog,Đóng hộp thoại
+Close cashier switcher,Đóng bộ chuyển đổi thu ngân
+Close closing shift dialog,Đóng hộp thoại chuyển đổi đang đóng
+Close column selector,Đóng bộ chọn cột
+Close Dialog,Đóng hộp thoại
+Close drafts dialog,Đóng hộp thoại bản nháp
+Close invoice details dialog,Đóng hộp thoại chi tiết hóa đơn
+Close invoice management,Đóng quản lý hóa đơn
+Close offline invoices dialog,Đóng hộp thoại hóa đơn ngoại tuyến
+Close packing list dialog,Đóng hộp thoại danh sách đóng gói
+Close returns dialog,Đóng hộp thoại trả hàng
+Close sales orders dialog,Đóng hộp thoại đặt hàng bán hàng
+Close Scanner,Đóng máy quét
+Close scanner dialog,Đóng hộp thoại máy quét
+Close Settings,Đóng cài đặt
+Closing Amount,Số tiền đóng
+Closing POS Shift,Đóng ca POS
+Closing Snapshot Available,Có sẵn ảnh chụp nhanh
+Code,Mã
+Code scanned successfully,Quét mã thành công
+COGS,giá vốn
+Collapse item details,Thu gọn chi tiết mục
+Collected,Đã sưu tầm
+Cols,Cols
+Columns,Cột
+commits,cam kết
+Completed and active sales in this range,Doanh số bán hàng đã hoàn thành và đang hoạt động trong phạm vi này
+Completed returns will appear here.,Các tờ khai đã hoàn thành sẽ xuất hiện ở đây.
+Confirm,Xác nhận
+Confirm Close,Xác nhận Đóng
+Confirm Mobile Number,Xác nhận số điện thoại di động
+Confirm PIN,Xác nhận mã PIN
+Connect,Kết nối
+Connect printer and manage certificate,Kết nối máy in và quản lý chứng chỉ
+Connecting to QZ Tray...,Đang kết nối với khay QZ...
+Connection problem while submitting invoice,Sự cố kết nối khi gửi hóa đơn
+Connections:,Kết nối:
+Connectivity and cached prerequisite status were rechecked.,Kết nối và trạng thái điều kiện tiên quyết được lưu trong bộ nhớ đệm đã được kiểm tra lại.
+Continue Editing,Tiếp tục chỉnh sửa
+Could not fetch latest balance from server,Không thể lấy số dư mới nhất từ máy chủ
+Count,Đếm
+Country,Quốc gia
+Coupon,Phiếu giảm giá
+Coupons,Phiếu giảm giá
+Cover,Bìa
+CPU Cores:,Lõi CPU:
+Create,Tạo
+Create and load a new prepaid card,Tạo và nạp thẻ trả trước mới
+Create and preload a new gift card,Tạo và tải trước thẻ quà tặng mới
+Create Bill,Tạo hóa đơn
+Create Customer,Tạo khách hàng
+Create New Item,Tạo mục mới
+Create or change your PIN,Tạo hoặc thay đổi mã PIN của bạn
+Create PIN,Tạo mã PIN
+Create POS Opening Shift,Tạo ca mở POS
+Create Purchase Order,Tạo đơn đặt hàng
+Create Return,Tạo Trả lại
+Create return from invoice,Tạo lợi nhuận từ hóa đơn
+Create Supplier,Tạo nhà cung cấp
+Credit and Output,Tín dụng và đầu ra
+Credit Note,Ghi chú tín dụng
+Credit Outstanding,Dư nợ tín dụng
+Credit sales remaining to be collected,Doanh số tín dụng còn lại sẽ được thu
+Critical,Quan trọng
+Currency,Tiền tệ
+Current,hiện tại
+Current Event Loop Lag:,Độ trễ của vòng lặp sự kiện hiện tại:
+Current Month,Tháng hiện tại
+Current PIN,Mã PIN hiện tại
+Current Profile,Hồ sơ hiện tại
+Current redeemable value on the gift card,Giá trị có thể quy đổi hiện tại trên thẻ quà tặng
+Current User,Người dùng hiện tại
+Custom,tùy chỉnh
+Custom Due Days,Ngày đến hạn tùy chỉnh
+Custom items per page,Các mục tùy chỉnh trên mỗi trang
+Customer,Khách hàng
+Customer already selected,Khách hàng đã được chọn
+Customer Balance,Số dư của khách hàng
+Customer balance unavailable offline,Số dư khách hàng không khả dụng ngoại tuyến
+Customer created successfully.,Khách hàng đã tạo thành công.
+Customer creation failed.,Tạo khách hàng không thành công.
+Customer Details,Chi tiết khách hàng
+Customer display channel is missing,Kênh hiển thị khách hàng bị thiếu
+Customer display was blocked. Please allow pop-ups for this site.,Hiển thị của khách hàng đã bị chặn. Vui lòng cho phép cửa sổ bật lên cho trang web này.
+Customer group is required,Nhóm khách hàng là bắt buộc
+Customer is required to add payment,Khách hàng được yêu cầu thêm thanh toán
+Customer Name is required,Tên khách hàng là bắt buộc
+Customer not selected,Khách hàng không được chọn
+Customer Report,Báo cáo khách hàng
+Customer saved offline,Khách hàng đã lưu ngoại tuyến
+Customer Screen,Màn hình khách hàng
+Customer territory is required,Lãnh thổ của khách hàng là bắt buộc
+Customer updated successfully.,Khách hàng đã cập nhật thành công.
+Customer-facing tools and printer setup.,Các công cụ hướng tới khách hàng và thiết lập máy in.
+Customers,Khách hàng
+Customers not found,Không tìm thấy khách hàng
+Daily cashier actions without scrolling.,Hành động thu ngân hàng ngày mà không cần cuộn.
+Daily Sales,Bán hàng hàng ngày
+Daily Sales Summary,Tóm tắt doanh số hàng ngày
+Data loaded in form. Review and submit.,Dữ liệu được tải trong biểu mẫu. Xem xét và gửi.
+Database Health,Tình trạng cơ sở dữ liệu
+Database health affects overall system speed and reliability.,Tình trạng cơ sở dữ liệu ảnh hưởng đến tốc độ và độ tin cậy tổng thể của hệ thống.
+Database Info,Thông tin cơ sở dữ liệu
+Date,Ngày
+Day ?,Ngày?
+days,ngày
+Day-wise (MTD),Hàng ngày (MTD)
+Day-wise Movement,Phong trào hàng ngày
+Dead Stock,Hàng chết
+Dead Stock Items,Hàng tồn kho đã chết
+Decrease quantity,Giảm số lượng
+Default,Mặc định
+Default:,Mặc định:
+Delete,Xóa
+Delete cancelled cash movement {0}?,Xóa chuyển tiền mặt bị hủy {0}?
+Delete Draft,Xóa bản nháp
+Delete draft invoice,Xóa hóa đơn dự thảo
+Delete draft invoice {0}?,Xóa hóa đơn nháp {0}?
+Delete Invoice,Xóa hóa đơn
+Delete offline invoice,Xóa hóa đơn ngoại tuyến
+Delivered,Đã giao
+Delivery Charges,Phí giao hàng
+Delivery Information,Thông tin giao hàng
+Delivery Note {0} created,Đã tạo Phiếu giao hàng {0}
+Delivery note created,Đã tạo phiếu giao hàng
+Deployed Bundle:,Gói đã triển khai:
+Deposit,Gửi tiền
+Description,Mô tả
+Detailed Supplier Breakdown,Phân tích chi tiết về nhà cung cấp
+Detecting formats:,Phát hiện các định dạng:
+Device Memory:,Bộ nhớ thiết bị:
+Difference,Sự khác biệt
+Difference (In Company Currency),Chênh lệch (Tính theo đơn vị tiền tệ của công ty)
+Disable offline mode first to recheck live connectivity.,Trước tiên hãy tắt chế độ ngoại tuyến để kiểm tra lại kết nối trực tiếp.
+Disconnect,Ngắt kết nối
+discount,giảm giá
+Discount %,% chiết khấu
+Discount / Void / Return Report,Báo cáo giảm giá / vô hiệu / trả lại
+Discount Amount,Số tiền chiết khấu
+Discount limited by POS Profile,Giảm giá bị giới hạn bởi hồ sơ POS
+Discounted Invoices,Hóa đơn chiết khấu
+Discounts,Giảm giá
+Dismiss,Loại bỏ
+Download Certificate,Tải xuống chứng chỉ
+Draft,bản nháp
+Draft invoice deleted,Đã xóa hóa đơn dự thảo
+Draft source,Nguồn dự thảo
+Drafts,Bản nháp
+Due {0},Đến hạn {0}
+Due Date,Ngày đáo hạn
+Duplicate,trùng lặp
+Edit customer,Chỉnh sửa khách hàng
+Edit discount amount,Chỉnh sửa số tiền chiết khấu
+Edit discount percentage,Chỉnh sửa tỷ lệ chiết khấu
+Edit Gift Application,Chỉnh sửa ứng dụng quà tặng
+Edit item name,Chỉnh sửa tên mục
+Edit quantity,Chỉnh sửa số lượng
+Edit rate,Chỉnh sửa tỷ lệ
+Edit unit of measure,Chỉnh sửa đơn vị đo
+Edited,Đã chỉnh sửa
+Employee,nhân viên
+Enable background sync,Bật đồng bộ hóa nền
+Enable Customer Display in POS Profile first.,Trước tiên hãy bật Hiển thị khách hàng trong Hồ sơ POS.
+Enter a PIN.,Nhập mã PIN.
+Enter a valid grams value,Nhập giá trị gam hợp lệ
+Enter new price list rate,Nhập tỷ lệ bảng giá mới
+Enter Quantity,Nhập số lượng
+Enter the cashier PIN to continue.,Nhập mã PIN thu ngân để tiếp tục.
+Enter the current PIN first.,Nhập mã PIN hiện tại trước.
+"Enter the current PIN, then choose a new one.","Nhập mã PIN hiện tại, sau đó chọn mã PIN mới."
+Enter valid grams for scale barcode,Nhập gam hợp lệ cho mã vạch cân
+Entries,Bài dự thi
+Error accessing camera:,Lỗi truy cập vào camera:
+Error calculating prices,Lỗi tính giá
+Error fetching customer balance,Lỗi khi lấy số dư của khách hàng
+Error in change calculations!,Lỗi trong tính toán thay đổi!
+Error Loading Data,Lỗi tải dữ liệu
+Error loading invoice details,Lỗi tải chi tiết hóa đơn
+Error processing invoice,Lỗi xử lý hóa đơn
+Error processing payment,Lỗi xử lý thanh toán
+Error searching invoices,Lỗi tra cứu hóa đơn
+Error submitting invoice:,Lỗi gửi hóa đơn:
+Error submitting invoice: {0},Lỗi gửi hóa đơn: {0}
+Error submitting invoice: No response from server,Lỗi gửi hóa đơn: Không có phản hồi từ máy chủ
+Error updating currency,Lỗi cập nhật tiền tệ
+Error updating item details,Lỗi cập nhật chi tiết mặt hàng
+Est. Purchase,Ước tính. Mua hàng
+Est. Value,Ước tính. Giá trị
+Event-loop lag measures how busy your browser is. Lower is better.,Độ trễ của vòng lặp sự kiện đo lường mức độ bận rộn của trình duyệt của bạn. Thấp hơn là tốt hơn.
+Every,Mỗi
+Exchange Rate,Tỷ giá hối đoái
+Expand item details,Mở rộng chi tiết mục
+Expected Amount (In Company Currency),Số tiền dự kiến (bằng tiền tệ của công ty)
+Expected Cash,Tiền mặt dự kiến
+Expected cash on hand grouped by currency,Tiền mặt dự kiến được nhóm theo loại tiền tệ
+Expected vs Actual,Dự kiến so với thực tế
+Expense,chi phí
+Expense Account (Optional Override),Tài khoản chi phí (Ghi đè tùy chọn)
+Expense account is required.,Tài khoản chi phí là bắt buộc.
+Expenses and deposits posted during this shift,"Các chi phí, tiền đặt cọc phát sinh trong ca này"
+Expired,Đã hết hạn
+Failed to auto reconcile payments.,Không thể tự động điều chỉnh các khoản thanh toán.
+Failed to cancel cash movement,Không thể hủy chuyển tiền mặt
+Failed to clear cache,Không xóa được bộ nhớ đệm
+Failed to create item,Không tạo được mục
+Failed to create supplier,Không tạo được nhà cung cấp
+Failed to delete cash movement,Không thể xóa chuyển động tiền mặt
+Failed to generate scale barcode. Using item barcode only.,Không thể tạo mã vạch cân. Chỉ sử dụng mã vạch mặt hàng.
+Failed to load cash movement context.,Không thể tải bối cảnh chuyển tiền mặt.
+Failed to load dashboard data.,Không tải được dữ liệu trang tổng quan.
+Failed to reload invoice from server,Không thể tải lại hóa đơn từ máy chủ
+Failed to submit cash movement,Không thể gửi chuyển động tiền mặt
+Failed to sync offline cash movements,Không thể đồng bộ hóa các chuyển động tiền mặt ngoại tuyến
+Fast cashier actions for active shifts.,Hành động thu ngân nhanh chóng cho ca hoạt động.
+Fast Moving Items,Vật phẩm di chuyển nhanh
+Fees,Phí
+Fetch the latest offline prerequisite updates,Tìm nạp các bản cập nhật điều kiện tiên quyết ngoại tuyến mới nhất
+Find a sales order quickly and load it into the current sale.,Tìm một đơn đặt hàng một cách nhanh chóng và tải nó vào việc bán hàng hiện tại.
+Fixing payment amounts for return invoice...,Ấn định số tiền thanh toán cho hóa đơn trả lại...
+Flash Off,Tắt đèn flash
+Flash On,Bật đèn flash
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","Đối với các mặt hàng 'Gói sản phẩm', Kho, Số sê-ri và Số lô sẽ được xem xét từ bảng 'Danh sách đóng gói'. Nếu Kho và Số lô giống nhau cho tất cả các mặt hàng đóng gói cho bất kỳ mặt hàng 'Gói sản phẩm' nào, thì những giá trị đó có thể được nhập vào bảng Mặt hàng chính; các giá trị sẽ được sao chép vào bảng 'Danh sách đóng gói'."
+Free,miễn phí
+Free Qty,Số lượng miễn phí
+Frequency,Tần số
+from,từ
+From Date,Từ ngày
+Fulfillment Details,Chi tiết thực hiện
+Full Name,Tên đầy đủ
+Gain,Đạt được
+Generate a fresh prepaid card and start it with an opening balance.,Tạo một thẻ trả trước mới và bắt đầu với số dư đầu kỳ.
+Generate and install the certificate to allow fully silent printing without trust prompts.,Tạo và cài đặt chứng chỉ để cho phép in hoàn toàn im lặng mà không cần lời nhắc tin cậy.
+Generate Certificate,Tạo chứng chỉ
+Generated scale barcode: {0},Mã vạch tỷ lệ đã tạo: {0}
+Get Payments,Nhận thanh toán
+Gift Card,Thẻ quà tặng
+Gift card amount must be greater than zero.,Số tiền thẻ quà tặng phải lớn hơn 0.
+Gift Card Code,Mã thẻ quà tặng
+Gift card code is required for redemption,Cần có mã thẻ quà tặng để đổi quà
+Gift card code is required.,Mã thẻ quà tặng là bắt buộc.
+Gift card issued successfully.,Thẻ quà tặng được phát hành thành công.
+Gift card loaded successfully.,Đã nạp thẻ quà tặng thành công.
+Gift Card Management,Quản lý thẻ quà tặng
+Gift card payment,Thanh toán bằng thẻ quà tặng
+Gift card redemption requires an online connection,Đổi thẻ quà tặng yêu cầu kết nối trực tuyến
+Gift card topped up successfully.,Nạp thẻ quà tặng thành công.
+Gift Cards,Thẻ quà tặng
+Go to Frappe Desk,Đi đến bàn Frappe
+Grand Total,Tổng cộng
+Gross Margin,Tỷ suất lợi nhuận gộp
+Gross Profit,Lợi nhuận gộp
+Gross Sales,Tổng doanh thu
+Group not found,Không tìm thấy nhóm
+"Grouped controls for terminal, UI, and session settings.","Các điều khiển được nhóm cho cài đặt thiết bị đầu cuối, giao diện người dùng và phiên."
+Grouped totals for each payment method and currency,Tổng số được nhóm cho từng phương thức thanh toán và loại tiền tệ
+Hide,Ẩn
+Hide Gift Card,Ẩn thẻ quà tặng
+Hide Non Essential Fields,Ẩn các trường không cần thiết
+Hide quantity decimals,Ẩn số thập phân
+Hide search tools,Ẩn công cụ tìm kiếm
+Hide zero rated items,Ẩn các mục được xếp hạng 0
+High,Cao
+History,Lịch sử
+Hourly (Today),Hàng giờ (Hôm nay)
+How this section works,Phần này hoạt động như thế nào
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","Nếu dữ liệu cũ vẫn còn, hãy mở Cài đặt > Ngoại tuyến & Đồng bộ hóa và chạy lại Xây dựng lại dữ liệu ngoại tuyến khi trực tuyến."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","Nếu cảnh báo vẫn tiếp diễn, hãy mở Cài đặt > Ngoại tuyến & Đồng bộ hóa, sau đó chạy Làm mới dữ liệu ngoại tuyến hoặc Xây dựng lại dữ liệu ngoại tuyến."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Nhập chứng chỉ vào QZ Tray và khởi động lại QZ Tray trên mỗi máy POS.
+In,trong
+In stock: {0},Còn hàng: {0}
+Include Batch / Serial,Bao gồm Lô/Sê-ri
+Include Price,Bao gồm giá
+Increase quantity,Tăng số lượng
+IndexedDB,IndexedDB
+Initial Amount,Số tiền ban đầu
+Initialize your shift with opening balances,Bắt đầu ca làm việc của bạn với số dư đầu kỳ
+Initializing application...,Đang khởi tạo ứng dụng...
+"Inspect cache, sync, and prerequisite status","Kiểm tra bộ đệm, đồng bộ hóa và trạng thái điều kiện tiên quyết"
+Installed Applications,Ứng dụng đã cài đặt
+Insufficient stock:\n{0},Không đủ hàng:\n{0}
+Invalid rate,Tỷ lệ không hợp lệ
+Inventory Status Report,Báo cáo tình trạng hàng tồn kho
+Invoice,hóa đơn
+Invoice {0} is Submitted,Hóa đơn {0} đã được gửi
+Invoice {0} processed successfully,Hóa đơn {0} được xử lý thành công
+Invoice {0} submission failed,Gửi hóa đơn {0} không thành công
+Invoice {0} was already submitted,Hóa đơn {0} đã được gửi
+Invoice Adjustments,Điều chỉnh hóa đơn
+Invoice Change,Thay đổi hóa đơn
+Invoice Details,Chi tiết hóa đơn
+Invoice is still in draft after background submission.,Hóa đơn vẫn còn ở dạng bản nháp sau khi nộp lý lịch.
+Invoice Items,Mục hóa đơn
+Invoice Management,Quản lý hóa đơn
+Invoice Mgmt,Quản lý hóa đơn
+Invoice saved offline,Hóa đơn được lưu ngoại tuyến
+Invoice submission failed,Gửi hóa đơn không thành công
+Invoice Submitted,Hóa đơn đã gửi
+"Invoice value settled by loyalty points, not cash collection","Giá trị hóa đơn được thanh toán bằng điểm khách hàng thân thiết, không phải thu tiền mặt"
+Invoices,Hóa đơn
+Invoices already past due date,Hóa đơn đã quá hạn
+Invoices saved as POS Invoices,Hóa đơn được lưu dưới dạng Hóa đơn POS
+Invoices still carrying balances,Hóa đơn vẫn còn số dư
+Issue Mode,Chế độ phát hành
+Issue New Card,Phát hành thẻ mới
+Issue Workflow,Quy trình phát hành
+"Issue, top up, and check","Phát hành, nạp tiền và kiểm tra"
+Item,Mục
+Item / Product Sales Report,Báo cáo doanh số mặt hàng/sản phẩm
+Item {0} added to invoice,Mặt hàng {0} đã được thêm vào hóa đơn
+Item '{0}' has no barcode,Mặt hàng '{0}' không có mã vạch
+Item Code,Mã mặt hàng
+Item created successfully,Mục được tạo thành công
+Item is out of stock,Mặt hàng đã hết hàng
+Item Name,Tên mặt hàng
+Item not found,Không tìm thấy mục
+Item order updated,Đã cập nhật đơn hàng
+Item Selector Settings,Cài đặt bộ chọn mục
+Items,Mặt hàng
+Items added in POS will appear here automatically.,Các mặt hàng được thêm vào POS sẽ tự động xuất hiện ở đây.
+Items added to invoice,Các mặt hàng được thêm vào hóa đơn
+Items per page,Các mục trên mỗi trang
+Items Sold,Mặt hàng đã bán
+Items/Invoice,Mặt hàng/Hóa đơn
+Item-wise Profitability,Khả năng sinh lời theo mặt hàng
+Journal Entry,Nhật ký
+json,json
+Just now,Vừa rồi
+Keep offline prerequisites healthy and recover stale data safely.,Giữ các điều kiện tiên quyết ngoại tuyến ổn định và khôi phục dữ liệu cũ một cách an toàn.
+Labels,Nhãn
+"Language, theme, terminal tools, and session controls.","Ngôn ngữ, chủ đề, công cụ đầu cuối và điều khiển phiên."
+Last,Cuối cùng
+Last 14 Days (Paid vs Pending),14 ngày qua (Trả tiền và Đang chờ xử lý)
+Last 14 Days Activity,Hoạt động 14 ngày qua
+Last 14 Days Gross Profit,Lợi nhuận gộp trong 14 ngày qua
+Last 14 Days Purchases,Số lần mua hàng trong 14 ngày qua
+Last 14 Days Tax/Charges,Thuế/Phí 14 ngày qua
+Last sync:,Đồng bộ hóa lần cuối:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},Đồng bộ hóa lần cuối: {0} | được: {1} | thất bại: {2} | đã bỏ qua: {3}
+Latest entries for current shift,Các mục mới nhất cho ca hiện tại
+Lead Time,Thời gian dẫn
+Limited,Bị giới hạn
+lines,dòng
+List,Danh sách
+Live Snapshot,Ảnh chụp trực tiếp
+Load a POS profile and cashier first.,Tải hồ sơ POS và nhân viên thu ngân trước.
+Load More Invoices,Tải thêm hóa đơn
+Load previously saved invoices,Tải hóa đơn đã lưu trước đó
+Load Sale,Tải bán
+Load Sales Invoice,Tải hóa đơn bán hàng
+Loading app data...,Đang tải dữ liệu ứng dụng...
+Loading customer database...,Đang tải cơ sở dữ liệu khách hàng...
+Loading customers...,Đang tải khách hàng...
+Loading database stats...,Đang tải số liệu thống kê cơ sở dữ liệu...
+Loading details...,Đang tải chi tiết...
+Loading invoice history...,Đang tải lịch sử hóa đơn...
+Loading items...,Đang tải các mục...
+Loading product catalog...,Đang tải danh mục sản phẩm...
+Loading return invoices...,Đang tải hóa đơn trả lại...
+Loading server CPU/memory usage...,Đang tải mức sử dụng CPU/bộ nhớ của máy chủ...
+Loading suppliers...,Đang tải nhà cung cấp...
+Loading unpaid invoices...,Đang tải hóa đơn chưa thanh toán...
+Loading view...,Đang tải chế độ xem...
+Loading...,Đang tải...
+Local storage is unavailable. Switching to online-only mode.,Bộ nhớ cục bộ không có sẵn. Đang chuyển sang chế độ chỉ trực tuyến.
+localStorage,lưu trữ cục bộ
+Location Performance,Hiệu suất vị trí
+Locations,Địa điểm
+Lock Screen,Màn hình khóa
+Lookup Workflow,Tra cứu quy trình làm việc
+Loss,Mất mát
+Low,Thấp
+Low Stock,Ít hàng
+Low Stock Alerts,Cảnh báo sắp hết hàng
+Low Stock Items,Mặt hàng có ít hàng
+Low Stock Threshold,Ngưỡng tồn kho thấp
+Low Stock Total,Tổng số hàng thấp
+Lowest Margin,Ký quỹ thấp nhất
+Low-frequency maintenance and system details.,Bảo trì tần số thấp và chi tiết hệ thống.
+Loyalty Redeemed,Lòng trung thành được chuộc
+Loyalty Redemption,Đổi thưởng trung thành
+Make New Payment,Thực hiện thanh toán mới
+Manage all,Quản lý tất cả
+Manage and synchronize your offline transactions,Quản lý và đồng bộ hóa các giao dịch ngoại tuyến của bạn
+Manage Cashier PIN,Quản lý mã PIN thu ngân
+"Manage offline tools, terminal controls, and maintenance from one workspace.","Quản lý các công cụ ngoại tuyến, điều khiển thiết bị đầu cuối và bảo trì từ một không gian làm việc."
+manual,hướng dẫn sử dụng
+"Manual codes, barcode scans, and QR scans work in the same field","Mã thủ công, quét mã vạch và quét QR hoạt động trong cùng một trường"
+Manual offline mode is enabled,Đã bật chế độ ngoại tuyến thủ công
+Margin,Ký quỹ
+Maximum available quantity is {0}. Quantity adjusted to match stock.,Số lượng hiện có tối đa là {0}. Số lượng được điều chỉnh để phù hợp với lượng hàng tồn kho.
+Maximum discount amount for this offer item is {0}.,Số tiền chiết khấu tối đa cho mặt hàng ưu đãi này là {0}.
+Maximum discount percentage for this offer item is {0}%.,Tỷ lệ phần trăm giảm giá tối đa cho mặt hàng ưu đãi này là {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,Số lượng ưu đãi tối đa là {0}. Số lượng được điều chỉnh đến giới hạn cho phép.
+Medium,Trung bình
+Method-wise Collections,Bộ sưu tập theo phương pháp
+Minimum allowed rate for this offer item is {0}.,Tỷ lệ tối thiểu được phép cho mặt hàng ưu đãi này là {0}.
+Minimum Qty,Số lượng tối thiểu
+Mobile No,Số di động
+Mode,Chế độ
+Mode of Payment,Phương thức thanh toán
+Month,Tháng
+Month ?,Tháng?
+Monthly Profit,Lợi nhuận hàng tháng
+Monthly Sales,Doanh thu hàng tháng
+Monthly Sales Summary,Tóm tắt doanh số hàng tháng
+Month-wise,Hàng tháng
+Most Active Cashiers,Nhân viên thu ngân tích cực nhất
+Movement Type,Loại chuyển động
+Movements,Phong trào
+Multi Currency,Đa tiền tệ
+N/A,không áp dụng
+Name,Tên
+Negative Stock,Cổ phiếu âm
+Negative Stock Items,Mặt hàng tồn kho âm
+Negative values not allowed,Giá trị âm không được phép
+Net,mạng lưới
+Net Qty,Số lượng ròng
+Net Sales,Doanh thu thuần
+Net Value,Giá trị ròng
+Never,không bao giờ
+New changes are ready to load,Những thay đổi mới đã sẵn sàng để tải
+New Item,Mục mới
+New Offer Available,Ưu đãi mới có sẵn
+New PIN,Mã PIN mới
+New rate,Tỷ lệ mới
+Next unit of measure,Đơn vị đo tiếp theo
+No attribute data found.,Không tìm thấy dữ liệu thuộc tính.
+No Barcode,Không có mã vạch
+No barcode found for UOM '{0}',Không tìm thấy mã vạch cho UOM '{0}'
+No branch/location data found.,Không tìm thấy dữ liệu chi nhánh/địa điểm.
+No brand data found.,Không tìm thấy dữ liệu thương hiệu.
+No cached gift card balance is available offline.,Không có số dư thẻ quà tặng được lưu trong bộ nhớ cache khả dụng ngoại tuyến.
+No camera found on this device. Please ensure your device has a working camera.,Không tìm thấy máy ảnh trên thiết bị này. Hãy đảm bảo thiết bị của bạn có camera hoạt động.
+No capability warnings recorded yet.,Chưa có cảnh báo khả năng nào được ghi lại.
+No cash expected for this shift.,Không có tiền mặt dự kiến ​​cho sự thay đổi này.
+No cash mode configured,Không có chế độ tiền mặt nào được định cấu hình
+No cash movement type is allowed for this POS Profile.,Không cho phép loại chuyển tiền mặt nào đối với Hồ sơ POS này.
+No cashier PIN is set yet. Create one now.,Chưa có mã PIN thu ngân nào được đặt. Tạo một cái ngay bây giờ.
+No cashier profiles are available for this POS profile yet.,Chưa có hồ sơ thu ngân nào cho hồ sơ POS này.
+No cashier-wise discount/void/return activity.,Không có hoạt động giảm giá/vô hiệu/trả lại về mặt thu ngân.
+No category data found.,Không tìm thấy dữ liệu danh mục.
+No category profitability data found.,Không tìm thấy dữ liệu lợi nhuận danh mục.
+No change returned recorded for this shift.,Không có thay đổi nào được trả lại được ghi lại cho ca này.
+No change-allocation invoices match the current filters.,Không có hóa đơn phân bổ thay đổi nào khớp với các bộ lọc hiện tại.
+No charge head breakdown found.,Không tìm thấy sự cố đầu sạc.
+No Company Selected,Không có công ty nào được chọn
+No customer sales data found.,Không tìm thấy dữ liệu bán hàng của khách hàng.
+No day-wise discount/void/return trend.,Không có xu hướng giảm giá/vô hiệu/hoàn trả theo ngày.
+No day-wise payment data found.,Không tìm thấy dữ liệu thanh toán theo ngày.
+No day-wise profitability trend found.,Không tìm thấy xu hướng lợi nhuận hàng ngày.
+No day-wise purchase data found.,Không tìm thấy dữ liệu mua hàng theo ngày.
+No day-wise sales trend found.,Không tìm thấy xu hướng bán hàng hàng ngày.
+No day-wise tax/charges trend found.,Không tìm thấy xu hướng thuế/phí theo ngày.
+No dead stock items.,Không có mặt hàng tồn kho chết.
+No due date,Không có ngày đáo hạn
+No exact repair match found for this invoice,Không tìm thấy kết quả sửa chữa chính xác cho hóa đơn này
+No hourly sales trend found for today.,Không tìm thấy xu hướng bán hàng theo giờ nào cho ngày hôm nay.
+No invoice activity found.,Không tìm thấy hoạt động hóa đơn.
+No invoices found,Không tìm thấy hóa đơn
+No invoices found. Try different search criteria.,Không tìm thấy hóa đơn nào. Hãy thử các tiêu chí tìm kiếm khác nhau.
+No invoices recorded for this shift.,Không có hóa đơn nào được ghi cho ca này.
+No item profitability data found.,Không tìm thấy dữ liệu lợi nhuận của mặt hàng.
+No item sales data found for this period.,Không tìm thấy dữ liệu bán hàng trong khoảng thời gian này.
+No items found,Không tìm thấy mục nào
+No items in cart,Không có mặt hàng nào trong giỏ hàng
+No items with barcodes to print,Không có mặt hàng nào có mã vạch để in
+No location-wise top item data found.,Không tìm thấy dữ liệu mục hàng đầu theo vị trí.
+No low stock alerts right now.,Hiện tại không có cảnh báo sắp hết hàng.
+No low stock items.,Không có mặt hàng tồn kho thấp.
+No matching items in cart,Không có mặt hàng phù hợp trong giỏ hàng
+No month-wise sales trend found.,Không tìm thấy xu hướng bán hàng theo tháng.
+No negative stock items.,Không có mặt hàng tồn kho tiêu cực.
+No notifications yet,Chưa có thông báo nào
+No offline cash movement synced.,Không có chuyển động tiền mặt ngoại tuyến nào được đồng bộ hóa.
+No offline invoices pending synchronization,Không có hóa đơn ngoại tuyến nào đang chờ đồng bộ hóa
+No offline sync issues recorded yet.,Chưa có sự cố đồng bộ hóa ngoại tuyến nào được ghi lại.
+No out-of-stock items.,Không có mặt hàng nào hết hàng.
+No outstanding credit invoices for this shift.,Không có hóa đơn ghi có chưa thanh toán cho ca làm việc này.
+No payment collection data found.,Không tìm thấy dữ liệu thu thanh toán.
+No payment rows available on this invoice.,Không có hàng thanh toán nào trên hóa đơn này.
+No payments registered for this shift.,Không có khoản thanh toán nào được đăng ký cho ca làm việc này.
+No pending balances in this period.,Không có số dư đang chờ xử lý trong giai đoạn này.
+No pending offline invoices,Không có hóa đơn ngoại tuyến đang chờ xử lý
+No Print Formats Found,Không tìm thấy định dạng in
+No profiles found for selected scope. Falling back to current profile failed.,Không tìm thấy hồ sơ nào cho phạm vi đã chọn. Không thể quay lại hồ sơ hiện tại.
+No recent customer activity found.,Không tìm thấy hoạt động gần đây của khách hàng.
+No recent stock entries found.,Không tìm thấy mục chứng khoán gần đây.
+No records found,Không tìm thấy bản ghi nào
+No reorder suggestions right now.,Không có đề xuất sắp xếp lại ngay bây giờ.
+No repeat customers in this period.,Không có khách hàng lặp lại trong giai đoạn này.
+No response from server,Không có phản hồi từ máy chủ
+No return invoices found,Không tìm thấy hóa đơn trả lại
+No return item trend found.,Không tìm thấy xu hướng trả lại hàng.
+No returnable items found for this invoice,Không tìm thấy mặt hàng có thể trả lại cho hóa đơn này
+No returns were processed in this shift.,Không có khoản hoàn trả nào được xử lý trong ca này.
+No risk activity found.,Không tìm thấy hoạt động rủi ro nào.
+No sales activity found for this period.,Không tìm thấy hoạt động bán hàng nào trong khoảng thời gian này.
+No slow moving items.,Không có vật phẩm di chuyển chậm.
+No staff sales activity found.,Không tìm thấy hoạt động bán hàng của nhân viên.
+No stock movement for this period.,Không có chuyển động cổ phiếu trong giai đoạn này.
+No submitted cash movements in this shift.,Không có chuyển động tiền mặt nào được gửi trong ca này.
+No supplier purchases found in this month.,Không tìm thấy giao dịch mua nhà cung cấp nào trong tháng này.
+No suppliers found for this period.,Không tìm thấy nhà cung cấp nào trong thời gian này
+No sync trigger has run yet in this session.,Chưa có trình kích hoạt đồng bộ hóa nào chạy trong phiên này.
+No tax head breakdown found.,Không tìm thấy thông tin chi tiết về đầu thuế.
+No top items found for this location.,Không tìm thấy mục hàng đầu nào cho vị trí này.
+No unpaid invoices,Không có hóa đơn chưa thanh toán
+No variant data found.,Không tìm thấy dữ liệu biến thể.
+No week-wise sales trend found.,Không tìm thấy xu hướng bán hàng theo tuần.
+No.,Không.
+Nobile Number,Số Nobile
+Not available,Không có sẵn
+Not checked,Chưa được kiểm tra
+Not selected,Không được chọn
+Not Set,Chưa đặt
+Notifications,Thông báo
+Offer,ưu đãi
+Offer Applied,Ưu đãi đã áp dụng
+Offer criteria exceeded,Đã vượt quá tiêu chí ưu đãi
+Offer Item,Mặt hàng ưu đãi
+Offer item unavailable,Mặt hàng ưu đãi không có sẵn
+Offer Removed,Đã xóa ưu đãi
+Offer UOM cannot be changed,Ưu đãi UOM không thể thay đổi
+Offer?,Đề nghị?
+Offers,Ưu đãi
+Offline,Ngoại tuyến
+Offline & Sync,Ngoại tuyến & Đồng bộ hóa
+Offline Capabilities,Khả năng ngoại tuyến
+Offline data status refreshed,Đã làm mới trạng thái dữ liệu ngoại tuyến
+Offline diagnostics,Chẩn đoán ngoại tuyến
+Offline Invoices,Hóa đơn ngoại tuyến
+Offline invoices status,Trạng thái hóa đơn ngoại tuyến
+Offline invoices synced,Hóa đơn ngoại tuyến đã được đồng bộ hóa
+Offline Queue: {0},Hàng đợi ngoại tuyến: {0}
+Offline rebuild guidance,Hướng dẫn xây dựng lại ngoại tuyến
+Offline restore is unavailable for this session.,Khôi phục ngoại tuyến không khả dụng cho phiên này.
+Offline selling is available with degraded capabilities.,Bán hàng ngoại tuyến có sẵn với khả năng xuống cấp.
+Offline snapshot does not match the current POS state.,Ảnh chụp nhanh ngoại tuyến không khớp với trạng thái POS hiện tại.
+Offline Status,Trạng thái ngoại tuyến
+"Offline, terminal, and system controls","Điều khiển ngoại tuyến, thiết bị đầu cuối và hệ thống"
+OK,được rồi
+Online,trực tuyến
+Open actions menu,Mở menu hành động
+Open balance to collect,Mở số dư để thu thập
+Open Customer Display,Mở màn hình khách hàng
+Open drawer,Mở ngăn kéo
+Open invoices,Mở hóa đơn
+Open Payments?,Mở thanh toán?
+Open POS home,Mở POS tại nhà
+Open this screen from POS Menu -> Open Customer Display.,Mở màn hình này từ Menu POS -> Mở Màn hình khách hàng.
+OpenCV image processing enabled - Enhanced barcode detection,Đã bật xử lý hình ảnh OpenCV - Phát hiện mã vạch nâng cao
+OpenCV image processing unavailable on this device,Xử lý hình ảnh OpenCV không khả dụng trên thiết bị này
+OpenCV Off,Tắt OpenCV
+OpenCV On,OpenCV Bật
+OpenCV processing disabled,Xử lý OpenCV bị vô hiệu hóa
+Opening Amount,Số tiền mở
+Opening Cash,Mở tiền mặt
+options,tùy chọn
+Order,Đặt hàng
+Original,Bản gốc
+Other,Khác
+Out,Ra ngoài
+Out of Stock,Hết hàng
+Out of Stock Items,Các mặt hàng hết hàng
+Outstanding,Nổi bật
+Outstanding Credit by Currency,Dư nợ tín dụng theo loại tiền
+Overdue,Quá hạn
+Overpayment Change,Thay đổi thanh toán vượt mức
+Overpayment change deducted: {0},Khoản thay đổi thanh toán vượt mức được khấu trừ: {0}
+Packing List,Danh sách đóng gói
+Page Format,Định dạng trang
+Page unavailable offline,Trang không có sẵn ngoại tuyến
+Paid,Đã trả tiền
+Paid (orig):,Đã trả tiền (gốc):
+Paid Amount,Số tiền đã thanh toán
+Paid change cannot be greater than total change!,Thay đổi được trả tiền không thể lớn hơn tổng thay đổi!
+Paid:,Đã trả tiền:
+Parent Item,Mục gốc
+Partial,một phần
+Partly Paid,được trả một phần
+Party Account,Tài khoản bên
+Party Type,Loại Đảng
+Pause terminal until next cashier,Tạm dừng thiết bị đầu cuối cho đến khi thu ngân tiếp theo
+PAY,TRẢ TIỀN
+Payment,Thanh toán
+Payment Account,Tài khoản thanh toán
+Payment entries processed for Invoice {0},Các mục thanh toán được xử lý cho Hóa đơn {0}
+Payment Entry Type,Loại mục thanh toán
+Payment History,Lịch sử thanh toán
+Payment ID,ID thanh toán
+Payment Method Report,Báo cáo phương thức thanh toán
+Payment Methods,Phương thức thanh toán
+Payment of {0} received successfully.,Đã nhận được khoản thanh toán {0} thành công.
+Payment Progress,Tiến độ thanh toán
+Payment Reconciliation,Đối chiếu thanh toán
+Payment request status could not be retrieved. Please try again,Không thể truy xuất trạng thái yêu cầu thanh toán. Vui lòng thử lại
+Payment Request took too long to respond. Please try requesting for payment again,Yêu cầu thanh toán mất quá nhiều thời gian để phản hồi. Vui lòng thử yêu cầu thanh toán lại
+Payment saved offline,Đã lưu thanh toán ngoại tuyến
+Payment State,Trạng thái thanh toán
+Payment Status,Trạng thái thanh toán
+Payment submitted but print function could not be executed. Payment name not found.,Đã gửi thanh toán nhưng chức năng in không thể thực hiện được. Không tìm thấy tên thanh toán.
+Payment submitted.,Đã gửi thanh toán.
+Payment Summary,Tóm tắt thanh toán
+Payments,Thanh toán
+Payments are not open. Do you want to open payments and submit?,Thanh toán không được mở. Bạn có muốn mở thanh toán và gửi không?
+Payments by Mode of Payment,Thanh toán theo phương thức thanh toán
+PDF,PDF
+Peak Hour,Giờ cao điểm
+Peak Memory:,Bộ nhớ cao điểm:
+Peak Server:,Máy chủ đỉnh cao:
+Peak:,Đỉnh:
+Pending,Đang chờ xử lý
+Pending Amount,Số tiền chờ xử lý
+Pending count updated from {0} to {1},Số lượng đang chờ cập nhật từ {0} lên {1}
+Pending Exposure,Đang chờ hiển thị
+Pending Invoices,Hóa đơn đang chờ xử lý
+Pending Ratio,Tỷ lệ chờ xử lý
+Pending Sales,Đang chờ bán hàng
+Pending sales: {0} | Cache usage: {1}%,Doanh số đang chờ xử lý: {0} | Mức sử dụng bộ nhớ đệm: {1}%
+Pending Sync,Đang chờ đồng bộ hóa
+Pending: {0},Đang chờ xử lý: {0}
+Pending: {0} | Synced: {1} | Draft: {2},Đang chờ xử lý: {0} | Đã đồng bộ hóa: {1} | Bản nháp: {2}
+Per Page,mỗi trang
+Personal,cá nhân
+Personal preferences adjust the current cashier experience without changing the active POS route.,Tùy chọn cá nhân điều chỉnh trải nghiệm thu ngân hiện tại mà không thay đổi lộ trình POS đang hoạt động.
+PIN confirmation does not match.,Xác nhận mã PIN không khớp.
+PIN must be 4 to 8 digits.,Mã PIN phải có từ 4 đến 8 chữ số.
+Please add at least one item.,Vui lòng thêm ít nhất một mục.
+Please allow camera access to scan codes,Vui lòng cho phép máy ảnh truy cập để quét mã
+Please enter payment amount,Vui lòng nhập số tiền thanh toán
+Please fill all required fields,Vui lòng điền vào tất cả các trường bắt buộc
+Please make a payment or select a payment,Vui lòng thanh toán hoặc chọn thanh toán
+Please request phone payment or use another payment method,Vui lòng yêu cầu thanh toán qua điện thoại hoặc sử dụng phương thức thanh toán khác
+Please select a customer first,Vui lòng chọn khách hàng trước
+Please select a party,Vui lòng chọn một bữa tiệc
+Please select a party before reconciling.,Vui lòng chọn một bên trước khi hòa giải.
+Please select a valid movement type.,Vui lòng chọn loại chuyển động hợp lệ.
+Please select an invoice,Vui lòng chọn hóa đơn
+Please select company before reconciling.,Vui lòng chọn công ty trước khi đối chiếu.
+Please set the customer's mobile number,Vui lòng đặt số điện thoại di động của khách hàng
+Please try again or enter the item manually.,Vui lòng thử lại hoặc nhập mục này theo cách thủ công.
+Please verify the barcode or check the item's availability.,Vui lòng xác minh mã vạch hoặc kiểm tra tính sẵn có của mặt hàng.
+Points,Điểm
+Popup blocked. Please allow popups.,Cửa sổ bật lên bị chặn. Vui lòng cho phép cửa sổ bật lên.
+POS,POS
+POS controls and maintenance,Kiểm soát và bảo trì POS
+POS Expense is disabled for this POS Profile.,Chi phí POS bị vô hiệu hóa đối với Hồ sơ POS này.
+POS is running with limited offline prerequisites.,POS đang chạy với điều kiện tiên quyết ngoại tuyến hạn chế.
+POS Profile,Hồ sơ POS
+Position the QR code or barcode within the scanning area,Định vị mã QR hoặc mã vạch trong khu vực quét
+Posting,Đăng bài
+Posting and Price List,Đăng và bảng giá
+Posting Date,Ngày đăng
+Preparing background sync,Đang chuẩn bị đồng bộ hóa nền
+"Press OK to continue offline with a warning, or Cancel to retry.",Nhấn OK để tiếp tục ngoại tuyến kèm theo cảnh báo hoặc Hủy để thử lại.
+Previous unit of measure,Đơn vị đo lường trước đó
+Price List,Bảng giá
+Price List Rate,Tỷ lệ bảng giá
+Price list rate updated locally only,Bảng giá chỉ cập nhật tại địa phương
+Pricing & Discounts,Giá cả & Giảm giá
+Pricing Rule,Quy tắc định giá
+Print,In
+Print Draft,In bản nháp
+Print Format (Invoice),Định dạng in (Hóa đơn)
+Print Format (Order),Định dạng in (Thứ tự)
+Print invoice,In hóa đơn
+Print Purchase Invoice instead of PO,In hóa đơn mua hàng thay vì PO
+Printer,Máy in
+Processed returns impacting the shift totals,Lợi nhuận đã xử lý ảnh hưởng đến tổng ca
+Processing Payment,Đang xử lý thanh toán
+Processing payment entries for Invoice {0},Đang xử lý các mục thanh toán cho Hóa đơn {0}
+Profile,Hồ sơ
+Profiles,Hồ sơ
+Profit,Lợi nhuận
+Profit: Invoice Item Estimate,Lợi nhuận: Ước tính khoản mục hóa đơn
+Profit: Stock Ledger (COGS),Lợi nhuận: Sổ cái chứng khoán (COGS)
+Profitability Report,Báo cáo lợi nhuận
+Prorated return discount,Giảm giá hoàn trả theo tỷ lệ
+Purchase Amount,Số tiền mua
+Purchase Invoices,Hóa đơn mua hàng
+Purchase Order created,Đơn đặt hàng đã được tạo
+Qty,Số lượng
+Qualified,đủ điều kiện
+Quantity,số lượng
+Quantity exceeds available stock,Số lượng vượt quá số lượng có sẵn
+Quick Actions,Thao tác nhanh
+Quotation {0} is Submitted,Báo giá {0} đã được gửi
+Quotation submitted,Đã gửi báo giá
+QZ Tray connected.,Đã kết nối khay QZ.
+QZ Tray is manually disconnected. Press Connect to enable it again.,Khay QZ được ngắt kết nối thủ công. Nhấn Connect để kích hoạt lại.
+QZ Tray is not connected.,Khay QZ chưa được kết nối.
+QZ Tray Setup,Thiết lập khay QZ
+Rate,tỷ lệ
+Rate adjusted to maximum allowed discount,Tỷ lệ được điều chỉnh theo mức chiết khấu tối đa được phép
+Ready,Sẵn sàng
+Ready to resume,Sẵn sàng tiếp tục
+Ready!,Sẵn sàng!
+Real-time POS insights for retail operations.,Thông tin chi tiết về POS theo thời gian thực cho hoạt động bán lẻ.
+Rebuild Offline Data,Xây dựng lại dữ liệu ngoại tuyến
+Receive,Nhận
+Receive now,Nhận ngay
+Received,Đã nhận
+Received:,Đã nhận:
+Recent Movement Entries,Các mục chuyển động gần đây
+Recent updates about your invoices,Thông tin cập nhật gần đây về hóa đơn của bạn
+Recently Active Customers,Khách hàng hoạt động gần đây
+Rechecking connection,Kiểm tra lại kết nối
+Reconcile payment methods and close shift,Đối chiếu phương thức thanh toán và đóng ca
+Reconciling Payments,Đối chiếu các khoản thanh toán
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","Kết nối lại và mở trang này một lần khi trực tuyến, sau đó các lần làm mới ngoại tuyến sẽ có thể khôi phục trang đó."
+Reconnect online to refresh cached offline data from the server.,Kết nối lại trực tuyến để làm mới dữ liệu ngoại tuyến được lưu trong bộ nhớ đệm từ máy chủ.
+Recreate local offline prerequisites from scratch,Tạo lại các điều kiện tiên quyết ngoại tuyến cục bộ từ đầu
+Recv:,Nhận:
+Redeem,Đổi quà
+Redeem / Scan,Đổi/Quét
+Redeem Amount,Số tiền đổi
+Redeem Mode,Chế độ đổi quà
+Redeemed Amount,Số tiền đã đổi
+Redeemed credit cannot be greater than its total.,Tín dụng được quy đổi không thể lớn hơn tổng số tín dụng của nó.
+Redemption and Totals,Quy đổi và Tổng số
+Reference,Tài liệu tham khảo
+Refresh,Làm mới
+Refresh Exchange Rate,Làm mới tỷ giá hối đoái
+Refresh Offline Data,Làm mới dữ liệu ngoại tuyến
+Refresh Printers,Làm mới máy in
+Refund,Hoàn tiền
+Release Notes,Ghi chú phát hành
+Reload,Tải lại
+Reload customers,Tải lại khách hàng
+Reload Items,Tải lại các mục
+Reload Now,Tải lại ngay
+Reload to apply the latest changes. Your current session will be refreshed.,Tải lại để áp dụng những thay đổi mới nhất. Phiên hiện tại của bạn sẽ được làm mới.
+Reload Workflow,Tải lại quy trình công việc
+Remarks,Bình luận
+Remarks are required.,Cần có chú thích.
+Remove,Xóa
+Remove barcode item,Xóa mục mã vạch
+Remove cached data and reload the POS app,Xóa dữ liệu đã lưu trong bộ nhớ đệm và tải lại ứng dụng POS
+Remove item,Xóa mục
+Remove Offer,Xóa ưu đãi
+Reorder / Purchase Suggestions,Đề xuất đặt hàng lại/mua hàng
+Repair Candidate,Ứng viên sửa chữa
+Repair Change Allocation,Sửa chữa Thay đổi Phân bổ
+Repair requires an online connection,Sửa chữa yêu cầu kết nối trực tuyến
+Repaired,Đã sửa chữa
+Repairing change allocation,Sửa chữa phân bổ thay đổi
+Repeat Customers,Khách hàng lặp lại
+Repeat Rate,Tỷ lệ lặp lại
+Request,Yêu cầu
+Request ID: {0},ID yêu cầu: {0}
+Request Payment,Yêu cầu thanh toán
+Requested route: {0},Tuyến đường được yêu cầu: {0}
+Required columns cannot be hidden,Không thể ẩn các cột bắt buộc
+Reset,Đặt lại
+Reset item name,Đặt lại tên mục
+Reset to Default,Đặt lại về mặc định
+Resource Health,Tình trạng tài nguyên
+Restricted,Bị hạn chế
+Restricted operational controls for supervisors only.,Kiểm soát hoạt động hạn chế chỉ dành cho người giám sát.
+Retry,Thử lại
+Retry route,Thử lại lộ trình
+Return,Trở lại
+Return Amount,Số tiền hoàn trả
+Return Count,Số lần trả lại
+Return items must have negative quantities,Các mặt hàng trả lại phải có số lượng âm
+Return total must be negative,Tổng số tiền trả về phải âm
+Return Valid Until,Trả về có hiệu lực cho đến khi
+Return window passed,Đã qua thời hạn trả lại
+Return without Invoice,Trả lại không có hóa đơn
+Returns,Trả lại
+Returns / Voids / Discounts,Trả lại / Vô hiệu / Giảm giá
+Returns by Currency,Trả về theo loại tiền tệ
+Revenue,Doanh thu
+Review shift totals before submitting the closing entry,Xem lại tổng ca làm việc trước khi gửi mục kết thúc
+Round Off,Làm tròn
+Rows,Hàng
+Rows:,Hàng:
+Rule,quy tắc
+Sale,bán hàng
+Sales,bán hàng
+Sales Order {0} is Submitted,Đơn đặt hàng {0} đã được gửi
+Sales Person and Print,Nhân viên bán hàng và in ấn
+Sales Person not found,Không tìm thấy nhân viên bán hàng
+Sales processed,Bán hàng được xử lý
+Sales Return,Lợi nhuận bán hàng
+Sales Trend Report,Báo cáo xu hướng bán hàng
+Save,Lưu
+Save & Clear,Lưu & Xóa
+Save as POS Profile Default,Lưu làm mặc định hồ sơ POS
+Save Settings,Lưu cài đặt
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,Lưu máy in đã chọn làm mặc định cho Cấu hình POS để nó tự động hiển thị trên thiết lập này.
+Saved as draft because: {0},Đã lưu dưới dạng bản nháp vì: {0}
+Saving...,Đang lưu...
+Scale barcode detected. Quantity here is the number of labels to print.,Mã vạch quy mô được phát hiện. Số lượng ở đây chính là số lượng nhãn cần in.
+Scale barcode settings are not configured. Using item barcode only.,Cài đặt mã vạch tỷ lệ không được định cấu hình. Chỉ sử dụng mã vạch mặt hàng.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,Thiếu mã vạch mẫu tỷ lệ cho mục/UOM này. Chỉ sử dụng mã vạch mặt hàng.
+Scan an existing card and top it up without leaving the payment flow.,Quét thẻ hiện có và nạp tiền mà không cần rời khỏi luồng thanh toán.
+Scan Error,Lỗi quét
+Scan or enter a gift card code to check balance or redeem.,Quét hoặc nhập mã thẻ quà tặng để kiểm tra số dư hoặc đổi quà.
+Scan or paste the card code below.,Quét hoặc dán mã thẻ bên dưới.
+Scan QR Code/Barcode,Quét mã QR/mã vạch
+Scan with camera,Quét bằng máy ảnh
+Scan-First Flow,Luồng quét đầu tiên
+Scanned Code:,Mã được quét:
+Scanning for: {0},Đang quét tìm: {0}
+Scanning items,Quét các mục
+Scan-Ready,Sẵn sàng quét
+Scope,Phạm vi
+Scope: All Profiles,Phạm vi: Tất cả hồ sơ
+Scope: Current Profile,Phạm vi: Hồ sơ hiện tại
+Scope: Specific Profile,Phạm vi: Hồ sơ cụ thể
+Search,Tìm kiếm
+Search Account,Tìm kiếm tài khoản
+Search an invoice and continue the return flow without extra steps.,Tìm kiếm hóa đơn và tiếp tục quy trình trả lại mà không cần thực hiện thêm bước nào.
+Search customer,Tìm kiếm khách hàng
+Search invoices or customers,Tìm kiếm hóa đơn hoặc khách hàng
+Search item,Mục tìm kiếm
+Search item / code,Tìm kiếm mục/mã
+Search items or barcode,Tìm kiếm mặt hàng hoặc mã vạch
+Search Mpesa Payments,Tìm kiếm thanh toán Mpesa
+Search return invoices or customers,Tìm kiếm hóa đơn trả lại hoặc khách hàng
+Search supplier,Tìm kiếm nhà cung cấp
+Search unpaid invoices or customers,Tìm kiếm hóa đơn hoặc khách hàng chưa thanh toán
+Secure context (HTTPS or localhost) is required for camera access.,Cần có bối cảnh bảo mật (HTTPS hoặc localhost) để truy cập máy ảnh.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,Cần có bối cảnh bảo mật (HTTPS) để truy cập máy ảnh. Vui lòng sử dụng HTTPS để truy cập máy ảnh.
+Select,chọn
+Select a cashier first.,Chọn một nhân viên thu ngân đầu tiên.
+Select a customer,Chọn một khách hàng
+Select a customer to use coupon,Chọn khách hàng sử dụng phiếu giảm giá
+Select a printer to use QZ silent printing.,Chọn máy in để sử dụng tính năng in im lặng QZ.
+Select Batch,Chọn lô
+Select Columns to Display,Chọn cột để hiển thị
+Select items to sell,Chọn mặt hàng để bán
+Select Payment,Chọn thanh toán
+Select Payment Account,Chọn tài khoản thanh toán
+Select printer,Chọn máy in
+Select Return Invoice,Chọn Trả lại hóa đơn
+Select S.O,Chọn S.O
+Select Sales Orders,Chọn đơn bán hàng
+Select the cashier who is taking over this terminal.,Chọn nhân viên thu ngân đang tiếp quản thiết bị đầu cuối này.
+Selected,Đã chọn
+Selected movement type is not allowed by POS Profile.,Loại chuyển động đã chọn không được Hồ sơ POS cho phép.
+Selected Payments,Thanh toán đã chọn
+Sensitive actions kept away from quick taps.,Những hành động nhạy cảm tránh xa những cú chạm nhanh.
+Serial,nối tiếp
+Serial Numbers,Số sê-ri
+Server CPU Usage:,Sử dụng CPU máy chủ:
+Server Health,Tình trạng máy chủ
+Server Memory Usage:,Sử dụng bộ nhớ máy chủ:
+Server Metrics,Số liệu máy chủ
+Server Uptime:,Thời gian hoạt động của máy chủ:
+Service Charges,Phí dịch vụ
+Session,Phiên
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,Đặt từng mã PIN thu ngân trong biểu mẫu Người dùng và giữ các thành viên đầu cuối được chỉ định trong Người dùng Hồ sơ POS.
+Settings,Cài đặt
+Settings in this section update the POS workspace without changing the current route.,Các cài đặt trong phần này sẽ cập nhật không gian làm việc POS mà không thay đổi lộ trình hiện tại.
+Setup complete!,Thiết lập hoàn tất!
+Share,Chia sẻ
+Shared terminal,Thiết bị đầu cuối dùng chung
+Shift Closed Snapshot,Shift đã đóng ảnh chụp nhanh
+Shift Overview,Tổng quan về ca làm việc
+Show,Hiển thị
+Show cart on customer-facing screen,Hiển thị giỏ hàng trên màn hình hướng tới khách hàng
+Show last invoice rate,Hiển thị tỷ lệ hóa đơn cuối cùng
+Show rate info,Hiển thị thông tin giá
+Show Repair Candidates,Hiển thị ứng viên sửa chữa
+Show search tools,Hiển thị công cụ tìm kiếm
+Show the active cart on a customer-facing screen,Hiển thị giỏ hàng đang hoạt động trên màn hình hướng tới khách hàng
+Showing {0}-{1} of {2},Đang hiển thị {0}-{1} trong số {2}
+Showing 0 of 0,Hiển thị 0 trên 0
+Shows the distribution of invoices per currency,Hiển thị phân bổ hóa đơn theo loại tiền tệ
+Sign out of the current POS session,Đăng xuất khỏi phiên POS hiện tại
+Size:,Kích thước:
+Skipped Payments,Thanh toán bị bỏ qua
+Skipping items without barcodes,Bỏ qua các mục không có mã vạch
+Slow Moving,Di chuyển chậm
+Slow Moving Items,Vật phẩm di chuyển chậm
+Slow Queries:,Truy vấn chậm:
+Sold,đã bán
+Source,Nguồn
+Source Cash Account (Optional Override),Tài khoản tiền mặt nguồn (Ghi đè tùy chọn)
+Source Ex. Rate:,Nguồn Ex. Tỷ lệ:
+Source Rate:,Tỷ lệ nguồn:
+Specific Profile,Hồ sơ cụ thể
+Split Invoices,Chia hóa đơn
+Staff / Cashier Performance Report,Báo cáo hiệu suất nhân viên / thu ngân
+Status,Trạng thái
+Stock,kho
+Stock Information,Thông tin chứng khoán
+Stock is lower than requested,Hàng tồn kho thấp hơn yêu cầu
+Stock is lower than requested:\n{0},Hàng còn ít hơn yêu cầu:\n{0}
+Stock Movement Report,Báo cáo biến động chứng khoán
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,Cập nhật chứng khoán: {0} có sẵn {1}. Thêm {2} sẽ đưa cổ phiếu xuống dưới 0.
+Submit,Nộp
+Submit & Print,Gửi & In
+Submit Deposit,Gửi tiền gửi
+Submit Expense,Gửi chi phí
+Submitted,Đã gửi
+Submitted Cash Movements,Chuyển động tiền mặt đã gửi
+Submitted entries,Bài dự thi đã gửi
+Successfully scanned:,Đã quét thành công:
+Suggested,được đề xuất
+Suggested Qty,Số lượng đề xuất
+Supervisor Access,Quyền truy cập của người giám sát
+Supervisor permissions unlock issuance and reloads,Quyền của người giám sát mở khóa phát hành và tải lại
+Supervisor Tools,Công cụ giám sát
+Supplier,nhà cung cấp
+Supplier and dates are required.,Nhà cung cấp và ngày tháng là bắt buộc.
+Supplier Invoices,Hóa đơn nhà cung cấp
+Supplier is required.,Nhà cung cấp là bắt buộc.
+Supplier name is required,Tên nhà cung cấp là bắt buộc
+Supplier Payments,Thanh toán của nhà cung cấp
+Supplier Purchase Summary,Tóm tắt mua hàng của nhà cung cấp
+Suppliers,nhà cung cấp
+Suppliers not found,Không tìm thấy nhà cung cấp
+Switch Camera,Chuyển đổi máy ảnh
+Switch Cashier,Chuyển đổi nhân viên thu ngân
+Switch the POS appearance theme,Chuyển chủ đề giao diện POS
+Switched to:,Đã chuyển sang:
+Sync All Invoices,Đồng bộ hóa tất cả hóa đơn
+Sync Offline Cash Movements ({0}),Đồng bộ hóa các chuyển động tiền mặt ngoại tuyến ({0})
+Sync Offline Sales,Đồng bộ hóa doanh số ngoại tuyến
+Synced {0} offline cash movement(s).,Đã đồng bộ hóa {0} chuyển động tiền mặt ngoại tuyến.
+Syncing items in background,Đồng bộ hóa các mục ở chế độ nền
+System / Diagnostics,Hệ thống/Chẩn đoán
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","Hành động của hệ thống là các biện pháp kiểm soát bảo trì tần suất thấp như thông tin ứng dụng, chẩn đoán hỗ trợ và kiểm soát phiên."
+System Information,Thông tin hệ thống
+System Status,Trạng thái hệ thống
+Tables:,Bàn:
+Tap the button below to redeem a gift card during checkout.,Nhấn vào nút bên dưới để đổi thẻ quà tặng khi thanh toán.
+Target,Mục tiêu
+Target Ex. Rate:,Mục tiêu cũ. Tỷ lệ:
+Target Rate:,Tỷ lệ mục tiêu:
+Tax,Thuế
+Tax / Charges Report,Báo cáo thuế/phí
+Tax Heads,người đứng đầu thuế
+Taxable Amount,Số tiền chịu thuế
+Tendered,Đã đấu thầu
+Terminal,thiết bị đầu cuối
+Terminal & Devices,Thiết bị đầu cuối & Thiết bị
+Terminal locked,Thiết bị đầu cuối bị khóa
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","Các công cụ đầu cuối ảnh hưởng đến trạm thanh toán này, màn hình hướng tới khách hàng và các điều khiển máy in/thiết bị trong tương lai."
+Territory not found,Không tìm thấy lãnh thổ
+The amount paid is not complete,Số tiền thanh toán chưa đầy đủ
+The app stores data locally for offline use. This is called cache.,Ứng dụng lưu trữ dữ liệu cục bộ để sử dụng ngoại tuyến. Điều này được gọi là bộ đệm.
+The invoice stayed in draft. Please review and submit it manually.,Hóa đơn vẫn ở dạng dự thảo. Vui lòng xem lại và gửi nó theo cách thủ công.
+The maximum discount allowed is,Mức giảm giá tối đa được phép là
+The quantity for {0} has been adjusted to the maximum available stock.,Số lượng cho {0} đã được điều chỉnh theo lượng hàng tối đa hiện có.
+The system could not retrieve the item details. Please try again.,Hệ thống không thể truy xuất chi tiết mặt hàng. Vui lòng thử lại.
+These invoices will be synced when connection is restored,Các hóa đơn này sẽ được đồng bộ hóa khi kết nối được khôi phục
+This action now opens inside the settings workspace.,Hành động này bây giờ sẽ mở ra bên trong không gian làm việc cài đặt.
+This coupon already used !,Phiếu giảm giá này đã được sử dụng!
+This invoice does not need change-allocation repair,Hóa đơn này không cần sửa chữa phân bổ thay đổi
+This invoice is already repaired,Hóa đơn này đã được sửa chữa
+This is an item template. Please choose a variant.,Đây là một mẫu vật phẩm. Vui lòng chọn một biến thể.
+this item,mặt hàng này
+This POS page could not be opened offline because its code was not cached on this terminal yet.,Không thể mở trang POS này ngoại tuyến vì mã của nó chưa được lưu vào bộ nhớ đệm trên thiết bị đầu cuối này.
+This Serial Number {0} has already been added!,Số sê-ri {0} này đã được thêm vào!
+Threshold,Ngưỡng
+Time,thời gian
+Tip: Clear cache regularly to free up space and keep the app fast.,Mẹo: Xóa bộ nhớ đệm thường xuyên để giải phóng dung lượng và giữ cho ứng dụng chạy nhanh.
+Tip: Close unused tabs or apps to reduce lag.,Mẹo: Đóng các tab hoặc ứng dụng không sử dụng để giảm độ trễ.
+Tip: Monitor slow queries and table size for optimal performance.,Mẹo: Giám sát các truy vấn chậm và kích thước bảng để có hiệu suất tối ưu.
+To Be Paid,được trả tiền
+To Date,Đến ngày
+Today,hôm nay
+Today Profit,Lợi nhuận hôm nay
+Today Sales,Bán hàng hôm nay
+Toggle navigation drawer,Chuyển đổi ngăn điều hướng
+Toggle Theme,Chuyển đổi chủ đề
+Tools,Công cụ
+Tools for customer-facing screens and terminal-specific actions.,Công cụ dành cho màn hình hướng tới khách hàng và các hành động dành riêng cho thiết bị đầu cuối.
+Top Brand,Thương hiệu hàng đầu
+Top Category,Danh mục hàng đầu
+Top Charge Head,Đầu sạc hàng đầu
+Top Customers,Khách hàng hàng đầu
+Top Discount,Giảm giá hàng đầu
+Top Items by Location,Các mục hàng đầu theo vị trí
+Top Margin,Ký quỹ trên cùng
+Top Pending,Đang chờ xử lý hàng đầu
+Top Profit Item,Mục lợi nhuận cao nhất
+Top Return Items,Các mặt hàng trả lại hàng đầu
+Top Sales by Cashier,Doanh số bán hàng cao nhất theo thu ngân
+Top Supplier,Nhà cung cấp hàng đầu
+Top Suppliers by Spend,Nhà cung cấp hàng đầu theo mức chi tiêu
+Top Tables,Bảng hàng đầu
+Top Tax Head,Người đứng đầu thuế hàng đầu
+Top Up Amount,Số tiền nạp thêm
+Top Up Card,Nạp thẻ
+Top Up Mode,Chế độ nạp tiền
+Top Variant,Biến thể hàng đầu
+Total,Tổng cộng
+Total Amount,Tổng số tiền
+Total Change,Tổng số thay đổi
+Total Charges,Tổng phí
+Total In,Tổng số tiền
+Total Invoices,Tổng hóa đơn
+Total Items,Tổng số mặt hàng
+Total Mpesa,Tổng số tiền Mpesa
+Total Out,Tổng số tiền ra
+Total Payments,Tổng số tiền thanh toán
+Total Purchase,Tổng số tiền mua
+Total Selected :,Tổng số đã chọn :
+Total Size,Tổng kích thước
+Total Stock Qty,Tổng số lượng hàng tồn kho
+Total:,Tổng số:
+Totals by Invoice Currency,Tổng số theo đơn vị tiền tệ hóa đơn
+Track how much cash was handed back to customers,Theo dõi số tiền mặt đã được trả lại cho khách hàng
+"Track recent sales, collect unpaid balances, and reopen saved work","Theo dõi doanh số bán hàng gần đây, thu thập số dư chưa thanh toán và mở lại công việc đã lưu"
+Transaction ID,ID giao dịch
+Transfer,Chuyển khoản
+Try a different search term or clear the cart search.,Hãy thử cụm từ tìm kiếm khác hoặc xóa tìm kiếm giỏ hàng.
+Try adjusting your search or filters,Hãy thử điều chỉnh tìm kiếm hoặc bộ lọc của bạn
+Try another source or refresh the list.,Hãy thử nguồn khác hoặc làm mới danh sách.
+Try changing the date range or status filter.,Hãy thử thay đổi phạm vi ngày hoặc bộ lọc trạng thái.
+Type,loại
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,Không thể truy cập máy ảnh ngay cả với các cài đặt cơ bản. Vui lòng kiểm tra quyền truy cập máy ảnh và khả năng tương thích thiết bị của bạn.
+Unable to add offer item {0}. Please refresh and try again.,Không thể thêm mặt hàng ưu đãi {0}. Vui lòng làm mới và thử lại.
+Unable to add offer item. Please refresh and try again.,Không thể thêm mặt hàng ưu đãi. Vui lòng làm mới và thử lại.
+Unable to add scanned item.,Không thể thêm mục được quét.
+Unable to create purchase order,Không thể tạo đơn đặt hàng
+Unable to delete draft invoice,Không thể xóa hóa đơn nháp
+Unable to fetch documents,Không thể tìm nạp tài liệu
+Unable to fetch draft orders,Không thể tìm nạp đơn hàng nháp
+Unable to fetch invoice history,Không thể tìm nạp lịch sử hóa đơn
+Unable to fetch M-Pesa payments,Không thể lấy khoản thanh toán M-Pesa
+Unable to fetch sales orders,Không thể lấy đơn đặt hàng bán hàng
+Unable to fetch unpaid invoices,Không thể tìm nạp hóa đơn chưa thanh toán
+Unable to generate scale barcode,Không thể tạo mã vạch cân
+Unable to issue gift card.,Không thể phát hành thẻ quà tặng.
+Unable to load cashier PIN status.,Không thể tải trạng thái mã PIN của nhân viên thu ngân.
+Unable to load document,Không thể tải tài liệu
+Unable to load draft invoice,Không thể tải hóa đơn nháp
+Unable to load gift card balance.,Không thể tải số dư thẻ quà tặng.
+Unable to load invoice details,Không thể tải chi tiết hóa đơn
+Unable to load parked order,Không thể tải đơn hàng chưa đỗ
+Unable to load the selected sales order,Không thể tải đơn hàng đã chọn
+Unable to prepare document,Không thể chuẩn bị tài liệu
+Unable to prepare return invoice,Không thể chuẩn bị hóa đơn trả lại
+Unable to print draft invoice,Không in được hóa đơn nháp
+Unable to print submitted invoice,Không in được hóa đơn đã gửi
+Unable to process document action,Không thể xử lý hành động tài liệu
+Unable to repair change allocation,Không thể sửa chữa phân bổ thay đổi
+Unable to save cashier PIN.,Không thể lưu mã PIN thu ngân.
+Unable to save the rate to the backend price list,Không thể lưu giá vào bảng giá phụ trợ
+Unable to submit invoice,Không thể gửi hóa đơn
+Unable to submit the selected payment,Không thể gửi khoản thanh toán đã chọn
+Unable to top up gift card.,Không thể nạp thẻ quà tặng.
+Unable to verify cashier PIN.,Không thể xác minh mã PIN của nhân viên thu ngân.
+Unallocated,Chưa phân bổ
+Unallocated:,Chưa được phân bổ:
+Unavailable,Không có sẵn
+Unknown,Không xác định
+Unknown Item,Mục không xác định
+Unknown Warehouse,Kho không xác định
+Unlock POS,Mở khóa POS
+Unpaid,Chưa thanh toán
+"Unselected payments stay unallocated first, then auto reconcile after submit.","Các khoản thanh toán không được chọn trước tiên sẽ không được phân bổ, sau đó tự động điều chỉnh sau khi gửi."
+UOM,UOM
+UOM not found,Không tìm thấy UOM
+Update available,Đã có bản cập nhật
+Update Customer,Cập nhật khách hàng
+Update PIN,Cập nhật mã PIN
+Update Price List Rate,Cập Nhật Bảng Giá Tỷ Lệ
+Updated,Đã cập nhật
+Updates and app info that stay out of the cashier flow.,Các cập nhật và thông tin ứng dụng nằm ngoài luồng thu ngân.
+Updates automatically,Cập nhật tự động
+Usage,Cách sử dụng
+Usage Stats,Thống kê sử dụng
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,Sử dụng mã PIN gồm 4 đến 8 chữ số để chuyển đổi nhân viên thu ngân và mở khóa thiết bị đầu cuối.
+Use Cashier,Sử dụng nhân viên thu ngân
+Use date range to search for older invoices,Sử dụng phạm vi ngày để tìm kiếm hóa đơn cũ hơn
+"Use one field for manual code entry, barcode scans, or QR scans.","Sử dụng một trường để nhập mã thủ công, quét mã vạch hoặc quét QR."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","Sử dụng một quy trình làm việc để kiểm tra số dư, phát hành mới và nạp tiền mà không cần rời khỏi POS."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","Sử dụng phần này khi dữ liệu tiên quyết được lưu trong bộ nhớ đệm cần được làm mới, xây dựng lại hoặc xem xét chẩn đoán."
+Use Western numerals,Sử dụng chữ số phương Tây
+Used:,Đã sử dụng:
+Using basic camera settings due to device limitations,Sử dụng cài đặt camera cơ bản do hạn chế của thiết bị
+Using cached customer balance,Sử dụng số dư khách hàng đã lưu trong bộ nhớ đệm
+Valid until,Có hiệu lực cho đến khi
+Variance %,% phương sai
+Variants,Biến thể
+Variant-wise,Biến thể khôn ngoan
+Verify closing amounts for each payment method,Xác minh số tiền đóng cho mỗi phương thức thanh toán
+View all,Xem tất cả
+View app information and current build details,Xem thông tin ứng dụng và chi tiết bản dựng hiện tại
+View Data Diagnostics,Xem chẩn đoán dữ liệu
+View Details,Xem chi tiết
+View invoice details,Xem chi tiết hoá đơn
+View notifications,Xem thông báo
+View offline invoices,Xem hóa đơn ngoại tuyến
+View restricted POS insights,Xem thông tin chi tiết về POS bị hạn chế
+Void Amount,Số tiền vô hiệu
+Void Count,Số lượng trống
+Voids,khoảng trống
+Waiting for cart items,Đang chờ các mặt hàng trong giỏ hàng
+Waiting for payment...,Đang chờ thanh toán...
+Walk-in Customer,Khách hàng tham gia
+Warehouse,Kho
+Warning: High cache usage may affect performance.,Cảnh báo: Việc sử dụng bộ nhớ đệm cao có thể ảnh hưởng đến hiệu suất.
+Warning: High lag may indicate heavy processing or browser slowness.,Cảnh báo: Độ trễ cao có thể cho thấy quá trình xử lý nặng hoặc trình duyệt chậm.
+Week ?,Tuần ?
+Week-wise,Hàng tuần
+Weight (g),Trọng lượng (g)
+Weight (grams),Trọng lượng (gram)
+We'll let you know if an invoice fails to submit,Chúng tôi sẽ cho bạn biết nếu hóa đơn không được gửi
+Workflow,Quy trình làm việc
+Write off amount cannot exceed the POS profile maximum of {0},Số tiền xóa nợ không được vượt quá hồ sơ POS tối đa là {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,Số tiền xóa vượt quá giới hạn cho phép ({0}). Vui lòng thêm khoản thanh toán cho số tiền còn lại.
+Yes,Có
+"Yes, Cancel sale","Có, Hủy bán"
+"Yes, Close","Có, Đóng"
+You are not allowed to print draft invoices,Bạn không được phép in hóa đơn nháp
+You are offline. Add Payment will work again when the connection is restored.,Bạn đang ngoại tuyến. Thêm Thanh toán sẽ hoạt động trở lại khi kết nối được khôi phục.
+You have no notifications right now,Hiện tại bạn không có thông báo nào
+Your Cart,Giỏ hàng của bạn

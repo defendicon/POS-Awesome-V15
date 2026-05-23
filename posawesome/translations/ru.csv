@@ -1,0 +1,1362 @@
+POS Awesome,POS-терминал
+Fetch Items Directly from Server,Получение элементов напрямую с сервера
+Menu,Меню
+Actions,Действия
+Close Shift,Закрыть смену
+End current session,Завершить текущий сеанс
+Print Last Invoice,Распечатать последний счет
+Reprint previous transaction,Перепечатать предыдущую транзакцию
+Sync Offline Invoices,Синхронизировать автономные счета
+Upload pending transactions,Загрузить ожидающие транзакции
+Go Online,Выйти в Интернет
+Go Offline,Перейти в автономный режим
+Disable offline mode,Отключить автономный режим
+Work without server connection,Работа без подключения к серверу
+Clear Cache,Очистить кэш
+Remove local data and refresh,Удалить локальные данные и обновить
+About,О
+App information,Информация о приложении
+Language,Язык
+Change interface language,Изменить язык интерфейса
+Light Mode,Светлый режим
+Dark Mode,Темный режим
+Switch theme appearance,Переключить внешний вид темы
+Logout,Выход из системы
+Sign out of session,Выйти из сеанса
+Select Language,Выберите язык
+Choose your preferred language for the POS interface,Выберите предпочитаемый язык интерфейса POS
+Language will be changed to,Язык будет изменен на
+Cancel,Отмена
+Change Language,Изменить язык
+Close,Закрыть
+Cannot change language - same language selected,Невозможно изменить язык — выбран тот же язык
+Language changed successfully! Reloading...,Язык успешно изменен! Перезагрузка...
+Failed to change language,Не удалось изменить язык
+Unknown error,Неизвестная ошибка
+- Total Unallocated,- Всего нераспределенных
+* Required,* Обязательно
+{0} (Qty: {1}),{0} (Кол-во: {1})
+{0} actions,{0} действий
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,У {0} в наличии только {1}. Вы запросили {2}. Отрегулируйте количество или пополните запасы.
+{0} offline invoice{1} pending,{0}автономный счет{1} находится на рассмотрении
+{0} offline invoice{1} saved as draft,{0}офлайн-счет{1} сохранен как черновик.
+{0} offline invoice{1} synced,{0}автономный счет{1} синхронизирован
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0}д назад
+{0}h ago,{0}ч назад
+{0}m ago,{0} м назад
+A POS supervisor is required for this action.,Для этого действия требуется супервайзер POS.
+Access,Доступ
+Account,Аккаунт
+Account is overdrawn,Счет перегружен
+Acknowledge the error to resume scanning,"Подтвердите ошибку, чтобы возобновить сканирование."
+Acknowledge the error to resume scanning.,"Подтвердите ошибку, чтобы возобновить сканирование."
+Across,Через
+Action,Действие
+Active sale,Активная распродажа
+add,добавить
+Add items from the selector to start building this sale.,"Добавьте товары из селектора, чтобы начать создавать эту распродажу."
+Add more value to an existing gift card,Добавьте больше ценности существующей подарочной карте
+Add New Address,Добавить новый адрес
+Add new customer,Добавить нового клиента
+Add on New Line,Добавить новую строку
+Add Payment,Добавить платеж
+Add payment to invoice,Добавить оплату в счет
+Add/Edit Coupon Conditions,Добавить/изменить условия купона
+Additional Discount,Дополнительная скидка
+Additional Discount %,Дополнительная скидка %
+Address Line 1,Адресная строка 1
+Address not found,Адрес не найден
+Adjust the quantity or enable negative stock to continue.,"Отрегулируйте количество или включите отрицательный запас, чтобы продолжить."
+Adjustment,Регулировка
+After returns,После возврата
+Against,Против
+Against Name,Против имени
+Age Bracket,Возрастная группа
+All,Все
+All Caught Up!,Все пойманы!
+All invoices are synchronized,Все счета синхронизируются
+All pending invoices are up to date,Все ожидающие оплаты счета актуальны.
+All Profiles,Все профили
+All Synchronized,Все синхронизировано
+All visible invoices are fully settled.,Все видимые счета-фактуры полностью оплачены.
+All Warehouses,Все склады
+Allowed UOM is {0},Разрешенная единица измерения: {0}.
+Always fetch items from server (ignore local cache),Всегда получать элементы с сервера (игнорировать локальный кеш)
+Amount,Сумма
+Amount already received,Сумма уже получена
+Amount exceeds profile cash movement max amount.,Сумма превышает максимальную сумму движения денежных средств по профилю.
+Amount must be greater than zero.,Сумма должна быть больше нуля.
+Amount received from customer,Сумма получена от клиента
+Appearance and user-level preferences for the current session.,Внешний вид и настройки уровня пользователя для текущего сеанса.
+Applied,Прикладной
+Apply,Применить
+Apply Gift Card,Применить подарочную карту
+Apply Offer,Применить предложение
+Apply On,Подать заявку на
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,"Укажите в этом счете только ту сумму, которую хотите погасить. Остаток остается на карте."
+Apply Redemption,Применить погашение
+Applying,Применение
+Apps,Приложения
+Are you sure you want to close? All entered data will be lost.,"Вы уверены, что хотите закрыть? Все введенные данные будут потеряны."
+Attributes (Size/Color),Атрибуты (размер/цвет)
+Auto Allocate Payment Amount,Автоматическое распределение суммы платежа
+Auto Reconcile,Автоматическое согласование
+Auto reconciliation completed after payment submit.,Автоматическая сверка завершена после отправки платежа.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,Автоматическое согласование завершено. Выделено: {0}{1}. Осталось невыполненным: {0}{2}.
+Available Actions,Доступные действия
+Available QTY,Доступное количество
+Available:,Доступно:
+Average Basket,Средняя корзина
+Average Bill,Средний чек
+Average Ticket,Средний билет
+Avg Bill,Средний счет
+Avg Invoice,Средний счет
+Avg Invoice Profit,Средняя прибыль по счету
+Avg Invoice Value,Средняя стоимость счета
+Avg Purchase Frequency,Средняя частота покупок
+Awesome,Потрясающе
+Awesome Dashboard,Потрясающая панель мониторинга
+Awesome Dashboard is disabled for the selected POS Profile.,Awesome Dashboard отключен для выбранного профиля POS.
+Awesome Dashboard is unavailable for the selected scope.,Awesome Dashboard недоступна для выбранной области.
+Awesome Dashboard is visible only to POS supervisors.,Awesome Dashboard видна только супервайзерам POS.
+Back,Назад
+Back Office Cash Account,Денежный счет бэк-офиса
+Back Office Cash Account (Optional Override),Денежный счет бэк-офиса (необязательное переопределение)
+Back office cash account is required.,Требуется наличие кассового счета в бэк-офисе.
+Back to {0},Вернуться к {0}
+Background processing did not finish in time.,Фоновая обработка не завершилась вовремя.
+Background processing failed for Invoice {0}: {1},Не удалось выполнить фоновую обработку счета {0}: {1}.
+Background Submission Failed,Фоновая отправка не удалась
+Background sync interval (seconds),Интервал фоновой синхронизации (секунды)
+Balance,Баланс
+Balance will be updated when connection is restored,Баланс будет обновлен при восстановлении связи
+Balances still pending,Остатки все еще ожидаются
+Barcode,Штрих-код
+Barcode / QR Ready,Штрих-код / QR готов
+Barcode Label Printing,Печать этикеток со штрих-кодом
+Base Paid:,Базовая оплата:
+Base Recv:,Базовый прием:
+Base:,База:
+Basic Information,Основная информация
+Batch,Пакетный
+Batch Information,Информация о партии
+Before any return workflow,Перед возвратом рабочего процесса
+Before returns,До возвращения
+Best Day,Лучший день
+Best Seller,Бестселлер
+Book expense or deposit from active shift.,Запишите расходы или депозит за активную смену.
+Branch / Location-wise Report,Отчет о филиалах/локациях
+Brand-wise,С точки зрения бренда
+Breakdown,Разбивка
+Browse,Обзор
+Build Time:,Время сборки:
+Built with Frappe,Построено с использованием фраппе
+Bundle,Пакет
+Buying Price,Цена покупки
+Cache cleared successfully,Кэш успешно очищен
+Cache Usage,Использование кэша
+cache used,использован кеш
+Calculating...,Расчет...
+Camera Access Required,Требуется доступ к камере
+Camera access was aborted. Please try again.,"Доступ к камере прерван. Пожалуйста, попробуйте еще раз."
+Camera constraints not supported by your device. Trying fallback settings...,Ограничения камеры не поддерживаются вашим устройством. Пробуем резервные настройки...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,Камера занята или заблокирована другим приложением/вкладкой. Закройте другие приложения камеры и повторите попытку.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,"Разрешение на использование камеры отклонено. Пожалуйста, разрешите доступ к камере в настройках браузера и обновите страницу."
+Camera scanner is locked until the current error is acknowledged,"Сканер камеры заблокирован до тех пор, пока текущая ошибка не будет подтверждена."
+Camera started but the video stream did not load in time. Please try again.,"Камера запустилась, но видеопоток не загрузился вовремя. Пожалуйста, попробуйте еще раз."
+Cancel cash movement {0}?,Отменить движение денежных средств {0}?
+Cancel Payment,Отменить платеж
+Cancel Sale,Отменить продажу
+Cancel Sale ?,Отменить продажу?
+Cancelled,Отменено
+Cannot add an item with zero or negative quantity.,Невозможно добавить товар с нулевым или отрицательным количеством.
+Cannot clear cache while offline,Невозможно очистить кеш в автономном режиме
+Cannot redeem customer credit more than invoice total,"Невозможно погасить кредит клиента на сумму, превышающую общую сумму счета"
+Cannot redeem gift cards more than invoice total,"Невозможно активировать подарочные карты на сумму, превышающую сумму счета."
+Cannot Save Offline Invoice:,Невозможно сохранить автономный счет:
+Cannot Save Offline Payment:,Невозможно сохранить офлайн-платеж:
+Card,Карта
+Card / Online,Карта / Онлайн
+Card health after the last live lookup,Состояние карты после последнего оперативного поиска
+Cards,Карты
+Cart,Корзина
+Cash,Наличные
+Cash back to customers,Возврат денег клиентам
+Cash Collections,Денежные инкассации
+Cash Deposit is disabled for this POS Profile.,Внесение наличных отключено для этого профиля POS.
+Cash Drawer Snapshot,Снимок денежного ящика
+Cash In Hand,Наличные в руке
+Cash Movement,Движение денежных средств
+Cash movement cancelled,Движение денежных средств отменено
+Cash movement deduction applied,Применен вычет за движение денежных средств
+Cash movement deleted,Движение денежных средств удалено
+Cash movement is disabled for this POS Profile.,Движение наличных денег отключено для этого профиля POS.
+Cash Movement is disabled in current POS Profile.,Движение денежных средств отключено в текущем профиле POS.
+Cash movement saved offline,Движение денежных средств сохранено офлайн.
+Cash movement submitted,Движение денежных средств отправлено
+Cash Movements,Денежные движения
+Cash payment cannot be less than invoice total when partial payment is not allowed,"Оплата наличными не может быть меньше суммы счета, если частичная оплата не допускается."
+Cash returned after payment,Деньги возвращаются после оплаты
+Cashier,Кассир
+Cashier Access,Доступ к кассе
+Cashier identity and appearance preferences.,Личность кассира и предпочтения во внешности.
+Cashier PIN,ПИН-код кассира
+Cashier PIN saved successfully.,PIN-код кассира успешно сохранен.
+Cashiers,Кассиры
+Cashier-wise,С точки зрения кассира
+Categories,Категории
+Category,Категория
+Category / Brand / Variant Report,Отчет по категории/бренду/варианту
+Category-wise,По категориям
+Category-wise Margin,По категориям маржа
+Certificate,Сертификат
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,Сертификат отсутствует или не доверен. QZ может отображать диалоговые окна подтверждения.
+Certificate is trusted. Silent QZ printing is active.,Сертификату доверяют. Бесшумная печать QZ активна.
+Change,Изменить
+Change allocation repaired,Распределение изменений исправлено.
+Change Price,Изменить цену
+Change Return,Изменить возврат
+Change Returned,Изменение возвращено
+Change terminal cashier,Сменить кассу терминала
+Charge Heads,Зарядные головки
+Charges,Сборы
+Charges not found,Платежи не найдены
+Check Balance,Проверить баланс
+Check balance for any card. Supervisors can issue and top up cards here.,Проверить баланс любой карты. Здесь супервайзеры могут выдавать и пополнять карты.
+Check balance only,Только проверка баланса
+Check for new commits,Проверьте наличие новых коммитов
+Check for Updates,Проверьте наличие обновлений
+Check live balance before applying redemption,Проверьте реальный баланс перед применением погашения
+Check live balance before redemption,Проверьте реальный баланс перед погашением
+Checking...,Проверка...
+Cheque/Reference Date,Дата чека/отчета
+Cheque/Reference No,Номер чека/справки
+Choose the cashier currently operating this terminal.,"Выберите кассира, который в данный момент работает с этим терминалом."
+City,Город
+Clear,Очистить
+Clear All,Очистить все
+Clear all barcode items,Очистить все элементы штрих-кода
+Clear all purchase order items,Очистить все позиции заказа на покупку
+Clear Search,Очистить поиск
+Clearing local cache...,Очистка локального кэша...
+Click to refresh,"Нажмите, чтобы обновить"
+Client CPU Lag:,Задержка ЦП клиента:
+Client Memory Usage:,Использование клиентской памяти:
+Client Metrics,Клиентские метрики
+Close about dialog,Закрыть диалоговое окно «О программе»
+Close cashier switcher,Закрыть переключатель кассира
+Close closing shift dialog,Закрыть диалоговое окно закрытия смены
+Close column selector,Закрыть выбор столбцов
+Close Dialog,Закрыть диалог
+Close drafts dialog,Диалоговое окно закрытия черновиков
+Close invoice details dialog,Закрыть диалоговое окно сведений о счете
+Close invoice management,Закрыть управление счетами
+Close offline invoices dialog,Закрыть диалоговое окно автономных счетов
+Close packing list dialog,Закрыть диалоговое окно упаковочного листа
+Close returns dialog,Закрыть диалоговое окно возврата
+Close sales orders dialog,Диалоговое окно закрытия заказов на продажу
+Close Scanner,Закрыть сканер
+Close scanner dialog,Закрыть диалоговое окно сканера
+Close Settings,Закрыть настройки
+Closing Amount,Заключительная сумма
+Closing POS Shift,Закрытие кассовой смены
+Closing Snapshot Available,Доступен заключительный снимок
+Code,Код
+Code scanned successfully,Код успешно отсканирован
+COGS,COGS
+Collapse item details,Свернуть сведения об элементе
+Collected,Собрано
+Cols,Колс
+Columns,Столбцы
+commits,совершает
+Completed and active sales in this range,Завершенные и активные продажи в этом ассортименте
+Completed returns will appear here.,Заполненные отчеты появятся здесь.
+Confirm,Подтвердить
+Confirm Close,Подтвердить Закрыть
+Confirm Mobile Number,Подтвердить номер мобильного телефона
+Confirm PIN,Подтвердить PIN-код
+Connect,Подключиться
+Connect printer and manage certificate,Подключите принтер и управляйте сертификатом
+Connecting to QZ Tray...,Подключение к лотку QZ...
+Connection problem while submitting invoice,Проблема с подключением при отправке счета
+Connections:,Соединения:
+Connectivity and cached prerequisite status were rechecked.,Были перепроверены подключение и статус необходимых условий для кэширования.
+Continue Editing,Продолжить редактирование
+Could not fetch latest balance from server,Не удалось получить последний баланс с сервера.
+Count,Граф
+Country,Страна
+Coupon,Купон
+Coupons,Купоны
+Cover,Обложка
+CPU Cores:,Ядра процессора:
+Create,Создать
+Create and load a new prepaid card,Создайте и загрузите новую карту предоплаты
+Create and preload a new gift card,Создайте и предварительно загрузите новую подарочную карту
+Create Bill,Создать счет
+Create Customer,Создать клиента
+Create New Item,Создать новый элемент
+Create or change your PIN,Создайте или измените свой PIN-код
+Create PIN,Создать ПИН-код
+Create POS Opening Shift,Создать смену открытия POS
+Create Purchase Order,Создать заказ на поставку
+Create Return,Создать возврат
+Create return from invoice,Создать возврат из счета-фактуры
+Create Supplier,Создать поставщика
+Credit and Output,Кредит и выпуск
+Credit Note,Кредитная нота
+Credit Outstanding,Непогашенный кредит
+Credit sales remaining to be collected,"Продажи в кредит, которые еще предстоит собрать"
+Critical,Критический
+Currency,Валюта
+Current,Текущий
+Current Event Loop Lag:,Задержка цикла текущего события:
+Current Month,Текущий месяц
+Current PIN,Текущий PIN-код
+Current Profile,Текущий профиль
+Current redeemable value on the gift card,Текущая сумма погашения подарочной карты
+Current User,Текущий пользователь
+Custom,Пользовательский
+Custom Due Days,Пользовательские дни выполнения
+Custom items per page,Пользовательские элементы на странице
+Customer,Клиент
+Customer already selected,Клиент уже выбран
+Customer Balance,Баланс клиента
+Customer balance unavailable offline,Баланс клиента недоступен в офлайн-режиме
+Customer created successfully.,Клиент успешно создан.
+Customer creation failed.,Не удалось создать клиента.
+Customer Details,Сведения о клиенте
+Customer display channel is missing,Отсутствует канал отображения клиентов
+Customer display was blocked. Please allow pop-ups for this site.,"Показ покупателя был заблокирован. Пожалуйста, разрешите всплывающие окна для этого сайта."
+Customer group is required,Требуется группа клиентов.
+Customer is required to add payment,Клиенту необходимо добавить платеж
+Customer Name is required,Требуется имя клиента
+Customer not selected,Клиент не выбран
+Customer Report,Отчет клиента
+Customer saved offline,Клиент сохранен офлайн
+Customer Screen,Экран клиента
+Customer territory is required,Требуется территория клиента
+Customer updated successfully.,Клиент обновлен успешно.
+Customer-facing tools and printer setup.,Инструменты для работы с клиентами и настройка принтера.
+Customers,Клиенты
+Customers not found,Клиенты не найдены
+Daily cashier actions without scrolling.,Ежедневные действия кассира без прокрутки.
+Daily Sales,Ежедневные продажи
+Daily Sales Summary,Ежедневная сводка продаж
+Data loaded in form. Review and submit.,Данные загружены в форму. Рассмотрите и отправьте.
+Database Health,Состояние базы данных
+Database health affects overall system speed and reliability.,Состояние базы данных влияет на общую скорость и надежность системы.
+Database Info,Информация о базе данных
+Date,Дата
+Day ?,День?
+days,дни
+Day-wise (MTD),Дневной (MTD)
+Day-wise Movement,Дневное движение
+Dead Stock,Мертвый запас
+Dead Stock Items,Мертвые товары на складе
+Decrease quantity,Уменьшить количество
+Default,По умолчанию
+Default:,По умолчанию:
+Delete,Удалить
+Delete cancelled cash movement {0}?,Удалить отмененное движение денежных средств {0}?
+Delete Draft,Удалить черновик
+Delete draft invoice,Удалить черновик счета
+Delete draft invoice {0}?,Удалить черновик счета {0}?
+Delete Invoice,Удалить счет
+Delete offline invoice,Удалить офлайн-счет
+Delivered,Доставлено
+Delivery Charges,Стоимость доставки
+Delivery Information,Информация о доставке
+Delivery Note {0} created,Накладная {0} создана.
+Delivery note created,Накладная создана.
+Deployed Bundle:,Развернутый пакет:
+Deposit,Депозит
+Description,Описание
+Detailed Supplier Breakdown,Подробная разбивка поставщиков
+Detecting formats:,Обнаружение форматов:
+Device Memory:,Память устройства:
+Difference,Разница
+Difference (In Company Currency),Разница (в валюте компании)
+Disable offline mode first to recheck live connectivity.,"Сначала отключите автономный режим, чтобы еще раз проверить подключение в реальном времени."
+Disconnect,Отключить
+discount,скидка
+Discount %,Скидка %
+Discount / Void / Return Report,Отчет о скидках/аннулировании/возврате
+Discount Amount,Сумма скидки
+Discount limited by POS Profile,Скидка ограничена профилем POS
+Discounted Invoices,Счета со скидкой
+Discounts,Скидки
+Dismiss,Уволить
+Download Certificate,Скачать сертификат
+Draft,Черновик
+Draft invoice deleted,Черновик счета удален.
+Draft source,Источник черновика
+Drafts,Черновики
+Due {0},Срок погашения {0}
+Due Date,Срок сдачи
+Duplicate,Дублировать
+Edit customer,Изменить клиента
+Edit discount amount,Изменить сумму скидки
+Edit discount percentage,Изменить процент скидки
+Edit Gift Application,Редактировать заявку на получение подарка
+Edit item name,Изменить название элемента
+Edit quantity,Изменить количество
+Edit rate,Изменить цену
+Edit unit of measure,Изменить единицу измерения
+Edited,Отредактировано
+Employee,Сотрудник
+Enable background sync,Включить фоновую синхронизацию
+Enable Customer Display in POS Profile first.,Сначала включите отображение покупателя в профиле POS.
+Enter a PIN.,Введите ПИН-код.
+Enter a valid grams value,Введите допустимое значение в граммах
+Enter new price list rate,Введите новую цену прайс-листа
+Enter Quantity,Введите количество
+Enter the cashier PIN to continue.,"Введите PIN-код кассира, чтобы продолжить."
+Enter the current PIN first.,Сначала введите текущий PIN-код.
+"Enter the current PIN, then choose a new one.","Введите текущий PIN-код, затем выберите новый."
+Enter valid grams for scale barcode,Введите действительные граммы для штрих-кода весов
+Entries,Записи
+Error accessing camera:,Ошибка доступа к камере:
+Error calculating prices,Ошибка расчета цен
+Error fetching customer balance,Ошибка получения баланса клиента.
+Error in change calculations!,Ошибка в расчете сдачи!
+Error Loading Data,Ошибка загрузки данных
+Error loading invoice details,Ошибка при загрузке сведений о счете.
+Error processing invoice,Ошибка обработки счета
+Error processing payment,Ошибка обработки платежа
+Error searching invoices,Ошибка поиска счетов.
+Error submitting invoice:,Ошибка при отправке счета:
+Error submitting invoice: {0},Ошибка отправки счета: {0}
+Error submitting invoice: No response from server,Ошибка отправки счета: нет ответа от сервера.
+Error updating currency,Ошибка обновления валюты.
+Error updating item details,Ошибка обновления сведений об элементе.
+Est. Purchase,Оценка. Покупка
+Est. Value,Оценка. Значение
+Event-loop lag measures how busy your browser is. Lower is better.,"Задержка цикла событий измеряет, насколько загружен ваш браузер. Ниже лучше."
+Every,Каждый
+Exchange Rate,Обменный курс
+Expand item details,Развернуть сведения об элементе
+Expected Amount (In Company Currency),Ожидаемая сумма (в валюте компании)
+Expected Cash,Ожидаемые денежные средства
+Expected cash on hand grouped by currency,"Ожидаемые денежные средства в кассе, сгруппированные по валютам"
+Expected vs Actual,Ожидаемое и фактическое
+Expense,Расход
+Expense Account (Optional Override),Счет расходов (необязательное переопределение)
+Expense account is required.,Счет расходов обязателен.
+Expenses and deposits posted during this shift,"Расходы и депозиты, учтенные в течение этой смены"
+Expired,Срок действия истек
+Failed to auto reconcile payments.,Не удалось автоматически сверить платежи.
+Failed to cancel cash movement,Не удалось отменить движение денежных средств
+Failed to clear cache,Не удалось очистить кэш
+Failed to create item,Не удалось создать элемент
+Failed to create supplier,Не удалось создать поставщика.
+Failed to delete cash movement,Не удалось удалить движение денежных средств.
+Failed to generate scale barcode. Using item barcode only.,Не удалось создать масштабный штрих-код. Использование только штрих-кода товара.
+Failed to load cash movement context.,Не удалось загрузить контекст движения денежных средств.
+Failed to load dashboard data.,Не удалось загрузить данные информационной панели.
+Failed to reload invoice from server,Не удалось перезагрузить счет с сервера.
+Failed to submit cash movement,Не удалось отправить движение денежных средств
+Failed to sync offline cash movements,Не удалось синхронизировать движения денежных средств в автономном режиме.
+Fast cashier actions for active shifts.,Быстрые действия кассира для активных смен.
+Fast Moving Items,Быстродвижущиеся предметы
+Fees,Сборы
+Fetch the latest offline prerequisite updates,Получите последние обновления необходимых автономных компонентов
+Find a sales order quickly and load it into the current sale.,Быстро найдите заказ на продажу и загрузите его в текущую продажу.
+Fixing payment amounts for return invoice...,Фиксация суммы платежа для счета-фактуры на возврат...
+Flash Off,Вспышка выключена
+Flash On,Вспышка включена
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","Для позиций «Пакет продукции» будут учитываться склад, серийный номер и номер партии из таблицы «Упаковочный лист». Если номер склада и партии одинаковы для всех упаковочных позиций для любой позиции «Пакет продуктов», эти значения можно ввести в основную таблицу позиций; значения будут скопированы в таблицу «Упаковочный лист»."
+Free,Бесплатно
+Free Qty,Бесплатное количество
+Frequency,Частота
+from,из
+From Date,С даты
+Fulfillment Details,Детали выполнения
+Full Name,Полное имя
+Gain,Выигрыш
+Generate a fresh prepaid card and start it with an opening balance.,Создайте новую предоплаченную карту и запустите ее с начальным балансом.
+Generate and install the certificate to allow fully silent printing without trust prompts.,"Создайте и установите сертификат, чтобы разрешить полностью автоматическую печать без запросов доверия."
+Generate Certificate,Создать сертификат
+Generated scale barcode: {0},Сгенерированный штрих-код масштаба: {0}
+Get Payments,Получайте платежи
+Gift Card,Подарочная карта
+Gift card amount must be greater than zero.,Сумма подарочной карты должна быть больше нуля.
+Gift Card Code,Код подарочной карты
+Gift card code is required for redemption,Для активации требуется код подарочной карты.
+Gift card code is required.,Требуется код подарочной карты.
+Gift card issued successfully.,Подарочная карта успешно оформлена.
+Gift card loaded successfully.,Подарочная карта успешно загружена.
+Gift Card Management,Управление подарочными картами
+Gift card payment,Оплата подарочной картой
+Gift card redemption requires an online connection,Для погашения подарочной карты требуется подключение к Интернету.
+Gift card topped up successfully.,Подарочная карта успешно пополнена.
+Gift Cards,Подарочные карты
+Go to Frappe Desk,Подойдите к стойке фраппе
+Grand Total,Общий итог
+Gross Margin,Валовая прибыль
+Gross Profit,Валовая прибыль
+Gross Sales,Валовой объем продаж
+Group not found,Группа не найдена
+"Grouped controls for terminal, UI, and session settings.","Сгруппированные элементы управления для терминала, пользовательского интерфейса и настроек сеанса."
+Grouped totals for each payment method and currency,Сгруппированные итоги для каждого способа оплаты и валюты
+Hide,Скрыть
+Hide Gift Card,Скрыть подарочную карту
+Hide Non Essential Fields,Скрыть необязательные поля
+Hide quantity decimals,Скрыть десятичные дроби
+Hide search tools,Скрыть инструменты поиска
+Hide zero rated items,Скрыть товары с нулевым рейтингом
+High,Высокий
+History,История
+Hourly (Today),Ежечасно (сегодня)
+How this section works,Как работает этот раздел
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","Если устаревшие данные остались, откройте «Настройки» > «Офлайн и синхронизация» и снова запустите «Восстановить автономные данные», находясь в сети."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","Если предупреждение не исчезнет, ​​откройте «Настройки» > «Офлайн и синхронизация», затем запустите «Обновить автономные данные» или «Восстановить автономные данные»."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Импортируйте сертификат в QZ Tray и перезапустите QZ Tray на каждом POS-терминале.
+In,В
+In stock: {0},В наличии: {0}
+Include Batch / Serial,Включить пакет/серийный номер
+Include Price,Включить цену
+Increase quantity,Увеличить количество
+IndexedDB,ИндекседБД
+Initial Amount,Начальная сумма
+Initialize your shift with opening balances,Инициализируйте свою смену с начальными остатками
+Initializing application...,Инициализация приложения...
+"Inspect cache, sync, and prerequisite status","Проверка кэша, синхронизации и состояния необходимых компонентов"
+Installed Applications,Установленные приложения
+Insufficient stock:\n{0},Недостаточно товара:\n{0}
+Invalid rate,Неверный тариф
+Inventory Status Report,Отчет о состоянии инвентаря
+Invoice,Счет
+Invoice {0} is Submitted,Счет {0} отправлен
+Invoice {0} processed successfully,Счет {0} успешно обработан
+Invoice {0} submission failed,Не удалось отправить счет {0}.
+Invoice {0} was already submitted,Счет {0} уже отправлен
+Invoice Adjustments,Корректировки счетов
+Invoice Change,Изменение счета
+Invoice Details,Детали счета
+Invoice is still in draft after background submission.,Счет-фактура все еще находится в черновике после отправки предварительных данных.
+Invoice Items,Позиции счета-фактуры
+Invoice Management,Управление счетами
+Invoice Mgmt,Управление счетами
+Invoice saved offline,Счет сохранен офлайн.
+Invoice submission failed,Отправка счета не удалась
+Invoice Submitted,Счет отправлен
+"Invoice value settled by loyalty points, not cash collection","Стоимость счета рассчитывается с помощью баллов лояльности, а не получения наличных."
+Invoices,Счета-фактуры
+Invoices already past due date,Срок оплаты счетов уже просрочен
+Invoices saved as POS Invoices,Счета-фактуры сохранены как счета-фактуры POS.
+Invoices still carrying balances,Счета-фактуры все еще содержат остатки
+Issue Mode,Режим выпуска
+Issue New Card,Выпустить новую карту
+Issue Workflow,Рабочий процесс проблемы
+"Issue, top up, and check","Выпуск, пополнение и проверка"
+Item,Товар
+Item / Product Sales Report,Отчет о продажах товара/продукта
+Item {0} added to invoice,Товар {0} добавлен в счет
+Item '{0}' has no barcode,Товар '{0}' не имеет штрих-кода
+Item Code,Код товара
+Item created successfully,Объект успешно создан
+Item is out of stock,Товара нет в наличии
+Item Name,Название предмета
+Item not found,Товар не найден
+Item order updated,Порядок элементов обновлен.
+Item Selector Settings,Настройки выбора элемента
+Items,Предметы
+Items added in POS will appear here automatically.,"Товары, добавленные в POS, появятся здесь автоматически."
+Items added to invoice,Товары добавлены в счет
+Items per page,Элементов на странице
+Items Sold,Проданные товары
+Items/Invoice,Товары/Счет
+Item-wise Profitability,Постатейная рентабельность
+Journal Entry,Запись в журнале
+json,JSON
+Just now,только что
+Keep offline prerequisites healthy and recover stale data safely.,Поддерживайте работоспособность автономных компонентов и безопасно восстанавливайте устаревшие данные.
+Labels,Этикетки
+"Language, theme, terminal tools, and session controls.","Язык, тема, инструменты терминала и элементы управления сеансом."
+Last,Последний
+Last 14 Days (Paid vs Pending),Последние 14 дней (оплачено или ожидается)
+Last 14 Days Activity,Активность за последние 14 дней
+Last 14 Days Gross Profit,Валовая прибыль за последние 14 дней
+Last 14 Days Purchases,Покупки за последние 14 дней
+Last 14 Days Tax/Charges,Налоги/сборы за последние 14 дней
+Last sync:,Последняя синхронизация:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},Последняя синхронизация: {0} | ок: {1} | не удалось: {2} | пропущено: {3}
+Latest entries for current shift,Последние записи для текущей смены
+Lead Time,Время выполнения
+Limited,Ограниченный
+lines,линии
+List,Список
+Live Snapshot,Живой снимок
+Load a POS profile and cashier first.,Сначала загрузите профиль POS и кассу.
+Load More Invoices,Загрузить больше счетов
+Load previously saved invoices,Загрузить ранее сохраненные счета
+Load Sale,Загрузить распродажу
+Load Sales Invoice,Загрузить счет продажи
+Loading app data...,Загрузка данных приложения...
+Loading customer database...,Загрузка базы данных клиентов...
+Loading customers...,Загрузка клиентов...
+Loading database stats...,Загрузка статистики базы данных...
+Loading details...,Загрузка деталей...
+Loading invoice history...,Загрузка истории счетов...
+Loading items...,Загрузка элементов...
+Loading product catalog...,Загрузка каталога продукции...
+Loading return invoices...,Загрузка счетов-фактур...
+Loading server CPU/memory usage...,Загрузка использования процессора/памяти сервера...
+Loading suppliers...,Загрузка поставщиков...
+Loading unpaid invoices...,Загрузка неоплаченных счетов...
+Loading view...,Загрузка просмотра...
+Loading...,Загрузка...
+Local storage is unavailable. Switching to online-only mode.,Локальное хранилище недоступно. Переключение в онлайн-режим.
+localStorage,локальное хранилище
+Location Performance,Производительность местоположения
+Locations,Локации
+Lock Screen,Экран блокировки
+Lookup Workflow,Рабочий процесс поиска
+Loss,Потеря
+Low,Низкий
+Low Stock,Низкий запас
+Low Stock Alerts,Оповещения о низком уровне запасов
+Low Stock Items,Товары с низким запасом
+Low Stock Threshold,Низкий порог запаса
+Low Stock Total,Низкий общий запас
+Lowest Margin,Самая низкая маржа
+Low-frequency maintenance and system details.,Низкочастотное обслуживание и детали системы.
+Loyalty Redeemed,Лояльность погашена
+Loyalty Redemption,Погашение лояльности
+Make New Payment,Сделать новый платеж
+Manage all,Управлять всем
+Manage and synchronize your offline transactions,Управляйте и синхронизируйте свои офлайн-транзакции
+Manage Cashier PIN,Управление PIN-кодом кассира
+"Manage offline tools, terminal controls, and maintenance from one workspace.","Управляйте автономными инструментами, элементами управления терминалом и обслуживанием из одного рабочего пространства."
+manual,руководство
+"Manual codes, barcode scans, and QR scans work in the same field","Ручные коды, сканирование штрих-кодов и QR-сканирование работают в одном поле."
+Manual offline mode is enabled,Ручной автономный режим включен.
+Margin,Маржа
+Maximum available quantity is {0}. Quantity adjusted to match stock.,Максимальное доступное количество — {0}. Количество скорректировано в соответствии с наличием на складе.
+Maximum discount amount for this offer item is {0}.,Максимальная сумма скидки для этого предложения составляет {0}.
+Maximum discount percentage for this offer item is {0}%.,Максимальный процент скидки для этого предложения составляет {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,Максимальное количество предложения — {0}. Количество скорректировано до допустимого предела.
+Medium,Средний
+Method-wise Collections,Коллекции по методу
+Minimum allowed rate for this offer item is {0}.,Минимально допустимая цена для этого пункта предложения — {0}.
+Minimum Qty,Минимальное количество
+Mobile No,Мобильный Нет
+Mode,Режим
+Mode of Payment,Способ оплаты
+Month,Месяц
+Month ?,Месяц?
+Monthly Profit,Ежемесячная прибыль
+Monthly Sales,Ежемесячные продажи
+Monthly Sales Summary,Ежемесячная сводка продаж
+Month-wise,По месяцам
+Most Active Cashiers,Самые активные кассиры
+Movement Type,Тип движения
+Movements,Движения
+Multi Currency,Мультивалютность
+N/A,Н/Д
+Name,Имя
+Negative Stock,Отрицательный запас
+Negative Stock Items,Отрицательные запасы
+Negative values not allowed,Отрицательные значения не допускаются.
+Net,Чистая
+Net Qty,Чистое количество
+Net Sales,Чистые продажи
+Net Value,Чистая стоимость
+Never,Никогда
+New changes are ready to load,Новые изменения готовы к загрузке
+New Item,Новый товар
+New Offer Available,Доступно новое предложение
+New PIN,Новый ПИН-код
+New rate,Новый тариф
+Next unit of measure,Следующая единица измерения
+No attribute data found.,Данные атрибутов не найдены.
+No Barcode,Нет штрих-кода
+No barcode found for UOM '{0}',Не найден штрих-код для единицы измерения '{0}'.
+No branch/location data found.,Данные о филиалах/местоположении не найдены.
+No brand data found.,Данные о бренде не найдены.
+No cached gift card balance is available offline.,Кэшированный баланс подарочной карты недоступен в автономном режиме.
+No camera found on this device. Please ensure your device has a working camera.,"На этом устройстве не найдена камера. Убедитесь, что на вашем устройстве работает камера."
+No capability warnings recorded yet.,Предупреждений о возможностях пока не зарегистрировано.
+No cash expected for this shift.,Денег за эту смену не ожидается.
+No cash mode configured,Режим наличных не настроен
+No cash movement type is allowed for this POS Profile.,Для этого профиля POS не разрешен тип движения денежных средств.
+No cashier PIN is set yet. Create one now.,PIN-код кассира еще не установлен. Создайте его сейчас.
+No cashier profiles are available for this POS profile yet.,Для этого профиля POS пока нет доступных профилей кассира.
+No cashier-wise discount/void/return activity.,Никаких действий по скидкам/аннулированию/возврату со стороны кассира.
+No category data found.,Данные о категории не найдены.
+No category profitability data found.,Данные о рентабельности категории не найдены.
+No change returned recorded for this shift.,Для этой смены изменений не зарегистрировано.
+No change-allocation invoices match the current filters.,Ни один счет-фактура с распределением изменений не соответствует текущим фильтрам.
+No charge head breakdown found.,Поломки зарядной головки не обнаружено.
+No Company Selected,Компания не выбрана
+No customer sales data found.,Данные о продажах клиентов не найдены.
+No day-wise discount/void/return trend.,Нет дневной тенденции скидок/аннулирования/возврата.
+No day-wise payment data found.,Данных о ежедневных платежах не найдено.
+No day-wise profitability trend found.,Дневной тренд прибыльности не обнаружен.
+No day-wise purchase data found.,Данных о покупках за день не найдено.
+No day-wise sales trend found.,Дневной тренд продаж не обнаружен.
+No day-wise tax/charges trend found.,Дневной тренд налогов/сборов не обнаружен.
+No dead stock items.,Нет мертвых товаров на складе.
+No due date,Нет срока сдачи
+No exact repair match found for this invoice,Для этого счета-фактуры не найдено точного совпадения по ремонту.
+No hourly sales trend found for today.,На сегодня не обнаружено почасовой тенденции продаж.
+No invoice activity found.,Активность по счетам не обнаружена.
+No invoices found,Счета-фактуры не найдены
+No invoices found. Try different search criteria.,Счета-фактуры не найдены. Попробуйте другие критерии поиска.
+No invoices recorded for this shift.,За эту смену не зарегистрировано ни одного счета.
+No item profitability data found.,Данные о рентабельности позиции не найдены.
+No item sales data found for this period.,Данных о продажах товаров за этот период не найдено.
+No items found,Элементы не найдены
+No items in cart,В корзине нет товаров
+No items with barcodes to print,Нет товаров со штрих-кодами для печати
+No location-wise top item data found.,Данные о главных позициях с точки зрения местоположения не найдены.
+No low stock alerts right now.,На данный момент оповещений о низком уровне запасов нет.
+No low stock items.,Нет товаров с низкими запасами.
+No matching items in cart,В корзине нет подходящих товаров
+No month-wise sales trend found.,Ежемесячной тенденции продаж не обнаружено.
+No negative stock items.,Нет отрицательных позиций на складе.
+No notifications yet,Уведомлений пока нет
+No offline cash movement synced.,Движение денежных средств в автономном режиме не синхронизируется.
+No offline invoices pending synchronization,"Нет офлайн-счетов, ожидающих синхронизации."
+No offline sync issues recorded yet.,Проблем с автономной синхронизацией пока не зарегистрировано.
+No out-of-stock items.,"Нет товаров, отсутствующих в наличии."
+No outstanding credit invoices for this shift.,Нет непогашенных счетов-фактур за эту смену.
+No payment collection data found.,Данные о сборе платежей не найдены.
+No payment rows available on this invoice.,В этом счете нет доступных строк оплаты.
+No payments registered for this shift.,Платежей за эту смену не зарегистрировано.
+No pending balances in this period.,Никаких ожидающих остатков в этот период нет.
+No pending offline invoices,Нет ожидающих офлайн-счетов
+No Print Formats Found,Форматы печати не найдены
+No profiles found for selected scope. Falling back to current profile failed.,Для выбранной области профили не найдены. Не удалось вернуться к текущему профилю.
+No recent customer activity found.,Недавней активности клиентов не обнаружено.
+No recent stock entries found.,Недавних записей на бирже не найдено.
+No records found,Записи не найдены
+No reorder suggestions right now.,На данный момент предложений по повторному заказу нет.
+No repeat customers in this period.,Постоянных клиентов за этот период не было.
+No response from server,Нет ответа от сервера
+No return invoices found,Счета-фактуры на возврат не найдены
+No return item trend found.,Тенденция возврата товаров не обнаружена.
+No returnable items found for this invoice,Для этого счета не найдено возвратных товаров.
+No returns were processed in this shift.,В эту смену возвраты не обрабатывались.
+No risk activity found.,Рискованной деятельности не обнаружено.
+No sales activity found for this period.,За этот период продаж не обнаружено.
+No slow moving items.,Никаких медленно движущихся предметов.
+No staff sales activity found.,Никакой активности по продажам персонала не обнаружено.
+No stock movement for this period.,Никакого движения запасов за этот период.
+No submitted cash movements in this shift.,В этой смене не зарегистрировано движение денежных средств.
+No supplier purchases found in this month.,В этом месяце закупок у поставщиков не обнаружено.
+No suppliers found for this period.,За этот период поставщиков не найдено.
+No sync trigger has run yet in this session.,В этом сеансе еще не запускался ни один триггер синхронизации.
+No tax head breakdown found.,Никакой разбивки налоговой главы не обнаружено.
+No top items found for this location.,Для этого места не найдено лучших товаров.
+No unpaid invoices,Никаких неоплаченных счетов
+No variant data found.,Данные о вариантах не найдены.
+No week-wise sales trend found.,Недельной тенденции продаж не обнаружено.
+No.,Нет.
+Nobile Number,Нобиле номер
+Not available,Недоступно
+Not checked,Не проверено
+Not selected,Не выбрано
+Not Set,Не установлено
+Notifications,Уведомления
+Offer,Предложение
+Offer Applied,Предложение применено
+Offer criteria exceeded,Критерии предложения превышены
+Offer Item,Предложить товар
+Offer item unavailable,Товар предложения недоступен
+Offer Removed,Предложение удалено
+Offer UOM cannot be changed,Единицу предложения нельзя изменить
+Offer?,Предложение?
+Offers,Предложения
+Offline,Оффлайн
+Offline & Sync,Офлайн и синхронизация
+Offline Capabilities,Автономные возможности
+Offline data status refreshed,Статус офлайн-данных обновлен.
+Offline diagnostics,Оффлайн диагностика
+Offline Invoices,Офлайн-счета
+Offline invoices status,Статус офлайн-счетов
+Offline invoices synced,Офлайн-счета синхронизированы
+Offline Queue: {0},Офлайн-очередь: {0}
+Offline rebuild guidance,Руководство по автономному восстановлению
+Offline restore is unavailable for this session.,Автономное восстановление недоступно для этого сеанса.
+Offline selling is available with degraded capabilities.,Офлайн-продажа доступна с ухудшенными возможностями.
+Offline snapshot does not match the current POS state.,Автономный снимок не соответствует текущему состоянию POS.
+Offline Status,Офлайн-статус
+"Offline, terminal, and system controls","Автономное управление, управление терминалом и системой"
+OK,ОК
+Online,Онлайн
+Open actions menu,Открыть меню действий
+Open balance to collect,Открытый баланс для получения
+Open Customer Display,Открыть дисплей покупателя
+Open drawer,Открыть ящик
+Open invoices,Открытые счета
+Open Payments?,Открытые платежи?
+Open POS home,Открыть главную страницу POS
+Open this screen from POS Menu -> Open Customer Display.,Откройте этот экран из меню POS -> Открыть дисплей покупателя.
+OpenCV image processing enabled - Enhanced barcode detection,Включена обработка изображений OpenCV — улучшенное обнаружение штрих-кода.
+OpenCV image processing unavailable on this device,Обработка изображений OpenCV недоступна на этом устройстве
+OpenCV Off,OpenCV выкл.
+OpenCV On,OpenCV включен
+OpenCV processing disabled,Обработка OpenCV отключена
+Opening Amount,Начальная сумма
+Opening Cash,Открытие денежных средств
+options,варианты
+Order,Заказать
+Original,Оригинал
+Other,Другое
+Out,Выход
+Out of Stock,Нет в наличии
+Out of Stock Items,Товаров нет в наличии
+Outstanding,Выдающийся
+Outstanding Credit by Currency,Непогашенный кредит по валютам
+Overdue,Просрочено
+Overpayment Change,Изменение переплаты
+Overpayment change deducted: {0},Изменение переплаты вычтено: {0}
+Packing List,Упаковочный лист
+Page Format,Формат страницы
+Page unavailable offline,Страница недоступна офлайн
+Paid,Платный
+Paid (orig):,Платный (оригинал):
+Paid Amount,Оплаченная сумма
+Paid change cannot be greater than total change!,Платная сдача не может превышать общую сдачу!
+Paid:,Оплачено:
+Parent Item,Родительский элемент
+Partial,Частичный
+Partly Paid,Частично оплачено
+Party Account,Партийный аккаунт
+Party Type,Тип вечеринки
+Pause terminal until next cashier,Приостановить терминал до следующего кассира
+PAY,ПЛАТИТЬ
+Payment,Оплата
+Payment Account,Платежный счет
+Payment entries processed for Invoice {0},Платежные записи для счета {0} обработаны.
+Payment Entry Type,Тип записи платежа
+Payment History,История платежей
+Payment ID,Идентификатор платежа
+Payment Method Report,Отчет о способах оплаты
+Payment Methods,Способы оплаты
+Payment of {0} received successfully.,Платеж на сумму {0} успешно получен.
+Payment Progress,Прогресс платежа
+Payment Reconciliation,Сверка платежей
+Payment request status could not be retrieved. Please try again,"Не удалось получить статус запроса платежа. Пожалуйста, попробуйте еще раз"
+Payment Request took too long to respond. Please try requesting for payment again,"Ответ на запрос платежа занял слишком много времени. Пожалуйста, попробуйте запросить платеж еще раз."
+Payment saved offline,Платеж сохранен офлайн.
+Payment State,Состояние платежа
+Payment Status,Статус платежа
+Payment submitted but print function could not be executed. Payment name not found.,"Платеж отправлен, но функция печати не может быть выполнена. Название платежа не найдено."
+Payment submitted.,Платеж отправлен.
+Payment Summary,Сводка платежей
+Payments,Платежи
+Payments are not open. Do you want to open payments and submit?,Платежи не открыты. Вы хотите открыть платежи и отправить?
+Payments by Mode of Payment,Платежи по способам оплаты
+PDF,PDF
+Peak Hour,Час пик
+Peak Memory:,Пиковая память:
+Peak Server:,Пиковый сервер:
+Peak:,Пик:
+Pending,Ожидается
+Pending Amount,Ожидаемая сумма
+Pending count updated from {0} to {1},Количество ожидающих обновлений изменено с {0} на {1}
+Pending Exposure,Ожидается раскрытие
+Pending Invoices,Ожидающие счета
+Pending Ratio,Ожидаемый коэффициент
+Pending Sales,Ожидающие продажи
+Pending sales: {0} | Cache usage: {1}%,Ожидаемые продажи: {0} | Использование кэша: {1}%
+Pending Sync,Ожидает синхронизации
+Pending: {0},В ожидании: {0}
+Pending: {0} | Synced: {1} | Draft: {2},В ожидании: {0} | Синхронизировано: {1} | Черновик: {2}
+Per Page,За страницу
+Personal,Персональный
+Personal preferences adjust the current cashier experience without changing the active POS route.,Личные настройки настраивают текущий опыт кассира без изменения активного маршрута POS.
+PIN confirmation does not match.,Подтверждение PIN-кода не совпадает.
+PIN must be 4 to 8 digits.,PIN-код должен состоять из 4–8 цифр.
+Please add at least one item.,"Пожалуйста, добавьте хотя бы один товар."
+Please allow camera access to scan codes,Разрешите камере доступ к скан-кодам
+Please enter payment amount,"Пожалуйста, введите сумму платежа"
+Please fill all required fields,"Пожалуйста, заполните все обязательные поля"
+Please make a payment or select a payment,"Пожалуйста, произведите платеж или выберите платеж"
+Please request phone payment or use another payment method,"Пожалуйста, запросите оплату по телефону или используйте другой способ оплаты."
+Please select a customer first,"Пожалуйста, сначала выберите клиента"
+Please select a party,"Пожалуйста, выберите вечеринку"
+Please select a party before reconciling.,"Пожалуйста, выберите сторону перед примирением."
+Please select a valid movement type.,"Пожалуйста, выберите действительный тип движения."
+Please select an invoice,"Пожалуйста, выберите счет"
+Please select company before reconciling.,"Пожалуйста, выберите компанию перед согласованием."
+Please set the customer's mobile number,"Пожалуйста, укажите номер мобильного телефона клиента"
+Please try again or enter the item manually.,"Пожалуйста, попробуйте еще раз или введите элемент вручную."
+Please verify the barcode or check the item's availability.,"Пожалуйста, проверьте штрих-код или наличие товара."
+Points,Очки
+Popup blocked. Please allow popups.,"Всплывающее окно заблокировано. Пожалуйста, разрешите всплывающие окна."
+POS,POS-терминал
+POS controls and maintenance,POS-контроль и обслуживание
+POS Expense is disabled for this POS Profile.,Расходы POS отключены для этого профиля POS.
+POS is running with limited offline prerequisites.,POS работает с ограниченными предварительными условиями для работы в автономном режиме.
+POS Profile,POS-профиль
+Position the QR code or barcode within the scanning area,Разместите QR-код или штрих-код в области сканирования.
+Posting,Публикация
+Posting and Price List,Публикация и прайс-лист
+Posting Date,Дата публикации
+Preparing background sync,Подготовка фоновой синхронизации
+"Press OK to continue offline with a warning, or Cancel to retry.","Нажмите «ОК», чтобы продолжить работу в автономном режиме с предупреждением, или «Отмена», чтобы повторить попытку."
+Previous unit of measure,Предыдущая единица измерения
+Price List,Прайс-лист
+Price List Rate,Прайс-лист
+Price list rate updated locally only,Стоимость прайс-листа обновляется только локально
+Pricing & Discounts,Цены и скидки
+Pricing Rule,Правило ценообразования
+Print,Распечатать
+Print Draft,Распечатать черновик
+Print Format (Invoice),Формат печати (счет-фактура)
+Print Format (Order),Формат печати (заказ)
+Print invoice,Распечатать счет
+Print Purchase Invoice instead of PO,Распечатать счет на покупку вместо заказа на поставку
+Printer,Принтер
+Processed returns impacting the shift totals,"Обработанные возвраты, влияющие на общее количество смен"
+Processing Payment,Обработка платежа
+Processing payment entries for Invoice {0},Обработка платежных записей для счета {0}
+Profile,Профиль
+Profiles,Профили
+Profit,Прибыль
+Profit: Invoice Item Estimate,Прибыль: оценка позиции счета-фактуры
+Profit: Stock Ledger (COGS),Прибыль: Книга запасов (COGS)
+Profitability Report,Отчет о рентабельности
+Prorated return discount,Пропорциональная скидка на возврат
+Purchase Amount,Сумма покупки
+Purchase Invoices,Счета за покупку
+Purchase Order created,Заказ на поставку создан
+Qty,Кол-во
+Qualified,Квалифицированный
+Quantity,Количество
+Quantity exceeds available stock,Количество превышает доступный запас
+Quick Actions,Быстрые действия
+Quotation {0} is Submitted,Предложение {0} отправлено
+Quotation submitted,Предложение отправлено
+QZ Tray connected.,Лоток QZ подключен.
+QZ Tray is manually disconnected. Press Connect to enable it again.,"QZ Tray отключен вручную. Нажмите «Подключиться», чтобы снова включить его."
+QZ Tray is not connected.,Лоток QZ не подключен.
+QZ Tray Setup,Настройка лотка QZ
+Rate,Оценить
+Rate adjusted to maximum allowed discount,Ставка скорректирована с учетом максимально допустимой скидки
+Ready,Готово
+Ready to resume,Готов возобновить
+Ready!,Готово!
+Real-time POS insights for retail operations.,POS-информация в режиме реального времени для розничных операций.
+Rebuild Offline Data,Восстановить автономные данные
+Receive,Получить
+Receive now,Получите сейчас
+Received,Получено
+Received:,Получено:
+Recent Movement Entries,Недавние записи движения
+Recent updates about your invoices,Последние обновления о ваших счетах
+Recently Active Customers,Недавно активные клиенты
+Rechecking connection,Перепроверка соединения
+Reconcile payment methods and close shift,Согласовать способы оплаты и закрыть смену
+Reconciling Payments,Сверка платежей
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","Подключитесь повторно и откройте эту страницу один раз, находясь в сети, после чего автономные обновления смогут ее восстановить."
+Reconnect online to refresh cached offline data from the server.,"Повторно подключитесь к сети, чтобы обновить кэшированные автономные данные с сервера."
+Recreate local offline prerequisites from scratch,Воссоздайте локальные обязательные условия для автономной работы с нуля.
+Recv:,Получение:
+Redeem,выкупить
+Redeem / Scan,Погасить / Сканировать
+Redeem Amount,Сумма погашения
+Redeem Mode,Режим активации
+Redeemed Amount,Погашенная сумма
+Redeemed credit cannot be greater than its total.,Погашенный кредит не может быть больше его общей суммы.
+Redemption and Totals,Погашение и итоги
+Reference,Ссылка
+Refresh,Обновить
+Refresh Exchange Rate,Обновить курс обмена
+Refresh Offline Data,Обновить автономные данные
+Refresh Printers,Обновить принтеры
+Refund,Возврат
+Release Notes,Примечания к выпуску
+Reload,Перезагрузить
+Reload customers,Перезагрузить клиентов
+Reload Items,Перезагрузить предметы
+Reload Now,Перезагрузить сейчас
+Reload to apply the latest changes. Your current session will be refreshed.,"Перезагрузите, чтобы применить последние изменения. Ваш текущий сеанс будет обновлен."
+Reload Workflow,Перезагрузить рабочий процесс
+Remarks,Примечания
+Remarks are required.,Замечания обязательны.
+Remove,Удалить
+Remove barcode item,Удалить элемент со штрих-кодом
+Remove cached data and reload the POS app,Удалите кэшированные данные и перезагрузите приложение POS.
+Remove item,Удалить элемент
+Remove Offer,Удалить предложение
+Reorder / Purchase Suggestions,Предложения по повторному заказу/покупке
+Repair Candidate,Кандидат на ремонт
+Repair Change Allocation,Распределение ремонтных изменений
+Repair requires an online connection,Для ремонта требуется подключение к Интернету
+Repaired,Отремонтировано
+Repairing change allocation,Исправление распределения изменений
+Repeat Customers,Постоянные клиенты
+Repeat Rate,Частота повторения
+Request,Запрос
+Request ID: {0},Идентификатор запроса: {0}
+Request Payment,Запросить оплату
+Requested route: {0},Запрошенный маршрут: {0}
+Required columns cannot be hidden,Обязательные столбцы не могут быть скрыты
+Reset,Сброс
+Reset item name,Сбросить имя элемента
+Reset to Default,Сбросить настройки по умолчанию
+Resource Health,Здоровье ресурсов
+Restricted,Ограниченный
+Restricted operational controls for supervisors only.,Ограниченный оперативный контроль только для руководителей.
+Retry,Повторить попытку
+Retry route,Повторить маршрут
+Return,Возврат
+Return Amount,Сумма возврата
+Return Count,Количество возвратов
+Return items must have negative quantities,Возвращаемые товары должны иметь отрицательное количество.
+Return total must be negative,Сумма возврата должна быть отрицательной.
+Return Valid Until,Возврат действителен до
+Return window passed,Окно возврата пройдено
+Return without Invoice,Возврат без счета
+Returns,Возврат
+Returns / Voids / Discounts,Возврат / Аннулирование / Скидки
+Returns by Currency,Возврат по валюте
+Revenue,Доход
+Review shift totals before submitting the closing entry,Просмотрите итоговые данные смены перед отправкой заключительной записи.
+Round Off,Округление
+Rows,Строки
+Rows:,Строки:
+Rule,Правило
+Sale,Продажа
+Sales,Продажи
+Sales Order {0} is Submitted,Заказ на продажу {0} отправлен
+Sales Person and Print,Продавец и печать
+Sales Person not found,Продавец не найден
+Sales processed,Продажи обработаны
+Sales Return,Возврат продаж
+Sales Trend Report,Отчет о тенденциях продаж
+Save,Сохранить
+Save & Clear,Сохранить и очистить
+Save as POS Profile Default,Сохранить как профиль POS по умолчанию
+Save Settings,Сохранить настройки
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,"Сохраните выбранный принтер в качестве профиля POS по умолчанию, чтобы он автоматически отображался при этой настройке."
+Saved as draft because: {0},"Сохранено как черновик, потому что: {0}"
+Saving...,Сохранение...
+Scale barcode detected. Quantity here is the number of labels to print.,"Обнаружен штрих-код весов. Количество – это количество этикеток, которые нужно напечатать."
+Scale barcode settings are not configured. Using item barcode only.,Настройки штрих-кода весов не настроены. Использование только штрих-кода товара.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,Для этого элемента/единицы измерения отсутствует штрих-код шаблона масштаба. Использование только штрих-кода товара.
+Scan an existing card and top it up without leaving the payment flow.,"Отсканируйте существующую карту и пополните ее, не выходя из потока платежей."
+Scan Error,Ошибка сканирования
+Scan or enter a gift card code to check balance or redeem.,"Отсканируйте или введите код подарочной карты, чтобы проверить баланс или активировать ее."
+Scan or paste the card code below.,Отсканируйте или вставьте код карты ниже.
+Scan QR Code/Barcode,Сканировать QR-код/штрих-код
+Scan with camera,Сканировать с помощью камеры
+Scan-First Flow,Первый поток сканирования
+Scanned Code:,Сканированный код:
+Scanning for: {0},Сканирование: {0}
+Scanning items,Сканирование предметов
+Scan-Ready,Готов к сканированию
+Scope,Область применения
+Scope: All Profiles,Область применения: Все профили
+Scope: Current Profile,Область действия: текущий профиль
+Scope: Specific Profile,Область применения: конкретный профиль
+Search,Поиск
+Search Account,Поиск аккаунта
+Search an invoice and continue the return flow without extra steps.,Найдите счет-фактуру и продолжите возврат без дополнительных действий.
+Search customer,Поиск клиента
+Search invoices or customers,Поиск счетов или клиентов
+Search item,Поиск элемента
+Search item / code,Искать предмет/код
+Search items or barcode,Поиск товаров или штрих-кода
+Search Mpesa Payments,Поиск платежей Mpesa
+Search return invoices or customers,Поиск счетов-фактур или клиентов
+Search supplier,Поиск поставщика
+Search unpaid invoices or customers,Поиск неоплаченных счетов или клиентов
+Secure context (HTTPS or localhost) is required for camera access.,Для доступа к камере требуется безопасный контекст (HTTPS или локальный хост).
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,"Для доступа к камере требуется безопасный контекст (HTTPS). Пожалуйста, используйте HTTPS для доступа к камере."
+Select,Выбрать
+Select a cashier first.,Сначала выберите кассу.
+Select a customer,Выберите клиента
+Select a customer to use coupon,"Выберите клиента, который будет использовать купон"
+Select a printer to use QZ silent printing.,Выберите принтер для использования бесшумной печати QZ.
+Select Batch,Выберите пакет
+Select Columns to Display,Выберите столбцы для отображения
+Select items to sell,Выберите предметы для продажи
+Select Payment,Выберите оплату
+Select Payment Account,Выберите платежный счет
+Select printer,Выберите принтер
+Select Return Invoice,Выберите счет на возврат
+Select S.O,Выберите С.О.
+Select Sales Orders,Выберите заказы на продажу
+Select the cashier who is taking over this terminal.,"Выберите кассира, который принимает на себя управление этим терминалом."
+Selected,Выбрано
+Selected movement type is not allowed by POS Profile.,Выбранный тип движения не разрешен профилем POS.
+Selected Payments,Выбранные платежи
+Sensitive actions kept away from quick taps.,Чувствительные действия держатся подальше от быстрых нажатий.
+Serial,Серийный
+Serial Numbers,Серийные номера
+Server CPU Usage:,Использование ЦП сервера:
+Server Health,Состояние сервера
+Server Memory Usage:,Использование памяти сервера:
+Server Metrics,Метрики сервера
+Server Uptime:,Время работы сервера:
+Service Charges,Плата за обслуживание
+Session,Сессия
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,Установите каждый PIN-код кассира в форме пользователя и сохраните назначение участников терминала в профиле пользователя POS.
+Settings,Настройки
+Settings in this section update the POS workspace without changing the current route.,Настройки в этом разделе обновляют рабочую область POS без изменения текущего маршрута.
+Setup complete!,Настройка завершена!
+Share,Поделиться
+Shared terminal,Общий терминал
+Shift Closed Snapshot,Сдвиг закрытого снимка
+Shift Overview,Обзор смены
+Show,Показать
+Show cart on customer-facing screen,"Показывать корзину на экране, ориентированном на клиента."
+Show last invoice rate,Показать ставку последнего счета
+Show rate info,Показать информацию о тарифе
+Show Repair Candidates,Показать кандидатов на ремонт
+Show search tools,Показать инструменты поиска
+Show the active cart on a customer-facing screen,"Покажите активную корзину на экране, ориентированном на клиента."
+Showing {0}-{1} of {2},Показаны {0}-{1} из {2}
+Showing 0 of 0,Показаны 0 из 0
+Shows the distribution of invoices per currency,Показывает распределение счетов по валютам
+Sign out of the current POS session,Выйти из текущего сеанса POS
+Size:,Размер:
+Skipped Payments,Пропущенные платежи
+Skipping items without barcodes,Пропуск товаров без штрих-кодов
+Slow Moving,Медленное движение
+Slow Moving Items,Медленно движущиеся предметы
+Slow Queries:,Медленные запросы:
+Sold,Продано
+Source,Источник
+Source Cash Account (Optional Override),Исходный денежный счет (необязательное переопределение)
+Source Ex. Rate:,Источник Пр. Цена:
+Source Rate:,Исходная ставка:
+Specific Profile,Конкретный профиль
+Split Invoices,Разделить счета
+Staff / Cashier Performance Report,Отчет о работе персонала/кассира
+Status,Статус
+Stock,Акции
+Stock Information,Информация о запасах
+Stock is lower than requested,Запас ниже запрошенного
+Stock is lower than requested:\n{0},Запас меньше запрошенного:\n{0}
+Stock Movement Report,Отчет о движении запасов
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,"Обновление запасов: у {0} есть в наличии {1}. Добавление {2} приведет к тому, что запас опустится ниже нуля."
+Submit,Представлять на рассмотрение
+Submit & Print,Отправить и распечатать
+Submit Deposit,Отправить депозит
+Submit Expense,Отправить расходы
+Submitted,Отправлено
+Submitted Cash Movements,Представленные движения денежных средств
+Submitted entries,Отправленные записи
+Successfully scanned:,Успешно отсканировано:
+Suggested,Предлагается
+Suggested Qty,Рекомендуемое количество
+Supervisor Access,Доступ супервизора
+Supervisor permissions unlock issuance and reloads,Разрешения супервизора разблокируют выдачу и перезагрузку
+Supervisor Tools,Инструменты супервизора
+Supplier,Поставщик
+Supplier and dates are required.,Требуется поставщик и даты.
+Supplier Invoices,Счета-фактуры поставщиков
+Supplier is required.,Требуется поставщик.
+Supplier name is required,Требуется имя поставщика
+Supplier Payments,Платежи поставщикам
+Supplier Purchase Summary,Сводная информация о закупках поставщика
+Suppliers,Поставщики
+Suppliers not found,Поставщики не найдены
+Switch Camera,Переключить камеру
+Switch Cashier,Сменить кассу
+Switch the POS appearance theme,Переключить тему оформления POS
+Switched to:,Переключился на:
+Sync All Invoices,Синхронизировать все счета
+Sync Offline Cash Movements ({0}),Синхронизация движения денежных средств в автономном режиме ({0})
+Sync Offline Sales,Синхронизировать офлайн-продажи
+Synced {0} offline cash movement(s).,Синхронизировано движение денежных средств в автономном режиме ({0}).
+Syncing items in background,Синхронизация элементов в фоновом режиме
+System / Diagnostics,Система/Диагностика
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","Системные действия — это низкочастотные элементы управления обслуживанием, такие как информация о приложении, диагностика поддержки и элементы управления сеансом."
+System Information,Информация о системе
+System Status,Статус системы
+Tables:,Таблицы:
+Tap the button below to redeem a gift card during checkout.,"Нажмите кнопку ниже, чтобы активировать подарочную карту во время оформления заказа."
+Target,Цель
+Target Ex. Rate:,Целевой экс. Цена:
+Target Rate:,Целевая ставка:
+Tax,Налог
+Tax / Charges Report,Отчет о налогах/сборах
+Tax Heads,Налоговые руководители
+Taxable Amount,Налогооблагаемая сумма
+Tendered,Тендер
+Terminal,Терминал
+Terminal & Devices,Терминал и устройства
+Terminal locked,Терминал заблокирован
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","Инструменты терминала влияют на эту кассовую станцию, дисплеи, ориентированные на клиентов, и будущие средства управления принтером/устройством."
+Territory not found,Территория не найдена
+The amount paid is not complete,Выплаченная сумма не полная
+The app stores data locally for offline use. This is called cache.,Приложение хранит данные локально для использования в автономном режиме. Это называется кэшем.
+The invoice stayed in draft. Please review and submit it manually.,"Счет-фактура остался в черновике. Пожалуйста, просмотрите и отправьте его вручную."
+The maximum discount allowed is,Максимально допустимая скидка составляет
+The quantity for {0} has been adjusted to the maximum available stock.,Количество для {0} было скорректировано до максимально доступного запаса.
+The system could not retrieve the item details. Please try again.,"Системе не удалось получить подробную информацию об элементе. Пожалуйста, попробуйте еще раз."
+These invoices will be synced when connection is restored,Эти счета будут синхронизированы после восстановления соединения.
+This action now opens inside the settings workspace.,Теперь это действие открывается в рабочей области настроек.
+This coupon already used !,Этот купон уже использован!
+This invoice does not need change-allocation repair,Этот счет не требует исправления распределения сдачи.
+This invoice is already repaired,Этот счет уже исправлен
+This is an item template. Please choose a variant.,"Это шаблон элемента. Пожалуйста, выберите вариант."
+this item,этот предмет
+This POS page could not be opened offline because its code was not cached on this terminal yet.,"Эту страницу POS невозможно открыть в автономном режиме, поскольку ее код еще не был кэширован на этом терминале."
+This Serial Number {0} has already been added!,Этот серийный номер {0} уже добавлен!
+Threshold,Порог
+Time,Время
+Tip: Clear cache regularly to free up space and keep the app fast.,"Совет: регулярно очищайте кеш, чтобы освободить место и обеспечить быстроту работы приложения."
+Tip: Close unused tabs or apps to reduce lag.,"Совет. Закройте неиспользуемые вкладки и приложения, чтобы уменьшить задержку."
+Tip: Monitor slow queries and table size for optimal performance.,Совет: Следите за медленными запросами и размером таблицы для достижения оптимальной производительности.
+To Be Paid,Платить
+To Date,На сегодняшний день
+Today,Сегодня
+Today Profit,Сегодняшняя прибыль
+Today Sales,Сегодня продажи
+Toggle navigation drawer,Переключить панель навигации
+Toggle Theme,Переключить тему
+Tools,Инструменты
+Tools for customer-facing screens and terminal-specific actions.,"Инструменты для экранов, ориентированных на клиента, и действий, специфичных для терминала."
+Top Brand,Лучший бренд
+Top Category,Высшая категория
+Top Charge Head,Верхняя зарядная головка
+Top Customers,Лучшие клиенты
+Top Discount,Лучшие скидки
+Top Items by Location,Топ товаров по местоположению
+Top Margin,Верхняя маржа
+Top Pending,Топ в ожидании
+Top Profit Item,Самая прибыльная статья
+Top Return Items,Наиболее часто возвращаемые товары
+Top Sales by Cashier,Топ продаж по кассиру
+Top Supplier,Лучший поставщик
+Top Suppliers by Spend,Лучшие поставщики по расходам
+Top Tables,Лучшие столы
+Top Tax Head,Главный налоговый директор
+Top Up Amount,Сумма пополнения
+Top Up Card,Карта пополнения счета
+Top Up Mode,Режим пополнения счета
+Top Variant,Лучший вариант
+Total,Итого
+Total Amount,Общая сумма
+Total Change,Полное изменение
+Total Charges,Общая сумма сборов
+Total In,Всего в
+Total Invoices,Всего счетов
+Total Items,Всего предметов
+Total Mpesa,Всего Мпеса
+Total Out,Тотал аут
+Total Payments,Итого платежей
+Total Purchase,Общая сумма покупки
+Total Selected :,Всего выбрано:
+Total Size,Общий размер
+Total Stock Qty,Общее количество на складе
+Total:,Итого:
+Totals by Invoice Currency,Итоги по валюте счета
+Track how much cash was handed back to customers,"Отслеживайте, сколько денег было возвращено клиентам"
+"Track recent sales, collect unpaid balances, and reopen saved work","Отслеживайте недавние продажи, собирайте неоплаченные остатки и повторно открывайте сохраненную работу."
+Transaction ID,Идентификатор транзакции
+Transfer,Трансфер
+Try a different search term or clear the cart search.,Попробуйте другой поисковый запрос или очистите поиск в корзине.
+Try adjusting your search or filters,Попробуйте настроить поиск или фильтры.
+Try another source or refresh the list.,Попробуйте другой источник или обновите список.
+Try changing the date range or status filter.,Попробуйте изменить диапазон дат или фильтр статуса.
+Type,Тип
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,"Невозможно получить доступ к камере даже с базовыми настройками. Пожалуйста, проверьте разрешения вашей камеры и совместимость устройства."
+Unable to add offer item {0}. Please refresh and try again.,"Невозможно добавить элемент предложения {0}. Пожалуйста, обновите и повторите попытку."
+Unable to add offer item. Please refresh and try again.,"Невозможно добавить элемент предложения. Пожалуйста, обновите и повторите попытку."
+Unable to add scanned item.,Невозможно добавить отсканированный элемент.
+Unable to create purchase order,Невозможно создать заказ на покупку
+Unable to delete draft invoice,Невозможно удалить черновик счета.
+Unable to fetch documents,Не удалось получить документы
+Unable to fetch draft orders,Не удалось получить черновики заказов.
+Unable to fetch invoice history,Не удалось получить историю счетов.
+Unable to fetch M-Pesa payments,Не удалось получить платежи M-Pesa.
+Unable to fetch sales orders,Не удалось получить заказы на продажу
+Unable to fetch unpaid invoices,Не удалось получить неоплаченные счета.
+Unable to generate scale barcode,Невозможно создать масштабный штрих-код
+Unable to issue gift card.,Невозможно выдать подарочную карту.
+Unable to load cashier PIN status.,Невозможно загрузить статус PIN-кода кассира.
+Unable to load document,Невозможно загрузить документ
+Unable to load draft invoice,Не удалось загрузить черновик счета.
+Unable to load gift card balance.,Невозможно пополнить баланс подарочной карты.
+Unable to load invoice details,Не удалось загрузить данные счета-фактуры.
+Unable to load parked order,Невозможно загрузить припаркованный заказ
+Unable to load the selected sales order,Невозможно загрузить выбранный заказ на продажу.
+Unable to prepare document,Невозможно подготовить документ
+Unable to prepare return invoice,Невозможно подготовить счет на возврат
+Unable to print draft invoice,Невозможно распечатать черновик счета
+Unable to print submitted invoice,Невозможно распечатать отправленный счет
+Unable to process document action,Невозможно обработать действие документа
+Unable to repair change allocation,Невозможно исправить распределение изменений.
+Unable to save cashier PIN.,Не удалось сохранить PIN-код кассира.
+Unable to save the rate to the backend price list,Невозможно сохранить тариф в прайс-листе на сервере.
+Unable to submit invoice,Невозможно отправить счет
+Unable to submit the selected payment,Невозможно отправить выбранный платеж
+Unable to top up gift card.,Невозможно пополнить подарочную карту.
+Unable to verify cashier PIN.,Не удалось проверить PIN-код кассира.
+Unallocated,Нераспределенный
+Unallocated:,Нераспределенный:
+Unavailable,Недоступно
+Unknown,Неизвестно
+Unknown Item,Неизвестный предмет
+Unknown Warehouse,Неизвестный склад
+Unlock POS,Разблокировать POS
+Unpaid,Неоплачиваемый
+"Unselected payments stay unallocated first, then auto reconcile after submit.","Невыбранные платежи сначала остаются нераспределенными, а после отправки автоматически сверяются."
+UOM,Единица измерения
+UOM not found,Единица измерения не найдена
+Update available,Доступно обновление
+Update Customer,Обновить клиента
+Update PIN,Обновить PIN-код
+Update Price List Rate,Обновление прайс-листа
+Updated,Обновлено
+Updates and app info that stay out of the cashier flow.,"Обновления и информация о приложениях, которые не попадают в поток кассира."
+Updates automatically,Обновляется автоматически
+Usage,Использование
+Usage Stats,Статистика использования
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,Используйте PIN-код длиной от 4 до 8 цифр для переключения кассы и разблокировки терминала.
+Use Cashier,Используйте кассу
+Use date range to search for older invoices,Используйте диапазон дат для поиска старых счетов-фактур.
+"Use one field for manual code entry, barcode scans, or QR scans.","Используйте одно поле для ввода кода вручную, сканирования штрих-кода или QR-кода."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","Используйте один рабочий процесс для проверки баланса, нового выпуска и пополнения баланса, не покидая POS."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","Используйте этот раздел, если кэшированные необходимые данные требуют обновления, перестроения или диагностической проверки."
+Use Western numerals,Используйте западные цифры
+Used:,Использовано:
+Using basic camera settings due to device limitations,Использование основных настроек камеры из-за ограничений устройства
+Using cached customer balance,Использование кэшированного баланса клиента
+Valid until,Действительно до
+Variance %,Отклонение %
+Variants,Варианты
+Variant-wise,Вариант-мудрый
+Verify closing amounts for each payment method,Проверка итоговых сумм для каждого способа оплаты
+View all,Посмотреть все
+View app information and current build details,Просмотр информации о приложении и сведений о текущей сборке
+View Data Diagnostics,Просмотр диагностики данных
+View Details,Посмотреть детали
+View invoice details,Посмотреть детали счета
+View notifications,Просмотр уведомлений
+View offline invoices,Просмотр офлайн-счетов
+View restricted POS insights,Просмотр ограниченной информации о POS-терминалах
+Void Amount,Аннулировать сумму
+Void Count,Пустотный счетчик
+Voids,Пустоты
+Waiting for cart items,Ожидание товаров в корзине
+Waiting for payment...,Ожидание оплаты...
+Walk-in Customer,Приходящий клиент
+Warehouse,Склад
+Warning: High cache usage may affect performance.,Предупреждение. Высокое использование кэша может повлиять на производительность.
+Warning: High lag may indicate heavy processing or browser slowness.,Предупреждение. Высокая задержка может указывать на тяжелую обработку или медленную работу браузера.
+Week ?,Неделя ?
+Week-wise,по неделям
+Weight (g),Вес (г)
+Weight (grams),Вес (граммы)
+We'll let you know if an invoice fails to submit,"Мы сообщим вам, если счет не будет отправлен"
+Workflow,Рабочий процесс
+Write off amount cannot exceed the POS profile maximum of {0},Сумма списания не может превышать максимум профиля POS ({0}).
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,"Сумма списания превышает разрешенный лимит ({0}). Пожалуйста, добавьте оплату на оставшуюся сумму."
+Yes,Да
+"Yes, Cancel sale","Да, отменить продажу"
+"Yes, Close","Да, Закрыть"
+You are not allowed to print draft invoices,Вам не разрешено распечатывать черновики счетов-фактур.
+You are offline. Add Payment will work again when the connection is restored.,Вы не в сети. Добавление платежа снова заработает после восстановления соединения.
+You have no notifications right now,У вас сейчас нет уведомлений
+Your Cart,Ваша корзина

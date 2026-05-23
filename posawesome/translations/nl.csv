@@ -1,0 +1,1362 @@
+POS Awesome,POS Geweldig
+Fetch Items Directly from Server,Haal items rechtstreeks van de server op
+Menu,Menukaart
+Actions,Acties
+Close Shift,Sluit Shift
+End current session,Beëindig de huidige sessie
+Print Last Invoice,Laatste factuur afdrukken
+Reprint previous transaction,Vorige transactie opnieuw afdrukken
+Sync Offline Invoices,Synchroniseer offline facturen
+Upload pending transactions,Upload openstaande transacties
+Go Online,Ga online
+Go Offline,Ga offline
+Disable offline mode,Schakel de offlinemodus uit
+Work without server connection,Werk zonder serververbinding
+Clear Cache,Cache wissen
+Remove local data and refresh,Verwijder lokale gegevens en vernieuw
+About,Over
+App information,App-informatie
+Language,Taal
+Change interface language,Wijzig de interfacetaal
+Light Mode,Lichte modus
+Dark Mode,Donkere modus
+Switch theme appearance,Verander het uiterlijk van het thema
+Logout,Uitloggen
+Sign out of session,Meld u af bij de sessie
+Select Language,Selecteer Taal
+Choose your preferred language for the POS interface,Kies uw voorkeurstaal voor de POS-interface
+Language will be changed to,De taal wordt gewijzigd in
+Cancel,Annuleer
+Change Language,Taal wijzigen
+Close,Sluiten
+Cannot change language - same language selected,Kan taal niet wijzigen - dezelfde taal geselecteerd
+Language changed successfully! Reloading...,Taal succesvol gewijzigd! Herladen...
+Failed to change language,Kan de taal niet wijzigen
+Unknown error,Onbekende fout
+- Total Unallocated,- Totaal niet toegewezen
+* Required,* Vereist
+{0} (Qty: {1}),{0} (Aantal: {1})
+{0} actions,{0} acties
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} heeft slechts {1} op voorraad. Je hebt {2} aangevraagd. Pas het aantal aan of vul het aan.
+{0} offline invoice{1} pending,{0} offline factuur{1} in behandeling
+{0} offline invoice{1} saved as draft,{0} offline factuur{1} opgeslagen als concept
+{0} offline invoice{1} synced,{0} offline factuur{1} gesynchroniseerd
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0}d geleden
+{0}h ago,{0}u geleden
+{0}m ago,{0}m geleden
+A POS supervisor is required for this action.,Voor deze actie is een POS-supervisor vereist.
+Access,Toegang
+Account,Rekening
+Account is overdrawn,Rekening is rood
+Acknowledge the error to resume scanning,Bevestig de fout om het scannen te hervatten
+Acknowledge the error to resume scanning.,Bevestig de fout om het scannen te hervatten.
+Across,Aan de overkant
+Action,Actie
+Active sale,Actieve verkoop
+add,toevoegen
+Add items from the selector to start building this sale.,Voeg items uit de selector toe om deze verkoop op te bouwen.
+Add more value to an existing gift card,Voeg meer waarde toe aan een bestaande cadeaubon
+Add New Address,Nieuw adres toevoegen
+Add new customer,Nieuwe klant toevoegen
+Add on New Line,Voeg een nieuwe regel toe
+Add Payment,Betaling toevoegen
+Add payment to invoice,Betaling toevoegen aan factuur
+Add/Edit Coupon Conditions,Couponvoorwaarden toevoegen/bewerken
+Additional Discount,Extra korting
+Additional Discount %,Extra korting %
+Address Line 1,Adresregel 1
+Address not found,Adres niet gevonden
+Adjust the quantity or enable negative stock to continue.,Pas het aantal aan of schakel de negatieve voorraad in om door te gaan.
+Adjustment,Aanpassing
+After returns,Na terugkeer
+Against,Tegen
+Against Name,Tegen Naam
+Age Bracket,Leeftijdsgroep
+All,Allemaal
+All Caught Up!,Allemaal gevangen!
+All invoices are synchronized,Alle facturen worden gesynchroniseerd
+All pending invoices are up to date,Alle openstaande facturen zijn up-to-date
+All Profiles,Alle profielen
+All Synchronized,Alles gesynchroniseerd
+All visible invoices are fully settled.,Alle zichtbare facturen worden volledig verrekend.
+All Warehouses,Alle magazijnen
+Allowed UOM is {0},Toegestane eenheid is {0}
+Always fetch items from server (ignore local cache),Haal altijd items op van de server (negeer de lokale cache)
+Amount,Bedrag
+Amount already received,Bedrag al ontvangen
+Amount exceeds profile cash movement max amount.,Het bedrag overschrijdt het maximale bedrag voor cashbewegingen in het profiel.
+Amount must be greater than zero.,Het bedrag moet groter zijn dan nul.
+Amount received from customer,Bedrag ontvangen van klant
+Appearance and user-level preferences for the current session.,Voorkeuren voor uiterlijk en gebruikersniveau voor de huidige sessie.
+Applied,Toegepast
+Apply,Toepassen
+Apply Gift Card,Cadeaukaart toepassen
+Apply Offer,Aanbieding toepassen
+Apply On,Toepassen op
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,Pas alleen het bedrag toe dat u wilt inwisselen op deze factuur. Het resterende saldo blijft op de kaart staan.
+Apply Redemption,Pas verlossing toe
+Applying,Toepassen
+Apps,Apps
+Are you sure you want to close? All entered data will be lost.,Weet u zeker dat u wilt sluiten? Alle ingevoerde gegevens gaan verloren.
+Attributes (Size/Color),Kenmerken (grootte/kleur)
+Auto Allocate Payment Amount,Betalingsbedrag automatisch toewijzen
+Auto Reconcile,Automatisch afstemmen
+Auto reconciliation completed after payment submit.,Automatische afstemming voltooid nadat de betaling is ingediend.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,Automatische afstemming voltooid. Toegewezen: {0}{1}. Resterend uitstaand: {0}{2}.
+Available Actions,Beschikbare acties
+Available QTY,Beschikbaar AANTAL
+Available:,Beschikbaar:
+Average Basket,Gemiddeld mandje
+Average Bill,Gemiddelde factuur
+Average Ticket,Gemiddeld kaartje
+Avg Bill,Gem. factuur
+Avg Invoice,Gem. factuur
+Avg Invoice Profit,Gem. factuurwinst
+Avg Invoice Value,Gem. factuurwaarde
+Avg Purchase Frequency,Gem. aankoopfrequentie
+Awesome,Geweldig
+Awesome Dashboard,Geweldig dashboard
+Awesome Dashboard is disabled for the selected POS Profile.,Awesome Dashboard is uitgeschakeld voor het geselecteerde POS-profiel.
+Awesome Dashboard is unavailable for the selected scope.,Awesome Dashboard is niet beschikbaar voor het geselecteerde bereik.
+Awesome Dashboard is visible only to POS supervisors.,Awesome Dashboard is alleen zichtbaar voor POS-supervisors.
+Back,Terug
+Back Office Cash Account,Backoffice-geldrekening
+Back Office Cash Account (Optional Override),Backoffice-geldrekening (optionele overschrijving)
+Back office cash account is required.,Backoffice-kassarekening is vereist.
+Back to {0},Terug naar {0}
+Background processing did not finish in time.,De achtergrondverwerking is niet op tijd voltooid.
+Background processing failed for Invoice {0}: {1},Achtergrondverwerking mislukt voor factuur {0}: {1}
+Background Submission Failed,Achtergrondverzending mislukt
+Background sync interval (seconds),Achtergrondsynchronisatie-interval (seconden)
+Balance,Balans
+Balance will be updated when connection is restored,Het saldo wordt bijgewerkt zodra de verbinding is hersteld
+Balances still pending,Saldi zijn nog in behandeling
+Barcode,Streepjescode
+Barcode / QR Ready,Streepjescode / QR gereed
+Barcode Label Printing,Afdrukken van streepjescodelabels
+Base Paid:,Basis betaald:
+Base Recv:,Basisrecv:
+Base:,Basis:
+Basic Information,Basisinformatie
+Batch,Partij
+Batch Information,Batchinformatie
+Before any return workflow,Vóór elke retourworkflow
+Before returns,Vóór terugkeer
+Best Day,Beste dag
+Best Seller,Bestseller
+Book expense or deposit from active shift.,Boek onkosten of storting van actieve dienst.
+Branch / Location-wise Report,Branche-/locatiegewijs rapport
+Brand-wise,Merktechnisch
+Breakdown,Uitsplitsing
+Browse,Blader
+Build Time:,Bouwtijd:
+Built with Frappe,Gebouwd met Frappe
+Bundle,Bundel
+Buying Price,Koopprijs
+Cache cleared successfully,Cache is succesvol gewist
+Cache Usage,Cachegebruik
+cache used,cache gebruikt
+Calculating...,Berekenen...
+Camera Access Required,Cameratoegang vereist
+Camera access was aborted. Please try again.,Cameratoegang is afgebroken. Probeer het opnieuw.
+Camera constraints not supported by your device. Trying fallback settings...,Camerabeperkingen worden niet ondersteund door uw apparaat. Terugvalinstellingen proberen...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,Camera is bezet of geblokkeerd door een andere app/tabblad. Sluit andere camera-apps en probeer het opnieuw.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,Cameratoestemming geweigerd. Sta cameratoegang toe in uw browserinstellingen en vernieuw de pagina.
+Camera scanner is locked until the current error is acknowledged,De camerascanner is vergrendeld totdat de huidige fout wordt bevestigd
+Camera started but the video stream did not load in time. Please try again.,"Camera gestart, maar de videostream is niet op tijd geladen. Probeer het opnieuw."
+Cancel cash movement {0}?,Contante verplaatsing {0} annuleren?
+Cancel Payment,Betaling annuleren
+Cancel Sale,Verkoop annuleren
+Cancel Sale ?,Verkoop annuleren?
+Cancelled,Geannuleerd
+Cannot add an item with zero or negative quantity.,Kan een artikel met nul of een negatief aantal niet toevoegen.
+Cannot clear cache while offline,Kan de cache niet offline wissen
+Cannot redeem customer credit more than invoice total,Kan het klanttegoed niet voor meer dan het factuurtotaal inwisselen
+Cannot redeem gift cards more than invoice total,Cadeaubonnen kunnen niet meer worden ingewisseld dan het factuurtotaal
+Cannot Save Offline Invoice:,Kan offline factuur niet opslaan:
+Cannot Save Offline Payment:,Kan offline betaling niet opslaan:
+Card,Kaart
+Card / Online,Kaart / Online
+Card health after the last live lookup,Kaartstatus na de laatste live zoekopdracht
+Cards,Kaarten
+Cart,Winkelwagen
+Cash,Contant geld
+Cash back to customers,Geld terug voor klanten
+Cash Collections,Contante incasso's
+Cash Deposit is disabled for this POS Profile.,Contante storting is uitgeschakeld voor dit POS-profiel.
+Cash Drawer Snapshot,Momentopname van de kassalade
+Cash In Hand,Contant geld in de hand
+Cash Movement,Geldbeweging
+Cash movement cancelled,Geldbeweging geannuleerd
+Cash movement deduction applied,Contante bewegingsaftrek toegepast
+Cash movement deleted,Geldbeweging verwijderd
+Cash movement is disabled for this POS Profile.,Het verplaatsen van contant geld is uitgeschakeld voor dit POS-profiel.
+Cash Movement is disabled in current POS Profile.,Contantbeweging is uitgeschakeld in het huidige POS-profiel.
+Cash movement saved offline,Geldbewegingen offline opgeslagen
+Cash movement submitted,Geldbeweging ingediend
+Cash Movements,Geldbewegingen
+Cash payment cannot be less than invoice total when partial payment is not allowed,Contante betaling kan niet lager zijn dan het factuurtotaal wanneer gedeeltelijke betaling niet is toegestaan
+Cash returned after payment,Contant geld terug na betaling
+Cashier,Kassier
+Cashier Access,Toegang tot kassa
+Cashier identity and appearance preferences.,Kassieridentiteit en uiterlijkvoorkeuren.
+Cashier PIN,Kassier-pincode
+Cashier PIN saved successfully.,Kassierpincode succesvol opgeslagen.
+Cashiers,Kassiers
+Cashier-wise,Kassier-gewijs
+Categories,Categorieën
+Category,Categorie
+Category / Brand / Variant Report,Categorie / Merk / Variantrapport
+Category-wise,Categoriegewijs
+Category-wise Margin,Categoriegewijs marge
+Certificate,Certificaat
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,Certificaat ontbreekt of wordt niet vertrouwd. QZ kan bevestigingsdialoogvensters weergeven.
+Certificate is trusted. Silent QZ printing is active.,Certificaat is vertrouwd. Stil QZ-printen is actief.
+Change,Verandering
+Change allocation repaired,Wijzigingstoewijzing gerepareerd
+Change Price,Wijzig prijs
+Change Return,Wijzig retour
+Change Returned,Wijziging geretourneerd
+Change terminal cashier,Wissel terminalkassier
+Charge Heads,Laadhoofden
+Charges,Kosten
+Charges not found,Kosten niet gevonden
+Check Balance,Controleer het saldo
+Check balance for any card. Supervisors can issue and top up cards here.,Controleer het saldo voor elke kaart. Toezichthouders kunnen hier kaarten uitgeven en opwaarderen.
+Check balance only,Controleer alleen het saldo
+Check for new commits,Controleer op nieuwe commits
+Check for Updates,Controleer op updates
+Check live balance before applying redemption,Controleer het live saldo voordat u de inwisseling toepast
+Check live balance before redemption,Controleer het live saldo voordat u het inwisselt
+Checking...,Controleren...
+Cheque/Reference Date,Cheque/referentiedatum
+Cheque/Reference No,Cheque/referentienr
+Choose the cashier currently operating this terminal.,Kies de kassier die momenteel deze terminal bedient.
+City,Stad
+Clear,Duidelijk
+Clear All,Alles wissen
+Clear all barcode items,Wis alle streepjescode-items
+Clear all purchase order items,Wis alle inkooporderitems
+Clear Search,Zoekopdracht wissen
+Clearing local cache...,Lokale cache wissen...
+Click to refresh,Klik om te vernieuwen
+Client CPU Lag:,CPU-vertraging van client:
+Client Memory Usage:,Clientgeheugengebruik:
+Client Metrics,Klantstatistieken
+Close about dialog,Sluiten over dialoog
+Close cashier switcher,Sluit de kassierwisselaar
+Close closing shift dialog,Sluit het sluitende ploegdialoogvenster
+Close column selector,Sluit de kolomkiezer
+Close Dialog,Dialoogvenster sluiten
+Close drafts dialog,Sluit het conceptdialoogvenster
+Close invoice details dialog,Dialoogvenster met factuurdetails sluiten
+Close invoice management,Factuurbeheer afsluiten
+Close offline invoices dialog,Sluit het dialoogvenster Offline facturen
+Close packing list dialog,Sluit het paklijstdialoogvenster
+Close returns dialog,Sluit het retourdialoogvenster
+Close sales orders dialog,Dialoogvenster verkooporders sluiten
+Close Scanner,Sluit Scanner
+Close scanner dialog,Sluit het scannerdialoogvenster
+Close Settings,Sluit Instellingen
+Closing Amount,Slotbedrag
+Closing POS Shift,POS-shift sluiten
+Closing Snapshot Available,Sluitingsmomentopname beschikbaar
+Code,Codeer
+Code scanned successfully,Code succesvol gescand
+COGS,COGS
+Collapse item details,Artikeldetails samenvouwen
+Collected,Verzameld
+Cols,Col
+Columns,Kolommen
+commits,pleegt
+Completed and active sales in this range,Voltooide en actieve verkopen in dit assortiment
+Completed returns will appear here.,Hier verschijnen voltooide retourzendingen.
+Confirm,Bevestig
+Confirm Close,Bevestig Sluiten
+Confirm Mobile Number,Bevestig mobiel nummer
+Confirm PIN,Bevestig pincode
+Connect,Verbinden
+Connect printer and manage certificate,Sluit de printer aan en beheer het certificaat
+Connecting to QZ Tray...,Verbinding maken met QZ-lade...
+Connection problem while submitting invoice,Verbindingsprobleem tijdens het indienen van de factuur
+Connections:,Aansluitingen:
+Connectivity and cached prerequisite status were rechecked.,De connectiviteit en de vereiste status in de cache zijn opnieuw gecontroleerd.
+Continue Editing,Ga door met bewerken
+Could not fetch latest balance from server,Kan het laatste saldo niet ophalen van de server
+Count,Tel
+Country,Land
+Coupon,Coupon
+Coupons,Coupons
+Cover,Deksel
+CPU Cores:,CPU-kernen:
+Create,Creëer
+Create and load a new prepaid card,Maak en laad een nieuwe prepaidkaart
+Create and preload a new gift card,Maak een nieuwe cadeaubon aan en laad deze vooraf
+Create Bill,Maak een factuur
+Create Customer,Klant aanmaken
+Create New Item,Nieuw artikel maken
+Create or change your PIN,Maak of wijzig uw pincode
+Create PIN,Maak pincode aan
+Create POS Opening Shift,Maak een POS-openingsploeg
+Create Purchase Order,Inkooporder maken
+Create Return,Retour maken
+Create return from invoice,Retour van factuur maken
+Create Supplier,Leverancier aanmaken
+Credit and Output,Krediet en output
+Credit Note,Creditnota
+Credit Outstanding,Uitstaand krediet
+Credit sales remaining to be collected,Kredietverkopen die nog moeten worden geïnd
+Critical,Kritisch
+Currency,Valuta
+Current,Huidig
+Current Event Loop Lag:,Huidige gebeurtenislusvertraging:
+Current Month,Huidige maand
+Current PIN,Huidige pincode
+Current Profile,Huidig profiel
+Current redeemable value on the gift card,Huidige inwisselbare waarde op de cadeaukaart
+Current User,Huidige gebruiker
+Custom,Aangepast
+Custom Due Days,Aangepaste vervaldagen
+Custom items per page,Aangepaste items per pagina
+Customer,Klant
+Customer already selected,Klant al geselecteerd
+Customer Balance,Klantsaldo
+Customer balance unavailable offline,Klantsaldo offline niet beschikbaar
+Customer created successfully.,Klant is succesvol aangemaakt.
+Customer creation failed.,Het maken van klanten is mislukt.
+Customer Details,Klantgegevens
+Customer display channel is missing,Klantweergavekanaal ontbreekt
+Customer display was blocked. Please allow pop-ups for this site.,Klantendisplay was geblokkeerd. Sta pop-ups toe voor deze site.
+Customer group is required,Klantgroep is vereist
+Customer is required to add payment,Klant is verplicht om de betaling toe te voegen
+Customer Name is required,Klantnaam is vereist
+Customer not selected,Klant niet geselecteerd
+Customer Report,Klantrapport
+Customer saved offline,Klant offline opgeslagen
+Customer Screen,Klantscherm
+Customer territory is required,Klantterritorium is vereist
+Customer updated successfully.,Klant is succesvol bijgewerkt.
+Customer-facing tools and printer setup.,Klantgerichte tools en printerinstallatie.
+Customers,Klanten
+Customers not found,Klanten niet gevonden
+Daily cashier actions without scrolling.,Dagelijkse kassaacties zonder te scrollen.
+Daily Sales,Dagelijkse verkoop
+Daily Sales Summary,Dagelijks verkoopoverzicht
+Data loaded in form. Review and submit.,Gegevens geladen in formulier. Beoordelen en indienen.
+Database Health,Databasestatus
+Database health affects overall system speed and reliability.,De databasestatus heeft invloed op de algehele systeemsnelheid en betrouwbaarheid.
+Database Info,Database-informatie
+Date,Datum
+Day ?,Dag?
+days,dagen
+Day-wise (MTD),Daggewijs (MTD)
+Day-wise Movement,Dagwijze beweging
+Dead Stock,Dode voorraad
+Dead Stock Items,Dode voorraadartikelen
+Decrease quantity,Hoeveelheid verlagen
+Default,Standaard
+Default:,Standaard:
+Delete,Verwijderen
+Delete cancelled cash movement {0}?,Geannuleerde geldbeweging {0} verwijderen?
+Delete Draft,Concept verwijderen
+Delete draft invoice,Conceptfactuur verwijderen
+Delete draft invoice {0}?,Conceptfactuur {0} verwijderen?
+Delete Invoice,Factuur verwijderen
+Delete offline invoice,Offline factuur verwijderen
+Delivered,Geleverd
+Delivery Charges,Bezorgkosten
+Delivery Information,Leveringsinformatie
+Delivery Note {0} created,Leveringsbon {0} aangemaakt
+Delivery note created,Leveringsbon aangemaakt
+Deployed Bundle:,Geïmplementeerde bundel:
+Deposit,Borg
+Description,Beschrijving
+Detailed Supplier Breakdown,Gedetailleerde leveranciersspecificatie
+Detecting formats:,Formaten detecteren:
+Device Memory:,Apparaatgeheugen:
+Difference,Verschil
+Difference (In Company Currency),Verschil (in bedrijfsvaluta)
+Disable offline mode first to recheck live connectivity.,Schakel eerst de offline modus uit om de live connectiviteit opnieuw te controleren.
+Disconnect,Verbreek de verbinding
+discount,korting
+Discount %,Korting %
+Discount / Void / Return Report,Kortings- / ongeldig- / retourrapport
+Discount Amount,Kortingsbedrag
+Discount limited by POS Profile,Korting beperkt door POS-profiel
+Discounted Invoices,Korting op facturen
+Discounts,Kortingen
+Dismiss,Negeren
+Download Certificate,Certificaat downloaden
+Draft,Diepgang
+Draft invoice deleted,Conceptfactuur verwijderd
+Draft source,Conceptbron
+Drafts,Concepten
+Due {0},Vervaldatum {0}
+Due Date,Vervaldatum
+Duplicate,Duplicaat
+Edit customer,Klant bewerken
+Edit discount amount,Kortingsbedrag bewerken
+Edit discount percentage,Kortingspercentage bewerken
+Edit Gift Application,Cadeauaanvraag bewerken
+Edit item name,Artikelnaam bewerken
+Edit quantity,Hoeveelheid bewerken
+Edit rate,Tarief bewerken
+Edit unit of measure,Maateenheid bewerken
+Edited,Bewerkt
+Employee,Medewerker
+Enable background sync,Schakel achtergrondsynchronisatie in
+Enable Customer Display in POS Profile first.,Schakel eerst Klantweergave in POS-profiel in.
+Enter a PIN.,Voer een pincode in.
+Enter a valid grams value,Voer een geldige gramwaarde in
+Enter new price list rate,Voer een nieuw prijslijsttarief in
+Enter Quantity,Voer hoeveelheid in
+Enter the cashier PIN to continue.,Voer de pincode van de kassier in om door te gaan.
+Enter the current PIN first.,Voer eerst de huidige pincode in.
+"Enter the current PIN, then choose a new one.",Voer de huidige pincode in en kies vervolgens een nieuwe.
+Enter valid grams for scale barcode,Voer geldige grammen in voor de streepjescode van de weegschaal
+Entries,Inzendingen
+Error accessing camera:,Fout bij toegang tot camera:
+Error calculating prices,Fout bij het berekenen van prijzen
+Error fetching customer balance,Fout bij ophalen van klantensaldo
+Error in change calculations!,Fout bij wijzigingsberekeningen!
+Error Loading Data,Fout bij het laden van gegevens
+Error loading invoice details,Fout bij het laden van factuurgegevens
+Error processing invoice,Fout bij verwerken factuur
+Error processing payment,Fout bij het verwerken van de betaling
+Error searching invoices,Fout bij zoeken naar facturen
+Error submitting invoice:,Fout bij het indienen van de factuur:
+Error submitting invoice: {0},Fout bij indienen factuur: {0}
+Error submitting invoice: No response from server,Fout bij het indienen van de factuur: geen reactie van de server
+Error updating currency,Fout bij updaten van valuta
+Error updating item details,Fout bij updaten van itemdetails
+Est. Purchase,Geschat. Aankoop
+Est. Value,Geschat. Waarde
+Event-loop lag measures how busy your browser is. Lower is better.,Event-loop lag meet hoe druk uw browser is. Lager is beter.
+Every,Elke
+Exchange Rate,Wisselkoers
+Expand item details,Vouw artikeldetails uit
+Expected Amount (In Company Currency),Verwacht bedrag (in bedrijfsvaluta)
+Expected Cash,Verwacht contant geld
+Expected cash on hand grouped by currency,Verwacht contant geld gegroepeerd per valuta
+Expected vs Actual,Verwacht versus feitelijk
+Expense,Kosten
+Expense Account (Optional Override),Onkostenrekening (optioneel overschrijven)
+Expense account is required.,Onkostenrekening is vereist.
+Expenses and deposits posted during this shift,Tijdens deze dienst geboekte uitgaven en deposito's
+Expired,Verlopen
+Failed to auto reconcile payments.,Kan betalingen niet automatisch afstemmen.
+Failed to cancel cash movement,Kan contante verplaatsing niet annuleren
+Failed to clear cache,Kan de cache niet wissen
+Failed to create item,Kan item niet maken
+Failed to create supplier,Kan leverancier niet aanmaken
+Failed to delete cash movement,Kan contant geldbeweging niet verwijderen
+Failed to generate scale barcode. Using item barcode only.,Kan de streepjescode voor de weegschaal niet genereren. Alleen gebruik van de artikelbarcode.
+Failed to load cash movement context.,Kan context voor contante verplaatsing niet laden.
+Failed to load dashboard data.,Kan dashboardgegevens niet laden.
+Failed to reload invoice from server,Kan de factuur niet opnieuw laden van de server
+Failed to submit cash movement,Het is niet gelukt om de contante verplaatsing in te dienen
+Failed to sync offline cash movements,Kan offline geldbewegingen niet synchroniseren
+Fast cashier actions for active shifts.,Snelle kassaacties voor actieve diensten.
+Fast Moving Items,Snel bewegende items
+Fees,Kosten
+Fetch the latest offline prerequisite updates,Haal de nieuwste offline vereiste updates op
+Find a sales order quickly and load it into the current sale.,Vind snel een verkooporder en laad deze in de huidige verkoop.
+Fixing payment amounts for return invoice...,Betalingsbedragen voor retourfactuur fixeren...
+Flash Off,Flitser uit
+Flash On,Flitser aan
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","Voor 'Productbundel'-artikelen worden magazijn-, serienummer en batchnummer in aanmerking genomen uit de tabel 'Paklijst'. Als Magazijn en Batchnummer hetzelfde zijn voor alle verpakkingsartikelen voor een 'Productbundel'-artikel, kunnen deze waarden worden ingevoerd in de hoofdartikeltabel; waarden worden gekopieerd naar de tabel 'Paklijst'."
+Free,Gratis
+Free Qty,Gratis aantal
+Frequency,Frequentie
+from,van
+From Date,Vanaf Datum
+Fulfillment Details,Uitvoeringsdetails
+Full Name,Volledige naam
+Gain,Winst
+Generate a fresh prepaid card and start it with an opening balance.,Genereer een nieuwe prepaidkaart en start deze met een openingssaldo.
+Generate and install the certificate to allow fully silent printing without trust prompts.,Genereer en installeer het certificaat om volledig stil afdrukken zonder vertrouwensprompts mogelijk te maken.
+Generate Certificate,Certificaat genereren
+Generated scale barcode: {0},Gegenereerde weegschaalbarcode: {0}
+Get Payments,Betalingen ontvangen
+Gift Card,Cadeaukaart
+Gift card amount must be greater than zero.,Het bedrag op de cadeaubon moet groter zijn dan nul.
+Gift Card Code,Cadeaukaartcode
+Gift card code is required for redemption,Voor het inwisselen is een cadeaukaartcode vereist
+Gift card code is required.,Cadeaukaartcode is vereist.
+Gift card issued successfully.,Cadeaukaart succesvol uitgegeven.
+Gift card loaded successfully.,Cadeaukaart succesvol geladen.
+Gift Card Management,Beheer van cadeaukaarten
+Gift card payment,Betaling met cadeaukaart
+Gift card redemption requires an online connection,Voor het inwisselen van een cadeaukaart is een online verbinding vereist
+Gift card topped up successfully.,Cadeaukaart succesvol opgewaardeerd.
+Gift Cards,Cadeaubonnen
+Go to Frappe Desk,Ga naar Frappe Desk
+Grand Total,Algemeen totaal
+Gross Margin,Bruto marge
+Gross Profit,Bruto winst
+Gross Sales,Bruto omzet
+Group not found,Groep niet gevonden
+"Grouped controls for terminal, UI, and session settings.","Gegroepeerde bedieningselementen voor terminal-, UI- en sessie-instellingen."
+Grouped totals for each payment method and currency,Gegroepeerde totalen voor elke betaalmethode en valuta
+Hide,Verbergen
+Hide Gift Card,Cadeaubon verbergen
+Hide Non Essential Fields,Verberg niet-essentiële velden
+Hide quantity decimals,Aantal decimalen verbergen
+Hide search tools,Zoekhulpmiddelen verbergen
+Hide zero rated items,Verberg items met een nulwaardering
+High,Hoog
+History,Geschiedenis
+Hourly (Today),Per uur (vandaag)
+How this section works,Hoe deze sectie werkt
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","Als er verouderde gegevens achterblijven, opent u Instellingen > Offline en synchronisatie en voert u Offline gegevens opnieuw opbouwen opnieuw uit terwijl u online bent."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","Als de waarschuwing blijft bestaan, open dan Instellingen > Offline en synchronisatie en voer vervolgens Offline gegevens vernieuwen of Offline gegevens opnieuw opbouwen uit."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Importeer het certificaat in QZ Tray en start QZ Tray opnieuw op elke POS-machine.
+In,In
+In stock: {0},Op voorraad: {0}
+Include Batch / Serial,Inclusief batch/serieel
+Include Price,Inclusief prijs
+Increase quantity,Verhoog de hoeveelheid
+IndexedDB,GeïndexeerdeDB
+Initial Amount,Initieel bedrag
+Initialize your shift with opening balances,Initialiseer uw dienst met openingsbalansen
+Initializing application...,Applicatie initialiseren...
+"Inspect cache, sync, and prerequisite status","Inspecteer de cache-, synchronisatie- en vereistestatus"
+Installed Applications,Geïnstalleerde applicaties
+Insufficient stock:\n{0},Onvoldoende voorraad:\n{0}
+Invalid rate,Ongeldig tarief
+Inventory Status Report,Voorraadstatusrapport
+Invoice,Factuur
+Invoice {0} is Submitted,Factuur {0} is verzonden
+Invoice {0} processed successfully,Factuur {0} is succesvol verwerkt
+Invoice {0} submission failed,Het indienen van factuur {0} is mislukt
+Invoice {0} was already submitted,Factuur {0} is al ingediend
+Invoice Adjustments,Factuuraanpassingen
+Invoice Change,Factuurwijziging
+Invoice Details,Factuurgegevens
+Invoice is still in draft after background submission.,Factuur is nog steeds in concept na indiening op de achtergrond.
+Invoice Items,Factuurartikelen
+Invoice Management,Factuurbeheer
+Invoice Mgmt,Factuurbeheer
+Invoice saved offline,Factuur offline opgeslagen
+Invoice submission failed,Het indienen van de factuur is mislukt
+Invoice Submitted,Factuur ingediend
+"Invoice value settled by loyalty points, not cash collection","Factuurwaarde wordt verrekend door spaarpunten, niet door contante incasso"
+Invoices,Facturen
+Invoices already past due date,Facturen zijn al over de vervaldatum
+Invoices saved as POS Invoices,Facturen opgeslagen als POS-facturen
+Invoices still carrying balances,Facturen met nog steeds saldi
+Issue Mode,Uitgiftemodus
+Issue New Card,Nieuwe kaart uitgeven
+Issue Workflow,Probleem workflow
+"Issue, top up, and check","Uitgeven, bijvullen en controleren"
+Item,Artikel
+Item / Product Sales Report,Artikel-/productverkooprapport
+Item {0} added to invoice,Artikel {0} toegevoegd aan factuur
+Item '{0}' has no barcode,Artikel '{0}' heeft geen streepjescode
+Item Code,Artikelcode
+Item created successfully,Artikel succesvol aangemaakt
+Item is out of stock,Artikel is niet op voorraad
+Item Name,Artikelnaam
+Item not found,Artikel niet gevonden
+Item order updated,Artikelvolgorde bijgewerkt
+Item Selector Settings,Instellingen itemkiezer
+Items,Artikelen
+Items added in POS will appear here automatically.,"Artikelen die in POS zijn toegevoegd, verschijnen hier automatisch."
+Items added to invoice,Artikelen toegevoegd aan factuur
+Items per page,Artikelen per pagina
+Items Sold,Artikelen verkocht
+Items/Invoice,Artikelen/Factuur
+Item-wise Profitability,Artikelgewijs winstgevendheid
+Journal Entry,Journaalboeking
+json,json
+Just now,Zojuist
+Keep offline prerequisites healthy and recover stale data safely.,Houd de offline vereisten gezond en herstel verouderde gegevens veilig.
+Labels,Etiketten
+"Language, theme, terminal tools, and session controls.","Taal, thema, terminaltools en sessiebediening."
+Last,Laatste
+Last 14 Days (Paid vs Pending),Afgelopen 14 dagen (betaald versus in behandeling)
+Last 14 Days Activity,Laatste 14 dagen activiteit
+Last 14 Days Gross Profit,Brutowinst van de afgelopen 14 dagen
+Last 14 Days Purchases,Aankopen van de afgelopen 14 dagen
+Last 14 Days Tax/Charges,Belastingen/kosten van de laatste 14 dagen
+Last sync:,Laatste synchronisatie:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},Laatste synchronisatie: {0} | oké: {1} | mislukt: {2} | overgeslagen: {3}
+Latest entries for current shift,Laatste invoer voor huidige dienst
+Lead Time,Doorlooptijd
+Limited,Beperkt
+lines,lijnen
+List,Lijst
+Live Snapshot,Live-momentopname
+Load a POS profile and cashier first.,Laad eerst een POS-profiel en kassier.
+Load More Invoices,Laad meer facturen
+Load previously saved invoices,Laad eerder opgeslagen facturen
+Load Sale,Verkoop laden
+Load Sales Invoice,Verkoopfactuur laden
+Loading app data...,App-gegevens laden...
+Loading customer database...,Klantendatabase laden...
+Loading customers...,Klanten laden...
+Loading database stats...,Databasestatistieken laden...
+Loading details...,Gegevens laden...
+Loading invoice history...,Factuurgeschiedenis laden...
+Loading items...,Artikelen laden...
+Loading product catalog...,Productcatalogus laden...
+Loading return invoices...,Retourfacturen laden...
+Loading server CPU/memory usage...,CPU-/geheugengebruik van server laden...
+Loading suppliers...,Leveranciers laden...
+Loading unpaid invoices...,Onbetaalde facturen laden...
+Loading view...,Weergave laden...
+Loading...,Laden...
+Local storage is unavailable. Switching to online-only mode.,Lokale opslag is niet beschikbaar. Overschakelen naar alleen online-modus.
+localStorage,lokale opslag
+Location Performance,Locatieprestaties
+Locations,Locaties
+Lock Screen,Vergrendelscherm
+Lookup Workflow,Werkstroom opzoeken
+Loss,Verlies
+Low,Laag
+Low Stock,Lage voorraad
+Low Stock Alerts,Waarschuwingen voor lage voorraad
+Low Stock Items,Artikelen met weinig voorraad
+Low Stock Threshold,Lage voorraaddrempel
+Low Stock Total,Laag voorraadtotaal
+Lowest Margin,Laagste marge
+Low-frequency maintenance and system details.,Laagfrequent onderhoud en systeemdetails.
+Loyalty Redeemed,Loyaliteit verlost
+Loyalty Redemption,Loyaliteit verlossing
+Make New Payment,Voer een nieuwe betaling uit
+Manage all,Beheer alles
+Manage and synchronize your offline transactions,Beheer en synchroniseer uw offline transacties
+Manage Cashier PIN,Beheer de pincode van de kassier
+"Manage offline tools, terminal controls, and maintenance from one workspace.","Beheer offline tools, terminalcontroles en onderhoud vanuit één werkruimte."
+manual,handleiding
+"Manual codes, barcode scans, and QR scans work in the same field","Handmatige codes, barcodescans en QR-scans werken in hetzelfde veld"
+Manual offline mode is enabled,Handmatige offlinemodus is ingeschakeld
+Margin,Marge
+Maximum available quantity is {0}. Quantity adjusted to match stock.,Het maximaal beschikbare aantal is {0}. Aantal aangepast aan de voorraad.
+Maximum discount amount for this offer item is {0}.,Het maximale kortingsbedrag voor dit aanbiedingsartikel is {0}.
+Maximum discount percentage for this offer item is {0}%.,Het maximale kortingspercentage voor dit aanbiedingsartikel is {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,Het maximale aanbiedingsaantal is {0}. Hoeveelheid aangepast aan toegestane limiet.
+Medium,Middelmatig
+Method-wise Collections,Methodische collecties
+Minimum allowed rate for this offer item is {0}.,Het minimaal toegestane tarief voor dit aanbiedingsitem is {0}.
+Minimum Qty,Minimum aantal
+Mobile No,Mobiel nummer
+Mode,Modus
+Mode of Payment,Wijze van betaling
+Month,Maand
+Month ?,Maand?
+Monthly Profit,Maandelijkse winst
+Monthly Sales,Maandelijkse omzet
+Monthly Sales Summary,Maandelijks verkoopoverzicht
+Month-wise,Maandelijks
+Most Active Cashiers,Meest actieve kassiers
+Movement Type,Bewegingstype
+Movements,Bewegingen
+Multi Currency,Meerdere valuta
+N/A,N.v.t
+Name,Naam
+Negative Stock,Negatieve voorraad
+Negative Stock Items,Negatieve voorraadartikelen
+Negative values not allowed,Negatieve waarden zijn niet toegestaan
+Net,Netto
+Net Qty,Netto aantal
+Net Sales,Netto omzet
+Net Value,Netto waarde
+Never,Nooit
+New changes are ready to load,Nieuwe wijzigingen zijn klaar om te laden
+New Item,Nieuw artikel
+New Offer Available,Nieuwe aanbieding beschikbaar
+New PIN,Nieuwe pincode
+New rate,Nieuw tarief
+Next unit of measure,Volgende maateenheid
+No attribute data found.,Geen attribuutgegevens gevonden.
+No Barcode,Geen streepjescode
+No barcode found for UOM '{0}',Geen streepjescode gevonden voor eenheid '{0}'
+No branch/location data found.,Geen vestigings-/locatiegegevens gevonden.
+No brand data found.,Geen merkgegevens gevonden.
+No cached gift card balance is available offline.,Er is geen in de cache opgeslagen cadeaubonsaldo offline beschikbaar.
+No camera found on this device. Please ensure your device has a working camera.,Er is geen camera gevonden op dit apparaat. Zorg ervoor dat uw apparaat een werkende camera heeft.
+No capability warnings recorded yet.,Er zijn nog geen capaciteitswaarschuwingen geregistreerd.
+No cash expected for this shift.,Er wordt geen contant geld verwacht voor deze verschuiving.
+No cash mode configured,Geen contant geldmodus geconfigureerd
+No cash movement type is allowed for this POS Profile.,Voor dit POS-profiel is geen type contante verplaatsing toegestaan.
+No cashier PIN is set yet. Create one now.,Er is nog geen pincode voor de kassier ingesteld. Maak er nu een aan.
+No cashier profiles are available for this POS profile yet.,Er zijn nog geen kassierprofielen beschikbaar voor dit POS-profiel.
+No cashier-wise discount/void/return activity.,Geen kassierachtige korting/nietigverklaring/retouractiviteit.
+No category data found.,Geen categoriegegevens gevonden.
+No category profitability data found.,Er zijn geen gegevens over de winstgevendheid van de categorie gevonden.
+No change returned recorded for this shift.,Er is geen teruggestuurd wisselgeld geregistreerd voor deze dienst.
+No change-allocation invoices match the current filters.,Er zijn geen wijzigingstoewijzingsfacturen die overeenkomen met de huidige filters.
+No charge head breakdown found.,Er is geen uitsplitsing van de laadkop gevonden.
+No Company Selected,Geen bedrijf geselecteerd
+No customer sales data found.,Geen klantverkoopgegevens gevonden.
+No day-wise discount/void/return trend.,Geen dagelijkse korting/nietig/retourtrend.
+No day-wise payment data found.,Er zijn geen dagelijkse betalingsgegevens gevonden.
+No day-wise profitability trend found.,Er is geen dagelijkse winstgevendheidstrend gevonden.
+No day-wise purchase data found.,Er zijn geen dagelijkse aankoopgegevens gevonden.
+No day-wise sales trend found.,Geen verkooptrend per dag gevonden.
+No day-wise tax/charges trend found.,Er is geen dagelijkse belasting-/heffingstrend gevonden.
+No dead stock items.,Geen dode voorraadartikelen.
+No due date,Geen vervaldatum
+No exact repair match found for this invoice,Er is geen exacte reparatieovereenkomst gevonden voor deze factuur
+No hourly sales trend found for today.,Er is geen verkooptrend per uur gevonden voor vandaag.
+No invoice activity found.,Geen factuuractiviteit gevonden.
+No invoices found,Geen facturen gevonden
+No invoices found. Try different search criteria.,Geen facturen gevonden. Probeer verschillende zoekcriteria.
+No invoices recorded for this shift.,Voor deze dienst zijn geen facturen geregistreerd.
+No item profitability data found.,Er zijn geen gegevens over de winstgevendheid van artikelen gevonden.
+No item sales data found for this period.,Er zijn geen artikelverkoopgegevens gevonden voor deze periode.
+No items found,Geen artikelen gevonden
+No items in cart,Geen artikelen in winkelwagen
+No items with barcodes to print,Er zijn geen artikelen met streepjescodes om af te drukken
+No location-wise top item data found.,Geen locatiegewijze topitemgegevens gevonden.
+No low stock alerts right now.,Er zijn momenteel geen waarschuwingen voor lage voorraad.
+No low stock items.,Geen artikelen met een lage voorraad.
+No matching items in cart,Geen overeenkomende items in winkelwagen
+No month-wise sales trend found.,Geen maandelijkse verkooptrend gevonden.
+No negative stock items.,Geen negatieve voorraadartikelen.
+No notifications yet,Nog geen meldingen
+No offline cash movement synced.,Geen offline geldbeweging gesynchroniseerd.
+No offline invoices pending synchronization,Geen offline facturen in afwachting van synchronisatie
+No offline sync issues recorded yet.,Er zijn nog geen offline synchronisatieproblemen geregistreerd.
+No out-of-stock items.,Geen artikelen die niet op voorraad zijn.
+No outstanding credit invoices for this shift.,Geen openstaande creditfacturen voor deze dienst.
+No payment collection data found.,Geen betalingsincassogegevens gevonden.
+No payment rows available on this invoice.,Er zijn geen betalingsregels beschikbaar op deze factuur.
+No payments registered for this shift.,Er zijn geen betalingen geregistreerd voor deze dienst.
+No pending balances in this period.,Geen openstaande saldi in deze periode.
+No pending offline invoices,Geen openstaande offline facturen
+No Print Formats Found,Geen afdrukformaten gevonden
+No profiles found for selected scope. Falling back to current profile failed.,Er zijn geen profielen gevonden voor het geselecteerde bereik. Terugkeren naar het huidige profiel is mislukt.
+No recent customer activity found.,Geen recente klantactiviteit gevonden.
+No recent stock entries found.,Geen recente voorraadgegevens gevonden.
+No records found,Geen gegevens gevonden
+No reorder suggestions right now.,Er zijn momenteel geen suggesties voor opnieuw bestellen.
+No repeat customers in this period.,Geen terugkerende klanten in deze periode.
+No response from server,Geen reactie van de server
+No return invoices found,Geen retourfacturen gevonden
+No return item trend found.,Geen retourartikeltrend gevonden.
+No returnable items found for this invoice,Er zijn geen retourneerbare artikelen gevonden voor deze factuur
+No returns were processed in this shift.,In deze dienst zijn geen retouren verwerkt.
+No risk activity found.,Geen risicoactiviteit gevonden.
+No sales activity found for this period.,Er zijn geen verkoopactiviteiten gevonden voor deze periode.
+No slow moving items.,Geen langzaam bewegende items.
+No staff sales activity found.,Geen personeelsverkoopactiviteit gevonden.
+No stock movement for this period.,Geen voorraadbewegingen voor deze periode.
+No submitted cash movements in this shift.,Geen ingediende contante bewegingen in deze dienst.
+No supplier purchases found in this month.,Geen leveranciersaankopen gevonden in deze maand.
+No suppliers found for this period.,Er zijn geen leveranciers gevonden voor deze periode.
+No sync trigger has run yet in this session.,Er is nog geen synchronisatietrigger uitgevoerd in deze sessie.
+No tax head breakdown found.,Er is geen uitsplitsing van het belastinghoofd gevonden.
+No top items found for this location.,Er zijn geen topitems gevonden voor deze locatie.
+No unpaid invoices,Geen onbetaalde facturen
+No variant data found.,Geen variantgegevens gevonden.
+No week-wise sales trend found.,Geen wekelijkse verkooptrend gevonden.
+No.,Nee.
+Nobile Number,Edel nummer
+Not available,Niet beschikbaar
+Not checked,Niet gecontroleerd
+Not selected,Niet geselecteerd
+Not Set,Niet ingesteld
+Notifications,Meldingen
+Offer,Aanbieding
+Offer Applied,Aanbieding toegepast
+Offer criteria exceeded,Aanbiedingscriteria overschreden
+Offer Item,Aanbiedingsartikel
+Offer item unavailable,Aanbiedingsartikel niet beschikbaar
+Offer Removed,Aanbieding verwijderd
+Offer UOM cannot be changed,De eenheid van de aanbieding kan niet worden gewijzigd
+Offer?,Aanbieding?
+Offers,Aanbiedingen
+Offline,Offline
+Offline & Sync,Offline en synchronisatie
+Offline Capabilities,Offlinemogelijkheden
+Offline data status refreshed,Offline gegevensstatus vernieuwd
+Offline diagnostics,Offline diagnostiek
+Offline Invoices,Offline facturen
+Offline invoices status,Offline facturenstatus
+Offline invoices synced,Offline facturen gesynchroniseerd
+Offline Queue: {0},Offline wachtrij: {0}
+Offline rebuild guidance,Begeleiding voor offline opnieuw opbouwen
+Offline restore is unavailable for this session.,Offline herstel is niet beschikbaar voor deze sessie.
+Offline selling is available with degraded capabilities.,Offline verkopen is beschikbaar met verminderde mogelijkheden.
+Offline snapshot does not match the current POS state.,Offline momentopname komt niet overeen met de huidige POS-status.
+Offline Status,Offlinestatus
+"Offline, terminal, and system controls","Offline-, terminal- en systeembedieningen"
+OK,Oké
+Online,Online
+Open actions menu,Actiemenu openen
+Open balance to collect,Openstaand saldo om te verzamelen
+Open Customer Display,Open het klantendisplay
+Open drawer,Open lade
+Open invoices,Facturen openen
+Open Payments?,Betalingen openen?
+Open POS home,Open POS-thuis
+Open this screen from POS Menu -> Open Customer Display.,Open dit scherm vanuit POS-menu -> Open klantendisplay.
+OpenCV image processing enabled - Enhanced barcode detection,OpenCV-beeldverwerking ingeschakeld - Verbeterde barcodedetectie
+OpenCV image processing unavailable on this device,OpenCV-beeldverwerking is niet beschikbaar op dit apparaat
+OpenCV Off,Open CV Uit
+OpenCV On,Open CV Aan
+OpenCV processing disabled,OpenCV-verwerking uitgeschakeld
+Opening Amount,Openingsbedrag
+Opening Cash,Contant geld openen
+options,opties
+Order,Bestel
+Original,Origineel
+Other,Anders
+Out,Uit
+Out of Stock,Niet op voorraad
+Out of Stock Items,Artikelen die niet op voorraad zijn
+Outstanding,Uitstekend
+Outstanding Credit by Currency,Uitstaand krediet per valuta
+Overdue,Te laat
+Overpayment Change,Wijziging te veel betaald bedrag
+Overpayment change deducted: {0},Wijziging te veel betaald bedrag in mindering gebracht: {0}
+Packing List,Paklijst
+Page Format,Paginaformaat
+Page unavailable offline,Pagina offline niet beschikbaar
+Paid,Betaald
+Paid (orig):,Betaald (oorspronkelijk):
+Paid Amount,Betaald bedrag
+Paid change cannot be greater than total change!,Het betaalde wisselgeld kan niet groter zijn dan het totale wisselgeld!
+Paid:,Betaald:
+Parent Item,Bovenliggend item
+Partial,Gedeeltelijk
+Partly Paid,Gedeeltelijk betaald
+Party Account,Partijrekening
+Party Type,Partijtype
+Pause terminal until next cashier,Pauzeer de terminal tot de volgende kassamedewerker
+PAY,BETALEN
+Payment,Betaling
+Payment Account,Betaalrekening
+Payment entries processed for Invoice {0},Betalingsinvoer verwerkt voor factuur {0}
+Payment Entry Type,Betalingsinvoertype
+Payment History,Betalingsgeschiedenis
+Payment ID,Betalings-ID
+Payment Method Report,Betaalmethoderapport
+Payment Methods,Betaalmethoden
+Payment of {0} received successfully.,Betaling van {0} succesvol ontvangen.
+Payment Progress,Betalingsvoortgang
+Payment Reconciliation,Betalingsafstemming
+Payment request status could not be retrieved. Please try again,De status van het betalingsverzoek kan niet worden opgehaald. Probeer het opnieuw
+Payment Request took too long to respond. Please try requesting for payment again,Het duurde te lang om op het betalingsverzoek te reageren. Probeer opnieuw een betalingsverzoek in te dienen
+Payment saved offline,Betaling offline opgeslagen
+Payment State,Betalingsstaat
+Payment Status,Betalingsstatus
+Payment submitted but print function could not be executed. Payment name not found.,"Betaling verzonden, maar printfunctie kon niet worden uitgevoerd. Betalingsnaam niet gevonden."
+Payment submitted.,Betaling ingediend.
+Payment Summary,Betalingsoverzicht
+Payments,Betalingen
+Payments are not open. Do you want to open payments and submit?,Betalingen zijn niet geopend. Wilt u betalingen openen en verzenden?
+Payments by Mode of Payment,Betalingen per betalingswijze
+PDF,Pdf
+Peak Hour,Piekuur
+Peak Memory:,Piekgeheugen:
+Peak Server:,Piekserver:
+Peak:,Piek:
+Pending,In behandeling
+Pending Amount,Bedrag in behandeling
+Pending count updated from {0} to {1},Aantal in behandeling bijgewerkt van {0} naar {1}
+Pending Exposure,In afwachting van blootstelling
+Pending Invoices,Facturen in behandeling
+Pending Ratio,In afwachting van verhouding
+Pending Sales,In afwachting van verkopen
+Pending sales: {0} | Cache usage: {1}%,Verkoop in behandeling: {0} | Cachegebruik: {1}%
+Pending Sync,Synchronisatie in behandeling
+Pending: {0},In behandeling: {0}
+Pending: {0} | Synced: {1} | Draft: {2},In behandeling: {0} | Gesynchroniseerd: {1} | Concept: {2}
+Per Page,Per pagina
+Personal,Persoonlijk
+Personal preferences adjust the current cashier experience without changing the active POS route.,Persoonlijke voorkeuren passen de huidige kassa-ervaring aan zonder de actieve POS-route te wijzigen.
+PIN confirmation does not match.,PIN-bevestiging komt niet overeen.
+PIN must be 4 to 8 digits.,De pincode moet uit 4 tot 8 cijfers bestaan.
+Please add at least one item.,Voeg ten minste één item toe.
+Please allow camera access to scan codes,Geef cameratoegang om codes te scannen
+Please enter payment amount,Voer het betalingsbedrag in
+Please fill all required fields,Vul alle verplichte velden in
+Please make a payment or select a payment,Voer een betaling uit of selecteer een betaling
+Please request phone payment or use another payment method,Vraag telefonische betaling aan of gebruik een andere betaalmethode
+Please select a customer first,Selecteer eerst een klant
+Please select a party,Selecteer een partij
+Please select a party before reconciling.,Selecteer een partij voordat u zich verzoent.
+Please select a valid movement type.,Selecteer een geldig bewegingstype.
+Please select an invoice,Selecteer een factuur
+Please select company before reconciling.,Selecteer een bedrijf voordat u afstemt.
+Please set the customer's mobile number,Stel het mobiele nummer van de klant in
+Please try again or enter the item manually.,Probeer het opnieuw of voer het artikel handmatig in.
+Please verify the barcode or check the item's availability.,Controleer de streepjescode of controleer de beschikbaarheid van het artikel.
+Points,Punten
+Popup blocked. Please allow popups.,Pop-up geblokkeerd. Sta pop-ups toe.
+POS,POS
+POS controls and maintenance,POS-controles en onderhoud
+POS Expense is disabled for this POS Profile.,POS-kosten zijn uitgeschakeld voor dit POS-profiel.
+POS is running with limited offline prerequisites.,POS draait met beperkte offline vereisten.
+POS Profile,POS-profiel
+Position the QR code or barcode within the scanning area,Plaats de QR-code of barcode binnen het scangebied
+Posting,Posten
+Posting and Price List,Plaatsing en prijslijst
+Posting Date,Datum van publicatie
+Preparing background sync,Achtergrondsynchronisatie voorbereiden
+"Press OK to continue offline with a warning, or Cancel to retry.","Druk op OK om offline door te gaan met een waarschuwing, of op Annuleren om het opnieuw te proberen."
+Previous unit of measure,Vorige maateenheid
+Price List,Prijslijst
+Price List Rate,Prijslijst Tarief
+Price list rate updated locally only,Prijslijsttarief alleen lokaal bijgewerkt
+Pricing & Discounts,Prijzen en kortingen
+Pricing Rule,Prijsregel
+Print,Afdrukken
+Print Draft,Concept afdrukken
+Print Format (Invoice),Afdrukformaat (factuur)
+Print Format (Order),Afdrukformaat (bestelling)
+Print invoice,Factuur afdrukken
+Print Purchase Invoice instead of PO,Aankoopfactuur afdrukken in plaats van inkooporder
+Printer,Printer
+Processed returns impacting the shift totals,Verwerkte retourzendingen die van invloed zijn op de ploegtotalen
+Processing Payment,Betaling verwerken
+Processing payment entries for Invoice {0},Betalingsinvoer verwerken voor factuur {0}
+Profile,Profiel
+Profiles,Profielen
+Profit,Winst
+Profit: Invoice Item Estimate,Winst: schatting factuuritem
+Profit: Stock Ledger (COGS),Winst: Stock Ledger (COGS)
+Profitability Report,Winstgevendheidsrapport
+Prorated return discount,Pro rata retourkorting
+Purchase Amount,Aankoopbedrag
+Purchase Invoices,Aankoopfacturen
+Purchase Order created,Inkooporder aangemaakt
+Qty,Aantal
+Qualified,Gekwalificeerd
+Quantity,Hoeveelheid
+Quantity exceeds available stock,Het aantal is groter dan de beschikbare voorraad
+Quick Actions,Snelle acties
+Quotation {0} is Submitted,Offerte {0} is ingediend
+Quotation submitted,Offerte ingediend
+QZ Tray connected.,QZ-lade aangesloten.
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ Tray is handmatig losgekoppeld. Druk op Verbinden om het opnieuw in te schakelen.
+QZ Tray is not connected.,QZ-lade is niet aangesloten.
+QZ Tray Setup,QZ-lade instellen
+Rate,Beoordeel
+Rate adjusted to maximum allowed discount,Tarief aangepast aan maximaal toegestane korting
+Ready,Klaar
+Ready to resume,Klaar om te hervatten
+Ready!,Klaar!
+Real-time POS insights for retail operations.,Realtime POS-inzichten voor retailactiviteiten.
+Rebuild Offline Data,Offline gegevens opnieuw opbouwen
+Receive,Ontvang
+Receive now,Ontvang nu
+Received,Ontvangen
+Received:,Ontvangen:
+Recent Movement Entries,Recente bewegingsinzendingen
+Recent updates about your invoices,Recente updates over uw facturen
+Recently Active Customers,Recent actieve klanten
+Rechecking connection,Verbinding opnieuw controleren
+Reconcile payment methods and close shift,Stem betalingsmethoden af en sluit de dienst
+Reconciling Payments,Betalingen afstemmen
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.",Maak opnieuw verbinding en open deze pagina één keer terwijl u online bent. Offline vernieuwingen kunnen deze vervolgens herstellen.
+Reconnect online to refresh cached offline data from the server.,Maak opnieuw online verbinding om offline gegevens in de cache van de server te vernieuwen.
+Recreate local offline prerequisites from scratch,Maak de lokale offlinevereisten helemaal opnieuw
+Recv:,Recv:
+Redeem,Inwisselen
+Redeem / Scan,Inwisselen / scannen
+Redeem Amount,Bedrag inwisselen
+Redeem Mode,Inwisselmodus
+Redeemed Amount,Afgelost bedrag
+Redeemed credit cannot be greater than its total.,Het ingewisselde tegoed kan niet groter zijn dan het totaal ervan.
+Redemption and Totals,Inwisseling en totalen
+Reference,Referentie
+Refresh,Vernieuwen
+Refresh Exchange Rate,Wisselkoers vernieuwen
+Refresh Offline Data,Vernieuw offline gegevens
+Refresh Printers,Vernieuw printers
+Refund,Terugbetaling
+Release Notes,Release-opmerkingen
+Reload,Herladen
+Reload customers,Klanten opnieuw laden
+Reload Items,Artikelen opnieuw laden
+Reload Now,Nu opnieuw laden
+Reload to apply the latest changes. Your current session will be refreshed.,Herlaad om de laatste wijzigingen toe te passen. Uw huidige sessie wordt vernieuwd.
+Reload Workflow,Werkstroom opnieuw laden
+Remarks,Opmerkingen
+Remarks are required.,Opmerkingen zijn vereist.
+Remove,Verwijderen
+Remove barcode item,Barcode-item verwijderen
+Remove cached data and reload the POS app,Verwijder gegevens in de cache en laad de POS-app opnieuw
+Remove item,Artikel verwijderen
+Remove Offer,Aanbieding verwijderen
+Reorder / Purchase Suggestions,Opnieuw bestellen / Aankoopsuggesties
+Repair Candidate,Kandidaat voor reparatie
+Repair Change Allocation,Reparatie Wijzig toewijzing
+Repair requires an online connection,Voor reparatie is een online verbinding vereist
+Repaired,Gerepareerd
+Repairing change allocation,Wijzigingstoewijzing herstellen
+Repeat Customers,Herhaalde klanten
+Repeat Rate,Herhaalsnelheid
+Request,Verzoek
+Request ID: {0},Verzoek-ID: {0}
+Request Payment,Betaling aanvragen
+Requested route: {0},Aangevraagde route: {0}
+Required columns cannot be hidden,Vereiste kolommen kunnen niet worden verborgen
+Reset,Opnieuw instellen
+Reset item name,Itemnaam opnieuw instellen
+Reset to Default,Terugzetten naar standaard
+Resource Health,Gezondheid van hulpbronnen
+Restricted,Beperkt
+Restricted operational controls for supervisors only.,Beperkte operationele controles alleen voor supervisors.
+Retry,Opnieuw proberen
+Retry route,Route opnieuw proberen
+Return,Terugkeer
+Return Amount,Retourbedrag
+Return Count,Retourtelling
+Return items must have negative quantities,Retourartikelen moeten een negatief aantal hebben
+Return total must be negative,Het retourtotaal moet negatief zijn
+Return Valid Until,Retour geldig tot
+Return window passed,Retourperiode voorbij
+Return without Invoice,Retourneren zonder factuur
+Returns,Retouren
+Returns / Voids / Discounts,Retouren / Nietigverklaringen / Kortingen
+Returns by Currency,Retouren per valuta
+Revenue,Inkomsten
+Review shift totals before submitting the closing entry,Controleer de ploegentotalen voordat u de sluitingsinvoer indient
+Round Off,Rond af
+Rows,Rijen
+Rows:,Rijen:
+Rule,Regel
+Sale,Verkoop
+Sales,Verkoop
+Sales Order {0} is Submitted,Verkooporder {0} is verzonden
+Sales Person and Print,Verkoopmedewerker en print
+Sales Person not found,Verkoper niet gevonden
+Sales processed,Verkoop verwerkt
+Sales Return,Verkoopretour
+Sales Trend Report,Verkooptrendrapport
+Save,Opslaan
+Save & Clear,Opslaan en wissen
+Save as POS Profile Default,Opslaan als standaard POS-profiel
+Save Settings,Instellingen opslaan
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,"Sla de geselecteerde printer op als het standaard POS-profiel, zodat deze automatisch wordt weergegeven bij deze configuratie."
+Saved as draft because: {0},Opgeslagen als concept omdat: {0}
+Saving...,Opslaan...
+Scale barcode detected. Quantity here is the number of labels to print.,Barcode van schaal gedetecteerd. Aantal is hier het aantal labels dat moet worden afgedrukt.
+Scale barcode settings are not configured. Using item barcode only.,Instellingen voor streepjescodes voor schaal zijn niet geconfigureerd. Alleen gebruik van de artikelbarcode.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,Barcode van schaalsjabloon ontbreekt voor dit artikel/eenheid. Alleen gebruik van de artikelbarcode.
+Scan an existing card and top it up without leaving the payment flow.,Scan een bestaande kaart en waardeer deze op zonder de betaalstroom te verlaten.
+Scan Error,Scanfout
+Scan or enter a gift card code to check balance or redeem.,Scan of voer een cadeaukaartcode in om het saldo te controleren of in te wisselen.
+Scan or paste the card code below.,Scan of plak de onderstaande kaartcode.
+Scan QR Code/Barcode,Scan QR-code/streepjescode
+Scan with camera,Scannen met camera
+Scan-First Flow,Scan-eerste stroom
+Scanned Code:,Gescande code:
+Scanning for: {0},Scannen naar: {0}
+Scanning items,Artikelen scannen
+Scan-Ready,Scanklaar
+Scope,Reikwijdte
+Scope: All Profiles,Toepassingsgebied: alle profielen
+Scope: Current Profile,Reikwijdte: Huidig profiel
+Scope: Specific Profile,Reikwijdte: specifiek profiel
+Search,Zoeken
+Search Account,Zoek account
+Search an invoice and continue the return flow without extra steps.,Zoek een factuur en vervolg de retourstroom zonder extra stappen.
+Search customer,Zoek klant
+Search invoices or customers,Zoek facturen of klanten
+Search item,Zoek item
+Search item / code,Zoek artikel/code
+Search items or barcode,Zoek items of streepjescode
+Search Mpesa Payments,Zoek naar Mpesa-betalingen
+Search return invoices or customers,Zoek retourfacturen of klanten
+Search supplier,Zoek leverancier
+Search unpaid invoices or customers,Zoek onbetaalde facturen of klanten
+Secure context (HTTPS or localhost) is required for camera access.,Voor cameratoegang is een beveiligde context (HTTPS of localhost) vereist.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,Beveiligde context (HTTPS) vereist voor cameratoegang. Gebruik HTTPS om toegang te krijgen tot de camera.
+Select,Selecteer
+Select a cashier first.,Selecteer eerst een kassier.
+Select a customer,Selecteer een klant
+Select a customer to use coupon,Selecteer een klant om de coupon te gebruiken
+Select a printer to use QZ silent printing.,Selecteer een printer om QZ stil afdrukken te gebruiken.
+Select Batch,Selecteer Batch
+Select Columns to Display,Selecteer Kolommen om weer te geven
+Select items to sell,Selecteer items om te verkopen
+Select Payment,Selecteer Betaling
+Select Payment Account,Selecteer Betaalrekening
+Select printer,Selecteer printer
+Select Return Invoice,Selecteer Retourfactuur
+Select S.O,Selecteer S.O
+Select Sales Orders,Selecteer Verkooporders
+Select the cashier who is taking over this terminal.,Selecteer de kassier die deze terminal overneemt.
+Selected,Geselecteerd
+Selected movement type is not allowed by POS Profile.,Het geselecteerde bewegingstype is niet toegestaan door POS-profiel.
+Selected Payments,Geselecteerde betalingen
+Sensitive actions kept away from quick taps.,Gevoelige acties worden uit de buurt van snelle tikken gehouden.
+Serial,Serieel
+Serial Numbers,Serienummers
+Server CPU Usage:,Server-CPU-gebruik:
+Server Health,Serverstatus
+Server Memory Usage:,Servergeheugengebruik:
+Server Metrics,Serverstatistieken
+Server Uptime:,Server-uptime:
+Service Charges,Servicekosten
+Session,Sessie
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,Stel de pincode van elke kassier in het formulier Gebruiker in en houd de terminalleden toegewezen in POS-profielgebruiker.
+Settings,Instellingen
+Settings in this section update the POS workspace without changing the current route.,Instellingen in deze sectie werken de POS-werkruimte bij zonder de huidige route te wijzigen.
+Setup complete!,Installatie voltooid!
+Share,Deel
+Shared terminal,Gedeelde terminal
+Shift Closed Snapshot,Shift gesloten momentopname
+Shift Overview,Overzicht ploegendienst
+Show,Toon
+Show cart on customer-facing screen,Toon winkelwagen op klantgericht scherm
+Show last invoice rate,Toon laatste factuurtarief
+Show rate info,Toon tariefinformatie
+Show Repair Candidates,Toon reparatiekandidaten
+Show search tools,Toon zoekhulpmiddelen
+Show the active cart on a customer-facing screen,Toon de actieve winkelwagen op een klantgericht scherm
+Showing {0}-{1} of {2},Toont {0}-{1} van {2}
+Showing 0 of 0,Toont 0 van 0
+Shows the distribution of invoices per currency,Toont de verdeling van facturen per valuta
+Sign out of the current POS session,Meld u af bij de huidige POS-sessie
+Size:,Maat:
+Skipped Payments,Overgeslagen betalingen
+Skipping items without barcodes,Artikelen overslaan zonder streepjescodes
+Slow Moving,Langzaam bewegend
+Slow Moving Items,Langzaam bewegende voorwerpen
+Slow Queries:,Langzame zoekopdrachten:
+Sold,Verkocht
+Source,Bron
+Source Cash Account (Optional Override),Brongeldrekening (optionele overschrijving)
+Source Ex. Rate:,Bron Bijv. Tarief:
+Source Rate:,Brontarief:
+Specific Profile,Specifiek profiel
+Split Invoices,Facturen splitsen
+Staff / Cashier Performance Report,Prestatierapport personeel/kassier
+Status,Status
+Stock,Voorraad
+Stock Information,Voorraadinformatie
+Stock is lower than requested,De voorraad is lager dan gevraagd
+Stock is lower than requested:\n{0},Voorraad is lager dan gevraagd:\n{0}
+Stock Movement Report,Rapport over aandelenbewegingen
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,"Voorraadupdate: {0} heeft {1} beschikbaar. Door {2} toe te voegen, zal de voorraad onder nul komen."
+Submit,Indienen
+Submit & Print,Verzenden en afdrukken
+Submit Deposit,Storting indienen
+Submit Expense,Kosten indienen
+Submitted,Ingezonden
+Submitted Cash Movements,Ingediende contante bewegingen
+Submitted entries,Ingezonden inzendingen
+Successfully scanned:,Succesvol gescand:
+Suggested,Voorgesteld
+Suggested Qty,Aanbevolen aantal
+Supervisor Access,Toegang voor supervisors
+Supervisor permissions unlock issuance and reloads,Supervisormachtigingen ontgrendelen uitgifte en herladen
+Supervisor Tools,Hulpmiddelen voor toezichthouders
+Supplier,Leverancier
+Supplier and dates are required.,Leverancier en data zijn vereist.
+Supplier Invoices,Facturen van leveranciers
+Supplier is required.,Leverancier is vereist.
+Supplier name is required,Leveranciersnaam is vereist
+Supplier Payments,Leveranciersbetalingen
+Supplier Purchase Summary,Aankoopoverzicht leverancier
+Suppliers,Leveranciers
+Suppliers not found,Leveranciers niet gevonden
+Switch Camera,Camera wisselen
+Switch Cashier,Wissel van kassier
+Switch the POS appearance theme,Wijzig het POS-uiterlijkthema
+Switched to:,Overgeschakeld naar:
+Sync All Invoices,Synchroniseer alle facturen
+Sync Offline Cash Movements ({0}),Offline geldbewegingen synchroniseren ({0})
+Sync Offline Sales,Synchroniseer offline verkopen
+Synced {0} offline cash movement(s).,Gesynchroniseerde {0} offline geldbeweging(en).
+Syncing items in background,Items op de achtergrond synchroniseren
+System / Diagnostics,Systeem / Diagnostiek
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","Systeemacties zijn laagfrequente onderhoudscontroles, zoals app-info, ondersteuningsdiagnostiek en sessiecontroles."
+System Information,Systeeminformatie
+System Status,Systeemstatus
+Tables:,Tabellen:
+Tap the button below to redeem a gift card during checkout.,Tik op de onderstaande knop om een cadeaubon in te wisselen tijdens het afrekenen.
+Target,Doel
+Target Ex. Rate:,Doel bijv. Tarief:
+Target Rate:,Doeltarief:
+Tax,Belasting
+Tax / Charges Report,Belasting-/lastenrapport
+Tax Heads,Belastinghoofden
+Taxable Amount,Belastbaar bedrag
+Tendered,Aanbesteed
+Terminal,Terminal
+Terminal & Devices,Terminals en apparaten
+Terminal locked,Terminal vergrendeld
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","Terminaltools zijn van invloed op dit kassastation, klantgerichte displays en toekomstige printer-/apparaatbedieningen."
+Territory not found,Territorium niet gevonden
+The amount paid is not complete,Het betaalde bedrag is niet volledig
+The app stores data locally for offline use. This is called cache.,De app slaat gegevens lokaal op voor offline gebruik. Dit heet cache.
+The invoice stayed in draft. Please review and submit it manually.,De factuur bleef in concept. Controleer het en dien het handmatig in.
+The maximum discount allowed is,De maximaal toegestane korting is
+The quantity for {0} has been adjusted to the maximum available stock.,Het aantal voor {0} is aangepast aan de maximaal beschikbare voorraad.
+The system could not retrieve the item details. Please try again.,Het systeem kan de artikelgegevens niet ophalen. Probeer het opnieuw.
+These invoices will be synced when connection is restored,Deze facturen worden gesynchroniseerd zodra de verbinding is hersteld
+This action now opens inside the settings workspace.,Deze actie wordt nu geopend in de werkruimte Instellingen.
+This coupon already used !,Deze coupon is al gebruikt!
+This invoice does not need change-allocation repair,Voor deze factuur is geen reparatie met wijzigingstoewijzing nodig
+This invoice is already repaired,Deze factuur is al gerepareerd
+This is an item template. Please choose a variant.,Dit is een itemsjabloon. Kies een variant.
+this item,dit artikel
+This POS page could not be opened offline because its code was not cached on this terminal yet.,Deze POS-pagina kon niet offline worden geopend omdat de code nog niet in de cache op deze terminal was opgeslagen.
+This Serial Number {0} has already been added!,Dit serienummer {0} is al toegevoegd!
+Threshold,Drempel
+Time,Tijd
+Tip: Clear cache regularly to free up space and keep the app fast.,Tip: Wis het cachegeheugen regelmatig om ruimte vrij te maken en de app snel te houden.
+Tip: Close unused tabs or apps to reduce lag.,Tip: Sluit ongebruikte tabbladen of apps om vertraging te verminderen.
+Tip: Monitor slow queries and table size for optimal performance.,Tip: Houd langzame query's en tabelgrootte in de gaten voor optimale prestaties.
+To Be Paid,Te betalen
+To Date,Tot op heden
+Today,Vandaag
+Today Profit,Vandaag winst
+Today Sales,Vandaag verkoop
+Toggle navigation drawer,Schakel de navigatielade in
+Toggle Theme,Thema wisselen
+Tools,Gereedschap
+Tools for customer-facing screens and terminal-specific actions.,Tools voor klantgerichte schermen en terminalspecifieke acties.
+Top Brand,Topmerk
+Top Category,Topcategorie
+Top Charge Head,Bovenste laadkop
+Top Customers,Topklanten
+Top Discount,Topkorting
+Top Items by Location,Topartikelen per locatie
+Top Margin,Bovenste marge
+Top Pending,Bovenaan in behandeling
+Top Profit Item,Topwinstartikel
+Top Return Items,Top retourartikelen
+Top Sales by Cashier,Topverkopen per kassier
+Top Supplier,Topleverancier
+Top Suppliers by Spend,Topleveranciers op basis van uitgaven
+Top Tables,Toptafels
+Top Tax Head,Top belastinghoofd
+Top Up Amount,Opwaardeerbedrag
+Top Up Card,Opwaardeerkaart
+Top Up Mode,Opwaardeermodus
+Top Variant,Topvariant
+Total,Totaal
+Total Amount,Totaal bedrag
+Total Change,Totale verandering
+Total Charges,Totale kosten
+Total In,Totaal In
+Total Invoices,Totaal facturen
+Total Items,Totaal aantal artikelen
+Total Mpesa,Totaal Mpesa
+Total Out,Totaal uit
+Total Payments,Totaal betalingen
+Total Purchase,Totale aankoop
+Total Selected :,Totaal geselecteerd:
+Total Size,Totale grootte
+Total Stock Qty,Totaal voorraadaantal
+Total:,Totaal:
+Totals by Invoice Currency,Totalen per factuurvaluta
+Track how much cash was handed back to customers,Houd bij hoeveel geld er aan klanten is teruggegeven
+"Track recent sales, collect unpaid balances, and reopen saved work","Houd recente verkopen bij, verzamel onbetaalde saldi en heropen opgeslagen werk"
+Transaction ID,Transactie-ID
+Transfer,Overdracht
+Try a different search term or clear the cart search.,Probeer een andere zoekterm of wis de winkelwagenzoekopdracht.
+Try adjusting your search or filters,Probeer uw zoekopdracht of filters aan te passen
+Try another source or refresh the list.,Probeer een andere bron of vernieuw de lijst.
+Try changing the date range or status filter.,Probeer het datumbereik of statusfilter te wijzigen.
+Type,Typ
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,"Geen toegang tot de camera, zelfs niet met basisinstellingen. Controleer uw camerarechten en apparaatcompatibiliteit."
+Unable to add offer item {0}. Please refresh and try again.,Kan aanbiedingsitem {0} niet toevoegen. Vernieuw de pagina en probeer het opnieuw.
+Unable to add offer item. Please refresh and try again.,Kan aanbiedingsitem niet toevoegen. Vernieuw de pagina en probeer het opnieuw.
+Unable to add scanned item.,Kan gescand item niet toevoegen.
+Unable to create purchase order,Kan inkooporder niet aanmaken
+Unable to delete draft invoice,Kan conceptfactuur niet verwijderen
+Unable to fetch documents,Kan documenten niet ophalen
+Unable to fetch draft orders,Kan conceptbestellingen niet ophalen
+Unable to fetch invoice history,Kan factuurgeschiedenis niet ophalen
+Unable to fetch M-Pesa payments,Kan M-Pesa-betalingen niet ophalen
+Unable to fetch sales orders,Kan verkooporders niet ophalen
+Unable to fetch unpaid invoices,Kan onbetaalde facturen niet ophalen
+Unable to generate scale barcode,Kan schaalbarcode niet genereren
+Unable to issue gift card.,Kan de cadeaukaart niet uitgeven.
+Unable to load cashier PIN status.,Kan de pincode van de kassier niet laden.
+Unable to load document,Kan document niet laden
+Unable to load draft invoice,Kan conceptfactuur niet laden
+Unable to load gift card balance.,Kan het saldo van de cadeaukaart niet laden.
+Unable to load invoice details,Kan factuurgegevens niet laden
+Unable to load parked order,Kan geparkeerde bestelling niet laden
+Unable to load the selected sales order,Kan de geselecteerde verkooporder niet laden
+Unable to prepare document,Kan document niet voorbereiden
+Unable to prepare return invoice,Kan de retourfactuur niet opmaken
+Unable to print draft invoice,Kan conceptfactuur niet afdrukken
+Unable to print submitted invoice,Kan ingediende factuur niet afdrukken
+Unable to process document action,Kan documentactie niet verwerken
+Unable to repair change allocation,Kan de wijzigingstoewijzing niet herstellen
+Unable to save cashier PIN.,Kan de pincode van de kassier niet opslaan.
+Unable to save the rate to the backend price list,Kan het tarief niet opslaan in de backend-prijslijst
+Unable to submit invoice,Kan factuur niet indienen
+Unable to submit the selected payment,Kan de geselecteerde betaling niet indienen
+Unable to top up gift card.,Kan de cadeaukaart niet opwaarderen.
+Unable to verify cashier PIN.,Kan de pincode van de kassamedewerker niet verifiëren.
+Unallocated,Niet toegewezen
+Unallocated:,Niet toegewezen:
+Unavailable,Niet beschikbaar
+Unknown,Onbekend
+Unknown Item,Onbekend artikel
+Unknown Warehouse,Onbekend magazijn
+Unlock POS,Ontgrendel POS
+Unpaid,Onbetaald
+"Unselected payments stay unallocated first, then auto reconcile after submit.",Niet-geselecteerde betalingen blijven eerst niet-toegewezen en worden vervolgens automatisch afgestemd nadat ze zijn verzonden.
+UOM,Eenheid
+UOM not found,Maateenheid niet gevonden
+Update available,Update beschikbaar
+Update Customer,Klant bijwerken
+Update PIN,Pincode bijwerken
+Update Price List Rate,Prijslijsttarief bijwerken
+Updated,Bijgewerkt
+Updates and app info that stay out of the cashier flow.,Updates en app-info die buiten de kassastroom blijven.
+Updates automatically,Wordt automatisch bijgewerkt
+Usage,Gebruik
+Usage Stats,Gebruiksstatistieken
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,Gebruik een pincode van 4 tot 8 cijfers voor het wisselen van kassier en het ontgrendelen van de terminal.
+Use Cashier,Gebruik kassier
+Use date range to search for older invoices,Gebruik datumbereik om naar oudere facturen te zoeken
+"Use one field for manual code entry, barcode scans, or QR scans.","Gebruik één veld voor handmatige code-invoer, barcodescans of QR-scans."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","Gebruik één workflow voor saldocontroles, nieuwe uitgiften en opwaarderingen zonder het POS te verlaten."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","Gebruik deze sectie wanneer in de cache opgeslagen vereiste gegevens moeten worden vernieuwd, opnieuw moeten worden opgebouwd of een diagnostische beoordeling moet worden uitgevoerd."
+Use Western numerals,Gebruik westerse cijfers
+Used:,Gebruikt:
+Using basic camera settings due to device limitations,Basiscamera-instellingen gebruiken vanwege apparaatbeperkingen
+Using cached customer balance,Gebruik van in de cache opgeslagen klantensaldo
+Valid until,Geldig tot
+Variance %,Variantie %
+Variants,Varianten
+Variant-wise,Variantgewijs
+Verify closing amounts for each payment method,Controleer de eindbedragen voor elke betaalmethode
+View all,Bekijk alles
+View app information and current build details,Bekijk app-informatie en huidige builddetails
+View Data Diagnostics,Gegevensdiagnostiek bekijken
+View Details,Details bekijken
+View invoice details,Factuurgegevens bekijken
+View notifications,Bekijk meldingen
+View offline invoices,Offline facturen bekijken
+View restricted POS insights,Bekijk beperkte POS-inzichten
+Void Amount,Ongeldig bedrag
+Void Count,Ongeldige telling
+Voids,Leegtes
+Waiting for cart items,Wachten op winkelwagenitems
+Waiting for payment...,Wachten op betaling...
+Walk-in Customer,Inloop klant
+Warehouse,Magazijn
+Warning: High cache usage may affect performance.,Waarschuwing: Een hoog cachegebruik kan de prestaties beïnvloeden.
+Warning: High lag may indicate heavy processing or browser slowness.,Waarschuwing: een hoge vertraging kan duiden op zware verwerking of browsertraagheid.
+Week ?,Week ?
+Week-wise,Weekgewijs
+Weight (g),Gewicht (g)
+Weight (grams),Gewicht (gram)
+We'll let you know if an invoice fails to submit,"Als een factuur niet wordt ingediend, laten wij u dit weten"
+Workflow,Werkstroom
+Write off amount cannot exceed the POS profile maximum of {0},Het afgeschreven bedrag mag het POS-profielmaximum van {0} niet overschrijden
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,Het afgeschreven bedrag overschrijdt de toegestane limiet ({0}). Voeg de betaling toe voor het resterende bedrag.
+Yes,Ja
+"Yes, Cancel sale","Ja, verkoop annuleren"
+"Yes, Close","Ja, dichtbij"
+You are not allowed to print draft invoices,Het is niet toegestaan conceptfacturen af te drukken
+You are offline. Add Payment will work again when the connection is restored.,Je bent offline. Toevoegen Betaling werkt weer zodra de verbinding is hersteld.
+You have no notifications right now,Je hebt momenteel geen meldingen
+Your Cart,Uw winkelwagen

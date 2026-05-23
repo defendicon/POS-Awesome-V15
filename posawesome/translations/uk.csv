@@ -1,0 +1,1362 @@
+POS Awesome,POS Чудово
+Fetch Items Directly from Server,Отримання елементів безпосередньо з сервера
+Menu,Меню
+Actions,Дії
+Close Shift,Закрити Shift
+End current session,Завершити поточний сеанс
+Print Last Invoice,Роздрукувати останній рахунок-фактуру
+Reprint previous transaction,Повторний друк попередньої операції
+Sync Offline Invoices,Синхронізація офлайн-рахунків-фактур
+Upload pending transactions,Завантажити незавершені транзакції
+Go Online,Вийти в Інтернет
+Go Offline,Перейти в автономний режим
+Disable offline mode,Вимкнути автономний режим
+Work without server connection,Робота без підключення до сервера
+Clear Cache,Очистити кеш
+Remove local data and refresh,Видаліть локальні дані та оновіть
+About,про
+App information,Інформація про додаток
+Language,Мова
+Change interface language,Змінити мову інтерфейсу
+Light Mode,Світловий режим
+Dark Mode,Темний режим
+Switch theme appearance,Змінити вигляд теми
+Logout,Вийти
+Sign out of session,Вийти з сесії
+Select Language,Виберіть мову
+Choose your preferred language for the POS interface,Виберіть потрібну мову для інтерфейсу POS
+Language will be changed to,Мову буде змінено на
+Cancel,Скасувати
+Change Language,Змінити мову
+Close,Закрити
+Cannot change language - same language selected,Неможливо змінити мову – вибрано ту саму мову
+Language changed successfully! Reloading...,Мову успішно змінено! Перезавантаження...
+Failed to change language,Не вдалося змінити мову
+Unknown error,Невідома помилка
+- Total Unallocated,- Всього нерозподілених
+* Required,* Обов'язковий
+{0} (Qty: {1}),{0} (Кількість: {1})
+{0} actions,{0} дії
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} має лише {1} на складі. Ви запросили {2}. Відкоригуйте кількість або поповніть запаси.
+{0} offline invoice{1} pending,{0} офлайн-фактура{1} очікує на розгляд
+{0} offline invoice{1} saved as draft,{0} офлайн-фактуру{1} збережено як чернетку
+{0} offline invoice{1} synced,{0} офлайн-фактура{1} синхронізовано
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0} дн. тому
+{0}h ago,{0} год тому
+{0}m ago,{0} хв тому
+A POS supervisor is required for this action.,Для цієї дії потрібен наглядач POS.
+Access,Доступ
+Account,Обліковий запис
+Account is overdrawn,На рахунку овердрафт
+Acknowledge the error to resume scanning,"Підтвердьте помилку, щоб продовжити сканування"
+Acknowledge the error to resume scanning.,"Підтвердьте помилку, щоб продовжити сканування."
+Across,Поперек
+Action,Дія
+Active sale,Активний продаж
+add,додати
+Add items from the selector to start building this sale.,"Додайте елементи з вибору, щоб розпочати розпродаж."
+Add more value to an existing gift card,Додайте більше цінності наявній подарунковій картці
+Add New Address,Додати нову адресу
+Add new customer,Додати нового клієнта
+Add on New Line,Додати в новий рядок
+Add Payment,Додати платіж
+Add payment to invoice,Додайте платіж до рахунку-фактури
+Add/Edit Coupon Conditions,Додати/змінити умови купонів
+Additional Discount,Додаткова знижка
+Additional Discount %,Додаткова знижка %
+Address Line 1,"Адреса, рядок 1"
+Address not found,Адреса не знайдена
+Adjust the quantity or enable negative stock to continue.,"Відкоригуйте кількість або ввімкніть негативний запас, щоб продовжити."
+Adjustment,коригування
+After returns,Після повернення
+Against,Проти
+Against Name,Проти імені
+Age Bracket,Вікова категорія
+All,всі
+All Caught Up!,Все наздогнано!
+All invoices are synchronized,Усі рахунки синхронізовані
+All pending invoices are up to date,Усі рахунки-фактури актуальні
+All Profiles,Усі профілі
+All Synchronized,Все синхронізовано
+All visible invoices are fully settled.,Усі видимі рахунки повністю розраховані.
+All Warehouses,Всі склади
+Allowed UOM is {0},Дозволений UOM становить {0}
+Always fetch items from server (ignore local cache),Завжди отримувати елементи з сервера (ігнорувати локальний кеш)
+Amount,Сума
+Amount already received,Сума вже отримана
+Amount exceeds profile cash movement max amount.,Сума перевищує максимальну суму руху готівки профілю.
+Amount must be greater than zero.,Сума має бути більше нуля.
+Amount received from customer,Сума отримана від клієнта
+Appearance and user-level preferences for the current session.,Зовнішній вигляд і параметри на рівні користувача для поточного сеансу.
+Applied,Прикладний
+Apply,Застосувати
+Apply Gift Card,Застосувати подарункову картку
+Apply Offer,Застосувати пропозицію
+Apply On,Застосувати
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,"Застосуйте в цьому рахунку-фактурі лише ту суму, яку ви хочете отримати. Залишок залишається на картці."
+Apply Redemption,Застосувати Redemption
+Applying,Подача заявки
+Apps,програми
+Are you sure you want to close? All entered data will be lost.,"Ви впевнені, що бажаєте закрити? Усі введені дані будуть втрачені."
+Attributes (Size/Color),Атрибути (розмір/колір)
+Auto Allocate Payment Amount,Автоматичний розподіл суми платежу
+Auto Reconcile,Автоматичне узгодження
+Auto reconciliation completed after payment submit.,Автоматичне узгодження завершено після подання платежу.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,Автоматичне узгодження завершено. Виділено: {0}{1}. Залишилось: {0}{2}.
+Available Actions,Доступні дії
+Available QTY,Доступна кількість
+Available:,В наявності:
+Average Basket,Середній кошик
+Average Bill,Середній рахунок
+Average Ticket,Середній квиток
+Avg Bill,Середній рахунок
+Avg Invoice,Середній рахунок-фактура
+Avg Invoice Profit,Середній прибуток за рахунком-фактурою
+Avg Invoice Value,Середня вартість рахунку-фактури
+Avg Purchase Frequency,Середня частота покупок
+Awesome,приголомшливо
+Awesome Dashboard,Чудова інформаційна панель
+Awesome Dashboard is disabled for the selected POS Profile.,Awesome Dashboard вимкнено для вибраного профілю POS.
+Awesome Dashboard is unavailable for the selected scope.,Awesome Dashboard недоступний для вибраного діапазону.
+Awesome Dashboard is visible only to POS supervisors.,Awesome Dashboard доступна лише для наглядачів POS.
+Back,Назад
+Back Office Cash Account,Готівковий рахунок бек-офіс
+Back Office Cash Account (Optional Override),Готівковий рахунок бек-офісу (необов’язкова заміна)
+Back office cash account is required.,Потрібен касовий рахунок бек-офісу.
+Back to {0},Назад до {0}
+Background processing did not finish in time.,Фонова обробка не завершилася вчасно.
+Background processing failed for Invoice {0}: {1},Помилка фонової обробки для рахунку-фактури {0}: {1}
+Background Submission Failed,Помилка фонового подання
+Background sync interval (seconds),Інтервал фонової синхронізації (секунди)
+Balance,Баланс
+Balance will be updated when connection is restored,"Баланс буде оновлено, коли з'єднання буде відновлено"
+Balances still pending,Залишки все ще очікуються
+Barcode,Штрих-код
+Barcode / QR Ready,Готовий штрих-код / QR
+Barcode Label Printing,Друк етикетки зі штрих-кодом
+Base Paid:,Основна сплата:
+Base Recv:,Базове приймання:
+Base:,база:
+Basic Information,Основна інформація
+Batch,партія
+Batch Information,Інформація про партію
+Before any return workflow,Перед будь-яким робочим процесом повернення
+Before returns,Перед поверненням
+Best Day,Найкращий день
+Best Seller,Найкращий продавець
+Book expense or deposit from active shift.,Забронювати витрати або депозит з активної зміни.
+Branch / Location-wise Report,Звіт про філію/розташування
+Brand-wise,По-брендовому
+Breakdown,Поломка
+Browse,переглядати
+Build Time:,Час створення:
+Built with Frappe,Створено з фраппе
+Bundle,пучок
+Buying Price,Купівельна ціна
+Cache cleared successfully,Кеш успішно очищено
+Cache Usage,Використання кешу
+cache used,використаний кеш
+Calculating...,Розрахунок...
+Camera Access Required,Потрібен доступ до камери
+Camera access was aborted. Please try again.,Доступ до камери перервано. Спробуйте ще раз.
+Camera constraints not supported by your device. Trying fallback settings...,Обмеження камери не підтримуються вашим пристроєм. Спроба резервних налаштувань...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,Камера зайнята або заблокована іншою програмою/вкладкою. Закрийте інші програми камери та повторіть спробу.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,Відмовлено в дозволі на камеру. Дозвольте доступ до камери в налаштуваннях браузера та оновіть сторінку.
+Camera scanner is locked until the current error is acknowledged,"Сканер камери заблоковано, доки не буде підтверджено поточну помилку"
+Camera started but the video stream did not load in time. Please try again.,"Камера запустилася, але відеопотік не завантажився вчасно. Спробуйте ще раз."
+Cancel cash movement {0}?,Скасувати переміщення готівки {0}?
+Cancel Payment,Скасувати платіж
+Cancel Sale,Скасувати продаж
+Cancel Sale ?,Скасувати продаж?
+Cancelled,Скасовано
+Cannot add an item with zero or negative quantity.,Неможливо додати товар із нульовою чи від’ємною кількістю.
+Cannot clear cache while offline,Неможливо очистити кеш у режимі офлайн
+Cannot redeem customer credit more than invoice total,"Неможливо погасити кредит клієнта, що перевищує загальну суму рахунку-фактури"
+Cannot redeem gift cards more than invoice total,"Неможливо активувати подарункові картки, що перевищує загальну суму рахунку-фактури"
+Cannot Save Offline Invoice:,Неможливо зберегти офлайн-фактуру:
+Cannot Save Offline Payment:,Неможливо зберегти офлайн-платіж:
+Card,картка
+Card / Online,Картка / Онлайн
+Card health after the last live lookup,Справність картки після останнього пошуку в реальному часі
+Cards,картки
+Cart,кошик
+Cash,Готівка
+Cash back to customers,Повернення грошей клієнтам
+Cash Collections,Грошові збори
+Cash Deposit is disabled for this POS Profile.,Депозит готівкою вимкнено для цього профілю POS.
+Cash Drawer Snapshot,Знімок грошової шухляди
+Cash In Hand,Готівка в касі
+Cash Movement,Рух готівки
+Cash movement cancelled,Переміщення готівки скасовано
+Cash movement deduction applied,Застосовується вирахування руху готівки
+Cash movement deleted,Переміщення готівки видалено
+Cash movement is disabled for this POS Profile.,Переміщення готівки вимкнено для цього профілю POS.
+Cash Movement is disabled in current POS Profile.,Переміщення готівки вимкнено в поточному профілі POS.
+Cash movement saved offline,Переміщення готівки збережено офлайн
+Cash movement submitted,Переміщення готівки подано
+Cash Movements,Рух готівки
+Cash payment cannot be less than invoice total when partial payment is not allowed,"Оплата готівкою не може бути меншою за загальну суму рахунку-фактури, якщо часткова оплата не допускається"
+Cash returned after payment,Готівка повертається після оплати
+Cashier,Касир
+Cashier Access,Доступ до каси
+Cashier identity and appearance preferences.,Ідентичність касира та переваги зовнішнього вигляду.
+Cashier PIN,PIN-код касира
+Cashier PIN saved successfully.,PIN-код касира успішно збережено.
+Cashiers,Касири
+Cashier-wise,З точки зору касира
+Categories,Категорії
+Category,Категорія
+Category / Brand / Variant Report,Звіт про категорію/бренд/варіант
+Category-wise,Категоріально
+Category-wise Margin,Маржа за категорією
+Certificate,Сертифікат
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,Сертифікат відсутній або ненадійний. QZ може показувати діалогове вікно підтвердження.
+Certificate is trusted. Silent QZ printing is active.,Сертифікат довірений. Безшумний друк QZ активний.
+Change,Зміна
+Change allocation repaired,Зміна розподілу виправлена
+Change Price,Змінити ціну
+Change Return,Зміна Повернення
+Change Returned,Зміну повернуто
+Change terminal cashier,Зміна касира терміналу
+Charge Heads,Зарядні головки
+Charges,Звинувачення
+Charges not found,Заряди не знайдено
+Check Balance,Перевірте баланс
+Check balance for any card. Supervisors can issue and top up cards here.,Перевірте баланс будь-якої картки. Тут супервайзери можуть оформити та поповнити картки.
+Check balance only,Тільки перевіряти баланс
+Check for new commits,Перевірте наявність нових комітів
+Check for Updates,Перевірте наявність оновлень
+Check live balance before applying redemption,"Перевірте живий баланс, перш ніж застосувати викуп"
+Check live balance before redemption,Перевірте поточний баланс перед погашенням
+Checking...,Перевірка...
+Cheque/Reference Date,Дата чека/довідки
+Cheque/Reference No,Чек/довідковий номер
+Choose the cashier currently operating this terminal.,"Виберіть касира, який зараз обслуговує цей термінал."
+City,Місто
+Clear,ясно
+Clear All,Очистити все
+Clear all barcode items,Очистити всі штрих-коди
+Clear all purchase order items,Очистіть усі позиції замовлення
+Clear Search,Очистити пошук
+Clearing local cache...,Очищення локального кешу...
+Click to refresh,"Натисніть, щоб оновити"
+Client CPU Lag:,Затримка ЦП клієнта:
+Client Memory Usage:,Використання пам'яті клієнта:
+Client Metrics,Метрики клієнта
+Close about dialog,Закрити діалогове вікно
+Close cashier switcher,Закрити перемикач касирів
+Close closing shift dialog,Закрити діалогове вікно зміни
+Close column selector,Закрити селектор стовпців
+Close Dialog,Закрити діалогове вікно
+Close drafts dialog,Закрити діалогове вікно чернеток
+Close invoice details dialog,Закрити діалогове вікно інформації про рахунок-фактуру
+Close invoice management,Закрити керування рахунками-фактурами
+Close offline invoices dialog,Закрити діалогове вікно офлайн-рахунків-фактур
+Close packing list dialog,Закрити діалогове вікно пакувального списку
+Close returns dialog,Закрити діалогове вікно повернення
+Close sales orders dialog,Закрити діалогове вікно замовлень на продаж
+Close Scanner,Закрити сканер
+Close scanner dialog,Закрити діалогове вікно сканера
+Close Settings,Закрийте налаштування
+Closing Amount,Сума закриття
+Closing POS Shift,Закриття POS Shift
+Closing Snapshot Available,Доступний знімок закриття
+Code,Код
+Code scanned successfully,Код успішно проскановано
+COGS,COGS
+Collapse item details,Згорнути деталі елемента
+Collected,Зібрано
+Cols,Cols
+Columns,Стовпці
+commits,зобов'язується
+Completed and active sales in this range,Завершені та активні продажі в цьому асортименті
+Completed returns will appear here.,Завершені повернення з’являться тут.
+Confirm,Підтвердити
+Confirm Close,Підтвердити Закрити
+Confirm Mobile Number,Підтвердьте номер мобільного телефону
+Confirm PIN,Підтвердьте PIN-код
+Connect,Підключитися
+Connect printer and manage certificate,Підключіть принтер і керуйте сертифікатом
+Connecting to QZ Tray...,Підключення до QZ Tray...
+Connection problem while submitting invoice,Проблема з підключенням під час подання рахунку
+Connections:,Підключення:
+Connectivity and cached prerequisite status were rechecked.,Перевірено з’єднання та кешований статус передумов.
+Continue Editing,Продовжити редагування
+Could not fetch latest balance from server,Не вдалося отримати останній баланс із сервера
+Count,Граф
+Country,Країна
+Coupon,Купон
+Coupons,Купони
+Cover,Обкладинка
+CPU Cores:,Ядра ЦП:
+Create,Створити
+Create and load a new prepaid card,Створіть і завантажте нову передплачену картку
+Create and preload a new gift card,Створіть і попередньо завантажте нову подарункову картку
+Create Bill,Створити законопроект
+Create Customer,Створити клієнта
+Create New Item,Створити новий елемент
+Create or change your PIN,Створіть або змініть свій PIN-код
+Create PIN,Створіть PIN-код
+Create POS Opening Shift,Створіть зміну відкриття POS
+Create Purchase Order,Створення замовлення на купівлю
+Create Return,Створити повернення
+Create return from invoice,Створення повернення з рахунку-фактури
+Create Supplier,Створити постачальника
+Credit and Output,Кредит і вихід
+Credit Note,Кредит-нота
+Credit Outstanding,Кредит непогашений
+Credit sales remaining to be collected,"Продажі в кредит, що залишилися підлягають стягненню"
+Critical,Критичний
+Currency,Валюта
+Current,поточний
+Current Event Loop Lag:,Затримка поточного циклу подій:
+Current Month,Поточний місяць
+Current PIN,Поточний PIN-код
+Current Profile,Поточний профіль
+Current redeemable value on the gift card,Поточна вартість погашення на подарунковій картці
+Current User,Поточний користувач
+Custom,Custom
+Custom Due Days,Спеціальні дні виконання
+Custom items per page,Спеціальні елементи на сторінку
+Customer,Замовник
+Customer already selected,Клієнт уже обраний
+Customer Balance,Баланс клієнта
+Customer balance unavailable offline,Баланс клієнта недоступний офлайн
+Customer created successfully.,Клієнт створено успішно.
+Customer creation failed.,Помилка створення клієнта.
+Customer Details,Відомості про клієнта
+Customer display channel is missing,Відсутній канал відображення клієнта
+Customer display was blocked. Please allow pop-ups for this site.,"Відображення клієнта заблоковано. Будь ласка, дозвольте спливаючі вікна для цього сайту."
+Customer group is required,Група клієнтів обов’язкова
+Customer is required to add payment,Клієнт повинен додати оплату
+Customer Name is required,Потрібно вказати ім’я клієнта
+Customer not selected,Клієнт не вибрано
+Customer Report,Звіт клієнта
+Customer saved offline,Клієнт збережено офлайн
+Customer Screen,Екран клієнта
+Customer territory is required,Потрібна територія клієнта
+Customer updated successfully.,Клієнт успішно оновлений.
+Customer-facing tools and printer setup.,Інструменти для клієнта та налаштування принтера.
+Customers,Клієнти
+Customers not found,Клієнтів не знайдено
+Daily cashier actions without scrolling.,Щоденні дії касира без прокручування.
+Daily Sales,Щоденні продажі
+Daily Sales Summary,Щоденний підсумок продажів
+Data loaded in form. Review and submit.,Дані завантажуються у форму. Перегляньте та надішліть.
+Database Health,Справність бази даних
+Database health affects overall system speed and reliability.,Справність бази даних впливає на загальну швидкість і надійність системи.
+Database Info,Інформація про базу даних
+Date,Дата
+Day ?,день ?
+days,днів
+Day-wise (MTD),По днях (MTD)
+Day-wise Movement,Денний рух
+Dead Stock,Мертвий запас
+Dead Stock Items,Мертві запаси
+Decrease quantity,Зменшити кількість
+Default,За замовчуванням
+Default:,За замовчуванням:
+Delete,Видалити
+Delete cancelled cash movement {0}?,Видалити скасований рух готівки {0}?
+Delete Draft,Видалити чернетку
+Delete draft invoice,Видалити проект рахунку-фактури
+Delete draft invoice {0}?,Видалити чернетку рахунка-фактури {0}?
+Delete Invoice,Видалити рахунок-фактуру
+Delete offline invoice,Видалити офлайн-фактуру
+Delivered,Доставлено
+Delivery Charges,Плата за доставку
+Delivery Information,Інформація про доставку
+Delivery Note {0} created,Створено накладну {0}
+Delivery note created,Створена накладна
+Deployed Bundle:,Розгорнутий пакет:
+Deposit,депозит
+Description,опис
+Detailed Supplier Breakdown,Детальна розбивка постачальників
+Detecting formats:,Виявлення форматів:
+Device Memory:,Пам'ять пристрою:
+Difference,Різниця
+Difference (In Company Currency),Різниця (у валюті компанії)
+Disable offline mode first to recheck live connectivity.,"Спочатку вимкніть офлайн-режим, щоб повторно перевірити підключення в режимі реального часу."
+Disconnect,Відключити
+discount,знижка
+Discount %,Знижка %
+Discount / Void / Return Report,Знижка / анулювання / звіт про повернення
+Discount Amount,Розмір знижки
+Discount limited by POS Profile,Знижка обмежена профілем POS
+Discounted Invoices,Рахунки-фактури зі знижкою
+Discounts,Знижки
+Dismiss,Відхилити
+Download Certificate,Завантажити сертифікат
+Draft,Чернетка
+Draft invoice deleted,Чернетку рахунка видалено
+Draft source,Джерело чернетки
+Drafts,Чернетки
+Due {0},Термін: {0}
+Due Date,Термін виконання
+Duplicate,дублікат
+Edit customer,Редагувати клієнта
+Edit discount amount,Редагувати розмір знижки
+Edit discount percentage,Редагувати відсоток знижки
+Edit Gift Application,Редагувати заявку на подарунок
+Edit item name,Редагувати назву елемента
+Edit quantity,Редагувати кількість
+Edit rate,Змінити ставку
+Edit unit of measure,Редагувати одиницю вимірювання
+Edited,Відредаговано
+Employee,Співробітник
+Enable background sync,Увімкнути фонову синхронізацію
+Enable Customer Display in POS Profile first.,Спочатку ввімкніть відображення клієнтів у профілі POS.
+Enter a PIN.,Введіть PIN-код.
+Enter a valid grams value,Введіть дійсне значення в грамах
+Enter new price list rate,Введіть нову ставку прайс-листа
+Enter Quantity,Введіть кількість
+Enter the cashier PIN to continue.,"Щоб продовжити, введіть PIN-код касира."
+Enter the current PIN first.,Спочатку введіть поточний PIN-код.
+"Enter the current PIN, then choose a new one.","Введіть поточний PIN-код, а потім виберіть новий."
+Enter valid grams for scale barcode,Введіть дійсні грами для штрих-коду ваги
+Entries,Записи
+Error accessing camera:,Помилка доступу до камери:
+Error calculating prices,Помилка розрахунку цін
+Error fetching customer balance,Помилка отримання балансу клієнта
+Error in change calculations!,Помилка в розрахунках змін!
+Error Loading Data,Помилка завантаження даних
+Error loading invoice details,Помилка завантаження даних рахунку-фактури
+Error processing invoice,Помилка обробки рахунку-фактури
+Error processing payment,Помилка обробки платежу
+Error searching invoices,Помилка пошуку рахунків-фактур
+Error submitting invoice:,Помилка подання рахунку:
+Error submitting invoice: {0},Помилка подання рахунка: {0}
+Error submitting invoice: No response from server,Помилка надсилання рахунка: немає відповіді від сервера
+Error updating currency,Помилка оновлення валюти
+Error updating item details,Помилка оновлення деталей товару
+Est. Purchase,Приблизно Купівля
+Est. Value,Приблизно Значення
+Event-loop lag measures how busy your browser is. Lower is better.,"Затримка циклу подій вимірює, наскільки зайнятий ваш браузер. Нижче – краще."
+Every,кожен
+Exchange Rate,Обмінний курс
+Expand item details,Розгорнути відомості про товар
+Expected Amount (In Company Currency),Очікувана сума (у валюті компанії)
+Expected Cash,Очікувана готівка
+Expected cash on hand grouped by currency,"Очікувана готівка в касі, згрупована за валютою"
+Expected vs Actual,Очікуване проти фактичного
+Expense,Витрати
+Expense Account (Optional Override),Рахунок витрат (необов'язкове перевизначення)
+Expense account is required.,Обліковий запис витрат обов’язковий.
+Expenses and deposits posted during this shift,"Витрати та депозити, проведені протягом цієї зміни"
+Expired,Термін дії минув
+Failed to auto reconcile payments.,Не вдалося автоматично звірити платежі.
+Failed to cancel cash movement,Не вдалося скасувати рух готівки
+Failed to clear cache,Не вдалося очистити кеш
+Failed to create item,Не вдалося створити елемент
+Failed to create supplier,Не вдалося створити постачальника
+Failed to delete cash movement,Не вдалося видалити рух готівки
+Failed to generate scale barcode. Using item barcode only.,Не вдалося створити штрих-код ваги. Використовуючи лише штрих-код товару.
+Failed to load cash movement context.,Не вдалося завантажити контекст руху готівки.
+Failed to load dashboard data.,Не вдалося завантажити дані інформаційної панелі.
+Failed to reload invoice from server,Не вдалося перезавантажити рахунок із сервера
+Failed to submit cash movement,Не вдалося подати рух готівки
+Failed to sync offline cash movements,Не вдалося синхронізувати рух готівки в автономному режимі
+Fast cashier actions for active shifts.,Швидкі дії касира для активних змін.
+Fast Moving Items,"Предмети, що швидко рухаються"
+Fees,Комісії
+Fetch the latest offline prerequisite updates,Отримайте найновіші необхідні оновлення в автономному режимі
+Find a sales order quickly and load it into the current sale.,Швидко знайдіть замовлення на продаж і завантажте його в поточний продаж.
+Fixing payment amounts for return invoice...,Встановлення сум оплати для повернення рахунка...
+Flash Off,Спалах вимкнено
+Flash On,Спалах увімкнено
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","Для позицій «Пакет продуктів» склад, серійний номер і номер партії враховуватимуться з таблиці «Пакувальний лист». Якщо склад і номер партії однакові для всіх елементів упаковки для будь-якого елемента «Набору продуктів», ці значення можна ввести в головну таблицю «Елемент»; значення буде скопійовано в таблицю «Пакувальний лист»."
+Free,безкоштовно
+Free Qty,Безкоштовна кількість
+Frequency,Частота
+from,від
+From Date,З дати
+Fulfillment Details,Деталі виконання
+Full Name,ПІБ
+Gain,посилення
+Generate a fresh prepaid card and start it with an opening balance.,Створіть нову передплачену картку та почніть її з початкового балансу.
+Generate and install the certificate to allow fully silent printing without trust prompts.,"Створіть і встановіть сертифікат, щоб забезпечити безшумний друк без підказок довіри."
+Generate Certificate,Створити сертифікат
+Generated scale barcode: {0},Згенерований штрих-код ваги: {0}
+Get Payments,Отримати платежі
+Gift Card,Подарункова карта
+Gift card amount must be greater than zero.,Сума подарункової картки має бути більше нуля.
+Gift Card Code,Код подарункової картки
+Gift card code is required for redemption,Код подарункової картки потрібен для використання
+Gift card code is required.,Потрібно ввести код подарункової картки.
+Gift card issued successfully.,Подарункову картку видано успішно.
+Gift card loaded successfully.,Подарункову картку успішно завантажено.
+Gift Card Management,Управління подарунковими картками
+Gift card payment,Оплата подарунковою карткою
+Gift card redemption requires an online connection,Для використання подарункової картки потрібне онлайн-з’єднання
+Gift card topped up successfully.,Подарункову картку успішно поповнено.
+Gift Cards,Подарункові карти
+Go to Frappe Desk,Перейдіть до столу Frappe
+Grand Total,Загальна сума
+Gross Margin,Валовий прибуток
+Gross Profit,Валовий прибуток
+Gross Sales,Валовий обсяг продажів
+Group not found,Групу не знайдено
+"Grouped controls for terminal, UI, and session settings.","Згруповані елементи керування для налаштувань терміналу, інтерфейсу користувача та сеансу."
+Grouped totals for each payment method and currency,Згруповані суми для кожного способу оплати та валюти
+Hide,Сховати
+Hide Gift Card,Сховати подарункову картку
+Hide Non Essential Fields,Приховати несуттєві поля
+Hide quantity decimals,Приховати десяткові знаки кількості
+Hide search tools,Приховати інструменти пошуку
+Hide zero rated items,Приховати товари з нульовим рейтингом
+High,Високий
+History,історія
+Hourly (Today),Щогодини (сьогодні)
+How this section works,Як працює цей розділ
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","Якщо застарілі дані залишаються, відкрийте «Параметри» > «Офлайн і синхронізація» та знову запустіть Rebuild Offline Data у режимі онлайн."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","Якщо попередження не зникає, відкрийте «Параметри» > «Офлайн і синхронізація», а потім запустіть «Оновити офлайн-дані» або «Перебудувати офлайн-дані»."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Імпортуйте сертифікат у QZ Tray і перезапустіть QZ Tray на кожній POS-машині.
+In,в
+In stock: {0},На складі: {0}
+Include Batch / Serial,Включати партію / серійний номер
+Include Price,Включити ціну
+Increase quantity,Збільшити кількість
+IndexedDB,Індексована БД
+Initial Amount,Початкова сума
+Initialize your shift with opening balances,Ініціалізуйте свою зміну початковими залишками
+Initializing application...,Ініціалізація програми...
+"Inspect cache, sync, and prerequisite status","Перевірте стан кешу, синхронізації та передумов"
+Installed Applications,Встановлені програми
+Insufficient stock:\n{0},Недостатній запас:\n{0}
+Invalid rate,Недійсний курс
+Inventory Status Report,Звіт про стан запасів
+Invoice,рахунок-фактура
+Invoice {0} is Submitted,Рахунок-фактуру {0} подано
+Invoice {0} processed successfully,Рахунок-фактуру {0} успішно оброблено
+Invoice {0} submission failed,Не вдалося надіслати рахунок-фактуру {0}
+Invoice {0} was already submitted,Рахунок-фактуру {0} уже подано
+Invoice Adjustments,Коригування рахунків-фактур
+Invoice Change,Зміна рахунку-фактури
+Invoice Details,Відомості про рахунок-фактуру
+Invoice is still in draft after background submission.,Рахунок-фактура все ще залишається чернеткою після подання довідки.
+Invoice Items,Пункти рахунку-фактури
+Invoice Management,Управління рахунками-фактурами
+Invoice Mgmt,Керування рахунком-фактурою
+Invoice saved offline,Рахунок-фактура збережено офлайн
+Invoice submission failed,Помилка подання рахунку
+Invoice Submitted,Рахунок надіслано
+"Invoice value settled by loyalty points, not cash collection","Вартість рахунку-фактури розраховується балами лояльності, а не готівкою"
+Invoices,Рахунки-фактури
+Invoices already past due date,Рахунки вже прострочені
+Invoices saved as POS Invoices,"Рахунки-фактури, збережені як рахунки-фактури POS"
+Invoices still carrying balances,Рахунки-фактури все ще містять залишки
+Issue Mode,Режим випуску
+Issue New Card,Випуск нової картки
+Issue Workflow,Випуск робочого процесу
+"Issue, top up, and check","Випуск, поповнення та перевірка"
+Item,Пункт
+Item / Product Sales Report,Звіт про продаж товару/товару
+Item {0} added to invoice,Товар {0} додано до рахунку-фактури
+Item '{0}' has no barcode,"Елемент ""{0}"" не має штрих-коду"
+Item Code,Код товару
+Item created successfully,Елемент створено успішно
+Item is out of stock,Товару немає в наявності
+Item Name,Назва предмета
+Item not found,Товар не знайдено
+Item order updated,Порядок товарів оновлено
+Item Selector Settings,Параметри вибору елементів
+Items,Предмети
+Items added in POS will appear here automatically.,"Товари, додані в POS, з’являться тут автоматично."
+Items added to invoice,Товари додано до рахунку-фактури
+Items per page,Елементів на сторінці
+Items Sold,Продані товари
+Items/Invoice,Товари/рахунок-фактура
+Item-wise Profitability,Позиційна рентабельність
+Journal Entry,Запис у журналі
+json,json
+Just now,Просто зараз
+Keep offline prerequisites healthy and recover stale data safely.,Підтримуйте передумови офлайн і безпечно відновлюйте застарілі дані.
+Labels,етикетки
+"Language, theme, terminal tools, and session controls.","Мова, тема, інструменти терміналу та елементи керування сеансом."
+Last,Останній
+Last 14 Days (Paid vs Pending),Останні 14 днів (оплачено чи очікує на розгляд)
+Last 14 Days Activity,Активність за останні 14 днів
+Last 14 Days Gross Profit,Валовий прибуток за останні 14 днів
+Last 14 Days Purchases,Покупки за останні 14 днів
+Last 14 Days Tax/Charges,Податки/збори за останні 14 днів
+Last sync:,Остання синхронізація:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},Остання синхронізація: {0} | нормально: {1} | не вдалося: {2} | пропущено: {3}
+Latest entries for current shift,Останні записи поточної зміни
+Lead Time,Час виконання
+Limited,Обмежений
+lines,лінії
+List,Список
+Live Snapshot,Живий знімок
+Load a POS profile and cashier first.,Спочатку завантажте профіль POS і касира.
+Load More Invoices,Завантажити більше рахунків-фактур
+Load previously saved invoices,Завантажити раніше збережені рахунки-фактури
+Load Sale,Розпродаж навантаження
+Load Sales Invoice,Завантажити рахунок-фактуру
+Loading app data...,Завантаження даних програми...
+Loading customer database...,Завантаження бази даних клієнтів...
+Loading customers...,Завантаження клієнтів...
+Loading database stats...,Завантаження статистики бази даних...
+Loading details...,Завантаження деталей...
+Loading invoice history...,Завантаження історії рахунків-фактур...
+Loading items...,Завантаження елементів...
+Loading product catalog...,Завантаження каталогу товарів...
+Loading return invoices...,Завантаження рахунків-фактур для повернення...
+Loading server CPU/memory usage...,Завантаження ЦП/пам'яті сервера...
+Loading suppliers...,Завантаження постачальників...
+Loading unpaid invoices...,Завантаження неоплачених рахунків...
+Loading view...,Завантаження перегляду...
+Loading...,Завантаження...
+Local storage is unavailable. Switching to online-only mode.,Локальне сховище недоступне. Перехід у режим лише онлайн.
+localStorage,localStorage
+Location Performance,Ефективність розташування
+Locations,Розташування
+Lock Screen,Екран блокування
+Lookup Workflow,Робочий процес пошуку
+Loss,Втрата
+Low,Низький
+Low Stock,Низький запас
+Low Stock Alerts,Сповіщення про низькі запаси
+Low Stock Items,Малий склад
+Low Stock Threshold,Низький поріг запасів
+Low Stock Total,Низький загальний запас
+Lowest Margin,Найнижча маржа
+Low-frequency maintenance and system details.,Низькочастотне обслуговування та деталі системи.
+Loyalty Redeemed,Лояльність викуплена
+Loyalty Redemption,Викуп лояльності
+Make New Payment,Здійснити новий платіж
+Manage all,Керувати всім
+Manage and synchronize your offline transactions,Керуйте та синхронізуйте свої офлайн-транзакції
+Manage Cashier PIN,Керуйте PIN-кодом касира
+"Manage offline tools, terminal controls, and maintenance from one workspace.","Керуйте офлайн-інструментами, елементами керування терміналом і обслуговуванням з одного робочого простору."
+manual,посібник
+"Manual codes, barcode scans, and QR scans work in the same field","Ручні коди, сканування штрих-кодів і сканування QR працюють в одному полі"
+Manual offline mode is enabled,Ручний офлайн-режим увімкнено
+Margin,Маржа
+Maximum available quantity is {0}. Quantity adjusted to match stock.,Максимальна доступна кількість становить {0}. Кількість скоригована відповідно до наявності.
+Maximum discount amount for this offer item is {0}.,Максимальна сума знижки для цієї пропозиції становить {0}.
+Maximum discount percentage for this offer item is {0}%.,Максимальний відсоток знижки на цей товар пропозиції становить {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,Максимальна кількість пропозиції становить {0}. Кількість приведена до дозволеного ліміту.
+Medium,Середній
+Method-wise Collections,Методичні колекції
+Minimum allowed rate for this offer item is {0}.,Мінімальна дозволена ставка для цієї пропозиції становить {0}.
+Minimum Qty,Мінімальна кількість
+Mobile No,Номер мобільного телефону
+Mode,Режим
+Mode of Payment,Спосіб оплати
+Month,місяць
+Month ?,місяць ?
+Monthly Profit,Щомісячний прибуток
+Monthly Sales,Щомісячні продажі
+Monthly Sales Summary,Місячний підсумок продажів
+Month-wise,Щомісячно
+Most Active Cashiers,Найактивніші касири
+Movement Type,Тип руху
+Movements,Рухи
+Multi Currency,Мультивалютний
+N/A,N/A
+Name,Ім'я
+Negative Stock,Негативний запас
+Negative Stock Items,Негативні товарні товари
+Negative values not allowed,Від'ємні значення не допускаються
+Net,Чистий
+Net Qty,Чиста кількість
+Net Sales,Чистий продаж
+Net Value,Чиста вартість
+Never,Ніколи
+New changes are ready to load,Нові зміни готові до завантаження
+New Item,Новий товар
+New Offer Available,Доступна нова пропозиція
+New PIN,Новий PIN-код
+New rate,Нова ставка
+Next unit of measure,Наступна одиниця вимірювання
+No attribute data found.,Дані атрибутів не знайдено.
+No Barcode,Без штрих-коду
+No barcode found for UOM '{0}',"Не знайдено штрих-код для UOM ""{0}"""
+No branch/location data found.,Немає даних про відділення/місцезнаходження.
+No brand data found.,Немає даних про бренд.
+No cached gift card balance is available offline.,"Немає кешованого балансу подарункової картки, доступного офлайн."
+No camera found on this device. Please ensure your device has a working camera.,"На цьому пристрої не знайдено камери. Будь ласка, переконайтеся, що ваш пристрій має робочу камеру."
+No capability warnings recorded yet.,Попереджень про можливості ще не зареєстровано.
+No cash expected for this shift.,На цю зміну готівка не очікується.
+No cash mode configured,Режим готівки не налаштовано
+No cash movement type is allowed for this POS Profile.,Для цього профілю POS не дозволений тип руху готівки.
+No cashier PIN is set yet. Create one now.,PIN-код касира ще не встановлено. Створіть зараз.
+No cashier profiles are available for this POS profile yet.,Для цього профілю POS ще немає профілів касира.
+No cashier-wise discount/void/return activity.,Жодних касових знижок/скасування/повернення.
+No category data found.,Дані категорії не знайдено.
+No category profitability data found.,Немає даних про прибутковість категорії.
+No change returned recorded for this shift.,Для цієї зміни не зареєстровано жодної зміни.
+No change-allocation invoices match the current filters.,Жодні рахунки-фактури розподілу змін не відповідають поточним фільтрам.
+No charge head breakdown found.,Пробою зарядної головки не виявлено.
+No Company Selected,Компанію не вибрано
+No customer sales data found.,Немає даних про продажі клієнтів.
+No day-wise discount/void/return trend.,Немає денної тенденції знижок/недійсності/повернення.
+No day-wise payment data found.,Даних про оплату за день не знайдено.
+No day-wise profitability trend found.,Денна тенденція прибутковості не знайдена.
+No day-wise purchase data found.,Даних про покупки за день не знайдено.
+No day-wise sales trend found.,Тенденції продажів за день не знайдено.
+No day-wise tax/charges trend found.,Денна тенденція податків/зборів не знайдена.
+No dead stock items.,Немає мертвих товарів.
+No due date,Немає терміну виконання
+No exact repair match found for this invoice,Для цього рахунку-фактури не знайдено точної відповідності ремонту
+No hourly sales trend found for today.,На сьогодні не знайдено погодинної тенденції продажів.
+No invoice activity found.,Рахунок-фактура не знайдена.
+No invoices found,Рахунки-фактури не знайдено
+No invoices found. Try different search criteria.,Рахунки-фактури не знайдено. Спробуйте інші критерії пошуку.
+No invoices recorded for this shift.,Немає рахунків-фактур для цієї зміни.
+No item profitability data found.,Немає даних про прибутковість товару.
+No item sales data found for this period.,Немає даних про продаж товарів за цей період.
+No items found,Елементів не знайдено
+No items in cart,Немає товарів у кошику
+No items with barcodes to print,Немає елементів зі штрих-кодами для друку
+No location-wise top item data found.,Не знайдено даних про найпопулярніші елементи щодо розташування.
+No low stock alerts right now.,Зараз немає сповіщень про низькі запаси.
+No low stock items.,Немає товарів із низьким запасом.
+No matching items in cart,Немає відповідних товарів у кошику
+No month-wise sales trend found.,Тенденції продажів за місяць не знайдено.
+No negative stock items.,Немає негативних товарів на складі.
+No notifications yet,Ще немає сповіщень
+No offline cash movement synced.,Переміщення готівки в автономному режимі не синхронізовано.
+No offline invoices pending synchronization,"Немає офлайн-рахунків, які очікують на синхронізацію"
+No offline sync issues recorded yet.,Проблем із офлайн-синхронізацією ще не зафіксовано.
+No out-of-stock items.,"Немає товарів, яких немає в наявності."
+No outstanding credit invoices for this shift.,Немає неоплачених кредитних рахунків для цієї зміни.
+No payment collection data found.,Немає даних про збір платежів.
+No payment rows available on this invoice.,У цьому рахунку-фактурі немає платіжних рядків.
+No payments registered for this shift.,Для цієї зміни не зареєстровано платежів.
+No pending balances in this period.,У цей період немає незавершених залишків.
+No pending offline invoices,Немає незавершених офлайн-рахунків
+No Print Formats Found,Форматів друку не знайдено
+No profiles found for selected scope. Falling back to current profile failed.,Не знайдено профілів для вибраного обсягу. Не вдалося повернутися до поточного профілю.
+No recent customer activity found.,Останні дії клієнтів не знайдено.
+No recent stock entries found.,Останні записи про акції не знайдено.
+No records found,Записів не знайдено
+No reorder suggestions right now.,Наразі немає пропозицій змінити замовлення.
+No repeat customers in this period.,У цей період немає постійних клієнтів.
+No response from server,Немає відповіді від сервера
+No return invoices found,Рахунки-фактури на повернення не знайдено
+No return item trend found.,Тенденції повернення товару не знайдено.
+No returnable items found for this invoice,"Для цього рахунку-фактури не знайдено предметів, які підлягають поверненню"
+No returns were processed in this shift.,У цю зміну повернення не оброблялося.
+No risk activity found.,Ризикова діяльність не знайдена.
+No sales activity found for this period.,За цей період продажів не знайдено.
+No slow moving items.,"Ніяких предметів, що повільно рухаються."
+No staff sales activity found.,Жодної діяльності з продажу персоналу не знайдено.
+No stock movement for this period.,За цей період акції не рухаються.
+No submitted cash movements in this shift.,У цю зміну не подано рух готівки.
+No supplier purchases found in this month.,У цьому місяці не знайдено покупок постачальників.
+No suppliers found for this period.,За цей період постачальників не знайдено.
+No sync trigger has run yet in this session.,У цьому сеансі ще не запущено тригер синхронізації.
+No tax head breakdown found.,Не знайдено розбивку податкової глави.
+No top items found for this location.,Для цього місця не знайдено найкращих елементів.
+No unpaid invoices,Немає неоплачених рахунків
+No variant data found.,Немає даних про варіанти.
+No week-wise sales trend found.,Тенденції продажів за тиждень не знайдено.
+No.,немає
+Nobile Number,Nobile Number
+Not available,Не доступний
+Not checked,Не перевірено
+Not selected,Не вибрано
+Not Set,Не встановлено
+Notifications,Сповіщення
+Offer,Пропозиція
+Offer Applied,Пропозицію застосовано
+Offer criteria exceeded,Перевищено критерії пропозиції
+Offer Item,Предмет пропозиції
+Offer item unavailable,Товар пропозиції недоступний
+Offer Removed,Пропозицію видалено
+Offer UOM cannot be changed,Пропозиція UOM не може бути змінена
+Offer?,Пропозиція?
+Offers,Пропозиції
+Offline,Офлайн
+Offline & Sync,Офлайн і синхронізація
+Offline Capabilities,Офлайн-можливості
+Offline data status refreshed,Статус офлайн-даних оновлено
+Offline diagnostics,Офлайн діагностика
+Offline Invoices,Офлайн-фактури
+Offline invoices status,Статус офлайн-рахунків
+Offline invoices synced,Офлайн-фактури синхронізовано
+Offline Queue: {0},Офлайн-черга: {0}
+Offline rebuild guidance,Інструкції з перебудови в автономному режимі
+Offline restore is unavailable for this session.,Відновлення в автономному режимі недоступне для цього сеансу.
+Offline selling is available with degraded capabilities.,Офлайн-продаж доступний із зниженими можливостями.
+Offline snapshot does not match the current POS state.,Офлайн-знімок не відповідає поточному стану POS.
+Offline Status,Статус офлайн
+"Offline, terminal, and system controls","Офлайн, термінал і системні елементи керування"
+OK,добре
+Online,Онлайн
+Open actions menu,Відкрити меню дій
+Open balance to collect,Відкритий баланс для збору
+Open Customer Display,Відкрийте дисплей клієнта
+Open drawer,Відкритий ящик
+Open invoices,Відкриті рахунки
+Open Payments?,Відкрити Платежі?
+Open POS home,Відкритий POS home
+Open this screen from POS Menu -> Open Customer Display.,Відкрийте цей екран за допомогою POS Menu -> Open Customer Display.
+OpenCV image processing enabled - Enhanced barcode detection,Увімкнено обробку зображень OpenCV - покращене виявлення штрих-кодів
+OpenCV image processing unavailable on this device,Обробка зображень OpenCV недоступна на цьому пристрої
+OpenCV Off,OpenCV вимкнено
+OpenCV On,OpenCV увімкнено
+OpenCV processing disabled,Обробку OpenCV вимкнено
+Opening Amount,Сума відкриття
+Opening Cash,Відкриття готівки
+options,параметри
+Order,порядок
+Original,Оригінал
+Other,інше
+Out,Вийти
+Out of Stock,Немає в наявності
+Out of Stock Items,Товарів немає в наявності
+Outstanding,Видатний
+Outstanding Credit by Currency,Непогашений кредит за валютою
+Overdue,Прострочена
+Overpayment Change,Зміна переплати
+Overpayment change deducted: {0},Вираховано зміну переплати: {0}
+Packing List,Пакувальний лист
+Page Format,Формат сторінки
+Page unavailable offline,Сторінка недоступна офлайн
+Paid,Платний
+Paid (orig):,Платно (оригінал):
+Paid Amount,Сплачена сума
+Paid change cannot be greater than total change!,Оплачена здача не може бути більшою за загальну здачу!
+Paid:,Оплачено:
+Parent Item,Батьківський елемент
+Partial,Частковий
+Partly Paid,Частково оплачено
+Party Account,Партійний рахунок
+Party Type,Тип партії
+Pause terminal until next cashier,Призупинити термінал до наступного касира
+PAY,ЗАПЛАТИТИ
+Payment,Оплата
+Payment Account,Платіжний рахунок
+Payment entries processed for Invoice {0},Платіжні записи оброблено для рахунку-фактури {0}
+Payment Entry Type,Тип введення платежу
+Payment History,Історія платежів
+Payment ID,Ідентифікатор платежу
+Payment Method Report,Звіт про спосіб оплати
+Payment Methods,Способи оплати
+Payment of {0} received successfully.,Платіж на суму {0} успішно отримано.
+Payment Progress,Хід платежу
+Payment Reconciliation,Звірка платежів
+Payment request status could not be retrieved. Please try again,Не вдалося отримати статус платіжного запиту. Спробуйте ще раз
+Payment Request took too long to respond. Please try requesting for payment again,Відповідь на платіжний запит надто довго надходила. Спробуйте ще раз подати запит на оплату
+Payment saved offline,Платіж збережено офлайн
+Payment State,Стан оплати
+Payment Status,Статус платежу
+Payment submitted but print function could not be executed. Payment name not found.,"Платіж надіслано, але функцію друку не вдалося виконати. Ім'я платежу не знайдено."
+Payment submitted.,Платіж подано.
+Payment Summary,Підсумок платежу
+Payments,Платежі
+Payments are not open. Do you want to open payments and submit?,Платежі не відкриті. Бажаєте відкрити платежі та подати?
+Payments by Mode of Payment,Оплата за способом оплати
+PDF,PDF
+Peak Hour,Година пік
+Peak Memory:,Пікова пам'ять:
+Peak Server:,Піковий сервер:
+Peak:,пік:
+Pending,В очікуванні
+Pending Amount,Сума в очікуванні
+Pending count updated from {0} to {1},Кількість незавершених змінено з {0} на {1}
+Pending Exposure,Очікує викриття
+Pending Invoices,Рахунки в очікуванні
+Pending Ratio,Коефіцієнт очікування
+Pending Sales,Продажі в очікуванні
+Pending sales: {0} | Cache usage: {1}%,Незавершені продажі: {0} | Використання кешу: {1}%
+Pending Sync,Очікує на синхронізацію
+Pending: {0},Очікує: {0}
+Pending: {0} | Synced: {1} | Draft: {2},Очікує: {0} | Синхронізовано: {1} | Чернетка: {2}
+Per Page,На сторінку
+Personal,Особисті
+Personal preferences adjust the current cashier experience without changing the active POS route.,Особисті налаштування регулюють поточну роботу касира без зміни активного маршруту POS.
+PIN confirmation does not match.,Підтвердження PIN-коду не збігається.
+PIN must be 4 to 8 digits.,PIN-код має містити від 4 до 8 цифр.
+Please add at least one item.,"Будь ласка, додайте хоча б один елемент."
+Please allow camera access to scan codes,"Будь ласка, надайте доступ до камери для сканування кодів"
+Please enter payment amount,"Будь ласка, введіть суму платежу"
+Please fill all required fields,"Будь ласка, заповніть усі необхідні поля"
+Please make a payment or select a payment,Здійсніть платіж або виберіть платіж
+Please request phone payment or use another payment method,"Будь ласка, подайте запит на оплату телефоном або скористайтеся іншим способом оплати"
+Please select a customer first,Спочатку виберіть клієнта
+Please select a party,Виберіть партію
+Please select a party before reconciling.,"Будь ласка, виберіть сторону перед примиренням."
+Please select a valid movement type.,Виберіть дійсний тип руху.
+Please select an invoice,Виберіть рахунок-фактуру
+Please select company before reconciling.,"Будь ласка, виберіть компанію перед звіркою."
+Please set the customer's mobile number,Введіть номер мобільного телефону клієнта
+Please try again or enter the item manually.,Спробуйте ще раз або введіть елемент вручну.
+Please verify the barcode or check the item's availability.,Перевірте штрих-код або перевірте наявність товару.
+Points,Очки
+Popup blocked. Please allow popups.,"Спливаюче вікно заблоковано. Будь ласка, дозвольте спливаючі вікна."
+POS,POS
+POS controls and maintenance,Контроль і обслуговування POS
+POS Expense is disabled for this POS Profile.,POS Expense вимкнено для цього профілю POS.
+POS is running with limited offline prerequisites.,POS працює з обмеженими передумовами в автономному режимі.
+POS Profile,Профіль POS
+Position the QR code or barcode within the scanning area,Розмістіть QR-код або штрих-код в області сканування
+Posting,Розміщення
+Posting and Price List,Розміщення та прайс-лист
+Posting Date,Дата розміщення
+Preparing background sync,Підготовка фонової синхронізації
+"Press OK to continue offline with a warning, or Cancel to retry.","Натисніть OK, щоб продовжити офлайн із попередженням, або «Скасувати», щоб повторити спробу."
+Previous unit of measure,Попередня одиниця вимірювання
+Price List,Прайс лист
+Price List Rate,Прайс-лист Тариф
+Price list rate updated locally only,Прайс-лист оновлюється лише локально
+Pricing & Discounts,Ціни та знижки
+Pricing Rule,Правило ціноутворення
+Print,Роздрукувати
+Print Draft,Роздрукувати чернетку
+Print Format (Invoice),Формат друку (рахунок-фактура)
+Print Format (Order),Формат друку (замовлення)
+Print invoice,Роздрукувати рахунок-фактуру
+Print Purchase Invoice instead of PO,Друкуйте рахунок-фактуру замість замовлення на замовлення
+Printer,Принтер
+Processed returns impacting the shift totals,"Оброблені повернення, що впливають на підсумки зміни"
+Processing Payment,Обробка платежу
+Processing payment entries for Invoice {0},Обробка платіжних записів для рахунку-фактури {0}
+Profile,Профіль
+Profiles,Профілі
+Profit,Прибуток
+Profit: Invoice Item Estimate,Прибуток: оцінка позиції рахунку-фактури
+Profit: Stock Ledger (COGS),Прибуток: бухгалтерська книга (COGS)
+Profitability Report,Звіт про прибутковість
+Prorated return discount,Пропорційна знижка на повернення
+Purchase Amount,Сума покупки
+Purchase Invoices,Рахунки-фактури
+Purchase Order created,Замовлення на купівлю створено
+Qty,кількість
+Qualified,Кваліфікований
+Quantity,Кількість
+Quantity exceeds available stock,Кількість перевищує наявні запаси
+Quick Actions,Швидкі дії
+Quotation {0} is Submitted,Цінова пропозиція {0} подана
+Quotation submitted,Цінова пропозиція подана
+QZ Tray connected.,Лоток QZ підключено.
+QZ Tray is manually disconnected. Press Connect to enable it again.,"Лоток QZ від’єднано вручну. Натисніть Connect, щоб увімкнути його знову."
+QZ Tray is not connected.,Лоток QZ не підключений.
+QZ Tray Setup,Налаштування лотка QZ
+Rate,Оцінка
+Rate adjusted to maximum allowed discount,Ставка скоригована до максимально дозволеної знижки
+Ready,Готовий
+Ready to resume,Готовий до відновлення
+Ready!,Готовий!
+Real-time POS insights for retail operations.,Статистика POS у режимі реального часу для роздрібних операцій.
+Rebuild Offline Data,Відновити автономні дані
+Receive,Отримати
+Receive now,Отримайте зараз
+Received,Отримано
+Received:,Отримано:
+Recent Movement Entries,Останні записи про рух
+Recent updates about your invoices,Останні оновлення щодо ваших рахунків-фактур
+Recently Active Customers,Нещодавно активні клієнти
+Rechecking connection,Повторна перевірка підключення
+Reconcile payment methods and close shift,Узгодити способи оплати та закрити зміну
+Reconciling Payments,Звірка платежів
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","Повторно підключіться та відкрийте цю сторінку один раз, перебуваючи в режимі онлайн, а потім оновлення в автономному режимі зможуть відновити її."
+Reconnect online to refresh cached offline data from the server.,"Повторно підключіться онлайн, щоб оновити кешовані офлайн-дані з сервера."
+Recreate local offline prerequisites from scratch,Відтворіть передумови локального автономного режиму з нуля
+Recv:,Recv:
+Redeem,Викупити
+Redeem / Scan,Викупити / сканувати
+Redeem Amount,Викупити суму
+Redeem Mode,Режим викупу
+Redeemed Amount,Викуплена сума
+Redeemed credit cannot be greater than its total.,Погашений кредит не може перевищувати його загальну суму.
+Redemption and Totals,Викуп і підсумки
+Reference,довідка
+Refresh,Оновити
+Refresh Exchange Rate,Оновити обмінний курс
+Refresh Offline Data,Оновити автономні дані
+Refresh Printers,Оновити принтери
+Refund,Повернення коштів
+Release Notes,Примітки до випуску
+Reload,Перезавантажити
+Reload customers,Перезавантажте клієнтів
+Reload Items,Перезавантажити елементи
+Reload Now,Перезавантажити зараз
+Reload to apply the latest changes. Your current session will be refreshed.,"Перезавантажте, щоб застосувати останні зміни. Ваш поточний сеанс буде оновлено."
+Reload Workflow,Перезавантажити робочий процес
+Remarks,Зауваження
+Remarks are required.,Зауваження обов'язкові.
+Remove,видалити
+Remove barcode item,Видалити елемент штрих-коду
+Remove cached data and reload the POS app,Видаліть кешовані дані та перезавантажте програму POS
+Remove item,Видалити товар
+Remove Offer,Видалити пропозицію
+Reorder / Purchase Suggestions,Пропозиції щодо повторного замовлення/купівлі
+Repair Candidate,Кандидат в ремонт
+Repair Change Allocation,Ремонт Зміна розподілу
+Repair requires an online connection,Для ремонту потрібне підключення до Інтернету
+Repaired,Відремонтований
+Repairing change allocation,Виправлення розподілу змін
+Repeat Customers,Повторні клієнти
+Repeat Rate,Швидкість повторення
+Request,запит
+Request ID: {0},Ідентифікатор запиту: {0}
+Request Payment,Запит на оплату
+Requested route: {0},Запитаний маршрут: {0}
+Required columns cannot be hidden,Неможливо приховати необхідні стовпці
+Reset,Скинути
+Reset item name,Скинути назву елемента
+Reset to Default,Скинути до замовчування
+Resource Health,Ресурс здоров'я
+Restricted,Обмежений
+Restricted operational controls for supervisors only.,Обмежений операційний контроль лише для керівників.
+Retry,Повторіть спробу
+Retry route,Повторити маршрут
+Return,Повернення
+Return Amount,Сума повернення
+Return Count,Повернути лічильник
+Return items must have negative quantities,Товари для повернення повинні мати від’ємну кількість
+Return total must be negative,Сума повернення має бути від’ємною
+Return Valid Until,Повернення діє до
+Return window passed,Вікно повернення пройдено
+Return without Invoice,Повернення без накладної
+Returns,Повернення
+Returns / Voids / Discounts,Повернення / анулювання / знижки
+Returns by Currency,Повернення за валютою
+Revenue,Дохід
+Review shift totals before submitting the closing entry,"Перегляньте загальні показники зміни перед тим, як подавати заключний запис"
+Round Off,Округлити
+Rows,рядки
+Rows:,рядки:
+Rule,правило
+Sale,Розпродаж
+Sales,Продажі
+Sales Order {0} is Submitted,Замовлення на продаж {0} подано
+Sales Person and Print,Продавець і друк
+Sales Person not found,Продавець не знайдений
+Sales processed,Продажі оброблено
+Sales Return,Повернення від продажу
+Sales Trend Report,Звіт про тенденції продажів
+Save,зберегти
+Save & Clear,Зберегти та очистити
+Save as POS Profile Default,Зберегти як профіль POS за замовчуванням
+Save Settings,Зберегти налаштування
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,"Збережіть вибраний принтер як профіль POS за замовчуванням, щоб він автоматично відображався під час цього налаштування."
+Saved as draft because: {0},"Збережено як чернетку, оскільки: {0}"
+Saving...,Збереження...
+Scale barcode detected. Quantity here is the number of labels to print.,Штрих-код ваги виявлено. Кількість тут означає кількість етикеток для друку.
+Scale barcode settings are not configured. Using item barcode only.,Параметри штрих-коду ваги не налаштовані. Використовуючи лише штрих-код товару.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,Для цього елемента/UOM відсутній штрих-код шаблону ваги. Використовуючи лише штрих-код товару.
+Scan an existing card and top it up without leaving the payment flow.,"Відскануйте наявну картку та поповніть її, не виходячи з платіжного потоку."
+Scan Error,Помилка сканування
+Scan or enter a gift card code to check balance or redeem.,"Відскануйте або введіть код подарункової картки, щоб перевірити баланс або активувати її."
+Scan or paste the card code below.,Відскануйте або вставте код картки нижче.
+Scan QR Code/Barcode,Відскануйте QR-код/штрих-код
+Scan with camera,Сканування камерою
+Scan-First Flow,Scan-First Flow
+Scanned Code:,Відсканований код:
+Scanning for: {0},Сканування: {0}
+Scanning items,Сканування елементів
+Scan-Ready,Готовий до сканування
+Scope,Область застосування
+Scope: All Profiles,Область застосування: усі профілі
+Scope: Current Profile,Область: Поточний профіль
+Scope: Specific Profile,Сфера застосування: спеціальний профіль
+Search,Пошук
+Search Account,Пошук облікового запису
+Search an invoice and continue the return flow without extra steps.,Знайдіть рахунок-фактуру та продовжте повернення без додаткових кроків.
+Search customer,Пошук клієнта
+Search invoices or customers,Пошук рахунків-фактур або клієнтів
+Search item,Шукати предмет
+Search item / code,Шукати товар / код
+Search items or barcode,Пошук елементів або штрих-коду
+Search Mpesa Payments,Пошук платежів Mpesa
+Search return invoices or customers,Шукайте рахунки-фактури або клієнтів
+Search supplier,Пошук постачальника
+Search unpaid invoices or customers,Пошук неоплачених рахунків або клієнтів
+Secure context (HTTPS or localhost) is required for camera access.,Для доступу до камери потрібен захищений контекст (HTTPS або локальний хост).
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,Для доступу до камери потрібен безпечний контекст (HTTPS). Для доступу до камери використовуйте HTTPS.
+Select,Виберіть
+Select a cashier first.,Спочатку виберіть касира.
+Select a customer,Виберіть клієнта
+Select a customer to use coupon,Виберіть клієнта для використання купону
+Select a printer to use QZ silent printing.,Виберіть принтер для використання тихого друку QZ.
+Select Batch,Виберіть Пакет
+Select Columns to Display,Виберіть Стовпці для відображення
+Select items to sell,Виберіть предмети для продажу
+Select Payment,Виберіть Оплата
+Select Payment Account,Виберіть Платіжний рахунок
+Select printer,Виберіть принтер
+Select Return Invoice,Виберіть Повернути рахунок-фактуру
+Select S.O,Виберіть S.O
+Select Sales Orders,Виберіть Замовлення на продаж
+Select the cashier who is taking over this terminal.,"Виберіть касира, який займе цей термінал."
+Selected,Вибране
+Selected movement type is not allowed by POS Profile.,Вибраний тип руху не дозволяється профілем POS.
+Selected Payments,Вибрані платежі
+Sensitive actions kept away from quick taps.,Делікатні дії уникають швидких натискань.
+Serial,Серійний
+Serial Numbers,Серійні номери
+Server CPU Usage:,Використання ЦП сервера:
+Server Health,Справність сервера
+Server Memory Usage:,Використання пам'яті сервера:
+Server Metrics,Метрики сервера
+Server Uptime:,Час роботи сервера:
+Service Charges,Плата за обслуговування
+Session,Сесія
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,"Встановіть кожен PIN-код касира у формі користувача та зберігайте членів терміналу, призначених у профілі користувача POS."
+Settings,Налаштування
+Settings in this section update the POS workspace without changing the current route.,Параметри в цьому розділі оновлюють робочу область POS без зміни поточного маршруту.
+Setup complete!,Налаштування завершено!
+Share,Поділіться
+Shared terminal,Спільний термінал
+Shift Closed Snapshot,Shift закритий знімок
+Shift Overview,Огляд зміни
+Show,Показати
+Show cart on customer-facing screen,Показати кошик на екрані клієнта
+Show last invoice rate,Показати ставку останнього рахунку-фактури
+Show rate info,Показати інформацію про курс
+Show Repair Candidates,Показати кандидатів на ремонт
+Show search tools,Показати інструменти пошуку
+Show the active cart on a customer-facing screen,Показати активний кошик на екрані клієнта
+Showing {0}-{1} of {2},Показано {0}-{1} з {2}
+Showing 0 of 0,Показано 0 з 0
+Shows the distribution of invoices per currency,Показує розподіл рахунків-фактур за валютою
+Sign out of the current POS session,Вийти з поточного сеансу POS
+Size:,розмір:
+Skipped Payments,Пропущені платежі
+Skipping items without barcodes,Пропуск товарів без штрих-кодів
+Slow Moving,Повільний рух
+Slow Moving Items,Повільно рухаються предмети
+Slow Queries:,Повільні запити:
+Sold,Продано
+Source,Джерело
+Source Cash Account (Optional Override),Вихідний грошовий рахунок (необов’язкова заміна)
+Source Ex. Rate:,Джерело Пр. Оцінка:
+Source Rate:,Швидкість джерела:
+Specific Profile,Спеціальний профіль
+Split Invoices,Розділені рахунки-фактури
+Staff / Cashier Performance Report,Звіт про роботу персоналу / касира
+Status,Статус
+Stock,Запас
+Stock Information,Інформація про акції
+Stock is lower than requested,"На складі менше, ніж запитувано"
+Stock is lower than requested:\n{0},"На складі менше, ніж запитано:\n{0}"
+Stock Movement Report,Звіт про рух акцій
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,Оновлення запасів: {0} має в наявності {1}. Додавання {2} знизить акції нижче нуля.
+Submit,Надіслати
+Submit & Print,Надіслати та роздрукувати
+Submit Deposit,Надіслати депозит
+Submit Expense,Надіслати витрати
+Submitted,Надіслано
+Submitted Cash Movements,Подані рух готівки
+Submitted entries,Надіслані записи
+Successfully scanned:,Успішно проскановано:
+Suggested,Запропоновано
+Suggested Qty,Рекомендована кількість
+Supervisor Access,Доступ супервізора
+Supervisor permissions unlock issuance and reloads,Дозволи супервізора розблокують видачу та перезавантаження
+Supervisor Tools,Інструменти супервізора
+Supplier,Постачальник
+Supplier and dates are required.,Необхідно вказати постачальника та дати.
+Supplier Invoices,Рахунки постачальника
+Supplier is required.,Потрібен постачальник.
+Supplier name is required,Потрібно вказати назву постачальника
+Supplier Payments,Платежі постачальника
+Supplier Purchase Summary,Підсумок закупівлі постачальника
+Suppliers,Постачальники
+Suppliers not found,Постачальники не знайдені
+Switch Camera,Переключити камеру
+Switch Cashier,Перемикач касира
+Switch the POS appearance theme,Змініть тему зовнішнього вигляду POS
+Switched to:,Переключено на:
+Sync All Invoices,Синхронізувати всі рахунки-фактури
+Sync Offline Cash Movements ({0}),Синхронізувати офлайн-переміщення готівки ({0})
+Sync Offline Sales,Синхронізація офлайн-продажів
+Synced {0} offline cash movement(s).,Синхронізовано переміщення готівки в автономному режимі: {0}.
+Syncing items in background,Синхронізація елементів у фоновому режимі
+System / Diagnostics,Система / Діагностика
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","Системні дії – це низькочастотні елементи керування обслуговуванням, такі як інформація про програму, діагностика підтримки та керування сеансом."
+System Information,Інформація про систему
+System Status,Статус системи
+Tables:,Столи:
+Tap the button below to redeem a gift card during checkout.,"Торкніться кнопки нижче, щоб активувати подарункову картку під час оплати."
+Target,Цільова
+Target Ex. Rate:,Target Ex. Оцінка:
+Target Rate:,Цільова ставка:
+Tax,податок
+Tax / Charges Report,Звіт про податки та збори
+Tax Heads,Голови податкової
+Taxable Amount,Сума оподаткування
+Tendered,Тендер
+Terminal,Термінал
+Terminal & Devices,Термінали та пристрої
+Terminal locked,Термінал заблоковано
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","Інструменти терміналу впливають на цю касову станцію, дисплеї, що відображаються клієнтам, і майбутні елементи керування принтером/пристроєм."
+Territory not found,Територія не знайдена
+The amount paid is not complete,Сплачена сума не повна
+The app stores data locally for offline use. This is called cache.,Програма зберігає дані локально для використання в автономному режимі. Це називається кеш.
+The invoice stayed in draft. Please review and submit it manually.,Рахунок-фактура залишився чернеткою. Перегляньте та надішліть його вручну.
+The maximum discount allowed is,Максимальна дозволена знижка становить
+The quantity for {0} has been adjusted to the maximum available stock.,Кількість для {0} було скориговано до максимально доступного запасу.
+The system could not retrieve the item details. Please try again.,Системі не вдалося отримати деталі товару. Спробуйте ще раз.
+These invoices will be synced when connection is restored,"Ці рахунки-фактури буде синхронізовано, коли з’єднання буде відновлено"
+This action now opens inside the settings workspace.,Тепер ця дія відкривається в робочій області налаштувань.
+This coupon already used !,Цей купон уже використано!
+This invoice does not need change-allocation repair,Цей рахунок-фактура не потребує ремонту змін і розподілу
+This invoice is already repaired,Цей рахунок-фактуру вже виправлено
+This is an item template. Please choose a variant.,"Це шаблон предмета. Будь ласка, виберіть варіант."
+this item,цей предмет
+This POS page could not be opened offline because its code was not cached on this terminal yet.,"Цю POS-сторінку неможливо відкрити офлайн, оскільки її код ще не кешовано на цьому терміналі."
+This Serial Number {0} has already been added!,Цей серійний номер {0} уже додано!
+Threshold,Поріг
+Time,час
+Tip: Clear cache regularly to free up space and keep the app fast.,"Порада: регулярно очищайте кеш, щоб звільнити місце та забезпечити швидку роботу програми."
+Tip: Close unused tabs or apps to reduce lag.,"Порада: закрийте невикористані вкладки або програми, щоб зменшити затримку."
+Tip: Monitor slow queries and table size for optimal performance.,Порада: відстежуйте повільні запити та розмір таблиці для оптимальної продуктивності.
+To Be Paid,На оплату
+To Date,На сьогоднішній день
+Today,Сьогодні
+Today Profit,Сьогодні прибуток
+Today Sales,Сьогодні Продажі
+Toggle navigation drawer,Перемкнути панель навігації
+Toggle Theme,Перемкнути тему
+Tools,Інструменти
+Tools for customer-facing screens and terminal-specific actions.,"Інструменти для екранів, які дивляться клієнти, і специфічних для терміналу дій."
+Top Brand,Кращий бренд
+Top Category,Верхня категорія
+Top Charge Head,Верхня зарядна головка
+Top Customers,Найкращі клієнти
+Top Discount,Топ Знижка
+Top Items by Location,Найпопулярніші товари за місцем розташування
+Top Margin,Верхнє поле
+Top Pending,Топ в очікуванні
+Top Profit Item,Найвищий прибуток
+Top Return Items,Найкращі товари для повернення
+Top Sales by Cashier,Топ продажів за касиром
+Top Supplier,Кращий постачальник
+Top Suppliers by Spend,Найпопулярніші постачальники за витратами
+Top Tables,Верхні таблиці
+Top Tax Head,Головний керівник податкової
+Top Up Amount,Сума поповнення
+Top Up Card,Картка поповнення
+Top Up Mode,Режим поповнення
+Top Variant,Топовий варіант
+Total,Всього
+Total Amount,Загальна сума
+Total Change,Повна зміна
+Total Charges,Загальні витрати
+Total In,Всього в
+Total Invoices,Загальна кількість рахунків-фактур
+Total Items,Всього елементів
+Total Mpesa,Всього Мпеса
+Total Out,Total Out
+Total Payments,Загальна сума платежів
+Total Purchase,Загальна покупка
+Total Selected :,Усього вибрано:
+Total Size,Загальний розмір
+Total Stock Qty,Загальна кількість запасів
+Total:,Всього:
+Totals by Invoice Currency,Підсумки за валютою рахунку-фактури
+Track how much cash was handed back to customers,"Відстежуйте, скільки готівки було повернуто клієнтам"
+"Track recent sales, collect unpaid balances, and reopen saved work","Відстежуйте останні продажі, збирайте несплачені залишки та повторно відкривайте збережену роботу"
+Transaction ID,Ідентифікатор транзакції
+Transfer,Трансфер
+Try a different search term or clear the cart search.,Спробуйте інший термін пошуку або очистіть пошук кошика.
+Try adjusting your search or filters,Спробуйте налаштувати пошук або фільтри
+Try another source or refresh the list.,Спробуйте інше джерело або оновіть список.
+Try changing the date range or status filter.,Спробуйте змінити діапазон дат або фільтр статусу.
+Type,Тип
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,Неможливо отримати доступ до камери навіть із базовими налаштуваннями. Перевірте дозволи камери та сумісність пристрою.
+Unable to add offer item {0}. Please refresh and try again.,"Неможливо додати елемент пропозиції {0}. Будь ласка, оновіть і повторіть спробу."
+Unable to add offer item. Please refresh and try again.,"Неможливо додати товар пропозиції. Будь ласка, оновіть і повторіть спробу."
+Unable to add scanned item.,Не вдалося додати сканований елемент.
+Unable to create purchase order,Неможливо створити замовлення на купівлю
+Unable to delete draft invoice,Не вдалося видалити чернетку рахунка-фактури
+Unable to fetch documents,Не вдалося отримати документи
+Unable to fetch draft orders,Неможливо отримати проекти замовлень
+Unable to fetch invoice history,Не вдалося отримати історію рахунків-фактур
+Unable to fetch M-Pesa payments,Не вдалося отримати платежі M-Pesa
+Unable to fetch sales orders,Не вдалося отримати замовлення на продаж
+Unable to fetch unpaid invoices,Не вдалося отримати неоплачені рахунки-фактури
+Unable to generate scale barcode,Не вдалося створити штрих-код ваги
+Unable to issue gift card.,Неможливо випустити подарункову картку.
+Unable to load cashier PIN status.,Неможливо завантажити PIN-код касира.
+Unable to load document,Не вдалося завантажити документ
+Unable to load draft invoice,Не вдалося завантажити чернетку рахунка-фактури
+Unable to load gift card balance.,Не вдалося завантажити баланс подарункової картки.
+Unable to load invoice details,Неможливо завантажити деталі рахунку-фактури
+Unable to load parked order,Не вдалося завантажити припарковане замовлення
+Unable to load the selected sales order,Не вдалося завантажити вибране замовлення на продаж
+Unable to prepare document,Неможливо підготувати документ
+Unable to prepare return invoice,Не вдалося підготувати рахунок-фактуру для повернення
+Unable to print draft invoice,Неможливо надрукувати чернетку рахунка-фактури
+Unable to print submitted invoice,Неможливо роздрукувати надісланий рахунок-фактуру
+Unable to process document action,Неможливо обробити дію документа
+Unable to repair change allocation,Неможливо відновити розподіл змін
+Unable to save cashier PIN.,Не вдалося зберегти PIN-код касира.
+Unable to save the rate to the backend price list,Не вдається зберегти курс у прайс-лист серверної частини
+Unable to submit invoice,Неможливо надіслати рахунок-фактуру
+Unable to submit the selected payment,Не вдалося здійснити вибраний платіж
+Unable to top up gift card.,Не вдалося поповнити подарункову картку.
+Unable to verify cashier PIN.,Не вдалося підтвердити PIN-код касира.
+Unallocated,Нерозподілений
+Unallocated:,Нерозподілений:
+Unavailable,Недоступний
+Unknown,Невідомий
+Unknown Item,Невідомий предмет
+Unknown Warehouse,Невідомий склад
+Unlock POS,Розблокувати POS
+Unpaid,Неоплачений
+"Unselected payments stay unallocated first, then auto reconcile after submit.","Невибрані платежі спочатку залишаються нерозподіленими, а потім автоматично узгоджуються після надсилання."
+UOM,УОМ
+UOM not found,UOM не знайдено
+Update available,Доступне оновлення
+Update Customer,Оновити клієнта
+Update PIN,Оновіть PIN-код
+Update Price List Rate,Оновити ціну
+Updated,Оновлено
+Updates and app info that stay out of the cashier flow.,"Оновлення та інформація про програми, які залишаються поза касовим потоком."
+Updates automatically,Оновлюється автоматично
+Usage,Використання
+Usage Stats,Статистика використання
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,Використовуйте PIN-код від 4 до 8 цифр для перемикання касира та розблокування терміналу.
+Use Cashier,Використовуйте Касу
+Use date range to search for older invoices,Використовуйте діапазон дат для пошуку старіших рахунків-фактур
+"Use one field for manual code entry, barcode scans, or QR scans.","Використовуйте одне поле для введення коду вручну, сканування штрих-коду або QR-сканування."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","Використовуйте один робочий процес для перевірки балансу, нової видачі та поповнення, не виходячи з POS."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","Використовуйте цей розділ, якщо кешовані попередні дані потребують оновлення, перебудови або перевірки діагностики."
+Use Western numerals,Використовуйте західні цифри
+Used:,Використовується:
+Using basic camera settings due to device limitations,Використання основних налаштувань камери через обмеження пристрою
+Using cached customer balance,Використання кешованого балансу клієнта
+Valid until,Дійсний до
+Variance %,Відхилення %
+Variants,Варіанти
+Variant-wise,Варіантно
+Verify closing amounts for each payment method,Перевірте кінцеві суми для кожного способу оплати
+View all,Переглянути всі
+View app information and current build details,Перегляньте інформацію про програму та поточні деталі збірки
+View Data Diagnostics,Переглянути діагностику даних
+View Details,Переглянути деталі
+View invoice details,Переглянути деталі рахунку-фактури
+View notifications,Перегляд сповіщень
+View offline invoices,Перегляд офлайн-рахунків-фактур
+View restricted POS insights,Перегляд обмеженої статистики POS
+Void Amount,Недійсна сума
+Void Count,Підрахунок пустот
+Voids,Пустоти
+Waiting for cart items,Очікування товарів у кошику
+Waiting for payment...,Очікування оплати...
+Walk-in Customer,Вхідний клієнт
+Warehouse,Склад
+Warning: High cache usage may affect performance.,Попередження: велике використання кешу може вплинути на продуктивність.
+Warning: High lag may indicate heavy processing or browser slowness.,Попередження: висока затримка може вказувати на важку обробку або повільність браузера.
+Week ?,тиждень ?
+Week-wise,Щотижня
+Weight (g),Вага (г)
+Weight (grams),Вага (грами)
+We'll let you know if an invoice fails to submit,"Ми повідомимо вас, якщо не вдасться надіслати рахунок-фактуру"
+Workflow,робочий процес
+Write off amount cannot exceed the POS profile maximum of {0},Сума списання не може перевищувати максимум {0} для профілю POS
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,"Сума списання перевищує дозволений ліміт ({0}). Будь ласка, додайте платіж на решту суми."
+Yes,так
+"Yes, Cancel sale","Так, скасувати продаж"
+"Yes, Close","Так, Закрити"
+You are not allowed to print draft invoices,Ви не маєте права друкувати проекти рахунків-фактур
+You are offline. Add Payment will work again when the connection is restored.,"Ви офлайн. Додати платіж знову запрацює, коли з’єднання буде відновлено."
+You have no notifications right now,У вас зараз немає сповіщень
+Your Cart,Ваш кошик

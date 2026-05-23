@@ -1,0 +1,1362 @@
+POS Awesome,POS Awesome
+Fetch Items Directly from Server,Tiştên rasterast ji serverê bistînin
+Menu,Menu
+Actions,Actions
+Close Shift,Close Shift
+End current session,Danişîna heyî biqedînin
+Print Last Invoice,Fatoya Dawî çap bike
+Reprint previous transaction,Danûstandinên berê ji nû ve çap bikin
+Sync Offline Invoices,Fanoyên Offline Sync bikin
+Upload pending transactions,Danûstandinên li benda barkirin
+Go Online,Biçe Online
+Go Offline,Biçe Offline
+Disable offline mode,Moda offline neçalak bike
+Work without server connection,Bê girêdana serverê bixebite
+Clear Cache,Cache paqij bike
+Remove local data and refresh,Daneyên herêmî jêbirin û nûve bikin
+About,About
+App information,Agahdariya app
+Language,Ziman
+Change interface language,Zimanê navberê biguherînin
+Light Mode,Moda Ronahî
+Dark Mode,Moda Dark
+Switch theme appearance,Nîşana mijarê biguherînin
+Logout,Derketin
+Sign out of session,Ji danişînê derkeve
+Select Language,Ziman hilbijêrin
+Choose your preferred language for the POS interface,Ji bo pêwendiya POS-ê zimanê xweya bijartî hilbijêrin
+Language will be changed to,Ziman dê were guhertin
+Cancel,Betal bike
+Change Language,Ziman biguherînin
+Close,Close
+Cannot change language - same language selected,Ziman nayê guhertin - heman ziman hatiye hilbijartin
+Language changed successfully! Reloading...,Ziman bi serkeftî guherî! Ji nû ve barkirin...
+Failed to change language,Nekarî ziman biguhere
+Unknown error,Çewtiya nenas
+- Total Unallocated,- Tevahiya Unallocated
+* Required,* Pêdivî ye
+{0} (Qty: {1}),{0} (Qty: {1})
+{0} actions,{0} çalakî
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,Di stoka {0} de tenê {1} heye. Te {2} daxwaz kir. Mîqdarê eyar bikin an nûve bikin.
+{0} offline invoice{1} pending,{0} fatûreya offline{1} li bendê ye
+{0} offline invoice{1} saved as draft,{0} fatûreya negirêdayî{1} wekî pêşnûma hat tomarkirin
+{0} offline invoice{1} synced,{0} fatûreya offline{1} hevdem kirin
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0} roj berê
+{0}h ago,{0}h berê
+{0}m ago,{0} m berê
+A POS supervisor is required for this action.,Ji bo vê çalakiyê çavdêrek POS-ê hewce ye.
+Access,Gihîştin
+Account,Account
+Account is overdrawn,Hesab zêde ye
+Acknowledge the error to resume scanning,Çewtiyê bipejirînin ku ji nû ve şopandinê dest pê bike
+Acknowledge the error to resume scanning.,Çewtiyê bipejirînin ku ji nû ve şopandinê dest pê bike.
+Across,Li seranserê
+Action,Çalakî
+Active sale,Firotina çalak
+add,lê zêde bike
+Add items from the selector to start building this sale.,Ji hilbijêrê tiştan zêde bikin da ku dest bi avakirina vê firotanê bikin.
+Add more value to an existing gift card,Zêdetir nirx li qerta diyariya heyî zêde bikin
+Add New Address,Navnîşana Nû lê zêde bike
+Add new customer,Xerîdarek nû lê zêde bike
+Add on New Line,Li Xeta Nû zêde bikin
+Add Payment,Tezmînatê lê zêde bike
+Add payment to invoice,Tezmînatê li fatûreyê zêde bikin
+Add/Edit Coupon Conditions,Mercên Kuponê Zêde / Biguherîne
+Additional Discount,Discount Additional
+Additional Discount %,Daxistina Zêde %
+Address Line 1,Rêza navnîşan 1
+Address not found,Navnîşan nehat dîtin
+Adjust the quantity or enable negative stock to continue.,Hejmarê eyar bikin an stokê neyînî bidomînin çalak bikin.
+Adjustment,Adjustment
+After returns,Piştî vegera
+Against,Li hember
+Against Name,Li hember Name
+Age Bracket,Age Bracket
+All,Hemû
+All Caught Up!,Hemû Girtin!
+All invoices are synchronized,Hemî fatûreyên hevdemkirî ne
+All pending invoices are up to date,Hemî fatûreyên li bendê rojane ne
+All Profiles,Hemû Profîl
+All Synchronized,Hemû Senkronîzekirin
+All visible invoices are fully settled.,Hemî fatûreyên xuyayî bi tevahî têne bicîh kirin.
+All Warehouses,Hemû Warehouses
+Allowed UOM is {0},UOM destûr {0} e
+Always fetch items from server (ignore local cache),Her gav tiştan ji serverê werbigirin (çaşa herêmî paşguh nekin)
+Amount,Amount
+Amount already received,Heqê ku jixwe hatiye standin
+Amount exceeds profile cash movement max amount.,Mîqdar ji mîqdara herî zêde ya tevgera dravê profîlê derbas dike.
+Amount must be greater than zero.,Divê mîqdar ji sifirê mezintir be.
+Amount received from customer,Heqê ku ji xerîdar hatî wergirtin
+Appearance and user-level preferences for the current session.,Xuyabûn û tercîhên asta bikarhêner ji bo rûniştina heyî.
+Applied,Applied
+Apply,Apply
+Apply Gift Card,Serlêdana Karta Giftê bikin
+Apply Offer,Serlêdana Pêşniyarê
+Apply On,Apply On
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,Tenê mîqdara ku hûn dixwazin drav bidin ser vê fatûreyê bicîh bînin. Balansa mayî li ser kartê dimîne.
+Apply Redemption,Serîlêdana Redemption
+Applying,Serlêdan kirin
+Apps,Apps
+Are you sure you want to close? All entered data will be lost.,Ma hûn guman dikin ku hûn dixwazin bigirin? Hemî daneyên ketinê dê winda bibin.
+Attributes (Size/Color),Taybetmendî (Mezinahî/Reng)
+Auto Allocate Payment Amount,Veqetandina Mîqdara Tezmînata Xweser
+Auto Reconcile,Auto Reconcile
+Auto reconciliation completed after payment submit.,Lihevhatina otomatîkî piştî şandina dravê qediya.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,Lihevhatina otomatîkî qediya. Veqetandin: {0}{1}. Berbiçav mayî: {0}{2}.
+Available Actions,Çalakiyên Berdest
+Available QTY,QTY heye
+Available:,Berdest:
+Average Basket,Average Basket
+Average Bill,Average Bill
+Average Ticket,Bilêta Navîn
+Avg Bill,Avg Bill
+Avg Invoice,Navgîniya fatûre
+Avg Invoice Profit,Avg Invoice Profit
+Avg Invoice Value,Nirxa fatûreya navîn
+Avg Purchase Frequency,Frequency Kirîna Navîn
+Awesome,Awesome
+Awesome Dashboard,Dashboard awesome
+Awesome Dashboard is disabled for the selected POS Profile.,Dashboard Awesome ji bo Profîla POS-a hilbijartî neçalak e.
+Awesome Dashboard is unavailable for the selected scope.,Tabloya Awesome ji bo qada hilbijartî ne berdest e.
+Awesome Dashboard is visible only to POS supervisors.,Tabloya Awesome tenê ji çavdêrên POS-ê re tê xuyang kirin.
+Back,Vegere
+Back Office Cash Account,Back Office Cash Hesabê
+Back Office Cash Account (Optional Override),Hesabê Diravî ya Piştevaniyê (Desthilatdariya Vebijarkî)
+Back office cash account is required.,Hesabê dravê ya paşîn hewce ye.
+Back to {0},Vegere {0}
+Background processing did not finish in time.,Pêvajoya paşîn di wextê xwe de qediya.
+Background processing failed for Invoice {0}: {1},Pêvajoya paşîn ji bo fatûreya {0} têk çû: {1}
+Background Submission Failed,Pêşkêşkirina paşnavê têk çû
+Background sync interval (seconds),Navbera hevdemkirinê ya paşîn (çirk)
+Balance,Balance
+Balance will be updated when connection is restored,Dema ku girêdan were nûve kirin dê balans were nûve kirin
+Balances still pending,Hevsengiyên hê li bendê ne
+Barcode,Barcode
+Barcode / QR Ready,Barcode / QR Amade ye
+Barcode Label Printing,Çapkirina Labelê ya Barkodê
+Base Paid:,Bingehek dayîn:
+Base Recv:,Recv bingehîn:
+Base:,Bingeh:
+Basic Information,Agahiyên bingehîn
+Batch,Batch
+Batch Information,Agahdariya Batch
+Before any return workflow,Berî her xebata vegerê
+Before returns,Berî vegerê
+Best Day,Roja herî baş
+Best Seller,Best Seller
+Book expense or deposit from active shift.,Mesrefa pirtûkê an depoya ji veguherîna çalak.
+Branch / Location-wise Report,Rapora Şax / Cih-aqilmend
+Brand-wise,Brand-wise
+Breakdown,Breakdown
+Browse,Browse
+Build Time:,Dema çêkirinê:
+Built with Frappe,Bi Frappe ve hatî çêkirin
+Bundle,Bundle
+Buying Price,Kirîna Biha
+Cache cleared successfully,Cache bi serkeftî hate paqij kirin
+Cache Usage,Bikaranîna Cache
+cache used,cache tê bikaranîn
+Calculating...,Hesabkirin...
+Camera Access Required,Gihîştina Kamera Pêdivî ye
+Camera access was aborted. Please try again.,Gihîştina kamerayê hat betalkirin. Ji kerema xwe dîsa biceribîne.
+Camera constraints not supported by your device. Trying fallback settings...,Sînorên kamerayê ji hêla cîhaza we ve nayê piştgirî kirin. Mîhengên paşverû diceribînin...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,Kamera ji hêla sepanek/tabek din ve mijûl e an tê asteng kirin. Sepanên kamerayê yên din bigire û dîsa biceribîne.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,Destûra kamerayê hat redkirin. Ji kerema xwe destûrê bide gihîştina kamerayê di mîhengên geroka xwe de û rûpelê nûve bike.
+Camera scanner is locked until the current error is acknowledged,Skanera kamerayê girtî ye heya ku xeletiya heyî were pejirandin
+Camera started but the video stream did not load in time. Please try again.,Kamera dest pê kir lê weşana vîdyoyê di wextê xwe de bar nekir. Ji kerema xwe dîsa biceribîne.
+Cancel cash movement {0}?,Tevgera drav {0} betal bike?
+Cancel Payment,Betal Payment
+Cancel Sale,Cancel Sale
+Cancel Sale ?,Firotinê betal bike?
+Cancelled,Betal kirin
+Cannot add an item with zero or negative quantity.,Tiştek bi jimareya sifir an neyînî nayê zêdekirin.
+Cannot clear cache while offline,Di dema negirêdayî de cache nayê paqijkirin
+Cannot redeem customer credit more than invoice total,Nikare krediya xerîdar ji tevaya fatûreyê zêdetir bistîne
+Cannot redeem gift cards more than invoice total,Nikare qertên diyariyê ji tevaya fatûreyê zêdetir bistîne
+Cannot Save Offline Invoice:,Nabe fatûreya negirêdayî tomar bike:
+Cannot Save Offline Payment:,Nekare dravdana negirêdayî tomar bike:
+Card,Card
+Card / Online,Qert / Serhêl
+Card health after the last live lookup,Tenduristiya qertê piştî lêgerîna zindî ya paşîn
+Cards,Cards
+Cart,Cart
+Cash,Cash
+Cash back to customers,Cash back to mişteriyên
+Cash Collections,Koleksiyonên Cash
+Cash Deposit is disabled for this POS Profile.,Depoya drav ji bo vê Profîla POS-ê neçalak e.
+Cash Drawer Snapshot,Snapshot Drawer Cash
+Cash In Hand,Cash Di Destê de
+Cash Movement,Tevgera Cash
+Cash movement cancelled,Tevgera pere hat betalkirin
+Cash movement deduction applied,Daxistina tevgera drav tê sepandin
+Cash movement deleted,Tevgera dravê jêbirin
+Cash movement is disabled for this POS Profile.,Tevgera drav ji bo vê Profîla POS-ê neçalak e.
+Cash Movement is disabled in current POS Profile.,Di Profîla POS a heyî de Tevgera Diravî neçalak e.
+Cash movement saved offline,Tevgera dravê offline xilas bû
+Cash movement submitted,Tevgera dravê şandin
+Cash Movements,Tevgerên Cash
+Cash payment cannot be less than invoice total when partial payment is not allowed,"Dema ku dravdana qismî destûr neyê dayîn, dravdana dravê nikare ji tevahî fatûreyê kêmtir be"
+Cash returned after payment,Cash piştî dravdanê vegeriya
+Cashier,Cashier
+Cashier Access,Cashier Access
+Cashier identity and appearance preferences.,Nasnameya diravgir û tercîhên xuyangê.
+Cashier PIN,PIN diravgir
+Cashier PIN saved successfully.,PIN-a Cashier bi serfirazî hate tomarkirin.
+Cashiers,Cashiers
+Cashier-wise,Cashier-aqilmend
+Categories,Kategorî
+Category,Kategorî
+Category / Brand / Variant Report,Kategorî / Brand / Rapora Variant
+Category-wise,Kategorî-aqilmend
+Category-wise Margin,Kategorî-aqilmend Margin
+Certificate,Sertîfîka
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,Sertîfîka wenda ye an ne pêbawer e. QZ dibe ku diyalogên pejirandinê nîşan bide.
+Certificate is trusted. Silent QZ printing is active.,Sertîfîka pêbawer e. Çapkirina QZ ya bêdeng çalak e.
+Change,Guhertin
+Change allocation repaired,Dabeşkirina guhertinê hate tamîrkirin
+Change Price,Guhertina Bihayê
+Change Return,Vegere Guhertin
+Change Returned,Guhertin Vegere
+Change terminal cashier,Diravê termînalê biguherînin
+Charge Heads,Serên Charge
+Charges,Barkirin
+Charges not found,Berdêl nehat dîtin
+Check Balance,Balansa kontrol bikin
+Check balance for any card. Supervisors can issue and top up cards here.,Balansa ji bo her kartê kontrol bikin. Çavdêr dikarin li vir qertan derxînin û bilind bikin.
+Check balance only,Tenê balansa kontrol bikin
+Check for new commits,Ji bo peymanên nû kontrol bikin
+Check for Updates,Ji bo Nûvekirinan kontrol bikin
+Check live balance before applying redemption,Berî serîlêdana xilasbûnê balansa zindî kontrol bikin
+Check live balance before redemption,Berî xilasbûnê balansa zindî kontrol bikin
+Checking...,Kontrolkirin...
+Cheque/Reference Date,Çek / Dîroka Referansê
+Cheque/Reference No,Çek / Referans No
+Choose the cashier currently operating this terminal.,Diravê ku niha vê termînalê dixebitîne hilbijêrin.
+City,City
+Clear,Clear
+Clear All,Hemî Paqij bike
+Clear all barcode items,Hemî tiştên barcode paqij bikin
+Clear all purchase order items,Hemî tiştên fermana kirînê paqij bikin
+Clear Search,Lêgerînê Paqij bike
+Clearing local cache...,Paqijkirina cacheya herêmî...
+Click to refresh,Ji bo nûvekirinê bikirtînin
+Client CPU Lag:,Derengiya CPU ya Xerîdar:
+Client Memory Usage:,Bikaranîna Bîra Xerîdar:
+Client Metrics,Metrics Client
+Close about dialog,Di derbarê diyalogê de nêzîk bibin
+Close cashier switcher,Nêzîkî veguherînerê dravê
+Close closing shift dialog,Diyaloga girtina guheztinê bigire
+Close column selector,Hilbijêra stûnê bigire
+Close Dialog,Close Dialog
+Close drafts dialog,Danûstandina pêşnûmeyan bigire
+Close invoice details dialog,Danûstandina hûrguliyên fatûreyê bigire
+Close invoice management,Rêveberiya fatûreyê bigire
+Close offline invoices dialog,Diyaloga fatûreyên negirêdayî bigire
+Close packing list dialog,Danûstandina lîsteya pakkirinê bigire
+Close returns dialog,Diyaloga vegerê bigire
+Close sales orders dialog,Danûstandina fermanên firotanê bigire
+Close Scanner,Scanner Close
+Close scanner dialog,Danûstandina skanerê bigire
+Close Settings,Mîhengan bigire
+Closing Amount,Girtina Heqê
+Closing POS Shift,Girtina POS Shift
+Closing Snapshot Available,Girtina Snapshot Berdest e
+Code,Code
+Code scanned successfully,Kod bi serketî hat skankirin
+COGS,COGS
+Collapse item details,Hûrguliyên babetê hilweşînin
+Collected,Berhev kirin
+Cols,Cols
+Columns,Stûnên
+commits,dike
+Completed and active sales in this range,Di vê rêzê de firotana qedandî û çalak
+Completed returns will appear here.,Vegerên qedandî dê li vir xuya bibin.
+Confirm,Piştrast bike
+Confirm Close,Piştrast bike Close
+Confirm Mobile Number,Hejmara Mobîl piştrast bikin
+Confirm PIN,PIN-ê piştrast bikin
+Connect,Girêdan
+Connect printer and manage certificate,Çapkerê girêdin û sertîfîkayê birêve bibin
+Connecting to QZ Tray...,Girêdana QZ Tray...
+Connection problem while submitting invoice,Pirsgirêka girêdanê dema şandina fatûreyê
+Connections:,Têkilî:
+Connectivity and cached prerequisite status were rechecked.,Têkilî û statûya pêşdibistanê ya cached ji nû ve hate kontrol kirin.
+Continue Editing,Berdewam Biguherîne
+Could not fetch latest balance from server,Nekarî balansa herî dawî ji serverê bistîne
+Count,Count
+Country,Welat
+Coupon,Coupon
+Coupons,Coupons
+Cover,Cover
+CPU Cores:,Corên CPU:
+Create,Create
+Create and load a new prepaid card,Kartek nû ya pêşdibistanê biafirînin û bar bikin
+Create and preload a new gift card,Qerteke diyariyê ya nû biafirînin û berê xwe bidin
+Create Bill,Bill ava bikin
+Create Customer,Create Mişterî
+Create New Item,Tiştek Nû Biafirîne
+Create or change your PIN,PIN-a xwe biafirînin an biguhezînin
+Create PIN,PIN çêbikin
+Create POS Opening Shift,Guhertina Vekirina POS-ê biafirînin
+Create Purchase Order,Fermana Kirînê biafirînin
+Create Return,Vegerê çêbikin
+Create return from invoice,Vegera ji fatûreyê biafirînin
+Create Supplier,Pêşkêşker biafirînin
+Credit and Output,Kredî û Derketin
+Credit Note,Têbînî Kredî
+Credit Outstanding,Credit Outstanding
+Credit sales remaining to be collected,Firotina kredî ya mayî ku were berhev kirin
+Critical,Critical
+Currency,Currency
+Current,Current
+Current Event Loop Lag:,Derengiya Bûyera Niha:
+Current Month,Current Month
+Current PIN,PIN a niha
+Current Profile,Profîla Niha
+Current redeemable value on the gift card,Nirxa vegerandina heyî ya li ser qerta diyariyê
+Current User,Bikarhênerê Niha
+Custom,Custom
+Custom Due Days,Rojên Xweserî
+Custom items per page,Tiştên Custom per rûpel
+Customer,Mişterî
+Customer already selected,Mişterî jixwe hilbijartiye
+Customer Balance,Balance Mişterî
+Customer balance unavailable offline,Balansa xerîdar nehêle
+Customer created successfully.,Mişterî bi serkeftî hate afirandin.
+Customer creation failed.,Afirandina xerîdar têk çû.
+Customer Details,Details Mişterî
+Customer display channel is missing,Kanala pêşandana xerîdar winda ye
+Customer display was blocked. Please allow pop-ups for this site.,Nîşandana xerîdar hate asteng kirin. Ji kerema xwe rê bidin pop-upên vê malperê.
+Customer group is required,Koma xerîdar pêdivî ye
+Customer is required to add payment,Xerîdar pêdivî ye ku drav zêde bike
+Customer Name is required,Navê Mişterî hewce ye
+Customer not selected,Mişterî nehat hilbijartin
+Customer Report,Rapora Mişterî
+Customer saved offline,Mişterî offline xilas kir
+Customer Screen,Screen Mişterî
+Customer territory is required,Erdê xerîdar pêdivî ye
+Customer updated successfully.,Mişterî bi serkeftî hate nûve kirin.
+Customer-facing tools and printer setup.,Amûrên rûbirûyê xerîdar û sazkirina çaperê.
+Customers,Mişterî
+Customers not found,Mişterî nehatin dîtin
+Daily cashier actions without scrolling.,Çalakiyên dravê rojane bêyî gerok.
+Daily Sales,Sales rojane
+Daily Sales Summary,Kurteya Sales Daily
+Data loaded in form. Review and submit.,Daneyên di formê de hatine barkirin. Binirxînin û bişînin.
+Database Health,Database Health
+Database health affects overall system speed and reliability.,Tenduristiya databasê bandorê li leza pergalê û pêbaweriya giştî dike.
+Database Info,Database Info
+Date,Date
+Day ?,Day ?
+days,rojan
+Day-wise (MTD),Rojane (MTD)
+Day-wise Movement,Tevgera rojane
+Dead Stock,Dead Stock
+Dead Stock Items,Dead Stock Items
+Decrease quantity,Hejmarê kêm bike
+Default,Default
+Default:,Pêşbirk:
+Delete,Jêbirin
+Delete cancelled cash movement {0}?,Tevgera drav a betalkirî {0} jê bibe?
+Delete Draft,Pêşnûme jêbirin
+Delete draft invoice,Pêşnûmeya fatûreya jêbirin
+Delete draft invoice {0}?,Pêşnûmeya fatûreya {0} jê bibe?
+Delete Invoice,Faturê jêbirin
+Delete offline invoice,fatûreya negirêdayî jêbirin
+Delivered,Radest kirin
+Delivery Charges,Xercên Delivery
+Delivery Information,Information Delivery
+Delivery Note {0} created,Nîşeya radestkirinê {0} hate afirandin
+Delivery note created,Têkiliya radestkirinê hate afirandin
+Deployed Bundle:,Bundle Deployed:
+Deposit,Deposit
+Description,Danasîn
+Detailed Supplier Breakdown,Berfirehiya Pêşkêşkara Berfireh
+Detecting formats:,Tespîtkirina formatan:
+Device Memory:,Bîra Amûrê:
+Difference,Ferqa
+Difference (In Company Currency),Cûdahî (Di Pereyê Pargîdaniyê de)
+Disable offline mode first to recheck live connectivity.,Pêşî moda offline neçalak bike da ku girêdana zindî ji nû ve kontrol bike.
+Disconnect,Veqetandin
+discount,discount
+Discount %,Daxistin %
+Discount / Void / Return Report,Rapora Daxistin / Betal / Vegere
+Discount Amount,Discount Mîqdara
+Discount limited by POS Profile,Tenzîlat ji hêla Profîla POS-ê ve hatî sînorkirin
+Discounted Invoices,Faturên Discounted
+Discounts,Tenzîlat
+Dismiss,Derxistin
+Download Certificate,Sertîfîkaya Daxistinê
+Draft,Draft
+Draft invoice deleted,Pêşnûmeya fatûreyê hat jêbirin
+Draft source,Çavkaniya pêşnûmeyê
+Drafts,Drafts
+Due {0},Demjimêr {0}
+Due Date,Dem Date
+Duplicate,Ducarî
+Edit customer,Biguherîne mişterî
+Edit discount amount,Mîqdara dakêşanê biguherîne
+Edit discount percentage,Biguherîne ji sedî discount
+Edit Gift Application,Serlêdana diyariyê biguherîne
+Edit item name,Navê babetê biguherîne
+Edit quantity,Hejmara biguherîne
+Edit rate,Rêjeya biguherîne
+Edit unit of measure,Yekîneya pîvanê biguherîne
+Edited,Edited
+Employee,Employee
+Enable background sync,Hevdemkirina paşxanê çalak bike
+Enable Customer Display in POS Profile first.,Pêşî di Profîla POS-ê de Nîşandana Xerîdar çalak bikin.
+Enter a PIN.,PINek binivîse.
+Enter a valid grams value,Nirxa gramek derbasdar binivîse
+Enter new price list rate,Rêjeya lîsteya bihayê nû binivîse
+Enter Quantity,Hejmara binivîse
+Enter the cashier PIN to continue.,PIN-a dravê binivîsin da ku berdewam bikin.
+Enter the current PIN first.,Pêşî PIN-a heyî binivîse.
+"Enter the current PIN, then choose a new one.","PIN-a heyî binivîsin, paşê yekî nû hilbijêrin."
+Enter valid grams for scale barcode,Ji bo barkodê pîvanê gramên derbasdar binivîsin
+Entries,Entries
+Error accessing camera:,Çewtiya gihîştina kamerayê:
+Error calculating prices,Di hesabkirina bihayan de çewtî
+Error fetching customer balance,Di girtina balansa xerîdar de çewtî
+Error in change calculations!,Di hesabên guherînê de çewtî!
+Error Loading Data,Çewtiya Barkirina Daneyan
+Error loading invoice details,Di barkirina hûrguliyên fatûreyê de çewtî
+Error processing invoice,Error processing fatûreya
+Error processing payment,Error processing peredana
+Error searching invoices,Di lêgerîna fatûreyan de çewtî
+Error submitting invoice:,Di şandina fatûreyê de çewtî:
+Error submitting invoice: {0},Di şandina fatûreyê de çewtî: {0}
+Error submitting invoice: No response from server,Di şandina fatûreyê de çewtî: Ji serverê bersiv tune
+Error updating currency,Di nûvekirina diravê de çewtî
+Error updating item details,Di nûvekirina hûrguliyên babetê de çewtî
+Est. Purchase,Est. Kirîn
+Est. Value,Est. Nirx
+Event-loop lag measures how busy your browser is. Lower is better.,Derengiya bûyer-loop dipîve ku geroka we çiqas mijûl e. Jêtir çêtir e.
+Every,Her
+Exchange Rate,Rêjeya Exchange
+Expand item details,Hûrguliyên babetê berfireh bikin
+Expected Amount (In Company Currency),Mîqdara Hêvîkirî (Bi Diravê Pargîdaniyê)
+Expected Cash,Cash hêvîkirin
+Expected cash on hand grouped by currency,Dravên ku li ser destan têne hêvî kirin li gorî dirav têne kom kirin
+Expected vs Actual,Hêvîdar vs Rastî
+Expense,Expense
+Expense Account (Optional Override),Hesabê Lêçûn (Destpêkirina Bijarte)
+Expense account is required.,Hesabê lêçûn hewce ye.
+Expenses and deposits posted during this shift,Mesref û depoyên ku di vê veguheztinê de hatine şandin
+Expired,Dema derbas bû
+Failed to auto reconcile payments.,Veguhastina dravdanan bi ser neket.
+Failed to cancel cash movement,Nekarî betalkirina tevgera dravê
+Failed to clear cache,Paqijkirina cache bi ser neket
+Failed to create item,Afirandina babetê bi ser neket
+Failed to create supplier,Pêşkêşker nehat afirandin
+Failed to delete cash movement,Jêbirina tevgera dravê bi ser neket
+Failed to generate scale barcode. Using item barcode only.,Hilberîna barkodê pîvanê têk çû. Tenê barcode ya babetekê bikar tînin.
+Failed to load cash movement context.,Barkirina çarçoveya tevgera dravê bi ser neket.
+Failed to load dashboard data.,Daneyên dashboardê nehat barkirin.
+Failed to reload invoice from server,Ji nû ve barkirina fatûreyê ji serverê bi ser neket
+Failed to submit cash movement,Radestkirina tevgera dravê bi ser neket
+Failed to sync offline cash movements,Nekarî tevgerên dravê offline senkronîze bike
+Fast cashier actions for active shifts.,Ji bo guheztinên çalak çalakiyên dravê bilez.
+Fast Moving Items,Tiştên Bilez Digerin
+Fees,Fees
+Fetch the latest offline prerequisite updates,Nûvekirinên pêşdibistanê yên negirêdayî yên herî dawî bistînin
+Find a sales order quickly and load it into the current sale.,Zû fermanek firotanê bibînin û wê di firotana heyî de bar bikin.
+Fixing payment amounts for return invoice...,Sazkirina mîqdarên dravdana ji bo fatûreya vegerê...
+Flash Off,Flash Off
+Flash On,Flash On
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","Ji bo hêmanên 'Bunda Hilberê', Wargeh, Jimareya Rêjeyî û Hejmara Komê dê ji tabloya 'Lîsteya pakkirinê' were hesibandin. Ger Warehouse û Hejmara Batchê ji bo hemî tiştên pakkirinê yên ji bo her tiştê 'Bundle Product' yek bin, ew nirx dikarin di tabloya Babetê ya sereke de werin nivîsandin; nirx dê li tabloya 'Lîsteya pakkirinê' bêne kopî kirin."
+Free,Belaş
+Free Qty,Belaş Qty
+Frequency,Frequency
+from,ji
+From Date,From Date
+Fulfillment Details,Agahiyên Pêkanînê
+Full Name,Navê Tev
+Gain,Gain
+Generate a fresh prepaid card and start it with an opening balance.,Qertek nû ya pêşdibistanê biafirînin û wê bi balansek vekirinê dest pê bikin.
+Generate and install the certificate to allow fully silent printing without trust prompts.,Sertîfîkayê biafirînin û saz bikin da ku destûr bide çapkirina bi tevahî bêdeng bêyî daxwazên pêbaweriyê.
+Generate Certificate,Sertîfîkayê çêbikin
+Generated scale barcode: {0},Pîvana barkodê hatî çêkirin: {0}
+Get Payments,Payments bistînin
+Gift Card,Gift Card
+Gift card amount must be greater than zero.,Divê mîqdara qerta diyariyê ji sifirê mezintir be.
+Gift Card Code,Koda karta diyariyê
+Gift card code is required for redemption,Ji bo xilasbûnê koda qerta diyariyê hewce ye
+Gift card code is required.,Koda qerta diyariyê hewce ye.
+Gift card issued successfully.,Qerta diyariyê bi serkeftî hat weşandin.
+Gift card loaded successfully.,Qerta diyariyê bi serkeftî hat barkirin.
+Gift Card Management,Gerînendetiya Karta Giftê
+Gift card payment,Dravdana karta diyariyê
+Gift card redemption requires an online connection,Veguheztina qerta diyariyê pêwendiyek serhêl hewce dike
+Gift card topped up successfully.,Karta diyariyê bi serketî hat zêdekirin.
+Gift Cards,Kartên diyariyê
+Go to Frappe Desk,Biçe Maseya Frappe
+Grand Total,Grand Total
+Gross Margin,Margin Gross
+Gross Profit,Serkeftina Gross
+Gross Sales,Sales Gross
+Group not found,Kom nehat dîtin
+"Grouped controls for terminal, UI, and session settings.","Kontrolên komkirî yên ji bo mîhengên termînalê, UI, û danişînê."
+Grouped totals for each payment method and currency,Ji bo her awayê dravdanê û diravê jimareyên komkirî
+Hide,Veşêre
+Hide Gift Card,Karta diyariyê veşêre
+Hide Non Essential Fields,Zeviyên ne bingehîn veşêrin
+Hide quantity decimals,Dehaneyên mîqdarê veşêrin
+Hide search tools,Amûrên lêgerînê veşêre
+Hide zero rated items,Tiştên nirxkirî yên sifir veşêre
+High,Bilind
+History,Dîrok
+Hourly (Today),Saetî (Îro)
+How this section works,Ev beş çawa dixebite
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","Ger daneya rawestayî bimîne, Mîhengan> Offline & Sync vekin û dema serhêl dîsa Daneyên Offline ji nû ve ava bikin."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","Ger hişyarî berdewam bike, Settings> Offline & Sync vekin, paşê Daneyên Offline Nû Nûve Bikin an Daneyên Offline Ji nû ve Ava bikin."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Sertîfîkayê têxin nav QZ Tray û li ser her makîneya POS-ê QZ Tray ji nû ve bidin destpêkirin.
+In,In
+In stock: {0},Li stock: {0}
+Include Batch / Serial,Tevlîhevî / Serial
+Include Price,Bihayê têde
+Increase quantity,Hejmarê zêde bike
+IndexedDB,IndexedDB
+Initial Amount,Mîqdara Destpêkê
+Initialize your shift with opening balances,Guhertina xwe bi hevsengiyên vekirina dest pê bikin
+Initializing application...,Serlêdan dest pê dike...
+"Inspect cache, sync, and prerequisite status","Cache, hevdemkirin, û rewşa pêşdibistanê kontrol bikin"
+Installed Applications,Serlêdanên Sazkirî
+Insufficient stock:\n{0},Stok têr nake:\n{0}
+Invalid rate,Rêjeya nederbasdar
+Inventory Status Report,Rapora Rewşa Envanterê
+Invoice,Invoice
+Invoice {0} is Submitted,Fatureya {0} hatiye şandin
+Invoice {0} processed successfully,fatûreya {0} bi serkeftî hate pêvajo kirin
+Invoice {0} submission failed,Radestkirina fatûreya {0} têk çû
+Invoice {0} was already submitted,Jixwe fatûreya {0} hatibû şandin
+Invoice Adjustments,Guherandinên fatûre
+Invoice Change,Guhertina fatûre
+Invoice Details,Details fatûreya
+Invoice is still in draft after background submission.,Piştî radestkirina paşnavê fatûre hîn jî di pêşnûmeyê de ye.
+Invoice Items,Tiştên fatûre
+Invoice Management,Birêvebiriya fatûre
+Invoice Mgmt,Fatura Mgmt
+Invoice saved offline,fatûre offline xilas bû
+Invoice submission failed,Radestkirina fatûreyê têk çû
+Invoice Submitted,Faturek hat şandin
+"Invoice value settled by loyalty points, not cash collection","Nirxa fatûreyê ji hêla xalên dilsoziyê ve, ne berhevkirina drav"
+Invoices,Faturên
+Invoices already past due date,Jixwe fatûreyên di dema xwe de derbas bûne
+Invoices saved as POS Invoices,fatûreyên wekî fatûreyên POS-ê hatine tomarkirin
+Invoices still carrying balances,Faturên hê jî hevsengiyê digirin
+Issue Mode,Mode Pirsgirêk
+Issue New Card,Karta Nû biweşînin
+Issue Workflow,Pirsgirêka Xebatê
+"Issue, top up, and check","Pirsgirêk, jor bikin, û kontrol bikin"
+Item,Item
+Item / Product Sales Report,Babet / Rapora Firotina Hilberê
+Item {0} added to invoice,Babetê {0} li fatûreyê hat zêdekirin
+Item '{0}' has no barcode,Babetê '{0}' barkod nîne
+Item Code,Koda Babetê
+Item created successfully,Babet bi serkeftî hate afirandin
+Item is out of stock,Tiştek ji stokê derketiye
+Item Name,Navê Babetê
+Item not found,Babet nehat dîtin
+Item order updated,Siparîşa babete hat nûkirin
+Item Selector Settings,Mîhengên Hilbijêra Babetê
+Items,Items
+Items added in POS will appear here automatically.,Tiştên ku di POS-ê de hatine zêdekirin dê bixweber li vir xuya bibin.
+Items added to invoice,Tiştên ku li fatûreyê hatine zêdekirin
+Items per page,Tiştên li ser rûpelê
+Items Sold,Tiştên Firotin
+Items/Invoice,Tiştên / fatûre
+Item-wise Profitability,Babetê-şehreza Profitability
+Journal Entry,Têketina Rojname
+json,json
+Just now,Just now
+Keep offline prerequisites healthy and recover stale data safely.,Pêşmercên negirêdayî saxlem bihêlin û daneyên kevin bi ewlehî vegerînin.
+Labels,Labels
+"Language, theme, terminal tools, and session controls.","Ziman, mijar, amûrên termînalê, û kontrolên rûniştinê."
+Last,Dawî
+Last 14 Days (Paid vs Pending),14 Rojên Dawî (Derdayî beramberî Li bendê)
+Last 14 Days Activity,Çalakiya 14 rojên dawî
+Last 14 Days Gross Profit,14 Rojên Dawî Qezencê Gross
+Last 14 Days Purchases,Kirînên 14 rojên dawîn
+Last 14 Days Tax/Charges,14 rojên dawîn Bac / Xerc
+Last sync:,Hevdemkirina dawîn:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},Hevdemkirina dawîn: {0} | baş: {1} | têkçû: {2} | derbas bû: {3}
+Latest entries for current shift,Danûstandinên herî paşîn ji bo guheztina heyî
+Lead Time,Lead Time
+Limited,Limited
+lines,xetên
+List,List
+Live Snapshot,Wêneya Zindî
+Load a POS profile and cashier first.,Pêşî profîlek POS û dravê bar bikin.
+Load More Invoices,Zêdetir fatûreyên barkirin
+Load previously saved invoices,fatûreyên ku berê hatine hilanîn bar bikin
+Load Sale,Load Sale
+Load Sales Invoice,Barkirina fatûreya firotanê
+Loading app data...,Daneyên sepanê tê barkirin...
+Loading customer database...,Databasa xerîdar tê barkirin...
+Loading customers...,Barkirina xerîdar...
+Loading database stats...,Barkirina statîstîkên databasê...
+Loading details...,Barkirina hûragahiyan...
+Loading invoice history...,Dîroka fatûreyê tê barkirin...
+Loading items...,Barkirina tiştan...
+Loading product catalog...,Kataloga hilberê tê barkirin...
+Loading return invoices...,Barkirina fatûreyên vegerê...
+Loading server CPU/memory usage...,CPU/karanîna bîrê ya serverê tê barkirin...
+Loading suppliers...,Barkirina dabînkeran...
+Loading unpaid invoices...,Barkirina fatûreyên bêpere...
+Loading view...,Dîmena tê barkirin...
+Loading...,Barkirin...
+Local storage is unavailable. Switching to online-only mode.,Depoya herêmî ne berdest e. Veguherîna moda tenê-serhêl.
+localStorage,localStorage
+Location Performance,Cihê Performansa
+Locations,Cihan
+Lock Screen,Lock Screen
+Lookup Workflow,Bigerin Workflow
+Loss,Loss
+Low,Low
+Low Stock,Stock Stock
+Low Stock Alerts,Alerts Stock Stock
+Low Stock Items,Tiştên Kêm Stock
+Low Stock Threshold,Borseya Kêm
+Low Stock Total,Tevahiya Stock Stock
+Lowest Margin,Kêmtirîn Margin
+Low-frequency maintenance and system details.,Detayên pergalê û lênêrîna kêm-frekansa kêm.
+Loyalty Redeemed,Loyalty Redeemed
+Loyalty Redemption,Redemption dilsoziya
+Make New Payment,Tezmînata Nû Bikin
+Manage all,Hemî rêvebirin
+Manage and synchronize your offline transactions,Danûstendinên xweyên negirêdayî bi rê ve bibin û hevdeng bikin
+Manage Cashier PIN,PIN-a Cashier Birêvebirin
+"Manage offline tools, terminal controls, and maintenance from one workspace.","Amûrên negirêdayî, kontrolên termînalê, û lênêrînê ji yek cîhê xebatê birêve bibin."
+manual,manual
+"Manual codes, barcode scans, and QR scans work in the same field","Kodên destan, şopandina barkodê, û şopandina QR di heman qadê de dixebitin"
+Manual offline mode is enabled,Moda negirêdayî ya destan çalak e
+Margin,Margin
+Maximum available quantity is {0}. Quantity adjusted to match stock.,Hejmara herî zêde ya berdest {0} e. Mîqdar li gorî stokê hatî eyar kirin.
+Maximum discount amount for this offer item is {0}.,Rêjeya erzaniyê ya herî zêde ji bo vê babetê pêşniyarê {0} e.
+Maximum discount percentage for this offer item is {0}%.,Rêjeya erzaniyê ya herî zêde ji bo vê babetê teklîfê {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,Hêjmara pêşniyarê ya herî zêde {0} e. Mîqdar li gorî sînorê destûr hatî guheztin.
+Medium,Medium
+Method-wise Collections,Koleksiyonên Rêbaz
+Minimum allowed rate for this offer item is {0}.,Rêjeya herî kêm a destûr ji bo vê babetê pêşkêşî {0} e.
+Minimum Qty,Hejmara hindiktirîn
+Mobile No,Hejmara Mobîl
+Mode,Mode
+Mode of Payment,Mode of Payment
+Month,Month
+Month ?,Meh ?
+Monthly Profit,Qezenciya mehane
+Monthly Sales,Firotana mehane
+Monthly Sales Summary,Kurteya Firotana Mehane
+Month-wise,Li gorî mehê
+Most Active Cashiers,Diravên herî çalak
+Movement Type,Tîpa Tevgera
+Movements,Tevgerên
+Multi Currency,Multi Currency
+N/A,N/A
+Name,Name
+Negative Stock,Stock Neyînî
+Negative Stock Items,Tiştên Stock Neyînî
+Negative values not allowed,Nirxên neyînî destûr nayê dayîn
+Net,Net
+Net Qty,Net Qty
+Net Sales,Sales Net
+Net Value,Nirxa Net
+Never,Never
+New changes are ready to load,Guhertinên nû ji bo barkirinê amade ne
+New Item,Babetê Nû
+New Offer Available,Pêşniyara Nû Berdest e
+New PIN,PIN-a nû
+New rate,Rêjeya nû
+Next unit of measure,Yekîneya pîvanê ya paşîn
+No attribute data found.,Daneyên taybetmendiyê nehat dîtin.
+No Barcode,No Barcode
+No barcode found for UOM '{0}',Ji bo UOM '{0}' barkod nehat dîtin
+No branch/location data found.,Daneyên şax/cihê nehat dîtin.
+No brand data found.,Daneyên marqeyê nehat dîtin.
+No cached gift card balance is available offline.,Balansa qerta diyariya veşartî ne offline peyda dibe.
+No camera found on this device. Please ensure your device has a working camera.,Li ser vê cîhazê kamera nehat dîtin. Ji kerema xwe pê ewle bine ku cîhaza we kamerayek kar heye.
+No capability warnings recorded yet.,Hê hişyariyên kapasîteyê nehatine tomarkirin.
+No cash expected for this shift.,Ji bo vê veguheztinê drav nayê hêvî kirin.
+No cash mode configured,No moda drav nehatiye mîheng kirin
+No cash movement type is allowed for this POS Profile.,Ji bo vê Profîla POS-ê celebek tevgera drav nayê destûr kirin.
+No cashier PIN is set yet. Create one now.,PIN-a diravgir hêj nehatiye danîn. Niha yek çêbikin.
+No cashier profiles are available for this POS profile yet.,Ji bo vê profîla POS-ê hîn profîlên dravê tune ne.
+No cashier-wise discount/void/return activity.,Çalakiya erzankirina / betal / vegerê ya diravgir tune.
+No category data found.,Daneyên kategoriyê nehat dîtin.
+No category profitability data found.,Daneyên qezenckirina kategoriyê nehat dîtin.
+No change returned recorded for this shift.,Ji bo vê veguheztinê ti guhertinek nehatiye tomarkirin.
+No change-allocation invoices match the current filters.,Tu fatûreyên guheztin-veqetandinê bi parzûnên heyî re li hev nakin.
+No charge head breakdown found.,Ti şikestinek serê barkirinê nehat dîtin.
+No Company Selected,Şîrketek Hilbijartî nîne
+No customer sales data found.,Daneyên firotanê yên xerîdar nehat dîtin.
+No day-wise discount/void/return trend.,No meyla dakêşana rojane / betal / vegerê tune.
+No day-wise payment data found.,Daneyên dravdanê yên rojane nehatin dîtin.
+No day-wise profitability trend found.,No meyleke qezencê ya rojane nehat dîtin.
+No day-wise purchase data found.,Daneyên kirînê yên rojane nehatin dîtin.
+No day-wise sales trend found.,Meyla firotanê ya rojane nehat dîtin.
+No day-wise tax/charges trend found.,Rojane meyla bac/drav nehat dîtin.
+No dead stock items.,No tiştên stock mirî.
+No due date,Dîroka berdêl tune
+No exact repair match found for this invoice,Ji bo vê fatûreyê hevberdana tamîrê ya tam nehat dîtin
+No hourly sales trend found for today.,Ji bo îro meyleke firotana saetê nehat dîtin.
+No invoice activity found.,Çalakiya fatûreyê nehat dîtin.
+No invoices found,Ti fatûrek nehat dîtin
+No invoices found. Try different search criteria.,Ti fatûrek nehat dîtin. Pîvanên lêgerînê yên cuda biceribînin.
+No invoices recorded for this shift.,Ji bo vê veguheztinê ti fatûrek nehatiye tomar kirin.
+No item profitability data found.,Daneyên qezenckirina babetekê nehat dîtin.
+No item sales data found for this period.,Ji bo vê serdemê daneyên firotanê yên tiştan nehat dîtin.
+No items found,Tiştek nehat dîtin
+No items in cart,Tiştek di selikê de tune
+No items with barcodes to print,Tiştên bi barkod ji bo çapkirinê tune
+No location-wise top item data found.,Daneyên tiştên jorîn ên li gorî cîhê nehat dîtin.
+No low stock alerts right now.,No alerts stock kêm niha.
+No low stock items.,No tiştên stock kêm.
+No matching items in cart,Di selikê de tiştên lihevhatî tune
+No month-wise sales trend found.,Meyleka firotanê ya mehekê nehatiye dîtin.
+No negative stock items.,No tiştên stock neyînî.
+No notifications yet,No notifications hê
+No offline cash movement synced.,Ti tevgera dravê ya negirêdayî nayê hevdem kirin.
+No offline invoices pending synchronization,No fatûreyên offline li benda hevdemkirinê ne
+No offline sync issues recorded yet.,Pirsgirêkên hevdemkirinê yên offline hêj nehatine tomar kirin.
+No out-of-stock items.,Tiştên ku ji stokê ne.
+No outstanding credit invoices for this shift.,Ji bo vê veguheztinê fatûreyên krediyê yên nemayî tune.
+No payment collection data found.,Daneyên berhevkirina dravdanê nehat dîtin.
+No payment rows available on this invoice.,Li ser vê fatûreyê rêzên dravdanê tune.
+No payments registered for this shift.,Ji bo vê veguheztinê drav nehatine tomar kirin.
+No pending balances in this period.,Di vê heyamê de hevsengiyên li bendê nînin.
+No pending offline invoices,No fatûreyên negirêdayî yên li bendê
+No Print Formats Found,Tu Formên Çapkirinê nehatin dîtin
+No profiles found for selected scope. Falling back to current profile failed.,Ji bo çarçoveya hilbijartî profîl nehat dîtin. Vegere ser profîla heyî têk çû.
+No recent customer activity found.,Çalakiya xerîdar a dawî nehat dîtin.
+No recent stock entries found.,Tiştên stokê yên dawî nehatin dîtin.
+No records found,Ti tomar nehat dîtin
+No reorder suggestions right now.,Naha pêşniyarên ji nû ve rêzkirinê tune.
+No repeat customers in this period.,Di vê heyamê de xerîdarên dubare tune.
+No response from server,No bersiv ji server
+No return invoices found,Ti fatûreyên vegerê nehatin dîtin
+No return item trend found.,Meyleke vegerê nayê dîtin.
+No returnable items found for this invoice,Ji bo vê fatûreyê ti tiştên veger nehat dîtin
+No returns were processed in this shift.,Di vê veguherînê de veger nehat kirin.
+No risk activity found.,Çalakiya rîskê nehat dîtin.
+No sales activity found for this period.,Ji bo vê heyamê çalakiya firotanê nehat dîtin.
+No slow moving items.,Tiştên ku hêdî hêdî diçin tune.
+No staff sales activity found.,Çalakiya firotanê ya karmendan nehat dîtin.
+No stock movement for this period.,Ji bo vê heyamê tevgera stokê tune.
+No submitted cash movements in this shift.,Di vê guherînê de tevgerên drav nehatine şandin.
+No supplier purchases found in this month.,Di vê mehê de kirînên dabînker nehat dîtin.
+No suppliers found for this period.,Ji bo vê heyamê dabînker nehat dîtin.
+No sync trigger has run yet in this session.,Di vê danişînê de hîna teşekera hevdemkirinê nehatiye xebitandin.
+No tax head breakdown found.,No dabeşbûna serê bacê hat dîtin.
+No top items found for this location.,Ji bo vî cihî ti tiştên sereke nehatin dîtin.
+No unpaid invoices,No fatûreyên bêpere
+No variant data found.,Daneyên guhertoyê nehat dîtin.
+No week-wise sales trend found.,Meyla firotanê ya heftane nehatiye dîtin.
+No.,No.
+Nobile Number,Hejmara Nobile
+Not available,Ne peyda dibe
+Not checked,Nayê kontrol kirin
+Not selected,Ne hilbijartin
+Not Set,Not Set
+Notifications,Notifications
+Offer,Pêşkêş bike
+Offer Applied,Pêşniyar Serlêdan kirin
+Offer criteria exceeded,Pîvanên pêşniyarê derbas bûn
+Offer Item,Babetê Pêşkêş bike
+Offer item unavailable,Tişta pêşniyarê tune
+Offer Removed,Pêşniyar rakirin
+Offer UOM cannot be changed,Pêşniyara UOM nayê guhertin
+Offer?,Pêşkêş bike?
+Offers,Pêşkêş dike
+Offline,Offline
+Offline & Sync,Offline & Sync
+Offline Capabilities,Kapasîteyên Offline
+Offline data status refreshed,Rewşa daneya negirêdayî hate nûvekirin
+Offline diagnostics,Teşhîsên negirêdayî
+Offline Invoices,Faturên Offline
+Offline invoices status,Rewşa fatûreyên negirêdayî
+Offline invoices synced,fatûreyên negirêdayî hevdem kirin
+Offline Queue: {0},Dora Offline: {0}
+Offline rebuild guidance,Rêbernameya ji nû veavakirina negirêdayî
+Offline restore is unavailable for this session.,Vegerandina offline ji bo vê danişînê ne berdest e.
+Offline selling is available with degraded capabilities.,Firotina offline bi kapasîteyên xerabûyî peyda dibe.
+Offline snapshot does not match the current POS state.,Wêneya negirêdayî bi rewşa POS-a heyî re nayê hev.
+Offline Status,Rewşa Offline
+"Offline, terminal, and system controls","Kontrolên negirêdayî, termînalê û pergalê"
+OK,OK
+Online,Online
+Open actions menu,Menuya çalakiyan vekin
+Open balance to collect,Balansek vekin ku berhev bikin
+Open Customer Display,Nîşandana Xerîdar vekin
+Open drawer,Dorpêç vekin
+Open invoices,fatûreyên vekin
+Open Payments?,Payments Vekin?
+Open POS home,Mala POS-ê vekin
+Open this screen from POS Menu -> Open Customer Display.,Vê ekranê ji POS POS-ê vekin -> Nîşandana Xerîdar vekin.
+OpenCV image processing enabled - Enhanced barcode detection,Pêvajoya wêneya OpenCV çalak kir - Vedîtina barkodê ya pêşkeftî
+OpenCV image processing unavailable on this device,Pêvajoya wêneya OpenCV li ser vê cîhazê ne berdest e
+OpenCV Off,OpenCV Off
+OpenCV On,OpenCV On
+OpenCV processing disabled,Pêvajoya OpenCV neçalak kir
+Opening Amount,Mîqdara Vekirina
+Opening Cash,Vekirina Cash
+options,vebijarkên
+Order,Order
+Original,Original
+Other,Other
+Out,Derveyî
+Out of Stock,Out of Stock
+Out of Stock Items,Ji Tiştên Stock
+Outstanding,Outstanding
+Outstanding Credit by Currency,Krediya berbiçav ji hêla diravê ve
+Overdue,Dereng maye
+Overpayment Change,Guhertina zêdeperedanê
+Overpayment change deducted: {0},Guhertina zêdeperedanê hate birîn: {0}
+Packing List,Lîsteya pakkirinê
+Page Format,Forma Rûpelê
+Page unavailable offline,Rûpel nederbasdar e
+Paid,Pere kirin
+Paid (orig):,Pere (esal):
+Paid Amount,Heqê dayîn
+Paid change cannot be greater than total change!,Guhertina drav nikare ji guhertina tevahî mezintir be!
+Paid:,Berdêl:
+Parent Item,Babetê Babetê
+Partial,Qismî
+Partly Paid,Qismî Pad
+Party Account,Hesabê Partiyê
+Party Type,Tîpa Partiyê
+Pause terminal until next cashier,Termînalê rawestînin heya dravê din
+PAY,PAY
+Payment,Payment
+Payment Account,Hesabê Paymentê
+Payment entries processed for Invoice {0},Ketinên dravdanê ji bo fatûreya {0}
+Payment Entry Type,Cureyê Têketina Tezmînatê
+Payment History,Dîroka Payment
+Payment ID,ID Payment
+Payment Method Report,Rapora Rêbaza Paymentê
+Payment Methods,Rêbazên Payment
+Payment of {0} received successfully.,Tezmînata {0} bi serkeftî hat wergirtin.
+Payment Progress,Pêşveçûna Payment
+Payment Reconciliation,Lihevkirina Payment
+Payment request status could not be retrieved. Please try again,Rewşa daxwaza dravdanê nehat wergirtin. Ji kerema xwe dîsa biceribîne
+Payment Request took too long to respond. Please try requesting for payment again,Daxwaza Tezmînatê ji bo bersivdanê pir dirêj girt. Ji kerema xwe careke din daxwaza dravdanê biceribînin
+Payment saved offline,Tezmînat negirêdayî xilas bû
+Payment State,Dewletê Payment
+Payment Status,Rewşa Payment
+Payment submitted but print function could not be executed. Payment name not found.,Tezmînat hate şandin lê fonksiyona çapkirinê nekariye were xebitandin. Navê dayinê nehat dîtin.
+Payment submitted.,Payment şandin.
+Payment Summary,Kurteya Tezmînatê
+Payments,Payments
+Payments are not open. Do you want to open payments and submit?,Tezmînat vekirî ne. Ma hûn dixwazin dravdanê vekin û radest bikin?
+Payments by Mode of Payment,Tezmînatên bi Moda Tezmînatê
+PDF,PDF
+Peak Hour,Saet Peak
+Peak Memory:,Bîra Peak:
+Peak Server:,Pêşkêşkara Peak:
+Peak:,Peak:
+Pending,Li bendê ne
+Pending Amount,Mîqdara Li benda
+Pending count updated from {0} to {1},Hejmara li bendê ji {0} heta {1} hate nûvekirin
+Pending Exposure,Pêşkêşkirina li benda
+Pending Invoices,Li benda fatûreyên
+Pending Ratio,Rêjeya li benda
+Pending Sales,Li benda Sales
+Pending sales: {0} | Cache usage: {1}%,Firotinên li bendê: {0} | Bikaranîna cache: {1}%
+Pending Sync,Syncê li bendê ne
+Pending: {0},Li bendê: {0}
+Pending: {0} | Synced: {1} | Draft: {2},Li bendê: {0} | Hevdemkirin: {1} | Pêşnivîs: {2}
+Per Page,Per Rûpelê
+Personal,Personal
+Personal preferences adjust the current cashier experience without changing the active POS route.,Vebijarkên kesane ezmûna dravê heyî bêyî guheztina riya POS-a çalak eyar dikin.
+PIN confirmation does not match.,Pejirandina PIN-ê li hev nake.
+PIN must be 4 to 8 digits.,PIN divê ji 4 heta 8 reqeman be.
+Please add at least one item.,Ji kerema xwe bi kêmanî yek babetekê lê zêde bike.
+Please allow camera access to scan codes,Ji kerema xwe rê bidin kamerayê ku kodên skankirinê bigihîne
+Please enter payment amount,Ji kerema xwe mîqdara dravdanê binivîse
+Please fill all required fields,Ji kerema xwe hemû qadên pêwîst dagirin
+Please make a payment or select a payment,Ji kerema xwe drav bidin an jî dravek hilbijêrin
+Please request phone payment or use another payment method,Ji kerema xwe dravdana têlefonê daxwaz bikin an jî rêbazek dravdanê ya din bikar bînin
+Please select a customer first,Ji kerema xwe pêşî xerîdarek hilbijêrin
+Please select a party,Ji kerema xwe partiyek hilbijêrin
+Please select a party before reconciling.,Ji kerema xwe berî lihevhatinê partiyek hilbijêrin.
+Please select a valid movement type.,Ji kerema xwe celebek tevgerê ya derbasdar hilbijêrin.
+Please select an invoice,Ji kerema xwe fatûreyek hilbijêrin
+Please select company before reconciling.,Ji kerema xwe berî lihevhatinê pargîdanî hilbijêrin.
+Please set the customer's mobile number,Ji kerema xwe jimareya mobîl a xerîdar saz bikin
+Please try again or enter the item manually.,Ji kerema xwe dîsa biceribîne an jî babete bi destan binivîse.
+Please verify the barcode or check the item's availability.,Ji kerema xwe barkodê verast bikin an hebûna tiştê kontrol bikin.
+Points,Points
+Popup blocked. Please allow popups.,Popup hate asteng kirin. Ji kerema xwe rê bidin popupan.
+POS,POS
+POS controls and maintenance,Kontrol û lênêrînê POS
+POS Expense is disabled for this POS Profile.,Mesrefa POS-ê ji bo vê Profîla POS-ê neçalak e.
+POS is running with limited offline prerequisites.,POS bi şert û mercên negirêdayî yên tixûbdar dimeşe.
+POS Profile,Profîla POS
+Position the QR code or barcode within the scanning area,Koda QR an barkodê di nav devera şopandinê de bicîh bikin
+Posting,Posting
+Posting and Price List,Posting û Lîsteya Price
+Posting Date,Dîroka şandinê
+Preparing background sync,Amadekirina hevdengiya paşîn
+"Press OK to continue offline with a warning, or Cancel to retry.","OK bikirtînin da ku bi hişyariyek negirêdayî bidomînin, an jî Betal bikin ku ji nû ve biceribînin."
+Previous unit of measure,Yekîneya pîvana berê
+Price List,Lîsteya Bihayê
+Price List Rate,Rêjeya Lîsteya Bihayê
+Price list rate updated locally only,Rêjeya navnîşa bihayê tenê li herêmî nûve kirin
+Pricing & Discounts,Biha & Tenzîlat
+Pricing Rule,Pricing Rule
+Print,Çapkirin
+Print Draft,Pêşnûmeya çapkirinê
+Print Format (Invoice),Forma Çapkirinê (Fatur)
+Print Format (Order),Forma Çapkirinê (Siparîş)
+Print invoice,fatûreya çap bike
+Print Purchase Invoice instead of PO,Li şûna PO fatûreya kirînê çap bike
+Printer,Printer
+Processed returns impacting the shift totals,Vegerên pêvajoyî ku bandorê li serhevhatinên guheztinê dikin
+Processing Payment,Processing Payment
+Processing payment entries for Invoice {0},Pêvajoya tomarkirina dravdana ji bo fatûre {0}
+Profile,Profile
+Profiles,Profiles
+Profit,Profit
+Profit: Invoice Item Estimate,Qezenc: Texmîna Tişta Faturê
+Profit: Stock Ledger (COGS),Qezenc: Deftera Stock (COGS)
+Profitability Report,Rapora qezencê
+Prorated return discount,Tenzîlatkirina vegera prorated
+Purchase Amount,Hejmara Kirînê
+Purchase Invoices,Faturên Kirînê
+Purchase Order created,Fermana kirînê hate afirandin
+Qty,Qty
+Qualified,Qualified
+Quantity,Quantity
+Quantity exceeds available stock,Hejmar ji stoka berdest derbas dibe
+Quick Actions,Çalakiyên bilez
+Quotation {0} is Submitted,Gotara {0} hatiye şandin
+Quotation submitted,Quotation şandin
+QZ Tray connected.,QZ Tray ve girêdayî ye.
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ Tray bi destan tê qut kirin. Pêl Girêdanê bike da ku wê dîsa çalak bike.
+QZ Tray is not connected.,QZ Tray ne girêdayî ye.
+QZ Tray Setup,QZ Tray Setup
+Rate,Rate
+Rate adjusted to maximum allowed discount,Rêjeya li gorî erzaniya herî zêde destûr hate guheztin
+Ready,Ready
+Ready to resume,Amade ye ku ji nû ve dest pê bike
+Ready!,Ready!
+Real-time POS insights for retail operations.,Nêrînên POS-ê yên rastîn ên ji bo karûbarên firotanê.
+Rebuild Offline Data,Daneyên Offline ji nû ve ava bikin
+Receive,Distînin
+Receive now,Niha bistînin
+Received,Wergirtin
+Received:,Wergirtin:
+Recent Movement Entries,Têketinên Tevgera Dawîn
+Recent updates about your invoices,Nûvekirinên dawî yên di derbarê fatûreyên we de
+Recently Active Customers,Di demên dawî de Xerîdarên Çalak
+Rechecking connection,Ji nû ve kontrolkirina girêdanê
+Reconcile payment methods and close shift,Rêbazên dravdanê li hev bikin û guheztinê nêzîk bikin
+Reconciling Payments,Lihevanîna Payments
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","Ji nû ve girêdin û vê rûpelê carekê serhêl vekin, wê hingê nûvekirinên negirêdayî dê karibin wê sererast bikin."
+Reconnect online to refresh cached offline data from the server.,Ji nû ve bi serhêl ve girêdin da ku daneyên negirêdayî yên cached ji serverê nûve bikin.
+Recreate local offline prerequisites from scratch,Pêşmercên negirêdayî yên herêmî ji nû ve biafirînin
+Recv:,Recv:
+Redeem,Redeem
+Redeem / Scan,Berdêl / Scan
+Redeem Amount,Redeem Mount
+Redeem Mode,Redeem Mode
+Redeemed Amount,Mîqdara Redeeded
+Redeemed credit cannot be greater than its total.,Krediya dravkirî nikare ji tevahîya wê mezintir be.
+Redemption and Totals,Redemption û Tevahiya
+Reference,Çavkanî
+Refresh,Refresh
+Refresh Exchange Rate,Refresh Rate Exchange
+Refresh Offline Data,Daneyên negirêdayî nûve bikin
+Refresh Printers,Çapkeran nûve bikin
+Refund,Vegerandin
+Release Notes,Release Notes
+Reload,Ji nû ve barkirin
+Reload customers,Mişterî ji nû ve barkirin
+Reload Items,Tiştên nû barkirin
+Reload Now,Niha ji nû ve barkirin
+Reload to apply the latest changes. Your current session will be refreshed.,Ji nû ve barkirin da ku guheztinên herî dawî bicîh bînin. Danişîna weya heyî dê were nûve kirin.
+Reload Workflow,Karê ji nû ve barkirin
+Remarks,Remarks
+Remarks are required.,Têbînî pêwîst in.
+Remove,Rakirin
+Remove barcode item,Tişta barkodê jê bike
+Remove cached data and reload the POS app,Daneyên cache rakin û serîlêdana POS-ê ji nû ve bar bikin
+Remove item,Tiştê jêbirin
+Remove Offer,Pêşniyarê jêbirin
+Reorder / Purchase Suggestions,Pêşniyarên ji nû ve rêzkirin / Kirîn
+Repair Candidate,Tamîr Namzedê
+Repair Change Allocation,Dabeşkirina Guhertina Tamîrê
+Repair requires an online connection,Tamîrkirin pêwendiyek serhêl hewce dike
+Repaired,Tamîr kirin
+Repairing change allocation,Tamîrkirina dabeşkirina guhertinê
+Repeat Customers,Dubare Mişterî
+Repeat Rate,Rêjeya Dubarekirin
+Request,Daxwaz
+Request ID: {0},Nasnameya daxwazkirinê: {0}
+Request Payment,Daxwaza Tezmînatê
+Requested route: {0},Rêça daxwazkirî: {0}
+Required columns cannot be hidden,Stûnên pêwîst nayên veşartin
+Reset,Reset
+Reset item name,Navê babetê vegerîne
+Reset to Default,Vegere bo Pêşniyarê
+Resource Health,Tenduristiya Çavkaniyê
+Restricted,Bisînorkirî
+Restricted operational controls for supervisors only.,Kontrolên operasyonê yên sînorkirî tenê ji bo çavdêran.
+Retry,Ji nû ve biceribîne
+Retry route,Rêwî ji nû ve biceribîne
+Return,Vegere
+Return Amount,Mîqdara Vegerê
+Return Count,Hejmara Vegerê
+Return items must have negative quantities,Tiştên vegerî divê mîqdarên neyînî hebin
+Return total must be negative,Tevahiya vegerê divê neyînî be
+Return Valid Until,Vegere Derbasdar Heta
+Return window passed,Pencereya vegerê derbas bû
+Return without Invoice,Vegere bêyî fatûre
+Returns,Vedigere
+Returns / Voids / Discounts,Vedigere / Valahî / Discount
+Returns by Currency,Vedigere li gorî Pereyan
+Revenue,Hatina
+Review shift totals before submitting the closing entry,Berî radestkirina têketina girtinê jimareyên guheztinê binirxînin
+Round Off,Round Off
+Rows,Rêz
+Rows:,Rêz:
+Rule,Rule
+Sale,Sale
+Sales,Sales
+Sales Order {0} is Submitted,Fermana Firotanê {0} Hat şandin
+Sales Person and Print,Kesê Sales û Çap
+Sales Person not found,Kesê Firotanê nehat dîtin
+Sales processed,Firotan pêvajo kirin
+Sales Return,Sales Return
+Sales Trend Report,Rapora Trend Firotanê
+Save,Save
+Save & Clear,Save & Paqij
+Save as POS Profile Default,Wek Profîla POS-a Pêşniyarê tomar bike
+Save Settings,Save Settings
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,Çapkera hilbijartî wekî xwerû Profîla POS-ê hilînin da ku ew bixweber li ser vê sazkirinê nîşan bide.
+Saved as draft because: {0},Ji ber ku: {0}
+Saving...,Sazkirin...
+Scale barcode detected. Quantity here is the number of labels to print.,Scale barcode hat dîtin. Hejmar li vir hejmara etîketên çapkirinê ye.
+Scale barcode settings are not configured. Using item barcode only.,Mîhengên barkodê yên pîvanê nehatine mîheng kirin. Tenê barcode ya babetekê bikar tînin.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,Ji bo vê hêmanê/UOM-ê barkoda şablonê pîvanê tune ye. Tenê barcode ya babetekê bikar tînin.
+Scan an existing card and top it up without leaving the payment flow.,"Karteke heyî bişopînin û bêyî ku ji herikîna dravdanê derkevin, wê jor bikin."
+Scan Error,Error Scan
+Scan or enter a gift card code to check balance or redeem.,Kodek qerta diyariyê bişopînin an têkevin ku hevsengiyê kontrol bikin an berdêl bikin.
+Scan or paste the card code below.,Koda qerta jêrîn bişopînin an bixin.
+Scan QR Code/Barcode,Koda QR / Barkodê bişopînin
+Scan with camera,Bi kamerayê veşêre
+Scan-First Flow,Scan-First Flow
+Scanned Code:,Koda skankirî:
+Scanning for: {0},Skenandin ji bo: {0}
+Scanning items,Tiştên dişibînin
+Scan-Ready,Scan-Amade ye
+Scope,Scope
+Scope: All Profiles,Qada: Hemî Profîl
+Scope: Current Profile,Qada: Profîla niha
+Scope: Specific Profile,Qada: Profîla taybetî
+Search,Search
+Search Account,Hesabê Lêgerînê
+Search an invoice and continue the return flow without extra steps.,Li fatûreyek bigerin û vegerê bêyî gavên zêde bidomînin.
+Search customer,Bigere mişterî
+Search invoices or customers,Li fatoreyan an xerîdaran bigerin
+Search item,Tiştê bigerin
+Search item / code,Tiştê / kodê bigerin
+Search items or barcode,Tiştan an barkodê bigerin
+Search Mpesa Payments,Bigerin Mpesa Payments
+Search return invoices or customers,Vegere fatûreyên an xerîdaran
+Search supplier,Pêşkêşkerê lêgerînê
+Search unpaid invoices or customers,Li fatûreyên bêpere an xerîdar bigerin
+Secure context (HTTPS or localhost) is required for camera access.,Ji bo gihîştina kamerayê çarçoveyek ewledar (HTTPS an hosteya herêmî) hewce ye.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,Ji bo gihîştina kamerayê çarçoveyek ewledar (HTTPS) hewce ye. Ji kerema xwe HTTPS-ê bikar bînin ku bigihîjin kamerayê.
+Select,Hilbijêre
+Select a cashier first.,Pêşî diravgirek hilbijêrin.
+Select a customer,Xerîdarek hilbijêre
+Select a customer to use coupon,Xerîdarek hilbijêrin ku kupon bikar bînin
+Select a printer to use QZ silent printing.,Çapkerek hilbijêrin ku çapkirina bêdeng QZ bikar bînin.
+Select Batch,Batch hilbijêre
+Select Columns to Display,Ji bo Nîşandanê Stûnên Hilbijêre
+Select items to sell,Tiştên ji bo firotanê hilbijêrin
+Select Payment,Payment hilbijêrin
+Select Payment Account,Hesabê Paymentê hilbijêrin
+Select printer,Çapkerê hilbijêre
+Select Return Invoice,Hilbijartina Vegerandina fatûreyê
+Select S.O,Hilbijêre S.O
+Select Sales Orders,Fermanên Firotanê Hilbijêre
+Select the cashier who is taking over this terminal.,Dravê ku vê termînalê digire hilbijêrin.
+Selected,Hilbijartin
+Selected movement type is not allowed by POS Profile.,Cureya tevgera hilbijartî ji hêla Profîla POS-ê ve nayê destûr kirin.
+Selected Payments,Payments Hilbijartin
+Sensitive actions kept away from quick taps.,Tevgerên hesas ji lêpikên bilez dûr ketin.
+Serial,Serial
+Serial Numbers,Hejmarên Serî
+Server CPU Usage:,Bikaranîna CPU ya serverê:
+Server Health,Server Health
+Server Memory Usage:,Bikaranîna Bîra Server:
+Server Metrics,Server Metrics
+Server Uptime:,Server Uptime:
+Service Charges,Xercên Xizmetê
+Session,Session
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,Her PIN-a dravê di forma Bikarhêner de bicîh bikin û endamên termînalê yên ku di Bikarhêner Profîla POS-ê de hatine destnîşankirin bihêlin.
+Settings,Settings
+Settings in this section update the POS workspace without changing the current route.,Mîhengên di vê beşê de cîhê xebata POS-ê bêyî guheztina riya heyî nûve dikin.
+Setup complete!,Sazkirin qediya!
+Share,Parve bikin
+Shared terminal,Termînalê hevpar
+Shift Closed Snapshot,Shift Girtî Snapshot
+Shift Overview,Shift Overview
+Show,Nîşan bide
+Show cart on customer-facing screen,Selikê li ser ekrana rû bi xerîdar nîşan bidin
+Show last invoice rate,Rêjeya fatûreya paşîn nîşan bide
+Show rate info,Agahdariya rêjeya nîşan bide
+Show Repair Candidates,Namzetên Tamîrkirinê nîşan bidin
+Show search tools,Amûrên lêgerînê nîşan bide
+Show the active cart on a customer-facing screen,Kartê çalak li ser ekranek rûbirûyê xerîdar nîşan bidin
+Showing {0}-{1} of {2},Nîşandana {0}-{1} ji {2}
+Showing 0 of 0,0 ji 0 tê nîşandan
+Shows the distribution of invoices per currency,Dabeşkirina fatûreyan li ser pereyê nîşan dide
+Sign out of the current POS session,Ji danişîna POS-ê ya heyî derkeve
+Size:,Mezinahî:
+Skipped Payments,Payments Skipped
+Skipping items without barcodes,Dûrxistina tiştan bêyî barkod
+Slow Moving,Slow Moving
+Slow Moving Items,Tiştên Slow Moving
+Slow Queries:,Pirsên Hêdî:
+Sold,Firotin
+Source,Çavkanî
+Source Cash Account (Optional Override),Hesabê Diravî ya Çavkaniyê (Destpêkirina Vebijarkî)
+Source Ex. Rate:,Çavkanî Ex. Rêjeya:
+Source Rate:,Rêjeya Çavkaniyê:
+Specific Profile,Profîla taybetî
+Split Invoices,Faturên Split
+Staff / Cashier Performance Report,Rapora Performansa Karmend / Diravgir
+Status,Status
+Stock,Stock
+Stock Information,Agahdariya Stock
+Stock is lower than requested,Stock ji daxwazê kêmtir e
+Stock is lower than requested:\n{0},Stock ji daxwazê kêmtir e:\n{0}
+Stock Movement Report,Rapora Tevgera Stock
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,Nûvekirina stock: {0} {1} heye. Zêdekirina {2}ê wê stokê bîne binê sifirê.
+Submit,Nermijîn
+Submit & Print,Bişînin & Çap bikin
+Submit Deposit,Deposit bişînin
+Submit Expense,Submit Expense
+Submitted,Pêşkêş kirin
+Submitted Cash Movements,Tevgerên Cash Submitted
+Submitted entries,entries şandin
+Successfully scanned:,Bi serketî hate skankirin:
+Suggested,Pêşniyar kirin
+Suggested Qty,Qty pêşniyar kirin
+Supervisor Access,Çavdêr Access
+Supervisor permissions unlock issuance and reloads,Destûrên serpereştyar derketin û ji nû ve barkirin vedikin
+Supervisor Tools,Amûrên Çavdêr
+Supplier,Supplier
+Supplier and dates are required.,Pêşkêşker û tarîx hewce ne.
+Supplier Invoices,Faturên Supplier
+Supplier is required.,Pêşkêşker pêdivî ye.
+Supplier name is required,Navê dabînker hewce ye
+Supplier Payments,Payments Supplier
+Supplier Purchase Summary,Supplier Purchase Summary
+Suppliers,Suppliers
+Suppliers not found,Pêşkêşker nehatin dîtin
+Switch Camera,Biguherîne Kamera
+Switch Cashier,Switch Cashier
+Switch the POS appearance theme,Mijara xuyangkirina POS-ê biguherînin
+Switched to:,Veguherî ser:
+Sync All Invoices,Hemî fatûreyan hevdeng bikin
+Sync Offline Cash Movements ({0}),Tevgerên Diravî yên Offline Senkronîze bike ({0})
+Sync Offline Sales,Firotana Offline Sync bikin
+Synced {0} offline cash movement(s).,{0} tevger(ên) dravê offline hatin senkronîzekirin.
+Syncing items in background,Tiştên li paşperdeyê senkronîzekirin
+System / Diagnostics,Pergal / Diagnostics
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","Çalakiyên pergalê kontrolên lênihêrînê yên kêm-frekansa wekî agahdariya sepanê, tespîtkirina piştgirî, û kontrolên danişînê ne."
+System Information,Information System
+System Status,Rewşa Sîstemê
+Tables:,Tablo:
+Tap the button below to redeem a gift card during checkout.,Bişkojka jêrîn bikirtînin da ku di dema dravdanê de qertek diyariyê bistînin.
+Target,Target
+Target Ex. Rate:,Target Ex. Rêjeya:
+Target Rate:,Rêjeya Armanc:
+Tax,Bac
+Tax / Charges Report,Rapora Bacê / Xerc
+Tax Heads,Serokên Bacê
+Taxable Amount,Mîqdara Bacê
+Tendered,Tender kirin
+Terminal,Terminal
+Terminal & Devices,Terminal & Amûrên
+Terminal locked,Termînalê girtî
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","Amûrên termînalê bandorê li ser vê qereqola danûstendinê, dîmenên rûbirûyê xerîdar, û kontrolên çaper / cîhaza pêşerojê dike."
+Territory not found,Herêm nayê dîtin
+The amount paid is not complete,Heqê ku tê dayîn ne temam e
+The app stores data locally for offline use. This is called cache.,Serlêdan daneyên herêmî ji bo karanîna negirêdayî hilîne. Ji vê re cache tê gotin.
+The invoice stayed in draft. Please review and submit it manually.,fatûre di pêşnûmeyê de ma. Ji kerema xwe wê bi destan binirxînin û bişînin.
+The maximum discount allowed is,Daxistina herî zêde destûr e
+The quantity for {0} has been adjusted to the maximum available stock.,Mîqdara ji bo {0} li ser herî zêde stokên berdest hatiye eyar kirin.
+The system could not retrieve the item details. Please try again.,Pergalê nikarî hûrguliyên babetê bistîne. Ji kerema xwe dîsa biceribîne.
+These invoices will be synced when connection is restored,Dema ku girêdan ji nû ve were sererast kirin dê ev fatûre bêne hevdeng kirin
+This action now opens inside the settings workspace.,Ev çalakî naha di hundurê cîhê xebata mîhengan de vedibe.
+This coupon already used !,Ev kupon jixwe hatî bikar anîn!
+This invoice does not need change-allocation repair,Ev fatûre ne hewceyî tamîrkirina guhertin-veqetandinê ye
+This invoice is already repaired,Ev fatûre jixwe hatiye tamîrkirin
+This is an item template. Please choose a variant.,Ev şablonek babetek e. Ji kerema xwe guhertoyek hilbijêrin.
+this item,ev babete
+This POS page could not be opened offline because its code was not cached on this terminal yet.,Ev rûpela POS-ê nekaribû offline vebe ji ber ku koda wê hîn li ser vê termînalê nehatiye cache kirin.
+This Serial Number {0} has already been added!,Ev Jimareya Rêzeyî {0} jixwe hatiye zêdekirin!
+Threshold,Threshold
+Time,Time
+Tip: Clear cache regularly to free up space and keep the app fast.,Serişte: Kaşê bi rêkûpêk paqij bikin da ku cîh azad bikin û sepanê zû bihêlin.
+Tip: Close unused tabs or apps to reduce lag.,Serişte: Ji bo kêmkirina derengiyê tab an sepanên neyên bikar anîn bigrin.
+Tip: Monitor slow queries and table size for optimal performance.,Serişte: Ji bo performansa çêtirîn pirsên hêdî û mezinahiya tabloyê bişopînin.
+To Be Paid,Be Paid
+To Date,To Date
+Today,Îro
+Today Profit,Îro Profit
+Today Sales,Îro Sales
+Toggle navigation drawer,Berkêşka navîgasyonê biguherînin
+Toggle Theme,Mijar biguherîne
+Tools,Amûrên
+Tools for customer-facing screens and terminal-specific actions.,Amûrên ji bo ekranên rûbirû yên xerîdar û kiryarên taybetî yên termînalê.
+Top Brand,Top Brand
+Top Category,Top Kategorî
+Top Charge Head,Serê Charge Top
+Top Customers,Mişteriyên Top
+Top Discount,Top Discount
+Top Items by Location,Tiştên Top ji hêla Cihê ve
+Top Margin,Margin Top
+Top Pending,Top Pending
+Top Profit Item,Babetê Profit Top
+Top Return Items,Tiştên Vegera Serê
+Top Sales by Cashier,Firotana Top ji hêla Cashier ve
+Top Supplier,Top Supplier
+Top Suppliers by Spend,Pêşkêşkerên Top ji hêla Spend ve
+Top Tables,Top Tables
+Top Tax Head,Serê Bacê Top
+Top Up Amount,Serlêdana Serûpelê
+Top Up Card,Top Up Card
+Top Up Mode,Top Up Mode
+Top Variant,Top Variant
+Total,Total
+Total Amount,Tevahiya Amount
+Total Change,Guhertina tevahî
+Total Charges,Tevahiya Xercên
+Total In,Total In
+Total Invoices,Bi tevahî fatûreyên
+Total Items,Tevahiya Tiştên
+Total Mpesa,Total Mpesa
+Total Out,Total Out
+Total Payments,Tevahiya Tezmînat
+Total Purchase,Tevahiya Kirînê
+Total Selected :,Tevahiya Hilbijartî:
+Total Size,Mezinahiya tevahî
+Total Stock Qty,Tevahiya Stock Qty
+Total:,Bi tevahî:
+Totals by Invoice Currency,Tevahiya li gorî pereyê fatûreyê
+Track how much cash was handed back to customers,Bişopînin ka çiqas drav ji xerîdaran re hatî vegerandin
+"Track recent sales, collect unpaid balances, and reopen saved work","Firotanên dawî bişopînin, hevsengiyên bêpere berhev bikin, û xebata xilaskirî ji nû ve vekin"
+Transaction ID,Nasnameya danûstandinê
+Transfer,Transfer
+Try a different search term or clear the cart search.,Peyvek lêgerînê ya cihê biceribîne an lêgerîna selikê paqij bike.
+Try adjusting your search or filters,Biceribînin ku lêgerîn an fîlterên xwe rast bikin
+Try another source or refresh the list.,Çavkaniyek din biceribînin an navnîşê nûve bikin.
+Try changing the date range or status filter.,Biceribînin ku rêzika tarîx an parzûna statûyê biguhezînin.
+Type,Type
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,Tewra digel mîhengên bingehîn jî nekare bigihîje kamerayê. Ji kerema xwe destûrên kamera û lihevhatina cîhaza xwe kontrol bikin.
+Unable to add offer item {0}. Please refresh and try again.,Nikarin babeta pêşniyarê {0} zêde bike. Ji kerema xwe nûve bikin û dîsa biceribînin.
+Unable to add offer item. Please refresh and try again.,Nikarin babeta pêşniyarê lê zêde bike. Ji kerema xwe nûve bikin û dîsa biceribînin.
+Unable to add scanned item.,Nikarin tişta skankirî lê zêde bike.
+Unable to create purchase order,Nekarî emrê kirînê biafirîne
+Unable to delete draft invoice,Nekarî pêşnûmaya fatûreyê jê bibe
+Unable to fetch documents,Nikare belgeyan bîne
+Unable to fetch draft orders,Nekarî pêşnuma fermanan bîne
+Unable to fetch invoice history,Nekarî dîroka fatûreyê bîne
+Unable to fetch M-Pesa payments,Nikare dravdanên M-Pesa bistîne
+Unable to fetch sales orders,Nikare fermanên firotanê bigire
+Unable to fetch unpaid invoices,Nikarin fatûreyên bêpere bistînin
+Unable to generate scale barcode,Nekarî barkodê pîvanê çêbike
+Unable to issue gift card.,Nekarî qerta diyariyê derxîne.
+Unable to load cashier PIN status.,Nikare statûya PIN-a diravê bar bike.
+Unable to load document,Belge nayê barkirin
+Unable to load draft invoice,Nekarî fatûreya pêşnûmeyê were barkirin
+Unable to load gift card balance.,Nekarî balansa qerta diyariyê were barkirin.
+Unable to load invoice details,Nikare hûrguliyên fatûreyê bar bike
+Unable to load parked order,Nekarî fermana parkkirî bar bike
+Unable to load the selected sales order,Nekarî emrê firotana hilbijartî bar bike
+Unable to prepare document,Nikare belgeyê amade bike
+Unable to prepare return invoice,Nekarî fatûreya vegerê amade bike
+Unable to print draft invoice,Nekarî pêşnûmaya fatûreyê çap bike
+Unable to print submitted invoice,Nekarî fatûreya hatî şandin çap bike
+Unable to process document action,Pêvajoya çalakiya belgeyê nekare
+Unable to repair change allocation,Nekarî tamîrkirina veqetandina guherînê
+Unable to save cashier PIN.,Nikare PIN-a dravê tomar bike.
+Unable to save the rate to the backend price list,Nikarin rêjeyê li navnîşa bihayê paşîn tomar bike
+Unable to submit invoice,Nekarî fatûreyê bişîne
+Unable to submit the selected payment,Tezmînata hilbijartî nayê şandin
+Unable to top up gift card.,Nikare karta diyariyê zêde bike.
+Unable to verify cashier PIN.,PIN-a diravgir nayê verast kirin.
+Unallocated,Unallocated
+Unallocated:,Nedabeşkirî:
+Unavailable,Unavailable
+Unknown,Unknown
+Unknown Item,Item Unknown
+Unknown Warehouse,Warehouse Unknown
+Unlock POS,POS-ê vekin
+Unpaid,Bêpere
+"Unselected payments stay unallocated first, then auto reconcile after submit.","Dravdanên nehilbijartî pêşî nayên veqetandin, dûv re piştî şandinê bixweber lihevhatin."
+UOM,UOM
+UOM not found,UOM nehat dîtin
+Update available,Nûvekirin heye
+Update Customer,Mişterî Nûve bikin
+Update PIN,PIN-ê nûve bikin
+Update Price List Rate,Nûvekirina Rêjeya Lîsteya Bihayê
+Updated,Nûkirin
+Updates and app info that stay out of the cashier flow.,Nûvekirin û agahdariya serîlêdanê ya ku li derveyî herikîna dravê dimîne.
+Updates automatically,Jixweber nûvekirin
+Usage,Bikaranîna
+Usage Stats,Statîstîkên Bikaranînê
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,Ji bo guheztina dravê û vekirina termînalê PINek 4-8-hejmar bikar bînin.
+Use Cashier,Cashier bikar bînin
+Use date range to search for older invoices,Rêzeya tarîxê bikar bînin da ku li fatûreyên kevin bigerin
+"Use one field for manual code entry, barcode scans, or QR scans.","Ji bo têketina kodê bi destan, barkodê, an şopandina QR-ê yek zeviyê bikar bînin."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","Ji bo kontrolên hevsengiyê, derxistina nû, û jorveçûn bêyî derketina POS-ê yek karek bikar bînin."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","Vê beşê bikar bînin dema ku daneyên pêşmercên cached hewceyê nûvekirin, nûavakirin, an vekolînek tespîtkirinê hewce dike."
+Use Western numerals,Hejmarên rojavayî bikar bînin
+Used:,Bikaranîn:
+Using basic camera settings due to device limitations,Bikaranîna mîhengên kamerayê yên bingehîn ji ber sînorên cîhazê
+Using cached customer balance,Bikaranîna balansa xerîdar a cached
+Valid until,Derbasdar e heya
+Variance %,Variance %
+Variants,Variants
+Variant-wise,Variant-wise
+Verify closing amounts for each payment method,Ji bo her awayê dravdanê mîqdarên girtinê verast bikin
+View all,Hemî bibînin
+View app information and current build details,Agahdariya serîlêdanê û hûrguliyên avakirina heyî bibînin
+View Data Diagnostics,Binêre Daneyên Diagnostics
+View Details,Binêre Details
+View invoice details,Hûrguliyên fatûreyê bibînin
+View notifications,Daxuyaniyan bibînin
+View offline invoices,Binêre fatûreyên offline
+View restricted POS insights,Nêrînên POS-ê yên sînorkirî bibînin
+Void Amount,Mîqdara betal
+Void Count,Hejmara betal
+Voids,Voids
+Waiting for cart items,Li benda tiştên selikê ne
+Waiting for payment...,Li benda peredanê...
+Walk-in Customer,Walk-in Mişterî
+Warehouse,Warehouse
+Warning: High cache usage may affect performance.,Hişyarî: Bikaranîna cache ya zêde dibe ku bandorê li performansê bike.
+Warning: High lag may indicate heavy processing or browser slowness.,Hişyarî: Derengiya zêde dibe ku pêvajoyek giran an hêdîbûna gerokê nîşan bide.
+Week ?,Week ?
+Week-wise,Weke-aqilmend
+Weight (g),Giranî (g)
+Weight (grams),Giranî (gram)
+We'll let you know if an invoice fails to submit,Ger fatûreyek radest neke em ê we agahdar bikin
+Workflow,Workflow
+Write off amount cannot exceed the POS profile maximum of {0},Mîqdara nivîsandinê nikare ji profîla POS ya herî zêde ya {0} derbas bibe
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,Hejmara nivîsandinê ji sînorê destûr ({0}) derbas dibe. Ji kerema xwe ji bo mîqdara mayî drav zêde bikin.
+Yes,Yes
+"Yes, Cancel sale","Erê, firotanê betal bike"
+"Yes, Close","Erê, Girtî"
+You are not allowed to print draft invoices,Destûr nayê dayîn ku hûn fatûreyên pêşnuma çap bikin
+You are offline. Add Payment will work again when the connection is restored.,Tu negirêdayî yî. Dema ku girêdan ji nû ve were sererast kirin dê Payment zêde bike.
+You have no notifications right now,Tu agahiyek niha tune
+Your Cart,Selika we

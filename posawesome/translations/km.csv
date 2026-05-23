@@ -1,0 +1,1362 @@
+POS Awesome,POS អស្ចារ្យ
+Fetch Items Directly from Server,យកធាតុដោយផ្ទាល់ពីម៉ាស៊ីនមេ
+Menu,ម៉ឺនុយ
+Actions,សកម្មភាព
+Close Shift,បិទ Shift
+End current session,បញ្ចប់វគ្គបច្ចុប្បន្ន
+Print Last Invoice,បោះពុម្ពវិក្កយបត្រចុងក្រោយ
+Reprint previous transaction,បោះពុម្ពឡើងវិញនូវប្រតិបត្តិការពីមុន
+Sync Offline Invoices,ធ្វើសមកាលកម្មវិក្កយបត្រក្រៅបណ្តាញ
+Upload pending transactions,អាប់ឡូតប្រតិបត្តិការដែលមិនទាន់សម្រេច
+Go Online,ទៅអ៊ីនធឺណិត
+Go Offline,ទៅក្រៅបណ្តាញ
+Disable offline mode,បិទមុខងារក្រៅបណ្តាញ
+Work without server connection,ធ្វើការដោយគ្មានការតភ្ជាប់ម៉ាស៊ីនមេ
+Clear Cache,ជម្រះឃ្លាំងសម្ងាត់
+Remove local data and refresh,លុបទិន្នន័យមូលដ្ឋាន និងធ្វើឱ្យស្រស់
+About,អំពី
+App information,ព័ត៌មានកម្មវិធី
+Language,ភាសា
+Change interface language,ផ្លាស់ប្តូរភាសាចំណុចប្រទាក់
+Light Mode,របៀបពន្លឺ
+Dark Mode,របៀបងងឹត
+Switch theme appearance,ផ្លាស់ប្តូររូបរាងប្រធានបទ
+Logout,ចេញ
+Sign out of session,ចេញពីវគ្គ
+Select Language,ជ្រើសរើសភាសា
+Choose your preferred language for the POS interface,ជ្រើសរើសភាសាដែលអ្នកពេញចិត្តសម្រាប់ចំណុចប្រទាក់ POS
+Language will be changed to,ភាសានឹងត្រូវបានប្តូរទៅជា
+Cancel,បោះបង់
+Change Language,ផ្លាស់ប្តូរភាសា
+Close,បិទ
+Cannot change language - same language selected,មិនអាចប្តូរភាសា - ភាសាដូចគ្នាត្រូវបានជ្រើសរើស
+Language changed successfully! Reloading...,ភាសាបានផ្លាស់ប្តូរដោយជោគជ័យ! កំពុងផ្ទុកឡើងវិញ...
+Failed to change language,បរាជ័យក្នុងការផ្លាស់ប្តូរភាសា
+Unknown error,កំហុសមិនស្គាល់
+- Total Unallocated,- សរុបមិនបានបែងចែក
+* Required,* ទាមទារ
+{0} (Qty: {1}),{0} (ចំនួន៖ {1})
+{0} actions,សកម្មភាព {0}
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} មាន​តែ {1} ក្នុង​ស្តុក។ អ្នកបានស្នើសុំ {2}។ កែតម្រូវបរិមាណ ឬស្តុកទុកឡើងវិញ។
+{0} offline invoice{1} pending,{0} វិក័យប័ត្រក្រៅបណ្តាញ{1} កំពុងរង់ចាំ
+{0} offline invoice{1} saved as draft,{0} វិក្កយបត្រក្រៅបណ្តាញ{1} បានរក្សាទុកជាសេចក្តីព្រាង
+{0} offline invoice{1} synced,{0} វិក្កយបត្រក្រៅបណ្តាញ{1} បានធ្វើសមកាលកម្ម
+{0}: {1} {2},{0}៖ {1} {2}
+{0}d ago,{0}ថ្ងៃមុន។
+{0}h ago,{0}ម៉ោងមុន។
+{0}m ago,{0}នាទីមុន។
+A POS supervisor is required for this action.,អ្នកត្រួតពិនិត្យម៉ាស៊ីនឆូតកាតត្រូវបានទាមទារសម្រាប់សកម្មភាពនេះ។
+Access,ការចូលប្រើ
+Account,គណនី
+Account is overdrawn,គណនីត្រូវបានដកចេញ
+Acknowledge the error to resume scanning,ទទួលស្គាល់កំហុសដើម្បីបន្តការស្កេនឡើងវិញ
+Acknowledge the error to resume scanning.,ទទួលស្គាល់កំហុសដើម្បីបន្តការស្កេនឡើងវិញ។
+Across,ឆ្លង
+Action,សកម្មភាព
+Active sale,ការលក់សកម្ម
+add,បន្ថែម
+Add items from the selector to start building this sale.,បន្ថែមធាតុពីឧបករណ៍ជ្រើសរើសដើម្បីចាប់ផ្តើមបង្កើតការលក់នេះ។
+Add more value to an existing gift card,បន្ថែមតម្លៃបន្ថែមទៅកាតអំណោយដែលមានស្រាប់
+Add New Address,បន្ថែមអាសយដ្ឋានថ្មី។
+Add new customer,បន្ថែមអតិថិជនថ្មី។
+Add on New Line,បន្ថែមលើបន្ទាត់ថ្មី។
+Add Payment,បន្ថែមការទូទាត់
+Add payment to invoice,បន្ថែមការទូទាត់ទៅវិក្កយបត្រ
+Add/Edit Coupon Conditions,បន្ថែម/កែសម្រួលលក្ខខណ្ឌប័ណ្ណ
+Additional Discount,ការបញ្ចុះតម្លៃបន្ថែម
+Additional Discount %,ការបញ្ចុះតម្លៃបន្ថែម %
+Address Line 1,ខ្សែអាស័យដ្ឋាន 1
+Address not found,រកមិនឃើញអាសយដ្ឋាន
+Adjust the quantity or enable negative stock to continue.,កែតម្រូវបរិមាណ ឬបើកភាគហ៊ុនអវិជ្ជមានដើម្បីបន្ត។
+Adjustment,ការកែតម្រូវ
+After returns,បន្ទាប់ពីត្រឡប់មកវិញ
+Against,ប្រឆាំង
+Against Name,ប្រឆាំងនឹងឈ្មោះ
+Age Bracket,តង្កៀបអាយុ
+All,ទាំងអស់។
+All Caught Up!,ចាប់បានទាំងអស់!
+All invoices are synchronized,វិក្កយបត្រទាំងអស់ត្រូវបានធ្វើសមកាលកម្ម
+All pending invoices are up to date,វិក្កយបត្រដែលមិនទាន់សម្រេចទាំងអស់គឺទាន់សម័យ
+All Profiles,ប្រវត្តិរូបទាំងអស់។
+All Synchronized,ធ្វើសមកាលកម្មទាំងអស់។
+All visible invoices are fully settled.,វិក្កយបត្រដែលមើលឃើញទាំងអស់ត្រូវបានទូទាត់យ៉ាងពេញលេញ។
+All Warehouses,ឃ្លាំងទាំងអស់។
+Allowed UOM is {0},បានអនុញ្ញាត UOM គឺ {0}
+Always fetch items from server (ignore local cache),តែងតែទៅយកធាតុពីម៉ាស៊ីនមេ (មិនអើពើឃ្លាំងសម្ងាត់មូលដ្ឋាន)
+Amount,ចំនួនទឹកប្រាក់
+Amount already received,ចំនួនទឹកប្រាក់ដែលបានទទួលរួចហើយ
+Amount exceeds profile cash movement max amount.,ចំនួនទឹកប្រាក់លើសពីចំនួនអតិបរមានៃចលនាសាច់ប្រាក់កម្រងព័ត៌មាន។
+Amount must be greater than zero.,ចំនួនទឹកប្រាក់ត្រូវតែធំជាងសូន្យ។
+Amount received from customer,ចំនួនទឹកប្រាក់ដែលទទួលបានពីអតិថិជន
+Appearance and user-level preferences for the current session.,រូបរាង និងចំណូលចិត្តកម្រិតអ្នកប្រើប្រាស់សម្រាប់វគ្គបច្ចុប្បន្ន។
+Applied,បានអនុវត្ត
+Apply,អនុវត្ត
+Apply Gift Card,អនុវត្តកាតអំណោយ
+Apply Offer,អនុវត្តការផ្តល់ជូន
+Apply On,អនុវត្តលើ
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,អនុវត្តតែចំនួនទឹកប្រាក់ដែលអ្នកចង់ប្ដូរនៅលើវិក្កយបត្រនេះប៉ុណ្ណោះ។ សមតុល្យដែលនៅសល់គឺស្ថិតនៅក្នុងកាត។
+Apply Redemption,អនុវត្តការប្រោសលោះ
+Applying,កំពុងដាក់ពាក្យ
+Apps,កម្មវិធី
+Are you sure you want to close? All entered data will be lost.,តើអ្នកប្រាកដថាចង់បិទទេ? ទិន្នន័យដែលបានបញ្ចូលទាំងអស់នឹងត្រូវបាត់បង់។
+Attributes (Size/Color),គុណលក្ខណៈ (ទំហំ/ពណ៌)
+Auto Allocate Payment Amount,បែងចែកចំនួនទឹកប្រាក់ទូទាត់ដោយស្វ័យប្រវត្តិ
+Auto Reconcile,ការផ្សះផ្សាដោយស្វ័យប្រវត្តិ
+Auto reconciliation completed after payment submit.,ការផ្សះផ្សាដោយស្វ័យប្រវត្តិបានបញ្ចប់បន្ទាប់ពីការបញ្ជូនការទូទាត់។
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,ការផ្សះផ្សាដោយស្វ័យប្រវត្តិបានបញ្ចប់។ បានបែងចែក៖ {0}{1}។ នៅសល់៖ {0}{2}។
+Available Actions,សកម្មភាពដែលមាន
+Available QTY,មាន QTY
+Available:,មាន៖
+Average Basket,កញ្ចប់មធ្យម
+Average Bill,វិក័យប័ត្រមធ្យម
+Average Ticket,សំបុត្រជាមធ្យម
+Avg Bill,វិក័យប័ត្រជាមធ្យម
+Avg Invoice,វិក្កយបត្រជាមធ្យម
+Avg Invoice Profit,ប្រាក់ចំណេញវិក័យប័ត្រជាមធ្យម
+Avg Invoice Value,តម្លៃវិក្កយបត្រជាមធ្យម
+Avg Purchase Frequency,ភាពញឹកញាប់នៃការទិញជាមធ្យម
+Awesome,អស្ចារ្យ
+Awesome Dashboard,ផ្ទាំងគ្រប់គ្រងដ៏អស្ចារ្យ
+Awesome Dashboard is disabled for the selected POS Profile.,Awesome Dashboard ត្រូវបានបិទសម្រាប់ POS Profile ដែលបានជ្រើសរើស។
+Awesome Dashboard is unavailable for the selected scope.,Awesome Dashboard គឺមិនមានសម្រាប់វិសាលភាពដែលបានជ្រើសរើសទេ។
+Awesome Dashboard is visible only to POS supervisors.,Awesome Dashboard អាចមើលឃើញតែចំពោះអ្នកត្រួតពិនិត្យម៉ាស៊ីនឆូតកាតប៉ុណ្ណោះ។
+Back,ត្រឡប់មកវិញ
+Back Office Cash Account,គណនីសាច់ប្រាក់ Back Office
+Back Office Cash Account (Optional Override),គណនីសាច់ប្រាក់ Back Office (បដិសេធជាជម្រើស)
+Back office cash account is required.,គណនីសាច់ប្រាក់ការិយាល័យខាងក្រោយត្រូវបានទាមទារ។
+Back to {0},ត្រឡប់ទៅ {0}
+Background processing did not finish in time.,ដំណើរការផ្ទៃខាងក្រោយមិនបានបញ្ចប់ទាន់ពេលទេ។
+Background processing failed for Invoice {0}: {1},ដំណើរការផ្ទៃខាងក្រោយបានបរាជ័យសម្រាប់វិក្កយបត្រ {0}៖ {1}
+Background Submission Failed,ការបញ្ជូនផ្ទៃខាងក្រោយបានបរាជ័យ
+Background sync interval (seconds),ចន្លោះពេលធ្វើសមកាលកម្មផ្ទៃខាងក្រោយ (វិនាទី)
+Balance,តុល្យភាព
+Balance will be updated when connection is restored,សមតុល្យនឹងត្រូវបានអាប់ដេតនៅពេលដែលការតភ្ជាប់ត្រូវបានស្ដារឡើងវិញ
+Balances still pending,សមតុល្យនៅតែរង់ចាំ
+Barcode,បាកូដ
+Barcode / QR Ready,បាកូដ / QR រួចរាល់
+Barcode Label Printing,ការបោះពុម្ពស្លាកបាកូដ
+Base Paid:,មូលដ្ឋានបង់ប្រាក់៖
+Base Recv:,របាយការណ៍មូលដ្ឋាន៖
+Base:,មូលដ្ឋាន៖
+Basic Information,ព័ត៌មានមូលដ្ឋាន
+Batch,បាច់
+Batch Information,ព័ត៌មានបាច់
+Before any return workflow,មុនពេលលំហូរការងារត្រឡប់មកវិញ
+Before returns,មុនពេលត្រឡប់មកវិញ
+Best Day,ថ្ងៃល្អបំផុត
+Best Seller,អ្នកលក់ល្អបំផុត
+Book expense or deposit from active shift.,ការចំណាយលើការកក់ ឬដាក់ប្រាក់ពីការផ្លាស់ប្តូរសកម្ម។
+Branch / Location-wise Report,សាខា / របាយការណ៍ដោយប្រាជ្ញាទីតាំង
+Brand-wise,ឈ្លាសវៃ
+Breakdown,ការបំបែក
+Browse,រុករក
+Build Time:,ពេលវេលាសាងសង់៖
+Built with Frappe,បង្កើតឡើងដោយ Frappe
+Bundle,បាច់
+Buying Price,តម្លៃទិញ
+Cache cleared successfully,ឃ្លាំងសម្ងាត់ត្រូវបានសម្អាតដោយជោគជ័យ
+Cache Usage,ការប្រើប្រាស់ឃ្លាំងសម្ងាត់
+cache used,ឃ្លាំងសម្ងាត់បានប្រើ
+Calculating...,ការគណនា...
+Camera Access Required,តម្រូវឱ្យចូលប្រើកាមេរ៉ា
+Camera access was aborted. Please try again.,ការចូលប្រើកាមេរ៉ាត្រូវបានបោះបង់។ សូមព្យាយាមម្តងទៀត។
+Camera constraints not supported by your device. Trying fallback settings...,ឧបសគ្គកាមេរ៉ាមិនគាំទ្រដោយឧបករណ៍របស់អ្នកទេ។ កំពុង​ព្យាយាម​ការ​កំណត់​ត្រឡប់...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,កាមេរ៉ាជាប់រវល់ ឬត្រូវបានរារាំងដោយកម្មវិធី/ផ្ទាំងផ្សេងទៀត។ បិទកម្មវិធីកាមេរ៉ាផ្សេងទៀត ហើយព្យាយាមម្តងទៀត។
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,ការអនុញ្ញាតកាមេរ៉ាត្រូវបានបដិសេធ។ សូមអនុញ្ញាតឱ្យចូលប្រើកាមេរ៉ានៅក្នុងការកំណត់កម្មវិធីរុករករបស់អ្នក ហើយធ្វើឱ្យទំព័រឡើងវិញ។
+Camera scanner is locked until the current error is acknowledged,ម៉ាស៊ីនស្កេនកាមេរ៉ាត្រូវបានចាក់សោរហូតដល់កំហុសបច្ចុប្បន្នត្រូវបានទទួលស្គាល់
+Camera started but the video stream did not load in time. Please try again.,កាមេរ៉ាបានចាប់ផ្តើម ប៉ុន្តែការផ្សាយវីដេអូមិនដំណើរការទាន់ពេលទេ។ សូមព្យាយាមម្តងទៀត។
+Cancel cash movement {0}?,បោះបង់ចលនាសាច់ប្រាក់ {0}?
+Cancel Payment,បោះបង់ការទូទាត់
+Cancel Sale,បោះបង់ការលក់
+Cancel Sale ?,បោះបង់ការលក់?
+Cancelled,បានលុបចោល
+Cannot add an item with zero or negative quantity.,មិនអាចបន្ថែមធាតុដែលមានបរិមាណសូន្យ ឬអវិជ្ជមានបានទេ។
+Cannot clear cache while offline,មិនអាចសម្អាតឃ្លាំងសម្ងាត់ពេលគ្មានអ៊ីនធឺណិត
+Cannot redeem customer credit more than invoice total,មិនអាចប្តូរយកឥណទានអតិថិជនលើសពីចំនួនសរុបវិក្កយបត្របានទេ។
+Cannot redeem gift cards more than invoice total,មិនអាចផ្តោះប្តូរយកកាតអំណោយលើសពីចំនួនវិក្កយបត្របានទេ។
+Cannot Save Offline Invoice:,មិនអាចរក្សាទុកវិក្កយបត្រក្រៅបណ្តាញបានទេ៖
+Cannot Save Offline Payment:,មិនអាចរក្សាទុកការទូទាត់ក្រៅបណ្តាញ៖
+Card,កាត
+Card / Online,កាត / អនឡាញ
+Card health after the last live lookup,សុខភាពកាតបន្ទាប់ពីការរកមើលផ្ទាល់ចុងក្រោយ
+Cards,កាត
+Cart,រទេះ
+Cash,សាច់ប្រាក់
+Cash back to customers,ប្រគល់ប្រាក់ជូនអតិថិជនវិញ។
+Cash Collections,ការប្រមូលសាច់ប្រាក់
+Cash Deposit is disabled for this POS Profile.,ការដាក់ប្រាក់ត្រូវបានបិទសម្រាប់ប្រវត្តិរូប POS នេះ។
+Cash Drawer Snapshot,រូបថត​ថត​រូប​ប័ណ្ណ​ប្រាក់
+Cash In Hand,សាច់ប្រាក់ក្នុងដៃ
+Cash Movement,ចលនាសាច់ប្រាក់
+Cash movement cancelled,ចលនាសាច់ប្រាក់ត្រូវបានលុបចោល
+Cash movement deduction applied,ការកាត់សាច់ប្រាក់ត្រូវបានអនុវត្ត
+Cash movement deleted,ចលនាសាច់ប្រាក់ត្រូវបានលុប
+Cash movement is disabled for this POS Profile.,ចលនាសាច់ប្រាក់ត្រូវបានបិទសម្រាប់ប្រវត្តិរូប POS នេះ។
+Cash Movement is disabled in current POS Profile.,ចលនាសាច់ប្រាក់ត្រូវបានបិទនៅក្នុងប្រវត្តិរូប POS បច្ចុប្បន្ន។
+Cash movement saved offline,ចលនាសាច់ប្រាក់ត្រូវបានរក្សាទុកក្រៅបណ្តាញ
+Cash movement submitted,បានដាក់ស្នើចលនាសាច់ប្រាក់
+Cash Movements,ចលនាសាច់ប្រាក់
+Cash payment cannot be less than invoice total when partial payment is not allowed,ការទូទាត់សាច់ប្រាក់មិនអាចតិចជាងចំនួនសរុបវិក្កយបត្រទេ នៅពេលដែលការទូទាត់មួយផ្នែកមិនត្រូវបានអនុញ្ញាត
+Cash returned after payment,សាច់ប្រាក់ត្រឡប់មកវិញបន្ទាប់ពីការទូទាត់
+Cashier,អ្នកគិតលុយ
+Cashier Access,ការចូលប្រើអ្នកគិតលុយ
+Cashier identity and appearance preferences.,អត្តសញ្ញាណអ្នកគិតលុយ និងចំណូលចិត្តរូបរាង។
+Cashier PIN,លេខសម្ងាត់អ្នកគិតលុយ
+Cashier PIN saved successfully.,លេខសម្ងាត់អ្នកគិតលុយត្រូវបានរក្សាទុកដោយជោគជ័យ។
+Cashiers,អ្នកគិតលុយ
+Cashier-wise,អ្នកគិតលុយ
+Categories,ប្រភេទ
+Category,ប្រភេទ
+Category / Brand / Variant Report,ប្រភេទ / ម៉ាក / របាយការណ៍វ៉ារ្យ៉ង់
+Category-wise,ប្រភេទ - ឆ្លាតវៃ
+Category-wise Margin,រឹមតាមប្រភេទ
+Certificate,វិញ្ញាបនបត្រ
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,វិញ្ញាបនបត្របាត់ ឬមិនទុកចិត្ត។ QZ អាចបង្ហាញប្រអប់បញ្ជាក់។
+Certificate is trusted. Silent QZ printing is active.,វិញ្ញាបនបត្រត្រូវបានជឿទុកចិត្ត។ ការបោះពុម្ព QZ ស្ងាត់គឺសកម្ម។
+Change,ផ្លាស់ប្តូរ
+Change allocation repaired,ផ្លាស់ប្តូរការបែងចែកត្រូវបានជួសជុល
+Change Price,ផ្លាស់ប្តូរតម្លៃ
+Change Return,ផ្លាស់ប្តូរការត្រឡប់មកវិញ
+Change Returned,ការផ្លាស់ប្តូរបានត្រឡប់មកវិញ
+Change terminal cashier,ផ្លាស់ប្តូរអ្នកគិតលុយតាមស្ថានីយ
+Charge Heads,ក្បាលសាក
+Charges,ការចោទប្រកាន់
+Charges not found,រកមិនឃើញការចោទប្រកាន់ទេ។
+Check Balance,ពិនិត្យសមតុល្យ
+Check balance for any card. Supervisors can issue and top up cards here.,ពិនិត្យសមតុល្យសម្រាប់កាតណាមួយ។ អ្នកគ្រប់គ្រងអាចចេញ និងបញ្ចូលកាតនៅទីនេះ។
+Check balance only,ពិនិត្យសមតុល្យតែប៉ុណ្ណោះ
+Check for new commits,ពិនិត្យមើលការប្តេជ្ញាចិត្តថ្មី។
+Check for Updates,ពិនិត្យរកមើលបច្ចុប្បន្នភាព
+Check live balance before applying redemption,ពិនិត្យសមតុល្យបន្តផ្ទាល់ មុនពេលអនុវត្តការរំលោះ
+Check live balance before redemption,ពិនិត្យសមតុល្យបន្តផ្ទាល់ មុនពេលការរំលោះ
+Checking...,កំពុងពិនិត្យ...
+Cheque/Reference Date,កាលបរិច្ឆេទពិនិត្យ/យោង
+Cheque/Reference No,សែក/យោងលេខ
+Choose the cashier currently operating this terminal.,ជ្រើសរើសអ្នកគិតលុយដែលកំពុងដំណើរការស្ថានីយនេះ។
+City,ទីក្រុង
+Clear,ច្បាស់
+Clear All,ជម្រះទាំងអស់។
+Clear all barcode items,ជម្រះធាតុរបារកូដទាំងអស់។
+Clear all purchase order items,សម្អាតរាល់ទំនិញបញ្ជាទិញ
+Clear Search,ជម្រះការស្វែងរក
+Clearing local cache...,កំពុងសម្អាតឃ្លាំងសម្ងាត់មូលដ្ឋាន...
+Click to refresh,ចុចដើម្បីផ្ទុកឡើងវិញ
+Client CPU Lag:,ភាពយឺតយ៉ាវ CPU របស់អតិថិជន៖
+Client Memory Usage:,ការប្រើប្រាស់អង្គចងចាំរបស់អតិថិជន៖
+Client Metrics,មាត្រដ្ឋានអតិថិជន
+Close about dialog,បិទអំពីប្រអប់
+Close cashier switcher,បិទឧបករណ៍ប្តូរអ្នកគិតលុយ
+Close closing shift dialog,បិទប្រអប់ប្តូរវេន
+Close column selector,បិទ​ឧបករណ៍​ជ្រើស​ជួរ​ឈរ
+Close Dialog,បិទប្រអប់
+Close drafts dialog,បិទប្រអប់ពង្រាង
+Close invoice details dialog,បិទប្រអប់ព័ត៌មានលម្អិតវិក្កយបត្រ
+Close invoice management,បិទការគ្រប់គ្រងវិក្កយបត្រ
+Close offline invoices dialog,បិទប្រអប់វិក្កយបត្រក្រៅបណ្តាញ
+Close packing list dialog,បិទប្រអប់បញ្ជីវេចខ្ចប់
+Close returns dialog,បិទប្រអប់ត្រឡប់
+Close sales orders dialog,បិទប្រអប់បញ្ជាទិញ
+Close Scanner,បិទម៉ាស៊ីនស្កេន
+Close scanner dialog,បិទប្រអប់ម៉ាស៊ីនស្កេន
+Close Settings,បិទការកំណត់
+Closing Amount,ចំនួនទឹកប្រាក់បិទ
+Closing POS Shift,ការបិទការផ្លាស់ប្តូរ POS
+Closing Snapshot Available,ការបិទរូបថតមាន
+Code,កូដ
+Code scanned successfully,កូដត្រូវបានស្កេនដោយជោគជ័យ
+COGS,COGS
+Collapse item details,បង្រួមព័ត៌មានលម្អិតនៃធាតុ
+Collected,ប្រមូល
+Cols,លោក Cols
+Columns,ជួរឈរ
+commits,ប្តេជ្ញា
+Completed and active sales in this range,ការលក់ដែលបានបញ្ចប់ និងសកម្មនៅក្នុងជួរនេះ។
+Completed returns will appear here.,ការត្រឡប់មកវិញដែលបានបញ្ចប់នឹងបង្ហាញនៅទីនេះ។
+Confirm,បញ្ជាក់
+Confirm Close,បញ្ជាក់បិទ
+Confirm Mobile Number,បញ្ជាក់លេខទូរស័ព្ទ
+Confirm PIN,បញ្ជាក់កូដ PIN
+Connect,ភ្ជាប់
+Connect printer and manage certificate,ភ្ជាប់ម៉ាស៊ីនបោះពុម្ព និងគ្រប់គ្រងវិញ្ញាបនបត្រ
+Connecting to QZ Tray...,កំពុងភ្ជាប់ទៅ QZ Tray...
+Connection problem while submitting invoice,បញ្ហា​ក្នុង​ការ​តភ្ជាប់​ពេល​បញ្ជូន​វិក្កយបត្រ
+Connections:,ការតភ្ជាប់៖
+Connectivity and cached prerequisite status were rechecked.,ការតភ្ជាប់ និងស្ថានភាពតម្រូវការជាមុនក្នុងឃ្លាំងសម្ងាត់ត្រូវបានពិនិត្យឡើងវិញ។
+Continue Editing,បន្តការកែសម្រួល
+Could not fetch latest balance from server,មិនអាចទាញយកសមតុល្យចុងក្រោយពីម៉ាស៊ីនមេបានទេ។
+Count,រាប់
+Country,ប្រទេស
+Coupon,ប័ណ្ណ
+Coupons,គូប៉ុង
+Cover,គម្រប
+CPU Cores:,ស្នូលស៊ីភីយូ៖
+Create,បង្កើត
+Create and load a new prepaid card,បង្កើត និងផ្ទុកកាតបង់ប្រាក់ជាមុនថ្មី។
+Create and preload a new gift card,បង្កើត និងផ្ទុកកាតអំណោយថ្មី។
+Create Bill,បង្កើតវិក័យប័ត្រ
+Create Customer,បង្កើតអតិថិជន
+Create New Item,បង្កើតធាតុថ្មី។
+Create or change your PIN,បង្កើត ឬផ្លាស់ប្តូរលេខសម្ងាត់របស់អ្នក។
+Create PIN,បង្កើតកូដ PIN
+Create POS Opening Shift,បង្កើតការផ្លាស់ប្តូរការបើកម៉ាស៊ីនឆូតកាត
+Create Purchase Order,បង្កើតការបញ្ជាទិញ
+Create Return,បង្កើតការត្រឡប់មកវិញ
+Create return from invoice,បង្កើតការត្រឡប់មកវិញពីវិក្កយបត្រ
+Create Supplier,បង្កើតអ្នកផ្គត់ផ្គង់
+Credit and Output,ឥណទាន និងទិន្នផល
+Credit Note,កំណត់សម្គាល់ឥណទាន
+Credit Outstanding,ឥណទានឆ្នើម
+Credit sales remaining to be collected,ការលក់ឥណទានដែលនៅសល់ត្រូវប្រមូល
+Critical,រិះគន់
+Currency,រូបិយប័ណ្ណ
+Current,បច្ចុប្បន្ន
+Current Event Loop Lag:,ព្រឹត្តិការណ៍បច្ចុប្បន្ន Loop Lag៖
+Current Month,ខែបច្ចុប្បន្ន
+Current PIN,លេខសម្ងាត់បច្ចុប្បន្ន
+Current Profile,ប្រវត្តិរូបបច្ចុប្បន្ន
+Current redeemable value on the gift card,តម្លៃដែលអាចលោះបានបច្ចុប្បន្ននៅលើកាតអំណោយ
+Current User,អ្នកប្រើប្រាស់បច្ចុប្បន្ន
+Custom,ផ្ទាល់ខ្លួន
+Custom Due Days,ថ្ងៃផុតកំណត់ផ្ទាល់ខ្លួន
+Custom items per page,ធាតុផ្ទាល់ខ្លួនក្នុងមួយទំព័រ
+Customer,អតិថិជន
+Customer already selected,អតិថិជនបានជ្រើសរើសរួចហើយ
+Customer Balance,សមតុល្យអតិថិជន
+Customer balance unavailable offline,សមតុល្យអតិថិជនមិនអាចប្រើបានក្រៅបណ្តាញទេ។
+Customer created successfully.,អតិថិជនបានបង្កើតដោយជោគជ័យ។
+Customer creation failed.,ការបង្កើតអតិថិជនបរាជ័យ។
+Customer Details,ព័ត៌មានលំអិតរបស់អតិថិជន
+Customer display channel is missing,ឆានែលបង្ហាញអតិថិជនបាត់
+Customer display was blocked. Please allow pop-ups for this site.,ការបង្ហាញរបស់អតិថិជនត្រូវបានរារាំង។ សូមអនុញ្ញាតការលេចឡើងសម្រាប់គេហទំព័រនេះ។
+Customer group is required,ក្រុមអតិថិជនត្រូវបានទាមទារ
+Customer is required to add payment,អតិថិជនតម្រូវឱ្យបន្ថែមការទូទាត់
+Customer Name is required,ឈ្មោះអតិថិជនត្រូវបានទាមទារ
+Customer not selected,អតិថិជនមិនត្រូវបានជ្រើសរើសទេ។
+Customer Report,របាយការណ៍អតិថិជន
+Customer saved offline,អតិថិជនបានរក្សាទុកដោយគ្មានអ៊ីនធឺណិត
+Customer Screen,អេក្រង់អតិថិជន
+Customer territory is required,តំបន់អតិថិជនត្រូវបានទាមទារ
+Customer updated successfully.,អតិថិជនបានធ្វើបច្ចុប្បន្នភាពដោយជោគជ័យ។
+Customer-facing tools and printer setup.,ឧបករណ៍ប្រឈមមុខនឹងអតិថិជន និងការដំឡើងម៉ាស៊ីនបោះពុម្ព។
+Customers,អតិថិជន
+Customers not found,រកមិនឃើញអតិថិជនទេ។
+Daily cashier actions without scrolling.,សកម្មភាពអ្នកគិតលុយប្រចាំថ្ងៃដោយមិនរមូរ។
+Daily Sales,ការលក់ប្រចាំថ្ងៃ
+Daily Sales Summary,សង្ខេបការលក់ប្រចាំថ្ងៃ
+Data loaded in form. Review and submit.,ទិន្នន័យត្រូវបានផ្ទុកក្នុងទម្រង់។ ពិនិត្យ និងបញ្ជូន។
+Database Health,សុខភាពមូលដ្ឋានទិន្នន័យ
+Database health affects overall system speed and reliability.,សុខភាពមូលដ្ឋានទិន្នន័យប៉ះពាល់ដល់ល្បឿន និងភាពជឿជាក់នៃប្រព័ន្ធទាំងមូល។
+Database Info,ព័ត៌មានមូលដ្ឋានទិន្នន័យ
+Date,កាលបរិច្ឆេទ
+Day ?,ថ្ងៃ?
+days,ថ្ងៃ
+Day-wise (MTD),ប្រចាំថ្ងៃ (MTD)
+Day-wise Movement,ចលនាប្រចាំថ្ងៃ
+Dead Stock,ភាគហ៊ុនស្លាប់
+Dead Stock Items,ធាតុស្តុកស្លាប់
+Decrease quantity,បន្ថយបរិមាណ
+Default,លំនាំដើម
+Default:,លំនាំដើម៖
+Delete,លុប
+Delete cancelled cash movement {0}?,លុបចលនាសាច់ប្រាក់ដែលបានលុបចោល {0}?
+Delete Draft,លុបសេចក្តីព្រាង
+Delete draft invoice,លុបវិក្កយបត្រព្រាង
+Delete draft invoice {0}?,លុប​វិក្កយបត្រ​ព្រាង {0}?
+Delete Invoice,លុបវិក្កយបត្រ
+Delete offline invoice,លុបវិក្កយបត្រក្រៅបណ្តាញ
+Delivered,ចែកចាយ
+Delivery Charges,ថ្លៃដឹកជញ្ជូន
+Delivery Information,ព័ត៌មានអំពីការដឹកជញ្ជូន
+Delivery Note {0} created,កំណត់សម្គាល់ការដឹកជញ្ជូន {0} ត្រូវបានបង្កើតឡើង
+Delivery note created,បាន​បង្កើត​កំណត់​ហេតុ​ចែកចាយ
+Deployed Bundle:,កញ្ចប់ដែលបានដាក់ពង្រាយ៖
+Deposit,ដាក់ប្រាក់
+Description,ការពិពណ៌នា
+Detailed Supplier Breakdown,ការវិភាគអ្នកផ្គត់ផ្គង់លម្អិត
+Detecting formats:,ការរកឃើញទម្រង់៖
+Device Memory:,អង្គចងចាំឧបករណ៍៖
+Difference,ភាពខុសគ្នា
+Difference (In Company Currency),ភាពខុសគ្នា (ជារូបិយប័ណ្ណរបស់ក្រុមហ៊ុន)
+Disable offline mode first to recheck live connectivity.,បិទមុខងារក្រៅបណ្តាញជាមុនសិន ដើម្បីពិនិត្យមើលការតភ្ជាប់បន្តផ្ទាល់។
+Disconnect,ផ្តាច់
+discount,ការបញ្ចុះតម្លៃ
+Discount %,បញ្ចុះតម្លៃ%
+Discount / Void / Return Report,ការបញ្ចុះតម្លៃ / មោឃៈ / របាយការណ៍ត្រឡប់មកវិញ
+Discount Amount,ចំនួនទឹកប្រាក់បញ្ចុះតម្លៃ
+Discount limited by POS Profile,ការបញ្ចុះតម្លៃកំណត់ដោយ POS Profile
+Discounted Invoices,វិក្កយបត្របញ្ចុះតម្លៃ
+Discounts,ការបញ្ចុះតម្លៃ
+Dismiss,ច្រានចោល
+Download Certificate,ទាញយកវិញ្ញាបនប័ត្រ
+Draft,សេចក្តីព្រាង
+Draft invoice deleted,វិក្កយបត្រព្រាងត្រូវបានលុប
+Draft source,ប្រភពសេចក្តីព្រាង
+Drafts,សេចក្តីព្រាង
+Due {0},ដល់កំណត់ {0}
+Due Date,កាលបរិច្ឆេទផុតកំណត់
+Duplicate,ស្ទួន
+Edit customer,កែសម្រួលអតិថិជន
+Edit discount amount,កែសម្រួលចំនួនបញ្ចុះតម្លៃ
+Edit discount percentage,កែសម្រួលភាគរយបញ្ចុះតម្លៃ
+Edit Gift Application,កែសម្រួលកម្មវិធីអំណោយ
+Edit item name,កែសម្រួលឈ្មោះធាតុ
+Edit quantity,កែសម្រួលបរិមាណ
+Edit rate,កែសម្រួលអត្រា
+Edit unit of measure,កែសម្រួលឯកតារង្វាស់
+Edited,បានកែសម្រួល
+Employee,និយោជិត
+Enable background sync,បើកដំណើរការសមកាលកម្មផ្ទៃខាងក្រោយ
+Enable Customer Display in POS Profile first.,បើកការបង្ហាញអតិថិជននៅក្នុង POS Profile ជាមុនសិន។
+Enter a PIN.,បញ្ចូលកូដ PIN ។
+Enter a valid grams value,បញ្ចូលតម្លៃក្រាមត្រឹមត្រូវ។
+Enter new price list rate,បញ្ចូលអត្រាបញ្ជីតម្លៃថ្មី។
+Enter Quantity,បញ្ចូលបរិមាណ
+Enter the cashier PIN to continue.,បញ្ចូលកូដ PIN អ្នកគិតលុយ ដើម្បីបន្ត។
+Enter the current PIN first.,បញ្ចូលលេខសម្ងាត់បច្ចុប្បន្នជាមុនសិន។
+"Enter the current PIN, then choose a new one.",បញ្ចូលកូដ PIN បច្ចុប្បន្ន បន្ទាប់មកជ្រើសរើសលេខកូដថ្មី។
+Enter valid grams for scale barcode,បញ្ចូលក្រាមត្រឹមត្រូវសម្រាប់បាកូដខ្នាត
+Entries,ធាតុ
+Error accessing camera:,កំហុសក្នុងការចូលប្រើកាមេរ៉ា៖
+Error calculating prices,កំហុសក្នុងការគណនាតម្លៃ
+Error fetching customer balance,កំហុសក្នុងការទាញយកសមតុល្យអតិថិជន
+Error in change calculations!,កំហុសក្នុងការផ្លាស់ប្តូរការគណនា!
+Error Loading Data,កំហុសក្នុងការផ្ទុកទិន្នន័យ
+Error loading invoice details,កំហុសក្នុងការផ្ទុកព័ត៌មានលម្អិតវិក្កយបត្រ
+Error processing invoice,មានកំហុសក្នុងដំណើរការវិក្កយបត្រ
+Error processing payment,កំហុសក្នុងដំណើរការការទូទាត់
+Error searching invoices,កំហុសក្នុងការស្វែងរកវិក្កយបត្រ
+Error submitting invoice:,កំហុសក្នុងការដាក់វិក្កយបត្រ៖
+Error submitting invoice: {0},កំហុសក្នុងការដាក់វិក្កយបត្រ៖ {0}
+Error submitting invoice: No response from server,កំហុសក្នុងការដាក់វិក្កយបត្រ៖ មិនមានការឆ្លើយតបពីម៉ាស៊ីនមេទេ។
+Error updating currency,កំហុសក្នុងការធ្វើបច្ចុប្បន្នភាពរូបិយប័ណ្ណ
+Error updating item details,កំហុសក្នុងការធ្វើបច្ចុប្បន្នភាពព័ត៌មានលម្អិតរបស់ធាតុ
+Est. Purchase,ប៉ាន់ស្មាន ទិញ
+Est. Value,ប៉ាន់ស្មាន តម្លៃ
+Event-loop lag measures how busy your browser is. Lower is better.,Event-loop lag វាស់វែងថាតើកម្មវិធីរុករករបស់អ្នករវល់ប៉ុណ្ណា។ ទាបជាងគឺល្អជាង។
+Every,រាល់
+Exchange Rate,អត្រាប្តូរប្រាក់
+Expand item details,ពង្រីកព័ត៌មានលម្អិតអំពីធាតុ
+Expected Amount (In Company Currency),ចំនួនទឹកប្រាក់រំពឹងទុក (ជារូបិយប័ណ្ណរបស់ក្រុមហ៊ុន)
+Expected Cash,សាច់ប្រាក់ដែលរំពឹងទុក
+Expected cash on hand grouped by currency,សាច់ប្រាក់ដែលរំពឹងទុកនៅលើដៃដាក់ជាក្រុមតាមរូបិយប័ណ្ណ
+Expected vs Actual,ការរំពឹងទុកទល់នឹងការពិត
+Expense,ចំណាយ
+Expense Account (Optional Override),គណនីចំណាយ (បដិសេធជាជម្រើស)
+Expense account is required.,គណនីចំណាយត្រូវបានទាមទារ។
+Expenses and deposits posted during this shift,ការចំណាយ និងប្រាក់បញ្ញើដែលបានបង្ហោះក្នុងអំឡុងពេលផ្លាស់ប្តូរនេះ។
+Expired,ផុតកំណត់
+Failed to auto reconcile payments.,បរាជ័យក្នុងការផ្សះផ្សាការបង់ប្រាក់ដោយស្វ័យប្រវត្តិ។
+Failed to cancel cash movement,បរាជ័យក្នុងការលុបចោលចលនាសាច់ប្រាក់
+Failed to clear cache,បរាជ័យក្នុងការសម្អាតឃ្លាំងសម្ងាត់
+Failed to create item,បរាជ័យក្នុងការបង្កើតធាតុ
+Failed to create supplier,បរាជ័យក្នុងការបង្កើតអ្នកផ្គត់ផ្គង់
+Failed to delete cash movement,បរាជ័យក្នុងការលុបចលនាសាច់ប្រាក់
+Failed to generate scale barcode. Using item barcode only.,បរាជ័យក្នុងការបង្កើតរបារកូដខ្នាត។ ប្រើតែបាកូដធាតុ។
+Failed to load cash movement context.,បរាជ័យក្នុងការផ្ទុកបរិបទនៃចលនាសាច់ប្រាក់។
+Failed to load dashboard data.,បានបរាជ័យក្នុងការផ្ទុកទិន្នន័យផ្ទាំងគ្រប់គ្រង។
+Failed to reload invoice from server,បរាជ័យក្នុងការផ្ទុកវិក្កយបត្រពីម៉ាស៊ីនមេឡើងវិញ
+Failed to submit cash movement,បរាជ័យក្នុងការបញ្ជូនចលនាសាច់ប្រាក់
+Failed to sync offline cash movements,បរាជ័យក្នុងការធ្វើសមកាលកម្មចលនាសាច់ប្រាក់ក្រៅបណ្តាញ
+Fast cashier actions for active shifts.,សកម្មភាពអ្នកគិតលុយរហ័សសម្រាប់ការផ្លាស់ប្តូរសកម្ម។
+Fast Moving Items,ធាតុផ្លាស់ទីលឿន
+Fees,ថ្លៃសេវា
+Fetch the latest offline prerequisite updates,ទាញយកការអាប់ដេតតាមតម្រូវការជាមុនក្រៅបណ្តាញចុងក្រោយបង្អស់
+Find a sales order quickly and load it into the current sale.,ស្វែងរកការបញ្ជាទិញលក់យ៉ាងឆាប់រហ័ស ហើយផ្ទុកវាទៅក្នុងការលក់បច្ចុប្បន្ន។
+Fixing payment amounts for return invoice...,កំពុង​ជួសជុល​ចំនួន​ទូទាត់​សម្រាប់​វិក្កយបត្រ​ត្រឡប់...
+Flash Off,បិទពន្លឺ
+Flash On,បើកពន្លឺ
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.",សម្រាប់ធាតុ 'កញ្ចប់ផលិតផល' ឃ្លាំង លេខស៊េរី និងលេខបាច់នឹងត្រូវបានពិចារណាពីតារាង 'បញ្ជីវេចខ្ចប់' ។ ប្រសិនបើ Warehouse និង Batch No គឺដូចគ្នាសម្រាប់ធាតុវេចខ្ចប់ទាំងអស់សម្រាប់ធាតុ 'Product Bundle' ណាមួយ តម្លៃទាំងនោះអាចត្រូវបានបញ្ចូលក្នុងតារាងធាតុសំខាន់។ តម្លៃនឹងត្រូវបានចម្លងទៅតារាង 'បញ្ជីវេចខ្ចប់' ។
+Free,ឥតគិតថ្លៃ
+Free Qty,Qty ឥតគិតថ្លៃ
+Frequency,ប្រេកង់
+from,ពី
+From Date,ពីកាលបរិច្ឆេទ
+Fulfillment Details,ព័ត៌មានលម្អិតនៃការបំពេញ
+Full Name,ឈ្មោះពេញ
+Gain,ទទួលបាន
+Generate a fresh prepaid card and start it with an opening balance.,បង្កើតកាតបង់ប្រាក់ជាមុនថ្មី ហើយចាប់ផ្តើមវាជាមួយនឹងសមតុល្យបើក។
+Generate and install the certificate to allow fully silent printing without trust prompts.,បង្កើត និងដំឡើងវិញ្ញាបនបត្រ ដើម្បីអនុញ្ញាតឱ្យការបោះពុម្ពដោយស្ងៀមស្ងាត់ទាំងស្រុង ដោយមិនមានការណែនាំអំពីទំនុកចិត្ត។
+Generate Certificate,បង្កើតវិញ្ញាបនប័ត្រ
+Generated scale barcode: {0},បាកូដខ្នាតដែលបានបង្កើត៖ {0}
+Get Payments,ទទួលបានការទូទាត់
+Gift Card,កាតអំណោយ
+Gift card amount must be greater than zero.,ចំនួនកាតអំណោយត្រូវតែធំជាងសូន្យ។
+Gift Card Code,លេខកូដប័ណ្ណអំណោយ
+Gift card code is required for redemption,លេខកូដប័ណ្ណអំណោយត្រូវបានទាមទារសម្រាប់ការប្រោសលោះ
+Gift card code is required.,លេខកូដប័ណ្ណអំណោយត្រូវបានទាមទារ។
+Gift card issued successfully.,កាតអំណោយត្រូវបានចេញដោយជោគជ័យ។
+Gift card loaded successfully.,កាតអំណោយត្រូវបានផ្ទុកដោយជោគជ័យ។
+Gift Card Management,ការគ្រប់គ្រងកាតអំណោយ
+Gift card payment,ការទូទាត់កាតអំណោយ
+Gift card redemption requires an online connection,ការប្រោសលោះកាតអំណោយតម្រូវឱ្យមានការតភ្ជាប់អ៊ីនធឺណិត
+Gift card topped up successfully.,កាតអំណោយត្រូវបានបញ្ចូលដោយជោគជ័យ។
+Gift Cards,កាតអំណោយ
+Go to Frappe Desk,ទៅកាន់ Frappe Desk
+Grand Total,សរុបធំ
+Gross Margin,រឹមសរុប
+Gross Profit,ប្រាក់ចំណេញដុល
+Gross Sales,ការលក់សរុប
+Group not found,រកមិនឃើញក្រុមទេ។
+"Grouped controls for terminal, UI, and session settings.",ការគ្រប់គ្រងជាក្រុមសម្រាប់ស្ថានីយ UI និងការកំណត់សម័យ។
+Grouped totals for each payment method and currency,សរុបជាក្រុមសម្រាប់វិធីបង់ប្រាក់ និងរូបិយប័ណ្ណនីមួយៗ
+Hide,លាក់
+Hide Gift Card,លាក់កាតអំណោយ
+Hide Non Essential Fields,លាក់វាលមិនសំខាន់
+Hide quantity decimals,លាក់ទសភាគបរិមាណ
+Hide search tools,លាក់ឧបករណ៍ស្វែងរក
+Hide zero rated items,លាក់ធាតុដែលបានវាយតម្លៃសូន្យ
+High,ខ្ពស់។
+History,ប្រវត្តិសាស្ត្រ
+Hourly (Today),រៀងរាល់ម៉ោង (ថ្ងៃនេះ)
+How this section works,របៀបដែលផ្នែកនេះដំណើរការ
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.",ប្រសិនបើទិន្នន័យជាប់គាំង សូមបើក ការកំណត់ > ក្រៅបណ្តាញ និងសមកាលកម្ម ហើយដំណើរការបង្កើតទិន្នន័យក្រៅបណ្តាញឡើងវិញម្តងទៀត ខណៈពេលដែលមានអ៊ីនធឺណិត។
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.",ប្រសិនបើការព្រមាននៅតែបន្ត បើកការកំណត់ > ក្រៅបណ្តាញ និងសមកាលកម្ម បន្ទាប់មកដំណើរការផ្ទុកទិន្នន័យក្រៅបណ្តាញឡើងវិញ ឬបង្កើតទិន្នន័យក្រៅបណ្តាញឡើងវិញ។
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,នាំចូលវិញ្ញាបនបត្រទៅក្នុង QZ Tray ហើយចាប់ផ្តើម QZ Tray ឡើងវិញនៅលើម៉ាស៊ីន POS នីមួយៗ។
+In,ក្នុង
+In stock: {0},មានក្នុងស្តុក៖ {0}
+Include Batch / Serial,រួមបញ្ចូលបាច់ / សៀរៀល
+Include Price,រួមបញ្ចូលតម្លៃ
+Increase quantity,បង្កើនបរិមាណ
+IndexedDB,IndexedDB
+Initial Amount,ចំនួនទឹកប្រាក់ដំបូង
+Initialize your shift with opening balances,ចាប់ផ្តើមការផ្លាស់ប្តូររបស់អ្នកជាមួយនឹងសមតុល្យបើក
+Initializing application...,កំពុងចាប់ផ្តើមកម្មវិធី...
+"Inspect cache, sync, and prerequisite status",ពិនិត្យឃ្លាំងសម្ងាត់ ធ្វើសមកាលកម្ម និងស្ថានភាពតម្រូវការជាមុន
+Installed Applications,កម្មវិធីដែលបានដំឡើង
+Insufficient stock:\n{0},ស្តុកមិនគ្រប់គ្រាន់៖\n{0}
+Invalid rate,អត្រា​មិន​ត្រឹមត្រូវ
+Inventory Status Report,របាយការណ៍ស្ថានភាពសារពើភ័ណ្ឌ
+Invoice,វិក្កយបត្រ
+Invoice {0} is Submitted,វិក្កយបត្រ {0} ត្រូវបានបញ្ជូន
+Invoice {0} processed successfully,វិក្កយបត្រ {0} បានដំណើរការដោយជោគជ័យ
+Invoice {0} submission failed,ការបញ្ជូនវិក័យប័ត្រ {0} បានបរាជ័យ
+Invoice {0} was already submitted,វិក្កយបត្រ {0} ត្រូវបានបញ្ជូនរួចហើយ
+Invoice Adjustments,ការកែតម្រូវវិក្កយបត្រ
+Invoice Change,ការផ្លាស់ប្តូរវិក្កយបត្រ
+Invoice Details,ព័ត៌មានលម្អិតអំពីវិក្កយបត្រ
+Invoice is still in draft after background submission.,វិក្កយបត្រនៅតែស្ថិតក្នុងសេចក្តីព្រាងបន្ទាប់ពីការបញ្ជូនផ្ទៃខាងក្រោយ។
+Invoice Items,ធាតុវិក្កយបត្រ
+Invoice Management,ការគ្រប់គ្រងវិក្កយបត្រ
+Invoice Mgmt,វិក្កយបត្រ Mgmt
+Invoice saved offline,វិក្កយបត្រត្រូវបានរក្សាទុកក្រៅបណ្តាញ
+Invoice submission failed,ការបញ្ជូនវិក្កយបត្របានបរាជ័យ
+Invoice Submitted,បានបញ្ជូនវិក្កយបត្រ
+"Invoice value settled by loyalty points, not cash collection",តម្លៃវិក័យប័ត្រទូទាត់ដោយពិន្ទុភក្ដីភាព មិនមែនការប្រមូលសាច់ប្រាក់ទេ។
+Invoices,វិក្កយបត្រ
+Invoices already past due date,វិក្កយបត្រហួសកាលបរិច្ឆេទកំណត់រួចហើយ
+Invoices saved as POS Invoices,វិក្កយបត្រត្រូវបានរក្សាទុកជាវិក្កយបត្រ POS
+Invoices still carrying balances,វិក្កយបត្រនៅតែមានសមតុល្យ
+Issue Mode,របៀបបញ្ហា
+Issue New Card,ចេញប័ណ្ណថ្មី។
+Issue Workflow,បញ្ហាលំហូរការងារ
+"Issue, top up, and check",ចេញ បញ្ចូលទឹកប្រាក់ និងពិនិត្យ
+Item,ធាតុ
+Item / Product Sales Report,របាយការណ៍លក់ទំនិញ/ផលិតផល
+Item {0} added to invoice,ធាតុ {0} ត្រូវបានបញ្ចូលទៅក្នុងវិក្កយបត្រ
+Item '{0}' has no barcode,ធាតុ '{0}' មិនមានបាកូដទេ។
+Item Code,លេខកូដធាតុ
+Item created successfully,ធាតុត្រូវបានបង្កើតដោយជោគជ័យ
+Item is out of stock,ទំនិញអស់ពីស្តុក
+Item Name,ឈ្មោះធាតុ
+Item not found,រកមិនឃើញធាតុទេ។
+Item order updated,បានធ្វើបច្ចុប្បន្នភាពការបញ្ជាទិញទំនិញ
+Item Selector Settings,ការកំណត់កម្មវិធីជ្រើសរើសធាតុ
+Items,ធាតុ
+Items added in POS will appear here automatically.,ធាតុដែលបានបន្ថែមនៅក្នុងម៉ាស៊ីនឆូតកាតនឹងបង្ហាញនៅទីនេះដោយស្វ័យប្រវត្តិ។
+Items added to invoice,ធាតុត្រូវបានបញ្ចូលទៅក្នុងវិក្កយបត្រ
+Items per page,ធាតុក្នុងមួយទំព័រ
+Items Sold,ទំនិញបានលក់
+Items/Invoice,ទំនិញ/វិក្កយបត្រ
+Item-wise Profitability,ប្រាក់ចំណេញតាមវត្ថុ
+Journal Entry,ធាតុទិនានុប្បវត្តិ
+json,ជេសុន
+Just now,ឥឡូវនេះ
+Keep offline prerequisites healthy and recover stale data safely.,រក្សាតម្រូវការជាមុនក្រៅបណ្តាញឱ្យមានសុខភាពល្អ និងសង្គ្រោះទិន្នន័យដែលជាប់គាំងដោយសុវត្ថិភាព។
+Labels,ស្លាក
+"Language, theme, terminal tools, and session controls.",ភាសា ស្បែក ឧបករណ៍ស្ថានីយ និងការគ្រប់គ្រងសម័យ។
+Last,ចុងក្រោយ
+Last 14 Days (Paid vs Pending),14 ថ្ងៃចុងក្រោយ (បង់ប្រាក់ធៀបនឹងការរង់ចាំ)
+Last 14 Days Activity,សកម្មភាព 14 ថ្ងៃចុងក្រោយ
+Last 14 Days Gross Profit,ប្រាក់ចំណេញសរុប 14 ថ្ងៃចុងក្រោយ
+Last 14 Days Purchases,ការទិញ 14 ថ្ងៃចុងក្រោយ
+Last 14 Days Tax/Charges,ពន្ធ/ការគិតថ្លៃរយៈពេល 14 ថ្ងៃចុងក្រោយ
+Last sync:,សមកាលកម្មចុងក្រោយ៖
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},សមកាលកម្មចុងក្រោយ៖ {0} | យល់ព្រម៖ {1} | បរាជ័យ៖ {2} | បានរំលង៖ {3}
+Latest entries for current shift,ធាតុចុងក្រោយសម្រាប់ការផ្លាស់ប្តូរបច្ចុប្បន្ន
+Lead Time,ពេលវេលានាំមុខ
+Limited,មានកំណត់
+lines,បន្ទាត់
+List,បញ្ជី
+Live Snapshot,រូបថតផ្ទាល់
+Load a POS profile and cashier first.,ផ្ទុកទម្រង់ POS និងអ្នកគិតលុយជាមុនសិន។
+Load More Invoices,ផ្ទុកវិក្កយបត្របន្ថែមទៀត
+Load previously saved invoices,ផ្ទុកវិក្កយបត្រដែលបានរក្សាទុកពីមុន
+Load Sale,ផ្ទុកការលក់
+Load Sales Invoice,ផ្ទុកវិក្កយបត្រលក់
+Loading app data...,កំពុងផ្ទុកទិន្នន័យកម្មវិធី...
+Loading customer database...,កំពុងផ្ទុកទិន្នន័យអតិថិជន...
+Loading customers...,កំពុងផ្ទុកអតិថិជន...
+Loading database stats...,កំពុង​ផ្ទុក​ទិន្នន័យ​ស្ថិតិ...
+Loading details...,កំពុងផ្ទុកព័ត៌មានលម្អិត...
+Loading invoice history...,កំពុងផ្ទុកប្រវត្តិវិក្កយបត្រ...
+Loading items...,កំពុង​ផ្ទុក​ធាតុ...
+Loading product catalog...,កំពុងផ្ទុកកាតាឡុកផលិតផល...
+Loading return invoices...,កំពុង​ផ្ទុក​វិក្កយបត្រ​ត្រឡប់...
+Loading server CPU/memory usage...,កំពុងផ្ទុកស៊ីភីយូ/ការប្រើប្រាស់អង្គចងចាំរបស់ម៉ាស៊ីនមេ...
+Loading suppliers...,កំពុងផ្ទុកអ្នកផ្គត់ផ្គង់...
+Loading unpaid invoices...,កំពុងផ្ទុកវិក្កយបត្រដែលមិនទាន់បង់ប្រាក់...
+Loading view...,កំពុងផ្ទុកទិដ្ឋភាព...
+Loading...,កំពុង​ផ្ទុក...
+Local storage is unavailable. Switching to online-only mode.,កន្លែងផ្ទុកក្នុងតំបន់មិនអាចប្រើបានទេ។ ប្តូរទៅរបៀបសម្រាប់តែអ៊ីនធឺណិត។
+localStorage,ការផ្ទុកក្នុងស្រុក
+Location Performance,ការអនុវត្តទីតាំង
+Locations,ទីតាំង
+Lock Screen,ចាក់សោអេក្រង់
+Lookup Workflow,រកមើលលំហូរការងារ
+Loss,ការបាត់បង់
+Low,ទាប
+Low Stock,ភាគហ៊ុនទាប
+Low Stock Alerts,ការជូនដំណឹងអំពីស្តុកទាប
+Low Stock Items,ធាតុស្តុកទាប
+Low Stock Threshold,កម្រិតស្តុកទាប
+Low Stock Total,ភាគហ៊ុនទាបសរុប
+Lowest Margin,រឹមទាបបំផុត។
+Low-frequency maintenance and system details.,ការថែទាំប្រេកង់ទាប និងព័ត៌មានលម្អិតអំពីប្រព័ន្ធ។
+Loyalty Redeemed,ភក្ដីភាពត្រូវបានប្រោសលោះ
+Loyalty Redemption,ការប្រោសលោះភាពស្មោះត្រង់
+Make New Payment,ធ្វើការទូទាត់ថ្មី។
+Manage all,គ្រប់គ្រងទាំងអស់។
+Manage and synchronize your offline transactions,គ្រប់គ្រង និងធ្វើសមកាលកម្មប្រតិបត្តិការក្រៅបណ្តាញរបស់អ្នក។
+Manage Cashier PIN,គ្រប់គ្រងលេខ PIN អ្នកគិតលុយ
+"Manage offline tools, terminal controls, and maintenance from one workspace.",គ្រប់គ្រងឧបករណ៍ក្រៅបណ្តាញ ការគ្រប់គ្រងស្ថានីយ និងការថែទាំពីកន្លែងធ្វើការមួយ។
+manual,សៀវភៅដៃ
+"Manual codes, barcode scans, and QR scans work in the same field",លេខកូដដោយដៃ ការស្កេនបាកូដ និងការស្កេន QR ដំណើរការក្នុងវាលតែមួយ
+Manual offline mode is enabled,របៀបក្រៅបណ្តាញដោយដៃត្រូវបានបើក
+Margin,រឹម
+Maximum available quantity is {0}. Quantity adjusted to match stock.,បរិមាណអតិបរមាដែលមានគឺ {0}។ បរិមាណ​ត្រូវ​គ្នា​នឹង​ស្តុក។
+Maximum discount amount for this offer item is {0}.,ចំនួនបញ្ចុះតម្លៃអតិបរមាសម្រាប់ធាតុផ្តល់ជូននេះគឺ {0}។
+Maximum discount percentage for this offer item is {0}%.,ភាគរយបញ្ចុះតម្លៃអតិបរមាសម្រាប់ធាតុផ្តល់ជូននេះគឺ {0}%។
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,បរិមាណផ្តល់ជូនអតិបរមាគឺ {0}។ បរិមាណត្រូវបានកែតម្រូវតាមដែនកំណត់ដែលអនុញ្ញាត។
+Medium,មធ្យម
+Method-wise Collections,ការប្រមូលតាមវិធីសាស្រ្ត
+Minimum allowed rate for this offer item is {0}.,អត្រាអនុញ្ញាតអប្បបរមាសម្រាប់ធាតុផ្តល់ជូននេះគឺ {0}។
+Minimum Qty,ចំនួនអប្បបរមា
+Mobile No,លេខទូរសព្ទ
+Mode,របៀប
+Mode of Payment,របៀបបង់ប្រាក់
+Month,ខែ
+Month ?,ខែ?
+Monthly Profit,ប្រាក់ចំណេញប្រចាំខែ
+Monthly Sales,ការលក់ប្រចាំខែ
+Monthly Sales Summary,សង្ខេបការលក់ប្រចាំខែ
+Month-wise,ប្រចាំខែ
+Most Active Cashiers,អ្នកគិតលុយសកម្មបំផុត។
+Movement Type,ប្រភេទចលនា
+Movements,ចលនា
+Multi Currency,រូបិយប័ណ្ណច្រើន។
+N/A,គ្មាន
+Name,ឈ្មោះ
+Negative Stock,ភាគហ៊ុនអវិជ្ជមាន
+Negative Stock Items,ធាតុភាគហ៊ុនអវិជ្ជមាន
+Negative values not allowed,តម្លៃអវិជ្ជមានមិនត្រូវបានអនុញ្ញាតទេ។
+Net,សុទ្ធ
+Net Qty,Qty សុទ្ធ
+Net Sales,ការលក់សុទ្ធ
+Net Value,តម្លៃសុទ្ធ
+Never,មិនដែល
+New changes are ready to load,ការផ្លាស់ប្តូរថ្មីរួចរាល់ក្នុងការផ្ទុក
+New Item,ធាតុថ្មី។
+New Offer Available,ការផ្តល់ជូនថ្មីអាចរកបាន
+New PIN,កូដ PIN ថ្មី។
+New rate,អត្រាថ្មី។
+Next unit of measure,ឯកតារង្វាស់បន្ទាប់
+No attribute data found.,រកមិនឃើញទិន្នន័យគុណលក្ខណៈទេ។
+No Barcode,គ្មាន Barcode
+No barcode found for UOM '{0}',រកមិនឃើញបាកូដសម្រាប់ UOM '{0}'
+No branch/location data found.,រកមិនឃើញទិន្នន័យសាខា/ទីតាំងទេ។
+No brand data found.,រកមិនឃើញទិន្នន័យម៉ាកទេ។
+No cached gift card balance is available offline.,មិនមានសមតុល្យកាតអំណោយក្នុងឃ្លាំងសម្ងាត់អាចប្រើប្រាស់បានដោយមិនមានអ៊ីនធឺណិតទេ។
+No camera found on this device. Please ensure your device has a working camera.,រកមិនឃើញកាមេរ៉ានៅលើឧបករណ៍នេះទេ។ សូមប្រាកដថាឧបករណ៍របស់អ្នកមានកាមេរ៉ាដែលកំពុងដំណើរការ។
+No capability warnings recorded yet.,មិនទាន់បានកត់ត្រាការព្រមានអំពីសមត្ថភាពនៅឡើយទេ។
+No cash expected for this shift.,មិនមានសាច់ប្រាក់រំពឹងសម្រាប់ការផ្លាស់ប្តូរនេះទេ។
+No cash mode configured,មិន​បាន​កំណត់​ទម្រង់​សាច់ប្រាក់​ទេ។
+No cash movement type is allowed for this POS Profile.,គ្មានប្រភេទចលនាសាច់ប្រាក់ត្រូវបានអនុញ្ញាតសម្រាប់ប្រវត្តិរូប POS នេះទេ។
+No cashier PIN is set yet. Create one now.,មិន​ទាន់​មាន​លេខ PIN អ្នក​គិតលុយ​ត្រូវ​បាន​កំណត់​នៅ​ឡើយ​ទេ។ បង្កើតមួយឥឡូវនេះ។
+No cashier profiles are available for this POS profile yet.,មិនទាន់មានប្រវត្តិរូបអ្នកគិតលុយសម្រាប់ទម្រង់ POS នេះនៅឡើយទេ។
+No cashier-wise discount/void/return activity.,មិនមានសកម្មភាពបញ្ចុះតម្លៃ/ចាត់ទុកជាមោឃៈ/ការប្រគល់ប្រាក់តាមអ្នកគិតលុយទេ។
+No category data found.,រកមិនឃើញទិន្នន័យប្រភេទទេ។
+No category profitability data found.,រកមិនឃើញទិន្នន័យប្រាក់ចំណេញប្រភេទទេ។
+No change returned recorded for this shift.,គ្មានការផ្លាស់ប្តូរដែលបានត្រឡប់មកវិញដែលបានកត់ត្រាសម្រាប់ការផ្លាស់ប្តូរនេះទេ។
+No change-allocation invoices match the current filters.,គ្មាន​វិក្កយបត្រ​ការ​ផ្លាស់ប្តូរ​ការ​បែងចែក​ត្រូវ​នឹង​តម្រង​បច្ចុប្បន្ន​ទេ។
+No charge head breakdown found.,រកមិនឃើញការវិភាគក្បាលគិតថ្លៃទេ។
+No Company Selected,គ្មានក្រុមហ៊ុនត្រូវបានជ្រើសរើសទេ។
+No customer sales data found.,រកមិនឃើញទិន្នន័យលក់របស់អតិថិជនទេ។
+No day-wise discount/void/return trend.,គ្មានការបញ្ចុះតម្លៃ/ចាត់ទុកជាមោឃៈ/និន្នាការត្រឡប់មកវិញ។
+No day-wise payment data found.,រកមិនឃើញទិន្នន័យការទូទាត់ប្រចាំថ្ងៃទេ។
+No day-wise profitability trend found.,រកមិនឃើញនិន្នាការរកប្រាក់ចំណេញប្រចាំថ្ងៃទេ។
+No day-wise purchase data found.,រកមិនឃើញទិន្នន័យការទិញប្រចាំថ្ងៃទេ។
+No day-wise sales trend found.,រកមិនឃើញនិន្នាការលក់ប្រចាំថ្ងៃទេ។
+No day-wise tax/charges trend found.,រកមិនឃើញនិន្នាការពន្ធ/ការគិតថ្លៃប្រចាំថ្ងៃទេ។
+No dead stock items.,គ្មាន​ទំនិញ​ស្តុក​ទុក​ទេ។
+No due date,គ្មានកាលបរិច្ឆេទកំណត់
+No exact repair match found for this invoice,រកមិនឃើញការប្រកួតជួសជុលពិតប្រាកដសម្រាប់វិក្កយបត្រនេះទេ។
+No hourly sales trend found for today.,រកមិនឃើញនិន្នាការលក់រៀងរាល់ម៉ោងសម្រាប់ថ្ងៃនេះទេ។
+No invoice activity found.,រកមិនឃើញសកម្មភាពវិក្កយបត្រទេ។
+No invoices found,រកមិនឃើញវិក្កយបត្រទេ។
+No invoices found. Try different search criteria.,រកមិនឃើញវិក្កយបត្រទេ។ សាកល្បងលក្ខណៈវិនិច្ឆ័យស្វែងរកផ្សេងៗគ្នា។
+No invoices recorded for this shift.,មិនមានវិក្កយបត្រដែលបានកត់ត្រាសម្រាប់ការផ្លាស់ប្តូរនេះទេ។
+No item profitability data found.,រកមិនឃើញទិន្នន័យប្រាក់ចំណេញរបស់ធាតុទេ។
+No item sales data found for this period.,រកមិនឃើញទិន្នន័យលក់ទំនិញសម្រាប់រយៈពេលនេះទេ។
+No items found,រកមិនឃើញធាតុទេ។
+No items in cart,មិនមានទំនិញនៅក្នុងរទេះទេ។
+No items with barcodes to print,មិនមានធាតុដែលមានលេខកូដសម្រាប់បោះពុម្ពទេ។
+No location-wise top item data found.,រកមិនឃើញទិន្នន័យធាតុកំពូលតាមទីតាំងទេ។
+No low stock alerts right now.,គ្មាន​ការ​ជូន​ដំណឹង​ពី​ស្តុក​ទាប​ទេ​ឥឡូវ​នេះ។
+No low stock items.,មិនមានធាតុស្តុកទាបទេ។
+No matching items in cart,មិនមានធាតុដែលត្រូវគ្នានៅក្នុងរទេះទេ។
+No month-wise sales trend found.,រកមិនឃើញនិន្នាការលក់ប្រចាំខែទេ។
+No negative stock items.,មិនមានធាតុស្តុកអវិជ្ជមានទេ។
+No notifications yet,មិនមានការជូនដំណឹងនៅឡើយទេ
+No offline cash movement synced.,មិនមានការធ្វើសមកាលកម្មចលនាសាច់ប្រាក់ក្រៅបណ្តាញទេ។
+No offline invoices pending synchronization,មិនមានវិក្កយបត្រក្រៅបណ្តាញដែលកំពុងរង់ចាំការធ្វើសមកាលកម្មទេ។
+No offline sync issues recorded yet.,មិន​ទាន់​មាន​បញ្ហា​សមកាលកម្ម​ក្រៅ​បណ្ដាញ​ត្រូវ​បាន​ថត​នៅ​ឡើយ​ទេ។
+No out-of-stock items.,មិនមានទំនិញអស់ពីស្តុក។
+No outstanding credit invoices for this shift.,មិនមានវិក្កយបត្រឥណទានដែលនៅសល់សម្រាប់ការផ្លាស់ប្តូរនេះទេ។
+No payment collection data found.,រកមិនឃើញទិន្នន័យប្រមូលការទូទាត់ទេ។
+No payment rows available on this invoice.,មិនមានជួរបង់ប្រាក់ដែលមាននៅលើវិក្កយបត្រនេះទេ។
+No payments registered for this shift.,គ្មានការបង់ប្រាក់ដែលបានចុះឈ្មោះសម្រាប់ការផ្លាស់ប្តូរនេះទេ។
+No pending balances in this period.,មិន​មាន​សមតុល្យ​ដែល​កំពុង​រង់ចាំ​ក្នុង​រយៈពេល​នេះ​ទេ។
+No pending offline invoices,មិន​មាន​វិក្កយបត្រ​ក្រៅ​បណ្ដាញ​ដែល​កំពុង​រង់ចាំ
+No Print Formats Found,រកមិនឃើញទម្រង់បោះពុម្ពទេ។
+No profiles found for selected scope. Falling back to current profile failed.,រកមិនឃើញទម្រង់សម្រាប់វិសាលភាពដែលបានជ្រើសរើសទេ។ បរាជ័យក្នុងការត្រលប់ទៅប្រវត្តិរូបបច្ចុប្បន្នវិញ។
+No recent customer activity found.,រកមិនឃើញសកម្មភាពអតិថិជនថ្មីៗទេ។
+No recent stock entries found.,រកមិនឃើញធាតុស្តុកថ្មីៗទេ។
+No records found,រកមិនឃើញកំណត់ត្រាទេ។
+No reorder suggestions right now.,មិន​មាន​ការណែនាំ​បញ្ជា​ទិញ​ឡើង​វិញ​ទេ​ឥឡូវ​នេះ។
+No repeat customers in this period.,មិនមានអតិថិជនដដែលៗក្នុងអំឡុងពេលនេះទេ។
+No response from server,គ្មានការឆ្លើយតបពីម៉ាស៊ីនមេទេ។
+No return invoices found,រកមិនឃើញវិក្កយបត្រត្រឡប់មកវិញទេ។
+No return item trend found.,រកមិនឃើញនិន្នាការធាតុត្រឡប់មកវិញទេ។
+No returnable items found for this invoice,រកមិនឃើញធាតុដែលអាចយកមកវិញបានសម្រាប់វិក្កយបត្រនេះទេ។
+No returns were processed in this shift.,គ្មានការត្រឡប់មកវិញត្រូវបានដំណើរការនៅក្នុងការផ្លាស់ប្តូរនេះទេ។
+No risk activity found.,រកមិនឃើញសកម្មភាពហានិភ័យទេ។
+No sales activity found for this period.,រកមិនឃើញសកម្មភាពលក់ទេសម្រាប់រយៈពេលនេះ។
+No slow moving items.,មិនមានធាតុផ្លាស់ទីយឺតទេ។
+No staff sales activity found.,រកមិនឃើញសកម្មភាពលក់បុគ្គលិកទេ។
+No stock movement for this period.,មិនមានចលនាភាគហ៊ុនសម្រាប់រយៈពេលនេះទេ។
+No submitted cash movements in this shift.,មិនមានការផ្ទេរសាច់ប្រាក់នៅក្នុងការផ្លាស់ប្តូរនេះទេ។
+No supplier purchases found in this month.,រកមិនឃើញការទិញរបស់អ្នកផ្គត់ផ្គង់នៅក្នុងខែនេះទេ។
+No suppliers found for this period.,រកមិនឃើញអ្នកផ្គត់ផ្គង់ទេសម្រាប់រយៈពេលនេះ។
+No sync trigger has run yet in this session.,មិនទាន់មានដំណើរការធ្វើសមកាលកម្មនៅឡើយទេនៅក្នុងវគ្គនេះ
+No tax head breakdown found.,រកមិនឃើញការវិភាគក្បាលពន្ធទេ។
+No top items found for this location.,រកមិនឃើញធាតុកំពូលសម្រាប់ទីតាំងនេះទេ។
+No unpaid invoices,មិនមានវិក្កយបត្រដែលមិនបានបង់ប្រាក់ទេ។
+No variant data found.,រកមិនឃើញទិន្នន័យបំរែបំរួលទេ។
+No week-wise sales trend found.,រកមិនឃើញនិន្នាការលក់ប្រចាំសប្តាហ៍ទេ។
+No.,ទេ
+Nobile Number,លេខ Nobile
+Not available,មិនអាចប្រើបានទេ។
+Not checked,មិនបានត្រួតពិនិត្យ
+Not selected,មិនបានជ្រើសរើស
+Not Set,មិនបានកំណត់
+Notifications,ការជូនដំណឹង
+Offer,ការផ្តល់ជូន
+Offer Applied,ការផ្តល់ជូនត្រូវបានអនុវត្ត
+Offer criteria exceeded,លើសពីលក្ខខណ្ឌនៃការផ្តល់ជូន
+Offer Item,ធាតុផ្តល់ជូន
+Offer item unavailable,ធាតុផ្តល់ជូនមិនអាចប្រើបានទេ។
+Offer Removed,ការផ្តល់ជូនត្រូវបានដកចេញ
+Offer UOM cannot be changed,ការផ្តល់ជូន UOM មិនអាចផ្លាស់ប្តូរបានទេ។
+Offer?,ផ្តល់ជូន?
+Offers,ការផ្តល់ជូន
+Offline,ក្រៅបណ្តាញ
+Offline & Sync,ក្រៅបណ្តាញ និងសមកាលកម្ម
+Offline Capabilities,សមត្ថភាពក្រៅបណ្តាញ
+Offline data status refreshed,ស្ថានភាពទិន្នន័យក្រៅបណ្តាញត្រូវបានធ្វើឱ្យស្រស់ឡើងវិញ
+Offline diagnostics,ការធ្វើរោគវិនិច្ឆ័យក្រៅបណ្តាញ
+Offline Invoices,វិក្កយបត្រក្រៅបណ្តាញ
+Offline invoices status,ស្ថានភាពវិក័យប័ត្រក្រៅបណ្តាញ
+Offline invoices synced,វិក្កយបត្រក្រៅបណ្តាញត្រូវបានធ្វើសមកាលកម្ម
+Offline Queue: {0},ជួរក្រៅបណ្តាញ៖ {0}
+Offline rebuild guidance,ការណែនាំបង្កើតឡើងវិញក្រៅបណ្តាញ
+Offline restore is unavailable for this session.,ការស្តារដោយគ្មានអ៊ីនធឺណិតមិនមានសម្រាប់វគ្គនេះទេ។
+Offline selling is available with degraded capabilities.,ការលក់ក្រៅបណ្តាញអាចប្រើបានជាមួយនឹងសមត្ថភាពធ្លាក់ចុះ
+Offline snapshot does not match the current POS state.,រូបថតក្រៅបណ្តាញមិនត្រូវគ្នានឹងស្ថានភាពម៉ាស៊ីនឆូតកាតបច្ចុប្បន្នទេ។
+Offline Status,ស្ថានភាពក្រៅបណ្តាញ
+"Offline, terminal, and system controls",ក្រៅបណ្តាញ ស្ថានីយ និងការគ្រប់គ្រងប្រព័ន្ធ
+OK,យល់ព្រម
+Online,អនឡាញ
+Open actions menu,បើកម៉ឺនុយសកម្មភាព
+Open balance to collect,បើកសមតុល្យដើម្បីប្រមូល
+Open Customer Display,បើកការបង្ហាញអតិថិជន
+Open drawer,បើកថត
+Open invoices,បើកវិក្កយបត្រ
+Open Payments?,បើកការទូទាត់?
+Open POS home,បើកម៉ាស៊ីនឆូតកាតនៅផ្ទះ
+Open this screen from POS Menu -> Open Customer Display.,បើកអេក្រង់នេះពី POS Menu -> បើកការបង្ហាញអតិថិជន។
+OpenCV image processing enabled - Enhanced barcode detection,ដំណើរការរូបភាព OpenCV ត្រូវបានបើក - ការរកឃើញលេខកូដដែលប្រសើរឡើង
+OpenCV image processing unavailable on this device,ដំណើរការរូបភាព OpenCV មិនមាននៅលើឧបករណ៍នេះទេ។
+OpenCV Off,បិទ OpenCV
+OpenCV On,OpenCV បើក
+OpenCV processing disabled,ដំណើរការ OpenCV ត្រូវបានបិទ
+Opening Amount,ចំនួនទឹកប្រាក់បើក
+Opening Cash,ការបើកសាច់ប្រាក់
+options,ជម្រើស
+Order,បញ្ជាទិញ
+Original,ដើម
+Other,ផ្សេងៗ
+Out,ចេញ
+Out of Stock,អស់ពីស្តុក
+Out of Stock Items,ទំនិញអស់ពីស្តុក
+Outstanding,ពូកែ
+Outstanding Credit by Currency,ឥណទានឆ្នើមតាមរូបិយប័ណ្ណ
+Overdue,ហួសកំណត់
+Overpayment Change,ការផ្លាស់ប្តូរការទូទាត់លើស
+Overpayment change deducted: {0},ការផ្លាស់ប្តូរការទូទាត់លើសត្រូវបានកាត់ចេញ៖ {0}
+Packing List,បញ្ជីវេចខ្ចប់
+Page Format,ទម្រង់ទំព័រ
+Page unavailable offline,ទំព័រមិនអាចប្រើបានក្រៅបណ្តាញ
+Paid,បង់
+Paid (orig):,បានបង់ (ដើម)៖
+Paid Amount,ចំនួនទឹកប្រាក់ដែលបានបង់
+Paid change cannot be greater than total change!,ការផ្លាស់ប្តូរដែលបានបង់មិនអាចធំជាងការផ្លាស់ប្តូរសរុប!
+Paid:,បានបង់៖
+Parent Item,ធាតុមេ
+Partial,ផ្នែក
+Partly Paid,បង់មួយផ្នែក
+Party Account,គណនីគណបក្ស
+Party Type,ប្រភេទគណបក្ស
+Pause terminal until next cashier,ផ្អាកស្ថានីយរហូតដល់អ្នកគិតលុយបន្ទាប់
+PAY,បង់
+Payment,ការទូទាត់
+Payment Account,គណនីទូទាត់
+Payment entries processed for Invoice {0},ធាតុទូទាត់ត្រូវបានដំណើរការសម្រាប់វិក្កយបត្រ {0}
+Payment Entry Type,ប្រភេទនៃការទូទាត់
+Payment History,ប្រវត្តិការទូទាត់
+Payment ID,លេខសម្គាល់ការទូទាត់
+Payment Method Report,របាយការណ៍វិធីបង់ប្រាក់
+Payment Methods,វិធីសាស្រ្តទូទាត់
+Payment of {0} received successfully.,ការបង់ប្រាក់ចំនួន {0} បានទទួលដោយជោគជ័យ។
+Payment Progress,វឌ្ឍនភាពនៃការទូទាត់
+Payment Reconciliation,ការផ្សះផ្សាការទូទាត់
+Payment request status could not be retrieved. Please try again,ស្ថានភាពសំណើទូទាត់មិនអាចទាញយកមកវិញបានទេ។ សូមព្យាយាមម្តងទៀត
+Payment Request took too long to respond. Please try requesting for payment again,សំណើបង់ប្រាក់ចំណាយពេលយូរពេកក្នុងការឆ្លើយតប។ សូមព្យាយាមស្នើសុំការទូទាត់ម្តងទៀត
+Payment saved offline,ការបង់ប្រាក់ត្រូវបានរក្សាទុកក្រៅបណ្តាញ
+Payment State,ស្ថានភាពទូទាត់
+Payment Status,ស្ថានភាពការទូទាត់
+Payment submitted but print function could not be executed. Payment name not found.,ការទូទាត់ត្រូវបានបញ្ជូន ប៉ុន្តែមុខងារបោះពុម្ពមិនអាចប្រតិបត្តិបានទេ។ រកមិនឃើញឈ្មោះបង់ប្រាក់ទេ។
+Payment submitted.,ការទូទាត់ត្រូវបានបញ្ជូន។
+Payment Summary,សង្ខេបការទូទាត់
+Payments,ការទូទាត់
+Payments are not open. Do you want to open payments and submit?,ការទូទាត់មិនបើកទេ។ តើអ្នកចង់បើកការបង់ប្រាក់ ហើយដាក់ស្នើទេ?
+Payments by Mode of Payment,ការទូទាត់តាមវិធីនៃការទូទាត់
+PDF,PDF
+Peak Hour,ម៉ោងកំពូល
+Peak Memory:,ការចងចាំកំពូល៖
+Peak Server:,ម៉ាស៊ីនមេកំពូល៖
+Peak:,កំពូល៖
+Pending,កំពុងរង់ចាំ
+Pending Amount,ចំនួនទឹកប្រាក់ដែលមិនទាន់សម្រេច
+Pending count updated from {0} to {1},ចំនួនដែលមិនទាន់សម្រេចបានធ្វើបច្ចុប្បន្នភាពពី {0} ដល់ {1}
+Pending Exposure,រង់ចាំការប៉ះពាល់
+Pending Invoices,វិក្កយបត្រដែលកំពុងរង់ចាំ
+Pending Ratio,សមាមាត្ររង់ចាំ
+Pending Sales,ការលក់ដែលកំពុងរង់ចាំ
+Pending sales: {0} | Cache usage: {1}%,ការលក់មិនទាន់សម្រេច៖ {0} | ការប្រើប្រាស់ឃ្លាំងសម្ងាត់៖ {1}%
+Pending Sync,សមកាលកម្មកំពុងរង់ចាំ
+Pending: {0},រង់ចាំ៖ {0}
+Pending: {0} | Synced: {1} | Draft: {2},រង់ចាំ៖ {0} | បានធ្វើសមកាលកម្ម៖ {1} | សេចក្តីព្រាង៖ {2}
+Per Page,ក្នុងមួយទំព័រ
+Personal,ផ្ទាល់ខ្លួន
+Personal preferences adjust the current cashier experience without changing the active POS route.,ចំណង់ចំណូលចិត្តផ្ទាល់ខ្លួនកែតម្រូវបទពិសោធន៍អ្នកគិតលុយបច្ចុប្បន្នដោយមិនផ្លាស់ប្តូរផ្លូវម៉ាស៊ីនឆូតកាតសកម្ម។
+PIN confirmation does not match.,ការបញ្ជាក់កូដ PIN មិនត្រូវគ្នាទេ។
+PIN must be 4 to 8 digits.,កូដ PIN ត្រូវតែមានពី 4 ទៅ 8 ខ្ទង់។
+Please add at least one item.,សូមបន្ថែមធាតុយ៉ាងហោចណាស់មួយ។
+Please allow camera access to scan codes,សូមអនុញ្ញាតឱ្យចូលប្រើកាមេរ៉ាដើម្បីស្កេនលេខកូដ
+Please enter payment amount,សូមបញ្ចូលចំនួនទឹកប្រាក់ទូទាត់
+Please fill all required fields,សូមបំពេញវាលដែលត្រូវការទាំងអស់។
+Please make a payment or select a payment,សូមធ្វើការបង់ប្រាក់ ឬជ្រើសរើសការទូទាត់
+Please request phone payment or use another payment method,សូមស្នើសុំការទូទាត់តាមទូរស័ព្ទ ឬប្រើវិធីបង់ប្រាក់ផ្សេងទៀត។
+Please select a customer first,សូមជ្រើសរើសអតិថិជនជាមុនសិន
+Please select a party,សូមជ្រើសរើសពិធីជប់លៀង
+Please select a party before reconciling.,សូមជ្រើសរើសភាគីមួយមុនពេលផ្សះផ្សា។
+Please select a valid movement type.,សូមជ្រើសរើសប្រភេទចលនាត្រឹមត្រូវ។
+Please select an invoice,សូមជ្រើសរើសវិក្កយបត្រ
+Please select company before reconciling.,សូមជ្រើសរើសក្រុមហ៊ុនមុនពេលផ្សះផ្សា។
+Please set the customer's mobile number,សូមកំណត់លេខទូរស័ព្ទរបស់អតិថិជន
+Please try again or enter the item manually.,សូមព្យាយាមម្តងទៀត ឬបញ្ចូលធាតុដោយដៃ។
+Please verify the barcode or check the item's availability.,សូមផ្ទៀងផ្ទាត់បាកូដ ឬពិនិត្យមើលភាពអាចរកបានរបស់ធាតុ។
+Points,ពិន្ទុ
+Popup blocked. Please allow popups.,ការលេចឡើងត្រូវបានរារាំង។ សូមអនុញ្ញាតការលេចឡើង។
+POS,ម៉ាស៊ីនឆូតកាត
+POS controls and maintenance,ការគ្រប់គ្រង និងថែទាំម៉ាស៊ីនឆូតកាត
+POS Expense is disabled for this POS Profile.,ការចំណាយលើម៉ាស៊ីនឆូតកាតត្រូវបានបិទសម្រាប់ទម្រង់ POS នេះ។
+POS is running with limited offline prerequisites.,ម៉ាស៊ីនឆូតកាតកំពុងដំណើរការជាមួយនឹងតម្រូវការជាមុនក្រៅបណ្តាញមានកំណត់។
+POS Profile,ប្រវត្តិរូប POS
+Position the QR code or barcode within the scanning area,ដាក់លេខកូដ QR ឬបាកូដនៅក្នុងតំបន់ស្កេន
+Posting,ប្រកាស
+Posting and Price List,តារាងតម្លៃ និងប្រកាស
+Posting Date,កាលបរិច្ឆេទប្រកាស
+Preparing background sync,កំពុងរៀបចំសមកាលកម្មផ្ទៃខាងក្រោយ
+"Press OK to continue offline with a warning, or Cancel to retry.",ចុច យល់ព្រម ដើម្បីបន្តដោយគ្មានអ៊ីនធឺណិតជាមួយនឹងការព្រមាន ឬបោះបង់ ដើម្បីព្យាយាមម្តងទៀត។
+Previous unit of measure,ឯកតារង្វាស់មុន។
+Price List,បញ្ជីតម្លៃ
+Price List Rate,អត្រាបញ្ជីតម្លៃ
+Price list rate updated locally only,អត្រាបញ្ជីតម្លៃបានធ្វើបច្ចុប្បន្នភាពក្នុងស្រុកតែប៉ុណ្ណោះ
+Pricing & Discounts,តម្លៃ & ការបញ្ចុះតម្លៃ
+Pricing Rule,ច្បាប់កំណត់តម្លៃ
+Print,បោះពុម្ព
+Print Draft,បោះពុម្ពសេចក្តីព្រាង
+Print Format (Invoice),ទម្រង់បោះពុម្ព (វិក្កយបត្រ)
+Print Format (Order),ទម្រង់បោះពុម្ព (បញ្ជាទិញ)
+Print invoice,បោះពុម្ពវិក្កយបត្រ
+Print Purchase Invoice instead of PO,បោះពុម្ពវិក្កយបត្រការទិញជំនួសឱ្យ PO
+Printer,ម៉ាស៊ីនបោះពុម្ព
+Processed returns impacting the shift totals,លទ្ធផលដែលបានដំណើរការប៉ះពាល់ដល់ចំនួនសរុបនៃការផ្លាស់ប្តូរ
+Processing Payment,ដំណើរការការទូទាត់
+Processing payment entries for Invoice {0},កំពុងដំណើរការធាតុបង់ប្រាក់សម្រាប់វិក្កយបត្រ {0}
+Profile,ប្រវត្តិរូប
+Profiles,ប្រវត្តិរូប
+Profit,ប្រាក់ចំណេញ
+Profit: Invoice Item Estimate,ប្រាក់ចំណេញ៖ ការប៉ាន់ស្មានធាតុវិក្កយបត្រ
+Profit: Stock Ledger (COGS),ប្រាក់ចំណេញ៖ សៀវភៅបញ្ជីភាគហ៊ុន (COGS)
+Profitability Report,របាយការណ៍ប្រាក់ចំណេញ
+Prorated return discount,ការបញ្ចុះតម្លៃត្រឡប់មកវិញតាមសមាមាត្រ
+Purchase Amount,ចំនួនទឹកប្រាក់ទិញ
+Purchase Invoices,ទិញវិក្កយបត្រ
+Purchase Order created,ការបញ្ជាទិញត្រូវបានបង្កើតឡើង
+Qty,ចំនួន
+Qualified,មានលក្ខណៈសម្បត្តិគ្រប់គ្រាន់
+Quantity,បរិមាណ
+Quantity exceeds available stock,បរិមាណលើសពីស្តុកដែលមាន
+Quick Actions,សកម្មភាពរហ័ស
+Quotation {0} is Submitted,សម្រង់តម្លៃ {0} ត្រូវបានបញ្ជូន
+Quotation submitted,បាន​ដាក់​សំណើ​សម្រង់
+QZ Tray connected.,ថាស QZ បានភ្ជាប់។
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ Tray ត្រូវបានផ្តាច់ដោយដៃ។ ចុច Connect ដើម្បីបើកវាម្តងទៀត។
+QZ Tray is not connected.,ថាស QZ មិនត្រូវបានភ្ជាប់ទេ។
+QZ Tray Setup,ការដំឡើងថាស QZ
+Rate,អត្រា
+Rate adjusted to maximum allowed discount,អត្រាការប្រាក់ត្រូវបានកែសម្រួលទៅជាការបញ្ចុះតម្លៃអតិបរមាដែលអនុញ្ញាត
+Ready,រួចរាល់
+Ready to resume,រួចរាល់ដើម្បីបន្ត
+Ready!,រួចរាល់ហើយ!
+Real-time POS insights for retail operations.,ការយល់ដឹងអំពីម៉ាស៊ីនឆូតកាតតាមពេលវេលាជាក់ស្តែងសម្រាប់ប្រតិបត្តិការលក់រាយ។
+Rebuild Offline Data,បង្កើតទិន្នន័យក្រៅបណ្តាញឡើងវិញ
+Receive,ទទួល
+Receive now,ទទួលឥឡូវនេះ
+Received,បានទទួល
+Received:,បានទទួល៖
+Recent Movement Entries,ធាតុនៃចលនាថ្មីៗ
+Recent updates about your invoices,បច្ចុប្បន្នភាពថ្មីៗអំពីវិក្កយបត្ររបស់អ្នក។
+Recently Active Customers,អតិថិជនសកម្មថ្មីៗ
+Rechecking connection,កំពុងពិនិត្យមើលការតភ្ជាប់ឡើងវិញ
+Reconcile payment methods and close shift,ផ្សះផ្សាវិធីសាស្រ្តទូទាត់ និងបិទការផ្លាស់ប្តូរ
+Reconciling Payments,ការផ្សះផ្សាការទូទាត់
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.",ភ្ជាប់ឡើងវិញ ហើយបើកទំព័រនេះម្តងពេលកំពុងអ៊ីនធឺណិត បន្ទាប់មកការធ្វើឱ្យឡើងវិញដោយគ្មានអ៊ីនធឺណិតនឹងអាចស្ដារវាឡើងវិញបាន។
+Reconnect online to refresh cached offline data from the server.,ភ្ជាប់អ៊ីនធឺណិតឡើងវិញ ដើម្បីផ្ទុកទិន្នន័យក្រៅបណ្តាញដែលបានផ្ទុកឡើងវិញពីម៉ាស៊ីនមេ។
+Recreate local offline prerequisites from scratch,បង្កើតតម្រូវការជាមុនក្រៅបណ្តាញមូលដ្ឋានឡើងវិញពីដំបូង
+Recv:,Recv:
+Redeem,ប្រោសលោះ
+Redeem / Scan,ប្រោសលោះ / ស្កេន
+Redeem Amount,ចំនួនទឹកប្រាក់លោះ
+Redeem Mode,របៀបប្រោសលោះ
+Redeemed Amount,ចំនួនទឹកប្រាក់ដែលបានលោះ
+Redeemed credit cannot be greater than its total.,ឥណទានដែលបានប្ដូរមិនអាចធំជាងចំនួនសរុបរបស់វាទេ។
+Redemption and Totals,ការប្រោសលោះ និងសរុប
+Reference,ឯកសារយោង
+Refresh,ធ្វើឱ្យស្រស់
+Refresh Exchange Rate,ធ្វើបច្ចុប្បន្នភាពអត្រាប្តូរប្រាក់
+Refresh Offline Data,ផ្ទុកទិន្នន័យក្រៅបណ្តាញឡើងវិញ
+Refresh Printers,ធ្វើឱ្យម៉ាស៊ីនបោះពុម្ពឡើងវិញ
+Refund,សងប្រាក់វិញ។
+Release Notes,កំណត់ចំណាំចេញផ្សាយ
+Reload,ផ្ទុកឡើងវិញ
+Reload customers,ផ្ទុកអតិថិជនឡើងវិញ
+Reload Items,ផ្ទុកធាតុឡើងវិញ
+Reload Now,ផ្ទុកឡើងវិញឥឡូវនេះ
+Reload to apply the latest changes. Your current session will be refreshed.,ផ្ទុកឡើងវិញដើម្បីអនុវត្តការផ្លាស់ប្តូរចុងក្រោយបំផុត។ វគ្គបច្ចុប្បន្នរបស់អ្នកនឹងត្រូវបានធ្វើឱ្យស្រស់។
+Reload Workflow,ផ្ទុកលំហូរការងារឡើងវិញ
+Remarks,សុន្ទរកថា
+Remarks are required.,ការកត់សម្គាល់ត្រូវបានទាមទារ។
+Remove,ដកចេញ
+Remove barcode item,ដកធាតុបាកូដចេញ
+Remove cached data and reload the POS app,លុបទិន្នន័យក្នុងឃ្លាំងសម្ងាត់ ហើយផ្ទុកកម្មវិធី POS ឡើងវិញ
+Remove item,លុបធាតុ
+Remove Offer,លុបការផ្តល់ជូន
+Reorder / Purchase Suggestions,បញ្ជាទិញឡើងវិញ / សំណើទិញ
+Repair Candidate,ជួសជុលបេក្ខជន
+Repair Change Allocation,ជួសជុលការផ្លាស់ប្តូរការបែងចែក
+Repair requires an online connection,ការជួសជុលទាមទារការតភ្ជាប់អ៊ីនធឺណិត
+Repaired,ជួសជុល
+Repairing change allocation,ជួសជុលការបែងចែកការផ្លាស់ប្តូរ
+Repeat Customers,ធ្វើម្តងទៀតអតិថិជន
+Repeat Rate,អត្រាធ្វើម្តងទៀត
+Request,ស្នើសុំ
+Request ID: {0},លេខសម្គាល់សំណើ៖ {0}
+Request Payment,ស្នើសុំការទូទាត់
+Requested route: {0},ផ្លូវដែលបានស្នើសុំ៖ {0}
+Required columns cannot be hidden,ជួរឈរដែលត្រូវការមិនអាចលាក់បានទេ។
+Reset,កំណត់ឡើងវិញ
+Reset item name,កំណត់ឈ្មោះធាតុឡើងវិញ
+Reset to Default,កំណត់ឡើងវិញទៅលំនាំដើម
+Resource Health,សុខភាពធនធាន
+Restricted,បានដាក់កម្រិត
+Restricted operational controls for supervisors only.,ការគ្រប់គ្រងប្រតិបត្តិការដែលបានដាក់កម្រិតសម្រាប់តែអ្នកគ្រប់គ្រងប៉ុណ្ណោះ។
+Retry,ព្យាយាមម្តងទៀត
+Retry route,សាកល្បងផ្លូវម្តងទៀត
+Return,ត្រឡប់មកវិញ
+Return Amount,ចំនួនទឹកប្រាក់ត្រឡប់មកវិញ
+Return Count,ចំនួនត្រឡប់មកវិញ
+Return items must have negative quantities,ទំនិញត្រឡប់ត្រូវតែមានបរិមាណអវិជ្ជមាន
+Return total must be negative,សរុបមកវិញត្រូវតែអវិជ្ជមាន
+Return Valid Until,ត្រឡប់មានសុពលភាពរហូតដល់
+Return window passed,បង្អួចត្រឡប់បានកន្លងផុតទៅ
+Return without Invoice,ត្រឡប់ដោយគ្មានវិក័យប័ត្រ
+Returns,ត្រឡប់មកវិញ
+Returns / Voids / Discounts,ការត្រឡប់មកវិញ / មោឃៈ / ការបញ្ចុះតម្លៃ
+Returns by Currency,ត្រឡប់មកវិញដោយរូបិយប័ណ្ណ
+Revenue,ចំណូល
+Review shift totals before submitting the closing entry,ពិនិត្យមើលការផ្លាស់ប្តូរសរុប មុនពេលបញ្ជូនធាតុបិទ
+Round Off,ជុំបិទ
+Rows,ជួរដេក
+Rows:,ជួរ​ដេក៖
+Rule,ក្បួន
+Sale,លក់
+Sales,ការលក់
+Sales Order {0} is Submitted,ការបញ្ជាទិញលក់ {0} ត្រូវបានបញ្ជូន
+Sales Person and Print,បុគ្គលិកផ្នែកលក់ និងបោះពុម្ព
+Sales Person not found,រកមិនឃើញអ្នកលក់ទេ។
+Sales processed,ដំណើរការលក់
+Sales Return,ការលក់ត្រឡប់មកវិញ
+Sales Trend Report,របាយការណ៍និន្នាការលក់
+Save,រក្សាទុក
+Save & Clear,រក្សាទុក & ជម្រះ
+Save as POS Profile Default,រក្សាទុកជាទម្រង់ POS លំនាំដើម
+Save Settings,រក្សាទុកការកំណត់
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,រក្សាទុកម៉ាស៊ីនបោះពុម្ពដែលបានជ្រើសរើសជាទម្រង់ POS លំនាំដើម ដូច្នេះវាបង្ហាញដោយស្វ័យប្រវត្តិនៅលើការដំឡើងនេះ។
+Saved as draft because: {0},បានរក្សាទុកជាសេចក្តីព្រាងព្រោះ៖ {0}
+Saving...,កំពុងរក្សាទុក...
+Scale barcode detected. Quantity here is the number of labels to print.,បានរកឃើញរបារកូដមាត្រដ្ឋាន។ បរិមាណនៅទីនេះគឺជាចំនួនស្លាកដែលត្រូវបោះពុម្ព។
+Scale barcode settings are not configured. Using item barcode only.,ការ​កំណត់​របារ​កូដ​ខ្នាត​មិន​ត្រូវ​បាន​កំណត់​រចនាសម្ព័ន្ធ​ទេ។ ប្រើតែបាកូដធាតុ។
+Scale template barcode is missing for this item/UOM. Using item barcode only.,បាត់លេខកូដគំរូខ្នាតសម្រាប់ធាតុនេះ/UOM។ ប្រើតែបាកូដធាតុ។
+Scan an existing card and top it up without leaving the payment flow.,ស្កេនកាតដែលមានស្រាប់ ហើយបញ្ចូលវាដោយមិនបន្សល់នូវលំហូរនៃការទូទាត់។
+Scan Error,កំហុសស្កេន
+Scan or enter a gift card code to check balance or redeem.,ស្កេន ឬបញ្ចូលលេខកូដកាតអំណោយ ដើម្បីពិនិត្យមើលសមតុល្យ ឬប្តូរយក។
+Scan or paste the card code below.,ស្កេន ឬបិទភ្ជាប់កូដកាតខាងក្រោម។
+Scan QR Code/Barcode,ស្កែន QR Code/Barcode
+Scan with camera,ស្កេនជាមួយកាមេរ៉ា
+Scan-First Flow,ស្កែន-លំហូរដំបូង
+Scanned Code:,លេខកូដដែលបានស្កេន៖
+Scanning for: {0},កំពុងស្កេនសម្រាប់៖ {0}
+Scanning items,កំពុងស្កេនធាតុ
+Scan-Ready,ស្កេនរួចរាល់
+Scope,វិសាលភាព
+Scope: All Profiles,វិសាលភាព៖ ទម្រង់ទាំងអស់។
+Scope: Current Profile,វិសាលភាព៖ ប្រវត្តិរូបបច្ចុប្បន្ន
+Scope: Specific Profile,វិសាលភាព៖ ប្រវត្តិរូបជាក់លាក់
+Search,ស្វែងរក
+Search Account,ស្វែងរកគណនី
+Search an invoice and continue the return flow without extra steps.,ស្វែងរកវិក្កយបត្រ និងបន្តលំហូរត្រឡប់មកវិញដោយគ្មានជំហានបន្ថែម។
+Search customer,ស្វែងរកអតិថិជន
+Search invoices or customers,ស្វែងរកវិក្កយបត្រ ឬអតិថិជន
+Search item,ស្វែងរកធាតុ
+Search item / code,ស្វែងរកធាតុ / លេខកូដ
+Search items or barcode,ស្វែងរកធាតុឬលេខកូដ
+Search Mpesa Payments,ស្វែងរកការទូទាត់ Mpesa
+Search return invoices or customers,ស្វែងរកវិក្កយបត្រត្រឡប់ ឬអតិថិជន
+Search supplier,ស្វែងរកអ្នកផ្គត់ផ្គង់
+Search unpaid invoices or customers,ស្វែងរកវិក្កយបត្រដែលមិនទាន់បង់ប្រាក់ ឬអតិថិជន
+Secure context (HTTPS or localhost) is required for camera access.,បរិបទសុវត្ថិភាព (HTTPS ឬ localhost) ត្រូវបានទាមទារសម្រាប់ការចូលប្រើកាមេរ៉ា។
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,បរិបទសុវត្ថិភាព (HTTPS) ទាមទារសម្រាប់ការចូលប្រើកាមេរ៉ា។ សូមប្រើ HTTPS ដើម្បីចូលប្រើកាមេរ៉ា។
+Select,ជ្រើសរើស
+Select a cashier first.,ជ្រើសរើសអ្នកគិតលុយជាមុនសិន។
+Select a customer,ជ្រើសរើសអតិថិជន
+Select a customer to use coupon,ជ្រើសរើសអតិថិជនដើម្បីប្រើប័ណ្ណ
+Select a printer to use QZ silent printing.,ជ្រើសរើសម៉ាស៊ីនបោះពុម្ពដើម្បីប្រើការបោះពុម្ពស្ងាត់ QZ ។
+Select Batch,ជ្រើសរើសបាច់
+Select Columns to Display,ជ្រើសរើសជួរឈរដែលត្រូវបង្ហាញ
+Select items to sell,ជ្រើសរើសទំនិញដែលត្រូវលក់
+Select Payment,ជ្រើសរើសការទូទាត់
+Select Payment Account,ជ្រើសរើសគណនីទូទាត់
+Select printer,ជ្រើសរើសម៉ាស៊ីនបោះពុម្ព
+Select Return Invoice,ជ្រើសរើសវិក្កយបត្រត្រឡប់
+Select S.O,ជ្រើសរើស S.O
+Select Sales Orders,ជ្រើសរើសការបញ្ជាទិញលក់
+Select the cashier who is taking over this terminal.,ជ្រើសរើសអ្នកគិតលុយដែលកំពុងកាន់កាប់ស្ថានីយនេះ។
+Selected,បានជ្រើសរើស
+Selected movement type is not allowed by POS Profile.,ប្រភេទចលនាដែលបានជ្រើសរើសមិនត្រូវបានអនុញ្ញាតដោយ POS Profile ទេ។
+Selected Payments,ការទូទាត់ដែលបានជ្រើសរើស
+Sensitive actions kept away from quick taps.,សកម្មភាពរសើបបានរក្សាឱ្យឆ្ងាយពីការចុចរហ័ស។
+Serial,សៀរៀល
+Serial Numbers,លេខស៊េរី
+Server CPU Usage:,ការប្រើប្រាស់ស៊ីភីយូរបស់ម៉ាស៊ីនមេ៖
+Server Health,សុខភាពម៉ាស៊ីនមេ
+Server Memory Usage:,ការប្រើប្រាស់អង្គចងចាំម៉ាស៊ីនមេ៖
+Server Metrics,មាត្រដ្ឋានម៉ាស៊ីនមេ
+Server Uptime:,ពេលវេលាដំណើរការរបស់ម៉ាស៊ីនមេ៖
+Service Charges,ថ្លៃសេវា
+Session,វគ្គ
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,កំណត់កូដ PIN អ្នកគិតលុយនីមួយៗក្នុងទម្រង់អ្នកប្រើប្រាស់ និងរក្សាសមាជិកស្ថានីយដែលបានកំណត់ក្នុង POS Profile User ។
+Settings,ការកំណត់
+Settings in this section update the POS workspace without changing the current route.,ការកំណត់នៅក្នុងផ្នែកនេះធ្វើបច្ចុប្បន្នភាពកន្លែងធ្វើការ POS ដោយមិនចាំបាច់ផ្លាស់ប្តូរផ្លូវបច្ចុប្បន្ន។
+Setup complete!,ការដំឡើងបានបញ្ចប់!
+Share,ចែករំលែក
+Shared terminal,ស្ថានីយដែលបានចែករំលែក
+Shift Closed Snapshot,Shift Closed Snapshot
+Shift Overview,ការផ្លាស់ប្តូរទិដ្ឋភាពទូទៅ
+Show,បង្ហាញ
+Show cart on customer-facing screen,បង្ហាញរទេះនៅលើអេក្រង់ដែលប្រឈមមុខនឹងអតិថិជន
+Show last invoice rate,បង្ហាញអត្រាវិក្កយបត្រចុងក្រោយ
+Show rate info,បង្ហាញព័ត៌មានអត្រា
+Show Repair Candidates,បង្ហាញបេក្ខជនជួសជុល
+Show search tools,បង្ហាញឧបករណ៍ស្វែងរក
+Show the active cart on a customer-facing screen,បង្ហាញរទេះសកម្មនៅលើអេក្រង់ដែលប្រឈមមុខនឹងអតិថិជន
+Showing {0}-{1} of {2},បង្ហាញ {0}-{1} នៃ {2}
+Showing 0 of 0,បង្ហាញ 0 នៃ 0
+Shows the distribution of invoices per currency,បង្ហាញការចែកចាយវិក្កយបត្រក្នុងមួយរូបិយប័ណ្ណ
+Sign out of the current POS session,ចេញពីសម័យ POS បច្ចុប្បន្ន
+Size:,ទំហំ៖
+Skipped Payments,រំលងការទូទាត់
+Skipping items without barcodes,រំលងធាតុដោយគ្មានលេខកូដ
+Slow Moving,ចលនាយឺត
+Slow Moving Items,ធាតុផ្លាស់ទីយឺត
+Slow Queries:,សំណួរយឺត៖
+Sold,លក់
+Source,ប្រភព
+Source Cash Account (Optional Override),គណនីសាច់ប្រាក់ប្រភព (បដិសេធជាជម្រើស)
+Source Ex. Rate:,ប្រភព Ex. អត្រា៖
+Source Rate:,អត្រាប្រភព៖
+Specific Profile,ប្រវត្តិរូបជាក់លាក់
+Split Invoices,បំបែកវិក្កយបត្រ
+Staff / Cashier Performance Report,របាយការណ៍ការអនុវត្តបុគ្គលិក/អ្នកគិតលុយ
+Status,ស្ថានភាព
+Stock,ភាគហ៊ុន
+Stock Information,ព័ត៌មានភាគហ៊ុន
+Stock is lower than requested,ភាគហ៊ុនគឺទាបជាងការស្នើសុំ
+Stock is lower than requested:\n{0},ភាគហ៊ុនទាបជាងការស្នើសុំ៖\n{0}
+Stock Movement Report,របាយការណ៍ចលនាភាគហ៊ុន
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,បច្ចុប្បន្នភាពស្តុក៖ {0} មាន {1} ។ ការបន្ថែម {2} នឹងធ្វើឱ្យភាគហ៊ុននៅខាងក្រោមសូន្យ។
+Submit,ដាក់ស្នើ
+Submit & Print,ដាក់ស្នើ & បោះពុម្ព
+Submit Deposit,ដាក់ប្រាក់បញ្ញើ
+Submit Expense,ដាក់ស្នើការចំណាយ
+Submitted,បានដាក់ស្នើ
+Submitted Cash Movements,បានបញ្ជូនចលនាសាច់ប្រាក់
+Submitted entries,ធាតុដែលបានដាក់ស្នើ
+Successfully scanned:,ស្កេនដោយជោគជ័យ៖
+Suggested,បានណែនាំ
+Suggested Qty,ចំនួនដែលបានណែនាំ
+Supervisor Access,ការចូលប្រើអ្នកគ្រប់គ្រង
+Supervisor permissions unlock issuance and reloads,ការអនុញ្ញាតពីអ្នកគ្រប់គ្រងដោះសោការចេញ និងផ្ទុកឡើងវិញ
+Supervisor Tools,ឧបករណ៍អ្នកគ្រប់គ្រង
+Supplier,អ្នកផ្គត់ផ្គង់
+Supplier and dates are required.,អ្នកផ្គត់ផ្គង់ និងកាលបរិច្ឆេទត្រូវបានទាមទារ។
+Supplier Invoices,វិក្កយបត្រអ្នកផ្គត់ផ្គង់
+Supplier is required.,អ្នកផ្គត់ផ្គង់ត្រូវបានទាមទារ។
+Supplier name is required,ឈ្មោះអ្នកផ្គត់ផ្គង់ត្រូវបានទាមទារ
+Supplier Payments,ការទូទាត់របស់អ្នកផ្គត់ផ្គង់
+Supplier Purchase Summary,សេចក្តីសង្ខេបនៃការទិញរបស់អ្នកផ្គត់ផ្គង់
+Suppliers,អ្នកផ្គត់ផ្គង់
+Suppliers not found,រកមិនឃើញអ្នកផ្គត់ផ្គង់ទេ។
+Switch Camera,ប្តូរកាមេរ៉ា
+Switch Cashier,ប្តូរអ្នកគិតលុយ
+Switch the POS appearance theme,ប្តូររូបរាងរូបរាងម៉ាស៊ីនឆូតកាត
+Switched to:,បានប្តូរទៅ៖
+Sync All Invoices,ធ្វើសមកាលកម្មវិក្កយបត្រទាំងអស់។
+Sync Offline Cash Movements ({0}),ធ្វើសមកាលកម្មចលនាសាច់ប្រាក់ក្រៅបណ្តាញ ({0})
+Sync Offline Sales,ធ្វើសមកាលកម្មការលក់ក្រៅបណ្តាញ
+Synced {0} offline cash movement(s).,បានធ្វើសមកាលកម្ម {0} ចលនាសាច់ប្រាក់ក្រៅបណ្តាញ។
+Syncing items in background,ធ្វើសមកាលកម្មធាតុនៅក្នុងផ្ទៃខាងក្រោយ
+System / Diagnostics,ប្រព័ន្ធ / រោគវិនិច្ឆ័យ
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.",សកម្មភាពរបស់ប្រព័ន្ធគឺជាការគ្រប់គ្រងការថែទាំដែលមានប្រេកង់ទាប ដូចជាព័ត៌មានកម្មវិធី ការវិនិច្ឆ័យជំនួយ និងការគ្រប់គ្រងវគ្គ។
+System Information,ព័ត៌មានប្រព័ន្ធ
+System Status,ស្ថានភាពប្រព័ន្ធ
+Tables:,តារាង៖
+Tap the button below to redeem a gift card during checkout.,ចុចប៊ូតុងខាងក្រោមដើម្បីប្តូរយកកាតអំណោយអំឡុងពេលបង់ប្រាក់ចេញ។
+Target,គោលដៅ
+Target Ex. Rate:,គោលដៅ Ex. អត្រា៖
+Target Rate:,អត្រាគោលដៅ៖
+Tax,ពន្ធ
+Tax / Charges Report,របាយការណ៍ពន្ធ/ការគិតថ្លៃ
+Tax Heads,ក្បាលពន្ធ
+Taxable Amount,ចំនួនទឹកប្រាក់ដែលត្រូវបង់ពន្ធ
+Tendered,ដេញថ្លៃ
+Terminal,ស្ថានីយ
+Terminal & Devices,ស្ថានីយ និងឧបករណ៍
+Terminal locked,ស្ថានីយត្រូវបានចាក់សោ
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.",ឧបករណ៍ស្ថានីយប៉ះពាល់ដល់ស្ថានីយទូទាត់នេះ ការបង្ហាញដែលប្រឈមមុខនឹងអតិថិជន និងការគ្រប់គ្រងម៉ាស៊ីនបោះពុម្ព/ឧបករណ៍នាពេលអនាគត។
+Territory not found,រកមិនឃើញទឹកដីទេ។
+The amount paid is not complete,ចំនួនទឹកប្រាក់ដែលត្រូវបង់មិនពេញលេញទេ។
+The app stores data locally for offline use. This is called cache.,កម្មវិធីនេះរក្សាទុកទិន្នន័យក្នុងមូលដ្ឋានសម្រាប់ការប្រើប្រាស់ក្រៅបណ្តាញ។ វាត្រូវបានគេហៅថាឃ្លាំងសម្ងាត់។
+The invoice stayed in draft. Please review and submit it manually.,វិក្កយបត្រនៅតែស្ថិតក្នុងសេចក្តីព្រាង។ សូមពិនិត្យ និងបញ្ជូនវាដោយដៃ។
+The maximum discount allowed is,ការបញ្ចុះតម្លៃអតិបរមាដែលអនុញ្ញាតគឺ
+The quantity for {0} has been adjusted to the maximum available stock.,បរិមាណ​សម្រាប់ {0} ត្រូវ​បាន​កែ​តម្រូវ​ទៅ​នឹង​ស្តុក​អតិបរមា​ដែល​មាន។
+The system could not retrieve the item details. Please try again.,ប្រព័ន្ធ​មិន​អាច​ទៅ​យក​ព័ត៌មាន​លម្អិត​របស់​ធាតុ​បាន​ទេ។ សូមព្យាយាមម្តងទៀត។
+These invoices will be synced when connection is restored,វិក្កយបត្រទាំងនេះនឹងត្រូវបានធ្វើសមកាលកម្ម នៅពេលដែលការតភ្ជាប់ត្រូវបានស្ដារឡើងវិញ
+This action now opens inside the settings workspace.,ឥឡូវនេះសកម្មភាពនេះបើកនៅខាងក្នុងកន្លែងធ្វើការការកំណត់។
+This coupon already used !,គូប៉ុងនេះប្រើរួចហើយ!
+This invoice does not need change-allocation repair,វិក្កយបត្រនេះមិនត្រូវការការជួសជុលផ្លាស់ប្តូរការបែងចែកទេ។
+This invoice is already repaired,វិក្កយបត្រនេះត្រូវបានជួសជុលរួចហើយ
+This is an item template. Please choose a variant.,នេះគឺជាគំរូធាតុ។ សូមជ្រើសរើសវ៉ារ្យ៉ង់។
+this item,ធាតុនេះ។
+This POS page could not be opened offline because its code was not cached on this terminal yet.,ទំព័រម៉ាស៊ីនឆូតកាតនេះមិនអាចបើកក្រៅបណ្តាញបានទេ ដោយសារលេខកូដរបស់វាមិនទាន់បានរក្សាទុកនៅលើស្ថានីយនេះនៅឡើយ។
+This Serial Number {0} has already been added!,លេខស៊េរី {0} នេះត្រូវបានបន្ថែមរួចហើយ!
+Threshold,កម្រិត
+Time,ពេលវេលា
+Tip: Clear cache regularly to free up space and keep the app fast.,គន្លឹះ៖ សម្អាតឃ្លាំងសម្ងាត់ជាប្រចាំ ដើម្បីបង្កើនទំហំផ្ទុក និងរក្សាកម្មវិធីឱ្យលឿន។
+Tip: Close unused tabs or apps to reduce lag.,គន្លឹះ៖ បិទផ្ទាំង ឬកម្មវិធីដែលមិនប្រើ ដើម្បីកាត់បន្ថយភាពយឺតយ៉ាវ។
+Tip: Monitor slow queries and table size for optimal performance.,គន្លឹះ៖ តាមដានសំណួរយឺតៗ និងទំហំតារាងសម្រាប់ដំណើរការល្អបំផុត។
+To Be Paid,ដែលត្រូវបង់
+To Date,ដល់កាលបរិច្ឆេទ
+Today,ថ្ងៃនេះ
+Today Profit,ថ្ងៃនេះចំណេញ
+Today Sales,ការលក់ថ្ងៃនេះ
+Toggle navigation drawer,បិទបើកថតរុករក
+Toggle Theme,បិទ/បើកស្បែក
+Tools,ឧបករណ៍
+Tools for customer-facing screens and terminal-specific actions.,ឧបករណ៍សម្រាប់អេក្រង់ដែលប្រឈមមុខនឹងអតិថិជន និងសកម្មភាពជាក់លាក់របស់ស្ថានីយ។
+Top Brand,ម៉ាកកំពូល
+Top Category,ប្រភេទកំពូល
+Top Charge Head,ក្បាលសាកថ្មកំពូល
+Top Customers,អតិថិជនកំពូល
+Top Discount,ការបញ្ចុះតម្លៃកំពូល
+Top Items by Location,ធាតុពេញនិយមតាមទីតាំង
+Top Margin,រឹមកំពូល
+Top Pending,កំពូលកំពុងរង់ចាំ
+Top Profit Item,ធាតុប្រាក់ចំណេញកំពូល
+Top Return Items,ធាតុត្រឡប់មកវិញកំពូល
+Top Sales by Cashier,ការលក់កំពូលដោយ Cashier
+Top Supplier,អ្នកផ្គត់ផ្គង់កំពូល
+Top Suppliers by Spend,អ្នកផ្គត់ផ្គង់កំពូលដោយចំណាយ
+Top Tables,តារាងកំពូល
+Top Tax Head,ប្រធានពន្ធកំពូល
+Top Up Amount,ចំនួនទឹកប្រាក់បញ្ចូលទឹកប្រាក់
+Top Up Card,កាតបញ្ចូលទឹកប្រាក់
+Top Up Mode,របៀបបញ្ចូលទឹកប្រាក់
+Top Variant,វ៉ារ្យ៉ង់កំពូល
+Total,សរុប
+Total Amount,ចំនួនសរុប
+Total Change,ការផ្លាស់ប្តូរសរុប
+Total Charges,ការគិតថ្លៃសរុប
+Total In,សរុប
+Total Invoices,វិក្កយបត្រសរុប
+Total Items,ធាតុសរុប
+Total Mpesa,Mpesa សរុប
+Total Out,សរុបចេញ
+Total Payments,ការទូទាត់សរុប
+Total Purchase,ការទិញសរុប
+Total Selected :,សរុបដែលបានជ្រើសរើស៖
+Total Size,ទំហំសរុប
+Total Stock Qty,ចំនួនភាគហ៊ុនសរុប
+Total:,សរុប៖
+Totals by Invoice Currency,សរុបដោយរូបិយប័ណ្ណវិក្កយបត្រ
+Track how much cash was handed back to customers,តាមដានថាតើសាច់ប្រាក់ប៉ុន្មានត្រូវបានប្រគល់ឱ្យអតិថិជនវិញ។
+"Track recent sales, collect unpaid balances, and reopen saved work",តាមដានការលក់ថ្មីៗ ប្រមូលសមតុល្យដែលមិនបានបង់ប្រាក់ និងបើកការងារដែលបានរក្សាទុកឡើងវិញ
+Transaction ID,លេខសម្គាល់ប្រតិបត្តិការ
+Transfer,ផ្ទេរ
+Try a different search term or clear the cart search.,សាកល្បងពាក្យស្វែងរកផ្សេង ឬសម្អាតការស្វែងរករទេះ។
+Try adjusting your search or filters,ព្យាយាមកែតម្រូវការស្វែងរក ឬតម្រងរបស់អ្នក។
+Try another source or refresh the list.,សាកល្បងប្រភពផ្សេងទៀត ឬធ្វើឱ្យបញ្ជីឡើងវិញ។
+Try changing the date range or status filter.,សាកល្បងផ្លាស់ប្តូរជួរកាលបរិច្ឆេទ ឬតម្រងស្ថានភាព។
+Type,ប្រភេទ
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,មិន​អាច​ចូល​ប្រើ​កាមេរ៉ា​បាន​សូម្បី​តែ​ការ​កំណត់​មូលដ្ឋាន​។ សូមពិនិត្យមើលការអនុញ្ញាតកាមេរ៉ារបស់អ្នក និងភាពឆបគ្នានៃឧបករណ៍។
+Unable to add offer item {0}. Please refresh and try again.,មិនអាចបន្ថែមធាតុផ្តល់ជូន {0} បានទេ។ សូមផ្ទុកឡើងវិញ ហើយព្យាយាមម្តងទៀត។
+Unable to add offer item. Please refresh and try again.,មិនអាចបន្ថែមធាតុផ្តល់ជូនបានទេ។ សូមផ្ទុកឡើងវិញ ហើយព្យាយាមម្តងទៀត។
+Unable to add scanned item.,មិនអាចបន្ថែមធាតុដែលបានស្កេនបានទេ។
+Unable to create purchase order,មិនអាចបង្កើតការបញ្ជាទិញបានទេ។
+Unable to delete draft invoice,មិនអាចលុបវិក្កយបត្រព្រាងបានទេ។
+Unable to fetch documents,មិនអាចទៅយកឯកសារបានទេ។
+Unable to fetch draft orders,មិន​អាច​ទៅ​យក​ការ​បញ្ជា​ទិញ​ព្រាង
+Unable to fetch invoice history,មិនអាចទៅយកប្រវត្តិវិក្កយបត្របានទេ។
+Unable to fetch M-Pesa payments,មិនអាចទៅយកការបង់ប្រាក់ M-Pesa បានទេ។
+Unable to fetch sales orders,មិនអាចទៅយកការបញ្ជាទិញលក់បានទេ។
+Unable to fetch unpaid invoices,មិនអាចទៅយកវិក្កយបត្រដែលមិនទាន់បង់ប្រាក់បានទេ។
+Unable to generate scale barcode,មិនអាចបង្កើតបាកូដខ្នាតបានទេ។
+Unable to issue gift card.,មិនអាចចេញកាតអំណោយបានទេ។
+Unable to load cashier PIN status.,មិនអាចផ្ទុកស្ថានភាព PIN អ្នកគិតលុយបានទេ។
+Unable to load document,មិនអាចផ្ទុកឯកសារបានទេ។
+Unable to load draft invoice,មិនអាចផ្ទុកវិក្កយបត្រព្រាងបានទេ។
+Unable to load gift card balance.,មិនអាចផ្ទុកសមតុល្យកាតអំណោយបានទេ។
+Unable to load invoice details,មិនអាចផ្ទុកព័ត៌មានលម្អិតវិក្កយបត្របានទេ។
+Unable to load parked order,មិនអាចផ្ទុកការបញ្ជាទិញដែលចតបានទេ។
+Unable to load the selected sales order,មិនអាចផ្ទុកការបញ្ជាទិញលក់ដែលបានជ្រើសរើសបានទេ។
+Unable to prepare document,មិនអាចរៀបចំឯកសារបានទេ។
+Unable to prepare return invoice,មិនអាចរៀបចំវិក្កយបត្រត្រឡប់មកវិញបានទេ។
+Unable to print draft invoice,មិនអាចបោះពុម្ពវិក្កយបត្រព្រាងបានទេ។
+Unable to print submitted invoice,មិនអាចបោះពុម្ពវិក្កយបត្រដែលបានបញ្ជូន
+Unable to process document action,មិនអាចដំណើរការសកម្មភាពឯកសារបានទេ។
+Unable to repair change allocation,មិនអាចជួសជុលការបែងចែកការផ្លាស់ប្តូរបានទេ។
+Unable to save cashier PIN.,មិនអាចរក្សាទុកលេខ PIN អ្នកគិតលុយបានទេ។
+Unable to save the rate to the backend price list,មិនអាចរក្សាទុកអត្រានេះទៅក្នុងបញ្ជីតម្លៃខាងក្រោយបានទេ។
+Unable to submit invoice,មិនអាចដាក់វិក្កយបត្របានទេ។
+Unable to submit the selected payment,មិនអាចបញ្ជូនការទូទាត់ដែលបានជ្រើសរើសបានទេ។
+Unable to top up gift card.,មិនអាចបញ្ចូលកាតអំណោយបានទេ។
+Unable to verify cashier PIN.,មិនអាចផ្ទៀងផ្ទាត់កូដ PIN អ្នកគិតលុយបានទេ។
+Unallocated,មិនបានបែងចែក
+Unallocated:,មិនបានបែងចែក៖
+Unavailable,មិនអាចប្រើបាន
+Unknown,មិនស្គាល់
+Unknown Item,ធាតុមិនស្គាល់
+Unknown Warehouse,ឃ្លាំងមិនស្គាល់
+Unlock POS,ដោះសោម៉ាស៊ីនឆូតកាត
+Unpaid,មិនទាន់បង់ប្រាក់
+"Unselected payments stay unallocated first, then auto reconcile after submit.",ការបង់ប្រាក់ដែលមិនបានជ្រើសរើសនៅតែមិនបានបែងចែកជាមុន បន្ទាប់មកផ្សះផ្សាដោយស្វ័យប្រវត្តិបន្ទាប់ពីដាក់ស្នើ។
+UOM,អ៊ុំ
+UOM not found,រកមិនឃើញ UOM
+Update available,ការអាប់ដេតមាន
+Update Customer,ធ្វើបច្ចុប្បន្នភាពអតិថិជន
+Update PIN,ធ្វើបច្ចុប្បន្នភាពកូដ PIN
+Update Price List Rate,ធ្វើបច្ចុប្បន្នភាពអត្រាបញ្ជីតម្លៃ
+Updated,បានធ្វើបច្ចុប្បន្នភាព
+Updates and app info that stay out of the cashier flow.,ការអាប់ដេត និងព័ត៌មានកម្មវិធីដែលនៅឆ្ងាយពីលំហូរអ្នកគិតលុយ។
+Updates automatically,ធ្វើបច្ចុប្បន្នភាពដោយស្វ័យប្រវត្តិ
+Usage,ការប្រើប្រាស់
+Usage Stats,ស្ថិតិប្រើប្រាស់
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,ប្រើកូដ PIN ពី 4 ទៅ 8 ខ្ទង់សម្រាប់ការប្តូរអ្នកគិតលុយ និងការដោះសោស្ថានីយ។
+Use Cashier,ប្រើ Cashier
+Use date range to search for older invoices,ប្រើជួរកាលបរិច្ឆេទដើម្បីស្វែងរកវិក្កយបត្រចាស់
+"Use one field for manual code entry, barcode scans, or QR scans.",ប្រើវាលមួយសម្រាប់ការបញ្ចូលលេខកូដដោយដៃ ស្កេនបាកូដ ឬការស្កេន QR ។
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.",ប្រើលំហូរការងារមួយសម្រាប់ការត្រួតពិនិត្យសមតុល្យ ការចេញថ្មី និងការបញ្ចូលទឹកប្រាក់ដោយមិនចាំបាច់ចាកចេញពីម៉ាស៊ីនឆូតកាត។
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.",ប្រើផ្នែកនេះនៅពេលដែលទិន្នន័យដែលតម្រូវជាមុនក្នុងឃ្លាំងសម្ងាត់ត្រូវការការធ្វើឱ្យស្រស់ បង្កើតឡើងវិញ ឬពិនិត្យការវិនិច្ឆ័យ។
+Use Western numerals,ប្រើលេខខាងលិច
+Used:,បានប្រើ៖
+Using basic camera settings due to device limitations,ការប្រើប្រាស់ការកំណត់កាមេរ៉ាជាមូលដ្ឋាន ដោយសារការកំណត់ឧបករណ៍
+Using cached customer balance,ការប្រើប្រាស់សមតុល្យអតិថិជនដែលបានរក្សាទុកក្នុងឃ្លាំងសម្ងាត់
+Valid until,មានសុពលភាពរហូតដល់
+Variance %,ភាពខុសគ្នា %
+Variants,វ៉ារ្យ៉ង់
+Variant-wise,វ៉ារ្យ៉ង់ - ឆ្លាតវៃ
+Verify closing amounts for each payment method,ផ្ទៀងផ្ទាត់ចំនួនទឹកប្រាក់បិទសម្រាប់វិធីបង់ប្រាក់នីមួយៗ
+View all,មើលទាំងអស់។
+View app information and current build details,មើលព័ត៌មានកម្មវិធី និងព័ត៌មានលម្អិតអំពីការសាងសង់បច្ចុប្បន្ន
+View Data Diagnostics,មើលការវិភាគទិន្នន័យ
+View Details,មើលព័ត៌មានលម្អិត
+View invoice details,មើលព័ត៌មានលម្អិតនៃវិក្កយបត្រ
+View notifications,មើលការជូនដំណឹង
+View offline invoices,មើលវិក្កយបត្រក្រៅបណ្តាញ
+View restricted POS insights,មើលការយល់ដឹងអំពីម៉ាស៊ីនឆូតកាតដែលបានដាក់កម្រិត
+Void Amount,ចំនួន​ប្រាក់​ឥត​បានការ
+Void Count,រាប់ជាមោឃៈ
+Voids,មោឃៈ
+Waiting for cart items,កំពុងរង់ចាំធាតុរទេះ
+Waiting for payment...,កំពុងរង់ចាំការទូទាត់...
+Walk-in Customer,អតិថិជនដើរចូល
+Warehouse,ឃ្លាំង
+Warning: High cache usage may affect performance.,ការព្រមាន៖ ការប្រើប្រាស់ឃ្លាំងសម្ងាត់ខ្ពស់អាចប៉ះពាល់ដល់ដំណើរការ។
+Warning: High lag may indicate heavy processing or browser slowness.,ការព្រមាន៖ ភាពយឺតយ៉ាវខ្ពស់អាចបង្ហាញពីដំណើរការធ្ងន់ ឬភាពយឺតនៃកម្មវិធីរុករក។
+Week ?,សប្តាហ៍?
+Week-wise,ប្រចាំសប្តាហ៍
+Weight (g),ទម្ងន់ (ក្រាម)
+Weight (grams),ទំងន់ (ក្រាម)
+We'll let you know if an invoice fails to submit,យើង​នឹង​ប្រាប់​ឱ្យ​អ្នក​ដឹង​ប្រសិន​បើ​វិក្កយបត្រ​បរាជ័យ​ក្នុង​ការ​ដាក់​ស្នើ
+Workflow,លំហូរការងារ
+Write off amount cannot exceed the POS profile maximum of {0},ចំនួនទឹកប្រាក់ដែលសរសេរចេញមិនអាចលើសពីទម្រង់ POS អតិបរមានៃ {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,ចំនួន​ដែល​ត្រូវ​បាន​គេ​សរសេរ​លើស​ចំនួន​កំណត់​ដែល​បាន​អនុញ្ញាត ({0})។ សូមបន្ថែមការទូទាត់សម្រាប់ចំនួនដែលនៅសល់។
+Yes,បាទ
+"Yes, Cancel sale",បាទ/ចាស បោះបង់ការលក់
+"Yes, Close",បាទ បិទ
+You are not allowed to print draft invoices,អ្នកមិនត្រូវបានអនុញ្ញាតឱ្យបោះពុម្ពវិក្កយបត្រព្រាងទេ។
+You are offline. Add Payment will work again when the connection is restored.,អ្នកគ្មានអ៊ីនធឺណិតទេ។ បន្ថែមការទូទាត់នឹងដំណើរការម្តងទៀតនៅពេលដែលការតភ្ជាប់ត្រូវបានស្ដារឡើងវិញ។
+You have no notifications right now,អ្នកមិនមានការជូនដំណឹងទេឥឡូវនេះ
+Your Cart,រទេះរបស់អ្នក។

@@ -1,0 +1,1362 @@
+POS Awesome,POS ഗംഭീരം
+Fetch Items Directly from Server,സെർവറിൽ നിന്ന് നേരിട്ട് ഇനങ്ങൾ ലഭ്യമാക്കുക
+Menu,മെനു
+Actions,പ്രവർത്തനങ്ങൾ
+Close Shift,ഷിഫ്റ്റ് അടയ്ക്കുക
+End current session,നിലവിലെ സെഷൻ അവസാനിപ്പിക്കുക
+Print Last Invoice,അവസാന ഇൻവോയ്സ് പ്രിൻ്റ് ചെയ്യുക
+Reprint previous transaction,മുമ്പത്തെ ഇടപാട് വീണ്ടും അച്ചടിക്കുക
+Sync Offline Invoices,ഓഫ്‌ലൈൻ ഇൻവോയ്‌സുകൾ സമന്വയിപ്പിക്കുക
+Upload pending transactions,തീർപ്പാക്കാത്ത ഇടപാടുകൾ അപ്‌ലോഡ് ചെയ്യുക
+Go Online,ഓൺലൈനിൽ പോകുക
+Go Offline,ഓഫ്‌ലൈനിൽ പോകുക
+Disable offline mode,ഓഫ്‌ലൈൻ മോഡ് പ്രവർത്തനരഹിതമാക്കുക
+Work without server connection,സെർവർ കണക്ഷൻ ഇല്ലാതെ പ്രവർത്തിക്കുക
+Clear Cache,കാഷെ മായ്‌ക്കുക
+Remove local data and refresh,പ്രാദേശിക ഡാറ്റ നീക്കം ചെയ്‌ത് പുതുക്കുക
+About,കുറിച്ച്
+App information,ആപ്പ് വിവരങ്ങൾ
+Language,ഭാഷ
+Change interface language,ഇൻ്റർഫേസ് ഭാഷ മാറ്റുക
+Light Mode,ലൈറ്റ് മോഡ്
+Dark Mode,ഡാർക്ക് മോഡ്
+Switch theme appearance,തീം രൂപം മാറുക
+Logout,പുറത്തുകടക്കുക
+Sign out of session,സെഷനിൽ നിന്ന് സൈൻ ഔട്ട് ചെയ്യുക
+Select Language,ഭാഷ തിരഞ്ഞെടുക്കുക
+Choose your preferred language for the POS interface,POS ഇൻ്റർഫേസിനായി നിങ്ങൾ തിരഞ്ഞെടുത്ത ഭാഷ തിരഞ്ഞെടുക്കുക
+Language will be changed to,എന്നതിലേക്ക് ഭാഷ മാറ്റപ്പെടും
+Cancel,റദ്ദാക്കുക
+Change Language,ഭാഷ മാറ്റുക
+Close,അടയ്ക്കുക
+Cannot change language - same language selected,ഭാഷ മാറ്റാൻ കഴിയില്ല - അതേ ഭാഷ തിരഞ്ഞെടുത്തു
+Language changed successfully! Reloading...,ഭാഷ വിജയകരമായി മാറ്റി! വീണ്ടും ലോഡുചെയ്യുന്നു...
+Failed to change language,ഭാഷ മാറ്റുന്നതിൽ പരാജയപ്പെട്ടു
+Unknown error,അജ്ഞാത പിശക്
+- Total Unallocated,- ആകെ അനുവദിച്ചിട്ടില്ല
+* Required,*ആവശ്യമാണ്
+{0} (Qty: {1}),{0} (Qty: {1})
+{0} actions,{0} പ്രവർത്തനങ്ങൾ
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} ന് {1} മാത്രമേ സ്‌റ്റോക്കിലുള്ളൂ. നിങ്ങൾ {2} അഭ്യർത്ഥിച്ചു. അളവ് അല്ലെങ്കിൽ റീസ്റ്റോക്ക് ക്രമീകരിക്കുക.
+{0} offline invoice{1} pending,{0} ഓഫ്‌ലൈൻ ഇൻവോയ്സ്{1} തീർച്ചപ്പെടുത്തിയിട്ടില്ല
+{0} offline invoice{1} saved as draft,{0} ഓഫ്‌ലൈൻ ഇൻവോയ്സ്{1} ഡ്രാഫ്റ്റായി സംരക്ഷിച്ചു
+{0} offline invoice{1} synced,{0} ഓഫ്‌ലൈൻ ഇൻവോയ്സ്{1} സമന്വയിപ്പിച്ചു
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0}ദിവസം മുമ്പ്
+{0}h ago,{0}മണിക്കൂർ മുമ്പ്
+{0}m ago,{0}മിനിറ്റ് മുമ്പ്
+A POS supervisor is required for this action.,ഈ പ്രവർത്തനത്തിന് ഒരു POS സൂപ്പർവൈസർ ആവശ്യമാണ്.
+Access,പ്രവേശനം
+Account,അക്കൗണ്ട്
+Account is overdrawn,അക്കൗണ്ട് ഓവർഡ്രോയിംഗ് ആണ്
+Acknowledge the error to resume scanning,സ്കാനിംഗ് പുനരാരംഭിക്കുന്നതിനുള്ള പിശക് അംഗീകരിക്കുക
+Acknowledge the error to resume scanning.,സ്കാനിംഗ് പുനരാരംഭിക്കുന്നതിനുള്ള പിശക് അംഗീകരിക്കുക.
+Across,ഉടനീളം
+Action,ആക്ഷൻ
+Active sale,സജീവമായ വിൽപ്പന
+add,ചേർക്കുക
+Add items from the selector to start building this sale.,ഈ വിൽപ്പന ആരംഭിക്കാൻ സെലക്ടറിൽ നിന്ന് ഇനങ്ങൾ ചേർക്കുക.
+Add more value to an existing gift card,നിലവിലുള്ള ഒരു സമ്മാന കാർഡിന് കൂടുതൽ മൂല്യം ചേർക്കുക
+Add New Address,പുതിയ വിലാസം ചേർക്കുക
+Add new customer,പുതിയ ഉപഭോക്താവിനെ ചേർക്കുക
+Add on New Line,പുതിയ ലൈനിൽ ചേർക്കുക
+Add Payment,പേയ്മെൻ്റ് ചേർക്കുക
+Add payment to invoice,ഇൻവോയ്‌സിലേക്ക് പേയ്‌മെൻ്റ് ചേർക്കുക
+Add/Edit Coupon Conditions,കൂപ്പൺ വ്യവസ്ഥകൾ ചേർക്കുക/എഡിറ്റ് ചെയ്യുക
+Additional Discount,അധിക കിഴിവ്
+Additional Discount %,അധിക കിഴിവ് %
+Address Line 1,വിലാസം ലൈൻ 1
+Address not found,വിലാസം കണ്ടെത്തിയില്ല
+Adjust the quantity or enable negative stock to continue.,തുടരുന്നതിന് അളവ് ക്രമീകരിക്കുക അല്ലെങ്കിൽ നെഗറ്റീവ് സ്റ്റോക്ക് പ്രവർത്തനക്ഷമമാക്കുക.
+Adjustment,അഡ്ജസ്റ്റ്മെൻ്റ്
+After returns,തിരിച്ചുവരവിന് ശേഷം
+Against,എതിരായി
+Against Name,പേരിന് എതിരായി
+Age Bracket,പ്രായപരിധി
+All,എല്ലാം
+All Caught Up!,എല്ലാം പിടിക്കപ്പെട്ടു!
+All invoices are synchronized,എല്ലാ ഇൻവോയ്‌സുകളും സമന്വയിപ്പിച്ചിരിക്കുന്നു
+All pending invoices are up to date,തീർച്ചപ്പെടുത്താത്ത എല്ലാ ഇൻവോയ്‌സുകളും കാലികമാണ്
+All Profiles,എല്ലാ പ്രൊഫൈലുകളും
+All Synchronized,എല്ലാം സമന്വയിപ്പിച്ചു
+All visible invoices are fully settled.,ദൃശ്യമാകുന്ന എല്ലാ ഇൻവോയ്‌സുകളും പൂർണ്ണമായും തീർപ്പാക്കി.
+All Warehouses,എല്ലാ വെയർഹൗസുകളും
+Allowed UOM is {0},അനുവദനീയമായ UOM ആണ് {0}
+Always fetch items from server (ignore local cache),എല്ലായ്‌പ്പോഴും സെർവറിൽ നിന്ന് ഇനങ്ങൾ ലഭ്യമാക്കുക (പ്രാദേശിക കാഷെ അവഗണിക്കുക)
+Amount,തുക
+Amount already received,ഇതിനകം ലഭിച്ച തുക
+Amount exceeds profile cash movement max amount.,തുക പ്രൊഫൈൽ ക്യാഷ് മൂവ്മെൻ്റ് പരമാവധി തുക കവിഞ്ഞു.
+Amount must be greater than zero.,തുക പൂജ്യത്തേക്കാൾ കൂടുതലായിരിക്കണം.
+Amount received from customer,ഉപഭോക്താവിൽ നിന്ന് ലഭിച്ച തുക
+Appearance and user-level preferences for the current session.,നിലവിലെ സെഷനിലെ രൂപഭാവവും ഉപയോക്തൃ-തല മുൻഗണനകളും.
+Applied,പ്രയോഗിച്ചു
+Apply,അപേക്ഷിക്കുക
+Apply Gift Card,ഗിഫ്റ്റ് കാർഡ് പ്രയോഗിക്കുക
+Apply Offer,ഓഫർ പ്രയോഗിക്കുക
+Apply On,അപേക്ഷിക്കുക
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,ഈ ഇൻവോയ്സിൽ നിങ്ങൾ റിഡീം ചെയ്യാൻ ആഗ്രഹിക്കുന്ന തുക മാത്രം പ്രയോഗിക്കുക. ബാക്കി തുക കാർഡിൽ തന്നെ തുടരും.
+Apply Redemption,റിഡംപ്ഷൻ പ്രയോഗിക്കുക
+Applying,അപേക്ഷിക്കുന്നു
+Apps,ആപ്പുകൾ
+Are you sure you want to close? All entered data will be lost.,അടയ്ക്കണമെന്ന് തീർച്ചയാണോ? നൽകിയ എല്ലാ ഡാറ്റയും നഷ്ടപ്പെടും.
+Attributes (Size/Color),ആട്രിബ്യൂട്ടുകൾ (വലിപ്പം/നിറം)
+Auto Allocate Payment Amount,പേയ്‌മെൻ്റ് തുക സ്വയമേവ അനുവദിക്കുക
+Auto Reconcile,യാന്ത്രിക അനുരഞ്ജനം
+Auto reconciliation completed after payment submit.,പേയ്‌മെൻ്റ് സമർപ്പിച്ചതിന് ശേഷം യാന്ത്രിക അനുരഞ്ജനം പൂർത്തിയായി.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,യാന്ത്രിക അനുരഞ്ജനം പൂർത്തിയായി. അനുവദിച്ചത്: {0}{1}. ബാക്കിയുള്ളവ: {0}{2}.
+Available Actions,ലഭ്യമായ പ്രവർത്തനങ്ങൾ
+Available QTY,QTY ലഭ്യമാണ്
+Available:,ലഭ്യമാണ്:
+Average Basket,ശരാശരി കൊട്ട
+Average Bill,ശരാശരി ബിൽ
+Average Ticket,ശരാശരി ടിക്കറ്റ്
+Avg Bill,ശരാശരി ബിൽ
+Avg Invoice,ശരാശരി ഇൻവോയ്സ്
+Avg Invoice Profit,ശരാശരി ഇൻവോയ്സ് ലാഭം
+Avg Invoice Value,ശരാശരി ഇൻവോയ്സ് മൂല്യം
+Avg Purchase Frequency,ശരാശരി വാങ്ങൽ ആവൃത്തി
+Awesome,ഗംഭീരം
+Awesome Dashboard,ആകർഷണീയമായ ഡാഷ്ബോർഡ്
+Awesome Dashboard is disabled for the selected POS Profile.,തിരഞ്ഞെടുത്ത POS പ്രൊഫൈലിനായി ആകർഷണീയമായ ഡാഷ്‌ബോർഡ് പ്രവർത്തനരഹിതമാക്കി.
+Awesome Dashboard is unavailable for the selected scope.,തിരഞ്ഞെടുത്ത സ്കോപ്പിന് ആകർഷണീയമായ ഡാഷ്ബോർഡ് ലഭ്യമല്ല.
+Awesome Dashboard is visible only to POS supervisors.,ആകർഷണീയമായ ഡാഷ്‌ബോർഡ് POS സൂപ്പർവൈസർമാർക്ക് മാത്രമേ ദൃശ്യമാകൂ.
+Back,തിരികെ
+Back Office Cash Account,ബാക്ക് ഓഫീസ് ക്യാഷ് അക്കൗണ്ട്
+Back Office Cash Account (Optional Override),ബാക്ക് ഓഫീസ് ക്യാഷ് അക്കൗണ്ട് (ഓപ്ഷണൽ ഓവർറൈഡ്)
+Back office cash account is required.,ബാക്ക് ഓഫീസ് ക്യാഷ് അക്കൗണ്ട് ആവശ്യമാണ്.
+Back to {0},{0} എന്നതിലേക്ക് മടങ്ങുക
+Background processing did not finish in time.,പശ്ചാത്തല പ്രോസസ്സിംഗ് കൃത്യസമയത്ത് പൂർത്തിയായില്ല.
+Background processing failed for Invoice {0}: {1},ഇൻവോയ്‌സിൻ്റെ പശ്ചാത്തല പ്രോസസ്സിംഗ് പരാജയപ്പെട്ടു {0}: {1}
+Background Submission Failed,പശ്ചാത്തല സമർപ്പണം പരാജയപ്പെട്ടു
+Background sync interval (seconds),പശ്ചാത്തല സമന്വയ ഇടവേള (സെക്കൻഡ്)
+Balance,ബാലൻസ്
+Balance will be updated when connection is restored,കണക്ഷൻ പുനഃസ്ഥാപിക്കുമ്പോൾ ബാലൻസ് അപ്ഡേറ്റ് ചെയ്യും
+Balances still pending,ബാലൻസുകൾ ഇപ്പോഴും തീർപ്പാക്കിയിട്ടില്ല
+Barcode,ബാർകോഡ്
+Barcode / QR Ready,ബാർകോഡ് / QR തയ്യാറാണ്
+Barcode Label Printing,ബാർകോഡ് ലേബൽ പ്രിൻ്റിംഗ്
+Base Paid:,അടിസ്ഥാന പണമടച്ചത്:
+Base Recv:,അടിസ്ഥാന Recv:
+Base:,അടിസ്ഥാനം:
+Basic Information,അടിസ്ഥാന വിവരങ്ങൾ
+Batch,ബാച്ച്
+Batch Information,ബാച്ച് വിവരങ്ങൾ
+Before any return workflow,ഏതെങ്കിലും റിട്ടേൺ വർക്ക്ഫ്ലോയ്ക്ക് മുമ്പ്
+Before returns,തിരിച്ചുവരുന്നതിന് മുമ്പ്
+Best Day,മികച്ച ദിവസം
+Best Seller,ബെസ്റ്റ് സെല്ലർ
+Book expense or deposit from active shift.,സജീവമായ ഷിഫ്റ്റിൽ നിന്നുള്ള ബുക്ക് ചെലവ് അല്ലെങ്കിൽ നിക്ഷേപം.
+Branch / Location-wise Report,ബ്രാഞ്ച് / ലൊക്കേഷൻ തിരിച്ചുള്ള റിപ്പോർട്ട്
+Brand-wise,ബ്രാൻഡ് അടിസ്ഥാനത്തിൽ
+Breakdown,തകർച്ച
+Browse,ബ്രൗസ് ചെയ്യുക
+Build Time:,നിർമ്മാണ സമയം:
+Built with Frappe,ഫ്രാപ്പെ ഉപയോഗിച്ച് നിർമ്മിച്ചത്
+Bundle,ബണ്ടിൽ
+Buying Price,വാങ്ങൽ വില
+Cache cleared successfully,കാഷെ വിജയകരമായി മായ്ച്ചു
+Cache Usage,കാഷെ ഉപയോഗം
+cache used,ഉപയോഗിച്ച കാഷെ
+Calculating...,കണക്കാക്കുന്നു...
+Camera Access Required,ക്യാമറ ആക്‌സസ് ആവശ്യമാണ്
+Camera access was aborted. Please try again.,ക്യാമറ ആക്സസ് റദ്ദാക്കി. ദയവായി വീണ്ടും ശ്രമിക്കുക.
+Camera constraints not supported by your device. Trying fallback settings...,ക്യാമറ നിയന്ത്രണങ്ങൾ നിങ്ങളുടെ ഉപകരണം പിന്തുണയ്ക്കുന്നില്ല. ഫാൾബാക്ക് ക്രമീകരണങ്ങൾ പരീക്ഷിക്കുന്നു...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,ക്യാമറ തിരക്കിലാണ് അല്ലെങ്കിൽ മറ്റൊരു ആപ്പ്/ടാബ് ബ്ലോക്ക് ചെയ്‌തിരിക്കുന്നു. മറ്റ് ക്യാമറ ആപ്പുകൾ അടച്ച് വീണ്ടും ശ്രമിക്കുക.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,ക്യാമറ അനുമതി നിഷേധിച്ചു. നിങ്ങളുടെ ബ്രൗസർ ക്രമീകരണങ്ങളിൽ ക്യാമറ ആക്‌സസ് അനുവദിക്കുകയും പേജ് പുതുക്കുകയും ചെയ്യുക.
+Camera scanner is locked until the current error is acknowledged,നിലവിലെ പിശക് അംഗീകരിക്കുന്നത് വരെ ക്യാമറ സ്കാനർ ലോക്ക് ചെയ്തിരിക്കുന്നു
+Camera started but the video stream did not load in time. Please try again.,ക്യാമറ ആരംഭിച്ചുവെങ്കിലും വീഡിയോ സ്ട്രീം കൃത്യസമയത്ത് ലോഡ് ചെയ്തില്ല. ദയവായി വീണ്ടും ശ്രമിക്കുക.
+Cancel cash movement {0}?,പണമിടപാട് {0} റദ്ദാക്കണോ?
+Cancel Payment,പേയ്‌മെൻ്റ് റദ്ദാക്കുക
+Cancel Sale,വിൽപ്പന റദ്ദാക്കുക
+Cancel Sale ?,വിൽപ്പന റദ്ദാക്കണോ?
+Cancelled,റദ്ദാക്കി
+Cannot add an item with zero or negative quantity.,പൂജ്യമോ നെഗറ്റീവ് അളവോ ഉള്ള ഒരു ഇനം ചേർക്കാൻ കഴിയില്ല.
+Cannot clear cache while offline,ഓഫ്‌ലൈനായിരിക്കുമ്പോൾ കാഷെ മായ്‌ക്കാനാവില്ല
+Cannot redeem customer credit more than invoice total,ഇൻവോയ്സ് മൊത്തത്തിൽ കൂടുതൽ ഉപഭോക്തൃ ക്രെഡിറ്റ് റിഡീം ചെയ്യാൻ കഴിയില്ല
+Cannot redeem gift cards more than invoice total,ഇൻവോയ്‌സ് മൊത്തത്തിൽ കൂടുതൽ സമ്മാന കാർഡുകൾ റിഡീം ചെയ്യാൻ കഴിയില്ല
+Cannot Save Offline Invoice:,ഓഫ്‌ലൈൻ ഇൻവോയ്സ് സംരക്ഷിക്കാൻ കഴിയില്ല:
+Cannot Save Offline Payment:,ഓഫ്‌ലൈൻ പേയ്‌മെൻ്റ് സംരക്ഷിക്കാൻ കഴിയില്ല:
+Card,കാർഡ്
+Card / Online,കാർഡ് / ഓൺലൈൻ
+Card health after the last live lookup,അവസാന തത്സമയ ലുക്കപ്പിന് ശേഷം കാർഡ് ആരോഗ്യം
+Cards,കാർഡുകൾ
+Cart,വണ്ടി
+Cash,പണം
+Cash back to customers,ഉപഭോക്താക്കൾക്ക് പണം തിരികെ നൽകൂ
+Cash Collections,പണ ശേഖരണങ്ങൾ
+Cash Deposit is disabled for this POS Profile.,ഈ POS പ്രൊഫൈലിനായി ക്യാഷ് ഡെപ്പോസിറ്റ് പ്രവർത്തനരഹിതമാക്കിയിരിക്കുന്നു.
+Cash Drawer Snapshot,ക്യാഷ് ഡ്രോയർ സ്നാപ്പ്ഷോട്ട്
+Cash In Hand,കയ്യിൽ കാശ്
+Cash Movement,ക്യാഷ് മൂവ്മെൻ്റ്
+Cash movement cancelled,പണമിടപാട് റദ്ദാക്കി
+Cash movement deduction applied,ക്യാഷ് മൂവ്മെൻ്റ് കിഴിവ് ബാധകമാക്കി
+Cash movement deleted,പണമൊഴുക്ക് ഇല്ലാതാക്കി
+Cash movement is disabled for this POS Profile.,ഈ POS പ്രൊഫൈലിനായി പണം നീക്കുന്നത് പ്രവർത്തനരഹിതമാക്കിയിരിക്കുന്നു.
+Cash Movement is disabled in current POS Profile.,നിലവിലെ പിഒഎസ് പ്രൊഫൈലിൽ പണമിടപാട് പ്രവർത്തനരഹിതമാണ്.
+Cash movement saved offline,പണമൊഴുക്ക് ഓഫ്‌ലൈനിൽ സംരക്ഷിച്ചു
+Cash movement submitted,പണമിടപാട് സമർപ്പിച്ചു
+Cash Movements,പണ നീക്കങ്ങൾ
+Cash payment cannot be less than invoice total when partial payment is not allowed,ഭാഗിക പേയ്‌മെൻ്റ് അനുവദനീയമല്ലാത്തപ്പോൾ ക്യാഷ് പേയ്‌മെൻ്റ് മൊത്തം ഇൻവോയ്‌സിനേക്കാൾ കുറവായിരിക്കരുത്
+Cash returned after payment,പണമടച്ചതിന് ശേഷം പണം തിരികെ നൽകി
+Cashier,കാഷ്യർ
+Cashier Access,കാഷ്യർ ആക്സസ്
+Cashier identity and appearance preferences.,കാഷ്യർ ഐഡൻ്റിറ്റിയും രൂപഭാവ മുൻഗണനകളും.
+Cashier PIN,കാഷ്യർ പിൻ
+Cashier PIN saved successfully.,കാഷ്യർ പിൻ വിജയകരമായി സംരക്ഷിച്ചു.
+Cashiers,കാഷ്യർമാർ
+Cashier-wise,കാഷ്യർ-വൈസ്
+Categories,വിഭാഗങ്ങൾ
+Category,വിഭാഗം
+Category / Brand / Variant Report,വിഭാഗം / ബ്രാൻഡ് / വേരിയൻ്റ് റിപ്പോർട്ട്
+Category-wise,കാറ്റഗറി തിരിച്ച്
+Category-wise Margin,കാറ്റഗറി തിരിച്ചുള്ള മാർജിൻ
+Certificate,സർട്ടിഫിക്കറ്റ്
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,സർട്ടിഫിക്കറ്റ് കാണുന്നില്ല അല്ലെങ്കിൽ വിശ്വസനീയമല്ല. QZ സ്ഥിരീകരണ ഡയലോഗുകൾ കാണിച്ചേക്കാം.
+Certificate is trusted. Silent QZ printing is active.,സർട്ടിഫിക്കറ്റ് വിശ്വസനീയമാണ്. നിശബ്ദ QZ പ്രിൻ്റിംഗ് സജീവമാണ്.
+Change,മാറ്റുക
+Change allocation repaired,മാറ്റാനുള്ള വിഹിതം നന്നാക്കി
+Change Price,വില മാറ്റുക
+Change Return,റിട്ടേൺ മാറ്റുക
+Change Returned,മാറ്റം തിരിച്ചുകിട്ടി
+Change terminal cashier,ടെർമിനൽ കാഷ്യർ മാറ്റുക
+Charge Heads,ചാർജ് ഹെഡ്സ്
+Charges,ചാർജുകൾ
+Charges not found,ചാർജുകൾ കണ്ടെത്തിയില്ല
+Check Balance,ബാലൻസ് പരിശോധിക്കുക
+Check balance for any card. Supervisors can issue and top up cards here.,ഏതെങ്കിലും കാർഡിനായി ബാലൻസ് പരിശോധിക്കുക. സൂപ്പർവൈസർമാർക്ക് ഇവിടെ കാർഡുകൾ നൽകാനും ടോപ്പ് അപ്പ് ചെയ്യാനും കഴിയും.
+Check balance only,ബാലൻസ് മാത്രം പരിശോധിക്കുക
+Check for new commits,പുതിയ കമ്മിറ്റുകൾക്കായി പരിശോധിക്കുക
+Check for Updates,അപ്‌ഡേറ്റുകൾക്കായി പരിശോധിക്കുക
+Check live balance before applying redemption,റിഡീംഷൻ പ്രയോഗിക്കുന്നതിന് മുമ്പ് തത്സമയ ബാലൻസ് പരിശോധിക്കുക
+Check live balance before redemption,വീണ്ടെടുക്കുന്നതിന് മുമ്പ് തത്സമയ ബാലൻസ് പരിശോധിക്കുക
+Checking...,പരിശോധിക്കുന്നു...
+Cheque/Reference Date,ചെക്ക്/റഫറൻസ് തീയതി
+Cheque/Reference No,ചെക്ക്/റഫറൻസ് നമ്പർ
+Choose the cashier currently operating this terminal.,നിലവിൽ ഈ ടെർമിനൽ പ്രവർത്തിക്കുന്ന കാഷ്യറെ തിരഞ്ഞെടുക്കുക.
+City,നഗരം
+Clear,ക്ലിയർ
+Clear All,എല്ലാം മായ്‌ക്കുക
+Clear all barcode items,എല്ലാ ബാർകോഡ് ഇനങ്ങളും മായ്‌ക്കുക
+Clear all purchase order items,എല്ലാ വാങ്ങൽ ഓർഡർ ഇനങ്ങളും മായ്‌ക്കുക
+Clear Search,തിരയൽ മായ്‌ക്കുക
+Clearing local cache...,പ്രാദേശിക കാഷെ മായ്‌ക്കുന്നു...
+Click to refresh,പുതുക്കാൻ ക്ലിക്ക് ചെയ്യുക
+Client CPU Lag:,ക്ലയൻ്റ് സിപിയു ലാഗ്:
+Client Memory Usage:,ക്ലയൻ്റ് മെമ്മറി ഉപയോഗം:
+Client Metrics,ക്ലയൻ്റ് മെട്രിക്സ്
+Close about dialog,ഡയലോഗിനെക്കുറിച്ച് അടയ്ക്കുക
+Close cashier switcher,കാഷ്യർ സ്വിച്ചർ അടയ്ക്കുക
+Close closing shift dialog,ക്ലോസിംഗ് ഷിഫ്റ്റ് ഡയലോഗ് അടയ്ക്കുക
+Close column selector,കോളം സെലക്ടർ അടയ്ക്കുക
+Close Dialog,ഡയലോഗ് അടയ്ക്കുക
+Close drafts dialog,ഡ്രാഫ്റ്റ് ഡയലോഗ് അടയ്ക്കുക
+Close invoice details dialog,ഇൻവോയ്സ് വിശദാംശങ്ങളുടെ ഡയലോഗ് അടയ്ക്കുക
+Close invoice management,ഇൻവോയ്സ് മാനേജ്മെൻ്റ് അടയ്ക്കുക
+Close offline invoices dialog,ഓഫ്‌ലൈൻ ഇൻവോയ്‌സ് ഡയലോഗ് അടയ്‌ക്കുക
+Close packing list dialog,പാക്കിംഗ് ലിസ്റ്റ് ഡയലോഗ് അടയ്ക്കുക
+Close returns dialog,റിട്ടേൺസ് ഡയലോഗ് അടയ്ക്കുക
+Close sales orders dialog,വിൽപ്പന ഓർഡറുകൾ ഡയലോഗ് അടയ്ക്കുക
+Close Scanner,സ്കാനർ അടയ്ക്കുക
+Close scanner dialog,സ്കാനർ ഡയലോഗ് അടയ്ക്കുക
+Close Settings,ക്രമീകരണങ്ങൾ അടയ്ക്കുക
+Closing Amount,ക്ലോസിംഗ് തുക
+Closing POS Shift,POS ഷിഫ്റ്റ് അടയ്ക്കുന്നു
+Closing Snapshot Available,ക്ലോസിംഗ് സ്നാപ്പ്ഷോട്ട് ലഭ്യമാണ്
+Code,കോഡ്
+Code scanned successfully,കോഡ് വിജയകരമായി സ്കാൻ ചെയ്തു
+COGS,COGS
+Collapse item details,ഇനത്തിൻ്റെ വിശദാംശങ്ങൾ ചുരുക്കുക
+Collected,ശേഖരിച്ചു
+Cols,കോളുകൾ
+Columns,നിരകൾ
+commits,ചെയ്യുന്നു
+Completed and active sales in this range,ഈ ശ്രേണിയിൽ പൂർത്തിയായതും സജീവവുമായ വിൽപ്പന
+Completed returns will appear here.,പൂർത്തിയാക്കിയ റിട്ടേണുകൾ ഇവിടെ ദൃശ്യമാകും.
+Confirm,സ്ഥിരീകരിക്കുക
+Confirm Close,അടയ്ക്കുക സ്ഥിരീകരിക്കുക
+Confirm Mobile Number,മൊബൈൽ നമ്പർ സ്ഥിരീകരിക്കുക
+Confirm PIN,പിൻ സ്ഥിരീകരിക്കുക
+Connect,ബന്ധിപ്പിക്കുക
+Connect printer and manage certificate,പ്രിൻ്റർ ബന്ധിപ്പിച്ച് സർട്ടിഫിക്കറ്റ് മാനേജ് ചെയ്യുക
+Connecting to QZ Tray...,QZ ട്രേയിലേക്ക് ബന്ധിപ്പിക്കുന്നു...
+Connection problem while submitting invoice,ഇൻവോയ്സ് സമർപ്പിക്കുമ്പോൾ കണക്ഷൻ പ്രശ്നം
+Connections:,കണക്ഷനുകൾ:
+Connectivity and cached prerequisite status were rechecked.,കണക്റ്റിവിറ്റിയും കാഷെ ചെയ്ത മുൻവ്യവസ്ഥ നിലയും വീണ്ടും പരിശോധിച്ചു.
+Continue Editing,എഡിറ്റിംഗ് തുടരുക
+Could not fetch latest balance from server,സെർവറിൽ നിന്ന് ഏറ്റവും പുതിയ ബാലൻസ് നേടാനായില്ല
+Count,എണ്ണുക
+Country,രാജ്യം
+Coupon,കൂപ്പൺ
+Coupons,കൂപ്പണുകൾ
+Cover,മൂടുക
+CPU Cores:,സിപിയു കോറുകൾ:
+Create,സൃഷ്ടിക്കുക
+Create and load a new prepaid card,ഒരു പുതിയ പ്രീപെയ്ഡ് കാർഡ് സൃഷ്‌ടിക്കുകയും ലോഡ് ചെയ്യുകയും ചെയ്യുക
+Create and preload a new gift card,ഒരു പുതിയ സമ്മാന കാർഡ് സൃഷ്‌ടിച്ച് പ്രീലോഡ് ചെയ്യുക
+Create Bill,ബിൽ സൃഷ്ടിക്കുക
+Create Customer,ഉപഭോക്താവിനെ സൃഷ്ടിക്കുക
+Create New Item,പുതിയ ഇനം സൃഷ്ടിക്കുക
+Create or change your PIN,നിങ്ങളുടെ പിൻ സൃഷ്‌ടിക്കുക അല്ലെങ്കിൽ മാറ്റുക
+Create PIN,പിൻ സൃഷ്‌ടിക്കുക
+Create POS Opening Shift,POS ഓപ്പണിംഗ് ഷിഫ്റ്റ് സൃഷ്ടിക്കുക
+Create Purchase Order,വാങ്ങൽ ഓർഡർ സൃഷ്ടിക്കുക
+Create Return,റിട്ടേൺ സൃഷ്ടിക്കുക
+Create return from invoice,ഇൻവോയ്സിൽ നിന്ന് റിട്ടേൺ സൃഷ്ടിക്കുക
+Create Supplier,വിതരണക്കാരനെ സൃഷ്ടിക്കുക
+Credit and Output,ക്രെഡിറ്റും ഔട്ട്പുട്ടും
+Credit Note,ക്രെഡിറ്റ് നോട്ട്
+Credit Outstanding,ക്രെഡിറ്റ് ഔട്ട്സ്റ്റാൻഡിംഗ്
+Credit sales remaining to be collected,ക്രെഡിറ്റ് വിൽപ്പന ശേഖരിക്കാൻ ശേഷിക്കുന്നു
+Critical,ക്രിട്ടിക്കൽ
+Currency,കറൻസി
+Current,നിലവിലുള്ളത്
+Current Event Loop Lag:,നിലവിലെ ഇവൻ്റ് ലൂപ്പ് ലാഗ്:
+Current Month,നിലവിലെ മാസം
+Current PIN,നിലവിലെ പിൻ
+Current Profile,നിലവിലെ പ്രൊഫൈൽ
+Current redeemable value on the gift card,സമ്മാന കാർഡിലെ നിലവിലെ റിഡീം ചെയ്യാവുന്ന മൂല്യം
+Current User,നിലവിലെ ഉപയോക്താവ്
+Custom,കസ്റ്റം
+Custom Due Days,കസ്റ്റം ഡ്യൂ ഡേകൾ
+Custom items per page,ഓരോ പേജിനും ഇഷ്ടാനുസൃത ഇനങ്ങൾ
+Customer,ഉപഭോക്താവ്
+Customer already selected,ഉപഭോക്താവ് ഇതിനകം തിരഞ്ഞെടുത്തു
+Customer Balance,കസ്റ്റമർ ബാലൻസ്
+Customer balance unavailable offline,കസ്റ്റമർ ബാലൻസ് ഓഫ്‌ലൈനിൽ ലഭ്യമല്ല
+Customer created successfully.,ഉപഭോക്താവിനെ സൃഷ്ടിച്ചു.
+Customer creation failed.,ഉപഭോക്തൃ സൃഷ്‌ടി പരാജയപ്പെട്ടു.
+Customer Details,ഉപഭോക്തൃ വിശദാംശങ്ങൾ
+Customer display channel is missing,ഉപഭോക്തൃ ഡിസ്പ്ലേ ചാനൽ കാണുന്നില്ല
+Customer display was blocked. Please allow pop-ups for this site.,ഉപഭോക്തൃ ഡിസ്പ്ലേ തടഞ്ഞു. ഈ സൈറ്റിനായി പോപ്പ്-അപ്പുകൾ അനുവദിക്കുക.
+Customer group is required,ഉപഭോക്തൃ ഗ്രൂപ്പ് ആവശ്യമാണ്
+Customer is required to add payment,ഉപഭോക്താവ് പേയ്‌മെൻ്റ് ചേർക്കേണ്ടതുണ്ട്
+Customer Name is required,ഉപഭോക്താവിൻ്റെ പേര് ആവശ്യമാണ്
+Customer not selected,ഉപഭോക്താവിനെ തിരഞ്ഞെടുത്തിട്ടില്ല
+Customer Report,ഉപഭോക്തൃ റിപ്പോർട്ട്
+Customer saved offline,കസ്റ്റമർ ഓഫ്‌ലൈനിൽ സംരക്ഷിച്ചു
+Customer Screen,ഉപഭോക്തൃ സ്ക്രീൻ
+Customer territory is required,ഉപഭോക്തൃ പ്രദേശം ആവശ്യമാണ്
+Customer updated successfully.,ഉപഭോക്താവ് വിജയകരമായി അപ്ഡേറ്റ് ചെയ്തു.
+Customer-facing tools and printer setup.,കസ്റ്റമർ-ഫേസിംഗ് ടൂളുകളും പ്രിൻ്റർ സജ്ജീകരണവും.
+Customers,ഉപഭോക്താക്കൾ
+Customers not found,ഉപഭോക്താക്കളെ കണ്ടെത്തിയില്ല
+Daily cashier actions without scrolling.,സ്ക്രോൾ ചെയ്യാതെ പ്രതിദിന കാഷ്യർ പ്രവർത്തനങ്ങൾ.
+Daily Sales,പ്രതിദിന വിൽപ്പന
+Daily Sales Summary,പ്രതിദിന വിൽപ്പന സംഗ്രഹം
+Data loaded in form. Review and submit.,ഫോമിൽ ഡാറ്റ ലോഡ് ചെയ്തു. അവലോകനം ചെയ്ത് സമർപ്പിക്കുക.
+Database Health,ഡാറ്റാബേസ് ആരോഗ്യം
+Database health affects overall system speed and reliability.,ഡാറ്റാബേസ് ആരോഗ്യം മൊത്തത്തിലുള്ള സിസ്റ്റം വേഗതയെയും വിശ്വാസ്യതയെയും ബാധിക്കുന്നു.
+Database Info,ഡാറ്റാബേസ് വിവരം
+Date,തീയതി
+Day ?,ദിവസം?
+days,ദിവസങ്ങൾ
+Day-wise (MTD),ദിവസം തിരിച്ചുള്ള (MTD)
+Day-wise Movement,ദിവസം തിരിച്ചുള്ള പ്രസ്ഥാനം
+Dead Stock,ഡെഡ് സ്റ്റോക്ക്
+Dead Stock Items,ഡെഡ് സ്റ്റോക്ക് ഇനങ്ങൾ
+Decrease quantity,അളവ് കുറയ്ക്കുക
+Default,സ്ഥിരസ്ഥിതി
+Default:,ഡിഫോൾട്ട്:
+Delete,ഇല്ലാതാക്കുക
+Delete cancelled cash movement {0}?,റദ്ദാക്കിയ പണ നീക്കം ഇല്ലാതാക്കണോ {0}?
+Delete Draft,ഡ്രാഫ്റ്റ് ഇല്ലാതാക്കുക
+Delete draft invoice,ഡ്രാഫ്റ്റ് ഇൻവോയ്സ് ഇല്ലാതാക്കുക
+Delete draft invoice {0}?,ഡ്രാഫ്റ്റ് ഇൻവോയ്സ് {0} ഇല്ലാതാക്കണോ?
+Delete Invoice,ഇൻവോയ്സ് ഇല്ലാതാക്കുക
+Delete offline invoice,ഓഫ്‌ലൈൻ ഇൻവോയ്സ് ഇല്ലാതാക്കുക
+Delivered,എത്തിച്ചു
+Delivery Charges,ഡെലിവറി നിരക്കുകൾ
+Delivery Information,ഡെലിവറി വിവരങ്ങൾ
+Delivery Note {0} created,ഡെലിവറി കുറിപ്പ് {0} സൃഷ്ടിച്ചു
+Delivery note created,ഡെലിവറി കുറിപ്പ് സൃഷ്ടിച്ചു
+Deployed Bundle:,വിന്യസിച്ചിരിക്കുന്ന ബണ്ടിൽ:
+Deposit,നിക്ഷേപിക്കുക
+Description,വിവരണം
+Detailed Supplier Breakdown,വിശദമായ വിതരണക്കാരൻ്റെ തകർച്ച
+Detecting formats:,ഫോർമാറ്റുകൾ കണ്ടെത്തുന്നു:
+Device Memory:,ഉപകരണ മെമ്മറി:
+Difference,വ്യത്യാസം
+Difference (In Company Currency),വ്യത്യാസം (കമ്പനി കറൻസിയിൽ)
+Disable offline mode first to recheck live connectivity.,തത്സമയ കണക്റ്റിവിറ്റി വീണ്ടും പരിശോധിക്കാൻ ആദ്യം ഓഫ്‌ലൈൻ മോഡ് പ്രവർത്തനരഹിതമാക്കുക.
+Disconnect,വിച്ഛേദിക്കുക
+discount,കിഴിവ്
+Discount %,കിഴിവ് %
+Discount / Void / Return Report,കിഴിവ് / അസാധുവായ / റിട്ടേൺ റിപ്പോർട്ട്
+Discount Amount,കിഴിവ് തുക
+Discount limited by POS Profile,POS പ്രൊഫൈൽ പ്രകാരം കിഴിവ് പരിമിതപ്പെടുത്തിയിരിക്കുന്നു
+Discounted Invoices,ഡിസ്കൗണ്ട് ഇൻവോയ്സുകൾ
+Discounts,ഡിസ്കൗണ്ടുകൾ
+Dismiss,പിരിച്ചുവിടുക
+Download Certificate,സർട്ടിഫിക്കറ്റ് ഡൗൺലോഡ് ചെയ്യുക
+Draft,ഡ്രാഫ്റ്റ്
+Draft invoice deleted,ഡ്രാഫ്റ്റ് ഇൻവോയ്സ് ഇല്ലാതാക്കി
+Draft source,കരട് ഉറവിടം
+Drafts,ഡ്രാഫ്റ്റുകൾ
+Due {0},അവസാന തീയതി {0}
+Due Date,അവസാന തീയതി
+Duplicate,ഡ്യൂപ്ലിക്കേറ്റ്
+Edit customer,ഉപഭോക്താവിനെ എഡിറ്റ് ചെയ്യുക
+Edit discount amount,കിഴിവ് തുക എഡിറ്റ് ചെയ്യുക
+Edit discount percentage,കിഴിവ് ശതമാനം എഡിറ്റ് ചെയ്യുക
+Edit Gift Application,സമ്മാന അപേക്ഷ എഡിറ്റ് ചെയ്യുക
+Edit item name,ഇനത്തിൻ്റെ പേര് എഡിറ്റ് ചെയ്യുക
+Edit quantity,അളവ് എഡിറ്റ് ചെയ്യുക
+Edit rate,നിരക്ക് എഡിറ്റ് ചെയ്യുക
+Edit unit of measure,അളവിൻ്റെ യൂണിറ്റ് എഡിറ്റ് ചെയ്യുക
+Edited,എഡിറ്റ് ചെയ്തു
+Employee,ജീവനക്കാരൻ
+Enable background sync,പശ്ചാത്തല സമന്വയം പ്രവർത്തനക്ഷമമാക്കുക
+Enable Customer Display in POS Profile first.,ആദ്യം POS പ്രൊഫൈലിൽ കസ്റ്റമർ ഡിസ്പ്ലേ പ്രവർത്തനക്ഷമമാക്കുക.
+Enter a PIN.,ഒരു പിൻ നൽകുക.
+Enter a valid grams value,ഒരു സാധുവായ ഗ്രാം മൂല്യം നൽകുക
+Enter new price list rate,പുതിയ വില ലിസ്റ്റ് നിരക്ക് നൽകുക
+Enter Quantity,അളവ് നൽകുക
+Enter the cashier PIN to continue.,തുടരാൻ കാഷ്യർ പിൻ നൽകുക.
+Enter the current PIN first.,ആദ്യം നിലവിലുള്ള പിൻ നൽകുക.
+"Enter the current PIN, then choose a new one.","നിലവിലെ പിൻ നൽകുക, തുടർന്ന് പുതിയൊരെണ്ണം തിരഞ്ഞെടുക്കുക."
+Enter valid grams for scale barcode,സ്കെയിൽ ബാർകോഡിനായി സാധുവായ ഗ്രാം നൽകുക
+Entries,എൻട്രികൾ
+Error accessing camera:,ക്യാമറ ആക്‌സസ് ചെയ്യുന്നതിൽ പിശക്:
+Error calculating prices,വിലകൾ കണക്കാക്കുന്നതിൽ പിശക്
+Error fetching customer balance,ഉപഭോക്തൃ ബാലൻസ് ലഭ്യമാക്കുന്നതിൽ പിശക്
+Error in change calculations!,കണക്ക് മാറ്റുന്നതിൽ പിഴവ്!
+Error Loading Data,ഡാറ്റ ലോഡുചെയ്യുന്നതിൽ പിശക്
+Error loading invoice details,ഇൻവോയ്സ് വിശദാംശങ്ങൾ ലോഡുചെയ്യുന്നതിൽ പിശക്
+Error processing invoice,ഇൻവോയ്സ് പ്രോസസ്സ് ചെയ്യുന്നതിൽ പിശക്
+Error processing payment,പേയ്‌മെൻ്റ് പ്രോസസ്സ് ചെയ്യുന്നതിൽ പിശക്
+Error searching invoices,ഇൻവോയ്‌സുകൾ തിരയുന്നതിൽ പിശക്
+Error submitting invoice:,ഇൻവോയ്സ് സമർപ്പിക്കുന്നതിൽ പിശക്:
+Error submitting invoice: {0},ഇൻവോയ്സ് സമർപ്പിക്കുന്നതിൽ പിശക്: {0}
+Error submitting invoice: No response from server,ഇൻവോയ്സ് സമർപ്പിക്കുന്നതിൽ പിശക്: സെർവറിൽ നിന്ന് പ്രതികരണമില്ല
+Error updating currency,കറൻസി അപ്ഡേറ്റ് ചെയ്യുന്നതിൽ പിശക്
+Error updating item details,ഇനത്തിൻ്റെ വിശദാംശങ്ങൾ അപ്ഡേറ്റ് ചെയ്യുന്നതിൽ പിശക്
+Est. Purchase,എസ്റ്റ്. വാങ്ങുക
+Est. Value,എസ്റ്റ്. മൂല്യം
+Event-loop lag measures how busy your browser is. Lower is better.,നിങ്ങളുടെ ബ്രൗസർ എത്ര തിരക്കിലാണെന്ന് ഇവൻ്റ്-ലൂപ്പ് ലാഗ് അളക്കുന്നു. താഴ്ന്നതാണ് നല്ലത്.
+Every,ഓരോ
+Exchange Rate,വിനിമയ നിരക്ക്
+Expand item details,ഇനത്തിൻ്റെ വിശദാംശങ്ങൾ വികസിപ്പിക്കുക
+Expected Amount (In Company Currency),പ്രതീക്ഷിക്കുന്ന തുക (കമ്പനി കറൻസിയിൽ)
+Expected Cash,പ്രതീക്ഷിക്കുന്ന പണം
+Expected cash on hand grouped by currency,കറൻസി പ്രകാരം ഗ്രൂപ്പുചെയ്‌ത കൈയിൽ പ്രതീക്ഷിക്കുന്ന പണം
+Expected vs Actual,പ്രതീക്ഷിക്കുന്നത് vs യഥാർത്ഥം
+Expense,ചെലവ്
+Expense Account (Optional Override),ചെലവ് അക്കൗണ്ട് (ഓപ്ഷണൽ ഓവർറൈഡ്)
+Expense account is required.,ചെലവ് അക്കൗണ്ട് ആവശ്യമാണ്.
+Expenses and deposits posted during this shift,ഈ ഷിഫ്റ്റിൽ പോസ്റ്റ് ചെയ്ത ചെലവുകളും നിക്ഷേപങ്ങളും
+Expired,കാലഹരണപ്പെട്ടു
+Failed to auto reconcile payments.,പേയ്‌മെൻ്റുകൾ സ്വയമേവ അനുരഞ്ജിപ്പിക്കുന്നതിൽ പരാജയപ്പെട്ടു.
+Failed to cancel cash movement,പണമിടപാട് റദ്ദാക്കുന്നതിൽ പരാജയപ്പെട്ടു
+Failed to clear cache,കാഷെ മായ്‌ക്കുന്നതിൽ പരാജയപ്പെട്ടു
+Failed to create item,ഇനം സൃഷ്ടിക്കുന്നതിൽ പരാജയപ്പെട്ടു
+Failed to create supplier,വിതരണക്കാരനെ സൃഷ്ടിക്കുന്നതിൽ പരാജയപ്പെട്ടു
+Failed to delete cash movement,പണമിടപാട് ഇല്ലാതാക്കുന്നതിൽ പരാജയപ്പെട്ടു
+Failed to generate scale barcode. Using item barcode only.,സ്കെയിൽ ബാർകോഡ് സൃഷ്ടിക്കുന്നതിൽ പരാജയപ്പെട്ടു. ഇനത്തിൻ്റെ ബാർകോഡ് മാത്രം ഉപയോഗിക്കുന്നു.
+Failed to load cash movement context.,പണമിടപാട് സന്ദർഭം ലോഡ് ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു.
+Failed to load dashboard data.,ഡാഷ്‌ബോർഡ് ഡാറ്റ ലോഡുചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു.
+Failed to reload invoice from server,സെർവറിൽ നിന്ന് ഇൻവോയ്സ് റീലോഡ് ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു
+Failed to submit cash movement,പണമിടപാട് സമർപ്പിക്കുന്നതിൽ പരാജയപ്പെട്ടു
+Failed to sync offline cash movements,ഓഫ്‌ലൈൻ പണ നീക്കങ്ങൾ സമന്വയിപ്പിക്കുന്നതിൽ പരാജയപ്പെട്ടു
+Fast cashier actions for active shifts.,സജീവമായ ഷിഫ്റ്റുകൾക്കുള്ള ഫാസ്റ്റ് കാഷ്യർ പ്രവർത്തനങ്ങൾ.
+Fast Moving Items,വേഗത്തിൽ ചലിക്കുന്ന ഇനങ്ങൾ
+Fees,ഫീസ്
+Fetch the latest offline prerequisite updates,ഏറ്റവും പുതിയ ഓഫ്‌ലൈൻ മുൻകൂർ അപ്‌ഡേറ്റുകൾ നേടുക
+Find a sales order quickly and load it into the current sale.,ഒരു വിൽപ്പന ഓർഡർ വേഗത്തിൽ കണ്ടെത്തി നിലവിലെ വിൽപ്പനയിലേക്ക് ലോഡ് ചെയ്യുക.
+Fixing payment amounts for return invoice...,റിട്ടേൺ ഇൻവോയ്‌സിനായി പേയ്‌മെൻ്റ് തുകകൾ നിശ്ചയിക്കുന്നു...
+Flash Off,ഫ്ലാഷ് ഓഫ്
+Flash On,ഫ്ലാഷ് ഓൺ
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","'ഉൽപ്പന്ന ബണ്ടിൽ' ഇനങ്ങൾക്കായി, 'പാക്കിംഗ് ലിസ്റ്റ്' പട്ടികയിൽ നിന്ന് വെയർഹൗസ്, സീരിയൽ നമ്പർ, ബാച്ച് നമ്പർ എന്നിവ പരിഗണിക്കും. ഏതെങ്കിലും 'ഉൽപ്പന്ന ബണ്ടിൽ' ഇനത്തിനായുള്ള എല്ലാ പാക്കിംഗ് ഇനങ്ങൾക്കും വെയർഹൗസും ബാച്ച് നമ്പറും ഒരുപോലെയാണെങ്കിൽ, ആ മൂല്യങ്ങൾ പ്രധാന ഇന പട്ടികയിൽ നൽകാം; മൂല്യങ്ങൾ 'പാക്കിംഗ് ലിസ്റ്റ്' പട്ടികയിലേക്ക് പകർത്തും."
+Free,സൗജന്യം
+Free Qty,സൗജന്യ Qty
+Frequency,ആവൃത്തി
+from,നിന്ന്
+From Date,തീയതി മുതൽ
+Fulfillment Details,പൂർത്തീകരണ വിശദാംശങ്ങൾ
+Full Name,മുഴുവൻ പേര്
+Gain,നേട്ടം
+Generate a fresh prepaid card and start it with an opening balance.,ഒരു പുതിയ പ്രീപെയ്ഡ് കാർഡ് സൃഷ്ടിച്ച് ഒരു ഓപ്പണിംഗ് ബാലൻസ് ഉപയോഗിച്ച് അത് ആരംഭിക്കുക.
+Generate and install the certificate to allow fully silent printing without trust prompts.,ട്രസ്റ്റ് പ്രോംപ്‌റ്റുകളില്ലാതെ പൂർണ്ണമായും നിശബ്ദമായ പ്രിൻ്റിംഗ് അനുവദിക്കുന്നതിന് സർട്ടിഫിക്കറ്റ് സൃഷ്‌ടിക്കുകയും ഇൻസ്റ്റാൾ ചെയ്യുകയും ചെയ്യുക.
+Generate Certificate,സർട്ടിഫിക്കറ്റ് സൃഷ്ടിക്കുക
+Generated scale barcode: {0},സൃഷ്ടിച്ച സ്കെയിൽ ബാർകോഡ്: {0}
+Get Payments,പേയ്‌മെൻ്റുകൾ നേടുക
+Gift Card,സമ്മാന കാർഡ്
+Gift card amount must be greater than zero.,സമ്മാന കാർഡ് തുക പൂജ്യത്തേക്കാൾ കൂടുതലായിരിക്കണം.
+Gift Card Code,സമ്മാന കാർഡ് കോഡ്
+Gift card code is required for redemption,റിഡീം ചെയ്യുന്നതിന് ഗിഫ്റ്റ് കാർഡ് കോഡ് ആവശ്യമാണ്
+Gift card code is required.,സമ്മാന കാർഡ് കോഡ് ആവശ്യമാണ്.
+Gift card issued successfully.,സമ്മാന കാർഡ് വിജയകരമായി വിതരണം ചെയ്തു.
+Gift card loaded successfully.,സമ്മാന കാർഡ് വിജയകരമായി ലോഡുചെയ്‌തു.
+Gift Card Management,ഗിഫ്റ്റ് കാർഡ് മാനേജ്മെൻ്റ്
+Gift card payment,സമ്മാന കാർഡ് പേയ്മെൻ്റ്
+Gift card redemption requires an online connection,സമ്മാന കാർഡ് റിഡീം ചെയ്യുന്നതിന് ഒരു ഓൺലൈൻ കണക്ഷൻ ആവശ്യമാണ്
+Gift card topped up successfully.,സമ്മാന കാർഡ് വിജയകരമായി ടോപ്പ് അപ്പ് ചെയ്തു.
+Gift Cards,സമ്മാന കാർഡുകൾ
+Go to Frappe Desk,ഫ്രാപ്പ് ഡെസ്കിലേക്ക് പോകുക
+Grand Total,ഗ്രാൻഡ് ടോട്ടൽ
+Gross Margin,മൊത്തം മാർജിൻ
+Gross Profit,മൊത്ത ലാഭം
+Gross Sales,മൊത്ത വിൽപ്പന
+Group not found,ഗ്രൂപ്പ് കണ്ടെത്തിയില്ല
+"Grouped controls for terminal, UI, and session settings.","ടെർമിനൽ, യുഐ, സെഷൻ ക്രമീകരണങ്ങൾ എന്നിവയ്‌ക്കായുള്ള ഗ്രൂപ്പുചെയ്‌ത നിയന്ത്രണങ്ങൾ."
+Grouped totals for each payment method and currency,ഓരോ പേയ്‌മെൻ്റ് രീതിക്കും കറൻസിക്കുമായി ഗ്രൂപ്പുചെയ്‌ത മൊത്തങ്ങൾ
+Hide,മറയ്ക്കുക
+Hide Gift Card,സമ്മാന കാർഡ് മറയ്ക്കുക
+Hide Non Essential Fields,അനിവാര്യമല്ലാത്ത ഫീൽഡുകൾ മറയ്ക്കുക
+Hide quantity decimals,അളവ് ദശാംശങ്ങൾ മറയ്ക്കുക
+Hide search tools,തിരയൽ ഉപകരണങ്ങൾ മറയ്ക്കുക
+Hide zero rated items,പൂജ്യം റേറ്റുചെയ്ത ഇനങ്ങൾ മറയ്ക്കുക
+High,ഉയർന്നത്
+History,ചരിത്രം
+Hourly (Today),മണിക്കൂർ തോറും (ഇന്ന്)
+How this section works,ഈ വിഭാഗം എങ്ങനെ പ്രവർത്തിക്കുന്നു
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","പഴകിയ ഡാറ്റ അവശേഷിക്കുന്നുണ്ടെങ്കിൽ, ക്രമീകരണങ്ങൾ > ഓഫ്‌ലൈനും സമന്വയവും തുറന്ന് ഓൺലൈനായിരിക്കുമ്പോൾ വീണ്ടും ഓഫ്‌ലൈൻ ഡാറ്റ റീബിൽഡ് റൺ ചെയ്യുക."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","മുന്നറിയിപ്പ് നിലനിൽക്കുകയാണെങ്കിൽ, ക്രമീകരണങ്ങൾ > ഓഫ്‌ലൈനും സമന്വയവും തുറക്കുക, തുടർന്ന് ഓഫ്‌ലൈൻ ഡാറ്റ പുതുക്കുക അല്ലെങ്കിൽ ഓഫ്‌ലൈൻ ഡാറ്റ പുനർനിർമ്മിക്കുക."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,QZ ട്രേയിലേക്ക് സർട്ടിഫിക്കറ്റ് ഇമ്പോർട്ടുചെയ്‌ത് ഓരോ POS മെഷീനിലും QZ ട്രേ പുനരാരംഭിക്കുക.
+In,ഇൻ
+In stock: {0},സ്റ്റോക്കുണ്ട്: {0}
+Include Batch / Serial,ബാച്ച് / സീരിയൽ ഉൾപ്പെടുത്തുക
+Include Price,വില ഉൾപ്പെടുത്തുക
+Increase quantity,അളവ് കൂട്ടുക
+IndexedDB,IndexedDB
+Initial Amount,പ്രാരംഭ തുക
+Initialize your shift with opening balances,ഓപ്പണിംഗ് ബാലൻസുകൾ ഉപയോഗിച്ച് നിങ്ങളുടെ ഷിഫ്റ്റ് ആരംഭിക്കുക
+Initializing application...,ആപ്ലിക്കേഷൻ ആരംഭിക്കുന്നു...
+"Inspect cache, sync, and prerequisite status","കാഷെ, സമന്വയം, ആവശ്യമായ നില എന്നിവ പരിശോധിക്കുക"
+Installed Applications,ഇൻസ്റ്റാൾ ചെയ്ത ആപ്ലിക്കേഷനുകൾ
+Insufficient stock:\n{0},മതിയായ സ്റ്റോക്കില്ല:\n{0}
+Invalid rate,അസാധുവായ നിരക്ക്
+Inventory Status Report,ഇൻവെൻ്ററി സ്റ്റാറ്റസ് റിപ്പോർട്ട്
+Invoice,ഇൻവോയ്സ്
+Invoice {0} is Submitted,ഇൻവോയ്സ് {0} സമർപ്പിച്ചു
+Invoice {0} processed successfully,ഇൻവോയ്സ് {0} വിജയകരമായി പ്രോസസ്സ് ചെയ്തു
+Invoice {0} submission failed,ഇൻവോയ്സ് {0} സമർപ്പിക്കൽ പരാജയപ്പെട്ടു
+Invoice {0} was already submitted,ഇൻവോയ്സ് {0} ഇതിനകം സമർപ്പിച്ചു
+Invoice Adjustments,ഇൻവോയ്സ് ക്രമീകരണങ്ങൾ
+Invoice Change,ഇൻവോയ്സ് മാറ്റം
+Invoice Details,ഇൻവോയ്സ് വിശദാംശങ്ങൾ
+Invoice is still in draft after background submission.,പശ്ചാത്തല സമർപ്പണത്തിന് ശേഷവും ഇൻവോയ്സ് ഡ്രാഫ്റ്റിലാണ്.
+Invoice Items,ഇൻവോയ്സ് ഇനങ്ങൾ
+Invoice Management,ഇൻവോയ്സ് മാനേജ്മെൻ്റ്
+Invoice Mgmt,ഇൻവോയ്സ് Mgmt
+Invoice saved offline,ഇൻവോയ്സ് ഓഫ്‌ലൈനിൽ സംരക്ഷിച്ചു
+Invoice submission failed,ഇൻവോയ്സ് സമർപ്പിക്കൽ പരാജയപ്പെട്ടു
+Invoice Submitted,ഇൻവോയ്സ് സമർപ്പിച്ചു
+"Invoice value settled by loyalty points, not cash collection","പണ ശേഖരണമല്ല, ലോയൽറ്റി പോയിൻ്റുകൾ വഴിയാണ് ഇൻവോയ്സ് മൂല്യം തീർപ്പാക്കിയത്"
+Invoices,ഇൻവോയ്സുകൾ
+Invoices already past due date,ഇൻവോയ്‌സുകൾ ഇതിനകം അവസാന തീയതി കഴിഞ്ഞു
+Invoices saved as POS Invoices,ഇൻവോയ്സുകൾ POS ഇൻവോയ്സുകളായി സംരക്ഷിച്ചു
+Invoices still carrying balances,ഇൻവോയ്‌സുകളിൽ ഇപ്പോഴും ബാലൻസ് ഉണ്ട്
+Issue Mode,ഇഷ്യൂ മോഡ്
+Issue New Card,പുതിയ കാർഡ് ഇഷ്യൂ ചെയ്യുക
+Issue Workflow,ഇഷ്യൂ വർക്ക്ഫ്ലോ
+"Issue, top up, and check","ഇഷ്യൂ ചെയ്യുക, ടോപ്പ് അപ്പ് ചെയ്യുക, പരിശോധിക്കുക"
+Item,ഇനം
+Item / Product Sales Report,ഇനം / ഉൽപ്പന്ന വിൽപ്പന റിപ്പോർട്ട്
+Item {0} added to invoice,ഇൻവോയ്‌സിൽ {0} ഇനം ചേർത്തു
+Item '{0}' has no barcode,'{0}' ഇനത്തിന് ബാർകോഡില്ല
+Item Code,ഇനം കോഡ്
+Item created successfully,ഇനം വിജയകരമായി സൃഷ്ടിച്ചു
+Item is out of stock,ഇനം സ്റ്റോക്കില്ല
+Item Name,ഇനത്തിൻ്റെ പേര്
+Item not found,ഇനം കണ്ടെത്തിയില്ല
+Item order updated,ഇനത്തിൻ്റെ ഓർഡർ അപ്ഡേറ്റ് ചെയ്തു
+Item Selector Settings,ഇനം സെലക്ടർ ക്രമീകരണങ്ങൾ
+Items,ഇനങ്ങൾ
+Items added in POS will appear here automatically.,POS-ൽ ചേർത്ത ഇനങ്ങൾ ഇവിടെ സ്വയമേവ ദൃശ്യമാകും.
+Items added to invoice,ഇൻവോയ്‌സിലേക്ക് ഇനങ്ങൾ ചേർത്തു
+Items per page,ഓരോ പേജിലും ഇനങ്ങൾ
+Items Sold,വിറ്റ വസ്തുക്കൾ
+Items/Invoice,ഇനങ്ങൾ/ഇൻവോയ്സ്
+Item-wise Profitability,ഇനം തിരിച്ചുള്ള ലാഭക്ഷമത
+Journal Entry,ജേണൽ എൻട്രി
+json,json
+Just now,ഇപ്പോൾ തന്നെ
+Keep offline prerequisites healthy and recover stale data safely.,ഓഫ്‌ലൈൻ മുൻവ്യവസ്ഥകൾ ആരോഗ്യകരമായി നിലനിർത്തുകയും പഴകിയ ഡാറ്റ സുരക്ഷിതമായി വീണ്ടെടുക്കുകയും ചെയ്യുക.
+Labels,ലേബലുകൾ
+"Language, theme, terminal tools, and session controls.","ഭാഷ, തീം, ടെർമിനൽ ടൂളുകൾ, സെഷൻ നിയന്ത്രണങ്ങൾ."
+Last,അവസാനത്തേത്
+Last 14 Days (Paid vs Pending),കഴിഞ്ഞ 14 ദിവസം (പണമടച്ചതും തീർച്ചപ്പെടുത്തിയിട്ടില്ലാത്തതും)
+Last 14 Days Activity,കഴിഞ്ഞ 14 ദിവസത്തെ പ്രവർത്തനം
+Last 14 Days Gross Profit,കഴിഞ്ഞ 14 ദിവസത്തെ മൊത്ത ലാഭം
+Last 14 Days Purchases,കഴിഞ്ഞ 14 ദിവസത്തെ വാങ്ങലുകൾ
+Last 14 Days Tax/Charges,കഴിഞ്ഞ 14 ദിവസത്തെ നികുതി/നിരക്കുകൾ
+Last sync:,അവസാന സമന്വയം:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},അവസാന സമന്വയം: {0} | ശരി: {1} | പരാജയപ്പെട്ടു: {2} | ഒഴിവാക്കി: {3}
+Latest entries for current shift,നിലവിലെ ഷിഫ്റ്റിനുള്ള ഏറ്റവും പുതിയ എൻട്രികൾ
+Lead Time,ലീഡ് സമയം
+Limited,ലിമിറ്റഡ്
+lines,വരികൾ
+List,ലിസ്റ്റ്
+Live Snapshot,തത്സമയ സ്നാപ്പ്ഷോട്ട്
+Load a POS profile and cashier first.,ആദ്യം ഒരു POS പ്രൊഫൈലും കാഷ്യറും ലോഡ് ചെയ്യുക.
+Load More Invoices,കൂടുതൽ ഇൻവോയ്‌സുകൾ ലോഡുചെയ്യുക
+Load previously saved invoices,മുമ്പ് സംരക്ഷിച്ച ഇൻവോയ്‌സുകൾ ലോഡുചെയ്യുക
+Load Sale,ലോഡ് വിൽപ്പന
+Load Sales Invoice,വിൽപ്പന ഇൻവോയ്സ് ലോഡ് ചെയ്യുക
+Loading app data...,ആപ്പ് ഡാറ്റ ലോഡുചെയ്യുന്നു...
+Loading customer database...,ഉപഭോക്തൃ ഡാറ്റാബേസ് ലോഡുചെയ്യുന്നു...
+Loading customers...,ഉപഭോക്താക്കളെ ലോഡ് ചെയ്യുന്നു...
+Loading database stats...,ഡാറ്റാബേസ് സ്ഥിതിവിവരക്കണക്കുകൾ ലോഡുചെയ്യുന്നു...
+Loading details...,വിശദാംശങ്ങൾ ലോഡുചെയ്യുന്നു...
+Loading invoice history...,ഇൻവോയ്സ് ചരിത്രം ലോഡ് ചെയ്യുന്നു...
+Loading items...,ഇനങ്ങൾ ലോഡുചെയ്യുന്നു...
+Loading product catalog...,ഉൽപ്പന്ന കാറ്റലോഗ് ലോഡ് ചെയ്യുന്നു...
+Loading return invoices...,റിട്ടേൺ ഇൻവോയ്‌സുകൾ ലോഡ് ചെയ്യുന്നു...
+Loading server CPU/memory usage...,സെർവർ CPU/മെമ്മറി ഉപയോഗം ലോഡുചെയ്യുന്നു...
+Loading suppliers...,വിതരണക്കാരെ ലോഡ് ചെയ്യുന്നു...
+Loading unpaid invoices...,പണമടയ്ക്കാത്ത ഇൻവോയ്‌സുകൾ ലോഡ് ചെയ്യുന്നു...
+Loading view...,കാഴ്ച ലോഡുചെയ്യുന്നു...
+Loading...,ലോഡ് ചെയ്യുന്നു...
+Local storage is unavailable. Switching to online-only mode.,പ്രാദേശിക സംഭരണം ലഭ്യമല്ല. ഓൺലൈൻ-മാത്രം മോഡിലേക്ക് മാറുന്നു.
+localStorage,പ്രാദേശിക സംഭരണം
+Location Performance,ലൊക്കേഷൻ പ്രകടനം
+Locations,സ്ഥാനങ്ങൾ
+Lock Screen,ലോക്ക് സ്ക്രീൻ
+Lookup Workflow,വർക്ക്ഫ്ലോ നോക്കുക
+Loss,നഷ്ടം
+Low,താഴ്ന്നത്
+Low Stock,കുറഞ്ഞ സ്റ്റോക്ക്
+Low Stock Alerts,കുറഞ്ഞ സ്റ്റോക്ക് അലേർട്ടുകൾ
+Low Stock Items,കുറഞ്ഞ സ്റ്റോക്ക് ഇനങ്ങൾ
+Low Stock Threshold,കുറഞ്ഞ സ്റ്റോക്ക് ത്രെഷോൾഡ്
+Low Stock Total,കുറഞ്ഞ സ്റ്റോക്ക് ആകെ
+Lowest Margin,ഏറ്റവും കുറഞ്ഞ മാർജിൻ
+Low-frequency maintenance and system details.,ലോ-ഫ്രീക്വൻസി അറ്റകുറ്റപ്പണികളും സിസ്റ്റം വിശദാംശങ്ങളും.
+Loyalty Redeemed,ലോയൽറ്റി റിഡീം ചെയ്തു
+Loyalty Redemption,ലോയൽറ്റി റിഡംപ്ഷൻ
+Make New Payment,പുതിയ പേയ്‌മെൻ്റ് നടത്തുക
+Manage all,എല്ലാം കൈകാര്യം ചെയ്യുക
+Manage and synchronize your offline transactions,നിങ്ങളുടെ ഓഫ്‌ലൈൻ ഇടപാടുകൾ നിയന്ത്രിക്കുകയും സമന്വയിപ്പിക്കുകയും ചെയ്യുക
+Manage Cashier PIN,കാഷ്യർ പിൻ കൈകാര്യം ചെയ്യുക
+"Manage offline tools, terminal controls, and maintenance from one workspace.","ഒരു വർക്ക്‌സ്‌പെയ്‌സിൽ നിന്ന് ഓഫ്‌ലൈൻ ടൂളുകൾ, ടെർമിനൽ നിയന്ത്രണങ്ങൾ, മെയിൻ്റനൻസ് എന്നിവ കൈകാര്യം ചെയ്യുക."
+manual,മാനുവൽ
+"Manual codes, barcode scans, and QR scans work in the same field","മാനുവൽ കോഡുകൾ, ബാർകോഡ് സ്കാൻ, QR സ്കാൻ എന്നിവ ഒരേ ഫീൽഡിൽ പ്രവർത്തിക്കുന്നു"
+Manual offline mode is enabled,മാനുവൽ ഓഫ്‌ലൈൻ മോഡ് പ്രവർത്തനക്ഷമമാക്കി
+Margin,മാർജിൻ
+Maximum available quantity is {0}. Quantity adjusted to match stock.,ലഭ്യമായ പരമാവധി അളവ് {0} ആണ്. മാച്ച് സ്റ്റോക്കിലേക്ക് അളവ് ക്രമീകരിച്ചു.
+Maximum discount amount for this offer item is {0}.,ഈ ഓഫർ ഇനത്തിനുള്ള പരമാവധി കിഴിവ് തുക {0} ആണ്.
+Maximum discount percentage for this offer item is {0}%.,ഈ ഓഫർ ഇനത്തിൻ്റെ പരമാവധി കിഴിവ് ശതമാനം {0}% ആണ്.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,പരമാവധി ഓഫർ അളവ് {0} ആണ്. അനുവദനീയമായ പരിധിയിലേക്ക് അളവ് ക്രമീകരിച്ചു.
+Medium,ഇടത്തരം
+Method-wise Collections,രീതി തിരിച്ചുള്ള ശേഖരങ്ങൾ
+Minimum allowed rate for this offer item is {0}.,ഈ ഓഫർ ഇനത്തിന് അനുവദനീയമായ ഏറ്റവും കുറഞ്ഞ നിരക്ക് {0} ആണ്.
+Minimum Qty,കുറഞ്ഞ അളവ്
+Mobile No,മൊബൈൽ നമ്പർ
+Mode,മോഡ്
+Mode of Payment,പേയ്‌മെൻ്റ് രീതി
+Month,മാസം
+Month ?,മാസം ?
+Monthly Profit,പ്രതിമാസ ലാഭം
+Monthly Sales,പ്രതിമാസ വിൽപ്പന
+Monthly Sales Summary,പ്രതിമാസ വിൽപ്പന സംഗ്രഹം
+Month-wise,മാസാടിസ്ഥാനത്തിൽ
+Most Active Cashiers,ഏറ്റവും സജീവമായ കാഷ്യർമാർ
+Movement Type,ചലന തരം
+Movements,ചലനങ്ങൾ
+Multi Currency,മൾട്ടി കറൻസി
+N/A,N/A
+Name,പേര്
+Negative Stock,നെഗറ്റീവ് സ്റ്റോക്ക്
+Negative Stock Items,നെഗറ്റീവ് സ്റ്റോക്ക് ഇനങ്ങൾ
+Negative values not allowed,നെഗറ്റീവ് മൂല്യങ്ങൾ അനുവദനീയമല്ല
+Net,നെറ്റ്
+Net Qty,നെറ്റ് ക്യൂട്ടി
+Net Sales,അറ്റ വിൽപ്പന
+Net Value,മൊത്തം മൂല്യം
+Never,ഒരിക്കലും
+New changes are ready to load,പുതിയ മാറ്റങ്ങൾ ലോഡ് ചെയ്യാൻ തയ്യാറാണ്
+New Item,പുതിയ ഇനം
+New Offer Available,പുതിയ ഓഫർ ലഭ്യമാണ്
+New PIN,പുതിയ പിൻ
+New rate,പുതിയ നിരക്ക്
+Next unit of measure,അളവിൻ്റെ അടുത്ത യൂണിറ്റ്
+No attribute data found.,ആട്രിബ്യൂട്ട് ഡാറ്റയൊന്നും കണ്ടെത്തിയില്ല.
+No Barcode,ബാർകോഡ് ഇല്ല
+No barcode found for UOM '{0}',UOM '{0}' എന്നതിനായി ബാർകോഡൊന്നും കണ്ടെത്തിയില്ല
+No branch/location data found.,ബ്രാഞ്ച്/ലൊക്കേഷൻ ഡാറ്റയൊന്നും കണ്ടെത്തിയില്ല.
+No brand data found.,ബ്രാൻഡ് ഡാറ്റയൊന്നും കണ്ടെത്തിയില്ല.
+No cached gift card balance is available offline.,കാഷെ ചെയ്‌ത സമ്മാന കാർഡ് ബാലൻസ് ഓഫ്‌ലൈനിൽ ലഭ്യമല്ല.
+No camera found on this device. Please ensure your device has a working camera.,ഈ ഉപകരണത്തിൽ ക്യാമറയൊന്നും കണ്ടെത്തിയില്ല. നിങ്ങളുടെ ഉപകരണത്തിൽ പ്രവർത്തിക്കുന്ന ക്യാമറ ഉണ്ടെന്ന് ഉറപ്പാക്കുക.
+No capability warnings recorded yet.,ശേഷി മുന്നറിയിപ്പുകളൊന്നും ഇതുവരെ രേഖപ്പെടുത്തിയിട്ടില്ല.
+No cash expected for this shift.,ഈ ഷിഫ്റ്റിന് പണമൊന്നും പ്രതീക്ഷിക്കുന്നില്ല.
+No cash mode configured,ക്യാഷ് മോഡ് കോൺഫിഗർ ചെയ്തിട്ടില്ല
+No cash movement type is allowed for this POS Profile.,ഈ POS പ്രൊഫൈലിനായി പണമിടപാട് തരങ്ങളൊന്നും അനുവദനീയമല്ല.
+No cashier PIN is set yet. Create one now.,കാഷ്യർ പിൻ ഇതുവരെ സജ്ജീകരിച്ചിട്ടില്ല. ഇപ്പോൾ ഒരെണ്ണം സൃഷ്‌ടിക്കുക.
+No cashier profiles are available for this POS profile yet.,ഈ POS പ്രൊഫൈലിനായി ഇതുവരെ കാഷ്യർ പ്രൊഫൈലുകളൊന്നും ലഭ്യമല്ല.
+No cashier-wise discount/void/return activity.,കാഷ്യർ തിരിച്ചുള്ള കിഴിവ്/അസാധുത/റിട്ടേൺ ആക്റ്റിവിറ്റി ഇല്ല.
+No category data found.,വിഭാഗ ഡാറ്റയൊന്നും കണ്ടെത്തിയില്ല.
+No category profitability data found.,വിഭാഗത്തിലെ ലാഭക്ഷമത ഡാറ്റയൊന്നും കണ്ടെത്തിയില്ല.
+No change returned recorded for this shift.,ഈ ഷിഫ്റ്റിൽ ഒരു മാറ്റവും രേഖപ്പെടുത്തിയിട്ടില്ല.
+No change-allocation invoices match the current filters.,നിലവിലെ ഫിൽട്ടറുകളുമായി പൊരുത്തപ്പെടുന്ന മാറ്റ-അലോക്കേഷൻ ഇൻവോയ്സുകളൊന്നുമില്ല.
+No charge head breakdown found.,ചാർജ് ഹെഡ് ബ്രേക്ക്‌ഡൗൺ കണ്ടെത്തിയില്ല.
+No Company Selected,കമ്പനിയൊന്നും തിരഞ്ഞെടുത്തിട്ടില്ല
+No customer sales data found.,ഉപഭോക്തൃ വിൽപ്പന വിവരങ്ങളൊന്നും കണ്ടെത്തിയില്ല.
+No day-wise discount/void/return trend.,ദിവസം തിരിച്ചുള്ള കിഴിവ്/അസാധുത/റിട്ടേൺ ട്രെൻഡ് ഇല്ല.
+No day-wise payment data found.,ദിവസം തിരിച്ചുള്ള പേയ്‌മെൻ്റ് ഡാറ്റയൊന്നും കണ്ടെത്തിയില്ല.
+No day-wise profitability trend found.,ദിവസം തിരിച്ചുള്ള ലാഭ പ്രവണതയൊന്നും കണ്ടെത്തിയില്ല.
+No day-wise purchase data found.,ദിവസം തിരിച്ചുള്ള വാങ്ങൽ വിവരങ്ങളൊന്നും കണ്ടെത്തിയില്ല.
+No day-wise sales trend found.,ദിവസം തിരിച്ചുള്ള വിൽപ്പന ട്രെൻഡൊന്നും കണ്ടെത്തിയില്ല.
+No day-wise tax/charges trend found.,ദിവസം തിരിച്ചുള്ള നികുതി/നിരക്കുകളുടെ ട്രെൻഡ് കണ്ടെത്തിയില്ല.
+No dead stock items.,ഡെഡ് സ്റ്റോക്ക് ഇനങ്ങൾ ഇല്ല.
+No due date,അവസാന തീയതി ഇല്ല
+No exact repair match found for this invoice,ഈ ഇൻവോയ്‌സിന് കൃത്യമായ റിപ്പയർ പൊരുത്തം കണ്ടെത്തിയില്ല
+No hourly sales trend found for today.,ഇന്നത്തെ മണിക്കൂർ വിൽപന ട്രെൻഡുകളൊന്നും കണ്ടെത്തിയില്ല.
+No invoice activity found.,ഇൻവോയ്സ് പ്രവർത്തനമൊന്നും കണ്ടെത്തിയില്ല.
+No invoices found,ഇൻവോയ്സുകളൊന്നും കണ്ടെത്തിയില്ല
+No invoices found. Try different search criteria.,ഇൻവോയ്സുകളൊന്നും കണ്ടെത്തിയില്ല. വ്യത്യസ്ത തിരയൽ മാനദണ്ഡങ്ങൾ പരീക്ഷിക്കുക.
+No invoices recorded for this shift.,ഈ ഷിഫ്റ്റിനായി ഇൻവോയ്സുകളൊന്നും രേഖപ്പെടുത്തിയിട്ടില്ല.
+No item profitability data found.,ഇനത്തിൻ്റെ ലാഭക്ഷമത ഡാറ്റയൊന്നും കണ്ടെത്തിയില്ല.
+No item sales data found for this period.,ഈ കാലയളവിൽ ഇനങ്ങളുടെ വിൽപ്പന ഡാറ്റയൊന്നും കണ്ടെത്തിയില്ല.
+No items found,ഇനങ്ങളൊന്നും കണ്ടെത്തിയില്ല
+No items in cart,വണ്ടിയിൽ സാധനങ്ങളൊന്നുമില്ല
+No items with barcodes to print,പ്രിൻ്റ് ചെയ്യാൻ ബാർകോഡുകളുള്ള ഇനങ്ങളൊന്നുമില്ല
+No location-wise top item data found.,ലൊക്കേഷൻ തിരിച്ചുള്ള മുൻനിര ഇന ഡാറ്റയൊന്നും കണ്ടെത്തിയില്ല.
+No low stock alerts right now.,ഇപ്പോൾ കുറഞ്ഞ സ്റ്റോക്ക് അലേർട്ടുകളൊന്നുമില്ല.
+No low stock items.,കുറഞ്ഞ സ്റ്റോക്ക് ഇനങ്ങൾ ഇല്ല.
+No matching items in cart,കാർട്ടിൽ പൊരുത്തപ്പെടുന്ന ഇനങ്ങളൊന്നുമില്ല
+No month-wise sales trend found.,മാസാടിസ്ഥാനത്തിലുള്ള വിൽപ്പന പ്രവണതകളൊന്നും കണ്ടെത്തിയില്ല.
+No negative stock items.,നെഗറ്റീവ് സ്റ്റോക്ക് ഇനങ്ങൾ ഇല്ല.
+No notifications yet,ഇതുവരെ അറിയിപ്പുകളൊന്നുമില്ല
+No offline cash movement synced.,ഓഫ്‌ലൈൻ പണ നീക്കങ്ങളൊന്നും സമന്വയിപ്പിച്ചിട്ടില്ല.
+No offline invoices pending synchronization,സമന്വയം തീർപ്പാക്കാത്ത ഓഫ്‌ലൈൻ ഇൻവോയ്സുകളൊന്നുമില്ല
+No offline sync issues recorded yet.,ഓഫ്‌ലൈൻ സമന്വയ പ്രശ്‌നങ്ങളൊന്നും ഇതുവരെ രേഖപ്പെടുത്തിയിട്ടില്ല.
+No out-of-stock items.,സ്റ്റോക്ക് ഇല്ലാത്ത ഇനങ്ങളില്ല.
+No outstanding credit invoices for this shift.,ഈ ഷിഫ്റ്റിനായി കുടിശ്ശികയുള്ള ക്രെഡിറ്റ് ഇൻവോയ്സുകളൊന്നുമില്ല.
+No payment collection data found.,പേയ്‌മെൻ്റ് ശേഖരണ ഡാറ്റയൊന്നും കണ്ടെത്തിയില്ല.
+No payment rows available on this invoice.,ഈ ഇൻവോയ്‌സിൽ പേയ്‌മെൻ്റ് വരികളൊന്നും ലഭ്യമല്ല.
+No payments registered for this shift.,ഈ ഷിഫ്റ്റിനായി പേയ്‌മെൻ്റുകളൊന്നും രജിസ്റ്റർ ചെയ്തിട്ടില്ല.
+No pending balances in this period.,ഈ കാലയളവിൽ ശേഷിക്കുന്ന ബാലൻസുകളൊന്നുമില്ല.
+No pending offline invoices,തീർപ്പാക്കാത്ത ഓഫ്‌ലൈൻ ഇൻവോയ്‌സുകളൊന്നുമില്ല
+No Print Formats Found,പ്രിൻ്റ് ഫോർമാറ്റുകളൊന്നും കണ്ടെത്തിയില്ല
+No profiles found for selected scope. Falling back to current profile failed.,തിരഞ്ഞെടുത്ത സ്കോപ്പിനായി പ്രൊഫൈലുകളൊന്നും കണ്ടെത്തിയില്ല. നിലവിലെ പ്രൊഫൈലിലേക്ക് മടങ്ങുന്നത് പരാജയപ്പെട്ടു.
+No recent customer activity found.,സമീപകാല ഉപഭോക്തൃ പ്രവർത്തനങ്ങളൊന്നും കണ്ടെത്തിയില്ല.
+No recent stock entries found.,സമീപകാല സ്റ്റോക്ക് എൻട്രികളൊന്നും കണ്ടെത്തിയില്ല.
+No records found,രേഖകളൊന്നും കണ്ടെത്തിയില്ല
+No reorder suggestions right now.,ഇപ്പോൾ പുനഃക്രമീകരിക്കാനുള്ള നിർദ്ദേശങ്ങളൊന്നുമില്ല.
+No repeat customers in this period.,ഈ കാലയളവിൽ ആവർത്തിച്ചുള്ള ഉപഭോക്താക്കളില്ല.
+No response from server,സെർവറിൽ നിന്ന് പ്രതികരണമൊന്നുമില്ല
+No return invoices found,റിട്ടേൺ ഇൻവോയ്സുകളൊന്നും കണ്ടെത്തിയില്ല
+No return item trend found.,റിട്ടേൺ ഇനത്തിൻ്റെ ട്രെൻഡൊന്നും കണ്ടെത്തിയില്ല.
+No returnable items found for this invoice,ഈ ഇൻവോയ്‌സിനായി തിരികെ നൽകാവുന്ന ഇനങ്ങളൊന്നും കണ്ടെത്തിയില്ല
+No returns were processed in this shift.,ഈ ഷിഫ്റ്റിൽ റിട്ടേണുകളൊന്നും പ്രോസസ്സ് ചെയ്തിട്ടില്ല.
+No risk activity found.,അപകടകരമായ പ്രവർത്തനങ്ങളൊന്നും കണ്ടെത്തിയില്ല.
+No sales activity found for this period.,ഈ കാലയളവിൽ വിൽപ്പന പ്രവർത്തനങ്ങളൊന്നും കണ്ടെത്തിയില്ല.
+No slow moving items.,പതുക്കെ ചലിക്കുന്ന ഇനങ്ങളൊന്നുമില്ല.
+No staff sales activity found.,ജീവനക്കാരുടെ വിൽപ്പന പ്രവർത്തനങ്ങളൊന്നും കണ്ടെത്തിയില്ല.
+No stock movement for this period.,ഈ കാലയളവിൽ സ്റ്റോക്ക് ചലനമില്ല.
+No submitted cash movements in this shift.,ഈ ഷിഫ്റ്റിൽ സമർപ്പിച്ച പണ നീക്കങ്ങളൊന്നുമില്ല.
+No supplier purchases found in this month.,ഈ മാസം വിതരണക്കാരൻ്റെ പർച്ചേസുകളൊന്നും കണ്ടെത്തിയില്ല.
+No suppliers found for this period.,ഈ കാലയളവിൽ വിതരണക്കാരെ കണ്ടെത്തിയില്ല.
+No sync trigger has run yet in this session.,ഈ സെഷനിൽ ഇതുവരെ ഒരു സമന്വയ ട്രിഗറും പ്രവർത്തിച്ചിട്ടില്ല.
+No tax head breakdown found.,നികുതി തല തകർച്ച കണ്ടെത്തിയില്ല.
+No top items found for this location.,ഈ ലൊക്കേഷനായി മികച്ച ഇനങ്ങളൊന്നും കണ്ടെത്തിയില്ല.
+No unpaid invoices,പണമടയ്ക്കാത്ത ഇൻവോയ്സുകളൊന്നുമില്ല
+No variant data found.,വേരിയൻ്റ് ഡാറ്റയൊന്നും കണ്ടെത്തിയില്ല.
+No week-wise sales trend found.,ആഴ്‌ച തിരിച്ചുള്ള വിൽപ്പന പ്രവണതകളൊന്നും കണ്ടെത്തിയില്ല.
+No.,ഇല്ല.
+Nobile Number,നോബൽ നമ്പർ
+Not available,ലഭ്യമല്ല
+Not checked,പരിശോധിച്ചിട്ടില്ല
+Not selected,തിരഞ്ഞെടുത്തിട്ടില്ല
+Not Set,സജ്ജമാക്കിയിട്ടില്ല
+Notifications,അറിയിപ്പുകൾ
+Offer,ഓഫർ
+Offer Applied,ഓഫർ പ്രയോഗിച്ചു
+Offer criteria exceeded,ഓഫർ മാനദണ്ഡം കവിഞ്ഞു
+Offer Item,ഓഫർ ഇനം
+Offer item unavailable,ഓഫർ ഇനം ലഭ്യമല്ല
+Offer Removed,ഓഫർ നീക്കം ചെയ്തു
+Offer UOM cannot be changed,ഓഫർ UOM മാറ്റാൻ കഴിയില്ല
+Offer?,ഓഫർ?
+Offers,ഓഫറുകൾ
+Offline,ഓഫ്‌ലൈൻ
+Offline & Sync,ഓഫ്‌ലൈനും സമന്വയവും
+Offline Capabilities,ഓഫ്‌ലൈൻ കഴിവുകൾ
+Offline data status refreshed,ഓഫ്‌ലൈൻ ഡാറ്റ നില പുതുക്കി
+Offline diagnostics,ഓഫ്‌ലൈൻ ഡയഗ്നോസ്റ്റിക്സ്
+Offline Invoices,ഓഫ്‌ലൈൻ ഇൻവോയ്‌സുകൾ
+Offline invoices status,ഓഫ്‌ലൈൻ ഇൻവോയ്‌സ് നില
+Offline invoices synced,ഓഫ്‌ലൈൻ ഇൻവോയ്‌സുകൾ സമന്വയിപ്പിച്ചു
+Offline Queue: {0},ഓഫ്‌ലൈൻ ക്യൂ: {0}
+Offline rebuild guidance,ഓഫ്‌ലൈൻ പുനർനിർമ്മാണ മാർഗ്ഗനിർദ്ദേശം
+Offline restore is unavailable for this session.,ഈ സെഷനിൽ ഓഫ്‌ലൈൻ വീണ്ടെടുക്കൽ ലഭ്യമല്ല.
+Offline selling is available with degraded capabilities.,തരംതാഴ്ന്ന കഴിവുകളോടെ ഓഫ്‌ലൈൻ വിൽപ്പന ലഭ്യമാണ്.
+Offline snapshot does not match the current POS state.,ഓഫ്‌ലൈൻ സ്നാപ്പ്ഷോട്ട് നിലവിലെ POS അവസ്ഥയുമായി പൊരുത്തപ്പെടുന്നില്ല.
+Offline Status,ഓഫ്‌ലൈൻ നില
+"Offline, terminal, and system controls","ഓഫ്‌ലൈൻ, ടെർമിനൽ, സിസ്റ്റം നിയന്ത്രണങ്ങൾ"
+OK,ശരി
+Online,ഓൺലൈൻ
+Open actions menu,പ്രവർത്തന മെനു തുറക്കുക
+Open balance to collect,ശേഖരിക്കാൻ ബാലൻസ് തുറക്കുക
+Open Customer Display,കസ്റ്റമർ ഡിസ്പ്ലേ തുറക്കുക
+Open drawer,ഡ്രോയർ തുറക്കുക
+Open invoices,ഇൻവോയ്സുകൾ തുറക്കുക
+Open Payments?,പേയ്‌മെൻ്റുകൾ തുറക്കണോ?
+Open POS home,POS ഹോം തുറക്കുക
+Open this screen from POS Menu -> Open Customer Display.,POS മെനുവിൽ നിന്ന് ഈ സ്ക്രീൻ തുറക്കുക -> കസ്റ്റമർ ഡിസ്പ്ലേ തുറക്കുക.
+OpenCV image processing enabled - Enhanced barcode detection,OpenCV ഇമേജ് പ്രോസസ്സിംഗ് പ്രവർത്തനക്ഷമമാക്കി - മെച്ചപ്പെടുത്തിയ ബാർകോഡ് കണ്ടെത്തൽ
+OpenCV image processing unavailable on this device,ഈ ഉപകരണത്തിൽ OpenCV ഇമേജ് പ്രോസസ്സിംഗ് ലഭ്യമല്ല
+OpenCV Off,OpenCV ഓഫാണ്
+OpenCV On,OpenCV ഓൺ
+OpenCV processing disabled,OpenCV പ്രോസസ്സിംഗ് പ്രവർത്തനരഹിതമാക്കി
+Opening Amount,തുറക്കുന്ന തുക
+Opening Cash,പണം തുറക്കുന്നു
+options,ഓപ്ഷനുകൾ
+Order,ഓർഡർ ചെയ്യുക
+Original,ഒറിജിനൽ
+Other,മറ്റുള്ളവ
+Out,പുറത്ത്
+Out of Stock,സ്റ്റോക്ക് തീർന്നു
+Out of Stock Items,സ്റ്റോക്ക് തീർന്ന ഇനങ്ങൾ
+Outstanding,മികച്ചത്
+Outstanding Credit by Currency,കറൻസി പ്രകാരം മികച്ച ക്രെഡിറ്റ്
+Overdue,കാലഹരണപ്പെട്ടു
+Overpayment Change,ഓവർ പേയ്മെൻ്റ് മാറ്റം
+Overpayment change deducted: {0},ഓവർപേയ്‌മെൻ്റ് മാറ്റം കുറച്ചു: {0}
+Packing List,പാക്കിംഗ് ലിസ്റ്റ്
+Page Format,പേജ് ഫോർമാറ്റ്
+Page unavailable offline,പേജ് ഓഫ്‌ലൈനിൽ ലഭ്യമല്ല
+Paid,പണം നൽകി
+Paid (orig):,പണമടച്ചത് (ഒറിജിനൽ):
+Paid Amount,അടച്ച തുക
+Paid change cannot be greater than total change!,പണമടച്ചുള്ള മാറ്റം മൊത്തം മാറ്റത്തേക്കാൾ വലുതായിരിക്കരുത്!
+Paid:,പണമടച്ചത്:
+Parent Item,മാതൃ ഇനം
+Partial,ഭാഗികം
+Partly Paid,ഭാഗികമായി പണം നൽകി
+Party Account,പാർട്ടി അക്കൗണ്ട്
+Party Type,പാർട്ടി തരം
+Pause terminal until next cashier,അടുത്ത കാഷ്യർ വരെ ടെർമിനൽ താൽക്കാലികമായി നിർത്തുക
+PAY,പണം നൽകുക
+Payment,പേയ്മെൻ്റ്
+Payment Account,പേയ്മെൻ്റ് അക്കൗണ്ട്
+Payment entries processed for Invoice {0},ഇൻവോയ്‌സിനായി പേയ്‌മെൻ്റ് എൻട്രികൾ പ്രോസസ്സ് ചെയ്തു {0}
+Payment Entry Type,പേയ്മെൻ്റ് എൻട്രി തരം
+Payment History,പേയ്മെൻ്റ് ചരിത്രം
+Payment ID,പേയ്‌മെൻ്റ് ഐഡി
+Payment Method Report,പേയ്മെൻ്റ് രീതി റിപ്പോർട്ട്
+Payment Methods,പേയ്മെൻ്റ് രീതികൾ
+Payment of {0} received successfully.,{0} പേയ്‌മെൻ്റ് വിജയകരമായി ലഭിച്ചു.
+Payment Progress,പേയ്മെൻ്റ് പുരോഗതി
+Payment Reconciliation,പേയ്മെൻ്റ് അനുരഞ്ജനം
+Payment request status could not be retrieved. Please try again,പേയ്‌മെൻ്റ് അഭ്യർത്ഥന നില വീണ്ടെടുക്കാൻ കഴിഞ്ഞില്ല. ദയവായി വീണ്ടും ശ്രമിക്കുക
+Payment Request took too long to respond. Please try requesting for payment again,പേയ്‌മെൻ്റ് അഭ്യർത്ഥന പ്രതികരിക്കാൻ വളരെയധികം സമയമെടുത്തു. പേയ്‌മെൻ്റിനായി വീണ്ടും അഭ്യർത്ഥിക്കാൻ ശ്രമിക്കുക
+Payment saved offline,പേയ്‌മെൻ്റ് ഓഫ്‌ലൈനിൽ സംരക്ഷിച്ചു
+Payment State,പേയ്മെൻ്റ് സ്റ്റേറ്റ്
+Payment Status,പേയ്മെൻ്റ് നില
+Payment submitted but print function could not be executed. Payment name not found.,പേയ്‌മെൻ്റ് സമർപ്പിച്ചെങ്കിലും പ്രിൻ്റ് ഫംഗ്‌ഷൻ എക്‌സിക്യൂട്ട് ചെയ്യാൻ കഴിഞ്ഞില്ല. പേയ്‌മെൻ്റ് പേര് കണ്ടെത്തിയില്ല.
+Payment submitted.,പേയ്മെൻ്റ് സമർപ്പിച്ചു.
+Payment Summary,പേയ്മെൻ്റ് സംഗ്രഹം
+Payments,പേയ്മെൻ്റുകൾ
+Payments are not open. Do you want to open payments and submit?,പേയ്‌മെൻ്റുകൾ തുറന്നിട്ടില്ല. പേയ്‌മെൻ്റുകൾ തുറന്ന് സമർപ്പിക്കണോ?
+Payments by Mode of Payment,പേയ്‌മെൻ്റ് മോഡ് വഴിയുള്ള പേയ്‌മെൻ്റുകൾ
+PDF,PDF
+Peak Hour,പീക്ക് അവർ
+Peak Memory:,പീക്ക് മെമ്മറി:
+Peak Server:,പീക്ക് സെർവർ:
+Peak:,കൊടുമുടി:
+Pending,തീർപ്പാക്കാത്തത്
+Pending Amount,കെട്ടിക്കിടക്കുന്ന തുക
+Pending count updated from {0} to {1},ശേഷിക്കുന്ന എണ്ണം {0} മുതൽ {1} വരെ അപ്‌ഡേറ്റ് ചെയ്‌തു
+Pending Exposure,ശേഷിക്കുന്ന എക്സ്പോഷർ
+Pending Invoices,തീർച്ചപ്പെടുത്താത്ത ഇൻവോയ്‌സുകൾ
+Pending Ratio,ശേഷിക്കുന്ന അനുപാതം
+Pending Sales,ശേഷിക്കുന്ന വിൽപ്പന
+Pending sales: {0} | Cache usage: {1}%,ശേഷിക്കുന്ന വിൽപ്പന: {0} | കാഷെ ഉപയോഗം: {1}%
+Pending Sync,ശേഷിക്കുന്ന സമന്വയം
+Pending: {0},തീർച്ചപ്പെടുത്താത്തത്: {0}
+Pending: {0} | Synced: {1} | Draft: {2},തീർച്ചപ്പെടുത്താത്തത്: {0} | സമന്വയിപ്പിച്ചു: {1} | ഡ്രാഫ്റ്റ്: {2}
+Per Page,ഓരോ പേജിനും
+Personal,വ്യക്തിപരം
+Personal preferences adjust the current cashier experience without changing the active POS route.,സജീവമായ POS റൂട്ട് മാറ്റാതെ തന്നെ വ്യക്തിഗത മുൻഗണനകൾ നിലവിലെ കാഷ്യർ അനുഭവം ക്രമീകരിക്കുന്നു.
+PIN confirmation does not match.,പിൻ സ്ഥിരീകരണം പൊരുത്തപ്പെടുന്നില്ല.
+PIN must be 4 to 8 digits.,പിൻ 4 മുതൽ 8 വരെ അക്കങ്ങൾ ആയിരിക്കണം.
+Please add at least one item.,ദയവായി ഒരു ഇനമെങ്കിലും ചേർക്കുക.
+Please allow camera access to scan codes,കോഡുകൾ സ്കാൻ ചെയ്യാൻ ക്യാമറ ആക്സസ് അനുവദിക്കുക
+Please enter payment amount,പേയ്‌മെൻ്റ് തുക നൽകുക
+Please fill all required fields,ആവശ്യമായ എല്ലാ ഫീൽഡുകളും പൂരിപ്പിക്കുക
+Please make a payment or select a payment,ദയവായി ഒരു പേയ്‌മെൻ്റ് നടത്തുക അല്ലെങ്കിൽ ഒരു പേയ്‌മെൻ്റ് തിരഞ്ഞെടുക്കുക
+Please request phone payment or use another payment method,ഫോൺ പേയ്‌മെൻ്റ് അഭ്യർത്ഥിക്കുക അല്ലെങ്കിൽ മറ്റൊരു പേയ്‌മെൻ്റ് രീതി ഉപയോഗിക്കുക
+Please select a customer first,ആദ്യം ഒരു ഉപഭോക്താവിനെ തിരഞ്ഞെടുക്കുക
+Please select a party,ദയവായി ഒരു പാർട്ടി തിരഞ്ഞെടുക്കുക
+Please select a party before reconciling.,അനുരഞ്ജനത്തിന് മുമ്പ് ദയവായി ഒരു പാർട്ടി തിരഞ്ഞെടുക്കുക.
+Please select a valid movement type.,സാധുവായ ഒരു ചലന തരം തിരഞ്ഞെടുക്കുക.
+Please select an invoice,ദയവായി ഒരു ഇൻവോയ്സ് തിരഞ്ഞെടുക്കുക
+Please select company before reconciling.,അനുരഞ്ജനത്തിന് മുമ്പ് ദയവായി കമ്പനി തിരഞ്ഞെടുക്കുക.
+Please set the customer's mobile number,ഉപഭോക്താവിൻ്റെ മൊബൈൽ നമ്പർ സജ്ജീകരിക്കുക
+Please try again or enter the item manually.,ദയവായി വീണ്ടും ശ്രമിക്കുക അല്ലെങ്കിൽ ഇനം നേരിട്ട് നൽകുക.
+Please verify the barcode or check the item's availability.,ദയവായി ബാർകോഡ് പരിശോധിക്കുക അല്ലെങ്കിൽ ഇനത്തിൻ്റെ ലഭ്യത പരിശോധിക്കുക.
+Points,പോയിൻ്റുകൾ
+Popup blocked. Please allow popups.,പോപ്പ്അപ്പ് തടഞ്ഞു. ദയവായി പോപ്പ്അപ്പുകൾ അനുവദിക്കുക.
+POS,POS
+POS controls and maintenance,POS നിയന്ത്രണങ്ങളും പരിപാലനവും
+POS Expense is disabled for this POS Profile.,ഈ POS പ്രൊഫൈലിനായി POS ചെലവ് പ്രവർത്തനരഹിതമാക്കിയിരിക്കുന്നു.
+POS is running with limited offline prerequisites.,പരിമിതമായ ഓഫ്‌ലൈൻ മുൻവ്യവസ്ഥകളോടെയാണ് POS പ്രവർത്തിക്കുന്നത്.
+POS Profile,POS പ്രൊഫൈൽ
+Position the QR code or barcode within the scanning area,സ്കാനിംഗ് ഏരിയയിൽ QR കോഡോ ബാർകോഡോ സ്ഥാപിക്കുക
+Posting,പോസ്റ്റുചെയ്യുന്നു
+Posting and Price List,പോസ്റ്റിംഗും വില പട്ടികയും
+Posting Date,പോസ്റ്റ് ചെയ്യുന്ന തീയതി
+Preparing background sync,പശ്ചാത്തല സമന്വയം തയ്യാറാക്കുന്നു
+"Press OK to continue offline with a warning, or Cancel to retry.","ഒരു മുന്നറിയിപ്പോടെ ഓഫ്‌ലൈനിൽ തുടരാൻ ശരി അമർത്തുക, അല്ലെങ്കിൽ വീണ്ടും ശ്രമിക്കാൻ റദ്ദാക്കുക."
+Previous unit of measure,അളവിൻ്റെ മുൻ യൂണിറ്റ്
+Price List,വില ലിസ്റ്റ്
+Price List Rate,വില ലിസ്റ്റ് നിരക്ക്
+Price list rate updated locally only,വില ലിസ്റ്റ് നിരക്ക് പ്രാദേശികമായി മാത്രം അപ്ഡേറ്റ് ചെയ്തു
+Pricing & Discounts,വിലനിർണ്ണയവും കിഴിവുകളും
+Pricing Rule,വിലനിർണ്ണയ നിയമം
+Print,അച്ചടിക്കുക
+Print Draft,ഡ്രാഫ്റ്റ് അച്ചടിക്കുക
+Print Format (Invoice),പ്രിൻ്റ് ഫോർമാറ്റ് (ഇൻവോയ്സ്)
+Print Format (Order),പ്രിൻ്റ് ഫോർമാറ്റ് (ഓർഡർ)
+Print invoice,ഇൻവോയ്സ് പ്രിൻ്റ് ചെയ്യുക
+Print Purchase Invoice instead of PO,PO എന്നതിനുപകരം പർച്ചേസ് ഇൻവോയ്സ് അച്ചടിക്കുക
+Printer,പ്രിൻ്റർ
+Processed returns impacting the shift totals,ഷിഫ്റ്റ് ടോട്ടലുകളെ ബാധിക്കുന്ന പ്രോസസ്സ് ചെയ്ത റിട്ടേണുകൾ
+Processing Payment,പേയ്‌മെൻ്റ് പ്രോസസ്സ് ചെയ്യുന്നു
+Processing payment entries for Invoice {0},ഇൻവോയ്‌സിനായുള്ള പേയ്‌മെൻ്റ് എൻട്രികൾ പ്രോസസ്സ് ചെയ്യുന്നു {0}
+Profile,പ്രൊഫൈൽ
+Profiles,പ്രൊഫൈലുകൾ
+Profit,ലാഭം
+Profit: Invoice Item Estimate,ലാഭം: ഇൻവോയ്സ് ഇനത്തിൻ്റെ എസ്റ്റിമേറ്റ്
+Profit: Stock Ledger (COGS),ലാഭം: സ്റ്റോക്ക് ലെഡ്ജർ (COGS)
+Profitability Report,ലാഭക്ഷമത റിപ്പോർട്ട്
+Prorated return discount,പ്രൊറേറ്റഡ് റിട്ടേൺ ഡിസ്കൗണ്ട്
+Purchase Amount,വാങ്ങൽ തുക
+Purchase Invoices,ഇൻവോയ്‌സുകൾ വാങ്ങുക
+Purchase Order created,പർച്ചേസ് ഓർഡർ സൃഷ്ടിച്ചു
+Qty,ക്യൂട്ടി
+Qualified,യോഗ്യത നേടി
+Quantity,അളവ്
+Quantity exceeds available stock,അളവ് ലഭ്യമായ സ്റ്റോക്കിനെക്കാൾ കൂടുതലാണ്
+Quick Actions,ദ്രുത പ്രവർത്തനങ്ങൾ
+Quotation {0} is Submitted,ഉദ്ധരണി {0} സമർപ്പിച്ചു
+Quotation submitted,ക്വട്ടേഷൻ സമർപ്പിച്ചു
+QZ Tray connected.,QZ ട്രേ ബന്ധിപ്പിച്ചു.
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ ട്രേ സ്വമേധയാ വിച്ഛേദിച്ചു. ഇത് വീണ്ടും പ്രവർത്തനക്ഷമമാക്കാൻ കണക്റ്റ് അമർത്തുക.
+QZ Tray is not connected.,QZ ട്രേ ബന്ധിപ്പിച്ചിട്ടില്ല.
+QZ Tray Setup,QZ ട്രേ സജ്ജീകരണം
+Rate,നിരക്ക്
+Rate adjusted to maximum allowed discount,അനുവദനീയമായ പരമാവധി കിഴിവിലേക്ക് നിരക്ക് ക്രമീകരിച്ചു
+Ready,തയ്യാറാണ്
+Ready to resume,പുനരാരംഭിക്കാൻ തയ്യാറാണ്
+Ready!,തയ്യാറാണ്!
+Real-time POS insights for retail operations.,റീട്ടെയിൽ പ്രവർത്തനങ്ങൾക്കായുള്ള തത്സമയ POS സ്ഥിതിവിവരക്കണക്കുകൾ.
+Rebuild Offline Data,ഓഫ്‌ലൈൻ ഡാറ്റ പുനർനിർമ്മിക്കുക
+Receive,സ്വീകരിക്കുക
+Receive now,ഇപ്പോൾ സ്വീകരിക്കുക
+Received,ലഭിച്ചു
+Received:,സ്വീകരിച്ചത്:
+Recent Movement Entries,സമീപകാല പ്രസ്ഥാന എൻട്രികൾ
+Recent updates about your invoices,നിങ്ങളുടെ ഇൻവോയ്‌സുകളെക്കുറിച്ചുള്ള സമീപകാല അപ്‌ഡേറ്റുകൾ
+Recently Active Customers,അടുത്തിടെ സജീവമായ ഉപഭോക്താക്കൾ
+Rechecking connection,കണക്ഷൻ വീണ്ടും പരിശോധിക്കുന്നു
+Reconcile payment methods and close shift,പേയ്‌മെൻ്റ് രീതികളും ക്ലോസ് ഷിഫ്റ്റും സമന്വയിപ്പിക്കുക
+Reconciling Payments,പേയ്‌മെൻ്റുകൾ സമന്വയിപ്പിക്കുന്നു
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","ഓൺലൈനിലായിരിക്കുമ്പോൾ ഒരിക്കൽ ഈ പേജ് വീണ്ടും കണക്റ്റുചെയ്‌ത് തുറക്കുക, തുടർന്ന് ഓഫ്‌ലൈൻ പുതുക്കലുകൾക്ക് ഇത് പുനഃസ്ഥാപിക്കാൻ കഴിയും."
+Reconnect online to refresh cached offline data from the server.,സെർവറിൽ നിന്ന് കാഷെ ചെയ്‌ത ഓഫ്‌ലൈൻ ഡാറ്റ പുതുക്കാൻ ഓൺലൈനിൽ വീണ്ടും കണക്റ്റുചെയ്യുക.
+Recreate local offline prerequisites from scratch,ആദ്യം മുതൽ പ്രാദേശിക ഓഫ്‌ലൈൻ മുൻവ്യവസ്ഥകൾ പുനഃസൃഷ്ടിക്കുക
+Recv:,Recv:
+Redeem,വീണ്ടെടുക്കുക
+Redeem / Scan,വീണ്ടെടുക്കുക / സ്കാൻ ചെയ്യുക
+Redeem Amount,തുക റിഡീം ചെയ്യുക
+Redeem Mode,റിഡീം മോഡ്
+Redeemed Amount,റിഡീം ചെയ്ത തുക
+Redeemed credit cannot be greater than its total.,റിഡീം ചെയ്ത ക്രെഡിറ്റ് അതിൻ്റെ ആകെത്തേക്കാൾ വലുതായിരിക്കരുത്.
+Redemption and Totals,വീണ്ടെടുക്കലും ആകെത്തുകയും
+Reference,റഫറൻസ്
+Refresh,പുതുക്കുക
+Refresh Exchange Rate,വിനിമയ നിരക്ക് പുതുക്കുക
+Refresh Offline Data,ഓഫ്‌ലൈൻ ഡാറ്റ പുതുക്കുക
+Refresh Printers,പ്രിൻ്ററുകൾ പുതുക്കുക
+Refund,റീഫണ്ട്
+Release Notes,റിലീസ് കുറിപ്പുകൾ
+Reload,വീണ്ടും ലോഡുചെയ്യുക
+Reload customers,ഉപഭോക്താക്കളെ വീണ്ടും ലോഡുചെയ്യുക
+Reload Items,ഇനങ്ങൾ വീണ്ടും ലോഡുചെയ്യുക
+Reload Now,ഇപ്പോൾ വീണ്ടും ലോഡുചെയ്യുക
+Reload to apply the latest changes. Your current session will be refreshed.,ഏറ്റവും പുതിയ മാറ്റങ്ങൾ പ്രയോഗിക്കാൻ റീലോഡ് ചെയ്യുക. നിങ്ങളുടെ നിലവിലെ സെഷൻ പുതുക്കും.
+Reload Workflow,വർക്ക്ഫ്ലോ വീണ്ടും ലോഡുചെയ്യുക
+Remarks,അഭിപ്രായങ്ങൾ
+Remarks are required.,അഭിപ്രായങ്ങൾ ആവശ്യമാണ്.
+Remove,നീക്കം ചെയ്യുക
+Remove barcode item,ബാർകോഡ് ഇനം നീക്കം ചെയ്യുക
+Remove cached data and reload the POS app,കാഷെ ചെയ്‌ത ഡാറ്റ നീക്കം ചെയ്‌ത് POS ആപ്പ് വീണ്ടും ലോഡുചെയ്യുക
+Remove item,ഇനം നീക്കം ചെയ്യുക
+Remove Offer,ഓഫർ നീക്കം ചെയ്യുക
+Reorder / Purchase Suggestions,പുനഃക്രമീകരിക്കുക / വാങ്ങൽ നിർദ്ദേശങ്ങൾ
+Repair Candidate,റിപ്പയർ കാൻഡിഡേറ്റ്
+Repair Change Allocation,അലോക്കേഷൻ മാറ്റുക
+Repair requires an online connection,അറ്റകുറ്റപ്പണിക്ക് ഒരു ഓൺലൈൻ കണക്ഷൻ ആവശ്യമാണ്
+Repaired,നന്നാക്കി
+Repairing change allocation,മാറ്റ വിഹിതം നന്നാക്കുന്നു
+Repeat Customers,ഉപഭോക്താക്കൾ ആവർത്തിക്കുക
+Repeat Rate,ആവർത്തന നിരക്ക്
+Request,അഭ്യർത്ഥിക്കുക
+Request ID: {0},അഭ്യർത്ഥന ഐഡി: {0}
+Request Payment,പേയ്‌മെൻ്റ് അഭ്യർത്ഥിക്കുക
+Requested route: {0},അഭ്യർത്ഥിച്ച റൂട്ട്: {0}
+Required columns cannot be hidden,ആവശ്യമായ നിരകൾ മറയ്ക്കാൻ കഴിയില്ല
+Reset,പുനഃസജ്ജമാക്കുക
+Reset item name,ഇനത്തിൻ്റെ പേര് പുനഃസജ്ജമാക്കുക
+Reset to Default,ഡിഫോൾട്ടിലേക്ക് പുനഃസജ്ജമാക്കുക
+Resource Health,റിസോഴ്സ് ഹെൽത്ത്
+Restricted,നിയന്ത്രിച്ചു
+Restricted operational controls for supervisors only.,സൂപ്പർവൈസർമാർക്ക് മാത്രം നിയന്ത്രിത പ്രവർത്തന നിയന്ത്രണങ്ങൾ.
+Retry,വീണ്ടും ശ്രമിക്കുക
+Retry route,റൂട്ട് വീണ്ടും ശ്രമിക്കുക
+Return,മടങ്ങുക
+Return Amount,റിട്ടേൺ തുക
+Return Count,റിട്ടേൺ കൗണ്ട്
+Return items must have negative quantities,റിട്ടേൺ ഇനങ്ങൾക്ക് നെഗറ്റീവ് അളവുകൾ ഉണ്ടായിരിക്കണം
+Return total must be negative,മൊത്തം റിട്ടേൺ നെഗറ്റീവ് ആയിരിക്കണം
+Return Valid Until,റിട്ടേൺ സാധുവാണ്
+Return window passed,റിട്ടേൺ വിൻഡോ കടന്നുപോയി
+Return without Invoice,ഇൻവോയ്സ് ഇല്ലാതെ മടങ്ങുക
+Returns,മടങ്ങുന്നു
+Returns / Voids / Discounts,റിട്ടേണുകൾ / ശൂന്യത / കിഴിവുകൾ
+Returns by Currency,കറൻസി പ്രകാരം മടങ്ങുന്നു
+Revenue,വരുമാനം
+Review shift totals before submitting the closing entry,ക്ലോസിംഗ് എൻട്രി സമർപ്പിക്കുന്നതിന് മുമ്പ് ഷിഫ്റ്റ് മൊത്തങ്ങൾ അവലോകനം ചെയ്യുക
+Round Off,റൗണ്ട് ഓഫ്
+Rows,വരികൾ
+Rows:,വരികൾ:
+Rule,ഭരണം
+Sale,വിൽപ്പന
+Sales,വിൽപ്പന
+Sales Order {0} is Submitted,സെയിൽസ് ഓർഡർ {0} സമർപ്പിച്ചു
+Sales Person and Print,വിൽപ്പനക്കാരനും പ്രിൻ്റും
+Sales Person not found,വിൽപ്പനക്കാരനെ കണ്ടെത്തിയില്ല
+Sales processed,വിൽപ്പന പ്രോസസ്സ് ചെയ്തു
+Sales Return,വിൽപ്പന റിട്ടേൺ
+Sales Trend Report,വിൽപ്പന ട്രെൻഡ് റിപ്പോർട്ട്
+Save,സംരക്ഷിക്കുക
+Save & Clear,സംരക്ഷിച്ച് മായ്ക്കുക
+Save as POS Profile Default,POS പ്രൊഫൈൽ ഡിഫോൾട്ടായി സംരക്ഷിക്കുക
+Save Settings,ക്രമീകരണങ്ങൾ സംരക്ഷിക്കുക
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,"തിരഞ്ഞെടുത്ത പ്രിൻ്റർ POS പ്രൊഫൈൽ ഡിഫോൾട്ടായി സംരക്ഷിക്കുക, അതുവഴി ഈ സജ്ജീകരണത്തിൽ അത് സ്വയമേവ കാണിക്കും."
+Saved as draft because: {0},ഡ്രാഫ്റ്റായി സംരക്ഷിച്ചത് കാരണം: {0}
+Saving...,സംരക്ഷിക്കുന്നു...
+Scale barcode detected. Quantity here is the number of labels to print.,സ്കെയിൽ ബാർകോഡ് കണ്ടെത്തി. പ്രിൻ്റ് ചെയ്യേണ്ട ലേബലുകളുടെ എണ്ണമാണ് ഇവിടെ അളവ്.
+Scale barcode settings are not configured. Using item barcode only.,സ്കെയിൽ ബാർകോഡ് ക്രമീകരണങ്ങൾ കോൺഫിഗർ ചെയ്തിട്ടില്ല. ഇനത്തിൻ്റെ ബാർകോഡ് മാത്രം ഉപയോഗിക്കുന്നു.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,ഈ ഇനത്തിന്/UOM-ന് സ്കെയിൽ ടെംപ്ലേറ്റ് ബാർകോഡ് കാണുന്നില്ല. ഇനത്തിൻ്റെ ബാർകോഡ് മാത്രം ഉപയോഗിക്കുന്നു.
+Scan an existing card and top it up without leaving the payment flow.,പേയ്‌മെൻ്റ് ഫ്ലോ വിടാതെ നിലവിലുള്ള കാർഡ് സ്‌കാൻ ചെയ്‌ത് ടോപ്പ് അപ്പ് ചെയ്യുക.
+Scan Error,സ്കാൻ പിശക്
+Scan or enter a gift card code to check balance or redeem.,ബാലൻസ് പരിശോധിക്കുന്നതിനോ റിഡീം ചെയ്യുന്നതിനോ ഒരു സമ്മാന കാർഡ് കോഡ് സ്കാൻ ചെയ്യുക അല്ലെങ്കിൽ നൽകുക.
+Scan or paste the card code below.,ചുവടെയുള്ള കാർഡ് കോഡ് സ്കാൻ ചെയ്യുക അല്ലെങ്കിൽ ഒട്ടിക്കുക.
+Scan QR Code/Barcode,QR കോഡ്/ബാർകോഡ് സ്കാൻ ചെയ്യുക
+Scan with camera,ക്യാമറ ഉപയോഗിച്ച് സ്കാൻ ചെയ്യുക
+Scan-First Flow,സ്കാൻ-ആദ്യ ഫ്ലോ
+Scanned Code:,സ്കാൻ ചെയ്ത കോഡ്:
+Scanning for: {0},ഇതിനായി സ്കാൻ ചെയ്യുന്നു: {0}
+Scanning items,ഇനങ്ങൾ സ്കാൻ ചെയ്യുന്നു
+Scan-Ready,സ്കാൻ-തയ്യാറാണ്
+Scope,വ്യാപ്തി
+Scope: All Profiles,വ്യാപ്തി: എല്ലാ പ്രൊഫൈലുകളും
+Scope: Current Profile,വ്യാപ്തി: നിലവിലെ പ്രൊഫൈൽ
+Scope: Specific Profile,വ്യാപ്തി: നിർദ്ദിഷ്ട പ്രൊഫൈൽ
+Search,തിരയുക
+Search Account,അക്കൗണ്ട് തിരയുക
+Search an invoice and continue the return flow without extra steps.,"ഒരു ഇൻവോയ്സ് തിരയുക, അധിക ഘട്ടങ്ങളില്ലാതെ റിട്ടേൺ ഫ്ലോ തുടരുക."
+Search customer,ഉപഭോക്താവിനെ തിരയുക
+Search invoices or customers,ഇൻവോയ്സുകൾ അല്ലെങ്കിൽ ഉപഭോക്താക്കളെ തിരയുക
+Search item,ഇനം തിരയുക
+Search item / code,ഇനം / കോഡ് തിരയുക
+Search items or barcode,ഇനങ്ങൾ അല്ലെങ്കിൽ ബാർകോഡ് തിരയുക
+Search Mpesa Payments,Mpesa പേയ്‌മെൻ്റുകൾ തിരയുക
+Search return invoices or customers,റിട്ടേൺ ഇൻവോയ്സുകൾ അല്ലെങ്കിൽ ഉപഭോക്താക്കളെ തിരയുക
+Search supplier,വിതരണക്കാരനെ തിരയുക
+Search unpaid invoices or customers,പണമടയ്ക്കാത്ത ഇൻവോയ്‌സുകളോ ഉപഭോക്താക്കളോ തിരയുക
+Secure context (HTTPS or localhost) is required for camera access.,ക്യാമറ ആക്‌സസ് ചെയ്യുന്നതിന് സുരക്ഷിത സന്ദർഭം (HTTPS അല്ലെങ്കിൽ ലോക്കൽഹോസ്റ്റ്) ആവശ്യമാണ്.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,ക്യാമറ ആക്‌സസ് ചെയ്യുന്നതിന് സുരക്ഷിത സന്ദർഭം (HTTPS) ആവശ്യമാണ്. ക്യാമറ ആക്‌സസ് ചെയ്യാൻ HTTPS ഉപയോഗിക്കുക.
+Select,തിരഞ്ഞെടുക്കുക
+Select a cashier first.,ആദ്യം ഒരു കാഷ്യറെ തിരഞ്ഞെടുക്കുക.
+Select a customer,ഒരു ഉപഭോക്താവിനെ തിരഞ്ഞെടുക്കുക
+Select a customer to use coupon,കൂപ്പൺ ഉപയോഗിക്കാൻ ഒരു ഉപഭോക്താവിനെ തിരഞ്ഞെടുക്കുക
+Select a printer to use QZ silent printing.,QZ നിശബ്ദ പ്രിൻ്റിംഗ് ഉപയോഗിക്കുന്നതിന് ഒരു പ്രിൻ്റർ തിരഞ്ഞെടുക്കുക.
+Select Batch,ബാച്ച് തിരഞ്ഞെടുക്കുക
+Select Columns to Display,പ്രദർശിപ്പിക്കാനുള്ള നിരകൾ തിരഞ്ഞെടുക്കുക
+Select items to sell,വിൽക്കാൻ ഇനങ്ങൾ തിരഞ്ഞെടുക്കുക
+Select Payment,പേയ്‌മെൻ്റ് തിരഞ്ഞെടുക്കുക
+Select Payment Account,പേയ്‌മെൻ്റ് അക്കൗണ്ട് തിരഞ്ഞെടുക്കുക
+Select printer,പ്രിൻ്റർ തിരഞ്ഞെടുക്കുക
+Select Return Invoice,റിട്ടേൺ ഇൻവോയ്സ് തിരഞ്ഞെടുക്കുക
+Select S.O,S.O തിരഞ്ഞെടുക്കുക
+Select Sales Orders,സെയിൽസ് ഓർഡറുകൾ തിരഞ്ഞെടുക്കുക
+Select the cashier who is taking over this terminal.,ഈ ടെർമിനൽ ഏറ്റെടുക്കുന്ന കാഷ്യറെ തിരഞ്ഞെടുക്കുക.
+Selected,തിരഞ്ഞെടുത്തു
+Selected movement type is not allowed by POS Profile.,തിരഞ്ഞെടുത്ത ചലന തരം POS പ്രൊഫൈൽ അനുവദനീയമല്ല.
+Selected Payments,തിരഞ്ഞെടുത്ത പേയ്‌മെൻ്റുകൾ
+Sensitive actions kept away from quick taps.,സെൻസിറ്റീവ് പ്രവർത്തനങ്ങൾ പെട്ടെന്നുള്ള ടാപ്പുകളിൽ നിന്ന് അകറ്റിനിർത്തി.
+Serial,സീരിയൽ
+Serial Numbers,സീരിയൽ നമ്പറുകൾ
+Server CPU Usage:,സെർവർ സിപിയു ഉപയോഗം:
+Server Health,സെർവർ ആരോഗ്യം
+Server Memory Usage:,സെർവർ മെമ്മറി ഉപയോഗം:
+Server Metrics,സെർവർ മെട്രിക്‌സ്
+Server Uptime:,സെർവർ പ്രവർത്തനസമയം:
+Service Charges,സേവന നിരക്കുകൾ
+Session,സെഷൻ
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,ഉപയോക്തൃ ഫോമിൽ ഓരോ കാഷ്യർ പിൻ സജ്ജീകരിക്കുകയും POS പ്രൊഫൈൽ ഉപയോക്താവിൽ അസൈൻ ചെയ്‌ത ടെർമിനൽ അംഗങ്ങളെ നിലനിർത്തുകയും ചെയ്യുക.
+Settings,ക്രമീകരണങ്ങൾ
+Settings in this section update the POS workspace without changing the current route.,ഈ വിഭാഗത്തിലെ ക്രമീകരണങ്ങൾ നിലവിലെ റൂട്ട് മാറ്റാതെ തന്നെ POS വർക്ക്‌സ്‌പെയ്‌സ് അപ്‌ഡേറ്റ് ചെയ്യുന്നു.
+Setup complete!,സജ്ജീകരണം പൂർത്തിയായി!
+Share,പങ്കിടുക
+Shared terminal,പങ്കിട്ട ടെർമിനൽ
+Shift Closed Snapshot,ഷിഫ്റ്റ് അടച്ച സ്നാപ്പ്ഷോട്ട്
+Shift Overview,ഷിഫ്റ്റ് അവലോകനം
+Show,കാണിക്കുക
+Show cart on customer-facing screen,ഉപഭോക്താവിനെ അഭിമുഖീകരിക്കുന്ന സ്ക്രീനിൽ കാർട്ട് കാണിക്കുക
+Show last invoice rate,അവസാന ഇൻവോയ്സ് നിരക്ക് കാണിക്കുക
+Show rate info,നിരക്ക് വിവരം കാണിക്കുക
+Show Repair Candidates,റിപ്പയർ കാൻഡിഡേറ്റുകളെ കാണിക്കുക
+Show search tools,തിരയൽ ഉപകരണങ്ങൾ കാണിക്കുക
+Show the active cart on a customer-facing screen,ഉപഭോക്താവിനെ അഭിമുഖീകരിക്കുന്ന സ്ക്രീനിൽ സജീവമായ കാർട്ട് കാണിക്കുക
+Showing {0}-{1} of {2},{2}-ൽ {0}-{1} കാണിക്കുന്നു
+Showing 0 of 0,0-ൽ 0 കാണിക്കുന്നു
+Shows the distribution of invoices per currency,ഓരോ കറൻസിയിലും ഇൻവോയ്‌സുകളുടെ വിതരണം കാണിക്കുന്നു
+Sign out of the current POS session,നിലവിലെ POS സെഷനിൽ നിന്ന് സൈൻ ഔട്ട് ചെയ്യുക
+Size:,വലിപ്പം:
+Skipped Payments,പേയ്‌മെൻ്റുകൾ ഒഴിവാക്കി
+Skipping items without barcodes,ബാർകോഡുകളില്ലാതെ ഇനങ്ങൾ ഒഴിവാക്കുന്നു
+Slow Moving,സ്ലോ മൂവിംഗ്
+Slow Moving Items,സ്ലോ മൂവിംഗ് ഇനങ്ങൾ
+Slow Queries:,സാവധാനത്തിലുള്ള ചോദ്യങ്ങൾ:
+Sold,വിറ്റു
+Source,ഉറവിടം
+Source Cash Account (Optional Override),ഉറവിട ക്യാഷ് അക്കൗണ്ട് (ഓപ്ഷണൽ ഓവർറൈഡ്)
+Source Ex. Rate:,ഉറവിടം Ex. നിരക്ക്:
+Source Rate:,ഉറവിട നിരക്ക്:
+Specific Profile,നിർദ്ദിഷ്ട പ്രൊഫൈൽ
+Split Invoices,ഇൻവോയ്‌സുകൾ വിഭജിക്കുക
+Staff / Cashier Performance Report,സ്റ്റാഫ് / കാഷ്യർ പെർഫോമൻസ് റിപ്പോർട്ട്
+Status,നില
+Stock,സ്റ്റോക്ക്
+Stock Information,സ്റ്റോക്ക് വിവരങ്ങൾ
+Stock is lower than requested,സ്റ്റോക്ക് ആവശ്യപ്പെട്ടതിലും കുറവാണ്
+Stock is lower than requested:\n{0},സ്റ്റോക്ക് ആവശ്യപ്പെട്ടതിലും കുറവാണ്:\n{0}
+Stock Movement Report,സ്റ്റോക്ക് മൂവ്മെൻ്റ് റിപ്പോർട്ട്
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,സ്റ്റോക്ക് അപ്ഡേറ്റ്: {0} {1} ലഭ്യമാണ്. {2} ചേർക്കുന്നത് സ്റ്റോക്കിനെ പൂജ്യത്തിന് താഴെ കൊണ്ടുവരും.
+Submit,സമർപ്പിക്കുക
+Submit & Print,"സമർപ്പിക്കുക, അച്ചടിക്കുക"
+Submit Deposit,നിക്ഷേപം സമർപ്പിക്കുക
+Submit Expense,ചെലവ് സമർപ്പിക്കുക
+Submitted,സമർപ്പിച്ചു
+Submitted Cash Movements,സമർപ്പിച്ച പണ നീക്കങ്ങൾ
+Submitted entries,എൻട്രികൾ സമർപ്പിച്ചു
+Successfully scanned:,സ്‌കാൻ ചെയ്‌തു:
+Suggested,നിർദ്ദേശിച്ചു
+Suggested Qty,നിർദ്ദേശിച്ച Qty
+Supervisor Access,സൂപ്പർവൈസർ ആക്സസ്
+Supervisor permissions unlock issuance and reloads,സൂപ്പർവൈസർ അനുമതികൾ അൺലോക്ക് ഇഷ്യൂവും റീലോഡുകളും
+Supervisor Tools,സൂപ്പർവൈസർ ഉപകരണങ്ങൾ
+Supplier,വിതരണക്കാരൻ
+Supplier and dates are required.,വിതരണക്കാരനും തീയതിയും ആവശ്യമാണ്.
+Supplier Invoices,വിതരണക്കാരൻ്റെ ഇൻവോയ്‌സുകൾ
+Supplier is required.,വിതരണക്കാരൻ ആവശ്യമാണ്.
+Supplier name is required,വിതരണക്കാരൻ്റെ പേര് ആവശ്യമാണ്
+Supplier Payments,വിതരണക്കാരൻ്റെ പേയ്‌മെൻ്റുകൾ
+Supplier Purchase Summary,വിതരണക്കാരൻ്റെ പർച്ചേസ് സംഗ്രഹം
+Suppliers,വിതരണക്കാർ
+Suppliers not found,വിതരണക്കാരെ കണ്ടെത്തിയില്ല
+Switch Camera,ക്യാമറ മാറുക
+Switch Cashier,കാഷ്യർ മാറുക
+Switch the POS appearance theme,POS രൂപഭാവം തീം മാറ്റുക
+Switched to:,ഇതിലേക്ക് മാറി:
+Sync All Invoices,എല്ലാ ഇൻവോയ്സുകളും സമന്വയിപ്പിക്കുക
+Sync Offline Cash Movements ({0}),ഓഫ്‌ലൈൻ പണ നീക്കങ്ങൾ സമന്വയിപ്പിക്കുക ({0})
+Sync Offline Sales,ഓഫ്‌ലൈൻ വിൽപ്പന സമന്വയിപ്പിക്കുക
+Synced {0} offline cash movement(s).,സമന്വയിപ്പിച്ച {0} ഓഫ്‌ലൈൻ ക്യാഷ് മൂവ്‌മെൻ്റ്(കൾ).
+Syncing items in background,പശ്ചാത്തലത്തിൽ ഇനങ്ങൾ സമന്വയിപ്പിക്കുന്നു
+System / Diagnostics,സിസ്റ്റം / ഡയഗ്നോസ്റ്റിക്സ്
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","ആപ്പ് വിവരം, സപ്പോർട്ട് ഡയഗ്‌നോസ്റ്റിക്‌സ്, സെഷൻ കൺട്രോളുകൾ തുടങ്ങിയ ലോ-ഫ്രീക്വൻസി മെയിൻ്റനൻസ് കൺട്രോളുകളാണ് സിസ്റ്റം പ്രവർത്തനങ്ങൾ."
+System Information,സിസ്റ്റം വിവരങ്ങൾ
+System Status,സിസ്റ്റം നില
+Tables:,പട്ടികകൾ:
+Tap the button below to redeem a gift card during checkout.,ചെക്ക്ഔട്ട് സമയത്ത് ഒരു സമ്മാന കാർഡ് റിഡീം ചെയ്യാൻ താഴെയുള്ള ബട്ടൺ ടാപ്പ് ചെയ്യുക.
+Target,ലക്ഷ്യം
+Target Ex. Rate:,ലക്ഷ്യം മുൻ. നിരക്ക്:
+Target Rate:,ടാർഗെറ്റ് നിരക്ക്:
+Tax,നികുതി
+Tax / Charges Report,നികുതി / ചാർജുകൾ റിപ്പോർട്ട്
+Tax Heads,നികുതി തലവന്മാർ
+Taxable Amount,നികുതി നൽകേണ്ട തുക
+Tendered,ടെൻഡർ ചെയ്തു
+Terminal,ടെർമിനൽ
+Terminal & Devices,ടെർമിനലും ഉപകരണങ്ങളും
+Terminal locked,ടെർമിനൽ പൂട്ടി
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","ടെർമിനൽ ടൂളുകൾ ഈ ചെക്ക്ഔട്ട് സ്റ്റേഷൻ, കസ്റ്റമർ-ഫേസിംഗ് ഡിസ്പ്ലേകൾ, ഭാവി പ്രിൻ്റർ/ഉപകരണ നിയന്ത്രണങ്ങൾ എന്നിവയെ ബാധിക്കുന്നു."
+Territory not found,പ്രദേശം കണ്ടെത്തിയില്ല
+The amount paid is not complete,അടച്ച തുക പൂർത്തിയായിട്ടില്ല
+The app stores data locally for offline use. This is called cache.,ഓഫ്‌ലൈൻ ഉപയോഗത്തിനായി ആപ്പ് പ്രാദേശികമായി ഡാറ്റ സംഭരിക്കുന്നു. ഇതിനെ കാഷെ എന്ന് വിളിക്കുന്നു.
+The invoice stayed in draft. Please review and submit it manually.,ഇൻവോയ്സ് ഡ്രാഫ്റ്റിൽ തന്നെ തുടർന്നു. ദയവായി ഇത് അവലോകനം ചെയ്ത് നേരിട്ട് സമർപ്പിക്കുക.
+The maximum discount allowed is,അനുവദനീയമായ പരമാവധി കിഴിവ്
+The quantity for {0} has been adjusted to the maximum available stock.,{0} എന്നതിൻ്റെ അളവ് ലഭ്യമായ പരമാവധി സ്റ്റോക്കിലേക്ക് ക്രമീകരിച്ചു.
+The system could not retrieve the item details. Please try again.,ഇനത്തിൻ്റെ വിശദാംശങ്ങൾ വീണ്ടെടുക്കാൻ സിസ്റ്റത്തിന് കഴിഞ്ഞില്ല. ദയവായി വീണ്ടും ശ്രമിക്കുക.
+These invoices will be synced when connection is restored,കണക്ഷൻ പുനഃസ്ഥാപിക്കുമ്പോൾ ഈ ഇൻവോയ്സുകൾ സമന്വയിപ്പിക്കപ്പെടും
+This action now opens inside the settings workspace.,ഈ പ്രവർത്തനം ഇപ്പോൾ ക്രമീകരണ വർക്ക്‌സ്‌പെയ്‌സിനുള്ളിൽ തുറക്കുന്നു.
+This coupon already used !,ഈ കൂപ്പൺ ഇതിനകം ഉപയോഗിച്ചു!
+This invoice does not need change-allocation repair,ഈ ഇൻവോയ്‌സിന് മാറ്റം-അലോക്കേഷൻ റിപ്പയർ ആവശ്യമില്ല
+This invoice is already repaired,ഈ ഇൻവോയ്സ് ഇതിനകം നന്നാക്കിയിട്ടുണ്ട്
+This is an item template. Please choose a variant.,ഇതൊരു ഇനം ടെംപ്ലേറ്റ് ആണ്. ദയവായി ഒരു വേരിയൻ്റ് തിരഞ്ഞെടുക്കുക.
+this item,ഈ ഇനം
+This POS page could not be opened offline because its code was not cached on this terminal yet.,ഈ ടെർമിനലിൽ അതിൻ്റെ കോഡ് ഇതുവരെ കാഷെ ചെയ്യാത്തതിനാൽ ഈ POS പേജ് ഓഫ്‌ലൈനിൽ തുറക്കാൻ കഴിഞ്ഞില്ല.
+This Serial Number {0} has already been added!,ഈ സീരിയൽ നമ്പർ {0} ഇതിനകം ചേർത്തിട്ടുണ്ട്!
+Threshold,ത്രെഷോൾഡ്
+Time,സമയം
+Tip: Clear cache regularly to free up space and keep the app fast.,നുറുങ്ങ്: ഇടം സൃഷ്‌ടിക്കാനും ആപ്പ് വേഗത്തിലാക്കാനും പതിവായി കാഷെ മായ്‌ക്കുക.
+Tip: Close unused tabs or apps to reduce lag.,നുറുങ്ങ്: കാലതാമസം കുറയ്ക്കാൻ ഉപയോഗിക്കാത്ത ടാബുകളോ ആപ്പുകളോ അടയ്ക്കുക.
+Tip: Monitor slow queries and table size for optimal performance.,നുറുങ്ങ്: ഒപ്റ്റിമൽ പ്രകടനത്തിനായി മന്ദഗതിയിലുള്ള ചോദ്യങ്ങളും പട്ടികയുടെ വലുപ്പവും നിരീക്ഷിക്കുക.
+To Be Paid,പണം നൽകണം
+To Date,ഇന്നുവരെ
+Today,ഇന്ന്
+Today Profit,ഇന്ന് ലാഭം
+Today Sales,ഇന്ന് വിൽപ്പന
+Toggle navigation drawer,നാവിഗേഷൻ ഡ്രോയർ ടോഗിൾ ചെയ്യുക
+Toggle Theme,തീം ടോഗിൾ ചെയ്യുക
+Tools,ഉപകരണങ്ങൾ
+Tools for customer-facing screens and terminal-specific actions.,ഉപഭോക്താവിനെ അഭിമുഖീകരിക്കുന്ന സ്ക്രീനുകൾക്കും ടെർമിനൽ-നിർദ്ദിഷ്ട പ്രവർത്തനങ്ങൾക്കുമുള്ള ഉപകരണങ്ങൾ.
+Top Brand,മുൻനിര ബ്രാൻഡ്
+Top Category,മുൻനിര വിഭാഗം
+Top Charge Head,ടോപ്പ് ചാർജ് ഹെഡ്
+Top Customers,മുൻനിര ഉപഭോക്താക്കൾ
+Top Discount,ടോപ്പ് ഡിസ്കൗണ്ട്
+Top Items by Location,ലൊക്കേഷൻ അനുസരിച്ച് മികച്ച ഇനങ്ങൾ
+Top Margin,മുകളിലെ മാർജിൻ
+Top Pending,തീർപ്പുകൽപ്പിക്കാത്ത ടോപ്പ്
+Top Profit Item,ഏറ്റവും ഉയർന്ന ലാഭ ഇനം
+Top Return Items,മുൻനിര റിട്ടേൺ ഇനങ്ങൾ
+Top Sales by Cashier,കാഷ്യറുടെ ഏറ്റവും മികച്ച വിൽപ്പന
+Top Supplier,മുൻനിര വിതരണക്കാരൻ
+Top Suppliers by Spend,ചെലവ് പ്രകാരം മുൻനിര വിതരണക്കാർ
+Top Tables,മുൻനിര പട്ടികകൾ
+Top Tax Head,ടോപ്പ് ടാക്സ് ഹെഡ്
+Top Up Amount,ടോപ്പ് അപ്പ് തുക
+Top Up Card,ടോപ്പ് അപ്പ് കാർഡ്
+Top Up Mode,ടോപ്പ് അപ്പ് മോഡ്
+Top Variant,ടോപ്പ് വേരിയൻ്റ്
+Total,ആകെ
+Total Amount,ആകെ തുക
+Total Change,ആകെ മാറ്റം
+Total Charges,മൊത്തം ചാർജുകൾ
+Total In,ആകെ ഇൻ
+Total Invoices,മൊത്തം ഇൻവോയ്‌സുകൾ
+Total Items,മൊത്തം ഇനങ്ങൾ
+Total Mpesa,ആകെ എംപെസ
+Total Out,ആകെ ഔട്ട്
+Total Payments,മൊത്തം പേയ്‌മെൻ്റുകൾ
+Total Purchase,മൊത്തം വാങ്ങൽ
+Total Selected :,ആകെ തിരഞ്ഞെടുത്തത്:
+Total Size,ആകെ വലിപ്പം
+Total Stock Qty,മൊത്തം സ്റ്റോക്ക് Qty
+Total:,ആകെ:
+Totals by Invoice Currency,ഇൻവോയ്സ് കറൻസി പ്രകാരം ആകെ
+Track how much cash was handed back to customers,ഉപഭോക്താക്കൾക്ക് എത്ര പണം തിരികെ കൈമാറിയെന്ന് ട്രാക്ക് ചെയ്യുക
+"Track recent sales, collect unpaid balances, and reopen saved work","സമീപകാല വിൽപ്പന ട്രാക്ക് ചെയ്യുക, പണമടയ്ക്കാത്ത ബാലൻസുകൾ ശേഖരിക്കുക, സംരക്ഷിച്ച ജോലി വീണ്ടും തുറക്കുക"
+Transaction ID,ഇടപാട് ഐഡി
+Transfer,കൈമാറ്റം
+Try a different search term or clear the cart search.,മറ്റൊരു തിരയൽ പദം പരീക്ഷിക്കുക അല്ലെങ്കിൽ കാർട്ട് തിരയൽ മായ്‌ക്കുക.
+Try adjusting your search or filters,നിങ്ങളുടെ തിരയൽ അല്ലെങ്കിൽ ഫിൽട്ടറുകൾ ക്രമീകരിക്കാൻ ശ്രമിക്കുക
+Try another source or refresh the list.,മറ്റൊരു ഉറവിടം പരീക്ഷിക്കുക അല്ലെങ്കിൽ ലിസ്റ്റ് പുതുക്കുക.
+Try changing the date range or status filter.,തീയതി ശ്രേണിയോ സ്റ്റാറ്റസ് ഫിൽട്ടറോ മാറ്റാൻ ശ്രമിക്കുക.
+Type,ടൈപ്പ് ചെയ്യുക
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,അടിസ്ഥാന ക്രമീകരണങ്ങൾ ഉപയോഗിച്ച് പോലും ക്യാമറ ആക്‌സസ് ചെയ്യാൻ കഴിയുന്നില്ല. നിങ്ങളുടെ ക്യാമറ അനുമതികളും ഉപകരണ അനുയോജ്യതയും പരിശോധിക്കുക.
+Unable to add offer item {0}. Please refresh and try again.,ഓഫർ ഇനം {0} ചേർക്കാനായില്ല. പുതുക്കി വീണ്ടും ശ്രമിക്കുക.
+Unable to add offer item. Please refresh and try again.,ഓഫർ ഇനം ചേർക്കാനായില്ല. പുതുക്കി വീണ്ടും ശ്രമിക്കുക.
+Unable to add scanned item.,സ്കാൻ ചെയ്ത ഇനം ചേർക്കാനായില്ല.
+Unable to create purchase order,വാങ്ങൽ ഓർഡർ സൃഷ്‌ടിക്കാനായില്ല
+Unable to delete draft invoice,ഡ്രാഫ്റ്റ് ഇൻവോയ്സ് ഇല്ലാതാക്കാൻ കഴിയുന്നില്ല
+Unable to fetch documents,രേഖകൾ ലഭ്യമാക്കാനായില്ല
+Unable to fetch draft orders,ഡ്രാഫ്റ്റ് ഓർഡറുകൾ ലഭ്യമാക്കാനായില്ല
+Unable to fetch invoice history,ഇൻവോയ്സ് ചരിത്രം ലഭ്യമാക്കാനായില്ല
+Unable to fetch M-Pesa payments,എം-പെസ പേയ്‌മെൻ്റുകൾ ലഭ്യമാക്കാനായില്ല
+Unable to fetch sales orders,വിൽപ്പന ഓർഡറുകൾ ലഭ്യമാക്കാനായില്ല
+Unable to fetch unpaid invoices,പണമടയ്ക്കാത്ത ഇൻവോയ്‌സുകൾ ലഭ്യമാക്കാനായില്ല
+Unable to generate scale barcode,സ്കെയിൽ ബാർകോഡ് സൃഷ്ടിക്കാൻ കഴിയുന്നില്ല
+Unable to issue gift card.,സമ്മാന കാർഡ് നൽകാനായില്ല.
+Unable to load cashier PIN status.,കാഷ്യർ പിൻ സ്റ്റാറ്റസ് ലോഡുചെയ്യാനായില്ല.
+Unable to load document,പ്രമാണം ലോഡ് ചെയ്യാനായില്ല
+Unable to load draft invoice,ഡ്രാഫ്റ്റ് ഇൻവോയ്സ് ലോഡുചെയ്യാനായില്ല
+Unable to load gift card balance.,ഗിഫ്റ്റ് കാർഡ് ബാലൻസ് ലോഡ് ചെയ്യാനാവുന്നില്ല.
+Unable to load invoice details,ഇൻവോയ്സ് വിശദാംശങ്ങൾ ലോഡ് ചെയ്യാനായില്ല
+Unable to load parked order,പാർക്ക് ചെയ്‌ത ഓർഡർ ലോഡുചെയ്യാനായില്ല
+Unable to load the selected sales order,തിരഞ്ഞെടുത്ത വിൽപ്പന ഓർഡർ ലോഡ് ചെയ്യാനായില്ല
+Unable to prepare document,പ്രമാണം തയ്യാറാക്കാൻ കഴിയുന്നില്ല
+Unable to prepare return invoice,റിട്ടേൺ ഇൻവോയ്സ് തയ്യാറാക്കാനായില്ല
+Unable to print draft invoice,ഡ്രാഫ്റ്റ് ഇൻവോയ്സ് പ്രിൻ്റ് ചെയ്യാനാവുന്നില്ല
+Unable to print submitted invoice,സമർപ്പിച്ച ഇൻവോയ്സ് പ്രിൻ്റ് ചെയ്യാനാവുന്നില്ല
+Unable to process document action,ഡോക്യുമെൻ്റ് പ്രവർത്തനം പ്രോസസ്സ് ചെയ്യാനായില്ല
+Unable to repair change allocation,അലോക്കേഷൻ മാറ്റുന്നത് നന്നാക്കാനായില്ല
+Unable to save cashier PIN.,കാഷ്യർ പിൻ സംരക്ഷിക്കാനായില്ല.
+Unable to save the rate to the backend price list,ബാക്കെൻഡ് പ്രൈസ് ലിസ്റ്റിലേക്ക് നിരക്ക് സംരക്ഷിക്കാനായില്ല
+Unable to submit invoice,ഇൻവോയ്സ് സമർപ്പിക്കാനായില്ല
+Unable to submit the selected payment,തിരഞ്ഞെടുത്ത പേയ്‌മെൻ്റ് സമർപ്പിക്കാനായില്ല
+Unable to top up gift card.,സമ്മാന കാർഡ് ടോപ്പ് അപ്പ് ചെയ്യാനായില്ല.
+Unable to verify cashier PIN.,കാഷ്യർ പിൻ പരിശോധിക്കാനായില്ല.
+Unallocated,അനുവദിച്ചിട്ടില്ല
+Unallocated:,അനുവദിച്ചിട്ടില്ല:
+Unavailable,ലഭ്യമല്ല
+Unknown,അജ്ഞാതം
+Unknown Item,അജ്ഞാത ഇനം
+Unknown Warehouse,അജ്ഞാത വെയർഹൗസ്
+Unlock POS,POS അൺലോക്ക് ചെയ്യുക
+Unpaid,പണം നൽകാത്തത്
+"Unselected payments stay unallocated first, then auto reconcile after submit.","തിരഞ്ഞെടുക്കാത്ത പേയ്‌മെൻ്റുകൾ ആദ്യം അൺലോക്കേറ്റ് ചെയ്യപ്പെടാതെ തുടരുക, തുടർന്ന് സമർപ്പിച്ചതിന് ശേഷം സ്വയമേവ അനുരഞ്ജിപ്പിക്കുക."
+UOM,UOM
+UOM not found,UOM കണ്ടെത്തിയില്ല
+Update available,അപ്ഡേറ്റ് ലഭ്യമാണ്
+Update Customer,ഉപഭോക്താവിനെ അപ്ഡേറ്റ് ചെയ്യുക
+Update PIN,പിൻ അപ്ഡേറ്റ് ചെയ്യുക
+Update Price List Rate,വില ലിസ്റ്റ് നിരക്ക് അപ്ഡേറ്റ് ചെയ്യുക
+Updated,അപ്ഡേറ്റ് ചെയ്തു
+Updates and app info that stay out of the cashier flow.,കാഷ്യർ ഫ്ലോയിൽ നിന്ന് അകന്നുനിൽക്കുന്ന അപ്‌ഡേറ്റുകളും ആപ്പ് വിവരങ്ങളും.
+Updates automatically,യാന്ത്രികമായി അപ്ഡേറ്റുകൾ
+Usage,ഉപയോഗം
+Usage Stats,ഉപയോഗ സ്ഥിതിവിവരക്കണക്കുകൾ
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,കാഷ്യർ സ്വിച്ചിംഗിനും ടെർമിനൽ അൺലോക്കിനും 4 മുതൽ 8 അക്കങ്ങൾ വരെയുള്ള പിൻ ഉപയോഗിക്കുക.
+Use Cashier,കാഷ്യർ ഉപയോഗിക്കുക
+Use date range to search for older invoices,പഴയ ഇൻവോയ്‌സുകൾക്കായി തിരയാൻ തീയതി ശ്രേണി ഉപയോഗിക്കുക
+"Use one field for manual code entry, barcode scans, or QR scans.","മാനുവൽ കോഡ് എൻട്രി, ബാർകോഡ് സ്കാൻ അല്ലെങ്കിൽ ക്യുആർ സ്കാൻ എന്നിവയ്ക്കായി ഒരു ഫീൽഡ് ഉപയോഗിക്കുക."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","POS-ൽ നിന്ന് പുറത്തുപോകാതെ തന്നെ ബാലൻസ് ചെക്കുകൾ, പുതിയ ഇഷ്യു, ടോപ്പ് അപ്പുകൾ എന്നിവയ്ക്കായി ഒരു വർക്ക്ഫ്ലോ ഉപയോഗിക്കുക."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","കാഷെ ചെയ്‌ത മുൻവ്യവസ്ഥ ഡാറ്റയ്ക്ക് ഒരു പുതുക്കൽ, പുനർനിർമ്മാണം അല്ലെങ്കിൽ ഡയഗ്നോസ്റ്റിക്സ് അവലോകനം ആവശ്യമായി വരുമ്പോൾ ഈ വിഭാഗം ഉപയോഗിക്കുക."
+Use Western numerals,പാശ്ചാത്യ അക്കങ്ങൾ ഉപയോഗിക്കുക
+Used:,ഉപയോഗിച്ചത്:
+Using basic camera settings due to device limitations,ഉപകരണ പരിമിതികൾ കാരണം അടിസ്ഥാന ക്യാമറ ക്രമീകരണങ്ങൾ ഉപയോഗിക്കുന്നു
+Using cached customer balance,കാഷെ ചെയ്ത ഉപഭോക്തൃ ബാലൻസ് ഉപയോഗിക്കുന്നു
+Valid until,വരെ സാധുവാണ്
+Variance %,വ്യത്യാസം %
+Variants,വകഭേദങ്ങൾ
+Variant-wise,വേരിയൻ്റ് തിരിച്ച്
+Verify closing amounts for each payment method,ഓരോ പേയ്‌മെൻ്റ് രീതിയുടെയും ക്ലോസിംഗ് തുകകൾ പരിശോധിച്ചുറപ്പിക്കുക
+View all,എല്ലാം കാണുക
+View app information and current build details,ആപ്പ് വിവരങ്ങളും നിലവിലെ ബിൽഡ് വിശദാംശങ്ങളും കാണുക
+View Data Diagnostics,ഡാറ്റ ഡയഗ്നോസ്റ്റിക്സ് കാണുക
+View Details,വിശദാംശങ്ങൾ കാണുക
+View invoice details,ഇൻവോയ്സ് വിശദാംശങ്ങൾ കാണുക
+View notifications,അറിയിപ്പുകൾ കാണുക
+View offline invoices,ഓഫ്‌ലൈൻ ഇൻവോയ്‌സുകൾ കാണുക
+View restricted POS insights,നിയന്ത്രിത POS സ്ഥിതിവിവരക്കണക്കുകൾ കാണുക
+Void Amount,അസാധുവായ തുക
+Void Count,ശൂന്യമായ എണ്ണം
+Voids,ശൂന്യത
+Waiting for cart items,വണ്ടി സാധനങ്ങൾക്കായി കാത്തിരിക്കുന്നു
+Waiting for payment...,പേയ്‌മെൻ്റിനായി കാത്തിരിക്കുന്നു...
+Walk-in Customer,വാക്ക്-ഇൻ കസ്റ്റമർ
+Warehouse,വെയർഹൗസ്
+Warning: High cache usage may affect performance.,മുന്നറിയിപ്പ്: ഉയർന്ന കാഷെ ഉപയോഗം പ്രകടനത്തെ ബാധിച്ചേക്കാം.
+Warning: High lag may indicate heavy processing or browser slowness.,മുന്നറിയിപ്പ്: ഉയർന്ന കാലതാമസം കനത്ത പ്രോസസ്സിംഗ് അല്ലെങ്കിൽ ബ്രൗസർ മന്ദതയെ സൂചിപ്പിക്കാം.
+Week ?,ആഴ്ച?
+Week-wise,ആഴ്ച തിരിച്ച്
+Weight (g),ഭാരം (ഗ്രാം)
+Weight (grams),ഭാരം (ഗ്രാം)
+We'll let you know if an invoice fails to submit,ഒരു ഇൻവോയ്സ് സമർപ്പിക്കുന്നതിൽ പരാജയപ്പെട്ടാൽ ഞങ്ങൾ നിങ്ങളെ അറിയിക്കും
+Workflow,വർക്ക്ഫ്ലോ
+Write off amount cannot exceed the POS profile maximum of {0},എഴുതിത്തള്ളുന്ന തുക POS പ്രൊഫൈൽ പരമാവധി {0} കവിയരുത്
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,എഴുതിത്തള്ളുന്ന തുക അനുവദനീയമായ പരിധി കവിയുന്നു ({0}). ബാക്കി തുകയ്ക്ക് പേയ്‌മെൻ്റ് ചേർക്കുക.
+Yes,അതെ
+"Yes, Cancel sale","അതെ, വിൽപ്പന റദ്ദാക്കുക"
+"Yes, Close","അതെ, അടയ്ക്കുക"
+You are not allowed to print draft invoices,നിങ്ങൾക്ക് ഡ്രാഫ്റ്റ് ഇൻവോയ്‌സുകൾ പ്രിൻ്റ് ചെയ്യാൻ അനുവാദമില്ല
+You are offline. Add Payment will work again when the connection is restored.,നിങ്ങൾ ഓഫ്‌ലൈനാണ്. കണക്ഷൻ പുനഃസ്ഥാപിക്കുമ്പോൾ പേയ്‌മെൻ്റ് ചേർക്കുക വീണ്ടും പ്രവർത്തിക്കും.
+You have no notifications right now,നിങ്ങൾക്ക് ഇപ്പോൾ അറിയിപ്പുകളൊന്നുമില്ല
+Your Cart,നിങ്ങളുടെ വണ്ടി

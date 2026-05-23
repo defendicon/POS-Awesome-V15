@@ -1,0 +1,1362 @@
+POS Awesome,POS מדהים
+Fetch Items Directly from Server,אחזר פריטים ישירות מהשרת
+Menu,תפריט
+Actions,פעולות
+Close Shift,סגור Shift
+End current session,סיום ההפעלה הנוכחית
+Print Last Invoice,הדפס חשבונית אחרונה
+Reprint previous transaction,הדפס מחדש עסקה קודמת
+Sync Offline Invoices,סנכרון חשבוניות לא מקוונות
+Upload pending transactions,העלה עסקאות ממתינות
+Go Online,עבור לאינטרנט
+Go Offline,עבור למצב לא מקוון
+Disable offline mode,השבת מצב לא מקוון
+Work without server connection,עבודה ללא חיבור לשרת
+Clear Cache,נקה את המטמון
+Remove local data and refresh,הסר נתונים מקומיים ורענן
+About,בערך
+App information,מידע על האפליקציה
+Language,שפה
+Change interface language,שנה שפת ממשק
+Light Mode,מצב אור
+Dark Mode,מצב כהה
+Switch theme appearance,החלף את מראה הנושא
+Logout,התנתק
+Sign out of session,צא מההפעלה
+Select Language,בחר שפה
+Choose your preferred language for the POS interface,בחר את השפה המועדפת עליך עבור ממשק הקופה
+Language will be changed to,השפה תשתנה ל
+Cancel,בטל
+Change Language,שנה שפה
+Close,סגור
+Cannot change language - same language selected,לא ניתן לשנות שפה - נבחרה אותה שפה
+Language changed successfully! Reloading...,השפה השתנתה בהצלחה! טוען מחדש...
+Failed to change language,שינוי השפה נכשל
+Unknown error,שגיאה לא ידועה
+- Total Unallocated,- סך הכל לא מוקצה
+* Required,*חובה
+{0} (Qty: {1}),{0} (כמות: {1})
+{0} actions,{0} פעולות
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,ל-{0} יש רק {1} במלאי. ביקשת {2}. התאם כמות או מלאי מחדש.
+{0} offline invoice{1} pending,{0} חשבונית לא מקוונת{1} בהמתנה
+{0} offline invoice{1} saved as draft,{0} חשבונית לא מקוונת{1} נשמרה כטיוטה
+{0} offline invoice{1} synced,{0} חשבונית לא מקוונת{1} מסונכרנת
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,לפני {0} ימים
+{0}h ago,לפני {0} שעות
+{0}m ago,לפני {0}מ'
+A POS supervisor is required for this action.,נדרש מפקח קופה לפעולה זו.
+Access,גישה
+Account,חשבון
+Account is overdrawn,יש משיכת יתר בחשבון
+Acknowledge the error to resume scanning,אשר את השגיאה כדי לחדש את הסריקה
+Acknowledge the error to resume scanning.,אשר את השגיאה כדי לחדש את הסריקה.
+Across,ממול
+Action,פעולה
+Active sale,מכירה פעילה
+add,להוסיף
+Add items from the selector to start building this sale.,הוסף פריטים מהבורר כדי להתחיל לבנות את המכירה הזו.
+Add more value to an existing gift card,הוסף ערך רב יותר לכרטיס מתנה קיים
+Add New Address,הוסף כתובת חדשה
+Add new customer,הוסף לקוח חדש
+Add on New Line,הוסף בשורה חדשה
+Add Payment,הוסף תשלום
+Add payment to invoice,הוסף תשלום לחשבונית
+Add/Edit Coupon Conditions,הוסף/ערוך תנאי קופון
+Additional Discount,הנחה נוספת
+Additional Discount %,% הנחה נוספת
+Address Line 1,שורת כתובת 1
+Address not found,הכתובת לא נמצאה
+Adjust the quantity or enable negative stock to continue.,התאם את הכמות או אפשר את המשך המלאי השלילי.
+Adjustment,התאמה
+After returns,אחרי החזרות
+Against,נגד
+Against Name,נגד השם
+Age Bracket,שכבת גיל
+All,הכל
+All Caught Up!,הכל נתפס!
+All invoices are synchronized,כל החשבוניות מסונכרנות
+All pending invoices are up to date,כל החשבוניות הממתינות מעודכנות
+All Profiles,כל הפרופילים
+All Synchronized,הכל מסונכרן
+All visible invoices are fully settled.,כל החשבוניות הגלויות מסולקות במלואן.
+All Warehouses,כל המחסנים
+Allowed UOM is {0},UOM מותר הוא {0}
+Always fetch items from server (ignore local cache),אחזר תמיד פריטים מהשרת (התעלם מהמטמון המקומי)
+Amount,כמות
+Amount already received,הסכום כבר התקבל
+Amount exceeds profile cash movement max amount.,הסכום חורג מהסכום המקסימלי לתנועת מזומנים בפרופיל.
+Amount must be greater than zero.,הסכום חייב להיות גדול מאפס.
+Amount received from customer,סכום שהתקבל מהלקוח
+Appearance and user-level preferences for the current session.,מראה והעדפות ברמת המשתמש עבור ההפעלה הנוכחית.
+Applied,הוחל
+Apply,החל
+Apply Gift Card,החל כרטיס מתנה
+Apply Offer,החל את ההצעה
+Apply On,החל ב-
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,החל רק את הסכום שברצונך לפדות על חשבונית זו. היתרה נשארת בכרטיס.
+Apply Redemption,החל פדיון
+Applying,מגיש בקשה
+Apps,אפליקציות
+Are you sure you want to close? All entered data will be lost.,האם אתה בטוח שאתה רוצה לסגור? כל הנתונים שהוזנו יאבדו.
+Attributes (Size/Color),תכונות (גודל/צבע)
+Auto Allocate Payment Amount,הקצאה אוטומטית של סכום תשלום
+Auto Reconcile,התאמה אוטומטית
+Auto reconciliation completed after payment submit.,התאמה אוטומטית הושלמה לאחר הגשת התשלום.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,התאמה אוטומטית הושלמה. הוקצו: {0}{1}. נותרו ללא תשלום: {0}{2}.
+Available Actions,פעולות זמינות
+Available QTY,כמות זמינה
+Available:,זמין:
+Average Basket,סל ממוצע
+Average Bill,חשבון ממוצע
+Average Ticket,כרטיס ממוצע
+Avg Bill,ביל ממוצע
+Avg Invoice,חשבונית ממוצעת
+Avg Invoice Profit,רווח ממוצע בחשבונית
+Avg Invoice Value,ערך חשבונית ממוצע
+Avg Purchase Frequency,תדירות רכישה ממוצעת
+Awesome,מדהים
+Awesome Dashboard,לוח מחוונים מדהים
+Awesome Dashboard is disabled for the selected POS Profile.,לוח המחוונים Awesome מושבת עבור פרופיל ה-POS שנבחר.
+Awesome Dashboard is unavailable for the selected scope.,מרכז השליטה של ​​Awesome אינו זמין עבור ההיקף שנבחר.
+Awesome Dashboard is visible only to POS supervisors.,לוח המחוונים Awesome גלוי רק למפקחי קופה.
+Back,חזרה
+Back Office Cash Account,חשבון Back Office Cash
+Back Office Cash Account (Optional Override),חשבון Back Office Cash (עקיפה אופציונלית)
+Back office cash account is required.,יש צורך בחשבון Back Office מזומן.
+Back to {0},חזרה אל {0}
+Background processing did not finish in time.,עיבוד הרקע לא הסתיים בזמן.
+Background processing failed for Invoice {0}: {1},עיבוד הרקע נכשל עבור חשבונית {0}: {1}
+Background Submission Failed,הגשת הרקע נכשלה
+Background sync interval (seconds),מרווח סנכרון ברקע (שניות)
+Balance,איזון
+Balance will be updated when connection is restored,היתרה תעודכן כאשר החיבור ישוחזר
+Balances still pending,יתרות עדיין ממתינות
+Barcode,ברקוד
+Barcode / QR Ready,ברקוד / QR מוכן
+Barcode Label Printing,הדפסת תווית ברקוד
+Base Paid:,בתשלום בסיס:
+Base Recv:,Recv בסיס:
+Base:,בסיס:
+Basic Information,מידע בסיסי
+Batch,אצווה
+Batch Information,מידע אצווה
+Before any return workflow,לפני כל זרימת עבודה חוזרת
+Before returns,לפני החזרות
+Best Day,היום הכי טוב
+Best Seller,רב מכר
+Book expense or deposit from active shift.,ספר הוצאה או הפקדה ממשמרת פעילה.
+Branch / Location-wise Report,דוח סניף / מיקום
+Brand-wise,מבחינה מותגית
+Breakdown,התמוטטות
+Browse,עיין
+Build Time:,זמן בנייה:
+Built with Frappe,נבנה עם Frappe
+Bundle,צרור
+Buying Price,מחיר קנייה
+Cache cleared successfully,המטמון נוקה בהצלחה
+Cache Usage,שימוש במטמון
+cache used,מטמון בשימוש
+Calculating...,מחשב...
+Camera Access Required,נדרשת גישה למצלמה
+Camera access was aborted. Please try again.,הגישה למצלמה בוטלה. אנא נסה שוב.
+Camera constraints not supported by your device. Trying fallback settings...,אילוצי מצלמה אינם נתמכים על ידי המכשיר שלך. מנסה הגדרות החלפה...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,המצלמה תפוסה או חסומה על ידי אפליקציה/כרטיסייה אחרת. סגור אפליקציות מצלמה אחרות ונסה שוב.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,הרשאת המצלמה נדחתה. אנא אפשר גישה למצלמה בהגדרות הדפדפן שלך ורענן את הדף.
+Camera scanner is locked until the current error is acknowledged,סורק המצלמה נעול עד לאישור השגיאה הנוכחית
+Camera started but the video stream did not load in time. Please try again.,המצלמה הופעלה אך זרם הווידאו לא נטען בזמן. אנא נסה שוב.
+Cancel cash movement {0}?,לבטל את תנועת המזומנים {0}?
+Cancel Payment,בטל תשלום
+Cancel Sale,בטל מכירה
+Cancel Sale ?,לבטל את המכירה?
+Cancelled,בוטלה
+Cannot add an item with zero or negative quantity.,לא ניתן להוסיף פריט עם כמות אפס או שלילית.
+Cannot clear cache while offline,לא ניתן לנקות את המטמון במצב לא מקוון
+Cannot redeem customer credit more than invoice total,לא ניתן לממש אשראי לקוח יותר מסך החשבונית
+Cannot redeem gift cards more than invoice total,לא ניתן לממש כרטיסי מתנה יותר מסך החשבונית
+Cannot Save Offline Invoice:,לא ניתן לשמור חשבונית לא מקוונת:
+Cannot Save Offline Payment:,לא ניתן לשמור תשלום לא מקוון:
+Card,כרטיס
+Card / Online,כרטיס / אונליין
+Card health after the last live lookup,בריאות הכרטיס לאחר חיפוש חי האחרון
+Cards,קלפים
+Cart,עגלה
+Cash,מזומן
+Cash back to customers,החזר מזומן ללקוחות
+Cash Collections,גביית מזומנים
+Cash Deposit is disabled for this POS Profile.,הפקדת מזומן מושבתת עבור פרופיל קופה זה.
+Cash Drawer Snapshot,תמונת מצב של מגירת מזומנים
+Cash In Hand,מזומן ביד
+Cash Movement,תנועת מזומנים
+Cash movement cancelled,תנועת מזומנים בוטלה
+Cash movement deduction applied,הוחל ניכוי תנועת מזומנים
+Cash movement deleted,תנועת מזומנים נמחקה
+Cash movement is disabled for this POS Profile.,תנועת מזומנים מושבתת עבור פרופיל קופה זה.
+Cash Movement is disabled in current POS Profile.,תנועת מזומנים מושבתת בפרופיל הקופה הנוכחי.
+Cash movement saved offline,תנועת מזומנים נשמרה במצב לא מקוון
+Cash movement submitted,הוגשה תנועת מזומנים
+Cash Movements,תנועות מזומנים
+Cash payment cannot be less than invoice total when partial payment is not allowed,תשלום במזומן לא יכול להיות נמוך מסך החשבונית כאשר תשלום חלקי אינו מותר
+Cash returned after payment,מזומן הוחזר לאחר התשלום
+Cashier,קופאית
+Cashier Access,גישה לקופאית
+Cashier identity and appearance preferences.,זהות הקופאית והעדפות המראה.
+Cashier PIN,PIN של קופאית
+Cashier PIN saved successfully.,PIN של הקופאי נשמר בהצלחה.
+Cashiers,קופאיות
+Cashier-wise,מבחינת הקופאית
+Categories,קטגוריות
+Category,קטגוריה
+Category / Brand / Variant Report,דוח קטגוריה / מותג / וריאציות
+Category-wise,מבחינת קטגוריה
+Category-wise Margin,שוליים מבחינת קטגוריה
+Certificate,תעודה
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,אישור חסר או לא מהימן. QZ עשוי להציג תיבות אישור.
+Certificate is trusted. Silent QZ printing is active.,תעודה מהימנה. הדפסת QZ שקטה פעילה.
+Change,שנה
+Change allocation repaired,הקצאת שינוי תוקנה
+Change Price,שנה מחיר
+Change Return,שנה החזרה
+Change Returned,השינוי הוחזר
+Change terminal cashier,החלף קופאית מסוף
+Charge Heads,ראשי טעינה
+Charges,חיובים
+Charges not found,חיובים לא נמצאו
+Check Balance,בדוק יתרה
+Check balance for any card. Supervisors can issue and top up cards here.,בדוק יתרה עבור כל כרטיס. מפקחים יכולים להנפיק ולהטעין כרטיסים כאן.
+Check balance only,בדוק יתרה בלבד
+Check for new commits,בדוק אם יש התחייבויות חדשות
+Check for Updates,בדוק אם קיימים עדכונים
+Check live balance before applying redemption,בדוק יתרה חיה לפני החלת מימוש
+Check live balance before redemption,בדוק יתרה חיה לפני המימוש
+Checking...,בודק...
+Cheque/Reference Date,המחאה/תאריך ייחוס
+Cheque/Reference No,המחאה/מספר אסמכתא
+Choose the cashier currently operating this terminal.,בחר את הקופאית שמפעילה כעת מסוף זה.
+City,עיר
+Clear,ברור
+Clear All,נקה הכל
+Clear all barcode items,נקה את כל פריטי הברקוד
+Clear all purchase order items,נקה את כל פריטי הזמנת הרכש
+Clear Search,נקה חיפוש
+Clearing local cache...,מנקה מטמון מקומי...
+Click to refresh,לחץ כדי לרענן
+Client CPU Lag:,משך מעבד לקוח:
+Client Memory Usage:,שימוש בזיכרון הלקוח:
+Client Metrics,מדדי לקוח
+Close about dialog,סגור על דו-שיח
+Close cashier switcher,סגור את מחליף הקופאים
+Close closing shift dialog,סגירת תיבת סגירת משמרת
+Close column selector,סגור את בורר העמודות
+Close Dialog,סגור דיאלוג
+Close drafts dialog,סגור תיבת תיבת טיוטות
+Close invoice details dialog,סגור את תיבת הדו-שיח של פרטי חשבונית
+Close invoice management,ניהול חשבוניות סגור
+Close offline invoices dialog,סגור תיבת הדו-שיח של חשבוניות לא מקוונות
+Close packing list dialog,סגור דו-שיח של רשימת אריזה
+Close returns dialog,סגור דו-שיח החזרות
+Close sales orders dialog,סגור תיבת הדו-שיח של הזמנות מכירה
+Close Scanner,סגור את הסורק
+Close scanner dialog,סגור תיבת הדו-שיח של הסורק
+Close Settings,סגור את ההגדרות
+Closing Amount,סכום סגירה
+Closing POS Shift,סגירת משמרת POS
+Closing Snapshot Available,תמונת מצב סגירה זמינה
+Code,קוד
+Code scanned successfully,הקוד נסרק בהצלחה
+COGS,גלגלי שיניים
+Collapse item details,כווץ את פרטי הפריט
+Collected,נאסף
+Cols,קולס
+Columns,עמודות
+commits,מתחייב
+Completed and active sales in this range,מכירות שהושלמו ופעילות בטווח זה
+Completed returns will appear here.,החזרות שהושלמו יופיעו כאן.
+Confirm,אשר
+Confirm Close,אשר סגירה
+Confirm Mobile Number,אשר את מספר הנייד
+Confirm PIN,אשר את ה-PIN
+Connect,התחבר
+Connect printer and manage certificate,חבר מדפסת ונהל אישור
+Connecting to QZ Tray...,מתחבר למגש QZ...
+Connection problem while submitting invoice,בעיית חיבור בעת הגשת חשבונית
+Connections:,חיבורים:
+Connectivity and cached prerequisite status were rechecked.,קישוריות וסטטוס תנאי מוקדם בקובץ השמור נבדקו מחדש.
+Continue Editing,המשך בעריכה
+Could not fetch latest balance from server,לא ניתן היה להביא את היתרה האחרונה מהשרת
+Count,לספור
+Country,מדינה
+Coupon,קופון
+Coupons,קופונים
+Cover,כיסוי
+CPU Cores:,ליבות מעבד:
+Create,צור
+Create and load a new prepaid card,צור וטען כרטיס משולם חדש
+Create and preload a new gift card,צור וטען מראש כרטיס מתנה חדש
+Create Bill,צור ביל
+Create Customer,צור לקוח
+Create New Item,צור פריט חדש
+Create or change your PIN,צור או שנה את ה-PIN שלך
+Create PIN,צור PIN
+Create POS Opening Shift,צור משמרת פתיחה לקופה
+Create Purchase Order,צור הזמנת רכש
+Create Return,צור החזרה
+Create return from invoice,צור החזר מחשבונית
+Create Supplier,צור ספק
+Credit and Output,אשראי ותפוקה
+Credit Note,הערת אשראי
+Credit Outstanding,אשראי יוצא מן הכלל
+Credit sales remaining to be collected,מכירות אשראי נותרו לאיסוף
+Critical,קריטי
+Currency,מטבע
+Current,נוכחי
+Current Event Loop Lag:,השהיית לולאת אירוע נוכחית:
+Current Month,חודש נוכחי
+Current PIN,PIN נוכחי
+Current Profile,פרופיל נוכחי
+Current redeemable value on the gift card,ערך מימוש נוכחי בכרטיס המתנה
+Current User,משתמש נוכחי
+Custom,מותאם אישית
+Custom Due Days,ימי פירעון מותאמים אישית
+Custom items per page,פריטים מותאמים אישית לכל עמוד
+Customer,לקוח
+Customer already selected,הלקוח כבר נבחר
+Customer Balance,יתרת לקוחות
+Customer balance unavailable offline,יתרת הלקוח לא זמינה במצב לא מקוון
+Customer created successfully.,הלקוח נוצר בהצלחה.
+Customer creation failed.,יצירת הלקוח נכשלה.
+Customer Details,פרטי לקוח
+Customer display channel is missing,ערוץ תצוגת הלקוח חסר
+Customer display was blocked. Please allow pop-ups for this site.,תצוגת הלקוח נחסמה. אנא אפשר חלונות קופצים עבור אתר זה.
+Customer group is required,נדרשת קבוצת לקוחות
+Customer is required to add payment,הלקוח נדרש להוסיף תשלום
+Customer Name is required,נדרש שם לקוח
+Customer not selected,לקוח לא נבחר
+Customer Report,דוח לקוח
+Customer saved offline,הלקוח נשמר במצב לא מקוון
+Customer Screen,מסך לקוח
+Customer territory is required,יש צורך בטריטוריה של לקוחות
+Customer updated successfully.,הלקוח עודכן בהצלחה.
+Customer-facing tools and printer setup.,כלים מול לקוחות והגדרת מדפסת.
+Customers,לקוחות
+Customers not found,לקוחות לא נמצאו
+Daily cashier actions without scrolling.,פעולות קופאיות יומיות ללא גלילה.
+Daily Sales,מכירות יומיות
+Daily Sales Summary,סיכום מכירות יומי
+Data loaded in form. Review and submit.,נתונים נטענים בטופס. בדוק ושלח.
+Database Health,בריאות מסד הנתונים
+Database health affects overall system speed and reliability.,תקינות מסד הנתונים משפיעה על מהירות ואמינות המערכת הכוללת.
+Database Info,מידע על מסד נתונים
+Date,תאריך
+Day ?,יום?
+days,ימים
+Day-wise (MTD),מבחינת יום (MTD)
+Day-wise Movement,תנועה חכמת יום
+Dead Stock,מלאי מת
+Dead Stock Items,פריטי מלאי מתים
+Decrease quantity,הקטנת כמות
+Default,ברירת מחדל
+Default:,ברירת מחדל:
+Delete,מחק
+Delete cancelled cash movement {0}?,למחוק את תנועת המזומנים שבוטלה {0}?
+Delete Draft,מחק טיוטה
+Delete draft invoice,מחק טיוטת חשבונית
+Delete draft invoice {0}?,למחוק את טיוטת החשבונית {0}?
+Delete Invoice,מחק חשבונית
+Delete offline invoice,מחק חשבונית לא מקוונת
+Delivered,נמסר
+Delivery Charges,דמי משלוח
+Delivery Information,מידע על משלוח
+Delivery Note {0} created,הערת משלוח {0} נוצרה
+Delivery note created,נוצרה תעודת משלוח
+Deployed Bundle:,חבילה פרוסה:
+Deposit,פיקדון
+Description,תיאור
+Detailed Supplier Breakdown,פירוט מפורט של ספקים
+Detecting formats:,זיהוי פורמטים:
+Device Memory:,זיכרון המכשיר:
+Difference,הבדל
+Difference (In Company Currency),הבדל (במטבע החברה)
+Disable offline mode first to recheck live connectivity.,השבת תחילה מצב לא מקוון כדי לבדוק מחדש קישוריות חיה.
+Disconnect,התנתק
+discount,הנחה
+Discount %,% הנחה
+Discount / Void / Return Report,דוח הנחה / בטל / החזרה
+Discount Amount,סכום הנחה
+Discount limited by POS Profile,ההנחה מוגבלת על ידי פרופיל POS
+Discounted Invoices,חשבוניות מוזלות
+Discounts,הנחות
+Dismiss,לבטל
+Download Certificate,הורד תעודה
+Draft,טיוטה
+Draft invoice deleted,טיוטת החשבונית נמחקה
+Draft source,מקור טיוטת
+Drafts,טיוטות
+Due {0},תאריך היעד {0}
+Due Date,תאריך יעד
+Duplicate,שכפול
+Edit customer,ערוך לקוח
+Edit discount amount,ערוך את סכום ההנחה
+Edit discount percentage,ערוך אחוז הנחה
+Edit Gift Application,ערוך יישום מתנה
+Edit item name,ערוך את שם הפריט
+Edit quantity,ערוך כמות
+Edit rate,ערוך שיעור
+Edit unit of measure,ערוך יחידת מידה
+Edited,ערוך
+Employee,עובד
+Enable background sync,אפשר סנכרון ברקע
+Enable Customer Display in POS Profile first.,הפעל תחילה תצוגת לקוחות בפרופיל קופה.
+Enter a PIN.,הזן PIN.
+Enter a valid grams value,הזן ערך גרם חוקי
+Enter new price list rate,הזן תעריף מחירון חדש
+Enter Quantity,הזן כמות
+Enter the cashier PIN to continue.,הזן את ה-PIN של הקופאי כדי להמשיך.
+Enter the current PIN first.,הזן תחילה את ה-PIN הנוכחי.
+"Enter the current PIN, then choose a new one.",הזן את ה-PIN הנוכחי ולאחר מכן בחר קוד חדש.
+Enter valid grams for scale barcode,הזן גרמים חוקיים לברקוד בקנה מידה
+Entries,ערכים
+Error accessing camera:,שגיאה בגישה למצלמה:
+Error calculating prices,שגיאה בחישוב מחירים
+Error fetching customer balance,שגיאה באחזור יתרת הלקוח
+Error in change calculations!,טעות בחישובי שינוי!
+Error Loading Data,שגיאה בטעינת נתונים
+Error loading invoice details,שגיאה בטעינת פרטי החשבונית
+Error processing invoice,שגיאה בעיבוד החשבונית
+Error processing payment,שגיאה בעיבוד התשלום
+Error searching invoices,שגיאה בחיפוש חשבוניות
+Error submitting invoice:,שגיאה בהגשת חשבונית:
+Error submitting invoice: {0},שגיאה בהגשת חשבונית: {0}
+Error submitting invoice: No response from server,שגיאה בהגשת חשבונית: אין תגובה מהשרת
+Error updating currency,שגיאה בעדכון המטבע
+Error updating item details,שגיאה בעדכון פרטי הפריט
+Est. Purchase,הערכה רכישה
+Est. Value,הערכה ערך
+Event-loop lag measures how busy your browser is. Lower is better.,השהיה של לולאת אירוע מודד עד כמה הדפדפן שלך עמוס. נמוך יותר עדיף.
+Every,כל
+Exchange Rate,שער חליפין
+Expand item details,הרחב את פרטי הפריט
+Expected Amount (In Company Currency),סכום צפוי (במטבע החברה)
+Expected Cash,מזומן צפוי
+Expected cash on hand grouped by currency,מזומנים צפויים ביד מקובצים לפי מטבע
+Expected vs Actual,צפוי לעומת בפועל
+Expense,הוצאה
+Expense Account (Optional Override),חשבון הוצאות (עקיפה אופציונלית)
+Expense account is required.,נדרש חשבון הוצאות.
+Expenses and deposits posted during this shift,הוצאות והפקדות שנרשמו במהלך משמרת זו
+Expired,פג תוקף
+Failed to auto reconcile payments.,התאמה אוטומטית של תשלומים נכשלה.
+Failed to cancel cash movement,ביטול תנועת המזומנים נכשל
+Failed to clear cache,ניקוי המטמון נכשל
+Failed to create item,יצירת הפריט נכשלה
+Failed to create supplier,יצירת הספק נכשלה
+Failed to delete cash movement,מחיקת תנועת המזומנים נכשלה
+Failed to generate scale barcode. Using item barcode only.,יצירת ברקוד בקנה מידה נכשל. שימוש בברקוד פריט בלבד.
+Failed to load cash movement context.,טעינת ההקשר של תנועת המזומנים נכשלה.
+Failed to load dashboard data.,טעינת נתוני לוח המחוונים נכשלה.
+Failed to reload invoice from server,הטעינה מחדש של החשבונית מהשרת נכשלה
+Failed to submit cash movement,הגשת תנועת המזומנים נכשלה
+Failed to sync offline cash movements,הסנכרון של תנועות מזומנים לא מקוונות נכשל
+Fast cashier actions for active shifts.,פעולות קופאיות מהירות למשמרות פעילות.
+Fast Moving Items,פריטים נעים במהירות
+Fees,עמלות
+Fetch the latest offline prerequisite updates,אחזר את העדכונים האחרונים של דרישות קדם לא מקוונות
+Find a sales order quickly and load it into the current sale.,מצא הזמנת מכירה במהירות וטען אותה למכירה הנוכחית.
+Fixing payment amounts for return invoice...,תיקון סכומי תשלום עבור חשבונית החזרה...
+Flash Off,פלאש כבוי
+Flash On,Flash On
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","עבור פריטי 'חבילת מוצרים', מחסן, מס' סידורי ומספר אצווה ייחשבו מהטבלה 'רשימת האריזה'. אם מחסן ומספר אצווה זהים עבור כל פריטי האריזה עבור כל פריט 'חבילת מוצרים', ניתן להזין ערכים אלו בטבלת הפריטים הראשית; הערכים יועתקו לטבלת 'רשימת אריזה'."
+Free,חינם
+Free Qty,כמות חינם
+Frequency,תדירות
+from,מ
+From Date,מתאריך
+Fulfillment Details,פרטי הגשמה
+Full Name,שם מלא
+Gain,רווח
+Generate a fresh prepaid card and start it with an opening balance.,צור כרטיס משולם חדש והתחל אותו עם יתרת פתיחה.
+Generate and install the certificate to allow fully silent printing without trust prompts.,הפק והתקן את האישור כדי לאפשר הדפסה שקטה לחלוטין ללא הנחיות אמון.
+Generate Certificate,צור תעודה
+Generated scale barcode: {0},ברקוד בקנה מידה שנוצר: {0}
+Get Payments,קבל תשלומים
+Gift Card,כרטיס מתנה
+Gift card amount must be greater than zero.,סכום כרטיס המתנה חייב להיות גדול מאפס.
+Gift Card Code,קוד כרטיס מתנה
+Gift card code is required for redemption,קוד כרטיס מתנה נדרש למימוש
+Gift card code is required.,קוד כרטיס מתנה נדרש.
+Gift card issued successfully.,כרטיס מתנה הונפק בהצלחה.
+Gift card loaded successfully.,כרטיס המתנה נטען בהצלחה.
+Gift Card Management,ניהול כרטיסי מתנה
+Gift card payment,תשלום בכרטיס מתנה
+Gift card redemption requires an online connection,מימוש כרטיס מתנה דורש חיבור מקוון
+Gift card topped up successfully.,כרטיס המתנה הוטען בהצלחה.
+Gift Cards,כרטיסי מתנה
+Go to Frappe Desk,לך ל-Frappe Desk
+Grand Total,סך הכל
+Gross Margin,רווח גולמי
+Gross Profit,רווח גולמי
+Gross Sales,מכירות ברוטו
+Group not found,הקבוצה לא נמצאה
+"Grouped controls for terminal, UI, and session settings.","פקדים מקובצים עבור הגדרות מסוף, ממשק משתמש והפעלה."
+Grouped totals for each payment method and currency,סיכומים מקובצים עבור כל אמצעי תשלום ומטבע
+Hide,הסתר
+Hide Gift Card,הסתר כרטיס מתנה
+Hide Non Essential Fields,הסתר שדות לא חיוניים
+Hide quantity decimals,הסתר כמות עשרונית
+Hide search tools,הסתר כלי חיפוש
+Hide zero rated items,הסתר פריטים בדירוג אפס
+High,גבוה
+History,היסטוריה
+Hourly (Today),מדי שעה (היום)
+How this section works,איך הקטע הזה עובד
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","אם נותרו נתונים מיושנים, פתח את 'הגדרות' > 'לא מקוון וסנכרון' והפעל שוב 'בנה מחדש נתונים לא מקוונים' תוך כדי חיבור לאינטרנט."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","אם האזהרה נמשכת, פתח את הגדרות > לא מקוון וסנכרון, ואז הפעל רענן נתונים לא מקוונים או בנה מחדש נתונים לא מקוונים."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,ייבא את האישור למגש QZ והפעל מחדש את מגש QZ בכל מכונת קופה.
+In,ב
+In stock: {0},במלאי: {0}
+Include Batch / Serial,כלול אצווה / סדרתי
+Include Price,כולל מחיר
+Increase quantity,הגדל כמות
+IndexedDB,IndexedDB
+Initial Amount,סכום ראשוני
+Initialize your shift with opening balances,אתחל את המשמרת שלך עם יתרות פתיחה
+Initializing application...,מאתחל את היישום...
+"Inspect cache, sync, and prerequisite status","בדוק את המטמון, הסנכרון והסטטוס הדרוש"
+Installed Applications,אפליקציות מותקנות
+Insufficient stock:\n{0},מלאי לא מספיק:\n{0}
+Invalid rate,תעריף לא חוקי
+Inventory Status Report,דוח מצב מלאי
+Invoice,חשבונית
+Invoice {0} is Submitted,החשבונית {0} הוגשה
+Invoice {0} processed successfully,חשבונית {0} עובדה בהצלחה
+Invoice {0} submission failed,הגשת החשבונית {0} נכשלה
+Invoice {0} was already submitted,חשבונית {0} כבר נשלחה
+Invoice Adjustments,התאמות חשבוניות
+Invoice Change,שינוי חשבונית
+Invoice Details,פרטי חשבונית
+Invoice is still in draft after background submission.,החשבונית עדיין בטיוטה לאחר הגשת הרקע.
+Invoice Items,פריטי חשבונית
+Invoice Management,ניהול חשבוניות
+Invoice Mgmt,ניהול חשבונית
+Invoice saved offline,החשבונית נשמרה במצב לא מקוון
+Invoice submission failed,הגשת החשבונית נכשלה
+Invoice Submitted,החשבונית הוגשה
+"Invoice value settled by loyalty points, not cash collection","ערך החשבונית נקבע לפי נקודות נאמנות, לא גביית מזומן"
+Invoices,חשבוניות
+Invoices already past due date,חשבוניות שכבר עבר תאריך פירעון
+Invoices saved as POS Invoices,חשבוניות נשמרו כחשבוניות קופה
+Invoices still carrying balances,חשבוניות עדיין נושאות יתרות
+Issue Mode,מצב בעיה
+Issue New Card,הנפק כרטיס חדש
+Issue Workflow,זרימת עבודה של בעיה
+"Issue, top up, and check","הנפק, הטען ובדוק"
+Item,פריט
+Item / Product Sales Report,דוח מכירת פריט/מוצר
+Item {0} added to invoice,פריט {0} נוסף לחשבונית
+Item '{0}' has no barcode,לפריט '{0}' אין ברקוד
+Item Code,קוד פריט
+Item created successfully,הפריט נוצר בהצלחה
+Item is out of stock,הפריט אזל מהמלאי
+Item Name,שם פריט
+Item not found,פריט לא נמצא
+Item order updated,הזמנת הפריט עודכנה
+Item Selector Settings,הגדרות בורר פריטים
+Items,פריטים
+Items added in POS will appear here automatically.,פריטים שנוספו בקופה יופיעו כאן באופן אוטומטי.
+Items added to invoice,פריטים נוספו לחשבונית
+Items per page,פריטים לכל עמוד
+Items Sold,פריטים שנמכרו
+Items/Invoice,פריטים/חשבונית
+Item-wise Profitability,רווחיות מבחינת פריט
+Journal Entry,ערך יומן
+json,json
+Just now,רק עכשיו
+Keep offline prerequisites healthy and recover stale data safely.,שמור על תנאים מוקדמים במצב לא מקוון בריאים ושחזור נתונים מיושנים בבטחה.
+Labels,תוויות
+"Language, theme, terminal tools, and session controls.","שפה, ערכת נושא, כלים מסוף ובקרות הפעלה."
+Last,אחרון
+Last 14 Days (Paid vs Pending),14 הימים האחרונים (בתשלום לעומת בהמתנה)
+Last 14 Days Activity,פעילות 14 הימים האחרונים
+Last 14 Days Gross Profit,רווח גולמי של 14 הימים האחרונים
+Last 14 Days Purchases,רכישות של 14 ימים אחרונים
+Last 14 Days Tax/Charges,מס/היטלים של 14 הימים האחרונים
+Last sync:,סנכרון אחרון:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},סנכרון אחרון: {0} | בסדר: {1} | נכשל: {2} | דילג: {3}
+Latest entries for current shift,ערכים אחרונים למשמרת הנוכחית
+Lead Time,זמן אספקה
+Limited,מוגבל
+lines,קווים
+List,רשימה
+Live Snapshot,תמונת מצב חיה
+Load a POS profile and cashier first.,טען תחילה פרופיל קופה וקופאית.
+Load More Invoices,טען עוד חשבוניות
+Load previously saved invoices,טען חשבוניות שנשמרו בעבר
+Load Sale,טען מכירה
+Load Sales Invoice,טען חשבונית מכירה
+Loading app data...,טוען נתוני אפליקציה...
+Loading customer database...,טוען מאגר לקוחות...
+Loading customers...,טוען לקוחות...
+Loading database stats...,טוען נתונים סטטיסטיים...
+Loading details...,טוען פרטים...
+Loading invoice history...,טוען היסטוריית חשבוניות...
+Loading items...,טוען פריטים...
+Loading product catalog...,טוען קטלוג מוצרים...
+Loading return invoices...,טוען חשבוניות החזרה...
+Loading server CPU/memory usage...,טוען שימוש במעבד/זיכרון בשרת...
+Loading suppliers...,טוען ספקים...
+Loading unpaid invoices...,טוען חשבוניות שלא שולמו...
+Loading view...,טוען תצוגה...
+Loading...,טוען...
+Local storage is unavailable. Switching to online-only mode.,אחסון מקומי אינו זמין. מעבר למצב מקוון בלבד.
+localStorage,localStorage
+Location Performance,ביצועי מיקום
+Locations,מיקומים
+Lock Screen,מסך נעילה
+Lookup Workflow,זרימת עבודה של חיפוש
+Loss,הפסד
+Low,נמוך
+Low Stock,מלאי נמוך
+Low Stock Alerts,התראות מלאי נמוך
+Low Stock Items,פריטים במלאי נמוך
+Low Stock Threshold,סף מלאי נמוך
+Low Stock Total,סך מלאי נמוך
+Lowest Margin,השוליים הנמוכים ביותר
+Low-frequency maintenance and system details.,תחזוקה בתדירות נמוכה ופרטי מערכת.
+Loyalty Redeemed,נאמנות נגאל
+Loyalty Redemption,גאולת נאמנות
+Make New Payment,בצע תשלום חדש
+Manage all,נהל הכל
+Manage and synchronize your offline transactions,נהל וסנכרן את העסקאות הלא מקוונות שלך
+Manage Cashier PIN,ניהול PIN של קופאית
+"Manage offline tools, terminal controls, and maintenance from one workspace.","נהל כלים לא מקוונים, בקרות מסוף ותחזוקה מסביבת עבודה אחת."
+manual,ידני
+"Manual codes, barcode scans, and QR scans work in the same field","קודים ידניים, סריקות ברקוד וסריקות QR פועלות באותו שדה"
+Manual offline mode is enabled,מצב לא מקוון ידני מופעל
+Margin,שוליים
+Maximum available quantity is {0}. Quantity adjusted to match stock.,הכמות המרבית הזמינה היא {0}. כמות מותאמת בהתאם למלאי.
+Maximum discount amount for this offer item is {0}.,סכום ההנחה המקסימלי עבור פריט מבצע זה הוא {0}.
+Maximum discount percentage for this offer item is {0}%.,אחוז ההנחה המקסימלי עבור פריט מבצע זה הוא {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,כמות ההצעה המקסימלית היא {0}. הכמות מותאמת למגבלה המותרת.
+Medium,בינוני
+Method-wise Collections,אוספים מבחינה שיטה
+Minimum allowed rate for this offer item is {0}.,התעריף המינימלי המותר עבור פריט הצעה זה הוא {0}.
+Minimum Qty,כמות מינימלית
+Mobile No,מספר נייד
+Mode,מצב
+Mode of Payment,אופן תשלום
+Month,חודש
+Month ?,חודש?
+Monthly Profit,רווח חודשי
+Monthly Sales,מכירות חודשיות
+Monthly Sales Summary,סיכום מכירות חודשי
+Month-wise,מבחינת חודש
+Most Active Cashiers,הקופאיות הפעילות ביותר
+Movement Type,סוג תנועה
+Movements,תנועות
+Multi Currency,ריבוי מטבעות
+N/A,לא
+Name,שם
+Negative Stock,מלאי שלילי
+Negative Stock Items,פריטי מלאי שליליים
+Negative values not allowed,ערכים שליליים אינם מותרים
+Net,נטו
+Net Qty,כמות נטו
+Net Sales,מכירות נטו
+Net Value,ערך נקי
+Never,לעולם לא
+New changes are ready to load,שינויים חדשים מוכנים לטעינה
+New Item,פריט חדש
+New Offer Available,הצעה חדשה זמינה
+New PIN,PIN חדש
+New rate,תעריף חדש
+Next unit of measure,יחידת המידה הבאה
+No attribute data found.,לא נמצאו נתוני מאפיינים.
+No Barcode,אין ברקוד
+No barcode found for UOM '{0}',לא נמצא ברקוד עבור UOM '{0}'
+No branch/location data found.,לא נמצאו נתוני סניף/מיקום.
+No brand data found.,לא נמצאו נתוני מותג.
+No cached gift card balance is available offline.,אין יתרת כרטיס מתנה במטמון זמינה במצב לא מקוון.
+No camera found on this device. Please ensure your device has a working camera.,לא נמצאה מצלמה במכשיר זה. אנא ודא שלמכשיר שלך יש מצלמה תקינה.
+No capability warnings recorded yet.,עדיין לא נרשמו אזהרות לגבי יכולת.
+No cash expected for this shift.,לא צפויים מזומנים למשמרת זו.
+No cash mode configured,לא הוגדר מצב מזומן
+No cash movement type is allowed for this POS Profile.,לא מותר סוג תנועת מזומנים עבור פרופיל קופה זה.
+No cashier PIN is set yet. Create one now.,עדיין לא הוגדר PIN של הקופאי. צור אחד עכשיו.
+No cashier profiles are available for this POS profile yet.,אין עדיין פרופילי קופאי זמינים עבור פרופיל קופה זה.
+No cashier-wise discount/void/return activity.,אין פעילות הנחה/בטלה/החזרה בקופאית.
+No category data found.,לא נמצאו נתוני קטגוריה.
+No category profitability data found.,לא נמצאו נתוני רווחיות בקטגוריה.
+No change returned recorded for this shift.,לא נרשם שינוי שהוחזר עבור משמרת זו.
+No change-allocation invoices match the current filters.,אין חשבוניות הקצאת שינוי תואמות למסננים הנוכחיים.
+No charge head breakdown found.,לא נמצא פירוט ראש טעינה.
+No Company Selected,לא נבחרה חברה
+No customer sales data found.,לא נמצאו נתוני מכירות של לקוחות.
+No day-wise discount/void/return trend.,אין מגמת הנחה/בטל/החזרה יומית.
+No day-wise payment data found.,לא נמצאו נתוני תשלום יומית.
+No day-wise profitability trend found.,לא נמצאה מגמת רווחיות יומית.
+No day-wise purchase data found.,לא נמצאו נתוני רכישה יומית.
+No day-wise sales trend found.,לא נמצאה מגמת מכירות יומית.
+No day-wise tax/charges trend found.,לא נמצאה מגמת מס/חיובים יומית.
+No dead stock items.,אין פריטי מלאי מתים.
+No due date,אין תאריך יעד
+No exact repair match found for this invoice,לא נמצאה התאמת תיקון מדויקת לחשבונית זו
+No hourly sales trend found for today.,לא נמצאה מגמת מכירות לפי שעה להיום.
+No invoice activity found.,לא נמצאה פעילות חשבונית.
+No invoices found,לא נמצאו חשבוניות
+No invoices found. Try different search criteria.,לא נמצאו חשבוניות. נסה קריטריוני חיפוש שונים.
+No invoices recorded for this shift.,לא נרשמו חשבוניות עבור משמרת זו.
+No item profitability data found.,לא נמצאו נתוני רווחיות של פריט.
+No item sales data found for this period.,לא נמצאו נתוני מכירת פריטים לתקופה זו.
+No items found,לא נמצאו פריטים
+No items in cart,אין פריטים בעגלה
+No items with barcodes to print,אין פריטים עם ברקודים להדפסה
+No location-wise top item data found.,לא נמצאו נתוני פריט עליון מבחינת מיקום.
+No low stock alerts right now.,אין התראות מלאי נמוך כרגע.
+No low stock items.,אין פריטים במלאי נמוך.
+No matching items in cart,אין פריטים תואמים בעגלה
+No month-wise sales trend found.,לא נמצאה מגמת מכירות חודשית.
+No negative stock items.,אין פריטי מלאי שליליים.
+No notifications yet,עדיין אין התראות
+No offline cash movement synced.,לא מסונכרנת תנועת מזומנים לא מקוונת.
+No offline invoices pending synchronization,אין חשבוניות לא מקוונות הממתינות לסנכרון
+No offline sync issues recorded yet.,עדיין לא נרשמו בעיות בסנכרון לא מקוון.
+No out-of-stock items.,אין פריטים שאזלו מהמלאי.
+No outstanding credit invoices for this shift.,אין חשבוניות זיכוי מתקיימות עבור משמרת זו.
+No payment collection data found.,לא נמצאו נתוני גביית תשלומים.
+No payment rows available on this invoice.,אין שורות תשלום זמינות בחשבונית זו.
+No payments registered for this shift.,לא נרשמו תשלומים למשמרת זו.
+No pending balances in this period.,אין יתרות תלויות בתקופה זו.
+No pending offline invoices,אין חשבוניות לא מקוונות ממתינות
+No Print Formats Found,לא נמצאו פורמטי הדפסה
+No profiles found for selected scope. Falling back to current profile failed.,לא נמצאו פרופילים עבור ההיקף שנבחר. החזרה לפרופיל הנוכחי נכשלה.
+No recent customer activity found.,לא נמצאה פעילות אחרונה של לקוחות.
+No recent stock entries found.,לא נמצאו רישומים אחרונים במלאי.
+No records found,לא נמצאו רשומות
+No reorder suggestions right now.,אין הצעות לסדר מחדש כרגע.
+No repeat customers in this period.,אין לקוחות חוזרים בתקופה זו.
+No response from server,אין תגובה מהשרת
+No return invoices found,לא נמצאו חשבוניות החזרה
+No return item trend found.,לא נמצאה מגמת פריט החזרה.
+No returnable items found for this invoice,לא נמצאו פריטים להחזרה עבור חשבונית זו
+No returns were processed in this shift.,לא טופלו החזרות במשמרת זו.
+No risk activity found.,לא נמצאה פעילות סיכון.
+No sales activity found for this period.,לא נמצאה פעילות מכירות לתקופה זו.
+No slow moving items.,אין פריטים נעים לאט.
+No staff sales activity found.,לא נמצאה פעילות מכירות של צוות.
+No stock movement for this period.,אין תנועת מניות לתקופה זו.
+No submitted cash movements in this shift.,לא הוגשו תנועות מזומנים במשמרת זו.
+No supplier purchases found in this month.,לא נמצאו רכישות של ספקים בחודש זה.
+No suppliers found for this period.,לא נמצאו ספקים לתקופה זו.
+No sync trigger has run yet in this session.,לא פעל עדיין טריגר סנכרון בהפעלה זו.
+No tax head breakdown found.,לא נמצא פירוט ראשי מס.
+No top items found for this location.,לא נמצאו פריטים מובילים עבור מיקום זה.
+No unpaid invoices,אין חשבוניות שלא שולמו
+No variant data found.,לא נמצאו נתוני וריאציות.
+No week-wise sales trend found.,לא נמצאה מגמת מכירות שבועית.
+No.,לא.
+Nobile Number,מספר נובל
+Not available,לא זמין
+Not checked,לא נבדק
+Not selected,לא נבחר
+Not Set,לא מוגדר
+Notifications,התראות
+Offer,הצעה
+Offer Applied,ההצעה הושמה
+Offer criteria exceeded,חריגה מהקריטריונים של ההצעה
+Offer Item,הצעה פריט
+Offer item unavailable,פריט המבצע אינו זמין
+Offer Removed,ההצעה הוסרה
+Offer UOM cannot be changed,לא ניתן לשנות את UOM ההצעה
+Offer?,להציע?
+Offers,הצעות
+Offline,לא מקוון
+Offline & Sync,לא מקוון וסנכרון
+Offline Capabilities,יכולות לא מקוונות
+Offline data status refreshed,רענון סטטוס הנתונים הלא מקוונים
+Offline diagnostics,אבחון לא מקוון
+Offline Invoices,חשבוניות לא מקוונות
+Offline invoices status,מצב חשבוניות לא מקוונות
+Offline invoices synced,חשבוניות לא מקוונות מסונכרנות
+Offline Queue: {0},תור לא מקוון: {0}
+Offline rebuild guidance,הדרכה לבנייה מחדש במצב לא מקוון
+Offline restore is unavailable for this session.,שחזור לא מקוון אינו זמין עבור הפעלה זו.
+Offline selling is available with degraded capabilities.,מכירה לא מקוונת זמינה עם יכולות מושפלות.
+Offline snapshot does not match the current POS state.,תמונת מצב לא מקוונת אינה תואמת את מצב הקופה הנוכחי.
+Offline Status,מצב לא מקוון
+"Offline, terminal, and system controls","בקרות לא מקוונות, מסוף ומערכת"
+OK,בסדר
+Online,באינטרנט
+Open actions menu,פתח את תפריט הפעולות
+Open balance to collect,יתרה פתוחה לאיסוף
+Open Customer Display,פתח את תצוגת הלקוח
+Open drawer,פתח את המגירה
+Open invoices,חשבוניות פתוחות
+Open Payments?,לפתוח תשלומים?
+Open POS home,פתח את בית הקופה
+Open this screen from POS Menu -> Open Customer Display.,פתח מסך זה מתפריט POS -> פתח תצוגת לקוחות.
+OpenCV image processing enabled - Enhanced barcode detection,עיבוד תמונה OpenCV מופעל - זיהוי ברקוד משופר
+OpenCV image processing unavailable on this device,עיבוד תמונה OpenCV אינו זמין במכשיר זה
+OpenCV Off,OpenCV כבוי
+OpenCV On,OpenCV פועל
+OpenCV processing disabled,עיבוד OpenCV מושבת
+Opening Amount,כמות פתיחה
+Opening Cash,פתיחת מזומן
+options,אפשרויות
+Order,סדר
+Original,מקורי
+Other,אחר
+Out,החוצה
+Out of Stock,אזל מהמלאי
+Out of Stock Items,פריטים אזלו במלאי
+Outstanding,יוצא מן הכלל
+Outstanding Credit by Currency,אשראי יוצא דופן לפי מטבע
+Overdue,באיחור
+Overpayment Change,שינוי בתשלום יתר
+Overpayment change deducted: {0},שינוי בתשלום יתר נוכה: {0}
+Packing List,רשימת אריזה
+Page Format,פורמט עמוד
+Page unavailable offline,הדף לא זמין במצב לא מקוון
+Paid,בתשלום
+Paid (orig):,בתשלום (מקור):
+Paid Amount,סכום שולם
+Paid change cannot be greater than total change!,שינוי בתשלום לא יכול להיות גדול מהשינוי הכולל!
+Paid:,בתשלום:
+Parent Item,פריט אב
+Partial,חלקי
+Partly Paid,בתשלום חלקית
+Party Account,חשבון צד
+Party Type,סוג מסיבה
+Pause terminal until next cashier,השהה את המסוף עד לקופאי הבא
+PAY,שלם
+Payment,תשלום
+Payment Account,חשבון תשלום
+Payment entries processed for Invoice {0},כניסות תשלום שעובדו עבור חשבונית {0}
+Payment Entry Type,סוג הזנת תשלום
+Payment History,היסטוריית תשלומים
+Payment ID,מזהה תשלום
+Payment Method Report,דוח אמצעי תשלום
+Payment Methods,דרכי תשלום
+Payment of {0} received successfully.,תשלום בסך {0} התקבל בהצלחה.
+Payment Progress,התקדמות התשלום
+Payment Reconciliation,תיאום תשלום
+Payment request status could not be retrieved. Please try again,לא ניתן היה לאחזר את סטטוס בקשת התשלום. אנא נסה שוב
+Payment Request took too long to respond. Please try requesting for payment again,לבקשת התשלום לקח זמן רב מדי להגיב. אנא נסה לבקש תשלום שוב
+Payment saved offline,התשלום נשמר במצב לא מקוון
+Payment State,מצב תשלום
+Payment Status,מצב תשלום
+Payment submitted but print function could not be executed. Payment name not found.,התשלום נשלח אך לא ניתן היה לבצע את פונקציית ההדפסה. שם התשלום לא נמצא.
+Payment submitted.,התשלום הוגש.
+Payment Summary,סיכום תשלום
+Payments,תשלומים
+Payments are not open. Do you want to open payments and submit?,התשלומים אינם פתוחים. האם אתה רוצה לפתוח תשלומים ולהגיש?
+Payments by Mode of Payment,תשלומים לפי אמצעי תשלום
+PDF,PDF
+Peak Hour,שעת שיא
+Peak Memory:,שיא זיכרון:
+Peak Server:,שרת שיא:
+Peak:,שיא:
+Pending,בהמתנה
+Pending Amount,כמות בהמתנה
+Pending count updated from {0} to {1},ספירה בהמתנה עודכנה מ-{0} ל-{1}
+Pending Exposure,בהמתנה לחשיפה
+Pending Invoices,חשבוניות ממתינות
+Pending Ratio,יחס בהמתנה
+Pending Sales,מכירות בהמתנה
+Pending sales: {0} | Cache usage: {1}%,מכירות בהמתנה: {0} | שימוש במטמון: {1}%
+Pending Sync,ממתין לסנכרון
+Pending: {0},בהמתנה: {0}
+Pending: {0} | Synced: {1} | Draft: {2},בהמתנה: {0} | מסונכרן: {1} | טיוטה: {2}
+Per Page,לכל עמוד
+Personal,אישי
+Personal preferences adjust the current cashier experience without changing the active POS route.,העדפות אישיות מתאימות את חוויית הקופאית הנוכחית מבלי לשנות את מסלול הקופה הפעיל.
+PIN confirmation does not match.,אישור ה-PIN אינו תואם.
+PIN must be 4 to 8 digits.,PIN חייב להיות בן 4 עד 8 ספרות.
+Please add at least one item.,הוסף לפחות פריט אחד.
+Please allow camera access to scan codes,אנא אפשר גישה למצלמה כדי לסרוק קודים
+Please enter payment amount,נא להזין את סכום התשלום
+Please fill all required fields,אנא מלא את כל השדות הנדרשים
+Please make a payment or select a payment,אנא בצע תשלום או בחר תשלום
+Please request phone payment or use another payment method,אנא בקש תשלום טלפוני או השתמש באמצעי תשלום אחר
+Please select a customer first,אנא בחר תחילה לקוח
+Please select a party,אנא בחר מסיבה
+Please select a party before reconciling.,אנא בחר צד לפני הפיוס.
+Please select a valid movement type.,אנא בחר סוג תנועה חוקי.
+Please select an invoice,אנא בחר חשבונית
+Please select company before reconciling.,אנא בחר חברה לפני ההתאמה.
+Please set the customer's mobile number,נא להגדיר את מספר הטלפון הנייד של הלקוח
+Please try again or enter the item manually.,אנא נסה שוב או הזן את הפריט באופן ידני.
+Please verify the barcode or check the item's availability.,נא לאמת את הברקוד או לבדוק את זמינות הפריט.
+Points,נקודות
+Popup blocked. Please allow popups.,חלון קופץ נחסם. אנא אפשר חלונות קופצים.
+POS,קופה
+POS controls and maintenance,בקרות ותחזוקה של קופה
+POS Expense is disabled for this POS Profile.,הוצאות קופה מושבתות עבור פרופיל קופה זה.
+POS is running with limited offline prerequisites.,POS פועל עם דרישות קדם לא מקוונות מוגבלות.
+POS Profile,פרופיל POS
+Position the QR code or barcode within the scanning area,מקם את קוד ה-QR או הברקוד בתוך אזור הסריקה
+Posting,פרסום
+Posting and Price List,פרסום ומחירון
+Posting Date,תאריך פרסום
+Preparing background sync,מכין סנכרון ברקע
+"Press OK to continue offline with a warning, or Cancel to retry.","לחץ על אישור כדי להמשיך במצב לא מקוון עם אזהרה, או על ביטול כדי לנסות שוב."
+Previous unit of measure,יחידת מידה קודמת
+Price List,מחירון
+Price List Rate,תעריף מחירון
+Price list rate updated locally only,תעריף המחירון מעודכן מקומית בלבד
+Pricing & Discounts,תמחור והנחות
+Pricing Rule,כלל תמחור
+Print,הדפס
+Print Draft,הדפס טיוטה
+Print Format (Invoice),פורמט הדפסה (חשבונית)
+Print Format (Order),פורמט הדפסה (הזמנה)
+Print invoice,הדפס חשבונית
+Print Purchase Invoice instead of PO,הדפס חשבונית רכישה במקום הזמנה
+Printer,מדפסת
+Processed returns impacting the shift totals,החזרות מעובדות המשפיעות על סכומי המשמרות
+Processing Payment,עיבוד תשלום
+Processing payment entries for Invoice {0},עיבוד כניסות תשלום עבור חשבונית {0}
+Profile,פרופיל
+Profiles,פרופילים
+Profit,רווח
+Profit: Invoice Item Estimate,רווח: אומדן פריט חשבונית
+Profit: Stock Ledger (COGS),רווח: פנקס מניות (COGS)
+Profitability Report,דוח רווחיות
+Prorated return discount,הנחה יחסית להחזרה
+Purchase Amount,סכום רכישה
+Purchase Invoices,חשבוניות רכישה
+Purchase Order created,הזמנת רכש נוצרה
+Qty,כמות
+Qualified,מוסמך
+Quantity,כמות
+Quantity exceeds available stock,הכמות עולה על המלאי הזמין
+Quick Actions,פעולות מהירות
+Quotation {0} is Submitted,הצעת המחיר {0} הוגשה
+Quotation submitted,הוגשה הצעת מחיר
+QZ Tray connected.,מגש QZ מחובר.
+QZ Tray is manually disconnected. Press Connect to enable it again.,מגש QZ מנותק באופן ידני. לחץ על התחבר כדי להפעיל אותו שוב.
+QZ Tray is not connected.,מגש QZ אינו מחובר.
+QZ Tray Setup,הגדרת מגש QZ
+Rate,דרג
+Rate adjusted to maximum allowed discount,התעריף מותאם להנחה המקסימלית המותרת
+Ready,מוכן
+Ready to resume,מוכן לחדש
+Ready!,מוכן!
+Real-time POS insights for retail operations.,תובנות קופה בזמן אמת לפעילות קמעונאית.
+Rebuild Offline Data,בנה מחדש נתונים לא מקוונים
+Receive,קבלו
+Receive now,קבלו עכשיו
+Received,התקבל
+Received:,התקבל:
+Recent Movement Entries,ערכים אחרונים בתנועה
+Recent updates about your invoices,עדכונים אחרונים לגבי החשבוניות שלך
+Recently Active Customers,לקוחות פעילים לאחרונה
+Rechecking connection,בודק מחדש את החיבור
+Reconcile payment methods and close shift,התאם אמצעי תשלום וסגור משמרת
+Reconciling Payments,תיאום תשלומים
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","התחבר מחדש ופתח את הדף הזה פעם אחת במצב מקוון, ואז רענון לא מקוון יוכל לשחזר אותו."
+Reconnect online to refresh cached offline data from the server.,התחבר מחדש באופן מקוון כדי לרענן נתונים לא מקוונים במטמון מהשרת.
+Recreate local offline prerequisites from scratch,צור מחדש דרישות מוקדמות לא מקוונות מקומיות מאפס
+Recv:,Recv:
+Redeem,פדה
+Redeem / Scan,מימוש / סריקה
+Redeem Amount,סכום פדיון
+Redeem Mode,מצב מימוש
+Redeemed Amount,סכום פדיון
+Redeemed credit cannot be greater than its total.,אשראי שנפדה לא יכול להיות גדול מהסך הכולל שלו.
+Redemption and Totals,פדיון וסיכומים
+Reference,הפניה
+Refresh,רענן
+Refresh Exchange Rate,רענון שער החליפין
+Refresh Offline Data,רענן נתונים לא מקוונים
+Refresh Printers,רענון מדפסות
+Refund,החזר
+Release Notes,הערות פרסום
+Reload,טען מחדש
+Reload customers,טען מחדש לקוחות
+Reload Items,טען מחדש פריטים
+Reload Now,טען מחדש עכשיו
+Reload to apply the latest changes. Your current session will be refreshed.,טען מחדש כדי להחיל את השינויים האחרונים. ההפעלה הנוכחית שלך תתרענן.
+Reload Workflow,טען מחדש את זרימת העבודה
+Remarks,הערות
+Remarks are required.,נדרשות הערות.
+Remove,הסר
+Remove barcode item,הסר פריט ברקוד
+Remove cached data and reload the POS app,הסר את הנתונים המאוחסנים במטמון וטען מחדש את אפליקציית הקופה
+Remove item,הסר פריט
+Remove Offer,הסר את ההצעה
+Reorder / Purchase Suggestions,הזמנות מחדש / הצעות רכישה
+Repair Candidate,מועמד לתיקון
+Repair Change Allocation,תיקון הקצאת שינוי
+Repair requires an online connection,התיקון דורש חיבור מקוון
+Repaired,תוקן
+Repairing change allocation,תיקון הקצאת שינויים
+Repeat Customers,לקוחות חוזרים
+Repeat Rate,קצב חוזר
+Request,בקשה
+Request ID: {0},מזהה בקשה: {0}
+Request Payment,בקש תשלום
+Requested route: {0},מסלול מבוקש: {0}
+Required columns cannot be hidden,לא ניתן להסתיר את העמודות הנדרשות
+Reset,אפס
+Reset item name,אפס את שם הפריט
+Reset to Default,אפס לברירת מחדל
+Resource Health,בריאות משאבים
+Restricted,מוגבל
+Restricted operational controls for supervisors only.,בקרות תפעוליות מוגבלות למפקחים בלבד.
+Retry,נסה שוב
+Retry route,נסה שוב את המסלול
+Return,חזרה
+Return Amount,סכום החזרה
+Return Count,ספירת החזרות
+Return items must have negative quantities,פריטים להחזרה חייבים להיות בכמויות שליליות
+Return total must be negative,סך ההחזר חייב להיות שלילי
+Return Valid Until,החזרה בתוקף עד
+Return window passed,חלף חלון החזרה
+Return without Invoice,החזר ללא חשבונית
+Returns,מחזיר
+Returns / Voids / Discounts,החזרות / חללים / הנחות
+Returns by Currency,החזרות לפי מטבע
+Revenue,הכנסה
+Review shift totals before submitting the closing entry,בדוק את סכומי המשמרות לפני הגשת ערך הסגירה
+Round Off,סיבוב
+Rows,שורות
+Rows:,שורות:
+Rule,כלל
+Sale,מכירה
+Sales,מכירות
+Sales Order {0} is Submitted,הזמנת מכירות {0} הוגשה
+Sales Person and Print,איש מכירות ודפוס
+Sales Person not found,איש מכירות לא נמצא
+Sales processed,עיבוד המכירות
+Sales Return,החזרת מכירות
+Sales Trend Report,דוח מגמת מכירות
+Save,שמור
+Save & Clear,שמור ונקה
+Save as POS Profile Default,שמור כברירת מחדל של פרופיל POS
+Save Settings,שמור הגדרות
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,שמור את המדפסת שנבחרה כברירת המחדל של פרופיל POS כך שהיא תוצג אוטומטית בהגדרה זו.
+Saved as draft because: {0},נשמר כטיוטה בגלל: {0}
+Saving...,שומר...
+Scale barcode detected. Quantity here is the number of labels to print.,זוהה ברקוד בקנה מידה. הכמות כאן היא מספר התוויות להדפסה.
+Scale barcode settings are not configured. Using item barcode only.,הגדרות ברקוד קנה מידה אינן מוגדרות. שימוש בברקוד פריט בלבד.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,חסר ברקוד תבנית קנה מידה עבור פריט/UOM זה. שימוש בברקוד פריט בלבד.
+Scan an existing card and top it up without leaving the payment flow.,סרוק כרטיס קיים והטען אותו מבלי לצאת מתזרים התשלום.
+Scan Error,שגיאת סריקה
+Scan or enter a gift card code to check balance or redeem.,סרוק או הזן קוד כרטיס מתנה כדי לבדוק יתרה או לממש.
+Scan or paste the card code below.,סרוק או הדבק את קוד הכרטיס למטה.
+Scan QR Code/Barcode,סרוק קוד QR/ברקוד
+Scan with camera,סרוק עם מצלמה
+Scan-First Flow,סריקה-תחילה זרימה
+Scanned Code:,קוד סרוק:
+Scanning for: {0},סורק אחר: {0}
+Scanning items,סריקת פריטים
+Scan-Ready,מוכן לסריקה
+Scope,היקף
+Scope: All Profiles,היקף: כל הפרופילים
+Scope: Current Profile,היקף: פרופיל נוכחי
+Scope: Specific Profile,היקף: פרופיל ספציפי
+Search,חפש
+Search Account,חפש חשבון
+Search an invoice and continue the return flow without extra steps.,חפש חשבונית והמשך את זרימת ההחזרה ללא שלבים נוספים.
+Search customer,חפש לקוח
+Search invoices or customers,חפש חשבוניות או לקוחות
+Search item,חיפוש פריט
+Search item / code,חפש פריט/קוד
+Search items or barcode,חפש פריטים או ברקוד
+Search Mpesa Payments,חפש ב-Mpesa Payments
+Search return invoices or customers,חפש חשבוניות חוזרות או לקוחות
+Search supplier,חפש ספק
+Search unpaid invoices or customers,חפש חשבוניות או לקוחות שלא שולמו
+Secure context (HTTPS or localhost) is required for camera access.,נדרש הקשר מאובטח (HTTPS או localhost) לגישה למצלמה.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,הקשר מאובטח (HTTPS) נדרש לגישה למצלמה. אנא השתמש ב-HTTPS כדי לגשת למצלמה.
+Select,בחר
+Select a cashier first.,תחילה בחר קופאית.
+Select a customer,בחר לקוח
+Select a customer to use coupon,בחר לקוח שישתמש בקופון
+Select a printer to use QZ silent printing.,בחר מדפסת לשימוש בהדפסה שקטה QZ.
+Select Batch,בחר אצווה
+Select Columns to Display,בחר עמודות לתצוגה
+Select items to sell,בחר פריטים למכירה
+Select Payment,בחר תשלום
+Select Payment Account,בחר חשבון תשלום
+Select printer,בחר מדפסת
+Select Return Invoice,בחר החזרת חשבונית
+Select S.O,בחר S.O
+Select Sales Orders,בחר הזמנות מכירה
+Select the cashier who is taking over this terminal.,בחר את הקופאית שמשתלטת על המסוף הזה.
+Selected,נבחר
+Selected movement type is not allowed by POS Profile.,סוג התנועה שנבחר אינו מותר על ידי פרופיל POS.
+Selected Payments,תשלומים נבחרים
+Sensitive actions kept away from quick taps.,פעולות רגישות התרחקו מהקשות מהירות.
+Serial,סדרתי
+Serial Numbers,מספרים סידוריים
+Server CPU Usage:,שימוש במעבד שרת:
+Server Health,בריאות השרת
+Server Memory Usage:,שימוש בזיכרון שרת:
+Server Metrics,מדדי שרת
+Server Uptime:,זמן פעילות שרת:
+Service Charges,דמי שירות
+Session,מושב
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,הגדר כל PIN של קופאי בטופס משתמש ושמור על חברי מסוף שהוקצו ב-POS User Profile.
+Settings,הגדרות
+Settings in this section update the POS workspace without changing the current route.,ההגדרות בסעיף זה מעדכנות את סביבת העבודה של הקופה מבלי לשנות את המסלול הנוכחי.
+Setup complete!,ההגדרה הושלמה!
+Share,שתף
+Shared terminal,מסוף משותף
+Shift Closed Snapshot,Shift Snapshot סגור
+Shift Overview,סקירה כללית של Shift
+Show,הצג
+Show cart on customer-facing screen,הצג את העגלה על מסך הפונה ללקוח
+Show last invoice rate,הצג את שיעור החשבונית האחרונה
+Show rate info,הצג מידע על תעריפים
+Show Repair Candidates,הצג מועמדים לתיקון
+Show search tools,הצג כלי חיפוש
+Show the active cart on a customer-facing screen,הצג את העגלה הפעילה על מסך הפונה ללקוח
+Showing {0}-{1} of {2},מציג {0}-{1} מתוך {2}
+Showing 0 of 0,מציג 0 מתוך 0
+Shows the distribution of invoices per currency,מציג את התפלגות החשבוניות לפי מטבע
+Sign out of the current POS session,צא מההפעלה הנוכחית של POS
+Size:,גודל:
+Skipped Payments,דילג על תשלומים
+Skipping items without barcodes,דילוג על פריטים ללא ברקודים
+Slow Moving,תנועה איטית
+Slow Moving Items,פריטים בתנועה איטית
+Slow Queries:,שאילתות איטיות:
+Sold,נמכר
+Source,מקור
+Source Cash Account (Optional Override),חשבון מקור מזומן (עקיפה אופציונלית)
+Source Ex. Rate:,מקור דוגמה תעריף:
+Source Rate:,שיעור מקור:
+Specific Profile,פרופיל ספציפי
+Split Invoices,פיצול חשבוניות
+Staff / Cashier Performance Report,דוח ביצועי צוות/קופאית
+Status,סטטוס
+Stock,מלאי
+Stock Information,מידע על מלאי
+Stock is lower than requested,המלאי נמוך מהמבוקש
+Stock is lower than requested:\n{0},המלאי נמוך מהמבוקש:\n{0}
+Stock Movement Report,דוח תנועת מניות
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,עדכון מלאי: ל-{0} יש {1} זמין. הוספת {2} תביא את המניה מתחת לאפס.
+Submit,לְהַגִישׁ
+Submit & Print,שלח והדפס
+Submit Deposit,הגשת הפקדה
+Submit Expense,שלח הוצאה
+Submitted,הוגש
+Submitted Cash Movements,תנועות מזומנים שהוגשו
+Submitted entries,ערכים שהוגשו
+Successfully scanned:,נסרק בהצלחה:
+Suggested,מוצע
+Suggested Qty,כמות מוצעת
+Supervisor Access,גישת מפקח
+Supervisor permissions unlock issuance and reloads,הרשאות מפקח פותחות הנפקה וטעינות מחדש
+Supervisor Tools,כלי מפקח
+Supplier,ספק
+Supplier and dates are required.,ספק ותאריכים נדרשים.
+Supplier Invoices,חשבוניות ספקים
+Supplier is required.,נדרש ספק.
+Supplier name is required,נדרש שם הספק
+Supplier Payments,תשלומי ספקים
+Supplier Purchase Summary,סיכום רכישת ספקים
+Suppliers,ספקים
+Suppliers not found,ספקים לא נמצאו
+Switch Camera,החלף מצלמה
+Switch Cashier,החלף קופאית
+Switch the POS appearance theme,החלף את נושא הופעת ה-POS
+Switched to:,עבר ל:
+Sync All Invoices,סנכרן את כל החשבוניות
+Sync Offline Cash Movements ({0}),סנכרן תנועות מזומנים לא מקוונות ({0})
+Sync Offline Sales,סנכרון מכירות לא מקוונות
+Synced {0} offline cash movement(s).,סונכרן {0} תנועות מזומנים לא מקוונות.
+Syncing items in background,מסנכרן פריטים ברקע
+System / Diagnostics,מערכת / אבחון
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","פעולות מערכת הן בקרות תחזוקה בתדירות נמוכה כגון מידע על אפליקציה, אבחון תמיכה ובקרות הפעלה."
+System Information,מידע מערכת
+System Status,מצב מערכת
+Tables:,טבלאות:
+Tap the button below to redeem a gift card during checkout.,הקש על הלחצן למטה כדי לממש כרטיס מתנה במהלך התשלום.
+Target,יעד
+Target Ex. Rate:,אקס היעד תעריף:
+Target Rate:,שיעור יעד:
+Tax,מס
+Tax / Charges Report,דוח מסים/היטלים
+Tax Heads,ראשי מס
+Taxable Amount,סכום חייב במס
+Tendered,במכרז
+Terminal,טרמינל
+Terminal & Devices,מסוף והתקנים
+Terminal locked,המסוף נעול
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","כלי מסוף משפיעים על עמדת התשלום הזו, על תצוגות מול לקוחות ובקרות עתידיות של מדפסת/מכשיר."
+Territory not found,הטריטוריה לא נמצאה
+The amount paid is not complete,הסכום ששולם אינו שלם
+The app stores data locally for offline use. This is called cache.,האפליקציה מאחסנת נתונים באופן מקומי לשימוש לא מקוון. זה נקרא מטמון.
+The invoice stayed in draft. Please review and submit it manually.,החשבונית נשארה בטיוטה. אנא עיין ושלח אותו באופן ידני.
+The maximum discount allowed is,ההנחה המקסימלית המותרת היא
+The quantity for {0} has been adjusted to the maximum available stock.,הכמות עבור {0} הותאמה למלאי המרבי הזמין.
+The system could not retrieve the item details. Please try again.,המערכת לא הצליחה לאחזר את פרטי הפריט. אנא נסה שוב.
+These invoices will be synced when connection is restored,חשבוניות אלו יסונכרנו כאשר החיבור ישוחזר
+This action now opens inside the settings workspace.,פעולה זו נפתחת כעת בתוך סביבת העבודה של ההגדרות.
+This coupon already used !,קופון זה כבר בשימוש!
+This invoice does not need change-allocation repair,חשבונית זו אינה זקוקה לתיקון שינוי-הקצאה
+This invoice is already repaired,חשבונית זו כבר תוקנה
+This is an item template. Please choose a variant.,זוהי תבנית פריט. אנא בחר גרסה.
+this item,פריט זה
+This POS page could not be opened offline because its code was not cached on this terminal yet.,לא ניתן היה לפתוח דף קופה זה במצב לא מקוון מכיוון שהקוד שלו עדיין לא נשמר במסוף זה.
+This Serial Number {0} has already been added!,המספר הסידורי הזה {0} כבר נוסף!
+Threshold,סף
+Time,זמן
+Tip: Clear cache regularly to free up space and keep the app fast.,טיפ: נקה את המטמון באופן קבוע כדי לפנות מקום ולשמור על האפליקציה מהירה.
+Tip: Close unused tabs or apps to reduce lag.,טיפ: סגור כרטיסיות או אפליקציות שאינן בשימוש כדי להפחית את ההשהיה.
+Tip: Monitor slow queries and table size for optimal performance.,טיפ: עקוב אחר שאילתות איטיות וגודל טבלה לביצועים מיטביים.
+To Be Paid,לקבל תשלום
+To Date,עד היום
+Today,היום
+Today Profit,היום רווח
+Today Sales,היום מכירות
+Toggle navigation drawer,החלף את מגירת הניווט
+Toggle Theme,החלף נושא
+Tools,כלים
+Tools for customer-facing screens and terminal-specific actions.,כלים למסכים מול לקוחות ולפעולות ספציפיות למסוף.
+Top Brand,מותג מוביל
+Top Category,קטגוריה עליונה
+Top Charge Head,ראש טעינה עליון
+Top Customers,לקוחות מובילים
+Top Discount,הנחה מובילה
+Top Items by Location,פריטים מובילים לפי מיקום
+Top Margin,שוליים עליונים
+Top Pending,למעלה בהמתנה
+Top Profit Item,פריט רווח מוביל
+Top Return Items,פריטי החזרה למעלה
+Top Sales by Cashier,מכירות מובילות על ידי קופאי
+Top Supplier,ספק מוביל
+Top Suppliers by Spend,ספקים מובילים לפי Spend
+Top Tables,טבלאות למעלה
+Top Tax Head,ראש המס העליון
+Top Up Amount,כמות הטעינה
+Top Up Card,כרטיס טעינה
+Top Up Mode,מצב טעינה
+Top Variant,גרסה עליונה
+Total,סך הכל
+Total Amount,סכום כולל
+Total Change,שינוי מוחלט
+Total Charges,סך חיובים
+Total In,סך הכל אין
+Total Invoices,סך החשבוניות
+Total Items,סך הכל פריטים
+Total Mpesa,סך הכל Mpesa
+Total Out,Total Out
+Total Payments,סך התשלומים
+Total Purchase,סך הרכישה
+Total Selected :,סך הכל נבחר:
+Total Size,גודל כולל
+Total Stock Qty,כמות מלאי כוללת
+Total:,סך הכל:
+Totals by Invoice Currency,סיכומים לפי מטבע החשבונית
+Track how much cash was handed back to customers,עקוב אחר כמה כסף מזומן הוחזר ללקוחות
+"Track recent sales, collect unpaid balances, and reopen saved work","עקוב אחר מכירות אחרונות, אסוף יתרות שטרם שולמו ופתח מחדש עבודה שנשמרה"
+Transaction ID,מזהה עסקה
+Transfer,העברה
+Try a different search term or clear the cart search.,נסה מונח חיפוש אחר או נקה את החיפוש בעגלה.
+Try adjusting your search or filters,נסה להתאים את החיפוש או המסננים שלך
+Try another source or refresh the list.,נסה מקור אחר או רענן את הרשימה.
+Try changing the date range or status filter.,נסה לשנות את טווח התאריכים או מסנן הסטטוס.
+Type,הקלד
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,אין אפשרות לגשת למצלמה אפילו עם הגדרות בסיסיות. אנא בדוק את הרשאות המצלמה שלך ואת תאימות המכשיר.
+Unable to add offer item {0}. Please refresh and try again.,לא ניתן להוסיף פריט הצעה {0}. אנא רענן ונסה שוב.
+Unable to add offer item. Please refresh and try again.,לא ניתן להוסיף פריט הצעה. אנא רענן ונסה שוב.
+Unable to add scanned item.,לא ניתן להוסיף פריט סרוק.
+Unable to create purchase order,לא ניתן ליצור הזמנת רכש
+Unable to delete draft invoice,לא ניתן למחוק טיוטת חשבונית
+Unable to fetch documents,לא ניתן להביא מסמכים
+Unable to fetch draft orders,לא ניתן להביא טיוטת הזמנות
+Unable to fetch invoice history,לא ניתן להביא היסטוריית חשבוניות
+Unable to fetch M-Pesa payments,לא ניתן להביא תשלומי M-Pesa
+Unable to fetch sales orders,לא ניתן להביא הזמנות מכירה
+Unable to fetch unpaid invoices,לא ניתן להביא חשבוניות שלא שולמו
+Unable to generate scale barcode,לא ניתן ליצור ברקוד בקנה מידה
+Unable to issue gift card.,לא ניתן להנפיק כרטיס מתנה.
+Unable to load cashier PIN status.,לא ניתן לטעון את סטטוס ה-PIN של הקופאי.
+Unable to load document,לא ניתן לטעון את המסמך
+Unable to load draft invoice,לא ניתן לטעון טיוטת חשבונית
+Unable to load gift card balance.,לא ניתן לטעון את יתרת כרטיס המתנה.
+Unable to load invoice details,לא ניתן לטעון את פרטי החשבונית
+Unable to load parked order,לא ניתן לטעון את ההזמנה החונה
+Unable to load the selected sales order,לא ניתן לטעון את הזמנת המכירה שנבחרה
+Unable to prepare document,לא ניתן להכין מסמך
+Unable to prepare return invoice,לא ניתן להכין חשבונית החזרה
+Unable to print draft invoice,לא ניתן להדפיס טיוטת חשבונית
+Unable to print submitted invoice,לא ניתן להדפיס חשבונית שנשלחה
+Unable to process document action,לא ניתן לעבד את פעולת המסמך
+Unable to repair change allocation,לא ניתן לתקן הקצאת שינוי
+Unable to save cashier PIN.,לא ניתן לשמור את ה-PIN של הקופאי.
+Unable to save the rate to the backend price list,לא ניתן לשמור את התעריף למחירון העורפי
+Unable to submit invoice,לא ניתן להגיש חשבונית
+Unable to submit the selected payment,לא ניתן להגיש את התשלום שנבחר
+Unable to top up gift card.,לא ניתן לטעון כרטיס מתנה.
+Unable to verify cashier PIN.,לא ניתן לאמת את ה-PIN של הקופאי.
+Unallocated,לא מוקצה
+Unallocated:,לא מוקצה:
+Unavailable,לא זמין
+Unknown,לא ידוע
+Unknown Item,פריט לא ידוע
+Unknown Warehouse,מחסן לא ידוע
+Unlock POS,פתח את הנעילה של POS
+Unpaid,ללא תשלום
+"Unselected payments stay unallocated first, then auto reconcile after submit.","תשלומים שלא נבחרו יישארו לא מוקצים תחילה, ולאחר מכן מתאימים אוטומטית לאחר השליחה."
+UOM,UOM
+UOM not found,UOM לא נמצא
+Update available,עדכון זמין
+Update Customer,עדכן את הלקוח
+Update PIN,עדכן את ה-PIN
+Update Price List Rate,עדכן את תעריף המחירון
+Updated,עודכן
+Updates and app info that stay out of the cashier flow.,עדכונים ומידע על אפליקציה שנשארים מחוץ לתזרים הקופאי.
+Updates automatically,מתעדכן אוטומטית
+Usage,שימוש
+Usage Stats,סטטיסטיקות שימוש
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,השתמש ב-PIN בן 4 עד 8 ספרות עבור החלפת קופאים ופתיחת המסוף.
+Use Cashier,השתמש בקופאי
+Use date range to search for older invoices,השתמש בטווח תאריכים כדי לחפש חשבוניות ישנות יותר
+"Use one field for manual code entry, barcode scans, or QR scans.","השתמש בשדה אחד להזנת קוד ידנית, סריקות ברקוד או סריקות QR."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","השתמש בזרימת עבודה אחת לבדיקות יתרה, הנפקה חדשה והעלאות מבלי לעזוב את הקופה."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","השתמש בסעיף זה כשנתונים מוקדמים בקובץ שמור זקוקים לרענון, בנייה מחדש או סקירת אבחון."
+Use Western numerals,השתמש בספרות מערביות
+Used:,בשימוש:
+Using basic camera settings due to device limitations,שימוש בהגדרות מצלמה בסיסיות עקב מגבלות המכשיר
+Using cached customer balance,שימוש ביתרת לקוח במטמון
+Valid until,תקף עד
+Variance %,שונות %
+Variants,גרסאות
+Variant-wise,מבחינת וריאציות
+Verify closing amounts for each payment method,אמת את סכומי הסגירה עבור כל אמצעי תשלום
+View all,הצג הכל
+View app information and current build details,הצג מידע על האפליקציה ופרטי הבנייה הנוכחיים
+View Data Diagnostics,הצג את אבחון הנתונים
+View Details,הצג פרטים
+View invoice details,צפה בפרטי החשבונית
+View notifications,הצג התראות
+View offline invoices,הצג חשבוניות לא מקוונות
+View restricted POS insights,הצג תובנות POS מוגבלות
+Void Amount,סכום בטל
+Void Count,ספירת ריק
+Voids,חללים
+Waiting for cart items,מחכה לפריטי עגלה
+Waiting for payment...,מחכה לתשלום...
+Walk-in Customer,לקוח נכנס
+Warehouse,מחסן
+Warning: High cache usage may affect performance.,אזהרה: שימוש גבוה במטמון עלול להשפיע על הביצועים.
+Warning: High lag may indicate heavy processing or browser slowness.,אזהרה: פיגור גבוה עשוי להצביע על עיבוד כבד או איטיות בדפדפן.
+Week ?,שבוע?
+Week-wise,מבחינה שבועית
+Weight (g),משקל (ג)
+Weight (grams),משקל (גרם)
+We'll let you know if an invoice fails to submit,אנו נודיע לך אם חשבונית לא תוגש
+Workflow,זרימת עבודה
+Write off amount cannot exceed the POS profile maximum of {0},סכום המחיקה לא יכול לחרוג מפרופיל הקופה המקסימלי של {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,סכום המחיקה חורג מהמגבלה המותרת ({0}). נא הוסף תשלום עבור הסכום הנותר.
+Yes,כן
+"Yes, Cancel sale","כן, בטל מכירה"
+"Yes, Close","כן, סגור"
+You are not allowed to print draft invoices,אינך רשאי להדפיס טיוטות חשבוניות
+You are offline. Add Payment will work again when the connection is restored.,אתה במצב לא מקוון. הוסף תשלום יפעל שוב כאשר החיבור ישוחזר.
+You have no notifications right now,אין לך התראות כרגע
+Your Cart,העגלה שלך

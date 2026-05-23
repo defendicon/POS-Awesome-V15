@@ -1,0 +1,1362 @@
+POS Awesome,พีเอส สุดเจ๋ง
+Fetch Items Directly from Server,ดึงรายการโดยตรงจากเซิร์ฟเวอร์
+Menu,เมนู
+Actions,การดำเนินการ
+Close Shift,ปิดกะ
+End current session,สิ้นสุดเซสชันปัจจุบัน
+Print Last Invoice,พิมพ์ใบแจ้งหนี้ล่าสุด
+Reprint previous transaction,พิมพ์ธุรกรรมก่อนหน้าอีกครั้ง
+Sync Offline Invoices,ซิงค์ใบแจ้งหนี้ออฟไลน์
+Upload pending transactions,อัปโหลดธุรกรรมที่รอดำเนินการ
+Go Online,ออนไลน์
+Go Offline,ออฟไลน์
+Disable offline mode,ปิดการใช้งานโหมดออฟไลน์
+Work without server connection,ทำงานโดยไม่ต้องเชื่อมต่อกับเซิร์ฟเวอร์
+Clear Cache,ล้างแคช
+Remove local data and refresh,ลบข้อมูลในเครื่องและรีเฟรช
+About,เกี่ยวกับ
+App information,ข้อมูลแอพ
+Language,ภาษา
+Change interface language,เปลี่ยนภาษาของอินเทอร์เฟซ
+Light Mode,โหมดแสง
+Dark Mode,โหมดมืด
+Switch theme appearance,สลับรูปลักษณ์ของธีม
+Logout,ออกจากระบบ
+Sign out of session,ออกจากระบบเซสชั่น
+Select Language,เลือกภาษา
+Choose your preferred language for the POS interface,เลือกภาษาที่คุณต้องการสำหรับอินเทอร์เฟซ POS
+Language will be changed to,ภาษาจะเปลี่ยนเป็น
+Cancel,ยกเลิก
+Change Language,เปลี่ยนภาษา
+Close,ปิด
+Cannot change language - same language selected,ไม่สามารถเปลี่ยนภาษาได้ - เลือกภาษาเดียวกัน
+Language changed successfully! Reloading...,เปลี่ยนภาษาเรียบร้อยแล้ว! กำลังโหลดซ้ำ...
+Failed to change language,ไม่สามารถเปลี่ยนภาษาได้
+Unknown error,ข้อผิดพลาดที่ไม่รู้จัก
+- Total Unallocated,- ยอดรวมที่ไม่ได้ปันส่วน
+* Required,* จำเป็น
+{0} (Qty: {1}),{0} (จำนวน: {1})
+{0} actions,การดำเนินการ {0}
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} มีเพียง {1} ในสต็อก คุณร้องขอ {2} ปรับปริมาณหรือเติมสต็อก
+{0} offline invoice{1} pending,{0} ใบแจ้งหนี้ออฟไลน์{1} รอดำเนินการ
+{0} offline invoice{1} saved as draft,{0} ใบแจ้งหนี้ออฟไลน์{1} บันทึกเป็นฉบับร่างแล้ว
+{0} offline invoice{1} synced,ซิงค์ {0} ใบแจ้งหนี้ออฟไลน์{1} แล้ว
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0}ที่ผ่านมา
+{0}h ago,{0}ชม.แล้ว
+{0}m ago,{0}ม.ที่แล้ว
+A POS supervisor is required for this action.,จำเป็นต้องมีผู้ดูแล POS สำหรับการดำเนินการนี้
+Access,การเข้าถึง
+Account,บัญชี
+Account is overdrawn,บัญชีถูกถอนออกมากเกินไป
+Acknowledge the error to resume scanning,รับทราบข้อผิดพลาดเพื่อทำการสแกนต่อ
+Acknowledge the error to resume scanning.,รับทราบข้อผิดพลาดเพื่อทำการสแกนต่อ
+Across,ข้าม
+Action,การดำเนินการ
+Active sale,การขายที่ใช้งานอยู่
+add,เพิ่ม
+Add items from the selector to start building this sale.,เพิ่มรายการจากตัวเลือกเพื่อเริ่มสร้างการลดราคานี้
+Add more value to an existing gift card,เพิ่มมูลค่าให้กับบัตรของขวัญที่มีอยู่
+Add New Address,เพิ่มที่อยู่ใหม่
+Add new customer,เพิ่มลูกค้าใหม่
+Add on New Line,เพิ่มในบรรทัดใหม่
+Add Payment,เพิ่มการชำระเงิน
+Add payment to invoice,เพิ่มการชำระเงินลงในใบแจ้งหนี้
+Add/Edit Coupon Conditions,เพิ่ม/แก้ไขเงื่อนไขคูปอง
+Additional Discount,ส่วนลดเพิ่มเติม
+Additional Discount %,ส่วนลดเพิ่มเติม %
+Address Line 1,ที่อยู่บรรทัดที่ 1
+Address not found,ไม่พบที่อยู่
+Adjust the quantity or enable negative stock to continue.,ปรับปริมาณหรือเปิดใช้งานสต็อคติดลบเพื่อดำเนินการต่อ
+Adjustment,การปรับ
+After returns,หลังจากกลับมา
+Against,ต่อต้าน
+Against Name,ต่อต้านชื่อ
+Age Bracket,วงเล็บอายุ
+All,ทั้งหมด
+All Caught Up!,ตามทันแล้ว!
+All invoices are synchronized,ใบแจ้งหนี้ทั้งหมดจะถูกซิงโครไนซ์
+All pending invoices are up to date,ใบแจ้งหนี้ที่รอดำเนินการทั้งหมดเป็นข้อมูลล่าสุด
+All Profiles,โปรไฟล์ทั้งหมด
+All Synchronized,ซิงโครไนซ์ทั้งหมด
+All visible invoices are fully settled.,ใบแจ้งหนี้ที่มองเห็นทั้งหมดได้รับการชำระครบถ้วนแล้ว
+All Warehouses,โกดังทั้งหมด
+Allowed UOM is {0},หน่วยที่อนุญาตคือ {0}
+Always fetch items from server (ignore local cache),ดึงรายการจากเซิร์ฟเวอร์เสมอ (ละเว้นแคชในเครื่อง)
+Amount,จำนวน
+Amount already received,จำนวนเงินที่ได้รับแล้ว
+Amount exceeds profile cash movement max amount.,จำนวนเงินเกินจำนวนเงินสูงสุดในการเคลื่อนย้ายเงินสดของโปรไฟล์
+Amount must be greater than zero.,จำนวนเงินต้องมากกว่าศูนย์
+Amount received from customer,จำนวนเงินที่ได้รับจากลูกค้า
+Appearance and user-level preferences for the current session.,ลักษณะที่ปรากฏและการตั้งค่าระดับผู้ใช้สำหรับเซสชันปัจจุบัน
+Applied,ประยุกต์แล้ว
+Apply,สมัคร
+Apply Gift Card,สมัครบัตรของขวัญ
+Apply Offer,สมัครข้อเสนอ
+Apply On,สมัครบน
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,ใช้เฉพาะจำนวนเงินที่คุณต้องการแลกในใบแจ้งหนี้นี้ ยอดคงเหลือจะยังคงอยู่ในบัตร
+Apply Redemption,ใช้การไถ่ถอน
+Applying,กำลังสมัคร
+Apps,แอพ
+Are you sure you want to close? All entered data will be lost.,คุณแน่ใจหรือไม่ว่าต้องการปิด? ข้อมูลที่ป้อนทั้งหมดจะหายไป
+Attributes (Size/Color),คุณสมบัติ (ขนาด/สี)
+Auto Allocate Payment Amount,จัดสรรจำนวนเงินที่ชำระอัตโนมัติ
+Auto Reconcile,ปรับยอดอัตโนมัติ
+Auto reconciliation completed after payment submit.,การกระทบยอดอัตโนมัติเสร็จสมบูรณ์หลังจากส่งการชำระเงิน
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,การกระทบยอดอัตโนมัติเสร็จสมบูรณ์ จัดสรรแล้ว: {0}{1} คงค้างอยู่: {0}{2}
+Available Actions,การดำเนินการที่มีอยู่
+Available QTY,จำนวนที่มีจำหน่าย
+Available:,มีจำหน่าย:
+Average Basket,ตะกร้าเฉลี่ย
+Average Bill,บิลเฉลี่ย
+Average Ticket,ตั๋วเฉลี่ย
+Avg Bill,บิลเฉลี่ย
+Avg Invoice,ใบแจ้งหนี้เฉลี่ย
+Avg Invoice Profit,กำไรตามใบแจ้งหนี้เฉลี่ย
+Avg Invoice Value,มูลค่าใบแจ้งหนี้เฉลี่ย
+Avg Purchase Frequency,ความถี่ในการซื้อเฉลี่ย
+Awesome,เจ๋งเลย
+Awesome Dashboard,แดชบอร์ดที่ยอดเยี่ยม
+Awesome Dashboard is disabled for the selected POS Profile.,Awesome Dashboard ถูกปิดใช้งานสำหรับโปรไฟล์ POS ที่เลือก
+Awesome Dashboard is unavailable for the selected scope.,Awesome Dashboard ไม่พร้อมใช้งานสำหรับขอบเขตที่เลือก
+Awesome Dashboard is visible only to POS supervisors.,แดชบอร์ดที่ยอดเยี่ยมจะปรากฏเฉพาะกับหัวหน้างาน POS เท่านั้น
+Back,กลับ
+Back Office Cash Account,บัญชีเงินสดหลังสำนักงาน
+Back Office Cash Account (Optional Override),บัญชีเงินสด Back Office (แทนที่หรือไม่ก็ได้)
+Back office cash account is required.,ต้องมีบัญชีเงินสดของ Back Office
+Back to {0},กลับไปที่ {0}
+Background processing did not finish in time.,การประมวลผลเบื้องหลังไม่เสร็จทันเวลา
+Background processing failed for Invoice {0}: {1},การประมวลผลเบื้องหลังล้มเหลวสำหรับใบแจ้งหนี้ {0}: {1}
+Background Submission Failed,การส่งพื้นหลังล้มเหลว
+Background sync interval (seconds),ช่วงเวลาการซิงค์พื้นหลัง (วินาที)
+Balance,ยอดคงเหลือ
+Balance will be updated when connection is restored,ยอดคงเหลือจะได้รับการอัปเดตเมื่อการเชื่อมต่อกลับคืนมา
+Balances still pending,ยอดคงเหลือยังค้างอยู่
+Barcode,บาร์โค้ด
+Barcode / QR Ready,บาร์โค้ด / QR พร้อม
+Barcode Label Printing,การพิมพ์ฉลากบาร์โค้ด
+Base Paid:,ฐานที่จ่าย:
+Base Recv:,รายรับพื้นฐาน:
+Base:,ฐาน:
+Basic Information,ข้อมูลพื้นฐาน
+Batch,แบทช์
+Batch Information,ข้อมูลแบทช์
+Before any return workflow,ก่อนขั้นตอนการส่งคืนใดๆ
+Before returns,ก่อนกลับ
+Best Day,วันที่ดีที่สุด
+Best Seller,ขายดีที่สุด
+Book expense or deposit from active shift.,บันทึกค่าใช้จ่ายหรือเงินฝากจากกะที่ใช้งานอยู่
+Branch / Location-wise Report,รายงานสาขา / สถานที่ตั้ง
+Brand-wise,ฉลาดเรื่องแบรนด์
+Breakdown,พังทลาย
+Browse,เรียกดู
+Build Time:,เวลาสร้าง:
+Built with Frappe,สร้างด้วยแฟรปเป้
+Bundle,มัด
+Buying Price,ราคาซื้อ
+Cache cleared successfully,ล้างแคชเรียบร้อยแล้ว
+Cache Usage,การใช้แคช
+cache used,แคชที่ใช้
+Calculating...,กำลังคำนวณ...
+Camera Access Required,จำเป็นต้องเข้าถึงกล้อง
+Camera access was aborted. Please try again.,การเข้าถึงกล้องถูกยกเลิก โปรดลองอีกครั้ง
+Camera constraints not supported by your device. Trying fallback settings...,อุปกรณ์ของคุณไม่รองรับข้อจำกัดของกล้อง กำลังลองใช้การตั้งค่าทางเลือก...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,กล้องไม่ว่างหรือถูกบล็อกโดยแอป/แท็บอื่น ปิดแอปกล้องอื่นๆ แล้วลองอีกครั้ง
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,การอนุญาตกล้องถูกปฏิเสธ โปรดอนุญาตให้เข้าถึงกล้องในการตั้งค่าเบราว์เซอร์ของคุณและรีเฟรชหน้า
+Camera scanner is locked until the current error is acknowledged,เครื่องสแกนกล้องถูกล็อคจนกว่าจะยอมรับข้อผิดพลาดปัจจุบัน
+Camera started but the video stream did not load in time. Please try again.,กล้องเริ่มทำงานแต่สตรีมวิดีโอไม่โหลดทันเวลา โปรดลองอีกครั้ง
+Cancel cash movement {0}?,ยกเลิกการเคลื่อนย้ายเงินสด {0}?
+Cancel Payment,ยกเลิกการชำระเงิน
+Cancel Sale,ยกเลิกการขาย
+Cancel Sale ?,ยกเลิกการขาย ?
+Cancelled,ยกเลิกแล้ว
+Cannot add an item with zero or negative quantity.,ไม่สามารถเพิ่มสินค้าที่มีปริมาณเป็นศูนย์หรือติดลบได้
+Cannot clear cache while offline,ไม่สามารถล้างแคชขณะออฟไลน์
+Cannot redeem customer credit more than invoice total,ไม่สามารถแลกเครดิตของลูกค้าเกินกว่ายอดรวมในใบแจ้งหนี้ได้
+Cannot redeem gift cards more than invoice total,ไม่สามารถแลกบัตรของขวัญเกินกว่ายอดรวมในใบแจ้งหนี้
+Cannot Save Offline Invoice:,ไม่สามารถบันทึกใบแจ้งหนี้ออฟไลน์ได้:
+Cannot Save Offline Payment:,ไม่สามารถบันทึกการชำระเงินออฟไลน์ได้:
+Card,การ์ด
+Card / Online,บัตร/ออนไลน์
+Card health after the last live lookup,ความสมบูรณ์ของการ์ดหลังจากการค้นหาสดครั้งล่าสุด
+Cards,การ์ด
+Cart,รถเข็น
+Cash,เงินสด
+Cash back to customers,คืนเงินให้กับลูกค้า
+Cash Collections,การเก็บเงิน
+Cash Deposit is disabled for this POS Profile.,การฝากเงินสดถูกปิดใช้งานสำหรับโปรไฟล์ POS นี้
+Cash Drawer Snapshot,ภาพรวมลิ้นชักเก็บเงิน
+Cash In Hand,เงินสดในมือ
+Cash Movement,การเคลื่อนย้ายเงินสด
+Cash movement cancelled,การเคลื่อนย้ายเงินสดถูกยกเลิก
+Cash movement deduction applied,ใช้การหักเงินเคลื่อนไหว
+Cash movement deleted,ลบการเคลื่อนไหวของเงินสดแล้ว
+Cash movement is disabled for this POS Profile.,การเคลื่อนย้ายเงินสดถูกปิดใช้งานสำหรับโปรไฟล์ POS นี้
+Cash Movement is disabled in current POS Profile.,การเคลื่อนย้ายเงินสดถูกปิดใช้งานในโปรไฟล์ POS ปัจจุบัน
+Cash movement saved offline,บันทึกการเคลื่อนไหวของเงินสดแบบออฟไลน์
+Cash movement submitted,ส่งการเคลื่อนย้ายเงินสดแล้ว
+Cash Movements,การเคลื่อนไหวของเงินสด
+Cash payment cannot be less than invoice total when partial payment is not allowed,การชำระด้วยเงินสดต้องไม่น้อยกว่ายอดรวมในใบแจ้งหนี้ เมื่อไม่อนุญาตให้ชำระเงินบางส่วน
+Cash returned after payment,เงินสดคืนหลังการชำระเงิน
+Cashier,แคชเชียร์
+Cashier Access,การเข้าถึงแคชเชียร์
+Cashier identity and appearance preferences.,เอกลักษณ์ของแคชเชียร์และการตั้งค่ารูปลักษณ์ภายนอก
+Cashier PIN,PIN แคชเชียร์
+Cashier PIN saved successfully.,บันทึก PIN แคชเชียร์เรียบร้อยแล้ว
+Cashiers,พนักงานเก็บเงิน
+Cashier-wise,แคชเชียร์ฉลาด
+Categories,หมวดหมู่
+Category,หมวดหมู่
+Category / Brand / Variant Report,หมวดหมู่ / แบรนด์ / รายงานตัวเลือกสินค้า
+Category-wise,หมวดหมู่ที่ชาญฉลาด
+Category-wise Margin,อัตรากำไรตามหมวดหมู่
+Certificate,ใบรับรอง
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,ใบรับรองหายไปหรือไม่น่าเชื่อถือ QZ อาจแสดงกล่องโต้ตอบการยืนยัน
+Certificate is trusted. Silent QZ printing is active.,ใบรับรองได้รับความไว้วางใจ การพิมพ์ Silent QZ ทำงานอยู่
+Change,เปลี่ยน
+Change allocation repaired,ซ่อมแซมการจัดสรรการเปลี่ยนแปลงแล้ว
+Change Price,เปลี่ยนแปลงราคา
+Change Return,เปลี่ยนคืน
+Change Returned,เปลี่ยนคืนแล้ว
+Change terminal cashier,เปลี่ยนเครื่องแคชเชียร์
+Charge Heads,หัวชาร์จ
+Charges,ค่าธรรมเนียม
+Charges not found,ไม่พบการเรียกเก็บเงิน
+Check Balance,ตรวจสอบยอดคงเหลือ
+Check balance for any card. Supervisors can issue and top up cards here.,ตรวจสอบยอดเงินคงเหลือของบัตรใด ๆ หัวหน้างานสามารถออกและเติมเงินบัตรได้ที่นี่
+Check balance only,ตรวจสอบยอดเงินคงเหลือเท่านั้น
+Check for new commits,ตรวจสอบการคอมมิตใหม่
+Check for Updates,ตรวจสอบการอัปเดต
+Check live balance before applying redemption,ตรวจสอบยอดคงเหลือสดก่อนที่จะใช้การแลก
+Check live balance before redemption,ตรวจสอบยอดคงเหลือสดก่อนแลก
+Checking...,กำลังตรวจสอบ...
+Cheque/Reference Date,เช็ค/วันที่อ้างอิง
+Cheque/Reference No,เช็ค/หมายเลขอ้างอิง
+Choose the cashier currently operating this terminal.,เลือกแคชเชียร์ที่ใช้งานเครื่องเทอร์มินัลนี้อยู่
+City,เมือง
+Clear,ชัดเจน
+Clear All,ล้างทั้งหมด
+Clear all barcode items,ล้างรายการบาร์โค้ดทั้งหมด
+Clear all purchase order items,ล้างรายการใบสั่งซื้อทั้งหมด
+Clear Search,ล้างการค้นหา
+Clearing local cache...,กำลังล้างแคชในเครื่อง...
+Click to refresh,คลิกเพื่อรีเฟรช
+Client CPU Lag:,CPU ล่าช้าของไคลเอ็นต์:
+Client Memory Usage:,การใช้หน่วยความจำไคลเอ็นต์:
+Client Metrics,ตัวชี้วัดลูกค้า
+Close about dialog,ปิดเกี่ยวกับกล่องโต้ตอบ
+Close cashier switcher,ปิดสวิตช์แคชเชียร์
+Close closing shift dialog,ปิดกล่องโต้ตอบกะปิด
+Close column selector,ปิดตัวเลือกคอลัมน์
+Close Dialog,ปิดกล่องโต้ตอบ
+Close drafts dialog,ปิดกล่องโต้ตอบฉบับร่าง
+Close invoice details dialog,ปิดกล่องโต้ตอบรายละเอียดใบแจ้งหนี้
+Close invoice management,ปิดการจัดการใบแจ้งหนี้
+Close offline invoices dialog,ปิดกล่องโต้ตอบใบแจ้งหนี้แบบออฟไลน์
+Close packing list dialog,ปิดกล่องโต้ตอบรายการบรรจุภัณฑ์
+Close returns dialog,ปิดกล่องโต้ตอบการคืนสินค้า
+Close sales orders dialog,ปิดกล่องโต้ตอบใบสั่งขาย
+Close Scanner,ปิดเครื่องสแกน
+Close scanner dialog,ปิดกล่องโต้ตอบเครื่องสแกน
+Close Settings,ปิดการตั้งค่า
+Closing Amount,จำนวนเงินปิด
+Closing POS Shift,ปิดกะ POS
+Closing Snapshot Available,มีภาพรวมการปิดบัญชี
+Code,รหัส
+Code scanned successfully,สแกนรหัสเรียบร้อยแล้ว
+COGS,ฟันเฟือง
+Collapse item details,ยุบรายละเอียดรายการ
+Collected,รวบรวม
+Cols,พ.อ
+Columns,คอลัมน์
+commits,กระทำ
+Completed and active sales in this range,ยอดขายที่เสร็จสมบูรณ์และใช้งานอยู่ในช่วงนี้
+Completed returns will appear here.,ผลตอบแทนที่เสร็จสมบูรณ์จะปรากฏที่นี่
+Confirm,ยืนยัน
+Confirm Close,ยืนยันการปิด
+Confirm Mobile Number,ยืนยันหมายเลขโทรศัพท์มือถือ
+Confirm PIN,ยืนยันรหัส PIN
+Connect,เชื่อมต่อ
+Connect printer and manage certificate,เชื่อมต่อเครื่องพิมพ์และจัดการใบรับรอง
+Connecting to QZ Tray...,กำลังเชื่อมต่อกับถาด QZ...
+Connection problem while submitting invoice,ปัญหาการเชื่อมต่อขณะส่งใบแจ้งหนี้
+Connections:,การเชื่อมต่อ:
+Connectivity and cached prerequisite status were rechecked.,มีการตรวจสอบการเชื่อมต่อและสถานะข้อกำหนดเบื้องต้นที่แคชไว้อีกครั้ง
+Continue Editing,แก้ไขต่อ
+Could not fetch latest balance from server,ไม่สามารถดึงยอดคงเหลือล่าสุดจากเซิร์ฟเวอร์
+Count,นับ
+Country,ประเทศ
+Coupon,คูปอง
+Coupons,คูปอง
+Cover,ปก
+CPU Cores:,แกนซีพียู:
+Create,สร้าง
+Create and load a new prepaid card,สร้างและโหลดบัตรเติมเงินใหม่
+Create and preload a new gift card,สร้างและโหลดบัตรของขวัญใหม่ล่วงหน้า
+Create Bill,สร้างบิล
+Create Customer,สร้างลูกค้า
+Create New Item,สร้างรายการใหม่
+Create or change your PIN,สร้างหรือเปลี่ยน PIN ของคุณ
+Create PIN,สร้างรหัส PIN
+Create POS Opening Shift,สร้างกะการเปิด POS
+Create Purchase Order,สร้างใบสั่งซื้อ
+Create Return,สร้างผลตอบแทน
+Create return from invoice,สร้างผลตอบแทนจากใบแจ้งหนี้
+Create Supplier,สร้างซัพพลายเออร์
+Credit and Output,เครดิตและผลผลิต
+Credit Note,ใบลดหนี้
+Credit Outstanding,เครดิตดีเด่น
+Credit sales remaining to be collected,ยอดขายเครดิตที่เหลือจะต้องรวบรวม
+Critical,สำคัญ
+Currency,สกุลเงิน
+Current,ปัจจุบัน
+Current Event Loop Lag:,ความล่าช้าของเหตุการณ์ปัจจุบัน:
+Current Month,เดือนปัจจุบัน
+Current PIN,รหัสประจำตัวปัจจุบัน
+Current Profile,โปรไฟล์ปัจจุบัน
+Current redeemable value on the gift card,มูลค่าแลกปัจจุบันบนบัตรของขวัญ
+Current User,ผู้ใช้ปัจจุบัน
+Custom,กำหนดเอง
+Custom Due Days,วันครบกำหนดที่กำหนดเอง
+Custom items per page,รายการที่กำหนดเองต่อหน้า
+Customer,ลูกค้า
+Customer already selected,ลูกค้าเลือกไว้แล้ว
+Customer Balance,ยอดคงเหลือของลูกค้า
+Customer balance unavailable offline,ยอดคงเหลือของลูกค้าไม่พร้อมใช้งานแบบออฟไลน์
+Customer created successfully.,สร้างลูกค้าเรียบร้อยแล้ว
+Customer creation failed.,การสร้างลูกค้าล้มเหลว
+Customer Details,รายละเอียดลูกค้า
+Customer display channel is missing,ช่องทางการแสดงลูกค้าหายไป
+Customer display was blocked. Please allow pop-ups for this site.,จอแสดงผลของลูกค้าถูกบล็อก โปรดอนุญาตป๊อปอัปสำหรับไซต์นี้
+Customer group is required,ต้องระบุกลุ่มลูกค้า
+Customer is required to add payment,ลูกค้าจะต้องเพิ่มการชำระเงิน
+Customer Name is required,ต้องระบุชื่อลูกค้า
+Customer not selected,ไม่ได้เลือกลูกค้า
+Customer Report,รายงานลูกค้า
+Customer saved offline,ลูกค้าบันทึกแบบออฟไลน์
+Customer Screen,หน้าจอลูกค้า
+Customer territory is required,ต้องระบุอาณาเขตของลูกค้า
+Customer updated successfully.,อัปเดตลูกค้าเรียบร้อยแล้ว
+Customer-facing tools and printer setup.,เครื่องมือพบปะกับลูกค้าและการตั้งค่าเครื่องพิมพ์
+Customers,ลูกค้า
+Customers not found,ไม่พบลูกค้า
+Daily cashier actions without scrolling.,การดำเนินการแคชเชียร์รายวันโดยไม่ต้องเลื่อน
+Daily Sales,ยอดขายรายวัน
+Daily Sales Summary,สรุปยอดขายรายวัน
+Data loaded in form. Review and submit.,โหลดข้อมูลในแบบฟอร์ม ตรวจสอบและส่ง
+Database Health,สุขภาพฐานข้อมูล
+Database health affects overall system speed and reliability.,ความสมบูรณ์ของฐานข้อมูลส่งผลต่อความเร็วและความน่าเชื่อถือของระบบโดยรวม
+Database Info,ข้อมูลฐานข้อมูล
+Date,วันที่
+Day ?,วัน ?
+days,วัน
+Day-wise (MTD),รายวัน (MTD)
+Day-wise Movement,การเคลื่อนไหวในแต่ละวัน
+Dead Stock,หุ้นที่ตายแล้ว
+Dead Stock Items,รายการสินค้าหมดสต็อก
+Decrease quantity,ลดปริมาณ
+Default,ค่าเริ่มต้น
+Default:,ค่าเริ่มต้น:
+Delete,ลบ
+Delete cancelled cash movement {0}?,ลบการเคลื่อนย้ายเงินสดที่ถูกยกเลิก {0}?
+Delete Draft,ลบฉบับร่าง
+Delete draft invoice,ลบใบแจ้งหนี้ฉบับร่าง
+Delete draft invoice {0}?,ลบใบแจ้งหนี้ฉบับร่าง {0} หรือไม่
+Delete Invoice,ลบใบแจ้งหนี้
+Delete offline invoice,ลบใบแจ้งหนี้แบบออฟไลน์
+Delivered,จัดส่งแล้ว
+Delivery Charges,ค่าจัดส่ง
+Delivery Information,ข้อมูลการจัดส่ง
+Delivery Note {0} created,สร้างบันทึกการจัดส่ง {0} แล้ว
+Delivery note created,สร้างบันทึกการจัดส่งแล้ว
+Deployed Bundle:,บันเดิลที่ปรับใช้:
+Deposit,เงินฝาก
+Description,คำอธิบาย
+Detailed Supplier Breakdown,รายละเอียดซัพพลายเออร์โดยละเอียด
+Detecting formats:,การตรวจจับรูปแบบ:
+Device Memory:,หน่วยความจำอุปกรณ์:
+Difference,ความแตกต่าง
+Difference (In Company Currency),ส่วนต่าง (ในสกุลเงินของบริษัท)
+Disable offline mode first to recheck live connectivity.,ปิดการใช้งานโหมดออฟไลน์ก่อนเพื่อตรวจสอบการเชื่อมต่อสดอีกครั้ง
+Disconnect,ตัดการเชื่อมต่อ
+discount,ส่วนลด
+Discount %,ส่วนลด %
+Discount / Void / Return Report,รายงานส่วนลด / เป็นโมฆะ / คืนสินค้า
+Discount Amount,จำนวนส่วนลด
+Discount limited by POS Profile,ส่วนลดถูกจำกัดโดยโปรไฟล์ POS
+Discounted Invoices,ใบแจ้งหนี้ที่ลดราคา
+Discounts,ส่วนลด
+Dismiss,ยกเลิก
+Download Certificate,ดาวน์โหลดใบรับรอง
+Draft,ร่าง
+Draft invoice deleted,ลบใบแจ้งหนี้ฉบับร่างแล้ว
+Draft source,แหล่งที่มาร่าง
+Drafts,ร่างจดหมาย
+Due {0},ครบกำหนด {0}
+Due Date,วันครบกำหนด
+Duplicate,ทำซ้ำ
+Edit customer,แก้ไขลูกค้า
+Edit discount amount,แก้ไขจำนวนส่วนลด
+Edit discount percentage,แก้ไขเปอร์เซ็นต์ส่วนลด
+Edit Gift Application,แก้ไขใบสมัครของขวัญ
+Edit item name,แก้ไขชื่อรายการ
+Edit quantity,แก้ไขปริมาณ
+Edit rate,แก้ไขอัตรา
+Edit unit of measure,แก้ไขหน่วยวัด
+Edited,แก้ไขแล้ว
+Employee,ลูกจ้าง
+Enable background sync,เปิดใช้งานการซิงค์พื้นหลัง
+Enable Customer Display in POS Profile first.,เปิดใช้งานการแสดงข้อมูลลูกค้าในโปรไฟล์ POS ก่อน
+Enter a PIN.,ป้อน PIN
+Enter a valid grams value,ป้อนค่ากรัมที่ถูกต้อง
+Enter new price list rate,ป้อนอัตรารายการราคาใหม่
+Enter Quantity,ป้อนจำนวน
+Enter the cashier PIN to continue.,ป้อน PIN แคชเชียร์เพื่อดำเนินการต่อ
+Enter the current PIN first.,ป้อน PIN ปัจจุบันก่อน
+"Enter the current PIN, then choose a new one.",ป้อน PIN ปัจจุบัน จากนั้นเลือกรหัสใหม่
+Enter valid grams for scale barcode,ป้อนกรัมที่ถูกต้องสำหรับบาร์โค้ดขนาด
+Entries,รายการ
+Error accessing camera:,เกิดข้อผิดพลาดในการเข้าถึงกล้อง:
+Error calculating prices,เกิดข้อผิดพลาดในการคำนวณราคา
+Error fetching customer balance,เกิดข้อผิดพลาดในการเรียกยอดคงเหลือของลูกค้า
+Error in change calculations!,เกิดข้อผิดพลาดในการคำนวณการเปลี่ยนแปลง!
+Error Loading Data,เกิดข้อผิดพลาดในการโหลดข้อมูล
+Error loading invoice details,เกิดข้อผิดพลาดในการโหลดรายละเอียดใบแจ้งหนี้
+Error processing invoice,เกิดข้อผิดพลาดในการประมวลผลใบแจ้งหนี้
+Error processing payment,เกิดข้อผิดพลาดในการประมวลผลการชำระเงิน
+Error searching invoices,เกิดข้อผิดพลาดในการค้นหาใบแจ้งหนี้
+Error submitting invoice:,เกิดข้อผิดพลาดในการส่งใบแจ้งหนี้:
+Error submitting invoice: {0},เกิดข้อผิดพลาดในการส่งใบแจ้งหนี้: {0}
+Error submitting invoice: No response from server,เกิดข้อผิดพลาดในการส่งใบแจ้งหนี้: ไม่มีการตอบกลับจากเซิร์ฟเวอร์
+Error updating currency,เกิดข้อผิดพลาดในการอัปเดตสกุลเงิน
+Error updating item details,เกิดข้อผิดพลาดในการอัปเดตรายละเอียดรายการ
+Est. Purchase,ประมาณ ซื้อ
+Est. Value,ประมาณ ความคุ้มค่า
+Event-loop lag measures how busy your browser is. Lower is better.,Event-loop lag วัดว่าเบราว์เซอร์ของคุณยุ่งแค่ไหน ต่ำกว่าจะดีกว่า
+Every,ทุกๆ
+Exchange Rate,อัตราแลกเปลี่ยน
+Expand item details,ขยายรายละเอียดรายการ
+Expected Amount (In Company Currency),จำนวนเงินที่คาดหวัง (ในสกุลเงินของบริษัท)
+Expected Cash,เงินสดที่คาดหวัง
+Expected cash on hand grouped by currency,เงินสดคงเหลือที่คาดหวังจัดกลุ่มตามสกุลเงิน
+Expected vs Actual,คาดหวังเทียบกับจริง
+Expense,ค่าใช้จ่าย
+Expense Account (Optional Override),บัญชีค่าใช้จ่าย (แทนที่ตัวเลือก)
+Expense account is required.,จำเป็นต้องมีบัญชีค่าใช้จ่าย
+Expenses and deposits posted during this shift,ค่าใช้จ่ายและเงินฝากที่โพสต์ระหว่างการเปลี่ยนแปลงนี้
+Expired,หมดอายุแล้ว
+Failed to auto reconcile payments.,ไม่สามารถกระทบยอดการชำระเงินอัตโนมัติ
+Failed to cancel cash movement,ไม่สามารถยกเลิกการเคลื่อนย้ายเงินสด
+Failed to clear cache,ไม่สามารถล้างแคชได้
+Failed to create item,ไม่สามารถสร้างรายการได้
+Failed to create supplier,ไม่สามารถสร้างซัพพลายเออร์
+Failed to delete cash movement,ไม่สามารถลบการเคลื่อนไหวของเงินสด
+Failed to generate scale barcode. Using item barcode only.,ไม่สามารถสร้างบาร์โค้ดขนาดได้ ใช้บาร์โค้ดรายการเท่านั้น
+Failed to load cash movement context.,ไม่สามารถโหลดบริบทการเคลื่อนย้ายเงินสด
+Failed to load dashboard data.,โหลดข้อมูลแดชบอร์ดไม่สำเร็จ
+Failed to reload invoice from server,โหลดใบแจ้งหนี้จากเซิร์ฟเวอร์ไม่สำเร็จ
+Failed to submit cash movement,ไม่สามารถส่งการเคลื่อนย้ายเงินสด
+Failed to sync offline cash movements,ไม่สามารถซิงค์การเคลื่อนไหวของเงินสดแบบออฟไลน์ได้
+Fast cashier actions for active shifts.,การดำเนินการแคชเชียร์ที่รวดเร็วสำหรับกะที่ใช้งานอยู่
+Fast Moving Items,สิ่งของที่เคลื่อนไหวเร็ว
+Fees,ค่าธรรมเนียม
+Fetch the latest offline prerequisite updates,รับการอัปเดตข้อกำหนดเบื้องต้นออฟไลน์ล่าสุด
+Find a sales order quickly and load it into the current sale.,ค้นหาใบสั่งขายอย่างรวดเร็วและโหลดลงในการขายปัจจุบัน
+Fixing payment amounts for return invoice...,แก้ไขจำนวนเงินที่ชำระสำหรับใบกำกับสินค้าคืน...
+Flash Off,ปิดแฟลช
+Flash On,เปิดแฟลช
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.",สำหรับสินค้า 'ชุดผลิตภัณฑ์' คลังสินค้า หมายเลขประจำเครื่อง และหมายเลขแบทช์จะได้รับการพิจารณาจากตาราง 'รายการบรรจุภัณฑ์' หากคลังสินค้าและหมายเลขชุดงานเหมือนกันสำหรับสินค้าบรรจุภัณฑ์ทั้งหมดสำหรับสินค้า 'ชุดผลิตภัณฑ์' ใดๆ ก็สามารถป้อนค่าเหล่านั้นในตารางสินค้าหลักได้ ค่าจะถูกคัดลอกไปยังตาราง 'รายการบรรจุภัณฑ์'
+Free,ฟรี
+Free Qty,จำนวนฟรี
+Frequency,ความถี่
+from,จาก
+From Date,จากวันที่
+Fulfillment Details,รายละเอียดการเติมเต็ม
+Full Name,ชื่อเต็ม
+Gain,ได้รับ
+Generate a fresh prepaid card and start it with an opening balance.,สร้างบัตรเติมเงินใหม่และเริ่มต้นด้วยยอดคงเหลือเปิดบัญชี
+Generate and install the certificate to allow fully silent printing without trust prompts.,สร้างและติดตั้งใบรับรองเพื่อให้สามารถพิมพ์โดยสมบูรณ์โดยไม่ต้องแจ้งว่าเชื่อถือ
+Generate Certificate,สร้างใบรับรอง
+Generated scale barcode: {0},บาร์โค้ดมาตราส่วนที่สร้างขึ้น: {0}
+Get Payments,รับการชำระเงิน
+Gift Card,บัตรของขวัญ
+Gift card amount must be greater than zero.,จำนวนบัตรของขวัญต้องมากกว่าศูนย์
+Gift Card Code,รหัสบัตรของขวัญ
+Gift card code is required for redemption,ต้องใช้รหัสบัตรของขวัญในการแลก
+Gift card code is required.,ต้องระบุรหัสบัตรของขวัญ
+Gift card issued successfully.,ออกบัตรของขวัญเรียบร้อยแล้ว
+Gift card loaded successfully.,โหลดบัตรของขวัญเรียบร้อยแล้ว
+Gift Card Management,การจัดการบัตรของขวัญ
+Gift card payment,การชำระเงินด้วยบัตรของขวัญ
+Gift card redemption requires an online connection,การแลกบัตรของขวัญต้องมีการเชื่อมต่อออนไลน์
+Gift card topped up successfully.,เติมเงินบัตรของขวัญเรียบร้อยแล้ว
+Gift Cards,บัตรของขวัญ
+Go to Frappe Desk,ไปที่โต๊ะ Frappe
+Grand Total,ผลรวมทั้งหมด
+Gross Margin,อัตรากำไรขั้นต้น
+Gross Profit,กำไรขั้นต้น
+Gross Sales,ยอดขายรวม
+Group not found,ไม่พบกลุ่ม
+"Grouped controls for terminal, UI, and session settings.",การควบคุมแบบกลุ่มสำหรับการตั้งค่าเทอร์มินัล UI และเซสชัน
+Grouped totals for each payment method and currency,ยอดรวมที่จัดกลุ่มสำหรับแต่ละวิธีการชำระเงินและสกุลเงิน
+Hide,ซ่อน
+Hide Gift Card,ซ่อนบัตรของขวัญ
+Hide Non Essential Fields,ซ่อนฟิลด์ที่ไม่สำคัญ
+Hide quantity decimals,ซ่อนทศนิยมของปริมาณ
+Hide search tools,ซ่อนเครื่องมือค้นหา
+Hide zero rated items,ซ่อนรายการที่ได้รับการจัดอันดับเป็นศูนย์
+High,สูง
+History,ประวัติศาสตร์
+Hourly (Today),รายชั่วโมง (วันนี้)
+How this section works,ส่วนนี้ทำงานอย่างไร
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.",หากข้อมูลเก่ายังคงอยู่ ให้เปิดการตั้งค่า > ออฟไลน์และซิงค์ และเรียกใช้สร้างข้อมูลออฟไลน์ใหม่อีกครั้งขณะออนไลน์
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.",หากคำเตือนยังคงอยู่ ให้เปิดการตั้งค่า > ออฟไลน์และการซิงค์ จากนั้นเรียกใช้รีเฟรชข้อมูลออฟไลน์หรือสร้างข้อมูลออฟไลน์ใหม่
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,นำเข้าใบรับรองลงใน QZ Tray และรีสตาร์ท QZ Tray บนเครื่อง POS แต่ละเครื่อง
+In,ใน
+In stock: {0},ในสต็อก: {0}
+Include Batch / Serial,รวมแบทช์/ซีเรียล
+Include Price,รวมราคา
+Increase quantity,เพิ่มปริมาณ
+IndexedDB,IndexedDB
+Initial Amount,จำนวนเงินเริ่มต้น
+Initialize your shift with opening balances,เริ่มต้นกะของคุณด้วยยอดดุลยกมา
+Initializing application...,กำลังเริ่มต้นแอปพลิเคชัน...
+"Inspect cache, sync, and prerequisite status",ตรวจสอบแคช การซิงค์ และสถานะข้อกำหนดเบื้องต้น
+Installed Applications,แอพพลิเคชั่นที่ติดตั้ง
+Insufficient stock:\n{0},สต็อกไม่เพียงพอ:\n{0}
+Invalid rate,อัตราไม่ถูกต้อง
+Inventory Status Report,รายงานสถานะสินค้าคงคลัง
+Invoice,ใบแจ้งหนี้
+Invoice {0} is Submitted,ส่งใบแจ้งหนี้ {0} แล้ว
+Invoice {0} processed successfully,ประมวลผลใบแจ้งหนี้ {0} สำเร็จแล้ว
+Invoice {0} submission failed,การส่งใบแจ้งหนี้ {0} ล้มเหลว
+Invoice {0} was already submitted,ส่งใบแจ้งหนี้ {0} แล้ว
+Invoice Adjustments,การปรับใบแจ้งหนี้
+Invoice Change,การเปลี่ยนแปลงใบแจ้งหนี้
+Invoice Details,รายละเอียดใบแจ้งหนี้
+Invoice is still in draft after background submission.,ใบแจ้งหนี้ยังคงอยู่ในแบบร่างหลังจากส่งเบื้องหลัง
+Invoice Items,รายการใบแจ้งหนี้
+Invoice Management,การจัดการใบแจ้งหนี้
+Invoice Mgmt,การจัดการใบแจ้งหนี้
+Invoice saved offline,ใบแจ้งหนี้ที่บันทึกไว้แบบออฟไลน์
+Invoice submission failed,การส่งใบแจ้งหนี้ล้มเหลว
+Invoice Submitted,ส่งใบแจ้งหนี้แล้ว
+"Invoice value settled by loyalty points, not cash collection",มูลค่าใบแจ้งหนี้จะชำระตามคะแนนสะสม ไม่ใช่การเรียกเก็บเงินเงินสด
+Invoices,ใบแจ้งหนี้
+Invoices already past due date,ใบแจ้งหนี้เลยวันครบกำหนดไปแล้ว
+Invoices saved as POS Invoices,ใบแจ้งหนี้ที่บันทึกเป็นใบแจ้งหนี้ POS
+Invoices still carrying balances,ใบแจ้งหนี้ยังคงมียอดคงเหลืออยู่
+Issue Mode,โหมดปัญหา
+Issue New Card,ออกบัตรใหม่
+Issue Workflow,ปัญหาเวิร์กโฟลว์
+"Issue, top up, and check",ออก เติมเงิน และตรวจสอบ
+Item,รายการ
+Item / Product Sales Report,รายงานการขายสินค้า/สินค้า
+Item {0} added to invoice,เพิ่มรายการ {0} ลงในใบแจ้งหนี้แล้ว
+Item '{0}' has no barcode,รายการ '{0}' ไม่มีบาร์โค้ด
+Item Code,รหัสสินค้า
+Item created successfully,สร้างรายการสำเร็จแล้ว
+Item is out of stock,สินค้าหมดสต็อก
+Item Name,ชื่อรายการ
+Item not found,ไม่พบรายการ
+Item order updated,อัพเดตรายการสั่งซื้อแล้ว
+Item Selector Settings,การตั้งค่าตัวเลือกรายการ
+Items,รายการ
+Items added in POS will appear here automatically.,รายการที่เพิ่มใน POS จะปรากฏที่นี่โดยอัตโนมัติ
+Items added to invoice,รายการที่เพิ่มลงในใบแจ้งหนี้
+Items per page,รายการต่อหน้า
+Items Sold,สินค้าที่ขายแล้ว
+Items/Invoice,รายการ/ใบแจ้งหนี้
+Item-wise Profitability,การทำกำไรตามรายการ
+Journal Entry,รายการวารสาร
+json,json.json
+Just now,แค่ตอนนี้
+Keep offline prerequisites healthy and recover stale data safely.,รักษาข้อกำหนดเบื้องต้นแบบออฟไลน์ให้เหมาะสมและกู้คืนข้อมูลเก่าได้อย่างปลอดภัย
+Labels,ป้ายกำกับ
+"Language, theme, terminal tools, and session controls.",ภาษา ธีม เครื่องมือเทอร์มินัล และการควบคุมเซสชัน
+Last,สุดท้าย
+Last 14 Days (Paid vs Pending),14 วันที่ผ่านมา (ชำระเงินแล้วและรอดำเนินการ)
+Last 14 Days Activity,กิจกรรม 14 วันที่ผ่านมา
+Last 14 Days Gross Profit,กำไรขั้นต้น 14 วันที่ผ่านมา
+Last 14 Days Purchases,การซื้อในช่วง 14 วันที่ผ่านมา
+Last 14 Days Tax/Charges,ภาษี/ค่าธรรมเนียม 14 วันล่าสุด
+Last sync:,การซิงค์ครั้งล่าสุด:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},ซิงค์ครั้งล่าสุด: {0} | ตกลง: {1} | ล้มเหลว: {2} | ข้าม: {3}
+Latest entries for current shift,รายการล่าสุดสำหรับการเปลี่ยนแปลงปัจจุบัน
+Lead Time,เวลานำ
+Limited,จำกัด
+lines,เส้น
+List,รายการ
+Live Snapshot,ภาพรวมสด
+Load a POS profile and cashier first.,โหลดโปรไฟล์ POS และแคชเชียร์ก่อน
+Load More Invoices,โหลดใบแจ้งหนี้เพิ่มเติม
+Load previously saved invoices,โหลดใบแจ้งหนี้ที่บันทึกไว้ก่อนหน้านี้
+Load Sale,โหลดขาย
+Load Sales Invoice,โหลดใบแจ้งหนี้การขาย
+Loading app data...,กำลังโหลดข้อมูลแอป...
+Loading customer database...,กำลังโหลดฐานข้อมูลลูกค้า...
+Loading customers...,กำลังโหลดลูกค้า...
+Loading database stats...,กำลังโหลดสถิติฐานข้อมูล...
+Loading details...,กำลังโหลดรายละเอียด...
+Loading invoice history...,กำลังโหลดประวัติใบแจ้งหนี้...
+Loading items...,กำลังโหลดรายการ...
+Loading product catalog...,กำลังโหลดแค็ตตาล็อกผลิตภัณฑ์...
+Loading return invoices...,กำลังโหลดใบแจ้งหนี้การคืนสินค้า...
+Loading server CPU/memory usage...,กำลังโหลดการใช้งาน CPU/หน่วยความจำของเซิร์ฟเวอร์...
+Loading suppliers...,กำลังโหลดซัพพลายเออร์...
+Loading unpaid invoices...,กำลังโหลดใบแจ้งหนี้ที่ยังไม่ได้ชำระ...
+Loading view...,กำลังโหลดมุมมอง...
+Loading...,กำลังโหลด...
+Local storage is unavailable. Switching to online-only mode.,ที่เก็บข้อมูลในเครื่องไม่พร้อมใช้งาน เปลี่ยนเป็นโหมดออนไลน์เท่านั้น
+localStorage,พื้นที่เก็บข้อมูลท้องถิ่น
+Location Performance,ประสิทธิภาพสถานที่ตั้ง
+Locations,สถานที่
+Lock Screen,ล็อคหน้าจอ
+Lookup Workflow,เวิร์กโฟลว์การค้นหา
+Loss,การสูญเสีย
+Low,ต่ำ
+Low Stock,สต๊อกต่ำ
+Low Stock Alerts,การแจ้งเตือนสต็อกต่ำ
+Low Stock Items,รายการสต็อกต่ำ
+Low Stock Threshold,เกณฑ์สต็อกต่ำ
+Low Stock Total,ยอดรวมสต็อคต่ำ
+Lowest Margin,อัตรากำไรขั้นต้นต่ำสุด
+Low-frequency maintenance and system details.,การบำรุงรักษาความถี่ต่ำและรายละเอียดระบบ
+Loyalty Redeemed,แลกความภักดีแล้ว
+Loyalty Redemption,การไถ่ถอนความภักดี
+Make New Payment,ชำระเงินใหม่
+Manage all,จัดการทั้งหมด
+Manage and synchronize your offline transactions,จัดการและซิงโครไนซ์ธุรกรรมออฟไลน์ของคุณ
+Manage Cashier PIN,จัดการ PIN แคชเชียร์
+"Manage offline tools, terminal controls, and maintenance from one workspace.",จัดการเครื่องมือออฟไลน์ การควบคุมเทอร์มินัล และการบำรุงรักษาจากพื้นที่ทำงานที่เดียว
+manual,คู่มือ
+"Manual codes, barcode scans, and QR scans work in the same field",รหัสแบบแมนนวล การสแกนบาร์โค้ด และการสแกน QR ทำงานในฟิลด์เดียวกัน
+Manual offline mode is enabled,เปิดใช้งานโหมดออฟไลน์ด้วยตนเองแล้ว
+Margin,ขอบ
+Maximum available quantity is {0}. Quantity adjusted to match stock.,ปริมาณสูงสุดที่มีอยู่คือ {0} ปรับจำนวนให้ตรงกับสต๊อก
+Maximum discount amount for this offer item is {0}.,จำนวนส่วนลดสูงสุดสำหรับรายการข้อเสนอนี้คือ {0}
+Maximum discount percentage for this offer item is {0}%.,เปอร์เซ็นต์ส่วนลดสูงสุดสำหรับรายการข้อเสนอนี้คือ {0}%
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,จำนวนข้อเสนอสูงสุดคือ {0} ปริมาณที่ปรับตามขีดจำกัดที่อนุญาต
+Medium,ปานกลาง
+Method-wise Collections,คอลเลกชันที่ชาญฉลาด
+Minimum allowed rate for this offer item is {0}.,อัตราขั้นต่ำที่อนุญาตสำหรับรายการข้อเสนอนี้คือ {0}
+Minimum Qty,จำนวนขั้นต่ำ
+Mobile No,เบอร์มือถือ
+Mode,โหมด
+Mode of Payment,โหมดการชำระเงิน
+Month,เดือน
+Month ?,เดือน ?
+Monthly Profit,กำไรรายเดือน
+Monthly Sales,ยอดขายรายเดือน
+Monthly Sales Summary,สรุปยอดขายประจำเดือน
+Month-wise,ต่อเดือน
+Most Active Cashiers,พนักงานเก็บเงินที่ใช้งานมากที่สุด
+Movement Type,ประเภทการเคลื่อนไหว
+Movements,การเคลื่อนไหว
+Multi Currency,หลายสกุลเงิน
+N/A,ไม่มี
+Name,ชื่อ
+Negative Stock,หุ้นติดลบ
+Negative Stock Items,รายการสต็อคติดลบ
+Negative values not allowed,ไม่อนุญาตให้ใช้ค่าลบ
+Net,สุทธิ
+Net Qty,ปริมาณสุทธิ
+Net Sales,ยอดขายสุทธิ
+Net Value,มูลค่าสุทธิ
+Never,ไม่เคย
+New changes are ready to load,การเปลี่ยนแปลงใหม่พร้อมที่จะโหลดแล้ว
+New Item,รายการใหม่
+New Offer Available,มีข้อเสนอใหม่
+New PIN,รหัส PIN ใหม่
+New rate,อัตราใหม่
+Next unit of measure,หน่วยวัดถัดไป
+No attribute data found.,ไม่พบข้อมูลแอตทริบิวต์
+No Barcode,ไม่มีบาร์โค้ด
+No barcode found for UOM '{0}',ไม่พบบาร์โค้ดสำหรับ UOM '{0}'
+No branch/location data found.,ไม่พบข้อมูลสาขา/ที่ตั้ง
+No brand data found.,ไม่พบข้อมูลแบรนด์
+No cached gift card balance is available offline.,ไม่มียอดคงเหลือในบัตรของขวัญที่เก็บไว้แบบออฟไลน์
+No camera found on this device. Please ensure your device has a working camera.,ไม่พบกล้องในอุปกรณ์นี้ โปรดตรวจสอบให้แน่ใจว่าอุปกรณ์ของคุณมีกล้องที่ใช้งานได้
+No capability warnings recorded yet.,ยังไม่มีการบันทึกคำเตือนเกี่ยวกับความสามารถ
+No cash expected for this shift.,คาดว่าจะไม่มีเงินสดสำหรับการเปลี่ยนแปลงนี้
+No cash mode configured,ไม่มีการกำหนดค่าโหมดเงินสด
+No cash movement type is allowed for this POS Profile.,ไม่อนุญาตให้ใช้ประเภทการเคลื่อนย้ายเงินสดสำหรับโปรไฟล์ POS นี้
+No cashier PIN is set yet. Create one now.,ยังไม่ได้ตั้ง PIN แคชเชียร์ สร้างหนึ่งตอนนี้
+No cashier profiles are available for this POS profile yet.,ยังไม่มีโปรไฟล์แคชเชียร์สำหรับโปรไฟล์ POS นี้
+No cashier-wise discount/void/return activity.,ไม่มีกิจกรรมส่วนลด/โมฆะ/คืนสินค้าตามแคชเชียร์
+No category data found.,ไม่พบข้อมูลหมวดหมู่
+No category profitability data found.,ไม่พบข้อมูลความสามารถในการทำกำไรของหมวดหมู่
+No change returned recorded for this shift.,ไม่มีการบันทึกการเปลี่ยนแปลงที่ส่งคืนสำหรับการเปลี่ยนแปลงนี้
+No change-allocation invoices match the current filters.,ไม่มีใบแจ้งหนี้การเปลี่ยนแปลงการจัดสรรที่ตรงกับตัวกรองปัจจุบัน
+No charge head breakdown found.,ไม่พบความเสียหายของหัวชาร์จ
+No Company Selected,ไม่มีบริษัทที่เลือก
+No customer sales data found.,ไม่พบข้อมูลการขายของลูกค้า
+No day-wise discount/void/return trend.,ไม่มีแนวโน้มส่วนลด/โมฆะ/คืนสินค้าตามวัน
+No day-wise payment data found.,ไม่พบข้อมูลการชำระเงินแบบรายวัน
+No day-wise profitability trend found.,ไม่พบแนวโน้มการทำกำไรแบบรายวัน
+No day-wise purchase data found.,ไม่พบข้อมูลการซื้อแบบรายวัน
+No day-wise sales trend found.,ไม่พบแนวโน้มการขายในแต่ละวัน
+No day-wise tax/charges trend found.,ไม่พบแนวโน้มภาษี/ค่าธรรมเนียมรายวัน
+No dead stock items.,ไม่มีสินค้าค้างสต็อก
+No due date,ไม่มีวันครบกำหนด
+No exact repair match found for this invoice,ไม่พบการจับคู่การซ่อมที่ตรงกันทุกประการสำหรับใบแจ้งหนี้นี้
+No hourly sales trend found for today.,ไม่พบแนวโน้มยอดขายรายชั่วโมงสำหรับวันนี้
+No invoice activity found.,ไม่พบกิจกรรมใบแจ้งหนี้
+No invoices found,ไม่พบใบแจ้งหนี้
+No invoices found. Try different search criteria.,ไม่พบใบแจ้งหนี้ ลองใช้เกณฑ์การค้นหาอื่น
+No invoices recorded for this shift.,ไม่มีการบันทึกใบแจ้งหนี้สำหรับการเปลี่ยนแปลงนี้
+No item profitability data found.,ไม่พบข้อมูลความสามารถในการทำกำไรของสินค้า
+No item sales data found for this period.,ไม่พบข้อมูลการขายสินค้าในช่วงเวลานี้
+No items found,ไม่พบรายการ
+No items in cart,ไม่มีสินค้าในรถเข็น
+No items with barcodes to print,ไม่มีรายการที่มีบาร์โค้ดที่จะพิมพ์
+No location-wise top item data found.,ไม่พบข้อมูลรายการยอดนิยมตามตำแหน่ง
+No low stock alerts right now.,ไม่มีการแจ้งเตือนสต็อกต่ำในขณะนี้
+No low stock items.,ไม่มีสินค้าในสต็อกต่ำ
+No matching items in cart,ไม่มีสินค้าที่ตรงกันในรถเข็น
+No month-wise sales trend found.,ไม่พบแนวโน้มยอดขายในแต่ละเดือน
+No negative stock items.,ไม่มีรายการสต็อกติดลบ
+No notifications yet,ยังไม่มีการแจ้งเตือน
+No offline cash movement synced.,ไม่มีการซิงค์การเคลื่อนไหวของเงินสดออฟไลน์
+No offline invoices pending synchronization,ไม่มีใบแจ้งหนี้ออฟไลน์ที่รอการซิงโครไนซ์
+No offline sync issues recorded yet.,ยังไม่มีการบันทึกปัญหาการซิงค์ออฟไลน์
+No out-of-stock items.,ไม่มีสินค้าหมดสต็อก
+No outstanding credit invoices for this shift.,ไม่มีใบแจ้งหนี้เครดิตคงค้างสำหรับการเปลี่ยนแปลงนี้
+No payment collection data found.,ไม่พบข้อมูลการเรียกเก็บเงิน
+No payment rows available on this invoice.,ไม่มีแถวการชำระเงินในใบแจ้งหนี้นี้
+No payments registered for this shift.,ไม่มีการชำระเงินที่ลงทะเบียนสำหรับการเปลี่ยนแปลงนี้
+No pending balances in this period.,ไม่มียอดค้างชำระในช่วงเวลานี้
+No pending offline invoices,ไม่มีใบแจ้งหนี้ออฟไลน์ที่รอดำเนินการ
+No Print Formats Found,ไม่พบรูปแบบการพิมพ์
+No profiles found for selected scope. Falling back to current profile failed.,ไม่พบโปรไฟล์สำหรับขอบเขตที่เลือก การถอยกลับไปยังโปรไฟล์ปัจจุบันล้มเหลว
+No recent customer activity found.,ไม่พบกิจกรรมของลูกค้าล่าสุด
+No recent stock entries found.,ไม่พบรายการสต็อกล่าสุด
+No records found,ไม่พบบันทึก
+No reorder suggestions right now.,ไม่มีข้อเสนอแนะในการสั่งซื้อใหม่ในขณะนี้
+No repeat customers in this period.,ช่วงนี้ไม่มีลูกค้าประจำ
+No response from server,ไม่มีการตอบกลับจากเซิร์ฟเวอร์
+No return invoices found,ไม่พบใบแจ้งหนี้การคืนสินค้า
+No return item trend found.,ไม่พบแนวโน้มการคืนสินค้า
+No returnable items found for this invoice,ไม่พบสินค้าที่สามารถคืนได้สำหรับใบแจ้งหนี้นี้
+No returns were processed in this shift.,ไม่มีการดำเนินการคืนสินค้าในการเปลี่ยนแปลงนี้
+No risk activity found.,ไม่พบกิจกรรมความเสี่ยง
+No sales activity found for this period.,ไม่พบกิจกรรมการขายในช่วงเวลานี้
+No slow moving items.,ไม่มีสิ่งของที่เคลื่อนไหวช้า
+No staff sales activity found.,ไม่พบกิจกรรมการขายพนักงาน
+No stock movement for this period.,ไม่มีการเคลื่อนไหวของหุ้นในช่วงนี้
+No submitted cash movements in this shift.,ไม่มีการส่งการเคลื่อนไหวของเงินสดในกะนี้
+No supplier purchases found in this month.,ไม่พบการซื้อของซัพพลายเออร์ในเดือนนี้
+No suppliers found for this period.,ไม่พบซัพพลายเออร์ในช่วงเวลานี้
+No sync trigger has run yet in this session.,ยังไม่มีทริกเกอร์การซิงค์ทำงานในเซสชันนี้
+No tax head breakdown found.,ไม่พบรายละเอียดส่วนหัวของภาษี
+No top items found for this location.,ไม่พบรายการยอดนิยมสำหรับสถานที่นี้
+No unpaid invoices,ไม่มีใบแจ้งหนี้ที่ค้างชำระ
+No variant data found.,ไม่พบข้อมูลรูปแบบต่างๆ
+No week-wise sales trend found.,ไม่พบแนวโน้มยอดขายรายสัปดาห์
+No.,ไม่
+Nobile Number,เบอร์โนบิเล่
+Not available,ไม่สามารถใช้ได้
+Not checked,ไม่ได้ตรวจสอบ
+Not selected,ไม่ได้เลือก
+Not Set,ไม่ได้ตั้งค่า
+Notifications,การแจ้งเตือน
+Offer,ข้อเสนอ
+Offer Applied,ใช้ข้อเสนอแล้ว
+Offer criteria exceeded,เกินเกณฑ์ข้อเสนอ
+Offer Item,เสนอรายการ
+Offer item unavailable,รายการข้อเสนอไม่พร้อมใช้งาน
+Offer Removed,ลบข้อเสนอแล้ว
+Offer UOM cannot be changed,หน่วยข้อเสนอไม่สามารถเปลี่ยนแปลงได้
+Offer?,ข้อเสนอ?
+Offers,ข้อเสนอ
+Offline,ออฟไลน์
+Offline & Sync,ออฟไลน์และซิงค์
+Offline Capabilities,ความสามารถแบบออฟไลน์
+Offline data status refreshed,รีเฟรชสถานะข้อมูลออฟไลน์แล้ว
+Offline diagnostics,การวินิจฉัยแบบออฟไลน์
+Offline Invoices,ใบแจ้งหนี้ออฟไลน์
+Offline invoices status,สถานะใบแจ้งหนี้แบบออฟไลน์
+Offline invoices synced,ซิงค์ใบแจ้งหนี้ออฟไลน์แล้ว
+Offline Queue: {0},คิวออฟไลน์: {0}
+Offline rebuild guidance,คำแนะนำการสร้างใหม่ออฟไลน์
+Offline restore is unavailable for this session.,การคืนค่าแบบออฟไลน์ไม่พร้อมใช้งานสำหรับเซสชันนี้
+Offline selling is available with degraded capabilities.,การขายแบบออฟไลน์สามารถใช้ได้พร้อมกับความสามารถที่ลดลง
+Offline snapshot does not match the current POS state.,สแนปช็อตแบบออฟไลน์ไม่ตรงกับสถานะ POS ปัจจุบัน
+Offline Status,สถานะออฟไลน์
+"Offline, terminal, and system controls",การควบคุมออฟไลน์ เทอร์มินัล และระบบ
+OK,ตกลง
+Online,ออนไลน์
+Open actions menu,เปิดเมนูการดำเนินการ
+Open balance to collect,เปิดยอดเพื่อสะสม
+Open Customer Display,เปิดหน้าจอลูกค้า
+Open drawer,เปิดลิ้นชัก
+Open invoices,เปิดใบแจ้งหนี้
+Open Payments?,เปิดการชำระเงิน?
+Open POS home,เปิด POS ที่บ้าน
+Open this screen from POS Menu -> Open Customer Display.,เปิดหน้าจอนี้จากเมนู POS -> เปิดหน้าจอลูกค้า
+OpenCV image processing enabled - Enhanced barcode detection,เปิดใช้งานการประมวลผลภาพ OpenCV - การตรวจจับบาร์โค้ดที่ได้รับการปรับปรุง
+OpenCV image processing unavailable on this device,การประมวลผลภาพ OpenCV ไม่พร้อมใช้งานบนอุปกรณ์นี้
+OpenCV Off,ปิด OpenCV
+OpenCV On,เปิด OpenCV
+OpenCV processing disabled,การประมวลผล OpenCV ถูกปิดใช้งาน
+Opening Amount,จำนวนการเปิด
+Opening Cash,เปิดเงินสด
+options,ตัวเลือก
+Order,สั่งซื้อ
+Original,ต้นฉบับ
+Other,อื่นๆ
+Out,ออก
+Out of Stock,สินค้าหมด
+Out of Stock Items,สินค้าหมดสต็อก
+Outstanding,โดดเด่น
+Outstanding Credit by Currency,เครดิตคงค้างตามสกุลเงิน
+Overdue,เกินกำหนด
+Overpayment Change,การเปลี่ยนแปลงการจ่ายเงินมากเกินไป
+Overpayment change deducted: {0},การเปลี่ยนแปลงการชำระเงินส่วนเกินถูกหัก: {0}
+Packing List,รายการบรรจุภัณฑ์
+Page Format,รูปแบบหน้า
+Page unavailable offline,เพจไม่พร้อมใช้งานแบบออฟไลน์
+Paid,ชำระเงินแล้ว
+Paid (orig):,ชำระเงินแล้ว (เดิม):
+Paid Amount,จำนวนเงินที่ชำระ
+Paid change cannot be greater than total change!,การเปลี่ยนแปลงที่ชำระเงินต้องไม่มากกว่าการเปลี่ยนแปลงทั้งหมด!
+Paid:,ชำระเงินแล้ว:
+Parent Item,รายการหลัก
+Partial,บางส่วน
+Partly Paid,ชำระแล้วบางส่วน
+Party Account,บัญชีพรรค
+Party Type,ประเภทปาร์ตี้
+Pause terminal until next cashier,หยุดเครื่องเทอร์มินัลชั่วคราวจนกว่าแคชเชียร์คนถัดไป
+PAY,จ่าย
+Payment,การชำระเงิน
+Payment Account,บัญชีการชำระเงิน
+Payment entries processed for Invoice {0},รายการการชำระเงินที่ประมวลผลสำหรับใบแจ้งหนี้ {0}
+Payment Entry Type,ประเภทรายการชำระเงิน
+Payment History,ประวัติการชำระเงิน
+Payment ID,รหัสการชำระเงิน
+Payment Method Report,รายงานวิธีการชำระเงิน
+Payment Methods,วิธีการชำระเงิน
+Payment of {0} received successfully.,ได้รับการชำระเงินจำนวน {0} เรียบร้อยแล้ว
+Payment Progress,ความคืบหน้าการชำระเงิน
+Payment Reconciliation,การกระทบยอดการชำระเงิน
+Payment request status could not be retrieved. Please try again,ไม่สามารถเรียกสถานะคำขอชำระเงินได้ โปรดลองอีกครั้ง
+Payment Request took too long to respond. Please try requesting for payment again,คำขอชำระเงินใช้เวลาตอบกลับนานเกินไป โปรดลองขอชำระเงินอีกครั้ง
+Payment saved offline,บันทึกการชำระเงินแบบออฟไลน์
+Payment State,สถานะการชำระเงิน
+Payment Status,สถานะการชำระเงิน
+Payment submitted but print function could not be executed. Payment name not found.,ส่งการชำระเงินแล้ว แต่ไม่สามารถดำเนินการฟังก์ชันการพิมพ์ได้ ไม่พบชื่อการชำระเงิน
+Payment submitted.,ส่งการชำระเงินแล้ว
+Payment Summary,สรุปการชำระเงิน
+Payments,การชำระเงิน
+Payments are not open. Do you want to open payments and submit?,การชำระเงินไม่เปิด คุณต้องการเปิดการชำระเงินและส่งหรือไม่?
+Payments by Mode of Payment,การชำระเงินตามรูปแบบการชำระเงิน
+PDF,PDF
+Peak Hour,ชั่วโมงเร่งด่วน
+Peak Memory:,หน่วยความจำสูงสุด:
+Peak Server:,เซิร์ฟเวอร์สูงสุด:
+Peak:,จุดสูงสุด:
+Pending,รอดำเนินการ
+Pending Amount,จำนวนเงินที่รอดำเนินการ
+Pending count updated from {0} to {1},จำนวนที่รอดำเนินการอัปเดตจาก {0} เป็น {1}
+Pending Exposure,รอการพิจารณารับสาร
+Pending Invoices,ใบแจ้งหนี้ที่รอดำเนินการ
+Pending Ratio,อัตราส่วนรอดำเนินการ
+Pending Sales,รอการขาย
+Pending sales: {0} | Cache usage: {1}%,รอการขาย: {0} | การใช้แคช: {1}%
+Pending Sync,รอการซิงค์
+Pending: {0},รอดำเนินการ: {0}
+Pending: {0} | Synced: {1} | Draft: {2},รอดำเนินการ: {0} | ซิงค์แล้ว: {1} | ร่าง: {2}
+Per Page,ต่อหน้า
+Personal,ส่วนตัว
+Personal preferences adjust the current cashier experience without changing the active POS route.,การกำหนดลักษณะส่วนบุคคลจะปรับประสบการณ์แคชเชียร์ปัจจุบันโดยไม่ต้องเปลี่ยนเส้นทาง POS ที่ใช้งานอยู่
+PIN confirmation does not match.,การยืนยัน PIN ไม่ตรงกัน
+PIN must be 4 to 8 digits.,PIN ต้องเป็นตัวเลข 4 ถึง 8 หลัก
+Please add at least one item.,โปรดเพิ่มอย่างน้อยหนึ่งรายการ
+Please allow camera access to scan codes,โปรดอนุญาตให้กล้องเข้าถึงรหัสสแกน
+Please enter payment amount,กรุณากรอกจำนวนเงินที่ชำระ
+Please fill all required fields,กรุณากรอกข้อมูลในช่องที่ต้องกรอกทั้งหมด
+Please make a payment or select a payment,กรุณาชำระเงินหรือเลือกการชำระเงิน
+Please request phone payment or use another payment method,กรุณาขอชำระเงินทางโทรศัพท์หรือใช้วิธีการชำระเงินอื่น
+Please select a customer first,กรุณาเลือกลูกค้าก่อน
+Please select a party,กรุณาเลือกปาร์ตี้
+Please select a party before reconciling.,โปรดเลือกฝ่ายก่อนที่จะกระทบยอด
+Please select a valid movement type.,โปรดเลือกประเภทการเคลื่อนไหวที่ถูกต้อง
+Please select an invoice,โปรดเลือกใบแจ้งหนี้
+Please select company before reconciling.,กรุณาเลือกบริษัทก่อนที่จะกระทบยอด
+Please set the customer's mobile number,กรุณากำหนดหมายเลขโทรศัพท์มือถือของลูกค้า
+Please try again or enter the item manually.,โปรดลองอีกครั้งหรือป้อนรายการด้วยตนเอง
+Please verify the barcode or check the item's availability.,กรุณาตรวจสอบบาร์โค้ดหรือตรวจสอบความพร้อมของสินค้า
+Points,คะแนน
+Popup blocked. Please allow popups.,ป๊อปอัปถูกบล็อก โปรดอนุญาตป๊อปอัป
+POS,จุดขาย
+POS controls and maintenance,การควบคุมและบำรุงรักษา POS
+POS Expense is disabled for this POS Profile.,ค่าใช้จ่าย POS ถูกปิดใช้งานสำหรับโปรไฟล์ POS นี้
+POS is running with limited offline prerequisites.,POS กำลังทำงานโดยมีข้อกำหนดเบื้องต้นแบบออฟไลน์ที่จำกัด
+POS Profile,โปรไฟล์ POS
+Position the QR code or barcode within the scanning area,วางตำแหน่งรหัส QR หรือบาร์โค้ดภายในพื้นที่การสแกน
+Posting,กำลังโพสต์
+Posting and Price List,การโพสต์และรายการราคา
+Posting Date,วันที่โพสต์
+Preparing background sync,กำลังเตรียมการซิงค์พื้นหลัง
+"Press OK to continue offline with a warning, or Cancel to retry.",กดตกลงเพื่อดำเนินการต่อแบบออฟไลน์โดยมีคำเตือน หรือยกเลิกเพื่อลองอีกครั้ง
+Previous unit of measure,หน่วยวัดก่อนหน้า
+Price List,รายการราคา
+Price List Rate,อัตรารายการราคา
+Price list rate updated locally only,อัตรารายการราคาอัปเดตเฉพาะในพื้นที่เท่านั้น
+Pricing & Discounts,ราคาและส่วนลด
+Pricing Rule,กฎการกำหนดราคา
+Print,พิมพ์
+Print Draft,พิมพ์ร่าง
+Print Format (Invoice),รูปแบบการพิมพ์ (ใบแจ้งหนี้)
+Print Format (Order),รูปแบบการพิมพ์ (สั่งซื้อ)
+Print invoice,พิมพ์ใบแจ้งหนี้
+Print Purchase Invoice instead of PO,พิมพ์ใบกำกับสินค้าแทน PO
+Printer,เครื่องพิมพ์
+Processed returns impacting the shift totals,ผลตอบแทนที่ได้รับการประมวลผลส่งผลต่อผลรวมการเปลี่ยนแปลง
+Processing Payment,กำลังประมวลผลการชำระเงิน
+Processing payment entries for Invoice {0},กำลังประมวลผลรายการการชำระเงินสำหรับใบแจ้งหนี้ {0}
+Profile,โปรไฟล์
+Profiles,โปรไฟล์
+Profit,กำไร
+Profit: Invoice Item Estimate,กำไร: การประมาณรายการในใบแจ้งหนี้
+Profit: Stock Ledger (COGS),กำไร: บัญชีแยกประเภทหุ้น (COGS)
+Profitability Report,รายงานความสามารถในการทำกำไร
+Prorated return discount,ส่วนลดการคืนสินค้าตามสัดส่วน
+Purchase Amount,จำนวนการซื้อ
+Purchase Invoices,ซื้อใบแจ้งหนี้
+Purchase Order created,สร้างใบสั่งซื้อแล้ว
+Qty,จำนวน
+Qualified,ผ่านการรับรอง
+Quantity,ปริมาณ
+Quantity exceeds available stock,ปริมาณเกินสต็อกที่มีอยู่
+Quick Actions,การดำเนินการด่วน
+Quotation {0} is Submitted,ส่งใบเสนอราคา {0} แล้ว
+Quotation submitted,ส่งใบเสนอราคาแล้ว
+QZ Tray connected.,เชื่อมต่อถาด QZ แล้ว
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ Tray ถูกยกเลิกการเชื่อมต่อด้วยตนเอง กดเชื่อมต่อเพื่อเปิดใช้งานอีกครั้ง
+QZ Tray is not connected.,ไม่ได้เชื่อมต่อถาด QZ
+QZ Tray Setup,การตั้งค่าถาด QZ
+Rate,อัตรา
+Rate adjusted to maximum allowed discount,อัตราปรับเป็นส่วนลดสูงสุดที่อนุญาต
+Ready,พร้อม
+Ready to resume,พร้อมดำเนินการต่อ
+Ready!,พร้อม!
+Real-time POS insights for retail operations.,ข้อมูลเชิงลึก POS แบบเรียลไทม์สำหรับการดำเนินธุรกิจค้าปลีก
+Rebuild Offline Data,สร้างข้อมูลออฟไลน์ขึ้นมาใหม่
+Receive,รับ
+Receive now,รับเลย
+Received,ได้รับแล้ว
+Received:,ได้รับ:
+Recent Movement Entries,รายการเคลื่อนไหวล่าสุด
+Recent updates about your invoices,การอัปเดตล่าสุดเกี่ยวกับใบแจ้งหนี้ของคุณ
+Recently Active Customers,ลูกค้าที่ใช้งานล่าสุด
+Rechecking connection,กำลังตรวจสอบการเชื่อมต่ออีกครั้ง
+Reconcile payment methods and close shift,กระทบยอดวิธีการชำระเงินและปิดกะ
+Reconciling Payments,การกระทบยอดการชำระเงิน
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.",เชื่อมต่อใหม่และเปิดหน้านี้อีกครั้งในขณะที่ออนไลน์ จากนั้นการรีเฟรชแบบออฟไลน์จะสามารถกู้คืนได้
+Reconnect online to refresh cached offline data from the server.,เชื่อมต่อออนไลน์อีกครั้งเพื่อรีเฟรชข้อมูลออฟไลน์ที่แคชไว้จากเซิร์ฟเวอร์
+Recreate local offline prerequisites from scratch,สร้างข้อกำหนดเบื้องต้นแบบออฟไลน์ในเครื่องใหม่ตั้งแต่ต้น
+Recv:,รับ:
+Redeem,แลก
+Redeem / Scan,แลก / สแกน
+Redeem Amount,แลกจำนวนเงิน
+Redeem Mode,แลกโหมด
+Redeemed Amount,จำนวนเงินที่ไถ่ถอน
+Redeemed credit cannot be greater than its total.,เครดิตที่แลกต้องไม่เกินยอดรวม
+Redemption and Totals,การไถ่ถอนและยอดรวม
+Reference,อ้างอิง
+Refresh,รีเฟรช
+Refresh Exchange Rate,รีเฟรชอัตราแลกเปลี่ยน
+Refresh Offline Data,รีเฟรชข้อมูลออฟไลน์
+Refresh Printers,รีเฟรชเครื่องพิมพ์
+Refund,การคืนเงิน
+Release Notes,บันทึกประจำรุ่น
+Reload,โหลดซ้ำ
+Reload customers,โหลดลูกค้าอีกครั้ง
+Reload Items,โหลดรายการซ้ำ
+Reload Now,โหลดใหม่ตอนนี้
+Reload to apply the latest changes. Your current session will be refreshed.,โหลดซ้ำเพื่อใช้การเปลี่ยนแปลงล่าสุด เซสชั่นปัจจุบันของคุณจะถูกรีเฟรช
+Reload Workflow,โหลดเวิร์กโฟลว์อีกครั้ง
+Remarks,หมายเหตุ
+Remarks are required.,จำเป็นต้องมีข้อสังเกต
+Remove,ลบ
+Remove barcode item,ลบรายการบาร์โค้ด
+Remove cached data and reload the POS app,ลบข้อมูลที่แคชไว้และโหลดแอป POS อีกครั้ง
+Remove item,ลบรายการ
+Remove Offer,ลบข้อเสนอ
+Reorder / Purchase Suggestions,สั่งซื้อใหม่/แนะนำการซื้อ
+Repair Candidate,ผู้สมัครซ่อม
+Repair Change Allocation,การซ่อมแซมการจัดสรรการเปลี่ยนแปลง
+Repair requires an online connection,การซ่อมแซมต้องใช้การเชื่อมต่อออนไลน์
+Repaired,ซ่อมแซมแล้ว
+Repairing change allocation,กำลังซ่อมแซมการจัดสรรการเปลี่ยนแปลง
+Repeat Customers,ลูกค้าทำซ้ำ
+Repeat Rate,อัตราการทำซ้ำ
+Request,คำขอ
+Request ID: {0},รหัสคำขอ: {0}
+Request Payment,ขอชำระเงิน
+Requested route: {0},เส้นทางที่ร้องขอ: {0}
+Required columns cannot be hidden,ไม่สามารถซ่อนคอลัมน์ที่จำเป็นได้
+Reset,รีเซ็ต
+Reset item name,รีเซ็ตชื่อรายการ
+Reset to Default,รีเซ็ตเป็นค่าเริ่มต้น
+Resource Health,สุขภาพของทรัพยากร
+Restricted,ถูกจำกัด
+Restricted operational controls for supervisors only.,การควบคุมการปฏิบัติงานแบบจำกัดสำหรับผู้บังคับบัญชาเท่านั้น
+Retry,ลองอีกครั้ง
+Retry route,ลองเส้นทางอีกครั้ง
+Return,กลับ
+Return Amount,จำนวนเงินส่งคืน
+Return Count,จำนวนการส่งคืน
+Return items must have negative quantities,สินค้าที่ส่งคืนต้องมีปริมาณเป็นลบ
+Return total must be negative,ผลรวมผลตอบแทนต้องเป็นลบ
+Return Valid Until,ส่งคืนได้จนถึง
+Return window passed,ผ่านหน้าต่างการคืนสินค้าแล้ว
+Return without Invoice,กลับโดยไม่มีใบแจ้งหนี้
+Returns,การส่งคืน
+Returns / Voids / Discounts,การคืนสินค้า / ถือเป็นโมฆะ / ส่วนลด
+Returns by Currency,ส่งคืนตามสกุลเงิน
+Revenue,รายได้
+Review shift totals before submitting the closing entry,ตรวจสอบผลรวมกะก่อนที่จะส่งรายการปิดบัญชี
+Round Off,ปิดรอบ
+Rows,แถว
+Rows:,แถว:
+Rule,กฎ
+Sale,ขาย
+Sales,การขาย
+Sales Order {0} is Submitted,ส่งใบสั่งขาย {0} แล้ว
+Sales Person and Print,พนักงานขายและพิมพ์
+Sales Person not found,ไม่พบพนักงานขาย
+Sales processed,ดำเนินการขายแล้ว
+Sales Return,ขายคืน
+Sales Trend Report,รายงานแนวโน้มการขาย
+Save,บันทึก
+Save & Clear,บันทึกและล้าง
+Save as POS Profile Default,บันทึกเป็นค่าเริ่มต้นโปรไฟล์ POS
+Save Settings,บันทึกการตั้งค่า
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,บันทึกเครื่องพิมพ์ที่เลือกเป็นค่าเริ่มต้นของโปรไฟล์ POS เพื่อให้แสดงโดยอัตโนมัติในการตั้งค่านี้
+Saved as draft because: {0},บันทึกเป็นฉบับร่างเนื่องจาก: {0}
+Saving...,กำลังบันทึก...
+Scale barcode detected. Quantity here is the number of labels to print.,ตรวจพบบาร์โค้ดขนาด ปริมาณในที่นี้คือจำนวนฉลากที่จะพิมพ์
+Scale barcode settings are not configured. Using item barcode only.,การตั้งค่าบาร์โค้ดมาตราส่วนไม่ได้รับการกำหนดค่า ใช้บาร์โค้ดรายการเท่านั้น
+Scale template barcode is missing for this item/UOM. Using item barcode only.,บาร์โค้ดเทมเพลตมาตราส่วนหายไปสำหรับสินค้า/หน่วยนี้ ใช้บาร์โค้ดรายการเท่านั้น
+Scan an existing card and top it up without leaving the payment flow.,สแกนบัตรที่มีอยู่แล้วเติมเงินโดยไม่ต้องออกจากขั้นตอนการชำระเงิน
+Scan Error,ข้อผิดพลาดในการสแกน
+Scan or enter a gift card code to check balance or redeem.,สแกนหรือป้อนรหัสบัตรของขวัญเพื่อตรวจสอบยอดคงเหลือหรือแลก
+Scan or paste the card code below.,สแกนหรือวางรหัสบัตรด้านล่าง
+Scan QR Code/Barcode,สแกนรหัส QR/บาร์โค้ด
+Scan with camera,สแกนด้วยกล้อง
+Scan-First Flow,สแกนขั้นตอนแรก
+Scanned Code:,รหัสที่สแกน:
+Scanning for: {0},กำลังสแกนหา: {0}
+Scanning items,กำลังสแกนรายการ
+Scan-Ready,พร้อมสแกน
+Scope,ขอบเขต
+Scope: All Profiles,ขอบเขต: โปรไฟล์ทั้งหมด
+Scope: Current Profile,ขอบเขต: โปรไฟล์ปัจจุบัน
+Scope: Specific Profile,ขอบเขต: โปรไฟล์เฉพาะ
+Search,ค้นหา
+Search Account,ค้นหาบัญชี
+Search an invoice and continue the return flow without extra steps.,ค้นหาใบแจ้งหนี้และดำเนินการขั้นตอนการคืนสินค้าต่อไปโดยไม่มีขั้นตอนเพิ่มเติม
+Search customer,ค้นหาลูกค้า
+Search invoices or customers,ค้นหาใบแจ้งหนี้หรือลูกค้า
+Search item,ค้นหารายการ
+Search item / code,ค้นหารายการ/รหัส
+Search items or barcode,ค้นหารายการหรือบาร์โค้ด
+Search Mpesa Payments,ค้นหาการชำระเงิน Mpesa
+Search return invoices or customers,ค้นหาใบแจ้งหนี้การคืนสินค้าหรือลูกค้า
+Search supplier,ค้นหาซัพพลายเออร์
+Search unpaid invoices or customers,ค้นหาใบแจ้งหนี้หรือลูกค้าที่ค้างชำระ
+Secure context (HTTPS or localhost) is required for camera access.,จำเป็นต้องมีบริบทที่ปลอดภัย (HTTPS หรือ localhost) สำหรับการเข้าถึงกล้อง
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,บริบทที่ปลอดภัย (HTTPS) ที่จำเป็นสำหรับการเข้าถึงกล้อง โปรดใช้ HTTPS เพื่อเข้าถึงกล้อง
+Select,เลือก
+Select a cashier first.,เลือกแคชเชียร์ก่อน
+Select a customer,เลือกลูกค้า
+Select a customer to use coupon,เลือกลูกค้าที่จะใช้คูปอง
+Select a printer to use QZ silent printing.,เลือกเครื่องพิมพ์เพื่อใช้การพิมพ์แบบเงียบของ QZ
+Select Batch,เลือกแบทช์
+Select Columns to Display,เลือกคอลัมน์ที่จะแสดง
+Select items to sell,เลือกสินค้าที่จะขาย
+Select Payment,เลือกการชำระเงิน
+Select Payment Account,เลือกบัญชีการชำระเงิน
+Select printer,เลือกเครื่องพิมพ์
+Select Return Invoice,เลือกใบกำกับสินค้าคืน
+Select S.O,เลือกส.อ
+Select Sales Orders,เลือกใบสั่งขาย
+Select the cashier who is taking over this terminal.,เลือกแคชเชียร์ที่จะเข้าควบคุมเครื่องนี้
+Selected,เลือกแล้ว
+Selected movement type is not allowed by POS Profile.,ประเภทการเคลื่อนไหวที่เลือกไม่ได้รับอนุญาตจากโปรไฟล์ POS
+Selected Payments,การชำระเงินที่เลือก
+Sensitive actions kept away from quick taps.,การดำเนินการที่ละเอียดอ่อนอยู่ห่างจากการแตะอย่างรวดเร็ว
+Serial,อนุกรม
+Serial Numbers,หมายเลขซีเรียล
+Server CPU Usage:,การใช้งาน CPU ของเซิร์ฟเวอร์:
+Server Health,ความสมบูรณ์ของเซิร์ฟเวอร์
+Server Memory Usage:,การใช้หน่วยความจำเซิร์ฟเวอร์:
+Server Metrics,ตัวชี้วัดเซิร์ฟเวอร์
+Server Uptime:,เวลาทำงานของเซิร์ฟเวอร์:
+Service Charges,ค่าบริการ
+Session,เซสชัน
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,ตั้งค่า PIN แคชเชียร์แต่ละรายการในแบบฟอร์มผู้ใช้ และกำหนดสมาชิกเครื่องปลายทางไว้ในผู้ใช้โปรไฟล์ POS
+Settings,การตั้งค่า
+Settings in this section update the POS workspace without changing the current route.,การตั้งค่าในส่วนนี้จะอัปเดตพื้นที่ทำงาน POS โดยไม่ต้องเปลี่ยนเส้นทางปัจจุบัน
+Setup complete!,การตั้งค่าเสร็จสมบูรณ์!
+Share,แบ่งปัน
+Shared terminal,เทอร์มินัลที่ใช้ร่วมกัน
+Shift Closed Snapshot,Shift สแนปชอตปิด
+Shift Overview,ภาพรวมการเปลี่ยนแปลง
+Show,แสดง
+Show cart on customer-facing screen,แสดงตะกร้าสินค้าบนหน้าจอที่ติดต่อกับลูกค้า
+Show last invoice rate,แสดงอัตราใบแจ้งหนี้ล่าสุด
+Show rate info,แสดงข้อมูลอัตรา
+Show Repair Candidates,แสดงผู้สมัครซ่อม
+Show search tools,แสดงเครื่องมือค้นหา
+Show the active cart on a customer-facing screen,แสดงรถเข็นที่ใช้งานอยู่บนหน้าจอที่ติดต่อกับลูกค้า
+Showing {0}-{1} of {2},กำลังแสดง {0}-{1} จาก {2}
+Showing 0 of 0,กำลังแสดง 0 จาก 0
+Shows the distribution of invoices per currency,แสดงการกระจายใบแจ้งหนี้ตามสกุลเงิน
+Sign out of the current POS session,ออกจากระบบเซสชัน POS ปัจจุบัน
+Size:,ขนาด:
+Skipped Payments,ข้ามการชำระเงิน
+Skipping items without barcodes,ข้ามรายการที่ไม่มีบาร์โค้ด
+Slow Moving,เคลื่อนไหวช้า
+Slow Moving Items,รายการที่เคลื่อนไหวช้า
+Slow Queries:,แบบสอบถามช้า:
+Sold,ขายแล้ว
+Source,แหล่งที่มา
+Source Cash Account (Optional Override),บัญชีเงินสดต้นทาง (แทนที่หรือไม่ก็ได้)
+Source Ex. Rate:,ที่มา เช่น อัตรา:
+Source Rate:,อัตราแหล่งที่มา:
+Specific Profile,โปรไฟล์เฉพาะ
+Split Invoices,แยกใบแจ้งหนี้
+Staff / Cashier Performance Report,รายงานผลการปฏิบัติงานของพนักงาน/แคชเชียร์
+Status,สถานะ
+Stock,หุ้น
+Stock Information,ข้อมูลหุ้น
+Stock is lower than requested,สต็อกต่ำกว่าที่ร้องขอ
+Stock is lower than requested:\n{0},สต็อกต่ำกว่าที่ร้องขอ:\n{0}
+Stock Movement Report,รายงานความเคลื่อนไหวของสต็อก
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,อัปเดตสต็อก: {0} มี {1} ว่าง การเพิ่ม {2} จะทำให้หุ้นต่ำกว่าศูนย์
+Submit,ส่ง
+Submit & Print,ส่งและพิมพ์
+Submit Deposit,ฝากส่ง
+Submit Expense,ส่งค่าใช้จ่าย
+Submitted,ส่งแล้ว
+Submitted Cash Movements,การเคลื่อนย้ายเงินสดที่ส่งแล้ว
+Submitted entries,รายการที่ส่งแล้ว
+Successfully scanned:,สแกนสำเร็จแล้ว:
+Suggested,แนะนำ
+Suggested Qty,ปริมาณที่แนะนำ
+Supervisor Access,การเข้าถึงของหัวหน้างาน
+Supervisor permissions unlock issuance and reloads,สิทธิ์ของหัวหน้างานจะปลดล็อกการออกและโหลดซ้ำ
+Supervisor Tools,เครื่องมือหัวหน้างาน
+Supplier,ซัพพลายเออร์
+Supplier and dates are required.,ต้องระบุซัพพลายเออร์และวันที่
+Supplier Invoices,ใบแจ้งหนี้ของซัพพลายเออร์
+Supplier is required.,จำเป็นต้องมีซัพพลายเออร์
+Supplier name is required,ต้องระบุชื่อซัพพลายเออร์
+Supplier Payments,การชำระเงินของซัพพลายเออร์
+Supplier Purchase Summary,สรุปการจัดซื้อของซัพพลายเออร์
+Suppliers,ซัพพลายเออร์
+Suppliers not found,ไม่พบซัพพลายเออร์
+Switch Camera,สลับกล้อง
+Switch Cashier,สลับแคชเชียร์
+Switch the POS appearance theme,สลับธีมลักษณะที่ปรากฏของ POS
+Switched to:,เปลี่ยนเป็น:
+Sync All Invoices,ซิงค์ใบแจ้งหนี้ทั้งหมด
+Sync Offline Cash Movements ({0}),ซิงค์การเคลื่อนย้ายเงินสดออฟไลน์ ({0})
+Sync Offline Sales,ซิงค์การขายออฟไลน์
+Synced {0} offline cash movement(s).,ซิงค์การเคลื่อนไหวของเงินสดออฟไลน์ {0} รายการ
+Syncing items in background,กำลังซิงค์รายการในพื้นหลัง
+System / Diagnostics,ระบบ / การวินิจฉัย
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.",การทำงานของระบบคือการควบคุมการบำรุงรักษาความถี่ต่ำ เช่น ข้อมูลแอป การวินิจฉัยการสนับสนุน และการควบคุมเซสชัน
+System Information,ข้อมูลระบบ
+System Status,สถานะของระบบ
+Tables:,ตาราง:
+Tap the button below to redeem a gift card during checkout.,แตะปุ่มด้านล่างเพื่อแลกบัตรของขวัญระหว่างชำระเงิน
+Target,เป้าหมาย
+Target Ex. Rate:,เป้าหมาย เช่น อัตรา:
+Target Rate:,อัตราเป้าหมาย:
+Tax,ภาษี
+Tax / Charges Report,รายงานภาษี / ค่าธรรมเนียม
+Tax Heads,หัวหน้าภาษี
+Taxable Amount,จำนวนเงินที่ต้องเสียภาษี
+Tendered,ประกวดราคาแล้ว
+Terminal,เทอร์มินัล
+Terminal & Devices,เทอร์มินัลและอุปกรณ์
+Terminal locked,เทอร์มินัลถูกล็อค
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.",เครื่องมือเทอร์มินัลส่งผลต่อสถานีชำระเงิน จอแสดงผลที่ติดต่อกับลูกค้า และการควบคุมเครื่องพิมพ์/อุปกรณ์ในอนาคต
+Territory not found,ไม่พบอาณาเขต
+The amount paid is not complete,จำนวนเงินที่ชำระไม่ครบถ้วน
+The app stores data locally for offline use. This is called cache.,แอปจัดเก็บข้อมูลไว้ในเครื่องเพื่อการใช้งานออฟไลน์ สิ่งนี้เรียกว่าแคช
+The invoice stayed in draft. Please review and submit it manually.,ใบแจ้งหนี้ยังคงอยู่ในร่าง โปรดตรวจสอบและส่งด้วยตนเอง
+The maximum discount allowed is,ส่วนลดสูงสุดที่อนุญาตคือ
+The quantity for {0} has been adjusted to the maximum available stock.,ปริมาณสำหรับ {0} ได้รับการปรับให้เป็นสต็อกสูงสุดที่มีอยู่
+The system could not retrieve the item details. Please try again.,ระบบไม่สามารถเรียกรายละเอียดของรายการได้ โปรดลองอีกครั้ง
+These invoices will be synced when connection is restored,ใบแจ้งหนี้เหล่านี้จะถูกซิงค์เมื่อการเชื่อมต่อกลับคืนมา
+This action now opens inside the settings workspace.,การดำเนินการนี้จะเปิดขึ้นภายในพื้นที่ทำงานการตั้งค่า
+This coupon already used !,คูปองนี้ถูกใช้ไปแล้ว !
+This invoice does not need change-allocation repair,ใบแจ้งหนี้นี้ไม่จำเป็นต้องซ่อมแซมการปันส่วนการเปลี่ยนแปลง
+This invoice is already repaired,ใบแจ้งหนี้นี้ได้รับการซ่อมแซมแล้ว
+This is an item template. Please choose a variant.,นี่คือเทมเพลตรายการ โปรดเลือกรุ่น
+this item,รายการนี้
+This POS page could not be opened offline because its code was not cached on this terminal yet.,ไม่สามารถเปิดหน้า POS นี้แบบออฟไลน์ได้ เนื่องจากรหัสของหน้ายังไม่ได้แคชบนเทอร์มินัลนี้
+This Serial Number {0} has already been added!,เพิ่มหมายเลขซีเรียลนี้ {0} แล้ว!
+Threshold,เกณฑ์
+Time,เวลา
+Tip: Clear cache regularly to free up space and keep the app fast.,เคล็ดลับ: ล้างแคชเป็นประจำเพื่อเพิ่มพื้นที่ว่างและทำให้แอปรวดเร็ว
+Tip: Close unused tabs or apps to reduce lag.,เคล็ดลับ: ปิดแท็บหรือแอปที่ไม่ได้ใช้เพื่อลดความล่าช้า
+Tip: Monitor slow queries and table size for optimal performance.,เคล็ดลับ: ตรวจสอบการสืบค้นที่ช้าและขนาดตารางเพื่อประสิทธิภาพสูงสุด
+To Be Paid,ที่จะได้รับการชำระเงิน
+To Date,จนถึงปัจจุบัน
+Today,วันนี้
+Today Profit,วันนี้กำไร.
+Today Sales,วันนี้ขาย
+Toggle navigation drawer,สลับลิ้นชักการนำทาง
+Toggle Theme,สลับธีม
+Tools,เครื่องมือ
+Tools for customer-facing screens and terminal-specific actions.,เครื่องมือสำหรับหน้าจอที่ติดต่อกับลูกค้าและการดำเนินการเฉพาะเครื่อง
+Top Brand,แบรนด์ชั้นนำ
+Top Category,หมวดหมู่ยอดนิยม
+Top Charge Head,หัวชาร์จสูงสุด
+Top Customers,ลูกค้าชั้นนำ
+Top Discount,ส่วนลดสูงสุด
+Top Items by Location,รายการยอดนิยมตามสถานที่
+Top Margin,ขอบบนสุด
+Top Pending,สูงสุดที่รอดำเนินการ
+Top Profit Item,รายการกำไรสูงสุด
+Top Return Items,รายการส่งคืนยอดนิยม
+Top Sales by Cashier,ยอดขายสูงสุดโดยแคชเชียร์
+Top Supplier,ซัพพลายเออร์ชั้นนำ
+Top Suppliers by Spend,ซัพพลายเออร์ยอดนิยมตามการใช้จ่าย
+Top Tables,ตารางยอดนิยม
+Top Tax Head,หัวหน้าภาษีชั้นนำ
+Top Up Amount,จำนวนเงินที่เติม
+Top Up Card,บัตรเติมเงิน
+Top Up Mode,โหมดเติมเงิน
+Top Variant,รุ่นยอดนิยม
+Total,รวม
+Total Amount,จำนวนเงินทั้งหมด
+Total Change,การเปลี่ยนแปลงทั้งหมด
+Total Charges,ค่าใช้จ่ายทั้งหมด
+Total In,รวมเข้า
+Total Invoices,ใบแจ้งหนี้ทั้งหมด
+Total Items,รายการทั้งหมด
+Total Mpesa,รวม Mpesa
+Total Out,รวมออก
+Total Payments,การชำระเงินทั้งหมด
+Total Purchase,ยอดซื้อรวม
+Total Selected :,รวมที่เลือก :
+Total Size,ขนาดรวม
+Total Stock Qty,จำนวนสต็อกทั้งหมด
+Total:,รวม:
+Totals by Invoice Currency,ยอดรวมตามสกุลเงินของใบแจ้งหนี้
+Track how much cash was handed back to customers,ติดตามจำนวนเงินที่ส่งคืนให้กับลูกค้า
+"Track recent sales, collect unpaid balances, and reopen saved work",ติดตามยอดขายล่าสุด รวบรวมยอดค้างชำระ และเปิดงานที่บันทึกไว้อีกครั้ง
+Transaction ID,รหัสธุรกรรม
+Transfer,โอน
+Try a different search term or clear the cart search.,ลองใช้คำค้นหาอื่นหรือล้างการค้นหาในรถเข็น
+Try adjusting your search or filters,ลองปรับการค้นหาหรือตัวกรองของคุณ
+Try another source or refresh the list.,ลองแหล่งอื่นหรือรีเฟรชรายการ
+Try changing the date range or status filter.,ลองเปลี่ยนช่วงวันที่หรือตัวกรองสถานะ
+Type,ประเภท
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,ไม่สามารถเข้าถึงกล้องได้แม้จะมีการตั้งค่าพื้นฐานก็ตาม โปรดตรวจสอบการอนุญาตกล้องและความเข้ากันได้ของอุปกรณ์
+Unable to add offer item {0}. Please refresh and try again.,ไม่สามารถเพิ่มรายการข้อเสนอ {0} โปรดรีเฟรชและลองอีกครั้ง
+Unable to add offer item. Please refresh and try again.,ไม่สามารถเพิ่มรายการข้อเสนอได้ โปรดรีเฟรชและลองอีกครั้ง
+Unable to add scanned item.,ไม่สามารถเพิ่มรายการที่สแกนได้
+Unable to create purchase order,ไม่สามารถสร้างใบสั่งซื้อได้
+Unable to delete draft invoice,ไม่สามารถลบใบแจ้งหนี้ฉบับร่างได้
+Unable to fetch documents,ไม่สามารถดึงเอกสารได้
+Unable to fetch draft orders,ไม่สามารถดึงคำสั่งซื้อฉบับร่างได้
+Unable to fetch invoice history,ไม่สามารถดึงประวัติใบแจ้งหนี้ได้
+Unable to fetch M-Pesa payments,ไม่สามารถรับการชำระเงิน M-Pesa
+Unable to fetch sales orders,ไม่สามารถดึงข้อมูลใบสั่งขายได้
+Unable to fetch unpaid invoices,ไม่สามารถดึงใบแจ้งหนี้ที่ค้างชำระได้
+Unable to generate scale barcode,ไม่สามารถสร้างบาร์โค้ดขนาดได้
+Unable to issue gift card.,ไม่สามารถออกบัตรของขวัญได้
+Unable to load cashier PIN status.,ไม่สามารถโหลดสถานะ PIN แคชเชียร์ได้
+Unable to load document,ไม่สามารถโหลดเอกสารได้
+Unable to load draft invoice,ไม่สามารถโหลดใบแจ้งหนี้ฉบับร่างได้
+Unable to load gift card balance.,ไม่สามารถโหลดยอดคงเหลือบัตรของขวัญได้
+Unable to load invoice details,ไม่สามารถโหลดรายละเอียดใบแจ้งหนี้ได้
+Unable to load parked order,ไม่สามารถโหลดคำสั่งซื้อที่จอดไว้ได้
+Unable to load the selected sales order,ไม่สามารถโหลดใบสั่งขายที่เลือกได้
+Unable to prepare document,ไม่สามารถเตรียมเอกสารได้
+Unable to prepare return invoice,ไม่สามารถจัดทำใบกำกับสินค้าคืนได้
+Unable to print draft invoice,ไม่สามารถพิมพ์ใบแจ้งหนี้ฉบับร่างได้
+Unable to print submitted invoice,ไม่สามารถพิมพ์ใบแจ้งหนี้ที่ส่งมาได้
+Unable to process document action,ไม่สามารถประมวลผลการดำเนินการของเอกสารได้
+Unable to repair change allocation,ไม่สามารถซ่อมแซมการจัดสรรการเปลี่ยนแปลงได้
+Unable to save cashier PIN.,ไม่สามารถบันทึก PIN แคชเชียร์ได้
+Unable to save the rate to the backend price list,ไม่สามารถบันทึกอัตราลงในรายการราคาแบ็กเอนด์ได้
+Unable to submit invoice,ไม่สามารถส่งใบแจ้งหนี้ได้
+Unable to submit the selected payment,ไม่สามารถส่งการชำระเงินที่เลือกได้
+Unable to top up gift card.,ไม่สามารถเติมเงินบัตรของขวัญได้
+Unable to verify cashier PIN.,ไม่สามารถยืนยัน PIN แคชเชียร์ได้
+Unallocated,ไม่ได้จัดสรร
+Unallocated:,ไม่ได้จัดสรร:
+Unavailable,ไม่พร้อมใช้งาน
+Unknown,ไม่ทราบ
+Unknown Item,รายการที่ไม่รู้จัก
+Unknown Warehouse,คลังสินค้าที่ไม่รู้จัก
+Unlock POS,ปลดล็อค POS
+Unpaid,ค้างชำระ
+"Unselected payments stay unallocated first, then auto reconcile after submit.",การชำระเงินที่ไม่ได้เลือกจะไม่มีการจัดสรรก่อน จากนั้นจะกระทบยอดอัตโนมัติหลังจากส่ง
+UOM,หน่วยขาย
+UOM not found,ไม่พบหน่วยขาย
+Update available,อัปเดตพร้อมใช้งาน
+Update Customer,อัพเดทลูกค้า
+Update PIN,อัปเดต PIN
+Update Price List Rate,อัปเดตอัตรารายการราคา
+Updated,อัปเดตแล้ว
+Updates and app info that stay out of the cashier flow.,การอัปเดตและข้อมูลแอปที่ไม่อยู่ในกระแสแคชเชียร์
+Updates automatically,อัพเดตอัตโนมัติ
+Usage,การใช้งาน
+Usage Stats,สถิติการใช้งาน
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,ใช้ PIN 4 ถึง 8 หลักสำหรับการเปลี่ยนแคชเชียร์และการปลดล็อคเครื่อง
+Use Cashier,ใช้แคชเชียร์
+Use date range to search for older invoices,ใช้ช่วงวันที่เพื่อค้นหาใบแจ้งหนี้เก่า
+"Use one field for manual code entry, barcode scans, or QR scans.",ใช้ช่องเดียวสำหรับการป้อนรหัสด้วยตนเอง การสแกนบาร์โค้ด หรือการสแกน QR
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.",ใช้ขั้นตอนการทำงานเดียวสำหรับการตรวจสอบยอดคงเหลือ การออกใหม่ และการเติมเงินโดยไม่ต้องออกจาก POS
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.",ใช้ส่วนนี้เมื่อข้อมูลข้อกำหนดเบื้องต้นที่แคชไว้ต้องการการรีเฟรช สร้างใหม่ หรือการตรวจทานการวินิจฉัย
+Use Western numerals,ใช้ตัวเลขตะวันตก
+Used:,ใช้แล้ว:
+Using basic camera settings due to device limitations,การใช้การตั้งค่ากล้องพื้นฐานเนื่องจากข้อจำกัดของอุปกรณ์
+Using cached customer balance,การใช้ยอดคงเหลือของลูกค้าที่แคชไว้
+Valid until,ใช้ได้ถึงวันที่
+Variance %,ความแปรปรวน %
+Variants,สายพันธุ์
+Variant-wise,ตัวแปรที่ชาญฉลาด
+Verify closing amounts for each payment method,ตรวจสอบยอดเงินปิดบัญชีสำหรับวิธีการชำระเงินแต่ละวิธี
+View all,ดูทั้งหมด
+View app information and current build details,ดูข้อมูลแอปและรายละเอียดการสร้างปัจจุบัน
+View Data Diagnostics,ดูการวินิจฉัยข้อมูล
+View Details,ดูรายละเอียด
+View invoice details,ดูรายละเอียดใบแจ้งหนี้
+View notifications,ดูการแจ้งเตือน
+View offline invoices,ดูใบแจ้งหนี้แบบออฟไลน์
+View restricted POS insights,ดูข้อมูลเชิงลึก POS ที่จำกัด
+Void Amount,จำนวนเงินที่เป็นโมฆะ
+Void Count,การนับเป็นโมฆะ
+Voids,ช่องว่าง
+Waiting for cart items,รอสินค้าในรถเข็น
+Waiting for payment...,กำลังรอการชำระเงิน...
+Walk-in Customer,ลูกค้าวอล์คอิน
+Warehouse,คลังสินค้า
+Warning: High cache usage may affect performance.,คำเตือน: การใช้แคชสูงอาจส่งผลต่อประสิทธิภาพการทำงาน
+Warning: High lag may indicate heavy processing or browser slowness.,คำเตือน: ความล่าช้าสูงอาจบ่งบอกถึงการประมวลผลที่หนักหน่วงหรือความล่าช้าของเบราว์เซอร์
+Week ?,สัปดาห์ ?
+Week-wise,รายสัปดาห์
+Weight (g),น้ำหนัก (กรัม)
+Weight (grams),น้ำหนัก (กรัม)
+We'll let you know if an invoice fails to submit,เราจะแจ้งให้คุณทราบหากไม่สามารถส่งใบแจ้งหนี้ได้
+Workflow,ขั้นตอนการทำงาน
+Write off amount cannot exceed the POS profile maximum of {0},จำนวนเงินตัดจ่ายต้องไม่เกินโปรไฟล์ POS สูงสุด {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,จำนวนเงินตัดจ่ายเกินขีดจำกัดที่อนุญาต ({0}) กรุณาบวกการชำระเงินสำหรับจำนวนเงินที่เหลือ
+Yes,ใช่
+"Yes, Cancel sale",ใช่ ยกเลิกการขาย
+"Yes, Close",ใช่ ปิด
+You are not allowed to print draft invoices,คุณไม่ได้รับอนุญาตให้พิมพ์ใบแจ้งหนี้ฉบับร่าง
+You are offline. Add Payment will work again when the connection is restored.,คุณออฟไลน์อยู่ การเพิ่มการชำระเงินจะทำงานอีกครั้งเมื่อการเชื่อมต่อกลับคืนมา
+You have no notifications right now,คุณไม่มีการแจ้งเตือนในขณะนี้
+Your Cart,รถเข็นของคุณ

@@ -1,0 +1,1362 @@
+POS Awesome,POS Igitangaje
+Fetch Items Directly from Server,Shakisha Ibintu Biturutse kuri Seriveri
+Menu,Ibikubiyemo
+Actions,Ibikorwa
+Close Shift,Funga Shift
+End current session,Kurangiza isomo ryubu
+Print Last Invoice,Shira inyemezabuguzi ya nyuma
+Reprint previous transaction,Ongera usubiremo ibyakozwe mbere
+Sync Offline Invoices,Guhuza inyemezabuguzi zitagaragara
+Upload pending transactions,Kuramo ibicuruzwa bitegereje
+Go Online,Jya kumurongo
+Go Offline,Genda kumurongo
+Disable offline mode,Hagarika uburyo bwa interineti
+Work without server connection,Kora udafite seriveri ihuza
+Clear Cache,Kuraho Cache
+Remove local data and refresh,Kuraho amakuru yaho hanyuma ugarure
+About,Ibyerekeye
+App information,Ibisobanuro
+Language,Ururimi
+Change interface language,Hindura imvugo yimbere
+Light Mode,Uburyo bworoshye
+Dark Mode,Uburyo bwijimye
+Switch theme appearance,Hindura insanganyamatsiko
+Logout,Kwinjira
+Sign out of session,Sohora hanze
+Select Language,Hitamo Ururimi
+Choose your preferred language for the POS interface,Hitamo ururimi ukunda kuri interineti ya POS
+Language will be changed to,Ururimi ruzahindurwa kuri
+Cancel,Kureka
+Change Language,Hindura Ururimi
+Close,Funga
+Cannot change language - same language selected,Ntushobora guhindura ururimi - ururimi rumwe rwatoranijwe
+Language changed successfully! Reloading...,Ururimi rwahindutse neza! Gusubiramo ...
+Failed to change language,Kunanirwa guhindura imvugo
+Unknown error,Ikosa ritazwi
+- Total Unallocated,- Igabanywa ryose
+* Required,* Birasabwa
+{0} (Qty: {1}),{0} (Qty: {1})
+{0} actions,{0} ibikorwa
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} ifite {1} gusa mububiko. Wasabye {2}. Hindura ingano cyangwa usubiremo.
+{0} offline invoice{1} pending,{0} inyemezabuguzi ya interineti {1} itegereje
+{0} offline invoice{1} saved as draft,{0} inyemezabuguzi ya interineti {1} yazigamye nkumushinga
+{0} offline invoice{1} synced,{0} inyemezabuguzi ya interineti {1} ihujwe
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0} d ishize
+{0}h ago,{0} h ishize
+{0}m ago,{0} m ishize
+A POS supervisor is required for this action.,Umuyobozi wa POS arasabwa iki gikorwa.
+Access,Kwinjira
+Account,Konti
+Account is overdrawn,Konti irarenze
+Acknowledge the error to resume scanning,Emera ikosa ryo gukomeza gusikana
+Acknowledge the error to resume scanning.,Emera ikosa ryo gukomeza gusikana.
+Across,Hirya no hino
+Action,Igikorwa
+Active sale,Kugurisha neza
+add,ongeraho
+Add items from the selector to start building this sale.,Ongeramo ibintu byatoranijwe kugirango utangire kubaka iri gurisha.
+Add more value to an existing gift card,Ongeraho agaciro kurikarita ihari
+Add New Address,Ongeraho Aderesi Nshya
+Add new customer,Ongeraho umukiriya mushya
+Add on New Line,Ongeraho kumurongo mushya
+Add Payment,Ongeraho Kwishura
+Add payment to invoice,Ongeraho kwishura kuri fagitire
+Add/Edit Coupon Conditions,Ongeraho / Hindura Imiterere ya Coupon
+Additional Discount,Kugabanuka kwinyongera
+Additional Discount %,Kugabanuka kwinyongera%
+Address Line 1,Umurongo wa aderesi 1
+Address not found,Aderesi ntiyabonetse
+Adjust the quantity or enable negative stock to continue.,Hindura ingano cyangwa ushoboze ububiko bubi gukomeza.
+Adjustment,Guhindura
+After returns,Nyuma yo kugaruka
+Against,Kurwanya
+Against Name,Kurwanya Izina
+Age Bracket,Imyaka
+All,Byose
+All Caught Up!,Byose byafashwe!
+All invoices are synchronized,Inyemezabuguzi zose zirahuzwa
+All pending invoices are up to date,Inyemezabuguzi zose zitegereje zigezweho
+All Profiles,Umwirondoro wose
+All Synchronized,Byose Bihujwe
+All visible invoices are fully settled.,Inyemezabuguzi zose zigaragara zuzuye.
+All Warehouses,Ububiko bwose
+Allowed UOM is {0},Byemerewe UOM ni {0}
+Always fetch items from server (ignore local cache),Buri gihe uzane ibintu muri seriveri (wirengagize cache yaho)
+Amount,Umubare
+Amount already received,Amafaranga yamaze kwakirwa
+Amount exceeds profile cash movement max amount.,Umubare urenze umwirondoro w'amafaranga menshi.
+Amount must be greater than zero.,Umubare ugomba kuba urenze zeru.
+Amount received from customer,Amafaranga yakiriwe n'umukiriya
+Appearance and user-level preferences for the current session.,Kugaragara hamwe nu mukoresha-urwego rwicyiciro cyubu.
+Applied,Bikoreshwa
+Apply,Koresha
+Apply Gift Card,Koresha Ikarita y'Impano
+Apply Offer,Saba itangwa
+Apply On,Koresha
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,Koresha gusa amafaranga ushaka gucungura kuriyi fagitire. Amafaranga asigaye aguma ku ikarita.
+Apply Redemption,Koresha Gucungurwa
+Applying,Gusaba
+Apps,Porogaramu
+Are you sure you want to close? All entered data will be lost.,Uzi neza ko ushaka gufunga? Amakuru yose yinjiye azabura.
+Attributes (Size/Color),Ibiranga (Ingano / Ibara)
+Auto Allocate Payment Amount,Kugenera Imodoka Amafaranga yo Kwishura
+Auto Reconcile,Kwiyunga mu modoka
+Auto reconciliation completed after payment submit.,Ubwiyunge bwimodoka bwarangiye nyuma yo kwishyura.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,Ubwiyunge bwimodoka bwarangiye. Yagabanijwe: {0} {1}. Ibisigaye bidasanzwe: {0} {2}.
+Available Actions,Ibikorwa Bihari
+Available QTY,Bihari QTY
+Available:,Iraboneka:
+Average Basket,Impuzandengo
+Average Bill,Impuzandengo
+Average Ticket,Impuzandengo
+Avg Bill,Avg Bill
+Avg Invoice,Inyemezabuguzi
+Avg Invoice Profit,Avg Inyemezabuguzi
+Avg Invoice Value,Agaciro k'inyemezabuguzi
+Avg Purchase Frequency,Kugura inshuro
+Awesome,Igitangaje
+Awesome Dashboard,Ikibaho Cyiza
+Awesome Dashboard is disabled for the selected POS Profile.,Dashboard itangaje irahagarikwa kumurongo watoranijwe wa POS.
+Awesome Dashboard is unavailable for the selected scope.,Dashboard itangaje ntishobora kuboneka kurwego rwatoranijwe.
+Awesome Dashboard is visible only to POS supervisors.,Dashboard itangaje iragaragara gusa kubayobozi ba POS.
+Back,Inyuma
+Back Office Cash Account,Inyuma ya konti yo mu biro
+Back Office Cash Account (Optional Override),Inyuma Konti Yamafaranga Yibiro (Byanze bikunze)
+Back office cash account is required.,Konti yinyuma y'ibiro irakenewe.
+Back to {0},Subira kuri {0}
+Background processing did not finish in time.,Gutunganya inyuma ntabwo byarangiye mugihe.
+Background processing failed for Invoice {0}: {1},Gutunganya inyuma byananiranye kuri fagitire {0}: {1}
+Background Submission Failed,Gutanga Amavu n'amavuko byatsinzwe
+Background sync interval (seconds),Intangiriro yo guhuza intera (amasegonda)
+Balance,Kuringaniza
+Balance will be updated when connection is restored,Impirimbanyi izavugururwa mugihe ihuza ryagaruwe
+Balances still pending,Impirimbanyi ziracyategerejwe
+Barcode,Barcode
+Barcode / QR Ready,Barcode / QR Yiteguye
+Barcode Label Printing,Icapiro rya Barcode
+Base Paid:,Umushahara fatizo:
+Base Recv:,Base Recv:
+Base:,Shingiro:
+Basic Information,Amakuru Yibanze
+Batch,Batch
+Batch Information,Ibisobanuro
+Before any return workflow,Mbere yo gusubira inyuma
+Before returns,Mbere yo kugaruka
+Best Day,Umunsi mwiza
+Best Seller,Umugurisha mwiza
+Book expense or deposit from active shift.,Igitabo cyamafaranga cyangwa kubitsa kuva kumurimo ukora.
+Branch / Location-wise Report,Ishami / Ikibanza-cyiza Raporo
+Brand-wise,Ibiranga ubwenge
+Breakdown,Gusenyuka
+Browse,Gushakisha
+Build Time:,Kubaka Igihe:
+Built with Frappe,Yubatswe na Frappe
+Bundle,Bundle
+Buying Price,Kugura Igiciro
+Cache cleared successfully,Ubwihisho bwakuweho neza
+Cache Usage,Ikoreshwa rya Cache
+cache used,cache yakoreshejwe
+Calculating...,Kubara ...
+Camera Access Required,Kamera Yinjira
+Camera access was aborted. Please try again.,Kamera yakuweho. Nyamuneka gerageza.
+Camera constraints not supported by your device. Trying fallback settings...,Inzitizi za kamera zidashyigikiwe nigikoresho cyawe. Kugerageza gusubira inyuma ...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,Kamera irahuze cyangwa ihagaritswe nindi porogaramu / tab. Funga izindi porogaramu za kamera hanyuma ugerageze.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,Uruhushya rwa Kamera rwanze. Nyamuneka wemerere kamera mumashusho yawe hanyuma ushireho page.
+Camera scanner is locked until the current error is acknowledged,Kamera scaneri ifunze kugeza ikosa ryemewe
+Camera started but the video stream did not load in time. Please try again.,Kamera yatangiye ariko amashusho ya videwo ntabwo yikoreye igihe. Nyamuneka gerageza.
+Cancel cash movement {0}?,Kureka kugenda amafaranga {0}?
+Cancel Payment,Hagarika kwishyura
+Cancel Sale,Kureka kugurisha
+Cancel Sale ?,Kureka kugurisha?
+Cancelled,Yahagaritswe
+Cannot add an item with zero or negative quantity.,Ntushobora kongeramo ikintu gifite zeru cyangwa ingano mbi.
+Cannot clear cache while offline,Ntushobora gukuraho cache mugihe utari kumurongo
+Cannot redeem customer credit more than invoice total,Ntushobora gucungura inguzanyo zabakiriya kurenza inyemezabuguzi zose
+Cannot redeem gift cards more than invoice total,Ntushobora gucungura amakarita yimpano kurenza inyemezabuguzi zose
+Cannot Save Offline Invoice:,Ntushobora Kubika Inyemezabuguzi ya Offline:
+Cannot Save Offline Payment:,Ntushobora kuzigama kuri interineti:
+Card,Ikarita
+Card / Online,Ikarita / Kumurongo
+Card health after the last live lookup,Ubuzima bwikarita nyuma yo kureba bwa nyuma
+Cards,Ikarita
+Cart,Igare
+Cash,Amafaranga
+Cash back to customers,Amafaranga asubire kubakiriya
+Cash Collections,Amafaranga yakusanyijwe
+Cash Deposit is disabled for this POS Profile.,Kubitsa amafaranga byahagaritswe kuriyi myirondoro ya POS.
+Cash Drawer Snapshot,Cash Drawer Snapshot
+Cash In Hand,Amafaranga mu ntoki
+Cash Movement,Amafaranga
+Cash movement cancelled,Amafaranga yatanzwe
+Cash movement deduction applied,Kugabanya amafaranga yatanzwe
+Cash movement deleted,Amafaranga yatanzwe
+Cash movement is disabled for this POS Profile.,Amafaranga yimodoka arahagarikwa kuriyi myirondoro ya POS.
+Cash Movement is disabled in current POS Profile.,Amafaranga yimuka arahagarikwa mumwirondoro wa POS.
+Cash movement saved offline,Amafaranga yatanzwe yabitswe kumurongo
+Cash movement submitted,Amafaranga yatanzwe
+Cash Movements,Amafaranga yimuka
+Cash payment cannot be less than invoice total when partial payment is not allowed,Amafaranga yishyuwe ntashobora kuba munsi ya fagitire yose mugihe kwishyura igice bitemewe
+Cash returned after payment,Amafaranga yagarutse nyuma yo kwishyura
+Cashier,Cashier
+Cashier Access,Kubona amafaranga
+Cashier identity and appearance preferences.,Indangamuntu ya Cashier nibigaragara.
+Cashier PIN,Cashier PIN
+Cashier PIN saved successfully.,Cashier PIN yazigamye neza.
+Cashiers,Cashiers
+Cashier-wise,Cashier-ubwenge
+Categories,Ibyiciro
+Category,Icyiciro
+Category / Brand / Variant Report,Icyiciro / Ikirango / Raporo zitandukanye
+Category-wise,Icyiciro-cyiza
+Category-wise Margin,Icyiciro-cyiza
+Certificate,Icyemezo
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,Icyemezo kibuze cyangwa nticyizere. QZ irashobora kwerekana ibiganiro byemeza.
+Certificate is trusted. Silent QZ printing is active.,Icyemezo cyizewe. Gucecekesha QZ icapiro rirakora.
+Change,Hindura
+Change allocation repaired,Guhindura amafaranga yatanzwe
+Change Price,Hindura Igiciro
+Change Return,Hindura Garuka
+Change Returned,Impinduka Yagarutse
+Change terminal cashier,Hindura amafaranga ya terefone
+Charge Heads,Kwishyuza imitwe
+Charges,Amafaranga
+Charges not found,Amafaranga atabonetse
+Check Balance,Reba Impirimbanyi
+Check balance for any card. Supervisors can issue and top up cards here.,Reba neza ikarita iyo ari yo yose. Abagenzuzi barashobora gutanga no kuzuza amakarita hano.
+Check balance only,Reba impirimbanyi gusa
+Check for new commits,Reba ibyo wiyemeje
+Check for Updates,Reba Ibishya
+Check live balance before applying redemption,Reba impirimbanyi nzima mbere yo gusaba gucungurwa
+Check live balance before redemption,Reba impirimbanyi nzima mbere yo gucungurwa
+Checking...,Kugenzura ...
+Cheque/Reference Date,Kugenzura / Itariki Itariki
+Cheque/Reference No,Reba / Reba Oya
+Choose the cashier currently operating this terminal.,Hitamo kashi ikora ubu terminal.
+City,Umujyi
+Clear,Biragaragara
+Clear All,Kuraho Byose
+Clear all barcode items,Kuraho ibintu byose bya barcode
+Clear all purchase order items,Kuraho ibintu byose byaguzwe
+Clear Search,Gushakisha neza
+Clearing local cache...,Kuraho cache yaho ...
+Click to refresh,Kanda kugirango ugarure
+Client CPU Lag:,Umukiriya CPU Lag:
+Client Memory Usage:,Ikoreshwa ry'Urwibutso rw'abakiriya:
+Client Metrics,Ibipimo by'abakiriya
+Close about dialog,Funga hafi y'ibiganiro
+Close cashier switcher,Funga kashi
+Close closing shift dialog,Gufunga gufunga ibiganiro
+Close column selector,Funga inkingi
+Close Dialog,Funga Ikiganiro
+Close drafts dialog,Funga inyandiko
+Close invoice details dialog,Funga inyemezabuguzi ibisobanuro
+Close invoice management,Gufunga inyemezabuguzi
+Close offline invoices dialog,Funga inyemezabuguzi za interineti
+Close packing list dialog,Funga urutonde rwibiganiro
+Close returns dialog,Gufunga kugaruka
+Close sales orders dialog,Funga ibicuruzwa byo kugurisha
+Close Scanner,Funga Scaneri
+Close scanner dialog,Funga scaneri ikiganiro
+Close Settings,Funga Igenamiterere
+Closing Amount,Amafaranga yo gufunga
+Closing POS Shift,Gufunga POS Shift
+Closing Snapshot Available,Gufunga Snapshot Iraboneka
+Code,Kode
+Code scanned successfully,Kode yasikanye neza
+COGS,COGS
+Collapse item details,Gusenya ibintu birambuye
+Collected,Byegeranijwe
+Cols,Abakol
+Columns,Inkingi
+commits,yiyemeje
+Completed and active sales in this range,Igurisha ryuzuye kandi rikora muriki cyiciro
+Completed returns will appear here.,Inyungu zuzuye zizagaragara hano.
+Confirm,Emeza
+Confirm Close,Emeza hafi
+Confirm Mobile Number,Emeza nimero ya mobile
+Confirm PIN,Emeza PIN
+Connect,Ihuze
+Connect printer and manage certificate,Huza printer kandi ucunge icyemezo
+Connecting to QZ Tray...,Kwihuza na QZ Tray ...
+Connection problem while submitting invoice,Ikibazo cyo guhuza mugihe utanga inyemezabuguzi
+Connections:,Ihuza:
+Connectivity and cached prerequisite status were rechecked.,Kwihuza hamwe na cashe byateganijwe byasubiwemo.
+Continue Editing,Komeza Guhindura
+Could not fetch latest balance from server,Ntushobora kuzana impirimbanyi zanyuma kuva seriveri
+Count,Kubara
+Country,Igihugu
+Coupon,Coupon
+Coupons,Coupons
+Cover,Igipfukisho
+CPU Cores:,Ibikorwa bya CPU:
+Create,Kurema
+Create and load a new prepaid card,Kurema no kwikorera ikarita nshya yishyuwe mbere
+Create and preload a new gift card,Kurema no kubanziriza ikarita nshya yimpano
+Create Bill,Kora umushinga w'itegeko
+Create Customer,Kurema Umukiriya
+Create New Item,Kurema Ikintu gishya
+Create or change your PIN,Kurema cyangwa guhindura PIN yawe
+Create PIN,Kora PIN
+Create POS Opening Shift,Kora POS Ifungura Shift
+Create Purchase Order,Shiraho gahunda yo kugura
+Create Return,Kora Garuka
+Create return from invoice,Kora garuka kuri fagitire
+Create Supplier,Kurema Utanga isoko
+Credit and Output,Inguzanyo n'ibisohoka
+Credit Note,Icyitonderwa cy'inguzanyo
+Credit Outstanding,Inguzanyo zidasanzwe
+Credit sales remaining to be collected,Igurisha ry'inguzanyo risigaye gukusanywa
+Critical,Birakomeye
+Currency,Ifaranga
+Current,Ibiriho
+Current Event Loop Lag:,Ibihe Byibihe Byakera:
+Current Month,Ukwezi kurubu
+Current PIN,PIN y'ubu
+Current Profile,Umwirondoro wubu
+Current redeemable value on the gift card,Agaciro gacungurwa kurikarita yimpano
+Current User,Umukoresha wa none
+Custom,Custom
+Custom Due Days,Iminsi Yateganijwe
+Custom items per page,Ibintu byihariye kurupapuro
+Customer,Umukiriya
+Customer already selected,Umukiriya yamaze guhitamo
+Customer Balance,Impirimbanyi zabakiriya
+Customer balance unavailable offline,Impirimbanyi zabakiriya zitaboneka kumurongo
+Customer created successfully.,Umukiriya yaremye neza.
+Customer creation failed.,Kurema abakiriya byarananiranye.
+Customer Details,Ibisobanuro by'abakiriya
+Customer display channel is missing,Umuyoboro werekana abakiriya wabuze
+Customer display was blocked. Please allow pop-ups for this site.,Kugaragaza abakiriya byarahagaritswe. Nyamuneka wemerere pop-up kururu rubuga.
+Customer group is required,Itsinda ryabakiriya rirasabwa
+Customer is required to add payment,Umukiriya asabwa kongera ubwishyu
+Customer Name is required,Izina ryabakiriya rirakenewe
+Customer not selected,Umukiriya ntabwo yatoranijwe
+Customer Report,Raporo y'abakiriya
+Customer saved offline,Umukiriya yazigamye kumurongo
+Customer Screen,Mugaragaza
+Customer territory is required,Ifasi yabakiriya irakenewe
+Customer updated successfully.,Umukiriya yavuguruwe neza.
+Customer-facing tools and printer setup.,Ibikoresho-byabakiriya nibikoresho bya printer.
+Customers,Abakiriya
+Customers not found,Abakiriya ntibabonetse
+Daily cashier actions without scrolling.,Ibikorwa bya kashi ya buri munsi nta kuzunguruka.
+Daily Sales,Igurishwa rya buri munsi
+Daily Sales Summary,Incamake yo kugurisha buri munsi
+Data loaded in form. Review and submit.,Amakuru yuzuye muburyo. Subiramo kandi utange.
+Database Health,Ubuzima bwububiko
+Database health affects overall system speed and reliability.,Ubuzima bwububiko bugira ingaruka kuri sisitemu muri rusange no kwizerwa.
+Database Info,Ububikoshingiro
+Date,Itariki
+Day ?,Umunsi?
+days,iminsi
+Day-wise (MTD),Umunsi (MTD)
+Day-wise Movement,Umunsi-Umunsi
+Dead Stock,Ikigega cyapfuye
+Dead Stock Items,Ibintu byapfuye
+Decrease quantity,Kugabanya ingano
+Default,Mburabuzi
+Default:,Ibisanzwe:
+Delete,Siba
+Delete cancelled cash movement {0}?,Gusiba amafaranga yahagaritswe {0}?
+Delete Draft,Gusiba Inyandiko
+Delete draft invoice,Kuraho inyemezabuguzi
+Delete draft invoice {0}?,Gusiba inyemezabuguzi {0}?
+Delete Invoice,Siba Inyemezabuguzi
+Delete offline invoice,Kuraho inyemezabuguzi ya interineti
+Delivered,Yatanzwe
+Delivery Charges,Amafaranga yo gutanga
+Delivery Information,Amakuru yo Gutanga
+Delivery Note {0} created,Icyitonderwa cyo gutanga {0} cyaremewe
+Delivery note created,Inyandiko yo gutanga
+Deployed Bundle:,Bundle yoherejwe:
+Deposit,Kubitsa
+Description,Ibisobanuro
+Detailed Supplier Breakdown,Kumeneka kubatanga isoko
+Detecting formats:,Kumenya imiterere:
+Device Memory:,Ububiko bwibikoresho:
+Difference,Itandukaniro
+Difference (In Company Currency),Itandukaniro (Mu Ifaranga rya Sosiyete)
+Disable offline mode first to recheck live connectivity.,Hagarika uburyo bwa interineti mbere yo gusuzuma umurongo wa Live.
+Disconnect,Guhagarika
+discount,kugabanyirizwa
+Discount %,Kugabanuka%
+Discount / Void / Return Report,Kugabanuka / Ubusa / Raporo Yagarutse
+Discount Amount,Amafaranga yagabanutse
+Discount limited by POS Profile,Kugabanuka kugarukira kumwirondoro wa POS
+Discounted Invoices,Inyemezabuguzi zagabanijwe
+Discounts,Kugabanuka
+Dismiss,Kwirukana
+Download Certificate,Kuramo Icyemezo
+Draft,Inyandiko
+Draft invoice deleted,Umushinga w'inyemezabuguzi wasibwe
+Draft source,Umushinga w'inkomoko
+Drafts,Inyandiko
+Due {0},Kubera {0}
+Due Date,Itariki Yateganijwe
+Duplicate,Kwigana
+Edit customer,Hindura umukiriya
+Edit discount amount,Hindura amafaranga yagabanijwe
+Edit discount percentage,Hindura ijanisha
+Edit Gift Application,Hindura Impano Porogaramu
+Edit item name,Hindura izina ryikintu
+Edit quantity,Hindura ingano
+Edit rate,Guhindura igipimo
+Edit unit of measure,Hindura igipimo
+Edited,Byahinduwe
+Employee,Umukozi
+Enable background sync,Gushoboza guhuza ibice
+Enable Customer Display in POS Profile first.,Gushoboza kwerekana abakiriya mubisobanuro bya POS mbere.
+Enter a PIN.,Injira PIN.
+Enter a valid grams value,Injiza garama yemewe
+Enter new price list rate,Injiza igiciro gishya cyurutonde
+Enter Quantity,Injira Umubare
+Enter the cashier PIN to continue.,Injira kashi PIN kugirango ukomeze.
+Enter the current PIN first.,Injira PIN iriho ubu.
+"Enter the current PIN, then choose a new one.","Injira PIN iriho, hanyuma uhitemo indi nshya."
+Enter valid grams for scale barcode,Injira garama zemewe kubipimo bya barcode
+Entries,Ibyinjira
+Error accessing camera:,Ikosa ryo kubona kamera:
+Error calculating prices,Ikosa ryo kubara ibiciro
+Error fetching customer balance,Ikosa ryo kuzana abakiriya
+Error in change calculations!,Ikosa mu kubara impinduka!
+Error Loading Data,Ikosa ryo gupakira amakuru
+Error loading invoice details,Ikosa ryo gupakira inyemezabuguzi
+Error processing invoice,Inyemezabuguzi yo gutunganya
+Error processing payment,Kwishura amakosa
+Error searching invoices,Ikosa ryo gushakisha inyemezabuguzi
+Error submitting invoice:,Ikosa ryo gutanga inyemezabuguzi:
+Error submitting invoice: {0},Ikosa ryo gutanga inyemezabuguzi: {0}
+Error submitting invoice: No response from server,Ikosa ryo gutanga inyemezabuguzi: Nta gisubizo kiva kuri seriveri
+Error updating currency,Ikosa ryo kuvugurura amafaranga
+Error updating item details,Ikosa ryo kuvugurura ibintu birambuye
+Est. Purchase,Est. Kugura
+Est. Value,Est. Agaciro
+Event-loop lag measures how busy your browser is. Lower is better.,Ibirori-bizenguruka bipima uburyo mushakisha yawe ihuze. Hasi ni byiza.
+Every,Buri
+Exchange Rate,Igipimo cy'ivunjisha
+Expand item details,Kwagura ibisobanuro birambuye
+Expected Amount (In Company Currency),Amafaranga ateganijwe (Mu Ifaranga rya Sosiyete)
+Expected Cash,Amafaranga ateganijwe
+Expected cash on hand grouped by currency,Amafaranga ateganijwe kumaboko ashyizwe hamwe nifaranga
+Expected vs Actual,Biteganijwe vs Mubyukuri
+Expense,Amafaranga
+Expense Account (Optional Override),Konti Yikoreshwa (Kurenga kubishaka)
+Expense account is required.,Konti ikoreshwa irakenewe.
+Expenses and deposits posted during this shift,Amafaranga yakoreshejwe hamwe no kubitsa byashyizwe mugihe cyo kwimuka
+Expired,Byarangiye
+Failed to auto reconcile payments.,Kunanirwa kwiyunga ubwishyu.
+Failed to cancel cash movement,Kunanirwa guhagarika amafaranga yimuka
+Failed to clear cache,Kunanirwa gukuraho cache
+Failed to create item,Kunanirwa gukora ikintu
+Failed to create supplier,Kunanirwa kurema isoko
+Failed to delete cash movement,Kunanirwa gusiba amafaranga yimuka
+Failed to generate scale barcode. Using item barcode only.,Kunanirwa kubyara igipimo kode. Gukoresha ikintu kode gusa.
+Failed to load cash movement context.,Kunanirwa gupakira amafaranga yimikorere.
+Failed to load dashboard data.,Kunanirwa kwipakurura amakuru.
+Failed to reload invoice from server,Kunanirwa kwishura fagitire kuva seriveri
+Failed to submit cash movement,Kunanirwa gutanga amafaranga yimuka
+Failed to sync offline cash movements,Kunanirwa guhuza ibikorwa byamafaranga kumurongo
+Fast cashier actions for active shifts.,Ibikorwa byihuse byihuse kubikorwa byimikorere.
+Fast Moving Items,Ibintu Byihuta
+Fees,Amafaranga
+Fetch the latest offline prerequisite updates,Shakisha ibyagezweho kuri interineti ibisabwa mbere
+Find a sales order quickly and load it into the current sale.,Shakisha ibicuruzwa byihuse hanyuma ubishyire mubicuruzwa bigezweho.
+Fixing payment amounts for return invoice...,Kugena amafaranga yo kwishyura kuri fagitire yo kugaruka ...
+Flash Off,Funga
+Flash On,Flash On
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","Kubintu 'Bundle yibicuruzwa', ububiko, Serial Oya na Batch Oya bizasuzumwa kuva kumeza 'Gupakira'. Niba ububiko na Batch Oya ari bimwe kubintu byose bipakira kubintu byose 'Ibicuruzwa Bundle', izo ndangagaciro zishobora kwinjizwa mumeza yibintu byingenzi; indangagaciro zizakopororwa kumeza 'Gupakira Urutonde'."
+Free,Ubuntu
+Free Qty,Ubuntu Qty
+Frequency,Inshuro
+from,Kuva
+From Date,Kuva Itariki
+Fulfillment Details,Ibisobanuro birambuye
+Full Name,Izina ryuzuye
+Gain,Inyungu
+Generate a fresh prepaid card and start it with an opening balance.,Kora ikarita nshya yishyuwe mbere hanyuma uyitangire hamwe.
+Generate and install the certificate to allow fully silent printing without trust prompts.,Kora kandi ushyireho icyemezo kugirango wemererwe gucapa bucece nta kwizerana.
+Generate Certificate,Tanga Icyemezo
+Generated scale barcode: {0},Ibipimo byakozwe na barcode: {0}
+Get Payments,Shaka Kwishura
+Gift Card,Ikarita y'Impano
+Gift card amount must be greater than zero.,Amafaranga yikarita yimpano agomba kuba arenze zeru.
+Gift Card Code,Ikarita y'Impano
+Gift card code is required for redemption,Ikarita yimpano irakenewe kugirango ucungurwe
+Gift card code is required.,Ikarita yimpano irakenewe.
+Gift card issued successfully.,Ikarita y'impano yatanzwe neza.
+Gift card loaded successfully.,Ikarita yimpano yapakiwe neza.
+Gift Card Management,Gucunga Ikarita
+Gift card payment,Kwishura ikarita
+Gift card redemption requires an online connection,Gucungura ikarita yimpano bisaba guhuza kumurongo
+Gift card topped up successfully.,Ikarita yimpano yazamutse neza.
+Gift Cards,Ikarita y'impano
+Go to Frappe Desk,Jya kuri Frappe
+Grand Total,Igiteranyo Cyuzuye
+Gross Margin,Amafaranga menshi
+Gross Profit,Inyungu rusange
+Gross Sales,Igurishwa rusange
+Group not found,Itsinda ntabwo ryabonetse
+"Grouped controls for terminal, UI, and session settings.","Igenzura rishyizwe hamwe kuri terminal, UI, hamwe nigenamiterere."
+Grouped totals for each payment method and currency,Bishyizwe hamwe kuri buri buryo bwo kwishyura n'ifaranga
+Hide,Hisha
+Hide Gift Card,Hisha Ikarita Yimpano
+Hide Non Essential Fields,Hisha Imirima Yingenzi
+Hide quantity decimals,Hisha umubare wimibare
+Hide search tools,Hisha ibikoresho by'ishakisha
+Hide zero rated items,Hisha ibintu bya zeru
+High,Hejuru
+History,Amateka
+Hourly (Today),Isaha (Uyu munsi)
+How this section works,Uburyo iki gice gikora
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","Niba amakuru ashaje asigaye, fungura Igenamiterere> Offline & Sync hanyuma ukore Rebuild Offline Data wongeyeho mugihe uri kumurongo."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","Niba umuburo ukomeje, fungura Igenamiterere> Offline & Sync, hanyuma ukore Refresh Offline Data cyangwa Wubake Data Offline Data."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Kuzana icyemezo muri QZ Tray hanyuma utangire QZ Tray kuri buri mashini ya POS.
+In,Muri
+In stock: {0},Mububiko: {0}
+Include Batch / Serial,Shyiramo Batch / Serial
+Include Price,Shyiramo Igiciro
+Increase quantity,Ongera ubwinshi
+IndexedDB,YerekanweDB
+Initial Amount,Umubare wambere
+Initialize your shift with opening balances,Tangiza umwanya wawe hamwe no gufungura impirimbanyi
+Initializing application...,Gutangiza porogaramu ...
+"Inspect cache, sync, and prerequisite status","Kugenzura cache, guhuza, hamwe nibisabwa"
+Installed Applications,Kwinjiza Porogaramu
+Insufficient stock:\n{0},Ububiko budahagije: \ n {0}
+Invalid rate,Igipimo kitemewe
+Inventory Status Report,Raporo y'ibarurishamibare
+Invoice,Inyemezabuguzi
+Invoice {0} is Submitted,Inyemezabuguzi {0} Yatanzwe
+Invoice {0} processed successfully,Inyemezabuguzi {0} yatunganijwe neza
+Invoice {0} submission failed,Inyemezabuguzi {0} gutanga byananiranye
+Invoice {0} was already submitted,Inyemezabuguzi {0} yari imaze gutangwa
+Invoice Adjustments,Inyemezabuguzi
+Invoice Change,Inyemezabuguzi
+Invoice Details,Inyemezabuguzi
+Invoice is still in draft after background submission.,Inyemezabuguzi iracyari mu mushinga nyuma yo gutanga inyuma.
+Invoice Items,Inyemezabuguzi
+Invoice Management,Gucunga inyemezabuguzi
+Invoice Mgmt,Inyemezabuguzi Mgmt
+Invoice saved offline,Inyemezabuguzi yazigamye kuri interineti
+Invoice submission failed,Gutanga inyemezabuguzi byarananiranye
+Invoice Submitted,Inyemezabuguzi yatanzwe
+"Invoice value settled by loyalty points, not cash collection","Inyemezabuguzi yagenwe ningingo zubudahemuka, ntabwo gukusanya amafaranga"
+Invoices,Inyemezabuguzi
+Invoices already past due date,Inyemezabuguzi zimaze igihe ntarengwa
+Invoices saved as POS Invoices,Inyemezabuguzi zabitswe nka Fagitire ya POS
+Invoices still carrying balances,Inyemezabuguzi ziracyafite impirimbanyi
+Issue Mode,Uburyo bw'ikibazo
+Issue New Card,Tanga Ikarita Nshya
+Issue Workflow,Tanga akazi
+"Issue, top up, and check","Ikibazo, hejuru, no kugenzura"
+Item,Ingingo
+Item / Product Sales Report,Ikintu / Raporo yo kugurisha ibicuruzwa
+Item {0} added to invoice,Ingingo {0} yongeyeho kuri fagitire
+Item '{0}' has no barcode,Ingingo '{0}' nta barcode ifite
+Item Code,Kode y'Ikintu
+Item created successfully,Ikintu cyakozwe neza
+Item is out of stock,Ikintu ntikibitswe
+Item Name,Izina ryikintu
+Item not found,Ikintu nticyabonetse
+Item order updated,Itondekanya ryibintu rivugururwa
+Item Selector Settings,Igenamiterere ry'ikintu
+Items,Ibintu
+Items added in POS will appear here automatically.,Ibintu byongewe muri POS bizagaragara hano byikora.
+Items added to invoice,Ibintu byongewe kuri fagitire
+Items per page,Ibintu kurupapuro
+Items Sold,Ibintu byagurishijwe
+Items/Invoice,Ibintu / Inyemezabuguzi
+Item-wise Profitability,Ikintu-cyunguka
+Journal Entry,Kwinjira mu Kinyamakuru
+json,json
+Just now,Ubu
+Keep offline prerequisites healthy and recover stale data safely.,Komeza kumurongo wa ngombwa kugirango ugire ubuzima bwiza kandi ugarure amakuru ashaje neza.
+Labels,Ibirango
+"Language, theme, terminal tools, and session controls.","Ururimi, insanganyamatsiko, ibikoresho byanyuma, hamwe nigenzura."
+Last,Icya nyuma
+Last 14 Days (Paid vs Pending),Iminsi 14 Yanyuma (Yishyuwe vs Biteganijwe)
+Last 14 Days Activity,Iminsi 14 Yanyuma Igikorwa
+Last 14 Days Gross Profit,Iminsi 14 Yanyuma Yunguka
+Last 14 Days Purchases,Kugura Iminsi 14 Yanyuma
+Last 14 Days Tax/Charges,Iminsi 14 Yanyuma Umusoro / Amafaranga
+Last sync:,Sync ya nyuma:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},Guhuza kwa nyuma: {0} | ok: {1} | byananiye: {2} | gusimbuka: {3}
+Latest entries for current shift,Ibyanditswe byanyuma kugirango uhindurwe
+Lead Time,Kuyobora Igihe
+Limited,Ntarengwa
+lines,imirongo
+List,Urutonde
+Live Snapshot,Igicapo kizima
+Load a POS profile and cashier first.,Ongeramo umwirondoro wa POS na kashi mbere.
+Load More Invoices,Fungura Inyemezabuguzi
+Load previously saved invoices,Fungura inyemezabuguzi zabitswe mbere
+Load Sale,Igurisha ry'imizigo
+Load Sales Invoice,Inyemezabuguzi yo kugurisha imizigo
+Loading app data...,Gupakira amakuru ya porogaramu ...
+Loading customer database...,Gupakira ububiko bwabakiriya ...
+Loading customers...,Gutwara abakiriya ...
+Loading database stats...,Gupakira imibare yububiko ...
+Loading details...,Gupakira ibisobanuro ...
+Loading invoice history...,Gupakira inyemezabuguzi amateka ...
+Loading items...,Gupakira ibintu ...
+Loading product catalog...,Gupakira ibicuruzwa ...
+Loading return invoices...,Gupakira inyemezabuguzi zo kugaruka ...
+Loading server CPU/memory usage...,Gupakira seriveri CPU / gukoresha imikoreshereze ...
+Loading suppliers...,Gutwara abaguzi ...
+Loading unpaid invoices...,Gupakira inyemezabuguzi zitishyuwe ...
+Loading view...,Kuremera ibintu ...
+Loading...,Kuremera ...
+Local storage is unavailable. Switching to online-only mode.,Ububiko bwaho ntibushobora kuboneka. Guhindukira kumurongo-gusa.
+localStorage,Ububiko
+Location Performance,Imikorere yaho
+Locations,Ahantu
+Lock Screen,Funga Mugaragaza
+Lookup Workflow,Reba Akazi
+Loss,Igihombo
+Low,Hasi
+Low Stock,Ububiko buke
+Low Stock Alerts,Imenyekanisha Rito
+Low Stock Items,Ibintu Bike
+Low Stock Threshold,Umubare muto
+Low Stock Total,Umubare muto
+Lowest Margin,Urwego rwo hasi
+Low-frequency maintenance and system details.,Kubungabunga inshuro nke hamwe na sisitemu irambuye.
+Loyalty Redeemed,Ubudahemuka bwacunguwe
+Loyalty Redemption,Gucungurwa
+Make New Payment,Kora Ubwishyu bushya
+Manage all,Gucunga byose
+Manage and synchronize your offline transactions,Gucunga no guhuza ibikorwa byawe kumurongo
+Manage Cashier PIN,Gucunga Cashier PIN
+"Manage offline tools, terminal controls, and maintenance from one workspace.","Gucunga ibikoresho bya interineti, kugenzura kugenzura, no kubungabunga uhereye kumurimo umwe."
+manual,imfashanyigisho
+"Manual codes, barcode scans, and QR scans work in the same field","Kode y'intoki, scan ya barcode, na QR scan ikora murwego rumwe"
+Manual offline mode is enabled,Uburyo bwa interineti butemewe burashoboka
+Margin,Margin
+Maximum available quantity is {0}. Quantity adjusted to match stock.,Umubare ntarengwa waboneka ni {0}. Umubare wahinduwe kugirango uhuze ububiko.
+Maximum discount amount for this offer item is {0}.,Umubare ntarengwa wo kugabanyirizwa iki kintu ni {0}.
+Maximum discount percentage for this offer item is {0}%.,Umubare ntarengwa wo kugabanyirizwa iki kintu ni {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,Umubare ntarengwa watanzwe ni {0}. Umubare wahinduwe ntarengwa.
+Medium,Hagati
+Method-wise Collections,Uburyo bukusanyirijwe hamwe
+Minimum allowed rate for this offer item is {0}.,Igipimo ntarengwa cyemewe kuri iki kintu gitangwa ni {0}.
+Minimum Qty,Ntarengwa Qty
+Mobile No,Terefone Oya
+Mode,Uburyo
+Mode of Payment,Uburyo bwo Kwishura
+Month,Ukwezi
+Month ?,Ukwezi?
+Monthly Profit,Inyungu ya buri kwezi
+Monthly Sales,Kugurisha buri kwezi
+Monthly Sales Summary,Incamake yo kugurisha buri kwezi
+Month-wise,Ukwezi
+Most Active Cashiers,Amafaranga menshi akora
+Movement Type,Ubwoko bwimuka
+Movements,Ingendo
+Multi Currency,Amafaranga menshi
+N/A,N / A.
+Name,Izina
+Negative Stock,Ububiko bubi
+Negative Stock Items,Ibintu bibi
+Negative values not allowed,Indangagaciro mbi ntizemewe
+Net,Net
+Net Qty,Net Qty
+Net Sales,Igurishwa ryiza
+Net Value,Agaciro keza
+Never,Nta na rimwe
+New changes are ready to load,Impinduka nshya ziteguye kwikorera
+New Item,Ikintu gishya
+New Offer Available,Igitekerezo gishya kiraboneka
+New PIN,PIN Nshya
+New rate,Igipimo gishya
+Next unit of measure,Igice gikurikiraho
+No attribute data found.,Nta kiranga amakuru yabonetse.
+No Barcode,Nta Barcode
+No barcode found for UOM '{0}',Nta barcode yabonetse kuri UOM '{0}'
+No branch/location data found.,Nta shami / amakuru yamakuru yabonetse.
+No brand data found.,Nta makuru yikimenyetso yabonetse.
+No cached gift card balance is available offline.,Nta mpano yikarita yimpano isigaye iboneka kumurongo.
+No camera found on this device. Please ensure your device has a working camera.,Nta kamera iboneka kuri iki gikoresho. Nyamuneka wemeze ko igikoresho cyawe gifite kamera ikora.
+No capability warnings recorded yet.,Nta mbuzi zubushobozi zanditswe.
+No cash expected for this shift.,Ntamafaranga ateganijwe kuriyi nteruro.
+No cash mode configured,Nta buryo bw'amafaranga bwashyizweho
+No cash movement type is allowed for this POS Profile.,Nta bwoko bwimodoka yemerewe kuri uyu mwirondoro wa POS.
+No cashier PIN is set yet. Create one now.,Nta mucungamutungo PIN washyizweho. Kurema ubu.
+No cashier profiles are available for this POS profile yet.,Nta mwirondoro wa kashi uraboneka kuriyi profil ya POS kugeza ubu.
+No cashier-wise discount/void/return activity.,Nta cashier-yagabanutse / ubusa / igikorwa cyo kugaruka.
+No category data found.,Nta cyiciro cyamakuru cyabonetse.
+No category profitability data found.,Nta cyiciro cyunguka cyabonetse.
+No change returned recorded for this shift.,Nta mpinduka yagarutse yanditswe kuriyi nteruro.
+No change-allocation invoices match the current filters.,Nta fagitire yo guhindura-kugabana ihuye niyungurura.
+No charge head breakdown found.,Nta kwishyuza umutwe wabonetse.
+No Company Selected,Nta Isosiyete Yatoranijwe
+No customer sales data found.,Nta makuru yo kugurisha abakiriya yabonetse.
+No day-wise discount/void/return trend.,Nta munsi-wo kugabanya / ubusa / kugaruka.
+No day-wise payment data found.,Nta makuru yumunsi yishyurwa yabonetse.
+No day-wise profitability trend found.,Nta munsi-wunguka wunguka wabonetse.
+No day-wise purchase data found.,Nta makuru yo kugura umunsi yabonetse.
+No day-wise sales trend found.,Ntamunsi wo kugurisha wabonetse.
+No day-wise tax/charges trend found.,Ntamunsi-wumusoro / ibiciro byabonetse.
+No dead stock items.,Nta bintu byapfuye.
+No due date,Nta tariki yagenwe
+No exact repair match found for this invoice,Nta mukino wo gusana wabonetse kuriyi fagitire
+No hourly sales trend found for today.,Nta cyerekezo cyo kugurisha cyisaha cyabonetse uyumunsi.
+No invoice activity found.,Nta gikorwa cya fagitire cyabonetse.
+No invoices found,Nta fagitire zabonetse
+No invoices found. Try different search criteria.,Nta fagitire zabonetse. Gerageza ibipimo bitandukanye byo gushakisha.
+No invoices recorded for this shift.,Nta fagitire zanditswe kuriyi nteruro.
+No item profitability data found.,Nta kintu cyunguka cyabonetse.
+No item sales data found for this period.,Nta makuru yo kugurisha ibintu yabonetse muri iki gihe.
+No items found,Nta kintu cyabonetse
+No items in cart,Nta kintu kiri mu igare
+No items with barcodes to print,Ntakintu gifite kode yo gucapa
+No location-wise top item data found.,Nta kibanza-cyiza cyo hejuru cyibintu byabonetse.
+No low stock alerts right now.,Nta bubiko buke bwo kumenyesha nonaha.
+No low stock items.,Nta bintu biri hasi.
+No matching items in cart,Ntakintu gihuye mumagare
+No month-wise sales trend found.,Nta kwezi-kugurisha kugurisha kuboneka.
+No negative stock items.,Nta bintu bibi.
+No notifications yet,Nta menyesha
+No offline cash movement synced.,Ntamafaranga yo kumurongo wa interineti yahujwe.
+No offline invoices pending synchronization,Nta fagitire zo kuri interineti zitegereje guhuza
+No offline sync issues recorded yet.,Ntakibazo cyo guhuza kumurongo cyanditse kugeza ubu.
+No out-of-stock items.,Nta bintu biri hanze yububiko.
+No outstanding credit invoices for this shift.,Nta fagitire zinguzanyo zidasanzwe kuriyi nteruro.
+No payment collection data found.,Nta makuru yo gukusanya yishyurwa yabonetse.
+No payment rows available on this invoice.,Nta murongo wo kwishyura uboneka kuriyi fagitire.
+No payments registered for this shift.,Nta bwishyu bwanditse kuriyi nteruro.
+No pending balances in this period.,Nta buringanire butegereje muri iki gihe.
+No pending offline invoices,Nta fagitire zitegereje
+No Print Formats Found,Nta bicapiro byabonetse
+No profiles found for selected scope. Falling back to current profile failed.,Nta mwirondoro wabonetse kurwego rwatoranijwe. Kugaruka kumurongo wubu byarananiranye.
+No recent customer activity found.,Nta gikorwa cyabakiriya giherutse cyabonetse.
+No recent stock entries found.,Nta byanditswe vuba aha byabonetse.
+No records found,Nta nyandiko zabonetse
+No reorder suggestions right now.,Nta byifuzo bya reorder ubungubu.
+No repeat customers in this period.,Nta gusubiramo abakiriya muri iki gihe.
+No response from server,Nta gisubizo kiva kuri seriveri
+No return invoices found,Nta fagitire yo kugaruka yabonetse
+No return item trend found.,Nta kintu cyo kugaruka cyabonetse.
+No returnable items found for this invoice,Nta bintu bisubizwa byabonetse kuriyi fagitire
+No returns were processed in this shift.,Nta garuka yatunganijwe muri iri hinduka.
+No risk activity found.,Nta gikorwa cy'ingaruka cyabonetse.
+No sales activity found for this period.,Nta gikorwa cyo kugurisha cyabonetse muri iki gihe.
+No slow moving items.,Nta bintu bigenda buhoro.
+No staff sales activity found.,Nta gikorwa cyo kugurisha abakozi cyabonetse.
+No stock movement for this period.,Nta kugenda kwimigabane muri iki gihe.
+No submitted cash movements in this shift.,Ntabwo amafaranga yatanzwe yatanzwe muriyi nteruro.
+No supplier purchases found in this month.,Nta kugura ibicuruzwa byabonetse muri uku kwezi.
+No suppliers found for this period.,Nta mutanga wabonetse muri iki gihe.
+No sync trigger has run yet in this session.,Nta guhuza sync gukora kugeza ubu muriki cyiciro.
+No tax head breakdown found.,Nta kugabanuka k'umusoro wabonetse.
+No top items found for this location.,Nta bintu byo hejuru byabonetse aha hantu.
+No unpaid invoices,Nta fagitire zitishyuwe
+No variant data found.,Nta makuru atandukanye yabonetse.
+No week-wise sales trend found.,Ntacyumweru cyo kugurisha cyabonetse.
+No.,Oya.
+Nobile Number,Numero ya nimero
+Not available,Ntiboneka
+Not checked,Ntabwo yagenzuwe
+Not selected,Ntabwo byatoranijwe
+Not Set,Ntabwo washyizweho
+Notifications,Kumenyesha
+Offer,Tanga
+Offer Applied,Tanga Byakoreshejwe
+Offer criteria exceeded,Ibipimo byatanzwe birenze
+Offer Item,Tanga Ikintu
+Offer item unavailable,Tanga ikintu kitaboneka
+Offer Removed,Gutanga Byakuweho
+Offer UOM cannot be changed,Tanga UOM ntishobora guhinduka
+Offer?,Gutanga?
+Offers,Amaturo
+Offline,Kurubuga
+Offline & Sync,Offline & Sync
+Offline Capabilities,Ubushobozi bwa Offline
+Offline data status refreshed,Offline data status yongeye kugarurwa
+Offline diagnostics,Kwisuzumisha kumurongo
+Offline Invoices,Inyemezabuguzi
+Offline invoices status,Impapuro zerekana inyemezabuguzi
+Offline invoices synced,Inyemezabuguzi zitangirwa kumurongo
+Offline Queue: {0},Umurongo wa interineti: {0}
+Offline rebuild guidance,Offline yubake ubuyobozi
+Offline restore is unavailable for this session.,Kugarura kumurongo ntibishoboka muriki cyiciro.
+Offline selling is available with degraded capabilities.,Kugurisha kumurongo birahari hamwe nubushobozi bwangiritse.
+Offline snapshot does not match the current POS state.,Offline snapshot ntabwo ihuye na leta ya POS.
+Offline Status,Imiterere ya Offline
+"Offline, terminal, and system controls","Offline, terminal, na sisitemu igenzura"
+OK,Nibyo
+Online,Kumurongo
+Open actions menu,Fungura ibikorwa
+Open balance to collect,Fungura impirimbanyi zo gukusanya
+Open Customer Display,Fungura abakiriya
+Open drawer,Fungura igikurura
+Open invoices,Fungura inyemezabuguzi
+Open Payments?,Gufungura ubwishyu?
+Open POS home,Fungura POS murugo
+Open this screen from POS Menu -> Open Customer Display.,Fungura iyi ecran muri POS menu -> Fungura abakiriya berekana.
+OpenCV image processing enabled - Enhanced barcode detection,Gufungura amashusho ya OpenCV birashoboka - Kumenyekanisha barcode yongerewe
+OpenCV image processing unavailable on this device,Gufungura amashusho ya OpenCV ntibishoboka kuri iki gikoresho
+OpenCV Off,Gufungura
+OpenCV On,Gufungura
+OpenCV processing disabled,Gufungura OpenCV byahagaritswe
+Opening Amount,Amafaranga yo gufungura
+Opening Cash,Gufungura amafaranga
+options,amahitamo
+Order,Tegeka
+Original,Umwimerere
+Other,Ibindi
+Out,Hanze
+Out of Stock,Ntibisanzwe
+Out of Stock Items,Hanze y'ibintu
+Outstanding,Indashyikirwa
+Outstanding Credit by Currency,Inguzanyo zidasanzwe ku Ifaranga
+Overdue,Igihe kirenze
+Overpayment Change,Guhindura umushahara
+Overpayment change deducted: {0},Impinduka zishyuwe zaciwe: {0}
+Packing List,Urutonde
+Page Format,Urupapuro
+Page unavailable offline,Urupapuro rutaboneka kumurongo
+Paid,Yishyuwe
+Paid (orig):,Yishyuwe (inkomoko):
+Paid Amount,Amafaranga yishyuwe
+Paid change cannot be greater than total change!,Impinduka zishyuwe ntizishobora kurenza impinduka zose!
+Paid:,Yishyuwe:
+Parent Item,Ikintu cyababyeyi
+Partial,Igice
+Partly Paid,Amafaranga yishyuwe
+Party Account,Konti y'Ishyaka
+Party Type,Ubwoko bw'Ishyaka
+Pause terminal until next cashier,Hagarika itumanaho kugeza kashi itaha
+PAY,SHAKA
+Payment,Kwishura
+Payment Account,Konti yo Kwishura
+Payment entries processed for Invoice {0},Inyandiko zo kwishyura zitunganijwe kuri fagitire {0}
+Payment Entry Type,Ubwoko bwo Kwishura
+Payment History,Amateka yo Kwishura
+Payment ID,Indangamuntu yo kwishyura
+Payment Method Report,Raporo yuburyo bwo kwishyura
+Payment Methods,Uburyo bwo Kwishura
+Payment of {0} received successfully.,Kwishura {0} byakiriwe neza.
+Payment Progress,Amajyambere yo Kwishura
+Payment Reconciliation,Ubwiyunge bwo Kwishura
+Payment request status could not be retrieved. Please try again,Imiterere yo gusaba kwishyurwa ntishobora kuboneka. Nyamuneka gerageza
+Payment Request took too long to respond. Please try requesting for payment again,Gusaba kwishyura byatwaye igihe kinini kugirango usubize. Nyamuneka gerageza usabe kwishyura
+Payment saved offline,Ubwishyu bwabitswe kumurongo
+Payment State,Leta yo Kwishura
+Payment Status,Imiterere yo Kwishura
+Payment submitted but print function could not be executed. Payment name not found.,Ubwishyu bwatanzwe ariko imirimo yo gucapa ntishobora gukorwa. Izina ryo kwishyura ntiriboneka.
+Payment submitted.,Amafaranga yatanzwe.
+Payment Summary,Incamake yo Kwishura
+Payments,Kwishura
+Payments are not open. Do you want to open payments and submit?,Kwishura ntabwo bifunguye. Urashaka gufungura ubwishyu no gutanga?
+Payments by Mode of Payment,Kwishura muburyo bwo kwishyura
+PDF,PDF
+Peak Hour,Isaha yo hejuru
+Peak Memory:,Kwibuka impinga:
+Peak Server:,Seriveri:
+Peak:,Impinga:
+Pending,Bitegereje
+Pending Amount,Amafaranga ategereje
+Pending count updated from {0} to {1},Gutegereza kubara byavuguruwe kuva {0} kugeza kuri {1}
+Pending Exposure,Gutegereza Kumurika
+Pending Invoices,Inyemezabuguzi zitegereje
+Pending Ratio,Igipimo gitegereje
+Pending Sales,Gutegereza kugurisha
+Pending sales: {0} | Cache usage: {1}%,Gutegereza kugurisha: {0} | Gukoresha ubwihisho: {1}%
+Pending Sync,Gutegereza Sync
+Pending: {0},Bitegereje: {0}
+Pending: {0} | Synced: {1} | Draft: {2},Bitegereje: {0} | Byahujwe: {1} | Inyandiko: {2}
+Per Page,Kurupapuro
+Personal,Umuntu ku giti cye
+Personal preferences adjust the current cashier experience without changing the active POS route.,Ibyifuzo byawe bwite bihindura uburambe bwa cashier udahinduye inzira ikora ya POS.
+PIN confirmation does not match.,Kwemeza PIN ntabwo bihuye.
+PIN must be 4 to 8 digits.,PIN igomba kuba imibare 4 kugeza 8.
+Please add at least one item.,Nyamuneka ongeraho byibuze ikintu kimwe.
+Please allow camera access to scan codes,Nyamuneka wemerere kamera kubona kode ya scan
+Please enter payment amount,Nyamuneka andika amafaranga yo kwishyura
+Please fill all required fields,Nyamuneka wuzuze imirima yose isabwa
+Please make a payment or select a payment,Nyamuneka kora ubwishyu cyangwa uhitemo ubwishyu
+Please request phone payment or use another payment method,Nyamuneka saba kwishyura terefone cyangwa ukoreshe ubundi buryo bwo kwishyura
+Please select a customer first,Nyamuneka hitamo umukiriya
+Please select a party,Nyamuneka hitamo ibirori
+Please select a party before reconciling.,Nyamuneka hitamo ibirori mbere yo kwiyunga.
+Please select a valid movement type.,Nyamuneka hitamo ubwoko bwimikorere yemewe.
+Please select an invoice,Nyamuneka hitamo inyemezabuguzi
+Please select company before reconciling.,Nyamuneka hitamo sosiyete mbere yo kwiyunga.
+Please set the customer's mobile number,Nyamuneka shyira numero ya terefone igendanwa
+Please try again or enter the item manually.,Nyamuneka ongera ugerageze cyangwa wandike ikintu nintoki.
+Please verify the barcode or check the item's availability.,Nyamuneka reba barcode cyangwa urebe ikintu kiboneka.
+Points,Ingingo
+Popup blocked. Please allow popups.,Popup yahagaritswe. Nyamuneka wemerere popups.
+POS,POS
+POS controls and maintenance,POS igenzura no kuyitaho
+POS Expense is disabled for this POS Profile.,Amafaranga ya POS arahagarikwa kuriyi myirondoro ya POS.
+POS is running with limited offline prerequisites.,POS ikora hamwe na interineti ntarengwa.
+POS Profile,Umwirondoro wa POS
+Position the QR code or barcode within the scanning area,Shyira QR code cyangwa barcode mumwanya wo gusikana
+Posting,Kohereza
+Posting and Price List,Kohereza no kurutonde rwibiciro
+Posting Date,Itariki yoherejwe
+Preparing background sync,Gutegura guhuza ibice
+"Press OK to continue offline with a warning, or Cancel to retry.","Kanda OK kugirango ukomeze kumurongo hamwe no kuburira, cyangwa Kureka kugerageza."
+Previous unit of measure,Igice cyambere cyo gupima
+Price List,Urutonde rwibiciro
+Price List Rate,Igipimo cyibiciro
+Price list rate updated locally only,Igipimo cyibiciro byavuguruwe mugace gusa
+Pricing & Discounts,Igiciro & Kugabanuka
+Pricing Rule,Amategeko agenga ibiciro
+Print,Icapa
+Print Draft,Shushanya Inyandiko
+Print Format (Invoice),Icapa Imiterere (Inyemezabuguzi)
+Print Format (Order),Shira Imiterere (Iteka)
+Print invoice,Shira inyemezabuguzi
+Print Purchase Invoice instead of PO,Shira inyemezabuguzi yo kugura aho kuba PO
+Printer,Mucapyi
+Processed returns impacting the shift totals,Inyungu zitunganijwe zigira ingaruka kuri shift zose
+Processing Payment,Gutunganya ubwishyu
+Processing payment entries for Invoice {0},Gutunganya ibyinjira byishyurwa kuri fagitire {0}
+Profile,Umwirondoro
+Profiles,Umwirondoro
+Profit,Inyungu
+Profit: Invoice Item Estimate,Inyungu: Ikigereranyo cya Fagitire
+Profit: Stock Ledger (COGS),Inyungu: Igitabo cyimigabane (COGS)
+Profitability Report,Raporo y'inyungu
+Prorated return discount,Kugabanuka kugaruka
+Purchase Amount,Kugura Amafaranga
+Purchase Invoices,Kugura inyemezabuguzi
+Purchase Order created,Kugura byashyizweho
+Qty,Qty
+Qualified,Yujuje ibyangombwa
+Quantity,Umubare
+Quantity exceeds available stock,Umubare urenze ububiko bwaboneka
+Quick Actions,Ibikorwa Byihuse
+Quotation {0} is Submitted,Amagambo {0} Yatanzwe
+Quotation submitted,Amajambo yatanzwe
+QZ Tray connected.,QZ Tray irahujwe.
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ Tray yaciwe n'intoki. Kanda Kwihuza kugirango ubisubiremo.
+QZ Tray is not connected.,QZ Tray ntabwo ihujwe.
+QZ Tray Setup,QZ Gushiraho
+Rate,Igipimo
+Rate adjusted to maximum allowed discount,Igipimo cyahinduwe kugiciro ntarengwa cyemewe
+Ready,Witegure
+Ready to resume,Witegure gusubukura
+Ready!,Witegure!
+Real-time POS insights for retail operations.,Igihe nyacyo POS ishishoza kubikorwa byo gucuruza.
+Rebuild Offline Data,Ongera wubake amakuru ya Offline
+Receive,Akira
+Receive now,Akira nonaha
+Received,Yakiriwe
+Received:,Yakiriwe:
+Recent Movement Entries,Ibyinjira byimuka vuba
+Recent updates about your invoices,Amakuru agezweho kubyerekeye inyemezabuguzi
+Recently Active Customers,Vuba aha
+Rechecking connection,Kugenzura ihuza
+Reconcile payment methods and close shift,Guhuza uburyo bwo kwishyura no gufunga shift
+Reconciling Payments,Kwiyunga Kwishura
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","Ongera uhuze kandi ufungure iyi page rimwe mugihe uri kumurongo, hanyuma kuvugurura kumurongo bizashobora kugarura."
+Reconnect online to refresh cached offline data from the server.,Ongera uhuze kumurongo kugirango uhindure amakuru yatanzwe kuri seriveri.
+Recreate local offline prerequisites from scratch,Kora ibyibanze bya interineti byateganijwe kuva kera
+Recv:,Recv:
+Redeem,Gucungura
+Redeem / Scan,Gucungura / Gusikana
+Redeem Amount,Gucungura amafaranga
+Redeem Mode,Uburyo bwo gucungura
+Redeemed Amount,Amafaranga yacunguwe
+Redeemed credit cannot be greater than its total.,Inguzanyo yacunguwe ntishobora kurenza igiteranyo cyayo.
+Redemption and Totals,Gucungurwa hamwe
+Reference,Reba
+Refresh,Ongera
+Refresh Exchange Rate,Kuvugurura igipimo cyo kuvunja
+Refresh Offline Data,Kuvugurura amakuru ya interineti
+Refresh Printers,Kuvugurura Mucapyi
+Refund,Gusubizwa
+Release Notes,Kurekura Inyandiko
+Reload,Ongera usubiremo
+Reload customers,Ongera usubiremo abakiriya
+Reload Items,Ongera usubiremo ibintu
+Reload Now,Ongera usubiremo
+Reload to apply the latest changes. Your current session will be refreshed.,Ongera ushyire mubikorwa impinduka zanyuma. Isomo ryanyu ryubu rizavugururwa.
+Reload Workflow,Ongera usubiremo akazi
+Remarks,Ijambo
+Remarks are required.,Ijambo rirakenewe.
+Remove,Kuraho
+Remove barcode item,Kuraho ikintu cya barcode
+Remove cached data and reload the POS app,Kuraho amakuru yabitswe hanyuma usubiremo porogaramu ya POS
+Remove item,Kuraho ikintu
+Remove Offer,Kuraho ituro
+Reorder / Purchase Suggestions,Kwiyandikisha / Kugura Ibyifuzo
+Repair Candidate,Gusana Umukandida
+Repair Change Allocation,Gusana Impinduka
+Repair requires an online connection,Gusana bisaba guhuza kumurongo
+Repaired,Yasanwe
+Repairing change allocation,Gusana ibyagabanijwe
+Repeat Customers,Subiramo abakiriya
+Repeat Rate,Subiramo igipimo
+Request,Gusaba
+Request ID: {0},Gusaba ID: {0}
+Request Payment,Saba ubwishyu
+Requested route: {0},Inzira isabwa: {0}
+Required columns cannot be hidden,Inkingi zisabwa ntizishobora guhishwa
+Reset,Gusubiramo
+Reset item name,Ongera usubize izina
+Reset to Default,Ongera usubiremo
+Resource Health,Ubuzima bwiza
+Restricted,Birabujijwe
+Restricted operational controls for supervisors only.,Igenzurwa ryimikorere kubagenzuzi gusa.
+Retry,Ongera ugerageze
+Retry route,Ongera usubire inzira
+Return,Garuka
+Return Amount,Garuka Amafaranga
+Return Count,Garuka Kubara
+Return items must have negative quantities,Garuka ibintu bigomba kugira umubare mubi
+Return total must be negative,Garuka byose bigomba kuba bibi
+Return Valid Until,Garuka Byemewe Kugeza
+Return window passed,Garuka idirishya ryarenze
+Return without Invoice,Garuka nta fagitire
+Returns,Garuka
+Returns / Voids / Discounts,Garuka / Ubusa / Kugabanuka
+Returns by Currency,Garuka ukoresheje Ifaranga
+Revenue,Amafaranga yinjira
+Review shift totals before submitting the closing entry,Ongera uhindure ibintu byose mbere yo gutanga ibyinjira
+Round Off,Round Off
+Rows,Imirongo
+Rows:,Imirongo:
+Rule,Amategeko
+Sale,Igurisha
+Sales,Kugurisha
+Sales Order {0} is Submitted,Icyemezo cyo kugurisha {0} cyatanzwe
+Sales Person and Print,Umuntu ugurisha no gucapa
+Sales Person not found,Umuntu ugurisha ntabwo yabonetse
+Sales processed,Igurisha ryatunganijwe
+Sales Return,Kugaruka kugurisha
+Sales Trend Report,Raporo yerekana ibicuruzwa
+Save,Bika
+Save & Clear,Bika & Clear
+Save as POS Profile Default,Bika nka POS Umwirondoro Mburabuzi
+Save Settings,Bika Igenamiterere
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,Bika icapiro ryatoranijwe nka POS Umwirondoro usanzwe bityo irerekana mu buryo bwikora kuriyi mikorere.
+Saved as draft because: {0},Yakijijwe nkumushinga kuko: {0}
+Saving...,Kuzigama ...
+Scale barcode detected. Quantity here is the number of labels to print.,Kode ya barcode yamenyekanye. Umubare hano ni umubare wibirango byo gucapa.
+Scale barcode settings are not configured. Using item barcode only.,Igenamiterere rya barcode igenamiterere ntabwo ryashyizweho. Gukoresha ikintu kode gusa.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,Ibipimo byerekana urugero barcode yabuze kuriyi ngingo / UOM. Gukoresha ikintu kode gusa.
+Scan an existing card and top it up without leaving the payment flow.,Sikana ikarita ihari hanyuma uyishyire hejuru utaretse kwishyura.
+Scan Error,Gusikana Ikosa
+Scan or enter a gift card code to check balance or redeem.,Sikana cyangwa wandike ikarita yimpano kugirango ugenzure neza cyangwa ucungure.
+Scan or paste the card code below.,Sikana cyangwa wandike ikarita yamakarita hepfo.
+Scan QR Code/Barcode,Sikana QR Code / Barcode
+Scan with camera,Sikana ukoresheje kamera
+Scan-First Flow,Gusikana-Itemba rya mbere
+Scanned Code:,Kode ya Scan:
+Scanning for: {0},Gusikana kuri: {0}
+Scanning items,Gusikana ibintu
+Scan-Ready,Gusikana
+Scope,Umwanya
+Scope: All Profiles,Igipimo: Imyirondoro yose
+Scope: Current Profile,Igipimo: Umwirondoro wa none
+Scope: Specific Profile,Igipimo: Umwirondoro wihariye
+Search,Shakisha
+Search Account,Shakisha Konti
+Search an invoice and continue the return flow without extra steps.,Shakisha inyemezabuguzi hanyuma ukomeze kugaruka nta ntambwe yinyongera.
+Search customer,Shakisha umukiriya
+Search invoices or customers,Shakisha inyemezabuguzi cyangwa abakiriya
+Search item,Shakisha ikintu
+Search item / code,Shakisha ikintu / kode
+Search items or barcode,Shakisha ibintu cyangwa barcode
+Search Mpesa Payments,Shakisha Mpesa Kwishura
+Search return invoices or customers,Shakisha inyemezabuguzi cyangwa abakiriya
+Search supplier,Shakisha utanga isoko
+Search unpaid invoices or customers,Shakisha inyemezabuguzi zitishyuwe cyangwa abakiriya
+Secure context (HTTPS or localhost) is required for camera access.,Imiterere itekanye (HTTPS cyangwa localhost) irakenewe kugirango kamera igerweho.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,Imiterere itekanye (HTTPS) isabwa kugirango kamera igerweho. Nyamuneka koresha HTTPS kugirango ugere kuri kamera.
+Select,Hitamo
+Select a cashier first.,Banza uhitemo kashiire.
+Select a customer,Hitamo umukiriya
+Select a customer to use coupon,Hitamo umukiriya kugirango akoreshe coupon
+Select a printer to use QZ silent printing.,Hitamo printer kugirango ukoreshe QZ icapiro ryicecekeye.
+Select Batch,Hitamo Batch
+Select Columns to Display,Hitamo Inkingi Kugaragaza
+Select items to sell,Hitamo ibintu byo kugurisha
+Select Payment,Hitamo Kwishura
+Select Payment Account,Hitamo Konti yo Kwishura
+Select printer,Hitamo printer
+Select Return Invoice,Hitamo Inyemezabuguzi
+Select S.O,Hitamo S.O.
+Select Sales Orders,Hitamo amabwiriza yo kugurisha
+Select the cashier who is taking over this terminal.,Hitamo kashi ufata iyi terminal.
+Selected,Byahiswemo
+Selected movement type is not allowed by POS Profile.,Ubwoko bwimodoka bwatoranijwe ntabwo byemewe na POS Umwirondoro.
+Selected Payments,Ubwishyu bwatoranijwe
+Sensitive actions kept away from quick taps.,Ibikorwa byiyumvo byirinze gukanda vuba.
+Serial,Urukurikirane
+Serial Numbers,Imibare ikurikirana
+Server CPU Usage:,Seriveri CPU Ikoreshwa:
+Server Health,Ubuzima bwa Serveri
+Server Memory Usage:,Seriveri Yibukwa:
+Server Metrics,Ibipimo bya seriveri
+Server Uptime:,Seriveri Uptime:
+Service Charges,Amafaranga ya serivisi
+Session,Isomo
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,Shiraho buri mucungamutungo PIN muburyo bwabakoresha kandi ugumane abanyamuryango ba terminal bashinzwe muri POS Umwirondoro.
+Settings,Igenamiterere
+Settings in this section update the POS workspace without changing the current route.,Igenamiterere muri iki gice rivugurura umwanya wa POS udahinduye inzira igezweho.
+Setup complete!,Gushiraho byuzuye!
+Share,Sangira
+Shared terminal,Igice gisangiwe
+Shift Closed Snapshot,Hindura Ifoto Ifunze
+Shift Overview,Incamake
+Show,Erekana
+Show cart on customer-facing screen,Erekana igare kuri ecran-ireba abakiriya
+Show last invoice rate,Erekana igipimo cya fagitire yanyuma
+Show rate info,Erekana igipimo cyamakuru
+Show Repair Candidates,Erekana Abakandida Basana
+Show search tools,Erekana ibikoresho by'ishakisha
+Show the active cart on a customer-facing screen,Erekana igare rikora kuri ecran-ireba abakiriya
+Showing {0}-{1} of {2},Kwerekana {0} - {1} ya {2}
+Showing 0 of 0,Kwerekana 0 ya 0
+Shows the distribution of invoices per currency,Erekana ikwirakwizwa rya fagitire ku ifaranga
+Sign out of the current POS session,Sohora hanze ya POS isomo
+Size:,Ingano:
+Skipped Payments,Yasibye Kwishura
+Skipping items without barcodes,Gusiba ibintu bidafite kode
+Slow Moving,Buhoro Buhoro
+Slow Moving Items,Buhoro Buhoro Ibintu
+Slow Queries:,Buhoro Buhoro:
+Sold,Igurishwa
+Source,Inkomoko
+Source Cash Account (Optional Override),Inkomoko y'amafaranga ya konte (Birenzeho)
+Source Ex. Rate:,Inkomoko Ex. Igipimo:
+Source Rate:,Igipimo cy'inkomoko:
+Specific Profile,Umwirondoro wihariye
+Split Invoices,Gutandukanya inyemezabuguzi
+Staff / Cashier Performance Report,Raporo y'imikorere y'abakozi / Cashier
+Status,Imiterere
+Stock,Ububiko
+Stock Information,Amakuru yimigabane
+Stock is lower than requested,Ububiko buri munsi yibisabwa
+Stock is lower than requested:\n{0},Ububiko buri munsi yibisabwa: \ n {0}
+Stock Movement Report,Raporo yimigabane
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,Kuvugurura ububiko: {0} ifite {1} irahari. Ongeraho {2} bizazana ububiko munsi ya zeru.
+Submit,Tanga
+Submit & Print,Tanga & Icapa
+Submit Deposit,Tanga Kubitsa
+Submit Expense,Tanga amafaranga
+Submitted,Yatanzwe
+Submitted Cash Movements,Kohereza amafaranga
+Submitted entries,Byoherejwe
+Successfully scanned:,Gusikana neza:
+Suggested,Igitekerezo
+Suggested Qty,Igitekerezo Qty
+Supervisor Access,Kugenzura
+Supervisor permissions unlock issuance and reloads,Uruhushya rwumugenzuzi rufungura itangwa na reloads
+Supervisor Tools,Ibikoresho byo kugenzura
+Supplier,Utanga isoko
+Supplier and dates are required.,Utanga amatariki n'amatariki arakenewe.
+Supplier Invoices,Inyemezabuguzi
+Supplier is required.,Utanga isoko arakenewe.
+Supplier name is required,Izina ryabatanga rirakenewe
+Supplier Payments,Kwishura ibicuruzwa
+Supplier Purchase Summary,Incamake yo kugura ibicuruzwa
+Suppliers,Abatanga isoko
+Suppliers not found,Abatanga isoko ntibabonetse
+Switch Camera,Hindura Kamera
+Switch Cashier,Hindura Cashier
+Switch the POS appearance theme,Hindura insanganyamatsiko ya POS
+Switched to:,Yahinduwe kuri:
+Sync All Invoices,Guhuza inyemezabuguzi zose
+Sync Offline Cash Movements ({0}),Guhuza Offline Amafaranga Yimuka ({0})
+Sync Offline Sales,Guhuza kugurisha kumurongo
+Synced {0} offline cash movement(s).,Guhuza {0} kumurongo wamafaranga (s).
+Syncing items in background,Guhuza ibintu inyuma
+System / Diagnostics,Sisitemu / Gusuzuma
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","Ibikorwa bya sisitemu nubushobozi buke bwo kugenzura nkibisobanuro bya porogaramu, gushyigikira gusuzuma, no kugenzura amasomo."
+System Information,Sisitemu Amakuru
+System Status,Imiterere ya Sisitemu
+Tables:,Imbonerahamwe:
+Tap the button below to redeem a gift card during checkout.,Kanda buto hepfo kugirango ucungure ikarita yimpano mugihe cyo kugenzura.
+Target,Intego
+Target Ex. Rate:,Intego Ex. Igipimo:
+Target Rate:,Igipimo cy'intego:
+Tax,Umusoro
+Tax / Charges Report,Raporo y'Imisoro / Amafaranga
+Tax Heads,Abayobozi b'Imisoro
+Taxable Amount,Amafaranga asoreshwa
+Tendered,Amasoko
+Terminal,Terminal
+Terminal & Devices,Terminal & Ibikoresho
+Terminal locked,Terminal ifunze
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","Ibikoresho bya terefone bigira ingaruka kuri sitasiyo yo kugenzura, abakiriya-bareba ibyerekanwa, hamwe na printer / igikoresho kizaza."
+Territory not found,Ifasi ntiyabonetse
+The amount paid is not complete,Amafaranga yishyuwe ntabwo yuzuye
+The app stores data locally for offline use. This is called cache.,Porogaramu ibika amakuru mugace kugirango ikoreshwe kumurongo. Ibi byitwa cache.
+The invoice stayed in draft. Please review and submit it manually.,Inyemezabuguzi yagumye mu mbanzirizamushinga. Nyamuneka subiremo kandi utange intoki.
+The maximum discount allowed is,Igabanywa ntarengwa ryemewe ni
+The quantity for {0} has been adjusted to the maximum available stock.,Ingano ya {0} yahinduwe kuri stock ntarengwa iboneka.
+The system could not retrieve the item details. Please try again.,Sisitemu ntishobora kugarura amakuru arambuye. Nyamuneka gerageza.
+These invoices will be synced when connection is restored,Inyemezabuguzi zizahuzwa mugihe ihuza ryagaruwe
+This action now opens inside the settings workspace.,Igikorwa noneho gifungura imbere mumikorere yumwanya.
+This coupon already used !,Iyi talon imaze gukoreshwa!
+This invoice does not need change-allocation repair,Inyemezabuguzi ntikeneye gusanwa-kugabana
+This invoice is already repaired,Inyemezabuguzi yamaze gusanwa
+This is an item template. Please choose a variant.,Nicyitegererezo. Nyamuneka hitamo impinduka.
+this item,iyi ngingo
+This POS page could not be opened offline because its code was not cached on this terminal yet.,Uru rupapuro rwa POS ntirushobora gufungurwa kumurongo kubera ko code yarwo itigeze ibikwa kuri iyi terminal.
+This Serial Number {0} has already been added!,Iyi Serial Numero {0} yamaze kongerwaho!
+Threshold,Imipaka
+Time,Igihe
+Tip: Clear cache regularly to free up space and keep the app fast.,Inama: Kuraho cache buri gihe kugirango ubone umwanya kandi ukomeze porogaramu vuba.
+Tip: Close unused tabs or apps to reduce lag.,Inama: Funga tabs cyangwa porogaramu zidakoreshwa kugirango ugabanye gutinda.
+Tip: Monitor slow queries and table size for optimal performance.,Impanuro: Kurikirana ibibazo bitinda nubunini bwimbonerahamwe kugirango bikore neza.
+To Be Paid,Kwishyurwa
+To Date,Itariki
+Today,Uyu munsi
+Today Profit,Uyu munsi Inyungu
+Today Sales,Uyu munsi Kugurisha
+Toggle navigation drawer,Toggle yogushushanya
+Toggle Theme,Toggle Insanganyamatsiko
+Tools,Ibikoresho
+Tools for customer-facing screens and terminal-specific actions.,Ibikoresho kubakiriya-bareba ecran hamwe nibikorwa byihariye.
+Top Brand,Ikirango cyo hejuru
+Top Category,Icyiciro cyo hejuru
+Top Charge Head,Umutwe wo hejuru
+Top Customers,Abakiriya bo hejuru
+Top Discount,Kugabanuka hejuru
+Top Items by Location,Ibintu byo hejuru ukurikije aho biherereye
+Top Margin,Hejuru
+Top Pending,Hejuru
+Top Profit Item,Ikintu cyo hejuru cyunguka
+Top Return Items,Ibintu byo kugaruka hejuru
+Top Sales by Cashier,Igurishwa rya mbere na Cashier
+Top Supplier,Isoko ryo hejuru
+Top Suppliers by Spend,Abatanga Isoko rya mbere ukoresheje
+Top Tables,Imbonerahamwe yo hejuru
+Top Tax Head,Umuyobozi mukuru wimisoro
+Top Up Amount,Hejuru Hejuru Amafaranga
+Top Up Card,Ikarita yo hejuru
+Top Up Mode,Uburyo bwo hejuru
+Top Variant,Impinduka zo hejuru
+Total,Igiteranyo
+Total Amount,Umubare wose
+Total Change,Impinduka zose
+Total Charges,Amafaranga yose
+Total In,Byose Muri
+Total Invoices,Inyemezabuguzi zose
+Total Items,Ibintu byose
+Total Mpesa,Mpesa yose
+Total Out,Byose
+Total Payments,Amafaranga yose yishyuwe
+Total Purchase,Kugura Byose
+Total Selected :,Byose byatoranijwe:
+Total Size,Ingano yose
+Total Stock Qty,Umubare wuzuye Qty
+Total:,Igiteranyo:
+Totals by Invoice Currency,Amafaranga yose hamwe na fagitire
+Track how much cash was handed back to customers,Kurikirana umubare w'amafaranga yasubijwe abakiriya
+"Track recent sales, collect unpaid balances, and reopen saved work","Kurikirana ibicuruzwa biherutse, gukusanya amafaranga atishyuwe, no gufungura imirimo wabitswe"
+Transaction ID,Indangamuntu
+Transfer,Kwimura
+Try a different search term or clear the cart search.,Gerageza ijambo ritandukanye cyangwa ushakishe igare.
+Try adjusting your search or filters,Gerageza guhindura ubushakashatsi bwawe cyangwa muyungurura
+Try another source or refresh the list.,Gerageza indi soko cyangwa kuvugurura urutonde.
+Try changing the date range or status filter.,Gerageza guhindura itariki urwego cyangwa imiterere ya filteri.
+Type,Andika
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,Ntushobora kugera kuri kamera niyo igenamiterere ryibanze. Nyamuneka reba uruhushya rwa kamera hamwe nibikoresho bihuye.
+Unable to add offer item {0}. Please refresh and try again.,Ntushobora kongeramo ibintu {0}. Nyamuneka reba kandi ugerageze.
+Unable to add offer item. Please refresh and try again.,Ntushobora kongeramo ikintu. Nyamuneka reba kandi ugerageze.
+Unable to add scanned item.,Ntushobora kongeramo ikintu cyerekanwe.
+Unable to create purchase order,Ntibishobora gukora gahunda yo kugura
+Unable to delete draft invoice,Ntushobora gusiba inyemezabuguzi
+Unable to fetch documents,Ntibishobora kuzana inyandiko
+Unable to fetch draft orders,Ntibishobora kuzana umushinga wibyateganijwe
+Unable to fetch invoice history,Ntibishobora kuzana amateka ya fagitire
+Unable to fetch M-Pesa payments,Ntibishobora kuzana ubwishyu bwa M-Pesa
+Unable to fetch sales orders,Ntibishobora kuzana ibicuruzwa byo kugurisha
+Unable to fetch unpaid invoices,Ntushobora kuzana inyemezabuguzi zitishyuwe
+Unable to generate scale barcode,Ntibishobora kubyara igipimo kode
+Unable to issue gift card.,Ntushobora gutanga ikarita yimpano.
+Unable to load cashier PIN status.,Ntushobora gupakira kashi ya PIN imiterere.
+Unable to load document,Ntushobora gupakira inyandiko
+Unable to load draft invoice,Ntushobora gupakira inyemezabuguzi
+Unable to load gift card balance.,Ntushobora gupakira ikarita yimpano.
+Unable to load invoice details,Ntushobora gupakira inyemezabuguzi
+Unable to load parked order,Ntushobora gupakira gahunda ihagaze
+Unable to load the selected sales order,Ntushobora gupakira ibicuruzwa byatoranijwe
+Unable to prepare document,Ntushobora gutegura inyandiko
+Unable to prepare return invoice,Ntushobora gutegura inyemezabuguzi yo kugaruka
+Unable to print draft invoice,Ntushobora gucapa inyemezabuguzi
+Unable to print submitted invoice,Ntushobora gucapa inyemezabuguzi yatanzwe
+Unable to process document action,Ntibishobora gutunganya inyandiko yibikorwa
+Unable to repair change allocation,Ntibishobora gusana impinduka zagabanijwe
+Unable to save cashier PIN.,Ntushobora kuzigama amafaranga PIN.
+Unable to save the rate to the backend price list,Ntushobora kubika igipimo kurutonde rwibiciro byinyuma
+Unable to submit invoice,Ntushobora gutanga inyemezabuguzi
+Unable to submit the selected payment,Ntushobora gutanga ubwishyu bwatoranijwe
+Unable to top up gift card.,Ntushobora kuzuza ikarita yimpano.
+Unable to verify cashier PIN.,Ntibishobora kugenzura cashier PIN.
+Unallocated,Ntibagabanijwe
+Unallocated:,Ntibagabanijwe:
+Unavailable,Ntibishoboka
+Unknown,Ntazwi
+Unknown Item,Ikintu kitazwi
+Unknown Warehouse,Ububiko butazwi
+Unlock POS,Fungura POS
+Unpaid,Yishyuwe
+"Unselected payments stay unallocated first, then auto reconcile after submit.","Ubwishyu butatoranijwe bugumaho mbere, hanyuma imodoka yiyunge nyuma yo gutanga."
+UOM,UOM
+UOM not found,UOM ntabwo yabonetse
+Update available,Kuvugurura birahari
+Update Customer,Kuvugurura umukiriya
+Update PIN,Kuvugurura PIN
+Update Price List Rate,Kuvugurura Igiciro Urutonde
+Updated,Yavuguruwe
+Updates and app info that stay out of the cashier flow.,Kuvugurura hamwe namakuru ya porogaramu ataguma hanze ya cashier.
+Updates automatically,Kuvugurura mu buryo bwikora
+Usage,Ikoreshwa
+Usage Stats,Imibare ikoreshwa
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,Koresha imibare 4 kugeza kuri 8 PIN kugirango uhindure cashier no gufungura terminal.
+Use Cashier,Koresha Cashier
+Use date range to search for older invoices,Koresha itariki kugirango ushakishe inyemezabuguzi zishaje
+"Use one field for manual code entry, barcode scans, or QR scans.","Koresha umurima umwe kugirango wandike intoki, scan ya barcode, cyangwa QR scan."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","Koresha urujya n'uruza rw'akazi kuringaniza igenzura, gusohora gushya, no hejuru hejuru utaretse POS."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","Koresha iki gice mugihe cashe yamakuru asabwa akeneye gusubirwamo, kwiyubaka, cyangwa gusuzuma."
+Use Western numerals,Koresha imibare y'Iburengerazuba
+Used:,Byakoreshejwe:
+Using basic camera settings due to device limitations,Gukoresha kamera yibanze ya kamera kubera ubushobozi bwibikoresho
+Using cached customer balance,Gukoresha uburinganire bwabakiriya
+Valid until,Byemewe kugeza
+Variance %,Itandukaniro%
+Variants,Ibihinduka
+Variant-wise,Binyuranye
+Verify closing amounts for each payment method,Kugenzura amafaranga yo gufunga kuri buri buryo bwo kwishyura
+View all,Reba byose
+View app information and current build details,Reba amakuru ya porogaramu nibisobanuro byubaka
+View Data Diagnostics,Reba Gusuzuma Ibyatanzwe
+View Details,Reba Ibisobanuro
+View invoice details,Reba inyemezabuguzi
+View notifications,Reba imenyesha
+View offline invoices,Reba inyemezabuguzi zo kuri interineti
+View restricted POS insights,Reba ubushishozi bwa POS
+Void Amount,Umubare wubusa
+Void Count,Kubara ubusa
+Voids,Ubusa
+Waiting for cart items,Gutegereza ibintu byikarita
+Waiting for payment...,Gutegereza kwishyura ...
+Walk-in Customer,Kugenda-Umukiriya
+Warehouse,Ububiko
+Warning: High cache usage may affect performance.,Icyitonderwa: Gukoresha cache nyinshi bishobora guhindura imikorere.
+Warning: High lag may indicate heavy processing or browser slowness.,Icyitonderwa: Gutinda cyane birashobora kwerekana gutunganya cyane cyangwa gutinda kwa mushakisha.
+Week ?,Icyumweru?
+Week-wise,Icyumweru
+Weight (g),Ibiro (g)
+Weight (grams),Uburemere (garama)
+We'll let you know if an invoice fails to submit,Tuzakumenyesha niba inyemezabuguzi yananiwe gutanga
+Workflow,Urupapuro rw'akazi
+Write off amount cannot exceed the POS profile maximum of {0},Andika amafaranga ntashobora kurenza umwirondoro wa POS ntarengwa {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,Kwandika amafaranga arenze imipaka yemerewe ({0}). Nyamuneka ongeraho ubwishyu kumafaranga asigaye.
+Yes,Yego
+"Yes, Cancel sale","Nibyo, Hagarika kugurisha"
+"Yes, Close","Yego, Funga"
+You are not allowed to print draft invoices,Ntiwemerewe gucapa inyemezabuguzi
+You are offline. Add Payment will work again when the connection is restored.,Nturi kumurongo. Ongeraho Kwishura bizongera gukora mugihe ihuza ryagaruwe.
+You have no notifications right now,Nta matangazo ufite ubu
+Your Cart,Igare ryawe

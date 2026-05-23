@@ -1,0 +1,1362 @@
+POS Awesome,POS 최고
+Fetch Items Directly from Server,서버에서 직접 항목 가져오기
+Menu,메뉴
+Actions,작업
+Close Shift,교대근무 종료
+End current session,현재 세션 종료
+Print Last Invoice,마지막 송장 인쇄
+Reprint previous transaction,이전 거래 재인쇄
+Sync Offline Invoices,오프라인 송장 동기화
+Upload pending transactions,대기 중인 거래 업로드
+Go Online,온라인으로 전환
+Go Offline,오프라인으로 전환
+Disable offline mode,오프라인 모드 비활성화
+Work without server connection,서버 연결 없이 작업
+Clear Cache,캐시 지우기
+Remove local data and refresh,로컬 데이터 제거 및 새로 고침
+About,소개
+App information,앱 정보
+Language,언어
+Change interface language,인터페이스 언어 변경
+Light Mode,라이트 모드
+Dark Mode,다크 모드
+Switch theme appearance,테마 모양 전환
+Logout,로그아웃
+Sign out of session,세션에서 로그아웃
+Select Language,언어 선택
+Choose your preferred language for the POS interface,POS 인터페이스에 대해 선호하는 언어를 선택하세요
+Language will be changed to,언어는 다음으로 변경됩니다.
+Cancel,취소
+Change Language,언어 변경
+Close,닫기
+Cannot change language - same language selected,언어를 변경할 수 없습니다. 동일한 언어가 선택되었습니다.
+Language changed successfully! Reloading...,언어가 성공적으로 변경되었습니다! 새로고침 중...
+Failed to change language,언어를 변경하지 못했습니다.
+Unknown error,알 수 없는 오류
+- Total Unallocated,- 총 할당되지 않음
+* Required,* 필수
+{0} (Qty: {1}),{0} (수량: {1})
+{0} actions,{0} 작업
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0}의 재고는 {1}개뿐입니다. {2}을(를) 요청하셨습니다. 수량을 조정하거나 재입고하세요.
+{0} offline invoice{1} pending,{0} 오프라인 인보이스{1} 보류 중
+{0} offline invoice{1} saved as draft,{0} 오프라인 인보이스{1}가 초안으로 저장되었습니다.
+{0} offline invoice{1} synced,{0} 오프라인 인보이스{1} 동기화됨
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0}일 전
+{0}h ago,{0}시간 전
+{0}m ago,{0}분 전
+A POS supervisor is required for this action.,이 작업에는 POS 감독자가 필요합니다.
+Access,액세스
+Account,계정
+Account is overdrawn,계좌가 초과 인출되었습니다
+Acknowledge the error to resume scanning,스캔을 재개하려면 오류를 확인하세요.
+Acknowledge the error to resume scanning.,스캔을 재개하려면 오류를 확인하세요.
+Across,건너편
+Action,액션
+Active sale,활성 판매
+add,추가하다
+Add items from the selector to start building this sale.,이 판매를 시작하려면 선택기에서 항목을 추가하세요.
+Add more value to an existing gift card,기존 기프트 카드에 더 많은 가치 추가
+Add New Address,새 주소 추가
+Add new customer,새 고객 추가
+Add on New Line,새 줄에 추가
+Add Payment,결제 추가
+Add payment to invoice,송장에 결제 추가
+Add/Edit Coupon Conditions,쿠폰 조건 추가/수정
+Additional Discount,추가 할인
+Additional Discount %,추가 할인 %
+Address Line 1,주소 입력란 1
+Address not found,주소를 찾을 수 없습니다
+Adjust the quantity or enable negative stock to continue.,계속하려면 수량을 조정하거나 마이너스 재고를 활성화하세요.
+Adjustment,조정
+After returns,반품 후
+Against,반대
+Against Name,반대 이름
+Age Bracket,연령층
+All,모두
+All Caught Up!,모두 따라잡았어!
+All invoices are synchronized,모든 송장이 동기화됩니다.
+All pending invoices are up to date,보류 중인 모든 청구서가 최신 상태입니다.
+All Profiles,모든 프로필
+All Synchronized,모두 동기화됨
+All visible invoices are fully settled.,눈에 보이는 모든 송장이 완전히 정산되었습니다.
+All Warehouses,모든 창고
+Allowed UOM is {0},허용된 UOM은 {0}입니다.
+Always fetch items from server (ignore local cache),항상 서버에서 항목 가져오기(로컬 캐시 무시)
+Amount,금액
+Amount already received,이미 받은 금액
+Amount exceeds profile cash movement max amount.,금액이 프로필 현금 이동 최대 금액을 초과합니다.
+Amount must be greater than zero.,금액은 0보다 커야 합니다.
+Amount received from customer,고객으로부터 받은 금액
+Appearance and user-level preferences for the current session.,현재 세션의 모양 및 사용자 수준 기본 설정입니다.
+Applied,적용됨
+Apply,적용
+Apply Gift Card,기프트 카드 적용
+Apply Offer,제안 적용
+Apply On,신청일
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,이 청구서에는 상환하려는 금액만 적용하세요. 남은 잔액은 카드에 남아 있습니다.
+Apply Redemption,상환 적용
+Applying,신청
+Apps,앱
+Are you sure you want to close? All entered data will be lost.,정말로 닫으시겠어요? 입력한 모든 데이터가 손실됩니다.
+Attributes (Size/Color),속성(크기/색상)
+Auto Allocate Payment Amount,결제 금액 자동 할당
+Auto Reconcile,자동 조정
+Auto reconciliation completed after payment submit.,결제 완료 후 자동 조정이 완료되었습니다.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,자동 조정이 완료되었습니다. 할당됨: {0}{1}. 남은 미결제 금액: {0}{2}.
+Available Actions,사용 가능한 작업
+Available QTY,사용 가능 수량
+Available:,사용 가능:
+Average Basket,평균 바구니
+Average Bill,평균 청구서
+Average Ticket,평균 티켓
+Avg Bill,평균 청구서
+Avg Invoice,평균 송장
+Avg Invoice Profit,평균 송장 이익
+Avg Invoice Value,평균 송장 금액
+Avg Purchase Frequency,평균 구매 빈도
+Awesome,굉장해
+Awesome Dashboard,멋진 대시보드
+Awesome Dashboard is disabled for the selected POS Profile.,선택한 POS 프로필에 대해 Awesome Dashboard가 비활성화되어 있습니다.
+Awesome Dashboard is unavailable for the selected scope.,선택한 범위에서는 Awesome Dashboard를 사용할 수 없습니다.
+Awesome Dashboard is visible only to POS supervisors.,Awesome Dashboard는 POS 감독자에게만 표시됩니다.
+Back,뒤로
+Back Office Cash Account,백오피스 현금 계좌
+Back Office Cash Account (Optional Override),백오피스 현금 계좌(선택적 대체)
+Back office cash account is required.,백오피스 현금 계좌가 필요합니다.
+Back to {0},{0}(으)로 돌아가기
+Background processing did not finish in time.,백그라운드 처리가 제 시간에 완료되지 않았습니다.
+Background processing failed for Invoice {0}: {1},송장 {0}에 대한 백그라운드 처리 실패: {1}
+Background Submission Failed,배경 제출 실패
+Background sync interval (seconds),백그라운드 동기화 간격(초)
+Balance,잔액
+Balance will be updated when connection is restored,연결이 복원되면 잔액이 업데이트됩니다.
+Balances still pending,아직 보류 중인 잔액
+Barcode,바코드
+Barcode / QR Ready,바코드/QR 지원
+Barcode Label Printing,바코드 라벨 인쇄
+Base Paid:,기본 유료:
+Base Recv:,기본 수신:
+Base:,베이스:
+Basic Information,기본정보
+Batch,배치
+Batch Information,배치 정보
+Before any return workflow,반품 작업 흐름 전
+Before returns,반품 전
+Best Day,최고의 날
+Best Seller,베스트셀러
+Book expense or deposit from active shift.,활동적인 근무 시간에 따른 비용이나 보증금을 예약하세요.
+Branch / Location-wise Report,지점/위치별 보고
+Brand-wise,브랜드별
+Breakdown,고장
+Browse,찾아보기
+Build Time:,빌드 시간:
+Built with Frappe,프라페로 만든
+Bundle,번들
+Buying Price,구매 가격
+Cache cleared successfully,캐시가 성공적으로 지워졌습니다.
+Cache Usage,캐시 사용량
+cache used,사용된 캐시
+Calculating...,계산 중...
+Camera Access Required,카메라 액세스 필요
+Camera access was aborted. Please try again.,카메라 액세스가 중단되었습니다. 다시 시도해 주세요.
+Camera constraints not supported by your device. Trying fallback settings...,귀하의 장치에서는 카메라 제약 조건이 지원되지 않습니다. 대체 설정을 시도하는 중...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,카메라가 사용 중이거나 다른 앱/탭에 의해 차단되었습니다. 다른 카메라 앱을 종료하고 다시 시도해 보세요.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,카메라 권한이 거부되었습니다. 브라우저 설정에서 카메라 액세스를 허용하고 페이지를 새로고침하세요.
+Camera scanner is locked until the current error is acknowledged,현재 오류가 확인될 때까지 카메라 스캐너가 잠겨 있습니다.
+Camera started but the video stream did not load in time. Please try again.,카메라가 시작되었지만 비디오 스트림이 제 시간에 로드되지 않았습니다. 다시 시도해 주세요.
+Cancel cash movement {0}?,현금 이동 {0}을(를) 취소하시겠습니까?
+Cancel Payment,결제 취소
+Cancel Sale,판매 취소
+Cancel Sale ?,판매를 취소하시겠습니까?
+Cancelled,취소됨
+Cannot add an item with zero or negative quantity.,수량이 0이거나 음수인 항목을 추가할 수 없습니다.
+Cannot clear cache while offline,오프라인 상태에서는 캐시를 지울 수 없습니다.
+Cannot redeem customer credit more than invoice total,송장 총액보다 많은 고객 크레딧을 사용할 수 없습니다.
+Cannot redeem gift cards more than invoice total,청구서 총액을 초과하여 기프트 카드를 사용할 수 없습니다.
+Cannot Save Offline Invoice:,오프라인 송장을 저장할 수 없습니다:
+Cannot Save Offline Payment:,오프라인 결제를 저장할 수 없습니다:
+Card,카드
+Card / Online,카드 / 온라인
+Card health after the last live lookup,마지막 실시간 조회 후 카드 상태
+Cards,카드
+Cart,장바구니
+Cash,현금
+Cash back to customers,고객에게 캐시백
+Cash Collections,현금 수집
+Cash Deposit is disabled for this POS Profile.,이 POS 프로필에는 현금 예금이 비활성화되어 있습니다.
+Cash Drawer Snapshot,현금 서랍 스냅샷
+Cash In Hand,현금 보유
+Cash Movement,현금 이동
+Cash movement cancelled,현금 이동이 취소되었습니다.
+Cash movement deduction applied,현금 이동 공제가 적용됨
+Cash movement deleted,현금 이동이 삭제되었습니다.
+Cash movement is disabled for this POS Profile.,이 POS 프로필에 대한 현금 이동이 비활성화되었습니다.
+Cash Movement is disabled in current POS Profile.,현재 POS 프로필에서는 현금 이동이 비활성화되어 있습니다.
+Cash movement saved offline,오프라인으로 저장된 현금 이동
+Cash movement submitted,현금 이동 제출됨
+Cash Movements,현금 이동
+Cash payment cannot be less than invoice total when partial payment is not allowed,부분결제 불가 시 현금결제 금액은 송장총액보다 작을 수 없습니다.
+Cash returned after payment,결제 후 현금반환
+Cashier,계산원
+Cashier Access,계산원 접근
+Cashier identity and appearance preferences.,계산원 신원 및 외모 선호도.
+Cashier PIN,계산원 PIN
+Cashier PIN saved successfully.,계산원 PIN이 성공적으로 저장되었습니다.
+Cashiers,계산원
+Cashier-wise,계산원 현명한
+Categories,카테고리
+Category,카테고리
+Category / Brand / Variant Report,카테고리 / 브랜드 / 변형 보고서
+Category-wise,카테고리별
+Category-wise Margin,카테고리별 마진
+Certificate,인증서
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,인증서가 없거나 신뢰할 수 없습니다. QZ는 확인 대화상자를 표시할 수 있습니다.
+Certificate is trusted. Silent QZ printing is active.,인증서가 신뢰됩니다. 무음 QZ 인쇄가 활성화되었습니다.
+Change,변경
+Change allocation repaired,변경 할당이 복구되었습니다.
+Change Price,가격 변경
+Change Return,반품 변경
+Change Returned,변경사항이 반환됨
+Change terminal cashier,터미널 계산원 변경
+Charge Heads,차지 헤드
+Charges,요금
+Charges not found,청구 내역을 찾을 수 없음
+Check Balance,잔액 확인
+Check balance for any card. Supervisors can issue and top up cards here.,모든 카드의 잔액을 확인하세요. 감독자는 여기에서 카드를 발행하고 충전할 수 있습니다.
+Check balance only,잔액만 확인하세요
+Check for new commits,새로운 커밋 확인
+Check for Updates,업데이트 확인
+Check live balance before applying redemption,상환을 적용하기 전에 실시간 잔액을 확인하세요
+Check live balance before redemption,상환 전 실시간 잔액 확인
+Checking...,확인 중...
+Cheque/Reference Date,수표/참조 날짜
+Cheque/Reference No,수표/참조 번호
+Choose the cashier currently operating this terminal.,현재 이 단말기를 운영하고 있는 계산원을 선택하세요.
+City,도시
+Clear,지우기
+Clear All,모두 지우기
+Clear all barcode items,모든 바코드 항목 지우기
+Clear all purchase order items,모든 구매 주문 항목 지우기
+Clear Search,검색 지우기
+Clearing local cache...,로컬 캐시를 지우는 중...
+Click to refresh,새로고침하려면 클릭하세요.
+Client CPU Lag:,클라이언트 CPU 지연:
+Client Memory Usage:,클라이언트 메모리 사용량:
+Client Metrics,클라이언트 지표
+Close about dialog,대화상자 닫기
+Close cashier switcher,계산원 전환기 닫기
+Close closing shift dialog,교대 근무 종료 대화 상자 닫기
+Close column selector,열 선택기 닫기
+Close Dialog,닫기 대화상자
+Close drafts dialog,초안 대화상자 닫기
+Close invoice details dialog,송장 세부정보 대화상자 닫기
+Close invoice management,인보이스 관리 닫기
+Close offline invoices dialog,오프라인 송장 대화상자 닫기
+Close packing list dialog,짐 목록 대화상자 닫기
+Close returns dialog,반품 대화상자 닫기
+Close sales orders dialog,판매 주문 대화 상자 닫기
+Close Scanner,스캐너 닫기
+Close scanner dialog,스캐너 대화상자 닫기
+Close Settings,설정 닫기
+Closing Amount,마감 금액
+Closing POS Shift,POS 교대 마감
+Closing Snapshot Available,마감 스냅샷 사용 가능
+Code,코드
+Code scanned successfully,코드가 성공적으로 스캔되었습니다
+COGS,톱니바퀴
+Collapse item details,항목 세부정보 접기
+Collected,수집됨
+Cols,콜스
+Columns,열
+commits,커밋하다
+Completed and active sales in this range,이 범위에서 완료되고 활성화된 판매
+Completed returns will appear here.,완료된 반품이 여기에 표시됩니다.
+Confirm,확인
+Confirm Close,닫기 확인
+Confirm Mobile Number,휴대폰 번호 확인
+Confirm PIN,PIN 확인
+Connect,연결하다
+Connect printer and manage certificate,프린터 연결 및 인증서 관리
+Connecting to QZ Tray...,QZ 트레이에 연결하는 중...
+Connection problem while submitting invoice,송장 제출 중 연결 문제
+Connections:,연결:
+Connectivity and cached prerequisite status were rechecked.,연결성 및 캐시된 필수 구성 요소 상태를 다시 확인했습니다.
+Continue Editing,계속 편집
+Could not fetch latest balance from server,서버에서 최신 잔액을 가져올 수 없습니다.
+Count,개수
+Country,국가
+Coupon,쿠폰
+Coupons,쿠폰
+Cover,표지
+CPU Cores:,CPU 코어:
+Create,만들기
+Create and load a new prepaid card,새 선불카드 생성 및 로드
+Create and preload a new gift card,새 기프트 카드를 만들고 미리 로드하세요.
+Create Bill,청구서 작성
+Create Customer,고객 생성
+Create New Item,새 항목 만들기
+Create or change your PIN,PIN 생성 또는 변경
+Create PIN,PIN 생성
+Create POS Opening Shift,POS 오프닝 교대근무 생성
+Create Purchase Order,구매 주문 생성
+Create Return,반품 생성
+Create return from invoice,송장에서 반품 생성
+Create Supplier,공급업체 생성
+Credit and Output,신용 및 산출물
+Credit Note,신용 메모
+Credit Outstanding,신용 미지급
+Credit sales remaining to be collected,회수 예정인 크레딧 판매 잔액
+Critical,심각
+Currency,통화
+Current,현재
+Current Event Loop Lag:,현재 이벤트 루프 지연:
+Current Month,이번 달
+Current PIN,현재 PIN
+Current Profile,현재 프로필
+Current redeemable value on the gift card,기프트 카드의 현재 사용 가능한 금액
+Current User,현재 사용자
+Custom,맞춤
+Custom Due Days,맞춤 마감일
+Custom items per page,페이지당 사용자 정의 항목
+Customer,고객
+Customer already selected,고객이 이미 선택되었습니다.
+Customer Balance,고객 잔액
+Customer balance unavailable offline,고객 잔액을 오프라인에서 사용할 수 없음
+Customer created successfully.,고객이 성공적으로 생성되었습니다.
+Customer creation failed.,고객 생성에 실패했습니다.
+Customer Details,고객 세부정보
+Customer display channel is missing,고객 디스플레이 채널이 누락되었습니다.
+Customer display was blocked. Please allow pop-ups for this site.,고객 디스플레이가 차단되었습니다. 이 사이트에 대한 팝업을 허용해 주세요.
+Customer group is required,고객 그룹은 필수 항목입니다.
+Customer is required to add payment,고객이 결제 수단을 추가해야 합니다.
+Customer Name is required,고객 이름이 필요합니다
+Customer not selected,고객이 선택되지 않았습니다.
+Customer Report,고객 보고서
+Customer saved offline,고객이 오프라인으로 저장했습니다.
+Customer Screen,고객 화면
+Customer territory is required,고객 지역은 필수 항목입니다.
+Customer updated successfully.,고객이 업데이트되었습니다.
+Customer-facing tools and printer setup.,고객용 도구 및 프린터 설정.
+Customers,고객
+Customers not found,고객을 찾을 수 없습니다
+Daily cashier actions without scrolling.,스크롤 없이 일일 계산원 작업.
+Daily Sales,일일 매출
+Daily Sales Summary,일일 매출 요약
+Data loaded in form. Review and submit.,양식에 데이터가 로드되었습니다. 검토하고 제출하세요.
+Database Health,데이터베이스 상태
+Database health affects overall system speed and reliability.,데이터베이스 상태는 전반적인 시스템 속도와 안정성에 영향을 미칩니다.
+Database Info,데이터베이스 정보
+Date,날짜
+Day ?,하루?
+days,일
+Day-wise (MTD),일별(MTD)
+Day-wise Movement,주간 운동
+Dead Stock,재고
+Dead Stock Items,재고 품목
+Decrease quantity,수량 감소
+Default,기본값
+Default:,기본값:
+Delete,삭제
+Delete cancelled cash movement {0}?,취소된 현금 이동 {0}을(를) 삭제하시겠습니까?
+Delete Draft,초안 삭제
+Delete draft invoice,초안 송장 삭제
+Delete draft invoice {0}?,초안 송장 {0}을(를) 삭제하시겠습니까?
+Delete Invoice,송장 삭제
+Delete offline invoice,오프라인 송장 삭제
+Delivered,배달됨
+Delivery Charges,배송비
+Delivery Information,배송정보
+Delivery Note {0} created,배송 메모 {0}이(가) 생성되었습니다.
+Delivery note created,배달 메모가 생성되었습니다.
+Deployed Bundle:,배포된 번들:
+Deposit,예금
+Description,설명
+Detailed Supplier Breakdown,상세한 공급업체 분석
+Detecting formats:,형식 감지:
+Device Memory:,장치 메모리:
+Difference,차이
+Difference (In Company Currency),차액(회사 통화 기준)
+Disable offline mode first to recheck live connectivity.,실시간 연결을 다시 확인하려면 먼저 오프라인 모드를 비활성화하세요.
+Disconnect,연결 끊기
+discount,할인
+Discount %,할인%
+Discount / Void / Return Report,할인/무효/반품 보고서
+Discount Amount,할인금액
+Discount limited by POS Profile,POS 프로필에 따라 할인이 제한됨
+Discounted Invoices,할인된 송장
+Discounts,할인
+Dismiss,닫기
+Download Certificate,인증서 다운로드
+Draft,초안
+Draft invoice deleted,송장 초안이 삭제되었습니다.
+Draft source,초안 소스
+Drafts,초안
+Due {0},마감일: {0}
+Due Date,만기일
+Duplicate,중복
+Edit customer,고객 수정
+Edit discount amount,할인 금액 수정
+Edit discount percentage,할인율 수정
+Edit Gift Application,선물 신청 수정
+Edit item name,항목 이름 수정
+Edit quantity,수량 수정
+Edit rate,요금 수정
+Edit unit of measure,측정 단위 편집
+Edited,편집됨
+Employee,직원
+Enable background sync,백그라운드 동기화 활성화
+Enable Customer Display in POS Profile first.,먼저 POS 프로필에서 고객 디스플레이를 활성화하세요.
+Enter a PIN.,PIN을 입력하세요.
+Enter a valid grams value,유효한 그램 값을 입력하세요.
+Enter new price list rate,새 가격표 요율 입력
+Enter Quantity,수량 입력
+Enter the cashier PIN to continue.,계속하려면 계산원 PIN을 입력하세요.
+Enter the current PIN first.,현재 PIN을 먼저 입력하세요.
+"Enter the current PIN, then choose a new one.",현재 PIN을 입력한 후 새 PIN을 선택하세요.
+Enter valid grams for scale barcode,체중계 바코드에 유효한 그램을 입력하세요.
+Entries,항목
+Error accessing camera:,카메라 액세스 오류:
+Error calculating prices,가격 계산 오류
+Error fetching customer balance,고객 잔액을 가져오는 중에 오류가 발생했습니다.
+Error in change calculations!,변경 계산에 오류가 발생했습니다.
+Error Loading Data,데이터 로드 중 오류가 발생했습니다.
+Error loading invoice details,송장 세부정보를 로드하는 중에 오류가 발생했습니다.
+Error processing invoice,인보이스 처리 중 오류가 발생했습니다.
+Error processing payment,결제 처리 중 오류가 발생했습니다.
+Error searching invoices,인보이스 검색 중 오류가 발생했습니다.
+Error submitting invoice:,송장 제출 오류:
+Error submitting invoice: {0},인보이스 제출 오류: {0}
+Error submitting invoice: No response from server,송장 제출 오류: 서버에서 응답이 없습니다.
+Error updating currency,통화 업데이트 중 오류 발생
+Error updating item details,항목 세부정보를 업데이트하는 중에 오류가 발생했습니다.
+Est. Purchase,예상 구매
+Est. Value,예상 가치
+Event-loop lag measures how busy your browser is. Lower is better.,이벤트 루프 지연은 브라우저가 얼마나 바쁜지를 측정합니다. 낮을수록 좋습니다.
+Every,매
+Exchange Rate,환율
+Expand item details,항목 세부정보 펼치기
+Expected Amount (In Company Currency),예상 금액(회사 통화 기준)
+Expected Cash,예상현금
+Expected cash on hand grouped by currency,통화별로 그룹화된 예상 보유 현금
+Expected vs Actual,예상 대 실제
+Expense,비용
+Expense Account (Optional Override),비용 계정(선택적 대체)
+Expense account is required.,비용 계정이 필요합니다.
+Expenses and deposits posted during this shift,이 근무 시간 동안 게시된 비용 및 보증금
+Expired,만료됨
+Failed to auto reconcile payments.,결제 자동 조정에 실패했습니다.
+Failed to cancel cash movement,현금 이동을 취소하지 못했습니다.
+Failed to clear cache,캐시를 지우지 못했습니다.
+Failed to create item,항목을 생성하지 못했습니다.
+Failed to create supplier,공급업체를 생성하지 못했습니다.
+Failed to delete cash movement,현금 이동을 삭제하지 못했습니다.
+Failed to generate scale barcode. Using item barcode only.,체중계 바코드 생성에 실패했습니다. 품목 바코드만 사용합니다.
+Failed to load cash movement context.,현금 이동 컨텍스트를 로드하지 못했습니다.
+Failed to load dashboard data.,대시보드 데이터를 로드하지 못했습니다.
+Failed to reload invoice from server,서버에서 송장을 다시 로드하지 못했습니다.
+Failed to submit cash movement,현금 이동을 제출하지 못했습니다.
+Failed to sync offline cash movements,오프라인 현금 이동을 동기화하지 못했습니다.
+Fast cashier actions for active shifts.,활동적인 교대 근무를 위한 빠른 출납원 작업.
+Fast Moving Items,빠르게 움직이는 아이템
+Fees,수수료
+Fetch the latest offline prerequisite updates,최신 오프라인 필수 구성 요소 업데이트 가져오기
+Find a sales order quickly and load it into the current sale.,판매 주문을 빠르게 찾아 현재 판매에 로드하세요.
+Fixing payment amounts for return invoice...,반품 송장의 결제 금액을 수정하는 중...
+Flash Off,플래시 끄기
+Flash On,플래시 켜기
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","'제품 번들' 품목의 경우 창고, 일련 번호 및 배치 번호는 '포장 목록' 표에서 고려됩니다. '제품 번들' 항목의 모든 포장 항목에 대해 창고 및 배치 번호가 동일한 경우 해당 값을 기본 항목 테이블에 입력할 수 있습니다. 값은 'Packing List' 테이블에 복사됩니다."
+Free,무료
+Free Qty,무료 수량
+Frequency,빈도
+from,에서
+From Date,날짜부터
+Fulfillment Details,이행 세부정보
+Full Name,성명
+Gain,게인
+Generate a fresh prepaid card and start it with an opening balance.,새로운 선불 카드를 생성하고 기초 잔액으로 시작하세요.
+Generate and install the certificate to allow fully silent printing without trust prompts.,신뢰 프롬프트 없이 완전 자동 인쇄를 허용하려면 인증서를 생성하고 설치하십시오.
+Generate Certificate,인증서 생성
+Generated scale barcode: {0},생성된 체중계 바코드: {0}
+Get Payments,지불 받기
+Gift Card,기프트 카드
+Gift card amount must be greater than zero.,기프트 카드 금액은 0보다 커야 합니다.
+Gift Card Code,기프트 카드 코드
+Gift card code is required for redemption,교환하려면 기프트 카드 코드가 필요합니다.
+Gift card code is required.,기프트 카드 코드가 필요합니다.
+Gift card issued successfully.,기프트 카드가 성공적으로 발급되었습니다.
+Gift card loaded successfully.,기프트카드가 성공적으로 로드되었습니다.
+Gift Card Management,기프트 카드 관리
+Gift card payment,기프트 카드 결제
+Gift card redemption requires an online connection,기프트 카드를 사용하려면 온라인 연결이 필요합니다.
+Gift card topped up successfully.,기프트 카드가 충전되었습니다.
+Gift Cards,기프트 카드
+Go to Frappe Desk,프라페데스크 바로가기
+Grand Total,총계
+Gross Margin,총이익
+Gross Profit,총 이익
+Gross Sales,총매출
+Group not found,그룹을 찾을 수 없습니다
+"Grouped controls for terminal, UI, and session settings.","터미널, UI, 세션 설정에 대한 그룹화된 제어입니다."
+Grouped totals for each payment method and currency,각 결제 방법 및 통화에 대한 그룹화된 합계
+Hide,숨기기
+Hide Gift Card,기프트 카드 숨기기
+Hide Non Essential Fields,필수가 아닌 필드 숨기기
+Hide quantity decimals,수량 소수점 숨기기
+Hide search tools,검색 도구 숨기기
+Hide zero rated items,등급이 0인 항목 숨기기
+High,높음
+History,역사
+Hourly (Today),시간별(오늘)
+How this section works,이 섹션의 작동 방식
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.",오래된 데이터가 남아 있으면 설정 > 오프라인 및 동기화를 열고 온라인 상태에서 오프라인 데이터 재구성을 다시 실행하세요.
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.",경고가 지속되면 설정 > 오프라인 및 동기화를 연 다음 오프라인 데이터 새로 고침 또는 오프라인 데이터 재구성을 실행하세요.
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,인증서를 QZ 트레이로 가져오고 각 POS 시스템에서 QZ 트레이를 다시 시작하세요.
+In,에서
+In stock: {0},재고 있음: {0}
+Include Batch / Serial,배치/일련번호 포함
+Include Price,가격 포함
+Increase quantity,수량 늘리기
+IndexedDB,IndexedDB
+Initial Amount,초기 금액
+Initialize your shift with opening balances,기초 잔액으로 교대근무를 초기화하세요
+Initializing application...,애플리케이션 초기화 중...
+"Inspect cache, sync, and prerequisite status","캐시, 동기화, 필수 구성 요소 상태 검사"
+Installed Applications,설치된 애플리케이션
+Insufficient stock:\n{0},재고 부족:\n{0}
+Invalid rate,잘못된 요율
+Inventory Status Report,재고 현황 보고서
+Invoice,송장
+Invoice {0} is Submitted,송장 {0}이(가) 제출되었습니다
+Invoice {0} processed successfully,송장 {0}이(가) 성공적으로 처리되었습니다.
+Invoice {0} submission failed,송장 {0} 제출 실패
+Invoice {0} was already submitted,송장 {0}이(가) 이미 제출되었습니다.
+Invoice Adjustments,송장 조정
+Invoice Change,송장 변경
+Invoice Details,송장 세부정보
+Invoice is still in draft after background submission.,송장은 백그라운드 제출 후에도 여전히 초안 상태입니다.
+Invoice Items,송장 항목
+Invoice Management,송장 관리
+Invoice Mgmt,송장 관리
+Invoice saved offline,인보이스가 오프라인으로 저장됨
+Invoice submission failed,송장 제출 실패
+Invoice Submitted,송장 제출됨
+"Invoice value settled by loyalty points, not cash collection",현금 징수가 아닌 로열티 포인트로 정산되는 송장 가치
+Invoices,송장
+Invoices already past due date,청구서의 기한이 이미 지났습니다.
+Invoices saved as POS Invoices,POS 송장으로 저장된 송장
+Invoices still carrying balances,송장에는 아직 잔액이 남아 있습니다.
+Issue Mode,이슈 모드
+Issue New Card,신규 카드 발급
+Issue Workflow,이슈 워크플로
+"Issue, top up, and check","발급, 충전, 확인"
+Item,품목
+Item / Product Sales Report,품목/제품 판매 보고서
+Item {0} added to invoice,송장에 항목 {0}이(가) 추가되었습니다
+Item '{0}' has no barcode,항목 '{0}'에 바코드가 없습니다.
+Item Code,품목 코드
+Item created successfully,항목이 성공적으로 생성되었습니다.
+Item is out of stock,상품이 품절되었습니다.
+Item Name,품목 이름
+Item not found,항목을 찾을 수 없습니다
+Item order updated,상품 주문이 업데이트되었습니다.
+Item Selector Settings,항목 선택기 설정
+Items,품목
+Items added in POS will appear here automatically.,POS에 추가된 항목은 여기에 자동으로 표시됩니다.
+Items added to invoice,송장에 추가된 항목
+Items per page,페이지당 항목
+Items Sold,판매된 품목
+Items/Invoice,품목/송장
+Item-wise Profitability,품목별 수익성
+Journal Entry,분개장
+json,JSON
+Just now,지금 막
+Keep offline prerequisites healthy and recover stale data safely.,오프라인 필수 구성 요소를 정상으로 유지하고 오래된 데이터를 안전하게 복구하세요.
+Labels,라벨
+"Language, theme, terminal tools, and session controls.","언어, 테마, 터미널 도구 및 세션 제어."
+Last,마지막
+Last 14 Days (Paid vs Pending),지난 14일(결제 완료 및 보류 중)
+Last 14 Days Activity,지난 14일 활동
+Last 14 Days Gross Profit,지난 14일 총 이익
+Last 14 Days Purchases,지난 14일 구매
+Last 14 Days Tax/Charges,지난 14일간의 세금/요금
+Last sync:,마지막 동기화:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},마지막 동기화: {0} | 알았어: {1} | 실패: {2} | 건너뛰었습니다: {3}
+Latest entries for current shift,현재 근무조에 대한 최신 항목
+Lead Time,리드타임
+Limited,제한적
+lines,라인
+List,목록
+Live Snapshot,라이브 스냅샷
+Load a POS profile and cashier first.,POS 프로필과 계산원을 먼저 로드하세요.
+Load More Invoices,더 많은 송장 로드
+Load previously saved invoices,이전에 저장한 청구서 로드
+Load Sale,로드 세일
+Load Sales Invoice,판매 송장 로드
+Loading app data...,앱 데이터 로드 중...
+Loading customer database...,고객 데이터베이스 로드 중...
+Loading customers...,고객 로드 중...
+Loading database stats...,데이터베이스 통계 로드 중...
+Loading details...,세부정보 로드 중...
+Loading invoice history...,인보이스 내역 로드 중...
+Loading items...,항목 로드 중...
+Loading product catalog...,제품 카탈로그 로드 중...
+Loading return invoices...,반품 송장 로드 중...
+Loading server CPU/memory usage...,서버 CPU/메모리 사용량 로드 중...
+Loading suppliers...,공급업체 로드 중...
+Loading unpaid invoices...,미지급 송장 로드 중...
+Loading view...,보기 로드 중...
+Loading...,로드 중...
+Local storage is unavailable. Switching to online-only mode.,로컬 저장소를 사용할 수 없습니다. 온라인 전용 모드로 전환합니다.
+localStorage,로컬스토리지
+Location Performance,위치 실적
+Locations,위치
+Lock Screen,잠금 화면
+Lookup Workflow,조회 워크플로
+Loss,손실
+Low,낮음
+Low Stock,재고 부족
+Low Stock Alerts,재고 부족 경고
+Low Stock Items,재고가 적은 품목
+Low Stock Threshold,낮은 재고 임계값
+Low Stock Total,낮은 재고 총계
+Lowest Margin,최저 마진
+Low-frequency maintenance and system details.,저주파 유지보수 및 시스템 세부사항.
+Loyalty Redeemed,충성심을 되찾았습니다
+Loyalty Redemption,로열티 상환
+Make New Payment,새로 결제하기
+Manage all,모두 관리
+Manage and synchronize your offline transactions,오프라인 거래 관리 및 동기화
+Manage Cashier PIN,계산원 PIN 관리
+"Manage offline tools, terminal controls, and maintenance from one workspace.","하나의 작업 공간에서 오프라인 도구, 터미널 제어 및 유지 관리를 관리하세요."
+manual,매뉴얼
+"Manual codes, barcode scans, and QR scans work in the same field","수동 코드, 바코드 스캔, QR 스캔이 동일한 분야에서 작동합니다."
+Manual offline mode is enabled,수동 오프라인 모드가 활성화되었습니다.
+Margin,여백
+Maximum available quantity is {0}. Quantity adjusted to match stock.,최대 사용 가능 수량은 {0}입니다. 재고에 맞게 수량을 조정했습니다.
+Maximum discount amount for this offer item is {0}.,이 제안 항목의 최대 할인 금액은 {0}입니다.
+Maximum discount percentage for this offer item is {0}%.,이 제안 항목의 최대 할인율은 {0}%입니다.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,최대 제안 수량은 {0}입니다. 허용된 한도로 수량을 조정했습니다.
+Medium,중간
+Method-wise Collections,방법별 컬렉션
+Minimum allowed rate for this offer item is {0}.,이 제안 항목에 허용되는 최소 요율은 {0}입니다.
+Minimum Qty,최소 수량
+Mobile No,모바일 번호
+Mode,모드
+Mode of Payment,결제 방식
+Month,월
+Month ?,월?
+Monthly Profit,월간 이익
+Monthly Sales,월간 매출
+Monthly Sales Summary,월별 매출 요약
+Month-wise,월별
+Most Active Cashiers,가장 활동적인 계산원
+Movement Type,이동 유형
+Movements,움직임
+Multi Currency,다중 통화
+N/A,해당 없음
+Name,이름
+Negative Stock,마이너스 주식
+Negative Stock Items,마이너스 재고 품목
+Negative values not allowed,음수 값은 허용되지 않습니다.
+Net,순
+Net Qty,순 수량
+Net Sales,순매출
+Net Value,순 가치
+Never,절대로
+New changes are ready to load,새로운 변경사항을 로드할 준비가 되었습니다.
+New Item,새 항목
+New Offer Available,새로운 제안 이용 가능
+New PIN,새 PIN
+New rate,새로운 요율
+Next unit of measure,다음 측정 단위
+No attribute data found.,속성 데이터가 없습니다.
+No Barcode,바코드 없음
+No barcode found for UOM '{0}',UOM '{0}'에 대한 바코드가 없습니다.
+No branch/location data found.,지점/위치 정보를 찾을 수 없습니다.
+No brand data found.,브랜드 데이터를 찾을 수 없습니다.
+No cached gift card balance is available offline.,캐시된 기프트 카드 잔액은 오프라인에서 사용할 수 없습니다.
+No camera found on this device. Please ensure your device has a working camera.,이 기기에서 카메라를 찾을 수 없습니다. 장치에 작동하는 카메라가 있는지 확인하세요.
+No capability warnings recorded yet.,아직 기록된 기능 경고가 없습니다.
+No cash expected for this shift.,이번 근무에는 현금이 필요하지 않습니다.
+No cash mode configured,현금 모드가 구성되지 않았습니다.
+No cash movement type is allowed for this POS Profile.,이 POS 프로필에는 현금 이동 유형이 허용되지 않습니다.
+No cashier PIN is set yet. Create one now.,계산원 PIN이 아직 설정되지 않았습니다. 지금 하나 만들어 보세요.
+No cashier profiles are available for this POS profile yet.,아직 이 POS 프로필에 사용할 수 있는 계산원 프로필이 없습니다.
+No cashier-wise discount/void/return activity.,계산원별 할인/무효/반품 활동이 없습니다.
+No category data found.,카테고리 데이터를 찾을 수 없습니다.
+No category profitability data found.,카테고리 수익성 데이터가 없습니다.
+No change returned recorded for this shift.,이 교대 근무에 대해 반환된 변경 사항이 기록되지 않았습니다.
+No change-allocation invoices match the current filters.,현재 필터와 일치하는 변경 할당 송장이 없습니다.
+No charge head breakdown found.,충전 헤드 고장이 발견되지 않았습니다.
+No Company Selected,선택한 회사가 없습니다.
+No customer sales data found.,고객 판매 데이터를 찾을 수 없습니다.
+No day-wise discount/void/return trend.,일별 할인/무효/반품 추세가 없습니다.
+No day-wise payment data found.,일별 결제 데이터가 없습니다.
+No day-wise profitability trend found.,일별 수익성 추세를 찾을 수 없습니다.
+No day-wise purchase data found.,일별 구매 데이터가 없습니다.
+No day-wise sales trend found.,일별 판매 동향을 찾을 수 없습니다.
+No day-wise tax/charges trend found.,일별 세금/요금 추세가 없습니다.
+No dead stock items.,재고품이 없습니다.
+No due date,마감일 없음
+No exact repair match found for this invoice,이 청구서에 대해 정확한 수리 일치 항목을 찾을 수 없습니다.
+No hourly sales trend found for today.,오늘의 시간별 판매 추세를 찾을 수 없습니다.
+No invoice activity found.,송장 활동이 없습니다.
+No invoices found,인보이스를 찾을 수 없습니다.
+No invoices found. Try different search criteria.,청구서를 찾을 수 없습니다. 다른 검색 기준을 사용해 보세요.
+No invoices recorded for this shift.,이번 교대조에 대해 기록된 청구서가 없습니다.
+No item profitability data found.,품목 수익성 데이터를 찾을 수 없습니다.
+No item sales data found for this period.,해당 기간 동안의 상품 판매 데이터가 없습니다.
+No items found,항목을 찾을 수 없습니다
+No items in cart,장바구니에 상품이 없습니다
+No items with barcodes to print,인쇄할 바코드가 있는 항목이 없습니다.
+No location-wise top item data found.,위치별 상위 항목 데이터가 없습니다.
+No low stock alerts right now.,현재 재고 부족 알림은 없습니다.
+No low stock items.,재고가 적은 품목은 없습니다.
+No matching items in cart,장바구니에 일치하는 항목이 없습니다.
+No month-wise sales trend found.,월별 매출 추이를 찾을 수 없습니다.
+No negative stock items.,부정적인 재고 항목이 없습니다.
+No notifications yet,아직 알림이 없습니다
+No offline cash movement synced.,오프라인 현금 이동이 동기화되지 않았습니다.
+No offline invoices pending synchronization,동기화 보류 중인 오프라인 송장이 없습니다.
+No offline sync issues recorded yet.,아직 오프라인 동기화 문제가 기록되지 않았습니다.
+No out-of-stock items.,품절된 상품이 없습니다.
+No outstanding credit invoices for this shift.,이번 교대근무에 대한 미결제 신용 송장이 없습니다.
+No payment collection data found.,결제 수집 데이터가 없습니다.
+No payment rows available on this invoice.,이 송장에는 결제 행이 없습니다.
+No payments registered for this shift.,이 교대근무에 대해 등록된 지불이 없습니다.
+No pending balances in this period.,이 기간에는 보류 잔액이 없습니다.
+No pending offline invoices,보류 중인 오프라인 송장 없음
+No Print Formats Found,인쇄 형식을 찾을 수 없습니다.
+No profiles found for selected scope. Falling back to current profile failed.,선택한 범위에 대한 프로필을 찾을 수 없습니다. 현재 프로필로 폴백하지 못했습니다.
+No recent customer activity found.,최근 고객 활동이 없습니다.
+No recent stock entries found.,최근 주식 항목을 찾을 수 없습니다.
+No records found,기록을 찾을 수 없습니다
+No reorder suggestions right now.,지금은 재주문 제안이 없습니다.
+No repeat customers in this period.,이 기간에는 반복 고객이 없습니다.
+No response from server,서버에서 응답이 없습니다
+No return invoices found,반품 청구서를 찾을 수 없습니다.
+No return item trend found.,반품 항목 추세를 찾을 수 없습니다.
+No returnable items found for this invoice,이 송장에는 반품 가능한 품목이 없습니다.
+No returns were processed in this shift.,이번 교대조에서는 반품이 처리되지 않았습니다.
+No risk activity found.,위험 활동이 발견되지 않았습니다.
+No sales activity found for this period.,해당 기간 동안 판매 활동이 없습니다.
+No slow moving items.,느리게 움직이는 항목이 없습니다.
+No staff sales activity found.,직원 판매 활동을 찾을 수 없습니다.
+No stock movement for this period.,해당 기간 동안 재고 이동은 없습니다.
+No submitted cash movements in this shift.,이번 교대조에는 제출된 현금 이동이 없습니다.
+No supplier purchases found in this month.,이번달에는 공급업체 구매가 없습니다.
+No suppliers found for this period.,해당 기간 동안 공급업체를 찾을 수 없습니다.
+No sync trigger has run yet in this session.,이 세션에서는 아직 동기화 트리거가 실행되지 않았습니다.
+No tax head breakdown found.,세무 분류를 찾을 수 없습니다.
+No top items found for this location.,이 위치에는 인기 항목이 없습니다.
+No unpaid invoices,미지급 송장 없음
+No variant data found.,변형 데이터가 없습니다.
+No week-wise sales trend found.,주간 판매 동향을 찾을 수 없습니다.
+No.,아니요.
+Nobile Number,귀족 번호
+Not available,사용할 수 없음
+Not checked,체크하지 않음
+Not selected,선택되지 않음
+Not Set,설정되지 않음
+Notifications,알림
+Offer,제안
+Offer Applied,제안이 적용되었습니다
+Offer criteria exceeded,제안 기준을 초과했습니다.
+Offer Item,제공 품목
+Offer item unavailable,쿠폰 항목을 사용할 수 없습니다.
+Offer Removed,제안이 제거되었습니다.
+Offer UOM cannot be changed,제안 UOM을 변경할 수 없습니다.
+Offer?,제안?
+Offers,제안
+Offline,오프라인
+Offline & Sync,오프라인 및 동기화
+Offline Capabilities,오프라인 기능
+Offline data status refreshed,오프라인 데이터 상태가 새로 고쳐졌습니다.
+Offline diagnostics,오프라인 진단
+Offline Invoices,오프라인 송장
+Offline invoices status,오프라인 송장 상태
+Offline invoices synced,오프라인 송장이 동기화되었습니다.
+Offline Queue: {0},오프라인 대기열: {0}
+Offline rebuild guidance,오프라인 재구축 지침
+Offline restore is unavailable for this session.,이 세션에서는 오프라인 복원을 사용할 수 없습니다.
+Offline selling is available with degraded capabilities.,오프라인 판매는 저하된 기능으로 가능합니다.
+Offline snapshot does not match the current POS state.,오프라인 스냅샷이 현재 POS 상태와 일치하지 않습니다.
+Offline Status,오프라인 상태
+"Offline, terminal, and system controls","오프라인, 터미널 및 시스템 제어"
+OK,알았어
+Online,온라인
+Open actions menu,작업 메뉴 열기
+Open balance to collect,수집할 잔액 공개
+Open Customer Display,고객 디스플레이 열기
+Open drawer,서랍 열기
+Open invoices,미결제 송장
+Open Payments?,결제를 개시하시겠습니까?
+Open POS home,POS 홈 열기
+Open this screen from POS Menu -> Open Customer Display.,POS 메뉴 -> 고객 디스플레이 열기에서 이 화면을 엽니다.
+OpenCV image processing enabled - Enhanced barcode detection,OpenCV 이미지 처리 활성화 - 향상된 바코드 감지
+OpenCV image processing unavailable on this device,이 장치에서는 OpenCV 이미지 처리를 사용할 수 없습니다.
+OpenCV Off,OpenCV 끄기
+OpenCV On,OpenCV 켜기
+OpenCV processing disabled,OpenCV 처리가 비활성화되었습니다.
+Opening Amount,개시 금액
+Opening Cash,개시현금
+options,옵션
+Order,주문
+Original,원본
+Other,기타
+Out,아웃
+Out of Stock,품절
+Out of Stock Items,품절 상품
+Outstanding,뛰어난
+Outstanding Credit by Currency,통화별 뛰어난 신용도
+Overdue,연체
+Overpayment Change,초과지불 변경
+Overpayment change deducted: {0},초과지불 변경사항 공제: {0}
+Packing List,포장 목록
+Page Format,페이지 형식
+Page unavailable offline,오프라인에서 페이지를 사용할 수 없음
+Paid,유료
+Paid (orig):,유료(원본):
+Paid Amount,결제금액
+Paid change cannot be greater than total change!,지불된 잔돈은 총 잔액보다 클 수 없습니다!
+Paid:,유료:
+Parent Item,상위 품목
+Partial,부분
+Partly Paid,부분 유료
+Party Account,파티 계정
+Party Type,파티 유형
+Pause terminal until next cashier,다음 계산원이 나올 때까지 단말기를 일시중지합니다.
+PAY,지불
+Payment,결제
+Payment Account,지불 계정
+Payment entries processed for Invoice {0},송장 {0}에 대한 지불 항목이 처리되었습니다.
+Payment Entry Type,지불 입력 유형
+Payment History,결제 내역
+Payment ID,결제 ID
+Payment Method Report,결제 방법 보고서
+Payment Methods,결제 방법
+Payment of {0} received successfully.,{0}의 결제가 성공적으로 접수되었습니다.
+Payment Progress,결제 진행
+Payment Reconciliation,결제 조정
+Payment request status could not be retrieved. Please try again,결제 요청 상태를 검색할 수 없습니다. 다시 시도해 주세요
+Payment Request took too long to respond. Please try requesting for payment again,결제 요청에 응답하는 데 시간이 너무 오래 걸렸습니다. 다시 결제 요청을 시도해 주세요.
+Payment saved offline,결제가 오프라인으로 저장됨
+Payment State,결제 상태
+Payment Status,결제 상태
+Payment submitted but print function could not be executed. Payment name not found.,결제가 완료되었으나 인쇄 기능을 실행할 수 없습니다. 결제 이름을 찾을 수 없습니다.
+Payment submitted.,결제가 제출되었습니다.
+Payment Summary,결제 요약
+Payments,결제
+Payments are not open. Do you want to open payments and submit?,결제가 열리지 않습니다. 결제를 개시하고 제출하시겠습니까?
+Payments by Mode of Payment,결제 방식별 결제
+PDF,PDF
+Peak Hour,피크시간
+Peak Memory:,최대 메모리:
+Peak Server:,피크 서버:
+Peak:,피크:
+Pending,보류 중
+Pending Amount,보류 금액
+Pending count updated from {0} to {1},보류 중인 개수가 {0}에서 {1}(으)로 업데이트되었습니다.
+Pending Exposure,노출 대기 중
+Pending Invoices,보류 중인 송장
+Pending Ratio,보류 비율
+Pending Sales,판매 대기 중
+Pending sales: {0} | Cache usage: {1}%,판매 대기 중: {0} | 캐시 사용량: {1}%
+Pending Sync,보류 중인 동기화
+Pending: {0},보류 중: {0}
+Pending: {0} | Synced: {1} | Draft: {2},보류 중: {0} | 동기화됨: {1} | 초안: {2}
+Per Page,페이지당
+Personal,개인
+Personal preferences adjust the current cashier experience without changing the active POS route.,활성 POS 경로를 변경하지 않고 개인 기본 설정에 따라 현재 계산원 환경이 조정됩니다.
+PIN confirmation does not match.,PIN 확인이 일치하지 않습니다.
+PIN must be 4 to 8 digits.,PIN은 4~8자리여야 합니다.
+Please add at least one item.,항목을 하나 이상 추가하세요.
+Please allow camera access to scan codes,코드를 스캔하려면 카메라 액세스를 허용하세요.
+Please enter payment amount,결제금액을 입력해주세요
+Please fill all required fields,필수 입력란을 모두 작성해 주세요.
+Please make a payment or select a payment,결제를 하시거나 결제수단을 선택해주세요
+Please request phone payment or use another payment method,전화결제를 요청하시거나 다른 결제수단을 이용해주세요
+Please select a customer first,먼저 고객을 선택하세요.
+Please select a party,정당을 선택해주세요
+Please select a party before reconciling.,조정하기 전에 정당을 선택하세요.
+Please select a valid movement type.,유효한 이동 유형을 선택하십시오.
+Please select an invoice,송장을 선택해 주세요
+Please select company before reconciling.,조정하기 전에 회사를 선택하세요.
+Please set the customer's mobile number,고객의 휴대폰 번호를 설정해주세요
+Please try again or enter the item manually.,다시 시도하거나 항목을 수동으로 입력하십시오.
+Please verify the barcode or check the item's availability.,바코드를 확인하거나 상품의 재고 여부를 확인하세요.
+Points,포인트
+Popup blocked. Please allow popups.,팝업이 차단되었습니다. 팝업을 허용해주세요.
+POS,POS
+POS controls and maintenance,POS 제어 및 유지 관리
+POS Expense is disabled for this POS Profile.,이 POS 프로필에 대해 POS 비용이 비활성화되었습니다.
+POS is running with limited offline prerequisites.,POS는 제한된 오프라인 전제 조건으로 실행되고 있습니다.
+POS Profile,POS 프로필
+Position the QR code or barcode within the scanning area,스캔 영역 내에 QR 코드 또는 바코드를 배치하세요.
+Posting,게시
+Posting and Price List,게시 및 가격표
+Posting Date,게시 날짜
+Preparing background sync,백그라운드 동기화 준비 중
+"Press OK to continue offline with a warning, or Cancel to retry.","경고와 함께 오프라인을 계속하려면 확인을 누르고, 다시 시도하려면 취소를 누르세요."
+Previous unit of measure,이전 측정 단위
+Price List,가격표
+Price List Rate,가격표 요율
+Price list rate updated locally only,가격표 요율은 로컬에서만 업데이트됩니다.
+Pricing & Discounts,가격 및 할인
+Pricing Rule,가격 책정 규칙
+Print,인쇄
+Print Draft,초안 인쇄
+Print Format (Invoice),인쇄 형식(송장)
+Print Format (Order),인쇄형식(주문)
+Print invoice,송장 인쇄
+Print Purchase Invoice instead of PO,PO 대신 구매 송장 인쇄
+Printer,프린터
+Processed returns impacting the shift totals,교대 근무 합계에 영향을 미치는 처리된 반품
+Processing Payment,결제 처리 중
+Processing payment entries for Invoice {0},송장 {0}에 대한 지불 항목 처리 중
+Profile,프로필
+Profiles,프로필
+Profit,이익
+Profit: Invoice Item Estimate,이익: 송장 품목 견적
+Profit: Stock Ledger (COGS),이익: 재고 원장(COGS)
+Profitability Report,수익성 보고서
+Prorated return discount,일할 계산된 반품 할인
+Purchase Amount,구매 금액
+Purchase Invoices,구매 송장
+Purchase Order created,구매 주문이 생성되었습니다.
+Qty,수량
+Qualified,자격을 갖춘
+Quantity,수량
+Quantity exceeds available stock,수량이 사용 가능한 재고를 초과합니다.
+Quick Actions,빠른 작업
+Quotation {0} is Submitted,견적서 {0}이(가) 제출되었습니다
+Quotation submitted,제출된 견적
+QZ Tray connected.,QZ 트레이가 연결되었습니다.
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ 트레이가 수동으로 연결 해제되었습니다. 다시 활성화하려면 연결을 누르세요.
+QZ Tray is not connected.,QZ 트레이가 연결되지 않았습니다.
+QZ Tray Setup,QZ 트레이 설정
+Rate,요금
+Rate adjusted to maximum allowed discount,허용된 최대 할인으로 요금이 조정되었습니다.
+Ready,준비
+Ready to resume,재개 준비 완료
+Ready!,준비됐어요!
+Real-time POS insights for retail operations.,소매 운영을 위한 실시간 POS 통찰력.
+Rebuild Offline Data,오프라인 데이터 재구축
+Receive,수신
+Receive now,지금 받기
+Received,접수됨
+Received:,수신:
+Recent Movement Entries,최근 운동 항목
+Recent updates about your invoices,인보이스에 대한 최근 업데이트
+Recently Active Customers,최근 활성 고객
+Rechecking connection,연결 재확인 중
+Reconcile payment methods and close shift,결제 수단 조정 및 교대 마감
+Reconciling Payments,지급 조정
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.",온라인 상태에서 이 페이지를 다시 연결하고 한 번 열면 오프라인으로 새로고침하여 복원할 수 있습니다.
+Reconnect online to refresh cached offline data from the server.,서버에서 캐시된 오프라인 데이터를 새로 고치려면 온라인으로 다시 연결하세요.
+Recreate local offline prerequisites from scratch,로컬 오프라인 필수 구성 요소를 처음부터 다시 생성
+Recv:,수신:
+Redeem,사용
+Redeem / Scan,사용/스캔
+Redeem Amount,상환 금액
+Redeem Mode,상환 모드
+Redeemed Amount,상환 금액
+Redeemed credit cannot be greater than its total.,상환된 크레딧은 총액보다 클 수 없습니다.
+Redemption and Totals,상환 및 총액
+Reference,참고자료
+Refresh,새로고침
+Refresh Exchange Rate,환율 새로 고침
+Refresh Offline Data,오프라인 데이터 새로 고침
+Refresh Printers,프린터 새로 고침
+Refund,환불
+Release Notes,릴리스 노트
+Reload,새로고침
+Reload customers,고객 새로고침
+Reload Items,항목 새로고침
+Reload Now,지금 새로고침
+Reload to apply the latest changes. Your current session will be refreshed.,최신 변경사항을 적용하려면 새로고침하세요. 현재 세션이 새로 고쳐집니다.
+Reload Workflow,워크플로 다시 로드
+Remarks,비고
+Remarks are required.,비고가 필요합니다.
+Remove,제거
+Remove barcode item,바코드 항목 제거
+Remove cached data and reload the POS app,캐시된 데이터를 제거하고 POS 앱을 다시 로드하세요.
+Remove item,항목 삭제
+Remove Offer,제안 제거
+Reorder / Purchase Suggestions,재주문 / 구매 제안
+Repair Candidate,수리 후보자
+Repair Change Allocation,수리 변경 할당
+Repair requires an online connection,수리하려면 온라인 연결이 필요합니다.
+Repaired,수리됨
+Repairing change allocation,변경 할당 복구 중
+Repeat Customers,반복 고객
+Repeat Rate,반복률
+Request,요청
+Request ID: {0},요청 ID: {0}
+Request Payment,결제 요청
+Requested route: {0},요청된 경로: {0}
+Required columns cannot be hidden,필수 열은 숨길 수 없습니다.
+Reset,재설정
+Reset item name,항목 이름 재설정
+Reset to Default,기본값으로 재설정
+Resource Health,리소스 상태
+Restricted,제한됨
+Restricted operational controls for supervisors only.,감독자에게만 제한된 운영 통제가 제공됩니다.
+Retry,재시도
+Retry route,경로 재시도
+Return,반환
+Return Amount,반품 금액
+Return Count,반품 횟수
+Return items must have negative quantities,반품 품목 수량이 음수여야 합니다.
+Return total must be negative,반품 총액은 음수여야 합니다.
+Return Valid Until,반품 유효기간
+Return window passed,반품 기간이 지났습니다.
+Return without Invoice,송장 없이 반품
+Returns,반품
+Returns / Voids / Discounts,반품 / 무효 / 할인
+Returns by Currency,통화별 반품
+Revenue,수익
+Review shift totals before submitting the closing entry,마감 항목을 제출하기 전에 교대근무 합계를 검토하세요.
+Round Off,반올림
+Rows,행
+Rows:,행:
+Rule,규칙
+Sale,세일
+Sales,매출
+Sales Order {0} is Submitted,판매 주문 {0}이(가) 제출되었습니다
+Sales Person and Print,영업사원 및 인쇄물
+Sales Person not found,영업사원을 찾을 수 없습니다
+Sales processed,판매 처리됨
+Sales Return,판매 수익
+Sales Trend Report,판매 동향 보고서
+Save,저장
+Save & Clear,저장 및 지우기
+Save as POS Profile Default,POS 프로필 기본값으로 저장
+Save Settings,설정 저장
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,선택한 프린터를 POS 프로필 기본값으로 저장하면 이 설정에서 자동으로 표시됩니다.
+Saved as draft because: {0},다음과 같은 이유로 초안으로 저장되었습니다: {0}
+Saving...,저장 중...
+Scale barcode detected. Quantity here is the number of labels to print.,스케일 바코드가 감지되었습니다. 여기서 수량은 인쇄할 라벨의 수입니다.
+Scale barcode settings are not configured. Using item barcode only.,스케일 바코드 설정이 구성되지 않았습니다. 품목 바코드만 사용합니다.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,이 품목/UOM에 대한 스케일 템플릿 바코드가 누락되었습니다. 품목 바코드만 사용합니다.
+Scan an existing card and top it up without leaving the payment flow.,기존 카드를 스캔하고 결제 흐름을 종료하지 않고 충전하세요.
+Scan Error,스캔 오류
+Scan or enter a gift card code to check balance or redeem.,잔액을 확인하거나 사용하려면 기프트 카드 코드를 스캔하거나 입력하세요.
+Scan or paste the card code below.,아래 카드 코드를 스캔하거나 붙여넣으세요.
+Scan QR Code/Barcode,QR 코드/바코드 스캔
+Scan with camera,카메라로 스캔
+Scan-First Flow,스캔 우선 흐름
+Scanned Code:,스캔된 코드:
+Scanning for: {0},검색 중: {0}
+Scanning items,항목 스캔 중
+Scan-Ready,스캔 준비
+Scope,범위
+Scope: All Profiles,범위: 모든 프로필
+Scope: Current Profile,범위: 현재 프로필
+Scope: Specific Profile,범위: 특정 프로필
+Search,검색
+Search Account,계정 검색
+Search an invoice and continue the return flow without extra steps.,송장을 검색하고 추가 단계 없이 반품 절차를 계속 진행하세요.
+Search customer,고객 검색
+Search invoices or customers,송장 또는 고객 검색
+Search item,검색항목
+Search item / code,항목/코드 검색
+Search items or barcode,항목 또는 바코드 검색
+Search Mpesa Payments,Mpesa 결제 검색
+Search return invoices or customers,반품 송장 또는 고객 검색
+Search supplier,공급자 검색
+Search unpaid invoices or customers,미지급 송장 또는 고객 검색
+Secure context (HTTPS or localhost) is required for camera access.,카메라 액세스에는 보안 컨텍스트(HTTPS 또는 localhost)가 필요합니다.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,카메라 액세스에는 보안 컨텍스트(HTTPS)가 필요합니다. 카메라에 액세스하려면 HTTPS를 사용하세요.
+Select,선택
+Select a cashier first.,먼저 계산원을 선택하세요.
+Select a customer,고객을 선택하세요
+Select a customer to use coupon,쿠폰을 사용할 고객을 선택하세요.
+Select a printer to use QZ silent printing.,QZ 자동 인쇄를 사용할 프린터를 선택하세요.
+Select Batch,배치 선택
+Select Columns to Display,표시할 열 선택
+Select items to sell,판매할 품목을 선택하세요
+Select Payment,결제 선택
+Select Payment Account,결제 계좌 선택
+Select printer,프린터 선택
+Select Return Invoice,반품 송장 선택
+Select S.O,S.O를 선택하세요
+Select Sales Orders,판매 주문 선택
+Select the cashier who is taking over this terminal.,이 단말기를 점유할 계산원을 선택하세요.
+Selected,선택됨
+Selected movement type is not allowed by POS Profile.,선택한 이동 유형은 POS 프로필에서 허용되지 않습니다.
+Selected Payments,선택한 결제
+Sensitive actions kept away from quick taps.,민감한 작업은 빠른 탭에서 제외됩니다.
+Serial,시리얼
+Serial Numbers,일련번호
+Server CPU Usage:,서버 CPU 사용량:
+Server Health,서버 상태
+Server Memory Usage:,서버 메모리 사용량:
+Server Metrics,서버 측정항목
+Server Uptime:,서버 가동 시간:
+Service Charges,서비스 요금
+Session,세션
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,사용자 양식에 각 계산원 PIN을 설정하고 POS 프로필 사용자에 단말기 구성원을 할당해 둡니다.
+Settings,설정
+Settings in this section update the POS workspace without changing the current route.,이 섹션의 설정은 현재 경로를 변경하지 않고 POS 작업 공간을 업데이트합니다.
+Setup complete!,설정이 완료되었습니다.
+Share,공유
+Shared terminal,공유단말기
+Shift Closed Snapshot,교대근무 마감 스냅샷
+Shift Overview,교대근무 개요
+Show,쇼
+Show cart on customer-facing screen,고객이 보는 화면에 장바구니 표시
+Show last invoice rate,마지막 인보이스 요율 표시
+Show rate info,요금 정보 표시
+Show Repair Candidates,수리 후보자 표시
+Show search tools,검색 도구 표시
+Show the active cart on a customer-facing screen,고객이 보는 화면에 활성 장바구니 표시
+Showing {0}-{1} of {2},{2}개 중 {0}-{1}개 표시 중
+Showing 0 of 0,0개 중 0개 표시 중
+Shows the distribution of invoices per currency,통화별 송장 분포를 표시합니다.
+Sign out of the current POS session,현재 POS 세션에서 로그아웃
+Size:,크기:
+Skipped Payments,건너뛴 결제
+Skipping items without barcodes,바코드가 없는 항목 건너뛰기
+Slow Moving,천천히 움직이는
+Slow Moving Items,느리게 움직이는 아이템
+Slow Queries:,느린 쿼리:
+Sold,판매됨
+Source,소스
+Source Cash Account (Optional Override),출처 현금 계정(선택적 대체)
+Source Ex. Rate:,소스 예. 요금:
+Source Rate:,소스 속도:
+Specific Profile,특정 프로필
+Split Invoices,송장 분할
+Staff / Cashier Performance Report,직원/계산원 성과 보고서
+Status,상태
+Stock,주식
+Stock Information,주식정보
+Stock is lower than requested,재고가 요청한 것보다 적습니다.
+Stock is lower than requested:\n{0},재고가 요청한 것보다 적습니다.\n{0}
+Stock Movement Report,재고 이동 보고서
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,재고 업데이트: {0}에는 {1}의 재고가 있습니다. {2}를 추가하면 재고가 0 아래로 내려갑니다.
+Submit,제출하다
+Submit & Print,제출 및 인쇄
+Submit Deposit,보증금 제출
+Submit Expense,비용 제출
+Submitted,제출됨
+Submitted Cash Movements,제출된 현금 이동
+Submitted entries,제출된 항목
+Successfully scanned:,성공적으로 스캔됨:
+Suggested,제안
+Suggested Qty,권장 수량
+Supervisor Access,감독자 액세스
+Supervisor permissions unlock issuance and reloads,감독자 권한으로 발급 및 재로드 잠금 해제
+Supervisor Tools,감독자 도구
+Supplier,공급자
+Supplier and dates are required.,공급업체 및 날짜가 필요합니다.
+Supplier Invoices,공급업체 송장
+Supplier is required.,공급업체가 필요합니다.
+Supplier name is required,공급업체 이름은 필수 항목입니다.
+Supplier Payments,공급자 지불
+Supplier Purchase Summary,공급업체 구매 요약
+Suppliers,공급자
+Suppliers not found,공급업체를 찾을 수 없습니다.
+Switch Camera,카메라 전환
+Switch Cashier,계산원 전환
+Switch the POS appearance theme,POS 모양 테마 전환
+Switched to:,다음으로 전환됨:
+Sync All Invoices,모든 청구서 동기화
+Sync Offline Cash Movements ({0}),오프라인 현금 이동 동기화({0})
+Sync Offline Sales,오프라인 판매 동기화
+Synced {0} offline cash movement(s).,{0}개의 오프라인 현금 이동을 동기화했습니다.
+Syncing items in background,백그라운드에서 항목 동기화 중
+System / Diagnostics,시스템/진단
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","시스템 작업은 앱 정보, 지원 진단, 세션 제어 등 빈도가 낮은 유지 관리 제어입니다."
+System Information,시스템 정보
+System Status,시스템 상태
+Tables:,테이블:
+Tap the button below to redeem a gift card during checkout.,결제 중에 기프트 카드를 사용하려면 아래 버튼을 탭하세요.
+Target,대상
+Target Ex. Rate:,타겟 엑. 요금:
+Target Rate:,목표 비율:
+Tax,세금
+Tax / Charges Report,세금/요금 보고서
+Tax Heads,세금 책임자
+Taxable Amount,과세금액
+Tendered,입찰됨
+Terminal,터미널
+Terminal & Devices,단말기 및 장치
+Terminal locked,터미널이 잠겼습니다.
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","터미널 도구는 이 계산대, 고객 대면 디스플레이 및 향후 프린터/장치 제어에 영향을 미칩니다."
+Territory not found,지역을 찾을 수 없습니다.
+The amount paid is not complete,결제 금액이 완료되지 않았습니다.
+The app stores data locally for offline use. This is called cache.,앱은 오프라인 사용을 위해 데이터를 로컬에 저장합니다. 이것을 캐시라고 합니다.
+The invoice stayed in draft. Please review and submit it manually.,송장은 초안 상태로 유지되었습니다. 검토한 후 수동으로 제출해 주세요.
+The maximum discount allowed is,허용되는 최대 할인 금액은 다음과 같습니다.
+The quantity for {0} has been adjusted to the maximum available stock.,{0}의 수량은 최대 사용 가능한 재고로 조정되었습니다.
+The system could not retrieve the item details. Please try again.,시스템에서 품목 세부정보를 검색할 수 없습니다. 다시 시도해 주세요.
+These invoices will be synced when connection is restored,연결이 복원되면 이 청구서가 동기화됩니다.
+This action now opens inside the settings workspace.,이제 이 작업은 설정 작업 공간 내에서 열립니다.
+This coupon already used !,이미 사용된 쿠폰입니다!
+This invoice does not need change-allocation repair,이 송장은 변경 할당 수리가 필요하지 않습니다.
+This invoice is already repaired,이 송장은 이미 수리되었습니다.
+This is an item template. Please choose a variant.,아이템 템플릿입니다. 변형을 선택하십시오.
+this item,이 항목
+This POS page could not be opened offline because its code was not cached on this terminal yet.,코드가 아직 이 터미널에 캐시되지 않았기 때문에 이 POS 페이지를 오프라인으로 열 수 없습니다.
+This Serial Number {0} has already been added!,이 일련번호 {0}은(는) 이미 추가되었습니다!
+Threshold,임계값
+Time,시간
+Tip: Clear cache regularly to free up space and keep the app fast.,팁: 정기적으로 캐시를 지워 공간을 확보하고 앱 속도를 빠르게 유지하세요.
+Tip: Close unused tabs or apps to reduce lag.,팁: 지연을 줄이려면 사용하지 않는 탭이나 앱을 닫으세요.
+Tip: Monitor slow queries and table size for optimal performance.,팁: 최적의 성능을 위해 느린 쿼리와 테이블 크기를 모니터링하세요.
+To Be Paid,지불 예정
+To Date,현재까지
+Today,오늘
+Today Profit,오늘의 이익
+Today Sales,오늘의 매출
+Toggle navigation drawer,탐색 창 전환
+Toggle Theme,테마 전환
+Tools,도구
+Tools for customer-facing screens and terminal-specific actions.,고객 대면 화면 및 터미널별 작업을 위한 도구입니다.
+Top Brand,최고의 브랜드
+Top Category,상위 카테고리
+Top Charge Head,탑 차지 헤드
+Top Customers,상위 고객
+Top Discount,최고 할인
+Top Items by Location,위치별 상위 항목
+Top Margin,상단 여백
+Top Pending,상위 보류 중
+Top Profit Item,최고 수익 항목
+Top Return Items,인기 반품 품목
+Top Sales by Cashier,계산원별 최고 매출
+Top Supplier,최고 공급업체
+Top Suppliers by Spend,지출 기준 상위 공급업체
+Top Tables,상위 테이블
+Top Tax Head,최고 세금 책임자
+Top Up Amount,충전 금액
+Top Up Card,충전 카드
+Top Up Mode,충전 모드
+Top Variant,상위 변형
+Total,합계
+Total Amount,총액
+Total Change,총 변화
+Total Charges,총 요금
+Total In,총계
+Total Invoices,총 송장
+Total Items,총 품목
+Total Mpesa,총 Mpesa
+Total Out,총 아웃
+Total Payments,총 결제금액
+Total Purchase,총 구매액
+Total Selected :,전체 선택 항목:
+Total Size,전체 크기
+Total Stock Qty,총재고수량
+Total:,합계:
+Totals by Invoice Currency,송장 통화별 합계
+Track how much cash was handed back to customers,고객에게 돌려준 현금의 양을 추적하세요.
+"Track recent sales, collect unpaid balances, and reopen saved work","최근 판매를 추적하고, 미지급 잔액을 수집하고, 저장된 작업을 다시 엽니다."
+Transaction ID,거래 ID
+Transfer,환승
+Try a different search term or clear the cart search.,다른 검색어를 사용해 보거나 장바구니 검색을 삭제하세요.
+Try adjusting your search or filters,검색 또는 필터를 조정해 보세요.
+Try another source or refresh the list.,다른 소스를 시도하거나 목록을 새로 고치세요.
+Try changing the date range or status filter.,기간이나 상태 필터를 변경해 보세요.
+Type,유형
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,기본 설정으로도 카메라에 접근할 수 없습니다. 카메라 권한과 기기 호환성을 확인해주세요.
+Unable to add offer item {0}. Please refresh and try again.,제안 항목 {0}을(를) 추가할 수 없습니다. 새로고침한 후 다시 시도해 주세요.
+Unable to add offer item. Please refresh and try again.,쿠폰 항목을 추가할 수 없습니다. 새로고침한 후 다시 시도해 주세요.
+Unable to add scanned item.,스캔한 항목을 추가할 수 없습니다.
+Unable to create purchase order,구매 주문을 생성할 수 없습니다.
+Unable to delete draft invoice,초안 송장을 삭제할 수 없습니다.
+Unable to fetch documents,문서를 가져올 수 없습니다.
+Unable to fetch draft orders,발주 주문을 가져올 수 없습니다.
+Unable to fetch invoice history,인보이스 내역을 가져올 수 없습니다.
+Unable to fetch M-Pesa payments,M-Pesa 결제를 가져올 수 없습니다.
+Unable to fetch sales orders,판매 주문을 가져올 수 없습니다.
+Unable to fetch unpaid invoices,미지급 송장을 가져올 수 없습니다.
+Unable to generate scale barcode,체중계 바코드를 생성할 수 없습니다
+Unable to issue gift card.,기프트 카드를 발행할 수 없습니다.
+Unable to load cashier PIN status.,계산원 PIN 상태를 로드할 수 없습니다.
+Unable to load document,문서를 로드할 수 없습니다.
+Unable to load draft invoice,초안 송장을 로드할 수 없습니다.
+Unable to load gift card balance.,기프트 카드 잔액을 로드할 수 없습니다.
+Unable to load invoice details,송장 세부정보를 로드할 수 없습니다.
+Unable to load parked order,주차 주문을 로드할 수 없습니다.
+Unable to load the selected sales order,선택한 판매 주문을 로드할 수 없습니다.
+Unable to prepare document,문서를 준비할 수 없습니다.
+Unable to prepare return invoice,반품 송장을 준비할 수 없습니다.
+Unable to print draft invoice,초안 송장을 인쇄할 수 없습니다.
+Unable to print submitted invoice,제출된 청구서를 인쇄할 수 없습니다.
+Unable to process document action,문서 작업을 처리할 수 없습니다.
+Unable to repair change allocation,변경 할당을 복구할 수 없습니다.
+Unable to save cashier PIN.,계산원 PIN을 저장할 수 없습니다.
+Unable to save the rate to the backend price list,백엔드 가격표에 요금을 저장할 수 없습니다.
+Unable to submit invoice,청구서를 제출할 수 없습니다
+Unable to submit the selected payment,선택한 결제를 제출할 수 없습니다
+Unable to top up gift card.,기프트 카드를 충전할 수 없습니다.
+Unable to verify cashier PIN.,계산원 PIN을 확인할 수 없습니다.
+Unallocated,할당되지 않음
+Unallocated:,할당되지 않음:
+Unavailable,이용 불가
+Unknown,알 수 없음
+Unknown Item,알 수 없는 항목
+Unknown Warehouse,알 수 없는 창고
+Unlock POS,POS 잠금 해제
+Unpaid,미지급
+"Unselected payments stay unallocated first, then auto reconcile after submit.",선택하지 않은 결제는 먼저 할당되지 않은 상태로 유지되며 제출 후 자동 조정됩니다.
+UOM,어옴
+UOM not found,UOM을 찾을 수 없습니다
+Update available,업데이트 가능
+Update Customer,고객 업데이트
+Update PIN,PIN 업데이트
+Update Price List Rate,가격표 비율 업데이트
+Updated,업데이트됨
+Updates and app info that stay out of the cashier flow.,계산원 흐름에서 벗어나는 업데이트 및 앱 정보.
+Updates automatically,자동으로 업데이트
+Usage,사용법
+Usage Stats,사용 통계
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,계산원 전환 및 단말기 잠금 해제에는 4~8자리 PIN을 사용하세요.
+Use Cashier,계산원 이용
+Use date range to search for older invoices,날짜 범위를 사용하여 이전 인보이스 검색
+"Use one field for manual code entry, barcode scans, or QR scans.","수동 코드 입력, 바코드 스캔 또는 QR 스캔에 하나의 필드를 사용하십시오."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","POS를 떠나지 않고도 잔고 확인, 신규 발행, 충전을 하나의 워크플로에서 사용하세요."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","캐시된 필수 구성 요소 데이터에 새로 고침, 재구축 또는 진단 검토가 필요한 경우 이 섹션을 사용하세요."
+Use Western numerals,서양 숫자를 사용하세요
+Used:,사용:
+Using basic camera settings due to device limitations,기기 제한으로 인해 기본 카메라 설정 사용
+Using cached customer balance,캐시된 고객 잔액 사용
+Valid until,유효기간
+Variance %,차이 %
+Variants,변형
+Variant-wise,변형별
+Verify closing amounts for each payment method,결제수단별 마감금액 확인
+View all,모두 보기
+View app information and current build details,앱 정보 및 현재 빌드 세부정보 보기
+View Data Diagnostics,데이터 진단 보기
+View Details,세부정보 보기
+View invoice details,송장 세부정보 보기
+View notifications,알림 보기
+View offline invoices,오프라인 송장 보기
+View restricted POS insights,제한된 POS 통계 보기
+Void Amount,무효 금액
+Void Count,보이드 카운트
+Voids,보이드
+Waiting for cart items,장바구니 항목을 기다리는 중
+Waiting for payment...,결제를 기다리는 중...
+Walk-in Customer,방문 고객
+Warehouse,창고
+Warning: High cache usage may affect performance.,경고: 캐시 사용량이 높으면 성능에 영향을 미칠 수 있습니다.
+Warning: High lag may indicate heavy processing or browser slowness.,경고: 지연 시간이 길면 처리량이 많거나 브라우저 속도가 느려질 수 있습니다.
+Week ?,주 ?
+Week-wise,주별
+Weight (g),무게(g)
+Weight (grams),무게(그램)
+We'll let you know if an invoice fails to submit,청구서를 제출하지 못한 경우 알려드리겠습니다.
+Workflow,작업 흐름
+Write off amount cannot exceed the POS profile maximum of {0},상각 금액은 POS 프로필 최대값인 {0}을(를) 초과할 수 없습니다.
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,상각 금액이 허용 한도({0})를 초과했습니다. 남은 금액을 추가 결제해주세요.
+Yes,예
+"Yes, Cancel sale","예, 판매를 취소합니다"
+"Yes, Close","예, 닫습니다"
+You are not allowed to print draft invoices,초안 송장을 인쇄할 수 없습니다.
+You are offline. Add Payment will work again when the connection is restored.,귀하는 오프라인 상태입니다. 연결이 복원되면 결제 추가가 다시 작동됩니다.
+You have no notifications right now,지금은 알림이 없습니다.
+Your Cart,장바구니

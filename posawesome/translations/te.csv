@@ -1,0 +1,1362 @@
+POS Awesome,POS అద్భుతం
+Fetch Items Directly from Server,సర్వర్ నుండి నేరుగా వస్తువులను పొందండి
+Menu,మెనూ
+Actions,చర్యలు
+Close Shift,షిఫ్ట్‌ని మూసివేయండి
+End current session,ప్రస్తుత సెషన్‌ను ముగించండి
+Print Last Invoice,చివరి ఇన్‌వాయిస్‌ని ప్రింట్ చేయండి
+Reprint previous transaction,మునుపటి లావాదేవీని రీప్రింట్ చేయండి
+Sync Offline Invoices,ఆఫ్‌లైన్ ఇన్‌వాయిస్‌లను సమకాలీకరించండి
+Upload pending transactions,పెండింగ్‌లో ఉన్న లావాదేవీలను అప్‌లోడ్ చేయండి
+Go Online,ఆన్‌లైన్‌కి వెళ్లండి
+Go Offline,ఆఫ్‌లైన్‌కి వెళ్లండి
+Disable offline mode,ఆఫ్‌లైన్ మోడ్‌ను నిలిపివేయండి
+Work without server connection,సర్వర్ కనెక్షన్ లేకుండా పని చేయండి
+Clear Cache,కాష్‌ని క్లియర్ చేయండి
+Remove local data and refresh,"స్థానిక డేటాను తీసివేసి, రిఫ్రెష్ చేయండి"
+About,గురించి
+App information,యాప్ సమాచారం
+Language,భాష
+Change interface language,ఇంటర్ఫేస్ భాషను మార్చండి
+Light Mode,లైట్ మోడ్
+Dark Mode,డార్క్ మోడ్
+Switch theme appearance,థీమ్ రూపాన్ని మార్చండి
+Logout,లాగ్అవుట్
+Sign out of session,సెషన్ నుండి సైన్ అవుట్ చేయండి
+Select Language,భాషను ఎంచుకోండి
+Choose your preferred language for the POS interface,POS ఇంటర్‌ఫేస్ కోసం మీకు నచ్చిన భాషను ఎంచుకోండి
+Language will be changed to,భాష మార్చబడుతుంది
+Cancel,రద్దు చేయి
+Change Language,భాష మార్చండి
+Close,మూసివేయి
+Cannot change language - same language selected,భాషను మార్చలేరు - అదే భాష ఎంచుకోబడింది
+Language changed successfully! Reloading...,భాష విజయవంతంగా మార్చబడింది! మళ్లీ లోడ్ అవుతోంది...
+Failed to change language,భాషను మార్చడంలో విఫలమైంది
+Unknown error,తెలియని లోపం
+- Total Unallocated,- మొత్తం కేటాయించబడలేదు
+* Required,* అవసరం
+{0} (Qty: {1}),{0} (పరిమాణం: {1})
+{0} actions,{0} చర్యలు
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} వద్ద {1} మాత్రమే స్టాక్‌లో ఉంది. మీరు {2}ని అభ్యర్థించారు. పరిమాణం లేదా రీస్టాక్‌ని సర్దుబాటు చేయండి.
+{0} offline invoice{1} pending,{0} ఆఫ్‌లైన్ ఇన్‌వాయిస్{1} పెండింగ్‌లో ఉంది
+{0} offline invoice{1} saved as draft,{0} ఆఫ్‌లైన్ ఇన్‌వాయిస్{1} డ్రాఫ్ట్‌గా సేవ్ చేయబడింది
+{0} offline invoice{1} synced,{0} ఆఫ్‌లైన్ ఇన్‌వాయిస్{1} సమకాలీకరించబడింది
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0}రో క్రితం
+{0}h ago,{0}గం క్రితం
+{0}m ago,{0}నిమి క్రితం
+A POS supervisor is required for this action.,ఈ చర్య కోసం POS సూపర్‌వైజర్ అవసరం.
+Access,యాక్సెస్
+Account,ఖాతా
+Account is overdrawn,ఖాతా ఓవర్‌డ్రా చేయబడింది
+Acknowledge the error to resume scanning,స్కానింగ్‌ను పునఃప్రారంభించడంలో లోపాన్ని గుర్తించండి
+Acknowledge the error to resume scanning.,స్కానింగ్‌ను పునఃప్రారంభించడంలో లోపాన్ని గుర్తించండి.
+Across,అంతటా
+Action,చర్య
+Active sale,క్రియాశీల విక్రయం
+add,జోడించు
+Add items from the selector to start building this sale.,ఈ సేల్‌ను నిర్మించడం ప్రారంభించడానికి సెలెక్టర్ నుండి అంశాలను జోడించండి.
+Add more value to an existing gift card,ఇప్పటికే ఉన్న బహుమతి కార్డ్‌కి మరింత విలువను జోడించండి
+Add New Address,కొత్త చిరునామాను జోడించండి
+Add new customer,కొత్త కస్టమర్‌ని జోడించండి
+Add on New Line,కొత్త లైన్‌లో జోడించండి
+Add Payment,చెల్లింపును జోడించండి
+Add payment to invoice,ఇన్‌వాయిస్‌కు చెల్లింపును జోడించండి
+Add/Edit Coupon Conditions,కూపన్ షరతులను జోడించండి/సవరించండి
+Additional Discount,అదనపు తగ్గింపు
+Additional Discount %,అదనపు తగ్గింపు %
+Address Line 1,చిరునామా లైన్ 1
+Address not found,చిరునామా దొరకలేదు
+Adjust the quantity or enable negative stock to continue.,కొనసాగించడానికి పరిమాణాన్ని సర్దుబాటు చేయండి లేదా ప్రతికూల స్టాక్‌ను ప్రారంభించండి.
+Adjustment,సర్దుబాటు
+After returns,తిరిగి వచ్చిన తర్వాత
+Against,వ్యతిరేకంగా
+Against Name,పేరుకు వ్యతిరేకంగా
+Age Bracket,వయస్సు బ్రాకెట్
+All,అన్నీ
+All Caught Up!,అంతా క్యాచ్ అప్!
+All invoices are synchronized,అన్ని ఇన్‌వాయిస్‌లు సమకాలీకరించబడ్డాయి
+All pending invoices are up to date,పెండింగ్‌లో ఉన్న అన్ని ఇన్‌వాయిస్‌లు తాజాగా ఉన్నాయి
+All Profiles,అన్ని ప్రొఫైల్‌లు
+All Synchronized,అన్నీ సమకాలీకరించబడ్డాయి
+All visible invoices are fully settled.,అన్ని కనిపించే ఇన్‌వాయిస్‌లు పూర్తిగా పరిష్కరించబడ్డాయి.
+All Warehouses,అన్ని గిడ్డంగులు
+Allowed UOM is {0},అనుమతించబడిన UOM {0}
+Always fetch items from server (ignore local cache),ఎల్లప్పుడూ సర్వర్ నుండి అంశాలను పొందండి (స్థానిక కాష్‌ను విస్మరించండి)
+Amount,మొత్తం
+Amount already received,ఇప్పటికే అందిన మొత్తం
+Amount exceeds profile cash movement max amount.,ప్రొఫైల్ నగదు కదలిక గరిష్ట మొత్తాన్ని మించిపోయింది.
+Amount must be greater than zero.,మొత్తం తప్పనిసరిగా సున్నా కంటే ఎక్కువగా ఉండాలి.
+Amount received from customer,కస్టమర్ నుండి అందుకున్న మొత్తం
+Appearance and user-level preferences for the current session.,ప్రస్తుత సెషన్ కోసం ప్రదర్శన మరియు వినియోగదారు-స్థాయి ప్రాధాన్యతలు.
+Applied,దరఖాస్తు చేసుకున్నారు
+Apply,దరఖాస్తు చేసుకోండి
+Apply Gift Card,గిఫ్ట్ కార్డ్‌ని వర్తింపజేయండి
+Apply Offer,ఆఫర్‌ని వర్తింపజేయండి
+Apply On,వర్తించు
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,ఈ ఇన్‌వాయిస్‌పై మీరు రీడీమ్ చేయాలనుకుంటున్న మొత్తాన్ని మాత్రమే వర్తింపజేయండి. మిగిలిన బ్యాలెన్స్ కార్డుపైనే ఉంటుంది.
+Apply Redemption,విముక్తిని వర్తింపజేయండి
+Applying,దరఖాస్తు చేస్తోంది
+Apps,యాప్‌లు
+Are you sure you want to close? All entered data will be lost.,మీరు ఖచ్చితంగా మూసివేయాలనుకుంటున్నారా? నమోదు చేసిన మొత్తం డేటా పోతుంది.
+Attributes (Size/Color),గుణాలు (పరిమాణం/రంగు)
+Auto Allocate Payment Amount,చెల్లింపు మొత్తాన్ని స్వయంచాలకంగా కేటాయించండి
+Auto Reconcile,ఆటో రాజీ
+Auto reconciliation completed after payment submit.,చెల్లింపు సమర్పించిన తర్వాత స్వీయ సయోధ్య పూర్తయింది.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,స్వీయ సయోధ్య పూర్తయింది. కేటాయించబడింది: {0}{1}. మిగిలినవి: {0}{2}.
+Available Actions,అందుబాటులో ఉన్న చర్యలు
+Available QTY,QTY అందుబాటులో ఉంది
+Available:,అందుబాటులో ఉంది:
+Average Basket,సగటు బాస్కెట్
+Average Bill,సగటు బిల్లు
+Average Ticket,సగటు టికెట్
+Avg Bill,సగటు బిల్లు
+Avg Invoice,సగటు ఇన్‌వాయిస్
+Avg Invoice Profit,సగటు ఇన్‌వాయిస్ లాభం
+Avg Invoice Value,సగటు ఇన్‌వాయిస్ విలువ
+Avg Purchase Frequency,సగటు కొనుగోలు ఫ్రీక్వెన్సీ
+Awesome,అద్భుతం
+Awesome Dashboard,అద్భుతమైన డాష్‌బోర్డ్
+Awesome Dashboard is disabled for the selected POS Profile.,ఎంచుకున్న POS ప్రొఫైల్ కోసం అద్భుతమైన డాష్‌బోర్డ్ నిలిపివేయబడింది.
+Awesome Dashboard is unavailable for the selected scope.,ఎంచుకున్న స్కోప్ కోసం అద్భుత డ్యాష్‌బోర్డ్ అందుబాటులో లేదు.
+Awesome Dashboard is visible only to POS supervisors.,అద్భుతమైన డాష్‌బోర్డ్ POS సూపర్‌వైజర్‌లకు మాత్రమే కనిపిస్తుంది.
+Back,వెనుకకు
+Back Office Cash Account,బ్యాక్ ఆఫీస్ నగదు ఖాతా
+Back Office Cash Account (Optional Override),బ్యాక్ ఆఫీస్ నగదు ఖాతా (ఐచ్ఛిక ఓవర్‌రైడ్)
+Back office cash account is required.,బ్యాక్ ఆఫీస్ నగదు ఖాతా అవసరం.
+Back to {0},తిరిగి {0}కి
+Background processing did not finish in time.,బ్యాక్‌గ్రౌండ్ ప్రాసెసింగ్ సకాలంలో పూర్తి కాలేదు.
+Background processing failed for Invoice {0}: {1},ఇన్‌వాయిస్ {0}: {1} కోసం బ్యాక్‌గ్రౌండ్ ప్రాసెసింగ్ విఫలమైంది
+Background Submission Failed,నేపథ్య సమర్పణ విఫలమైంది
+Background sync interval (seconds),నేపథ్య సమకాలీకరణ విరామం (సెకన్లు)
+Balance,బ్యాలెన్స్
+Balance will be updated when connection is restored,కనెక్షన్ పునరుద్ధరించబడినప్పుడు బ్యాలెన్స్ నవీకరించబడుతుంది
+Balances still pending,బ్యాలెన్స్‌లు ఇంకా పెండింగ్‌లో ఉన్నాయి
+Barcode,బార్‌కోడ్
+Barcode / QR Ready,బార్‌కోడ్ / QR సిద్ధంగా ఉంది
+Barcode Label Printing,బార్‌కోడ్ లేబుల్ ప్రింటింగ్
+Base Paid:,బేస్ పెయిడ్:
+Base Recv:,బేస్ Recv:
+Base:,ఆధారం:
+Basic Information,ప్రాథమిక సమాచారం
+Batch,బ్యాచ్
+Batch Information,బ్యాచ్ సమాచారం
+Before any return workflow,ఏదైనా రిటర్న్ వర్క్‌ఫ్లో ముందు
+Before returns,తిరిగి వచ్చే ముందు
+Best Day,ఉత్తమ రోజు
+Best Seller,బెస్ట్ సెల్లర్
+Book expense or deposit from active shift.,యాక్టివ్ షిఫ్ట్ నుండి బుక్ ఖర్చు లేదా డిపాజిట్.
+Branch / Location-wise Report,బ్రాంచ్ / స్థాన వారీగా నివేదిక
+Brand-wise,బ్రాండ్ వారీగా
+Breakdown,విచ్ఛిన్నం
+Browse,బ్రౌజ్ చేయండి
+Build Time:,బిల్డ్ సమయం:
+Built with Frappe,ఫ్రాప్పేతో నిర్మించబడింది
+Bundle,కట్ట
+Buying Price,కొనుగోలు ధర
+Cache cleared successfully,కాష్ విజయవంతంగా క్లియర్ చేయబడింది
+Cache Usage,కాష్ వినియోగం
+cache used,కాష్ ఉపయోగించబడింది
+Calculating...,లెక్కిస్తోంది...
+Camera Access Required,కెమెరా యాక్సెస్ అవసరం
+Camera access was aborted. Please try again.,కెమెరా యాక్సెస్ రద్దు చేయబడింది. దయచేసి మళ్లీ ప్రయత్నించండి.
+Camera constraints not supported by your device. Trying fallback settings...,మీ పరికరం ద్వారా కెమెరా పరిమితులకు మద్దతు లేదు. ఫాల్‌బ్యాక్ సెట్టింగ్‌లను ప్రయత్నిస్తోంది...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,"కెమెరా బిజీగా ఉంది లేదా మరొక యాప్/ట్యాబ్ ద్వారా బ్లాక్ చేయబడింది. ఇతర కెమెరా యాప్‌లను మూసివేసి, మళ్లీ ప్రయత్నించండి."
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,కెమెరా అనుమతి నిరాకరించబడింది. దయచేసి మీ బ్రౌజర్ సెట్టింగ్‌లలో కెమెరా యాక్సెస్‌ని అనుమతించండి మరియు పేజీని రిఫ్రెష్ చేయండి.
+Camera scanner is locked until the current error is acknowledged,ప్రస్తుత లోపం గుర్తించబడే వరకు కెమెరా స్కానర్ లాక్ చేయబడింది
+Camera started but the video stream did not load in time. Please try again.,కెమెరా ప్రారంభించబడింది కానీ వీడియో స్ట్రీమ్ సకాలంలో లోడ్ కాలేదు. దయచేసి మళ్లీ ప్రయత్నించండి.
+Cancel cash movement {0}?,నగదు తరలింపు {0}ని రద్దు చేయాలా?
+Cancel Payment,చెల్లింపును రద్దు చేయండి
+Cancel Sale,విక్రయాన్ని రద్దు చేయండి
+Cancel Sale ?,విక్రయాన్ని రద్దు చేయాలా?
+Cancelled,రద్దు చేయబడింది
+Cannot add an item with zero or negative quantity.,సున్నా లేదా ప్రతికూల పరిమాణంతో అంశాన్ని జోడించలేరు.
+Cannot clear cache while offline,ఆఫ్‌లైన్‌లో ఉన్నప్పుడు కాష్‌ని క్లియర్ చేయలేరు
+Cannot redeem customer credit more than invoice total,ఇన్‌వాయిస్ మొత్తం కంటే ఎక్కువ కస్టమర్ క్రెడిట్‌ని రీడీమ్ చేయలేరు
+Cannot redeem gift cards more than invoice total,మొత్తం ఇన్‌వాయిస్ కంటే ఎక్కువ బహుమతి కార్డ్‌లను రీడీమ్ చేయలేరు
+Cannot Save Offline Invoice:,ఆఫ్‌లైన్ ఇన్‌వాయిస్‌ను సేవ్ చేయడం సాధ్యం కాదు:
+Cannot Save Offline Payment:,ఆఫ్‌లైన్ చెల్లింపును సేవ్ చేయడం సాధ్యం కాదు:
+Card,కార్డ్
+Card / Online,కార్డ్ / ఆన్‌లైన్
+Card health after the last live lookup,చివరి ప్రత్యక్ష శోధన తర్వాత కార్డ్ ఆరోగ్యం
+Cards,కార్డులు
+Cart,బండి
+Cash,నగదు
+Cash back to customers,కస్టమర్లకు క్యాష్ బ్యాక్
+Cash Collections,నగదు సేకరణలు
+Cash Deposit is disabled for this POS Profile.,ఈ POS ప్రొఫైల్ కోసం నగదు డిపాజిట్ నిలిపివేయబడింది.
+Cash Drawer Snapshot,నగదు డ్రాయర్ స్నాప్‌షాట్
+Cash In Hand,చేతిలో నగదు
+Cash Movement,నగదు ఉద్యమం
+Cash movement cancelled,నగదు తరలింపు రద్దు చేయబడింది
+Cash movement deduction applied,నగదు తరలింపు మినహాయింపు వర్తించబడింది
+Cash movement deleted,నగదు తరలింపు తొలగించబడింది
+Cash movement is disabled for this POS Profile.,ఈ POS ప్రొఫైల్ కోసం నగదు తరలింపు నిలిపివేయబడింది.
+Cash Movement is disabled in current POS Profile.,ప్రస్తుత POS ప్రొఫైల్‌లో నగదు తరలింపు నిలిపివేయబడింది.
+Cash movement saved offline,నగదు తరలింపు ఆఫ్‌లైన్‌లో సేవ్ చేయబడింది
+Cash movement submitted,నగదు తరలింపు సమర్పించబడింది
+Cash Movements,నగదు కదలికలు
+Cash payment cannot be less than invoice total when partial payment is not allowed,పాక్షిక చెల్లింపు అనుమతించబడనప్పుడు నగదు చెల్లింపు మొత్తం ఇన్‌వాయిస్ కంటే తక్కువగా ఉండకూడదు
+Cash returned after payment,చెల్లింపు తర్వాత నగదు తిరిగి వచ్చింది
+Cashier,క్యాషియర్
+Cashier Access,క్యాషియర్ యాక్సెస్
+Cashier identity and appearance preferences.,క్యాషియర్ గుర్తింపు మరియు ప్రదర్శన ప్రాధాన్యతలు.
+Cashier PIN,క్యాషియర్ పిన్
+Cashier PIN saved successfully.,క్యాషియర్ పిన్ విజయవంతంగా సేవ్ చేయబడింది.
+Cashiers,క్యాషియర్లు
+Cashier-wise,క్యాషియర్ వారీగా
+Categories,వర్గాలు
+Category,వర్గం
+Category / Brand / Variant Report,వర్గం / బ్రాండ్ / వేరియంట్ నివేదిక
+Category-wise,కేటగిరీ వారీగా
+Category-wise Margin,కేటగిరీ వారీగా మార్జిన్
+Certificate,సర్టిఫికేట్
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,సర్టిఫికేట్ లేదు లేదా విశ్వసించబడలేదు. QZ నిర్ధారణ డైలాగ్‌లను చూపవచ్చు.
+Certificate is trusted. Silent QZ printing is active.,సర్టిఫికేట్ నమ్మదగినది. సైలెంట్ QZ ప్రింటింగ్ సక్రియంగా ఉంది.
+Change,మార్చండి
+Change allocation repaired,మార్పు కేటాయింపు మరమ్మత్తు చేయబడింది
+Change Price,ధర మార్చండి
+Change Return,రిటర్న్ మార్చండి
+Change Returned,మార్పు తిరిగి వచ్చింది
+Change terminal cashier,టెర్మినల్ క్యాషియర్‌ని మార్చండి
+Charge Heads,ఛార్జ్ హెడ్స్
+Charges,ఛార్జీలు
+Charges not found,ఛార్జీలు కనుగొనబడలేదు
+Check Balance,బ్యాలెన్స్ తనిఖీ చేయండి
+Check balance for any card. Supervisors can issue and top up cards here.,ఏదైనా కార్డ్ కోసం బ్యాలెన్స్ తనిఖీ చేయండి. సూపర్‌వైజర్‌లు ఇక్కడ కార్డ్‌లను జారీ చేయవచ్చు మరియు టాప్ అప్ చేయవచ్చు.
+Check balance only,బ్యాలెన్స్ మాత్రమే తనిఖీ చేయండి
+Check for new commits,కొత్త కమిట్‌ల కోసం తనిఖీ చేయండి
+Check for Updates,నవీకరణల కోసం తనిఖీ చేయండి
+Check live balance before applying redemption,విముక్తిని వర్తింపజేయడానికి ముందు ప్రత్యక్ష బ్యాలెన్స్‌ని తనిఖీ చేయండి
+Check live balance before redemption,రిడీమ్ చేయడానికి ముందు లైవ్ బ్యాలెన్స్‌ని చెక్ చేయండి
+Checking...,తనిఖీ చేస్తోంది...
+Cheque/Reference Date,చెక్/రిఫరెన్స్ తేదీ
+Cheque/Reference No,చెక్/రిఫరెన్స్ నం
+Choose the cashier currently operating this terminal.,ప్రస్తుతం ఈ టెర్మినల్‌ను నిర్వహిస్తున్న క్యాషియర్‌ని ఎంచుకోండి.
+City,నగరం
+Clear,క్లియర్
+Clear All,అన్నీ క్లియర్ చేయండి
+Clear all barcode items,అన్ని బార్‌కోడ్ అంశాలను క్లియర్ చేయండి
+Clear all purchase order items,అన్ని కొనుగోలు ఆర్డర్ అంశాలను క్లియర్ చేయండి
+Clear Search,శోధనను క్లియర్ చేయండి
+Clearing local cache...,స్థానిక కాష్‌ని క్లియర్ చేస్తోంది...
+Click to refresh,రిఫ్రెష్ చేయడానికి క్లిక్ చేయండి
+Client CPU Lag:,క్లయింట్ CPU లాగ్:
+Client Memory Usage:,క్లయింట్ మెమరీ వినియోగం:
+Client Metrics,క్లయింట్ కొలమానాలు
+Close about dialog,డైలాగ్ గురించి మూసివేయండి
+Close cashier switcher,క్యాషియర్ స్విచ్చర్‌ను మూసివేయండి
+Close closing shift dialog,మూసివేసే షిఫ్ట్ డైలాగ్‌ను మూసివేయండి
+Close column selector,నిలువు వరుస ఎంపిక సాధనాన్ని మూసివేయండి
+Close Dialog,డైలాగ్‌ని మూసివేయండి
+Close drafts dialog,డ్రాఫ్ట్ డైలాగ్‌ను మూసివేయండి
+Close invoice details dialog,ఇన్వాయిస్ వివరాల డైలాగ్‌ని మూసివేయండి
+Close invoice management,ఇన్వాయిస్ నిర్వహణను మూసివేయండి
+Close offline invoices dialog,ఆఫ్‌లైన్ ఇన్‌వాయిస్‌ల డైలాగ్‌ని మూసివేయండి
+Close packing list dialog,ప్యాకింగ్ జాబితా డైలాగ్‌ను మూసివేయండి
+Close returns dialog,రిటర్న్స్ డైలాగ్‌ని మూసివేయండి
+Close sales orders dialog,సేల్స్ ఆర్డర్‌ల డైలాగ్‌ని మూసివేయండి
+Close Scanner,స్కానర్‌ని మూసివేయండి
+Close scanner dialog,స్కానర్ డైలాగ్‌ని మూసివేయండి
+Close Settings,సెట్టింగ్‌లను మూసివేయండి
+Closing Amount,ముగింపు మొత్తం
+Closing POS Shift,POS షిఫ్ట్‌ని మూసివేస్తోంది
+Closing Snapshot Available,క్లోజింగ్ స్నాప్‌షాట్ అందుబాటులో ఉంది
+Code,కోడ్
+Code scanned successfully,కోడ్ విజయవంతంగా స్కాన్ చేయబడింది
+COGS,COGS
+Collapse item details,అంశం వివరాలను కుదించు
+Collected,సేకరించారు
+Cols,కల్ల్స్
+Columns,నిలువు వరుసలు
+commits,కట్టుబడి ఉంటుంది
+Completed and active sales in this range,ఈ శ్రేణిలో పూర్తి మరియు క్రియాశీల అమ్మకాలు
+Completed returns will appear here.,పూర్తయిన రిటర్న్‌లు ఇక్కడ కనిపిస్తాయి.
+Confirm,నిర్ధారించండి
+Confirm Close,మూసివేయి నిర్ధారించండి
+Confirm Mobile Number,మొబైల్ నంబర్‌ని నిర్ధారించండి
+Confirm PIN,PINని నిర్ధారించండి
+Connect,కనెక్ట్ చేయండి
+Connect printer and manage certificate,ప్రింటర్‌ను కనెక్ట్ చేయండి మరియు సర్టిఫికేట్‌ను నిర్వహించండి
+Connecting to QZ Tray...,QZ ట్రేకి కనెక్ట్ చేస్తోంది...
+Connection problem while submitting invoice,ఇన్‌వాయిస్‌ను సమర్పించేటప్పుడు కనెక్షన్ సమస్య
+Connections:,కనెక్షన్లు:
+Connectivity and cached prerequisite status were rechecked.,కనెక్టివిటీ మరియు కాష్ చేయబడిన ముందస్తు స్థితి తిరిగి తనిఖీ చేయబడింది.
+Continue Editing,సవరణ కొనసాగించు
+Could not fetch latest balance from server,సర్వర్ నుండి తాజా బ్యాలెన్స్ పొందడం సాధ్యపడలేదు
+Count,లెక్కించు
+Country,దేశం
+Coupon,కూపన్
+Coupons,కూపన్లు
+Cover,కవర్
+CPU Cores:,CPU కోర్లు:
+Create,సృష్టించు
+Create and load a new prepaid card,కొత్త ప్రీపెయిడ్ కార్డ్‌ని సృష్టించండి మరియు లోడ్ చేయండి
+Create and preload a new gift card,కొత్త బహుమతి కార్డ్‌ని సృష్టించండి మరియు ప్రీలోడ్ చేయండి
+Create Bill,బిల్లును సృష్టించండి
+Create Customer,కస్టమర్‌ని సృష్టించండి
+Create New Item,కొత్త అంశాన్ని సృష్టించండి
+Create or change your PIN,మీ PINని సృష్టించండి లేదా మార్చండి
+Create PIN,PINని సృష్టించండి
+Create POS Opening Shift,POS ఓపెనింగ్ షిఫ్ట్‌ని సృష్టించండి
+Create Purchase Order,కొనుగోలు ఆర్డర్‌ని సృష్టించండి
+Create Return,రిటర్న్ సృష్టించండి
+Create return from invoice,ఇన్వాయిస్ నుండి వాపసును సృష్టించండి
+Create Supplier,సరఫరాదారుని సృష్టించండి
+Credit and Output,క్రెడిట్ మరియు అవుట్‌పుట్
+Credit Note,క్రెడిట్ నోట్
+Credit Outstanding,అత్యుత్తమ క్రెడిట్
+Credit sales remaining to be collected,క్రెడిట్ అమ్మకాలు సేకరించడానికి మిగిలి ఉన్నాయి
+Critical,క్లిష్టమైన
+Currency,కరెన్సీ
+Current,ప్రస్తుత
+Current Event Loop Lag:,ప్రస్తుత ఈవెంట్ లూప్ లాగ్:
+Current Month,ప్రస్తుత నెల
+Current PIN,ప్రస్తుత పిన్
+Current Profile,ప్రస్తుత ప్రొఫైల్
+Current redeemable value on the gift card,బహుమతి కార్డ్‌లో ప్రస్తుత రీడీమ్ చేయదగిన విలువ
+Current User,ప్రస్తుత వినియోగదారు
+Custom,కస్టమ్
+Custom Due Days,కస్టమ్ గడువు రోజులు
+Custom items per page,పేజీకి అనుకూల అంశాలు
+Customer,కస్టమర్
+Customer already selected,కస్టమర్ ఇప్పటికే ఎంపికయ్యారు
+Customer Balance,కస్టమర్ బ్యాలెన్స్
+Customer balance unavailable offline,కస్టమర్ బ్యాలెన్స్ ఆఫ్‌లైన్‌లో అందుబాటులో లేదు
+Customer created successfully.,కస్టమర్ విజయవంతంగా సృష్టించబడ్డారు.
+Customer creation failed.,కస్టమర్ సృష్టి విఫలమైంది.
+Customer Details,కస్టమర్ వివరాలు
+Customer display channel is missing,కస్టమర్ డిస్‌ప్లే ఛానెల్ లేదు
+Customer display was blocked. Please allow pop-ups for this site.,కస్టమర్ డిస్‌ప్లే బ్లాక్ చేయబడింది. దయచేసి ఈ సైట్ కోసం పాప్-అప్‌లను అనుమతించండి.
+Customer group is required,కస్టమర్ గ్రూప్ అవసరం
+Customer is required to add payment,కస్టమర్ చెల్లింపును జోడించాల్సిన అవసరం ఉంది
+Customer Name is required,కస్టమర్ పేరు అవసరం
+Customer not selected,కస్టమర్ ఎంపిక కాలేదు
+Customer Report,కస్టమర్ రిపోర్ట్
+Customer saved offline,కస్టమర్ ఆఫ్‌లైన్‌లో సేవ్ చేయబడింది
+Customer Screen,కస్టమర్ స్క్రీన్
+Customer territory is required,కస్టమర్ ప్రాంతం అవసరం
+Customer updated successfully.,కస్టమర్ విజయవంతంగా నవీకరించబడ్డారు.
+Customer-facing tools and printer setup.,కస్టమర్-ఫేసింగ్ టూల్స్ మరియు ప్రింటర్ సెటప్.
+Customers,వినియోగదారులు
+Customers not found,వినియోగదారులు కనుగొనబడలేదు
+Daily cashier actions without scrolling.,స్క్రోలింగ్ లేకుండా రోజువారీ క్యాషియర్ చర్యలు.
+Daily Sales,రోజువారీ అమ్మకాలు
+Daily Sales Summary,రోజువారీ విక్రయాల సారాంశం
+Data loaded in form. Review and submit.,రూపంలో డేటా లోడ్ చేయబడింది. సమీక్షించి సమర్పించండి.
+Database Health,డేటాబేస్ ఆరోగ్యం
+Database health affects overall system speed and reliability.,డేటాబేస్ ఆరోగ్యం మొత్తం సిస్టమ్ వేగం మరియు విశ్వసనీయతను ప్రభావితం చేస్తుంది.
+Database Info,డేటాబేస్ సమాచారం
+Date,తేదీ
+Day ?,రోజు ?
+days,రోజులు
+Day-wise (MTD),రోజు వారీగా (MTD)
+Day-wise Movement,రోజు వారీ ఉద్యమం
+Dead Stock,డెడ్ స్టాక్
+Dead Stock Items,డెడ్ స్టాక్ వస్తువులు
+Decrease quantity,పరిమాణాన్ని తగ్గించండి
+Default,డిఫాల్ట్
+Default:,డిఫాల్ట్:
+Delete,తొలగించు
+Delete cancelled cash movement {0}?,రద్దు చేయబడిన నగదు తరలింపు {0}ని తొలగించాలా?
+Delete Draft,చిత్తుప్రతిని తొలగించండి
+Delete draft invoice,డ్రాఫ్ట్ ఇన్‌వాయిస్‌ని తొలగించండి
+Delete draft invoice {0}?,డ్రాఫ్ట్ ఇన్‌వాయిస్ {0}ని తొలగించాలా?
+Delete Invoice,ఇన్‌వాయిస్‌ని తొలగించండి
+Delete offline invoice,ఆఫ్‌లైన్ ఇన్‌వాయిస్‌ను తొలగించండి
+Delivered,పంపిణీ చేయబడింది
+Delivery Charges,డెలివరీ ఛార్జీలు
+Delivery Information,డెలివరీ సమాచారం
+Delivery Note {0} created,డెలివరీ గమనిక {0} సృష్టించబడింది
+Delivery note created,డెలివరీ నోట్ సృష్టించబడింది
+Deployed Bundle:,అమలు చేయబడిన బండిల్:
+Deposit,డిపాజిట్ చేయండి
+Description,వివరణ
+Detailed Supplier Breakdown,వివరణాత్మక సరఫరాదారు విచ్ఛిన్నం
+Detecting formats:,ఆకృతులను గుర్తించడం:
+Device Memory:,పరికర మెమరీ:
+Difference,తేడా
+Difference (In Company Currency),వ్యత్యాసం (కంపెనీ కరెన్సీలో)
+Disable offline mode first to recheck live connectivity.,లైవ్ కనెక్టివిటీని మళ్లీ తనిఖీ చేయడానికి ముందుగా ఆఫ్‌లైన్ మోడ్‌ను నిలిపివేయండి.
+Disconnect,డిస్‌కనెక్ట్ చేయండి
+discount,తగ్గింపు
+Discount %,తగ్గింపు %
+Discount / Void / Return Report,తగ్గింపు / శూన్యం / రిటర్న్ రిపోర్ట్
+Discount Amount,తగ్గింపు మొత్తం
+Discount limited by POS Profile,POS ప్రొఫైల్ ద్వారా తగ్గింపు పరిమితం చేయబడింది
+Discounted Invoices,డిస్కౌంట్ ఇన్‌వాయిస్‌లు
+Discounts,డిస్కౌంట్లు
+Dismiss,తొలగించు
+Download Certificate,సర్టిఫికేట్ డౌన్‌లోడ్ చేయండి
+Draft,డ్రాఫ్ట్
+Draft invoice deleted,డ్రాఫ్ట్ ఇన్‌వాయిస్ తొలగించబడింది
+Draft source,డ్రాఫ్ట్ మూలం
+Drafts,చిత్తుప్రతులు
+Due {0},గడువు {0}
+Due Date,గడువు తేదీ
+Duplicate,నకిలీ
+Edit customer,కస్టమర్‌ని సవరించండి
+Edit discount amount,తగ్గింపు మొత్తాన్ని సవరించండి
+Edit discount percentage,తగ్గింపు శాతాన్ని సవరించండి
+Edit Gift Application,బహుమతి దరఖాస్తును సవరించండి
+Edit item name,అంశం పేరును సవరించండి
+Edit quantity,పరిమాణాన్ని సవరించండి
+Edit rate,రేటును సవరించండి
+Edit unit of measure,కొలత యూనిట్‌ని సవరించండి
+Edited,సవరించబడింది
+Employee,ఉద్యోగి
+Enable background sync,నేపథ్య సమకాలీకరణను ప్రారంభించండి
+Enable Customer Display in POS Profile first.,ముందుగా POS ప్రొఫైల్‌లో కస్టమర్ డిస్‌ప్లేను ప్రారంభించండి.
+Enter a PIN.,PINని నమోదు చేయండి.
+Enter a valid grams value,చెల్లుబాటు అయ్యే గ్రాముల విలువను నమోదు చేయండి
+Enter new price list rate,కొత్త ధర జాబితా రేటును నమోదు చేయండి
+Enter Quantity,పరిమాణాన్ని నమోదు చేయండి
+Enter the cashier PIN to continue.,కొనసాగించడానికి క్యాషియర్ పిన్‌ని నమోదు చేయండి.
+Enter the current PIN first.,ముందుగా ప్రస్తుత పిన్‌ని నమోదు చేయండి.
+"Enter the current PIN, then choose a new one.","ప్రస్తుత పిన్‌ని నమోదు చేసి, ఆపై కొత్తదాన్ని ఎంచుకోండి."
+Enter valid grams for scale barcode,స్కేల్ బార్‌కోడ్ కోసం చెల్లుబాటు అయ్యే గ్రాములను నమోదు చేయండి
+Entries,ఎంట్రీలు
+Error accessing camera:,కెమెరాను యాక్సెస్ చేయడంలో లోపం:
+Error calculating prices,ధరలను గణించడంలో లోపం
+Error fetching customer balance,కస్టమర్ బ్యాలెన్స్ పొందడంలో లోపం ఏర్పడింది
+Error in change calculations!,మార్పు లెక్కల్లో లోపం!
+Error Loading Data,డేటా లోడ్ చేయడంలో లోపం
+Error loading invoice details,ఇన్‌వాయిస్ వివరాలను లోడ్ చేయడంలో లోపం
+Error processing invoice,ఇన్‌వాయిస్‌ను ప్రాసెస్ చేయడంలో లోపం
+Error processing payment,చెల్లింపును ప్రాసెస్ చేయడంలో లోపం
+Error searching invoices,ఇన్‌వాయిస్‌లను శోధించడంలో లోపం
+Error submitting invoice:,ఇన్‌వాయిస్‌ని సమర్పించడంలో లోపం:
+Error submitting invoice: {0},ఇన్‌వాయిస్‌ని సమర్పించడంలో లోపం: {0}
+Error submitting invoice: No response from server,ఇన్‌వాయిస్‌ని సమర్పించడంలో లోపం: సర్వర్ నుండి స్పందన లేదు
+Error updating currency,కరెన్సీని నవీకరించడంలో లోపం ఏర్పడింది
+Error updating item details,ఐటెమ్ వివరాలను అప్‌డేట్ చేయడంలో ఎర్రర్ ఏర్పడింది
+Est. Purchase,అంచనా. కొనుగోలు
+Est. Value,అంచనా. విలువ
+Event-loop lag measures how busy your browser is. Lower is better.,ఈవెంట్-లూప్ లాగ్ మీ బ్రౌజర్ ఎంత బిజీగా ఉందో కొలుస్తుంది. దిగువ ఉత్తమం.
+Every,ప్రతి
+Exchange Rate,మార్పిడి రేటు
+Expand item details,అంశం వివరాలను విస్తరించండి
+Expected Amount (In Company Currency),ఆశించిన మొత్తం (కంపెనీ కరెన్సీలో)
+Expected Cash,ఆశించిన నగదు
+Expected cash on hand grouped by currency,కరెన్సీ ద్వారా సమూహం చేయబడిన చేతిలో ఉన్న నగదు అంచనా
+Expected vs Actual,ఊహించినది vs వాస్తవమైనది
+Expense,ఖర్చు
+Expense Account (Optional Override),ఖర్చు ఖాతా (ఐచ్ఛిక ఓవర్‌రైడ్)
+Expense account is required.,ఖర్చు ఖాతా అవసరం.
+Expenses and deposits posted during this shift,ఈ షిఫ్ట్ సమయంలో పోస్ట్ చేయబడిన ఖర్చులు మరియు డిపాజిట్లు
+Expired,గడువు ముగిసింది
+Failed to auto reconcile payments.,చెల్లింపులను స్వయంచాలకంగా సరిచేయడంలో విఫలమైంది.
+Failed to cancel cash movement,నగదు తరలింపును రద్దు చేయడంలో విఫలమైంది
+Failed to clear cache,కాష్‌ని క్లియర్ చేయడంలో విఫలమైంది
+Failed to create item,అంశాన్ని సృష్టించడం విఫలమైంది
+Failed to create supplier,సరఫరాదారుని సృష్టించడం విఫలమైంది
+Failed to delete cash movement,నగదు తరలింపును తొలగించడంలో విఫలమైంది
+Failed to generate scale barcode. Using item barcode only.,స్కేల్ బార్‌కోడ్‌ను రూపొందించడంలో విఫలమైంది. అంశం బార్‌కోడ్‌ను మాత్రమే ఉపయోగిస్తోంది.
+Failed to load cash movement context.,నగదు తరలింపు సందర్భాన్ని లోడ్ చేయడంలో విఫలమైంది.
+Failed to load dashboard data.,డాష్‌బోర్డ్ డేటాను లోడ్ చేయడంలో విఫలమైంది.
+Failed to reload invoice from server,సర్వర్ నుండి ఇన్‌వాయిస్‌ని రీలోడ్ చేయడంలో విఫలమైంది
+Failed to submit cash movement,నగదు తరలింపును సమర్పించడంలో విఫలమైంది
+Failed to sync offline cash movements,ఆఫ్‌లైన్ నగదు కదలికలను సమకాలీకరించడంలో విఫలమైంది
+Fast cashier actions for active shifts.,యాక్టివ్ షిఫ్ట్‌ల కోసం వేగవంతమైన క్యాషియర్ చర్యలు.
+Fast Moving Items,ఫాస్ట్ మూవింగ్ అంశాలు
+Fees,రుసుములు
+Fetch the latest offline prerequisite updates,తాజా ఆఫ్‌లైన్ ముందస్తు నవీకరణలను పొందండి
+Find a sales order quickly and load it into the current sale.,"సేల్స్ ఆర్డర్‌ను త్వరగా కనుగొని, దానిని ప్రస్తుత విక్రయంలోకి లోడ్ చేయండి."
+Fixing payment amounts for return invoice...,రిటర్న్ ఇన్‌వాయిస్ కోసం చెల్లింపు మొత్తాలను నిర్ణయిస్తోంది...
+Flash Off,ఫ్లాష్ ఆఫ్
+Flash On,ఫ్లాష్ ఆన్
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","'ప్రొడక్ట్ బండిల్' ఐటెమ్‌ల కోసం, వేర్‌హౌస్, సీరియల్ నంబర్ మరియు బ్యాచ్ నంబర్ 'ప్యాకింగ్ లిస్ట్' టేబుల్ నుండి పరిగణించబడతాయి. ఏదైనా 'ప్రొడక్ట్ బండిల్' ఐటెమ్‌కి అన్ని ప్యాకింగ్ ఐటెమ్‌లకు వేర్‌హౌస్ మరియు బ్యాచ్ నంబర్ ఒకేలా ఉంటే, ఆ విలువలను ప్రధాన ఐటెమ్ టేబుల్‌లో నమోదు చేయవచ్చు; విలువలు 'ప్యాకింగ్ జాబితా' పట్టికకు కాపీ చేయబడతాయి."
+Free,ఉచిత
+Free Qty,ఉచిత Qty
+Frequency,ఫ్రీక్వెన్సీ
+from,నుండి
+From Date,తేదీ నుండి
+Fulfillment Details,పూర్తి వివరాలు
+Full Name,పూర్తి పేరు
+Gain,లాభం
+Generate a fresh prepaid card and start it with an opening balance.,తాజా ప్రీపెయిడ్ కార్డ్‌ని రూపొందించండి మరియు దానిని ప్రారంభ బ్యాలెన్స్‌తో ప్రారంభించండి.
+Generate and install the certificate to allow fully silent printing without trust prompts.,విశ్వసనీయ ప్రాంప్ట్‌లు లేకుండా పూర్తిగా నిశ్శబ్ద ముద్రణను అనుమతించడానికి సర్టిఫికేట్‌ను రూపొందించండి మరియు ఇన్‌స్టాల్ చేయండి.
+Generate Certificate,సర్టిఫికేట్ రూపొందించండి
+Generated scale barcode: {0},రూపొందించిన స్కేల్ బార్‌కోడ్: {0}
+Get Payments,చెల్లింపులు పొందండి
+Gift Card,గిఫ్ట్ కార్డ్
+Gift card amount must be greater than zero.,బహుమతి కార్డ్ మొత్తం తప్పనిసరిగా సున్నా కంటే ఎక్కువగా ఉండాలి.
+Gift Card Code,బహుమతి కార్డ్ కోడ్
+Gift card code is required for redemption,రిడీమ్ కోసం బహుమతి కార్డ్ కోడ్ అవసరం
+Gift card code is required.,బహుమతి కార్డ్ కోడ్ అవసరం.
+Gift card issued successfully.,బహుమతి కార్డ్ విజయవంతంగా జారీ చేయబడింది.
+Gift card loaded successfully.,బహుమతి కార్డ్ విజయవంతంగా లోడ్ చేయబడింది.
+Gift Card Management,బహుమతి కార్డ్ నిర్వహణ
+Gift card payment,బహుమతి కార్డు చెల్లింపు
+Gift card redemption requires an online connection,గిఫ్ట్ కార్డ్ రిడీమ్‌కి ఆన్‌లైన్ కనెక్షన్ అవసరం
+Gift card topped up successfully.,బహుమతి కార్డ్ విజయవంతంగా టాప్ అప్ చేయబడింది.
+Gift Cards,బహుమతి కార్డులు
+Go to Frappe Desk,Frappe డెస్క్‌కి వెళ్లండి
+Grand Total,గ్రాండ్ టోటల్
+Gross Margin,స్థూల మార్జిన్
+Gross Profit,స్థూల లాభం
+Gross Sales,స్థూల అమ్మకాలు
+Group not found,సమూహం కనుగొనబడలేదు
+"Grouped controls for terminal, UI, and session settings.","టెర్మినల్, UI మరియు సెషన్ సెట్టింగ్‌ల కోసం సమూహ నియంత్రణలు."
+Grouped totals for each payment method and currency,ప్రతి చెల్లింపు పద్ధతి మరియు కరెన్సీ కోసం సమూహ మొత్తాలు
+Hide,దాచు
+Hide Gift Card,బహుమతి కార్డ్‌ను దాచండి
+Hide Non Essential Fields,అనవసరమైన ఫీల్డ్‌లను దాచండి
+Hide quantity decimals,పరిమాణ దశాంశాలను దాచండి
+Hide search tools,శోధన సాధనాలను దాచండి
+Hide zero rated items,సున్నా రేట్ చేయబడిన అంశాలను దాచండి
+High,అధిక
+History,చరిత్ర
+Hourly (Today),గంటకోసారి (ఈరోజు)
+How this section works,ఈ విభాగం ఎలా పని చేస్తుంది
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","పాత డేటా మిగిలి ఉంటే, సెట్టింగ్‌లు > ఆఫ్‌లైన్ & సమకాలీకరణను తెరిచి, ఆన్‌లైన్‌లో ఉన్నప్పుడు మళ్లీ ఆఫ్‌లైన్ డేటాను రీబిల్డ్ చేయండి."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","హెచ్చరిక కొనసాగితే, సెట్టింగ్‌లు > ఆఫ్‌లైన్ & సమకాలీకరణను తెరిచి, ఆఫ్‌లైన్ డేటాను రిఫ్రెష్ చేయండి లేదా ఆఫ్‌లైన్ డేటాను రీబిల్డ్ చేయండి."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,సర్టిఫికెట్‌ను QZ ట్రేలోకి దిగుమతి చేయండి మరియు ప్రతి POS మెషీన్‌లో QZ ట్రేని పునఃప్రారంభించండి.
+In,లో
+In stock: {0},స్టాక్‌లో ఉంది: {0}
+Include Batch / Serial,బ్యాచ్ / సీరియల్ చేర్చండి
+Include Price,ధరను చేర్చండి
+Increase quantity,పరిమాణాన్ని పెంచండి
+IndexedDB,ఇండెక్స్డ్DB
+Initial Amount,ప్రారంభ మొత్తం
+Initialize your shift with opening balances,ప్రారంభ బ్యాలెన్స్‌లతో మీ షిఫ్ట్‌ని ప్రారంభించండి
+Initializing application...,అప్లికేషన్‌ను ప్రారంభిస్తోంది...
+"Inspect cache, sync, and prerequisite status","కాష్, సమకాలీకరణ మరియు ముందస్తు స్థితిని తనిఖీ చేయండి"
+Installed Applications,ఇన్‌స్టాల్ చేసిన అప్లికేషన్‌లు
+Insufficient stock:\n{0},తగినంత స్టాక్ లేదు:\n{0}
+Invalid rate,చెల్లని రేటు
+Inventory Status Report,ఇన్వెంటరీ స్థితి నివేదిక
+Invoice,ఇన్వాయిస్
+Invoice {0} is Submitted,ఇన్‌వాయిస్ {0} సమర్పించబడింది
+Invoice {0} processed successfully,ఇన్‌వాయిస్ {0} విజయవంతంగా ప్రాసెస్ చేయబడింది
+Invoice {0} submission failed,ఇన్‌వాయిస్ {0} సమర్పణ విఫలమైంది
+Invoice {0} was already submitted,ఇన్‌వాయిస్ {0} ఇప్పటికే సమర్పించబడింది
+Invoice Adjustments,ఇన్వాయిస్ సర్దుబాట్లు
+Invoice Change,ఇన్వాయిస్ మార్పు
+Invoice Details,ఇన్వాయిస్ వివరాలు
+Invoice is still in draft after background submission.,నేపథ్య సమర్పణ తర్వాత ఇన్‌వాయిస్ ఇప్పటికీ డ్రాఫ్ట్‌లో ఉంది.
+Invoice Items,ఇన్వాయిస్ అంశాలు
+Invoice Management,ఇన్వాయిస్ నిర్వహణ
+Invoice Mgmt,ఇన్వాయిస్ Mgmt
+Invoice saved offline,ఇన్‌వాయిస్ ఆఫ్‌లైన్‌లో సేవ్ చేయబడింది
+Invoice submission failed,ఇన్‌వాయిస్ సమర్పణ విఫలమైంది
+Invoice Submitted,ఇన్వాయిస్ సమర్పించబడింది
+"Invoice value settled by loyalty points, not cash collection","ఇన్‌వాయిస్ విలువ లాయల్టీ పాయింట్‌ల ద్వారా పరిష్కరించబడింది, నగదు సేకరణ కాదు"
+Invoices,ఇన్‌వాయిస్‌లు
+Invoices already past due date,ఇప్పటికే గడువు తేదీ దాటిన ఇన్‌వాయిస్‌లు
+Invoices saved as POS Invoices,ఇన్‌వాయిస్‌లు POS ఇన్‌వాయిస్‌లుగా సేవ్ చేయబడ్డాయి
+Invoices still carrying balances,ఇన్‌వాయిస్‌లు ఇప్పటికీ బ్యాలెన్స్‌లను కలిగి ఉన్నాయి
+Issue Mode,ఇష్యూ మోడ్
+Issue New Card,కొత్త కార్డును జారీ చేయండి
+Issue Workflow,ఇష్యూ వర్క్‌ఫ్లో
+"Issue, top up, and check","జారీ చేయండి, టాప్ అప్ చేయండి మరియు తనిఖీ చేయండి"
+Item,అంశం
+Item / Product Sales Report,వస్తువు / ఉత్పత్తి విక్రయాల నివేదిక
+Item {0} added to invoice,అంశం {0} ఇన్‌వాయిస్‌కు జోడించబడింది
+Item '{0}' has no barcode,ఐటెమ్ '{0}'కి బార్‌కోడ్ లేదు
+Item Code,అంశం కోడ్
+Item created successfully,అంశం విజయవంతంగా సృష్టించబడింది
+Item is out of stock,వస్తువు స్టాక్ లేదు
+Item Name,అంశం పేరు
+Item not found,అంశం కనుగొనబడలేదు
+Item order updated,ఐటెమ్ ఆర్డర్ అప్‌డేట్ చేయబడింది
+Item Selector Settings,ఐటెమ్ సెలెక్టర్ సెట్టింగ్‌లు
+Items,వస్తువులు
+Items added in POS will appear here automatically.,POSలో జోడించిన అంశాలు స్వయంచాలకంగా ఇక్కడ కనిపిస్తాయి.
+Items added to invoice,ఇన్‌వాయిస్‌కు అంశాలు జోడించబడ్డాయి
+Items per page,ప్రతి పేజీకి సంబంధించిన అంశాలు
+Items Sold,వస్తువులు విక్రయించబడ్డాయి
+Items/Invoice,వస్తువులు/ఇన్‌వాయిస్
+Item-wise Profitability,అంశాల వారీగా లాభదాయకత
+Journal Entry,జర్నల్ ఎంట్రీ
+json,json
+Just now,ఇప్పుడే
+Keep offline prerequisites healthy and recover stale data safely.,ఆఫ్‌లైన్ ముందస్తు అవసరాలను ఆరోగ్యంగా ఉంచండి మరియు పాత డేటాను సురక్షితంగా పునరుద్ధరించండి.
+Labels,లేబుల్స్
+"Language, theme, terminal tools, and session controls.","భాష, థీమ్, టెర్మినల్ సాధనాలు మరియు సెషన్ నియంత్రణలు."
+Last,చివరిది
+Last 14 Days (Paid vs Pending),గత 14 రోజులు (చెల్లింపు vs పెండింగ్)
+Last 14 Days Activity,గత 14 రోజుల కార్యాచరణ
+Last 14 Days Gross Profit,గత 14 రోజుల స్థూల లాభం
+Last 14 Days Purchases,గత 14 రోజుల కొనుగోళ్లు
+Last 14 Days Tax/Charges,గత 14 రోజుల పన్ను/ఛార్జీలు
+Last sync:,చివరి సమకాలీకరణ:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},చివరి సమకాలీకరణ: {0} | సరే: {1} | విఫలమైంది: {2} | దాటవేయబడింది: {3}
+Latest entries for current shift,ప్రస్తుత షిఫ్ట్ కోసం తాజా ఎంట్రీలు
+Lead Time,ప్రధాన సమయం
+Limited,పరిమితం చేయబడింది
+lines,పంక్తులు
+List,జాబితా
+Live Snapshot,ప్రత్యక్ష స్నాప్‌షాట్
+Load a POS profile and cashier first.,ముందుగా POS ప్రొఫైల్ మరియు క్యాషియర్‌ని లోడ్ చేయండి.
+Load More Invoices,మరిన్ని ఇన్‌వాయిస్‌లను లోడ్ చేయండి
+Load previously saved invoices,గతంలో సేవ్ చేసిన ఇన్‌వాయిస్‌లను లోడ్ చేయండి
+Load Sale,లోడ్ సేల్
+Load Sales Invoice,సేల్స్ ఇన్‌వాయిస్‌ని లోడ్ చేయండి
+Loading app data...,యాప్ డేటా లోడ్ అవుతోంది...
+Loading customer database...,కస్టమర్ డేటాబేస్ లోడ్ అవుతోంది...
+Loading customers...,కస్టమర్‌లను లోడ్ చేస్తోంది...
+Loading database stats...,డేటాబేస్ గణాంకాలను లోడ్ చేస్తోంది...
+Loading details...,వివరాలను లోడ్ చేస్తోంది...
+Loading invoice history...,ఇన్‌వాయిస్ చరిత్రను లోడ్ చేస్తోంది...
+Loading items...,అంశాలను లోడ్ చేస్తోంది...
+Loading product catalog...,ఉత్పత్తి కేటలాగ్ లోడ్ అవుతోంది...
+Loading return invoices...,రిటర్న్ ఇన్‌వాయిస్‌లను లోడ్ చేస్తోంది...
+Loading server CPU/memory usage...,సర్వర్ CPU/మెమొరీ వినియోగం లోడ్ అవుతోంది...
+Loading suppliers...,సరఫరాదారులను లోడ్ చేస్తోంది...
+Loading unpaid invoices...,చెల్లించని ఇన్‌వాయిస్‌లను లోడ్ చేస్తోంది...
+Loading view...,వీక్షణ లోడ్ అవుతోంది...
+Loading...,లోడ్ అవుతోంది...
+Local storage is unavailable. Switching to online-only mode.,స్థానిక నిల్వ అందుబాటులో లేదు. ఆన్‌లైన్-మాత్రమే మోడ్‌కి మారుతోంది.
+localStorage,స్థానిక నిల్వ
+Location Performance,స్థాన పనితీరు
+Locations,స్థానాలు
+Lock Screen,లాక్ స్క్రీన్
+Lookup Workflow,వర్క్‌ఫ్లో చూడండి
+Loss,నష్టం
+Low,తక్కువ
+Low Stock,తక్కువ స్టాక్
+Low Stock Alerts,తక్కువ స్టాక్ హెచ్చరికలు
+Low Stock Items,తక్కువ స్టాక్ వస్తువులు
+Low Stock Threshold,తక్కువ స్టాక్ థ్రెషోల్డ్
+Low Stock Total,తక్కువ స్టాక్ మొత్తం
+Lowest Margin,అత్యల్ప మార్జిన్
+Low-frequency maintenance and system details.,తక్కువ-ఫ్రీక్వెన్సీ నిర్వహణ మరియు సిస్టమ్ వివరాలు.
+Loyalty Redeemed,లాయల్టీ రీడీమ్ చేయబడింది
+Loyalty Redemption,లాయల్టీ రిడెంప్షన్
+Make New Payment,కొత్త చెల్లింపు చేయండి
+Manage all,అన్నింటినీ నిర్వహించండి
+Manage and synchronize your offline transactions,మీ ఆఫ్‌లైన్ లావాదేవీలను నిర్వహించండి మరియు సమకాలీకరించండి
+Manage Cashier PIN,క్యాషియర్ పిన్‌ని నిర్వహించండి
+"Manage offline tools, terminal controls, and maintenance from one workspace.","ఒక కార్యస్థలం నుండి ఆఫ్‌లైన్ సాధనాలు, టెర్మినల్ నియంత్రణలు మరియు నిర్వహణను నిర్వహించండి."
+manual,మాన్యువల్
+"Manual codes, barcode scans, and QR scans work in the same field","మాన్యువల్ కోడ్‌లు, బార్‌కోడ్ స్కాన్‌లు మరియు QR స్కాన్‌లు ఒకే ఫీల్డ్‌లో పని చేస్తాయి"
+Manual offline mode is enabled,మాన్యువల్ ఆఫ్‌లైన్ మోడ్ ప్రారంభించబడింది
+Margin,మార్జిన్
+Maximum available quantity is {0}. Quantity adjusted to match stock.,అందుబాటులో ఉన్న గరిష్ట పరిమాణం {0}. సరిపోలే స్టాక్‌కు పరిమాణం సర్దుబాటు చేయబడింది.
+Maximum discount amount for this offer item is {0}.,ఈ ఆఫర్ అంశం కోసం గరిష్ట తగ్గింపు మొత్తం {0}.
+Maximum discount percentage for this offer item is {0}%.,ఈ ఆఫర్ అంశం కోసం గరిష్ట తగ్గింపు శాతం {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,గరిష్ట ఆఫర్ పరిమాణం {0}. అనుమతించబడిన పరిమితికి పరిమాణం సర్దుబాటు చేయబడింది.
+Medium,మధ్యస్థం
+Method-wise Collections,పద్ధతి వారీగా సేకరణలు
+Minimum allowed rate for this offer item is {0}.,ఈ ఆఫర్ ఐటెమ్ కోసం అనుమతించబడిన కనీస ధర {0}.
+Minimum Qty,కనిష్ట క్యూటీ
+Mobile No,మొబైల్ నెం
+Mode,మోడ్
+Mode of Payment,చెల్లింపు విధానం
+Month,నెల
+Month ?,నెల ?
+Monthly Profit,నెలవారీ లాభం
+Monthly Sales,నెలవారీ అమ్మకాలు
+Monthly Sales Summary,నెలవారీ విక్రయాల సారాంశం
+Month-wise,నెలవారీగా
+Most Active Cashiers,చాలా యాక్టివ్ క్యాషియర్‌లు
+Movement Type,కదలిక రకం
+Movements,ఉద్యమాలు
+Multi Currency,బహుళ కరెన్సీ
+N/A,N/A
+Name,పేరు
+Negative Stock,ప్రతికూల స్టాక్
+Negative Stock Items,ప్రతికూల స్టాక్ అంశాలు
+Negative values not allowed,ప్రతికూల విలువలు అనుమతించబడవు
+Net,నికర
+Net Qty,నికర క్యూటీ
+Net Sales,నికర అమ్మకాలు
+Net Value,నికర విలువ
+Never,ఎప్పుడూ
+New changes are ready to load,కొత్త మార్పులు లోడ్ చేయడానికి సిద్ధంగా ఉన్నాయి
+New Item,కొత్త అంశం
+New Offer Available,కొత్త ఆఫర్ అందుబాటులో ఉంది
+New PIN,కొత్త పిన్
+New rate,కొత్త రేటు
+Next unit of measure,కొలత యొక్క తదుపరి యూనిట్
+No attribute data found.,అట్రిబ్యూట్ డేటా ఏదీ కనుగొనబడలేదు.
+No Barcode,బార్‌కోడ్ లేదు
+No barcode found for UOM '{0}',UOM '{0}' కోసం బార్‌కోడ్ కనుగొనబడలేదు
+No branch/location data found.,శాఖ/స్థాన డేటా ఏదీ కనుగొనబడలేదు.
+No brand data found.,బ్రాండ్ డేటా కనుగొనబడలేదు.
+No cached gift card balance is available offline.,కాష్ చేయబడిన బహుమతి కార్డ్ బ్యాలెన్స్ ఆఫ్‌లైన్‌లో అందుబాటులో లేదు.
+No camera found on this device. Please ensure your device has a working camera.,ఈ పరికరంలో కెమెరా ఏదీ కనుగొనబడలేదు. దయచేసి మీ పరికరంలో పనిచేసే కెమెరా ఉందని నిర్ధారించుకోండి.
+No capability warnings recorded yet.,సామర్థ్య హెచ్చరికలు ఇంకా రికార్డ్ చేయబడలేదు.
+No cash expected for this shift.,ఈ షిఫ్ట్ కోసం ఎటువంటి నగదు ఆశించబడదు.
+No cash mode configured,నగదు మోడ్ ఏదీ కాన్ఫిగర్ చేయబడలేదు
+No cash movement type is allowed for this POS Profile.,ఈ POS ప్రొఫైల్ కోసం నగదు తరలింపు రకం అనుమతించబడదు.
+No cashier PIN is set yet. Create one now.,క్యాషియర్ పిన్ ఇంకా సెట్ చేయబడలేదు. ఇప్పుడే ఒకదాన్ని సృష్టించండి.
+No cashier profiles are available for this POS profile yet.,ఈ POS ప్రొఫైల్ కోసం క్యాషియర్ ప్రొఫైల్‌లు ఏవీ ఇంకా అందుబాటులో లేవు.
+No cashier-wise discount/void/return activity.,క్యాషియర్ వారీగా తగ్గింపు/శూన్యత/వాపసు కార్యకలాపం లేదు.
+No category data found.,వర్గం డేటా కనుగొనబడలేదు.
+No category profitability data found.,వర్గం లాభదాయకత డేటా కనుగొనబడలేదు.
+No change returned recorded for this shift.,ఈ షిఫ్ట్ కోసం ఎలాంటి మార్పు నమోదు కాలేదు.
+No change-allocation invoices match the current filters.,ప్రస్తుత ఫిల్టర్‌లకు ఏ మార్పు-కేటాయింపు ఇన్‌వాయిస్‌లు సరిపోలలేదు.
+No charge head breakdown found.,ఛార్జ్ హెడ్ బ్రేక్‌డౌన్ కనుగొనబడలేదు.
+No Company Selected,ఏ కంపెనీ ఎంపిక కాలేదు
+No customer sales data found.,కస్టమర్ విక్రయాల డేటా కనుగొనబడలేదు.
+No day-wise discount/void/return trend.,రోజు వారీగా తగ్గింపు/శూన్యం/వాపసు ట్రెండ్ లేదు.
+No day-wise payment data found.,రోజు వారీ చెల్లింపు డేటా కనుగొనబడలేదు.
+No day-wise profitability trend found.,రోజు వారీ లాభదాయక ధోరణి కనుగొనబడలేదు.
+No day-wise purchase data found.,రోజు వారీగా కొనుగోలు డేటా కనుగొనబడలేదు.
+No day-wise sales trend found.,రోజు వారీ విక్రయాల ట్రెండ్ కనుగొనబడలేదు.
+No day-wise tax/charges trend found.,రోజు వారీగా పన్ను/ఛార్జీల ట్రెండ్ కనుగొనబడలేదు.
+No dead stock items.,డెడ్ స్టాక్ వస్తువులు లేవు.
+No due date,గడువు తేదీ లేదు
+No exact repair match found for this invoice,ఈ ఇన్‌వాయిస్‌కు ఖచ్చితమైన మరమ్మతు సరిపోలిక కనుగొనబడలేదు
+No hourly sales trend found for today.,నేటికి గంటవారీ విక్రయాల ట్రెండ్ కనుగొనబడలేదు.
+No invoice activity found.,ఇన్‌వాయిస్ కార్యాచరణ ఏదీ కనుగొనబడలేదు.
+No invoices found,ఇన్‌వాయిస్‌లు ఏవీ కనుగొనబడలేదు
+No invoices found. Try different search criteria.,ఇన్‌వాయిస్‌లు ఏవీ కనుగొనబడలేదు. విభిన్న శోధన ప్రమాణాలను ప్రయత్నించండి.
+No invoices recorded for this shift.,ఈ షిఫ్ట్ కోసం ఇన్‌వాయిస్‌లు రికార్డ్ చేయబడలేదు.
+No item profitability data found.,వస్తువు లాభదాయకత డేటా కనుగొనబడలేదు.
+No item sales data found for this period.,ఈ కాలానికి వస్తువు విక్రయాల డేటా ఏదీ కనుగొనబడలేదు.
+No items found,అంశాలు ఏవీ కనుగొనబడలేదు
+No items in cart,కార్ట్‌లో వస్తువులు లేవు
+No items with barcodes to print,ప్రింట్ చేయడానికి బార్‌కోడ్‌లతో ఐటెమ్‌లు లేవు
+No location-wise top item data found.,లొకేషన్ వారీగా టాప్ ఐటెమ్ డేటా కనుగొనబడలేదు.
+No low stock alerts right now.,ప్రస్తుతం తక్కువ స్టాక్ హెచ్చరికలు లేవు.
+No low stock items.,తక్కువ స్టాక్ వస్తువులు లేవు.
+No matching items in cart,కార్ట్‌లో సరిపోలే అంశాలు లేవు
+No month-wise sales trend found.,నెలవారీ విక్రయాల ట్రెండ్ కనుగొనబడలేదు.
+No negative stock items.,ప్రతికూల స్టాక్ అంశాలు లేవు.
+No notifications yet,ఇంకా నోటిఫికేషన్‌లు లేవు
+No offline cash movement synced.,ఆఫ్‌లైన్ నగదు తరలింపు ఏదీ సమకాలీకరించబడలేదు.
+No offline invoices pending synchronization,ఆఫ్‌లైన్ ఇన్‌వాయిస్‌లు ఏవీ పెండింగ్‌లో లేవు సమకాలీకరణ
+No offline sync issues recorded yet.,ఆఫ్‌లైన్ సమకాలీకరణ సమస్యలు ఇంకా రికార్డ్ చేయబడలేదు.
+No out-of-stock items.,స్టాక్ లేని వస్తువులు లేవు.
+No outstanding credit invoices for this shift.,ఈ షిఫ్ట్ కోసం అత్యుత్తమ క్రెడిట్ ఇన్‌వాయిస్‌లు లేవు.
+No payment collection data found.,చెల్లింపు సేకరణ డేటా కనుగొనబడలేదు.
+No payment rows available on this invoice.,ఈ ఇన్‌వాయిస్‌లో చెల్లింపు వరుసలు ఏవీ అందుబాటులో లేవు.
+No payments registered for this shift.,ఈ షిఫ్ట్ కోసం చెల్లింపులు నమోదు చేయబడలేదు.
+No pending balances in this period.,ఈ వ్యవధిలో పెండింగ్ బ్యాలెన్స్‌లు లేవు.
+No pending offline invoices,ఆఫ్‌లైన్ ఇన్‌వాయిస్‌లు పెండింగ్‌లో లేవు
+No Print Formats Found,ప్రింట్ ఫార్మాట్‌లు ఏవీ కనుగొనబడలేదు
+No profiles found for selected scope. Falling back to current profile failed.,ఎంచుకున్న స్కోప్ కోసం ప్రొఫైల్‌లు ఏవీ కనుగొనబడలేదు. ప్రస్తుత ప్రొఫైల్‌కు తిరిగి రావడం విఫలమైంది.
+No recent customer activity found.,ఇటీవలి కస్టమర్ కార్యాచరణ ఏదీ కనుగొనబడలేదు.
+No recent stock entries found.,ఇటీవలి స్టాక్ నమోదులు ఏవీ కనుగొనబడలేదు.
+No records found,రికార్డులు ఏవీ దొరకలేదు
+No reorder suggestions right now.,ప్రస్తుతం రీఆర్డర్ సూచనలు లేవు.
+No repeat customers in this period.,ఈ కాలంలో రిపీట్ కస్టమర్‌లు లేరు.
+No response from server,సర్వర్ నుండి స్పందన లేదు
+No return invoices found,రిటర్న్ ఇన్‌వాయిస్‌లు ఏవీ కనుగొనబడలేదు
+No return item trend found.,వాపసు అంశం ట్రెండ్ కనుగొనబడలేదు.
+No returnable items found for this invoice,ఈ ఇన్‌వాయిస్ కోసం వాపసు చేయదగిన అంశాలు ఏవీ కనుగొనబడలేదు
+No returns were processed in this shift.,ఈ షిఫ్ట్‌లో రిటర్న్‌లు ఏవీ ప్రాసెస్ చేయబడలేదు.
+No risk activity found.,ప్రమాదకర కార్యాచరణ ఏదీ కనుగొనబడలేదు.
+No sales activity found for this period.,ఈ కాలానికి విక్రయ కార్యకలాపాలు ఏవీ కనుగొనబడలేదు.
+No slow moving items.,నెమ్మదిగా కదిలే అంశాలు లేవు.
+No staff sales activity found.,సిబ్బంది విక్రయ కార్యకలాపాలు ఏవీ కనుగొనబడలేదు.
+No stock movement for this period.,ఈ కాలానికి స్టాక్ కదలిక లేదు.
+No submitted cash movements in this shift.,ఈ షిఫ్ట్‌లో సమర్పించిన నగదు కదలికలు లేవు.
+No supplier purchases found in this month.,ఈ నెలలో సరఫరాదారు కొనుగోళ్లు ఏవీ కనుగొనబడలేదు.
+No suppliers found for this period.,ఈ కాలానికి సరఫరాదారులు ఎవరూ కనుగొనబడలేదు.
+No sync trigger has run yet in this session.,ఈ సెషన్‌లో ఇంకా ఏ సింక్ ట్రిగ్గర్ అమలు కాలేదు.
+No tax head breakdown found.,పన్ను హెడ్ బ్రేక్‌డౌన్ కనుగొనబడలేదు.
+No top items found for this location.,ఈ స్థానం కోసం అగ్ర అంశాలు ఏవీ కనుగొనబడలేదు.
+No unpaid invoices,చెల్లించని ఇన్‌వాయిస్‌లు లేవు
+No variant data found.,వేరియంట్ డేటా ఏదీ కనుగొనబడలేదు.
+No week-wise sales trend found.,వారం వారీగా అమ్మకాల ట్రెండ్ కనుగొనబడలేదు.
+No.,నం.
+Nobile Number,నోబుల్ నంబర్
+Not available,అందుబాటులో లేదు
+Not checked,తనిఖీ చేయలేదు
+Not selected,ఎంపిక కాలేదు
+Not Set,సెట్ చేయలేదు
+Notifications,నోటిఫికేషన్‌లు
+Offer,ఆఫర్
+Offer Applied,ఆఫర్ వర్తింపజేయబడింది
+Offer criteria exceeded,ఆఫర్ ప్రమాణాలు మించిపోయాయి
+Offer Item,ఆఫర్ అంశం
+Offer item unavailable,ఆఫర్ అంశం అందుబాటులో లేదు
+Offer Removed,ఆఫర్ తీసివేయబడింది
+Offer UOM cannot be changed,ఆఫర్ UOM మార్చబడదు
+Offer?,ఆఫర్ చేస్తారా?
+Offers,ఆఫర్లు
+Offline,ఆఫ్‌లైన్
+Offline & Sync,ఆఫ్‌లైన్ & సమకాలీకరణ
+Offline Capabilities,ఆఫ్‌లైన్ సామర్థ్యాలు
+Offline data status refreshed,ఆఫ్‌లైన్ డేటా స్థితి రిఫ్రెష్ చేయబడింది
+Offline diagnostics,ఆఫ్‌లైన్ డయాగ్నస్టిక్స్
+Offline Invoices,ఆఫ్‌లైన్ ఇన్‌వాయిస్‌లు
+Offline invoices status,ఆఫ్‌లైన్ ఇన్‌వాయిస్‌ల స్థితి
+Offline invoices synced,ఆఫ్‌లైన్ ఇన్‌వాయిస్‌లు సమకాలీకరించబడ్డాయి
+Offline Queue: {0},ఆఫ్‌లైన్ క్యూ: {0}
+Offline rebuild guidance,ఆఫ్‌లైన్ పునర్నిర్మాణ మార్గదర్శకత్వం
+Offline restore is unavailable for this session.,ఈ సెషన్‌కు ఆఫ్‌లైన్ పునరుద్ధరణ అందుబాటులో లేదు.
+Offline selling is available with degraded capabilities.,క్షీణించిన సామర్థ్యాలతో ఆఫ్‌లైన్ అమ్మకం అందుబాటులో ఉంది.
+Offline snapshot does not match the current POS state.,ఆఫ్‌లైన్ స్నాప్‌షాట్ ప్రస్తుత POS స్థితికి సరిపోలడం లేదు.
+Offline Status,ఆఫ్‌లైన్ స్థితి
+"Offline, terminal, and system controls","ఆఫ్‌లైన్, టెర్మినల్ మరియు సిస్టమ్ నియంత్రణలు"
+OK,సరే
+Online,ఆన్‌లైన్
+Open actions menu,చర్యల మెనుని తెరవండి
+Open balance to collect,సేకరించడానికి బ్యాలెన్స్ తెరవండి
+Open Customer Display,కస్టమర్ డిస్‌ప్లే తెరవండి
+Open drawer,డ్రాయర్ తెరవండి
+Open invoices,ఇన్‌వాయిస్‌లను తెరవండి
+Open Payments?,చెల్లింపులను తెరవాలా?
+Open POS home,POS హోమ్‌ని తెరవండి
+Open this screen from POS Menu -> Open Customer Display.,POS మెను నుండి ఈ స్క్రీన్‌ని తెరవండి -> కస్టమర్ డిస్‌ప్లే తెరవండి.
+OpenCV image processing enabled - Enhanced barcode detection,OpenCV ఇమేజ్ ప్రాసెసింగ్ ప్రారంభించబడింది - మెరుగైన బార్‌కోడ్ గుర్తింపు
+OpenCV image processing unavailable on this device,ఈ పరికరంలో OpenCV ఇమేజ్ ప్రాసెసింగ్ అందుబాటులో లేదు
+OpenCV Off,OpenCV ఆఫ్
+OpenCV On,OpenCV ఆన్
+OpenCV processing disabled,OpenCV ప్రాసెసింగ్ నిలిపివేయబడింది
+Opening Amount,ప్రారంభ మొత్తం
+Opening Cash,నగదు తెరవడం
+options,ఎంపికలు
+Order,ఆర్డర్ చేయండి
+Original,అసలైనది
+Other,ఇతర
+Out,అవుట్
+Out of Stock,స్టాక్ అయిపోయింది
+Out of Stock Items,స్టాక్ వస్తువులు లేవు
+Outstanding,అత్యుత్తమమైనది
+Outstanding Credit by Currency,కరెన్సీ ద్వారా అత్యుత్తమ క్రెడిట్
+Overdue,గడువు దాటిపోయింది
+Overpayment Change,ఓవర్ పేమెంట్ మార్పు
+Overpayment change deducted: {0},ఓవర్ పేమెంట్ మార్పు తీసివేయబడింది: {0}
+Packing List,ప్యాకింగ్ జాబితా
+Page Format,పేజీ ఫార్మాట్
+Page unavailable offline,పేజీ ఆఫ్‌లైన్‌లో అందుబాటులో లేదు
+Paid,చెల్లించారు
+Paid (orig):,చెల్లించిన (మూలం):
+Paid Amount,చెల్లించిన మొత్తం
+Paid change cannot be greater than total change!,చెల్లింపు మార్పు మొత్తం మార్పు కంటే ఎక్కువగా ఉండకూడదు!
+Paid:,చెల్లించినది:
+Parent Item,మాతృ అంశం
+Partial,పాక్షికం
+Partly Paid,పాక్షికంగా చెల్లించబడింది
+Party Account,పార్టీ ఖాతా
+Party Type,పార్టీ రకం
+Pause terminal until next cashier,తదుపరి క్యాషియర్ వరకు టెర్మినల్‌ను పాజ్ చేయండి
+PAY,చెల్లించండి
+Payment,చెల్లింపు
+Payment Account,చెల్లింపు ఖాతా
+Payment entries processed for Invoice {0},ఇన్‌వాయిస్ {0} కోసం చెల్లింపు నమోదులు ప్రాసెస్ చేయబడ్డాయి
+Payment Entry Type,చెల్లింపు ఎంట్రీ రకం
+Payment History,చెల్లింపు చరిత్ర
+Payment ID,చెల్లింపు ID
+Payment Method Report,చెల్లింపు పద్ధతి నివేదిక
+Payment Methods,చెల్లింపు పద్ధతులు
+Payment of {0} received successfully.,{0} చెల్లింపు విజయవంతంగా స్వీకరించబడింది.
+Payment Progress,చెల్లింపు పురోగతి
+Payment Reconciliation,చెల్లింపు సయోధ్య
+Payment request status could not be retrieved. Please try again,చెల్లింపు అభ్యర్థన స్థితిని తిరిగి పొందడం సాధ్యపడలేదు. దయచేసి మళ్లీ ప్రయత్నించండి
+Payment Request took too long to respond. Please try requesting for payment again,చెల్లింపు అభ్యర్థన ప్రతిస్పందించడానికి చాలా సమయం పట్టింది. దయచేసి చెల్లింపు కోసం మళ్లీ అభ్యర్థించడానికి ప్రయత్నించండి
+Payment saved offline,చెల్లింపు ఆఫ్‌లైన్‌లో సేవ్ చేయబడింది
+Payment State,చెల్లింపు స్థితి
+Payment Status,చెల్లింపు స్థితి
+Payment submitted but print function could not be executed. Payment name not found.,చెల్లింపు సమర్పించబడింది కానీ ప్రింట్ ఫంక్షన్‌ని అమలు చేయడం సాధ్యపడలేదు. చెల్లింపు పేరు కనుగొనబడలేదు.
+Payment submitted.,చెల్లింపు సమర్పించబడింది.
+Payment Summary,చెల్లింపు సారాంశం
+Payments,చెల్లింపులు
+Payments are not open. Do you want to open payments and submit?,చెల్లింపులు తెరవబడవు. మీరు చెల్లింపులను తెరిచి సమర్పించాలనుకుంటున్నారా?
+Payments by Mode of Payment,చెల్లింపు విధానం ద్వారా చెల్లింపులు
+PDF,PDF
+Peak Hour,పీక్ అవర్
+Peak Memory:,పీక్ మెమరీ:
+Peak Server:,పీక్ సర్వర్:
+Peak:,శిఖరం:
+Pending,పెండింగ్‌లో ఉంది
+Pending Amount,పెండింగ్ మొత్తం
+Pending count updated from {0} to {1},పెండింగ్ కౌంట్ {0} నుండి {1}కి అప్‌డేట్ చేయబడింది
+Pending Exposure,పెండింగ్‌లో ఉన్న ఎక్స్‌పోజర్
+Pending Invoices,పెండింగ్ ఇన్‌వాయిస్‌లు
+Pending Ratio,పెండింగ్ నిష్పత్తి
+Pending Sales,పెండింగ్ సేల్స్
+Pending sales: {0} | Cache usage: {1}%,పెండింగ్‌లో ఉన్న అమ్మకాలు: {0} | కాష్ వినియోగం: {1}%
+Pending Sync,పెండింగ్ సమకాలీకరణ
+Pending: {0},పెండింగ్‌లో ఉంది: {0}
+Pending: {0} | Synced: {1} | Draft: {2},పెండింగ్‌లో ఉంది: {0} | సమకాలీకరించబడింది: {1} | డ్రాఫ్ట్: {2}
+Per Page,ఒక్కో పేజీకి
+Personal,వ్యక్తిగతం
+Personal preferences adjust the current cashier experience without changing the active POS route.,వ్యక్తిగత ప్రాధాన్యతలు క్రియాశీల POS మార్గాన్ని మార్చకుండా ప్రస్తుత క్యాషియర్ అనుభవాన్ని సర్దుబాటు చేస్తాయి.
+PIN confirmation does not match.,పిన్ నిర్ధారణ సరిపోలలేదు.
+PIN must be 4 to 8 digits.,పిన్ తప్పనిసరిగా 4 నుండి 8 అంకెలు ఉండాలి.
+Please add at least one item.,దయచేసి కనీసం ఒక అంశాన్ని జోడించండి.
+Please allow camera access to scan codes,దయచేసి కోడ్‌లను స్కాన్ చేయడానికి కెమెరా యాక్సెస్‌ను అనుమతించండి
+Please enter payment amount,దయచేసి చెల్లింపు మొత్తాన్ని నమోదు చేయండి
+Please fill all required fields,దయచేసి అవసరమైన అన్ని ఫీల్డ్‌లను పూరించండి
+Please make a payment or select a payment,దయచేసి చెల్లింపు చేయండి లేదా చెల్లింపును ఎంచుకోండి
+Please request phone payment or use another payment method,దయచేసి ఫోన్ చెల్లింపును అభ్యర్థించండి లేదా మరొక చెల్లింపు పద్ధతిని ఉపయోగించండి
+Please select a customer first,దయచేసి ముందుగా కస్టమర్‌ని ఎంచుకోండి
+Please select a party,దయచేసి పార్టీని ఎంచుకోండి
+Please select a party before reconciling.,దయచేసి సయోధ్యకు ముందు పార్టీని ఎంచుకోండి.
+Please select a valid movement type.,దయచేసి చెల్లుబాటు అయ్యే కదలిక రకాన్ని ఎంచుకోండి.
+Please select an invoice,దయచేసి ఇన్‌వాయిస్‌ను ఎంచుకోండి
+Please select company before reconciling.,దయచేసి సయోధ్యకు ముందు కంపెనీని ఎంచుకోండి.
+Please set the customer's mobile number,దయచేసి కస్టమర్ మొబైల్ నంబర్‌ను సెట్ చేయండి
+Please try again or enter the item manually.,దయచేసి మళ్లీ ప్రయత్నించండి లేదా అంశాన్ని మాన్యువల్‌గా నమోదు చేయండి.
+Please verify the barcode or check the item's availability.,దయచేసి బార్‌కోడ్‌ను ధృవీకరించండి లేదా అంశం లభ్యతను తనిఖీ చేయండి.
+Points,పాయింట్లు
+Popup blocked. Please allow popups.,పాప్అప్ బ్లాక్ చేయబడింది. దయచేసి పాపప్‌లను అనుమతించండి.
+POS,POS
+POS controls and maintenance,POS నియంత్రణలు మరియు నిర్వహణ
+POS Expense is disabled for this POS Profile.,ఈ POS ప్రొఫైల్ కోసం POS ఖర్చు నిలిపివేయబడింది.
+POS is running with limited offline prerequisites.,POS పరిమిత ఆఫ్‌లైన్ ముందస్తు అవసరాలతో అమలవుతోంది.
+POS Profile,POS ప్రొఫైల్
+Position the QR code or barcode within the scanning area,స్కానింగ్ ప్రాంతంలో QR కోడ్ లేదా బార్‌కోడ్‌ను ఉంచండి
+Posting,పోస్టింగ్
+Posting and Price List,పోస్టింగ్ మరియు ధర జాబితా
+Posting Date,పోస్టింగ్ తేదీ
+Preparing background sync,నేపథ్య సమకాలీకరణను సిద్ధం చేస్తోంది
+"Press OK to continue offline with a warning, or Cancel to retry.",హెచ్చరికతో ఆఫ్‌లైన్‌లో కొనసాగడానికి సరే నొక్కండి లేదా మళ్లీ ప్రయత్నించడానికి రద్దు చేయండి.
+Previous unit of measure,మునుపటి కొలత యూనిట్
+Price List,ధర జాబితా
+Price List Rate,ధర జాబితా రేటు
+Price list rate updated locally only,ధర జాబితా రేటు స్థానికంగా మాత్రమే నవీకరించబడింది
+Pricing & Discounts,ధర & తగ్గింపులు
+Pricing Rule,ధర నియమం
+Print,ముద్రించు
+Print Draft,డ్రాఫ్ట్ ముద్రించండి
+Print Format (Invoice),ప్రింట్ ఫార్మాట్ (ఇన్‌వాయిస్)
+Print Format (Order),ప్రింట్ ఫార్మాట్ (ఆర్డర్)
+Print invoice,ఇన్వాయిస్ ముద్రించండి
+Print Purchase Invoice instead of PO,PO బదులుగా కొనుగోలు ఇన్‌వాయిస్‌ను ముద్రించండి
+Printer,ప్రింటర్
+Processed returns impacting the shift totals,షిఫ్ట్ మొత్తాలను ప్రభావితం చేసే ప్రాసెస్ చేయబడిన రిటర్న్‌లు
+Processing Payment,చెల్లింపును ప్రాసెస్ చేస్తోంది
+Processing payment entries for Invoice {0},ఇన్‌వాయిస్ {0} కోసం చెల్లింపు నమోదులను ప్రాసెస్ చేస్తోంది
+Profile,ప్రొఫైల్
+Profiles,ప్రొఫైల్స్
+Profit,లాభం
+Profit: Invoice Item Estimate,లాభం: ఇన్‌వాయిస్ అంశం అంచనా
+Profit: Stock Ledger (COGS),లాభం: స్టాక్ లెడ్జర్ (COGS)
+Profitability Report,లాభదాయకత నివేదిక
+Prorated return discount,ప్రొరేటెడ్ రిటర్న్ డిస్కౌంట్
+Purchase Amount,కొనుగోలు మొత్తం
+Purchase Invoices,ఇన్‌వాయిస్‌లను కొనుగోలు చేయండి
+Purchase Order created,కొనుగోలు ఆర్డర్ సృష్టించబడింది
+Qty,క్యూటీ
+Qualified,అర్హత సాధించారు
+Quantity,పరిమాణం
+Quantity exceeds available stock,అందుబాటులో ఉన్న స్టాక్‌ను మించిపోయింది
+Quick Actions,త్వరిత చర్యలు
+Quotation {0} is Submitted,కొటేషన్ {0} సమర్పించబడింది
+Quotation submitted,కొటేషన్ సమర్పించబడింది
+QZ Tray connected.,QZ ట్రే కనెక్ట్ చేయబడింది.
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ ట్రే మాన్యువల్‌గా డిస్‌కనెక్ట్ చేయబడింది. దీన్ని మళ్లీ ఎనేబుల్ చేయడానికి కనెక్ట్ నొక్కండి.
+QZ Tray is not connected.,QZ ట్రే కనెక్ట్ చేయబడలేదు.
+QZ Tray Setup,QZ ట్రే సెటప్
+Rate,రేట్ చేయండి
+Rate adjusted to maximum allowed discount,గరిష్టంగా అనుమతించబడిన తగ్గింపుకు రేటు సర్దుబాటు చేయబడింది
+Ready,సిద్ధంగా ఉంది
+Ready to resume,పునఃప్రారంభించడానికి సిద్ధంగా ఉంది
+Ready!,సిద్ధంగా ఉంది!
+Real-time POS insights for retail operations.,రిటైల్ కార్యకలాపాల కోసం రియల్ టైమ్ POS అంతర్దృష్టులు.
+Rebuild Offline Data,ఆఫ్‌లైన్ డేటాను పునర్నిర్మించండి
+Receive,స్వీకరించండి
+Receive now,ఇప్పుడే స్వీకరించండి
+Received,అందుకుంది
+Received:,స్వీకరించబడింది:
+Recent Movement Entries,ఇటీవలి ఉద్యమ ఎంట్రీలు
+Recent updates about your invoices,మీ ఇన్‌వాయిస్‌ల గురించి ఇటీవలి అప్‌డేట్‌లు
+Recently Active Customers,ఇటీవల యాక్టివ్ కస్టమర్‌లు
+Rechecking connection,కనెక్షన్‌ని మళ్లీ తనిఖీ చేస్తోంది
+Reconcile payment methods and close shift,చెల్లింపు పద్ధతులను పునరుద్దరించండి మరియు షిఫ్ట్ మూసివేయండి
+Reconciling Payments,చెల్లింపులను సరిదిద్దడం
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","ఆన్‌లైన్‌లో ఉన్నప్పుడు ఈ పేజీని మళ్లీ కనెక్ట్ చేసి, తెరవండి, ఆపై ఆఫ్‌లైన్ రిఫ్రెష్‌లు దీన్ని పునరుద్ధరించగలవు."
+Reconnect online to refresh cached offline data from the server.,సర్వర్ నుండి కాష్ చేయబడిన ఆఫ్‌లైన్ డేటాను రిఫ్రెష్ చేయడానికి ఆన్‌లైన్‌కి మళ్లీ కనెక్ట్ చేయండి.
+Recreate local offline prerequisites from scratch,మొదటి నుండి స్థానిక ఆఫ్‌లైన్ ముందస్తు అవసరాలను పునఃసృష్టించండి
+Recv:,Recv:
+Redeem,రీడీమ్ చేయండి
+Redeem / Scan,రీడీమ్ / స్కాన్
+Redeem Amount,మొత్తాన్ని రీడీమ్ చేయండి
+Redeem Mode,రీడీమ్ మోడ్
+Redeemed Amount,రీడీమ్ చేయబడిన మొత్తం
+Redeemed credit cannot be greater than its total.,రీడీమ్ చేయబడిన క్రెడిట్ దాని మొత్తం కంటే ఎక్కువగా ఉండకూడదు.
+Redemption and Totals,విముక్తి మరియు మొత్తాలు
+Reference,సూచన
+Refresh,రిఫ్రెష్ చేయండి
+Refresh Exchange Rate,రిఫ్రెష్ మార్పిడి రేటు
+Refresh Offline Data,ఆఫ్‌లైన్ డేటాను రిఫ్రెష్ చేయండి
+Refresh Printers,ప్రింటర్‌లను రిఫ్రెష్ చేయండి
+Refund,వాపసు
+Release Notes,విడుదల గమనికలు
+Reload,మళ్లీ లోడ్ చేయండి
+Reload customers,కస్టమర్‌లను రీలోడ్ చేయండి
+Reload Items,అంశాలను మళ్లీ లోడ్ చేయండి
+Reload Now,ఇప్పుడు మళ్లీ లోడ్ చేయండి
+Reload to apply the latest changes. Your current session will be refreshed.,తాజా మార్పులను వర్తింపజేయడానికి రీలోడ్ చేయండి. మీ ప్రస్తుత సెషన్ రిఫ్రెష్ చేయబడుతుంది.
+Reload Workflow,వర్క్‌ఫ్లో రీలోడ్ చేయండి
+Remarks,వ్యాఖ్యలు
+Remarks are required.,రిమార్క్‌లు అవసరం.
+Remove,తొలగించు
+Remove barcode item,బార్‌కోడ్ అంశాన్ని తీసివేయండి
+Remove cached data and reload the POS app,"కాష్ చేసిన డేటాను తీసివేసి, POS యాప్‌ని మళ్లీ లోడ్ చేయండి"
+Remove item,అంశాన్ని తీసివేయండి
+Remove Offer,ఆఫర్‌ని తీసివేయండి
+Reorder / Purchase Suggestions,క్రమాన్ని మార్చండి / కొనుగోలు సలహాలు
+Repair Candidate,రిపేర్ అభ్యర్థి
+Repair Change Allocation,రిపేర్ మార్పు కేటాయింపు
+Repair requires an online connection,మరమ్మతుకు ఆన్‌లైన్ కనెక్షన్ అవసరం
+Repaired,మరమ్మతులు చేశారు
+Repairing change allocation,మార్పు కేటాయింపును రిపేర్ చేస్తోంది
+Repeat Customers,రిపీట్ కస్టమర్లు
+Repeat Rate,రిపీట్ రేట్
+Request,అభ్యర్థన
+Request ID: {0},అభ్యర్థన ID: {0}
+Request Payment,చెల్లింపును అభ్యర్థించండి
+Requested route: {0},అభ్యర్థించిన మార్గం: {0}
+Required columns cannot be hidden,అవసరమైన నిలువు వరుసలు దాచబడవు
+Reset,రీసెట్ చేయండి
+Reset item name,అంశం పేరును రీసెట్ చేయండి
+Reset to Default,డిఫాల్ట్‌కి రీసెట్ చేయండి
+Resource Health,వనరుల ఆరోగ్యం
+Restricted,పరిమితం చేయబడింది
+Restricted operational controls for supervisors only.,సూపర్‌వైజర్‌లకు మాత్రమే పరిమిత కార్యాచరణ నియంత్రణలు.
+Retry,మళ్లీ ప్రయత్నించండి
+Retry route,మార్గాన్ని మళ్లీ ప్రయత్నించండి
+Return,తిరిగి
+Return Amount,రిటర్న్ మొత్తం
+Return Count,రిటర్న్ కౌంట్
+Return items must have negative quantities,తిరిగి వచ్చే అంశాలు తప్పనిసరిగా ప్రతికూల పరిమాణాలను కలిగి ఉండాలి
+Return total must be negative,రిటర్న్ మొత్తం తప్పనిసరిగా ప్రతికూలంగా ఉండాలి
+Return Valid Until,వాపసు వరకు చెల్లుతుంది
+Return window passed,రిటర్న్ విండో పాస్ అయింది
+Return without Invoice,ఇన్వాయిస్ లేకుండా వాపసు
+Returns,తిరిగి వస్తుంది
+Returns / Voids / Discounts,రిటర్న్స్ / శూన్యాలు / తగ్గింపులు
+Returns by Currency,కరెన్సీ ద్వారా తిరిగి వస్తుంది
+Revenue,రాబడి
+Review shift totals before submitting the closing entry,ముగింపు ఎంట్రీని సమర్పించే ముందు షిఫ్ట్ మొత్తాలను సమీక్షించండి
+Round Off,రౌండ్ ఆఫ్
+Rows,వరుసలు
+Rows:,అడ్డు వరుసలు:
+Rule,నియమం
+Sale,అమ్మకం
+Sales,అమ్మకాలు
+Sales Order {0} is Submitted,సేల్స్ ఆర్డర్ {0} సమర్పించబడింది
+Sales Person and Print,సేల్స్ పర్సన్ మరియు ప్రింట్
+Sales Person not found,సేల్స్ పర్సన్ దొరకలేదు
+Sales processed,విక్రయాలు ప్రాసెస్ చేయబడ్డాయి
+Sales Return,సేల్స్ రిటర్న్
+Sales Trend Report,సేల్స్ ట్రెండ్ రిపోర్ట్
+Save,సేవ్ చేయండి
+Save & Clear,సేవ్ & క్లియర్
+Save as POS Profile Default,POS ప్రొఫైల్ డిఫాల్ట్‌గా సేవ్ చేయండి
+Save Settings,సెట్టింగ్‌లను సేవ్ చేయండి
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,"ఎంచుకున్న ప్రింటర్‌ను POS ప్రొఫైల్ డిఫాల్ట్‌గా సేవ్ చేయండి, తద్వారా ఇది ఈ సెటప్‌లో స్వయంచాలకంగా చూపబడుతుంది."
+Saved as draft because: {0},డ్రాఫ్ట్‌గా సేవ్ చేయబడింది ఎందుకంటే: {0}
+Saving...,సేవ్ చేస్తోంది...
+Scale barcode detected. Quantity here is the number of labels to print.,స్కేల్ బార్‌కోడ్ కనుగొనబడింది. ఇక్కడ పరిమాణం అనేది ప్రింట్ చేయాల్సిన లేబుల్‌ల సంఖ్య.
+Scale barcode settings are not configured. Using item barcode only.,స్కేల్ బార్‌కోడ్ సెట్టింగ్‌లు కాన్ఫిగర్ చేయబడలేదు. అంశం బార్‌కోడ్‌ను మాత్రమే ఉపయోగిస్తోంది.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,ఈ అంశం/UOM కోసం స్కేల్ టెంప్లేట్ బార్‌కోడ్ లేదు. అంశం బార్‌కోడ్‌ను మాత్రమే ఉపయోగిస్తోంది.
+Scan an existing card and top it up without leaving the payment flow.,"ఇప్పటికే ఉన్న కార్డ్‌ని స్కాన్ చేసి, చెల్లింపు ప్రక్రియను వదలకుండా టాప్ అప్ చేయండి."
+Scan Error,స్కాన్ లోపం
+Scan or enter a gift card code to check balance or redeem.,బ్యాలెన్స్ తనిఖీ చేయడానికి లేదా రీడీమ్ చేయడానికి బహుమతి కార్డ్ కోడ్‌ను స్కాన్ చేయండి లేదా నమోదు చేయండి.
+Scan or paste the card code below.,దిగువ కార్డ్ కోడ్‌ను స్కాన్ చేయండి లేదా అతికించండి.
+Scan QR Code/Barcode,QR కోడ్/బార్‌కోడ్‌ని స్కాన్ చేయండి
+Scan with camera,కెమెరాతో స్కాన్ చేయండి
+Scan-First Flow,స్కాన్-ఫస్ట్ ఫ్లో
+Scanned Code:,స్కాన్ చేసిన కోడ్:
+Scanning for: {0},దీని కోసం స్కాన్ చేస్తోంది: {0}
+Scanning items,అంశాలను స్కాన్ చేస్తోంది
+Scan-Ready,స్కాన్-సిద్ధంగా
+Scope,పరిధి
+Scope: All Profiles,పరిధి: అన్ని ప్రొఫైల్‌లు
+Scope: Current Profile,పరిధి: ప్రస్తుత ప్రొఫైల్
+Scope: Specific Profile,పరిధి: నిర్దిష్ట ప్రొఫైల్
+Search,శోధించండి
+Search Account,ఖాతాను శోధించండి
+Search an invoice and continue the return flow without extra steps.,ఇన్‌వాయిస్‌ని శోధించండి మరియు అదనపు దశలు లేకుండా రిటర్న్ ఫ్లోను కొనసాగించండి.
+Search customer,వినియోగదారుని శోధించండి
+Search invoices or customers,ఇన్‌వాయిస్‌లు లేదా కస్టమర్‌లను శోధించండి
+Search item,శోధన అంశం
+Search item / code,శోధన అంశం / కోడ్
+Search items or barcode,అంశాలను లేదా బార్‌కోడ్‌ను శోధించండి
+Search Mpesa Payments,Mpesa చెల్లింపులను శోధించండి
+Search return invoices or customers,రిటర్న్ ఇన్‌వాయిస్‌లు లేదా కస్టమర్‌లను శోధించండి
+Search supplier,శోధన సరఫరాదారు
+Search unpaid invoices or customers,చెల్లించని ఇన్‌వాయిస్‌లు లేదా కస్టమర్‌లను శోధించండి
+Secure context (HTTPS or localhost) is required for camera access.,కెమెరా యాక్సెస్ కోసం సురక్షిత సందర్భం (HTTPS లేదా లోకల్ హోస్ట్) అవసరం.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,కెమెరా యాక్సెస్ కోసం సురక్షిత సందర్భం (HTTPS) అవసరం. కెమెరాను యాక్సెస్ చేయడానికి దయచేసి HTTPSని ఉపయోగించండి.
+Select,ఎంచుకోండి
+Select a cashier first.,ముందుగా క్యాషియర్‌ని ఎంచుకోండి.
+Select a customer,కస్టమర్‌ని ఎంచుకోండి
+Select a customer to use coupon,కూపన్‌ని ఉపయోగించడానికి కస్టమర్‌ని ఎంచుకోండి
+Select a printer to use QZ silent printing.,QZ నిశ్శబ్ద ముద్రణను ఉపయోగించడానికి ప్రింటర్‌ను ఎంచుకోండి.
+Select Batch,బ్యాచ్‌ని ఎంచుకోండి
+Select Columns to Display,ప్రదర్శించడానికి నిలువు వరుసలను ఎంచుకోండి
+Select items to sell,విక్రయించడానికి వస్తువులను ఎంచుకోండి
+Select Payment,చెల్లింపును ఎంచుకోండి
+Select Payment Account,చెల్లింపు ఖాతాను ఎంచుకోండి
+Select printer,ప్రింటర్‌ని ఎంచుకోండి
+Select Return Invoice,రిటర్న్ ఇన్‌వాయిస్‌ని ఎంచుకోండి
+Select S.O,S.Oని ఎంచుకోండి
+Select Sales Orders,సేల్స్ ఆర్డర్‌లను ఎంచుకోండి
+Select the cashier who is taking over this terminal.,ఈ టెర్మినల్‌ను స్వాధీనం చేసుకునే క్యాషియర్‌ను ఎంచుకోండి.
+Selected,ఎంపిక చేయబడింది
+Selected movement type is not allowed by POS Profile.,ఎంచుకున్న కదలిక రకం POS ప్రొఫైల్ ద్వారా అనుమతించబడదు.
+Selected Payments,ఎంచుకున్న చెల్లింపులు
+Sensitive actions kept away from quick taps.,సున్నితమైన చర్యలు త్వరిత ట్యాప్‌ల నుండి దూరంగా ఉంటాయి.
+Serial,సీరియల్
+Serial Numbers,క్రమ సంఖ్యలు
+Server CPU Usage:,సర్వర్ CPU వినియోగం:
+Server Health,సర్వర్ ఆరోగ్యం
+Server Memory Usage:,సర్వర్ మెమరీ వినియోగం:
+Server Metrics,సర్వర్ కొలమానాలు
+Server Uptime:,సర్వర్ అప్‌టైమ్:
+Service Charges,సర్వీస్ ఛార్జీలు
+Session,సెషన్
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,ప్రతి క్యాషియర్ పిన్‌ను వినియోగదారు ఫారమ్‌లో సెట్ చేయండి మరియు టెర్మినల్ సభ్యులను POS ప్రొఫైల్ వినియోగదారులో కేటాయించండి.
+Settings,సెట్టింగ్‌లు
+Settings in this section update the POS workspace without changing the current route.,ఈ విభాగంలోని సెట్టింగ్‌లు ప్రస్తుత రూట్‌ను మార్చకుండానే POS వర్క్‌స్పేస్‌ను అప్‌డేట్ చేస్తాయి.
+Setup complete!,సెటప్ పూర్తయింది!
+Share,షేర్ చేయండి
+Shared terminal,షేర్డ్ టెర్మినల్
+Shift Closed Snapshot,షిఫ్ట్ క్లోజ్డ్ స్నాప్‌షాట్
+Shift Overview,షిఫ్ట్ అవలోకనం
+Show,చూపించు
+Show cart on customer-facing screen,కస్టమర్-ఫేసింగ్ స్క్రీన్‌పై కార్ట్‌ని చూపించు
+Show last invoice rate,చివరి ఇన్‌వాయిస్ రేటును చూపు
+Show rate info,రేటు సమాచారాన్ని చూపు
+Show Repair Candidates,మరమ్మతు అభ్యర్థులను చూపించు
+Show search tools,శోధన సాధనాలను చూపు
+Show the active cart on a customer-facing screen,కస్టమర్-ఫేసింగ్ స్క్రీన్‌పై క్రియాశీల కార్ట్‌ను చూపండి
+Showing {0}-{1} of {2},{2}లో {0}-{1} చూపుతోంది
+Showing 0 of 0,0లో 0 చూపుతోంది
+Shows the distribution of invoices per currency,ఒక్కో కరెన్సీకి ఇన్‌వాయిస్‌ల పంపిణీని చూపుతుంది
+Sign out of the current POS session,ప్రస్తుత POS సెషన్ నుండి సైన్ అవుట్ చేయండి
+Size:,పరిమాణం:
+Skipped Payments,స్కిప్డ్ చెల్లింపులు
+Skipping items without barcodes,బార్‌కోడ్‌లు లేకుండా అంశాలను దాటవేయడం
+Slow Moving,స్లో మూవింగ్
+Slow Moving Items,నెమ్మదిగా కదిలే అంశాలు
+Slow Queries:,నెమ్మదిగా ప్రశ్నలు:
+Sold,విక్రయించబడింది
+Source,మూలం
+Source Cash Account (Optional Override),మూల నగదు ఖాతా (ఐచ్ఛిక ఓవర్‌రైడ్)
+Source Ex. Rate:,మూలం Ex. రేటు:
+Source Rate:,మూలం రేటు:
+Specific Profile,నిర్దిష్ట ప్రొఫైల్
+Split Invoices,ఇన్‌వాయిస్‌లను విభజించండి
+Staff / Cashier Performance Report,సిబ్బంది / క్యాషియర్ పనితీరు నివేదిక
+Status,స్థితి
+Stock,స్టాక్
+Stock Information,స్టాక్ సమాచారం
+Stock is lower than requested,స్టాక్ అభ్యర్థించిన దాని కంటే తక్కువగా ఉంది
+Stock is lower than requested:\n{0},స్టాక్ అభ్యర్థించిన దాని కంటే తక్కువగా ఉంది:\n{0}
+Stock Movement Report,స్టాక్ కదలిక నివేదిక
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,స్టాక్ అప్‌డేట్: {0}కి {1} అందుబాటులో ఉంది. {2}ని జోడిస్తే స్టాక్ సున్నా కంటే దిగువకు వస్తుంది.
+Submit,సమర్పించండి
+Submit & Print,సమర్పించండి & ముద్రించండి
+Submit Deposit,డిపాజిట్ సమర్పించండి
+Submit Expense,ఖర్చు సమర్పించండి
+Submitted,సమర్పించారు
+Submitted Cash Movements,నగదు కదలికలను సమర్పించారు
+Submitted entries,ఎంట్రీలు సమర్పించారు
+Successfully scanned:,విజయవంతంగా స్కాన్ చేయబడింది:
+Suggested,సూచించారు
+Suggested Qty,సూచించిన క్యూటీ
+Supervisor Access,సూపర్‌వైజర్ యాక్సెస్
+Supervisor permissions unlock issuance and reloads,సూపర్‌వైజర్ అనుమతులు జారీ మరియు రీలోడ్‌లను అన్‌లాక్ చేస్తాయి
+Supervisor Tools,సూపర్‌వైజర్ సాధనాలు
+Supplier,సరఫరాదారు
+Supplier and dates are required.,సరఫరాదారు మరియు తేదీలు అవసరం.
+Supplier Invoices,సరఫరాదారు ఇన్‌వాయిస్‌లు
+Supplier is required.,సరఫరాదారు అవసరం.
+Supplier name is required,సరఫరాదారు పేరు అవసరం
+Supplier Payments,సరఫరాదారు చెల్లింపులు
+Supplier Purchase Summary,సరఫరాదారు కొనుగోలు సారాంశం
+Suppliers,సరఫరాదారులు
+Suppliers not found,సరఫరాదారులు కనుగొనబడలేదు
+Switch Camera,కెమెరాను మార్చండి
+Switch Cashier,క్యాషియర్ మారండి
+Switch the POS appearance theme,POS ప్రదర్శన థీమ్‌ను మార్చండి
+Switched to:,దీనికి మారారు:
+Sync All Invoices,అన్ని ఇన్‌వాయిస్‌లను సమకాలీకరించండి
+Sync Offline Cash Movements ({0}),ఆఫ్‌లైన్ నగదు కదలికలను సమకాలీకరించండి ({0})
+Sync Offline Sales,ఆఫ్‌లైన్ విక్రయాలను సమకాలీకరించండి
+Synced {0} offline cash movement(s).,{0} ఆఫ్‌లైన్ నగదు కదలిక(లు) సమకాలీకరించబడింది.
+Syncing items in background,నేపథ్యంలో అంశాలను సమకాలీకరించడం
+System / Diagnostics,సిస్టమ్ / డయాగ్నస్టిక్స్
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","సిస్టమ్ చర్యలు అనువర్తన సమాచారం, మద్దతు విశ్లేషణలు మరియు సెషన్ నియంత్రణలు వంటి తక్కువ-ఫ్రీక్వెన్సీ నిర్వహణ నియంత్రణలు."
+System Information,సిస్టమ్ సమాచారం
+System Status,సిస్టమ్ స్థితి
+Tables:,పట్టికలు:
+Tap the button below to redeem a gift card during checkout.,చెక్అవుట్ సమయంలో బహుమతి కార్డ్‌ని రీడీమ్ చేయడానికి దిగువ బటన్‌ను నొక్కండి.
+Target,లక్ష్యం
+Target Ex. Rate:,టార్గెట్ Ex. రేటు:
+Target Rate:,లక్ష్య రేటు:
+Tax,పన్ను
+Tax / Charges Report,పన్ను / ఛార్జీల నివేదిక
+Tax Heads,పన్ను హెడ్స్
+Taxable Amount,పన్ను విధించదగిన మొత్తం
+Tendered,టెండర్ వేశారు
+Terminal,టెర్మినల్
+Terminal & Devices,టెర్మినల్ & పరికరాలు
+Terminal locked,టెర్మినల్ లాక్ చేయబడింది
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","టెర్మినల్ సాధనాలు ఈ చెక్అవుట్ స్టేషన్, కస్టమర్-ఫేసింగ్ డిస్ప్లేలు మరియు భవిష్యత్ ప్రింటర్/పరికర నియంత్రణలను ప్రభావితం చేస్తాయి."
+Territory not found,భూభాగం కనుగొనబడలేదు
+The amount paid is not complete,చెల్లించిన మొత్తం పూర్తి కాలేదు
+The app stores data locally for offline use. This is called cache.,యాప్ ఆఫ్‌లైన్ ఉపయోగం కోసం స్థానికంగా డేటాను నిల్వ చేస్తుంది. దీనినే కాష్ అంటారు.
+The invoice stayed in draft. Please review and submit it manually.,"ఇన్‌వాయిస్ డ్రాఫ్ట్‌లో ఉండిపోయింది. దయచేసి సమీక్షించి, మాన్యువల్‌గా సమర్పించండి."
+The maximum discount allowed is,అనుమతించబడిన గరిష్ట తగ్గింపు
+The quantity for {0} has been adjusted to the maximum available stock.,{0} యొక్క పరిమాణం అందుబాటులో ఉన్న గరిష్ట స్టాక్‌కు సర్దుబాటు చేయబడింది.
+The system could not retrieve the item details. Please try again.,సిస్టమ్ ఐటెమ్ వివరాలను తిరిగి పొందలేకపోయింది. దయచేసి మళ్లీ ప్రయత్నించండి.
+These invoices will be synced when connection is restored,కనెక్షన్ పునరుద్ధరించబడినప్పుడు ఈ ఇన్‌వాయిస్‌లు సమకాలీకరించబడతాయి
+This action now opens inside the settings workspace.,ఈ చర్య ఇప్పుడు సెట్టింగ్‌ల వర్క్‌స్పేస్‌లో తెరవబడుతుంది.
+This coupon already used !,ఈ కూపన్ ఇప్పటికే ఉపయోగించబడింది!
+This invoice does not need change-allocation repair,ఈ ఇన్‌వాయిస్‌కు మార్పు-కేటాయింపు మరమ్మత్తు అవసరం లేదు
+This invoice is already repaired,ఈ ఇన్‌వాయిస్ ఇప్పటికే రిపేర్ చేయబడింది
+This is an item template. Please choose a variant.,ఇది ఒక అంశం టెంప్లేట్. దయచేసి వేరియంట్‌ని ఎంచుకోండి.
+this item,ఈ అంశం
+This POS page could not be opened offline because its code was not cached on this terminal yet.,ఈ POS పేజీని ఆఫ్‌లైన్‌లో తెరవడం సాధ్యపడలేదు ఎందుకంటే దీని కోడ్ ఇంకా ఈ టెర్మినల్‌లో కాష్ చేయబడలేదు.
+This Serial Number {0} has already been added!,ఈ క్రమ సంఖ్య {0} ఇప్పటికే జోడించబడింది!
+Threshold,థ్రెషోల్డ్
+Time,సమయం
+Tip: Clear cache regularly to free up space and keep the app fast.,చిట్కా: స్థలాన్ని ఖాళీ చేయడానికి మరియు యాప్‌ను వేగంగా ఉంచడానికి కాష్‌ని క్రమం తప్పకుండా క్లియర్ చేయండి.
+Tip: Close unused tabs or apps to reduce lag.,చిట్కా: లాగ్‌ని తగ్గించడానికి ఉపయోగించని ట్యాబ్‌లు లేదా యాప్‌లను మూసివేయండి.
+Tip: Monitor slow queries and table size for optimal performance.,చిట్కా: సరైన పనితీరు కోసం నెమ్మదిగా ప్రశ్నలు మరియు పట్టిక పరిమాణాన్ని పర్యవేక్షించండి.
+To Be Paid,చెల్లించాలి
+To Date,ఇప్పటి వరకు
+Today,ఈరోజు
+Today Profit,ఈరోజు లాభం
+Today Sales,నేడు అమ్మకాలు
+Toggle navigation drawer,నావిగేషన్ డ్రాయర్‌ని టోగుల్ చేయండి
+Toggle Theme,థీమ్‌ను టోగుల్ చేయండి
+Tools,ఉపకరణాలు
+Tools for customer-facing screens and terminal-specific actions.,కస్టమర్-ఫేసింగ్ స్క్రీన్‌లు మరియు టెర్మినల్-నిర్దిష్ట చర్యల కోసం సాధనాలు.
+Top Brand,టాప్ బ్రాండ్
+Top Category,అగ్ర వర్గం
+Top Charge Head,టాప్ ఛార్జ్ హెడ్
+Top Customers,అగ్ర కస్టమర్లు
+Top Discount,టాప్ డిస్కౌంట్
+Top Items by Location,స్థానం వారీగా అగ్ర అంశాలు
+Top Margin,ఎగువ మార్జిన్
+Top Pending,టాప్ పెండింగ్‌లో ఉంది
+Top Profit Item,అగ్ర లాభం అంశం
+Top Return Items,టాప్ రిటర్న్ అంశాలు
+Top Sales by Cashier,క్యాషియర్ ద్వారా అత్యధిక అమ్మకాలు
+Top Supplier,అగ్ర సరఫరాదారు
+Top Suppliers by Spend,ఖర్చు ద్వారా అగ్ర సరఫరాదారులు
+Top Tables,అగ్ర పట్టికలు
+Top Tax Head,టాప్ టాక్స్ హెడ్
+Top Up Amount,టాప్ అప్ మొత్తం
+Top Up Card,టాప్ అప్ కార్డ్
+Top Up Mode,టాప్ అప్ మోడ్
+Top Variant,టాప్ వేరియంట్
+Total,మొత్తం
+Total Amount,మొత్తం మొత్తం
+Total Change,మొత్తం మార్పు
+Total Charges,మొత్తం ఛార్జీలు
+Total In,మొత్తం ఇన్
+Total Invoices,మొత్తం ఇన్‌వాయిస్‌లు
+Total Items,మొత్తం అంశాలు
+Total Mpesa,మొత్తం Mpesa
+Total Out,టోటల్ అవుట్
+Total Payments,మొత్తం చెల్లింపులు
+Total Purchase,మొత్తం కొనుగోలు
+Total Selected :,మొత్తం ఎంపిక చేయబడింది:
+Total Size,మొత్తం పరిమాణం
+Total Stock Qty,మొత్తం స్టాక్ క్యూటీ
+Total:,మొత్తం:
+Totals by Invoice Currency,ఇన్‌వాయిస్ కరెన్సీ ద్వారా మొత్తాలు
+Track how much cash was handed back to customers,కస్టమర్లకు ఎంత నగదు తిరిగి అందజేశారో ట్రాక్ చేయండి
+"Track recent sales, collect unpaid balances, and reopen saved work","ఇటీవలి విక్రయాలను ట్రాక్ చేయండి, చెల్లించని బ్యాలెన్స్‌లను సేకరించండి మరియు సేవ్ చేసిన పనిని మళ్లీ తెరవండి"
+Transaction ID,లావాదేవీ ID
+Transfer,బదిలీ చేయండి
+Try a different search term or clear the cart search.,వేరే శోధన పదాన్ని ప్రయత్నించండి లేదా కార్ట్ శోధనను క్లియర్ చేయండి.
+Try adjusting your search or filters,మీ శోధన లేదా ఫిల్టర్‌లను సర్దుబాటు చేయడానికి ప్రయత్నించండి
+Try another source or refresh the list.,మరొక మూలాన్ని ప్రయత్నించండి లేదా జాబితాను రిఫ్రెష్ చేయండి.
+Try changing the date range or status filter.,తేదీ పరిధి లేదా స్థితి ఫిల్టర్‌ని మార్చడానికి ప్రయత్నించండి.
+Type,టైప్ చేయండి
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,ప్రాథమిక సెట్టింగ్‌లతో కూడా కెమెరాను యాక్సెస్ చేయడం సాధ్యపడలేదు. దయచేసి మీ కెమెరా అనుమతులు మరియు పరికర అనుకూలతను తనిఖీ చేయండి.
+Unable to add offer item {0}. Please refresh and try again.,"ఆఫర్ ఐటెమ్ {0}ని జోడించడం సాధ్యపడలేదు. దయచేసి రిఫ్రెష్ చేసి, మళ్లీ ప్రయత్నించండి."
+Unable to add offer item. Please refresh and try again.,"ఆఫర్ అంశాన్ని జోడించడం సాధ్యపడలేదు. దయచేసి రిఫ్రెష్ చేసి, మళ్లీ ప్రయత్నించండి."
+Unable to add scanned item.,స్కాన్ చేసిన అంశాన్ని జోడించడం సాధ్యం కాలేదు.
+Unable to create purchase order,కొనుగోలు ఆర్డర్‌ని సృష్టించడం సాధ్యం కాలేదు
+Unable to delete draft invoice,డ్రాఫ్ట్ ఇన్‌వాయిస్‌ని తొలగించడం సాధ్యపడలేదు
+Unable to fetch documents,పత్రాలను పొందడం సాధ్యం కాలేదు
+Unable to fetch draft orders,డ్రాఫ్ట్ ఆర్డర్‌లను పొందడం సాధ్యం కాలేదు
+Unable to fetch invoice history,ఇన్‌వాయిస్ చరిత్రను పొందడం సాధ్యం కాలేదు
+Unable to fetch M-Pesa payments,M-Pesa చెల్లింపులను పొందడం సాధ్యం కాలేదు
+Unable to fetch sales orders,విక్రయాల ఆర్డర్‌లను పొందడం సాధ్యం కాలేదు
+Unable to fetch unpaid invoices,చెల్లించని ఇన్‌వాయిస్‌లను పొందడం సాధ్యం కాలేదు
+Unable to generate scale barcode,స్కేల్ బార్‌కోడ్‌ను రూపొందించడం సాధ్యం కాలేదు
+Unable to issue gift card.,బహుమతి కార్డ్‌ని జారీ చేయడం సాధ్యపడలేదు.
+Unable to load cashier PIN status.,క్యాషియర్ పిన్ స్థితిని లోడ్ చేయడం సాధ్యపడలేదు.
+Unable to load document,పత్రాన్ని లోడ్ చేయడం సాధ్యపడలేదు
+Unable to load draft invoice,డ్రాఫ్ట్ ఇన్‌వాయిస్‌ని లోడ్ చేయడం సాధ్యపడలేదు
+Unable to load gift card balance.,బహుమతి కార్డ్ బ్యాలెన్స్‌ను లోడ్ చేయడం సాధ్యపడలేదు.
+Unable to load invoice details,ఇన్‌వాయిస్ వివరాలను లోడ్ చేయడం సాధ్యపడలేదు
+Unable to load parked order,పార్క్ చేసిన ఆర్డర్‌ను లోడ్ చేయడం సాధ్యపడలేదు
+Unable to load the selected sales order,ఎంచుకున్న విక్రయాల ఆర్డర్‌ను లోడ్ చేయడం సాధ్యపడలేదు
+Unable to prepare document,పత్రాన్ని సిద్ధం చేయడం సాధ్యపడలేదు
+Unable to prepare return invoice,రిటర్న్ ఇన్‌వాయిస్‌ని సిద్ధం చేయడం సాధ్యపడలేదు
+Unable to print draft invoice,డ్రాఫ్ట్ ఇన్‌వాయిస్‌ని ప్రింట్ చేయడం సాధ్యపడలేదు
+Unable to print submitted invoice,సమర్పించిన ఇన్‌వాయిస్‌ని ప్రింట్ చేయడం సాధ్యపడలేదు
+Unable to process document action,పత్రం చర్యను ప్రాసెస్ చేయడం సాధ్యపడలేదు
+Unable to repair change allocation,మార్పు కేటాయింపును రిపేర్ చేయడం సాధ్యపడలేదు
+Unable to save cashier PIN.,క్యాషియర్ పిన్‌ని సేవ్ చేయడం సాధ్యపడలేదు.
+Unable to save the rate to the backend price list,బ్యాకెండ్ ధర జాబితాకు రేటును సేవ్ చేయడం సాధ్యపడలేదు
+Unable to submit invoice,ఇన్‌వాయిస్‌ని సమర్పించడం సాధ్యం కాలేదు
+Unable to submit the selected payment,ఎంచుకున్న చెల్లింపును సమర్పించడం సాధ్యం కాలేదు
+Unable to top up gift card.,బహుమతి కార్డ్‌ని టాప్ అప్ చేయడం సాధ్యపడలేదు.
+Unable to verify cashier PIN.,క్యాషియర్ పిన్‌ని ధృవీకరించడం సాధ్యపడలేదు.
+Unallocated,కేటాయించబడలేదు
+Unallocated:,కేటాయించబడలేదు:
+Unavailable,అందుబాటులో లేదు
+Unknown,తెలియదు
+Unknown Item,తెలియని అంశం
+Unknown Warehouse,తెలియని గిడ్డంగి
+Unlock POS,POSని అన్‌లాక్ చేయండి
+Unpaid,చెల్లించని
+"Unselected payments stay unallocated first, then auto reconcile after submit.","ఎంపిక చేయని చెల్లింపులు ముందుగా కేటాయించబడవు, ఆపై సమర్పించిన తర్వాత స్వయంచాలకంగా పునరుద్దరించబడతాయి."
+UOM,UOM
+UOM not found,UOM కనుగొనబడలేదు
+Update available,అప్‌డేట్ అందుబాటులో ఉంది
+Update Customer,కస్టమర్‌ని అప్‌డేట్ చేయండి
+Update PIN,PINని నవీకరించండి
+Update Price List Rate,ధర జాబితా రేటును నవీకరించండి
+Updated,నవీకరించబడింది
+Updates and app info that stay out of the cashier flow.,క్యాషియర్ ఫ్లో నుండి దూరంగా ఉండే అప్‌డేట్‌లు మరియు యాప్ సమాచారం.
+Updates automatically,స్వయంచాలకంగా నవీకరణలు
+Usage,వాడుక
+Usage Stats,వినియోగ గణాంకాలు
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,క్యాషియర్ మార్పిడి మరియు టెర్మినల్ అన్‌లాక్ కోసం 4 నుండి 8 అంకెల పిన్‌ని ఉపయోగించండి.
+Use Cashier,క్యాషియర్ ఉపయోగించండి
+Use date range to search for older invoices,పాత ఇన్‌వాయిస్‌ల కోసం శోధించడానికి తేదీ పరిధిని ఉపయోగించండి
+"Use one field for manual code entry, barcode scans, or QR scans.","మాన్యువల్ కోడ్ ఎంట్రీ, బార్‌కోడ్ స్కాన్‌లు లేదా QR స్కాన్‌ల కోసం ఒక ఫీల్డ్‌ని ఉపయోగించండి."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","POS నుండి నిష్క్రమించకుండా బ్యాలెన్స్ తనిఖీలు, కొత్త జారీ మరియు టాప్ అప్‌ల కోసం ఒక వర్క్‌ఫ్లో ఉపయోగించండి."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","కాష్ చేయబడిన ముందస్తు అవసరమైన డేటాకు రిఫ్రెష్, రీబిల్డ్ లేదా డయాగ్నస్టిక్స్ రివ్యూ అవసరమైనప్పుడు ఈ విభాగాన్ని ఉపయోగించండి."
+Use Western numerals,పాశ్చాత్య అంకెలను ఉపయోగించండి
+Used:,వాడినది:
+Using basic camera settings due to device limitations,పరికర పరిమితుల కారణంగా ప్రాథమిక కెమెరా సెట్టింగ్‌లను ఉపయోగించడం
+Using cached customer balance,కాష్ చేసిన కస్టమర్ బ్యాలెన్స్‌ని ఉపయోగించడం
+Valid until,వరకు చెల్లుతుంది
+Variance %,వ్యత్యాసం %
+Variants,రూపాంతరాలు
+Variant-wise,వేరియంట్ వారీగా
+Verify closing amounts for each payment method,ప్రతి చెల్లింపు పద్ధతికి ముగింపు మొత్తాలను ధృవీకరించండి
+View all,అన్నీ చూడండి
+View app information and current build details,యాప్ సమాచారం మరియు ప్రస్తుత బిల్డ్ వివరాలను వీక్షించండి
+View Data Diagnostics,డేటా డయాగ్నోస్టిక్‌లను వీక్షించండి
+View Details,వివరాలను వీక్షించండి
+View invoice details,ఇన్వాయిస్ వివరాలను వీక్షించండి
+View notifications,నోటిఫికేషన్‌లను వీక్షించండి
+View offline invoices,ఆఫ్‌లైన్ ఇన్‌వాయిస్‌లను వీక్షించండి
+View restricted POS insights,పరిమితం చేయబడిన POS అంతర్దృష్టులను వీక్షించండి
+Void Amount,చెల్లని మొత్తం
+Void Count,శూన్య గణన
+Voids,శూన్యాలు
+Waiting for cart items,కార్ట్ వస్తువుల కోసం వేచి ఉంది
+Waiting for payment...,చెల్లింపు కోసం వేచి ఉంది...
+Walk-in Customer,వాక్-ఇన్ కస్టమర్
+Warehouse,గిడ్డంగి
+Warning: High cache usage may affect performance.,హెచ్చరిక: అధిక కాష్ వినియోగం పనితీరును ప్రభావితం చేయవచ్చు.
+Warning: High lag may indicate heavy processing or browser slowness.,హెచ్చరిక: అధిక లాగ్ భారీ ప్రాసెసింగ్ లేదా బ్రౌజర్ మందగమనాన్ని సూచిస్తుంది.
+Week ?,వారం ?
+Week-wise,వారం వారీగా
+Weight (g),బరువు (గ్రా)
+Weight (grams),బరువు (గ్రాములు)
+We'll let you know if an invoice fails to submit,ఇన్‌వాయిస్ సమర్పించడంలో విఫలమైతే మేము మీకు తెలియజేస్తాము
+Workflow,వర్క్‌ఫ్లో
+Write off amount cannot exceed the POS profile maximum of {0},రైట్ ఆఫ్ మొత్తం POS ప్రొఫైల్ గరిష్టం {0}ని మించకూడదు
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,అనుమతించబడిన పరిమితిని ({0}) మించిపోయిన మొత్తాన్ని రద్దు చేయడం. దయచేసి మిగిలిన మొత్తానికి చెల్లింపును జోడించండి.
+Yes,అవును
+"Yes, Cancel sale","అవును, విక్రయాన్ని రద్దు చేయి"
+"Yes, Close","అవును, దగ్గరగా"
+You are not allowed to print draft invoices,డ్రాఫ్ట్ ఇన్‌వాయిస్‌లను ప్రింట్ చేయడానికి మీకు అనుమతి లేదు
+You are offline. Add Payment will work again when the connection is restored.,మీరు ఆఫ్‌లైన్‌లో ఉన్నారు. కనెక్షన్ పునరుద్ధరించబడినప్పుడు యాడ్ పేమెంట్ మళ్లీ పని చేస్తుంది.
+You have no notifications right now,మీకు ప్రస్తుతం నోటిఫికేషన్‌లు లేవు
+Your Cart,మీ కార్ట్

@@ -1,0 +1,1362 @@
+POS Awesome,POSnya Luar Biasa
+Fetch Items Directly from Server,Ambil Item Langsung dari Server
+Menu,Tidak bisa
+Actions,Tindakan
+Close Shift,Tutup Pergeseran
+End current session,Akhiri sesi saat ini
+Print Last Invoice,Cetak Faktur Terakhir
+Reprint previous transaction,Cetak ulang transaksi sebelumnya
+Sync Offline Invoices,Sinkronkan Faktur Offline
+Upload pending transactions,Unggah transaksi yang tertunda
+Go Online,Daring
+Go Offline,Offline
+Disable offline mode,Nonaktifkan mode offline
+Work without server connection,Bekerja tanpa koneksi server
+Clear Cache,Hapus Tembolok
+Remove local data and refresh,Hapus data lokal dan segarkan
+About,Tentang
+App information,Informasi aplikasi
+Language,Bahasa
+Change interface language,Ubah bahasa antarmuka
+Light Mode,Modus Cahaya
+Dark Mode,Mode Gelap
+Switch theme appearance,Ganti tampilan tema
+Logout,Keluar
+Sign out of session,Keluar dari sesi
+Select Language,Pilih Bahasa
+Choose your preferred language for the POS interface,Pilih bahasa pilihan Anda untuk antarmuka POS
+Language will be changed to,Bahasa akan diubah menjadi
+Cancel,Batalkan
+Change Language,Ubah Bahasa
+Close,Tutup
+Cannot change language - same language selected,Tidak dapat mengubah bahasa - bahasa yang dipilih sama
+Language changed successfully! Reloading...,Bahasa berhasil diubah! Memuat ulang...
+Failed to change language,Gagal mengubah bahasa
+Unknown error,Kesalahan tidak diketahui
+- Total Unallocated,- Jumlah Tidak Terisi
+* Required,* Diperlukan
+{0} (Qty: {1}),{0} (Jumlah: {1})
+{0} actions,{0} tindakan
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} hanya memiliki stok {1}. Anda meminta {2}. Sesuaikan kuantitas atau isi ulang.
+{0} offline invoice{1} pending,{0} faktur offline{1} tertunda
+{0} offline invoice{1} saved as draft,{0} faktur offline{1} disimpan sebagai draf
+{0} offline invoice{1} synced,{0} faktur offline{1} disinkronkan
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0}hari yang lalu
+{0}h ago,{0}jam yang lalu
+{0}m ago,{0}m yang lalu
+A POS supervisor is required for this action.,Seorang supervisor POS diperlukan untuk tindakan ini.
+Access,Akses
+Account,Akun
+Account is overdrawn,Akun ditarik berlebihan
+Acknowledge the error to resume scanning,Akui kesalahan untuk melanjutkan pemindaian
+Acknowledge the error to resume scanning.,Akui kesalahan untuk melanjutkan pemindaian.
+Across,Di seberang
+Action,Tindakan
+Active sale,Penjualan aktif
+add,tambahkan
+Add items from the selector to start building this sale.,Tambahkan item dari pemilih untuk mulai membangun penjualan ini.
+Add more value to an existing gift card,Tambahkan nilai lebih pada kartu hadiah yang sudah ada
+Add New Address,Tambahkan Alamat Baru
+Add new customer,Tambahkan pelanggan baru
+Add on New Line,Tambahkan di Baris Baru
+Add Payment,Tambahkan Pembayaran
+Add payment to invoice,Tambahkan pembayaran ke faktur
+Add/Edit Coupon Conditions,Tambahkan/Edit Ketentuan Kupon
+Additional Discount,Diskon Tambahan
+Additional Discount %,Diskon Tambahan %
+Address Line 1,Jalur Alamat 1
+Address not found,Alamat tidak ditemukan
+Adjust the quantity or enable negative stock to continue.,Sesuaikan kuantitas atau aktifkan stok negatif untuk melanjutkan.
+Adjustment,Penyesuaian
+After returns,Setelah kembali
+Against,Melawan
+Against Name,Melawan Nama
+Age Bracket,Braket Usia
+All,Semua
+All Caught Up!,Semua Tertangkap!
+All invoices are synchronized,Semua faktur disinkronkan
+All pending invoices are up to date,Semua faktur yang tertunda adalah yang terbaru
+All Profiles,Semua Profil
+All Synchronized,Semua Tersinkronisasi
+All visible invoices are fully settled.,Semua faktur yang terlihat telah diselesaikan sepenuhnya.
+All Warehouses,Semua Gudang
+Allowed UOM is {0},UOM yang diizinkan adalah {0}
+Always fetch items from server (ignore local cache),Selalu ambil item dari server (abaikan cache lokal)
+Amount,Jumlah
+Amount already received,Jumlah sudah diterima
+Amount exceeds profile cash movement max amount.,Jumlahnya melebihi jumlah maksimal pergerakan kas profil.
+Amount must be greater than zero.,Jumlahnya harus lebih besar dari nol.
+Amount received from customer,Jumlah yang diterima dari pelanggan
+Appearance and user-level preferences for the current session.,Penampilan dan preferensi tingkat pengguna untuk sesi saat ini.
+Applied,Diterapkan
+Apply,Terapkan
+Apply Gift Card,Terapkan Kartu Hadiah
+Apply Offer,Terapkan Penawaran
+Apply On,Terapkan Aktif
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,Terapkan hanya jumlah yang ingin Anda tukarkan pada invoice ini. Sisa saldo tetap di kartu.
+Apply Redemption,Terapkan Penebusan
+Applying,Melamar
+Apps,Aplikasi
+Are you sure you want to close? All entered data will be lost.,Apakah Anda yakin ingin menutupnya? Semua data yang dimasukkan akan hilang.
+Attributes (Size/Color),Atribut (Ukuran/Warna)
+Auto Allocate Payment Amount,Alokasikan Jumlah Pembayaran Secara Otomatis
+Auto Reconcile,Rekonsiliasi Otomatis
+Auto reconciliation completed after payment submit.,Rekonsiliasi otomatis selesai setelah pembayaran dikirimkan.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,Rekonsiliasi otomatis selesai. Dialokasikan: {0}{1}. Sisa terutang: {0}{2}.
+Available Actions,Tindakan yang Tersedia
+Available QTY,QTY yang tersedia
+Available:,Tersedia:
+Average Basket,Keranjang Rata-Rata
+Average Bill,Tagihan Rata-Rata
+Average Ticket,Tiket Rata-Rata
+Avg Bill,Rata-rata Tagihan
+Avg Invoice,Rata-rata Faktur
+Avg Invoice Profit,Rata-rata Keuntungan Faktur
+Avg Invoice Value,Nilai Faktur Rata-rata
+Avg Purchase Frequency,Frekuensi Pembelian Rata-rata
+Awesome,Luar biasa
+Awesome Dashboard,Dasbor yang Luar Biasa
+Awesome Dashboard is disabled for the selected POS Profile.,Dasbor Luar Biasa dinonaktifkan untuk Profil POS yang dipilih.
+Awesome Dashboard is unavailable for the selected scope.,Dasbor Luar Biasa tidak tersedia untuk cakupan yang dipilih.
+Awesome Dashboard is visible only to POS supervisors.,Dashboard Luar Biasa hanya dapat dilihat oleh supervisor POS.
+Back,Kembali
+Back Office Cash Account,Rekening Kas Back Office
+Back Office Cash Account (Optional Override),Rekening Kas Back Office (Pengabaian Opsional)
+Back office cash account is required.,Rekening tunai back office diperlukan.
+Back to {0},Kembali ke {0}
+Background processing did not finish in time.,Pemrosesan latar belakang tidak selesai tepat waktu.
+Background processing failed for Invoice {0}: {1},Pemrosesan latar belakang gagal untuk Faktur {0}: {1}
+Background Submission Failed,Pengiriman Latar Belakang Gagal
+Background sync interval (seconds),Interval sinkronisasi latar belakang (detik)
+Balance,Keseimbangan
+Balance will be updated when connection is restored,Saldo akan diperbarui ketika koneksi pulih
+Balances still pending,Saldo masih tertunda
+Barcode,kode batang
+Barcode / QR Ready,Barcode / QR Siap
+Barcode Label Printing,Pencetakan Label Kode Batang
+Base Paid:,Pembayaran Dasar:
+Base Recv:,Pendapatan Dasar:
+Base:,Basis:
+Basic Information,Informasi Dasar
+Batch,kumpulan
+Batch Information,Informasi Batch
+Before any return workflow,Sebelum alur kerja pengembalian apa pun
+Before returns,Sebelum kembali
+Best Day,Hari Terbaik
+Best Seller,Penjual Terbaik
+Book expense or deposit from active shift.,Biaya buku atau setoran dari shift aktif.
+Branch / Location-wise Report,Laporan Cabang / Lokasi
+Brand-wise,Dari segi merek
+Breakdown,Kerusakan
+Browse,Jelajahi
+Build Time:,Waktu Pembuatan:
+Built with Frappe,Dibangun dengan Frappe
+Bundle,bundel
+Buying Price,Harga Beli
+Cache cleared successfully,Cache berhasil dibersihkan
+Cache Usage,Penggunaan Cache
+cache used,cache digunakan
+Calculating...,Menghitung...
+Camera Access Required,Akses Kamera Diperlukan
+Camera access was aborted. Please try again.,Akses kamera dibatalkan. Silakan coba lagi.
+Camera constraints not supported by your device. Trying fallback settings...,Batasan kamera tidak didukung oleh perangkat Anda. Mencoba pengaturan cadangan...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,Kamera sedang sibuk atau diblokir oleh aplikasi/tab lain. Tutup aplikasi kamera lainnya dan coba lagi.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,Izin kamera ditolak. Harap izinkan akses kamera di pengaturan browser Anda dan segarkan halaman.
+Camera scanner is locked until the current error is acknowledged,Pemindai kamera dikunci hingga kesalahan saat ini diketahui
+Camera started but the video stream did not load in time. Please try again.,Kamera dimulai tetapi streaming video tidak dimuat tepat waktu. Silakan coba lagi.
+Cancel cash movement {0}?,Batalkan pergerakan uang tunai {0}?
+Cancel Payment,Batalkan Pembayaran
+Cancel Sale,Batalkan Penjualan
+Cancel Sale ?,Batalkan Penjualan?
+Cancelled,Dibatalkan
+Cannot add an item with zero or negative quantity.,Tidak dapat menambahkan item dengan kuantitas nol atau negatif.
+Cannot clear cache while offline,Tidak dapat menghapus cache saat offline
+Cannot redeem customer credit more than invoice total,Tidak dapat menukarkan kredit pelanggan lebih dari total faktur
+Cannot redeem gift cards more than invoice total,Tidak dapat menukarkan kartu hadiah lebih dari total faktur
+Cannot Save Offline Invoice:,Tidak Dapat Menyimpan Faktur Offline:
+Cannot Save Offline Payment:,Tidak Dapat Menyimpan Pembayaran Offline:
+Card,Kartu
+Card / Online,Kartu / Daring
+Card health after the last live lookup,Kesehatan kartu setelah pencarian langsung terakhir
+Cards,Kartu-kartu
+Cart,Gerobak
+Cash,Uang tunai
+Cash back to customers,Uang kembali ke pelanggan
+Cash Collections,Pengumpulan Uang Tunai
+Cash Deposit is disabled for this POS Profile.,Setoran Tunai dinonaktifkan untuk Profil POS ini.
+Cash Drawer Snapshot,Cuplikan Laci Kas
+Cash In Hand,Uang Tunai di Tangan
+Cash Movement,Gerakan Tunai
+Cash movement cancelled,Pergerakan uang tunai dibatalkan
+Cash movement deduction applied,Pengurangan pergerakan tunai diterapkan
+Cash movement deleted,Pergerakan uang tunai dihapus
+Cash movement is disabled for this POS Profile.,Pergerakan uang tunai dinonaktifkan untuk Profil POS ini.
+Cash Movement is disabled in current POS Profile.,Pergerakan Tunai dinonaktifkan di Profil POS saat ini.
+Cash movement saved offline,Pergerakan uang tunai disimpan secara offline
+Cash movement submitted,Pergerakan uang tunai diserahkan
+Cash Movements,Pergerakan Uang Tunai
+Cash payment cannot be less than invoice total when partial payment is not allowed,Pembayaran tunai tidak boleh kurang dari total faktur jika pembayaran sebagian tidak diperbolehkan
+Cash returned after payment,Uang tunai dikembalikan setelah pembayaran
+Cashier,Kasir
+Cashier Access,Akses Kasir
+Cashier identity and appearance preferences.,Identitas kasir dan preferensi penampilan.
+Cashier PIN,PIN Kasir
+Cashier PIN saved successfully.,PIN kasir berhasil disimpan.
+Cashiers,Kasir
+Cashier-wise,Dari segi kasir
+Categories,Kategori
+Category,Kategori
+Category / Brand / Variant Report,Laporan Kategori / Merek / Varian
+Category-wise,Berdasarkan kategori
+Category-wise Margin,Margin berdasarkan kategori
+Certificate,Sertifikat
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,Sertifikat hilang atau tidak dipercaya. QZ mungkin menampilkan dialog konfirmasi.
+Certificate is trusted. Silent QZ printing is active.,Sertifikat dipercaya. Pencetakan QZ senyap aktif.
+Change,Perubahan
+Change allocation repaired,Perubahan alokasi diperbaiki
+Change Price,Ubah Harga
+Change Return,Ubah Kembali
+Change Returned,Perubahan Dikembalikan
+Change terminal cashier,Ganti kasir terminal
+Charge Heads,Kepala Pengisian
+Charges,Biaya
+Charges not found,Tagihan tidak ditemukan
+Check Balance,Periksa Saldo
+Check balance for any card. Supervisors can issue and top up cards here.,Periksa saldo untuk kartu apa pun. Supervisor dapat menerbitkan dan mengisi ulang kartu di sini.
+Check balance only,Periksa saldo saja
+Check for new commits,Periksa komitmen baru
+Check for Updates,Periksa Pembaruan
+Check live balance before applying redemption,Periksa saldo langsung sebelum menerapkan penukaran
+Check live balance before redemption,Periksa saldo langsung sebelum penukaran
+Checking...,Memeriksa...
+Cheque/Reference Date,Tanggal Cek/Referensi
+Cheque/Reference No,Nomor Cek/Referensi
+Choose the cashier currently operating this terminal.,Pilih kasir yang saat ini mengoperasikan terminal ini.
+City,Kota
+Clear,Jelas
+Clear All,Hapus Semua
+Clear all barcode items,Hapus semua item kode batang
+Clear all purchase order items,Hapus semua item pesanan pembelian
+Clear Search,Hapus Pencarian
+Clearing local cache...,Menghapus cache lokal...
+Click to refresh,Klik untuk menyegarkan
+Client CPU Lag:,Keterlambatan CPU Klien:
+Client Memory Usage:,Penggunaan Memori Klien:
+Client Metrics,Metrik Klien
+Close about dialog,Tutup tentang dialog
+Close cashier switcher,Tutup pengalih kasir
+Close closing shift dialog,Tutup dialog shift penutup
+Close column selector,Tutup pemilih kolom
+Close Dialog,Tutup Dialog
+Close drafts dialog,Tutup dialog draf
+Close invoice details dialog,Tutup dialog detail faktur
+Close invoice management,Tutup manajemen faktur
+Close offline invoices dialog,Tutup dialog faktur offline
+Close packing list dialog,Tutup dialog daftar pengepakan
+Close returns dialog,Tutup dialog pengembalian
+Close sales orders dialog,Tutup dialog pesanan penjualan
+Close Scanner,Tutup Pemindai
+Close scanner dialog,Tutup dialog pemindai
+Close Settings,Tutup Pengaturan
+Closing Amount,Jumlah Penutupan
+Closing POS Shift,Menutup Pergeseran POS
+Closing Snapshot Available,Cuplikan Penutupan Tersedia
+Code,Kode
+Code scanned successfully,Kode berhasil dipindai
+COGS,roda penggerak
+Collapse item details,Ciutkan detail item
+Collected,Dikumpulkan
+Cols,Kol
+Columns,Kolom
+commits,berkomitmen
+Completed and active sales in this range,Penjualan selesai dan aktif dalam kisaran ini
+Completed returns will appear here.,Pengembalian yang telah selesai akan muncul di sini.
+Confirm,Konfirmasikan
+Confirm Close,Konfirmasi Tutup
+Confirm Mobile Number,Konfirmasi Nomor Ponsel
+Confirm PIN,Konfirmasi PIN
+Connect,Hubungkan
+Connect printer and manage certificate,Hubungkan printer dan kelola sertifikat
+Connecting to QZ Tray...,Menyambungkan ke Baki QZ...
+Connection problem while submitting invoice,Masalah koneksi saat mengirimkan faktur
+Connections:,Koneksi:
+Connectivity and cached prerequisite status were rechecked.,Konektivitas dan status prasyarat yang disimpan dalam cache telah diperiksa ulang.
+Continue Editing,Lanjutkan Mengedit
+Could not fetch latest balance from server,Tidak dapat mengambil saldo terbaru dari server
+Count,Hitung
+Country,Negara
+Coupon,Kupon
+Coupons,Kupon
+Cover,Penutup
+CPU Cores:,Inti CPU:
+Create,Buat
+Create and load a new prepaid card,Buat dan muat kartu prabayar baru
+Create and preload a new gift card,Buat dan muat terlebih dahulu kartu hadiah baru
+Create Bill,Buat RUU
+Create Customer,Buat Pelanggan
+Create New Item,Buat Barang Baru
+Create or change your PIN,Buat atau ubah PIN Anda
+Create PIN,Buat PIN
+Create POS Opening Shift,Buat Pergeseran Pembukaan POS
+Create Purchase Order,Buat Pesanan Pembelian
+Create Return,Buat Pengembalian
+Create return from invoice,Buat pengembalian dari faktur
+Create Supplier,Buat Pemasok
+Credit and Output,Kredit dan Output
+Credit Note,Catatan Kredit
+Credit Outstanding,Kredit Luar Biasa
+Credit sales remaining to be collected,Sisa penjualan kredit yang harus ditagih
+Critical,Kritis
+Currency,Mata uang
+Current,Saat ini
+Current Event Loop Lag:,Keterlambatan Perulangan Peristiwa Saat Ini:
+Current Month,Bulan Saat Ini
+Current PIN,PIN saat ini
+Current Profile,Profil Saat Ini
+Current redeemable value on the gift card,Nilai saat ini yang dapat ditukarkan pada kartu hadiah
+Current User,Pengguna Saat Ini
+Custom,Adat
+Custom Due Days,Hari Batas Waktu Khusus
+Custom items per page,Item khusus per halaman
+Customer,Pelanggan
+Customer already selected,Pelanggan sudah memilih
+Customer Balance,Saldo Pelanggan
+Customer balance unavailable offline,Saldo pelanggan tidak tersedia secara offline
+Customer created successfully.,Pelanggan berhasil dibuat.
+Customer creation failed.,Pembuatan pelanggan gagal.
+Customer Details,Detail Pelanggan
+Customer display channel is missing,Saluran tampilan pelanggan tidak ada
+Customer display was blocked. Please allow pop-ups for this site.,Tampilan pelanggan diblokir. Izinkan pop-up untuk situs ini.
+Customer group is required,Grup pelanggan wajib diisi
+Customer is required to add payment,Pelanggan wajib menambahkan pembayaran
+Customer Name is required,Nama Pelanggan wajib diisi
+Customer not selected,Pelanggan tidak dipilih
+Customer Report,Laporan Pelanggan
+Customer saved offline,Pelanggan disimpan secara offline
+Customer Screen,Layar Pelanggan
+Customer territory is required,Wilayah pelanggan wajib diisi
+Customer updated successfully.,Pelanggan berhasil diperbarui.
+Customer-facing tools and printer setup.,Alat yang berhubungan dengan pelanggan dan pengaturan printer.
+Customers,Pelanggan
+Customers not found,Pelanggan tidak ditemukan
+Daily cashier actions without scrolling.,Tindakan kasir harian tanpa menggulir.
+Daily Sales,Penjualan Harian
+Daily Sales Summary,Ringkasan Penjualan Harian
+Data loaded in form. Review and submit.,Data dimuat dalam formulir. Tinjau dan kirimkan.
+Database Health,Kesehatan Basis Data
+Database health affects overall system speed and reliability.,Kesehatan basis data memengaruhi kecepatan dan keandalan sistem secara keseluruhan.
+Database Info,Info Basis Data
+Date,Tanggal
+Day ?,Hari?
+days,hari
+Day-wise (MTD),Berdasarkan hari (MTD)
+Day-wise Movement,Gerakan Bijaksana Sehari-hari
+Dead Stock,Stok Mati
+Dead Stock Items,Barang Stok Mati
+Decrease quantity,Kurangi kuantitas
+Default,Bawaan
+Default:,Bawaan:
+Delete,Hapus
+Delete cancelled cash movement {0}?,Hapus pergerakan uang tunai yang dibatalkan {0}?
+Delete Draft,Hapus Draf
+Delete draft invoice,Hapus draf faktur
+Delete draft invoice {0}?,Hapus draf faktur {0}?
+Delete Invoice,Hapus Faktur
+Delete offline invoice,Hapus faktur offline
+Delivered,Terkirim
+Delivery Charges,Biaya Pengiriman
+Delivery Information,Informasi Pengiriman
+Delivery Note {0} created,Catatan Pengiriman {0} dibuat
+Delivery note created,Catatan pengiriman dibuat
+Deployed Bundle:,Paket yang Dikerahkan:
+Deposit,Setoran
+Description,Deskripsi
+Detailed Supplier Breakdown,Rincian Pemasok Terperinci
+Detecting formats:,Mendeteksi format:
+Device Memory:,Memori Perangkat:
+Difference,Perbedaan
+Difference (In Company Currency),Selisih (Dalam Mata Uang Perusahaan)
+Disable offline mode first to recheck live connectivity.,Nonaktifkan mode offline terlebih dahulu untuk memeriksa ulang konektivitas langsung.
+Disconnect,Putuskan sambungan
+discount,diskon
+Discount %,Diskon%
+Discount / Void / Return Report,Laporan Diskon / Batal / Pengembalian
+Discount Amount,Jumlah Diskon
+Discount limited by POS Profile,Diskon dibatasi oleh Profil POS
+Discounted Invoices,Faktur Diskon
+Discounts,Diskon
+Dismiss,Singkirkan
+Download Certificate,Unduh Sertifikat
+Draft,Draf
+Draft invoice deleted,Draf faktur dihapus
+Draft source,Sumber draf
+Drafts,Draf
+Due {0},Jatuh tempo tanggal {0}
+Due Date,Tanggal Jatuh Tempo
+Duplicate,Duplikat
+Edit customer,Sunting pelanggan
+Edit discount amount,Edit jumlah diskon
+Edit discount percentage,Edit persentase diskon
+Edit Gift Application,Edit Aplikasi Hadiah
+Edit item name,Edit nama item
+Edit quantity,Edit kuantitas
+Edit rate,Tingkat pengeditan
+Edit unit of measure,Edit satuan ukuran
+Edited,Diedit
+Employee,Karyawan
+Enable background sync,Aktifkan sinkronisasi latar belakang
+Enable Customer Display in POS Profile first.,Aktifkan Tampilan Pelanggan di Profil POS terlebih dahulu.
+Enter a PIN.,Masukkan PIN.
+Enter a valid grams value,Masukkan nilai gram yang valid
+Enter new price list rate,Masukkan tarif daftar harga baru
+Enter Quantity,Masukkan Kuantitas
+Enter the cashier PIN to continue.,Masukkan PIN kasir untuk melanjutkan.
+Enter the current PIN first.,Masukkan PIN saat ini terlebih dahulu.
+"Enter the current PIN, then choose a new one.","Masukkan PIN saat ini, lalu pilih yang baru."
+Enter valid grams for scale barcode,Masukkan gram yang valid untuk kode batang timbangan
+Entries,Entri
+Error accessing camera:,Kesalahan mengakses kamera:
+Error calculating prices,Kesalahan menghitung harga
+Error fetching customer balance,Terjadi kesalahan saat mengambil saldo pelanggan
+Error in change calculations!,Kesalahan dalam perhitungan perubahan!
+Error Loading Data,Terjadi Kesalahan Saat Memuat Data
+Error loading invoice details,Terjadi kesalahan saat memuat detail faktur
+Error processing invoice,Kesalahan saat memproses faktur
+Error processing payment,Kesalahan saat memproses pembayaran
+Error searching invoices,Terjadi kesalahan saat mencari faktur
+Error submitting invoice:,Kesalahan saat mengirimkan faktur:
+Error submitting invoice: {0},Kesalahan saat mengirimkan faktur: {0}
+Error submitting invoice: No response from server,Kesalahan saat mengirimkan faktur: Tidak ada respons dari server
+Error updating currency,Terjadi kesalahan saat memperbarui mata uang
+Error updating item details,Terjadi kesalahan saat memperbarui detail item
+Est. Purchase,Perkiraan. Beli
+Est. Value,Perkiraan. Nilai
+Event-loop lag measures how busy your browser is. Lower is better.,Jeda loop peristiwa mengukur seberapa sibuk browser Anda. Lebih rendah lebih baik.
+Every,Setiap
+Exchange Rate,Nilai Tukar
+Expand item details,Perluas detail item
+Expected Amount (In Company Currency),Jumlah yang Diharapkan (Dalam Mata Uang Perusahaan)
+Expected Cash,Uang Tunai yang Diharapkan
+Expected cash on hand grouped by currency,Perkiraan uang tunai yang ada dikelompokkan berdasarkan mata uang
+Expected vs Actual,Diharapkan vs Aktual
+Expense,Biaya
+Expense Account (Optional Override),Akun Pengeluaran (Pengabaian Opsional)
+Expense account is required.,Akun pengeluaran diperlukan.
+Expenses and deposits posted during this shift,Biaya dan simpanan yang diposting selama shift ini
+Expired,Kedaluwarsa
+Failed to auto reconcile payments.,Gagal merekonsiliasi pembayaran secara otomatis.
+Failed to cancel cash movement,Gagal membatalkan pergerakan uang tunai
+Failed to clear cache,Gagal menghapus cache
+Failed to create item,Gagal membuat item
+Failed to create supplier,Gagal membuat pemasok
+Failed to delete cash movement,Gagal menghapus pergerakan uang tunai
+Failed to generate scale barcode. Using item barcode only.,Gagal membuat kode batang skala. Hanya menggunakan barcode item.
+Failed to load cash movement context.,Gagal memuat konteks pergerakan uang tunai.
+Failed to load dashboard data.,Gagal memuat data dasbor.
+Failed to reload invoice from server,Gagal memuat ulang faktur dari server
+Failed to submit cash movement,Gagal mengirimkan pergerakan uang tunai
+Failed to sync offline cash movements,Gagal menyinkronkan pergerakan uang tunai offline
+Fast cashier actions for active shifts.,Tindakan kasir cepat untuk shift aktif.
+Fast Moving Items,Barang Bergerak Cepat
+Fees,Biaya
+Fetch the latest offline prerequisite updates,Ambil pembaruan prasyarat offline terbaru
+Find a sales order quickly and load it into the current sale.,Temukan pesanan penjualan dengan cepat dan masukkan ke dalam penjualan saat ini.
+Fixing payment amounts for return invoice...,Memperbaiki jumlah pembayaran untuk faktur pengembalian...
+Flash Off,Lampu Kilat Mati
+Flash On,Nyalakan
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","Untuk item 'Paket Produk', Gudang, Nomor Seri, dan Nomor Batch akan dipertimbangkan dari tabel 'Daftar Pengepakan'. Jika No Gudang dan Nomor Batch sama untuk semua item pengepakan untuk item 'Paket Produk', nilai tersebut dapat dimasukkan dalam tabel Item utama; nilai akan disalin ke tabel 'Daftar Pengepakan'."
+Free,Gratis
+Free Qty,Kuantitas Gratis
+Frequency,Frekuensi
+from,dari
+From Date,Dari Tanggal
+Fulfillment Details,Detail Pemenuhan
+Full Name,Nama Lengkap
+Gain,Keuntungan
+Generate a fresh prepaid card and start it with an opening balance.,Hasilkan kartu prabayar baru dan mulai dengan saldo awal.
+Generate and install the certificate to allow fully silent printing without trust prompts.,Hasilkan dan instal sertifikat untuk memungkinkan pencetakan senyap sepenuhnya tanpa perintah kepercayaan.
+Generate Certificate,Hasilkan Sertifikat
+Generated scale barcode: {0},Kode batang skala yang dihasilkan: {0}
+Get Payments,Dapatkan Pembayaran
+Gift Card,Kartu Hadiah
+Gift card amount must be greater than zero.,Jumlah kartu hadiah harus lebih besar dari nol.
+Gift Card Code,Kode Kartu Hadiah
+Gift card code is required for redemption,Kode kartu hadiah diperlukan untuk penukaran
+Gift card code is required.,Kode kartu hadiah diperlukan.
+Gift card issued successfully.,Kartu hadiah berhasil dikeluarkan.
+Gift card loaded successfully.,Kartu hadiah berhasil dimuat.
+Gift Card Management,Manajemen Kartu Hadiah
+Gift card payment,Pembayaran kartu hadiah
+Gift card redemption requires an online connection,Penukaran kartu hadiah memerlukan koneksi online
+Gift card topped up successfully.,Kartu hadiah berhasil diisi ulang.
+Gift Cards,Kartu Hadiah
+Go to Frappe Desk,Pergi ke Meja Frappe
+Grand Total,Jumlah Keseluruhan
+Gross Margin,Margin Kotor
+Gross Profit,Laba Kotor
+Gross Sales,Penjualan Kotor
+Group not found,Grup tidak ditemukan
+"Grouped controls for terminal, UI, and session settings.","Kontrol yang dikelompokkan untuk pengaturan terminal, UI, dan sesi."
+Grouped totals for each payment method and currency,Total yang dikelompokkan untuk setiap metode pembayaran dan mata uang
+Hide,Sembunyikan
+Hide Gift Card,Sembunyikan Kartu Hadiah
+Hide Non Essential Fields,Sembunyikan Bidang yang Tidak Penting
+Hide quantity decimals,Sembunyikan desimal kuantitas
+Hide search tools,Sembunyikan alat pencarian
+Hide zero rated items,Sembunyikan item dengan nilai nol
+High,Tinggi
+History,Sejarah
+Hourly (Today),Setiap Jam (Hari ini)
+How this section works,Cara kerja bagian ini
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","Jika data basi masih ada, buka Pengaturan > Offline & Sinkronisasi dan jalankan kembali Pembuatan Data Offline saat online."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","Jika peringatan terus berlanjut, buka Pengaturan > Offline & Sinkronisasi, lalu jalankan Refresh Data Offline atau Rebuild Offline Data."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Impor sertifikat ke QZ Tray dan restart QZ Tray di setiap mesin POS.
+In,Di
+In stock: {0},Tersedia: {0}
+Include Batch / Serial,Sertakan Batch/Serial
+Include Price,Sertakan Harga
+Increase quantity,Tingkatkan kuantitas
+IndexedDB,DB yang diindeks
+Initial Amount,Jumlah Awal
+Initialize your shift with opening balances,Inisialisasi shift Anda dengan saldo awal
+Initializing application...,Menginisialisasi aplikasi...
+"Inspect cache, sync, and prerequisite status","Periksa cache, sinkronisasi, dan status prasyarat"
+Installed Applications,Aplikasi yang Terinstal
+Insufficient stock:\n{0},Stok tidak mencukupi:\n{0}
+Invalid rate,Tarif tidak valid
+Inventory Status Report,Laporan Status Inventaris
+Invoice,Faktur
+Invoice {0} is Submitted,Faktur {0} Telah Dikirim
+Invoice {0} processed successfully,Faktur {0} berhasil diproses
+Invoice {0} submission failed,Pengiriman faktur {0} gagal
+Invoice {0} was already submitted,Faktur {0} telah dikirimkan
+Invoice Adjustments,Penyesuaian Faktur
+Invoice Change,Perubahan Faktur
+Invoice Details,Detail Faktur
+Invoice is still in draft after background submission.,Faktur masih dalam konsep setelah penyerahan latar belakang.
+Invoice Items,Item Faktur
+Invoice Management,Manajemen Faktur
+Invoice Mgmt,Manajemen Faktur
+Invoice saved offline,Faktur disimpan offline
+Invoice submission failed,Pengiriman faktur gagal
+Invoice Submitted,Faktur Dikirim
+"Invoice value settled by loyalty points, not cash collection","Nilai faktur diselesaikan berdasarkan poin loyalitas, bukan pengumpulan uang tunai"
+Invoices,Faktur
+Invoices already past due date,Faktur sudah melewati tanggal jatuh tempo
+Invoices saved as POS Invoices,Faktur disimpan sebagai Faktur POS
+Invoices still carrying balances,Faktur masih membawa saldo
+Issue Mode,Modus Masalah
+Issue New Card,Penerbitan Kartu Baru
+Issue Workflow,Masalah Alur Kerja
+"Issue, top up, and check","Keluarkan, isi ulang, dan periksa"
+Item,Barang
+Item / Product Sales Report,Laporan Penjualan Barang/Produk
+Item {0} added to invoice,Item {0} ditambahkan ke faktur
+Item '{0}' has no barcode,Item '{0}' tidak memiliki kode batang
+Item Code,Kode Barang
+Item created successfully,Item berhasil dibuat
+Item is out of stock,Stok barang habis
+Item Name,Nama Barang
+Item not found,Barang tidak ditemukan
+Item order updated,Pesanan barang diperbarui
+Item Selector Settings,Pengaturan Pemilih Item
+Items,Barang
+Items added in POS will appear here automatically.,Item yang ditambahkan di POS akan muncul di sini secara otomatis.
+Items added to invoice,Item ditambahkan ke faktur
+Items per page,Item per halaman
+Items Sold,Barang Terjual
+Items/Invoice,Barang/Faktur
+Item-wise Profitability,Profitabilitas berdasarkan item
+Journal Entry,Entri Jurnal
+json,json
+Just now,Baru saja
+Keep offline prerequisites healthy and recover stale data safely.,Jaga agar prasyarat offline tetap sehat dan pulihkan data lama dengan aman.
+Labels,Label
+"Language, theme, terminal tools, and session controls.","Bahasa, tema, alat terminal, dan kontrol sesi."
+Last,Terakhir
+Last 14 Days (Paid vs Pending),14 Hari Terakhir (Berbayar vs Tertunda)
+Last 14 Days Activity,Aktivitas 14 Hari Terakhir
+Last 14 Days Gross Profit,Laba Kotor 14 Hari Terakhir
+Last 14 Days Purchases,Pembelian 14 Hari Terakhir
+Last 14 Days Tax/Charges,Pajak/Biaya 14 Hari Terakhir
+Last sync:,Sinkronisasi terakhir:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},Sinkronisasi terakhir: {0} | oke: {1} | gagal: {2} | dilewati: {3}
+Latest entries for current shift,Entri terbaru untuk shift saat ini
+Lead Time,Waktu Pimpin
+Limited,Terbatas
+lines,garis
+List,Daftar
+Live Snapshot,Cuplikan Langsung
+Load a POS profile and cashier first.,Muat profil POS dan kasir terlebih dahulu.
+Load More Invoices,Muat Lebih Banyak Faktur
+Load previously saved invoices,Muat faktur yang disimpan sebelumnya
+Load Sale,Muat Penjualan
+Load Sales Invoice,Muat Faktur Penjualan
+Loading app data...,Memuat data aplikasi...
+Loading customer database...,Memuat basis data pelanggan...
+Loading customers...,Memuat pelanggan...
+Loading database stats...,Memuat statistik basis data...
+Loading details...,Memuat detail...
+Loading invoice history...,Memuat riwayat faktur...
+Loading items...,Memuat item...
+Loading product catalog...,Memuat katalog produk...
+Loading return invoices...,Memuat faktur pengembalian...
+Loading server CPU/memory usage...,Memuat penggunaan CPU/memori server...
+Loading suppliers...,Memuat pemasok...
+Loading unpaid invoices...,Memuat faktur yang belum dibayar...
+Loading view...,Memuat tampilan...
+Loading...,Memuat...
+Local storage is unavailable. Switching to online-only mode.,Penyimpanan lokal tidak tersedia. Beralih ke mode online saja.
+localStorage,Penyimpanan lokal
+Location Performance,Kinerja Lokasi
+Locations,Lokasi
+Lock Screen,Layar Kunci
+Lookup Workflow,Alur Kerja Pencarian
+Loss,Kerugian
+Low,Rendah
+Low Stock,Stok Rendah
+Low Stock Alerts,Peringatan Stok Rendah
+Low Stock Items,Stok Barang Rendah
+Low Stock Threshold,Ambang Stok Rendah
+Low Stock Total,Jumlah Stok Rendah
+Lowest Margin,Margin Terendah
+Low-frequency maintenance and system details.,Pemeliharaan frekuensi rendah dan detail sistem.
+Loyalty Redeemed,Kesetiaan Ditebus
+Loyalty Redemption,Penebusan Loyalitas
+Make New Payment,Lakukan Pembayaran Baru
+Manage all,Kelola semuanya
+Manage and synchronize your offline transactions,Kelola dan sinkronkan transaksi offline Anda
+Manage Cashier PIN,Kelola PIN Kasir
+"Manage offline tools, terminal controls, and maintenance from one workspace.","Kelola alat offline, kontrol terminal, dan pemeliharaan dari satu ruang kerja."
+manual,panduan
+"Manual codes, barcode scans, and QR scans work in the same field","Kode manual, pemindaian kode batang, dan pemindaian QR berfungsi di bidang yang sama"
+Manual offline mode is enabled,Mode offline manual diaktifkan
+Margin,Margin
+Maximum available quantity is {0}. Quantity adjusted to match stock.,Kuantitas maksimum yang tersedia adalah {0}. Kuantitas disesuaikan dengan stok.
+Maximum discount amount for this offer item is {0}.,Jumlah diskon maksimum untuk item penawaran ini adalah {0}.
+Maximum discount percentage for this offer item is {0}%.,Persentase diskon maksimum untuk item penawaran ini adalah {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,Kuantitas penawaran maksimum adalah {0}. Jumlah disesuaikan dengan batas yang diperbolehkan.
+Medium,Sedang
+Method-wise Collections,Koleksi berdasarkan metode
+Minimum allowed rate for this offer item is {0}.,Tarif minimum yang diperbolehkan untuk item penawaran ini adalah {0}.
+Minimum Qty,Jumlah Minimum
+Mobile No,Nomor Ponsel
+Mode,Modus
+Mode of Payment,Cara Pembayaran
+Month,Bulan
+Month ?,Bulan?
+Monthly Profit,Keuntungan Bulanan
+Monthly Sales,Penjualan Bulanan
+Monthly Sales Summary,Ringkasan Penjualan Bulanan
+Month-wise,Dari segi bulan
+Most Active Cashiers,Kasir Paling Aktif
+Movement Type,Tipe Gerakan
+Movements,Gerakan
+Multi Currency,Multi Mata Uang
+N/A,T/A
+Name,Nama
+Negative Stock,Stok Negatif
+Negative Stock Items,Stok Barang Negatif
+Negative values not allowed,Nilai negatif tidak diperbolehkan
+Net,Bersih
+Net Qty,Jumlah Bersih
+Net Sales,Penjualan Bersih
+Net Value,Nilai Bersih
+Never,Tidak pernah
+New changes are ready to load,Perubahan baru siap dimuat
+New Item,Barang Baru
+New Offer Available,Penawaran Baru Tersedia
+New PIN,PIN baru
+New rate,Tarif baru
+Next unit of measure,Satuan ukuran berikutnya
+No attribute data found.,Tidak ada data atribut yang ditemukan.
+No Barcode,Tanpa Kode Batang
+No barcode found for UOM '{0}',Tidak ditemukan kode batang untuk UOM '{0}'
+No branch/location data found.,Tidak ditemukan data cabang/lokasi.
+No brand data found.,Tidak ada data merek yang ditemukan.
+No cached gift card balance is available offline.,Tidak ada saldo kartu hadiah dalam cache yang tersedia secara offline.
+No camera found on this device. Please ensure your device has a working camera.,Tidak ada kamera yang ditemukan di perangkat ini. Harap pastikan perangkat Anda memiliki kamera yang berfungsi.
+No capability warnings recorded yet.,Belum ada peringatan kemampuan yang tercatat.
+No cash expected for this shift.,Tidak ada uang tunai yang diharapkan untuk peralihan ini.
+No cash mode configured,Tidak ada mode tunai yang dikonfigurasi
+No cash movement type is allowed for this POS Profile.,Jenis pergerakan uang tunai tidak diperbolehkan untuk Profil POS ini.
+No cashier PIN is set yet. Create one now.,Belum ada PIN kasir yang disetel. Buat satu sekarang.
+No cashier profiles are available for this POS profile yet.,Belum ada profil kasir yang tersedia untuk profil POS ini.
+No cashier-wise discount/void/return activity.,Tidak ada aktivitas diskon/batal/pengembalian dari segi kasir.
+No category data found.,Tidak ada data kategori yang ditemukan.
+No category profitability data found.,Tidak ditemukan data profitabilitas kategori.
+No change returned recorded for this shift.,Tidak ada perubahan yang dicatat untuk shift ini.
+No change-allocation invoices match the current filters.,Tidak ada faktur perubahan alokasi yang cocok dengan filter saat ini.
+No charge head breakdown found.,Tidak ditemukan kerusakan kepala muatan.
+No Company Selected,Tidak Ada Perusahaan yang Dipilih
+No customer sales data found.,Tidak ada data penjualan pelanggan yang ditemukan.
+No day-wise discount/void/return trend.,Tidak ada tren diskon/batal/pengembalian harian.
+No day-wise payment data found.,Tidak ada data pembayaran harian yang ditemukan.
+No day-wise profitability trend found.,Tidak ditemukan tren profitabilitas harian.
+No day-wise purchase data found.,Tidak ada data pembelian harian yang ditemukan.
+No day-wise sales trend found.,Tidak ditemukan tren penjualan harian.
+No day-wise tax/charges trend found.,Tidak ditemukan tren pajak/biaya harian.
+No dead stock items.,Tidak ada barang stok mati.
+No due date,Tidak ada tanggal jatuh tempo
+No exact repair match found for this invoice,Tidak ditemukan perbaikan yang sama persis untuk faktur ini
+No hourly sales trend found for today.,Tidak ada tren penjualan per jam yang ditemukan untuk hari ini.
+No invoice activity found.,Tidak ditemukan aktivitas faktur.
+No invoices found,Tidak ada faktur yang ditemukan
+No invoices found. Try different search criteria.,Tidak ada faktur yang ditemukan. Coba kriteria pencarian yang berbeda.
+No invoices recorded for this shift.,Tidak ada faktur yang dicatat untuk shift ini.
+No item profitability data found.,Tidak ada data profitabilitas item yang ditemukan.
+No item sales data found for this period.,Tidak ditemukan data penjualan barang untuk periode ini.
+No items found,Tidak ada item yang ditemukan
+No items in cart,Tidak ada item di keranjang
+No items with barcodes to print,Tidak ada item dengan kode batang untuk dicetak
+No location-wise top item data found.,Tidak ditemukan data item teratas berdasarkan lokasi.
+No low stock alerts right now.,Tidak ada peringatan stok rendah saat ini.
+No low stock items.,Tidak ada barang dengan stok rendah.
+No matching items in cart,Tidak ada item yang cocok di keranjang
+No month-wise sales trend found.,Tidak ditemukan tren penjualan bulanan.
+No negative stock items.,Tidak ada item stok negatif.
+No notifications yet,Belum ada pemberitahuan
+No offline cash movement synced.,Tidak ada pergerakan uang tunai offline yang disinkronkan.
+No offline invoices pending synchronization,Tidak ada faktur offline yang menunggu sinkronisasi
+No offline sync issues recorded yet.,Belum ada masalah sinkronisasi offline yang tercatat.
+No out-of-stock items.,Tidak ada item yang kehabisan stok.
+No outstanding credit invoices for this shift.,Tidak ada faktur kredit terutang untuk peralihan ini.
+No payment collection data found.,Tidak ditemukan data pengumpulan pembayaran.
+No payment rows available on this invoice.,Tidak ada baris pembayaran yang tersedia pada invoice ini.
+No payments registered for this shift.,Tidak ada pembayaran yang terdaftar untuk shift ini.
+No pending balances in this period.,Tidak ada saldo tertunda pada periode ini.
+No pending offline invoices,Tidak ada faktur offline yang tertunda
+No Print Formats Found,Tidak Ditemukan Format Cetak
+No profiles found for selected scope. Falling back to current profile failed.,Tidak ada profil yang ditemukan untuk cakupan yang dipilih. Gagal mengembalikan ke profil saat ini.
+No recent customer activity found.,Tidak ditemukan aktivitas pelanggan terkini.
+No recent stock entries found.,Tidak ada entri stok terbaru yang ditemukan.
+No records found,Tidak ada catatan yang ditemukan
+No reorder suggestions right now.,Tidak ada saran pemesanan ulang saat ini.
+No repeat customers in this period.,Tidak ada pelanggan tetap pada periode ini.
+No response from server,Tidak ada tanggapan dari server
+No return invoices found,Tidak ditemukan faktur pengembalian
+No return item trend found.,Tidak ditemukan tren pengembalian barang.
+No returnable items found for this invoice,Tidak ditemukan item yang dapat dikembalikan untuk faktur ini
+No returns were processed in this shift.,Tidak ada pengembalian yang diproses dalam shift ini.
+No risk activity found.,Tidak ditemukan aktivitas berisiko.
+No sales activity found for this period.,Tidak ditemukan aktivitas penjualan untuk periode ini.
+No slow moving items.,Tidak ada item yang bergerak lambat.
+No staff sales activity found.,Tidak ditemukan aktivitas penjualan staf.
+No stock movement for this period.,Tidak ada pergerakan stok untuk periode ini.
+No submitted cash movements in this shift.,Tidak ada pergerakan uang tunai yang diserahkan pada shift ini.
+No supplier purchases found in this month.,Tidak ada pembelian pemasok yang ditemukan pada bulan ini.
+No suppliers found for this period.,Tidak ada pemasok yang ditemukan untuk periode ini.
+No sync trigger has run yet in this session.,Belum ada pemicu sinkronisasi yang dijalankan pada sesi ini.
+No tax head breakdown found.,Tidak ditemukan rincian kepala pajak.
+No top items found for this location.,Tidak ada item teratas yang ditemukan untuk lokasi ini.
+No unpaid invoices,Tidak ada faktur yang belum dibayar
+No variant data found.,Tidak ada data varian yang ditemukan.
+No week-wise sales trend found.,Tidak ditemukan tren penjualan mingguan.
+No.,Tidak.
+Nobile Number,Nomor Bangsawan
+Not available,Tidak tersedia
+Not checked,Tidak diperiksa
+Not selected,Tidak dipilih
+Not Set,Tidak Ditetapkan
+Notifications,Pemberitahuan
+Offer,Penawaran
+Offer Applied,Penawaran Diterapkan
+Offer criteria exceeded,Kriteria penawaran terlampaui
+Offer Item,Barang Penawaran
+Offer item unavailable,Item penawaran tidak tersedia
+Offer Removed,Penawaran Dihapus
+Offer UOM cannot be changed,Penawaran UOM tidak dapat diubah
+Offer?,Penawaran?
+Offers,Penawaran
+Offline,Luring
+Offline & Sync,Offline & Sinkronisasi
+Offline Capabilities,Kemampuan Offline
+Offline data status refreshed,Status data offline disegarkan
+Offline diagnostics,Diagnostik offline
+Offline Invoices,Faktur Offline
+Offline invoices status,Status faktur offline
+Offline invoices synced,Faktur offline disinkronkan
+Offline Queue: {0},Antrian Offline: {0}
+Offline rebuild guidance,Panduan pembangunan kembali offline
+Offline restore is unavailable for this session.,Pemulihan offline tidak tersedia untuk sesi ini.
+Offline selling is available with degraded capabilities.,Penjualan offline tersedia dengan kemampuan yang menurun.
+Offline snapshot does not match the current POS state.,Snapshot offline tidak cocok dengan status POS saat ini.
+Offline Status,Status Luar Talian
+"Offline, terminal, and system controls","Kontrol offline, terminal, dan sistem"
+OK,Oke
+Online,Daring
+Open actions menu,Buka menu tindakan
+Open balance to collect,Saldo terbuka untuk dikumpulkan
+Open Customer Display,Buka Tampilan Pelanggan
+Open drawer,Buka laci
+Open invoices,Buka faktur
+Open Payments?,Buka Pembayaran?
+Open POS home,Buka POS rumah
+Open this screen from POS Menu -> Open Customer Display.,Buka layar ini dari Menu POS -> Buka Tampilan Pelanggan.
+OpenCV image processing enabled - Enhanced barcode detection,Pemrosesan gambar OpenCV diaktifkan - Deteksi kode batang yang ditingkatkan
+OpenCV image processing unavailable on this device,Pemrosesan gambar OpenCV tidak tersedia di perangkat ini
+OpenCV Off,OpenCV Mati
+OpenCV On,OpenCV Aktif
+OpenCV processing disabled,Pemrosesan OpenCV dinonaktifkan
+Opening Amount,Jumlah Pembukaan
+Opening Cash,Membuka Uang Tunai
+options,pilihan
+Order,Memesan
+Original,Asli
+Other,Lainnya
+Out,Keluar
+Out of Stock,Kehabisan Stok
+Out of Stock Items,Barang Kehabisan Stok
+Outstanding,Luar biasa
+Outstanding Credit by Currency,Kredit yang Belum Dibayar Berdasarkan Mata Uang
+Overdue,Terlambat
+Overpayment Change,Perubahan Kelebihan Pembayaran
+Overpayment change deducted: {0},Perubahan kelebihan pembayaran dipotong: {0}
+Packing List,Daftar Pengepakan
+Page Format,Format Halaman
+Page unavailable offline,Halaman tidak tersedia secara offline
+Paid,Dibayar
+Paid (orig):,Berbayar (asal):
+Paid Amount,Jumlah yang Dibayar
+Paid change cannot be greater than total change!,Perubahan yang dibayar tidak boleh lebih besar dari perubahan total!
+Paid:,Dibayar:
+Parent Item,Barang Induk
+Partial,Sebagian
+Partly Paid,Dibayar Sebagian
+Party Account,Akun Partai
+Party Type,Tipe Pesta
+Pause terminal until next cashier,Jeda terminal hingga kasir berikutnya
+PAY,MEMBAYAR
+Payment,Pembayaran
+Payment Account,Akun Pembayaran
+Payment entries processed for Invoice {0},Entri pembayaran diproses untuk Faktur {0}
+Payment Entry Type,Jenis Entri Pembayaran
+Payment History,Riwayat Pembayaran
+Payment ID,ID Pembayaran
+Payment Method Report,Laporan Metode Pembayaran
+Payment Methods,Metode Pembayaran
+Payment of {0} received successfully.,Pembayaran sebesar {0} berhasil diterima.
+Payment Progress,Kemajuan Pembayaran
+Payment Reconciliation,Rekonsiliasi Pembayaran
+Payment request status could not be retrieved. Please try again,Status permintaan pembayaran tidak dapat diambil. Silakan coba lagi
+Payment Request took too long to respond. Please try requesting for payment again,Permintaan Pembayaran memerlukan waktu terlalu lama untuk ditanggapi. Silakan coba meminta pembayaran lagi
+Payment saved offline,Pembayaran disimpan offline
+Payment State,Negara Pembayaran
+Payment Status,Status Pembayaran
+Payment submitted but print function could not be executed. Payment name not found.,Pembayaran telah terkirim tetapi fungsi cetak tidak dapat dijalankan. Nama pembayaran tidak ditemukan.
+Payment submitted.,Pembayaran dikirimkan.
+Payment Summary,Ringkasan Pembayaran
+Payments,Pembayaran
+Payments are not open. Do you want to open payments and submit?,Pembayaran tidak terbuka. Apakah Anda ingin membuka pembayaran dan mengirimkan?
+Payments by Mode of Payment,Pembayaran berdasarkan Cara Pembayaran
+PDF,PDF
+Peak Hour,Jam Puncak
+Peak Memory:,Memori Puncak:
+Peak Server:,Server Puncak:
+Peak:,Puncak:
+Pending,Tertunda
+Pending Amount,Jumlah yang Tertunda
+Pending count updated from {0} to {1},Jumlah yang tertunda diperbarui dari {0} menjadi {1}
+Pending Exposure,Eksposur Tertunda
+Pending Invoices,Faktur yang Tertunda
+Pending Ratio,Rasio Tertunda
+Pending Sales,Penjualan Tertunda
+Pending sales: {0} | Cache usage: {1}%,Penjualan tertunda: {0} | Penggunaan cache: {1}%
+Pending Sync,Sinkronisasi Tertunda
+Pending: {0},Tertunda: {0}
+Pending: {0} | Synced: {1} | Draft: {2},Tertunda: {0} | Disinkronkan: {1} | Draf: {2}
+Per Page,Per Halaman
+Personal,Pribadi
+Personal preferences adjust the current cashier experience without changing the active POS route.,Preferensi pribadi menyesuaikan pengalaman kasir saat ini tanpa mengubah rute POS yang aktif.
+PIN confirmation does not match.,Konfirmasi PIN tidak cocok.
+PIN must be 4 to 8 digits.,PIN harus terdiri dari 4 hingga 8 digit.
+Please add at least one item.,Harap tambahkan setidaknya satu item.
+Please allow camera access to scan codes,Harap izinkan akses kamera untuk memindai kode
+Please enter payment amount,Silakan masukkan jumlah pembayaran
+Please fill all required fields,Silakan isi semua bidang yang wajib diisi
+Please make a payment or select a payment,Silakan lakukan pembayaran atau pilih pembayaran
+Please request phone payment or use another payment method,Silakan minta pembayaran melalui telepon atau gunakan metode pembayaran lain
+Please select a customer first,Silakan pilih pelanggan terlebih dahulu
+Please select a party,Silakan pilih pesta
+Please select a party before reconciling.,Silakan pilih salah satu pihak sebelum melakukan rekonsiliasi.
+Please select a valid movement type.,Silakan pilih jenis pergerakan yang valid.
+Please select an invoice,Silakan pilih faktur
+Please select company before reconciling.,Silakan pilih perusahaan sebelum melakukan rekonsiliasi.
+Please set the customer's mobile number,Silakan atur nomor ponsel pelanggan
+Please try again or enter the item manually.,Silakan coba lagi atau masukkan item secara manual.
+Please verify the barcode or check the item's availability.,Harap verifikasi kode batang atau periksa ketersediaan barang.
+Points,Poin
+Popup blocked. Please allow popups.,Munculan diblokir. Harap izinkan popup.
+POS,POS
+POS controls and maintenance,Kontrol dan pemeliharaan POS
+POS Expense is disabled for this POS Profile.,Pengeluaran POS dinonaktifkan untuk Profil POS ini.
+POS is running with limited offline prerequisites.,POS berjalan dengan prasyarat offline terbatas.
+POS Profile,Profil POS
+Position the QR code or barcode within the scanning area,Posisikan kode QR atau kode batang di dalam area pemindaian
+Posting,Posting
+Posting and Price List,Posting dan Daftar Harga
+Posting Date,Tanggal Posting
+Preparing background sync,Mempersiapkan sinkronisasi latar belakang
+"Press OK to continue offline with a warning, or Cancel to retry.","Tekan OK untuk melanjutkan offline dengan peringatan, atau Batal untuk mencoba lagi."
+Previous unit of measure,Satuan ukuran sebelumnya
+Price List,Daftar Harga
+Price List Rate,Tarif Daftar Harga
+Price list rate updated locally only,Tarif daftar harga diperbarui secara lokal saja
+Pricing & Discounts,Harga & Diskon
+Pricing Rule,Aturan Penetapan Harga
+Print,Cetak
+Print Draft,Draf Cetak
+Print Format (Invoice),Format Cetak (Faktur)
+Print Format (Order),Format Cetak (Pesanan)
+Print invoice,Cetak faktur
+Print Purchase Invoice instead of PO,Cetak Faktur Pembelian sebagai pengganti PO
+Printer,pencetak
+Processed returns impacting the shift totals,Pengembalian yang diproses berdampak pada total shift
+Processing Payment,Memproses Pembayaran
+Processing payment entries for Invoice {0},Memproses entri pembayaran untuk Faktur {0}
+Profile,Profil
+Profiles,Profil
+Profit,Keuntungan
+Profit: Invoice Item Estimate,Keuntungan: Estimasi Item Faktur
+Profit: Stock Ledger (COGS),Keuntungan: Buku Besar Saham (COGS)
+Profitability Report,Laporan Profitabilitas
+Prorated return discount,Diskon pengembalian yang diprorata
+Purchase Amount,Jumlah Pembelian
+Purchase Invoices,Faktur Pembelian
+Purchase Order created,Pesanan Pembelian dibuat
+Qty,Jumlah
+Qualified,Berkualitas
+Quantity,Kuantitas
+Quantity exceeds available stock,Kuantitas melebihi stok yang tersedia
+Quick Actions,Tindakan Cepat
+Quotation {0} is Submitted,Kutipan {0} Dikirim
+Quotation submitted,Kutipan dikirimkan
+QZ Tray connected.,Baki QZ terhubung.
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ Tray terputus secara manual. Tekan Hubungkan untuk mengaktifkannya lagi.
+QZ Tray is not connected.,Baki QZ tidak terhubung.
+QZ Tray Setup,Pengaturan Baki QZ
+Rate,Nilai
+Rate adjusted to maximum allowed discount,Tarif disesuaikan dengan diskon maksimum yang diperbolehkan
+Ready,Siap
+Ready to resume,Siap untuk melanjutkan
+Ready!,Siap!
+Real-time POS insights for retail operations.,Wawasan POS waktu nyata untuk operasi ritel.
+Rebuild Offline Data,Membangun Kembali Data Offline
+Receive,Terima
+Receive now,Terima sekarang
+Received,Diterima
+Received:,Diterima:
+Recent Movement Entries,Entri Pergerakan Terkini
+Recent updates about your invoices,Pembaruan terkini tentang faktur Anda
+Recently Active Customers,Pelanggan Aktif Baru-baru ini
+Rechecking connection,Memeriksa ulang koneksi
+Reconcile payment methods and close shift,Rekonsiliasi metode pembayaran dan tutup shift
+Reconciling Payments,Rekonsiliasi Pembayaran
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","Hubungkan kembali dan buka halaman ini satu kali saat online, maka penyegaran offline akan dapat memulihkannya."
+Reconnect online to refresh cached offline data from the server.,Sambungkan kembali secara online untuk menyegarkan data offline yang di-cache dari server.
+Recreate local offline prerequisites from scratch,Buat ulang prasyarat offline lokal dari awal
+Recv:,Penerimaan:
+Redeem,Tebus
+Redeem / Scan,Tebus / Pindai
+Redeem Amount,Jumlah Penukaran
+Redeem Mode,Mode Penukaran
+Redeemed Amount,Jumlah yang Ditebus
+Redeemed credit cannot be greater than its total.,Kredit yang ditebus tidak boleh lebih besar dari totalnya.
+Redemption and Totals,Penebusan dan Total
+Reference,Referensi
+Refresh,Segarkan
+Refresh Exchange Rate,Segarkan Nilai Tukar
+Refresh Offline Data,Segarkan Data Offline
+Refresh Printers,Segarkan Printer
+Refund,Pengembalian dana
+Release Notes,Catatan Rilis
+Reload,Muat ulang
+Reload customers,Muat ulang pelanggan
+Reload Items,Muat Ulang Item
+Reload Now,Muat Ulang Sekarang
+Reload to apply the latest changes. Your current session will be refreshed.,Muat ulang untuk menerapkan perubahan terbaru. Sesi Anda saat ini akan disegarkan.
+Reload Workflow,Muat Ulang Alur Kerja
+Remarks,Keterangan
+Remarks are required.,Catatan diperlukan.
+Remove,Hapus
+Remove barcode item,Hapus item kode batang
+Remove cached data and reload the POS app,Hapus data cache dan muat ulang aplikasi POS
+Remove item,Hapus barang
+Remove Offer,Hapus Penawaran
+Reorder / Purchase Suggestions,Saran Pemesanan Ulang / Pembelian
+Repair Candidate,Kandidat Perbaikan
+Repair Change Allocation,Perbaiki Alokasi Perubahan
+Repair requires an online connection,Perbaikan memerlukan koneksi online
+Repaired,Diperbaiki
+Repairing change allocation,Memperbaiki alokasi perubahan
+Repeat Customers,Pelanggan Berulang
+Repeat Rate,Tingkat Pengulangan
+Request,Permintaan
+Request ID: {0},Nomor Permintaan: {0}
+Request Payment,Minta Pembayaran
+Requested route: {0},Rute yang diminta: {0}
+Required columns cannot be hidden,Kolom yang wajib diisi tidak dapat disembunyikan
+Reset,Setel ulang
+Reset item name,Setel ulang nama item
+Reset to Default,Atur Ulang ke Default
+Resource Health,Kesehatan Sumber Daya
+Restricted,Terbatas
+Restricted operational controls for supervisors only.,Kontrol operasional terbatas hanya untuk supervisor.
+Retry,Coba lagi
+Retry route,Coba lagi rute
+Return,Kembali
+Return Amount,Jumlah Pengembalian
+Return Count,Jumlah Pengembalian
+Return items must have negative quantities,Barang yang dikembalikan harus memiliki jumlah negatif
+Return total must be negative,Total pengembalian harus negatif
+Return Valid Until,Pengembalian Berlaku Sampai
+Return window passed,Jendela kembali berlalu
+Return without Invoice,Kembali tanpa Faktur
+Returns,Kembali
+Returns / Voids / Discounts,Pengembalian / Batal / Diskon
+Returns by Currency,Pengembalian berdasarkan Mata Uang
+Revenue,Pendapatan
+Review shift totals before submitting the closing entry,Tinjau total shift sebelum mengirimkan entri penutup
+Round Off,Pembulatan
+Rows,Baris
+Rows:,Baris:
+Rule,Aturan
+Sale,Penjualan
+Sales,Penjualan
+Sales Order {0} is Submitted,Pesanan Penjualan {0} Telah Dikirim
+Sales Person and Print,Staf Penjualan dan Cetak
+Sales Person not found,Staf Penjualan tidak ditemukan
+Sales processed,Penjualan diproses
+Sales Return,Retur Penjualan
+Sales Trend Report,Laporan Tren Penjualan
+Save,Simpan
+Save & Clear,Simpan & Hapus
+Save as POS Profile Default,Simpan sebagai Default Profil POS
+Save Settings,Simpan Pengaturan
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,Simpan printer yang dipilih sebagai default Profil POS sehingga ditampilkan secara otomatis pada pengaturan ini.
+Saved as draft because: {0},Disimpan sebagai draf karena: {0}
+Saving...,Menyimpan...
+Scale barcode detected. Quantity here is the number of labels to print.,Kode batang skala terdeteksi. Quantity disini adalah jumlah label yang akan dicetak.
+Scale barcode settings are not configured. Using item barcode only.,Pengaturan kode batang skala tidak dikonfigurasi. Hanya menggunakan barcode item.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,Kode batang templat skala tidak ada untuk item/UOM ini. Hanya menggunakan barcode item.
+Scan an existing card and top it up without leaving the payment flow.,Pindai kartu yang ada dan isi ulang tanpa meninggalkan alur pembayaran.
+Scan Error,Kesalahan Pemindaian
+Scan or enter a gift card code to check balance or redeem.,Pindai atau masukkan kode kartu hadiah untuk memeriksa saldo atau menukarkannya.
+Scan or paste the card code below.,Pindai atau tempel kode kartu di bawah ini.
+Scan QR Code/Barcode,Pindai Kode QR/Kode Batang
+Scan with camera,Pindai dengan kamera
+Scan-First Flow,Aliran Pindai-Pertama
+Scanned Code:,Kode yang Dipindai:
+Scanning for: {0},Memindai: {0}
+Scanning items,Memindai item
+Scan-Ready,Siap Pindai
+Scope,Ruang lingkup
+Scope: All Profiles,Cakupan: Semua Profil
+Scope: Current Profile,Cakupan: Profil Saat Ini
+Scope: Specific Profile,Cakupan: Profil Tertentu
+Search,Cari
+Search Account,Cari Akun
+Search an invoice and continue the return flow without extra steps.,Cari faktur dan lanjutkan alur pengembalian tanpa langkah tambahan.
+Search customer,Cari pelanggan
+Search invoices or customers,Cari faktur atau pelanggan
+Search item,Barang pencarian
+Search item / code,Cari item/kode
+Search items or barcode,Cari item atau kode batang
+Search Mpesa Payments,Cari Pembayaran Mpesa
+Search return invoices or customers,Cari faktur pengembalian atau pelanggan
+Search supplier,Cari pemasok
+Search unpaid invoices or customers,Cari faktur atau pelanggan yang belum dibayar
+Secure context (HTTPS or localhost) is required for camera access.,Konteks aman (HTTPS atau localhost) diperlukan untuk akses kamera.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,Konteks aman (HTTPS) diperlukan untuk akses kamera. Silakan gunakan HTTPS untuk mengakses kamera.
+Select,Pilih
+Select a cashier first.,Pilih kasir terlebih dahulu.
+Select a customer,Pilih pelanggan
+Select a customer to use coupon,Pilih pelanggan untuk menggunakan kupon
+Select a printer to use QZ silent printing.,Pilih printer untuk menggunakan pencetakan senyap QZ.
+Select Batch,Pilih Kelompok
+Select Columns to Display,Pilih Kolom untuk Ditampilkan
+Select items to sell,Pilih item untuk dijual
+Select Payment,Pilih Pembayaran
+Select Payment Account,Pilih Akun Pembayaran
+Select printer,Pilih pencetak
+Select Return Invoice,Pilih Pengembalian Faktur
+Select S.O,Pilih S.O
+Select Sales Orders,Pilih Pesanan Penjualan
+Select the cashier who is taking over this terminal.,Pilih kasir yang mengambil alih terminal ini.
+Selected,Dipilih
+Selected movement type is not allowed by POS Profile.,Jenis pergerakan yang dipilih tidak diperbolehkan oleh Profil POS.
+Selected Payments,Pembayaran yang Dipilih
+Sensitive actions kept away from quick taps.,Tindakan sensitif dijauhkan dari ketukan cepat.
+Serial,Serial
+Serial Numbers,Nomor Seri
+Server CPU Usage:,Penggunaan CPU Server:
+Server Health,Kesehatan Server
+Server Memory Usage:,Penggunaan Memori Server:
+Server Metrics,Metrik Server
+Server Uptime:,Waktu Aktif Server:
+Service Charges,Biaya Layanan
+Session,Sesi
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,Tetapkan setiap PIN kasir di formulir Pengguna dan pertahankan anggota terminal ditetapkan di Pengguna Profil POS.
+Settings,Pengaturan
+Settings in this section update the POS workspace without changing the current route.,Pengaturan pada bagian ini memperbarui ruang kerja POS tanpa mengubah rute saat ini.
+Setup complete!,Penyiapan selesai!
+Share,Bagikan
+Shared terminal,Terminal bersama
+Shift Closed Snapshot,Geser Cuplikan Tertutup
+Shift Overview,Ikhtisar Pergeseran
+Show,Tunjukkan
+Show cart on customer-facing screen,Tampilkan keranjang di layar yang menghadap pelanggan
+Show last invoice rate,Tampilkan tarif faktur terakhir
+Show rate info,Tampilkan info tarif
+Show Repair Candidates,Tunjukkan Kandidat Perbaikan
+Show search tools,Tampilkan alat pencarian
+Show the active cart on a customer-facing screen,Tampilkan keranjang aktif di layar yang menghadap pelanggan
+Showing {0}-{1} of {2},Menampilkan {0}-{1} dari {2}
+Showing 0 of 0,Menampilkan 0 dari 0
+Shows the distribution of invoices per currency,Menunjukkan distribusi faktur per mata uang
+Sign out of the current POS session,Keluar dari sesi POS saat ini
+Size:,Ukuran:
+Skipped Payments,Pembayaran yang Dilewatkan
+Skipping items without barcodes,Melewatkan item tanpa barcode
+Slow Moving,Bergerak Lambat
+Slow Moving Items,Barang Bergerak Lambat
+Slow Queries:,Pertanyaan Lambat:
+Sold,Terjual
+Source,Sumber
+Source Cash Account (Optional Override),Rekening Kas Sumber (Pengabaian Opsional)
+Source Ex. Rate:,Sumber Mantan. Nilai:
+Source Rate:,Tingkat Sumber:
+Specific Profile,Profil Khusus
+Split Invoices,Pisahkan Faktur
+Staff / Cashier Performance Report,Laporan Kinerja Staf/Kasir
+Status,Status
+Stock,Stok
+Stock Information,Informasi Stok
+Stock is lower than requested,Stok lebih rendah dari yang diminta
+Stock is lower than requested:\n{0},Stok lebih rendah dari yang diminta:\n{0}
+Stock Movement Report,Laporan Pergerakan Saham
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,Pembaruan stok: {0} memiliki {1} tersedia. Menambahkan {2} akan membuat stok di bawah nol.
+Submit,Kirim
+Submit & Print,Kirim & Cetak
+Submit Deposit,Kirim Setoran
+Submit Expense,Kirim Biaya
+Submitted,Dikirim
+Submitted Cash Movements,Pergerakan Tunai yang Diserahkan
+Submitted entries,Entri yang dikirimkan
+Successfully scanned:,Berhasil dipindai:
+Suggested,Disarankan
+Suggested Qty,Jumlah yang disarankan
+Supervisor Access,Akses Pengawas
+Supervisor permissions unlock issuance and reloads,Izin supervisor membuka kunci penerbitan dan memuat ulang
+Supervisor Tools,Alat Pengawas
+Supplier,Pemasok
+Supplier and dates are required.,Pemasok dan tanggal wajib diisi.
+Supplier Invoices,Faktur Pemasok
+Supplier is required.,Pemasok diperlukan.
+Supplier name is required,Nama pemasok wajib diisi
+Supplier Payments,Pembayaran Pemasok
+Supplier Purchase Summary,Ringkasan Pembelian Pemasok
+Suppliers,Pemasok
+Suppliers not found,Pemasok tidak ditemukan
+Switch Camera,Ganti Kamera
+Switch Cashier,Ganti Kasir
+Switch the POS appearance theme,Ganti tema tampilan POS
+Switched to:,Beralih ke:
+Sync All Invoices,Sinkronkan Semua Faktur
+Sync Offline Cash Movements ({0}),Sinkronkan Pergerakan Tunai Offline ({0})
+Sync Offline Sales,Sinkronkan Penjualan Offline
+Synced {0} offline cash movement(s).,{0} pergerakan uang tunai offline telah disinkronkan.
+Syncing items in background,Menyinkronkan item di latar belakang
+System / Diagnostics,Sistem / Diagnostik
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","Tindakan sistem adalah kontrol pemeliharaan frekuensi rendah seperti info aplikasi, diagnostik dukungan, dan kontrol sesi."
+System Information,Sistem Informasi
+System Status,Status Sistem
+Tables:,Tabel:
+Tap the button below to redeem a gift card during checkout.,Ketuk tombol di bawah untuk menukarkan kartu hadiah saat checkout.
+Target,Sasaran
+Target Ex. Rate:,Sasaran Mantan. Nilai:
+Target Rate:,Tingkat Target:
+Tax,Pajak
+Tax / Charges Report,Laporan Pajak/Biaya
+Tax Heads,Kepala Pajak
+Taxable Amount,Jumlah Kena Pajak
+Tendered,Ditender
+Terminal,Terminal
+Terminal & Devices,Terminal & Perangkat
+Terminal locked,Terminal terkunci
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","Alat terminal memengaruhi stasiun pembayaran ini, tampilan yang menghadap pelanggan, dan kontrol printer/perangkat di masa mendatang."
+Territory not found,Wilayah tidak ditemukan
+The amount paid is not complete,Jumlah yang dibayarkan tidak lengkap
+The app stores data locally for offline use. This is called cache.,Aplikasi ini menyimpan data secara lokal untuk penggunaan offline. Ini disebut tembolok.
+The invoice stayed in draft. Please review and submit it manually.,Faktur tetap dalam bentuk draft. Harap tinjau dan kirimkan secara manual.
+The maximum discount allowed is,Diskon maksimum yang diperbolehkan adalah
+The quantity for {0} has been adjusted to the maximum available stock.,Kuantitas untuk {0} telah disesuaikan dengan stok maksimum yang tersedia.
+The system could not retrieve the item details. Please try again.,Sistem tidak dapat mengambil detail item. Silakan coba lagi.
+These invoices will be synced when connection is restored,Faktur ini akan disinkronkan ketika koneksi dipulihkan
+This action now opens inside the settings workspace.,Tindakan ini sekarang terbuka di dalam ruang kerja pengaturan.
+This coupon already used !,Kupon ini sudah digunakan!
+This invoice does not need change-allocation repair,Faktur ini tidak memerlukan perbaikan perubahan alokasi
+This invoice is already repaired,Faktur ini sudah diperbaiki
+This is an item template. Please choose a variant.,Ini adalah templat item. Silakan pilih varian.
+this item,barang ini
+This POS page could not be opened offline because its code was not cached on this terminal yet.,Halaman POS ini tidak dapat dibuka secara offline karena kodenya belum di-cache di terminal ini.
+This Serial Number {0} has already been added!,Nomor Seri {0} ini telah ditambahkan!
+Threshold,Ambang batas
+Time,Waktu
+Tip: Clear cache regularly to free up space and keep the app fast.,Tip: Hapus cache secara rutin untuk mengosongkan ruang dan menjaga aplikasi tetap cepat.
+Tip: Close unused tabs or apps to reduce lag.,Tip: Tutup tab atau aplikasi yang tidak digunakan untuk mengurangi kelambatan.
+Tip: Monitor slow queries and table size for optimal performance.,Tip: Pantau kueri yang lambat dan ukuran tabel untuk performa optimal.
+To Be Paid,Harus Dibayar
+To Date,Sampai saat ini
+Today,Hari ini
+Today Profit,Hari ini Untung
+Today Sales,Penjualan Hari Ini
+Toggle navigation drawer,Alihkan panel samping navigasi
+Toggle Theme,Alihkan Tema
+Tools,Alat
+Tools for customer-facing screens and terminal-specific actions.,Alat untuk layar yang menghadap pelanggan dan tindakan khusus terminal.
+Top Brand,Merek Teratas
+Top Category,Kategori Teratas
+Top Charge Head,Kepala Pengisi Daya Atas
+Top Customers,Pelanggan Teratas
+Top Discount,Diskon Teratas
+Top Items by Location,Item Teratas berdasarkan Lokasi
+Top Margin,Margin Atas
+Top Pending,Teratas Tertunda
+Top Profit Item,Item Keuntungan Teratas
+Top Return Items,Item Pengembalian Teratas
+Top Sales by Cashier,Penjualan Teratas berdasarkan Kasir
+Top Supplier,Pemasok Teratas
+Top Suppliers by Spend,Pemasok Teratas berdasarkan Pembelanjaan
+Top Tables,Tabel Teratas
+Top Tax Head,Kepala Pajak Tertinggi
+Top Up Amount,Jumlah Isi Ulang
+Top Up Card,Kartu Isi Ulang
+Top Up Mode,Mode Isi Ulang
+Top Variant,Varian Teratas
+Total,Jumlah
+Total Amount,Jumlah Total
+Total Change,Perubahan Total
+Total Charges,Jumlah Biaya
+Total In,Jumlah Masuk
+Total Invoices,Jumlah Faktur
+Total Items,Jumlah Barang
+Total Mpesa,Jumlah Mpesa
+Total Out,Keluar Total
+Total Payments,Jumlah Pembayaran
+Total Purchase,Jumlah Pembelian
+Total Selected :,Jumlah yang Dipilih :
+Total Size,Ukuran Jumlah
+Total Stock Qty,Total Jumlah Stok
+Total:,Jumlah:
+Totals by Invoice Currency,Total berdasarkan Mata Uang Faktur
+Track how much cash was handed back to customers,Lacak berapa banyak uang tunai yang dikembalikan ke pelanggan
+"Track recent sales, collect unpaid balances, and reopen saved work","Lacak penjualan terkini, kumpulkan saldo yang belum dibayar, dan buka kembali pekerjaan yang disimpan"
+Transaction ID,ID Transaksi
+Transfer,Pemindahan
+Try a different search term or clear the cart search.,Coba istilah pencarian lain atau hapus pencarian keranjang.
+Try adjusting your search or filters,Coba sesuaikan penelusuran atau filter Anda
+Try another source or refresh the list.,Coba sumber lain atau segarkan daftarnya.
+Try changing the date range or status filter.,Coba ubah rentang tanggal atau filter status.
+Type,Ketik
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,Tidak dapat mengakses kamera bahkan dengan pengaturan dasar. Silakan periksa izin kamera dan kompatibilitas perangkat Anda.
+Unable to add offer item {0}. Please refresh and try again.,Tidak dapat menambahkan item penawaran {0}. Silakan segarkan dan coba lagi.
+Unable to add offer item. Please refresh and try again.,Tidak dapat menambahkan item penawaran. Silakan segarkan dan coba lagi.
+Unable to add scanned item.,Tidak dapat menambahkan item yang dipindai.
+Unable to create purchase order,Tidak dapat membuat pesanan pembelian
+Unable to delete draft invoice,Tidak dapat menghapus draf faktur
+Unable to fetch documents,Tidak dapat mengambil dokumen
+Unable to fetch draft orders,Tidak dapat mengambil pesanan draf
+Unable to fetch invoice history,Tidak dapat mengambil riwayat faktur
+Unable to fetch M-Pesa payments,Tidak dapat mengambil pembayaran M-Pesa
+Unable to fetch sales orders,Tidak dapat mengambil pesanan penjualan
+Unable to fetch unpaid invoices,Tidak dapat mengambil faktur yang belum dibayar
+Unable to generate scale barcode,Tidak dapat membuat kode batang skala
+Unable to issue gift card.,Tidak dapat menerbitkan kartu hadiah.
+Unable to load cashier PIN status.,Tidak dapat memuat status PIN kasir.
+Unable to load document,Tidak dapat memuat dokumen
+Unable to load draft invoice,Tidak dapat memuat draf faktur
+Unable to load gift card balance.,Tidak dapat memuat saldo kartu hadiah.
+Unable to load invoice details,Tidak dapat memuat detail faktur
+Unable to load parked order,Tidak dapat memuat pesanan yang diparkir
+Unable to load the selected sales order,Tidak dapat memuat pesanan penjualan yang dipilih
+Unable to prepare document,Tidak dapat menyiapkan dokumen
+Unable to prepare return invoice,Tidak dapat menyiapkan faktur pengembalian
+Unable to print draft invoice,Tidak dapat mencetak draf faktur
+Unable to print submitted invoice,Tidak dapat mencetak faktur yang dikirimkan
+Unable to process document action,Tidak dapat memproses tindakan dokumen
+Unable to repair change allocation,Tidak dapat memperbaiki alokasi perubahan
+Unable to save cashier PIN.,Tidak dapat menyimpan PIN kasir.
+Unable to save the rate to the backend price list,Tidak dapat menyimpan tarif ke daftar harga backend
+Unable to submit invoice,Tidak dapat mengirimkan faktur
+Unable to submit the selected payment,Tidak dapat mengirimkan pembayaran yang dipilih
+Unable to top up gift card.,Tidak dapat mengisi ulang kartu hadiah.
+Unable to verify cashier PIN.,Tidak dapat memverifikasi PIN kasir.
+Unallocated,Tidak terisi
+Unallocated:,Tidak terisi:
+Unavailable,Tidak tersedia
+Unknown,Tidak diketahui
+Unknown Item,Barang Tidak Diketahui
+Unknown Warehouse,Gudang Tidak Dikenal
+Unlock POS,Buka kunci POS
+Unpaid,Tidak dibayar
+"Unselected payments stay unallocated first, then auto reconcile after submit.","Pembayaran yang tidak dipilih tetap tidak teralokasikan terlebih dahulu, kemudian direkonsiliasi secara otomatis setelah dikirimkan."
+UOM,UOM
+UOM not found,UOM tidak ditemukan
+Update available,Pembaruan tersedia
+Update Customer,Perbarui Pelanggan
+Update PIN,Perbarui PIN
+Update Price List Rate,Perbarui Tarif Daftar Harga
+Updated,Diperbarui
+Updates and app info that stay out of the cashier flow.,Pembaruan dan info aplikasi yang tidak mengikuti arus kasir.
+Updates automatically,Pembaruan secara otomatis
+Usage,Penggunaan
+Usage Stats,Statistik Penggunaan
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,Gunakan PIN 4 hingga 8 digit untuk peralihan kasir dan pembukaan kunci terminal.
+Use Cashier,Gunakan Kasir
+Use date range to search for older invoices,Gunakan rentang tanggal untuk mencari faktur lama
+"Use one field for manual code entry, barcode scans, or QR scans.","Gunakan satu bidang untuk entri kode manual, pemindaian kode batang, atau pemindaian QR."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","Gunakan satu alur kerja untuk pemeriksaan saldo, penerbitan baru, dan isi ulang tanpa meninggalkan POS."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","Gunakan bagian ini ketika data prasyarat yang di-cache memerlukan penyegaran, pembangunan kembali, atau peninjauan diagnostik."
+Use Western numerals,Gunakan angka Barat
+Used:,Digunakan:
+Using basic camera settings due to device limitations,Menggunakan pengaturan kamera dasar karena keterbatasan perangkat
+Using cached customer balance,Menggunakan saldo pelanggan yang di-cache
+Valid until,Berlaku sampai
+Variance %,Varians%
+Variants,Varian
+Variant-wise,Dari segi varian
+Verify closing amounts for each payment method,Verifikasi jumlah penutupan untuk setiap metode pembayaran
+View all,Lihat semuanya
+View app information and current build details,Lihat informasi aplikasi dan detail build saat ini
+View Data Diagnostics,Lihat Diagnostik Data
+View Details,Lihat Detail
+View invoice details,Lihat detail faktur
+View notifications,Lihat notifikasi
+View offline invoices,Lihat faktur offline
+View restricted POS insights,Lihat wawasan POS yang dibatasi
+Void Amount,Jumlah Batal
+Void Count,Jumlah Batal
+Voids,kosong
+Waiting for cart items,Menunggu item keranjang
+Waiting for payment...,Menunggu pembayaran...
+Walk-in Customer,Pelanggan Langsung
+Warehouse,Gudang
+Warning: High cache usage may affect performance.,Peringatan: Penggunaan cache yang tinggi dapat mempengaruhi kinerja.
+Warning: High lag may indicate heavy processing or browser slowness.,Peringatan: Kelambatan yang tinggi mungkin mengindikasikan pemrosesan yang berat atau kelambatan browser.
+Week ?,Pekan ?
+Week-wise,Dari segi minggu
+Weight (g),Berat (g)
+Weight (grams),Berat (gram)
+We'll let you know if an invoice fails to submit,Kami akan memberi tahu Anda jika faktur gagal dikirimkan
+Workflow,Alur kerja
+Write off amount cannot exceed the POS profile maximum of {0},Jumlah penghapusan tidak boleh melebihi maksimum profil POS sebesar {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,Jumlah penghapusan melebihi batas yang diperbolehkan ({0}). Silakan tambahkan pembayaran untuk jumlah yang tersisa.
+Yes,Ya
+"Yes, Cancel sale","Ya, Batalkan penjualan"
+"Yes, Close","Ya, Tutup"
+You are not allowed to print draft invoices,Anda tidak diperbolehkan mencetak draft invoice
+You are offline. Add Payment will work again when the connection is restored.,Anda sedang luring. Tambah Pembayaran akan berfungsi kembali ketika koneksi pulih.
+You have no notifications right now,Anda tidak memiliki notifikasi saat ini
+Your Cart,Keranjang Anda

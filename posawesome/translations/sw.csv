@@ -1,0 +1,1362 @@
+POS Awesome,POS ya Kushangaza
+Fetch Items Directly from Server,Leta Vipengee Moja kwa Moja kutoka kwa Seva
+Menu,Menyu
+Actions,Vitendo
+Close Shift,Funga Shift
+End current session,Maliza kipindi cha sasa
+Print Last Invoice,Chapisha ankara ya Mwisho
+Reprint previous transaction,Chapisha tena muamala uliopita
+Sync Offline Invoices,Sawazisha Ankara za Nje ya Mtandao
+Upload pending transactions,Pakia shughuli zinazosubiri
+Go Online,Nenda Mtandaoni
+Go Offline,Nenda Nje ya Mtandao
+Disable offline mode,Zima hali ya nje ya mtandao
+Work without server connection,Fanya kazi bila muunganisho wa seva
+Clear Cache,Futa Cache
+Remove local data and refresh,Ondoa data ya ndani na uonyeshe upya
+About,Kuhusu
+App information,Taarifa ya programu
+Language,Lugha
+Change interface language,Badilisha lugha ya kiolesura
+Light Mode,Hali ya Mwanga
+Dark Mode,Hali ya Giza
+Switch theme appearance,Badilisha mwonekano wa mandhari
+Logout,Ondoka
+Sign out of session,Ondoka kwenye kipindi
+Select Language,Chagua Lugha
+Choose your preferred language for the POS interface,Chagua lugha unayopendelea kwa kiolesura cha POS
+Language will be changed to,Lugha itabadilishwa kuwa
+Cancel,Ghairi
+Change Language,Badilisha Lugha
+Close,Funga
+Cannot change language - same language selected,Haiwezi kubadilisha lugha - lugha sawa imechaguliwa
+Language changed successfully! Reloading...,Lugha imebadilishwa kwa mafanikio! Inapakia upya...
+Failed to change language,Imeshindwa kubadilisha lugha
+Unknown error,Hitilafu isiyojulikana
+- Total Unallocated,- Jumla Isiyotengwa
+* Required,* Inahitajika
+{0} (Qty: {1}),{0} (Kiasi: {1})
+{0} actions,{0} vitendo
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} ina {1} pekee kwenye soko. Uliomba {2}. Rekebisha wingi au uhifadhi tena.
+{0} offline invoice{1} pending,{0} ankara ya nje ya mtandao{1} inasubiri
+{0} offline invoice{1} saved as draft,{0} ankara ya nje ya mtandao{1} imehifadhiwa kama rasimu
+{0} offline invoice{1} synced,{0} ankara ya nje ya mtandao{1} iliyosawazishwa
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,Siku {0} zilizopita
+{0}h ago,Saa {0} zilizopita
+{0}m ago,Dakika {0} zilizopita
+A POS supervisor is required for this action.,Msimamizi wa POS anahitajika kwa hatua hii.
+Access,Ufikiaji
+Account,Akaunti
+Account is overdrawn,Akaunti imetolewa
+Acknowledge the error to resume scanning,Kubali hitilafu ili kuendelea na utafutaji
+Acknowledge the error to resume scanning.,Kubali hitilafu ili kuendelea na utafutaji.
+Across,Kuvuka
+Action,Kitendo
+Active sale,Uuzaji unaotumika
+add,ongeza
+Add items from the selector to start building this sale.,Ongeza bidhaa kutoka kwa kiteuzi ili kuanza kuunda ofa hii.
+Add more value to an existing gift card,Ongeza thamani zaidi kwa kadi iliyopo ya zawadi
+Add New Address,Ongeza Anwani Mpya
+Add new customer,Ongeza mteja mpya
+Add on New Line,Ongeza kwenye Mstari Mpya
+Add Payment,Ongeza Malipo
+Add payment to invoice,Ongeza malipo kwenye ankara
+Add/Edit Coupon Conditions,Ongeza/Hariri Masharti ya Kuponi
+Additional Discount,Punguzo la Ziada
+Additional Discount %,Punguzo la Ziada %
+Address Line 1,Mstari wa 1 wa Anwani
+Address not found,Anwani haijapatikana
+Adjust the quantity or enable negative stock to continue.,Rekebisha wingi au uwashe hisa hasi ili kuendelea.
+Adjustment,Marekebisho
+After returns,Baada ya kurudi
+Against,Dhidi ya
+Against Name,Dhidi ya Jina
+Age Bracket,Bracket ya Umri
+All,Wote
+All Caught Up!,Yote Yameshikiliwa!
+All invoices are synchronized,Ankara zote zimesawazishwa
+All pending invoices are up to date,Ankara zote zinazosubiri zimesasishwa
+All Profiles,Profaili Zote
+All Synchronized,Zote Zimesawazishwa
+All visible invoices are fully settled.,Ankara zote zinazoonekana zimetatuliwa kikamilifu.
+All Warehouses,Maghala Yote
+Allowed UOM is {0},UOM inayoruhusiwa ni {0}
+Always fetch items from server (ignore local cache),Kila mara tafuta vitu kutoka kwa seva (puuza akiba ya ndani)
+Amount,Kiasi
+Amount already received,Kiasi ambacho tayari kimepokelewa
+Amount exceeds profile cash movement max amount.,Kiasi kinazidi kiwango cha juu cha uhamishaji wa pesa wasifu.
+Amount must be greater than zero.,Kiasi lazima kiwe kikubwa kuliko sifuri.
+Amount received from customer,Kiasi kilichopokelewa kutoka kwa mteja
+Appearance and user-level preferences for the current session.,Muonekano na mapendeleo ya kiwango cha mtumiaji kwa kipindi cha sasa.
+Applied,Imetumika
+Apply,Omba
+Apply Gift Card,Omba Kadi ya Zawadi
+Apply Offer,Omba Ofa
+Apply On,Tumia Washa
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,Tumia tu kiasi unachotaka kukomboa kwenye ankara hii. Salio iliyobaki inabaki kwenye kadi.
+Apply Redemption,Tumia Ukombozi
+Applying,Inatuma
+Apps,Programu
+Are you sure you want to close? All entered data will be lost.,"Je, una uhakika unataka kufunga? Data yote iliyoingizwa itapotea."
+Attributes (Size/Color),Sifa (Ukubwa/Rangi)
+Auto Allocate Payment Amount,Tenga Kiasi cha Malipo kiotomatiki
+Auto Reconcile,Kupatanisha Auto
+Auto reconciliation completed after payment submit.,Upatanisho otomatiki umekamilika baada ya kuwasilisha malipo.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,Upatanisho otomatiki umekamilika. Imetengwa: {0}{1}. Zinazosalia: {0}{2}.
+Available Actions,Vitendo Vinavyopatikana
+Available QTY,Inapatikana QTY
+Available:,Inapatikana:
+Average Basket,Kikapu cha wastani
+Average Bill,Mswada wa Wastani
+Average Ticket,Tikiti ya wastani
+Avg Bill,Wastani wa Bili
+Avg Invoice,Ankara ya wastani
+Avg Invoice Profit,Faida ya wastani ya ankara
+Avg Invoice Value,Thamani ya wastani ya ankara
+Avg Purchase Frequency,Wastani wa Marudio ya Ununuzi
+Awesome,Kushangaza
+Awesome Dashboard,Dashibodi ya Kushangaza
+Awesome Dashboard is disabled for the selected POS Profile.,Dashibodi ya Ajabu imezimwa kwa Wasifu wa POS uliochaguliwa.
+Awesome Dashboard is unavailable for the selected scope.,Dashibodi ya Ajabu haipatikani kwa upeo uliochaguliwa.
+Awesome Dashboard is visible only to POS supervisors.,Dashibodi ya Ajabu inaonekana kwa wasimamizi wa POS pekee.
+Back,Nyuma
+Back Office Cash Account,Akaunti ya Fedha ya Ofisi ya Nyuma
+Back Office Cash Account (Optional Override),Akaunti ya Fedha ya Ofisi ya Nyuma (Hiari ya Batilisha)
+Back office cash account is required.,Akaunti ya pesa ya ofisi ya nyuma inahitajika.
+Back to {0},Rudi kwa {0}
+Background processing did not finish in time.,Uchakataji wa usuli haukumaliza kwa wakati.
+Background processing failed for Invoice {0}: {1},Uchakataji wa chinichini haujafaulu kwa Ankara {0}: {1}
+Background Submission Failed,Uwasilishaji wa Mandharinyuma Umeshindwa
+Background sync interval (seconds),Muda wa kusawazisha usuli (sekunde)
+Balance,Mizani
+Balance will be updated when connection is restored,Salio litasasishwa muunganisho utakaporejeshwa
+Balances still pending,Mizani bado inasubiri
+Barcode,Msimbo pau
+Barcode / QR Ready,Msimbo pau / QR Tayari
+Barcode Label Printing,Uchapishaji wa Lebo ya Misimbo
+Base Paid:,Msingi Umelipwa:
+Base Recv:,Recv Msingi:
+Base:,Msingi:
+Basic Information,Taarifa za Msingi
+Batch,Kundi
+Batch Information,Taarifa za Kundi
+Before any return workflow,Kabla ya mtiririko wowote wa kurudi
+Before returns,Kabla ya kurudi
+Best Day,Siku Bora
+Best Seller,Muuzaji Bora
+Book expense or deposit from active shift.,Gharama ya kitabu au amana kutoka kwa zamu inayotumika.
+Branch / Location-wise Report,Ripoti ya Tawi / Mahali
+Brand-wise,Kwa busara chapa
+Breakdown,Uchanganuzi
+Browse,Vinjari
+Build Time:,Muda wa Kujenga:
+Built with Frappe,Imejengwa na Frappe
+Bundle,Kifungu
+Buying Price,Bei ya Kununua
+Cache cleared successfully,Akiba imefutwa
+Cache Usage,Matumizi ya Cache
+cache used,kashe iliyotumika
+Calculating...,Inakokotoa...
+Camera Access Required,Ufikiaji wa Kamera Unahitajika
+Camera access was aborted. Please try again.,Ufikiaji wa kamera umekatizwa. Tafadhali jaribu tena.
+Camera constraints not supported by your device. Trying fallback settings...,Vizuizi vya kamera haziauniwi na kifaa chako. Inajaribu mipangilio mbadala...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,Kamera ina shughuli nyingi au imezuiwa na programu/kichupo kingine. Funga programu zingine za kamera na ujaribu tena.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,Ruhusa ya kamera imekataliwa. Tafadhali ruhusu ufikiaji wa kamera katika mipangilio ya kivinjari chako na uonyeshe ukurasa upya.
+Camera scanner is locked until the current error is acknowledged,Kichanganuzi cha kamera kimefungwa hadi hitilafu ya sasa ikubaliwe
+Camera started but the video stream did not load in time. Please try again.,Kamera ilianza lakini mtiririko wa video haukupakia kwa wakati. Tafadhali jaribu tena.
+Cancel cash movement {0}?,Ungependa kughairi usafirishaji wa pesa {0}?
+Cancel Payment,Ghairi Malipo
+Cancel Sale,Ghairi Uuzaji
+Cancel Sale ?,Ungependa Kughairi Uuzaji?
+Cancelled,Imeghairiwa
+Cannot add an item with zero or negative quantity.,Haiwezi kuongeza kipengee chenye sifuri au wingi hasi.
+Cannot clear cache while offline,Haiwezi kufuta akiba ukiwa nje ya mtandao
+Cannot redeem customer credit more than invoice total,Haiwezi kukomboa mkopo wa mteja zaidi ya jumla ya ankara
+Cannot redeem gift cards more than invoice total,Haiwezi kukomboa kadi za zawadi zaidi ya jumla ya ankara
+Cannot Save Offline Invoice:,Haiwezi Kuhifadhi Ankara ya Nje ya Mtandao:
+Cannot Save Offline Payment:,Haiwezi Kuhifadhi Malipo ya Nje ya Mtandao:
+Card,Kadi
+Card / Online,Kadi / Mkondoni
+Card health after the last live lookup,Afya ya kadi baada ya ukaguzi wa mwisho wa moja kwa moja
+Cards,Kadi
+Cart,Mkokoteni
+Cash,Fedha taslimu
+Cash back to customers,Rejesha pesa kwa wateja
+Cash Collections,Makusanyo ya Fedha
+Cash Deposit is disabled for this POS Profile.,Amana ya Pesa imezimwa kwa Wasifu huu wa POS.
+Cash Drawer Snapshot,Picha ya Droo ya Pesa
+Cash In Hand,Pesa Mkononi
+Cash Movement,Harakati za Fedha
+Cash movement cancelled,Usafirishaji wa pesa umeghairiwa
+Cash movement deduction applied,Utoaji wa makato ya pesa taslimu umetumika
+Cash movement deleted,Uhamisho wa pesa umefutwa
+Cash movement is disabled for this POS Profile.,Uhamishaji wa pesa umezimwa kwa Wasifu huu wa POS.
+Cash Movement is disabled in current POS Profile.,Uhamishaji wa Pesa umezimwa katika Wasifu wa sasa wa POS.
+Cash movement saved offline,Uhamisho wa pesa umehifadhiwa nje ya mtandao
+Cash movement submitted,Harakati za pesa zimewasilishwa
+Cash Movements,Harakati za Fedha
+Cash payment cannot be less than invoice total when partial payment is not allowed,Malipo ya pesa taslimu hayawezi kuwa chini ya jumla ya ankara wakati malipo ya sehemu hayaruhusiwi
+Cash returned after payment,Pesa zilizorudishwa baada ya malipo
+Cashier,Keshia
+Cashier Access,Ufikiaji wa Cashier
+Cashier identity and appearance preferences.,Utambulisho wa mtunza fedha na upendeleo wa mwonekano.
+Cashier PIN,PIN ya keshia
+Cashier PIN saved successfully.,PIN ya keshia imehifadhiwa.
+Cashiers,Washika fedha
+Cashier-wise,Cashier-busara
+Categories,Kategoria
+Category,Kategoria
+Category / Brand / Variant Report,Ripoti ya Aina / Chapa / Lahaja
+Category-wise,Jamii-busara
+Category-wise Margin,Upeo wa busara wa kitengo
+Certificate,Cheti
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,Cheti hakipo au hakiaminiki. QZ inaweza kuonyesha mazungumzo ya uthibitishaji.
+Certificate is trusted. Silent QZ printing is active.,Cheti kinaaminika. Uchapishaji wa QZ wa Kimya unatumika.
+Change,Badilika
+Change allocation repaired,Mgao wa mabadiliko umerekebishwa
+Change Price,Badilisha Bei
+Change Return,Badilisha Kurudi
+Change Returned,Mabadiliko Imerejeshwa
+Change terminal cashier,Badilisha keshia ya mwisho
+Charge Heads,Vichwa vya malipo
+Charges,Malipo
+Charges not found,Gharama hazijapatikana
+Check Balance,Angalia Mizani
+Check balance for any card. Supervisors can issue and top up cards here.,Angalia salio la kadi yoyote. Wasimamizi wanaweza kutoa na kujaza kadi hapa.
+Check balance only,Angalia salio pekee
+Check for new commits,Angalia ahadi mpya
+Check for Updates,Angalia Usasisho
+Check live balance before applying redemption,Angalia salio la moja kwa moja kabla ya kutumia ukombozi
+Check live balance before redemption,Angalia salio la moja kwa moja kabla ya kukombolewa
+Checking...,Inaangalia...
+Cheque/Reference Date,Tarehe ya Cheki/Marejeleo
+Cheque/Reference No,Cheki/Rejea No
+Choose the cashier currently operating this terminal.,Chagua mtunza fedha anayetumia kituo hiki kwa sasa.
+City,Jiji
+Clear,Wazi
+Clear All,Futa Zote
+Clear all barcode items,Futa vipengee vyote vya msimbopau
+Clear all purchase order items,Futa bidhaa zote za agizo la ununuzi
+Clear Search,Futa Utafutaji
+Clearing local cache...,Inafuta akiba ya ndani...
+Click to refresh,Bofya ili kuonyesha upya
+Client CPU Lag:,Kuchelewa kwa CPU ya Mteja:
+Client Memory Usage:,Matumizi ya Kumbukumbu ya Mteja:
+Client Metrics,Vipimo vya Mteja
+Close about dialog,Funga kuhusu mazungumzo
+Close cashier switcher,Funga kibadilisha fedha
+Close closing shift dialog,Funga kidirisha cha kufunga zamu
+Close column selector,Funga kiteuzi cha safu wima
+Close Dialog,Funga Kidirisha
+Close drafts dialog,Funga kidirisha cha rasimu
+Close invoice details dialog,Funga kidirisha cha maelezo ya ankara
+Close invoice management,Funga usimamizi wa ankara
+Close offline invoices dialog,Funga kidirisha cha ankara za nje ya mtandao
+Close packing list dialog,Funga kidirisha cha orodha ya upakiaji
+Close returns dialog,Funga mazungumzo ya kurejesha
+Close sales orders dialog,Funga mazungumzo ya maagizo ya mauzo
+Close Scanner,Funga Kichanganuzi
+Close scanner dialog,Funga kidirisha cha skana
+Close Settings,Funga Mipangilio
+Closing Amount,Kiasi cha Kufunga
+Closing POS Shift,Inafunga Shift ya POS
+Closing Snapshot Available,Picha ya Kufunga Inapatikana
+Code,Kanuni
+Code scanned successfully,Msimbo umechanganuliwa
+COGS,COGS
+Collapse item details,Kunja maelezo ya kipengee
+Collected,Imekusanywa
+Cols,Cols
+Columns,Safu
+commits,anajituma
+Completed and active sales in this range,Uuzaji uliokamilika na amilifu katika safu hii
+Completed returns will appear here.,Marejesho yaliyokamilishwa yataonekana hapa.
+Confirm,Thibitisha
+Confirm Close,Thibitisha Funga
+Confirm Mobile Number,Thibitisha Nambari ya Simu
+Confirm PIN,Thibitisha PIN
+Connect,Unganisha
+Connect printer and manage certificate,Unganisha kichapishi na udhibiti cheti
+Connecting to QZ Tray...,Inaunganisha kwenye Tray ya QZ...
+Connection problem while submitting invoice,Tatizo la muunganisho wakati wa kuwasilisha ankara
+Connections:,Viunganisho:
+Connectivity and cached prerequisite status were rechecked.,Muunganisho na hali ya sharti iliyoakibishwa iliangaliwa upya.
+Continue Editing,Endelea Kuhariri
+Could not fetch latest balance from server,Haikuweza kuleta salio la hivi punde kutoka kwa seva
+Count,Hesabu
+Country,Nchi
+Coupon,Kuponi
+Coupons,Kuponi
+Cover,Jalada
+CPU Cores:,Viini vya CPU:
+Create,Unda
+Create and load a new prepaid card,Unda na upakie kadi mpya ya kulipia kabla
+Create and preload a new gift card,Unda na upakie mapema kadi mpya ya zawadi
+Create Bill,Unda Bill
+Create Customer,Unda Mteja
+Create New Item,Unda Kipengee Kipya
+Create or change your PIN,Unda au ubadilishe PIN yako
+Create PIN,Unda PIN
+Create POS Opening Shift,Unda Shift ya Ufunguzi ya POS
+Create Purchase Order,Unda Agizo la Ununuzi
+Create Return,Unda Kurudi
+Create return from invoice,Unda mapato kutoka kwa ankara
+Create Supplier,Unda Mtoaji
+Credit and Output,Mikopo na Pato
+Credit Note,Ujumbe wa Mkopo
+Credit Outstanding,Mikopo Inayolipwa
+Credit sales remaining to be collected,Uuzaji wa mkopo uliosalia kukusanywa
+Critical,Muhimu
+Currency,Sarafu
+Current,Ya sasa
+Current Event Loop Lag:,Kuchelewa kwa Mzunguko wa Tukio la Sasa:
+Current Month,Mwezi wa Sasa
+Current PIN,PIN ya sasa
+Current Profile,Wasifu wa Sasa
+Current redeemable value on the gift card,Thamani ya sasa inayoweza kukombolewa kwenye kadi ya zawadi
+Current User,Mtumiaji wa Sasa
+Custom,Desturi
+Custom Due Days,Siku Maalum
+Custom items per page,Vipengee maalum kwa kila ukurasa
+Customer,Mteja
+Customer already selected,Mteja tayari amechaguliwa
+Customer Balance,Salio la Wateja
+Customer balance unavailable offline,Salio la mteja halipatikani nje ya mtandao
+Customer created successfully.,Mteja amefanikiwa kuunda.
+Customer creation failed.,Imeshindwa kuunda mteja.
+Customer Details,Maelezo ya Wateja
+Customer display channel is missing,Kituo cha kuonyesha mteja hakipo
+Customer display was blocked. Please allow pop-ups for this site.,Onyesho la mteja lilizuiwa. Tafadhali ruhusu madirisha ibukizi kwa tovuti hii.
+Customer group is required,Kikundi cha wateja kinahitajika
+Customer is required to add payment,Mteja anahitajika ili kuongeza malipo
+Customer Name is required,Jina la Mteja linahitajika
+Customer not selected,Mteja hajachaguliwa
+Customer Report,Ripoti ya Wateja
+Customer saved offline,Mteja amehifadhiwa nje ya mtandao
+Customer Screen,Skrini ya Wateja
+Customer territory is required,Eneo la mteja linahitajika
+Customer updated successfully.,Mteja amesasishwa.
+Customer-facing tools and printer setup.,Zana zinazowakabili mteja na usanidi wa kichapishi.
+Customers,Wateja
+Customers not found,Wateja hawakupatikana
+Daily cashier actions without scrolling.,Vitendo vya keshia kila siku bila kusogeza.
+Daily Sales,Mauzo ya kila siku
+Daily Sales Summary,Muhtasari wa Mauzo ya Kila Siku
+Data loaded in form. Review and submit.,Data iliyopakiwa katika fomu. Kagua na uwasilishe.
+Database Health,Afya ya Hifadhidata
+Database health affects overall system speed and reliability.,Afya ya hifadhidata huathiri kasi ya jumla ya mfumo na kutegemewa.
+Database Info,Maelezo ya Hifadhidata
+Date,Tarehe
+Day ?,Siku?
+days,siku
+Day-wise (MTD),Siku kwa siku (MTD)
+Day-wise Movement,Harakati za Mchana
+Dead Stock,Mali iliyokufa
+Dead Stock Items,Vitu vya Hisa Vilivyokufa
+Decrease quantity,Punguza wingi
+Default,Chaguomsingi
+Default:,Chaguomsingi:
+Delete,Futa
+Delete cancelled cash movement {0}?,Ungependa kufuta uhamishaji wa pesa ulioghairiwa {0}?
+Delete Draft,Futa Rasimu
+Delete draft invoice,Futa rasimu ya ankara
+Delete draft invoice {0}?,"Je, ungependa kufuta rasimu ya ankara {0}?"
+Delete Invoice,Futa ankara
+Delete offline invoice,Futa ankara ya nje ya mtandao
+Delivered,Imewasilishwa
+Delivery Charges,Malipo ya Uwasilishaji
+Delivery Information,Taarifa ya Uwasilishaji
+Delivery Note {0} created,Dokezo la Uwasilishaji {0} limeundwa
+Delivery note created,Dokezo la uwasilishaji limeundwa
+Deployed Bundle:,Bundle Iliyotumika:
+Deposit,Amana
+Description,Maelezo
+Detailed Supplier Breakdown,Uchanganuzi wa Kina wa Wasambazaji
+Detecting formats:,Kugundua miundo:
+Device Memory:,Kumbukumbu ya Kifaa:
+Difference,Tofauti
+Difference (In Company Currency),Tofauti (Katika Sarafu ya Kampuni)
+Disable offline mode first to recheck live connectivity.,Zima hali ya nje ya mtandao kwanza ili kuangalia tena muunganisho wa moja kwa moja.
+Disconnect,Tenganisha
+discount,punguzo
+Discount %,Punguzo %
+Discount / Void / Return Report,Ripoti ya Punguzo / Batili / Rejesha
+Discount Amount,Kiasi cha Punguzo
+Discount limited by POS Profile,Punguzo limepunguzwa na Wasifu wa POS
+Discounted Invoices,Ankara zilizopunguzwa
+Discounts,Punguzo
+Dismiss,Ondoa
+Download Certificate,Pakua Cheti
+Draft,Rasimu
+Draft invoice deleted,Rasimu ya ankara imefutwa
+Draft source,Chanzo cha rasimu
+Drafts,Rasimu
+Due {0},Inadaiwa {0}
+Due Date,Tarehe ya Mwisho
+Duplicate,Nakala
+Edit customer,Badilisha mteja
+Edit discount amount,Badilisha kiasi cha punguzo
+Edit discount percentage,Badilisha asilimia ya punguzo
+Edit Gift Application,Hariri Programu ya Zawadi
+Edit item name,Badilisha jina la kipengee
+Edit quantity,Hariri wingi
+Edit rate,Badilisha kiwango
+Edit unit of measure,Badilisha kitengo cha kipimo
+Edited,Imehaririwa
+Employee,Mfanyakazi
+Enable background sync,Washa usawazishaji wa usuli
+Enable Customer Display in POS Profile first.,Washa Onyesho la Wateja katika Wasifu wa POS kwanza.
+Enter a PIN.,Weka PIN.
+Enter a valid grams value,Weka thamani halali ya gramu
+Enter new price list rate,Weka bei mpya ya orodha ya bei
+Enter Quantity,Ingiza Kiasi
+Enter the cashier PIN to continue.,Weka PIN ya keshia ili uendelee.
+Enter the current PIN first.,Weka PIN ya sasa kwanza.
+"Enter the current PIN, then choose a new one.","Weka PIN ya sasa, kisha uchague mpya."
+Enter valid grams for scale barcode,Weka gramu halali za msimbopau wa kipimo
+Entries,Maingizo
+Error accessing camera:,Hitilafu katika kufikia kamera:
+Error calculating prices,Hitilafu katika kuhesabu bei
+Error fetching customer balance,Hitilafu katika kuleta salio la mteja
+Error in change calculations!,Hitilafu katika mahesabu ya mabadiliko!
+Error Loading Data,Hitilafu katika Kupakia Data
+Error loading invoice details,Hitilafu katika kupakia maelezo ya ankara
+Error processing invoice,Hitilafu katika kuchakata ankara
+Error processing payment,Hitilafu katika kuchakata malipo
+Error searching invoices,Hitilafu katika kutafuta ankara
+Error submitting invoice:,Hitilafu katika kuwasilisha ankara:
+Error submitting invoice: {0},Hitilafu katika kuwasilisha ankara: {0}
+Error submitting invoice: No response from server,Hitilafu katika kuwasilisha ankara: Hakuna jibu kutoka kwa seva
+Error updating currency,Hitilafu katika kusasisha sarafu
+Error updating item details,Hitilafu katika kusasisha maelezo ya kipengee
+Est. Purchase,Est. Nunua
+Est. Value,Est. Thamani
+Event-loop lag measures how busy your browser is. Lower is better.,Kuchelewa kwa matukio hupima jinsi kivinjari chako kilivyo na shughuli nyingi. Chini ni bora zaidi.
+Every,Kila
+Exchange Rate,Kiwango cha ubadilishaji
+Expand item details,Panua maelezo ya kipengee
+Expected Amount (In Company Currency),Kiasi Kinachotarajiwa (Katika Sarafu ya Kampuni)
+Expected Cash,Pesa Zinazotarajiwa
+Expected cash on hand grouped by currency,Pesa zinazotarajiwa zikiwa zimepangwa kulingana na sarafu
+Expected vs Actual,Inatarajiwa dhidi ya Halisi
+Expense,Gharama
+Expense Account (Optional Override),Akaunti ya Gharama (Hiari ya Kubatilisha)
+Expense account is required.,Akaunti ya gharama inahitajika.
+Expenses and deposits posted during this shift,Gharama na amana zilizochapishwa wakati wa zamu hii
+Expired,Muda wake umeisha
+Failed to auto reconcile payments.,Imeshindwa kusawazisha malipo kiotomatiki.
+Failed to cancel cash movement,Imeshindwa kughairi uhamishaji wa pesa taslimu
+Failed to clear cache,Imeshindwa kufuta akiba
+Failed to create item,Imeshindwa kuunda kipengee
+Failed to create supplier,Imeshindwa kuunda mtoa huduma
+Failed to delete cash movement,Imeshindwa kufuta harakati za pesa
+Failed to generate scale barcode. Using item barcode only.,Imeshindwa kuzalisha msimbopau wa kiwango. Kwa kutumia msimbopau wa kipengee pekee.
+Failed to load cash movement context.,Imeshindwa kupakia muktadha wa harakati za pesa.
+Failed to load dashboard data.,Imeshindwa kupakia data ya dashibodi.
+Failed to reload invoice from server,Imeshindwa kupakia upya ankara kutoka kwa seva
+Failed to submit cash movement,Imeshindwa kuwasilisha harakati za pesa
+Failed to sync offline cash movements,Imeshindwa kusawazisha uhamishaji wa pesa nje ya mtandao
+Fast cashier actions for active shifts.,Vitendo vya keshia haraka kwa zamu zinazoendelea.
+Fast Moving Items,Vitu vya Kusonga Haraka
+Fees,Ada
+Fetch the latest offline prerequisite updates,Pata masasisho ya hivi punde ya sharti la nje ya mtandao
+Find a sales order quickly and load it into the current sale.,Pata agizo la mauzo haraka na upakie kwenye ofa ya sasa.
+Fixing payment amounts for return invoice...,Inarekebisha kiasi cha malipo kwa ankara ya kurejesha...
+Flash Off,Mweko Umezimwa
+Flash On,Mweko Umewashwa
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","Kwa bidhaa za 'Bidhaa Bundle', Ghala, Nambari ya Kundi na Nambari ya Kundi zitazingatiwa kutoka kwa jedwali la 'Orodha ya Vifungashio'. Ikiwa Ghala na Bashi Hapana ni sawa kwa vipengee vyote vya upakiaji kwa bidhaa yoyote ya 'Kifungu cha Bidhaa', thamani hizo zinaweza kuingizwa katika jedwali kuu la Bidhaa; thamani zitanakiliwa kwenye jedwali la 'Orodha ya Ufungashaji'."
+Free,Bure
+Free Qty,Ukubwa wa Bure
+Frequency,Mzunguko
+from,kutoka
+From Date,Kuanzia Tarehe
+Fulfillment Details,Maelezo ya Utimilifu
+Full Name,Jina Kamili
+Gain,Faida
+Generate a fresh prepaid card and start it with an opening balance.,Tengeneza kadi mpya ya kulipia kabla na uanze na salio la ufunguzi.
+Generate and install the certificate to allow fully silent printing without trust prompts.,Tengeneza na usakinishe cheti ili kuruhusu uchapishaji wa kimya bila maongozi ya uaminifu.
+Generate Certificate,Tengeneza Cheti
+Generated scale barcode: {0},Msimbopau wa kiwango kilichozalishwa: {0}
+Get Payments,Pata Malipo
+Gift Card,Kadi ya Zawadi
+Gift card amount must be greater than zero.,Kiasi cha kadi ya zawadi lazima kiwe kikubwa kuliko sifuri.
+Gift Card Code,Msimbo wa Kadi ya Zawadi
+Gift card code is required for redemption,Msimbo wa kadi ya zawadi unahitajika kwa kukomboa
+Gift card code is required.,Msimbo wa kadi ya zawadi unahitajika.
+Gift card issued successfully.,Kadi ya zawadi imetolewa.
+Gift card loaded successfully.,Kadi ya zawadi imepakiwa.
+Gift Card Management,Usimamizi wa Kadi ya Zawadi
+Gift card payment,Malipo ya kadi ya zawadi
+Gift card redemption requires an online connection,Ukombozi wa kadi ya zawadi unahitaji muunganisho wa mtandaoni
+Gift card topped up successfully.,Kadi ya zawadi imeongezwa kwa mafanikio.
+Gift Cards,Kadi za Zawadi
+Go to Frappe Desk,Nenda kwenye Dawati la Frappe
+Grand Total,Jumla Kubwa
+Gross Margin,Pambizo la Jumla
+Gross Profit,Faida ya Jumla
+Gross Sales,Mauzo ya Jumla
+Group not found,Kikundi hakijapatikana
+"Grouped controls for terminal, UI, and session settings.","Vidhibiti vilivyowekwa katika vikundi vya terminal, UI, na mipangilio ya kipindi."
+Grouped totals for each payment method and currency,Jumla zilizowekwa katika vikundi kwa kila njia ya malipo na sarafu
+Hide,Ficha
+Hide Gift Card,Ficha Kadi ya Zawadi
+Hide Non Essential Fields,Ficha Sehemu Zisizo Muhimu
+Hide quantity decimals,Ficha desimali za wingi
+Hide search tools,Ficha zana za utafutaji
+Hide zero rated items,Ficha vipengee vilivyokadiriwa sifuri
+High,Juu
+History,Historia
+Hourly (Today),Kila saa (Leo)
+How this section works,Jinsi sehemu hii inavyofanya kazi
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","Ikiwa data ya zamani itasalia, fungua Mipangilio > Nje ya Mtandao na Usawazishe na uendeshe Unda Upya Data ya Nje ya Mtandao tena ukiwa mtandaoni."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","Onyo likiendelea, fungua Mipangilio > Nje ya Mtandao na Usawazishe, kisha uendeshe Onyesha upya Data ya Nje ya Mtandao au Unda Upya Data ya Nje ya Mtandao."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Ingiza cheti kwenye Tray ya QZ na uwashe tena Tray ya QZ kwenye kila mashine ya POS.
+In,Katika
+In stock: {0},Inapatikana: {0}
+Include Batch / Serial,Ni pamoja na Kundi / Serial
+Include Price,Ni pamoja na Bei
+Increase quantity,Ongeza wingi
+IndexedDB,IndexedDB
+Initial Amount,Kiasi cha Awali
+Initialize your shift with opening balances,Anzisha zamu yako kwa kufungua salio
+Initializing application...,Inaanzisha programu...
+"Inspect cache, sync, and prerequisite status","Kagua akiba, usawazishaji, na hali ya sharti"
+Installed Applications,Programu zilizosakinishwa
+Insufficient stock:\n{0},Hisa haitoshi:\n{0}
+Invalid rate,Kiwango kisicho sahihi
+Inventory Status Report,Ripoti ya Hali ya Mali
+Invoice,Ankara
+Invoice {0} is Submitted,Ankara {0} Imewasilishwa
+Invoice {0} processed successfully,Ankara {0} imechakatwa
+Invoice {0} submission failed,Uwasilishaji wa ankara {0} haukufaulu
+Invoice {0} was already submitted,Ankara {0} ilikuwa tayari imewasilishwa
+Invoice Adjustments,Marekebisho ya ankara
+Invoice Change,Kubadilisha ankara
+Invoice Details,Maelezo ya ankara
+Invoice is still in draft after background submission.,Ankara bado iko kwenye rasimu baada ya kuwasilisha chinichini.
+Invoice Items,Vipengee vya ankara
+Invoice Management,Usimamizi wa ankara
+Invoice Mgmt,Ankara Mgmt
+Invoice saved offline,Ankara imehifadhiwa nje ya mtandao
+Invoice submission failed,Uwasilishaji wa ankara umeshindwa
+Invoice Submitted,Ankara Imewasilishwa
+"Invoice value settled by loyalty points, not cash collection","Thamani ya ankara inalipwa kwa pointi za uaminifu, si kukusanya pesa"
+Invoices,ankara
+Invoices already past due date,Ankara tayari zimepita tarehe ya kukamilisha
+Invoices saved as POS Invoices,Ankara zimehifadhiwa kama ankara za POS
+Invoices still carrying balances,Ankara bado zina salio
+Issue Mode,Hali ya Kutoa
+Issue New Card,Toa Kadi Mpya
+Issue Workflow,Suala Mtiririko wa Kazi
+"Issue, top up, and check","Suala, jaza, na uangalie"
+Item,Kipengee
+Item / Product Sales Report,Ripoti ya Uuzaji wa Bidhaa / Bidhaa
+Item {0} added to invoice,Bidhaa {0} imeongezwa kwenye ankara
+Item '{0}' has no barcode,Kipengee '{0}' hakina msimbo pau
+Item Code,Msimbo wa Kipengee
+Item created successfully,Kipengee kimeundwa
+Item is out of stock,Bidhaa haipo
+Item Name,Jina la Kipengee
+Item not found,Kipengee hakijapatikana
+Item order updated,Agizo la bidhaa limesasishwa
+Item Selector Settings,Mipangilio ya Kiteuzi cha Kipengee
+Items,Vipengee
+Items added in POS will appear here automatically.,Vipengee vilivyoongezwa katika POS vitaonekana hapa kiotomatiki.
+Items added to invoice,Bidhaa zimeongezwa kwenye ankara
+Items per page,Vipengee kwa kila ukurasa
+Items Sold,Vitu Vilivyouzwa
+Items/Invoice,Bidhaa/Ankara
+Item-wise Profitability,Faida ya Kipengee
+Journal Entry,Kuingia kwa jarida
+json,json
+Just now,Sasa hivi
+Keep offline prerequisites healthy and recover stale data safely.,Weka sharti za nje ya mtandao zikiwa na afya na urejeshe data ya zamani kwa usalama.
+Labels,Lebo
+"Language, theme, terminal tools, and session controls.","Lugha, mandhari, zana za mwisho, na vidhibiti vya kipindi."
+Last,Mwisho
+Last 14 Days (Paid vs Pending),Siku 14 Zilizopita (Inalipwa vs Inasubiri)
+Last 14 Days Activity,Shughuli ya Siku 14 Zilizopita
+Last 14 Days Gross Profit,Faida ya Jumla ya Siku 14 zilizopita
+Last 14 Days Purchases,Ununuzi wa Siku 14 Zilizopita
+Last 14 Days Tax/Charges,Kodi/Tozo za Siku 14 Zilizopita
+Last sync:,Usawazishaji wa mwisho:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},Usawazishaji wa mwisho: {0} | sawa: {1} | imeshindwa: {2} | ruka: {3}
+Latest entries for current shift,Maingizo ya hivi punde kwa zamu ya sasa
+Lead Time,Muda wa Kuongoza
+Limited,Kikomo
+lines,mistari
+List,Orodha
+Live Snapshot,Picha moja kwa moja
+Load a POS profile and cashier first.,Pakia wasifu wa POS na keshia kwanza.
+Load More Invoices,Pakia Ankara Zaidi
+Load previously saved invoices,Pakia ankara zilizohifadhiwa hapo awali
+Load Sale,Uuzaji wa Mizigo
+Load Sales Invoice,Pakia ankara ya Mauzo
+Loading app data...,Inapakia data ya programu...
+Loading customer database...,Inapakia hifadhidata ya mteja...
+Loading customers...,Inapakia wateja...
+Loading database stats...,Inapakia takwimu za hifadhidata...
+Loading details...,Inapakia maelezo...
+Loading invoice history...,Inapakia historia ya ankara...
+Loading items...,Inapakia vipengee...
+Loading product catalog...,Inapakia katalogi ya bidhaa...
+Loading return invoices...,Inapakia ankara za kurejesha...
+Loading server CPU/memory usage...,Inapakia seva CPU/matumizi ya kumbukumbu...
+Loading suppliers...,Inapakia wasambazaji...
+Loading unpaid invoices...,Inapakia ankara ambazo hazijalipwa...
+Loading view...,Inapakia mwonekano...
+Loading...,Inapakia...
+Local storage is unavailable. Switching to online-only mode.,Hifadhi ya ndani haipatikani. Inabadilisha hadi hali ya mtandaoni pekee.
+localStorage,Hifadhi ya ndani
+Location Performance,Utendaji wa Mahali
+Locations,Maeneo
+Lock Screen,Funga Skrini
+Lookup Workflow,Tafuta mtiririko wa kazi
+Loss,Hasara
+Low,Chini
+Low Stock,Hisa ya Chini
+Low Stock Alerts,Arifa za Hisa ya Chini
+Low Stock Items,Vipengee vya chini vya Hisa
+Low Stock Threshold,Kiwango cha chini cha Hisa
+Low Stock Total,Jumla ya Hisa ya Chini
+Lowest Margin,Pambizo la chini kabisa
+Low-frequency maintenance and system details.,Matengenezo ya masafa ya chini na maelezo ya mfumo.
+Loyalty Redeemed,Uaminifu Umekombolewa
+Loyalty Redemption,Ukombozi wa Uaminifu
+Make New Payment,Fanya Malipo Mapya
+Manage all,Dhibiti yote
+Manage and synchronize your offline transactions,Dhibiti na usawazishe miamala yako ya nje ya mtandao
+Manage Cashier PIN,Dhibiti PIN ya Keshia
+"Manage offline tools, terminal controls, and maintenance from one workspace.","Dhibiti zana za nje ya mtandao, vidhibiti vya matumizi na matengenezo kutoka kwa nafasi moja ya kazi."
+manual,mwongozo
+"Manual codes, barcode scans, and QR scans work in the same field","Nambari za misimbo, uchanganuzi wa misimbopau na uchanganuzi wa QR hufanya kazi katika sehemu moja"
+Manual offline mode is enabled,Hali ya nje ya mtandao mwenyewe imewezeshwa
+Margin,Pembezoni
+Maximum available quantity is {0}. Quantity adjusted to match stock.,Kiwango cha juu kinachopatikana ni {0}. Kiasi kimerekebishwa ili kuendana na hisa.
+Maximum discount amount for this offer item is {0}.,Kiwango cha juu cha punguzo la bidhaa hii ya ofa ni {0}.
+Maximum discount percentage for this offer item is {0}%.,Asilimia ya juu zaidi ya punguzo kwa bidhaa hii ya ofa ni {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,Kiwango cha juu cha ofa ni {0}. Kiasi kimerekebishwa hadi kikomo kinachoruhusiwa.
+Medium,Kati
+Method-wise Collections,Mikusanyiko ya busara
+Minimum allowed rate for this offer item is {0}.,Kiwango cha chini kinachoruhusiwa cha bidhaa hii ya ofa ni {0}.
+Minimum Qty,Kiwango cha chini cha Qty
+Mobile No,Simu No
+Mode,Hali
+Mode of Payment,Njia ya Malipo
+Month,Mwezi
+Month ?,Mwezi?
+Monthly Profit,Faida ya Kila Mwezi
+Monthly Sales,Mauzo ya Kila Mwezi
+Monthly Sales Summary,Muhtasari wa Mauzo ya Kila Mwezi
+Month-wise,Kwa mwezi
+Most Active Cashiers,Washika Pesa Wanaotumika Zaidi
+Movement Type,Aina ya Mwendo
+Movements,Harakati
+Multi Currency,Sarafu nyingi
+N/A,N/A
+Name,Jina
+Negative Stock,Hisa Hasi
+Negative Stock Items,Vipengee Hasi vya Hisa
+Negative values not allowed,Thamani hasi haziruhusiwi
+Net,Net
+Net Qty,Ukubwa kamili
+Net Sales,Uuzaji wa jumla
+Net Value,Thamani halisi
+Never,Kamwe
+New changes are ready to load,Mabadiliko mapya yako tayari kupakiwa
+New Item,Kipengee Kipya
+New Offer Available,Ofa Mpya Inapatikana
+New PIN,PIN mpya
+New rate,Kiwango kipya
+Next unit of measure,Sehemu inayofuata ya kipimo
+No attribute data found.,Hakuna data ya sifa iliyopatikana.
+No Barcode,Hakuna Msimbo Pau
+No barcode found for UOM '{0}',Hakuna msimbo pau uliopatikana wa UOM '{0}'
+No branch/location data found.,Hakuna data ya tawi/mahali iliyopatikana.
+No brand data found.,Hakuna data ya chapa iliyopatikana.
+No cached gift card balance is available offline.,Hakuna salio la kadi ya zawadi iliyoakibishwa linapatikana nje ya mtandao.
+No camera found on this device. Please ensure your device has a working camera.,Hakuna kamera iliyopatikana kwenye kifaa hiki. Tafadhali hakikisha kuwa kifaa chako kina kamera inayofanya kazi.
+No capability warnings recorded yet.,Hakuna maonyo ya uwezo yaliyorekodiwa bado.
+No cash expected for this shift.,Hakuna pesa inayotarajiwa kwa zamu hii.
+No cash mode configured,Hakuna hali ya pesa iliyosanidiwa
+No cash movement type is allowed for this POS Profile.,Hakuna aina ya uhamishaji pesa inayoruhusiwa kwa Wasifu huu wa POS.
+No cashier PIN is set yet. Create one now.,Bado hakuna PIN ya keshia iliyowekwa. Unda moja sasa.
+No cashier profiles are available for this POS profile yet.,Bado hakuna wasifu wa keshia unaopatikana kwa wasifu huu wa POS.
+No cashier-wise discount/void/return activity.,Hakuna punguzo la busara / shughuli batili / kurejesha pesa.
+No category data found.,Hakuna data ya kategoria iliyopatikana.
+No category profitability data found.,Hakuna data ya kategoria ya faida iliyopatikana.
+No change returned recorded for this shift.,Hakuna mabadiliko yaliyorejeshwa yaliyorekodiwa kwa zamu hii.
+No change-allocation invoices match the current filters.,Hakuna ankara za kubadilisha mgao zinazolingana na vichujio vya sasa.
+No charge head breakdown found.,Hakuna uchanganuzi wa kichwa cha malipo uliopatikana.
+No Company Selected,Hakuna Kampuni Iliyochaguliwa
+No customer sales data found.,Hakuna data ya mauzo ya wateja iliyopatikana.
+No day-wise discount/void/return trend.,Hakuna punguzo la siku/batili/kurejesha mtindo.
+No day-wise payment data found.,Hakuna data ya malipo ya kila siku iliyopatikana.
+No day-wise profitability trend found.,Hakuna mwelekeo wa faida wa kila siku uliopatikana.
+No day-wise purchase data found.,Hakuna data ya ununuzi wa kila siku iliyopatikana.
+No day-wise sales trend found.,Hakuna mwelekeo wa mauzo wa busara wa siku uliopatikana.
+No day-wise tax/charges trend found.,Hakuna mwelekeo wa ushuru/tozo wa siku iliyopatikana.
+No dead stock items.,Hakuna vitu vya hisa vilivyokufa.
+No due date,Hakuna tarehe ya kukamilisha
+No exact repair match found for this invoice,Hakuna urekebishaji kamili unaolingana na ankara hii
+No hourly sales trend found for today.,Hakuna mwelekeo wa mauzo wa kila saa uliopatikana kwa leo.
+No invoice activity found.,Hakuna shughuli ya ankara iliyopatikana.
+No invoices found,Hakuna ankara zilizopatikana
+No invoices found. Try different search criteria.,Hakuna ankara zilizopatikana. Jaribu vigezo tofauti vya utafutaji.
+No invoices recorded for this shift.,Hakuna ankara zilizorekodiwa za zamu hii.
+No item profitability data found.,Hakuna data ya faida ya bidhaa iliyopatikana.
+No item sales data found for this period.,Hakuna data ya mauzo ya bidhaa iliyopatikana kwa kipindi hiki.
+No items found,Hakuna vipengee vilivyopatikana
+No items in cart,Hakuna vitu kwenye rukwama
+No items with barcodes to print,Hakuna vipengee vilivyo na misimbopau vya kuchapishwa
+No location-wise top item data found.,Hakuna data ya kipengee cha juu kinachozingatia eneo iliyopatikana.
+No low stock alerts right now.,Hakuna arifa za hisa za chini kwa sasa.
+No low stock items.,Hakuna bidhaa za hisa za chini.
+No matching items in cart,Hakuna bidhaa zinazolingana kwenye rukwama
+No month-wise sales trend found.,Hakuna mwelekeo wa mauzo wa mwezi uliopatikana.
+No negative stock items.,Hakuna vitu hasi vya hisa.
+No notifications yet,Bado hakuna arifa
+No offline cash movement synced.,Hakuna harakati za pesa za nje ya mtandao zilizosawazishwa.
+No offline invoices pending synchronization,Hakuna ankara za nje ya mtandao zinazosubiri kusawazishwa
+No offline sync issues recorded yet.,Bado hakuna matatizo ya usawazishaji ya nje ya mtandao.
+No out-of-stock items.,Hakuna bidhaa ambazo hazijauzwa.
+No outstanding credit invoices for this shift.,Hakuna ankara za mkopo ambazo hazijalipwa za zamu hii.
+No payment collection data found.,Hakuna data ya ukusanyaji wa malipo iliyopatikana.
+No payment rows available on this invoice.,Hakuna safu mlalo za malipo zinazopatikana kwenye ankara hii.
+No payments registered for this shift.,Hakuna malipo yaliyosajiliwa kwa zamu hii.
+No pending balances in this period.,Hakuna salio linalosubiri katika kipindi hiki.
+No pending offline invoices,Hakuna ankara zinazosubiri za nje ya mtandao
+No Print Formats Found,Hakuna Miundo ya Kuchapisha Iliyopatikana
+No profiles found for selected scope. Falling back to current profile failed.,Hakuna wasifu uliopatikana kwa upeo uliochaguliwa. Imeshindwa kurudi kwenye wasifu wa sasa.
+No recent customer activity found.,Hakuna shughuli za hivi majuzi za mteja zilizopatikana.
+No recent stock entries found.,Hakuna maingizo ya hivi majuzi ya hisa yaliyopatikana.
+No records found,Hakuna rekodi zilizopatikana
+No reorder suggestions right now.,Hakuna mapendekezo ya kupanga upya kwa sasa.
+No repeat customers in this period.,Hakuna wateja wa kurudia katika kipindi hiki.
+No response from server,Hakuna jibu kutoka kwa seva
+No return invoices found,Hakuna ankara za kurejesha zilizopatikana
+No return item trend found.,Hakuna mtindo wa kurejesha bidhaa.
+No returnable items found for this invoice,Hakuna bidhaa zinazoweza kurejeshwa zilizopatikana kwa ankara hii
+No returns were processed in this shift.,Hakuna marejesho yaliyochakatwa katika zamu hii.
+No risk activity found.,Hakuna shughuli ya hatari iliyopatikana.
+No sales activity found for this period.,Hakuna shughuli ya mauzo iliyopatikana kwa kipindi hiki.
+No slow moving items.,Hakuna vitu vinavyosonga polepole.
+No staff sales activity found.,Hakuna shughuli ya mauzo ya wafanyikazi iliyopatikana.
+No stock movement for this period.,Hakuna harakati za hisa kwa kipindi hiki.
+No submitted cash movements in this shift.,Hakuna harakati za pesa zilizowasilishwa katika zamu hii.
+No supplier purchases found in this month.,Hakuna ununuzi wa wasambazaji uliopatikana mwezi huu.
+No suppliers found for this period.,Hakuna wasambazaji waliopatikana kwa kipindi hiki.
+No sync trigger has run yet in this session.,Hakuna kichochezi cha kusawazisha ambacho kimeendeshwa katika kipindi hiki.
+No tax head breakdown found.,Hakuna uchanganuzi wa kichwa cha ushuru uliopatikana.
+No top items found for this location.,Hakuna vipengee vya juu vilivyopatikana vya eneo hili.
+No unpaid invoices,Hakuna ankara ambazo hazijalipwa
+No variant data found.,Hakuna data lahaja iliyopatikana.
+No week-wise sales trend found.,Hakuna mwelekeo wa mauzo wa wiki uliopatikana.
+No.,Hapana.
+Nobile Number,Nambari ya Nobile
+Not available,Haipatikani
+Not checked,Haijaangaliwa
+Not selected,Haijachaguliwa
+Not Set,Haijawekwa
+Notifications,Arifa
+Offer,Toa
+Offer Applied,Ofa Imetumika
+Offer criteria exceeded,Vigezo vya ofa vimepitwa
+Offer Item,Bidhaa ya Ofa
+Offer item unavailable,Kipengee cha ofa hakipatikani
+Offer Removed,Ofa Imeondolewa
+Offer UOM cannot be changed,Ofa ya UOM haiwezi kubadilishwa
+Offer?,Toa?
+Offers,Matoleo
+Offline,Nje ya mtandao
+Offline & Sync,Nje ya mtandao na Usawazishaji
+Offline Capabilities,Uwezo wa Nje ya Mtandao
+Offline data status refreshed,Hali ya data ya nje ya mtandao imeonyeshwa upya
+Offline diagnostics,Uchunguzi wa nje ya mtandao
+Offline Invoices,Ankara za nje ya mtandao
+Offline invoices status,Hali ya ankara za nje ya mtandao
+Offline invoices synced,Ankara za nje ya mtandao zimesawazishwa
+Offline Queue: {0},Foleni ya Nje ya Mtandao: {0}
+Offline rebuild guidance,Mwongozo wa uundaji upya nje ya mtandao
+Offline restore is unavailable for this session.,Urejeshaji wa nje ya mtandao haupatikani kwa kipindi hiki.
+Offline selling is available with degraded capabilities.,Uuzaji wa nje ya mtandao unapatikana kwa uwezo duni.
+Offline snapshot does not match the current POS state.,Picha ya nje ya mtandao hailingani na hali ya sasa ya POS.
+Offline Status,Hali ya Nje ya Mtandao
+"Offline, terminal, and system controls","Vidhibiti vya nje ya mtandao, terminal na mfumo"
+OK,SAWA
+Online,Mtandaoni
+Open actions menu,Fungua menyu ya vitendo
+Open balance to collect,Fungua salio ili kukusanya
+Open Customer Display,Fungua Onyesho la Wateja
+Open drawer,Fungua droo
+Open invoices,Fungua ankara
+Open Payments?,Ungependa kufungua Malipo?
+Open POS home,Fungua POS nyumbani
+Open this screen from POS Menu -> Open Customer Display.,Fungua skrini hii kutoka kwa Menyu ya POS -> Fungua Onyesho la Mteja.
+OpenCV image processing enabled - Enhanced barcode detection,Uchakataji wa picha wa OpenCV umewashwa - Utambuzi ulioboreshwa wa msimbopau
+OpenCV image processing unavailable on this device,Uchakataji wa picha ya OpenCV haupatikani kwenye kifaa hiki
+OpenCV Off,OpenCV Imezimwa
+OpenCV On,OpenCV Imewashwa
+OpenCV processing disabled,Uchakataji wa OpenCV umezimwa
+Opening Amount,Kiasi cha Kufungua
+Opening Cash,Kufungua Fedha
+options,chaguzi
+Order,Agizo
+Original,Asili
+Other,Nyingine
+Out,Nje
+Out of Stock,Imeisha
+Out of Stock Items,Bidhaa Zisizouzwa
+Outstanding,Bora
+Outstanding Credit by Currency,Mkopo Uliolipwa kwa Sarafu
+Overdue,Imepitwa na wakati
+Overpayment Change,Mabadiliko ya malipo ya ziada
+Overpayment change deducted: {0},Mabadiliko ya malipo ya ziada yamekatwa: {0}
+Packing List,Orodha ya Ufungashaji
+Page Format,Umbizo la Ukurasa
+Page unavailable offline,Ukurasa haupatikani nje ya mtandao
+Paid,Imelipwa
+Paid (orig):,Imelipwa (asili):
+Paid Amount,Kiasi Kilicholipwa
+Paid change cannot be greater than total change!,Mabadiliko yanayolipwa hayawezi kuwa makubwa kuliko mabadiliko yote!
+Paid:,Imelipwa:
+Parent Item,Kipengee cha Mzazi
+Partial,Sehemu
+Partly Paid,Imelipwa kwa kiasi
+Party Account,Akaunti ya Chama
+Party Type,Aina ya Chama
+Pause terminal until next cashier,Sitisha kituo hadi mtunza fedha mwingine
+PAY,LIPA
+Payment,Malipo
+Payment Account,Akaunti ya Malipo
+Payment entries processed for Invoice {0},Maingizo ya malipo yamechakatwa kwa Ankara {0}
+Payment Entry Type,Aina ya Ingizo la Malipo
+Payment History,Historia ya Malipo
+Payment ID,Kitambulisho cha malipo
+Payment Method Report,Ripoti ya Njia ya Malipo
+Payment Methods,Mbinu za Malipo
+Payment of {0} received successfully.,Malipo ya {0} yamepokelewa.
+Payment Progress,Maendeleo ya Malipo
+Payment Reconciliation,Upatanisho wa Malipo
+Payment request status could not be retrieved. Please try again,Hali ya ombi la malipo haikuweza kurejeshwa. Tafadhali jaribu tena
+Payment Request took too long to respond. Please try requesting for payment again,Ombi la Malipo lilichukua muda mrefu sana kujibu. Tafadhali jaribu kuomba malipo tena
+Payment saved offline,Malipo yamehifadhiwa nje ya mtandao
+Payment State,Hali ya Malipo
+Payment Status,Hali ya Malipo
+Payment submitted but print function could not be executed. Payment name not found.,Malipo yamewasilishwa lakini utendakazi wa kuchapisha haukuweza kutekelezwa. Jina la malipo halijapatikana.
+Payment submitted.,Malipo yamewasilishwa.
+Payment Summary,Muhtasari wa Malipo
+Payments,Malipo
+Payments are not open. Do you want to open payments and submit?,"Malipo hayajafunguliwa. Je, ungependa kufungua malipo na kuwasilisha?"
+Payments by Mode of Payment,Malipo kwa Njia ya Malipo
+PDF,PDF
+Peak Hour,Saa ya Kilele
+Peak Memory:,Kumbukumbu ya kilele:
+Peak Server:,Seva ya kilele:
+Peak:,Kilele:
+Pending,Inasubiri
+Pending Amount,Kiasi Kinachosubiri
+Pending count updated from {0} to {1},Idadi inayosubiri imesasishwa kutoka {0} hadi {1}
+Pending Exposure,Inasubiri Mfichuo
+Pending Invoices,Ankara Zinazosubiri
+Pending Ratio,Uwiano Unaosubiri
+Pending Sales,Mauzo Yanayosubiri
+Pending sales: {0} | Cache usage: {1}%,Mauzo ambayo hayajashughulikiwa: {0} | Matumizi ya akiba: {1}%
+Pending Sync,Inasubiri Usawazishaji
+Pending: {0},Inasubiri: {0}
+Pending: {0} | Synced: {1} | Draft: {2},Inasubiri: {0} | Imesawazishwa: {1} | Rasimu: {2}
+Per Page,Kwa Ukurasa
+Personal,Binafsi
+Personal preferences adjust the current cashier experience without changing the active POS route.,Mapendeleo ya kibinafsi hurekebisha matumizi ya sasa ya keshia bila kubadilisha njia inayotumika ya POS.
+PIN confirmation does not match.,Uthibitishaji wa PIN haulingani.
+PIN must be 4 to 8 digits.,PIN lazima iwe na tarakimu 4 hadi 8.
+Please add at least one item.,Tafadhali ongeza angalau kipengee kimoja.
+Please allow camera access to scan codes,Tafadhali ruhusu ufikiaji wa kamera ili kuchanganua misimbo
+Please enter payment amount,Tafadhali weka kiasi cha malipo
+Please fill all required fields,Tafadhali jaza sehemu zote zinazohitajika
+Please make a payment or select a payment,Tafadhali fanya malipo au uchague malipo
+Please request phone payment or use another payment method,Tafadhali omba malipo ya simu au utumie njia nyingine ya kulipa
+Please select a customer first,Tafadhali chagua mteja kwanza
+Please select a party,Tafadhali chagua sherehe
+Please select a party before reconciling.,Tafadhali chagua chama kabla ya kupatanisha.
+Please select a valid movement type.,Tafadhali chagua aina sahihi ya harakati.
+Please select an invoice,Tafadhali chagua ankara
+Please select company before reconciling.,Tafadhali chagua kampuni kabla ya kupatanisha.
+Please set the customer's mobile number,Tafadhali weka nambari ya simu ya mteja
+Please try again or enter the item manually.,Tafadhali jaribu tena au uweke kipengee wewe mwenyewe.
+Please verify the barcode or check the item's availability.,Tafadhali thibitisha msimbo pau au uangalie upatikanaji wa bidhaa.
+Points,Pointi
+Popup blocked. Please allow popups.,Dirisha ibukizi limezuiwa. Tafadhali ruhusu madirisha ibukizi.
+POS,POS
+POS controls and maintenance,Udhibiti na matengenezo ya POS
+POS Expense is disabled for this POS Profile.,Gharama ya POS imezimwa kwa Wasifu huu wa POS.
+POS is running with limited offline prerequisites.,POS inaendeshwa na masharti machache ya nje ya mtandao.
+POS Profile,Wasifu wa POS
+Position the QR code or barcode within the scanning area,Weka msimbo wa QR au msimbopau ndani ya eneo la kuchanganua
+Posting,Inachapisha
+Posting and Price List,Orodha ya Machapisho na Bei
+Posting Date,Tarehe ya Kuchapisha
+Preparing background sync,Inatayarisha usawazishaji wa usuli
+"Press OK to continue offline with a warning, or Cancel to retry.","Bonyeza SAWA ili kuendelea nje ya mtandao kwa onyo, au Ghairi ili ujaribu tena."
+Previous unit of measure,Kitengo cha awali cha kipimo
+Price List,Orodha ya Bei
+Price List Rate,Kiwango cha Orodha ya Bei
+Price list rate updated locally only,Kiwango cha orodha ya bei kimesasishwa ndani ya nchi pekee
+Pricing & Discounts,Bei na Punguzo
+Pricing Rule,Kanuni ya Bei
+Print,Chapisha
+Print Draft,Chapisha Rasimu
+Print Format (Invoice),Umbizo la Chapisha (Ankara)
+Print Format (Order),Umbizo la Chapisha (Agizo)
+Print invoice,Chapisha ankara
+Print Purchase Invoice instead of PO,Chapisha Ankara ya Ununuzi badala ya PO
+Printer,Kichapishaji
+Processed returns impacting the shift totals,Marejesho yaliyochakatwa yanayoathiri jumla ya zamu
+Processing Payment,Inachakata Malipo
+Processing payment entries for Invoice {0},Inachakata maingizo ya malipo ya Ankara {0}
+Profile,Wasifu
+Profiles,Wasifu
+Profit,Faida
+Profit: Invoice Item Estimate,Faida: Kadirio la Kipengee cha Ankara
+Profit: Stock Ledger (COGS),Faida: Leja ya Hisa (COGS)
+Profitability Report,Ripoti ya Faida
+Prorated return discount,Punguzo la kurudi lililokadiriwa
+Purchase Amount,Kiasi cha Kununua
+Purchase Invoices,Nunua ankara
+Purchase Order created,Agizo la Ununuzi limeundwa
+Qty,Kiasi
+Qualified,Imehitimu
+Quantity,Kiasi
+Quantity exceeds available stock,Kiasi kinazidi hisa inayopatikana
+Quick Actions,Vitendo vya Haraka
+Quotation {0} is Submitted,Nukuu {0} Imewasilishwa
+Quotation submitted,Nukuu imewasilishwa
+QZ Tray connected.,Tray ya QZ imeunganishwa.
+QZ Tray is manually disconnected. Press Connect to enable it again.,Tray ya QZ imekatwa kwa mikono. Bonyeza Unganisha ili kuiwasha tena.
+QZ Tray is not connected.,Tray ya QZ haijaunganishwa.
+QZ Tray Setup,Usanidi wa Tray ya QZ
+Rate,Kiwango
+Rate adjusted to maximum allowed discount,Kiwango kimerekebishwa hadi punguzo la juu linaloruhusiwa
+Ready,Tayari
+Ready to resume,Tayari kuendelea
+Ready!,Tayari!
+Real-time POS insights for retail operations.,Maarifa ya POS ya wakati halisi ya shughuli za rejareja.
+Rebuild Offline Data,Unda upya Data ya Nje ya Mtandao
+Receive,Pokea
+Receive now,Pokea sasa
+Received,Imepokelewa
+Received:,Imepokelewa:
+Recent Movement Entries,Maingizo ya Hivi Punde ya Harakati
+Recent updates about your invoices,Taarifa za hivi majuzi kuhusu ankara zako
+Recently Active Customers,Wateja Wanaotumika Hivi Karibuni
+Rechecking connection,Inakagua tena muunganisho
+Reconcile payment methods and close shift,Sawazisha njia za malipo na mabadiliko ya karibu
+Reconciling Payments,Kulinganisha Malipo
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","Unganisha upya na ufungue ukurasa huu mara moja ukiwa mtandaoni, kisha uonyeshaji upya nje ya mtandao utaweza kuurejesha."
+Reconnect online to refresh cached offline data from the server.,Unganisha upya mtandaoni ili kuonyesha upya data iliyohifadhiwa nje ya mtandao kutoka kwa seva.
+Recreate local offline prerequisites from scratch,Unda upya mahitaji ya ndani ya nje ya mtandao kuanzia mwanzo
+Recv:,Recv:
+Redeem,Komboa
+Redeem / Scan,Komboa / Changanua
+Redeem Amount,Komboa Kiasi
+Redeem Mode,Tumia Hali
+Redeemed Amount,Kiasi Kilichokombolewa
+Redeemed credit cannot be greater than its total.,Salio iliyokombolewa haiwezi kuwa kubwa kuliko jumla yake.
+Redemption and Totals,Ukombozi na Jumla
+Reference,Rejea
+Refresh,Onyesha upya
+Refresh Exchange Rate,Onyesha upya Kiwango cha ubadilishaji
+Refresh Offline Data,Onyesha upya Data ya Nje ya Mtandao
+Refresh Printers,Onyesha upya Vichapishaji
+Refund,Rejesha pesa
+Release Notes,Vidokezo vya Kutolewa
+Reload,Pakia upya
+Reload customers,Pakia upya wateja
+Reload Items,Pakia upya Vipengee
+Reload Now,Pakia Upya Sasa
+Reload to apply the latest changes. Your current session will be refreshed.,Pakia upya ili kutumia mabadiliko ya hivi punde. Kipindi chako cha sasa kitaonyeshwa upya.
+Reload Workflow,Pakia upya Mtiririko wa Kazi
+Remarks,Maoni
+Remarks are required.,Maoni yanahitajika.
+Remove,Ondoa
+Remove barcode item,Ondoa kipengee cha msimbopau
+Remove cached data and reload the POS app,Ondoa data iliyohifadhiwa na upakie upya programu ya POS
+Remove item,Ondoa kipengee
+Remove Offer,Ondoa Ofa
+Reorder / Purchase Suggestions,Panga Upya / Nunua Mapendekezo
+Repair Candidate,Rekebisha Mgombea
+Repair Change Allocation,Rekebisha Mgao wa Mabadiliko
+Repair requires an online connection,Ukarabati unahitaji muunganisho wa mtandaoni
+Repaired,Imetengenezwa
+Repairing change allocation,Inarekebisha mgao wa mabadiliko
+Repeat Customers,Rudia Wateja
+Repeat Rate,Kiwango cha Rudia
+Request,Ombi
+Request ID: {0},Ombi la kitambulisho: {0}
+Request Payment,Omba Malipo
+Requested route: {0},Umeomba njia: {0}
+Required columns cannot be hidden,Safu wima zinazohitajika haziwezi kufichwa
+Reset,Weka upya
+Reset item name,Weka upya jina la kipengee
+Reset to Default,Weka upya kwa Chaguomsingi
+Resource Health,Afya ya Rasilimali
+Restricted,Imezuiwa
+Restricted operational controls for supervisors only.,Vidhibiti vya uendeshaji vilivyowekewa vikwazo kwa wasimamizi pekee.
+Retry,Jaribu tena
+Retry route,Jaribu tena njia
+Return,Rudi
+Return Amount,Kiasi cha Kurudisha
+Return Count,Hesabu ya Kurudi
+Return items must have negative quantities,Vipengee vya kurejesha lazima ziwe na idadi hasi
+Return total must be negative,Jumla ya urejeshaji lazima iwe hasi
+Return Valid Until,Kurudi Hutumika Hadi
+Return window passed,Dirisha la kurudi limepitishwa
+Return without Invoice,Rudisha bila ankara
+Returns,Inarudi
+Returns / Voids / Discounts,Marejesho / Utupu / Punguzo
+Returns by Currency,Hurejesha kwa Sarafu
+Revenue,Mapato
+Review shift totals before submitting the closing entry,Kagua jumla za zamu kabla ya kuwasilisha ingizo la kufunga
+Round Off,Mzunguko Mbali
+Rows,Safu
+Rows:,Safu mlalo:
+Rule,Kanuni
+Sale,Uuzaji
+Sales,Mauzo
+Sales Order {0} is Submitted,Agizo la Mauzo {0} limewasilishwa
+Sales Person and Print,Mtu wa Uuzaji na Uchapishaji
+Sales Person not found,Mtu wa Uuzaji hajapatikana
+Sales processed,Mauzo yamechakatwa
+Sales Return,Kurudi kwa Mauzo
+Sales Trend Report,Ripoti ya Mwenendo wa Mauzo
+Save,Hifadhi
+Save & Clear,Hifadhi & Futa
+Save as POS Profile Default,Hifadhi kama Chaguomsingi la Wasifu wa POS
+Save Settings,Hifadhi Mipangilio
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,Hifadhi printa iliyochaguliwa kama chaguomsingi ya Wasifu wa POS ili ionekane kiotomatiki kwenye usanidi huu.
+Saved as draft because: {0},Imehifadhiwa kama rasimu kwa sababu: {0}
+Saving...,Inahifadhi...
+Scale barcode detected. Quantity here is the number of labels to print.,Misimbo pau ya kipimo imetambuliwa. Kiasi hapa ni idadi ya lebo za kuchapishwa.
+Scale barcode settings are not configured. Using item barcode only.,Mipangilio ya msimbo pau wa kipimo haijasanidiwa. Kwa kutumia msimbopau wa kipengee pekee.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,Misimbo pau ya kiolezo cha kipimo haipo kwa kipengee hiki/UOM. Kwa kutumia msimbopau wa kipengee pekee.
+Scan an existing card and top it up without leaving the payment flow.,Changanua kadi iliyopo na uijaze bila kuacha mtiririko wa malipo.
+Scan Error,Hitilafu ya Kuchanganua
+Scan or enter a gift card code to check balance or redeem.,Changanua au uweke msimbo wa kadi ya zawadi ili kuangalia salio au ukomboe.
+Scan or paste the card code below.,Changanua au ubandike msimbo wa kadi hapa chini.
+Scan QR Code/Barcode,Changanua Msimbo wa QR/Msimbo Pau
+Scan with camera,Changanua kwa kutumia kamera
+Scan-First Flow,Mtiririko wa Scan-Kwanza
+Scanned Code:,Msimbo Uliochanganuliwa:
+Scanning for: {0},Inatafuta: {0}
+Scanning items,Inachanganua vitu
+Scan-Ready,Scan-Tayari
+Scope,Upeo
+Scope: All Profiles,Upeo: Wasifu Zote
+Scope: Current Profile,Upeo: Wasifu wa Sasa
+Scope: Specific Profile,Upeo: Wasifu Maalum
+Search,Tafuta
+Search Account,Tafuta Akaunti
+Search an invoice and continue the return flow without extra steps.,Tafuta ankara na uendelee na mtiririko wa kurejesha bila hatua za ziada.
+Search customer,Tafuta mteja
+Search invoices or customers,Tafuta ankara au wateja
+Search item,Tafuta kipengee
+Search item / code,Tafuta bidhaa / msimbo
+Search items or barcode,Tafuta vitu au msimbopau
+Search Mpesa Payments,Tafuta Malipo ya Mpesa
+Search return invoices or customers,Tafuta ankara za kurejesha au wateja
+Search supplier,Tafuta mtoa huduma
+Search unpaid invoices or customers,Tafuta ankara au wateja ambao hawajalipwa
+Secure context (HTTPS or localhost) is required for camera access.,Muktadha salama (HTTPS au localhost) inahitajika kwa ufikiaji wa kamera.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,Muktadha salama (HTTPS) unahitajika kwa ufikiaji wa kamera. Tafadhali tumia HTTPS kufikia kamera.
+Select,Chagua
+Select a cashier first.,Chagua mtunza fedha kwanza.
+Select a customer,Chagua mteja
+Select a customer to use coupon,Chagua mteja ili kutumia kuponi
+Select a printer to use QZ silent printing.,Chagua kichapishi ili kutumia uchapishaji kimya wa QZ.
+Select Batch,Chagua Kundi
+Select Columns to Display,Chagua Safu wima za Kuonyesha
+Select items to sell,Chagua bidhaa za kuuza
+Select Payment,Chagua Malipo
+Select Payment Account,Chagua Akaunti ya Malipo
+Select printer,Chagua kichapishi
+Select Return Invoice,Chagua Rejesha ankara
+Select S.O,Chagua S.O
+Select Sales Orders,Chagua Maagizo ya Mauzo
+Select the cashier who is taking over this terminal.,Chagua mtunza fedha ambaye anachukua kituo hiki.
+Selected,Imechaguliwa
+Selected movement type is not allowed by POS Profile.,Aina ya harakati iliyochaguliwa hairuhusiwi na Wasifu wa POS.
+Selected Payments,Malipo Uliyochaguliwa
+Sensitive actions kept away from quick taps.,Vitendo nyeti vilivyowekwa mbali na kugonga haraka.
+Serial,Msururu
+Serial Numbers,Nambari za mfululizo
+Server CPU Usage:,Matumizi ya CPU ya Seva:
+Server Health,Afya ya Seva
+Server Memory Usage:,Matumizi ya Kumbukumbu ya Seva:
+Server Metrics,Vipimo vya Seva
+Server Uptime:,Muda wa Seva:
+Service Charges,Gharama za Huduma
+Session,Kikao
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,Weka kila PIN ya keshia katika fomu ya Mtumiaji na uwaweke washiriki wa mwisho waliowekwa katika Mtumiaji wa Wasifu wa POS.
+Settings,Mipangilio
+Settings in this section update the POS workspace without changing the current route.,Mipangilio katika sehemu hii inasasisha nafasi ya kazi ya POS bila kubadilisha njia ya sasa.
+Setup complete!,Usanidi umekamilika!
+Share,Shiriki
+Shared terminal,Terminal iliyoshirikiwa
+Shift Closed Snapshot,Shift Iliyofungwa Picha
+Shift Overview,Muhtasari wa Shift
+Show,Onyesha
+Show cart on customer-facing screen,Onyesha rukwama kwenye skrini inayowakabili mteja
+Show last invoice rate,Onyesha kiwango cha mwisho cha ankara
+Show rate info,Onyesha maelezo ya kiwango
+Show Repair Candidates,Onyesha Wagombea Urekebishaji
+Show search tools,Onyesha zana za utafutaji
+Show the active cart on a customer-facing screen,Onyesha rukwama inayotumika kwenye skrini inayomkabili mteja
+Showing {0}-{1} of {2},Inaonyesha {0}-{1} kati ya {2}
+Showing 0 of 0,Inaonyesha 0 kati ya 0
+Shows the distribution of invoices per currency,Inaonyesha usambazaji wa ankara kwa kila sarafu
+Sign out of the current POS session,Ondoka kwenye kipindi cha sasa cha POS
+Size:,Ukubwa:
+Skipped Payments,Malipo Yameruka
+Skipping items without barcodes,Kuruka vitu bila misimbopau
+Slow Moving,Kusonga Polepole
+Slow Moving Items,Vipengee Vinavyosonga Polepole
+Slow Queries:,Maswali ya polepole:
+Sold,Inauzwa
+Source,Chanzo
+Source Cash Account (Optional Override),Chanzo cha Akaunti ya Pesa (Hiari ya Batilisha)
+Source Ex. Rate:,Chanzo Ex. Kadiria:
+Source Rate:,Kiwango cha Chanzo:
+Specific Profile,Wasifu Maalum
+Split Invoices,Gawanya ankara
+Staff / Cashier Performance Report,Ripoti ya Utendaji ya Wafanyakazi / Cashier
+Status,Hali
+Stock,Hisa
+Stock Information,Taarifa za Hisa
+Stock is lower than requested,Hisa ni ndogo kuliko ilivyoombwa
+Stock is lower than requested:\n{0},Hisa iko chini kuliko ilivyoombwa:\n{0}
+Stock Movement Report,Ripoti ya Harakati za Hisa
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,Sasisho la hisa: {0} {1} linapatikana. Kuongeza {2} kutapunguza hisa.
+Submit,Wasilisha
+Submit & Print,Wasilisha na Uchapishe
+Submit Deposit,Peana Amana
+Submit Expense,Wasilisha Gharama
+Submitted,Imewasilishwa
+Submitted Cash Movements,Harakati za Fedha Zilizowasilishwa
+Submitted entries,Maingizo yaliyowasilishwa
+Successfully scanned:,Imechanganua kwa ufanisi:
+Suggested,Imependekezwa
+Suggested Qty,Iliyopendekezwa Qty
+Supervisor Access,Ufikiaji wa Msimamizi
+Supervisor permissions unlock issuance and reloads,Utoaji na upakiaji upya wa ruhusa za msimamizi
+Supervisor Tools,Zana za Msimamizi
+Supplier,Msambazaji
+Supplier and dates are required.,Mtoa huduma na tarehe zinahitajika.
+Supplier Invoices,Ankara za Wasambazaji
+Supplier is required.,Mtoa huduma anahitajika.
+Supplier name is required,Jina la mtoa huduma linahitajika
+Supplier Payments,Malipo ya Wasambazaji
+Supplier Purchase Summary,Muhtasari wa Ununuzi wa Wasambazaji
+Suppliers,Wasambazaji
+Suppliers not found,Wasambazaji hawakupatikana
+Switch Camera,Badili Kamera
+Switch Cashier,Badilisha Cashier
+Switch the POS appearance theme,Badili mandhari ya mwonekano wa POS
+Switched to:,Imebadilishwa hadi:
+Sync All Invoices,Sawazisha Ankara Zote
+Sync Offline Cash Movements ({0}),Sawazisha Mienendo ya Pesa Nje ya Mtandao ({0})
+Sync Offline Sales,Sawazisha Mauzo ya Nje ya Mtandao
+Synced {0} offline cash movement(s).,Imesawazishwa {0} harakati za pesa nje ya mtandao.
+Syncing items in background,Inasawazisha vipengee chinichini
+System / Diagnostics,Mfumo / Uchunguzi
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","Vitendo vya mfumo ni vidhibiti vya urekebishaji wa masafa ya chini kama vile maelezo ya programu, uchunguzi wa usaidizi na vidhibiti vya kipindi."
+System Information,Taarifa za Mfumo
+System Status,Hali ya Mfumo
+Tables:,Majedwali:
+Tap the button below to redeem a gift card during checkout.,Gusa kitufe kilicho hapa chini ili kukomboa kadi ya zawadi wakati wa kulipa.
+Target,Lengo
+Target Ex. Rate:,Lengo Ex. Kadiria:
+Target Rate:,Kiwango Lengwa:
+Tax,Kodi
+Tax / Charges Report,Ripoti ya Ushuru / Gharama
+Tax Heads,Wakuu wa Kodi
+Taxable Amount,Kiasi cha Ushuru
+Tendered,Imetolewa zabuni
+Terminal,Kituo
+Terminal & Devices,Kituo na Vifaa
+Terminal locked,Terminal imefungwa
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","Zana za vituo huathiri kituo hiki cha kulipia, skrini zinazowakabili wateja na vidhibiti vya vichapishi/kifaa vya siku zijazo."
+Territory not found,Eneo halijapatikana
+The amount paid is not complete,Kiasi kilicholipwa hakijakamilika
+The app stores data locally for offline use. This is called cache.,Programu huhifadhi data ndani ya nchi kwa matumizi ya nje ya mtandao. Hii inaitwa cache.
+The invoice stayed in draft. Please review and submit it manually.,ankara ilikaa katika rasimu. Tafadhali kagua na uwasilishe mwenyewe.
+The maximum discount allowed is,Punguzo la juu linaloruhusiwa ni
+The quantity for {0} has been adjusted to the maximum available stock.,Kiasi cha {0} kimerekebishwa hadi kiwango cha juu cha hisa kinachopatikana.
+The system could not retrieve the item details. Please try again.,Mfumo haukuweza kurejesha maelezo ya kipengee. Tafadhali jaribu tena.
+These invoices will be synced when connection is restored,Ankara hizi zitasawazishwa wakati muunganisho ukirejeshwa
+This action now opens inside the settings workspace.,Kitendo hiki sasa kinafungua ndani ya nafasi ya kazi ya mipangilio.
+This coupon already used !,Kuponi hii tayari imetumika!
+This invoice does not need change-allocation repair,Ankara hii haihitaji ukarabati wa mgao wa mabadiliko
+This invoice is already repaired,ankara hii tayari imerekebishwa
+This is an item template. Please choose a variant.,Hiki ni kiolezo cha kipengee. Tafadhali chagua lahaja.
+this item,bidhaa hii
+This POS page could not be opened offline because its code was not cached on this terminal yet.,Ukurasa huu wa POS haukuweza kufunguliwa nje ya mtandao kwa sababu msimbo wake bado haujaakibishwa kwenye terminal hii.
+This Serial Number {0} has already been added!,Nambari hii ya Ufuatiliaji {0} tayari imeongezwa!
+Threshold,Kizingiti
+Time,Muda
+Tip: Clear cache regularly to free up space and keep the app fast.,Kidokezo: Futa akiba mara kwa mara ili upate nafasi na uhifadhi programu haraka.
+Tip: Close unused tabs or apps to reduce lag.,Kidokezo: Funga vichupo au programu ambazo hazijatumika ili kupunguza ucheleweshaji.
+Tip: Monitor slow queries and table size for optimal performance.,Kidokezo: Fuatilia maswali ya polepole na ukubwa wa jedwali kwa utendakazi bora.
+To Be Paid,Kulipwa
+To Date,Hadi Sasa
+Today,Leo
+Today Profit,Leo Faida
+Today Sales,Leo Mauzo
+Toggle navigation drawer,Geuza droo ya kusogeza
+Toggle Theme,Geuza Mandhari
+Tools,Zana
+Tools for customer-facing screens and terminal-specific actions.,Zana za skrini zinazowakabili wateja na vitendo mahususi vya mwisho.
+Top Brand,Chapa ya Juu
+Top Category,Aina ya Juu
+Top Charge Head,Juu Chaji Mkuu
+Top Customers,Wateja wa Juu
+Top Discount,Punguzo la Juu
+Top Items by Location,Vipengee vya Juu kulingana na Mahali
+Top Margin,Pembezoni ya Juu
+Top Pending,Inasubiri Juu
+Top Profit Item,Bidhaa ya Faida ya Juu
+Top Return Items,Vipengee vya Juu vya Kurudi
+Top Sales by Cashier,Mauzo ya Juu na Cashier
+Top Supplier,Muuzaji wa Juu
+Top Suppliers by Spend,Wasambazaji wa Juu kwa Matumizi
+Top Tables,Majedwali ya Juu
+Top Tax Head,Mkuu wa Ushuru
+Top Up Amount,Ongeza Kiasi
+Top Up Card,Kadi ya Juu Juu
+Top Up Mode,Hali ya Juu Juu
+Top Variant,Lahaja ya Juu
+Total,Jumla
+Total Amount,Jumla ya Kiasi
+Total Change,Jumla ya Mabadiliko
+Total Charges,Jumla ya Gharama
+Total In,Jumla ya Ndani
+Total Invoices,Jumla ya ankara
+Total Items,Jumla ya Vipengee
+Total Mpesa,Jumla ya Mpesa
+Total Out,Jumla ya nje
+Total Payments,Jumla ya Malipo
+Total Purchase,Jumla ya Ununuzi
+Total Selected :,Jumla Iliyochaguliwa :
+Total Size,Ukubwa Jumla
+Total Stock Qty,Jumla ya Hisa Uzito
+Total:,Jumla:
+Totals by Invoice Currency,Jumla kwa Sarafu ya Ankara
+Track how much cash was handed back to customers,Fuatilia ni pesa ngapi zilirejeshwa kwa wateja
+"Track recent sales, collect unpaid balances, and reopen saved work","Fuatilia mauzo ya hivi majuzi, kukusanya salio ambalo hujalipia na ufungue kazi uliyohifadhi upya"
+Transaction ID,Kitambulisho cha muamala
+Transfer,Uhamisho
+Try a different search term or clear the cart search.,Jaribu neno tofauti la utafutaji au ufute utafutaji wa rukwama.
+Try adjusting your search or filters,Jaribu kurekebisha utafutaji wako au vichujio
+Try another source or refresh the list.,Jaribu chanzo kingine au uonyeshe upya orodha.
+Try changing the date range or status filter.,Jaribu kubadilisha kipindi au kichujio cha hali.
+Type,Aina
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,Haiwezi kufikia kamera hata kwa mipangilio ya msingi. Tafadhali angalia ruhusa za kamera yako na uoanifu wa kifaa.
+Unable to add offer item {0}. Please refresh and try again.,Imeshindwa kuongeza kipengee cha ofa {0}. Tafadhali onyesha upya na ujaribu tena.
+Unable to add offer item. Please refresh and try again.,Imeshindwa kuongeza kipengee cha ofa. Tafadhali onyesha upya na ujaribu tena.
+Unable to add scanned item.,Imeshindwa kuongeza kipengee kilichochanganuliwa.
+Unable to create purchase order,Imeshindwa kuunda agizo la ununuzi
+Unable to delete draft invoice,Imeshindwa kufuta rasimu ya ankara
+Unable to fetch documents,Imeshindwa kuleta hati
+Unable to fetch draft orders,Imeshindwa kuleta rasimu ya maagizo
+Unable to fetch invoice history,Imeshindwa kuleta historia ya ankara
+Unable to fetch M-Pesa payments,Imeshindwa kuleta malipo ya M-Pesa
+Unable to fetch sales orders,Imeshindwa kuleta maagizo ya mauzo
+Unable to fetch unpaid invoices,Imeshindwa kuleta ankara ambazo hazijalipwa
+Unable to generate scale barcode,Imeshindwa kuzalisha msimbopau wa kiwango
+Unable to issue gift card.,Imeshindwa kutoa kadi ya zawadi.
+Unable to load cashier PIN status.,Imeshindwa kupakia hali ya PIN ya keshia.
+Unable to load document,Imeshindwa kupakia hati
+Unable to load draft invoice,Imeshindwa kupakia rasimu ya ankara
+Unable to load gift card balance.,Imeshindwa kupakia salio la kadi ya zawadi.
+Unable to load invoice details,Imeshindwa kupakia maelezo ya ankara
+Unable to load parked order,Imeshindwa kupakia agizo lililoegeshwa
+Unable to load the selected sales order,Imeshindwa kupakia agizo lililochaguliwa la mauzo
+Unable to prepare document,Imeshindwa kuandaa hati
+Unable to prepare return invoice,Imeshindwa kuandaa ankara ya kurejesha
+Unable to print draft invoice,Imeshindwa kuchapisha rasimu ya ankara
+Unable to print submitted invoice,Imeshindwa kuchapisha ankara iliyowasilishwa
+Unable to process document action,Imeshindwa kuchakata kitendo cha hati
+Unable to repair change allocation,Imeshindwa kurekebisha mgao wa mabadiliko
+Unable to save cashier PIN.,Imeshindwa kuhifadhi PIN ya keshia.
+Unable to save the rate to the backend price list,Imeshindwa kuhifadhi kiwango kwenye orodha ya bei ya nyuma
+Unable to submit invoice,Imeshindwa kuwasilisha ankara
+Unable to submit the selected payment,Imeshindwa kuwasilisha malipo uliyochagua
+Unable to top up gift card.,Imeshindwa kujaza kadi ya zawadi.
+Unable to verify cashier PIN.,Imeshindwa kuthibitisha PIN ya keshia.
+Unallocated,Haijatengwa
+Unallocated:,Haijatengwa:
+Unavailable,Haipatikani
+Unknown,Haijulikani
+Unknown Item,Kipengee kisichojulikana
+Unknown Warehouse,Ghala lisilojulikana
+Unlock POS,Fungua POS
+Unpaid,Haijalipwa
+"Unselected payments stay unallocated first, then auto reconcile after submit.","Malipo ambayo hayajachaguliwa hukaa bila kugawanywa kwanza, kisha upatanishe kiotomatiki baada ya kuwasilisha."
+UOM,UOM
+UOM not found,UOM haijapatikana
+Update available,Sasisho linapatikana
+Update Customer,Sasisha Mteja
+Update PIN,Sasisha PIN
+Update Price List Rate,Sasisha Kiwango cha Orodha ya Bei
+Updated,Imesasishwa
+Updates and app info that stay out of the cashier flow.,Masasisho na maelezo ya programu ambayo hayatumiki kwenye mtiririko wa mtunza fedha.
+Updates automatically,Inasasisha kiotomatiki
+Usage,Matumizi
+Usage Stats,Takwimu za Matumizi
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,Tumia PIN ya tarakimu 4 hadi 8 kubadilisha keshia na kufungua terminal.
+Use Cashier,Tumia Cashier
+Use date range to search for older invoices,Tumia kipindi kutafuta ankara za zamani
+"Use one field for manual code entry, barcode scans, or QR scans.","Tumia sehemu moja kuweka msimbo mwenyewe, uchanganuzi wa msimbo pau au uchanganuzi wa QR."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","Tumia mtiririko mmoja wa kazi kukagua salio, utoaji mpya na nyongeza bila kuondoka kwenye POS."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","Tumia sehemu hii wakati data ya sharti iliyoakibishwa inahitaji kusasishwa, kuunda upya au ukaguzi wa uchunguzi."
+Use Western numerals,Tumia nambari za Magharibi
+Used:,Imetumika:
+Using basic camera settings due to device limitations,Kutumia mipangilio ya msingi ya kamera kwa sababu ya mapungufu ya kifaa
+Using cached customer balance,Kwa kutumia salio la mteja lililoakibishwa
+Valid until,Inatumika hadi
+Variance %,Tofauti %
+Variants,Lahaja
+Variant-wise,Lahaja-busara
+Verify closing amounts for each payment method,Thibitisha kiasi cha kufunga kwa kila njia ya malipo
+View all,Tazama zote
+View app information and current build details,Tazama maelezo ya programu na maelezo ya sasa ya muundo
+View Data Diagnostics,Tazama Uchunguzi wa Data
+View Details,Tazama Maelezo
+View invoice details,Tazama maelezo ya ankara
+View notifications,Tazama arifa
+View offline invoices,Tazama ankara za nje ya mtandao
+View restricted POS insights,Tazama maarifa ya POS yenye vikwazo
+Void Amount,Kiasi Utupu
+Void Count,Hesabu Utupu
+Voids,Utupu
+Waiting for cart items,Inasubiri vitu vya gari
+Waiting for payment...,Inasubiri malipo...
+Walk-in Customer,Mteja wa Kuingia
+Warehouse,Ghala
+Warning: High cache usage may affect performance.,Onyo: Matumizi ya akiba ya juu yanaweza kuathiri utendakazi.
+Warning: High lag may indicate heavy processing or browser slowness.,Onyo: Kuchelewa sana kunaweza kuonyesha uchakataji mzito au ucheleweshaji wa kivinjari.
+Week ?,Wiki?
+Week-wise,Wiki-busara
+Weight (g),Uzito (g)
+Weight (grams),Uzito (gramu)
+We'll let you know if an invoice fails to submit,Tutakujulisha ikiwa ankara itashindwa kuwasilisha
+Workflow,Mtiririko wa kazi
+Write off amount cannot exceed the POS profile maximum of {0},Kiasi cha kufuta hakiwezi kuzidi kiwango cha juu cha wasifu wa POS cha {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,Kiasi cha kufuta kinazidi kikomo kinachoruhusiwa ({0}). Tafadhali ongeza malipo kwa kiasi kilichosalia.
+Yes,Ndiyo
+"Yes, Cancel sale","Ndiyo, Ghairi uuzaji"
+"Yes, Close","Ndiyo, Funga"
+You are not allowed to print draft invoices,Huruhusiwi kuchapisha rasimu ya ankara
+You are offline. Add Payment will work again when the connection is restored.,Hauko mtandaoni. Ongeza Malipo itafanya kazi tena muunganisho utakaporejeshwa.
+You have no notifications right now,Huna arifa kwa sasa
+Your Cart,Mkokoteni Wako

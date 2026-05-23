@@ -1,0 +1,1362 @@
+POS Awesome,POS Lieliski
+Fetch Items Directly from Server,Ienesiet preces tieši no servera
+Menu,Izvēlne
+Actions,Darbības
+Close Shift,Aizvērt Shift
+End current session,Beigt pašreizējo sesiju
+Print Last Invoice,Drukāt pēdējo rēķinu
+Reprint previous transaction,Pārdrukājiet iepriekšējo darījumu
+Sync Offline Invoices,Sinhronizējiet bezsaistes rēķinus
+Upload pending transactions,Augšupielādējiet neapstiprinātos darījumus
+Go Online,Iet tiešsaistē
+Go Offline,Pāriet bezsaistē
+Disable offline mode,Atspējot bezsaistes režīmu
+Work without server connection,Strādājiet bez savienojuma ar serveri
+Clear Cache,Notīrīt kešatmiņu
+Remove local data and refresh,Noņemiet vietējos datus un atsvaidziniet
+About,Par
+App information,Lietotnes informācija
+Language,Valoda
+Change interface language,Mainiet saskarnes valodu
+Light Mode,Gaismas režīms
+Dark Mode,Tumšais režīms
+Switch theme appearance,Mainiet motīva izskatu
+Logout,Atteikties
+Sign out of session,Izrakstieties no sesijas
+Select Language,Izvēlieties valodu
+Choose your preferred language for the POS interface,Izvēlieties vēlamo valodu POS saskarnei
+Language will be changed to,Valoda tiks mainīta uz
+Cancel,Atcelt
+Change Language,Mainīt valodu
+Close,Aizvērt
+Cannot change language - same language selected,Nevar mainīt valodu — atlasīta tā pati valoda
+Language changed successfully! Reloading...,Valoda veiksmīgi nomainīta! Notiek atkārtota ielāde...
+Failed to change language,Neizdevās mainīt valodu
+Unknown error,Nezināma kļūda
+- Total Unallocated,- Kopējais nepiešķirtais
+* Required,* Obligāti
+{0} (Qty: {1}),{0} (daudzums: {1})
+{0} actions,{0} darbības
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} ir tikai {1} noliktavā. Jūs pieprasījāt {2}. Pielāgojiet daudzumu vai papildiniet krājumus.
+{0} offline invoice{1} pending,Neapstiprināts {0} bezsaistes rēķins{1}
+{0} offline invoice{1} saved as draft,{0} bezsaistes rēķins{1} saglabāts kā melnraksts
+{0} offline invoice{1} synced,Sinhronizēts {0} bezsaistes rēķins{1}
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,Pirms {0} d
+{0}h ago,pirms {0} h
+{0}m ago,pirms {0} min
+A POS supervisor is required for this action.,Šai darbībai ir nepieciešams POS vadītājs.
+Access,Piekļuve
+Account,Konts
+Account is overdrawn,Konts ir pārtērēts
+Acknowledge the error to resume scanning,"Apstipriniet kļūdu, lai atsāktu skenēšanu"
+Acknowledge the error to resume scanning.,"Apstipriniet kļūdu, lai atsāktu skenēšanu."
+Across,Pāri
+Action,Darbība
+Active sale,Aktīva izpārdošana
+add,pievienot
+Add items from the selector to start building this sale.,"Pievienojiet preces no atlasītāja, lai sāktu veidot šo izpārdošanu."
+Add more value to an existing gift card,Pievienojiet vairāk vērtības esošai dāvanu kartei
+Add New Address,Pievienot jaunu adresi
+Add new customer,Pievienot jaunu klientu
+Add on New Line,Pievienot jaunā rindā
+Add Payment,Pievienot maksājumu
+Add payment to invoice,Pievienojiet rēķinam maksājumu
+Add/Edit Coupon Conditions,Pievienot/rediģēt kupona nosacījumus
+Additional Discount,Papildu atlaide
+Additional Discount %,Papildu atlaide %
+Address Line 1,Adreses 1. rindiņa
+Address not found,Adrese nav atrasta
+Adjust the quantity or enable negative stock to continue.,"Pielāgojiet daudzumu vai iespējojiet negatīvo krājumu, lai turpinātu."
+Adjustment,Pielāgošana
+After returns,Pēc atgriešanās
+Against,Pret
+Against Name,Pret Vārdu
+Age Bracket,Vecuma grupa
+All,Visi
+All Caught Up!,Visi noķerti!
+All invoices are synchronized,Visi rēķini ir sinhronizēti
+All pending invoices are up to date,Visi neapmaksātie rēķini ir atjaunināti
+All Profiles,Visi profili
+All Synchronized,Viss sinhronizēts
+All visible invoices are fully settled.,Visi redzamie rēķini ir pilnībā apmaksāti.
+All Warehouses,Visas noliktavas
+Allowed UOM is {0},Atļautais UOM ir {0}
+Always fetch items from server (ignore local cache),Vienmēr ienest vienumus no servera (ignorēt vietējo kešatmiņu)
+Amount,Summa
+Amount already received,Summa jau saņemta
+Amount exceeds profile cash movement max amount.,Summa pārsniedz profila skaidras naudas kustības maksimālo summu.
+Amount must be greater than zero.,Summai ir jābūt lielākai par nulli.
+Amount received from customer,"Summa, kas saņemta no klienta"
+Appearance and user-level preferences for the current session.,Pašreizējās sesijas izskats un lietotāja līmeņa preferences.
+Applied,Pielietots
+Apply,Pieteikties
+Apply Gift Card,Piesakies dāvanu kartei
+Apply Offer,Lietot piedāvājumu
+Apply On,Lietot On
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,"Šajā rēķinā izmantojiet tikai to summu, kuru vēlaties izpirkt. Atlikušais atlikums paliek kartē."
+Apply Redemption,Lietot izpirkšanu
+Applying,Pieteikšanās
+Apps,Lietotnes
+Are you sure you want to close? All entered data will be lost.,Vai tiešām vēlaties aizvērt? Visi ievadītie dati tiks zaudēti.
+Attributes (Size/Color),Atribūti (izmērs/krāsa)
+Auto Allocate Payment Amount,Automātiski piešķiriet maksājuma summu
+Auto Reconcile,Automātiskā saskaņošana
+Auto reconciliation completed after payment submit.,Automātiskā saskaņošana pabeigta pēc maksājuma iesniegšanas.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,Automātiskā saskaņošana pabeigta. Piešķirts: {0}{1}. Atlikušais atlikums: {0}{2}.
+Available Actions,Pieejamās darbības
+Available QTY,Pieejams daudzums
+Available:,Pieejams:
+Average Basket,Vidējais grozs
+Average Bill,Vidējais rēķins
+Average Ticket,Vidējā biļete
+Avg Bill,Vid. rēķins
+Avg Invoice,Vid. rēķins
+Avg Invoice Profit,Vidējā rēķina peļņa
+Avg Invoice Value,Vidējā rēķina vērtība
+Avg Purchase Frequency,Vidējais pirkumu biežums
+Awesome,Lieliski
+Awesome Dashboard,Lielisks informācijas panelis
+Awesome Dashboard is disabled for the selected POS Profile.,Awesome Dashboard ir atspējots atlasītajam POS profilam.
+Awesome Dashboard is unavailable for the selected scope.,Awesome Dashboard nav pieejams atlasītajam tvērumam.
+Awesome Dashboard is visible only to POS supervisors.,Awesome Dashboard ir redzams tikai POS uzraugiem.
+Back,Atpakaļ
+Back Office Cash Account,Back Office naudas konts
+Back Office Cash Account (Optional Override),Back Office naudas konts (izvēles ignorēšana)
+Back office cash account is required.,Nepieciešams back office naudas konts.
+Back to {0},Atpakaļ uz {0}
+Background processing did not finish in time.,Fona apstrāde netika pabeigta laikā.
+Background processing failed for Invoice {0}: {1},Fona apstrāde neizdevās rēķinam {0}: {1}
+Background Submission Failed,Fona iesniegšana neizdevās
+Background sync interval (seconds),Fona sinhronizācijas intervāls (sekundēs)
+Balance,Līdzsvars
+Balance will be updated when connection is restored,"Bilance tiks atjaunināta, kad savienojums tiks atjaunots"
+Balances still pending,Atlikumi joprojām ir neapstiprināti
+Barcode,Svītrkods
+Barcode / QR Ready,Svītrkods / QR gatavs
+Barcode Label Printing,Svītrkoda uzlīmju drukāšana
+Base Paid:,Pamata apmaksāta:
+Base Recv:,Pamata atv.:
+Base:,Bāze:
+Basic Information,Pamatinformācija
+Batch,Partija
+Batch Information,Partijas informācija
+Before any return workflow,Pirms jebkādas atgriešanas darbplūsmas
+Before returns,Pirms atgriešanās
+Best Day,Labākā diena
+Best Seller,Labākais pārdevējs
+Book expense or deposit from active shift.,Rezervējiet izdevumus vai depozītu no aktīvās maiņas.
+Branch / Location-wise Report,Pārskats par filiāli / atrašanās vietu
+Brand-wise,Zīmola ziņā
+Breakdown,Sadalījums
+Browse,Pārlūkot
+Build Time:,Būvēšanas laiks:
+Built with Frappe,Būvēts ar Frappe
+Bundle,Paka
+Buying Price,Pirkšanas cena
+Cache cleared successfully,Kešatmiņa ir veiksmīgi notīrīta
+Cache Usage,Kešatmiņas lietojums
+cache used,izmantota kešatmiņa
+Calculating...,Notiek aprēķināšana...
+Camera Access Required,Nepieciešama piekļuve kamerai
+Camera access was aborted. Please try again.,"Piekļuve kamerai tika pārtraukta. Lūdzu, mēģiniet vēlreiz."
+Camera constraints not supported by your device. Trying fallback settings...,Jūsu ierīce neatbalsta kameras ierobežojumus. Notiek rezerves iestatījumu mēģinājums...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,Kamera ir aizņemta vai to bloķē cita lietotne/cilne. Aizveriet citas kameras lietotnes un mēģiniet vēlreiz.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,"Kameras atļauja liegta. Lūdzu, pārlūkprogrammas iestatījumos atļaujiet piekļuvi kamerai un atsvaidziniet lapu."
+Camera scanner is locked until the current error is acknowledged,"Kameras skeneris ir bloķēts, līdz tiek apstiprināta pašreizējā kļūda"
+Camera started but the video stream did not load in time. Please try again.,"Kamera startēja, bet video straume netika ielādēta laikā. Lūdzu, mēģiniet vēlreiz."
+Cancel cash movement {0}?,Vai atcelt skaidras naudas kustību {0}?
+Cancel Payment,Atcelt maksājumu
+Cancel Sale,Atcelt izpārdošanu
+Cancel Sale ?,Vai atcelt izpārdošanu?
+Cancelled,Atcelts
+Cannot add an item with zero or negative quantity.,Nevar pievienot preci ar nulli vai negatīvu daudzumu.
+Cannot clear cache while offline,Bezsaistē nevar notīrīt kešatmiņu
+Cannot redeem customer credit more than invoice total,Klienta kredītu nevar izpirkt vairāk par rēķina kopsummu
+Cannot redeem gift cards more than invoice total,Dāvanu kartes nevar izpirkt vairāk par kopējo rēķinu
+Cannot Save Offline Invoice:,Nevar saglabāt bezsaistes rēķinu:
+Cannot Save Offline Payment:,Nevar saglabāt bezsaistes maksājumu:
+Card,Kart
+Card / Online,Karte / tiešsaistē
+Card health after the last live lookup,Kartes stāvoklis pēc pēdējās tiešraides
+Cards,Kartes
+Cart,Ratiņi
+Cash,Skaidra nauda
+Cash back to customers,Naudas atgriešana klientiem
+Cash Collections,Skaidras naudas kolekcijas
+Cash Deposit is disabled for this POS Profile.,Skaidras naudas iemaksa šim POS profilam ir atspējota.
+Cash Drawer Snapshot,Kases atvilktnes momentuzņēmums
+Cash In Hand,Nauda rokā
+Cash Movement,Skaidras naudas kustība
+Cash movement cancelled,Skaidras naudas kustība atcelta
+Cash movement deduction applied,Piemērots naudas kustības atskaitījums
+Cash movement deleted,Skaidras naudas kustība dzēsta
+Cash movement is disabled for this POS Profile.,Skaidras naudas kustība šim POS profilam ir atspējota.
+Cash Movement is disabled in current POS Profile.,Pašreizējā POS profilā skaidras naudas kustība ir atspējota.
+Cash movement saved offline,Skaidras naudas kustība saglabāta bezsaistē
+Cash movement submitted,Skaidras naudas kustība iesniegta
+Cash Movements,Skaidras naudas kustības
+Cash payment cannot be less than invoice total when partial payment is not allowed,"Skaidras naudas maksājums nevar būt mazāks par rēķina kopsummu, ja daļēja apmaksa nav atļauta"
+Cash returned after payment,Skaidra nauda atgriezta pēc apmaksas
+Cashier,Kasieris
+Cashier Access,Kases piekļuve
+Cashier identity and appearance preferences.,Kasiera identitāte un izskata preferences.
+Cashier PIN,Kases PIN
+Cashier PIN saved successfully.,Kases PIN ir veiksmīgi saglabāts.
+Cashiers,Kasieri
+Cashier-wise,Kasieres ziņā
+Categories,Kategorijas
+Category,Kategorija
+Category / Brand / Variant Report,Pārskats par kategoriju/zīmoliem/variantiem
+Category-wise,Kategorijas ziņā
+Category-wise Margin,Kategorijas robeža
+Certificate,Sertifikāts
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,Trūkst sertifikāta vai tas nav uzticams. QZ var parādīt apstiprinājuma dialoglodziņus.
+Certificate is trusted. Silent QZ printing is active.,Sertifikāts ir uzticams. Klusā QZ drukāšana ir aktīva.
+Change,Mainīt
+Change allocation repaired,Izmaiņu piešķīrums labots
+Change Price,Mainīt cenu
+Change Return,Mainīt atgriešanos
+Change Returned,Izmaiņas atgrieztas
+Change terminal cashier,Mainiet termināļa kasieri
+Charge Heads,Uzlādes galviņas
+Charges,Maksas
+Charges not found,Maksa nav atrasta
+Check Balance,Pārbaudiet atlikumu
+Check balance for any card. Supervisors can issue and top up cards here.,Pārbaudiet jebkuras kartes atlikumu. Šeit uzraugi var izsniegt un papildināt kartes.
+Check balance only,Pārbaudiet tikai bilanci
+Check for new commits,Pārbaudiet jaunas saistības
+Check for Updates,Pārbaudiet atjauninājumus
+Check live balance before applying redemption,Pirms izpirkšanas piemērošanas pārbaudiet reāllaika bilanci
+Check live balance before redemption,Pirms izpirkšanas pārbaudiet reāllaika bilanci
+Checking...,Notiek pārbaude...
+Cheque/Reference Date,Čeks/atsauces datums
+Cheque/Reference No,Čeka/uzziņas Nr
+Choose the cashier currently operating this terminal.,"Izvēlieties kasieri, kas pašlaik pārvalda šo termināli."
+City,Pilsēta
+Clear,Skaidrs
+Clear All,Notīrīt visu
+Clear all barcode items,Notīrīt visus svītrkoda vienumus
+Clear all purchase order items,Notīriet visas pirkuma pasūtījuma preces
+Clear Search,Notīrīt meklēšanu
+Clearing local cache...,Notiek vietējās kešatmiņas dzēšana...
+Click to refresh,"Noklikšķiniet, lai atsvaidzinātu"
+Client CPU Lag:,Klienta CPU kavēšanās:
+Client Memory Usage:,Klienta atmiņas lietojums:
+Client Metrics,Klientu metrika
+Close about dialog,Aizvērt par dialoglodziņu
+Close cashier switcher,Aizveriet kases pārslēdzēju
+Close closing shift dialog,Aizvērt maiņas dialoglodziņu
+Close column selector,Aizvērt kolonnu atlasītāju
+Close Dialog,Aizvērt dialoglodziņu
+Close drafts dialog,Aizvērt melnrakstu dialoglodziņu
+Close invoice details dialog,Aizvērt rēķina informācijas dialoglodziņu
+Close invoice management,Aizvērt rēķinu pārvaldību
+Close offline invoices dialog,Aizvērt bezsaistes rēķinu dialoglodziņu
+Close packing list dialog,Aizvērt iepakošanas saraksta dialoglodziņu
+Close returns dialog,Aizvērt atgriešanas dialoglodziņu
+Close sales orders dialog,Aizvērt pārdošanas pasūtījumu dialoglodziņu
+Close Scanner,Aizveriet skeneri
+Close scanner dialog,Aizvērt skenera dialoglodziņu
+Close Settings,Aizveriet iestatījumus
+Closing Amount,Noslēguma summa
+Closing POS Shift,POS Shift aizvēršana
+Closing Snapshot Available,Ir pieejams noslēguma momentuzņēmums
+Code,Kods
+Code scanned successfully,Kods ir veiksmīgi skenēts
+COGS,COGS
+Collapse item details,Sakļaut vienuma informāciju
+Collected,Savākts
+Cols,Cols
+Columns,Kolonnas
+commits,apņemas
+Completed and active sales in this range,Pabeigta un aktīva pārdošana šajā diapazonā
+Completed returns will appear here.,Šeit tiks parādītas pabeigtās atgriešanas.
+Confirm,Apstiprināt
+Confirm Close,Apstipriniet Aizvērt
+Confirm Mobile Number,Apstipriniet mobilā tālruņa numuru
+Confirm PIN,Apstipriniet PIN
+Connect,Savienot
+Connect printer and manage certificate,Pievienojiet printeri un pārvaldiet sertifikātu
+Connecting to QZ Tray...,Notiek savienojuma izveide ar QZ Tray...
+Connection problem while submitting invoice,"Savienojuma problēma, iesniedzot rēķinu"
+Connections:,Savienojumi:
+Connectivity and cached prerequisite status were rechecked.,Savienojamība un kešatmiņā saglabātā priekšnoteikuma statuss tika atkārtoti pārbaudīts.
+Continue Editing,Turpināt rediģēšanu
+Could not fetch latest balance from server,Nevarēja iegūt jaunāko bilanci no servera
+Count,Skaitīt
+Country,Valsts
+Coupon,Kupons
+Coupons,Kuponi
+Cover,Vāks
+CPU Cores:,CPU kodoli:
+Create,Izveidot
+Create and load a new prepaid card,Izveidojiet un ielādējiet jaunu priekšapmaksas karti
+Create and preload a new gift card,Izveidojiet un iepriekš ielādējiet jaunu dāvanu karti
+Create Bill,Izveidot rēķinu
+Create Customer,Izveidot klientu
+Create New Item,Izveidot jaunu vienumu
+Create or change your PIN,Izveidojiet vai mainiet savu PIN
+Create PIN,Izveidot PIN
+Create POS Opening Shift,Izveidojiet POS atvēršanas maiņu
+Create Purchase Order,Izveidojiet pirkuma pasūtījumu
+Create Return,Izveidot atgriešanos
+Create return from invoice,Izveidot atgriešanos no rēķina
+Create Supplier,Izveidot piegādātāju
+Credit and Output,Kredīts un izlaide
+Credit Note,Kredīta piezīme
+Credit Outstanding,Nenomaksāts kredīts
+Credit sales remaining to be collected,Atlicis iekasēt kredīta pārdošanu
+Critical,Kritiski
+Currency,Valūta
+Current,Pašreizējais
+Current Event Loop Lag:,Pašreizējā notikumu cikla aizkave:
+Current Month,Pašreizējais mēnesis
+Current PIN,Pašreizējais PIN
+Current Profile,Pašreizējais profils
+Current redeemable value on the gift card,Pašreizējā dāvanu kartes izpērkamā vērtība
+Current User,Pašreizējais lietotājs
+Custom,Pielāgots
+Custom Due Days,Pielāgotas izpildes dienas
+Custom items per page,Pielāgoti vienumi vienā lapā
+Customer,Klients
+Customer already selected,Klients jau ir izvēlēts
+Customer Balance,Klientu bilance
+Customer balance unavailable offline,Klienta atlikums bezsaistē nav pieejams
+Customer created successfully.,Klients ir veiksmīgi izveidots.
+Customer creation failed.,Klienta izveide neizdevās.
+Customer Details,Klienta informācija
+Customer display channel is missing,Trūkst klienta displeja kanāla
+Customer display was blocked. Please allow pop-ups for this site.,"Klienta displejs tika bloķēts. Lūdzu, atļaujiet šai vietnei uznirstošos logus."
+Customer group is required,Nepieciešama klientu grupa
+Customer is required to add payment,Klientam ir jāpievieno maksājums
+Customer Name is required,Nepieciešams klienta vārds
+Customer not selected,Klients nav izvēlēts
+Customer Report,Klienta ziņojums
+Customer saved offline,Klients saglabāts bezsaistē
+Customer Screen,Klientu ekrāns
+Customer territory is required,Nepieciešama klienta teritorija
+Customer updated successfully.,Klients ir veiksmīgi atjaunināts.
+Customer-facing tools and printer setup.,Klientam paredzēti rīki un printera iestatīšana.
+Customers,Klienti
+Customers not found,Klienti nav atrasti
+Daily cashier actions without scrolling.,Ikdienas kases darbības bez ritināšanas.
+Daily Sales,Ikdienas izpārdošana
+Daily Sales Summary,Ikdienas pārdošanas kopsavilkums
+Data loaded in form. Review and submit.,Dati ielādēti formā. Pārskatiet un iesniedziet.
+Database Health,Datu bāzes veselība
+Database health affects overall system speed and reliability.,Datu bāzes stāvoklis ietekmē kopējo sistēmas ātrumu un uzticamību.
+Database Info,Informācija par datu bāzi
+Date,Datums
+Day ?,Diena?
+days,dienas
+Day-wise (MTD),Dienas ziņā (MTD)
+Day-wise Movement,Dienas gudra kustība
+Dead Stock,Dead Stock
+Dead Stock Items,Dead Stock preces
+Decrease quantity,Samaziniet daudzumu
+Default,Noklusējums
+Default:,Noklusējums:
+Delete,Dzēst
+Delete cancelled cash movement {0}?,Vai dzēst atcelto skaidras naudas kustību {0}?
+Delete Draft,Dzēst melnrakstu
+Delete draft invoice,Dzēst rēķina melnrakstu
+Delete draft invoice {0}?,Vai dzēst rēķina melnrakstu {0}?
+Delete Invoice,Dzēst rēķinu
+Delete offline invoice,Dzēst bezsaistes rēķinu
+Delivered,Piegādāts
+Delivery Charges,Piegādes maksas
+Delivery Information,Informācija par piegādi
+Delivery Note {0} created,Piegādes pavadzīme {0} izveidota
+Delivery note created,Piegādes pavadzīme izveidota
+Deployed Bundle:,Izvietotais komplekts:
+Deposit,Depozīts
+Description,Apraksts
+Detailed Supplier Breakdown,Detalizēts piegādātāju sadalījums
+Detecting formats:,Formātu noteikšana:
+Device Memory:,Ierīces atmiņa:
+Difference,Atšķirība
+Difference (In Company Currency),Starpība (uzņēmuma valūtā)
+Disable offline mode first to recheck live connectivity.,"Vispirms atspējojiet bezsaistes režīmu, lai atkārtoti pārbaudītu tiešraides savienojumu."
+Disconnect,Atvienot
+discount,atlaide
+Discount %,Atlaide %
+Discount / Void / Return Report,Atlaide / Nederīgs / Atgriešanas ziņojums
+Discount Amount,Atlaides summa
+Discount limited by POS Profile,Atlaidi ierobežo POS profils
+Discounted Invoices,Atlaides rēķini
+Discounts,Atlaides
+Dismiss,Atlaist
+Download Certificate,Lejupielādēt sertifikātu
+Draft,Melnraksts
+Draft invoice deleted,Rēķina projekts ir izdzēsts
+Draft source,Melnraksta avots
+Drafts,Melnraksti
+Due {0},Termiņš: {0}
+Due Date,Izpildes datums
+Duplicate,Dublikāts
+Edit customer,Rediģēt klientu
+Edit discount amount,Rediģēt atlaides summu
+Edit discount percentage,Rediģēt atlaides procentus
+Edit Gift Application,Rediģēt dāvanu pieteikumu
+Edit item name,Rediģēt vienuma nosaukumu
+Edit quantity,Rediģēt daudzumu
+Edit rate,Rediģēt likmi
+Edit unit of measure,Rediģēt mērvienību
+Edited,Rediģēts
+Employee,Darbinieks
+Enable background sync,Iespējot fona sinhronizāciju
+Enable Customer Display in POS Profile first.,Vispirms iespējojiet klienta attēlojumu POS profilā.
+Enter a PIN.,Ievadiet PIN.
+Enter a valid grams value,Ievadiet derīgu gramu vērtību
+Enter new price list rate,Ievadiet jauno cenrāža likmi
+Enter Quantity,Ievadiet daudzumu
+Enter the cashier PIN to continue.,"Lai turpinātu, ievadiet kases PIN."
+Enter the current PIN first.,Vispirms ievadiet pašreizējo PIN.
+"Enter the current PIN, then choose a new one.","Ievadiet pašreizējo PIN, pēc tam izvēlieties jaunu."
+Enter valid grams for scale barcode,Ievadiet derīgus gramus skalas svītrkodam
+Entries,Ieraksti
+Error accessing camera:,"Piekļūstot kamerai, radās kļūda:"
+Error calculating prices,"Kļūda, aprēķinot cenas"
+Error fetching customer balance,"Iegūstot klienta bilanci, radās kļūda"
+Error in change calculations!,Kļūda izmaiņu aprēķinos!
+Error Loading Data,"Ielādējot datus, radās kļūda"
+Error loading invoice details,"Ielādējot rēķina informāciju, radās kļūda"
+Error processing invoice,"Kļūda, apstrādājot rēķinu"
+Error processing payment,"Kļūda, apstrādājot maksājumu"
+Error searching invoices,"Kļūda, meklējot rēķinus"
+Error submitting invoice:,"Kļūda, iesniedzot rēķinu:"
+Error submitting invoice: {0},"Kļūda, iesniedzot rēķinu: {0}"
+Error submitting invoice: No response from server,"Kļūda, iesniedzot rēķinu: no servera nav atbildes"
+Error updating currency,"Atjauninot valūtu, radās kļūda"
+Error updating item details,"Atjauninot preces informāciju, radās kļūda"
+Est. Purchase,Apt. Pirkums
+Est. Value,Apt. Vērtība
+Event-loop lag measures how busy your browser is. Lower is better.,Notikumu cilpas aizkave mēra jūsu pārlūkprogrammas noslogotību. Zemāks ir labāks.
+Every,Katru
+Exchange Rate,Valūtas kurss
+Expand item details,Izvērsiet preces informāciju
+Expected Amount (In Company Currency),Paredzamā summa (uzņēmuma valūtā)
+Expected Cash,Paredzamā nauda
+Expected cash on hand grouped by currency,"Paredzamā skaidrā nauda kasē, sagrupēta pēc valūtas"
+Expected vs Actual,Paredzētais pret faktisko
+Expense,Izdevumi
+Expense Account (Optional Override),Izdevumu konts (neobligāta ignorēšana)
+Expense account is required.,Nepieciešams izdevumu konts.
+Expenses and deposits posted during this shift,Šīs maiņas laikā iegrāmatotie izdevumi un noguldījumi
+Expired,Beidzies derīguma termiņš
+Failed to auto reconcile payments.,Neizdevās automātiski saskaņot maksājumus.
+Failed to cancel cash movement,Neizdevās atcelt skaidras naudas kustību
+Failed to clear cache,Neizdevās notīrīt kešatmiņu
+Failed to create item,Neizdevās izveidot vienumu
+Failed to create supplier,Neizdevās izveidot piegādātāju
+Failed to delete cash movement,Neizdevās izdzēst skaidras naudas kustību
+Failed to generate scale barcode. Using item barcode only.,Neizdevās ģenerēt mēroga svītrkodu. Izmantojot tikai preces svītrkodu.
+Failed to load cash movement context.,Neizdevās ielādēt skaidras naudas kustības kontekstu.
+Failed to load dashboard data.,Neizdevās ielādēt informācijas paneļa datus.
+Failed to reload invoice from server,Neizdevās atkārtoti ielādēt rēķinu no servera
+Failed to submit cash movement,Neizdevās iesniegt skaidras naudas kustību
+Failed to sync offline cash movements,Neizdevās sinhronizēt bezsaistes skaidras naudas kustības
+Fast cashier actions for active shifts.,Ātras kasiera darbības aktīvām maiņām.
+Fast Moving Items,Ātri pārvietojami priekšmeti
+Fees,Maksas
+Fetch the latest offline prerequisite updates,Iegūstiet jaunākos bezsaistes priekšnoteikumu atjauninājumus
+Find a sales order quickly and load it into the current sale.,Ātri atrodiet pārdošanas pasūtījumu un ievietojiet to pašreizējā izpārdošanā.
+Fixing payment amounts for return invoice...,Notiek atgriešanas rēķina maksājumu summas labošana...
+Flash Off,Zibspuldze izslēgta
+Flash On,Zibspuldze ieslēgta
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","Preču komplekta vienībām tabulā Iepakojuma saraksts tiks ņemts vērā noliktavas numurs, sērijas numurs un partijas numurs. Ja noliktavas un partijas numurs ir vienādi visām iepakojuma vienībām jebkurai ""Produktu komplekta"" vienībai, šīs vērtības var ievadīt galvenajā Preču tabulā; vērtības tiks kopētas tabulā Iepakojuma saraksts."
+Free,Bezmaksas
+Free Qty,Bezmaksas daudzums
+Frequency,Biežums
+from,no
+From Date,No datuma
+Fulfillment Details,Izpildes detaļas
+Full Name,Pilns vārds
+Gain,Ieguvums
+Generate a fresh prepaid card and start it with an opening balance.,Izveidojiet jaunu priekšapmaksas karti un sāciet to ar sākuma atlikumu.
+Generate and install the certificate to allow fully silent printing without trust prompts.,"Ģenerējiet un instalējiet sertifikātu, lai nodrošinātu pilnīgi klusu drukāšanu bez uzticamības uzvednēm."
+Generate Certificate,Izveidojiet sertifikātu
+Generated scale barcode: {0},Ģenerēts mēroga svītrkods: {0}
+Get Payments,Saņemiet maksājumus
+Gift Card,Dāvanu karte
+Gift card amount must be greater than zero.,Dāvanu kartes summai jābūt lielākai par nulli.
+Gift Card Code,Dāvanu kartes kods
+Gift card code is required for redemption,"Lai to izmantotu, ir nepieciešams dāvanu kartes kods"
+Gift card code is required.,Nepieciešams dāvanu kartes kods.
+Gift card issued successfully.,Dāvanu karte veiksmīgi izsniegta.
+Gift card loaded successfully.,Dāvanu karte veiksmīgi ielādēta.
+Gift Card Management,Dāvanu karšu pārvaldība
+Gift card payment,Dāvanu kartes apmaksa
+Gift card redemption requires an online connection,Dāvanu kartes izpirkšanai nepieciešams tiešsaistes savienojums
+Gift card topped up successfully.,Dāvanu karte veiksmīgi papildināta.
+Gift Cards,Dāvanu kartes
+Go to Frappe Desk,Dodieties uz Frappe Desk
+Grand Total,Grand Total
+Gross Margin,Bruto peļņa
+Gross Profit,Bruto peļņa
+Gross Sales,Bruto pārdošana
+Group not found,Grupa nav atrasta
+"Grouped controls for terminal, UI, and session settings.","Grupētas vadīklas termināļa, lietotāja interfeisa un sesijas iestatījumiem."
+Grouped totals for each payment method and currency,Grupētas kopsummas katram maksājuma veidam un valūtai
+Hide,Slēpt
+Hide Gift Card,Paslēpt dāvanu karti
+Hide Non Essential Fields,Slēpt nebūtiskus laukus
+Hide quantity decimals,Slēpt daudzuma decimāldaļas
+Hide search tools,Slēpt meklēšanas rīkus
+Hide zero rated items,Slēpt vienumus ar nulles vērtējumu
+High,Augsts
+History,Vēsture
+Hourly (Today),Reizi stundā (šodien)
+How this section works,Kā darbojas šī sadaļa
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","Ja joprojām ir novecojuši dati, atveriet Iestatījumi > Bezsaistes un sinhronizēšana un tiešsaistē palaidiet Rebuild Offline Data vēlreiz."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","Ja brīdinājums saglabājas, atveriet Iestatījumi > Bezsaistes un sinhronizēšana, pēc tam palaidiet Refresh Offline Data vai Rebuild Offline Data."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Importējiet sertifikātu QZ Tray un restartējiet QZ Tray katrā POS iekārtā.
+In,In
+In stock: {0},Noliktavā: {0}
+Include Batch / Serial,Iekļaut partiju / sēriju
+Include Price,Iekļaut cenu
+Increase quantity,Palielināt daudzumu
+IndexedDB,IndexedDB
+Initial Amount,Sākotnējā summa
+Initialize your shift with opening balances,Inicializējiet savu maiņu ar sākuma atlikumiem
+Initializing application...,Notiek pieteikuma inicializācija...
+"Inspect cache, sync, and prerequisite status","Pārbaudiet kešatmiņu, sinhronizāciju un priekšnoteikumu statusu"
+Installed Applications,Instalētās lietojumprogrammas
+Insufficient stock:\n{0},Nepietiekams krājums:\n{0}
+Invalid rate,Nederīga likme
+Inventory Status Report,Inventāra statusa pārskats
+Invoice,Rēķins
+Invoice {0} is Submitted,Rēķins {0} ir iesniegts
+Invoice {0} processed successfully,Rēķins {0} veiksmīgi apstrādāts
+Invoice {0} submission failed,Neizdevās iesniegt rēķinu {0}
+Invoice {0} was already submitted,Rēķins {0} jau ir iesniegts
+Invoice Adjustments,Rēķinu korekcijas
+Invoice Change,Rēķina maiņa
+Invoice Details,Rēķina informācija
+Invoice is still in draft after background submission.,Pēc fona iesniegšanas rēķins joprojām ir melnraksts.
+Invoice Items,Rēķina preces
+Invoice Management,Rēķinu pārvaldība
+Invoice Mgmt,Rēķins Mgmt
+Invoice saved offline,Rēķins saglabāts bezsaistē
+Invoice submission failed,Rēķina iesniegšana neizdevās
+Invoice Submitted,Rēķins ir iesniegts
+"Invoice value settled by loyalty points, not cash collection","Rēķina vērtība tiek apmaksāta ar lojalitātes punktiem, nevis skaidras naudas iekasēšanu"
+Invoices,Rēķini
+Invoices already past due date,Rēķini jau ir nokavēti
+Invoices saved as POS Invoices,Rēķini saglabāti kā POS rēķini
+Invoices still carrying balances,Rēķinos joprojām ir atlikumi
+Issue Mode,Problēmu režīms
+Issue New Card,Izdot jaunu karti
+Issue Workflow,Problēma Darbplūsma
+"Issue, top up, and check","Izsniedziet, papildiniet un pārbaudiet"
+Item,Vienums
+Item / Product Sales Report,Preču/produktu pārdošanas pārskats
+Item {0} added to invoice,Prece {0} pievienota rēķinam
+Item '{0}' has no barcode,Vienumam “{0}” nav svītrkoda
+Item Code,Preces kods
+Item created successfully,Vienums veiksmīgi izveidots
+Item is out of stock,Prece nav noliktavā
+Item Name,Vienuma nosaukums
+Item not found,Vienums nav atrasts
+Item order updated,Preču pasūtījums atjaunināts
+Item Selector Settings,Vienumu atlasītāja iestatījumi
+Items,Preces
+Items added in POS will appear here automatically.,POS pievienotie vienumi šeit parādīsies automātiski.
+Items added to invoice,Preces pievienotas rēķinam
+Items per page,Vienumi vienā lapā
+Items Sold,Pārdotās preces
+Items/Invoice,Preces/rēķins
+Item-wise Profitability,Preču rentabilitāte
+Journal Entry,Žurnāla ieraksts
+json,json
+Just now,Tikai tagad
+Keep offline prerequisites healthy and recover stale data safely.,Saglabājiet bezsaistes priekšnoteikumus veselīgus un droši atkopiet novecojušus datus.
+Labels,Etiķetes
+"Language, theme, terminal tools, and session controls.","Valoda, motīvs, termināļa rīki un sesijas vadīklas."
+Last,Pēdējais
+Last 14 Days (Paid vs Pending),Pēdējās 14 dienas (apmaksātās un neapstiprinātās)
+Last 14 Days Activity,Pēdējo 14 dienu darbība
+Last 14 Days Gross Profit,Pēdējo 14 dienu bruto peļņa
+Last 14 Days Purchases,Pēdējo 14 dienu pirkumi
+Last 14 Days Tax/Charges,Pēdējo 14 dienu nodoklis/izmaksas
+Last sync:,Pēdējā sinhronizācija:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},Pēdējā sinhronizācija: {0} | labi: {1} | neizdevās: {2} | izlaists: {3}
+Latest entries for current shift,Jaunākie ieraksti par pašreizējo maiņu
+Lead Time,Izpildes laiks
+Limited,Ierobežots
+lines,līnijas
+List,Saraksts
+Live Snapshot,Tiešraides momentuzņēmums
+Load a POS profile and cashier first.,Vispirms ielādējiet POS profilu un kasieri.
+Load More Invoices,Ielādējiet vairāk rēķinu
+Load previously saved invoices,Ielādēt iepriekš saglabātos rēķinus
+Load Sale,Kravas izpārdošana
+Load Sales Invoice,Ielādēt pārdošanas rēķinu
+Loading app data...,Notiek lietotnes datu ielāde...
+Loading customer database...,Notiek klientu datu bāzes ielāde...
+Loading customers...,Notiek klientu ielāde...
+Loading database stats...,Notiek datu bāzes statistikas ielāde...
+Loading details...,Notiek informācijas ielāde...
+Loading invoice history...,Notiek rēķinu vēstures ielāde...
+Loading items...,Notiek vienumu ielāde...
+Loading product catalog...,Notiek preču kataloga ielāde...
+Loading return invoices...,Notiek atgriešanas rēķinu ielāde...
+Loading server CPU/memory usage...,Notiek servera CPU/atmiņas lietojuma ielāde...
+Loading suppliers...,Notiek piegādātāju ielāde...
+Loading unpaid invoices...,Notiek neapmaksāto rēķinu ielāde...
+Loading view...,Notiek skata ielāde...
+Loading...,Notiek ielāde...
+Local storage is unavailable. Switching to online-only mode.,Vietējā krātuve nav pieejama. Pārslēgšanās uz tikai tiešsaistes režīmu.
+localStorage,vietējāStorage
+Location Performance,Atrašanās vietas veiktspēja
+Locations,Atrašanās vietas
+Lock Screen,Bloķēšanas ekrāns
+Lookup Workflow,Uzmeklēšanas darbplūsma
+Loss,Zaudējums
+Low,Zems
+Low Stock,Mazs krājums
+Low Stock Alerts,Brīdinājumi par krājumu samazināšanos
+Low Stock Items,Trūkuma preces
+Low Stock Threshold,Zems krājumu slieksnis
+Low Stock Total,Mazs krājums Kopā
+Lowest Margin,Zemākā peļņa
+Low-frequency maintenance and system details.,Zemfrekvences apkope un sistēmas detaļas.
+Loyalty Redeemed,Lojalitāte ir izpirkta
+Loyalty Redemption,Lojalitātes izpirkšana
+Make New Payment,Veikt jaunu maksājumu
+Manage all,Pārvaldīt visu
+Manage and synchronize your offline transactions,Pārvaldiet un sinhronizējiet bezsaistes darījumus
+Manage Cashier PIN,Pārvaldīt kases PIN
+"Manage offline tools, terminal controls, and maintenance from one workspace.","Pārvaldiet bezsaistes rīkus, termināļa vadīklas un apkopi vienā darbvietā."
+manual,rokasgrāmata
+"Manual codes, barcode scans, and QR scans work in the same field","Manuālie kodi, svītrkodu skenēšana un QR skenēšana darbojas tajā pašā laukā"
+Manual offline mode is enabled,Manuālais bezsaistes režīms ir iespējots
+Margin,Marža
+Maximum available quantity is {0}. Quantity adjusted to match stock.,"Maksimālais pieejamais daudzums ir {0}. Daudzums pielāgots, lai tas atbilstu krājumam."
+Maximum discount amount for this offer item is {0}.,Maksimālā atlaides summa šim piedāvājuma vienumam ir {0}.
+Maximum discount percentage for this offer item is {0}%.,Maksimālā atlaides procentuālā daļa šim piedāvājuma vienumam ir {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,Maksimālais piedāvājuma daudzums ir {0}. Daudzums pielāgots atļautajam ierobežojumam.
+Medium,Vidēja
+Method-wise Collections,Metodiski kolekcijas
+Minimum allowed rate for this offer item is {0}.,Minimālā atļautā cena šim piedāvājuma vienumam ir {0}.
+Minimum Qty,Minimālais daudzums
+Mobile No,Mobilais Nr
+Mode,Režīms
+Mode of Payment,Maksājuma veids
+Month,Mēnesis
+Month ?,Mēnesi?
+Monthly Profit,Mēneša peļņa
+Monthly Sales,Ikmēneša izpārdošana
+Monthly Sales Summary,Mēneša pārdošanas kopsavilkums
+Month-wise,Mēneša ziņā
+Most Active Cashiers,Aktīvākie kasieri
+Movement Type,Kustības veids
+Movements,Kustības
+Multi Currency,Vairāku valūtu
+N/A,N/A
+Name,Vārds
+Negative Stock,Negatīvs krājums
+Negative Stock Items,Negatīvie krājumi
+Negative values not allowed,Negatīvās vērtības nav atļautas
+Net,Net
+Net Qty,Neto daudzums
+Net Sales,Neto pārdošanas apjoms
+Net Value,Neto vērtība
+Never,Nekad
+New changes are ready to load,Jaunas izmaiņas ir gatavas ielādei
+New Item,Jauns vienums
+New Offer Available,Ir pieejams jauns piedāvājums
+New PIN,Jauns PIN
+New rate,Jauna likme
+Next unit of measure,Nākamā mērvienība
+No attribute data found.,Nav atrasti atribūtu dati.
+No Barcode,Nav svītrkoda
+No barcode found for UOM '{0}',UOM '{0}' nav atrasts svītrkods
+No branch/location data found.,Filiāles/atrašanās vietas dati nav atrasti.
+No brand data found.,Zīmola dati nav atrasti.
+No cached gift card balance is available offline.,Kešatmiņā saglabātais dāvanu kartes atlikums nav pieejams bezsaistē.
+No camera found on this device. Please ensure your device has a working camera.,"Šajā ierīcē nav atrasta neviena kamera. Lūdzu, pārliecinieties, ka jūsu ierīcei ir funkcionējoša kamera."
+No capability warnings recorded yet.,Vēl nav reģistrēts neviens brīdinājums par iespējām.
+No cash expected for this shift.,Šai maiņai nauda nav paredzēta.
+No cash mode configured,Nav konfigurēts skaidras naudas režīms
+No cash movement type is allowed for this POS Profile.,Šim POS profilam nav atļauts neviens skaidras naudas kustības veids.
+No cashier PIN is set yet. Create one now.,Kases PIN vēl nav iestatīts. Izveidojiet to tūlīt.
+No cashier profiles are available for this POS profile yet.,Šim POS profilam vēl nav pieejams neviens kases profils.
+No cashier-wise discount/void/return activity.,Nekādas kasieres atlaižu/anulēšanas/atgriešanas darbības.
+No category data found.,Kategorijas dati nav atrasti.
+No category profitability data found.,Kategoriju rentabilitātes dati nav atrasti.
+No change returned recorded for this shift.,Šai maiņai netika reģistrētas nekādas izmaiņas.
+No change-allocation invoices match the current filters.,Neviens izmaiņu piešķiršanas rēķins neatbilst pašreizējiem filtriem.
+No charge head breakdown found.,Nav atrasts uzlādes galvas sadalījums.
+No Company Selected,Nav atlasīts neviens uzņēmums
+No customer sales data found.,Klientu pārdošanas dati nav atrasti.
+No day-wise discount/void/return trend.,Nav dienas atlaižu/anulēšanas/atgriešanas tendences.
+No day-wise payment data found.,Dienas maksājumu dati nav atrasti.
+No day-wise profitability trend found.,Dienas rentabilitātes tendence netika atrasta.
+No day-wise purchase data found.,Nav atrasti pirkuma dati par katru dienu.
+No day-wise sales trend found.,Dienas pārdošanas tendence netika atrasta.
+No day-wise tax/charges trend found.,Dienas nodokļu/maksas tendence netika atrasta.
+No dead stock items.,Nav mirušu krājumu preču.
+No due date,Nav izpildes datuma
+No exact repair match found for this invoice,Šim rēķinam netika atrasta precīza remonta atbilstība
+No hourly sales trend found for today.,Šodien nav atrasta neviena stundas pārdošanas tendence.
+No invoice activity found.,Netika atrasta neviena rēķina darbība.
+No invoices found,Netika atrasts neviens rēķins
+No invoices found. Try different search criteria.,Netika atrasts neviens rēķins. Izmēģiniet dažādus meklēšanas kritērijus.
+No invoices recorded for this shift.,Par šo maiņu nav reģistrēts neviens rēķins.
+No item profitability data found.,Preču rentabilitātes dati nav atrasti.
+No item sales data found for this period.,Par šo periodu netika atrasti preču pārdošanas dati.
+No items found,Nav atrasts neviens vienums
+No items in cart,Grozā nav preču
+No items with barcodes to print,"Nav vienumu ar svītrkodiem, ko drukāt"
+No location-wise top item data found.,Nav atrasti dati par populārāko vienumu atrašanās vietu.
+No low stock alerts right now.,Pašlaik nav brīdinājumu par zemu krājumu daudzumu.
+No low stock items.,Nav preču ar zemu noliktavu.
+No matching items in cart,Grozā nav atbilstošu preču
+No month-wise sales trend found.,Netika atrasta neviena mēneša pārdošanas tendence.
+No negative stock items.,Nav negatīvu krājumu preču.
+No notifications yet,Pagaidām nav paziņojumu
+No offline cash movement synced.,Nav sinhronizēta bezsaistes skaidras naudas kustība.
+No offline invoices pending synchronization,"Nav bezsaistes rēķinu, kas gaida sinhronizāciju"
+No offline sync issues recorded yet.,Vēl nav reģistrēta neviena bezsaistes sinhronizācijas problēma.
+No out-of-stock items.,"Nav preču, kuras nav noliktavā."
+No outstanding credit invoices for this shift.,Šai maiņai nav neapmaksātu kredītrēķinu.
+No payment collection data found.,Maksājumu iekasēšanas dati nav atrasti.
+No payment rows available on this invoice.,Šajā rēķinā nav pieejama neviena maksājumu rinda.
+No payments registered for this shift.,Par šo maiņu nav reģistrēts neviens maksājums.
+No pending balances in this period.,Šajā periodā nav neapstiprinātu atlikumu.
+No pending offline invoices,Nav neapstiprinātu bezsaistes rēķinu
+No Print Formats Found,Drukas formāti nav atrasti
+No profiles found for selected scope. Falling back to current profile failed.,Atlasītajai jomai nav atrasts neviens profils. Atgriezties uz pašreizējo profilu neizdevās.
+No recent customer activity found.,Netika atrasta neviena pēdējā klienta darbība.
+No recent stock entries found.,Nav atrasti neseni krājuma ieraksti.
+No records found,Nav atrasts neviens ieraksts
+No reorder suggestions right now.,Pašlaik nav ieteikumu par pārkārtošanu.
+No repeat customers in this period.,Šajā periodā nav atkārtotu klientu.
+No response from server,Nav atbildes no servera
+No return invoices found,Atgriešanas rēķini netika atrasti
+No return item trend found.,Atgriešanas preču tendence nav atrasta.
+No returnable items found for this invoice,Šim rēķinam nav atrasta neviena atgriežama prece
+No returns were processed in this shift.,Šajā maiņā neviena atgriešana netika apstrādāta.
+No risk activity found.,Nav atrasta riska darbība.
+No sales activity found for this period.,Šajā periodā netika atrasta neviena pārdošanas darbība.
+No slow moving items.,Nav lēni kustīgu priekšmetu.
+No staff sales activity found.,Netika atrasta personāla pārdošanas darbība.
+No stock movement for this period.,Šajā periodā krājumu kustības nav.
+No submitted cash movements in this shift.,Šajā maiņā nav iesniegta neviena skaidras naudas kustība.
+No supplier purchases found in this month.,Šajā mēnesī nav atrasts neviens piegādātāja pirkums.
+No suppliers found for this period.,Šajā periodā nav atrasts neviens piegādātājs.
+No sync trigger has run yet in this session.,Šajā sesijā vēl nav palaists neviens sinhronizācijas aktivizētājs.
+No tax head breakdown found.,Netika atrasts nodokļu kategorijas sadalījums.
+No top items found for this location.,Šai atrašanās vietai nav atrasta neviena populārākā prece.
+No unpaid invoices,Nav neapmaksātu rēķinu
+No variant data found.,Nav atrasti dati par variantiem.
+No week-wise sales trend found.,Netika atrasta neviena nedēļas pārdošanas tendence.
+No.,Nē.
+Nobile Number,Nobiles numurs
+Not available,Nav pieejams
+Not checked,Nav pārbaudīts
+Not selected,Nav atlasīts
+Not Set,Nav iestatīts
+Notifications,Paziņojumi
+Offer,Piedāvājums
+Offer Applied,Piedāvājums ir piemērots
+Offer criteria exceeded,Piedāvājuma kritēriji ir pārsniegti
+Offer Item,Piedāvājuma vienība
+Offer item unavailable,Piedāvājuma prece nav pieejama
+Offer Removed,Piedāvājums noņemts
+Offer UOM cannot be changed,Piedāvājuma UOM nevar mainīt
+Offer?,Piedāvāt?
+Offers,Piedāvājumi
+Offline,Bezsaistē
+Offline & Sync,Bezsaistē un sinhronizēšana
+Offline Capabilities,Bezsaistes iespējas
+Offline data status refreshed,Bezsaistes datu statuss ir atsvaidzināts
+Offline diagnostics,Bezsaistes diagnostika
+Offline Invoices,Bezsaistes rēķini
+Offline invoices status,Bezsaistes rēķinu statuss
+Offline invoices synced,Bezsaistes rēķini ir sinhronizēti
+Offline Queue: {0},Bezsaistes rinda: {0}
+Offline rebuild guidance,Bezsaistes pārbūves norādījumi
+Offline restore is unavailable for this session.,Atjaunošana bezsaistē šai sesijai nav pieejama.
+Offline selling is available with degraded capabilities.,Pārdošana bezsaistē ir pieejama ar samazinātām iespējām.
+Offline snapshot does not match the current POS state.,Bezsaistes momentuzņēmums neatbilst pašreizējam POS stāvoklim.
+Offline Status,Bezsaistes statuss
+"Offline, terminal, and system controls","Bezsaistes, termināļa un sistēmas vadīklas"
+OK,Labi
+Online,Tiešsaistē
+Open actions menu,Atveriet darbību izvēlni
+Open balance to collect,"Atvērt atlikumu, lai savāktu"
+Open Customer Display,Atveriet klientu displeju
+Open drawer,Atveriet atvilktni
+Open invoices,Atvērtie rēķini
+Open Payments?,Vai atvērt maksājumus?
+Open POS home,Atveriet POS sākumlapu
+Open this screen from POS Menu -> Open Customer Display.,Atveriet šo ekrānu no POS Menu -> Open Customer Display.
+OpenCV image processing enabled - Enhanced barcode detection,OpenCV attēlu apstrāde ir iespējota — uzlabota svītrkoda noteikšana
+OpenCV image processing unavailable on this device,OpenCV attēlu apstrāde šajā ierīcē nav pieejama
+OpenCV Off,OpenCV izslēgts
+OpenCV On,OpenCV ieslēgts
+OpenCV processing disabled,OpenCV apstrāde ir atspējota
+Opening Amount,Atvēršanas summa
+Opening Cash,Kases atvēršana
+options,iespējas
+Order,Pasūtiet
+Original,Oriģināls
+Other,Cits
+Out,Ārā
+Out of Stock,Nav noliktavā
+Out of Stock Items,Preces nav noliktavā
+Outstanding,Izcili
+Outstanding Credit by Currency,Nenomaksāts kredīts pēc valūtas
+Overdue,Nokavēts
+Overpayment Change,Pārmaksas maiņa
+Overpayment change deducted: {0},Atskaitītas pārmaksas izmaiņas: {0}
+Packing List,Iepakojuma saraksts
+Page Format,Lapas formāts
+Page unavailable offline,Lapa nav pieejama bezsaistē
+Paid,Apmaksāts
+Paid (orig):,Apmaksāts (oriģināls):
+Paid Amount,Samaksātā summa
+Paid change cannot be greater than total change!,Apmaksātās izmaiņas nevar būt lielākas par kopējām izmaiņām!
+Paid:,Apmaksāts:
+Parent Item,Mātes vienums
+Partial,Daļēja
+Partly Paid,Daļēji apmaksāts
+Party Account,Partijas konts
+Party Type,Ballītes veids
+Pause terminal until next cashier,Pauzējiet termināli līdz nākamajam kasierim
+PAY,MAKSĀT
+Payment,Maksājums
+Payment Account,Maksājumu konts
+Payment entries processed for Invoice {0},Maksājumu ieraksti apstrādāti rēķinam {0}
+Payment Entry Type,Maksājuma ieraksta veids
+Payment History,Maksājumu vēsture
+Payment ID,Maksājuma ID
+Payment Method Report,Maksājuma metodes pārskats
+Payment Methods,Maksājumu veidi
+Payment of {0} received successfully.,Maksājums {0} ir veiksmīgi saņemts.
+Payment Progress,Maksājuma norise
+Payment Reconciliation,Maksājumu saskaņošana
+Payment request status could not be retrieved. Please try again,"Maksājuma pieprasījuma statusu nevarēja izgūt. Lūdzu, mēģiniet vēlreiz"
+Payment Request took too long to respond. Please try requesting for payment again,"Atbildēšana uz maksājuma pieprasījumu aizņēma pārāk ilgu laiku. Lūdzu, mēģiniet vēlreiz pieprasīt maksājumu"
+Payment saved offline,Maksājums saglabāts bezsaistē
+Payment State,Maksājuma valsts
+Payment Status,Maksājuma statuss
+Payment submitted but print function could not be executed. Payment name not found.,"Maksājums ir iesniegts, bet drukāšanas funkciju nevarēja izpildīt. Maksājuma nosaukums nav atrasts."
+Payment submitted.,Maksājums iesniegts.
+Payment Summary,Maksājumu kopsavilkums
+Payments,Maksājumi
+Payments are not open. Do you want to open payments and submit?,Maksājumi nav atvērti. Vai vēlaties atvērt un iesniegt maksājumus?
+Payments by Mode of Payment,Maksājumi pēc maksājuma veida
+PDF,PDF
+Peak Hour,Pīķa stunda
+Peak Memory:,Maksimālā atmiņa:
+Peak Server:,Maksimālais serveris:
+Peak:,Virsotne:
+Pending,Gaida
+Pending Amount,Neapstiprinātā summa
+Pending count updated from {0} to {1},Gaidīšanas skaits atjaunināts no {0} uz {1}
+Pending Exposure,Gaida ekspozīciju
+Pending Invoices,Neapstiprinātie rēķini
+Pending Ratio,Gaidīšanas attiecība
+Pending Sales,Gaidāmās pārdošanas
+Pending sales: {0} | Cache usage: {1}%,Gaidāmās pārdošanas: {0} | Kešatmiņas lietojums: {1}%
+Pending Sync,Gaida sinhronizāciju
+Pending: {0},Gaida: {0}
+Pending: {0} | Synced: {1} | Draft: {2},Gaida: {0} | Sinhronizēts: {1} | Melnraksts: {2}
+Per Page,Lapā
+Personal,Personīga
+Personal preferences adjust the current cashier experience without changing the active POS route.,"Personiskās preferences pielāgo pašreizējo kases pieredzi, nemainot aktīvo POS maršrutu."
+PIN confirmation does not match.,PIN apstiprinājums neatbilst.
+PIN must be 4 to 8 digits.,PIN kodā ir jābūt 4–8 cipariem.
+Please add at least one item.,"Lūdzu, pievienojiet vismaz vienu vienumu."
+Please allow camera access to scan codes,"Lūdzu, atļaujiet kamerai piekļuvi, lai skenētu kodus"
+Please enter payment amount,"Lūdzu, ievadiet maksājuma summu"
+Please fill all required fields,"Lūdzu, aizpildiet visus nepieciešamos laukus"
+Please make a payment or select a payment,"Lūdzu, veiciet maksājumu vai atlasiet maksājumu"
+Please request phone payment or use another payment method,"Lūdzu, pieprasiet maksājumu pa tālruni vai izmantojiet citu maksājuma veidu"
+Please select a customer first,"Lūdzu, vispirms atlasiet klientu"
+Please select a party,"Lūdzu, atlasiet ballīti"
+Please select a party before reconciling.,"Pirms saskaņošanas, lūdzu, izvēlieties pusi."
+Please select a valid movement type.,"Lūdzu, atlasiet derīgu kustības veidu."
+Please select an invoice,"Lūdzu, atlasiet rēķinu"
+Please select company before reconciling.,"Pirms saskaņošanas, lūdzu, atlasiet uzņēmumu."
+Please set the customer's mobile number,"Lūdzu, iestatiet klienta mobilā tālruņa numuru"
+Please try again or enter the item manually.,"Lūdzu, mēģiniet vēlreiz vai ievadiet vienumu manuāli."
+Please verify the barcode or check the item's availability.,"Lūdzu, pārbaudiet svītrkodu vai preces pieejamību."
+Points,Punkti
+Popup blocked. Please allow popups.,"Uznirstošais logs ir bloķēts. Lūdzu, atļaujiet uznirstošos logus."
+POS,POS
+POS controls and maintenance,POS kontrole un apkope
+POS Expense is disabled for this POS Profile.,POS izdevumi šim POS profilam ir atspējoti.
+POS is running with limited offline prerequisites.,POS darbojas ar ierobežotiem bezsaistes priekšnosacījumiem.
+POS Profile,POS profils
+Position the QR code or barcode within the scanning area,Novietojiet QR kodu vai svītrkodu skenēšanas zonā
+Posting,Publicēšana
+Posting and Price List,Izsūtīšana un cenrādis
+Posting Date,Publicēšanas datums
+Preparing background sync,Notiek fona sinhronizācijas sagatavošana
+"Press OK to continue offline with a warning, or Cancel to retry.","Nospiediet OK, lai turpinātu bezsaistē ar brīdinājumu, vai Atcelt, lai mēģinātu vēlreiz."
+Previous unit of measure,Iepriekšējā mērvienība
+Price List,Cenu saraksts
+Price List Rate,Cenrādis likme
+Price list rate updated locally only,Cenrādis tiek atjaunināts tikai lokāli
+Pricing & Discounts,Cenas un atlaides
+Pricing Rule,Cenu noteikšanas noteikums
+Print,Drukāt
+Print Draft,Drukāt melnrakstu
+Print Format (Invoice),Drukas formāts (rēķins)
+Print Format (Order),Drukas formāts (pasūtījums)
+Print invoice,Drukāt rēķinu
+Print Purchase Invoice instead of PO,"Drukāt pirkuma rēķinu, nevis PO"
+Printer,Printeris
+Processed returns impacting the shift totals,"Apstrādātas atgriešanas, kas ietekmē maiņu kopsummas"
+Processing Payment,Maksājuma apstrāde
+Processing payment entries for Invoice {0},Notiek maksājuma ierakstu apstrāde rēķinam {0}
+Profile,Profils
+Profiles,Profili
+Profit,Peļņa
+Profit: Invoice Item Estimate,Peļņa: rēķina preces tāme
+Profit: Stock Ledger (COGS),Peļņa: akciju virsgrāmata (COGS)
+Profitability Report,Rentabilitātes ziņojums
+Prorated return discount,Proporcionāla atgriešanas atlaide
+Purchase Amount,Pirkuma summa
+Purchase Invoices,Pirkuma rēķini
+Purchase Order created,Pirkšanas pasūtījums izveidots
+Qty,Daudzums
+Qualified,Kvalificēts
+Quantity,Daudzums
+Quantity exceeds available stock,Daudzums pārsniedz pieejamos krājumus
+Quick Actions,Ātrās darbības
+Quotation {0} is Submitted,Piedāvājums {0} ir iesniegts
+Quotation submitted,Citāts iesniegts
+QZ Tray connected.,QZ paplāte ir pievienota.
+QZ Tray is manually disconnected. Press Connect to enable it again.,"QZ paplāte ir manuāli atvienota. Nospiediet Savienot, lai to vēlreiz iespējotu."
+QZ Tray is not connected.,QZ Tray nav pievienots.
+QZ Tray Setup,QZ paplātes iestatīšana
+Rate,Likme
+Rate adjusted to maximum allowed discount,Likme pielāgota maksimāli pieļaujamajai atlaidei
+Ready,Gatavs
+Ready to resume,Gatavs atsākt
+Ready!,Gatavs!
+Real-time POS insights for retail operations.,Reāllaika POS ieskati mazumtirdzniecības operācijām.
+Rebuild Offline Data,Atjaunot bezsaistes datus
+Receive,Saņemt
+Receive now,Saņemiet tūlīt
+Received,Saņemts
+Received:,Saņemts:
+Recent Movement Entries,Jaunākie kustību ieraksti
+Recent updates about your invoices,Jaunākie atjauninājumi par jūsu rēķiniem
+Recently Active Customers,Nesen aktīvi klienti
+Rechecking connection,Atkārtoti pārbauda savienojumu
+Reconcile payment methods and close shift,Saskaņojiet maksājumu metodes un aizveriet maiņu
+Reconciling Payments,Maksājumu saskaņošana
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","Atkārtoti izveidojiet savienojumu un atveriet šo lapu vienreiz, kad esat tiešsaistē, pēc tam bezsaistes atsvaidzināšana varēs to atjaunot."
+Reconnect online to refresh cached offline data from the server.,"Atkārtoti izveidojiet savienojumu tiešsaistē, lai atsvaidzinātu kešatmiņā saglabātos bezsaistes datus no servera."
+Recreate local offline prerequisites from scratch,No jauna izveidojiet vietējos bezsaistes priekšnoteikumus
+Recv:,Rev.:
+Redeem,Izpirkt
+Redeem / Scan,Izpirkt/skenēt
+Redeem Amount,Izpirkuma summa
+Redeem Mode,Izpirkšanas režīms
+Redeemed Amount,Izpirktā summa
+Redeemed credit cannot be greater than its total.,Izpirktais kredīts nevar būt lielāks par tā kopējo summu.
+Redemption and Totals,Izpirkšana un kopsummas
+Reference,Atsauce
+Refresh,Atsvaidzināt
+Refresh Exchange Rate,Valūtas kursa atsvaidzināšana
+Refresh Offline Data,Atsvaidziniet bezsaistes datus
+Refresh Printers,Atsvaidziniet printerus
+Refund,Atmaksa
+Release Notes,Izlaiduma piezīmes
+Reload,Pārlādēt
+Reload customers,Pārlādējiet klientus
+Reload Items,Pārlādēt vienumus
+Reload Now,Pārlādēt tūlīt
+Reload to apply the latest changes. Your current session will be refreshed.,"Atkārtoti ielādējiet, lai lietotu jaunākās izmaiņas. Jūsu pašreizējā sesija tiks atsvaidzināta."
+Reload Workflow,Pārlādēt darbplūsmu
+Remarks,Piezīmes
+Remarks are required.,Nepieciešamas piezīmes.
+Remove,Noņemt
+Remove barcode item,Noņemiet svītrkoda vienumu
+Remove cached data and reload the POS app,Noņemiet kešatmiņā saglabātos datus un atkārtoti ielādējiet POS lietotni
+Remove item,Noņemt vienumu
+Remove Offer,Noņemt piedāvājumu
+Reorder / Purchase Suggestions,Pārkārtošanas / pirkuma ieteikumi
+Repair Candidate,Remonta kandidāts
+Repair Change Allocation,Remonta maiņas piešķiršana
+Repair requires an online connection,"Lai veiktu remontu, ir nepieciešams tiešsaistes savienojums"
+Repaired,Remontēts
+Repairing change allocation,Izmaiņu piešķiršanas labošana
+Repeat Customers,Atkārtoti klienti
+Repeat Rate,Atkārtošanas ātrums
+Request,Pieprasīt
+Request ID: {0},Pieprasījuma ID: {0}
+Request Payment,Pieprasīt maksājumu
+Requested route: {0},Pieprasītais maršruts: {0}
+Required columns cannot be hidden,Nepieciešamās kolonnas nevar paslēpt
+Reset,Atiestatīt
+Reset item name,Atiestatīt vienuma nosaukumu
+Reset to Default,Atiestatīt uz noklusējuma vērtību
+Resource Health,Resursu veselība
+Restricted,Ierobežots
+Restricted operational controls for supervisors only.,Ierobežotas darbības kontroles tikai uzraugiem.
+Retry,Mēģiniet vēlreiz
+Retry route,Mēģiniet vēlreiz maršrutu
+Return,Atgriezties
+Return Amount,Atgriešanas summa
+Return Count,Atgriešanās skaits
+Return items must have negative quantities,Atgriežamajām precēm jābūt negatīviem daudzumiem
+Return total must be negative,Kopējai atdevei jābūt negatīvai
+Return Valid Until,Atgriešana derīga līdz
+Return window passed,Atgriešanas logs pagājis
+Return without Invoice,Atgriešana bez rēķina
+Returns,Atgriežas
+Returns / Voids / Discounts,Atgriešana / Tukšumi / Atlaides
+Returns by Currency,Atgriešana pēc valūtas
+Revenue,Ieņēmumi
+Review shift totals before submitting the closing entry,Pirms noslēguma ieraksta iesniegšanas pārskatiet maiņu kopsummas
+Round Off,Noapaļot
+Rows,Rindas
+Rows:,Rindas:
+Rule,Noteikums
+Sale,Izpārdošana
+Sales,Pārdošana
+Sales Order {0} is Submitted,Pārdošanas pasūtījums {0} ir iesniegts
+Sales Person and Print,Pārdevēja persona un druka
+Sales Person not found,Pārdevēja persona nav atrasta
+Sales processed,Pārdošana apstrādāta
+Sales Return,Pārdošanas atgriešana
+Sales Trend Report,Pārdošanas tendenču pārskats
+Save,Saglabāt
+Save & Clear,Saglabāt un notīrīt
+Save as POS Profile Default,Saglabāt kā POS profila noklusējumu
+Save Settings,Saglabāt iestatījumus
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,"Saglabājiet atlasīto printeri kā noklusēto POS profilu, lai tas tiktu parādīts automātiski šajā iestatījumā."
+Saved as draft because: {0},"Saglabāts kā melnraksts, jo: {0}"
+Saving...,Notiek saglabāšana...
+Scale barcode detected. Quantity here is the number of labels to print.,Atklāts mēroga svītrkods. Daudzums šeit ir drukājamo uzlīmju skaits.
+Scale barcode settings are not configured. Using item barcode only.,Mēroga svītrkoda iestatījumi nav konfigurēti. Izmantojot tikai preces svītrkodu.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,Šim vienumam/UOM trūkst mēroga veidnes svītrkoda. Izmantojot tikai preces svītrkodu.
+Scan an existing card and top it up without leaving the payment flow.,"Skenējiet esošu karti un papildiniet to, neizejot no maksājumu plūsmas."
+Scan Error,Skenēšanas kļūda
+Scan or enter a gift card code to check balance or redeem.,"Skenējiet vai ievadiet dāvanu kartes kodu, lai pārbaudītu atlikumu vai izpirktu."
+Scan or paste the card code below.,Skenējiet vai ielīmējiet tālāk norādīto kartes kodu.
+Scan QR Code/Barcode,Skenējiet QR kodu / svītrkodu
+Scan with camera,Skenēt ar kameru
+Scan-First Flow,Scan-First Flow
+Scanned Code:,Skenēts kods:
+Scanning for: {0},Tiek meklēts: {0}
+Scanning items,Vienumu skenēšana
+Scan-Ready,Gatavs skenēšanai
+Scope,Darbības joma
+Scope: All Profiles,Darbības joma: visi profili
+Scope: Current Profile,Darbības joma: pašreizējais profils
+Scope: Specific Profile,Darbības joma: īpašs profils
+Search,Meklēt
+Search Account,Meklēt kontu
+Search an invoice and continue the return flow without extra steps.,Meklējiet rēķinu un turpiniet atgriešanās plūsmu bez papildu darbībām.
+Search customer,Meklēt klientu
+Search invoices or customers,Meklējiet rēķinus vai klientus
+Search item,Meklēt vienumu
+Search item / code,Meklēt preci / kodu
+Search items or barcode,Meklējiet vienumus vai svītrkodu
+Search Mpesa Payments,Meklēt Mpesa Payments
+Search return invoices or customers,Meklēt atgriešanas rēķinus vai klientus
+Search supplier,Meklēt piegādātāju
+Search unpaid invoices or customers,Meklējiet neapmaksātus rēķinus vai klientus
+Secure context (HTTPS or localhost) is required for camera access.,"Lai piekļūtu kamerai, ir nepieciešams drošs konteksts (HTTPS vai localhost)."
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,"Lai piekļūtu kamerai, ir nepieciešams drošs konteksts (HTTPS). Lūdzu, izmantojiet HTTPS, lai piekļūtu kamerai."
+Select,Izvēlieties
+Select a cashier first.,Vispirms izvēlieties kasieri.
+Select a customer,Izvēlieties klientu
+Select a customer to use coupon,"Izvēlieties klientu, kuram izmantot kuponu"
+Select a printer to use QZ silent printing.,"Izvēlieties printeri, lai izmantotu QZ kluso drukāšanu."
+Select Batch,Atlasiet Pakete
+Select Columns to Display,Atlasiet Parādāmās kolonnas
+Select items to sell,"Izvēlieties preces, ko pārdot"
+Select Payment,Atlasiet Maksājums
+Select Payment Account,Atlasiet Maksājumu konts
+Select printer,Izvēlieties printeri
+Select Return Invoice,Atlasiet Atgriešanas rēķins
+Select S.O,Atlasiet S.O
+Select Sales Orders,Atlasiet Pārdošanas pasūtījumi
+Select the cashier who is taking over this terminal.,"Izvēlieties kasieri, kurš pārņem šo termināli."
+Selected,Atlasīts
+Selected movement type is not allowed by POS Profile.,Atlasītais kustības veids nav atļauts POS profilā.
+Selected Payments,Atlasītie maksājumi
+Sensitive actions kept away from quick taps.,Sensitīvas darbības tiek novērstas no ātriem pieskārieniem.
+Serial,Seriāls
+Serial Numbers,Sērijas numuri
+Server CPU Usage:,Servera CPU lietojums:
+Server Health,Servera veselība
+Server Memory Usage:,Servera atmiņas lietojums:
+Server Metrics,Servera metrika
+Server Uptime:,Servera darbības laiks:
+Service Charges,Maksa par pakalpojumu
+Session,Sesija
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,"Iestatiet katru kases PIN veidlapā Lietotājs un saglabājiet termināļa dalībniekus, kas ir piešķirti POS profila lietotājs."
+Settings,Iestatījumi
+Settings in this section update the POS workspace without changing the current route.,"Šīs sadaļas iestatījumi atjaunina POS darbvietu, nemainot pašreizējo maršrutu."
+Setup complete!,Iestatīšana pabeigta!
+Share,Dalīties
+Shared terminal,Kopīgs terminālis
+Shift Closed Snapshot,Shift Closed Snapshot
+Shift Overview,Maiņu pārskats
+Show,Rādīt
+Show cart on customer-facing screen,Rādīt grozu uz klienta ekrāna
+Show last invoice rate,Rādīt pēdējā rēķina likmi
+Show rate info,Rādīt cenu informāciju
+Show Repair Candidates,Rādīt remonta kandidātus
+Show search tools,Rādīt meklēšanas rīkus
+Show the active cart on a customer-facing screen,Rādīt aktīvo grozu uz klientu vērstā ekrānā
+Showing {0}-{1} of {2},Rāda {0}-{1} no {2}
+Showing 0 of 0,Rāda 0 no 0
+Shows the distribution of invoices per currency,Parāda rēķinu sadalījumu pa valūtām
+Sign out of the current POS session,Izrakstieties no pašreizējās POS sesijas
+Size:,Izmērs:
+Skipped Payments,Izlaistie maksājumi
+Skipping items without barcodes,Vienumu izlaišana bez svītrkodiem
+Slow Moving,Lēna kustība
+Slow Moving Items,Lēni kustīgi vienumi
+Slow Queries:,Lēni vaicājumi:
+Sold,Pārdots
+Source,Avots
+Source Cash Account (Optional Override),Avota naudas konts (neobligāta ignorēšana)
+Source Ex. Rate:,Avots Piem. Novērtēt:
+Source Rate:,Avota likme:
+Specific Profile,Konkrēts profils
+Split Invoices,Sadalītie rēķini
+Staff / Cashier Performance Report,Darbinieku/kasiera darbības pārskats
+Status,Statuss
+Stock,Krājumi
+Stock Information,Krājuma informācija
+Stock is lower than requested,Krājumi ir mazāki nekā pieprasīts
+Stock is lower than requested:\n{0},Krājumi ir mazāki nekā pieprasīts:\n{0}
+Stock Movement Report,Pārskats par krājumu kustību
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,"Krājumu atjauninājums: {0} ir pieejams {1}. Pievienojot {2}, krājumi būs zem nulles."
+Submit,Iesniegt
+Submit & Print,Iesniegt un izdrukāt
+Submit Deposit,Iesniegt depozītu
+Submit Expense,Iesniegt izdevumus
+Submitted,Iesniegts
+Submitted Cash Movements,Iesniegtās naudas kustības
+Submitted entries,Iesniegtie ieraksti
+Successfully scanned:,Veiksmīgi skenēts:
+Suggested,Ieteikts
+Suggested Qty,Ieteicamais daudzums
+Supervisor Access,Piekļuve vadītājam
+Supervisor permissions unlock issuance and reloads,Pārrauga atļaujas atbloķē izdošanu un atkārtotu ielādi
+Supervisor Tools,Uzraudzītāja rīki
+Supplier,Piegādātājs
+Supplier and dates are required.,Nepieciešams piegādātājs un datumi.
+Supplier Invoices,Piegādātāju rēķini
+Supplier is required.,Nepieciešams piegādātājs.
+Supplier name is required,Nepieciešams piegādātāja nosaukums
+Supplier Payments,Piegādātāju maksājumi
+Supplier Purchase Summary,Piegādātāja pirkuma kopsavilkums
+Suppliers,Piegādātāji
+Suppliers not found,Piegādātāji nav atrasti
+Switch Camera,Pārslēgt kameru
+Switch Cashier,Mainiet kasieri
+Switch the POS appearance theme,Pārslēdziet POS izskata motīvu
+Switched to:,Pārslēgts uz:
+Sync All Invoices,Sinhronizēt visus rēķinus
+Sync Offline Cash Movements ({0}),Sinhronizēt bezsaistes naudas kustības ({0})
+Sync Offline Sales,Sinhronizējiet bezsaistes pārdošanu
+Synced {0} offline cash movement(s).,Sinhronizēta(-as) {0} bezsaistes skaidras naudas kustība(-as).
+Syncing items in background,Vienumu sinhronizēšana fonā
+System / Diagnostics,Sistēma / Diagnostika
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","Sistēmas darbības ir zemas frekvences uzturēšanas vadīklas, piemēram, lietotņu informācija, atbalsta diagnostika un sesijas vadīklas."
+System Information,Sistēmas informācija
+System Status,Sistēmas statuss
+Tables:,Tabulas:
+Tap the button below to redeem a gift card during checkout.,"Pieskarieties tālāk esošajai pogai, lai norēķināšanās laikā izpirktu dāvanu karti."
+Target,Mērķis
+Target Ex. Rate:,Mērķis Piem. Novērtēt:
+Target Rate:,Mērķa likme:
+Tax,Nodoklis
+Tax / Charges Report,Nodokļu/nodevu pārskats
+Tax Heads,Nodokļu vadītāji
+Taxable Amount,Ar nodokli apliekamā summa
+Tendered,Izsolīts
+Terminal,Terminālis
+Terminal & Devices,Terminālis un ierīces
+Terminal locked,Terminālis ir bloķēts
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","Termināļa rīki ietekmē šo norēķinu staciju, uz klientu vērstos displejus un turpmākās printera/ierīces vadīklas."
+Territory not found,Teritorija nav atrasta
+The amount paid is not complete,Samaksātā summa nav pilnīga
+The app stores data locally for offline use. This is called cache.,Lietotne lokāli saglabā datus lietošanai bezsaistē. To sauc par kešatmiņu.
+The invoice stayed in draft. Please review and submit it manually.,"Rēķins palika melnrakstā. Lūdzu, pārskatiet un iesniedziet to manuāli."
+The maximum discount allowed is,Maksimālā pieļaujamā atlaide ir
+The quantity for {0} has been adjusted to the maximum available stock.,{0} daudzums ir pielāgots maksimālajam pieejamajam krājumam.
+The system could not retrieve the item details. Please try again.,"Sistēma nevarēja izgūt preces informāciju. Lūdzu, mēģiniet vēlreiz."
+These invoices will be synced when connection is restored,"Šie rēķini tiks sinhronizēti, kad savienojums tiks atjaunots"
+This action now opens inside the settings workspace.,Šī darbība tagad tiek atvērta iestatījumu darbvietā.
+This coupon already used !,Šis kupons jau izmantots!
+This invoice does not need change-allocation repair,Šim rēķinam nav nepieciešams izmaiņu-piešķiršanas remonts
+This invoice is already repaired,Šis rēķins jau ir salabots
+This is an item template. Please choose a variant.,"Šī ir vienuma veidne. Lūdzu, izvēlieties variantu."
+this item,šo vienumu
+This POS page could not be opened offline because its code was not cached on this terminal yet.,"Šo POS lapu nevarēja atvērt bezsaistē, jo tās kods vēl nebija kešatmiņā šajā terminālī."
+This Serial Number {0} has already been added!,Šis sērijas numurs {0} jau ir pievienots!
+Threshold,Slieksnis
+Time,Laiks
+Tip: Clear cache regularly to free up space and keep the app fast.,"Padoms. Regulāri notīriet kešatmiņu, lai atbrīvotu vietu un nodrošinātu lietotnes ātruma darbību."
+Tip: Close unused tabs or apps to reduce lag.,"Padoms. Lai samazinātu aizkavi, aizveriet neizmantotās cilnes vai lietotnes."
+Tip: Monitor slow queries and table size for optimal performance.,"Padoms. Pārraugiet lēnus vaicājumus un tabulas lielumu, lai nodrošinātu optimālu veiktspēju."
+To Be Paid,Jāmaksā
+To Date,Līdz datumam
+Today,Šodien
+Today Profit,Šodien peļņa
+Today Sales,Šodien pārdošana
+Toggle navigation drawer,Pārslēgt navigācijas atvilktni
+Toggle Theme,Pārslēgt motīvu
+Tools,Rīki
+Tools for customer-facing screens and terminal-specific actions.,Rīki klientiem vērstiem ekrāniem un terminālim specifiskām darbībām.
+Top Brand,Top zīmols
+Top Category,Augstākā kategorija
+Top Charge Head,Augšējā uzlādes galva
+Top Customers,Labākie klienti
+Top Discount,Galvenā atlaide
+Top Items by Location,Populārākās preces pēc atrašanās vietas
+Top Margin,Augšējā piemale
+Top Pending,Augšējā gaida
+Top Profit Item,Labākā peļņas pozīcija
+Top Return Items,Populārākās atgriešanas preces
+Top Sales by Cashier,Visvairāk pārdotās kases
+Top Supplier,Labākais piegādātājs
+Top Suppliers by Spend,Labākie piegādātāji pēc tēriņiem
+Top Tables,Top tabulas
+Top Tax Head,Augstākais nodokļu vadītājs
+Top Up Amount,Papildināšanas summa
+Top Up Card,Papildināšanas karte
+Top Up Mode,Papildināšanas režīms
+Top Variant,Augšējais variants
+Total,Kopā
+Total Amount,Kopējā summa
+Total Change,Kopējās izmaiņas
+Total Charges,Kopējās maksas
+Total In,Kopā
+Total Invoices,Kopējais rēķinu skaits
+Total Items,Preču kopskaits
+Total Mpesa,Kopā Mpesa
+Total Out,Total Out
+Total Payments,Kopējie maksājumi
+Total Purchase,Kopējais pirkums
+Total Selected :,Kopā atlasītie:
+Total Size,Kopējais izmērs
+Total Stock Qty,Kopējais krājumu daudzums
+Total:,Kopā:
+Totals by Invoice Currency,Kopsummas pēc rēķina valūtas
+Track how much cash was handed back to customers,"Izsekojiet, cik daudz skaidras naudas tika atdots klientiem"
+"Track recent sales, collect unpaid balances, and reopen saved work","Sekojiet jaunākajiem pārdošanas apjomiem, savāciet neapmaksātos atlikumus un atkārtoti atveriet saglabātos darbus"
+Transaction ID,Darījuma ID
+Transfer,Pārsūtīšana
+Try a different search term or clear the cart search.,Izmēģiniet citu meklēšanas vienumu vai notīriet groza meklēšanu.
+Try adjusting your search or filters,Mēģiniet pielāgot meklēšanu vai filtrus
+Try another source or refresh the list.,Izmēģiniet citu avotu vai atsvaidziniet sarakstu.
+Try changing the date range or status filter.,Mēģiniet mainīt datumu diapazonu vai statusa filtru.
+Type,Tips
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,"Nevar piekļūt kamerai pat ar pamata iestatījumiem. Lūdzu, pārbaudiet kameras atļaujas un ierīces saderību."
+Unable to add offer item {0}. Please refresh and try again.,"Nevar pievienot piedāvājuma vienumu {0}. Lūdzu, atsvaidziniet un mēģiniet vēlreiz."
+Unable to add offer item. Please refresh and try again.,"Nevar pievienot piedāvājuma vienumu. Lūdzu, atsvaidziniet un mēģiniet vēlreiz."
+Unable to add scanned item.,Nevar pievienot skenēto vienumu.
+Unable to create purchase order,Nevar izveidot pirkuma pasūtījumu
+Unable to delete draft invoice,Nevar izdzēst rēķina melnrakstu
+Unable to fetch documents,Nevar ienest dokumentus
+Unable to fetch draft orders,Nevar ienest pasūtījumu melnrakstus
+Unable to fetch invoice history,Nevar ienest rēķinu vēsturi
+Unable to fetch M-Pesa payments,Nevar ienest M-Pesa maksājumus
+Unable to fetch sales orders,Nevar ienest pārdošanas pasūtījumus
+Unable to fetch unpaid invoices,Nevar ienest neapmaksātus rēķinus
+Unable to generate scale barcode,Nevar ģenerēt mēroga svītrkodu
+Unable to issue gift card.,Nevar izsniegt dāvanu karti.
+Unable to load cashier PIN status.,Nevar ielādēt kases PIN statusu.
+Unable to load document,Nevar ielādēt dokumentu
+Unable to load draft invoice,Nevar ielādēt rēķina projektu
+Unable to load gift card balance.,Nevar ielādēt dāvanu kartes atlikumu.
+Unable to load invoice details,Nevar ielādēt rēķina informāciju
+Unable to load parked order,Nevar ielādēt stāvošu pasūtījumu
+Unable to load the selected sales order,Nevar ielādēt atlasīto pārdošanas pasūtījumu
+Unable to prepare document,Nevar sagatavot dokumentu
+Unable to prepare return invoice,Nevar sagatavot atgriešanas rēķinu
+Unable to print draft invoice,Nevar izdrukāt rēķina melnrakstu
+Unable to print submitted invoice,Nevar izdrukāt iesniegto rēķinu
+Unable to process document action,Nevar apstrādāt dokumenta darbību
+Unable to repair change allocation,Nevar labot izmaiņu piešķiršanu
+Unable to save cashier PIN.,Nevar saglabāt kases PIN.
+Unable to save the rate to the backend price list,Nevar saglabāt likmi aizmugursistēmas cenrādī
+Unable to submit invoice,Nevar iesniegt rēķinu
+Unable to submit the selected payment,Nevar iesniegt atlasīto maksājumu
+Unable to top up gift card.,Nevar papildināt dāvanu karti.
+Unable to verify cashier PIN.,Nevar pārbaudīt kases PIN.
+Unallocated,Nepiešķirts
+Unallocated:,Nepiešķirts:
+Unavailable,Nav pieejams
+Unknown,Nezināms
+Unknown Item,Nezināms vienums
+Unknown Warehouse,Nezināma noliktava
+Unlock POS,Atbloķēt POS
+Unpaid,Neapmaksāts
+"Unselected payments stay unallocated first, then auto reconcile after submit.","Neatlasītie maksājumi vispirms paliek nepiešķirti, pēc tam tie tiek automātiski saskaņoti pēc iesniegšanas."
+UOM,UOM
+UOM not found,UOM nav atrasts
+Update available,Pieejams atjauninājums
+Update Customer,Atjauniniet klientu
+Update PIN,Atjauniniet PIN
+Update Price List Rate,Atjaunināt cenrāža likmi
+Updated,Atjaunināts
+Updates and app info that stay out of the cashier flow.,"Atjauninājumi un lietotņu informācija, kas neietilpst kasē."
+Updates automatically,Atjaunina automātiski
+Usage,Lietošana
+Usage Stats,Lietošanas statistika
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,"Izmantojiet 4–8 ciparu PIN kodu, lai pārslēgtu kasieri un atbloķētu termināli."
+Use Cashier,Izmantojiet kasi
+Use date range to search for older invoices,"Izmantojiet datumu diapazonu, lai meklētu vecākus rēķinus"
+"Use one field for manual code entry, barcode scans, or QR scans.","Izmantojiet vienu lauku manuālai koda ievadīšanai, svītrkoda skenēšanai vai QR skenēšanai."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","Izmantojiet vienu darbplūsmu bilances pārbaudēm, jaunai emisijai un papildināšanai, neizejot no POS."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","Izmantojiet šo sadaļu, ja kešatmiņā saglabātie priekšnosacījumu dati ir jāatsvaidzina, jāpārbūvē vai jāpārskata diagnostikai."
+Use Western numerals,Izmantojiet rietumu ciparus
+Used:,Lietots:
+Using basic camera settings due to device limitations,Kameras pamata iestatījumu izmantošana ierīces ierobežojumu dēļ
+Using cached customer balance,Kešatmiņā saglabātā klienta bilances izmantošana
+Valid until,Derīgs līdz
+Variance %,Novirze %
+Variants,Varianti
+Variant-wise,Variantu ziņā
+Verify closing amounts for each payment method,Pārbaudiet katra maksājuma veida noslēguma summas
+View all,Skatīt visu
+View app information and current build details,Skatiet informāciju par lietotni un pašreizējo būvējuma informāciju
+View Data Diagnostics,Skatīt datu diagnostiku
+View Details,Skatīt detaļas
+View invoice details,Skatīt rēķina informāciju
+View notifications,Skatīt paziņojumus
+View offline invoices,Skatiet bezsaistes rēķinus
+View restricted POS insights,Skatiet ierobežotos POS ieskatus
+Void Amount,Nederīgā summa
+Void Count,Nederīgo skaits
+Voids,Tukšumi
+Waiting for cart items,Gaida groza preces
+Waiting for payment...,Gaida maksājumu...
+Walk-in Customer,Ieejas klients
+Warehouse,Noliktava
+Warning: High cache usage may affect performance.,Brīdinājums: liels kešatmiņas lietojums var ietekmēt veiktspēju.
+Warning: High lag may indicate heavy processing or browser slowness.,Brīdinājums: liela aizkave var liecināt par intensīvu apstrādi vai pārlūkprogrammas lēnu darbību.
+Week ?,nedēļa?
+Week-wise,Nedēļas ziņā
+Weight (g),Svars (g)
+Weight (grams),Svars (gramos)
+We'll let you know if an invoice fails to submit,"Ja rēķinu neizdosies iesniegt, mēs jūs informēsim"
+Workflow,Darbplūsma
+Write off amount cannot exceed the POS profile maximum of {0},Norakstīšanas summa nedrīkst pārsniegt POS profila maksimālo {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,"Norakstīšanas summa pārsniedz atļauto ierobežojumu ({0}). Lūdzu, pievienojiet maksājumu par atlikušo summu."
+Yes,Jā
+"Yes, Cancel sale","Jā, atcelt izpārdošanu"
+"Yes, Close","Jā, aizvērt"
+You are not allowed to print draft invoices,Jums nav atļauts drukāt rēķinu melnrakstus
+You are offline. Add Payment will work again when the connection is restored.,"Jūs esat bezsaistē. Pievienot maksājumu atkal darbosies, kad savienojums tiks atjaunots."
+You have no notifications right now,Jums pašlaik nav paziņojumu
+Your Cart,Jūsu grozs

@@ -1,0 +1,1362 @@
+POS Awesome,POS Minunat
+Fetch Items Directly from Server,Preluați elementele direct de pe server
+Menu,Meniu
+Actions,Acțiuni
+Close Shift,Închide Shift
+End current session,Încheiați sesiunea curentă
+Print Last Invoice,Tipăriți ultima factură
+Reprint previous transaction,Retipărește tranzacția anterioară
+Sync Offline Invoices,Sincronizați facturile offline
+Upload pending transactions,Încărcați tranzacții în așteptare
+Go Online,Accesați online
+Go Offline,Intră offline
+Disable offline mode,Dezactivați modul offline
+Work without server connection,Lucrați fără conexiune la server
+Clear Cache,Goliți memoria cache
+Remove local data and refresh,Eliminați datele locale și reîmprospătați
+About,Despre
+App information,Informații despre aplicație
+Language,Limba
+Change interface language,Schimbați limba interfeței
+Light Mode,Modul de lumină
+Dark Mode,Modul întunecat
+Switch theme appearance,Schimbați aspectul temei
+Logout,Deconectare
+Sign out of session,Deconectați-vă de la sesiune
+Select Language,Selectați Limbă
+Choose your preferred language for the POS interface,Alegeți limba preferată pentru interfața POS
+Language will be changed to,Limba va fi schimbată în
+Cancel,Anulează
+Change Language,Schimbați limba
+Close,Închide
+Cannot change language - same language selected,Nu se poate schimba limba - aceeași limbă a fost selectată
+Language changed successfully! Reloading...,Limba s-a schimbat cu succes! Se reîncarcă...
+Failed to change language,Nu s-a putut schimba limba
+Unknown error,Eroare necunoscută
+- Total Unallocated,- Total nealocat
+* Required,* Obligatoriu
+{0} (Qty: {1}),{0} (Cantitate: {1})
+{0} actions,{0} acțiuni
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} are doar {1} în stoc. Ați solicitat {2}. Reglați cantitatea sau reaprovizionați.
+{0} offline invoice{1} pending,{0} factură offline{1} în așteptare
+{0} offline invoice{1} saved as draft,{0} factură offline{1} salvată ca ciornă
+{0} offline invoice{1} synced,{0} factură offline{1} sincronizată
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,acum {0} zile
+{0}h ago,acum {0}h
+{0}m ago,acum {0} m
+A POS supervisor is required for this action.,Pentru această acțiune este necesar un supervizor POS.
+Access,Acces
+Account,Cont
+Account is overdrawn,Contul este depășit
+Acknowledge the error to resume scanning,Confirmați eroarea pentru a relua scanarea
+Acknowledge the error to resume scanning.,Confirmați eroarea pentru a relua scanarea.
+Across,Peste tot
+Action,Acțiune
+Active sale,Vânzare activă
+add,adaugă
+Add items from the selector to start building this sale.,Adăugați articole din selector pentru a începe să construiți această vânzare.
+Add more value to an existing gift card,Adăugați mai multă valoare unui card cadou existent
+Add New Address,Adăugați o nouă adresă
+Add new customer,Adăugați un client nou
+Add on New Line,Adăugați pe linia nouă
+Add Payment,Adăugați Plata
+Add payment to invoice,Adăugați plata la factură
+Add/Edit Coupon Conditions,Adăugați/Editați condițiile cuponului
+Additional Discount,Reducere suplimentară
+Additional Discount %,% discount suplimentar
+Address Line 1,Linia de adresă 1
+Address not found,Adresa nu a fost găsită
+Adjust the quantity or enable negative stock to continue.,Ajustați cantitatea sau activați stocul negativ să continue.
+Adjustment,Ajustare
+After returns,După întoarceri
+Against,Împotriva
+Against Name,Împotriva numelui
+Age Bracket,Categoria de vârstă
+All,Toate
+All Caught Up!,Toți prinși!
+All invoices are synchronized,Toate facturile sunt sincronizate
+All pending invoices are up to date,Toate facturile în așteptare sunt la zi
+All Profiles,Toate profilurile
+All Synchronized,Toate sincronizate
+All visible invoices are fully settled.,Toate facturile vizibile sunt decontate integral.
+All Warehouses,Toate Depozitele
+Allowed UOM is {0},UOM permisă este {0}
+Always fetch items from server (ignore local cache),Preluați întotdeauna elemente de pe server (ignorați memoria cache locală)
+Amount,Suma
+Amount already received,Suma primita deja
+Amount exceeds profile cash movement max amount.,Suma depășește suma maximă a mișcării de numerar de profil.
+Amount must be greater than zero.,Suma trebuie să fie mai mare decât zero.
+Amount received from customer,Suma primita de la client
+Appearance and user-level preferences for the current session.,Aspect și preferințe la nivel de utilizator pentru sesiunea curentă.
+Applied,Aplicat
+Apply,Aplicați
+Apply Gift Card,Aplicați cardul cadou
+Apply Offer,Aplica oferta
+Apply On,Aplicați pe
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,Aplicați doar suma pe care doriți să o răscumpărați pe această factură. Soldul rămas rămâne pe card.
+Apply Redemption,Aplicați Răscumpărarea
+Applying,Aplicarea
+Apps,Aplicații
+Are you sure you want to close? All entered data will be lost.,Ești sigur că vrei să închizi? Toate datele introduse se vor pierde.
+Attributes (Size/Color),Atribute (dimensiune/culoare)
+Auto Allocate Payment Amount,Alocați automat suma de plată
+Auto Reconcile,Reconciliere automată
+Auto reconciliation completed after payment submit.,Reconcilierea automată a fost finalizată după trimiterea plății.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,Reconcilierea automată a fost finalizată. Alocat: {0}{1}. Restul restante: {0}{2}.
+Available Actions,Acțiuni disponibile
+Available QTY,CANTITATE disponibilă
+Available:,Disponibil:
+Average Basket,Coș mediu
+Average Bill,Factura medie
+Average Ticket,Biletul mediu
+Avg Bill,Factura medie
+Avg Invoice,Factură medie
+Avg Invoice Profit,Profit mediu pe factură
+Avg Invoice Value,Valoarea medie a facturii
+Avg Purchase Frequency,Frecvența medie de achiziție
+Awesome,Minunat
+Awesome Dashboard,Tabloul de bord minunat
+Awesome Dashboard is disabled for the selected POS Profile.,Awesome Dashboard este dezactivat pentru profilul POS selectat.
+Awesome Dashboard is unavailable for the selected scope.,Awesome Dashboard nu este disponibil pentru domeniul selectat.
+Awesome Dashboard is visible only to POS supervisors.,Awesome Dashboard este vizibil numai pentru supraveghetorii POS.
+Back,Înapoi
+Back Office Cash Account,Cont de numerar din Back Office
+Back Office Cash Account (Optional Override),Cont de numerar Back Office (Anulare opțională)
+Back office cash account is required.,Este necesar un cont de numerar de back office.
+Back to {0},Înapoi la {0}
+Background processing did not finish in time.,Procesarea în fundal nu s-a încheiat la timp.
+Background processing failed for Invoice {0}: {1},Procesarea în fundal a eșuat pentru factura {0}: {1}
+Background Submission Failed,Trimiterea în fundal a eșuat
+Background sync interval (seconds),Interval de sincronizare în fundal (secunde)
+Balance,Echilibru
+Balance will be updated when connection is restored,Soldul va fi actualizat la restabilirea conexiunii
+Balances still pending,Solduri încă în așteptare
+Barcode,Cod de bare
+Barcode / QR Ready,Cod de bare / QR Ready
+Barcode Label Printing,Imprimarea etichetelor cu coduri de bare
+Base Paid:,Plătit de bază:
+Base Recv:,Recv de bază:
+Base:,Baza:
+Basic Information,Informații de bază
+Batch,lot
+Batch Information,Informații despre lot
+Before any return workflow,Înainte de orice flux de lucru de retur
+Before returns,Înainte de întoarceri
+Best Day,Cea mai bună zi
+Best Seller,Cel mai bine vândut
+Book expense or deposit from active shift.,Rezervați cheltuiala sau depozitul din tura activă.
+Branch / Location-wise Report,Raport în funcție de sucursală / locație
+Brand-wise,În ceea ce privește marca
+Breakdown,Defalcare
+Browse,Răsfoiește
+Build Time:,Timp de construcție:
+Built with Frappe,Construit cu Frappe
+Bundle,Pachet
+Buying Price,Pretul de cumparare
+Cache cleared successfully,Cache-ul a fost golit cu succes
+Cache Usage,Utilizare cache
+cache used,cache folosit
+Calculating...,Se calculează...
+Camera Access Required,Accesul la cameră este necesar
+Camera access was aborted. Please try again.,Accesul la cameră a fost întrerupt. Vă rugăm să încercați din nou.
+Camera constraints not supported by your device. Trying fallback settings...,Constrângerile camerei nu sunt acceptate de dispozitivul dvs. Se încearcă setările de rezervă...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,Camera este ocupată sau blocată de altă aplicație/filă. Închideți alte aplicații ale camerei și încercați din nou.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,Permisiunea camerei a fost refuzată. Vă rugăm să permiteți accesul camerei în setările browserului dvs. și să reîmprospătați pagina.
+Camera scanner is locked until the current error is acknowledged,Scanerul camerei este blocat până când eroarea curentă este confirmată
+Camera started but the video stream did not load in time. Please try again.,"Camera a pornit, dar fluxul video nu s-a încărcat la timp. Vă rugăm să încercați din nou."
+Cancel cash movement {0}?,Anulați mișcarea de numerar {0}?
+Cancel Payment,Anulați plata
+Cancel Sale,Anulează vânzarea
+Cancel Sale ?,Anulați vânzarea?
+Cancelled,Anulat
+Cannot add an item with zero or negative quantity.,Nu se poate adăuga un articol cu cantitate zero sau negativă.
+Cannot clear cache while offline,Nu se poate șterge memoria cache când este offline
+Cannot redeem customer credit more than invoice total,Nu se poate valorifica creditul clientului mai mult decât totalul facturii
+Cannot redeem gift cards more than invoice total,Nu se pot valorifica cardurile cadou mai mult decât totalul facturii
+Cannot Save Offline Invoice:,Nu se poate salva factura offline:
+Cannot Save Offline Payment:,Nu se poate salva plata offline:
+Card,Card
+Card / Online,Card / Online
+Card health after the last live lookup,Sănătatea cardului după ultima căutare live
+Cards,Carduri
+Cart,Cărucior
+Cash,Numerar
+Cash back to customers,Rambursarea banilor către clienți
+Cash Collections,Încasări în numerar
+Cash Deposit is disabled for this POS Profile.,Depozitul în numerar este dezactivat pentru acest profil POS.
+Cash Drawer Snapshot,Instantaneu sertar de numerar
+Cash In Hand,Numerar în mână
+Cash Movement,Mișcarea numerarului
+Cash movement cancelled,Mișcarea numerarului a fost anulată
+Cash movement deduction applied,S-a aplicat deducerea mișcării numerarului
+Cash movement deleted,Mișcarea numerarului a fost ștearsă
+Cash movement is disabled for this POS Profile.,Mișcarea numerarului este dezactivată pentru acest profil POS.
+Cash Movement is disabled in current POS Profile.,Mișcarea numerarului este dezactivată în profilul POS actual.
+Cash movement saved offline,Mișcarea numerarului a fost salvată offline
+Cash movement submitted,Mișcare de numerar transmisă
+Cash Movements,Mișcări de numerar
+Cash payment cannot be less than invoice total when partial payment is not allowed,Plata în numerar nu poate fi mai mică decât totalul facturii atunci când plata parțială nu este permisă
+Cash returned after payment,Numerar returnat după plată
+Cashier,casier
+Cashier Access,Acces Casier
+Cashier identity and appearance preferences.,Identitatea casierului și preferințele de aspect.
+Cashier PIN,PIN casier
+Cashier PIN saved successfully.,PIN-ul casierului a fost salvat cu succes.
+Cashiers,Casierii
+Cashier-wise,Din punct de vedere al casieriei
+Categories,Categorii
+Category,categorie
+Category / Brand / Variant Report,Raport Categorie/Marcă/Variante
+Category-wise,Din punct de vedere al categoriei
+Category-wise Margin,Marja pe categorii
+Certificate,Certificat
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,Certificatul lipsește sau nu este de încredere. QZ poate afișa dialoguri de confirmare.
+Certificate is trusted. Silent QZ printing is active.,Certificatul este de încredere. Imprimarea QZ silențioasă este activă.
+Change,Schimbare
+Change allocation repaired,Modificarea alocării a fost reparată
+Change Price,Schimbați prețul
+Change Return,Schimbați Retur
+Change Returned,Schimbarea a revenit
+Change terminal cashier,Schimbați casieria terminalului
+Charge Heads,Capete de încărcare
+Charges,Taxe
+Charges not found,Taxele nu au fost găsite
+Check Balance,Verificați soldul
+Check balance for any card. Supervisors can issue and top up cards here.,Verificați soldul oricărui card. Supraveghetorii pot emite și încărca carduri aici.
+Check balance only,Verificați doar soldul
+Check for new commits,Verificați noi comiteri
+Check for Updates,Verificați actualizările
+Check live balance before applying redemption,Verificați soldul real înainte de a aplica răscumpărarea
+Check live balance before redemption,Verificați soldul în timp real înainte de răscumpărare
+Checking...,Se verifică...
+Cheque/Reference Date,Cec/Data de referință
+Cheque/Reference No,Cec/Nr
+Choose the cashier currently operating this terminal.,Alegeți casieria care operează în prezent acest terminal.
+City,Orașul
+Clear,Clar
+Clear All,Ștergeți tot
+Clear all barcode items,Ștergeți toate elementele codurilor de bare
+Clear all purchase order items,Ștergeți toate articolele comenzii de achiziție
+Clear Search,Ștergeți căutarea
+Clearing local cache...,Se golește memoria cache locală...
+Click to refresh,Faceți clic pentru a reîmprospăta
+Client CPU Lag:,Întârziere CPU client:
+Client Memory Usage:,Utilizarea memoriei clientului:
+Client Metrics,Valorile clientului
+Close about dialog,Închideți despre dialog
+Close cashier switcher,Închideți comutatorul de casierie
+Close closing shift dialog,Închideți dialogul de închidere a turei
+Close column selector,Închideți selectorul de coloană
+Close Dialog,Închide caseta de dialog
+Close drafts dialog,Închideți dialogul pentru schițe
+Close invoice details dialog,Închideți dialogul cu detaliile facturii
+Close invoice management,Închideți gestionarea facturilor
+Close offline invoices dialog,Închideți dialogul de facturi offline
+Close packing list dialog,Închideți caseta de dialog pentru lista de ambalare
+Close returns dialog,Închideți dialogul de întoarcere
+Close sales orders dialog,Închideți dialogul de comenzi de vânzare
+Close Scanner,Închideți scanerul
+Close scanner dialog,Închideți dialogul scanerului
+Close Settings,Închide Setări
+Closing Amount,Suma de închidere
+Closing POS Shift,Închiderea POS Shift
+Closing Snapshot Available,Instantaneu de închidere disponibil
+Code,Cod
+Code scanned successfully,Codul a fost scanat cu succes
+COGS,COGS
+Collapse item details,Restrângeți detaliile articolului
+Collected,Colectat
+Cols,cols
+Columns,Coloane
+commits,comite
+Completed and active sales in this range,Vânzări finalizate și active în această gamă
+Completed returns will appear here.,Retururile finalizate vor apărea aici.
+Confirm,Confirmați
+Confirm Close,Confirmați Închidere
+Confirm Mobile Number,Confirmați numărul de mobil
+Confirm PIN,Confirmați codul PIN
+Connect,Conectați-vă
+Connect printer and manage certificate,Conectați imprimanta și gestionați certificatul
+Connecting to QZ Tray...,Se conectează la QZ Tray...
+Connection problem while submitting invoice,Problemă de conectare la trimiterea facturii
+Connections:,Conexiuni:
+Connectivity and cached prerequisite status were rechecked.,Conectivitatea și starea cerințelor prealabile stocate în cache au fost verificate din nou.
+Continue Editing,Continuați editarea
+Could not fetch latest balance from server,Nu s-a putut prelua cel mai recent sold de pe server
+Count,numără
+Country,Țara
+Coupon,Cupon
+Coupons,Cupoane
+Cover,Acoperire
+CPU Cores:,Nuclee CPU:
+Create,Creați
+Create and load a new prepaid card,Creați și încărcați un nou card preplătit
+Create and preload a new gift card,Creați și preîncărcați un nou card cadou
+Create Bill,Creați Bill
+Create Customer,Creați client
+Create New Item,Creați un articol nou
+Create or change your PIN,Creați sau modificați codul PIN
+Create PIN,Creați codul PIN
+Create POS Opening Shift,Creați schimb de deschidere POS
+Create Purchase Order,Creați comandă de achiziție
+Create Return,Creați returnare
+Create return from invoice,Creați retur din factură
+Create Supplier,Creați furnizor
+Credit and Output,Credit și ieșire
+Credit Note,Nota de credit
+Credit Outstanding,Credit restante
+Credit sales remaining to be collected,Vânzările pe credit rămân de încasat
+Critical,Critic
+Currency,Moneda
+Current,Curent
+Current Event Loop Lag:,Întârzierea buclei evenimentului curent:
+Current Month,Luna curentă
+Current PIN,PIN curent
+Current Profile,Profil curent
+Current redeemable value on the gift card,Valoarea actuală rambursabilă a cardului cadou
+Current User,Utilizator curent
+Custom,Personalizat
+Custom Due Days,Zile scadente personalizate
+Custom items per page,Articole personalizate pe pagină
+Customer,Client
+Customer already selected,Client deja selectat
+Customer Balance,Soldul clientului
+Customer balance unavailable offline,Soldul clientului nu este disponibil offline
+Customer created successfully.,Client creat cu succes.
+Customer creation failed.,Crearea clienților a eșuat.
+Customer Details,Detalii client
+Customer display channel is missing,Canalul de afișare a clienților lipsește
+Customer display was blocked. Please allow pop-ups for this site.,Afișarea clientului a fost blocată. Vă rugăm să permiteți ferestrele pop-up pentru acest site.
+Customer group is required,Este necesar grupul de clienți
+Customer is required to add payment,Clientului i se cere să adauge plata
+Customer Name is required,Numele clientului este obligatoriu
+Customer not selected,Clientul nu a fost selectat
+Customer Report,Raportul clientului
+Customer saved offline,Clientul a fost salvat offline
+Customer Screen,Ecranul clientului
+Customer territory is required,Este necesar teritoriul clientului
+Customer updated successfully.,Clientul a fost actualizat cu succes.
+Customer-facing tools and printer setup.,Instrumente orientate către client și configurarea imprimantei.
+Customers,Clienții
+Customers not found,Clienți nu au fost găsiți
+Daily cashier actions without scrolling.,Acțiuni zilnice ale casieriei fără defilare.
+Daily Sales,Vânzări zilnice
+Daily Sales Summary,Rezumatul zilnic al vânzărilor
+Data loaded in form. Review and submit.,Date încărcate în formular. Examinați și trimiteți.
+Database Health,Sănătatea bazei de date
+Database health affects overall system speed and reliability.,Sănătatea bazei de date afectează viteza generală și fiabilitatea sistemului.
+Database Info,Informații baza de date
+Date,Data
+Day ?,Ziua?
+days,zile
+Day-wise (MTD),În funcție de zi (MTD)
+Day-wise Movement,Mișcarea în funcție de zi
+Dead Stock,Stoc mort
+Dead Stock Items,Articole de stoc mort
+Decrease quantity,Scade cantitatea
+Default,Implicit
+Default:,Implicit:
+Delete,Ștergeți
+Delete cancelled cash movement {0}?,Ștergeți mișcarea de numerar anulată {0}?
+Delete Draft,Ștergeți schița
+Delete draft invoice,Ștergeți proiectul de factură
+Delete draft invoice {0}?,Ștergeți proiectul de factură {0}?
+Delete Invoice,Șterge factura
+Delete offline invoice,Ștergeți factura offline
+Delivered,Livrat
+Delivery Charges,Taxe de livrare
+Delivery Information,Informații de livrare
+Delivery Note {0} created,A fost creată nota de livrare {0}
+Delivery note created,S-a creat bonul de livrare
+Deployed Bundle:,Pachet implementat:
+Deposit,Depozit
+Description,Descriere
+Detailed Supplier Breakdown,Defalcare detaliată a furnizorilor
+Detecting formats:,Detectarea formatelor:
+Device Memory:,Memoria dispozitivului:
+Difference,Diferența
+Difference (In Company Currency),Diferență (în moneda companiei)
+Disable offline mode first to recheck live connectivity.,Dezactivați mai întâi modul offline pentru a verifica din nou conectivitatea live.
+Disconnect,Deconectați-vă
+discount,reducere
+Discount %,Reducere %
+Discount / Void / Return Report,Raport de reducere / nul / returnare
+Discount Amount,Suma de reducere
+Discount limited by POS Profile,Reducere limitată de profilul POS
+Discounted Invoices,Facturi reduse
+Discounts,Reduceri
+Dismiss,Respingeți
+Download Certificate,Descărcați certificatul
+Draft,Ciornă
+Draft invoice deleted,Ciornă de factură a fost ștearsă
+Draft source,Sursa schiță
+Drafts,Ciorne
+Due {0},Data scadentă {0}
+Due Date,Data scadentă
+Duplicate,Duplicat
+Edit customer,Editați clientul
+Edit discount amount,Editați suma reducerii
+Edit discount percentage,Editați procentul de reducere
+Edit Gift Application,Editați aplicația cadou
+Edit item name,Editați numele articolului
+Edit quantity,Editați cantitatea
+Edit rate,Editați rata
+Edit unit of measure,Editați unitatea de măsură
+Edited,Editat
+Employee,Angajat
+Enable background sync,Activați sincronizarea în fundal
+Enable Customer Display in POS Profile first.,Activați mai întâi afișarea clientului în profilul POS.
+Enter a PIN.,Introduceți un PIN.
+Enter a valid grams value,Introduceți o valoare validă în grame
+Enter new price list rate,Introduceți noul tarif de listă de prețuri
+Enter Quantity,Introduceți Cantitatea
+Enter the cashier PIN to continue.,Introduceți PIN-ul casierului pentru a continua.
+Enter the current PIN first.,Introduceți mai întâi PIN-ul curent.
+"Enter the current PIN, then choose a new one.","Introduceți codul PIN actual, apoi alegeți unul nou."
+Enter valid grams for scale barcode,Introduceți grame valide pentru codul de bare
+Entries,Intrări
+Error accessing camera:,Eroare la accesarea camerei:
+Error calculating prices,Eroare la calcularea prețurilor
+Error fetching customer balance,Eroare la preluarea soldului clientului
+Error in change calculations!,Eroare la calculele modificării!
+Error Loading Data,Eroare la încărcarea datelor
+Error loading invoice details,Eroare la încărcarea detaliilor facturii
+Error processing invoice,Eroare la procesarea facturii
+Error processing payment,Eroare la procesarea plății
+Error searching invoices,Eroare la căutarea facturilor
+Error submitting invoice:,Eroare la trimiterea facturii:
+Error submitting invoice: {0},Eroare la trimiterea facturii: {0}
+Error submitting invoice: No response from server,Eroare la trimiterea facturii: niciun răspuns de la server
+Error updating currency,Eroare la actualizarea monedei
+Error updating item details,Eroare la actualizarea detaliilor articolului
+Est. Purchase,Est. Cumpără
+Est. Value,Est. Valoare
+Event-loop lag measures how busy your browser is. Lower is better.,Întârzierea buclei de evenimente măsoară cât de ocupat este browserul dvs. Mai jos este mai bine.
+Every,Fiecare
+Exchange Rate,Cursul de schimb
+Expand item details,Extindeți detaliile articolului
+Expected Amount (In Company Currency),Suma așteptată (în moneda companiei)
+Expected Cash,Numerar așteptat
+Expected cash on hand grouped by currency,"Numerar în mână așteptați, grupați în funcție de monedă"
+Expected vs Actual,Așteptată vs Reală
+Expense,Cheltuiala
+Expense Account (Optional Override),Cont de cheltuieli (Anulare opțională)
+Expense account is required.,Este necesar un cont de cheltuieli.
+Expenses and deposits posted during this shift,Cheltuieli și depozite înregistrate în timpul acestei ture
+Expired,A expirat
+Failed to auto reconcile payments.,Nu s-au reconciliat automat plățile.
+Failed to cancel cash movement,Nu s-a anulat mișcarea numerarului
+Failed to clear cache,Nu s-a șters memoria cache
+Failed to create item,Nu s-a putut crea elementul
+Failed to create supplier,Nu s-a putut crea furnizorul
+Failed to delete cash movement,Nu s-a șters mișcarea numerarului
+Failed to generate scale barcode. Using item barcode only.,Nu s-a putut genera codul de bare la scară. Folosind numai codul de bare al articolului.
+Failed to load cash movement context.,Nu s-a încărcat contextul de mișcare a numerarului.
+Failed to load dashboard data.,Nu s-au încărcat datele din tabloul de bord.
+Failed to reload invoice from server,Nu s-a reîncărcat factura de pe server
+Failed to submit cash movement,Mișcarea de numerar nu a fost trimisă
+Failed to sync offline cash movements,Nu s-au sincronizat mișcările de numerar offline
+Fast cashier actions for active shifts.,Acțiuni rapide de casierie pentru ture active.
+Fast Moving Items,Elemente cu mișcare rapidă
+Fees,Taxe
+Fetch the latest offline prerequisite updates,Preluați cele mai recente actualizări ale cerințelor preliminare offline
+Find a sales order quickly and load it into the current sale.,Găsiți rapid o comandă de vânzare și încărcați-o în vânzarea curentă.
+Fixing payment amounts for return invoice...,Se fixează sumele de plată pentru factura de retur...
+Flash Off,Bliț oprit
+Flash On,Flash pornit
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","Pentru articolele „Pachet de produse”, numărul de depozit, numărul de serie și numărul de lot vor fi luate în considerare din tabelul „Lista de ambalare”. Dacă Depozitul și numărul de lot sunt aceleași pentru toate articolele de ambalare pentru orice articol „Pachet de produse”, acele valori pot fi introduse în tabelul principal cu articole; valorile vor fi copiate în tabelul „Lista de ambalare”."
+Free,Gratuit
+Free Qty,Cantitate gratuită
+Frequency,Frecvența
+from,din
+From Date,De la Data
+Fulfillment Details,Detalii de îndeplinire
+Full Name,Nume complet
+Gain,Câștigă
+Generate a fresh prepaid card and start it with an opening balance.,Generați un nou card preplătit și începeți-l cu un sold de deschidere.
+Generate and install the certificate to allow fully silent printing without trust prompts.,Generați și instalați certificatul pentru a permite imprimarea complet silențioasă fără solicitări de încredere.
+Generate Certificate,Generați certificat
+Generated scale barcode: {0},Cod de bare pentru scară generat: {0}
+Get Payments,Obțineți plăți
+Gift Card,Card cadou
+Gift card amount must be greater than zero.,Valoarea cardului cadou trebuie să fie mai mare decât zero.
+Gift Card Code,Cod card cadou
+Gift card code is required for redemption,Codul cardului cadou este necesar pentru valorificare
+Gift card code is required.,Codul cardului cadou este necesar.
+Gift card issued successfully.,Card cadou emis cu succes.
+Gift card loaded successfully.,Cardul cadou a fost încărcat cu succes.
+Gift Card Management,Gestionarea cardurilor cadou
+Gift card payment,Plata prin card cadou
+Gift card redemption requires an online connection,Valorificarea cardului cadou necesită o conexiune online
+Gift card topped up successfully.,Cardul cadou a fost încărcat cu succes.
+Gift Cards,Carduri cadou
+Go to Frappe Desk,Du-te la Frappe Desk
+Grand Total,Total mare
+Gross Margin,Marja brută
+Gross Profit,Profit Brut
+Gross Sales,Vânzări Brute
+Group not found,Grupul nu a fost găsit
+"Grouped controls for terminal, UI, and session settings.","Controale grupate pentru setările de terminal, UI și sesiune."
+Grouped totals for each payment method and currency,Totaluri grupate pentru fiecare metodă de plată și monedă
+Hide,Ascunde
+Hide Gift Card,Ascunde cardul cadou
+Hide Non Essential Fields,Ascundeți câmpurile neesențiale
+Hide quantity decimals,Ascundeți zecimale de cantitate
+Hide search tools,Ascunde instrumentele de căutare
+Hide zero rated items,Ascunde articolele evaluate zero
+High,Înalt
+History,istorie
+Hourly (Today),Orar (Astăzi)
+How this section works,Cum funcționează această secțiune
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","Dacă rămân date învechite, deschideți Setări > Offline și sincronizare și rulați din nou Rebuild Offline Data când sunteți online."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","Dacă avertismentul persistă, deschideți Setări > Offline și sincronizare, apoi rulați Actualizare date offline sau Reconstruiți date offline."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Importați certificatul în QZ Tray și reporniți QZ Tray pe fiecare aparat POS.
+In,În
+In stock: {0},În stoc: {0}
+Include Batch / Serial,Include lot/serial
+Include Price,Includeți prețul
+Increase quantity,Măriți cantitatea
+IndexedDB,IndexedDB
+Initial Amount,Suma inițială
+Initialize your shift with opening balances,Inițializați-vă tura cu soldurile de deschidere
+Initializing application...,Se inițializează aplicația...
+"Inspect cache, sync, and prerequisite status","Inspectați memoria cache, sincronizarea și starea cerințelor preliminare"
+Installed Applications,Aplicații instalate
+Insufficient stock:\n{0},Stoc insuficient:\n{0}
+Invalid rate,Tarif nevalid
+Inventory Status Report,Raport privind starea inventarului
+Invoice,Factură
+Invoice {0} is Submitted,Factura {0} este trimisă
+Invoice {0} processed successfully,Factura {0} a fost procesată cu succes
+Invoice {0} submission failed,Trimiterea facturii {0} a eșuat
+Invoice {0} was already submitted,Factura {0} a fost deja trimisă
+Invoice Adjustments,Ajustări facturi
+Invoice Change,Modificarea facturii
+Invoice Details,Detalii factură
+Invoice is still in draft after background submission.,Factura este încă în schiță după trimiterea în antecedente.
+Invoice Items,Articole pe factură
+Invoice Management,Managementul facturilor
+Invoice Mgmt,Gestiunea facturii
+Invoice saved offline,Factura salvată offline
+Invoice submission failed,Trimiterea facturii nu a reușit
+Invoice Submitted,Factură transmisă
+"Invoice value settled by loyalty points, not cash collection","Valoarea facturii decontată prin puncte de fidelitate, nu încasări în numerar"
+Invoices,Facturi
+Invoices already past due date,Facturile deja depășite de scadență
+Invoices saved as POS Invoices,Facturi salvate ca facturi POS
+Invoices still carrying balances,Facturi care încă au solduri
+Issue Mode,Modul Problemă
+Issue New Card,Emite card nou
+Issue Workflow,Emite fluxul de lucru
+"Issue, top up, and check","Emiteți, completați și verificați"
+Item,Articol
+Item / Product Sales Report,Raport vânzări articol/produs
+Item {0} added to invoice,Articolul {0} a fost adăugat la factură
+Item '{0}' has no barcode,Articolul „{0}” nu are cod de bare
+Item Code,Cod articol
+Item created successfully,Element creat cu succes
+Item is out of stock,Produsul este epuizat
+Item Name,Nume articol
+Item not found,Element nu a fost găsit
+Item order updated,Comanda articolelor a fost actualizată
+Item Selector Settings,Setări selector de articole
+Items,Articole
+Items added in POS will appear here automatically.,Articolele adăugate în POS vor apărea automat aici.
+Items added to invoice,Articole adăugate pe factură
+Items per page,Articole pe pagină
+Items Sold,Articole vândute
+Items/Invoice,Articole/Factură
+Item-wise Profitability,Rentabilitatea în funcție de articole
+Journal Entry,Intrare în jurnal
+json,json
+Just now,Chiar acum
+Keep offline prerequisites healthy and recover stale data safely.,Păstrați condițiile prealabile offline sănătoase și recuperați datele învechite în siguranță.
+Labels,Etichete
+"Language, theme, terminal tools, and session controls.","Limbă, temă, instrumente terminale și controale de sesiune."
+Last,Ultimul
+Last 14 Days (Paid vs Pending),Ultimele 14 zile (plătit vs în așteptare)
+Last 14 Days Activity,Activitatea din ultimele 14 zile
+Last 14 Days Gross Profit,Profit brut din ultimele 14 zile
+Last 14 Days Purchases,Achiziții din ultimele 14 zile
+Last 14 Days Tax/Charges,Ultimele 14 zile Taxe/Taxe
+Last sync:,Ultima sincronizare:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},Ultima sincronizare: {0} | ok: {1} | a eșuat: {2} | omis: {3}
+Latest entries for current shift,Ultimele intrări pentru schimbul curent
+Lead Time,Timp de livrare
+Limited,Limitat
+lines,linii
+List,Lista
+Live Snapshot,Instantaneu live
+Load a POS profile and cashier first.,Încărcați mai întâi un profil POS și o casierie.
+Load More Invoices,Încărcați mai multe facturi
+Load previously saved invoices,Încărcați facturile salvate anterior
+Load Sale,Vânzare de încărcare
+Load Sales Invoice,Încărcați factura de vânzare
+Loading app data...,Se încarcă datele aplicației...
+Loading customer database...,Se încarcă baza de date cu clienți...
+Loading customers...,Se încarcă clienții...
+Loading database stats...,Se încarcă statisticile bazei de date...
+Loading details...,Se încarcă detaliile...
+Loading invoice history...,Se încarcă istoricul facturilor...
+Loading items...,Se încarcă articole...
+Loading product catalog...,Se încarcă catalogul de produse...
+Loading return invoices...,Se încarcă facturile de retur...
+Loading server CPU/memory usage...,Se încarcă utilizarea CPU/memoriei serverului...
+Loading suppliers...,Se încarcă furnizorii...
+Loading unpaid invoices...,Se încarcă facturile neplătite...
+Loading view...,Se încarcă vizualizarea...
+Loading...,Se încarcă...
+Local storage is unavailable. Switching to online-only mode.,Stocarea locală nu este disponibilă. Trecerea la modul numai online.
+localStorage,LocalStorage
+Location Performance,Performanța locației
+Locations,Locații
+Lock Screen,Blocare ecran
+Lookup Workflow,Flux de lucru de căutare
+Loss,Pierdere
+Low,Scăzut
+Low Stock,Stoc redus
+Low Stock Alerts,Alerte de stoc scăzut
+Low Stock Items,Articole cu stoc redus
+Low Stock Threshold,Pragul stoc scăzut
+Low Stock Total,Stoc redus total
+Lowest Margin,Marja cea mai mică
+Low-frequency maintenance and system details.,Întreținere de joasă frecvență și detalii despre sistem.
+Loyalty Redeemed,Loialitate răscumpărată
+Loyalty Redemption,Răscumpărarea prin loialitate
+Make New Payment,Efectuați o nouă plată
+Manage all,Gestionați totul
+Manage and synchronize your offline transactions,Gestionați și sincronizați tranzacțiile dvs. offline
+Manage Cashier PIN,Gestionați PIN-ul casierului
+"Manage offline tools, terminal controls, and maintenance from one workspace.","Gestionați instrumentele offline, controalele terminalului și întreținerea dintr-un singur spațiu de lucru."
+manual,manual
+"Manual codes, barcode scans, and QR scans work in the same field","Codurile manuale, scanările codurilor de bare și scanările QR funcționează în același domeniu"
+Manual offline mode is enabled,Modul offline manual este activat
+Margin,Marja
+Maximum available quantity is {0}. Quantity adjusted to match stock.,Cantitatea maximă disponibilă este {0}. Cantitatea ajustată pentru a se potrivi cu stocul.
+Maximum discount amount for this offer item is {0}.,Suma maximă de reducere pentru acest articol oferit este de {0}.
+Maximum discount percentage for this offer item is {0}%.,Procentul maxim de reducere pentru acest articol ofertă este de {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,Cantitatea maximă de ofertă este de {0}. Cantitatea ajustată la limita permisă.
+Medium,Mediu
+Method-wise Collections,Colecții din punct de vedere al metodelor
+Minimum allowed rate for this offer item is {0}.,Rata minimă permisă pentru acest articol ofertă este de {0}.
+Minimum Qty,Cantitate minima
+Mobile No,mobil nr
+Mode,Modul
+Mode of Payment,Modalitate de plată
+Month,luna
+Month ?,luna?
+Monthly Profit,Profit lunar
+Monthly Sales,Vânzări lunare
+Monthly Sales Summary,Rezumatul vânzărilor lunare
+Month-wise,În funcție de lună
+Most Active Cashiers,Cei mai activi casierii
+Movement Type,Tipul de mișcare
+Movements,Mișcări
+Multi Currency,Mai multe valute
+N/A,N/A
+Name,Nume
+Negative Stock,Stoc negativ
+Negative Stock Items,Articole negative din stoc
+Negative values not allowed,Valorile negative nu sunt permise
+Net,Net
+Net Qty,Cantitate netă
+Net Sales,Vânzări nete
+Net Value,Valoarea netă
+Never,Niciodată
+New changes are ready to load,Noi modificări sunt gata de încărcat
+New Item,Articol nou
+New Offer Available,Ofertă nouă disponibilă
+New PIN,PIN nou
+New rate,Tarif nou
+Next unit of measure,Următoarea unitate de măsură
+No attribute data found.,Nu s-au găsit date despre atribute.
+No Barcode,Fără cod de bare
+No barcode found for UOM '{0}',Nu s-a găsit niciun cod de bare pentru UOM „{0}”
+No branch/location data found.,Nu s-au găsit date despre sucursală/locație.
+No brand data found.,Nu s-au găsit date de marcă.
+No cached gift card balance is available offline.,Niciun sold de card cadou stocat în cache nu este disponibil offline.
+No camera found on this device. Please ensure your device has a working camera.,Nu a fost găsită nicio cameră pe acest dispozitiv. Asigurați-vă că dispozitivul dvs. are o cameră funcțională.
+No capability warnings recorded yet.,Nu au fost înregistrate încă avertismente de capacitate.
+No cash expected for this shift.,Nu se așteaptă numerar pentru această tură.
+No cash mode configured,Niciun mod de numerar configurat
+No cash movement type is allowed for this POS Profile.,Nu este permis niciun tip de mișcare de numerar pentru acest profil POS.
+No cashier PIN is set yet. Create one now.,Nu este setat încă niciun cod PIN pentru casierie. Creați unul acum.
+No cashier profiles are available for this POS profile yet.,Încă nu sunt disponibile profiluri de casierie pentru acest profil POS.
+No cashier-wise discount/void/return activity.,Nicio activitate de reducere/anulare/retur pentru casierie.
+No category data found.,Nu s-au găsit date de categorie.
+No category profitability data found.,Nu s-au găsit date privind profitabilitatea categoriei.
+No change returned recorded for this shift.,Nu a fost înregistrată nicio modificare înregistrată pentru această tură.
+No change-allocation invoices match the current filters.,Nicio factură de modificare a alocării nu corespunde filtrelor curente.
+No charge head breakdown found.,Nu a fost găsită nicio defecțiune a capului de încărcare.
+No Company Selected,Nu a fost selectată nicio companie
+No customer sales data found.,Nu s-au găsit date despre vânzările clienților.
+No day-wise discount/void/return trend.,Fără tendință de reducere/nulare/retur în funcție de zi.
+No day-wise payment data found.,Nu s-au găsit date de plată pe zi.
+No day-wise profitability trend found.,Nu a fost găsită nicio tendință de profitabilitate pe zi.
+No day-wise purchase data found.,Nu s-au găsit date de achiziție pe zi.
+No day-wise sales trend found.,Nu a fost găsită nicio tendință de vânzări pe zi.
+No day-wise tax/charges trend found.,Nu a fost găsită nicio tendință de taxe/taxări pe zi.
+No dead stock items.,Nu există articole de stoc mort.
+No due date,Fără termen
+No exact repair match found for this invoice,Nu s-a găsit nicio potrivire exactă a reparației pentru această factură
+No hourly sales trend found for today.,Nu s-a găsit nicio tendință orară de vânzări pentru astăzi.
+No invoice activity found.,Nu a fost găsită nicio activitate pe factură.
+No invoices found,Nu au fost găsite facturi
+No invoices found. Try different search criteria.,Nu au fost găsite facturi. Încercați diferite criterii de căutare.
+No invoices recorded for this shift.,Nu au fost înregistrate facturi pentru această tură.
+No item profitability data found.,Nu s-au găsit date despre profitabilitatea articolului.
+No item sales data found for this period.,Nu s-au găsit date despre vânzări de articole pentru această perioadă.
+No items found,Nu s-au găsit articole
+No items in cart,Nu există articole în coș
+No items with barcodes to print,Nu există articole cu coduri de bare de imprimat
+No location-wise top item data found.,Nu s-au găsit date despre articolele de top în funcție de locație.
+No low stock alerts right now.,Nu există alerte de stoc scăzut în acest moment.
+No low stock items.,Nu există articole cu stoc redus.
+No matching items in cart,Nu există articole care se potrivesc în coș
+No month-wise sales trend found.,Nu a fost găsită nicio tendință de vânzări lunară.
+No negative stock items.,Fără articole de stoc negative.
+No notifications yet,Nicio notificare încă
+No offline cash movement synced.,Nu s-a sincronizat nicio mișcare de numerar offline.
+No offline invoices pending synchronization,Nu există facturi offline în așteptarea sincronizării
+No offline sync issues recorded yet.,Nu au fost înregistrate încă probleme de sincronizare offline.
+No out-of-stock items.,Fără articole epuizate.
+No outstanding credit invoices for this shift.,Nu există facturi de credit restante pentru această tură.
+No payment collection data found.,Nu s-au găsit date de colectare a plăților.
+No payment rows available on this invoice.,Nu există rânduri de plată disponibile pe această factură.
+No payments registered for this shift.,Nu au fost înregistrate plăți pentru această tură.
+No pending balances in this period.,Nu există solduri în așteptare în această perioadă.
+No pending offline invoices,Nu există facturi offline în așteptare
+No Print Formats Found,Nu s-au găsit formate de imprimare
+No profiles found for selected scope. Falling back to current profile failed.,Nu s-au găsit profiluri pentru domeniul selectat. Revenirea la profilul actual nu a reușit.
+No recent customer activity found.,Nu a fost găsită nicio activitate recentă a clienților.
+No recent stock entries found.,Nu s-au găsit intrări recente de stoc.
+No records found,Nu au fost găsite înregistrări
+No reorder suggestions right now.,Nicio sugestie de reordonare în acest moment.
+No repeat customers in this period.,Nu există clienți repetați în această perioadă.
+No response from server,Niciun răspuns de la server
+No return invoices found,Nu au fost găsite facturi de retur
+No return item trend found.,Nu a fost găsită nicio tendință de returnare.
+No returnable items found for this invoice,Nu s-au găsit articole returnabile pentru această factură
+No returns were processed in this shift.,Nu au fost procesate returnări în această tură.
+No risk activity found.,Nu a fost găsită nicio activitate de risc.
+No sales activity found for this period.,Nu a fost găsită activitate de vânzări pentru această perioadă.
+No slow moving items.,Fără obiecte cu mișcare lentă.
+No staff sales activity found.,Nu a fost găsită nicio activitate de vânzări de personal.
+No stock movement for this period.,Nicio mișcare de stoc pentru această perioadă.
+No submitted cash movements in this shift.,Nu au fost transmise mișcări de numerar în această tură.
+No supplier purchases found in this month.,Nu s-au găsit achiziții de la furnizori în această lună.
+No suppliers found for this period.,Nu s-au găsit furnizori pentru această perioadă.
+No sync trigger has run yet in this session.,Nu s-a rulat încă niciun declanșator de sincronizare în această sesiune.
+No tax head breakdown found.,Nu s-a găsit nicio defalcare fiscală.
+No top items found for this location.,Nu s-au găsit articole de top pentru această locație.
+No unpaid invoices,Fără facturi neplătite
+No variant data found.,Nu s-au găsit date variante.
+No week-wise sales trend found.,Nu a fost găsită nicio tendință de vânzări pe săptămână.
+No.,Nu.
+Nobile Number,Număr nobil
+Not available,Nu este disponibil
+Not checked,Neverificat
+Not selected,Neselectat
+Not Set,Nu setat
+Notifications,Notificări
+Offer,Oferta
+Offer Applied,Oferta aplicată
+Offer criteria exceeded,Au fost depășite criteriile ofertei
+Offer Item,Ofertă articol
+Offer item unavailable,Articolul ofertă nu este disponibil
+Offer Removed,Oferta a fost eliminată
+Offer UOM cannot be changed,Oferta UOM nu poate fi modificată
+Offer?,Oferta?
+Offers,Oferte
+Offline,Offline
+Offline & Sync,Offline și sincronizare
+Offline Capabilities,Capacități offline
+Offline data status refreshed,Starea datelor offline a fost reîmprospătată
+Offline diagnostics,Diagnosticare offline
+Offline Invoices,Facturi offline
+Offline invoices status,Starea facturilor offline
+Offline invoices synced,Facturi offline sincronizate
+Offline Queue: {0},Coada offline: {0}
+Offline rebuild guidance,Ghid de reconstrucție offline
+Offline restore is unavailable for this session.,Restaurarea offline nu este disponibilă pentru această sesiune.
+Offline selling is available with degraded capabilities.,Vânzarea offline este disponibilă cu capacități degradate.
+Offline snapshot does not match the current POS state.,Instantaneul offline nu se potrivește cu starea POS curentă.
+Offline Status,Stare offline
+"Offline, terminal, and system controls","Comenzi offline, terminale și sistem"
+OK,OK
+Online,Online
+Open actions menu,Deschideți meniul de acțiuni
+Open balance to collect,Sold deschis de colectat
+Open Customer Display,Deschideți Afișarea clienților
+Open drawer,Deschide sertarul
+Open invoices,Facturi deschise
+Open Payments?,Plăți deschise?
+Open POS home,Deschideți acasă POS
+Open this screen from POS Menu -> Open Customer Display.,Deschideți acest ecran din Meniul POS -> Deschideți afișajul clientului.
+OpenCV image processing enabled - Enhanced barcode detection,Procesarea imaginii OpenCV activată - Detectare îmbunătățită a codurilor de bare
+OpenCV image processing unavailable on this device,Procesarea imaginii OpenCV nu este disponibilă pe acest dispozitiv
+OpenCV Off,OpenCV dezactivat
+OpenCV On,OpenCV activat
+OpenCV processing disabled,Procesarea OpenCV este dezactivată
+Opening Amount,Suma de deschidere
+Opening Cash,Deschiderea numerarului
+options,opțiuni
+Order,Comanda
+Original,Original
+Other,Altele
+Out,Afară
+Out of Stock,Stoc epuizat
+Out of Stock Items,Articole epuizate
+Outstanding,Remarcabil
+Outstanding Credit by Currency,Credit restante în funcție de monedă
+Overdue,Întârziat
+Overpayment Change,Schimbare de plată în exces
+Overpayment change deducted: {0},Modificarea plății în exces a fost dedusă: {0}
+Packing List,Lista de ambalare
+Page Format,Formatul paginii
+Page unavailable offline,Pagina indisponibilă offline
+Paid,Plătit
+Paid (orig):,Plătit (orig):
+Paid Amount,Suma plătită
+Paid change cannot be greater than total change!,Schimbarea plătită nu poate fi mai mare decât schimbarea totală!
+Paid:,Plătit:
+Parent Item,Element părinte
+Partial,Parțial
+Partly Paid,Plătit parțial
+Party Account,Cont de petrecere
+Party Type,Tip de petrecere
+Pause terminal until next cashier,Întrerupeți terminalul până la următoarea casierie
+PAY,PLATĂ
+Payment,Plata
+Payment Account,Cont de plată
+Payment entries processed for Invoice {0},Intrări de plată procesate pentru Factura {0}
+Payment Entry Type,Tip de intrare de plată
+Payment History,Istoricul plăților
+Payment ID,ID de plată
+Payment Method Report,Raportul metodei de plată
+Payment Methods,Metode de plată
+Payment of {0} received successfully.,Plata pentru {0} a primit cu succes.
+Payment Progress,Progresul plății
+Payment Reconciliation,Reconcilierea plăților
+Payment request status could not be retrieved. Please try again,Starea solicitării de plată nu a putut fi preluată. Vă rugăm să încercați din nou
+Payment Request took too long to respond. Please try requesting for payment again,Solicitarea de plată a durat prea mult pentru a răspunde. Vă rugăm să încercați să solicitați din nou plata
+Payment saved offline,Plata a fost salvată offline
+Payment State,Statul de plată
+Payment Status,Starea plății
+Payment submitted but print function could not be executed. Payment name not found.,"Plata a fost trimisă, dar funcția de imprimare nu a putut fi executată. Numele plății nu a fost găsit."
+Payment submitted.,Plata transmisă.
+Payment Summary,Rezumatul plăților
+Payments,Plăți
+Payments are not open. Do you want to open payments and submit?,Plățile nu sunt deschise. Doriți să deschideți plăți și să trimiteți?
+Payments by Mode of Payment,Plăți prin Modul de Plată
+PDF,PDF
+Peak Hour,Ora de vârf
+Peak Memory:,Memorie maximă:
+Peak Server:,Peak Server:
+Peak:,Vârf:
+Pending,În așteptare
+Pending Amount,Sumă în așteptare
+Pending count updated from {0} to {1},Numărul în așteptare a fost actualizat de la {0} la {1}
+Pending Exposure,Expunere în așteptare
+Pending Invoices,Facturi în așteptare
+Pending Ratio,Raportul în așteptare
+Pending Sales,Vânzări în așteptare
+Pending sales: {0} | Cache usage: {1}%,Vânzări în așteptare: {0} | Utilizare cache: {1}%
+Pending Sync,Sincronizare în așteptare
+Pending: {0},În așteptare: {0}
+Pending: {0} | Synced: {1} | Draft: {2},În așteptare: {0} | Sincronizat: {1} | Schiță: {2}
+Per Page,Pe pagină
+Personal,Personal
+Personal preferences adjust the current cashier experience without changing the active POS route.,Preferințele personale ajustează experiența actuală a casieriei fără a schimba ruta POS activă.
+PIN confirmation does not match.,Confirmarea PIN nu se potrivește.
+PIN must be 4 to 8 digits.,PIN-ul trebuie să aibă 4 până la 8 cifre.
+Please add at least one item.,Vă rugăm să adăugați cel puțin un articol.
+Please allow camera access to scan codes,Vă rugăm să permiteți accesul camerei pentru a scana codurile
+Please enter payment amount,Vă rugăm să introduceți suma de plată
+Please fill all required fields,Vă rugăm să completați toate câmpurile obligatorii
+Please make a payment or select a payment,Vă rugăm să efectuați o plată sau selectați o plată
+Please request phone payment or use another payment method,Vă rugăm să solicitați plata telefonică sau să utilizați o altă metodă de plată
+Please select a customer first,Vă rugăm să selectați mai întâi un client
+Please select a party,Vă rugăm să selectați o petrecere
+Please select a party before reconciling.,Vă rugăm să selectați o parte înainte de a reconcilia.
+Please select a valid movement type.,Vă rugăm să selectați un tip de mișcare valid.
+Please select an invoice,Vă rugăm să selectați o factură
+Please select company before reconciling.,Vă rugăm să selectați compania înainte de a reconcilia.
+Please set the customer's mobile number,Vă rugăm să setați numărul de telefon mobil al clientului
+Please try again or enter the item manually.,Vă rugăm să încercați din nou sau să introduceți elementul manual.
+Please verify the barcode or check the item's availability.,Vă rugăm să verificați codul de bare sau să verificați disponibilitatea articolului.
+Points,Puncte
+Popup blocked. Please allow popups.,Popup blocat. Vă rugăm să permiteți ferestrele pop-up.
+POS,POS
+POS controls and maintenance,Controale și întreținere POS
+POS Expense is disabled for this POS Profile.,Cheltuieli POS este dezactivată pentru acest profil POS.
+POS is running with limited offline prerequisites.,POS rulează cu cerințe prealabile offline limitate.
+POS Profile,Profil POS
+Position the QR code or barcode within the scanning area,Poziționați codul QR sau codul de bare în zona de scanare
+Posting,Postare
+Posting and Price List,Postare și Lista de prețuri
+Posting Date,Data afisarii
+Preparing background sync,Se pregătește sincronizarea în fundal
+"Press OK to continue offline with a warning, or Cancel to retry.",Apăsați OK pentru a continua offline cu un avertisment sau Anulați pentru a reîncerca.
+Previous unit of measure,Unitatea de măsură anterioară
+Price List,Lista de preturi
+Price List Rate,Tarif Lista de preturi
+Price list rate updated locally only,Tariful listei de prețuri este actualizat doar local
+Pricing & Discounts,Prețuri și reduceri
+Pricing Rule,Regula de preț
+Print,Imprimați
+Print Draft,Imprimare ciornă
+Print Format (Invoice),Format de imprimare (factură)
+Print Format (Order),Format de imprimare (comanda)
+Print invoice,Imprimați factura
+Print Purchase Invoice instead of PO,Imprimați factura de achiziție în loc de OP
+Printer,Imprimanta
+Processed returns impacting the shift totals,Retururi procesate care afectează totalul schimburilor
+Processing Payment,Procesarea plății
+Processing payment entries for Invoice {0},Procesarea intrărilor de plată pentru Factura {0}
+Profile,Profil
+Profiles,Profiluri
+Profit,Profit
+Profit: Invoice Item Estimate,Profit: Estimarea articolului pe factură
+Profit: Stock Ledger (COGS),Profit: Stock Ledger (COGS)
+Profitability Report,Raport de profitabilitate
+Prorated return discount,Reducere de retur proporțională
+Purchase Amount,Suma de achiziție
+Purchase Invoices,Facturi de achiziție
+Purchase Order created,Comanda de achiziție creată
+Qty,Cant
+Qualified,Calificat
+Quantity,Cantitatea
+Quantity exceeds available stock,Cantitatea depășește stocul disponibil
+Quick Actions,Acțiuni rapide
+Quotation {0} is Submitted,Cotația {0} este trimisă
+Quotation submitted,Cotația depusă
+QZ Tray connected.,Tava QZ conectată.
+QZ Tray is manually disconnected. Press Connect to enable it again.,Tava QZ este deconectată manual. Apăsați Conectare pentru a-l activa din nou.
+QZ Tray is not connected.,Tava QZ nu este conectată.
+QZ Tray Setup,Configurare tavă QZ
+Rate,Rata
+Rate adjusted to maximum allowed discount,Tarif ajustat la reducerea maximă permisă
+Ready,Gata
+Ready to resume,Gata de reluat
+Ready!,Gata!
+Real-time POS insights for retail operations.,Informații POS în timp real pentru operațiunile de vânzare cu amănuntul.
+Rebuild Offline Data,Reconstruiți datele offline
+Receive,Primește
+Receive now,Primește acum
+Received,Primit
+Received:,Primit:
+Recent Movement Entries,Înregistrări recente în mișcare
+Recent updates about your invoices,Actualizări recente despre facturile dvs
+Recently Active Customers,Clienți Activi recent
+Rechecking connection,Se verifică din nou conexiunea
+Reconcile payment methods and close shift,Reconciliați metodele de plată și închideți tura
+Reconciling Payments,Reconcilierea plăților
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","Reconectați-vă și deschideți această pagină o dată când sunteți online, apoi reîmprospătările offline o vor putea restabili."
+Reconnect online to refresh cached offline data from the server.,Reconectați-vă online pentru a reîmprospăta datele offline din cache de pe server.
+Recreate local offline prerequisites from scratch,Recreează de la zero cerințele locale offline
+Recv:,Recv:
+Redeem,Răscumpărați
+Redeem / Scan,Valorificați / Scanați
+Redeem Amount,Rambursați suma
+Redeem Mode,Modul de valorificare
+Redeemed Amount,Suma răscumpărată
+Redeemed credit cannot be greater than its total.,Creditul răscumpărat nu poate fi mai mare decât totalul său.
+Redemption and Totals,Răscumpărarea și totalurile
+Reference,Referință
+Refresh,Reîmprospătați
+Refresh Exchange Rate,Actualizează cursul de schimb
+Refresh Offline Data,Actualizează datele offline
+Refresh Printers,Actualizează imprimantele
+Refund,Rambursare
+Release Notes,Note de lansare
+Reload,Reîncărcați
+Reload customers,Reîncărcați clienții
+Reload Items,Reîncărcați articole
+Reload Now,Reîncărcați acum
+Reload to apply the latest changes. Your current session will be refreshed.,Reîncărcați pentru a aplica cele mai recente modificări. Sesiunea dvs. curentă va fi reîmprospătată.
+Reload Workflow,Reîncărcați fluxul de lucru
+Remarks,Remarci
+Remarks are required.,Sunt necesare observații.
+Remove,Eliminați
+Remove barcode item,Eliminați elementul cod de bare
+Remove cached data and reload the POS app,Eliminați datele din cache și reîncărcați aplicația POS
+Remove item,Eliminați elementul
+Remove Offer,Elimina oferta
+Reorder / Purchase Suggestions,Recomandă / Sugestii de cumpărare
+Repair Candidate,Candidat reparație
+Repair Change Allocation,Reparați modificarea alocației
+Repair requires an online connection,Reparația necesită o conexiune online
+Repaired,Reparat
+Repairing change allocation,Repararea alocării modificărilor
+Repeat Customers,Clienți repetați
+Repeat Rate,Rata de repetare
+Request,Cerere
+Request ID: {0},ID cerere: {0}
+Request Payment,Solicitați Plata
+Requested route: {0},Ruta solicitată: {0}
+Required columns cannot be hidden,Coloanele obligatorii nu pot fi ascunse
+Reset,Resetați
+Reset item name,Resetați numele articolului
+Reset to Default,Resetați la valoarea implicită
+Resource Health,Sănătatea resurselor
+Restricted,Restricţionat
+Restricted operational controls for supervisors only.,Controale operaționale restricționate numai pentru supraveghetori.
+Retry,Reîncercați
+Retry route,Reîncercați ruta
+Return,Întoarce-te
+Return Amount,Suma returnată
+Return Count,Număr de întoarceri
+Return items must have negative quantities,Articolele returnate trebuie să aibă cantități negative
+Return total must be negative,Totalul randamentului trebuie să fie negativ
+Return Valid Until,Returnare valabilă până la
+Return window passed,Fereastra de întoarcere a trecut
+Return without Invoice,Returnare fara factura
+Returns,Retururi
+Returns / Voids / Discounts,Retururi / Anulări / Reduceri
+Returns by Currency,Returnări în funcție de monedă
+Revenue,Venituri
+Review shift totals before submitting the closing entry,Examinați totalurile schimburilor înainte de a trimite înregistrarea de închidere
+Round Off,Rotunjiți
+Rows,Rânduri
+Rows:,Rânduri:
+Rule,Regula
+Sale,Vânzare
+Sales,Vânzări
+Sales Order {0} is Submitted,Comanda de vânzare {0} este trimisă
+Sales Person and Print,Persoana de vanzari si tipar
+Sales Person not found,Persoana de vânzări nu a fost găsită
+Sales processed,Vânzări procesate
+Sales Return,Returnarea vânzărilor
+Sales Trend Report,Raport privind tendințele vânzărilor
+Save,Salvați
+Save & Clear,Salvați și ștergeți
+Save as POS Profile Default,Salvați ca profil POS implicit
+Save Settings,Salvați setările
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,"Salvați imprimanta selectată ca profil implicit POS, astfel încât să se afișeze automat în această configurare."
+Saved as draft because: {0},Salvat ca schiță deoarece: {0}
+Saving...,Se salvează...
+Scale barcode detected. Quantity here is the number of labels to print.,S-a detectat codul de bare. Cantitatea aici este numărul de etichete de imprimat.
+Scale barcode settings are not configured. Using item barcode only.,Setările pentru codul de bare pentru scară nu sunt configurate. Folosind numai codul de bare al articolului.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,Codul de bare șablon de scară lipsește pentru acest articol/UOM. Folosind numai codul de bare al articolului.
+Scan an existing card and top it up without leaving the payment flow.,Scanați un card existent și încărcați-l fără a părăsi fluxul de plată.
+Scan Error,Eroare de scanare
+Scan or enter a gift card code to check balance or redeem.,Scanați sau introduceți un cod de card cadou pentru a verifica soldul sau pentru a valorifica.
+Scan or paste the card code below.,Scanați sau inserați codul cardului de mai jos.
+Scan QR Code/Barcode,Scanați codul QR/codul de bare
+Scan with camera,Scanează cu camera
+Scan-First Flow,Scanare-Primul flux
+Scanned Code:,Cod scanat:
+Scanning for: {0},Se scanează pentru: {0}
+Scanning items,Scanarea articolelor
+Scan-Ready,Gata de scanare
+Scope,Domeniul de aplicare
+Scope: All Profiles,Domeniu de aplicare: Toate profilurile
+Scope: Current Profile,Domeniu de aplicare: Profil curent
+Scope: Specific Profile,Domeniu de aplicare: Profil specific
+Search,Caută
+Search Account,Căutați în cont
+Search an invoice and continue the return flow without extra steps.,Căutați o factură și continuați fluxul de returnare fără pași suplimentari.
+Search customer,Cauta client
+Search invoices or customers,Căutați facturi sau clienți
+Search item,Căutare articol
+Search item / code,Căutați articol/cod
+Search items or barcode,Căutați articole sau coduri de bare
+Search Mpesa Payments,Căutați Mpesa Payments
+Search return invoices or customers,Căutați facturi de retur sau clienți
+Search supplier,Caută furnizor
+Search unpaid invoices or customers,Căutați facturi neplătite sau clienți
+Secure context (HTTPS or localhost) is required for camera access.,Contextul securizat (HTTPS sau localhost) este necesar pentru accesul la cameră.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,Este necesar un context securizat (HTTPS) pentru accesul la cameră. Vă rugăm să utilizați HTTPS pentru a accesa camera.
+Select,Selectați
+Select a cashier first.,Selectați mai întâi un casier.
+Select a customer,Selectați un client
+Select a customer to use coupon,Selectați un client pentru a utiliza cuponul
+Select a printer to use QZ silent printing.,Selectați o imprimantă pentru a utiliza imprimarea silențioasă QZ.
+Select Batch,Selectați lot
+Select Columns to Display,Selectați Coloane de afișat
+Select items to sell,Selectați articolele de vândut
+Select Payment,Selectați Plată
+Select Payment Account,Selectați Cont de plată
+Select printer,Selectați imprimanta
+Select Return Invoice,Selectați Retur Factură
+Select S.O,Selectați S.O
+Select Sales Orders,Selectați Comenzi de vânzare
+Select the cashier who is taking over this terminal.,Selectați casierul care preia acest terminal.
+Selected,Selectat
+Selected movement type is not allowed by POS Profile.,Tipul de mișcare selectat nu este permis de Profilul POS.
+Selected Payments,Plăți selectate
+Sensitive actions kept away from quick taps.,Acțiunile sensibile ținute departe de atingeri rapide.
+Serial,Serial
+Serial Numbers,Numere de serie
+Server CPU Usage:,Utilizare CPU server:
+Server Health,Sănătatea serverului
+Server Memory Usage:,Utilizarea memoriei serverului:
+Server Metrics,Valorile serverului
+Server Uptime:,Timp de funcționare a serverului:
+Service Charges,Taxe de servicii
+Session,Sesiune
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,Setați fiecare cod PIN al casieriei în formularul de utilizator și păstrați membrii terminalului alocați în profilul utilizator POS.
+Settings,Setări
+Settings in this section update the POS workspace without changing the current route.,Setările din această secțiune actualizează spațiul de lucru POS fără a schimba ruta curentă.
+Setup complete!,Configurare finalizată!
+Share,Distribuie
+Shared terminal,Terminal comun
+Shift Closed Snapshot,Shift închis instantaneu
+Shift Overview,Prezentare generală a schimburilor
+Show,Arată
+Show cart on customer-facing screen,Afișați coșul pe ecranul orientat către client
+Show last invoice rate,Afișați ultima cotă pe factură
+Show rate info,Afișați informații despre tarif
+Show Repair Candidates,Afișează candidații la reparații
+Show search tools,Afișați instrumentele de căutare
+Show the active cart on a customer-facing screen,Afișați coșul activ pe un ecran orientat către client
+Showing {0}-{1} of {2},Se afișează {0}-{1} din {2}
+Showing 0 of 0,Se afișează 0 din 0
+Shows the distribution of invoices per currency,Afișează distribuția facturilor pe monedă
+Sign out of the current POS session,Deconectați-vă de la sesiunea curentă POS
+Size:,Dimensiune:
+Skipped Payments,Plăți omise
+Skipping items without barcodes,Omiterea articolelor fără coduri de bare
+Slow Moving,Mișcare lentă
+Slow Moving Items,Elemente cu mișcare lentă
+Slow Queries:,Interogări lente:
+Sold,Vândut
+Source,Sursa
+Source Cash Account (Optional Override),Cont de numerar sursă (Anulare opțională)
+Source Ex. Rate:,Sursa Ex. Evaluare:
+Source Rate:,Rata sursă:
+Specific Profile,Profil specific
+Split Invoices,Facturi împărțite
+Staff / Cashier Performance Report,Raport de performanță al personalului/casierului
+Status,Stare
+Stock,Stoc
+Stock Information,Informații de stoc
+Stock is lower than requested,Stocul este mai mic decât cel solicitat
+Stock is lower than requested:\n{0},Stocul este mai mic decât cel solicitat:\n{0}
+Stock Movement Report,Raport de mișcare a stocurilor
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,Actualizare stoc: {0} are {1} disponibile. Adăugarea {2} va aduce stocul sub zero.
+Submit,Trimiteți
+Submit & Print,Trimiteți și imprimați
+Submit Deposit,Trimiteți Depozit
+Submit Expense,Trimiteți Cheltuială
+Submitted,Trimis
+Submitted Cash Movements,Mișcări de numerar transmise
+Submitted entries,Intrări trimise
+Successfully scanned:,Scanat cu succes:
+Suggested,Sugerat
+Suggested Qty,Cantitate sugerată
+Supervisor Access,Acces supervizor
+Supervisor permissions unlock issuance and reloads,Permisiunile supraveghetorului deblochează emiterea și reîncărcările
+Supervisor Tools,Instrumente de supraveghere
+Supplier,Furnizor
+Supplier and dates are required.,Furnizorul și datele sunt necesare.
+Supplier Invoices,Facturi furnizori
+Supplier is required.,Este necesar furnizorul.
+Supplier name is required,Numele furnizorului este obligatoriu
+Supplier Payments,Plăți la furnizor
+Supplier Purchase Summary,Rezumatul achiziției furnizorului
+Suppliers,Furnizori
+Suppliers not found,Furnizori nu au fost găsiti
+Switch Camera,Comutați camera
+Switch Cashier,Schimbă casieria
+Switch the POS appearance theme,Schimbați tema aspectului POS
+Switched to:,S-a schimbat la:
+Sync All Invoices,Sincronizați toate facturile
+Sync Offline Cash Movements ({0}),Sincronizați mișcările de numerar offline ({0})
+Sync Offline Sales,Sincronizați vânzările offline
+Synced {0} offline cash movement(s).,{0} mișcări de numerar offline sincronizate.
+Syncing items in background,Se sincronizează elemente în fundal
+System / Diagnostics,Sistem / Diagnosticare
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","Acțiunile sistemului sunt controale de întreținere de joasă frecvență, cum ar fi informații despre aplicație, diagnostice de asistență și controale de sesiune."
+System Information,Informații de sistem
+System Status,Stare sistem
+Tables:,tabele:
+Tap the button below to redeem a gift card during checkout.,Atingeți butonul de mai jos pentru a valorifica un card cadou în timpul plății.
+Target,țintă
+Target Ex. Rate:,Țintă Ex. Evaluare:
+Target Rate:,Rata țintă:
+Tax,Taxa
+Tax / Charges Report,Raport de taxe / taxe
+Tax Heads,Șefii de taxe
+Taxable Amount,Suma impozabilă
+Tendered,Adresat
+Terminal,Terminal
+Terminal & Devices,Terminal și dispozitive
+Terminal locked,Terminal blocat
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","Instrumentele terminalului afectează această stație de casă, afișajele orientate către clienți și comenzile viitoare ale imprimantei/dispozitivelor."
+Territory not found,Teritoriul nu a fost găsit
+The amount paid is not complete,Suma plătită nu este completă
+The app stores data locally for offline use. This is called cache.,Aplicația stochează date local pentru utilizare offline. Aceasta se numește cache.
+The invoice stayed in draft. Please review and submit it manually.,Factura a ramas in draft. Vă rugăm să o examinați și să o trimiteți manual.
+The maximum discount allowed is,Reducerea maximă permisă este
+The quantity for {0} has been adjusted to the maximum available stock.,Cantitatea pentru {0} a fost ajustată la stocul maxim disponibil.
+The system could not retrieve the item details. Please try again.,Sistemul nu a putut prelua detaliile articolului. Vă rugăm să încercați din nou.
+These invoices will be synced when connection is restored,Aceste facturi vor fi sincronizate la restabilirea conexiunii
+This action now opens inside the settings workspace.,Această acțiune se deschide acum în spațiul de lucru cu setări.
+This coupon already used !,Acest cupon este deja folosit!
+This invoice does not need change-allocation repair,Această factură nu necesită reparații de modificare-alocare
+This invoice is already repaired,Această factură este deja reparată
+This is an item template. Please choose a variant.,Acesta este un șablon de articol. Vă rugăm să alegeți o variantă.
+this item,acest articol
+This POS page could not be opened offline because its code was not cached on this terminal yet.,"Această pagină POS nu a putut fi deschisă offline, deoarece codul său nu a fost încă memorat în cache pe acest terminal."
+This Serial Number {0} has already been added!,Acest număr de serie {0} a fost deja adăugat!
+Threshold,Prag
+Time,Timpul
+Tip: Clear cache regularly to free up space and keep the app fast.,Sfat: goliți memoria cache în mod regulat pentru a elibera spațiu și pentru a menține rapid aplicația.
+Tip: Close unused tabs or apps to reduce lag.,Sfat: închideți filele sau aplicațiile neutilizate pentru a reduce decalajul.
+Tip: Monitor slow queries and table size for optimal performance.,Sfat: monitorizați interogările lente și dimensiunea tabelului pentru performanțe optime.
+To Be Paid,De plătit
+To Date,Până în prezent
+Today,Astăzi
+Today Profit,Azi Profit
+Today Sales,Vânzări de azi
+Toggle navigation drawer,Comutați sertarul de navigare
+Toggle Theme,Comutați tema
+Tools,Instrumente
+Tools for customer-facing screens and terminal-specific actions.,Instrumente pentru ecrane orientate către clienți și acțiuni specifice terminalului.
+Top Brand,Brand de top
+Top Category,Categoria de top
+Top Charge Head,Cap de încărcare superior
+Top Customers,Clienți de top
+Top Discount,Top Reducere
+Top Items by Location,Articole de top după locație
+Top Margin,Marja superioară
+Top Pending,Top În așteptare
+Top Profit Item,Articol cu profit de top
+Top Return Items,Top articole returnate
+Top Sales by Cashier,Top vânzări de la casierie
+Top Supplier,Furnizor de top
+Top Suppliers by Spend,Top furnizori în funcție de cheltuieli
+Top Tables,Top Mese
+Top Tax Head,Top Tax Head
+Top Up Amount,Suma de reîncărcare
+Top Up Card,Card de reîncărcare
+Top Up Mode,Modul de reîncărcare
+Top Variant,Varianta de top
+Total,Total
+Total Amount,Suma totală
+Total Change,Schimbare totală
+Total Charges,Taxe totale
+Total In,Total In
+Total Invoices,Total facturi
+Total Items,Total articole
+Total Mpesa,Total Mpesa
+Total Out,Total Out
+Total Payments,Plăți totale
+Total Purchase,Cumpărare totală
+Total Selected :,Total selectat:
+Total Size,Dimensiunea totală
+Total Stock Qty,Cantitate totală de stoc
+Total:,Total:
+Totals by Invoice Currency,Totaluri în funcție de moneda facturii
+Track how much cash was handed back to customers,Urmăriți câți bani au fost returnați clienților
+"Track recent sales, collect unpaid balances, and reopen saved work","Urmăriți vânzările recente, colectați soldurile neplătite și redeschideți munca salvată"
+Transaction ID,ID tranzacție
+Transfer,Transfer
+Try a different search term or clear the cart search.,Încercați un alt termen de căutare sau ștergeți căutarea în coș.
+Try adjusting your search or filters,Încercați să ajustați căutarea sau filtrele
+Try another source or refresh the list.,Încercați altă sursă sau reîmprospătați lista.
+Try changing the date range or status filter.,Încercați să schimbați intervalul de date sau filtrul de stare.
+Type,Tip
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,Nu se poate accesa camera chiar și cu setările de bază. Vă rugăm să verificați permisiunile camerei și compatibilitatea dispozitivului.
+Unable to add offer item {0}. Please refresh and try again.,Nu se poate adăuga elementul de ofertă {0}. Vă rugăm să actualizați și să încercați din nou.
+Unable to add offer item. Please refresh and try again.,Nu se poate adăuga elementul oferit. Vă rugăm să actualizați și să încercați din nou.
+Unable to add scanned item.,Nu se poate adăuga elementul scanat.
+Unable to create purchase order,Nu se poate crea comanda de cumpărare
+Unable to delete draft invoice,Imposibil de șters proiectul de factură
+Unable to fetch documents,Nu se pot prelua documentele
+Unable to fetch draft orders,Imposibil de preluat comenzile nefinalizate
+Unable to fetch invoice history,Imposibil de preluat istoricul facturilor
+Unable to fetch M-Pesa payments,Nu se pot prelua plățile M-Pesa
+Unable to fetch sales orders,Nu se pot prelua comenzile de vânzare
+Unable to fetch unpaid invoices,Imposibil de preluat facturile neplătite
+Unable to generate scale barcode,Nu se poate genera codul de bare la scară
+Unable to issue gift card.,Nu se poate emite cardul cadou.
+Unable to load cashier PIN status.,Nu se poate încărca starea PIN-ului casierului.
+Unable to load document,Nu se poate încărca documentul
+Unable to load draft invoice,Imposibil de încărcat proiectul de factură
+Unable to load gift card balance.,Nu se poate încărca soldul cardului cadou.
+Unable to load invoice details,Nu se pot încărca detaliile facturii
+Unable to load parked order,Nu se poate încărca comanda parcata
+Unable to load the selected sales order,Nu se poate încărca comanda de vânzare selectată
+Unable to prepare document,Nu se poate pregăti documentul
+Unable to prepare return invoice,Imposibil de pregătit factura de retur
+Unable to print draft invoice,Imposibil de imprimat proiectul de factură
+Unable to print submitted invoice,Imposibil de imprimat factura trimisă
+Unable to process document action,Imposibil de procesat acțiunea documentului
+Unable to repair change allocation,Imposibil de reparat modificarea alocației
+Unable to save cashier PIN.,Nu se poate salva PIN-ul casierului.
+Unable to save the rate to the backend price list,Nu se poate salva rata în lista de prețuri backend
+Unable to submit invoice,Imposibil de trimis factura
+Unable to submit the selected payment,Nu se poate trimite plata selectată
+Unable to top up gift card.,Nu se poate încărca cardul cadou.
+Unable to verify cashier PIN.,Nu se poate verifica PIN-ul casierului.
+Unallocated,Nealocate
+Unallocated:,Nealocate:
+Unavailable,Indisponibil
+Unknown,Necunoscut
+Unknown Item,Element necunoscut
+Unknown Warehouse,Depozit necunoscut
+Unlock POS,Deblocați POS
+Unpaid,Neplătit
+"Unselected payments stay unallocated first, then auto reconcile after submit.","Plățile neselectate rămân nealocate mai întâi, apoi reconcilierea automată după trimitere."
+UOM,UOM
+UOM not found,UOM nu a fost găsit
+Update available,Actualizare disponibilă
+Update Customer,Actualizați clientul
+Update PIN,Actualizați codul PIN
+Update Price List Rate,Actualizați tariful listei de prețuri
+Updated,Actualizat
+Updates and app info that stay out of the cashier flow.,Actualizări și informații despre aplicație care rămân în afara fluxului de casierie.
+Updates automatically,Se actualizează automat
+Usage,Utilizare
+Usage Stats,Statistici de utilizare
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,Utilizați un PIN din 4 până la 8 cifre pentru comutarea casieriei și deblocarea terminalului.
+Use Cashier,Folosește Casier
+Use date range to search for older invoices,Utilizați intervalul de date pentru a căuta facturi mai vechi
+"Use one field for manual code entry, barcode scans, or QR scans.","Utilizați un câmp pentru introducerea manuală a codului, scanările codurilor de bare sau scanările QR."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","Utilizați un singur flux de lucru pentru verificări de sold, emitere nouă și reîncărcări fără a părăsi POS."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","Utilizați această secțiune atunci când datele prealabile stocate în cache necesită o reîmprospătare, reconstrucție sau o analiză de diagnosticare."
+Use Western numerals,Folosiți cifre occidentale
+Used:,Folosit:
+Using basic camera settings due to device limitations,Utilizarea setărilor de bază ale camerei din cauza limitărilor dispozitivului
+Using cached customer balance,Utilizarea soldului clientului stocat în cache
+Valid until,Valabil până la
+Variance %,Varianta %
+Variants,Variante
+Variant-wise,Din punct de vedere al variantelor
+Verify closing amounts for each payment method,Verificați sumele de închidere pentru fiecare metodă de plată
+View all,Vezi toate
+View app information and current build details,Vizualizați informații despre aplicație și detalii despre versiunea curentă
+View Data Diagnostics,Vedeți Diagnosticarea datelor
+View Details,Vedeți detalii
+View invoice details,Vedeți detaliile facturii
+View notifications,Vizualizați notificările
+View offline invoices,Vedeți facturile offline
+View restricted POS insights,Vedeți statistici POS restricționate
+Void Amount,Suma nulă
+Void Count,Număr de goluri
+Voids,Goluri
+Waiting for cart items,În așteptarea articolelor din coș
+Waiting for payment...,Se așteaptă plata...
+Walk-in Customer,Client cu intrare
+Warehouse,Depozit
+Warning: High cache usage may affect performance.,Avertisment: utilizarea ridicată a memoriei cache poate afecta performanța.
+Warning: High lag may indicate heavy processing or browser slowness.,Avertisment: întârzierea mare poate indica procesarea grea sau încetinirea browserului.
+Week ?,Săptămâna?
+Week-wise,Săptămânal
+Weight (g),Greutate (g)
+Weight (grams),Greutate (grame)
+We'll let you know if an invoice fails to submit,Vă vom anunța dacă o factură nu se trimite
+Workflow,Fluxul de lucru
+Write off amount cannot exceed the POS profile maximum of {0},Suma anulată nu poate depăși valoarea maximă a profilului POS de {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,Suma anulată depășește limita permisă ({0}). Vă rugăm să adăugați plata pentru suma rămasă.
+Yes,Da
+"Yes, Cancel sale","Da, anulați vânzarea"
+"Yes, Close","Da, aproape"
+You are not allowed to print draft invoices,Nu aveți voie să tipăriți proiecte de facturi
+You are offline. Add Payment will work again when the connection is restored.,Ești offline. Adăugarea plății va funcționa din nou când conexiunea este restabilită.
+You have no notifications right now,Nu aveți notificări în acest moment
+Your Cart,Coșul dvs

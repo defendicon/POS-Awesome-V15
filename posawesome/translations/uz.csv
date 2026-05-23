@@ -1,0 +1,1362 @@
+POS Awesome,Ajoyib POS
+Fetch Items Directly from Server,To'g'ridan-to'g'ri serverdan elementlarni olish
+Menu,Menyu
+Actions,Harakatlar
+Close Shift,Shiftni yopish
+End current session,Joriy seansni tugatish
+Print Last Invoice,Oxirgi hisob-fakturani chop eting
+Reprint previous transaction,Oldingi tranzaksiyani qayta chop etish
+Sync Offline Invoices,Oflayn hisob-fakturalarni sinxronlash
+Upload pending transactions,Kutilayotgan tranzaksiyalarni yuklang
+Go Online,Onlayn o'tish
+Go Offline,Oflayn rejimga o'tish
+Disable offline mode,Oflayn rejimni o'chiring
+Work without server connection,Serverga ulanmasdan ishlash
+Clear Cache,Keshni tozalash
+Remove local data and refresh,Mahalliy ma'lumotlarni o'chiring va yangilang
+About,Haqida
+App information,Ilova ma'lumotlari
+Language,Til
+Change interface language,Interfeys tilini o'zgartiring
+Light Mode,Nur rejimi
+Dark Mode,Qorong'i rejim
+Switch theme appearance,Mavzu ko'rinishini o'zgartirish
+Logout,Chiqish
+Sign out of session,Sessiyadan chiqish
+Select Language,Tilni tanlang
+Choose your preferred language for the POS interface,POS interfeysi uchun sizga yoqqan tilni tanlang
+Language will be changed to,Til quyidagiga o'zgartiriladi
+Cancel,Bekor qilish
+Change Language,Tilni o'zgartirish
+Close,Yopish
+Cannot change language - same language selected,Tilni o'zgartirib bo'lmaydi - bir xil til tanlangan
+Language changed successfully! Reloading...,Til muvaffaqiyatli o'zgartirildi! Qayta yuklanmoqda...
+Failed to change language,Tilni o‘zgartirib bo‘lmadi
+Unknown error,Noma'lum xato
+- Total Unallocated,- Jami taqsimlanmagan
+* Required,* Majburiy
+{0} (Qty: {1}),{0} (Majmi: {1})
+{0} actions,{0} ta amal
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} zaxirasida faqat {1} bor. Siz soʻragansiz: {2}. Miqdorni sozlang yoki zaxiralang.
+{0} offline invoice{1} pending,{0} oflayn hisob-faktura{1} kutilmoqda
+{0} offline invoice{1} saved as draft,{0} oflayn hisob-faktura{1} qoralama sifatida saqlangan
+{0} offline invoice{1} synced,{0} oflayn hisob-faktura{1} sinxronlashtirildi
+{0}: {1} {2},{0}: {1} {2}
+{0}d ago,{0} kun oldin
+{0}h ago,{0}soat oldin
+{0}m ago,{0}daq oldin
+A POS supervisor is required for this action.,Bu amal uchun POS nazoratchisi talab qilinadi.
+Access,Kirish
+Account,Hisob
+Account is overdrawn,Hisob ortiqcha ishlangan
+Acknowledge the error to resume scanning,Skanerlashni davom ettirish uchun xatoni tan oling
+Acknowledge the error to resume scanning.,Skanerlashni davom ettirish uchun xatoni tan oling.
+Across,Bo'ylab
+Action,Harakat
+Active sale,Faol savdo
+add,qo'shish
+Add items from the selector to start building this sale.,Ushbu savdoni yaratishni boshlash uchun selektordan narsalarni qo'shing.
+Add more value to an existing gift card,Mavjud sovg'a kartasiga ko'proq qiymat qo'shing
+Add New Address,Yangi manzil qo'shish
+Add new customer,Yangi mijoz qo'shing
+Add on New Line,Yangi qatorga qo'shing
+Add Payment,To'lovni qo'shish
+Add payment to invoice,Hisob-fakturaga to'lov qo'shing
+Add/Edit Coupon Conditions,Kupon shartlarini qo'shish/tahrirlash
+Additional Discount,Qo'shimcha chegirma
+Additional Discount %,Qo'shimcha chegirma %
+Address Line 1,Manzil qatori 1
+Address not found,Manzil topilmadi
+Adjust the quantity or enable negative stock to continue.,Davom etish uchun miqdorni sozlang yoki salbiy zaxirani yoqing.
+Adjustment,Sozlash
+After returns,Qaytgandan keyin
+Against,Qarshi
+Against Name,Nomga qarshi
+Age Bracket,Yosh chegarasi
+All,Hammasi
+All Caught Up!,Hammasi ushlandi!
+All invoices are synchronized,Barcha hisob-fakturalar sinxronlashtiriladi
+All pending invoices are up to date,Barcha kutilayotgan hisob-fakturalar yangilangan
+All Profiles,Barcha profillar
+All Synchronized,Hammasi sinxronlangan
+All visible invoices are fully settled.,Barcha ko'rinadigan hisob-fakturalar to'liq hisob-kitob qilingan.
+All Warehouses,Barcha omborxonalar
+Allowed UOM is {0},Ruxsat etilgan UOM: {0}
+Always fetch items from server (ignore local cache),Har doim serverdan elementlarni oling (mahalliy keshga e'tibor bermang)
+Amount,Miqdori
+Amount already received,Qabul qilingan miqdor
+Amount exceeds profile cash movement max amount.,Miqdori naqd pul harakatining maksimal miqdoridan oshib ketdi.
+Amount must be greater than zero.,Miqdor noldan katta bo'lishi kerak.
+Amount received from customer,Mijozdan olingan miqdor
+Appearance and user-level preferences for the current session.,Joriy seans uchun tashqi ko'rinish va foydalanuvchi darajasidagi imtiyozlar.
+Applied,Qo'llaniladi
+Apply,Murojaat qiling
+Apply Gift Card,Sovg'a kartasini qo'llash
+Apply Offer,Taklifni qo'llash
+Apply On,Qo'llash yoqilgan
+Apply only the amount you want to redeem on this invoice. The remaining balance stays on the card.,Bu invoysda faqat oʻzingiz ishlatmoqchi boʻlgan miqdorni qoʻllang. Qolgan qoldiq kartada qoladi.
+Apply Redemption,Toʻlovni qoʻllash
+Applying,Murojaat qilinmoqda
+Apps,Ilovalar
+Are you sure you want to close? All entered data will be lost.,Haqiqatan ham yopmoqchimisiz? Barcha kiritilgan ma'lumotlar yo'qoladi.
+Attributes (Size/Color),Atributlar (hajmi/rangi)
+Auto Allocate Payment Amount,To'lov miqdorini avtomatik taqsimlash
+Auto Reconcile,Avtomatik muvofiqlashtirish
+Auto reconciliation completed after payment submit.,Toʻlov yuborilgandan keyin avtomatik solishtirish tugallandi.
+Auto reconciliation completed. Allocated: {0}{1}. Remaining outstanding: {0}{2}.,Avtomatik muvofiqlashtirish tugallandi. Ajratilgan: {0}{1}. Qolganlari: {0}{2}.
+Available Actions,Mavjud harakatlar
+Available QTY,Mavjud QTY
+Available:,Mavjud:
+Average Basket,O'rtacha savat
+Average Bill,O'rtacha hisob
+Average Ticket,O'rtacha chipta
+Avg Bill,Oʻrtacha hisob
+Avg Invoice,Oʻrtacha hisob-faktura
+Avg Invoice Profit,O'rtacha hisob-faktura foydasi
+Avg Invoice Value,Hisob-fakturaning oʻrtacha qiymati
+Avg Purchase Frequency,Oʻrtacha xarid chastotasi
+Awesome,Ajoyib
+Awesome Dashboard,Ajoyib boshqaruv paneli
+Awesome Dashboard is disabled for the selected POS Profile.,Tanlangan POS profili uchun Awesome Dashboard o‘chirib qo‘yilgan.
+Awesome Dashboard is unavailable for the selected scope.,Tanlangan doirada Awesome Dashboard mavjud emas.
+Awesome Dashboard is visible only to POS supervisors.,Ajoyib boshqaruv paneli faqat POS nazoratchilariga ko'rinadi.
+Back,Orqaga
+Back Office Cash Account,Back Office Cash Account
+Back Office Cash Account (Optional Override),Back Office Cash Account (ixtiyoriy bekor qilish)
+Back office cash account is required.,Back-ofis kassa hisobi talab qilinadi.
+Back to {0},{0} ga qaytish
+Background processing did not finish in time.,Fonni qayta ishlash o'z vaqtida tugamagan.
+Background processing failed for Invoice {0}: {1},Invoys {0} uchun fonda ishlov berilmadi: {1}
+Background Submission Failed,Fonni yuborish amalga oshmadi
+Background sync interval (seconds),Fon sinxronlash oralig'i (sekundlar)
+Balance,Balans
+Balance will be updated when connection is restored,Ulanish tiklanganda balans yangilanadi
+Balances still pending,Balanslar hali kutilmoqda
+Barcode,Shtrix-kod
+Barcode / QR Ready,Shtrixli kod / QR tayyor
+Barcode Label Printing,Shtrixli yorliqlarni chop etish
+Base Paid:,Asosiy to'lov:
+Base Recv:,Asosiy qabul qilish:
+Base:,Baza:
+Basic Information,Asosiy ma'lumotlar
+Batch,To'plam
+Batch Information,To'plam ma'lumotlari
+Before any return workflow,Har qanday qaytish ish jarayonidan oldin
+Before returns,Qaytishdan oldin
+Best Day,Eng yaxshi kun
+Best Seller,Eng yaxshi sotuvchi
+Book expense or deposit from active shift.,Faol smenadan kitob xarajatlari yoki depozit.
+Branch / Location-wise Report,Filial / Joylashuv bo'yicha hisobot
+Brand-wise,Brend nuqtai nazaridan
+Breakdown,Buzilish
+Browse,Ko‘rib chiqish
+Build Time:,Qurilish vaqti:
+Built with Frappe,Frappe bilan qurilgan
+Bundle,To'plam
+Buying Price,Sotib olish narxi
+Cache cleared successfully,Kesh muvaffaqiyatli tozalandi
+Cache Usage,Keshdan foydalanish
+cache used,kesh ishlatiladi
+Calculating...,Hisoblash...
+Camera Access Required,Kameraga kirish talab qilinadi
+Camera access was aborted. Please try again.,"Kameraga kirish to‘xtatildi. Iltimos, qayta urinib koʻring."
+Camera constraints not supported by your device. Trying fallback settings...,Kamera cheklovlari qurilmangiz tomonidan qo'llab-quvvatlanmaydi. Qayta tiklash sozlamalari sinab ko‘rilmoqda...
+Camera is busy or blocked by another app/tab. Close other camera apps and try again.,Kamera band yoki boshqa ilova/tab tomonidan bloklangan. Boshqa kamera ilovalarini yoping va qaytadan urining.
+Camera permission denied. Please allow camera access in your browser settings and refresh the page.,Kamera ruxsati rad etildi. Brauzer sozlamalarida kameraga kirishga ruxsat bering va sahifani yangilang.
+Camera scanner is locked until the current error is acknowledged,Kamera skaneri joriy xato tasdiqlanmaguncha qulflanadi
+Camera started but the video stream did not load in time. Please try again.,"Kamera ishga tushdi, lekin video oqimi o‘z vaqtida yuklanmadi. Iltimos, qayta urinib koʻring."
+Cancel cash movement {0}?,Naqd pul harakati {0} bekor qilinsinmi?
+Cancel Payment,To'lovni bekor qilish
+Cancel Sale,Sotishni bekor qilish
+Cancel Sale ?,Sotish bekor qilinsinmi?
+Cancelled,Bekor qilingan
+Cannot add an item with zero or negative quantity.,Nol yoki manfiy miqdorga ega element qoʻshib boʻlmaydi.
+Cannot clear cache while offline,Oflayn rejimda keshni tozalab bo‘lmaydi
+Cannot redeem customer credit more than invoice total,Mijoz kreditini hisob-faktura summasidan ko‘proq qaytarib bo‘lmaydi
+Cannot redeem gift cards more than invoice total,Jami hisob-fakturadan ortiq sovg‘a kartalarini qaytarib bo‘lmaydi
+Cannot Save Offline Invoice:,Oflayn hisob-fakturani saqlab bo‘lmaydi:
+Cannot Save Offline Payment:,Oflayn toʻlovni saqlab boʻlmaydi:
+Card,Karta
+Card / Online,Karta / Onlayn
+Card health after the last live lookup,Oxirgi jonli qidiruvdan keyin karta salomatligi
+Cards,Kartalar
+Cart,Arava
+Cash,Naqd pul
+Cash back to customers,Mijozlarga naqd pulni qaytarish
+Cash Collections,Naqd pul yig'imlari
+Cash Deposit is disabled for this POS Profile.,Ushbu POS profili uchun naqd depozit o‘chirib qo‘yilgan.
+Cash Drawer Snapshot,Naqd pul tortmasi surati
+Cash In Hand,Naqd pul
+Cash Movement,Naqd pul harakati
+Cash movement cancelled,Naqd pul harakati bekor qilindi
+Cash movement deduction applied,Naqd pul harakati chegirmasi qo'llaniladi
+Cash movement deleted,Naqd pul harakati o'chirildi
+Cash movement is disabled for this POS Profile.,Ushbu POS profili uchun naqd pul harakati o‘chirib qo‘yilgan.
+Cash Movement is disabled in current POS Profile.,Joriy POS profilida naqd pul harakati o‘chirilgan.
+Cash movement saved offline,Naqd pul harakati oflayn rejimda saqlangan
+Cash movement submitted,Naqd pul harakati topshirildi
+Cash Movements,Naqd pul harakati
+Cash payment cannot be less than invoice total when partial payment is not allowed,"Qisman to'lovga ruxsat berilmagan taqdirda, naqd to'lov hisob-faktura jamidan kam bo'lishi mumkin emas"
+Cash returned after payment,To'lovdan keyin naqd pul qaytariladi
+Cashier,Kassir
+Cashier Access,Kassirga kirish
+Cashier identity and appearance preferences.,Kassir identifikatori va tashqi ko'rinish afzalliklari.
+Cashier PIN,Kassir PIN-kodi
+Cashier PIN saved successfully.,Kassir PIN-kodi muvaffaqiyatli saqlandi.
+Cashiers,Kassirlar
+Cashier-wise,Kassir nuqtai nazaridan
+Categories,Kategoriyalar
+Category,Turkum
+Category / Brand / Variant Report,Turkum / Brend / Variant hisoboti
+Category-wise,Kategoriya bo'yicha
+Category-wise Margin,Kategoriya bo'yicha chegara
+Certificate,Sertifikat
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,Sertifikat yoʻq yoki ishonchli emas. QZ tasdiqlash dialoglarini ko'rsatishi mumkin.
+Certificate is trusted. Silent QZ printing is active.,Sertifikat ishonchli. Ovozsiz QZ bosib chiqarish faol.
+Change,O'zgartirish
+Change allocation repaired,O'zgartirish taqsimoti tuzatildi
+Change Price,Narxni o'zgartirish
+Change Return,Qaytishni o'zgartirish
+Change Returned,O'zgartirish qaytarildi
+Change terminal cashier,Terminal kassirini almashtiring
+Charge Heads,Zaryadlash boshlari
+Charges,To'lovlar
+Charges not found,Toʻlovlar topilmadi
+Check Balance,Balansni tekshiring
+Check balance for any card. Supervisors can issue and top up cards here.,Har qanday karta uchun balansni tekshiring. Nazoratchilar bu yerda kartalarni chiqarishi va to‘ldirishi mumkin.
+Check balance only,Faqat balansni tekshiring
+Check for new commits,Yangi majburiyatlarni tekshiring
+Check for Updates,Yangilanishlarni tekshiring
+Check live balance before applying redemption,Qabul qilishdan oldin jonli balansni tekshiring
+Check live balance before redemption,Qabul qilishdan oldin jonli balansni tekshiring
+Checking...,Tekshirilmoqda...
+Cheque/Reference Date,Chek/Ma'lumotnoma sanasi
+Cheque/Reference No,Chek/Ma'lumotnoma raqami
+Choose the cashier currently operating this terminal.,Hozirda ushbu terminalda ishlaydigan kassirni tanlang.
+City,Shahar
+Clear,Toza
+Clear All,Hammasini tozalash
+Clear all barcode items,Barcha shtrix-kod elementlarini tozalang
+Clear all purchase order items,Buyurtmaning barcha elementlarini tozalang
+Clear Search,Qidiruvni tozalash
+Clearing local cache...,Mahalliy kesh tozalanmoqda...
+Click to refresh,Yangilash uchun bosing
+Client CPU Lag:,Mijoz protsessorining kechikishi:
+Client Memory Usage:,Mijoz xotirasidan foydalanish:
+Client Metrics,Mijoz ko'rsatkichlari
+Close about dialog,Haqida muloqot oynasini yoping
+Close cashier switcher,Kassir almashtirgichni yoping
+Close closing shift dialog,Shiftni yopish dialogini yoping
+Close column selector,Ustun selektorini yoping
+Close Dialog,Muloqot oynasini yopish
+Close drafts dialog,Qoralamalar dialogini yoping
+Close invoice details dialog,Hisob-faktura tafsilotlari dialog oynasini yoping
+Close invoice management,Hisob-faktura boshqaruvini yoping
+Close offline invoices dialog,Oflayn hisob-fakturalar muloqot oynasini yoping
+Close packing list dialog,Qadoqlash ro'yxati dialogini yoping
+Close returns dialog,Qaytishlar dialogini yoping
+Close sales orders dialog,Savdo buyurtmalari dialogini yoping
+Close Scanner,Skanerni yoping
+Close scanner dialog,Skaner dialogini yoping
+Close Settings,Sozlamalarni yoping
+Closing Amount,Yakunlovchi miqdor
+Closing POS Shift,POS Shiftni yopish
+Closing Snapshot Available,Yakunlovchi surat mavjud
+Code,Kod
+Code scanned successfully,Kod muvaffaqiyatli skanerlandi
+COGS,COGS
+Collapse item details,Element tafsilotlarini yig‘ish
+Collected,Yig'ilgan
+Cols,Cols
+Columns,Ustunlar
+commits,majburiyat oladi
+Completed and active sales in this range,Ushbu diapazonda tugallangan va faol sotuvlar
+Completed returns will appear here.,Tugallangan deklaratsiyalar shu yerda ko'rinadi.
+Confirm,Tasdiqlang
+Confirm Close,Yopishni tasdiqlang
+Confirm Mobile Number,Mobil raqamni tasdiqlang
+Confirm PIN,PIN-kodni tasdiqlang
+Connect,Ulanish
+Connect printer and manage certificate,Printerni ulang va sertifikatni boshqaring
+Connecting to QZ Tray...,QZ trayga ulanmoqda...
+Connection problem while submitting invoice,Hisob-fakturani yuborishda ulanish muammosi
+Connections:,Ulanishlar:
+Connectivity and cached prerequisite status were rechecked.,Ulanish va keshlangan shart holati qayta tekshirildi.
+Continue Editing,Tahrirlashni davom ettiring
+Could not fetch latest balance from server,Serverdan oxirgi balansni olib bo‘lmadi
+Count,Hisoblash
+Country,Mamlakat
+Coupon,Kupon
+Coupons,Kuponlar
+Cover,Qopqoq
+CPU Cores:,CPU yadrolari:
+Create,Yaratish
+Create and load a new prepaid card,Yangi oldindan toʻlov kartasini yarating va yuklang
+Create and preload a new gift card,Yangi sovg'a kartasini yarating va oldindan yuklang
+Create Bill,Bill yaratish
+Create Customer,Xaridor yaratish
+Create New Item,Yangi element yaratish
+Create or change your PIN,PIN kodingizni yarating yoki o'zgartiring
+Create PIN,PIN kod yarating
+Create POS Opening Shift,POS ochish shiftini yarating
+Create Purchase Order,Buyurtmani yaratish
+Create Return,Qaytish yaratish
+Create return from invoice,Hisob-fakturadan deklaratsiya yaratish
+Create Supplier,Yetkazib beruvchi yaratish
+Credit and Output,Kredit va chiqish
+Credit Note,Kredit eslatmasi
+Credit Outstanding,To'lanmagan kredit
+Credit sales remaining to be collected,To'planishi kerak bo'lgan kredit sotuvi qolgan
+Critical,Tanqidiy
+Currency,Valyuta
+Current,Hozirgi
+Current Event Loop Lag:,Joriy hodisa davrining kechikishi:
+Current Month,Joriy oy
+Current PIN,Joriy PIN-kod
+Current Profile,Joriy profil
+Current redeemable value on the gift card,Sovg'a kartasidagi joriy qaytarib olinadigan qiymat
+Current User,Joriy foydalanuvchi
+Custom,Maxsus
+Custom Due Days,Maxsus to'lov kunlari
+Custom items per page,Har bir sahifa uchun moslashtirilgan elementlar
+Customer,Mijoz
+Customer already selected,Mijoz allaqachon tanlangan
+Customer Balance,Mijoz balansi
+Customer balance unavailable offline,Mijoz balansi oflayn rejimda mavjud emas
+Customer created successfully.,Mijoz muvaffaqiyatli yaratildi.
+Customer creation failed.,Mijoz yaratish amalga oshmadi.
+Customer Details,Xaridor tafsilotlari
+Customer display channel is missing,Mijozlarni ko'rsatish kanali yo'q
+Customer display was blocked. Please allow pop-ups for this site.,"Mijoz ekrani bloklandi. Iltimos, ushbu sayt uchun qalqib chiquvchi oynalarga ruxsat bering."
+Customer group is required,Mijozlar guruhi talab qilinadi
+Customer is required to add payment,Mijoz to'lovni qo'shishi kerak
+Customer Name is required,Mijoz nomi talab qilinadi
+Customer not selected,Mijoz tanlanmagan
+Customer Report,Mijoz hisoboti
+Customer saved offline,Mijoz oflayn rejimda saqlandi
+Customer Screen,Mijoz ekrani
+Customer territory is required,Mijoz hududi talab qilinadi
+Customer updated successfully.,Mijoz muvaffaqiyatli yangilandi.
+Customer-facing tools and printer setup.,Mijozlarga mo'ljallangan asboblar va printerni sozlash.
+Customers,Mijozlar
+Customers not found,Mijozlar topilmadi
+Daily cashier actions without scrolling.,Kundalik kassir harakatlari aylanmasdan.
+Daily Sales,Kundalik savdo
+Daily Sales Summary,Kundalik savdo xulosasi
+Data loaded in form. Review and submit.,Ma'lumotlar shaklda yuklangan. Ko'rib chiqing va yuboring.
+Database Health,Ma'lumotlar bazasi salomatligi
+Database health affects overall system speed and reliability.,Ma'lumotlar bazasining holati umumiy tizim tezligi va ishonchliligiga ta'sir qiladi.
+Database Info,Ma'lumotlar bazasi haqida ma'lumot
+Date,Sana
+Day ?,Kun?
+days,kunlar
+Day-wise (MTD),Kun bo'yi (MTD)
+Day-wise Movement,Kun bo'yi harakat
+Dead Stock,O'lik zaxira
+Dead Stock Items,O'lik zaxira buyumlari
+Decrease quantity,Miqdorni kamaytiring
+Default,Standart
+Default:,Standart:
+Delete,Oʻchirish
+Delete cancelled cash movement {0}?,Bekor qilingan naqd pul harakati {0} oʻchirilsinmi?
+Delete Draft,Qoralamani oʻchirish
+Delete draft invoice,Hisob-faktura loyihasini o'chirish
+Delete draft invoice {0}?,{0} hisob-faktura loyihasi oʻchirilsinmi?
+Delete Invoice,Hisob-fakturani o'chirish
+Delete offline invoice,Oflayn hisob-fakturani o'chirish
+Delivered,Yetkazib berildi
+Delivery Charges,Yetkazib berish to'lovlari
+Delivery Information,Yetkazib berish haqida ma'lumot
+Delivery Note {0} created,Yetkazib berish eslatmasi {0} yaratildi
+Delivery note created,Yetkazib berish eslatmasi yaratildi
+Deployed Bundle:,O'rnatilgan to'plam:
+Deposit,Depozit
+Description,Tavsif
+Detailed Supplier Breakdown,Yetkazib beruvchining batafsil taqsimoti
+Detecting formats:,Formatlarni aniqlash:
+Device Memory:,Qurilma xotirasi:
+Difference,Farq
+Difference (In Company Currency),Farqi (kompaniya valyutasida)
+Disable offline mode first to recheck live connectivity.,Jonli ulanishni qayta tekshirish uchun avval oflayn rejimni o'chiring.
+Disconnect,Ulanishni uzing
+discount,chegirma
+Discount %,Chegirma %
+Discount / Void / Return Report,Chegirma / bekor / Qaytish hisoboti
+Discount Amount,Chegirma miqdori
+Discount limited by POS Profile,Chegirma POS profili bilan cheklangan
+Discounted Invoices,Chegirmali hisob-fakturalar
+Discounts,Chegirmalar
+Dismiss,Rad etish
+Download Certificate,Sertifikat yuklab olish
+Draft,Qoralama
+Draft invoice deleted,Hisob-faktura loyihasi oʻchirildi
+Draft source,Qoralama manba
+Drafts,Qoralamalar
+Due {0},Muddati: {0
+Due Date,Tugash sanasi
+Duplicate,Dublikat
+Edit customer,Xaridorni tahrirlash
+Edit discount amount,Chegirma miqdorini tahrirlash
+Edit discount percentage,Chegirma foizini tahrirlash
+Edit Gift Application,Sovg'a ilovasini tahrirlash
+Edit item name,Element nomini tahrirlash
+Edit quantity,Miqdorni tahrirlash
+Edit rate,Tahrirlash darajasi
+Edit unit of measure,O'lchov birligini tahrirlash
+Edited,Tahrirlangan
+Employee,Xodim
+Enable background sync,Fon sinxronlashni yoqish
+Enable Customer Display in POS Profile first.,Avval POS profilida mijoz ko‘rinishini yoqing.
+Enter a PIN.,PIN kodni kiriting.
+Enter a valid grams value,Yaroqli gramm qiymatini kiriting
+Enter new price list rate,Yangi narxlar ro'yxatini kiriting
+Enter Quantity,Miqdorni kiriting
+Enter the cashier PIN to continue.,Davom etish uchun kassir PIN kodini kiriting.
+Enter the current PIN first.,Avval joriy PIN-kodni kiriting.
+"Enter the current PIN, then choose a new one.","Joriy PIN-kodni kiriting, so'ngra yangisini tanlang."
+Enter valid grams for scale barcode,Shtrix-kod uchun yaroqli grammlarni kiriting
+Entries,Yozuvlar
+Error accessing camera:,Kameraga kirishda xatolik yuz berdi:
+Error calculating prices,Narxlarni hisoblashda xato
+Error fetching customer balance,Mijoz balansini olishda xatolik yuz berdi
+Error in change calculations!,O'zgarishlarni hisoblashda xatolik yuz berdi!
+Error Loading Data,Maʼlumotlarni yuklashda xatolik yuz berdi
+Error loading invoice details,Hisob-faktura tafsilotlarini yuklashda xatolik yuz berdi
+Error processing invoice,Hisob-fakturani qayta ishlashda xatolik yuz berdi
+Error processing payment,Toʻlovni qayta ishlashda xatolik yuz berdi
+Error searching invoices,Hisob-fakturalarni qidirishda xatolik yuz berdi
+Error submitting invoice:,Hisob-fakturani yuborishda xatolik yuz berdi:
+Error submitting invoice: {0},Hisob-fakturani yuborishda xatolik yuz berdi: {0}
+Error submitting invoice: No response from server,Hisob-fakturani yuborishda xato: serverdan javob yo‘q
+Error updating currency,Valyutani yangilashda xatolik yuz berdi
+Error updating item details,Element tafsilotlarini yangilashda xatolik yuz berdi
+Est. Purchase,Tahminiy. Sotib olish
+Est. Value,Tahminiy. Qiymat
+Event-loop lag measures how busy your browser is. Lower is better.,Voqea-loop lag brauzeringiz qanchalik bandligini o'lchaydi. Pastroq - yaxshiroq.
+Every,Har
+Exchange Rate,Valyuta kursi
+Expand item details,Element tafsilotlarini kengaytirish
+Expected Amount (In Company Currency),Kutilayotgan miqdor (kompaniya valyutasida)
+Expected Cash,Kutilayotgan naqd pul
+Expected cash on hand grouped by currency,Kassadagi kutilayotgan naqd pul birligi boʻyicha guruhlangan
+Expected vs Actual,Kutilayotgan va haqiqiy
+Expense,Xarajat
+Expense Account (Optional Override),Xarajatlar hisobi (ixtiyoriy bekor qilish)
+Expense account is required.,Xarajatlar hisobi talab qilinadi.
+Expenses and deposits posted during this shift,Ushbu smenada e'lon qilingan xarajatlar va depozitlar
+Expired,Muddati tugagan
+Failed to auto reconcile payments.,Toʻlovlarni avtomatik tarzda solishtirib boʻlmadi.
+Failed to cancel cash movement,Naqd pul harakati bekor qilinmadi
+Failed to clear cache,Keshni tozalab bo‘lmadi
+Failed to create item,Element yaratib bo‘lmadi
+Failed to create supplier,Yetkazib beruvchi yaratilmadi
+Failed to delete cash movement,Naqd pul harakatini o‘chirib bo‘lmadi
+Failed to generate scale barcode. Using item barcode only.,Shtrix kodini yaratib bo‘lmadi. Faqat shtrix-koddan foydalanish.
+Failed to load cash movement context.,Naqd pul harakati konteksti yuklanmadi.
+Failed to load dashboard data.,Boshqaruv paneli maʼlumotlarini yuklab boʻlmadi.
+Failed to reload invoice from server,Hisob-fakturani serverdan qayta yuklab bo‘lmadi
+Failed to submit cash movement,Naqd pul harakati topshirilmadi
+Failed to sync offline cash movements,Oflayn pul o‘tkazmalarini sinxronlash amalga oshmadi
+Fast cashier actions for active shifts.,Faol siljishlar uchun tezkor kassir harakatlari.
+Fast Moving Items,Tez harakatlanuvchi elementlar
+Fees,To'lovlar
+Fetch the latest offline prerequisite updates,Eng so'nggi oflayn yangilanishlarni oling
+Find a sales order quickly and load it into the current sale.,Tezda savdo buyurtmasini toping va uni joriy sotuvga yuklang.
+Fixing payment amounts for return invoice...,Qaytarilgan faktura uchun toʻlov summalari aniqlanmoqda...
+Flash Off,Fleshli o'chirilgan
+Flash On,Fleshli yoniq
+"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table; values will be copied to 'Packing List' table.","""Mahsulot to'plami"" uchun ombor, seriya raqami va partiya raqami ""Qadoqlash ro'yxati"" jadvalidan ko'rib chiqiladi. Agar “Mahsulot to‘plami”ning barcha qadoqlash elementlari uchun ombor va partiya raqami bir xil bo‘lsa, bu qiymatlarni asosiy element jadvaliga kiritish mumkin; qiymatlar ""Paketlar ro'yxati"" jadvaliga ko'chiriladi."
+Free,Bepul
+Free Qty,Bepul miqdor
+Frequency,Chastotasi
+from,dan
+From Date,Sanadan boshlab
+Fulfillment Details,Bajarish tafsilotlari
+Full Name,To'liq ism
+Gain,Daromad
+Generate a fresh prepaid card and start it with an opening balance.,Yangi oldindan to'langan kartani yarating va uni boshlang'ich balans bilan boshlang.
+Generate and install the certificate to allow fully silent printing without trust prompts.,Ishonch soʻrovlarisiz toʻliq ovozsiz chop etishga ruxsat berish uchun sertifikatni yarating va oʻrnating.
+Generate Certificate,Sertifikat yaratish
+Generated scale barcode: {0},Yaratilgan shkala shtrix kodi: {0}
+Get Payments,Toʻlovlarni olish
+Gift Card,Sovg'a kartasi
+Gift card amount must be greater than zero.,Sovg'a kartasi miqdori noldan katta bo'lishi kerak.
+Gift Card Code,Sovg'a kartasi kodi
+Gift card code is required for redemption,Qabul qilish uchun sovg‘a kartasi kodi talab qilinadi
+Gift card code is required.,Sovg'a kartasi kodi talab qilinadi.
+Gift card issued successfully.,Sovgʻa kartasi chiqarildi.
+Gift card loaded successfully.,Sovg‘a kartasi yuklandi.
+Gift Card Management,Sovg'a kartalarini boshqarish
+Gift card payment,Sovg'a kartasi to'lovi
+Gift card redemption requires an online connection,Sovg'a kartasini sotib olish uchun onlayn ulanish kerak
+Gift card topped up successfully.,Sovg'a kartasi muvaffaqiyatli to'ldirildi.
+Gift Cards,Sovg'a kartalari
+Go to Frappe Desk,Frappe stoliga o'ting
+Grand Total,Umumiy jami
+Gross Margin,Yalpi marja
+Gross Profit,Yalpi foyda
+Gross Sales,Yalpi savdo
+Group not found,Guruh topilmadi
+"Grouped controls for terminal, UI, and session settings.","Terminal, UI va seans sozlamalari uchun guruhlangan boshqaruv elementlari."
+Grouped totals for each payment method and currency,Har bir toʻlov usuli va valyuta uchun guruhlangan jami
+Hide,Yashirish
+Hide Gift Card,Sovg'a kartasini yashirish
+Hide Non Essential Fields,Muhim bo'lmagan maydonlarni yashirish
+Hide quantity decimals,O'nli sonlarni yashirish
+Hide search tools,Qidiruv vositalarini yashirish
+Hide zero rated items,Nol baholangan narsalarni yashirish
+High,Yuqori
+History,Tarix
+Hourly (Today),Soatlik (Bugun)
+How this section works,Ushbu bo'lim qanday ishlaydi
+"If stale data remains, open Settings > Offline & Sync and run Rebuild Offline Data again while online.","Agar eskirgan maʼlumotlar qolsa, Sozlamalar > Oflayn va sinxronlash-ni oching va onlayn boʻlganingizda “Oflayn maʼlumotlarni qayta qurish”ni ishga tushiring."
+"If the warning persists, open Settings > Offline & Sync, then run Refresh Offline Data or Rebuild Offline Data.","Agar ogohlantirish davom etsa, Sozlamalar > Oflayn va sinxronlash-ni oching, so‘ng Oflayn ma’lumotlarni yangilash yoki Oflayn ma’lumotlarni qayta qurish-ni ishga tushiring."
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Sertifikatni QZ trayga import qiling va har bir POS mashinasida QZ trayni qayta ishga tushiring.
+In,In
+In stock: {0},Stokda: {0}
+Include Batch / Serial,To'plamli / Seriyani qo'shing
+Include Price,Narxni o'z ichiga oladi
+Increase quantity,Miqdorini oshiring
+IndexedDB,IndexedDB
+Initial Amount,Boshlang'ich miqdor
+Initialize your shift with opening balances,Ochilish balanslari bilan smenangizni boshlang
+Initializing application...,Ilova ishga tushirilmoqda...
+"Inspect cache, sync, and prerequisite status","Keshni, sinxronlashni va shart holatini tekshiring"
+Installed Applications,O'rnatilgan ilovalar
+Insufficient stock:\n{0},Zaxira yetarli emas:\n{0}
+Invalid rate,Yaroqsiz tarif
+Inventory Status Report,Inventarizatsiya holati to'g'risidagi hisobot
+Invoice,Hisob-faktura
+Invoice {0} is Submitted,{0}-faktura topshirildi
+Invoice {0} processed successfully,{0} hisob-fakturasi muvaffaqiyatli qayta ishlandi
+Invoice {0} submission failed,Invoys {0} yuborilmadi
+Invoice {0} was already submitted,Invoys {0} allaqachon yuborilgan
+Invoice Adjustments,Hisob-fakturani tuzatish
+Invoice Change,Hisob-fakturani o'zgartirish
+Invoice Details,Hisob-faktura tafsilotlari
+Invoice is still in draft after background submission.,Hisob-faktura fonda yuborilganidan keyin ham qoralamada.
+Invoice Items,Hisob-faktura elementlari
+Invoice Management,Hisob-faktura boshqaruvi
+Invoice Mgmt,Invoys Mgmt
+Invoice saved offline,Hisob-faktura oflayn rejimda saqlandi
+Invoice submission failed,Hisob-faktura topshirilmadi
+Invoice Submitted,Hisob-faktura topshirildi
+"Invoice value settled by loyalty points, not cash collection","Hisob-faktura qiymati naqd pul inkassosi emas, sodiqlik punktlari orqali hisoblab chiqiladi"
+Invoices,Hisob-fakturalar
+Invoices already past due date,Hisob-fakturalar muddati allaqachon o‘tgan
+Invoices saved as POS Invoices,Hisob-fakturalar POS hisob-fakturalari sifatida saqlanadi
+Invoices still carrying balances,Hisob-fakturalarda hali ham qoldiqlar bor
+Issue Mode,Muammo rejimi
+Issue New Card,Yangi kartani chiqarish
+Issue Workflow,Ish jarayoni muammosi
+"Issue, top up, and check","Chiqarish, to'ldirish va tekshirish"
+Item,Element
+Item / Product Sales Report,Mahsulot / mahsulot sotish hisoboti
+Item {0} added to invoice,{0}-band hisob-fakturaga qo‘shildi
+Item '{0}' has no barcode,“{0}” bandida shtrix-kod yo‘q
+Item Code,Element kodi
+Item created successfully,Element muvaffaqiyatli yaratildi
+Item is out of stock,Buyum stokda yo‘q
+Item Name,Element nomi
+Item not found,Element topilmadi
+Item order updated,Mahsulot tartibi yangilandi
+Item Selector Settings,Element tanlash sozlamalari
+Items,Elementlar
+Items added in POS will appear here automatically.,POS-ga qo'shilgan elementlar bu erda avtomatik ravishda paydo bo'ladi.
+Items added to invoice,Hisob-fakturaga qo'shilgan narsalar
+Items per page,Har bir sahifadagi elementlar
+Items Sold,Sotilgan buyumlar
+Items/Invoice,Elementlar / faktura
+Item-wise Profitability,Moddalar bo'yicha rentabellik
+Journal Entry,Jurnalga kirish
+json,json
+Just now,Hozir
+Keep offline prerequisites healthy and recover stale data safely.,Oflayn shartlarni sog'lom saqlang va eskirgan ma'lumotlarni xavfsiz tiklang.
+Labels,Yorliqlar
+"Language, theme, terminal tools, and session controls.","Til, mavzu, terminal vositalari va seans boshqaruvlari."
+Last,Oxirgi
+Last 14 Days (Paid vs Pending),Oxirgi 14 kun (Toʻlangan va kutilayotgan)
+Last 14 Days Activity,Oxirgi 14 kunlik faoliyat
+Last 14 Days Gross Profit,Oxirgi 14 kunlik yalpi foyda
+Last 14 Days Purchases,Oxirgi 14 kunlik xaridlar
+Last 14 Days Tax/Charges,Oxirgi 14 kunlik soliq/toʻlovlar
+Last sync:,Oxirgi sinxronlash:
+Last sync: {0} | ok: {1} | failed: {2} | skipped: {3},Oxirgi sinxronlash: {0} | yaxshi: {1} | muvaffaqiyatsiz: {2} | o'tkazib yuborilgan: {3}
+Latest entries for current shift,Joriy siljish uchun so'nggi yozuvlar
+Lead Time,Yetkazib berish vaqti
+Limited,Cheklangan
+lines,chiziqlar
+List,Roʻyxat
+Live Snapshot,Jonli surat
+Load a POS profile and cashier first.,Avval POS profili va kassirni yuklang.
+Load More Invoices,Ko'proq hisob-fakturalarni yuklang
+Load previously saved invoices,Oldindan saqlangan hisob-fakturalarni yuklang
+Load Sale,Yuklab sotish
+Load Sales Invoice,Sotish hisob-fakturasini yuklab oling
+Loading app data...,Ilova maʼlumotlari yuklanmoqda...
+Loading customer database...,Mijoz maʼlumotlar bazasi yuklanmoqda...
+Loading customers...,Mijozlar yuklanmoqda...
+Loading database stats...,Maʼlumotlar bazasi statistikasi yuklanmoqda...
+Loading details...,Tafsilotlar yuklanmoqda...
+Loading invoice history...,Hisob-fakturalar tarixi yuklanmoqda...
+Loading items...,Elementlar yuklanmoqda...
+Loading product catalog...,Mahsulot katalogi yuklanmoqda...
+Loading return invoices...,Qaytarilgan fakturalar yuklanmoqda...
+Loading server CPU/memory usage...,Server protsessor/xotiradan foydalanish yuklanmoqda...
+Loading suppliers...,Yetkazib beruvchilar yuklanmoqda...
+Loading unpaid invoices...,Toʻlanmagan invoyslar yuklanmoqda...
+Loading view...,Ko‘rinish yuklanmoqda...
+Loading...,Yuklanmoqda...
+Local storage is unavailable. Switching to online-only mode.,Mahalliy xotira mavjud emas. Faqat onlayn rejimiga o'tish.
+localStorage,localStorage
+Location Performance,Joylashuv samaradorligi
+Locations,Joylar
+Lock Screen,Ekranni qulflash
+Lookup Workflow,Ish jarayonini qidirish
+Loss,Yo'qotish
+Low,Past
+Low Stock,Kam zaxira
+Low Stock Alerts,Kam zaxiralar haqida ogohlantirishlar
+Low Stock Items,Kam zaxira buyumlar
+Low Stock Threshold,Past zaxira chegarasi
+Low Stock Total,Jami kam zaxira
+Lowest Margin,Eng past marja
+Low-frequency maintenance and system details.,Past chastotali texnik xizmat ko'rsatish va tizim tafsilotlari.
+Loyalty Redeemed,Sadoqat qaytarildi
+Loyalty Redemption,Sadoqatni qaytarish
+Make New Payment,Yangi to'lovni amalga oshirish
+Manage all,Hammasini boshqaring
+Manage and synchronize your offline transactions,Oflayn tranzaktsiyalaringizni boshqaring va sinxronlang
+Manage Cashier PIN,Kassir PIN-kodini boshqaring
+"Manage offline tools, terminal controls, and maintenance from one workspace.","Oflayn vositalarni, terminal boshqaruvlarini va texnik xizmatni bitta ish maydonidan boshqaring."
+manual,qo'llanma
+"Manual codes, barcode scans, and QR scans work in the same field","Qo'lda kodlar, shtrix-kod skanerlari va QR skanerlari bir xil sohada ishlaydi"
+Manual offline mode is enabled,Qo'lda oflayn rejim yoqilgan
+Margin,Marja
+Maximum available quantity is {0}. Quantity adjusted to match stock.,Maksimal mavjud miqdor: {0}. Miqdor zaxiraga mos kelishi uchun sozlangan.
+Maximum discount amount for this offer item is {0}.,Ushbu taklif mahsuloti uchun maksimal chegirma miqdori: {0}.
+Maximum discount percentage for this offer item is {0}%.,Ushbu taklif elementi uchun maksimal chegirma foizi {0}%.
+Maximum offer quantity is {0}. Quantity adjusted to allowed limit.,Maksimal taklif miqdori: {0}. Miqdor ruxsat etilgan chegaraga sozlangan.
+Medium,O'rta
+Method-wise Collections,Uslubiy to'plamlar
+Minimum allowed rate for this offer item is {0}.,Ushbu taklif elementi uchun ruxsat etilgan minimal narx: {0}.
+Minimum Qty,Minimal miqdor
+Mobile No,Mobil raqami
+Mode,Rejim
+Mode of Payment,To'lov tartibi
+Month,Oy
+Month ?,Oy?
+Monthly Profit,Oylik foyda
+Monthly Sales,Oylik savdo
+Monthly Sales Summary,Oylik savdo xulosasi
+Month-wise,Oy bo'yicha
+Most Active Cashiers,Eng faol kassirlar
+Movement Type,Harakat turi
+Movements,Harakatlar
+Multi Currency,Ko'p valyutali
+N/A,Yoʻq
+Name,Ism
+Negative Stock,Salbiy zaxira
+Negative Stock Items,Salbiy zaxira buyumlari
+Negative values not allowed,Salbiy qiymatlarga ruxsat berilmaydi
+Net,Net
+Net Qty,Sof miqdor
+Net Sales,Sof savdo
+Net Value,Sof qiymat
+Never,Hech qachon
+New changes are ready to load,Yangi oʻzgarishlar yuklashga tayyor
+New Item,Yangi element
+New Offer Available,Yangi taklif mavjud
+New PIN,Yangi PIN
+New rate,Yangi tarif
+Next unit of measure,Keyingi o'lchov birligi
+No attribute data found.,Atribut maʼlumotlari topilmadi.
+No Barcode,Shtrix-kod yo'q
+No barcode found for UOM '{0}',“{0}” UOM uchun shtrix-kod topilmadi
+No branch/location data found.,Filial/joylashuv maʼlumotlari topilmadi.
+No brand data found.,Brend maʼlumotlari topilmadi.
+No cached gift card balance is available offline.,Oflayn rejimda keshlangan sovg‘a kartasi balansi mavjud emas.
+No camera found on this device. Please ensure your device has a working camera.,Bu qurilmada hech qanday kamera topilmadi. Qurilmangizda ishlaydigan kamera borligiga ishonch hosil qiling.
+No capability warnings recorded yet.,Hali hech qanday qobiliyat haqida ogohlantirishlar qayd etilmagan.
+No cash expected for this shift.,Ushbu siljish uchun naqd pul kutilmaydi.
+No cash mode configured,Naqd pul rejimi sozlanmagan
+No cash movement type is allowed for this POS Profile.,Ushbu POS profili uchun naqd pul harakati turiga ruxsat berilmaydi.
+No cashier PIN is set yet. Create one now.,Hozircha kassir PIN-kodi o'rnatilmagan. Hozir yarating.
+No cashier profiles are available for this POS profile yet.,Ushbu POS profili uchun kassir profili hali mavjud emas.
+No cashier-wise discount/void/return activity.,Kassir bo'yicha chegirma / bekor qilish / qaytarish faoliyati yo'q.
+No category data found.,Turkum maʼlumotlari topilmadi.
+No category profitability data found.,Turkum rentabelligi haqida maʼlumot topilmadi.
+No change returned recorded for this shift.,Bu siljish uchun hech qanday o'zgarish qayd etilmagan.
+No change-allocation invoices match the current filters.,Joriy filtrlarga mos keladigan oʻzgartirishlar boʻyicha hisob-fakturalar mavjud emas.
+No charge head breakdown found.,Zaryadlash boshining buzilishi topilmadi.
+No Company Selected,Hech qanday kompaniya tanlanmagan
+No customer sales data found.,Xaridor savdosi maʼlumotlari topilmadi.
+No day-wise discount/void/return trend.,Kun bo'yicha chegirma/bekorlik/qaytish tendentsiyasi yo'q.
+No day-wise payment data found.,Kun boʻyicha toʻlov maʼlumotlari topilmadi.
+No day-wise profitability trend found.,Kunlik rentabellik tendentsiyasi topilmadi.
+No day-wise purchase data found.,Bir kunlik xarid maʼlumotlari topilmadi.
+No day-wise sales trend found.,Kunlik savdo tendentsiyasi topilmadi.
+No day-wise tax/charges trend found.,Kun boʻyicha soliq/toʻlovlar tendentsiyasi topilmadi.
+No dead stock items.,O'lik zaxira buyumlari yo'q.
+No due date,Muddati yo'q
+No exact repair match found for this invoice,Bu faktura uchun aniq taʼmirlash moslamasi topilmadi
+No hourly sales trend found for today.,Bugungi kun uchun soatlik savdo tendentsiyasi topilmadi.
+No invoice activity found.,Hisob-faktura bo‘yicha harakat topilmadi.
+No invoices found,Hech qanday hisob-faktura topilmadi
+No invoices found. Try different search criteria.,Hech qanday hisob-faktura topilmadi. Turli xil qidiruv mezonlarini sinab ko'ring.
+No invoices recorded for this shift.,Bu siljish uchun hisob-fakturalar qayd etilmagan.
+No item profitability data found.,Hech qanday mahsulot rentabelligi haqida ma'lumot topilmadi.
+No item sales data found for this period.,Bu davr uchun mahsulot sotish maʼlumotlari topilmadi.
+No items found,Hech narsa topilmadi
+No items in cart,Savatda hech narsa yo‘q
+No items with barcodes to print,Chop etish uchun shtrix kodlari mavjud emas
+No location-wise top item data found.,Joylashuvga oid asosiy maʼlumotlar topilmadi.
+No low stock alerts right now.,Hozirda kam zaxiralar haqida ogohlantirishlar yo‘q.
+No low stock items.,Kam miqdordagi mahsulotlar mavjud emas.
+No matching items in cart,Savatda mos mahsulotlar topilmadi
+No month-wise sales trend found.,Oylik savdo tendentsiyasi topilmadi.
+No negative stock items.,Salbiy zaxira buyumlari yo'q.
+No notifications yet,Hozircha bildirishnomalar yo‘q
+No offline cash movement synced.,Hech qanday oflayn pul harakati sinxronlanmagan.
+No offline invoices pending synchronization,Sinxronizatsiya kutilayotgan oflayn hisob-fakturalar yo'q
+No offline sync issues recorded yet.,Hozircha oflayn sinxronlash muammosi qayd etilmagan.
+No out-of-stock items.,Stokda yoʻq.
+No outstanding credit invoices for this shift.,Bu siljish uchun to‘lanmagan kredit schyot-fakturalari yo‘q.
+No payment collection data found.,Toʻlov yigʻish maʼlumotlari topilmadi.
+No payment rows available on this invoice.,Bu invoysda toʻlov qatorlari mavjud emas.
+No payments registered for this shift.,Bu siljish uchun hech qanday toʻlov qayd etilmagan.
+No pending balances in this period.,Bu davrda kutilayotgan qoldiq yo'q.
+No pending offline invoices,Kutilayotgan oflayn hisob-fakturalar yo‘q
+No Print Formats Found,Chop etish formatlari topilmadi
+No profiles found for selected scope. Falling back to current profile failed.,Tanlangan doira uchun profil topilmadi. Joriy profilga qaytish amalga oshmadi.
+No recent customer activity found.,Oxirgi mijoz faoliyati topilmadi.
+No recent stock entries found.,Oxirgi birja yozuvlari topilmadi.
+No records found,Hech qanday yozuv topilmadi
+No reorder suggestions right now.,Qayta tartiblash bo‘yicha takliflar hozir yo‘q.
+No repeat customers in this period.,Bu davrda takroriy mijozlar yo'q.
+No response from server,Serverdan javob yo'q
+No return invoices found,Qaytarilgan fakturalar topilmadi
+No return item trend found.,Qaytarilish tendentsiyasi topilmadi.
+No returnable items found for this invoice,Bu invoys uchun qaytariladigan mahsulotlar topilmadi
+No returns were processed in this shift.,Bu smenada hech qanday qaytarib olinmagan.
+No risk activity found.,Hech qanday xavfli faoliyat topilmadi.
+No sales activity found for this period.,Bu davr uchun savdo faoliyati topilmadi.
+No slow moving items.,Sekin harakatlanuvchi elementlar yo'q.
+No staff sales activity found.,Xodimlarning savdo faoliyati topilmadi.
+No stock movement for this period.,Ushbu davr uchun aksiyalar harakati yo'q.
+No submitted cash movements in this shift.,Ushbu smenada naqd pul harakati taqdim etilmagan.
+No supplier purchases found in this month.,Bu oyda yetkazib beruvchi xaridlari topilmadi.
+No suppliers found for this period.,Bu davr uchun yetkazib beruvchilar topilmadi.
+No sync trigger has run yet in this session.,Bu seansda hali hech qanday sinxronlash ishga tushirilmagan.
+No tax head breakdown found.,Hech qanday soliq bo'limi topilmadi.
+No top items found for this location.,Bu joy uchun hech qanday asosiy element topilmadi.
+No unpaid invoices,To'lanmagan hisob-fakturalar yo'q
+No variant data found.,Variant maʼlumotlari topilmadi.
+No week-wise sales trend found.,Haftalik savdo tendentsiyasi topilmadi.
+No.,Yo'q.
+Nobile Number,Nobil raqami
+Not available,Mavjud emas
+Not checked,Tekshirilmagan
+Not selected,Tanlanmagan
+Not Set,Belgilanmagan
+Notifications,Bildirishnomalar
+Offer,Taklif
+Offer Applied,Taklif Qo'llaniladi
+Offer criteria exceeded,Taklif mezonlaridan oshib ketdi
+Offer Item,Taklif elementi
+Offer item unavailable,Taklif elementi mavjud emas
+Offer Removed,Taklif olib tashlandi
+Offer UOM cannot be changed,Taklif UOMni o'zgartirib bo'lmaydi
+Offer?,Taklif?
+Offers,Takliflar
+Offline,Oflayn
+Offline & Sync,Oflayn va sinxronlash
+Offline Capabilities,Oflayn imkoniyatlar
+Offline data status refreshed,Oflayn maʼlumotlar holati yangilandi
+Offline diagnostics,Oflayn diagnostika
+Offline Invoices,Oflayn hisob-fakturalar
+Offline invoices status,Oflayn hisob-fakturalar holati
+Offline invoices synced,Oflayn hisob-fakturalar sinxronlashtirildi
+Offline Queue: {0},Oflayn navbat: {0}
+Offline rebuild guidance,Oflayn qayta tiklash bo'yicha ko'rsatmalar
+Offline restore is unavailable for this session.,Ushbu seans uchun oflayn tiklash imkonsiz.
+Offline selling is available with degraded capabilities.,Imkoniyatlari yomonlashgan holda oflayn sotish mavjud.
+Offline snapshot does not match the current POS state.,Oflayn surat joriy POS holatiga mos kelmaydi.
+Offline Status,Oflayn holat
+"Offline, terminal, and system controls","Oflayn, terminal va tizim boshqaruvlari"
+OK,OK
+Online,Onlayn
+Open actions menu,Amallar menyusini oching
+Open balance to collect,To'plash uchun ochiq balans
+Open Customer Display,Mijoz ekranini oching
+Open drawer,Ochiq tortma
+Open invoices,Hisob-fakturalarni ochish
+Open Payments?,Toʻlovlar ochilsinmi?
+Open POS home,POS uyini oching
+Open this screen from POS Menu -> Open Customer Display.,Ushbu ekranni POS menyusi -> Mijoz ekranini ochish orqali oching.
+OpenCV image processing enabled - Enhanced barcode detection,OpenCV tasvirni qayta ishlash yoqilgan - Kengaytirilgan shtrix-kodni aniqlash
+OpenCV image processing unavailable on this device,Ushbu qurilmada OpenCV tasvirni qayta ishlash imkonsiz
+OpenCV Off,OpenCV o'chirilgan
+OpenCV On,OpenCV yoqilgan
+OpenCV processing disabled,OpenCV-ni qayta ishlash o'chirilgan
+Opening Amount,Ochilish miqdori
+Opening Cash,Naqd pul ochish
+options,variantlari
+Order,Buyurtma
+Original,Asl
+Other,Boshqa
+Out,Chiqib ketdi
+Out of Stock,Stokda yoʻq
+Out of Stock Items,Stokda yoʻq
+Outstanding,Ajoyib
+Outstanding Credit by Currency,Valyuta bo'yicha to'lanmagan kredit
+Overdue,Muddati o'tgan
+Overpayment Change,Ortiqcha to'lovni o'zgartirish
+Overpayment change deducted: {0},Ortiqcha toʻlov oʻzgarishi chegirildi: {0}
+Packing List,Paket ro'yxati
+Page Format,Sahifa formati
+Page unavailable offline,Sahifa oflayn rejimda mavjud emas
+Paid,To'langan
+Paid (orig):,To'langan (original):
+Paid Amount,To'langan miqdor
+Paid change cannot be greater than total change!,To'langan o'zgarish umumiy o'zgarishdan kattaroq bo'lishi mumkin emas!
+Paid:,Toʻlangan:
+Parent Item,Asosiy element
+Partial,Qisman
+Partly Paid,Qisman to'langan
+Party Account,Partiya hisobi
+Party Type,Partiya turi
+Pause terminal until next cashier,Keyingi kassirga qadar terminalni to'xtatib turing
+PAY,TO'LOV
+Payment,To'lov
+Payment Account,To'lov hisobi
+Payment entries processed for Invoice {0},Invoys {0} uchun toʻlov yozuvlari qayta ishlandi
+Payment Entry Type,To'lovni kiritish turi
+Payment History,To'lov tarixi
+Payment ID,Toʻlov identifikatori
+Payment Method Report,To'lov usuli hisoboti
+Payment Methods,To'lov usullari
+Payment of {0} received successfully.,{0} toʻlovi muvaffaqiyatli qabul qilindi.
+Payment Progress,Toʻlov jarayoni
+Payment Reconciliation,To'lovni muvofiqlashtirish
+Payment request status could not be retrieved. Please try again,"Toʻlov soʻrovi holatini olib boʻlmadi. Iltimos, qayta urinib koʻring"
+Payment Request took too long to respond. Please try requesting for payment again,"Toʻlov soʻroviga javob berish juda uzoq davom etdi. Iltimos, toʻlovni qayta soʻrab koʻring"
+Payment saved offline,Toʻlov oflayn rejimda saqlandi
+Payment State,To'lov holati
+Payment Status,To'lov holati
+Payment submitted but print function could not be executed. Payment name not found.,"Toʻlov topshirildi, lekin chop etish funksiyasini bajarib boʻlmadi. Toʻlov nomi topilmadi."
+Payment submitted.,Toʻlov topshirildi.
+Payment Summary,To'lov xulosasi
+Payments,To'lovlar
+Payments are not open. Do you want to open payments and submit?,To'lovlar ochiq emas. Toʻlovlarni ochib yubormoqchimisiz?
+Payments by Mode of Payment,To'lov usuli bo'yicha to'lovlar
+PDF,PDF
+Peak Hour,Eng yuqori soat
+Peak Memory:,Eng yuqori xotira:
+Peak Server:,Eng yuqori server:
+Peak:,Tepalik:
+Pending,Kutilmoqda
+Pending Amount,Kutilayotgan miqdor
+Pending count updated from {0} to {1},Kutilayotgan raqam {0} dan {1} ga yangilandi
+Pending Exposure,Kutilayotgan EHM
+Pending Invoices,Kutilayotgan hisob-fakturalar
+Pending Ratio,Kutilayotgan nisbat
+Pending Sales,Kutilayotgan sotuvlar
+Pending sales: {0} | Cache usage: {1}%,Kutilayotgan savdolar: {0} | Keshdan foydalanish: {1}%
+Pending Sync,Sinxronlash kutilmoqda
+Pending: {0},Kutilmoqda: {0}
+Pending: {0} | Synced: {1} | Draft: {2},Kutilmoqda: {0} | Sinxronlangan: {1} | Qoralama: {2}
+Per Page,Sahifa uchun
+Personal,Shaxsiy
+Personal preferences adjust the current cashier experience without changing the active POS route.,Shaxsiy imtiyozlar faol POS yo'nalishini o'zgartirmasdan joriy kassir tajribasini moslashtiradi.
+PIN confirmation does not match.,PIN-kodni tasdiqlash mos emas.
+PIN must be 4 to 8 digits.,PIN kod 4 dan 8 gacha bo'lishi kerak.
+Please add at least one item.,"Iltimos, kamida bitta element qo'shing."
+Please allow camera access to scan codes,"Iltimos, skanerlash kodlari uchun kameraga ruxsat bering"
+Please enter payment amount,Toʻlov miqdorini kiriting
+Please fill all required fields,Barcha kerakli maydonlarni toʻldiring
+Please make a payment or select a payment,Toʻlovni amalga oshiring yoki toʻlovni tanlang
+Please request phone payment or use another payment method,Telefon orqali toʻlovni soʻrang yoki boshqa toʻlov usulidan foydalaning
+Please select a customer first,"Iltimos, avval mijozni tanlang"
+Please select a party,"Iltimos, partiyani tanlang"
+Please select a party before reconciling.,"Iltimos, yarashtirishdan oldin partiyani tanlang."
+Please select a valid movement type.,Yaroqli harakat turini tanlang.
+Please select an invoice,"Iltimos, hisob-fakturani tanlang"
+Please select company before reconciling.,"Iltimos, yarashtirishdan oldin kompaniyani tanlang."
+Please set the customer's mobile number,"Iltimos, mijozning mobil raqamini belgilang"
+Please try again or enter the item manually.,Qayta urinib ko'ring yoki elementni qo'lda kiriting.
+Please verify the barcode or check the item's availability.,"Iltimos, shtrix-kodni tasdiqlang yoki mahsulot mavjudligini tekshiring."
+Points,Ballar
+Popup blocked. Please allow popups.,"Qalqib chiquvchi oyna bloklandi. Iltimos, qalqib chiquvchi oynalarga ruxsat bering."
+POS,POS
+POS controls and maintenance,POS boshqaruvlari va texnik xizmat ko'rsatish
+POS Expense is disabled for this POS Profile.,Ushbu POS profili uchun POS xarajatlari o‘chirib qo‘yilgan.
+POS is running with limited offline prerequisites.,POS cheklangan oflayn shartlar bilan ishlaydi.
+POS Profile,POS profili
+Position the QR code or barcode within the scanning area,QR kod yoki shtrix kodni skanerlash maydoniga joylashtiring
+Posting,E’lon qilish
+Posting and Price List,E'lon qilish va narxlar ro'yxati
+Posting Date,E'lon qilingan sana
+Preparing background sync,Fon sinxronlash tayyorlanmoqda
+"Press OK to continue offline with a warning, or Cancel to retry.",Ogohlantirish bilan oflayn rejimda davom etish uchun OK tugmasini bosing yoki qayta urinish uchun Bekor qilish tugmasini bosing.
+Previous unit of measure,Oldingi o'lchov birligi
+Price List,Narxlar roʻyxati
+Price List Rate,Narxlar roʻyxati stavkasi
+Price list rate updated locally only,Narxlar roʻyxati faqat mahalliy darajada yangilanadi
+Pricing & Discounts,Narxlar va chegirmalar
+Pricing Rule,Narx belgilash qoidasi
+Print,Chop etish
+Print Draft,Qoralamani chop etish
+Print Format (Invoice),Chop etish formati (hisob-faktura)
+Print Format (Order),Chop etish formati (buyurtma)
+Print invoice,Hisob-fakturani chop etish
+Print Purchase Invoice instead of PO,PO o'rniga sotib olish fakturasini chop eting
+Printer,Printer
+Processed returns impacting the shift totals,Qayta ishlangan daromadlar siljishlar summasiga ta'sir qiladi
+Processing Payment,To'lovni qayta ishlash
+Processing payment entries for Invoice {0},Invoys {0} uchun toʻlov yozuvlari qayta ishlanmoqda
+Profile,Profil
+Profiles,Profillar
+Profit,Foyda
+Profit: Invoice Item Estimate,Foyda: Hisob-faktura ob'ekti taxmini
+Profit: Stock Ledger (COGS),Foyda: Birja kitobi (COGS)
+Profitability Report,Daromadlilik hisoboti
+Prorated return discount,Qaytish uchun proporsional chegirma
+Purchase Amount,Sotib olish miqdori
+Purchase Invoices,Xarid fakturalari
+Purchase Order created,Buyurtma yaratildi
+Qty,Miqdor
+Qualified,Malakali
+Quantity,Miqdori
+Quantity exceeds available stock,Miqdor mavjud zaxiralardan oshib ketdi
+Quick Actions,Tezkor harakatlar
+Quotation {0} is Submitted,{0} iqtibos yuborildi
+Quotation submitted,Kotirovka yuborildi
+QZ Tray connected.,QZ tepsisi ulangan.
+QZ Tray is manually disconnected. Press Connect to enable it again.,QZ tepsisi qo'lda uzilgan. Uni qayta yoqish uchun Ulanish tugmasini bosing.
+QZ Tray is not connected.,QZ tepsisi ulanmagan.
+QZ Tray Setup,QZ trayni sozlash
+Rate,Baho
+Rate adjusted to maximum allowed discount,Tarif maksimal ruxsat etilgan chegirmaga o'zgartirildi
+Ready,Tayyor
+Ready to resume,Davom etishga tayyor
+Ready!,Tayyor!
+Real-time POS insights for retail operations.,Chakana savdo operatsiyalari uchun real vaqtda POS tushunchalari.
+Rebuild Offline Data,Oflayn ma'lumotlarni qayta tiklash
+Receive,Qabul qilish
+Receive now,Hozir qabul qiling
+Received,Qabul qilingan
+Received:,Qabul qilingan:
+Recent Movement Entries,Oxirgi harakat yozuvlari
+Recent updates about your invoices,Hisob-fakturalaringiz haqidagi so‘nggi yangilanishlar
+Recently Active Customers,Yaqinda faol mijozlar
+Rechecking connection,Ulanish qayta tekshirilmoqda
+Reconcile payment methods and close shift,To'lov usullarini yarashtiring va smenani yoping
+Reconciling Payments,To'lovlarni solishtirish
+"Reconnect and open this page once while online, then offline refreshes will be able to restore it.","Ushbu sahifani onlayn bo'lganingizda bir marta qayta ulaning va oching, keyin oflayn yangilanishlar uni qayta tiklashi mumkin bo'ladi."
+Reconnect online to refresh cached offline data from the server.,Serverdan keshlangan oflayn ma'lumotlarni yangilash uchun onlaynga qayta ulaning.
+Recreate local offline prerequisites from scratch,Mahalliy oflayn shartlarni noldan qayta yarating
+Recv:,Recv:
+Redeem,Qabul qilish
+Redeem / Scan,Qabul qilish / skanerlash
+Redeem Amount,Qabul qilish summasi
+Redeem Mode,Foydalanish rejimi
+Redeemed Amount,Qabul qilingan miqdor
+Redeemed credit cannot be greater than its total.,Qabul qilingan kredit uning umumiy miqdoridan ko'p bo'lishi mumkin emas.
+Redemption and Totals,To'lov va jami
+Reference,Malumot
+Refresh,Yangilash
+Refresh Exchange Rate,Valyuta kursini yangilash
+Refresh Offline Data,Oflayn ma'lumotlarni yangilash
+Refresh Printers,Printerlarni yangilash
+Refund,To'lovni qaytarish
+Release Notes,Chiqarish eslatmalari
+Reload,Qayta yuklash
+Reload customers,Mijozlarni qayta yuklang
+Reload Items,Elementlarni qayta yuklash
+Reload Now,Hozir qayta yuklash
+Reload to apply the latest changes. Your current session will be refreshed.,Oxirgi oʻzgarishlarni qoʻllash uchun qayta yuklang. Joriy seansingiz yangilanadi.
+Reload Workflow,Ish jarayonini qayta yuklash
+Remarks,Izohlar
+Remarks are required.,Izohlar talab qilinadi.
+Remove,O'chirish
+Remove barcode item,Shtrix-kod elementini olib tashlang
+Remove cached data and reload the POS app,Keshlangan ma'lumotlarni olib tashlang va POS ilovasini qayta yuklang
+Remove item,Elementni olib tashlang
+Remove Offer,Taklifni olib tashlash
+Reorder / Purchase Suggestions,Qayta buyurtma qilish / sotib olish bo'yicha takliflar
+Repair Candidate,Ta'mirlash nomzodi
+Repair Change Allocation,Ta'mirlash o'zgarishlar ajratish
+Repair requires an online connection,Ta'mirlash onlayn ulanishni talab qiladi
+Repaired,Ta'mirlangan
+Repairing change allocation,O'zgarishlarni taqsimlashni tuzatish
+Repeat Customers,Takroriy mijozlar
+Repeat Rate,Takrorlash tezligi
+Request,So'rov
+Request ID: {0},So‘rov identifikatori: {0}
+Request Payment,To'lovni talab qilish
+Requested route: {0},So‘ralgan marshrut: {0}
+Required columns cannot be hidden,Kerakli ustunlarni yashirib bo'lmaydi
+Reset,Qayta tiklash
+Reset item name,Element nomini tiklash
+Reset to Default,Standart holatga qaytarish
+Resource Health,Resurs salomatligi
+Restricted,Cheklangan
+Restricted operational controls for supervisors only.,Faqat nazoratchilar uchun cheklangan operatsion nazorat.
+Retry,Qayta urinish
+Retry route,Marshrutni qaytadan urinish
+Return,Qaytish
+Return Amount,Qaytish miqdori
+Return Count,Qaytish soni
+Return items must have negative quantities,Qaytariladigan narsalar salbiy miqdorga ega bo'lishi kerak
+Return total must be negative,Jami daromad salbiy bo'lishi kerak
+Return Valid Until,Qaytish amal qilish muddati
+Return window passed,Qaytish oynasi o'tdi
+Return without Invoice,Hisob-fakturasiz qaytish
+Returns,Qaytadi
+Returns / Voids / Discounts,Qaytish / bekor qilish / chegirmalar
+Returns by Currency,Valyuta bo'yicha qaytariladi
+Revenue,Daromad
+Review shift totals before submitting the closing entry,Yakunlovchi yozuvni yuborishdan oldin siljish jamlamalarini ko'rib chiqing
+Round Off,Round Off
+Rows,Qatorlar
+Rows:,Qatorlar:
+Rule,Qoida
+Sale,Sotish
+Sales,Sotish
+Sales Order {0} is Submitted,Savdo buyurtmasi {0} topshirildi
+Sales Person and Print,Sotuvchi va bosma
+Sales Person not found,Sotuvchi topilmadi
+Sales processed,Sotish qayta ishlangan
+Sales Return,Sotish qaytish
+Sales Trend Report,Sotish tendentsiyasi hisoboti
+Save,Saqlash
+Save & Clear,Saqlash va tozalash
+Save as POS Profile Default,Standart POS profili sifatida saqlang
+Save Settings,Sozlamalarni saqlash
+Save the selected printer as the POS Profile default so it shows automatically on this setup.,"Tanlangan printerni standart POS profili sifatida saqlang, shunda u ushbu sozlashda avtomatik ravishda ko'rinadi."
+Saved as draft because: {0},"Qoralama sifatida saqlangan, chunki: {0}"
+Saving...,Saqlanmoqda...
+Scale barcode detected. Quantity here is the number of labels to print.,Shtrix kodi aniqlandi. Bu yerda miqdor chop etiladigan teglar soni.
+Scale barcode settings are not configured. Using item barcode only.,Shtrix-kod sozlamalari sozlanmagan. Faqat shtrix-koddan foydalanish.
+Scale template barcode is missing for this item/UOM. Using item barcode only.,Ushbu element/UOM uchun masshtab shablonining shtrix-kodi yo‘q. Faqat shtrix-koddan foydalanish.
+Scan an existing card and top it up without leaving the payment flow.,Mavjud kartani skanerlang va to'lov oqimidan chiqmasdan to'ldiring.
+Scan Error,Skanerlash xatosi
+Scan or enter a gift card code to check balance or redeem.,Balansni tekshirish yoki sotib olish uchun sovg'a kartasi kodini skanerlang yoki kiriting.
+Scan or paste the card code below.,Quyidagi karta kodini skanerlang yoki joylashtiring.
+Scan QR Code/Barcode,QR kod/shtrix kodini skanerlang
+Scan with camera,Kamera bilan skanerlash
+Scan-First Flow,Skanerlash-Birinchi oqim
+Scanned Code:,Skanerlangan kod:
+Scanning for: {0},{0} qidirilmoqda
+Scanning items,Elementlarni skanerlash
+Scan-Ready,Skanerlashga tayyor
+Scope,Qo'llash doirasi
+Scope: All Profiles,Qo'llanilish doirasi: Barcha profillar
+Scope: Current Profile,Qo'llanilish doirasi: Joriy profil
+Scope: Specific Profile,Qo'llash doirasi: Maxsus profil
+Search,Qidiruv
+Search Account,Hisobni qidirish
+Search an invoice and continue the return flow without extra steps.,Hisob-fakturani qidiring va qo'shimcha qadamlarsiz qaytarish oqimini davom ettiring.
+Search customer,Mijoz qidirish
+Search invoices or customers,Hisob-fakturalarni yoki mijozlarni qidiring
+Search item,Elementni qidirish
+Search item / code,Element / kodni qidiring
+Search items or barcode,Elementlarni yoki shtrix kodini qidiring
+Search Mpesa Payments,Mpesa to'lovlarini qidiring
+Search return invoices or customers,Qaytarilgan fakturalarni yoki mijozlarni qidiring
+Search supplier,Yetkazib beruvchini qidiring
+Search unpaid invoices or customers,To'lanmagan hisob-fakturalarni yoki mijozlarni qidiring
+Secure context (HTTPS or localhost) is required for camera access.,Kameraga kirish uchun xavfsiz kontekst (HTTPS yoki localhost) talab qilinadi.
+Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.,Kameraga kirish uchun xavfsiz kontekst (HTTPS) talab qilinadi. Kameraga kirish uchun HTTPS dan foydalaning.
+Select,Tanlang
+Select a cashier first.,Avval kassirni tanlang.
+Select a customer,Mijozni tanlang
+Select a customer to use coupon,Kupondan foydalanish uchun mijozni tanlang
+Select a printer to use QZ silent printing.,QZ ovozsiz chop etishdan foydalanish uchun printerni tanlang.
+Select Batch,To'plamni tanlang
+Select Columns to Display,Ko'rsatish uchun ustunlarni tanlang
+Select items to sell,Sotish uchun narsalarni tanlang
+Select Payment,To'lovni tanlang
+Select Payment Account,To'lov hisobini tanlang
+Select printer,Printerni tanlang
+Select Return Invoice,Hisob-fakturani qaytarish-ni tanlang
+Select S.O,S.O.ni tanlang
+Select Sales Orders,Savdo buyurtmalarini tanlang
+Select the cashier who is taking over this terminal.,Ushbu terminalni qabul qiladigan kassirni tanlang.
+Selected,Tanlangan
+Selected movement type is not allowed by POS Profile.,Tanlangan harakat turiga POS profili ruxsat bermaydi.
+Selected Payments,Tanlangan to'lovlar
+Sensitive actions kept away from quick taps.,Nozik harakatlar tezkor teginishdan uzoqroq tutiladi.
+Serial,Serial
+Serial Numbers,Seriya raqamlari
+Server CPU Usage:,Server protsessoridan foydalanish:
+Server Health,Server salomatligi
+Server Memory Usage:,Server xotirasidan foydalanish:
+Server Metrics,Server ko'rsatkichlari
+Server Uptime:,Serverning ish vaqti:
+Service Charges,Xizmat to'lovlari
+Session,Sessiya
+Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.,Foydalanuvchi formasida har bir kassir PIN-kodini o'rnating va terminal a'zolarini POS profili foydalanuvchisida saqlang.
+Settings,Sozlamalar
+Settings in this section update the POS workspace without changing the current route.,Ushbu bo'limdagi sozlamalar joriy marshrutni o'zgartirmasdan POS ish maydonini yangilaydi.
+Setup complete!,Sozlash tugallandi!
+Share,Ulashish
+Shared terminal,Umumiy terminal
+Shift Closed Snapshot,Shift yopiq surat
+Shift Overview,Shift umumiy ko'rinishi
+Show,Ko'rsatish
+Show cart on customer-facing screen,Savatni mijozga qaragan ekranda ko'rsatish
+Show last invoice rate,Oxirgi hisob-faktura stavkasini ko'rsatish
+Show rate info,Narx ma'lumotlarini ko'rsatish
+Show Repair Candidates,Ta'mirlashga nomzodlarni ko'rsatish
+Show search tools,Qidiruv vositalarini ko'rsatish
+Show the active cart on a customer-facing screen,Mijozlarga qaragan ekranda faol savatni ko'rsating
+Showing {0}-{1} of {2},{0}-{1}/{2} ko‘rsatilmoqda
+Showing 0 of 0,0 dan 0 ko‘rsatilmoqda
+Shows the distribution of invoices per currency,Valyuta bo'yicha hisob-fakturalarning taqsimlanishini ko'rsatadi
+Sign out of the current POS session,Joriy POS seansidan chiqing
+Size:,Hajmi:
+Skipped Payments,Oʻtkazib yuborilgan toʻlovlar
+Skipping items without barcodes,Shtrix-kodsiz elementlarni o'tkazib yuborish
+Slow Moving,Sekin harakatlanish
+Slow Moving Items,Sekin harakatlanuvchi elementlar
+Slow Queries:,Sekin so'rovlar:
+Sold,Sotilgan
+Source,Manba
+Source Cash Account (Optional Override),Naqd pul manbasi hisobi (ixtiyoriy bekor qilish)
+Source Ex. Rate:,Manba Ex. Baho:
+Source Rate:,Manba tezligi:
+Specific Profile,Maxsus profil
+Split Invoices,Hisob-fakturalarni taqsimlash
+Staff / Cashier Performance Report,Xodimlar / Kassirning ishlashi to'g'risidagi hisobot
+Status,Status
+Stock,Zaxira
+Stock Information,Birja ma'lumotlari
+Stock is lower than requested,Zaxira talab qilinganidan past
+Stock is lower than requested:\n{0},Qimmatli qog‘ozlar so‘ralgandan past:\n{0}
+Stock Movement Report,Qimmatli qog'ozlar harakati to'g'risidagi hisobot
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,Birja yangilanishi: {0}da {1} mavjud. {2} ni qoʻshish aksiyani noldan pastga tushiradi.
+Submit,Yuborish
+Submit & Print,Yuborish va chop etish
+Submit Deposit,Depozitni topshirish
+Submit Expense,Xarajatlarni topshirish
+Submitted,Taqdim etilgan
+Submitted Cash Movements,Taqdim etilgan naqd pul harakati
+Submitted entries,Taqdim etilgan yozuvlar
+Successfully scanned:,Muvaffaqiyatli skanerlash:
+Suggested,Tavsiya etilgan
+Suggested Qty,Tavsiya etilgan miqdor
+Supervisor Access,Supervisorga kirish
+Supervisor permissions unlock issuance and reloads,Nazoratchi ruxsatnomalari emissiya va qayta yuklashni blokdan chiqaradi
+Supervisor Tools,Supervisor vositalari
+Supplier,Yetkazib beruvchi
+Supplier and dates are required.,Yetkazib beruvchi va sanalar talab qilinadi.
+Supplier Invoices,Yetkazib beruvchi hisob-fakturalari
+Supplier is required.,Yetkazib beruvchi talab qilinadi.
+Supplier name is required,Yetkazib beruvchi nomi talab qilinadi
+Supplier Payments,Yetkazib beruvchi to'lovlari
+Supplier Purchase Summary,Yetkazib beruvchining xaridlari bo'yicha xulosa
+Suppliers,Yetkazib beruvchilar
+Suppliers not found,Yetkazib beruvchilar topilmadi
+Switch Camera,Kamerani almashtirish
+Switch Cashier,Kassirni almashtirish
+Switch the POS appearance theme,POS ko'rinishi mavzusini o'zgartiring
+Switched to:,Quyidagiga almashtirildi:
+Sync All Invoices,Barcha hisob-fakturalarni sinxronlash
+Sync Offline Cash Movements ({0}),Oflayn pul oʻtkazmalarini sinxronlash ({0})
+Sync Offline Sales,Oflayn savdolarni sinxronlash
+Synced {0} offline cash movement(s).,Sinxronlashtirilgan {0} oflayn naqd pul harakati(lar).
+Syncing items in background,Elementlarni fonda sinxronlash
+System / Diagnostics,Tizim / Diagnostika
+"System actions are low-frequency maintenance controls such as app info, support diagnostics, and session controls.","Tizim harakatlari past chastotali texnik xizmat ko'rsatish boshqaruvlari, masalan, ilovalar haqida ma'lumot, qo'llab-quvvatlash diagnostikasi va seans boshqaruvlari."
+System Information,Tizim ma'lumotlari
+System Status,Tizim holati
+Tables:,Jadvallar:
+Tap the button below to redeem a gift card during checkout.,Toʻlov vaqtida sovgʻa kartasini olish uchun quyidagi tugmani bosing.
+Target,Maqsad
+Target Ex. Rate:,Maqsad Ex. Baho:
+Target Rate:,Maqsadli stavka:
+Tax,Soliq
+Tax / Charges Report,Soliq / to'lovlar hisoboti
+Tax Heads,Soliq rahbarlari
+Taxable Amount,Soliq solinadigan miqdor
+Tendered,Tenderda
+Terminal,Terminal
+Terminal & Devices,Terminal va qurilmalar
+Terminal locked,Terminal qulflangan
+"Terminal tools affect this checkout station, customer-facing displays, and future printer/device controls.","Terminal vositalari ushbu to'lov stantsiyasiga, mijozlarga mo'ljallangan displeylarga va kelajakdagi printer/qurilma boshqaruvlariga ta'sir qiladi."
+Territory not found,Hudud topilmadi
+The amount paid is not complete,To'langan summa to'liq emas
+The app stores data locally for offline use. This is called cache.,Ilova ma'lumotlarni oflayn foydalanish uchun mahalliy sifatida saqlaydi. Bu kesh deb ataladi.
+The invoice stayed in draft. Please review and submit it manually.,"Hisob-faktura qoralamada qoldi. Iltimos, uni ko'rib chiqing va qo'lda yuboring."
+The maximum discount allowed is,Ruxsat etilgan maksimal chegirma
+The quantity for {0} has been adjusted to the maximum available stock.,{0} uchun miqdor maksimal mavjud zaxiraga moslashtirildi.
+The system could not retrieve the item details. Please try again.,"Tizim element tafsilotlarini ololmadi. Iltimos, qayta urinib koʻring."
+These invoices will be synced when connection is restored,"Ulanish tiklangach, bu hisob-fakturalar sinxronlanadi"
+This action now opens inside the settings workspace.,Bu amal endi sozlamalar ish maydonida ochiladi.
+This coupon already used !,Bu kupon allaqachon ishlatilgan!
+This invoice does not need change-allocation repair,Bu hisob-fakturani o'zgartirish-ajratish ta'mirlash kerak emas
+This invoice is already repaired,Bu faktura allaqachon tuzatilgan
+This is an item template. Please choose a variant.,Bu element shablonidir. Variantni tanlang.
+this item,ushbu element
+This POS page could not be opened offline because its code was not cached on this terminal yet.,"Ushbu POS sahifani oflayn rejimda ochib bo‘lmadi, chunki uning kodi hali bu terminalda keshlanmagan."
+This Serial Number {0} has already been added!,Bu {0} seriya raqami allaqachon qoʻshilgan!
+Threshold,Eshik
+Time,Vaqt
+Tip: Clear cache regularly to free up space and keep the app fast.,Maslahat: Joyni boʻshatish va ilovani tez ishlatish uchun keshni muntazam tozalab turing.
+Tip: Close unused tabs or apps to reduce lag.,Maslahat: Kechikishni kamaytirish uchun foydalanilmagan yorliqlar yoki ilovalarni yoping.
+Tip: Monitor slow queries and table size for optimal performance.,Maslahat: Optimal ishlash uchun sekin so'rovlar va jadval hajmini kuzatib boring.
+To Be Paid,To'lanishi
+To Date,Hozirgacha
+Today,Bugun
+Today Profit,Bugun foyda
+Today Sales,Bugun Sotish
+Toggle navigation drawer,Navigatsiya tortmasini almashtirish
+Toggle Theme,Mavzuni almashtirish
+Tools,Asboblar
+Tools for customer-facing screens and terminal-specific actions.,Mijozlarga mo'ljallangan ekranlar va terminalga xos harakatlar uchun asboblar.
+Top Brand,Top Brend
+Top Category,Yuqori toifa
+Top Charge Head,Yuqori zaryadlovchi bosh
+Top Customers,Eng yaxshi mijozlar
+Top Discount,Eng yaxshi chegirma
+Top Items by Location,Joylashuv bo'yicha eng yaxshi elementlar
+Top Margin,Yuqori chegara
+Top Pending,Yuqori kutilmoqda
+Top Profit Item,Yuqori daromadli element
+Top Return Items,Eng yaxshi qaytariladigan buyumlar
+Top Sales by Cashier,Kassir tomonidan eng yaxshi sotuvlar
+Top Supplier,Eng yaxshi yetkazib beruvchi
+Top Suppliers by Spend,Sarflar bo'yicha eng yaxshi etkazib beruvchilar
+Top Tables,Yuqori jadvallar
+Top Tax Head,Yuqori soliq boshlig'i
+Top Up Amount,To'ldirish miqdori
+Top Up Card,Kartani to'ldirish
+Top Up Mode,To'ldirish rejimi
+Top Variant,Yuqori variant
+Total,Jami
+Total Amount,Jami miqdor
+Total Change,Umumiy o'zgarish
+Total Charges,Jami to'lovlar
+Total In,Jami In
+Total Invoices,Jami hisob-fakturalar
+Total Items,Jami elementlar
+Total Mpesa,Jami Mpesa
+Total Out,Jami Chiqib ketish
+Total Payments,Jami to'lovlar
+Total Purchase,Jami xarid
+Total Selected :,Jami tanlanganlar:
+Total Size,Umumiy hajmi
+Total Stock Qty,Jami zaxira miqdori
+Total:,Jami:
+Totals by Invoice Currency,Hisob-faktura valyutasi bo'yicha jami
+Track how much cash was handed back to customers,Mijozlarga qancha naqd pul qaytarilganligini kuzatib boring
+"Track recent sales, collect unpaid balances, and reopen saved work","Oxirgi sotuvlarni kuzatib boring, to'lanmagan qoldiqlarni yig'ing va saqlangan ishni qayta oching"
+Transaction ID,Tranzaksiya identifikatori
+Transfer,Transfer
+Try a different search term or clear the cart search.,Boshqa qidiruv soʻzini sinab koʻring yoki savatdagi qidiruvni tozalang.
+Try adjusting your search or filters,Qidiruv yoki filtrlarni sozlashga harakat qiling
+Try another source or refresh the list.,Boshqa manbani sinab ko'ring yoki ro'yxatni yangilang.
+Try changing the date range or status filter.,Sana oraligʻi yoki holat filtrini oʻzgartirib koʻring.
+Type,Turi
+Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.,Hatto asosiy sozlamalar bilan ham kameraga kirish imkoni yo‘q. Kamera ruxsati va qurilma mosligini tekshiring.
+Unable to add offer item {0}. Please refresh and try again.,"{0} taklif elementini qoʻshib boʻlmadi. Iltimos, yangilang va qayta urinib ko'ring."
+Unable to add offer item. Please refresh and try again.,"Taklif elementini qo‘shib bo‘lmadi. Iltimos, yangilang va qayta urinib ko'ring."
+Unable to add scanned item.,Skanerlangan elementni qo‘shib bo‘lmadi.
+Unable to create purchase order,Xarid buyurtmasini yaratib bo‘lmadi
+Unable to delete draft invoice,Hisob-faktura qoralamasini o‘chirib bo‘lmadi
+Unable to fetch documents,Hujjatlarni olib bo‘lmadi
+Unable to fetch draft orders,Buyurtma qoralamalarini olib bo‘lmadi
+Unable to fetch invoice history,Hisob-fakturalar tarixini olib bo‘lmadi
+Unable to fetch M-Pesa payments,M-Pesa toʻlovlarini olib boʻlmadi
+Unable to fetch sales orders,Savdo buyurtmalarini olib bo'lmadi
+Unable to fetch unpaid invoices,Toʻlanmagan invoyslarni olib boʻlmadi
+Unable to generate scale barcode,Shtrix-kodni yaratish imkonsiz
+Unable to issue gift card.,Sovg‘a kartasini chiqarish imkonsiz.
+Unable to load cashier PIN status.,Kassir PIN-kod holatini yuklab bo‘lmadi.
+Unable to load document,Hujjatni yuklab bo‘lmadi
+Unable to load draft invoice,Hisob-faktura loyihasini yuklab bo‘lmadi
+Unable to load gift card balance.,Sovg‘a kartasi balansini yuklab bo‘lmadi.
+Unable to load invoice details,Hisob-faktura tafsilotlarini yuklab bo‘lmadi
+Unable to load parked order,Toʻxtatilgan buyurtmani yuklab boʻlmadi
+Unable to load the selected sales order,Tanlangan savdo buyurtmasini yuklab bo‘lmadi
+Unable to prepare document,Hujjatni tayyorlash imkonsiz
+Unable to prepare return invoice,Qaytarilish fakturasini tayyorlash imkonsiz
+Unable to print draft invoice,Hisob-faktura qoralamasini chop qilib bo‘lmadi
+Unable to print submitted invoice,Taqdim etilgan hisob-fakturani chop etib bo‘lmadi
+Unable to process document action,Hujjat harakatini qayta ishlash imkonsiz
+Unable to repair change allocation,Oʻzgarishlar taqsimotini tuzatib boʻlmadi
+Unable to save cashier PIN.,Kassir PIN-kodini saqlab bo'lmadi.
+Unable to save the rate to the backend price list,Narxlar roʻyxatiga tarifni saqlab boʻlmadi
+Unable to submit invoice,Hisob-fakturani yuborib bo‘lmadi
+Unable to submit the selected payment,Tanlangan toʻlovni yuborib boʻlmadi
+Unable to top up gift card.,Sovg‘a kartasini to‘ldirib bo‘lmadi.
+Unable to verify cashier PIN.,Kassir PIN-kodini tasdiqlab bo‘lmadi.
+Unallocated,Taqsimlanmagan
+Unallocated:,Taqsimlanmagan:
+Unavailable,Mavjud emas
+Unknown,Noma'lum
+Unknown Item,Noma'lum element
+Unknown Warehouse,Noma'lum ombor
+Unlock POS,POS qulfini ochish
+Unpaid,To'lanmagan
+"Unselected payments stay unallocated first, then auto reconcile after submit.","Tanlanmagan toʻlovlar avval taqsimlanmagan boʻlib qoladi, soʻngra yuborilgandan soʻng avtomatik tarzda solishtiriladi."
+UOM,UOM
+UOM not found,UOM topilmadi
+Update available,Yangilanish mavjud
+Update Customer,Xaridorni yangilash
+Update PIN,PIN-kodni yangilang
+Update Price List Rate,Narxlar roʻyxatini yangilash
+Updated,Yangilangan
+Updates and app info that stay out of the cashier flow.,Kassir oqimidan chetda qoladigan yangilanishlar va ilova ma'lumotlari.
+Updates automatically,Avtomatik yangilanadi
+Usage,Foydalanish
+Usage Stats,Foydalanish statistikasi
+Use a 4 to 8 digit PIN for cashier switching and terminal unlock.,Kassirni almashtirish va terminal qulfini ochish uchun 4 dan 8 gacha bo'lgan PIN-koddan foydalaning.
+Use Cashier,Kassirdan foydalaning
+Use date range to search for older invoices,Eski hisob-fakturalarni qidirish uchun sana oralig'idan foydalaning
+"Use one field for manual code entry, barcode scans, or QR scans.","Qo'lda kod kiritish, shtrix-kod skanerlash yoki QR skanerlash uchun bitta maydondan foydalaning."
+"Use one workflow for balance checks, new issuance, and top ups without leaving POS.","POS-dan chiqmasdan balansni tekshirish, yangi emissiya va to'ldirish uchun bitta ish jarayonidan foydalaning."
+"Use this section when cached prerequisite data needs a refresh, rebuild, or diagnostics review.","Keshlangan zaruriy maʼlumotlarni yangilash, qayta qurish yoki diagnostika tekshiruvi kerak boʻlganda ushbu boʻlimdan foydalaning."
+Use Western numerals,G'arbiy raqamlardan foydalaning
+Used:,Ishlatilgan:
+Using basic camera settings due to device limitations,Qurilma cheklovlari tufayli asosiy kamera sozlamalaridan foydalanish
+Using cached customer balance,Keshlangan mijoz balansidan foydalanish
+Valid until,gacha amal qiladi
+Variance %,Farq %
+Variants,Variantlar
+Variant-wise,Variant bo'yicha
+Verify closing amounts for each payment method,Har bir toʻlov usuli uchun yopilish summalarini tekshiring
+View all,Hammasini ko'rish
+View app information and current build details,Ilova ma'lumotlarini va joriy tuzilish tafsilotlarini ko'ring
+View Data Diagnostics,Ma'lumotlar diagnostikasini ko'rish
+View Details,Tafsilotlarni ko'rish
+View invoice details,Hisob-faktura tafsilotlarini ko'rish
+View notifications,Bildirishnomalarni ko'rish
+View offline invoices,Oflayn hisob-fakturalarni ko'rish
+View restricted POS insights,Cheklangan POS maʼlumotlarini koʻrish
+Void Amount,Bekor miqdori
+Void Count,Bo'sh soni
+Voids,Bo'shliqlar
+Waiting for cart items,Savatga buyumlar kutilmoqda
+Waiting for payment...,Toʻlov kutilmoqda...
+Walk-in Customer,Kirish mijozi
+Warehouse,Ombor
+Warning: High cache usage may affect performance.,Ogohlantirish: Yuqori keshdan foydalanish ishlashga ta'sir qilishi mumkin.
+Warning: High lag may indicate heavy processing or browser slowness.,Ogohlantirish: Yuqori kechikish og'ir ishlov berish yoki brauzer sekinligini ko'rsatishi mumkin.
+Week ?,Hafta?
+Week-wise,Hafta bo'yicha
+Weight (g),Og'irligi (g)
+Weight (grams),Og'irligi (gramm)
+We'll let you know if an invoice fails to submit,"Hisob-faktura topshirilmasa, sizga xabar beramiz"
+Workflow,Ish jarayoni
+Write off amount cannot exceed the POS profile maximum of {0},Hisobdan chiqarish summasi POS profilining maksimal qiymatidan oshmasligi kerak: {0}
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,Hisobdan chiqarish miqdori ruxsat etilgan chegaradan oshib ketdi ({0}). Qolgan miqdor uchun toʻlovni qoʻshing.
+Yes,Ha
+"Yes, Cancel sale","Ha, sotuvni bekor qilish"
+"Yes, Close","Ha, yoping"
+You are not allowed to print draft invoices,Hisob-faktura qoralamalarini chop etishga ruxsat berilmagan
+You are offline. Add Payment will work again when the connection is restored.,Siz oflaynsiz. Toʻlovni qoʻshish ulanish tiklangandan keyin yana ishlaydi.
+You have no notifications right now,Sizda hozir hech qanday bildirishnoma yo‘q
+Your Cart,Sizning savatingiz
