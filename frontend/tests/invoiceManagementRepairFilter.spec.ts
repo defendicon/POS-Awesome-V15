@@ -29,7 +29,9 @@ vi.mock("../src/posapp/services/qzTray", () => ({
 	printDocumentViaQz: vi.fn(),
 }));
 
-import InvoiceManagement from "../src/posapp/components/pos/flows/InvoiceManagement.vue";
+import { invoiceManagementTestApi } from "../src/posapp/composables/pos/flows/useInvoiceManagement";
+
+const { methods, computed } = invoiceManagementTestApi;
 
 describe("InvoiceManagement repair candidate filter", () => {
 	beforeEach(() => {
@@ -90,24 +92,24 @@ describe("InvoiceManagement repair candidate filter", () => {
 			repairCandidateInvoiceNames: ["ACC-SINV-0001"],
 			repairedChangeAllocationInvoiceNames: ["ACC-SINV-0003"],
 			repairCandidateScopeReady: true,
-			filterCollection: (InvoiceManagement as any).methods.filterCollection,
-			sortInvoicesByLatest: (InvoiceManagement as any).methods.sortInvoicesByLatest,
-			invoiceSortValue: (InvoiceManagement as any).methods.invoiceSortValue,
-			normalizeDate: (InvoiceManagement as any).methods.normalizeDate,
-			normalizePostingTime: (InvoiceManagement as any).methods.normalizePostingTime,
-			toPostingTimestamp: (InvoiceManagement as any).methods.toPostingTimestamp,
-			inRange: (InvoiceManagement as any).methods.inRange,
-			matchesRepairCandidatePattern: (InvoiceManagement as any).methods.matchesRepairCandidatePattern,
-			changeAllocationRepairState: (InvoiceManagement as any).methods.changeAllocationRepairState,
-			isRepairCandidate: (InvoiceManagement as any).methods.isRepairCandidate,
+			filterCollection: methods.filterCollection,
+			sortInvoicesByLatest: methods.sortInvoicesByLatest,
+			invoiceSortValue: methods.invoiceSortValue,
+			normalizeDate: methods.normalizeDate,
+			normalizePostingTime: methods.normalizePostingTime,
+			toPostingTimestamp: methods.toPostingTimestamp,
+			inRange: methods.inRange,
+			matchesRepairCandidatePattern: methods.matchesRepairCandidatePattern,
+			changeAllocationRepairState: methods.changeAllocationRepairState,
+			isRepairCandidate: methods.isRepairCandidate,
 		};
 
-		const filtered = (InvoiceManagement as any).computed.filteredHistoryInvoices.call(context);
+		const filtered = computed.filteredHistoryInvoices.call(context);
 
 		expect(filtered).toHaveLength(2);
 		expect(filtered.map((invoice: any) => invoice.name)).toEqual(["ACC-SINV-0003", "ACC-SINV-0001"]);
-		expect((InvoiceManagement as any).methods.changeAllocationRepairState.call(context, filtered[0])).toBe("repaired");
-		expect((InvoiceManagement as any).methods.changeAllocationRepairState.call(context, filtered[1])).toBe("candidate");
+		expect(methods.changeAllocationRepairState.call(context, filtered[0])).toBe("repaired");
+		expect(methods.changeAllocationRepairState.call(context, filtered[1])).toBe("candidate");
 	});
 
 	it("recomputes history totals from the repair-candidate subset", () => {
@@ -122,7 +124,7 @@ describe("InvoiceManagement repair candidate filter", () => {
 			],
 		};
 
-		const totals = (InvoiceManagement as any).computed.historyTotals.call(context);
+		const totals = computed.historyTotals.call(context);
 
 		expect(totals).toEqual({
 			gross: 240,
@@ -170,19 +172,19 @@ describe("InvoiceManagement repair candidate filter", () => {
 			repairedChangeAllocationInvoiceNames: [],
 			repairCandidateScopeReady: false,
 			toastStore: { show: vi.fn() },
-			matchesRepairCandidatePattern: (InvoiceManagement as any).methods.matchesRepairCandidatePattern,
-			changeAllocationRepairState: (InvoiceManagement as any).methods.changeAllocationRepairState,
+			matchesRepairCandidatePattern: methods.matchesRepairCandidatePattern,
+			changeAllocationRepairState: methods.changeAllocationRepairState,
 		};
 
-		await (InvoiceManagement as any).methods.refreshRepairCandidates.call(context, historyInvoices);
+		await methods.refreshRepairCandidates.call(context, historyInvoices);
 
 		expect(context.repairCandidateScopeReady).toBe(true);
 		expect(context.repairCandidateInvoiceNames).toEqual([]);
 		expect(context.repairedChangeAllocationInvoiceNames).toEqual(["ACC-SINV-0001"]);
-		expect((InvoiceManagement as any).methods.changeAllocationRepairState.call(context, historyInvoices[0])).toBe("repaired");
-		expect((InvoiceManagement as any).methods.isRepairCandidate.call(context, historyInvoices[0])).toBe(false);
-		expect((InvoiceManagement as any).methods.changeAllocationRepairState.call(context, historyInvoices[1])).toBe("candidate");
-		expect((InvoiceManagement as any).methods.isRepairCandidate.call(context, historyInvoices[1])).toBe(true);
+		expect(methods.changeAllocationRepairState.call(context, historyInvoices[0])).toBe("repaired");
+		expect(methods.isRepairCandidate.call(context, historyInvoices[0])).toBe(false);
+		expect(methods.changeAllocationRepairState.call(context, historyInvoices[1])).toBe("candidate");
+		expect(methods.isRepairCandidate.call(context, historyInvoices[1])).toBe(true);
 	});
 
 	it("keeps POS Invoice repair candidates visible when backend preview matches them", async () => {
@@ -211,11 +213,11 @@ describe("InvoiceManagement repair candidate filter", () => {
 			repairedChangeAllocationInvoiceNames: [],
 			repairCandidateScopeReady: false,
 			toastStore: { show: vi.fn() },
-			matchesRepairCandidatePattern: (InvoiceManagement as any).methods.matchesRepairCandidatePattern,
-			changeAllocationRepairState: (InvoiceManagement as any).methods.changeAllocationRepairState,
+			matchesRepairCandidatePattern: methods.matchesRepairCandidatePattern,
+			changeAllocationRepairState: methods.changeAllocationRepairState,
 		};
 
-		await (InvoiceManagement as any).methods.refreshRepairCandidates.call(context, historyInvoices);
+		await methods.refreshRepairCandidates.call(context, historyInvoices);
 
 		expect(callMock).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -227,7 +229,7 @@ describe("InvoiceManagement repair candidate filter", () => {
 			}),
 		);
 		expect(context.repairCandidateInvoiceNames).toEqual(["ACC-PINV-0001"]);
-		expect((InvoiceManagement as any).methods.isRepairCandidate.call(context, historyInvoices[0])).toBe(true);
+		expect(methods.isRepairCandidate.call(context, historyInvoices[0])).toBe(true);
 	});
 
 	it("checks repaired states per invoice doctype when history mixes POS and Sales invoices", async () => {
@@ -277,11 +279,11 @@ describe("InvoiceManagement repair candidate filter", () => {
 			repairedChangeAllocationInvoiceNames: [],
 			repairCandidateScopeReady: false,
 			toastStore: { show: vi.fn() },
-			matchesRepairCandidatePattern: (InvoiceManagement as any).methods.matchesRepairCandidatePattern,
-			changeAllocationRepairState: (InvoiceManagement as any).methods.changeAllocationRepairState,
+			matchesRepairCandidatePattern: methods.matchesRepairCandidatePattern,
+			changeAllocationRepairState: methods.changeAllocationRepairState,
 		};
 
-		await (InvoiceManagement as any).methods.refreshRepairCandidates.call(context, historyInvoices);
+		await methods.refreshRepairCandidates.call(context, historyInvoices);
 
 		expect(callMock).toHaveBeenNthCalledWith(
 			1,
@@ -303,7 +305,7 @@ describe("InvoiceManagement repair candidate filter", () => {
 		);
 		expect(context.repairCandidateInvoiceNames).toEqual(["ACC-PINV-0001"]);
 		expect(context.repairedChangeAllocationInvoiceNames).toEqual(["ACC-SINV-0002"]);
-		expect((InvoiceManagement as any).methods.changeAllocationRepairState.call(context, historyInvoices[0])).toBe("candidate");
-		expect((InvoiceManagement as any).methods.changeAllocationRepairState.call(context, historyInvoices[1])).toBe("repaired");
+		expect(methods.changeAllocationRepairState.call(context, historyInvoices[0])).toBe("candidate");
+		expect(methods.changeAllocationRepairState.call(context, historyInvoices[1])).toBe("repaired");
 	});
 });

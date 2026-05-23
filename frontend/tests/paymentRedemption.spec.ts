@@ -5,7 +5,7 @@ import { defineComponent, h } from "vue";
 import { mount } from "@vue/test-utils";
 
 import PaymentRedemption from "../src/posapp/components/pos/payments/PaymentRedemption.vue";
-import paymentsSource from "../src/posapp/components/pos/Payments.vue?raw";
+import paymentsScreenSource from "../src/posapp/composables/pos/payments/usePaymentsScreen.ts?raw";
 
 const BoxStub = defineComponent({
 	setup(_, { slots }) {
@@ -102,12 +102,12 @@ describe("PaymentRedemption", () => {
 	});
 
 	it("hydrates payment customer info from offline cache before checking network state", () => {
-		const refreshBlock = paymentsSource.slice(
-			paymentsSource.indexOf("const refreshPaymentCustomerInfo"),
-			paymentsSource.indexOf("const showDiffPayment"),
+		const refreshBlock = paymentsScreenSource.slice(
+			paymentsScreenSource.indexOf("const refreshPaymentCustomerInfo"),
+			paymentsScreenSource.indexOf("const showDiffPayment"),
 		);
 
-		expect(paymentsSource).toContain("getStoredCustomer");
+		expect(paymentsScreenSource).toContain("getStoredCustomer");
 		expect(refreshBlock).toContain("const cachedCustomer = await getStoredCustomer(customer);");
 		expect(refreshBlock).toContain("applyPaymentCustomerInfo(cachedCustomer, customer);");
 		expect(refreshBlock.indexOf("getStoredCustomer(customer)")).toBeLessThan(
@@ -116,9 +116,9 @@ describe("PaymentRedemption", () => {
 	});
 
 	it("does not mark zero loyalty amount as a redemption on the invoice", () => {
-		const loyaltyBlock = paymentsSource.slice(
-			paymentsSource.indexOf("watch(loyalty_amount"),
-			paymentsSource.indexOf("watch(redeemed_customer_credit"),
+		const loyaltyBlock = paymentsScreenSource.slice(
+			paymentsScreenSource.indexOf("watch(loyalty_amount"),
+			paymentsScreenSource.indexOf("watch(redeemed_customer_credit"),
 		);
 
 		expect(loyaltyBlock).toContain("if (amount <= 0)");

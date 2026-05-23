@@ -6,7 +6,7 @@ describe("InvoiceManagement dark mode summary cards", () => {
 	it("defines dedicated dark-mode text styling for summary card labels and meta copy", () => {
 		const filePath = resolve(
 			process.cwd(),
-			"src/posapp/components/pos/flows/InvoiceManagement.vue",
+		"src/posapp/components/pos/flows/invoice-management/invoice-management.css",
 		);
 		const source = readFileSync(filePath, "utf8");
 

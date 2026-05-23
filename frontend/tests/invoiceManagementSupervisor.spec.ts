@@ -29,7 +29,9 @@ vi.mock("../src/posapp/services/qzTray", () => ({
 	printDocumentViaQz: vi.fn(),
 }));
 
-import InvoiceManagement from "../src/posapp/components/pos/flows/InvoiceManagement.vue";
+import { invoiceManagementTestApi } from "../src/posapp/composables/pos/flows/useInvoiceManagement";
+
+const { methods, computed, watch } = invoiceManagementTestApi;
 
 describe("InvoiceManagement supervisor scope", () => {
 	beforeEach(() => {
@@ -52,16 +54,16 @@ describe("InvoiceManagement supervisor scope", () => {
 			currentCashier: { is_supervisor: true },
 			selectedSupervisorPosProfile: null,
 			currentInvoiceDoctype: "Sales Invoice",
-			isSupervisorScope: (InvoiceManagement as any).methods.isSupervisorScope,
-			resolveSupervisorProfileScope: (InvoiceManagement as any).methods.resolveSupervisorProfileScope,
-			buildInvoiceFilters: (InvoiceManagement as any).methods.buildInvoiceFilters,
-			getInvoiceListFields: (InvoiceManagement as any).methods.getInvoiceListFields,
+			isSupervisorScope: methods.isSupervisorScope,
+			resolveSupervisorProfileScope: methods.resolveSupervisorProfileScope,
+			buildInvoiceFilters: methods.buildInvoiceFilters,
+			getInvoiceListFields: methods.getInvoiceListFields,
 			historyInvoices: [],
 			loading: false,
 			toastStore: { show: vi.fn() },
 		};
 
-		await (InvoiceManagement as any).methods.loadHistory.call(context);
+		await methods.loadHistory.call(context);
 
 		expect(callMock).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -86,16 +88,16 @@ describe("InvoiceManagement supervisor scope", () => {
 			posOpeningShift: { name: "POSA-OS-26-0000007" },
 			currentCashier: { is_supervisor: false },
 			currentInvoiceDoctype: "Sales Invoice",
-			isSupervisorScope: (InvoiceManagement as any).methods.isSupervisorScope,
-			resolveSupervisorProfileScope: (InvoiceManagement as any).methods.resolveSupervisorProfileScope,
-			buildInvoiceFilters: (InvoiceManagement as any).methods.buildInvoiceFilters,
-			getInvoiceListFields: (InvoiceManagement as any).methods.getInvoiceListFields,
+			isSupervisorScope: methods.isSupervisorScope,
+			resolveSupervisorProfileScope: methods.resolveSupervisorProfileScope,
+			buildInvoiceFilters: methods.buildInvoiceFilters,
+			getInvoiceListFields: methods.getInvoiceListFields,
 			historyInvoices: [],
 			loading: false,
 			toastStore: { show: vi.fn() },
 		};
 
-		await (InvoiceManagement as any).methods.loadHistory.call(context);
+		await methods.loadHistory.call(context);
 
 		expect(callMock).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -121,17 +123,17 @@ describe("InvoiceManagement supervisor scope", () => {
 			posOpeningShift: { name: "POSA-OS-26-0000007" },
 			currentCashier: { is_supervisor: false },
 			currentInvoiceDoctype: "POS Invoice",
-			isSupervisorScope: (InvoiceManagement as any).methods.isSupervisorScope,
-			resolveSupervisorProfileScope: (InvoiceManagement as any).methods.resolveSupervisorProfileScope,
-			buildInvoiceFilters: (InvoiceManagement as any).methods.buildInvoiceFilters,
-			getInvoiceListFields: (InvoiceManagement as any).methods.getInvoiceListFields,
+			isSupervisorScope: methods.isSupervisorScope,
+			resolveSupervisorProfileScope: methods.resolveSupervisorProfileScope,
+			buildInvoiceFilters: methods.buildInvoiceFilters,
+			getInvoiceListFields: methods.getInvoiceListFields,
 			historyInvoices: [],
 			loading: false,
 			toastStore: { show: vi.fn() },
 			refreshRepairCandidates: vi.fn().mockResolvedValue(undefined),
 		};
 
-		await (InvoiceManagement as any).methods.loadHistory.call(context);
+		await methods.loadHistory.call(context);
 
 		expect(callMock).toHaveBeenNthCalledWith(
 			1,
@@ -162,13 +164,13 @@ describe("InvoiceManagement supervisor scope", () => {
 			posProfile: { name: "Main POS", company: "Farooq Chemicals" },
 			currentCashier: { is_supervisor: true },
 			selectedSupervisorPosProfile: "Main POS",
-			isSupervisorScope: (InvoiceManagement as any).methods.isSupervisorScope,
-			resolveSupervisorProfileScope: (InvoiceManagement as any).methods.resolveSupervisorProfileScope,
-			buildInvoiceFilters: (InvoiceManagement as any).methods.buildInvoiceFilters,
+			isSupervisorScope: methods.isSupervisorScope,
+			resolveSupervisorProfileScope: methods.resolveSupervisorProfileScope,
+			buildInvoiceFilters: methods.buildInvoiceFilters,
 		};
 
-		expect((InvoiceManagement as any).computed.supervisorProfileScope.call(context)).toBe("Main POS");
-		expect((InvoiceManagement as any).methods.buildInvoiceFilters.call(context)).toEqual({
+		expect(computed.supervisorProfileScope.call(context)).toBe("Main POS");
+		expect(methods.buildInvoiceFilters.call(context)).toEqual({
 			company: "Farooq Chemicals",
 			docstatus: 1,
 			pos_profile: "Main POS",
@@ -176,8 +178,8 @@ describe("InvoiceManagement supervisor scope", () => {
 
 		context.selectedSupervisorPosProfile = "All";
 
-		expect((InvoiceManagement as any).computed.supervisorProfileScope.call(context)).toBe(null);
-		expect((InvoiceManagement as any).methods.buildInvoiceFilters.call(context)).toEqual({
+		expect(computed.supervisorProfileScope.call(context)).toBe(null);
+		expect(methods.buildInvoiceFilters.call(context)).toEqual({
 			company: "Farooq Chemicals",
 			docstatus: 1,
 		});
@@ -193,21 +195,21 @@ describe("InvoiceManagement supervisor scope", () => {
 			currentCashier: { is_supervisor: true },
 			selectedSupervisorPosProfile: "Main POS",
 			currentInvoiceDoctype: "Sales Invoice",
-			isSupervisorScope: (InvoiceManagement as any).methods.isSupervisorScope,
-			resolveSupervisorProfileScope: (InvoiceManagement as any).methods.resolveSupervisorProfileScope,
-			buildInvoiceFilters: (InvoiceManagement as any).methods.buildInvoiceFilters,
-			getInvoiceListFields: (InvoiceManagement as any).methods.getInvoiceListFields,
+			isSupervisorScope: methods.isSupervisorScope,
+			resolveSupervisorProfileScope: methods.resolveSupervisorProfileScope,
+			buildInvoiceFilters: methods.buildInvoiceFilters,
+			getInvoiceListFields: methods.getInvoiceListFields,
 			currentDraftSource: "invoice",
 			draftRecordsBySource: {},
 			draftInvoices: [],
 			loading: false,
 			toastStore: { show: vi.fn() },
 			uiStore: { setInvoiceManagementDraftSource: vi.fn() },
-			inRange: (InvoiceManagement as any).methods.inRange,
-			normalizeDate: (InvoiceManagement as any).methods.normalizeDate,
+			inRange: methods.inRange,
+			normalizeDate: methods.normalizeDate,
 		};
 
-		await (InvoiceManagement as any).methods.loadDrafts.call(context);
+		await methods.loadDrafts.call(context);
 
 		expect(callMock).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -240,7 +242,7 @@ describe("InvoiceManagement supervisor scope", () => {
 			},
 		];
 
-		const matchedByProfile = (InvoiceManagement as any).methods.filterCollection.call(
+		const matchedByProfile = methods.filterCollection.call(
 			context,
 			rows,
 			"backup pos",
@@ -248,7 +250,7 @@ describe("InvoiceManagement supervisor scope", () => {
 			"",
 			"",
 		);
-		const matchedByCashier = (InvoiceManagement as any).methods.filterCollection.call(
+		const matchedByCashier = methods.filterCollection.call(
 			context,
 			rows,
 			"abdul manan",
@@ -272,10 +274,10 @@ describe("InvoiceManagement supervisor scope", () => {
 			initializeSupervisorProfileScope: vi.fn(),
 			loadSupervisorPosProfiles: vi.fn().mockResolvedValue(undefined),
 			refreshAll: vi.fn().mockResolvedValue(undefined),
-			isSupervisorScope: (InvoiceManagement as any).methods.isSupervisorScope,
+			isSupervisorScope: methods.isSupervisorScope,
 		};
 
-		await (InvoiceManagement as any).watch.posProfile.handler.call(
+		await watch.posProfile.handler.call(
 			context,
 			{ name: "Backup POS", company: "Farooq Chemicals", create_pos_invoice_instead_of_sales_invoice: 0 },
 			{ name: "Main POS", company: "Farooq Chemicals", create_pos_invoice_instead_of_sales_invoice: 0 },
