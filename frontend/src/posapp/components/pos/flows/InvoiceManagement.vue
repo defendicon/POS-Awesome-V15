@@ -140,9 +140,10 @@
 	</v-row>
 
 	<InvoiceManagementDetailDialog
-		v-model:detail-dialog="im.detailDialog"
+		v-if="selectedInvoiceDetailModel"
+		v-model:detail-dialog="detailDialogModel"
 		:is-dark-theme="isDarkTheme"
-		:selected-invoice-detail="im.selectedInvoiceDetail"
+		:selected-invoice-detail="selectedInvoiceDetailModel"
 		:detail-headers="im.detailHeaders"
 		:payment-headers="im.paymentHeaders"
 		:repair-change-loading="im.repairChangeLoading"
@@ -163,7 +164,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, unref } from "vue";
 import { storeToRefs } from "pinia";
 import { useTheme } from "../../../composables/core/useTheme";
 import { useResponsive } from "../../../composables/core/useResponsive";
@@ -189,6 +190,22 @@ const invoiceManagementDialogWidth = computed(() =>
 const invoiceManagementDialogMaxWidth = computed(() =>
 	responsive.windowWidth.value < 1100 ? "100vw" : "1420px",
 );
+
+const selectedInvoiceDetailModel = computed(() => unref(im.selectedInvoiceDetail) || null);
+const detailDialogModel = computed({
+	get: () => Boolean(unref(im.detailDialog) && selectedInvoiceDetailModel.value),
+	set: (value) => {
+		if (im.detailDialog && typeof im.detailDialog === "object" && "value" in im.detailDialog) {
+			im.detailDialog.value = Boolean(value);
+		} else {
+			im.detailDialog = Boolean(value);
+		}
+
+		if (!value && im.selectedInvoiceDetail && typeof im.selectedInvoiceDetail === "object") {
+			im.selectedInvoiceDetail.value = null;
+		}
+	},
+});
 </script>
 
 <style scoped>
