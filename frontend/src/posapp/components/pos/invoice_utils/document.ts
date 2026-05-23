@@ -4,6 +4,7 @@ import {
 	isOffline,
 } from "../../../../offline/index";
 import { _getPlcConversionRate } from "./currency";
+import { resolvePosDocumentDoctype } from "../../../utils/posDocumentMode";
 
 declare const flt: (_value: unknown, _precision?: number) => number;
 declare const frappe: any;
@@ -152,20 +153,10 @@ export function get_invoice_doc(context: any) {
 	}
 
 	// Always set these fields first
-	if (context.invoiceType === "Quotation") {
-		doc.doctype = "Quotation";
-	} else if (
-		context.invoiceType === "Order" &&
-		context.pos_profile?.posa_create_only_sales_order
-	) {
-		doc.doctype = "Sales Order";
-	} else if (
-		context.pos_profile?.create_pos_invoice_instead_of_sales_invoice
-	) {
-		doc.doctype = "POS Invoice";
-	} else {
-		doc.doctype = "Sales Invoice";
-	}
+	doc.doctype = resolvePosDocumentDoctype({
+		invoiceType: context.invoiceType,
+		posProfile: context.pos_profile,
+	});
 	doc.is_pos = 1;
 	doc.ignore_pricing_rule = 0;
 	doc.company = doc.company || context.pos_profile?.company || null;
@@ -185,7 +176,7 @@ export function get_invoice_doc(context: any) {
 				: 1;
 		const isOrderInvoiceFlow =
 			context.invoiceType === "Order" &&
-			!context.pos_profile?.posa_create_only_sales_order;
+			doc.doctype !== "Sales Order";
 		doc.update_stock =
 			explicitFlowUpdateStock === 0 || explicitFlowUpdateStock === 1
 				? explicitFlowUpdateStock

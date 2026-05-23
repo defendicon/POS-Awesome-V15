@@ -9,6 +9,7 @@ import {
 import { ensureInvoiceClientRequestId } from "../../../../offline/idempotency";
 import stockCoordinator from "../../../utils/stockCoordinator";
 import { parseBooleanSetting } from "../../../utils/stock";
+import { resolvePosDocumentDoctype } from "../../../utils/posDocumentMode";
 
 declare const frappe: any;
 declare const __: (_str: string, _args?: any[]) => string;
@@ -950,10 +951,14 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			}
 
 			if (!waitForInvoiceProcessing) {
+				const submittedDocumentType = resolvePosDocumentDoctype({
+					invoiceType: type,
+					posProfile: profile,
+				});
 				const submittedTitle =
-					type === "Order" && profile?.posa_create_only_sales_order
+					submittedDocumentType === "Sales Order"
 						? __("Sales Order {0} is Submitted", [r.message.name])
-						: type === "Quotation"
+						: submittedDocumentType === "Quotation"
 							? __("Quotation {0} is Submitted", [r.message.name])
 							: __("Invoice {0} is Submitted", [r.message.name]);
 				stores?.toastStore?.show(

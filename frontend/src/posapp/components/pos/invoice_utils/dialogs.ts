@@ -4,6 +4,7 @@ import {
 	getDefaultDocumentSource,
 	loadDocumentSourceRecord,
 } from "../../../utils/documentSources";
+import { resolvePosDocumentDoctype } from "../../../utils/posDocumentMode";
 
 declare const __: (_text: string, _args?: any[]) => string;
 declare const frappe: any;
@@ -45,9 +46,12 @@ export async function show_payment(context: any) {
 		if (context.ensure_auto_batch_selection) await context.ensure_auto_batch_selection();
 
 		let invoice_doc;
+		const paymentDoctype = resolvePosDocumentDoctype({
+			invoiceType: context.invoiceType,
+			posProfile: context.pos_profile,
+		});
 		if (
-			context.invoiceType === "Order" &&
-			context.pos_profile.posa_create_only_sales_order &&
+			paymentDoctype === "Sales Order" &&
 			!context.new_delivery_date &&
 			!(context.invoice_doc && context.invoice_doc.posa_delivery_date)
 		) {
