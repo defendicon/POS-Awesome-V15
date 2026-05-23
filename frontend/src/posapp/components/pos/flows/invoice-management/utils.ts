@@ -1,5 +1,4 @@
 // @ts-nocheck
-/* global __ */
 
 import { TAB_PAGE_SIZE, type InvoiceManagementTab } from "./constants";
 

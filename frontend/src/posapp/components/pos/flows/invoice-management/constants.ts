@@ -1,5 +1,3 @@
-/* global __ */
-
 export const TAB_PAGE_SIZE = 25;
 
 export const PARTIAL_STATUS_ITEMS = ["All", "Partly Paid", "Unpaid", "Overdue"] as const;

@@ -164,7 +164,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, unref } from "vue";
+import { computed, proxyRefs, unref } from "vue";
 import { storeToRefs } from "pinia";
 import { useTheme } from "../../../composables/core/useTheme";
 import { useResponsive } from "../../../composables/core/useResponsive";
@@ -179,7 +179,7 @@ const uiStore = useUIStore();
 const theme = useTheme();
 const responsive = useResponsive();
 const __ = (globalThis as any).__ || ((value: string) => value);
-const im = useInvoiceManagement() as any;
+const im = proxyRefs(useInvoiceManagement() as any);
 
 const { invoiceManagementDialog } = storeToRefs(uiStore);
 const isDarkTheme = theme.isDark;

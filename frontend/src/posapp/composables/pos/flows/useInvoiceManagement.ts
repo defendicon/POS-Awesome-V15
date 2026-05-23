@@ -1,5 +1,4 @@
 // @ts-nocheck
-/* global __, frappe */
 
 import { computed, inject, ref, watch } from "vue";
 import { storeToRefs } from "pinia";

@@ -124,7 +124,6 @@
 </template>
 
 <script setup>
-/* global __ */
 import { computed } from "vue";
 import InvoiceManagementSummaryTiles from "./InvoiceManagementSummaryTiles.vue";
 

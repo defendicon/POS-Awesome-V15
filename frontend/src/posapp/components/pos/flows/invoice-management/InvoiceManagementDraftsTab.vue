@@ -209,7 +209,6 @@
 </template>
 
 <script setup>
-/* global __ */
 import DocumentSourceSelector from "../../shared/DocumentSourceSelector.vue";
 
 const { im } = defineProps(["im"]);

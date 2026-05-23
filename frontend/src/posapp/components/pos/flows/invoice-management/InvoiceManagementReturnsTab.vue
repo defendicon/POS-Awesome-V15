@@ -181,7 +181,5 @@
 </template>
 
 <script setup>
-/* global __ */
-
 const { im } = defineProps(["im"]);
 </script>
