@@ -21,6 +21,24 @@ type CurrencyContext = {
 };
 
 export function useItemCurrency() {
+	const asFiniteNumber = (value: unknown): number | null => {
+		const parsed = Number(value);
+		return Number.isFinite(parsed) ? parsed : null;
+	};
+
+	const resolvePriceListCurrency = (
+		item: CurrencyItem,
+		context: CurrencyContext,
+	): string => {
+		const companyCurrency = context.pos_profile.currency;
+		return String(
+			item.original_currency ||
+			item.price_list_currency ||
+			context.price_list_currency ||
+			companyCurrency,
+		);
+	};
+
 	/**
 	 * Calculates the rate from Price List Currency to Company Currency.
 	 * @param {Object} item
@@ -32,8 +50,7 @@ export function useItemCurrency() {
 		context: CurrencyContext,
 	): number => {
 		const companyCurrency = context.pos_profile.currency;
-		const priceListCurrency =
-			context.price_list_currency || companyCurrency;
+		const priceListCurrency = resolvePriceListCurrency(item, context);
 		// Benchmark note: favor item-level plc_conversion_rate to avoid recomputing PLC->CC.
 		return (
 			item.plc_conversion_rate ??
@@ -55,17 +72,26 @@ export function useItemCurrency() {
 	) => {
 		if (!item) return;
 		const base = context.pos_profile.currency;
+		const priceListCurrency = resolvePriceListCurrency(item, context);
+		const selectedCurrency = context.selected_currency || base;
+		const plc_to_cc_rate = getPlcToCompanyRate(item, context);
 
-		if (!item.original_rate) {
-			item.original_rate = item.rate;
-			item.original_currency = item.currency || base;
+		if (asFiniteNumber(item.original_rate) === null) {
+			const listRate = asFiniteNumber(item.price_list_rate);
+			const baseListRate = asFiniteNumber(item.base_price_list_rate);
+			const currentRate = asFiniteNumber(item.rate);
+			item.original_rate =
+				listRate ??
+				(baseListRate !== null && plc_to_cc_rate ? baseListRate / plc_to_cc_rate : null) ??
+				currentRate ??
+				0;
 		}
+		item.original_currency = priceListCurrency;
 
 		// original_rate is in price list currency
 		const price_list_rate = item.original_rate || 0;
 
 		// Determine base rate using available conversion info (Price List -> Company)
-		const plc_to_cc_rate = getPlcToCompanyRate(item, context);
 		const base_rate = price_list_rate * plc_to_cc_rate;
 
 		item.base_rate = base_rate;
@@ -73,16 +99,10 @@ export function useItemCurrency() {
 
 		// Determine selected rate using exchange rate (Price List -> Selected)
 		// item.original_currency is the Price List Currency
-		const priceListCurrency = context.price_list_currency || base;
-		const selectedCurrency = context.selected_currency || base;
-
-		// Benchmark note: when PLC === SC, keep the displayed rate in PLC to avoid CC bleed-through.
 		const converted_rate =
 			selectedCurrency === priceListCurrency
 				? price_list_rate
-				: item.original_currency === selectedCurrency
-					? price_list_rate
-					: price_list_rate * (context.exchange_rate || 1);
+				: price_list_rate * (context.exchange_rate || 1);
 
 		// context.flt is expected to be available or passed
 		const flt = context.flt || ((v: unknown) => Number(v));

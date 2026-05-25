@@ -23,8 +23,8 @@
 							{{
 								currencySymbol(
 									item.original_currency ||
-										item.currency ||
 										item.price_list_currency ||
+										item.currency ||
 										posProfile.currency,
 								)
 							}}
@@ -32,8 +32,8 @@
 								formatCurrency(
 									item.original_rate ?? item.rate ?? 0,
 									item.original_currency ||
-										item.currency ||
 										item.price_list_currency ||
+										item.currency ||
 										posProfile.currency,
 									ratePrecision(item.original_rate ?? item.rate ?? 0),
 								)
@@ -53,8 +53,8 @@
 							selectedCurrency &&
 							selectedCurrency !==
 								(item.original_currency ||
-									item.currency ||
 									item.price_list_currency ||
+									item.currency ||
 									posProfile.currency)
 						"
 						class="text-success"
@@ -69,8 +69,8 @@
 							{{
 								currencySymbol(
 									item.original_currency ||
-										item.currency ||
 										item.price_list_currency ||
+										item.currency ||
 										posProfile.currency,
 								)
 							}}
@@ -78,8 +78,8 @@
 								formatCurrency(
 									item.original_rate ?? item.rate ?? item.standard_rate ?? 0,
 									item.original_currency ||
-										item.currency ||
 										item.price_list_currency ||
+										item.currency ||
 										posProfile.currency,
 									ratePrecision(item.original_rate ?? item.rate ?? item.standard_rate ?? 0),
 								)

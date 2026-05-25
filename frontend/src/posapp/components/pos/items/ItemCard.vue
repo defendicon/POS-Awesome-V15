@@ -95,15 +95,15 @@ const primaryCurrency = computed(() => {
 	if (props.context === "purchase") {
 		return (
 			props.item.original_currency ||
-			props.item.currency ||
 			props.item.price_list_currency ||
+			props.item.currency ||
 			props.posProfile.currency
 		);
 	}
 	return (
 		props.item.original_currency ||
-		props.item.currency ||
 		props.item.price_list_currency ||
+		props.item.currency ||
 		props.posProfile.currency
 	);
 });
