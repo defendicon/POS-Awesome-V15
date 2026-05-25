@@ -60,7 +60,7 @@
 						class="text-success"
 					>
 						{{ currencySymbol(selectedCurrency) }}
-						{{ formatCurrency(item.rate, selectedCurrency, ratePrecision(item.rate)) }}
+						{{ formatCurrency(getSecondaryRate(item), selectedCurrency, ratePrecision(getSecondaryRate(item))) }}
 					</div>
 				</div>
 				<div v-else>
@@ -115,6 +115,7 @@ const props = defineProps({
 	context: { type: String, default: "pos" },
 	posProfile: { type: Object, default: () => ({}) },
 	selectedCurrency: { type: String, default: "" },
+	selectedExchangeRate: { type: Number, default: 1 },
 	hideQtyDecimals: { type: Boolean, default: false },
 	showRateInfo: { type: Boolean, default: true },
 	currencySymbol: { type: Function, required: true },
@@ -129,6 +130,21 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["row-click", "list-scroll"]);
+
+const getPrimaryCurrency = (item) =>
+	item?.original_currency || item?.price_list_currency || item?.currency || props.posProfile.currency;
+
+const getPrimaryRate = (item) =>
+	item?.original_rate ?? item?.rate ?? item?.standard_rate ?? 0;
+
+const getSecondaryRate = (item) => {
+	const primaryRate = Number(getPrimaryRate(item) || 0);
+	if (props.selectedCurrency === getPrimaryCurrency(item)) {
+		return primaryRate;
+	}
+	const exchangeRate = Number(props.selectedExchangeRate || 1);
+	return primaryRate * (Number.isFinite(exchangeRate) && exchangeRate > 0 ? exchangeRate : 1);
+};
 
 const handleRowClick = (event, data) => {
 	emit("row-click", event, data);

@@ -47,7 +47,7 @@
 							{{ currencySymbol(secondaryCurrency) }}
 						</span>
 						<span class="price-amount">
-							{{ formatCurrency(item.rate, secondaryCurrency, primaryPrecision) }}
+							{{ formatCurrency(secondaryRate, secondaryCurrency, secondaryPrecision) }}
 						</span>
 					</div>
 				</div>
@@ -78,6 +78,7 @@ const props = defineProps({
 	posProfile: { type: Object, required: true },
 	context: { type: String, default: "pos" },
 	selectedCurrency: { type: String, default: "" },
+	selectedExchangeRate: { type: Number, default: 1 },
 	hideQtyDecimals: { type: Boolean, default: false },
 	showRateInfo: { type: Boolean, default: true },
 	getItemRateInfo: { type: Function, required: true },
@@ -122,6 +123,16 @@ const primaryPrecision = computed(() => {
 const rateInfo = computed(() => props.getItemRateInfo(props.item));
 
 const secondaryCurrency = computed(() => props.selectedCurrency);
+
+const secondaryRate = computed(() => {
+	if (secondaryCurrency.value === primaryCurrency.value) {
+		return primaryRate.value;
+	}
+	const exchangeRate = Number(props.selectedExchangeRate || 1);
+	return Number(primaryRate.value || 0) * (Number.isFinite(exchangeRate) && exchangeRate > 0 ? exchangeRate : 1);
+});
+
+const secondaryPrecision = computed(() => props.ratePrecision(secondaryRate.value));
 
 const showSecondaryPrice = computed(() => {
 	return (
