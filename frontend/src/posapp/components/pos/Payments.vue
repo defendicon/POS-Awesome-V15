@@ -314,6 +314,13 @@ import {
 import { resolvePaymentPrintFormatDoctypes } from "../../utils/paymentPrintDoctype";
 import { resolvePaymentPrintFormat } from "../../utils/paymentPrintFormat";
 import { parseBooleanSetting } from "../../utils/stock";
+import { loadPaymentMethodCurrencyMap } from "../../utils/paymentMethodCurrencyCache";
+import {
+	paymentCurrencyToTransaction,
+	resolvePaymentAccountCurrency,
+	syncPaymentBaseAmount,
+	transactionToPaymentCurrency,
+} from "../../utils/paymentCurrency";
 
 // Components
 import PaymentSummary from "./payments/PaymentSummary.vue";
@@ -406,6 +413,8 @@ const giftCardLoading = ref(false);
 const giftCardMode = ref("redeem");
 const giftCardError = ref("");
 const giftCardRedemptions = ref([]);
+const paymentMethodCurrencyMap = ref({});
+const paymentCurrencyRates = ref({});
 
 // Computed Properties
 const invoice_doc = computed({
@@ -553,7 +562,7 @@ const paymentCalculations = usePaymentCalculations({
 	customerCreditDict: customer_credit_dict,
 	customerInfo: customer_info,
 	giftCardRedemptions,
-	formatCurrency: (val, _curr) => formatCurrency(val, currency_precision.value),
+	formatCurrency: (val, curr) => formatCurrency(val, curr || invoice_doc.value?.currency),
 });
 
 const { diff_payment, total_payments, total_payments_display, diff_payment_display, diff_label, change_due } =
@@ -617,6 +626,10 @@ const {
 	getPaidChange: () => paid_change.value,
 	getCreditChange: () => credit_change.value,
 	onBackToInvoice: () => eventBus.emit("change_active_view", "Invoice"),
+	getPaymentDisplayAmount,
+	getPaymentCurrency,
+	syncPaymentBaseAmount: (payment) =>
+		syncPaymentBaseAmount(payment, invoice_doc.value, pos_profile.value, currency_precision.value),
 });
 
 const {
@@ -692,10 +705,74 @@ const isGiftCardPayment = (payment) => {
 		.includes("gift");
 };
 
+function normalizePaymentMethodCurrencyEntry(entry) {
+	if (!entry) return {};
+	if (typeof entry === "string") {
+		return { account_currency: entry };
+	}
+	return entry;
+}
+
+function applyPaymentAccountCurrency(payment) {
+	if (!payment?.mode_of_payment) return payment;
+	const accountInfo = normalizePaymentMethodCurrencyEntry(
+		paymentMethodCurrencyMap.value?.[payment.mode_of_payment],
+	);
+	if (accountInfo.account && !payment.account) {
+		payment.account = accountInfo.account;
+	}
+	if (accountInfo.account_currency) {
+		payment.account_currency = accountInfo.account_currency;
+	}
+	if (accountInfo.account_type && !payment.type) {
+		payment.type = accountInfo.account_type;
+	}
+	return payment;
+}
+
+function getPaymentCurrency(payment) {
+	return resolvePaymentAccountCurrency(payment, invoice_doc.value, pos_profile.value);
+}
+
+function getPaymentDisplayAmount(payment) {
+	return flt(
+		transactionToPaymentCurrency(
+			payment?.amount || 0,
+			payment,
+			invoice_doc.value,
+			pos_profile.value,
+			paymentCurrencyRates.value,
+		),
+		currency_precision.value,
+	);
+}
+
+function setPaymentTransactionAmount(payment, displayAmount) {
+	const transactionAmount = flt(
+		paymentCurrencyToTransaction(
+			displayAmount,
+			payment,
+			invoice_doc.value,
+			pos_profile.value,
+			paymentCurrencyRates.value,
+		),
+		currency_precision.value,
+	);
+	payment.amount = transactionAmount;
+	syncPaymentBaseAmount(payment, invoice_doc.value, pos_profile.value, currency_precision.value);
+	payment.display_amount = flt(displayAmount || 0, currency_precision.value);
+	payment.display_currency = getPaymentCurrency(payment);
+}
+
 const visiblePaymentMethods = computed(() =>
-	(Array.isArray(invoice_doc.value?.payments) ? invoice_doc.value.payments : []).filter(
-		(payment) => !isGiftCardPayment(payment),
-	),
+	(Array.isArray(invoice_doc.value?.payments) ? invoice_doc.value.payments : [])
+		.filter((payment) => !isGiftCardPayment(payment))
+		.map((payment) => {
+			applyPaymentAccountCurrency(payment);
+			payment.display_amount = getPaymentDisplayAmount(payment);
+			payment.display_currency = getPaymentCurrency(payment);
+			return payment;
+		}),
 );
 
 const giftCardAppliedAmount = computed(() =>
@@ -1065,14 +1142,84 @@ const buildProfilePaymentLines = () => {
 
 	return profilePayments
 		.filter((payment) => payment?.mode_of_payment)
-		.map((payment, index) => ({
-			mode_of_payment: payment.mode_of_payment,
-			amount: 0,
-			base_amount: 0,
-			account: payment.account,
-			type: payment.type,
-			default: payment.default === 1 || payment.default === true || index === 0 ? 1 : 0,
-		}));
+		.map((payment, index) => {
+			const accountInfo = normalizePaymentMethodCurrencyEntry(
+				paymentMethodCurrencyMap.value?.[payment.mode_of_payment],
+			);
+			return {
+				mode_of_payment: payment.mode_of_payment,
+				amount: 0,
+				base_amount: 0,
+				account: payment.account || accountInfo.account,
+				account_currency:
+					payment.account_currency || accountInfo.account_currency || invoice_doc.value?.currency,
+				type: payment.type || accountInfo.account_type,
+				default: payment.default === 1 || payment.default === true || index === 0 ? 1 : 0,
+			};
+		});
+};
+
+const loadPaymentAccountCurrencies = async () => {
+	const profile = pos_profile.value;
+	const company = profile?.company;
+	if (!company || !Array.isArray(profile?.payments) || !profile.payments.length) {
+		paymentMethodCurrencyMap.value = {};
+		return;
+	}
+
+	const modes = profile.payments.map((payment) => payment?.mode_of_payment).filter(Boolean);
+	paymentMethodCurrencyMap.value = await loadPaymentMethodCurrencyMap({
+		company,
+		offline: isOffline(),
+		fetcher: async () => {
+			const response = await frappe.call({
+				method: "posawesome.posawesome.api.payment_processing.utils.get_mode_of_payment_accounts",
+				args: { company, mode_of_payments: modes },
+			});
+			return response?.message || {};
+		},
+	});
+
+	(invoice_doc.value?.payments || []).forEach(applyPaymentAccountCurrency);
+	await loadPaymentCurrencyRates();
+};
+
+const loadPaymentCurrencyRates = async () => {
+	const doc = invoice_doc.value;
+	const profile = pos_profile.value;
+	const companyCurrency = doc?.company_currency || profile?.company_currency || profile?.currency || doc?.currency;
+	if (!doc || !profile || !companyCurrency) return;
+
+	const currencies = new Set(
+		(Array.isArray(doc.payments) ? doc.payments : [])
+			.map((payment) => getPaymentCurrency(payment))
+			.filter((currency) => currency && currency !== companyCurrency && currency !== doc.currency),
+	);
+
+	if (isOffline()) {
+		return;
+	}
+
+	const nextRates = { ...paymentCurrencyRates.value };
+	for (const currency of currencies) {
+		if (nextRates[currency]) continue;
+		try {
+			const response = await frappe.call({
+				method: "posawesome.posawesome.api.invoices.fetch_exchange_rate_pair",
+				args: {
+					from_currency: currency,
+					to_currency: companyCurrency,
+				},
+			});
+			const rate = Number(response?.message?.exchange_rate || 0);
+			if (rate > 0) {
+				nextRates[currency] = rate;
+			}
+		} catch (error) {
+			console.warn("Unable to load payment currency rate", currency, error);
+		}
+	}
+	paymentCurrencyRates.value = nextRates;
 };
 
 const syncPreferredPaymentToCurrentTotal = (doc = invoice_doc.value) => {
@@ -1103,9 +1250,8 @@ const syncPreferredPaymentToCurrentTotal = (doc = invoice_doc.value) => {
 
 	const total = netInvoiceSettlementAmount.value;
 	const normalizedTotal = doc.is_return ? -Math.abs(total) : Math.abs(total);
-	const conversionRate = flt(doc.conversion_rate || 1, currency_precision.value);
-
 	payments.forEach((payment) => {
+		applyPaymentAccountCurrency(payment);
 		if (payment !== preferredPayment) {
 			payment.amount = 0;
 			if (payment.base_amount !== undefined) {
@@ -1116,7 +1262,7 @@ const syncPreferredPaymentToCurrentTotal = (doc = invoice_doc.value) => {
 
 	preferredPayment.amount = normalizedTotal;
 	if (preferredPayment.base_amount !== undefined) {
-		preferredPayment.base_amount = flt(normalizedTotal * conversionRate, currency_precision.value);
+		syncPaymentBaseAmount(preferredPayment, doc, pos_profile.value, currency_precision.value);
 	}
 
 	return preferredPayment;
@@ -1178,6 +1324,8 @@ const ensurePaymentLinesInitialized = (doc = invoice_doc.value) => {
 			doc.payments = fallbackPayments;
 		}
 	}
+
+	(doc.payments || []).forEach(applyPaymentAccountCurrency);
 
 	// For returns, always show all profile payment methods so user can split refund
 	if (doc.is_return) {
@@ -1298,24 +1446,20 @@ const updateCreditChange = (rawValue) => {
 
 const handlePaymentAmountChange = (payment, event) => {
 	last_payment_change_was_cash.value = isCashLikePayment(payment);
-	setFormatedCurrency(payment, "amount", null, false, event);
+	const parsed = { value: 0 };
+	setFormatedCurrency(parsed, "value", null, false, event);
+	const displayAmount = flt(parsed.value, currency_precision.value);
+	setPaymentTransactionAmount(payment, displayAmount);
 
 	// For return invoices: user enters a positive number but we store it as negative (refund)
 	if (invoice_doc.value?.is_return && payment.amount > 0) {
 		payment.amount = -payment.amount;
 	}
-	if (payment.base_amount !== undefined) {
-		const conversion_rate = invoice_doc.value.conversion_rate || 1;
-		payment.base_amount = flt(payment.amount * conversion_rate, currency_precision.value);
-	}
+	syncPaymentBaseAmount(payment, invoice_doc.value, pos_profile.value, currency_precision.value);
 };
 
 const setPaymentToDenomination = (payment, amount) => {
-	payment.amount = amount;
-	if (payment.base_amount !== undefined) {
-		const conversion_rate = invoice_doc.value.conversion_rate || 1;
-		payment.base_amount = flt(amount * conversion_rate, currency_precision.value);
-	}
+	setPaymentTransactionAmount(payment, amount);
 	last_payment_change_was_cash.value = isCashLikePayment(payment);
 };
 
@@ -1654,6 +1798,7 @@ watch(
 		if (p) {
 			pos_profile.value = p;
 			stock_settings.value = uiStore.stockSettings || {};
+			void loadPaymentAccountCurrencies();
 			get_mpesa_modes();
 			get_print_formats();
 			resetGiftCardState({ clearPayment: true });
@@ -1854,6 +1999,7 @@ watch(
 watch(isPaymentOpen, (isOpen) => {
 	if (isOpen) {
 		ensurePaymentLinesInitialized();
+		void loadPaymentCurrencyRates();
 		handleShowPayment();
 	} else {
 		releaseActiveFocus();
@@ -1863,6 +2009,17 @@ watch(isPaymentOpen, (isOpen) => {
 		giftCardDialogOpen.value = false;
 	}
 });
+
+watch(
+	() => [invoice_doc.value?.currency, invoice_doc.value?.conversion_rate, invoice_doc.value?.posting_date],
+	() => {
+		(invoice_doc.value?.payments || []).forEach((payment) => {
+			applyPaymentAccountCurrency(payment);
+			syncPaymentBaseAmount(payment, invoice_doc.value, pos_profile.value, currency_precision.value);
+		});
+		void loadPaymentCurrencyRates();
+	},
+);
 
 watch(
 	() => invoice_doc.value.posa_delivery_date,
@@ -1918,6 +2075,7 @@ onMounted(() => {
 		eventBus.on("send_invoice_doc_payment", (doc) => {
 			invoiceStore.setInvoiceDoc(doc);
 			void refreshPaymentCustomerInfo(doc);
+			void loadPaymentAccountCurrencies();
 			paid_change.value = flt(doc.paid_change || 0, currency_precision.value);
 			credit_change.value = flt(doc.credit_change || 0, currency_precision.value);
 			last_payment_change_was_cash.value = null;

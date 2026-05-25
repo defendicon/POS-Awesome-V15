@@ -9,7 +9,6 @@
 				hide-details
 				:model-value="total_payments_display"
 				readonly
-				:prefix="currencySymbol(invoice_doc.currency)"
 				density="compact"
 				@click="$emit('show-paid-amount')"
 			></v-text-field>
@@ -22,7 +21,6 @@
 				class="sleek-field pos-themed-input"
 				hide-details
 				:model-value="diff_payment_display"
-				:prefix="currencySymbol(invoice_doc.currency)"
 				density="compact"
 				@focus="$emit('show-diff-payment')"
 				persistent-placeholder
@@ -81,7 +79,7 @@
 </template>
 
 <script setup>
-const props = defineProps({
+defineProps({
 	invoice_doc: Object,
 	total_payments_display: String,
 	diff_payment_display: String,

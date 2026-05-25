@@ -777,5 +777,19 @@ export function get_payments(context: any) {
 			}));
 	}
 
-	return context.invoice_doc.payments;
+	return context.invoice_doc.payments
+		.filter((payment) => payment?.mode_of_payment)
+		.map((payment) => ({
+			mode_of_payment: payment.mode_of_payment,
+			amount: payment.amount,
+			base_amount:
+				payment.base_amount ??
+				context.flt(
+					(payment.amount || 0) * (context.conversion_rate || 1),
+					context.currency_precision,
+				),
+			account: payment.account,
+			type: payment.type,
+			default: payment.default,
+		}));
 }

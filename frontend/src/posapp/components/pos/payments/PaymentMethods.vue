@@ -28,10 +28,10 @@
 						:label="frappe._('Amount')"
 						:class="['sleek-field pos-themed-input', isReturn ? 'pos-themed-input--refund' : '']"
 						hide-details
-						:model-value="formatCurrency(payment.amount)"
+						:model-value="formatCurrency(resolveDisplayAmount(payment))"
 						@change="$emit('update-amount', payment, $event)"
 						:rules="[isNumber]"
-						:prefix="currencySymbol(currency)"
+						:prefix="currencySymbol(resolvePaymentCurrency(payment))"
 						@focus="$emit('set-rest-amount', payment, isReturn)"
 						:readonly="isGiftCardPayment(payment)"
 					></v-text-field>
@@ -70,7 +70,7 @@
 							class="payment-denominations__btn"
 							@click="$emit('set-denomination', payment, d)"
 						>
-							{{ formatCurrency(d) }}
+							{{ currencySymbol(resolvePaymentCurrency(payment)) }}{{ formatCurrency(d) }}
 						</v-btn>
 					</div>
 				</v-col>
@@ -138,6 +138,16 @@ const emit = defineEmits([
 	"set-rest-amount",
 	"open-gift-card",
 ]);
+
+const resolvePaymentCurrency = (payment) =>
+	payment?.display_currency ||
+	payment?.account_currency ||
+	payment?.payment_currency ||
+	payment?.currency ||
+	props.currency;
+
+const resolveDisplayAmount = (payment) =>
+	payment?.display_amount ?? payment?.amount ?? 0;
 
 const handlePrimaryAction = (payment) => {
 	if (props.isGiftCardPayment(payment)) {

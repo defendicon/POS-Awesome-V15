@@ -5,6 +5,9 @@ export type PaymentLine = {
 	default?: number | boolean;
 	type?: string;
 	account?: string;
+	account_currency?: string;
+	display_amount?: number;
+	display_currency?: string;
 };
 
 export type PaymentInitDoc = {

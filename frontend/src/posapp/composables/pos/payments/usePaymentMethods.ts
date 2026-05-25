@@ -25,6 +25,9 @@ export interface PaymentMethodsOptions {
 	getPaidChange?: () => number;
 	getCreditChange?: () => number;
 	onBackToInvoice?: () => void;
+	getPaymentDisplayAmount?: (_payment: any) => number;
+	getPaymentCurrency?: (_payment: any) => string;
+	syncPaymentBaseAmount?: (_payment: any) => void;
 }
 
 export function usePaymentMethods(options: PaymentMethodsOptions) {
@@ -156,11 +159,12 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 
 				other.amount = newAmount;
 				if (other.base_amount !== undefined) {
-					// Approximate base amount update
-					// ideally we would use exchange rate but for now using simple ratio or 1 if not available
-					// This logic might need refinement if multi-currency is heavy used
-					const conversion_rate = doc.conversion_rate || 1;
-					other.base_amount = flt(newAmount * conversion_rate);
+					if (options.syncPaymentBaseAmount) {
+						options.syncPaymentBaseAmount(other);
+					} else {
+						const conversion_rate = doc.conversion_rate || 1;
+						other.base_amount = flt(newAmount * conversion_rate);
+					}
 				}
 
 				remaining_excess = flt(remaining_excess - reduction);
@@ -174,7 +178,9 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 	) => {
 		const doc = unref(invoiceDoc);
 		if (!doc || !payment) return [];
-		const currency = doc.currency;
+		const currency = options.getPaymentCurrency
+			? options.getPaymentCurrency(payment)
+			: doc.currency;
 
 		const current_total_paid = doc.payments.reduce(
 			(sum: number, p: any) => sum + flt(p.amount),
@@ -184,7 +190,13 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 		const other_payments = current_total_paid - current_payment_amount;
 
 		const invoice_total = flt(getInvoiceSettlementAmount());
-		const amount_to_pay = invoice_total - other_payments;
+		const amount_to_pay_transaction = invoice_total - other_payments;
+		const amount_to_pay = options.getPaymentDisplayAmount
+			? options.getPaymentDisplayAmount({
+					...payment,
+					amount: amount_to_pay_transaction,
+				})
+			: amount_to_pay_transaction;
 
 		if (amount_to_pay <= 0) return [];
 
@@ -207,7 +219,6 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 
 	// Set M-Pesa payment as customer credit
 	const set_mpesa_payment = (payment: any) => {
-		const doc = unref(invoiceDoc);
 		const profile = unref(posProfile);
 		if (profile) {
 			profile.use_customer_credit = true;
@@ -251,9 +262,15 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 
 		payment.amount = invoiceAmount;
 		if (payment.base_amount !== undefined) {
-			payment.base_amount = isReturn
-				? -Math.abs(invoiceAmount)
-				: invoiceAmount;
+			if (options.syncPaymentBaseAmount) {
+				options.syncPaymentBaseAmount(payment);
+				if (isReturn) payment.base_amount = -Math.abs(payment.base_amount);
+			} else {
+				const conversionRate = doc.conversion_rate || 1;
+				payment.base_amount = isReturn
+					? -Math.abs(invoiceAmount * conversionRate)
+					: invoiceAmount * conversionRate;
+			}
 		}
 	};
 
@@ -275,7 +292,15 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 
 		payment.amount = amount;
 		if (payment.base_amount !== undefined) {
-			payment.base_amount = isReturn ? -Math.abs(amount) : amount;
+			if (options.syncPaymentBaseAmount) {
+				options.syncPaymentBaseAmount(payment);
+				if (isReturn) payment.base_amount = -Math.abs(payment.base_amount);
+			} else {
+				const conversionRate = doc.conversion_rate || 1;
+				payment.base_amount = isReturn
+					? -Math.abs(amount * conversionRate)
+					: amount * conversionRate;
+			}
 		}
 	};
 
