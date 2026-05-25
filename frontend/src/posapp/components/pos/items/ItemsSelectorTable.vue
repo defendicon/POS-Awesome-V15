@@ -142,8 +142,13 @@ const getSecondaryRate = (item) => {
 	if (props.selectedCurrency === getPrimaryCurrency(item)) {
 		return primaryRate;
 	}
-	const exchangeRate = Number(props.selectedExchangeRate || 1);
-	return primaryRate * (Number.isFinite(exchangeRate) && exchangeRate > 0 ? exchangeRate : 1);
+	const propRate = Number(props.selectedExchangeRate || 0);
+	const itemRate =
+		item?.selected_currency === props.selectedCurrency
+			? Number(item?.selected_exchange_rate || 0)
+			: 0;
+	const exchangeRate = propRate > 0 && propRate !== 1 ? propRate : itemRate || propRate || 1;
+	return primaryRate * exchangeRate;
 };
 
 const handleRowClick = (event, data) => {

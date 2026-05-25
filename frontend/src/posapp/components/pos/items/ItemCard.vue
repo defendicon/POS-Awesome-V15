@@ -128,8 +128,13 @@ const secondaryRate = computed(() => {
 	if (secondaryCurrency.value === primaryCurrency.value) {
 		return primaryRate.value;
 	}
-	const exchangeRate = Number(props.selectedExchangeRate || 1);
-	return Number(primaryRate.value || 0) * (Number.isFinite(exchangeRate) && exchangeRate > 0 ? exchangeRate : 1);
+	const propRate = Number(props.selectedExchangeRate || 0);
+	const itemRate =
+		props.item.selected_currency === secondaryCurrency.value
+			? Number(props.item.selected_exchange_rate || 0)
+			: 0;
+	const exchangeRate = propRate > 0 && propRate !== 1 ? propRate : itemRate || propRate || 1;
+	return Number(primaryRate.value || 0) * exchangeRate;
 });
 
 const secondaryPrecision = computed(() => props.ratePrecision(secondaryRate.value));

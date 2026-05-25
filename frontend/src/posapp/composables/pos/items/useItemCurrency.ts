@@ -4,6 +4,8 @@ type CurrencyItem = {
 	original_currency?: string;
 	rate?: number;
 	currency?: string;
+	selected_exchange_rate?: number;
+	selected_currency?: string;
 	base_rate?: number;
 	base_price_list_rate?: number;
 	price_list_rate?: number;
@@ -109,6 +111,8 @@ export function useItemCurrency() {
 
 		item.rate = flt(converted_rate, context.currency_precision);
 		item.currency = selectedCurrency;
+		item.selected_currency = selectedCurrency;
+		item.selected_exchange_rate = context.exchange_rate || 1;
 		item.price_list_rate = item.rate;
 	};
 
