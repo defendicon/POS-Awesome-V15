@@ -5,6 +5,7 @@ import {
 } from "../../../../offline/index";
 import { _getPlcConversionRate } from "./currency";
 import { resolvePosDocumentDoctype } from "../../../utils/posDocumentMode";
+import { toCompanyCurrency } from "../../../utils/erpnextCurrency";
 
 declare const flt: (_value: unknown, _precision?: number) => number;
 declare const frappe: any;
@@ -263,8 +264,8 @@ export function get_invoice_doc(context: any) {
 
 	doc.total = total;
 	doc.net_total = total; // Will adjust later if taxes are inclusive
-	doc.base_total = total * (context.conversion_rate || 1);
-	doc.base_net_total = total * (context.conversion_rate || 1);
+	doc.base_total = toCompanyCurrency(context, total);
+	doc.base_net_total = toCompanyCurrency(context, total);
 
 	// Apply discounts with correct sign for returns
 	let discountAmount = flt(context.additional_discount);
@@ -272,7 +273,7 @@ export function get_invoice_doc(context: any) {
 		discountAmount = -Math.abs(discountAmount);
 
 	doc.discount_amount = discountAmount;
-	doc.base_discount_amount = discountAmount * (context.conversion_rate || 1);
+	doc.base_discount_amount = toCompanyCurrency(context, discountAmount);
 
 	let discountPercentage = flt(context.additional_discount_percentage);
 	if (context.pos_profile?.posa_use_percentage_discount) {
@@ -304,8 +305,8 @@ export function get_invoice_doc(context: any) {
 				tax_amount: tax.tax_amount,
 				total: tax.total,
 				base_tax_amount:
-					tax.tax_amount * (context.conversion_rate || 1),
-				base_total: tax.total * (context.conversion_rate || 1),
+					toCompanyCurrency(context, tax.tax_amount),
+				base_total: toCompanyCurrency(context, tax.total),
 			});
 		});
 		doc.total_taxes_and_charges = totalTax;
@@ -338,14 +339,14 @@ export function get_invoice_doc(context: any) {
 					tax_amount: tax_amount,
 					total: runningTotal,
 					base_tax_amount:
-						tax_amount * (context.conversion_rate || 1),
-					base_total: runningTotal * (context.conversion_rate || 1),
+						toCompanyCurrency(context, tax_amount),
+					base_total: toCompanyCurrency(context, runningTotal),
 				});
 			});
 			if (inclusive) {
 				doc.net_total = doc.total - totalTax;
 				doc.base_net_total =
-					doc.net_total * (context.conversion_rate || 1);
+					toCompanyCurrency(context, doc.net_total);
 				grandTotal = doc.total;
 			} else {
 				grandTotal = runningTotal;
@@ -357,7 +358,7 @@ export function get_invoice_doc(context: any) {
 	if (isReturn && grandTotal > 0) grandTotal = -Math.abs(grandTotal);
 
 	doc.grand_total = grandTotal;
-	doc.base_grand_total = grandTotal * (context.conversion_rate || 1);
+	doc.base_grand_total = toCompanyCurrency(context, grandTotal);
 
 	// Apply rounding to get rounded total unless disabled in POS Profile
 	if (context.pos_profile.disable_rounded_total) {
@@ -452,28 +453,17 @@ export function get_invoice_doc(context: any) {
 		context.pos_profile?.currency ||
 		null;
 	if (context.selected_currency !== companyCurrency) {
-		// For returns, we need to ensure negative values
-		const multiplier = isReturn ? -1 : 1;
-
-		// Convert amounts back to the base currency
-		doc.base_total = total * (context.conversion_rate || 1) * multiplier;
-		doc.base_net_total =
-			total * (context.conversion_rate || 1) * multiplier;
-		doc.base_discount_amount =
-			discountAmount * (context.conversion_rate || 1) * multiplier;
-		doc.base_grand_total =
-			grandTotal * (context.conversion_rate || 1) * multiplier;
-		doc.base_rounded_total =
-			grandTotal * (context.conversion_rate || 1) * multiplier;
+		doc.base_total = toCompanyCurrency(context, total);
+		doc.base_net_total = toCompanyCurrency(context, total);
+		doc.base_discount_amount = toCompanyCurrency(context, discountAmount);
+		doc.base_grand_total = toCompanyCurrency(context, grandTotal);
+		doc.base_rounded_total = toCompanyCurrency(context, doc.rounded_total);
 	} else {
-		// Same currency, just ensure negative values for returns
-		const multiplier = isReturn ? -1 : 1;
-		// When in base currency, the base amounts are the same as the regular amounts
-		doc.base_total = total * multiplier;
-		doc.base_net_total = total * multiplier;
-		doc.base_discount_amount = discountAmount * multiplier;
-		doc.base_grand_total = grandTotal * multiplier;
-		doc.base_rounded_total = grandTotal * multiplier;
+		doc.base_total = total;
+		doc.base_net_total = total;
+		doc.base_discount_amount = discountAmount;
+		doc.base_grand_total = grandTotal;
+		doc.base_rounded_total = doc.rounded_total;
 	}
 
 	// Ensure payments have correct base amounts
@@ -481,8 +471,7 @@ export function get_invoice_doc(context: any) {
 		doc.payments.forEach((payment) => {
 			if (context.selected_currency !== companyCurrency) {
 				// Convert payment amount to base currency
-				payment.base_amount =
-					payment.amount * (context.conversion_rate || 1);
+				payment.base_amount = toCompanyCurrency(context, payment.amount);
 			} else {
 				payment.base_amount = payment.amount;
 			}
@@ -587,23 +576,23 @@ export function get_invoice_items(context: any) {
 			// Use pre-stored base_rate if available, otherwise calculate
 			new_item.base_rate =
 				item.base_rate ||
-				flt(item.rate * (context.conversion_rate || 1));
+				toCompanyCurrency(context, item.rate);
 
 			new_item.price_list_rate = flt(item.price_list_rate); // Keep price list rate in USD
 			new_item.base_price_list_rate =
 				item.base_price_list_rate ??
-				flt(item.price_list_rate * (context.conversion_rate || 1));
+				toCompanyCurrency(context, item.price_list_rate);
 
 			// Calculate amounts
 			new_item.amount = flt(item.qty) * new_item.rate; // Amount in USD
 			new_item.base_amount =
-				new_item.amount * (context.conversion_rate || 1); // Convert to base currency
+				toCompanyCurrency(context, new_item.amount);
 
 			// Handle discount amount
 			new_item.discount_amount = flt(item.discount_amount); // Keep discount in USD
 			new_item.base_discount_amount =
 				item.base_discount_amount ||
-				flt(item.discount_amount * (context.conversion_rate || 1));
+				toCompanyCurrency(context, item.discount_amount);
 		} else {
 			// Same currency (base currency), make sure we use base rates if available
 			new_item.rate = flt(item.rate);

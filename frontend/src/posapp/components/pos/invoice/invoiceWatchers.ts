@@ -295,6 +295,27 @@ const invoiceWatchers: Record<string, unknown> & ThisType<InvoiceWatchersVm> = {
 
 	// Reactively update item prices when exchange rate changes
 	exchange_rate() {
+		if (this.eventBus) {
+			this.eventBus.emit("update_currency", {
+				currency: this.selected_currency || this.pos_profile?.currency,
+				exchange_rate: this.exchange_rate,
+				conversion_rate: this.conversion_rate,
+			});
+		}
+		if (this.items && this.items.length) {
+			this.update_item_rates();
+		}
+	},
+
+	// Reactively update item prices when selected-to-company rate changes
+	conversion_rate() {
+		if (this.eventBus) {
+			this.eventBus.emit("update_currency", {
+				currency: this.selected_currency || this.pos_profile?.currency,
+				exchange_rate: this.exchange_rate,
+				conversion_rate: this.conversion_rate,
+			});
+		}
 		if (this.items && this.items.length) {
 			this.update_item_rates();
 		}

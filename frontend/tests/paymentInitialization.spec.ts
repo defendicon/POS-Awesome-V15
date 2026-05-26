@@ -63,6 +63,20 @@ describe("paymentInitialization", () => {
 		expect(doc.payments[0].base_amount).toBe(-80);
 	});
 
+	it("initializes base payment amounts with ERPNext invoice conversion rate", () => {
+		const doc: any = {
+			currency: "USD",
+			rounded_total: 80,
+			conversion_rate: 280,
+			payments: [{ mode_of_payment: "Cash", type: "Cash", amount: 0, base_amount: 0 }],
+		};
+
+		initializePaymentLinesForDialog(doc, 2, isCashLikePayment);
+
+		expect(doc.payments[0].amount).toBe(80);
+		expect(doc.payments[0].base_amount).toBe(22400);
+	});
+
 	it("reduces the preferred payment amount when customer credit is redeemed", () => {
 		const doc: any = {
 			rounded_total: 2700,
@@ -126,9 +140,36 @@ describe("paymentInitialization", () => {
 			giftCardAmount: 120,
 		});
 
-	expect(payment).toBe(doc.payments[0]);
-	expect(doc.payments[0].amount).toBe(180);
-	expect(doc.payments[0].base_amount).toBe(180);
-	expect(doc.payments[1].amount).toBe(0);
+		expect(payment).toBe(doc.payments[0]);
+		expect(doc.payments[0].amount).toBe(180);
+		expect(doc.payments[0].base_amount).toBe(180);
+		expect(doc.payments[1].amount).toBe(0);
+	});
+
+	it("rebalances preferred payment base amount with ERPNext invoice conversion rate", () => {
+		const doc: any = {
+			currency: "USD",
+			rounded_total: 100,
+			conversion_rate: 280,
+			payments: [
+				{
+					mode_of_payment: "Cash",
+					type: "Cash",
+					amount: 100,
+					base_amount: 28000,
+					default: 1,
+				},
+			],
+		};
+
+		const payment = paymentInitialization.rebalancePreferredPaymentLine?.(doc, {
+			precision: 2,
+			isCashLikePayment,
+			giftCardAmount: 30,
+		});
+
+		expect(payment).toBe(doc.payments[0]);
+		expect(doc.payments[0].amount).toBe(70);
+		expect(doc.payments[0].base_amount).toBe(19600);
 	});
 });

@@ -68,6 +68,12 @@ export function _getPricingContext(context: any) {
 		price_list:
 			priceList || context.pos_profile?.selling_price_list || null,
 		currency: selectedCurrency || context.pos_profile?.currency || null,
+		price_list_currency:
+			context.price_list_currency || context.pos_profile?.currency || null,
+		conversion_rate: context.conversion_rate || 1,
+		plc_conversion_rate: context._getPlcConversionRate
+			? context._getPlcConversionRate()
+			: context.plc_conversion_rate || 1,
 		date:
 			context.posting_date ||
 			context.posting_date_display ||
@@ -520,9 +526,14 @@ export async function _applyServerPricingRules(context: any, ctx: any = {}) {
 					Number.isFinite(conversionFactor) && conversionFactor > 0
 						? conversionFactor
 						: undefined,
-				rate: baseRate || 0,
-				price_list_rate: basePriceListRate || 0,
-				discount_amount: baseDiscount || 0,
+				rate: Number.parseFloat(item.rate ?? 0) || 0,
+				price_list_rate:
+					Number.parseFloat(item.price_list_rate ?? 0) || 0,
+				discount_amount:
+					Number.parseFloat(item.discount_amount ?? 0) || 0,
+				base_rate: baseRate || 0,
+				base_price_list_rate: basePriceListRate || 0,
+				base_discount_amount: baseDiscount || 0,
 				discount_percentage:
 					Number.parseFloat(item.discount_percentage || 0) || 0,
 				warehouse: item.warehouse,
@@ -823,14 +834,14 @@ export async function _applyServerPricingRules(context: any, ctx: any = {}) {
 		}
 
 		const baseRate =
-			Number.parseFloat(update.rate ?? item.base_rate ?? 0) || 0;
+			Number.parseFloat(update.base_rate ?? item.base_rate ?? 0) || 0;
 		const basePriceListRate =
 			Number.parseFloat(
-				update.price_list_rate ?? item.base_price_list_rate ?? 0,
+				update.base_price_list_rate ?? item.base_price_list_rate ?? 0,
 			) || 0;
 		const baseDiscount =
 			Number.parseFloat(
-				update.discount_amount ?? item.base_discount_amount ?? 0,
+				update.base_discount_amount ?? item.base_discount_amount ?? 0,
 			) || 0;
 		const discountPercentage =
 			Number.parseFloat(
@@ -883,17 +894,25 @@ export async function _applyServerPricingRules(context: any, ctx: any = {}) {
 			)
 				? Number.parseFloat(item.base_discount_amount)
 				: toBase(item.discount_amount);
+			const rawServerBasePriceList = Number.parseFloat(
+				update.base_price_list_rate ?? update.price_list_rate,
+			);
+			const rawServerBaseDiscount = Number.parseFloat(
+				update.base_discount_amount ?? update.discount_amount,
+			);
 			const epsilon = 1e-6;
 			const zeroRateFromServer = basePriceListRate > 0 && baseRate <= 0;
 			const zeroPriceListFromServer =
-				!Number.isFinite(basePriceListRate) || basePriceListRate <= 0;
+				!Number.isFinite(rawServerBasePriceList) ||
+				rawServerBasePriceList <= 0;
 			const serverRemovedPriceList =
 				zeroPriceListFromServer &&
 					Number.isFinite(originalBasePriceList)
 					? originalBasePriceList > 0
 					: false;
 			const serverRemovedDiscount =
-				(!Number.isFinite(baseDiscount) || baseDiscount <= 0) &&
+				(!Number.isFinite(rawServerBaseDiscount) ||
+					rawServerBaseDiscount <= 0) &&
 					Number.isFinite(originalBaseDiscount)
 					? originalBaseDiscount > 0
 					: false;

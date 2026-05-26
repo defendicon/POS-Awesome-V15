@@ -1,6 +1,7 @@
 import { ref, unref, type Ref, type ComputedRef } from "vue";
 // @ts-ignore
 import { getSmartTenderSuggestions } from "../../../../utils/smartTender";
+import { toCompanyCurrency } from "../../../utils/erpnextCurrency";
 
 declare const frappe: any;
 declare const __: (_str: string, _args?: any[]) => string;
@@ -43,6 +44,11 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 
 	const flt = (v: any) =>
 		formatFloat ? formatFloat(v) : parseFloat(String(v)) || 0;
+
+	const currencyContext = (doc = unref(invoiceDoc)) => ({
+		...(doc || {}),
+		pos_profile: unref(posProfile),
+	});
 
 	const getInvoiceSettlementAmount = () => {
 		const doc = unref(invoiceDoc);
@@ -156,11 +162,9 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 
 				other.amount = newAmount;
 				if (other.base_amount !== undefined) {
-					// Approximate base amount update
-					// ideally we would use exchange rate but for now using simple ratio or 1 if not available
-					// This logic might need refinement if multi-currency is heavy used
-					const conversion_rate = doc.conversion_rate || 1;
-					other.base_amount = flt(newAmount * conversion_rate);
+					other.base_amount = flt(
+						toCompanyCurrency(currencyContext(doc), newAmount),
+					);
 				}
 
 				remaining_excess = flt(remaining_excess - reduction);
@@ -251,9 +255,10 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 
 		payment.amount = invoiceAmount;
 		if (payment.base_amount !== undefined) {
+			const baseAmount = toCompanyCurrency(currencyContext(doc), invoiceAmount);
 			payment.base_amount = isReturn
-				? -Math.abs(invoiceAmount)
-				: invoiceAmount;
+				? -Math.abs(baseAmount)
+				: baseAmount;
 		}
 	};
 
@@ -275,7 +280,8 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 
 		payment.amount = amount;
 		if (payment.base_amount !== undefined) {
-			payment.base_amount = isReturn ? -Math.abs(amount) : amount;
+			const baseAmount = toCompanyCurrency(currencyContext(doc), amount);
+			payment.base_amount = isReturn ? -Math.abs(baseAmount) : baseAmount;
 		}
 	};
 
@@ -284,6 +290,9 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 		if (doc && doc.payments) {
 			doc.payments.forEach((payment: any) => {
 				payment.amount = 0;
+				if (payment.base_amount !== undefined) {
+					payment.base_amount = 0;
+				}
 			});
 		}
 	};

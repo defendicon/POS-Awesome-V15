@@ -18,9 +18,9 @@ def get_base_value(doc, fieldname, base_fieldname=None, conversion_rate=None):
     if conversion_rate is None:
         conversion_rate = (
             doc.get("conversion_rate")
-            or doc.get("exchange_rate")
+            or doc.get("source_exchange_rate")
             or doc.get("target_exchange_rate")
-            or doc.get("plc_conversion_rate")
+            or doc.get("exchange_rate")
             or 1
         )
 

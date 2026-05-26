@@ -115,6 +115,12 @@ def _build_invoice_remarks(invoice_doc):
 
 def get_latest_rate(from_currency: str, to_currency: str, cache=None):
     """Return the most recent Currency Exchange rate and its date."""
+    if from_currency == to_currency:
+        result = 1.0, nowdate()
+        if cache is not None:
+            cache[(from_currency, to_currency)] = result
+        return result
+
     if cache is not None:
         key = (from_currency, to_currency)
         if key in cache:
@@ -137,6 +143,43 @@ def get_latest_rate(from_currency: str, to_currency: str, cache=None):
         cache[key] = result
 
     return result
+
+
+def resolve_erpnext_currency_rates(
+    invoice_currency: str,
+    price_list_currency: str | None,
+    company_currency: str,
+    posting_date=None,
+    cache=None,
+):
+    """Resolve ERPNext-style invoice and price-list rates to company currency."""
+
+    invoice_currency = invoice_currency or company_currency
+    price_list_currency = price_list_currency or company_currency
+    exchange_rate_date = posting_date or nowdate()
+
+    conversion_rate = 1.0
+    if invoice_currency != company_currency:
+        conversion_rate, exchange_rate_date = get_latest_rate(
+            invoice_currency,
+            company_currency,
+            cache=cache,
+        )
+
+    plc_conversion_rate = 1.0
+    if price_list_currency != company_currency:
+        plc_conversion_rate, _ignored = get_latest_rate(
+            price_list_currency,
+            company_currency,
+            cache=cache,
+        )
+
+    return {
+        "conversion_rate": flt(conversion_rate) if conversion_rate else None,
+        "plc_conversion_rate": flt(plc_conversion_rate) if plc_conversion_rate else None,
+        "price_list_currency": price_list_currency,
+        "exchange_rate_date": exchange_rate_date,
+    }
 
 
 @frappe.whitelist()

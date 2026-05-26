@@ -4,6 +4,14 @@ import {
 	setCustomerStorage,
 	saveStoredValueSnapshot,
 } from "../../../../offline/index";
+import {
+	fromCompanyCurrency,
+	getCompanyCurrency,
+	getConversionRate,
+	getPlcConversionRate,
+	getPriceListCurrency,
+	getSelectedCurrency,
+} from "../../../utils/erpnextCurrency";
 
 declare const frappe: any;
 
@@ -182,27 +190,26 @@ export function _computePriceConversion(
 	priceCurrency: string,
 ) {
 	const companyCurrency =
-		(context.company && context.company.default_currency) ||
-		context.pos_profile.currency;
-	const selectedCurrency = context.selected_currency || companyCurrency;
-	const priceListCurrency = context.price_list_currency || companyCurrency;
+		getCompanyCurrency(context) || context.pos_profile.currency;
+	const selectedCurrency = getSelectedCurrency(context) || companyCurrency;
+	const priceListCurrency = getPriceListCurrency(context) || companyCurrency;
 
 	let sourceToCompanyRate = 1;
 	if (priceCurrency === companyCurrency) {
 		sourceToCompanyRate = 1;
 	} else if (priceCurrency === selectedCurrency) {
-		sourceToCompanyRate = context.conversion_rate || 1;
+		sourceToCompanyRate = getConversionRate(context);
 	} else if (priceCurrency === priceListCurrency) {
 		sourceToCompanyRate = context._getPlcConversionRate
 			? context._getPlcConversionRate()
-			: 1;
+			: getPlcConversionRate(context);
 	}
 
 	const base_price_list_rate = rate * sourceToCompanyRate;
 	const price_list_rate =
 		selectedCurrency === companyCurrency
 			? base_price_list_rate
-			: base_price_list_rate / (context.conversion_rate || 1);
+			: fromCompanyCurrency(context, base_price_list_rate);
 
 	return {
 		price_list_rate,

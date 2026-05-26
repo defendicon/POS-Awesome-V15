@@ -10,6 +10,7 @@ import { ensureInvoiceClientRequestId } from "../../../../offline/idempotency";
 import stockCoordinator from "../../../utils/stockCoordinator";
 import { parseBooleanSetting } from "../../../utils/stock";
 import { resolvePosDocumentDoctype } from "../../../utils/posDocumentMode";
+import { toCompanyCurrency } from "../../../utils/erpnextCurrency";
 
 declare const frappe: any;
 declare const __: (_str: string, _args?: any[]) => string;
@@ -70,6 +71,11 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 		formatFloat,
 		stores,
 	} = options;
+
+	const currencyContext = (doc = unref(invoiceDoc)) => ({
+		...(doc || {}),
+		pos_profile: unref(posProfile),
+	});
 
 	const formatStockErrors = (errors: any[]) => {
 		const settings = unref(stockSettings) || {};
@@ -622,7 +628,9 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				const amount = doc.rounded_total || doc.grand_total;
 				default_payment.amount = -Math.abs(amount);
 				if (default_payment.base_amount !== undefined) {
-					default_payment.base_amount = -Math.abs(amount);
+					default_payment.base_amount = -Math.abs(
+						toCompanyCurrency(currencyContext(doc), amount),
+					);
 				}
 			}
 		}
@@ -757,7 +765,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			ensureInvoiceClientRequestId(doc);
 			doc.write_off_amount = writeOffAmount;
 			doc.base_write_off_amount = formatFloat(
-				writeOffAmount * (doc.conversion_rate || 1),
+				toCompanyCurrency(currencyContext(doc), writeOffAmount),
 				prec,
 			);
 			doc.paid_change = pChange;

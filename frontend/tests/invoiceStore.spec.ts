@@ -172,4 +172,22 @@ describe("invoiceStore invoice type state", () => {
 		expect(store.grossTotal).toBe(40);
 		expect(store.discountTotal).toBe(2);
 	});
+
+	it("uses rounded line amount for gross totals when available", () => {
+		const store = useInvoiceStore();
+		store.addItem({
+			posa_row_id: "row-rounded",
+			item_code: "ITEM-ROUND",
+			qty: 3,
+			rate: 33.3333,
+			amount: 100,
+			discount_amount: 0,
+		});
+
+		expect(store.grossTotal).toBe(100);
+
+		store.recalculateTotals();
+
+		expect(store.grossTotal).toBe(100);
+	});
 });

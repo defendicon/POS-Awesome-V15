@@ -47,6 +47,8 @@
 					:pos-profile="posProfile"
 					:context="context"
 					:selected-currency="selectedCurrency"
+					:selected-exchange-rate="selectedExchangeRate"
+					:selected-conversion-rate="selectedConversionRate"
 					:hide-qty-decimals="hideQtyDecimals"
 					:show-rate-info="showRateInfo"
 					:get-item-rate-info="getItemRateInfo"
@@ -91,6 +93,8 @@ const props = defineProps({
 	posProfile: { type: Object, default: () => ({}) },
 	context: { type: String, default: "pos" },
 	selectedCurrency: { type: String, default: "" },
+	selectedExchangeRate: { type: Number, default: 1 },
+	selectedConversionRate: { type: Number, default: 1 },
 	hideQtyDecimals: { type: Boolean, default: false },
 	showRateInfo: { type: Boolean, default: true },
 	getItemRateInfo: { type: Function, required: true },

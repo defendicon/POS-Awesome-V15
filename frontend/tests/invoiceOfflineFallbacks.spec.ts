@@ -150,4 +150,63 @@ describe("invoice offline fallbacks", () => {
 		expect(invoiceCurrency.exchange_rate.value).toBe(1.5);
 		expect(invoiceCurrency.conversion_rate.value).toBe(300);
 	});
+
+	it("rebuilds cart rates from the original price-list rate when currency is toggled back", async () => {
+		const { useUIStore } = await import("../src/posapp/stores/uiStore");
+		const { useInvoiceStore } = await import("../src/posapp/stores/invoiceStore");
+		const { useInvoiceCurrency } = await import(
+			"../src/posapp/composables/pos/invoice/useInvoiceCurrency"
+		);
+
+		const uiStore = useUIStore();
+		uiStore.setPosProfile({
+			name: "POS-1",
+			company: "Test Company",
+			currency: "PKR",
+			selling_price_list: "Retail",
+			posa_decimal_precision: "2",
+		} as any);
+		uiStore.setCompanyDoc({
+			default_currency: "PKR",
+		});
+
+		const invoiceStore = useInvoiceStore();
+		invoiceStore.addItem({
+			item_code: "ITEM-10",
+			qty: 1,
+			rate: 0.04,
+			price_list_rate: 0.04,
+			base_rate: 11.2,
+			base_price_list_rate: 11.2,
+			original_rate: 10,
+			original_currency: "PKR",
+			conversion_factor: 1,
+			discount_amount: 0,
+			base_discount_amount: 0,
+			amount: 0.04,
+			base_amount: 11.2,
+			posa_row_id: "row-10",
+		} as any);
+
+		const invoiceCurrency = useInvoiceCurrency();
+		invoiceCurrency.price_list_currency.value = "PKR";
+		invoiceCurrency.selected_currency.value = "USD";
+		invoiceCurrency.exchange_rate.value = 0.0035714285714285713;
+		invoiceCurrency.conversion_rate.value = 280;
+
+		await invoiceCurrency.update_item_rates();
+
+		expect(invoiceStore.items[0].base_rate).toBe(10);
+		expect(invoiceStore.items[0].rate).toBe(0.04);
+
+		invoiceCurrency.selected_currency.value = "PKR";
+		invoiceCurrency.exchange_rate.value = 1;
+		invoiceCurrency.conversion_rate.value = 1;
+
+		await invoiceCurrency.update_item_rates();
+
+		expect(invoiceStore.items[0].base_rate).toBe(10);
+		expect(invoiceStore.items[0].rate).toBe(10);
+		expect(invoiceStore.grossTotal).toBe(10);
+	});
 });

@@ -1,3 +1,5 @@
+import { fromCompanyCurrency } from "../../../utils/erpnextCurrency";
+
 export const getDisplayableBatchOptions = (batchList: any): any[] => {
 	if (!Array.isArray(batchList)) {
 		return [];
@@ -288,29 +290,17 @@ export function useBatchSerial() {
 				// Store batch price in base currency
 				item.base_batch_price = parsedBatchPrice;
 
-				// Convert batch price to selected currency if needed
-				const baseCurrency =
-					context.price_list_currency || context.pos_profile.currency;
-				if (context.selected_currency !== baseCurrency) {
-					item.batch_price = flt(
-						parsedBatchPrice / context.exchange_rate,
-						context.currency_precision,
-					);
-				} else {
-					item.batch_price = parsedBatchPrice;
-				}
+				item.batch_price = flt(
+					fromCompanyCurrency(context, parsedBatchPrice),
+					context.currency_precision,
+				);
 
 				// Set rates based on batch price
 				item.base_price_list_rate = item.base_batch_price;
 				item.base_rate = item.base_batch_price;
 
-				if (context.selected_currency !== baseCurrency) {
-					item.price_list_rate = item.batch_price;
-					item.rate = item.batch_price;
-				} else {
-					item.price_list_rate = item.base_batch_price;
-					item.rate = item.base_batch_price;
-				}
+				item.price_list_rate = item.batch_price;
+				item.rate = item.batch_price;
 
 				// Reset discounts since we're using batch price
 				item.discount_percentage = 0;

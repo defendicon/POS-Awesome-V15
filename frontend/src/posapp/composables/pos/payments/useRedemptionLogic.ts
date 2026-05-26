@@ -4,6 +4,7 @@ import {
 	getCachedStoredValueSnapshot,
 	saveStoredValueSnapshot,
 } from "../../../../offline/index";
+import { fromCompanyCurrency } from "../../../utils/erpnextCurrency";
 
 declare const frappe: any;
 
@@ -22,6 +23,11 @@ export interface RedemptionLogicOptions {
 export function useRedemptionLogic(options: RedemptionLogicOptions) {
 	const { invoiceDoc, posProfile, customerInfo, currencyPrecision, formatFloat, stores } =
 		options;
+
+	const currencyContext = (doc = unref(invoiceDoc)) => ({
+		...(doc || {}),
+		pos_profile: unref(posProfile),
+	});
 
 	// State
 	const loyalty_amount = ref(0);
@@ -48,7 +54,7 @@ export function useRedemptionLogic(options: RedemptionLogicOptions) {
 			normalizeFloat(info.conversion_factor || 1);
 
 		if (doc.currency && profile?.currency && doc.currency !== profile.currency) {
-			amount = normalizeFloat(amount / normalizeFloat(doc.conversion_rate || 1));
+			amount = normalizeFloat(fromCompanyCurrency(currencyContext(doc), amount));
 		}
 
 		return amount;

@@ -28,10 +28,12 @@ function attachFormatter(obj: any) {
 function computePaidAmount(doc: any) {
 	if (!doc) return 0;
 
+	const sign = doc.is_return ? -1 : 1;
 	const paymentsTotal = (doc.payments || []).reduce(
 		(sum: number, p: any) => sum + Math.abs(parseFloat(p.amount) || 0),
 		0,
 	);
+	const changeAmount = Math.abs(parseFloat(doc.change_amount) || 0);
 
 	const creditSale =
 		doc.is_credit_sale === true ||
@@ -43,8 +45,10 @@ function computePaidAmount(doc: any) {
 		return 0;
 	}
 
-	const base = doc.paid_amount ?? doc.grand_total ?? 0;
-	return paymentsTotal || base;
+	const paidAmount = paymentsTotal
+		? Math.max(paymentsTotal - changeAmount, 0)
+		: Math.abs(parseFloat(doc.paid_amount ?? doc.grand_total ?? 0) || 0);
+	return sign * paidAmount;
 }
 
 function defaultOfflineHTML(invoice: any, terms = "") {

@@ -90,6 +90,40 @@ describe("usePaymentMethods", () => {
 		expect(invoiceDoc.value.payments[1].base_amount).toBe(150);
 	});
 
+	it("fills base payment amount with the invoice conversion rate", () => {
+		const invoiceDoc = ref<any>({
+			currency: "USD",
+			rounded_total: 100,
+			grand_total: 100,
+			conversion_rate: 280,
+			payments: [
+				{
+					mode_of_payment: "Cash",
+					type: "Cash",
+					amount: 0,
+					base_amount: 0,
+					default: 1,
+				},
+			],
+		});
+
+		const { set_full_amount } = usePaymentMethods({
+			invoiceDoc,
+			posProfile: ref({ currency: "PKR" }),
+			diffPayment: computed(() => 0),
+			getNetInvoiceAmount: () => 100,
+			stores: {
+				toastStore: { show: () => undefined },
+				uiStore: { freeze: () => undefined, unfreeze: () => undefined },
+			},
+		});
+
+		set_full_amount(invoiceDoc.value.payments[0]);
+
+		expect(invoiceDoc.value.payments[0].amount).toBe(100);
+		expect(invoiceDoc.value.payments[0].base_amount).toBe(28000);
+	});
+
 	it("does not set a negative remaining amount on regular sale overpayments", () => {
 		const invoiceDoc = ref<any>({
 			rounded_total: 120,

@@ -93,6 +93,8 @@
 								:pos-profile="pos_profile"
 								:context="context"
 								:selected-currency="selected_currency"
+								:selected-exchange-rate="selected_exchange_rate"
+								:selected-conversion-rate="selected_conversion_rate"
 								:hide-qty-decimals="hide_qty_decimals"
 								:show-rate-info="show_last_invoice_rate"
 								:get-item-rate-info="getItemRateInfo"
@@ -120,6 +122,8 @@
 								:context="context"
 								:pos-profile="pos_profile"
 								:selected-currency="selected_currency"
+								:selected-exchange-rate="selected_exchange_rate"
+								:selected-conversion-rate="selected_conversion_rate"
 								:hide-qty-decimals="hide_qty_decimals"
 								:show-rate-info="show_last_invoice_rate"
 								:currency-symbol="currencySymbol"
@@ -635,7 +639,7 @@ const add_item = async (item, optionsOrQty: any = {}) => {
 			selected_currency: selected_currency.value,
 			exchange_rate: selected_exchange_rate.value,
 			conversion_rate: selected_conversion_rate.value,
-			price_list_currency: item.original_currency || item.currency || pos_profile.value?.currency,
+			price_list_currency: item.original_currency || item.price_list_currency || pos_profile.value?.currency,
 			itemCurrencyUtils,
 			invoiceStore,
 			itemDetailFetcher,
@@ -789,7 +793,7 @@ onMounted(async () => {
 		applyCurrencyConversionToItem: (item) => {
 			itemCurrencyUtils.applyCurrencyConversionToItem(item, {
 				pos_profile: pos_profile.value,
-				price_list_currency: item?.original_currency || item?.currency || pos_profile.value?.currency,
+				price_list_currency: item?.original_currency || item?.price_list_currency || pos_profile.value?.currency,
 				selected_currency: selected_currency.value || pos_profile.value?.currency,
 				exchange_rate: selected_exchange_rate.value,
 				conversion_rate: selected_conversion_rate.value,

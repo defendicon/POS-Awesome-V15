@@ -12,6 +12,7 @@ import {
 	emptyScanAssignment,
 	type ScanAssignment,
 } from "./scanProcessor/scanAssignment";
+import { toCompanyCurrency } from "../../../utils/erpnextCurrency";
 // @ts-ignore
 import placeholderImage from "../../../components/pos/placeholder-image.png";
 
@@ -293,16 +294,15 @@ export function useScanProcessor(context: ScanProcessorContext) {
 		if (effectivePrice !== null && !Number.isNaN(effectivePrice)) {
 			const parsedPrice = parseFloat(String(effectivePrice));
 			if (!Number.isNaN(parsedPrice)) {
-				const selectedCurrency = context.selected_currency?.value;
-				const companyCurrency = pos_profile.value?.currency;
-				const conversionRate =
-					Number(context.conversion_rate?.value || 1) || 1;
-				const basePrice =
-					selectedCurrency &&
-					companyCurrency &&
-					selectedCurrency !== companyCurrency
-						? parsedPrice * conversionRate
-						: parsedPrice;
+				const basePrice = toCompanyCurrency(
+					{
+						pos_profile: pos_profile.value,
+						currency: context.selected_currency?.value,
+						selected_currency: context.selected_currency?.value,
+						conversion_rate: context.conversion_rate?.value,
+					},
+					parsedPrice,
+				);
 
 				newItem.rate = parsedPrice;
 				newItem.price_list_rate = parsedPrice;

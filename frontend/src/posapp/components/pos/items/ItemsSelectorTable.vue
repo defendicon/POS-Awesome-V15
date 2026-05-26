@@ -60,7 +60,13 @@
 						class="text-success"
 					>
 						{{ currencySymbol(selectedCurrency) }}
-						{{ formatCurrency(item.rate, selectedCurrency, ratePrecision(item.rate)) }}
+						{{
+							formatCurrency(
+								secondaryRate(item),
+								selectedCurrency,
+								ratePrecision(secondaryRate(item)),
+							)
+						}}
 					</div>
 				</div>
 				<div v-else>
@@ -107,6 +113,7 @@
 <script setup>
 import { ref } from "vue";
 import ItemRateInfoMenu from "./ItemRateInfoMenu.vue";
+import { priceListToSelectedCurrency } from "../../../utils/erpnextCurrency";
 
 const props = defineProps({
 	displayedItems: { type: Array, default: () => [] },
@@ -115,6 +122,8 @@ const props = defineProps({
 	context: { type: String, default: "pos" },
 	posProfile: { type: Object, default: () => ({}) },
 	selectedCurrency: { type: String, default: "" },
+	selectedExchangeRate: { type: Number, default: 1 },
+	selectedConversionRate: { type: Number, default: 1 },
 	hideQtyDecimals: { type: Boolean, default: false },
 	showRateInfo: { type: Boolean, default: true },
 	currencySymbol: { type: Function, required: true },
@@ -148,6 +157,26 @@ const formatActualQty = (value) => {
 	}
 	return props.formatNumber(numericQty, 4);
 };
+
+const priceListCurrency = (item) =>
+	item.original_currency ||
+	item.currency ||
+	item.price_list_currency ||
+	props.posProfile.currency;
+
+const primaryRate = (item) => item.original_rate ?? item.rate ?? 0;
+
+const secondaryRate = (item) =>
+	priceListToSelectedCurrency(
+		{
+			pos_profile: props.posProfile,
+			price_list_currency: priceListCurrency(item),
+			selected_currency: props.selectedCurrency || props.posProfile.currency,
+			exchange_rate: props.selectedExchangeRate,
+			conversion_rate: props.selectedConversionRate,
+		},
+		primaryRate(item),
+	);
 
 const tableRef = ref(null);
 

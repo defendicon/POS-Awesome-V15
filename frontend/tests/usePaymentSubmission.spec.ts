@@ -474,6 +474,66 @@ describe("usePaymentSubmission", () => {
 		);
 	});
 
+	it("computes base write-off amount with the invoice conversion rate", async () => {
+		const invoiceService = (
+			await import("../src/posapp/services/invoiceService")
+		).default;
+		(invoiceService.submitInvoice as any).mockResolvedValue({
+			name: "ACC-SINV-MC-WRITEOFF",
+			doctype: "Sales Invoice",
+			docstatus: 1,
+		});
+
+		const invoiceDoc = ref<any>({
+			name: "ACC-SINV-MC-WRITEOFF",
+			doctype: "Sales Invoice",
+			currency: "USD",
+			conversion_rate: 280,
+			is_return: 0,
+			items: [{ item_code: "ITEM-1", qty: 1 }],
+			payments: [{ mode_of_payment: "Cash", amount: 90, type: "Cash" }],
+			rounded_total: 100,
+			grand_total: 100,
+		});
+
+		const { submitInvoice } = usePaymentSubmission({
+			invoiceDoc,
+			posProfile: ref({
+				currency: "PKR",
+				posa_allow_submissions_in_background_job: 0,
+				create_pos_invoice_instead_of_sales_invoice: 0,
+			}),
+			stockSettings: ref({}),
+			invoiceType: ref("Invoice"),
+			formatFloat: (value) => Number(value || 0),
+			stores: {
+				toastStore: { show: vi.fn() },
+				uiStore: {
+					setLastInvoice: vi.fn(),
+					setLastStockAdjustment: vi.fn(),
+				},
+				customersStore: { setSelectedCustomer: vi.fn() },
+				invoiceStore: { invoiceDoc: invoiceDoc.value },
+			},
+			isCashback: ref(false),
+			paidChange: ref(0),
+			creditChange: ref(0),
+			redeemedCustomerCredit: ref(0),
+			customerCreditDict: ref([]),
+			diff_payment: ref(10),
+			is_write_off_change: ref(true),
+		});
+
+		await submitInvoice(false, {
+			onFinishNavigation: vi.fn(),
+		});
+
+		const [, submittedDoc] = (invoiceService.submitInvoice as any).mock
+			.calls[0];
+		expect(submittedDoc.write_off_amount).toBe(10);
+		expect(submittedDoc.base_write_off_amount).toBe(2800);
+	});
+
 	it("reuses the same client request id across repeated invoice submit attempts", async () => {
 		const invoiceService = (
 			await import("../src/posapp/services/invoiceService")

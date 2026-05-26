@@ -47,7 +47,7 @@
 							{{ currencySymbol(secondaryCurrency) }}
 						</span>
 						<span class="price-amount">
-							{{ formatCurrency(item.rate, secondaryCurrency, primaryPrecision) }}
+							{{ formatCurrency(secondaryRate, secondaryCurrency, secondaryPrecision) }}
 						</span>
 					</div>
 				</div>
@@ -72,12 +72,15 @@
 import { computed } from "vue";
 import placeholderImage from "../placeholder-image.png";
 import ItemRateInfoMenu from "./ItemRateInfoMenu.vue";
+import { priceListToSelectedCurrency } from "../../../utils/erpnextCurrency";
 
 const props = defineProps({
 	item: { type: Object, required: true },
 	posProfile: { type: Object, required: true },
 	context: { type: String, default: "pos" },
 	selectedCurrency: { type: String, default: "" },
+	selectedExchangeRate: { type: Number, default: 1 },
+	selectedConversionRate: { type: Number, default: 1 },
 	hideQtyDecimals: { type: Boolean, default: false },
 	showRateInfo: { type: Boolean, default: true },
 	getItemRateInfo: { type: Function, required: true },
@@ -117,6 +120,23 @@ const primaryRate = computed(() => {
 
 const primaryPrecision = computed(() => {
 	return props.ratePrecision(primaryRate.value);
+});
+
+const secondaryRate = computed(() => {
+	return priceListToSelectedCurrency(
+		{
+			pos_profile: props.posProfile,
+			price_list_currency: primaryCurrency.value,
+			selected_currency: props.selectedCurrency || props.posProfile.currency,
+			exchange_rate: props.selectedExchangeRate,
+			conversion_rate: props.selectedConversionRate,
+		},
+		primaryRate.value,
+	);
+});
+
+const secondaryPrecision = computed(() => {
+	return props.ratePrecision(secondaryRate.value);
 });
 
 const rateInfo = computed(() => props.getItemRateInfo(props.item));

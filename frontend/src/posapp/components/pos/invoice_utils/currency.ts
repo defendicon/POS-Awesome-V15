@@ -1,3 +1,10 @@
+import {
+	fromCompanyCurrency,
+	getCompanyCurrency,
+	getPlcConversionRate,
+	toCompanyCurrency,
+} from "../../../utils/erpnextCurrency";
+
 type InvoiceContext = any;
 
 /**
@@ -13,17 +20,11 @@ type InvoiceContext = any;
  */
 
 export function _toBaseCurrency(context: InvoiceContext, value: unknown) {
-	const rate = Number.parseFloat(context.conversion_rate || 1) || 1;
-	if (!rate || rate === 0) {
-		return Number.parseFloat(String(value ?? 0)) || 0;
-	}
-	return Number.parseFloat(String(value ?? 0)) * rate;
+	return toCompanyCurrency(context, value);
 }
 
 export function _fromBaseCurrency(context: InvoiceContext, value: unknown) {
-	const rate = Number.parseFloat(context.conversion_rate || 1) || 1;
-	const numeric = Number.parseFloat(String(value ?? 0)) || 0;
-	return rate ? numeric / rate : numeric;
+	return fromCompanyCurrency(context, value);
 }
 
 export function convert_amount(context: InvoiceContext, value: unknown) {
@@ -31,14 +32,12 @@ export function convert_amount(context: InvoiceContext, value: unknown) {
 }
 
 export function _getPlcConversionRate(context: InvoiceContext) {
-    const companyCurrency = (context.company && context.company.default_currency) || context.pos_profile.currency;
+    const companyCurrency = getCompanyCurrency(context);
     const priceListCurrency = context.price_list_currency || companyCurrency;
     if (priceListCurrency === companyCurrency) {
         return 1;
     }
-    const exchangeRate = Number.parseFloat(context.exchange_rate || 1) || 1;
-    const conversionRate = Number.parseFloat(context.conversion_rate || 1) || 1;
-    return exchangeRate * conversionRate;
+    return getPlcConversionRate(context);
 }
 
 export function _buildPriceListSnapshot(context: InvoiceContext, items: any[] = []) {

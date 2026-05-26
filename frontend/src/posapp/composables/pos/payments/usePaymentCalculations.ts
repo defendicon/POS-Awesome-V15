@@ -1,5 +1,6 @@
 import { computed, unref, type Ref } from "vue";
 import { formatUtils } from "../../../format";
+import { fromCompanyCurrency } from "../../../utils/erpnextCurrency";
 
 declare const window: any;
 
@@ -43,6 +44,11 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 			: parseFloat(String(val)) || 0;
 	};
 
+	const currencyContext = (doc = unref(invoiceDoc)) => ({
+		...(doc || {}),
+		pos_profile: unref(posProfile),
+	});
+
 	/**
 	 * Performance: normalize payment amounts once per reactive update.
 	 */
@@ -77,7 +83,7 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 
 		if (lAmount && doc) {
 			if (doc.currency && doc.currency !== profile.currency) {
-				total += flt(lAmount / (doc.conversion_rate || 1));
+				total += flt(fromCompanyCurrency(currencyContext(doc), lAmount));
 			} else {
 				total += flt(lAmount);
 			}
@@ -85,7 +91,7 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 
 		if (rCredit && doc) {
 			if (doc.currency && doc.currency !== profile.currency) {
-				total += flt(rCredit / (doc.conversion_rate || 1));
+				total += flt(fromCompanyCurrency(currencyContext(doc), rCredit));
 			} else {
 				total += flt(rCredit);
 			}
@@ -118,7 +124,7 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 		if (info?.loyalty_points && doc) {
 			amount = info.loyalty_points * (info.conversion_factor || 1);
 			if (doc.currency !== profile.currency) {
-				amount = flt(amount / (doc.conversion_rate || 1));
+				amount = flt(fromCompanyCurrency(currencyContext(doc), amount));
 			}
 		}
 		return amount;

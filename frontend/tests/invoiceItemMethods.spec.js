@@ -261,6 +261,27 @@ describe("invoiceItemMethods.get_invoice_doc currency conversions", () => {
 		expect(doc.base_total).toBeCloseTo(220);
 		expect(doc.base_grand_total).toBeCloseTo(220);
 	});
+
+	it("keeps base totals negative for multi-currency returns", () => {
+		const context = createInvoiceContext({
+			price_list_currency: "USD",
+			selected_currency: "USD",
+			exchange_rate: 1,
+			conversion_rate: 1.5,
+			Total: 100,
+			subtotal: 100,
+			invoiceType: "Return",
+			isReturnInvoice: true,
+			invoice_doc: { return_against: "ACC-SINV-0001" },
+		});
+
+		const doc = invoiceItemMethods.get_invoice_doc.call(context);
+
+		expect(doc.grand_total).toBeCloseTo(-100);
+		expect(doc.base_grand_total).toBeCloseTo(-150);
+		expect(doc.rounded_total).toBeCloseTo(-100);
+		expect(doc.base_rounded_total).toBeCloseTo(-150);
+	});
 });
 
 describe("invoiceItemMethods._applyPricingToLine", () => {

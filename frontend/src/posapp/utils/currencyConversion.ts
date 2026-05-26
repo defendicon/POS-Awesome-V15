@@ -1,9 +1,18 @@
 // Benchmark note: keep conversion helpers lightweight to avoid overhead in hot paths.
 
+import {
+	fromCompanyCurrency,
+	getCompanyCurrency as resolveCompanyCurrency,
+	toCompanyCurrency,
+} from "./erpnextCurrency";
+
 /**
  * Interface for the context required by currency conversion functions.
  */
 export interface CurrencyContext {
+	company?: {
+		default_currency?: string;
+	};
 	pos_profile?: {
 		currency?: string;
 	};
@@ -19,7 +28,7 @@ export interface CurrencyContext {
  */
 export const getCompanyCurrency = (
 	context: CurrencyContext,
-): string | undefined => context?.pos_profile?.currency;
+): string | undefined => resolveCompanyCurrency(context);
 
 /**
  * Gets the base currency from the context.
@@ -43,8 +52,7 @@ export const toBaseCurrency = (
 	if (amount == null || isCompanyCurrencySelected(context)) {
 		return amount;
 	}
-	const conversionRate = context.conversion_rate || 1;
-	return context.flt(amount * conversionRate, context.currency_precision);
+	return context.flt(toCompanyCurrency(context, amount), context.currency_precision);
 };
 
 /**
@@ -57,6 +65,5 @@ export const toSelectedCurrency = (
 	if (amount == null || isCompanyCurrencySelected(context)) {
 		return amount;
 	}
-	const conversionRate = context.conversion_rate || 1;
-	return context.flt(amount / conversionRate, context.currency_precision);
+	return context.flt(fromCompanyCurrency(context, amount), context.currency_precision);
 };

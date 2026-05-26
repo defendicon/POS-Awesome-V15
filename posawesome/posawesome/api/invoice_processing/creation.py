@@ -14,7 +14,7 @@ from posawesome.posawesome.api.invoice_processing.utils import (
     _resolve_effective_price_list,
     _build_invoice_remarks,
     _set_return_valid_upto,
-    get_latest_rate,
+    resolve_erpnext_currency_rates,
 )
 from posawesome.posawesome.api.invoice_processing.stock import (
     _strip_client_freebies_from_payload,
@@ -893,75 +893,75 @@ def update_invoice(data):
         invoice_doc.currency = selected_currency
     price_list_currency = price_list_currency or company_currency
 
-    conversion_rate = 1
-    exchange_rate_date = invoice_doc.posting_date
-    if invoice_doc.currency != company_currency:
-        conversion_rate, exchange_rate_date = get_latest_rate(
-            invoice_doc.currency,
-            company_currency,
-            cache=currency_cache,
+    rates = resolve_erpnext_currency_rates(
+        invoice_doc.currency,
+        price_list_currency,
+        company_currency,
+        invoice_doc.posting_date,
+        cache=currency_cache,
+    )
+    conversion_rate = rates["conversion_rate"]
+    plc_conversion_rate = rates["plc_conversion_rate"]
+    exchange_rate_date = rates["exchange_rate_date"]
+
+    if invoice_doc.currency != company_currency and not conversion_rate:
+        frappe.throw(
+            _(
+                "Unable to find exchange rate for {0} to {1}. Please create a Currency Exchange record manually"
+            ).format(invoice_doc.currency, company_currency)
         )
-        if not conversion_rate:
-            frappe.throw(
-                _(
-                    "Unable to find exchange rate for {0} to {1}. Please create a Currency Exchange record manually"
-                ).format(invoice_doc.currency, company_currency)
+    if price_list_currency != company_currency and not plc_conversion_rate:
+        frappe.throw(
+            _(
+                "Unable to find exchange rate for {0} to {1}. Please create a Currency Exchange record manually"
+            ).format(price_list_currency, company_currency)
+        )
+
+    invoice_doc.conversion_rate = conversion_rate
+    invoice_doc.plc_conversion_rate = plc_conversion_rate
+    invoice_doc.price_list_currency = price_list_currency
+
+    for item in invoice_doc.items:
+        if item.price_list_rate:
+            item.base_price_list_rate = flt(
+                item.price_list_rate * conversion_rate,
+                item.precision("base_price_list_rate"),
+            )
+        if item.rate:
+            item.base_rate = flt(item.rate * conversion_rate, item.precision("base_rate"))
+        if item.amount:
+            item.base_amount = flt(item.amount * conversion_rate, item.precision("base_amount"))
+        if item.discount_amount:
+            item.base_discount_amount = flt(
+                item.discount_amount * conversion_rate,
+                item.precision("base_discount_amount"),
             )
 
-        plc_conversion_rate = 1
-        if price_list_currency != invoice_doc.currency:
-            plc_conversion_rate, _ignored = get_latest_rate(
-                price_list_currency,
-                invoice_doc.currency,
-                cache=currency_cache,
-            )
-            if not plc_conversion_rate:
-                frappe.throw(
-                    _(
-                        "Unable to find exchange rate for {0} to {1}. Please create a Currency Exchange record manually"
-                    ).format(price_list_currency, invoice_doc.currency)
-                )
+    for payment in invoice_doc.payments:
+        payment.amount, payment.base_amount = _resolve_payment_amounts(payment, conversion_rate)
 
-        invoice_doc.conversion_rate = conversion_rate
-        invoice_doc.plc_conversion_rate = plc_conversion_rate
-        invoice_doc.price_list_currency = price_list_currency
+    invoice_doc.base_total = flt(flt(invoice_doc.total) * conversion_rate, invoice_doc.precision("base_total"))
+    invoice_doc.base_net_total = flt(
+        flt(invoice_doc.net_total) * conversion_rate,
+        invoice_doc.precision("base_net_total"),
+    )
+    invoice_doc.base_grand_total = flt(
+        flt(invoice_doc.grand_total) * conversion_rate,
+        invoice_doc.precision("base_grand_total"),
+    )
+    invoice_doc.base_rounded_total = flt(
+        flt(invoice_doc.rounded_total) * conversion_rate,
+        invoice_doc.precision("base_rounded_total"),
+    )
+    invoice_doc.base_discount_amount = flt(
+        flt(invoice_doc.discount_amount) * conversion_rate,
+        invoice_doc.precision("base_discount_amount"),
+    )
+    invoice_doc.base_in_words = money_in_words(invoice_doc.base_rounded_total, company_currency)
 
-        # Update rates and amounts for all items using multiplication
-        for item in invoice_doc.items:
-            if item.price_list_rate:
-                item.base_price_list_rate = flt(
-                    item.price_list_rate * (conversion_rate / plc_conversion_rate),
-                    item.precision("base_price_list_rate"),
-                )
-            if item.rate:
-                item.base_rate = flt(item.rate * conversion_rate, item.precision("base_rate"))
-            if item.amount:
-                item.base_amount = flt(item.amount * conversion_rate, item.precision("base_amount"))
-
-        # Update payment amounts
-        for payment in invoice_doc.payments:
-            payment.amount, payment.base_amount = _resolve_payment_amounts(payment, conversion_rate)
-
-        # Update invoice level amounts
-        invoice_doc.base_total = flt(invoice_doc.total * conversion_rate, invoice_doc.precision("base_total"))
-        invoice_doc.base_net_total = flt(
-            invoice_doc.net_total * conversion_rate,
-            invoice_doc.precision("base_net_total"),
-        )
-        invoice_doc.base_grand_total = flt(
-            invoice_doc.grand_total * conversion_rate,
-            invoice_doc.precision("base_grand_total"),
-        )
-        invoice_doc.base_rounded_total = flt(
-            invoice_doc.rounded_total * conversion_rate,
-            invoice_doc.precision("base_rounded_total"),
-        )
-        invoice_doc.base_in_words = money_in_words(invoice_doc.base_rounded_total, company_currency)
-
-        # Update data to be sent back to frontend
-        data["conversion_rate"] = conversion_rate
-        data["plc_conversion_rate"] = plc_conversion_rate
-        data["exchange_rate_date"] = exchange_rate_date
+    data["conversion_rate"] = conversion_rate
+    data["plc_conversion_rate"] = plc_conversion_rate
+    data["exchange_rate_date"] = exchange_rate_date
 
     inclusive = frappe.get_cached_value("POS Profile", invoice_doc.pos_profile, "posa_tax_inclusive")
     if invoice_doc.get("taxes"):

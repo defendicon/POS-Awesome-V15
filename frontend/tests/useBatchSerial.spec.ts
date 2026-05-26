@@ -174,6 +174,51 @@ describe("useBatchSerial.setBatchQty", () => {
 		expect(item.base_amount).toBe(24);
 	});
 
+	it("converts company-currency batch price to selected currency using invoice conversion rate", () => {
+		const { setBatchQty } = useBatchSerial();
+		const context: any = {
+			items: [],
+			pos_profile: { currency: "PKR" },
+			price_list_currency: "PKR",
+			selected_currency: "USD",
+			conversion_rate: 280,
+			exchange_rate: 1,
+			currency_precision: 2,
+			flt: (value: any) => Number(value),
+			forceUpdate: vi.fn(),
+		};
+
+		const item: any = {
+			item_code: "ITEM-BATCH-MC",
+			qty: 2,
+			has_batch_no: 1,
+			has_serial_no: 0,
+			rate: 15,
+			price_list_rate: 15,
+			base_rate: 4200,
+			base_price_list_rate: 4200,
+			batch_no_data: [
+				{
+					batch_no: "B-MC",
+					batch_qty: 8,
+					batch_price: 2800,
+					is_expired: false,
+				},
+			],
+		};
+
+		setBatchQty(item, null, false, context);
+
+		expect(item.batch_price).toBe(10);
+		expect(item.base_batch_price).toBe(2800);
+		expect(item.rate).toBe(10);
+		expect(item.price_list_rate).toBe(10);
+		expect(item.base_rate).toBe(2800);
+		expect(item.base_price_list_rate).toBe(2800);
+		expect(item.amount).toBe(20);
+		expect(item.base_amount).toBe(5600);
+	});
+
 	it("does not zero item totals when selected batch has no positive batch price", () => {
 		const { setBatchQty } = useBatchSerial();
 		const context: any = {

@@ -442,8 +442,8 @@ def get_closing_shift_overview(pos_opening_shift):
         )
         raw_amount = flt(entry.get("paid_amount") or 0)
         entry_rate = (
-            entry.get("target_exchange_rate")
-            or entry.get("source_exchange_rate")
+            entry.get("source_exchange_rate")
+            or entry.get("target_exchange_rate")
             or entry.get("exchange_rate")
         )
         raw_base_amount = get_base_value(
@@ -798,9 +798,9 @@ def get_payment_reconciliation_details(closing_shift_doc):
         currency = invoice_doc.get("currency") or company_currency
         conversion_rate = (
             invoice_doc.get("conversion_rate")
-            or invoice_doc.get("exchange_rate")
+            or invoice_doc.get("source_exchange_rate")
             or invoice_doc.get("target_exchange_rate")
-            or invoice_doc.get("plc_conversion_rate")
+            or invoice_doc.get("exchange_rate")
             or 1
         )
 
