@@ -940,21 +940,21 @@ def update_invoice(data):
     for payment in invoice_doc.payments:
         payment.amount, payment.base_amount = _resolve_payment_amounts(payment, conversion_rate)
 
-    invoice_doc.base_total = flt(invoice_doc.total * conversion_rate, invoice_doc.precision("base_total"))
+    invoice_doc.base_total = flt(flt(invoice_doc.total) * conversion_rate, invoice_doc.precision("base_total"))
     invoice_doc.base_net_total = flt(
-        invoice_doc.net_total * conversion_rate,
+        flt(invoice_doc.net_total) * conversion_rate,
         invoice_doc.precision("base_net_total"),
     )
     invoice_doc.base_grand_total = flt(
-        invoice_doc.grand_total * conversion_rate,
+        flt(invoice_doc.grand_total) * conversion_rate,
         invoice_doc.precision("base_grand_total"),
     )
     invoice_doc.base_rounded_total = flt(
-        invoice_doc.rounded_total * conversion_rate,
+        flt(invoice_doc.rounded_total) * conversion_rate,
         invoice_doc.precision("base_rounded_total"),
     )
     invoice_doc.base_discount_amount = flt(
-        invoice_doc.discount_amount * conversion_rate,
+        flt(invoice_doc.discount_amount) * conversion_rate,
         invoice_doc.precision("base_discount_amount"),
     )
     invoice_doc.base_in_words = money_in_words(invoice_doc.base_rounded_total, company_currency)
