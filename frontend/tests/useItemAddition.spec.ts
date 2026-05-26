@@ -139,6 +139,35 @@ describe("useItemAddition new line behavior", () => {
 		expect(invoiceStore.grossTotal).toBe(20);
 	});
 
+	it("falls back to numeric rates when incoming base rates are null", async () => {
+		const api = useItemAddition();
+		const context = {
+			...createContext(false),
+			selected_currency: "USD",
+			conversion_rate: 280,
+			currency_precision: 2,
+			flt: (value: any) => Number(value),
+		};
+		context.pos_profile.currency = "PKR";
+
+		const item = {
+			...createItem(),
+			rate: 0.04,
+			price_list_rate: 0.04,
+			base_rate: null,
+			base_price_list_rate: null,
+		};
+
+		await api.prepareItemForCart(item, 1, context);
+		await api.addItem(item, context);
+
+		expect(context.items).toHaveLength(1);
+		expect(context.items[0].base_rate).toBeCloseTo(11.2);
+		expect(context.items[0].base_price_list_rate).toBeCloseTo(11.2);
+		expect(context.items[0].original_base_rate).toBeCloseTo(11.2);
+		expect(context.items[0].original_base_price_list_rate).toBeCloseTo(11.2);
+	});
+
 	it("resolves batched merge when invoice store lacks updateItemWithTotals", async () => {
 		const api = useItemAddition();
 		const context = createContext(false) as any;

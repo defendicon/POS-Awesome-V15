@@ -54,22 +54,16 @@ export function useItemCreation() {
 		if (selectedCurrency !== companyCurrency) {
 			// Store original base currency values (Selected -> Company)
 			new_item.base_price_list_rate =
-				item.base_price_list_rate !== undefined
-					? item.base_price_list_rate
-					: toCompanyCurrency(context, item.rate);
+				item.base_price_list_rate ?? toCompanyCurrency(context, item.rate);
 			new_item.base_rate =
-				item.base_rate !== undefined
-					? item.base_rate
-					: toCompanyCurrency(context, item.rate);
+				item.base_rate ?? toCompanyCurrency(context, item.rate);
 			new_item.base_discount_amount = 0;
 		} else {
 			// In base currency, base rates = displayed rates
 			new_item.base_price_list_rate =
-				item.base_price_list_rate !== undefined
-					? item.base_price_list_rate
-					: item.rate;
+				item.base_price_list_rate ?? item.rate;
 			new_item.base_rate =
-				item.base_rate !== undefined ? item.base_rate : item.rate;
+				item.base_rate ?? item.rate;
 			new_item.base_discount_amount = 0;
 		}
 
@@ -101,11 +95,11 @@ export function useItemCreation() {
 		// Baseline for UOM recalculations (ensure CF is finalized first)
 		const initialCF = new_item.conversion_factor || 1;
 		new_item.original_base_rate =
-			new_item.base_rate !== undefined
+			new_item.base_rate != null
 				? new_item.base_rate / initialCF
 				: 0;
 		new_item.original_base_price_list_rate =
-			new_item.base_price_list_rate !== undefined
+			new_item.base_price_list_rate != null
 				? new_item.base_price_list_rate / initialCF
 				: new_item.original_base_rate;
 
