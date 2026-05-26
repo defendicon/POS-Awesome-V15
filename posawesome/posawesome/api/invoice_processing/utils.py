@@ -175,8 +175,8 @@ def resolve_erpnext_currency_rates(
         )
 
     return {
-        "conversion_rate": flt(conversion_rate or 1),
-        "plc_conversion_rate": flt(plc_conversion_rate or 1),
+        "conversion_rate": flt(conversion_rate) if conversion_rate else None,
+        "plc_conversion_rate": flt(plc_conversion_rate) if plc_conversion_rate else None,
         "price_list_currency": price_list_currency,
         "exchange_rate_date": exchange_rate_date,
     }
