@@ -1,6 +1,7 @@
 import frappe
 from frappe.utils import cint, cstr, flt
 from typing import Any, Dict, Optional
+from posawesome.posawesome.api.performance import pos_perf_endpoint
 
 
 def _get_scale_barcode_settings():
@@ -387,6 +388,7 @@ def build_scale_barcode(
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.items.barcode_lookup", source="server")
 def get_items_from_barcode(selling_price_list, currency, barcode):
     scale_data = _parse_scale_barcode_data(barcode)
     item_code = None

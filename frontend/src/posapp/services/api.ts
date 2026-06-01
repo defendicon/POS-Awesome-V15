@@ -1,3 +1,10 @@
+import {
+	bucketCount,
+	startPerfMeasure,
+	type PerfMetricName,
+	type PerfTags,
+} from "../utils/perf";
+
 export interface CallOptions {
 	freeze?: boolean;
 	freeze_message?: string;
@@ -39,6 +46,61 @@ export type ApiEnvelope<T = any> =
 	  };
 
 const DEFAULT_TIMEOUT_MS = 30_000;
+
+const METHOD_METRICS: Array<[string, PerfMetricName]> = [
+	["get_active_pos_profile", "pos.boot.profile_load"],
+	["get_customer_names", "pos.customers.remote_search"],
+	["get_customer_info", "pos.customers.select"],
+	["get_customer_balance", "pos.customers.select"],
+	["get_items_from_barcode", "pos.items.barcode_lookup"],
+	["get_delta_items", "pos.items.delta_sync"],
+	["get_items", "pos.items.remote_search"],
+	["get_items_details", "pos.items.price_refresh"],
+	["update_price_list_rate", "pos.items.price_refresh"],
+	["get_active_pricing_rules", "pos.pricing.rules_load"],
+	["reconcile_line_prices", "pos.pricing.calculate_cart"],
+	["sync_items", "pos.items.delta_sync"],
+	["sync_customers", "pos.customers.delta_sync"],
+	["sync_payment_method_currencies", "pos.boot.payment_methods_load"],
+	["sync_currencies", "pos.boot.currency_load"],
+	["submit_invoice", "pos.payment.submit"],
+	["create_sales_invoice", "pos.payment.submit"],
+	["create_payment", "pos.payment.submit"],
+];
+
+function methodMetricName(method: string): PerfMetricName {
+	const match = METHOD_METRICS.find(([needle]) => method.includes(needle));
+	return match?.[1] || (`pos.api.${method.split(".").slice(-1)[0]}` as PerfMetricName);
+}
+
+function countPayload(value: unknown): number | null {
+	if (Array.isArray(value)) return value.length;
+	if (value && typeof value === "object") {
+		const record = value as Record<string, any>;
+		if (Array.isArray(record.data)) return record.data.length;
+		if (Array.isArray(record.items)) return record.items.length;
+		if (Array.isArray(record.customers)) return record.customers.length;
+		if (Array.isArray(record.changes)) return record.changes.length;
+		if (Array.isArray(record.updates)) return record.updates.length;
+	}
+	return null;
+}
+
+function safeMethodTags(method: string, args: Record<string, any>): PerfTags {
+	const tags: PerfTags = {
+		method: method.split(".").slice(-2).join("."),
+		source: "server",
+		online:
+			typeof navigator === "undefined" ? true : Boolean(navigator.onLine),
+	};
+	if (args?.modified_after || args?.watermark || args?.since) {
+		tags.source = "server_delta";
+	}
+	if (args?.limit || args?.limit_page_length) {
+		tags.limit_bucket = bucketCount(args.limit || args.limit_page_length);
+	}
+	return tags;
+}
 
 export class ApiEnvelopeError<T = any> extends Error {
 	envelope: ApiEnvelope<T>;
@@ -318,6 +380,7 @@ const api = {
 		args: Record<string, any> = {},
 		options: CallOptions = {},
 	): Promise<ApiEnvelope<T>> {
+		const metric = startPerfMeasure(methodMetricName(method), safeMethodTags(method, args));
 		const requestId = String(args.request_id || generateRequestId());
 		const timeoutMs = Math.max(
 			1,
@@ -339,6 +402,12 @@ const api = {
 					return;
 				}
 				settled = true;
+				const count = countPayload(envelope.ok ? envelope.data : null);
+				metric.finish(envelope.ok ? "success" : "failure", {
+					result_count_bucket: count === null ? "unknown" : bucketCount(count),
+					retryable: envelope.ok ? false : envelope.error.retryable,
+					error_code: envelope.ok ? null : envelope.error.code,
+				});
 				if (timeoutHandle) {
 					clearTimeout(timeoutHandle);
 					timeoutHandle = null;

@@ -40,9 +40,11 @@ from posawesome.posawesome.api.invoice_processing.returns import (
 from posawesome.posawesome.api.invoice_processing.payment import _create_change_payment_entries
 from posawesome.posawesome.api.invoice_processing.data import get_last_invoice_rates
 from posawesome.posawesome.api.utils import log_perf_event
+from posawesome.posawesome.api.performance import pos_perf_endpoint, pos_perf_query
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.payment.screen_open", source="server")
 def get_draft_invoices(
     pos_opening_shift=None,
     doctype="Sales Invoice",
@@ -75,24 +77,25 @@ def get_draft_invoices(
     if frappe.db.has_column(doctype, "posa_is_printed"):
         filters["posa_is_printed"] = 0
 
-    invoices_list = frappe.get_list(
-        doctype,
-        filters=filters,
-        fields=[
-            "name",
-            "customer",
-            "customer_name",
-            "posting_date",
-            "posting_time",
-            "grand_total",
-            "currency",
-            "pos_profile",
-            "owner",
-            "modified_by",
-        ],
-        limit_page_length=limit_page_length,
-        order_by="modified desc",
-    )
+    with pos_perf_query("pos.payment.screen_open.query", source="database"):
+        invoices_list = frappe.get_list(
+            doctype,
+            filters=filters,
+            fields=[
+                "name",
+                "customer",
+                "customer_name",
+                "posting_date",
+                "posting_time",
+                "grand_total",
+                "currency",
+                "pos_profile",
+                "owner",
+                "modified_by",
+            ],
+            limit_page_length=limit_page_length,
+            order_by="modified desc",
+        )
     for invoice in invoices_list:
         invoice["doctype"] = doctype
     log_perf_event(
@@ -105,6 +108,7 @@ def get_draft_invoices(
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.payment.screen_open", source="server")
 def get_draft_invoice_doc(invoice_name, doctype="Sales Invoice"):
     started_at = time.perf_counter()
     doc = frappe.get_cached_doc(doctype, invoice_name)
@@ -140,6 +144,7 @@ def delete_invoice(invoice):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.currency.exchange_rate_load", source="server")
 def fetch_exchange_rate_pair(from_currency, to_currency):
     """Return exchange rate payload expected by POS multi-currency UI."""
 
@@ -162,6 +167,7 @@ def fetch_exchange_rate_pair(from_currency, to_currency):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.payment.submit", source="server")
 def create_sales_invoice_from_order(sales_order):
     """Backward-compatible facade for legacy frontend method path."""
 
@@ -191,6 +197,7 @@ def delete_sales_invoice(sales_invoice):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.payment.submit", source="server")
 def update_invoice_from_order(data):
     """Backward-compatible facade used by order-to-invoice flow."""
 

@@ -1,4 +1,5 @@
 import frappe
+from posawesome.posawesome.api.performance import pos_perf_endpoint
 
 from posawesome.posawesome.api.item_processing.stock import get_bulk_stock_availability
 from posawesome.posawesome.api.offline_sync.common import (
@@ -67,6 +68,7 @@ def _collect_stock_rows(profile, watermark, start_after, limit):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.realtime.delta_applied", source="server")
 def sync_stock(
     pos_profile=None,
     watermark=None,

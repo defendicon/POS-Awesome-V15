@@ -1,4 +1,5 @@
 import { checkDbHealth, db, initPromise, memory } from "./db";
+import { startPerfMeasure } from "../posapp/utils/perf";
 import {
 	ensureOfflineInvoiceRequest,
 	ensurePaymentClientRequestId,
@@ -382,8 +383,21 @@ export async function enqueueWriteQueueEntry(
 	payload: AnyRecord,
 	options: { idempotencyKey?: string } = {},
 ) {
-	await ensureOfflineQueueReady();
-	return enqueueWriteQueueEntryInternal(entityType, payload, options);
+	const metric = startPerfMeasure("pos.offline.outbox_enqueue", {
+		entity_type: entityType,
+		source: "local",
+	});
+	try {
+		await ensureOfflineQueueReady();
+		const result = await enqueueWriteQueueEntryInternal(entityType, payload, options);
+		metric.finish("success", {
+			queue_size_bucket: String(getQueuedPayloadCount(entityType)),
+		});
+		return result;
+	} catch (error) {
+		metric.fail(error, { entity_type: entityType });
+		throw error;
+	}
 }
 
 export async function deleteWriteQueueEntry(

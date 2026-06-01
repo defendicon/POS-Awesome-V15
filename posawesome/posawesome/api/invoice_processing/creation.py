@@ -39,6 +39,7 @@ import json
 import hashlib
 from frappe.utils import money_in_words
 from frappe.utils.background_jobs import enqueue
+from posawesome.posawesome.api.performance import pos_perf_endpoint
 
 
 LEDGER_DOCTYPE = "POS Invoice Submission Ledger"
@@ -761,6 +762,7 @@ def _normalize_return_payment_rows(invoice_doc, conversion_rate=1):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.payment.submit", source="server")
 def update_invoice(data):
     currency_cache = {}
     data = json.loads(data)
@@ -987,6 +989,7 @@ def update_invoice(data):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.payment.submit", source="server")
 def submit_invoice(invoice, data, submit_in_background=False):
     data = json.loads(data)
     invoice = json.loads(invoice)
@@ -1343,6 +1346,7 @@ def submit_in_background_job(kwargs):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.offline.conflict_detected", source="server")
 def repair_invoice_submission(client_request_id, company, pos_profile, document_type="Sales Invoice"):
     """Reconcile an incomplete durable submission ledger row without creating a new invoice."""
 
@@ -1418,6 +1422,7 @@ def repair_invoice_submission(client_request_id, company, pos_profile, document_
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.pricing.calculate_cart", source="server")
 def validate_cart_items(items, pos_profile=None):
     """Validate cart items for available stock.
 

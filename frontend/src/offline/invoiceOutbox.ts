@@ -1,4 +1,5 @@
 import { checkDbHealth, db, initPromise, memory, persist, safeBulkPut } from "./db";
+import { bucketCount, startPerfMeasure } from "../posapp/utils/perf";
 
 type AnyRecord = Record<string, any>;
 
@@ -86,42 +87,53 @@ function getClientRequestId(entry: AnyRecord) {
 }
 
 export async function enqueueInvoiceOutboxEntry(entry: AnyRecord) {
-	await ensureOutboxReady();
-	const cleanEntry = cloneSerializable(entry);
-	const clientRequestId = getClientRequestId(cleanEntry);
-	if (!clientRequestId) {
-		throw new Error("Invoice outbox entry requires a client_request_id");
-	}
-
-	const table = db.table(TABLE);
-	return db.transaction("rw", table, async () => {
-		const existing = (await table
-			.where("client_request_id")
-			.equals(clientRequestId)
-			.first()) as InvoiceOutboxEntry | undefined;
-		if (existing) {
-			return existing;
+	const metric = startPerfMeasure("pos.offline.outbox_enqueue", {
+		entity_type: "invoice",
+		source: "local",
+	});
+	try {
+		await ensureOutboxReady();
+		const cleanEntry = cloneSerializable(entry);
+		const clientRequestId = getClientRequestId(cleanEntry);
+		if (!clientRequestId) {
+			throw new Error("Invoice outbox entry requires a client_request_id");
 		}
 
-		const timestamp = nowIso();
-		const outboxEntry: InvoiceOutboxEntry = {
-			client_request_id: clientRequestId,
-			resource: "invoice_outbox",
-			status: "pending",
-			invoice: cleanEntry.invoice,
-			data: cleanEntry.data || {},
-			created_at: timestamp,
-			updated_at: timestamp,
-			next_retry_at: null,
-			nextAttemptAt: null,
-			retry_count: 0,
-			last_error: null,
-			invoice_name: null,
-			acknowledged_at: null,
-		};
-		const outboxId = await table.add(outboxEntry);
-		return { ...outboxEntry, outbox_id: outboxId };
-	});
+		const table = db.table(TABLE);
+		const result = await db.transaction("rw", table, async () => {
+			const existing = (await table
+				.where("client_request_id")
+				.equals(clientRequestId)
+				.first()) as InvoiceOutboxEntry | undefined;
+			if (existing) {
+				return existing;
+			}
+
+			const timestamp = nowIso();
+			const outboxEntry: InvoiceOutboxEntry = {
+				client_request_id: clientRequestId,
+				resource: "invoice_outbox",
+				status: "pending",
+				invoice: cleanEntry.invoice,
+				data: cleanEntry.data || {},
+				created_at: timestamp,
+				updated_at: timestamp,
+				next_retry_at: null,
+				nextAttemptAt: null,
+				retry_count: 0,
+				last_error: null,
+				invoice_name: null,
+				acknowledged_at: null,
+			};
+			const outboxId = await table.add(outboxEntry);
+			return { ...outboxEntry, outbox_id: outboxId };
+		});
+		metric.finish("success");
+		return result;
+	} catch (error) {
+		metric.fail(error);
+		throw error;
+	}
 }
 
 export async function getInvoiceOutboxRows(
@@ -197,10 +209,13 @@ function markOutboxFailed(row: InvoiceOutboxEntry, error: unknown): InvoiceOutbo
 
 export async function syncInvoiceOutboxResource(
 	callOfflineSyncMethod: (
-		method: string,
-		args?: Record<string, any>,
+		_method: string,
+		_args?: Record<string, any>,
 	) => Promise<any>,
 ) {
+	const metric = startPerfMeasure("pos.offline.sync_start", {
+		resource: "invoice_outbox",
+	});
 	await ensureOutboxReady();
 	const rows = await getInvoiceOutboxRows();
 	let acknowledged = 0;
@@ -220,6 +235,10 @@ export async function syncInvoiceOutboxResource(
 	const finalRows: InvoiceOutboxEntry[] = [];
 
 	for (const claimed of claimedRows) {
+		const mutationMetric = startPerfMeasure("pos.offline.sync_mutation", {
+			resource: "invoice_outbox",
+			retry_count_bucket: bucketCount(claimed.retry_count || 0),
+		});
 		try {
 			const response = await callOfflineSyncMethod(
 				"posawesome.posawesome.api.offline_sync.invoices.submit_invoice_outbox_entry",
@@ -232,12 +251,14 @@ export async function syncInvoiceOutboxResource(
 			if (response?.acknowledged || response?.invoice || response?.name) {
 				finalRows.push(markOutboxAcknowledged(claimed, response || {}));
 				acknowledged += 1;
+				mutationMetric.finish("success");
 			} else {
 				throw new Error("Invoice outbox response was not acknowledged");
 			}
 		} catch (error) {
 			failed += 1;
 			finalRows.push(markOutboxFailed(claimed, error));
+			mutationMetric.fail(error);
 		}
 	}
 	if (finalRows.length) {
@@ -245,6 +266,16 @@ export async function syncInvoiceOutboxResource(
 	}
 
 	const pending = await getPendingInvoiceOutboxCount();
+	metric.finish(failed ? "failure" : "success", {
+		mutation_count_bucket: bucketCount(claimedRows.length),
+		pending_count_bucket: bucketCount(pending),
+	});
+	startPerfMeasure("pos.offline.sync_complete", {
+		resource: "invoice_outbox",
+	}).finish(failed ? "failure" : "success", {
+		acknowledged_count_bucket: bucketCount(acknowledged),
+		failed_count_bucket: bucketCount(failed),
+	});
 	return {
 		resourceId: "invoice_outbox",
 		status: failed ? "error" : "fresh",

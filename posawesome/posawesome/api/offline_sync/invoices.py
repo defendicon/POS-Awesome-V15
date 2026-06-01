@@ -1,6 +1,7 @@
 import json
 
 import frappe
+from posawesome.posawesome.api.performance import pos_perf_endpoint
 
 from posawesome.posawesome.api.invoice_processing.creation import (
     repair_invoice_submission,
@@ -27,6 +28,7 @@ def _invoice_identity(response):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.offline.sync_mutation", source="server")
 def submit_invoice_outbox_entry(client_request_id, invoice, data=None):
     client_request_id = (client_request_id or "").strip()
     if not client_request_id:
@@ -55,6 +57,7 @@ def submit_invoice_outbox_entry(client_request_id, invoice, data=None):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.offline.conflict_detected", source="server")
 def reconcile_invoice_outbox_entry(
     client_request_id,
     company,
@@ -78,6 +81,7 @@ def reconcile_invoice_outbox_entry(
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.offline.conflict_detected", source="server")
 def repair_invoice_outbox_entry(
     client_request_id,
     company,

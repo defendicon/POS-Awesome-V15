@@ -349,7 +349,7 @@ export function useItemAddition() {
 
 	// Add item to invoice
 	const addItem = withPerf(
-		"pos:add-item",
+		"pos.items.add_to_cart",
 		async function addItemMeasured(item, context) {
 			const currentInvoiceType =
 				typeof context?.invoiceType === "string"

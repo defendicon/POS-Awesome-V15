@@ -1,5 +1,5 @@
 import { ref } from "vue";
-import { perfMarkStart, perfMarkEnd } from "../../../utils/perf.js";
+import { bucketCount, startPerfMeasure } from "../../../utils/perf.js";
 
 declare const frappe: any;
 
@@ -64,9 +64,13 @@ export function useItemSearch() {
 		searchTerm: string,
 		itemGroup: string,
 	) => {
-		const mark = perfMarkStart("pos:search-filter");
+		const metric = startPerfMeasure("pos.items.local_search", {
+			source: "local",
+			item_count_bucket: bucketCount(items?.length || 0),
+			search_length_bucket: bucketCount((searchTerm || "").trim().length),
+		});
 		if (!items || !items.length) {
-			perfMarkEnd("pos:search-filter", mark);
+			metric.finish("success", { item_result_count: "0" });
 			return [];
 		}
 
@@ -136,7 +140,10 @@ export function useItemSearch() {
 			});
 		}
 
-		perfMarkEnd("pos:search-filter", mark);
+		metric.finish("success", {
+			item_result_count: bucketCount(filtered.length),
+			cache_hit: false,
+		});
 		return filtered;
 	};
 
@@ -193,7 +200,15 @@ export function useItemSearch() {
 			limit = 50,
 		} = {},
 	) => {
-		if (!items || !items.length) return [];
+		const metric = startPerfMeasure("pos.items.local_search", {
+			source: "local",
+			item_count_bucket: bucketCount(items?.length || 0),
+			limit_bucket: bucketCount(limit),
+		});
+		if (!items || !items.length) {
+			metric.finish("success", { item_result_count: "0" });
+			return [];
+		}
 
 		const term = (searchTerm || "").trim().toLowerCase();
 		const needsLocalSearch = term && term.length >= 3;
@@ -205,7 +220,12 @@ export function useItemSearch() {
 			!hideVariants &&
 			!onlyBarcode
 		) {
-			return items.slice(0, limit);
+			const sliced = items.slice(0, limit);
+			metric.finish("success", {
+				item_result_count: bucketCount(sliced.length),
+				cache_hit: true,
+			});
+			return sliced;
 		}
 
 		let searchTerms: string[] | null = null;
@@ -286,6 +306,10 @@ export function useItemSearch() {
 			}
 		}
 
+		metric.finish("success", {
+			item_result_count: bucketCount(result.length),
+			cache_hit: false,
+		});
 		return result;
 	};
 

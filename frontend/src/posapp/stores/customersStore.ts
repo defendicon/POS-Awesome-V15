@@ -14,6 +14,7 @@ import {
 	normalizeCustomerSearchTerm,
 } from "./customers/customerSearch";
 import { resetCustomerLoadingCoordinator } from "../modules/customers/customerLoadingCoordinator";
+import { bucketCount, startPerfMeasure } from "../utils/perf";
 // @ts-ignore
 import {
 	db,
@@ -338,6 +339,11 @@ export const useCustomersStore = defineStore("customers", () => {
 	}
 
 	async function performSearch({ append = false } = {}) {
+		const metric = startPerfMeasure("pos.customers.local_search", {
+			source: "local",
+			append,
+			customer_count_bucket: bucketCount(customers.value.length),
+		});
 		await ensureDatabase();
 
 		let collection = db.table("customers");
@@ -365,6 +371,9 @@ export const useCustomersStore = defineStore("customers", () => {
 			page.value += 1;
 		}
 
+		metric.finish("success", {
+			customer_result_count: bucketCount(results.length),
+		});
 		return results.length;
 	}
 
@@ -408,9 +417,15 @@ export const useCustomersStore = defineStore("customers", () => {
 		modifiedAfter: string | null,
 		limit: number,
 	): Promise<CustomerSummary[]> {
+		const metric = startPerfMeasure("pos.customers.remote_search", {
+			source: "server",
+			limit_bucket: bucketCount(limit),
+			cache_hit: false,
+		});
 		const serializedProfile = getSerializedProfile(posProfile.value);
 		return new Promise((resolve, reject) => {
 			if (!serializedProfile) {
+				metric.finish("success", { customer_result_count: "0" });
 				resolve([]);
 				return;
 			}
@@ -422,9 +437,16 @@ export const useCustomersStore = defineStore("customers", () => {
 					limit,
 					start_after: startAfter,
 				},
-				callback: (r: any) => resolve(r.message || []),
+				callback: (r: any) => {
+					const rows = r.message || [];
+					metric.finish("success", {
+						customer_result_count: bucketCount(rows.length),
+					});
+					resolve(rows);
+				},
 				error: (err: any) => {
 					console.error("Failed to fetch customers", err);
+					metric.fail(err);
 					reject(err);
 				},
 			});
@@ -576,8 +598,12 @@ export const useCustomersStore = defineStore("customers", () => {
 	}
 
 	async function load_customer_names_internal() {
+		const metric = startPerfMeasure("pos.customers.initial_load", {
+			source: "local",
+		});
 		if (!posProfile.value) {
 			console.debug("Customer fetch skipped: POS Profile not ready");
+			metric.finish("success", { skipped: true });
 			return;
 		}
 		await ensureCustomerScopeIsolation();
@@ -598,6 +624,10 @@ export const useCustomersStore = defineStore("customers", () => {
 			if (!nextCustomerStart.value) {
 				logFinalLoadedCustomerCount();
 			}
+			metric.finish("success", {
+				cache_hit: true,
+				customer_result_count: bucketCount(localCount),
+			});
 			return;
 		}
 
@@ -663,10 +693,17 @@ export const useCustomersStore = defineStore("customers", () => {
 			customersLoaded.value = true;
 		} catch (err) {
 			console.error("Failed to fetch customers:", err);
+			metric.fail(err);
 		} finally {
 			loadingCustomers.value = false;
 			customersLoaded.value = true;
 			await searchCustomers(searchTerm.value);
+			if (!localCount) {
+				metric.finish("success", {
+					cache_hit: false,
+					customer_result_count: bucketCount(loadedCustomerCount.value),
+				});
+			}
 		}
 	}
 

@@ -13,6 +13,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 from frappe.utils.caching import redis_cache
 from .utils import assert_pos_profile_write_allowed, fetch_sales_person_names
 from .stored_value import get_stored_value_summary
+from .performance import pos_perf_endpoint, pos_perf_query
 
 
 def _load_json_arg(value):
@@ -64,6 +65,7 @@ def get_customer_group_condition(pos_profile):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.customers.select", source="server")
 def get_customer_balance(customer, company=None):
     if not customer:
         return {"balance": 0, "customer_name": None, "currency": None}
@@ -104,6 +106,7 @@ def get_customer_balance(customer, company=None):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.customers.remote_search", source="server")
 def get_customer_names(pos_profile, limit=None, offset=None, start_after=None, modified_after=None):
     _pos_profile = json.loads(pos_profile)
     ttl = _pos_profile.get("posa_server_cache_duration")
@@ -132,26 +135,27 @@ def get_customer_names(pos_profile, limit=None, offset=None, start_after=None, m
         if start_after:
             filters["name"] = [">", start_after]
 
-        customers = frappe.get_all(
-            "Customer",
-            filters=filters,
-            fields=[
-                "name",
-                "modified",
-                "mobile_no",
-                "email_id",
-                "tax_id",
-                "customer_name",
-                "loyalty_program",
-                "default_price_list",
-                "customer_group",
-                "territory",
-                "primary_address",
-            ],
-            order_by="name",
-            limit_start=None if start_after else offset,
-            limit_page_length=limit,
-        )
+        with pos_perf_query("pos.customers.remote_search.query", source="database"):
+            customers = frappe.get_all(
+                "Customer",
+                filters=filters,
+                fields=[
+                    "name",
+                    "modified",
+                    "mobile_no",
+                    "email_id",
+                    "tax_id",
+                    "customer_name",
+                    "loyalty_program",
+                    "default_price_list",
+                    "customer_group",
+                    "territory",
+                    "primary_address",
+                ],
+                order_by="name",
+                limit_start=None if start_after else offset,
+                limit_page_length=limit,
+            )
         return customers
 
     if _pos_profile.get("posa_use_server_cache") and not (limit or offset or start_after or modified_after):
@@ -161,6 +165,7 @@ def get_customer_names(pos_profile, limit=None, offset=None, start_after=None, m
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.customers.initial_load", source="server")
 def get_customers_count(pos_profile):
     pos_profile = json.loads(pos_profile)
     filters = {"disabled": 0}
@@ -171,6 +176,7 @@ def get_customers_count(pos_profile):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.customers.select", source="server")
 def get_customer_info(customer=None, company=None):
     customer = cstr(customer or "").strip()
     if not customer:
@@ -260,6 +266,7 @@ def get_customer_info(customer=None, company=None):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.offline.outbox_enqueue", source="server")
 def create_customer(
     customer_name,
     company,

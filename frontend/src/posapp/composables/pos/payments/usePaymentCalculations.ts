@@ -1,5 +1,6 @@
 import { computed, unref, type Ref } from "vue";
 import { formatUtils } from "../../../format";
+import { bucketCount, startPerfMeasure } from "../../../utils/perf";
 
 declare const window: any;
 
@@ -47,6 +48,9 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 	 * Performance: normalize payment amounts once per reactive update.
 	 */
 	const paymentAmountSummary = computed(() => {
+		const metric = startPerfMeasure("pos.payment.recalculate", {
+			source: "local",
+		});
 		const doc = unref(invoiceDoc);
 		const payments = Array.isArray(doc?.payments) ? doc.payments : [];
 		let total = 0;
@@ -58,17 +62,24 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 			total += amount;
 		});
 
-		return {
+		const result = {
 			payments,
 			amountByPayment,
 			total: flt(total),
 		};
+		metric.finish("success", {
+			payment_count_bucket: bucketCount(payments.length),
+		});
+		return result;
 	});
 
 	/**
 	 * Calculate total payments including all methods, loyalty points, and customer credit.
 	 */
 	const total_payments = computed(() => {
+		const metric = startPerfMeasure("pos.currency.payment_conversion", {
+			source: "local",
+		});
 		let total = paymentAmountSummary.value.total;
 		const doc = unref(invoiceDoc);
 		const profile = unref(posProfile);
@@ -100,7 +111,11 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 			: 0;
 		total += giftCardTotal;
 
-		return flt(total);
+		const result = flt(total);
+		metric.finish("success", {
+			multi_currency: Boolean(doc && profile && doc.currency !== profile.currency),
+		});
+		return result;
 	});
 
 	const available_customer_credit = computed(() => {

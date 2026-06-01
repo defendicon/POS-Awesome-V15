@@ -3,6 +3,7 @@ import {
 	getSyncResourcesForTrigger,
 } from "./resourceRegistry";
 import { setSyncResourceState } from "./syncState";
+import { bucketCount, startPerfMeasure } from "../../posapp/utils/perf";
 import type {
 	SyncLifecycleState,
 	SyncResourceDefinition,
@@ -13,8 +14,8 @@ import type {
 } from "./types";
 
 type RunResource = (
-	resource: SyncResourceDefinition,
-	trigger: SyncTrigger,
+	_resource: SyncResourceDefinition,
+	_trigger: SyncTrigger,
 ) => Promise<
 	| void
 	| (Partial<SyncResourceState> & {
@@ -26,7 +27,7 @@ type SyncCoordinatorOptions = {
 	concurrency?: number;
 	resources?: SyncResourceDefinition[];
 	runResource?: RunResource;
-	onStateChange?: (states: SyncResourceState[]) => void;
+	onStateChange?: (_states: SyncResourceState[]) => void;
 	initialBackoffMs?: number;
 	maxBackoffMs?: number;
 };
@@ -113,7 +114,7 @@ export class SyncCoordinator {
 
 	private readonly runResource: RunResource;
 
-	private readonly onStateChange: ((states: SyncResourceState[]) => void) | null;
+	private readonly onStateChange: ((_states: SyncResourceState[]) => void) | null;
 
 	private readonly initialBackoffMs: number;
 
@@ -209,6 +210,9 @@ export class SyncCoordinator {
 	}
 
 	private async executeTrigger(trigger: SyncTrigger) {
+		const triggerMetric = startPerfMeasure("pos.offline.sync_start", {
+			trigger,
+		});
 		const resources = this.getResourcesForTrigger(trigger);
 		const startedAt = nowIso();
 		if (!resources.length) {
@@ -224,6 +228,7 @@ export class SyncCoordinator {
 				errors: [],
 				resources: [],
 			};
+			triggerMetric.finish("success", { resource_count_bucket: "0" });
 			return;
 		}
 		const summaries: ResourceExecutionSummary[] = [];
@@ -274,6 +279,20 @@ export class SyncCoordinator {
 			errors,
 			resources: summaries,
 		};
+		triggerMetric.finish(
+			this.lastRunSummary.failed ? "failure" : "success",
+			{
+				resource_count_bucket: bucketCount(resources.length),
+				failed_count_bucket: bucketCount(this.lastRunSummary.failed),
+				skipped_count_bucket: bucketCount(this.lastRunSummary.skipped),
+			},
+		);
+		startPerfMeasure("pos.offline.sync_complete", { trigger }).finish(
+			this.lastRunSummary.failed ? "failure" : "success",
+			{
+				resource_count_bucket: bucketCount(resources.length),
+			},
+		);
 
 		if (this.lastRunSummary.bootCriticalFailures > 0) {
 			const bootFailure = new Error(
@@ -346,12 +365,21 @@ export class SyncCoordinator {
 		resource: SyncResourceDefinition,
 		trigger: SyncTrigger,
 	) {
+		const metric = startPerfMeasure("pos.offline.sync_mutation", {
+			resource: resource.id,
+			trigger,
+			priority: resource.priority,
+		});
 		const previousState =
 			this.resourceStates.get(resource.id) || createInitialState(resource.id);
 		if (this.shouldDeferForCooldown(previousState, trigger)) {
 			const deferredState = await this.updateResourceState(resource.id, {
 				status: resolveCooldownStatus(previousState),
 				lastTrigger: trigger,
+			});
+			metric.finish("success", {
+				resource_status: deferredState.status,
+				skipped: true,
 			});
 			return {
 				resourceId: resource.id,
@@ -390,6 +418,9 @@ export class SyncCoordinator {
 				cooldownMs: null,
 				lastTrigger: trigger,
 			});
+			metric.finish(nextState.status === "error" ? "failure" : "success", {
+				resource_status: nextState.status,
+			});
 			return {
 				resourceId: resource.id,
 				priority: resource.priority,
@@ -410,6 +441,7 @@ export class SyncCoordinator {
 				cooldownMs,
 				lastTrigger: trigger,
 			});
+			metric.fail(error, { resource_status: nextState.status });
 			return {
 				resourceId: resource.id,
 				priority: resource.priority,

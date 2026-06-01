@@ -314,6 +314,7 @@ import {
 import { resolvePaymentPrintFormatDoctypes } from "../../utils/paymentPrintDoctype";
 import { resolvePaymentPrintFormat } from "../../utils/paymentPrintFormat";
 import { parseBooleanSetting } from "../../utils/stock";
+import { bucketCount, startPerfMeasure } from "../../utils/perf";
 
 // Components
 import PaymentSummary from "./payments/PaymentSummary.vue";
@@ -1297,6 +1298,9 @@ const updateCreditChange = (rawValue) => {
 };
 
 const handlePaymentAmountChange = (payment, event) => {
+	const metric = startPerfMeasure("pos.currency.payment_conversion", {
+		source: "local",
+	});
 	last_payment_change_was_cash.value = isCashLikePayment(payment);
 	setFormatedCurrency(payment, "amount", null, false, event);
 
@@ -1308,6 +1312,9 @@ const handlePaymentAmountChange = (payment, event) => {
 		const conversion_rate = invoice_doc.value.conversion_rate || 1;
 		payment.base_amount = flt(payment.amount * conversion_rate, currency_precision.value);
 	}
+	metric.finish("success", {
+		multi_currency: Boolean(invoice_doc.value?.currency !== pos_profile.value?.currency),
+	});
 };
 
 const setPaymentToDenomination = (payment, amount) => {
@@ -1544,6 +1551,11 @@ const submitInvoiceWrapper = async (print, callbackOverrides = {}, options = {})
 		return;
 	}
 
+	const metric = startPerfMeasure("pos.payment.submit", {
+		source: isOffline() ? "local" : "server",
+		online: !isOffline(),
+		payment_count_bucket: bucketCount(invoice_doc.value?.payments?.length || 0),
+	});
 	submissionInFlight.value = true;
 	loading.value = true;
 	try {
@@ -1584,8 +1596,10 @@ const submitInvoiceWrapper = async (print, callbackOverrides = {}, options = {})
 			},
 			...callbackOverrides,
 		});
+		metric.finish("success");
 	} catch (error) {
 		console.error("Submission failed propagate:", error);
+		metric.fail(error);
 		restorePaymentLinesAfterFailedSubmit();
 
 		if (error?.message) {
@@ -1853,8 +1867,13 @@ watch(
 
 watch(isPaymentOpen, (isOpen) => {
 	if (isOpen) {
+		const metric = startPerfMeasure("pos.payment.screen_open", {
+			source: "ui",
+			payment_count_bucket: bucketCount(invoice_doc.value?.payments?.length || 0),
+		});
 		ensurePaymentLinesInitialized();
 		handleShowPayment();
+		nextTick(() => metric.finish("success"));
 	} else {
 		releaseActiveFocus();
 		paymentVisible.value = false;

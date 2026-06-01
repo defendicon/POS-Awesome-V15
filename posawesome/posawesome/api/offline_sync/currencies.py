@@ -1,6 +1,7 @@
 import json
 
 import frappe
+from posawesome.posawesome.api.performance import pos_perf_endpoint
 
 from posawesome.posawesome.api.invoice_processing.utils import (
     get_available_currencies,
@@ -67,6 +68,7 @@ def _normalize_pairs(currency_pairs, profile):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.boot.currency_load", source="server")
 def sync_currency_scope(
     pos_profile=None,
     watermark=None,

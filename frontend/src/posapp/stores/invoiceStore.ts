@@ -32,12 +32,12 @@ declare const frappe: any;
 declare const __: any;
 import type {
 	CartItem,
-	InvoiceDoc,
 	InvoiceDocRef,
 	InvoiceMetadata,
 	DeliveryCharge,
 	PartialInvoiceDoc,
 } from "../types/models";
+import { bucketCount, startPerfMeasure } from "../utils/perf";
 
 /**
  * Converts an arbitrary value to a finite number.
@@ -120,6 +120,10 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	 * `triggerUpdateTotals` to avoid recalculating on every keystroke.
 	 */
 	const recalculateTotals = () => {
+		const metric = startPerfMeasure("pos.pricing.calculate_cart", {
+			source: "local",
+			line_count_bucket: bucketCount(itemsData.size),
+		});
 		let tQty = 0;
 		let tGross = 0;
 		let tDisc = 0;
@@ -137,6 +141,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		totalQty.value = tQty;
 		grossTotal.value = tGross;
 		discountTotal.value = tDisc;
+		metric.finish("success");
 	};
 
 	const applyTotalsDelta = (
@@ -296,12 +301,22 @@ export const useInvoiceStore = defineStore("invoice", () => {
 
 	/** Sets the transaction-level additional discount amount. Non-numeric values are coerced to `0`. */
 	const setAdditionalDiscount = (val: any) => {
+		const metric = startPerfMeasure("pos.pricing.recalculate_after_quantity_change", {
+			source: "local",
+			reason: "additional_discount",
+		});
 		additionalDiscount.value = toNumber(val);
+		metric.finish("success");
 	};
 
 	/** Sets the transaction-level discount percentage. Non-numeric values are coerced to `0`. */
 	const setAdditionalDiscountPercentage = (val: any) => {
+		const metric = startPerfMeasure("pos.pricing.recalculate_after_quantity_change", {
+			source: "local",
+			reason: "additional_discount_percentage",
+		});
 		additionalDiscountPercentage.value = toNumber(val);
+		metric.finish("success");
 	};
 
 	/** Replaces the delivery-charge list. Non-array values are coerced to `[]`. */
@@ -411,7 +426,14 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	 * @returns Array of reactive map proxies (one per added item), in insertion order.
 	 */
 	const addItems = (items: any[], index = -1) => {
-		if (!Array.isArray(items) || !items.length) return [];
+		const metric = startPerfMeasure("pos.items.add_to_cart", {
+			source: "local",
+			item_count_bucket: bucketCount(items?.length || 0),
+		});
+		if (!Array.isArray(items) || !items.length) {
+			metric.finish("success", { skipped: true });
+			return [];
+		}
 		const addedIds: string[] = [];
 		let deltaQty = 0;
 		let deltaGross = 0;
@@ -443,7 +465,11 @@ export const useInvoiceStore = defineStore("invoice", () => {
 			touch();
 		}
 
-		return addedIds.map((id) => itemsData.get(id));
+		const result = addedIds.map((id) => itemsData.get(id));
+		metric.finish("success", {
+			line_count_bucket: bucketCount(itemsData.size),
+		});
+		return result;
 	};
 
 	/**
@@ -513,14 +539,25 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		rowId: string,
 		updater: (_item: CartItem) => void,
 	) => {
-		if (!rowId || typeof updater !== "function") return;
+		const metric = startPerfMeasure("pos.pricing.calculate_line", {
+			source: "local",
+			line_count_bucket: bucketCount(itemsData.size),
+		});
+		if (!rowId || typeof updater !== "function") {
+			metric.finish("success", { skipped: true });
+			return;
+		}
 		const item = itemsData.get(rowId);
-		if (!item) return;
+		if (!item) {
+			metric.finish("success", { skipped: true });
+			return;
+		}
 
 		const before = cloneItem(item);
 		updater(item);
 		applyLineTotalsDiff(before, item);
 		touch();
+		metric.finish("success");
 		return item;
 	};
 
@@ -533,7 +570,13 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	 * @param rowId - The `posa_row_id` of the item to remove.
 	 */
 	const removeItemByRowId = (rowId: string) => {
+		const metric = startPerfMeasure("pos.pricing.calculate_cart", {
+			source: "local",
+			reason: "remove_item",
+			line_count_bucket: bucketCount(itemsData.size),
+		});
 		if (!rowId) {
+			metric.finish("success", { skipped: true });
 			return;
 		}
 
@@ -549,6 +592,9 @@ export const useInvoiceStore = defineStore("invoice", () => {
 			}
 			touch();
 		}
+		metric.finish("success", {
+			line_count_bucket: bucketCount(itemsData.size),
+		});
 	};
 
 	/**

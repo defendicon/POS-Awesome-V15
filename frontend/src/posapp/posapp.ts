@@ -41,6 +41,7 @@ import {
 	attachProfilerHelpers,
 	initLongTaskObserver,
 	isPerfEnabled,
+	startPerfMeasure,
 } from "./utils/perf.js";
 
 declare const __BUILD_VERSION__: string;
@@ -59,16 +60,34 @@ if (typeof frappe === "undefined") {
 }
 
 export async function initPosStorage() {
-	await initPromise;
+	const metric = startPerfMeasure("pos.boot.local_snapshot_read", {
+		source: "local",
+	});
+	try {
+		await initPromise;
+		metric.finish("success");
+	} catch (error) {
+		metric.fail(error);
+		throw error;
+	}
 }
 
 export async function runPosBootSync() {
+	const metric = startPerfMeasure("pos.boot.total", {
+		source: "boot_sync",
+	});
 	const buildVersion =
 		typeof __BUILD_VERSION__ !== "undefined" ? __BUILD_VERSION__ : null;
-	await reconcileBuildChangeOnStartup({
-		runtimeBuildVersion: buildVersion,
-		isOnline: !isOffline(),
-	});
+	try {
+		await reconcileBuildChangeOnStartup({
+			runtimeBuildVersion: buildVersion,
+			isOnline: !isOffline(),
+		});
+		metric.finish("success", { online: !isOffline() });
+	} catch (error) {
+		metric.fail(error, { online: !isOffline() });
+		throw error;
+	}
 }
 
 async function startOptionalRuntimeServices() {
@@ -136,6 +155,9 @@ class PosAppController {
 	}
 
 	async initializeApp() {
+		const mountMetric = startPerfMeasure("pos.app.mount", {
+			source: "app",
+		});
 		// Vuetify instance is now imported from plugins/vuetify.ts
 		this.app = createApp(App);
 		const { router, history } = createPosAppRouter();
@@ -172,8 +194,12 @@ class PosAppController {
 		installGlobalErrorHandlers(this.app);
 
 		this.app.mount(this.$el[0]);
+		mountMetric.finish("success");
 		clearChunkRecoveryState();
 		void this.router.isReady().finally(() => {
+			startPerfMeasure("pos.boot.sell_ready", {
+				source: "router",
+			}).finish("success");
 			scheduleChunkRecoveryStateReset();
 			scheduleAfterStableBoot(() => {
 				void finalizePendingBundleActivation();

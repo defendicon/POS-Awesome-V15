@@ -36,6 +36,7 @@
  * on detected corruption.
  */
 import Dexie from "dexie/dist/dexie.mjs";
+import { startPerfMeasure } from "../posapp/utils/perf";
 
 type AnyRecord = Record<string, any>;
 
@@ -361,8 +362,15 @@ async function deletePersistedKey(key: string) {
 
 export const initPromise = new Promise<void>((resolve) => {
 	const init = async () => {
+		const dbMetric = startPerfMeasure("pos.offline.db_open", {
+			source: "indexeddb",
+		});
+		const hydrateMetric = startPerfMeasure("pos.offline.snapshot_hydrate", {
+			source: "local",
+		});
 		try {
 			await db.open();
+			dbMetric.finish("success");
 			for (const key of Object.keys(memory)) {
 				const table = tableForKey(key);
 				let stored = await db.table(table).get(key);
@@ -392,7 +400,14 @@ export const initPromise = new Promise<void>((resolve) => {
 					}
 				}
 			}
+			hydrateMetric.finish("success", {
+				cache_ready: Boolean(memory.cache_ready),
+				item_cache_ready: Boolean(memory.items_last_sync),
+				customer_cache_ready: Boolean(memory.customers_last_sync),
+			});
 		} catch (e) {
+			dbMetric.fail(e);
+			hydrateMetric.fail(e);
 			console.error("Failed to initialize offline DB", e);
 		} finally {
 			scheduleIdleOfflinePruning();

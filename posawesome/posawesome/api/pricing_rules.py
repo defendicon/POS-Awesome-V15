@@ -14,6 +14,7 @@ from frappe import _
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Coalesce
 from frappe.utils import cint, flt, getdate, nowdate
+from posawesome.posawesome.api.performance import pos_perf_endpoint, pos_perf_query
 
 
 # ---------------------------------------------------------------------------
@@ -173,6 +174,7 @@ def _normalise_rule(doc: frappe._dict) -> frappe._dict:
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.pricing.rules_load", source="server")
 def get_active_pricing_rules(params: dict | None = None, **kwargs):
     """Return active selling pricing rules for the POS context."""
 
@@ -266,7 +268,8 @@ def get_active_pricing_rules(params: dict | None = None, **kwargs):
     if ctx.get("territory"):
         query = query.where((PricingRule.territory.isnull()) | (PricingRule.territory == ctx.territory))
 
-    rules = query.run(as_dict=True)
+    with pos_perf_query("pos.pricing.rules_load.query", source="database"):
+        rules = query.run(as_dict=True)
     parent_names = [r["name"] for r in rules]
     targets = _get_targets_map(parent_names)
 
@@ -379,6 +382,7 @@ def _collect_freebies(accumulator: Dict[Tuple[str, str], Dict[str, frappe._dict]
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.pricing.calculate_cart", source="server")
 def reconcile_line_prices(cart_payload: dict | str | None = None):
     """Recalculate line prices with ERPNext logic and return diffs."""
 

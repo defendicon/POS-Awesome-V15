@@ -1,6 +1,7 @@
 import json
 
 import frappe
+from posawesome.posawesome.api.performance import pos_perf_endpoint
 
 from posawesome.posawesome.api.customers import (
     get_customer_groups,
@@ -58,6 +59,7 @@ def _collect_deleted_customers(profile, watermark, limit):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.customers.delta_sync", source="server")
 def sync_customers(
     pos_profile=None,
     watermark=None,

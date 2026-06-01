@@ -31,6 +31,7 @@ import { ref } from "vue";
 import { useToastStore } from "./toastStore";
 import { useUIStore } from "./uiStore";
 import { dispatchRealtimeStockPayload } from "../utils/realtimeStock";
+import { startPerfMeasure } from "../utils/perf";
 
 type InvoiceProcessingPayload = {
   invoice?: string;
@@ -61,11 +62,11 @@ export const useSocketStore = defineStore("socket", () => {
   const uiStore = useUIStore();
   const processedInvoices = ref<Record<string, InvoiceProcessingState>>({});
   const postSubmitPayments = ref<Record<string, PostSubmitPaymentState>>({});
-  const invoiceWaiters = new Map<string, Array<{ resolve: (value?: any) => void; reject: (reason?: any) => void }>>();
-  const paymentWaiters = new Map<string, Array<{ resolve: (value?: any) => void; reject: (reason?: any) => void }>>();
+  const invoiceWaiters = new Map<string, Array<{ resolve: (_value?: any) => void; reject: (_reason?: any) => void }>>();
+  const paymentWaiters = new Map<string, Array<{ resolve: (_value?: any) => void; reject: (_reason?: any) => void }>>();
 
   const resolveWaiters = (
-    registry: Map<string, Array<{ resolve: (value?: any) => void; reject: (reason?: any) => void }>>,
+    registry: Map<string, Array<{ resolve: (_value?: any) => void; reject: (_reason?: any) => void }>>,
     key: string,
     payload: any,
     isError = false,
@@ -82,7 +83,7 @@ export const useSocketStore = defineStore("socket", () => {
   };
 
   const withTimeout = <T>(
-    registry: Map<string, Array<{ resolve: (value?: any) => void; reject: (reason?: any) => void }>>,
+    registry: Map<string, Array<{ resolve: (_value?: any) => void; reject: (_reason?: any) => void }>>,
     key: string,
     timeoutMs: number,
   ) =>
@@ -134,9 +135,14 @@ export const useSocketStore = defineStore("socket", () => {
 
   function init() {
     if (typeof frappe === "undefined" || !frappe.realtime) return;
+    startPerfMeasure("pos.realtime.connect", { source: "frappe" }).finish("success");
 
     // Global listener for background submission errors
     frappe.realtime.on("pos_invoice_submit_error", (data: InvoiceProcessingPayload) => {
+      const eventMetric = startPerfMeasure("pos.realtime.invalidation_received", {
+        source: "realtime",
+        event: "pos_invoice_submit_error",
+      });
       const message = data.error || data.message || "Unknown error";
       const invoice = data.invoice || "";
       processedInvoices.value[invoice] = {
@@ -161,12 +167,20 @@ export const useSocketStore = defineStore("socket", () => {
         color: "error",
         timeout: 8000,
       });
+      eventMetric.finish("failure");
     });
 
     // Global listener for successful background submission
     frappe.realtime.on("pos_invoice_processed", (data: InvoiceProcessingPayload) => {
+      const eventMetric = startPerfMeasure("pos.realtime.invalidation_received", {
+        source: "realtime",
+        event: "pos_invoice_processed",
+      });
       const invoice = data.invoice || data.name;
-      if (!invoice) return;
+      if (!invoice) {
+        eventMetric.finish("failure");
+        return;
+      }
       const hasPostSubmitPaymentWork = Boolean(data.has_post_submit_payment_work);
 
       const state: InvoiceProcessingState = {
@@ -195,6 +209,7 @@ export const useSocketStore = defineStore("socket", () => {
           color: "success",
         });
       }
+      eventMetric.finish("success");
     });
 
     frappe.realtime.on("pos_post_submit_payments_started", (data: InvoiceProcessingPayload) => {
@@ -263,9 +278,18 @@ export const useSocketStore = defineStore("socket", () => {
     });
 
     frappe.realtime.on("posa_stock_changed", (data: unknown) => {
+      const eventMetric = startPerfMeasure("pos.realtime.invalidation_received", {
+        source: "realtime",
+        event: "posa_stock_changed",
+      });
       dispatchRealtimeStockPayload(data, {
         setLastStockAdjustment: uiStore.setLastStockAdjustment,
       });
+      eventMetric.finish("success");
+      startPerfMeasure("pos.realtime.delta_applied", {
+        source: "realtime",
+        event: "posa_stock_changed",
+      }).finish("success");
     });
   }
 

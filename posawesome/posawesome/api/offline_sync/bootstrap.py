@@ -1,4 +1,5 @@
 import frappe
+from posawesome.posawesome.api.performance import pos_perf_endpoint
 
 from posawesome.posawesome.api.invoice_processing.utils import get_price_list_currency
 from posawesome.posawesome.api.offline_sync.common import (
@@ -34,6 +35,7 @@ def _should_include(modified, watermark):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.offline.snapshot_hydrate", source="server")
 def sync_bootstrap_config(
     pos_profile=None,
     watermark=None,

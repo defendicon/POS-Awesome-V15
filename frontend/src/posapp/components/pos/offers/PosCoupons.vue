@@ -79,6 +79,7 @@ import { useToastStore } from "../../../stores/toastStore.js";
 import { useUIStore } from "../../../stores/uiStore.js";
 import { storeToRefs } from "pinia";
 import { getCachedCoupons, saveCoupons } from "../../../../offline/index";
+import { startPerfMeasure } from "../../../utils/perf";
 
 export default {
 	setup() {
@@ -118,6 +119,9 @@ export default {
 			this.uiStore.setActiveView("items");
 		},
 		add_coupon(new_coupon, options = {}) {
+			const metric = startPerfMeasure("pos.pricing.coupon_apply", {
+				source: "server",
+			});
 			const silentDuplicate = !!options.silentDuplicate;
 			const normalizedCoupon = String(new_coupon || "")
 				.trim()
@@ -127,6 +131,7 @@ export default {
 					title: __("Select a customer to use coupon"),
 					color: "error",
 				});
+				metric.finish("failure", { reason: "missing_customer_or_coupon" });
 				return;
 			}
 			const coupons = this.posa_coupons || [];
@@ -143,6 +148,7 @@ export default {
 						color: "error",
 					});
 				}
+				metric.finish("success", { skipped: true });
 				return;
 			}
 			const vm = this;
@@ -161,6 +167,7 @@ export default {
 								title: res.msg,
 								color: "error",
 							});
+							metric.finish("failure", { reason: "not_applicable" });
 						} else {
 							vm.new_coupon = null;
 							const coupon = res.coupon;
@@ -173,8 +180,12 @@ export default {
 								pos_offer: coupon.pos_offer,
 								customer: coupon.customer || vm.customer,
 							});
+							metric.finish("success");
 						}
 					}
+				},
+				error: function (error) {
+					metric.fail(error);
 				},
 			});
 		},

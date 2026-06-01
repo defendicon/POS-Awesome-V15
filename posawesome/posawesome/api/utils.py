@@ -7,6 +7,7 @@ from functools import cache
 from typing import Any
 
 import frappe
+from posawesome.posawesome.api.performance import pos_perf_endpoint
 
 # Reusable ORM filter to exclude template items
 HAS_VARIANTS_EXCLUSION = {"has_variants": 0}
@@ -237,6 +238,7 @@ def _ensure_pos_profile(pos_profile):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.boot.profile_load", source="server")
 def get_active_pos_profile(user=None):
     """Return the active POS profile for the given user."""
     user = user or frappe.session.user

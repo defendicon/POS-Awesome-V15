@@ -36,6 +36,7 @@ import {
 	saveExchangeRateCache,
 	savePriceListMetaCache,
 } from "../../../../offline/index";
+import { bucketCount, startPerfMeasure } from "../../../utils/perf";
 
 // @ts-ignore
 const __ = window.__ || ((s) => s);
@@ -94,6 +95,9 @@ export function useInvoiceCurrency() {
 	const fetch_available_currencies = async () => {
 		if (!pos_profile.value) return [];
 		const profileName = pos_profile.value.name;
+		const metric = startPerfMeasure("pos.currency.bootstrap", {
+			source: "server",
+		});
 		try {
 			const r = await frappe.call({
 				method: "posawesome.posawesome.api.invoices.get_available_currencies",
@@ -116,8 +120,13 @@ export function useInvoiceCurrency() {
 					selected_currency.value = baseCurrency;
 				}
 				saveCurrencyOptionsCache(profileName, available_currencies.value);
+				metric.finish("success", {
+					result_count_bucket: bucketCount(available_currencies.value.length),
+					cache_hit: false,
+				});
 				return available_currencies.value;
 			}
+			metric.finish("success", { result_count_bucket: "0" });
 			return [];
 		} catch (error) {
 			console.error("Error fetching currencies:", error);
@@ -127,6 +136,10 @@ export function useInvoiceCurrency() {
 				if (!selected_currency.value) {
 					selected_currency.value = pos_profile.value.currency;
 				}
+				metric.finish("success", {
+					result_count_bucket: bucketCount(cachedCurrencies.length),
+					cache_hit: true,
+				});
 				return available_currencies.value;
 			}
 			const defaultCurrency = pos_profile.value.currency;
@@ -134,12 +147,19 @@ export function useInvoiceCurrency() {
 				{ value: defaultCurrency, title: defaultCurrency },
 			];
 			selected_currency.value = defaultCurrency;
+			metric.fail(error, { cache_hit: false });
 			return available_currencies.value;
 		}
 	};
 
 	const update_currency_and_rate = async () => {
 		if (!selected_currency.value || !pos_profile.value) return;
+		const metric = startPerfMeasure("pos.currency.change_transaction_currency", {
+			source: "local",
+		});
+		const rateMetric = startPerfMeasure("pos.currency.exchange_rate_load", {
+			source: "server",
+		});
 
 		const rateDate =
 			(typeof frappe !== "undefined" && frappe.datetime?.get_today?.()) ||
@@ -200,6 +220,8 @@ export function useInvoiceCurrency() {
 					});
 				}
 			}
+			rateMetric.finish("success", { cache_hit: false });
+			metric.finish("success");
 		} catch (error) {
 			console.error("Error updating currency:", error);
 			const cachedDisplayRate = getCachedExchangeRate({
@@ -236,14 +258,23 @@ export function useInvoiceCurrency() {
 					color: "error",
 				});
 			}
+			rateMetric.finish(
+				cachedDisplayRate?.exchange_rate || cachedConversionRate?.exchange_rate
+					? "success"
+					: "failure",
+				{
+					cache_hit: Boolean(cachedDisplayRate?.exchange_rate || cachedConversionRate?.exchange_rate),
+				},
+			);
+			metric.fail(error);
 		}
 	};
 
 	const update_item_rates = async () => {
-		console.log(
-			"Updating item rates with exchange rate:",
-			exchange_rate.value,
-		);
+		const metric = startPerfMeasure("pos.items.price_refresh", {
+			source: "local",
+			item_count_bucket: bucketCount(invoiceStore.items.length),
+		});
 		const items = invoiceStore.items;
 		const companyCurrency =
 			(company.value && company.value.default_currency) ||
@@ -297,6 +328,7 @@ export function useInvoiceCurrency() {
 			item.amount = flt(item.qty * item.rate, precision);
 			item.base_amount = flt(item.qty * item.base_rate, precision);
 		});
+		metric.finish("success");
 	};
 
 	const roundAmount = (amount: number) => {

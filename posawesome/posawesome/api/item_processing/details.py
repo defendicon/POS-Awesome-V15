@@ -3,12 +3,14 @@ from frappe.utils import nowdate
 from posawesome.posawesome.api.item_fetchers import ItemDetailAggregator, get_batches
 from posawesome.posawesome.api.item_processing.stock import get_stock_availability
 from posawesome.posawesome.api.utils import _ensure_pos_profile, log_perf_event
+from posawesome.posawesome.api.performance import pos_perf_endpoint
 from frappe import _, as_json
 import json
 import time
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.items.price_refresh", source="server")
 def get_items_details(pos_profile, items_data, price_list=None, customer=None):
     """Bulk fetch item details for a list of items."""
 
@@ -41,6 +43,7 @@ def get_items_details(pos_profile, items_data, price_list=None, customer=None):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.items.price_refresh", source="server")
 def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=None):
     from erpnext.stock.get_item_details import get_item_details
 

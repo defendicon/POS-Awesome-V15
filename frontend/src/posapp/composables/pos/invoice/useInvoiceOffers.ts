@@ -49,6 +49,7 @@ import { useToastStore } from "../../../stores/toastStore";
 import { storeToRefs } from "pinia";
 import itemService from "../../../services/itemService";
 import { bus } from "../../../bus";
+import { bucketCount, startPerfMeasure } from "../../../utils/perf";
 
 // @ts-ignore
 const __ = window.__ || ((s) => s);
@@ -335,10 +336,16 @@ export function useInvoiceOffers() {
 		changedRowIds: string[] = [],
 		removedRows: any = {},
 	) => {
+		const metric = startPerfMeasure("pos.pricing.promotion_apply", {
+			source: "local",
+			line_count_bucket: bucketCount(items.value?.length || 0),
+			changed_count_bucket: bucketCount(changedRowIds?.length || 0),
+		});
 		if (isApplyingOffer.value) {
 			offerDebugLog(
 				"[useInvoiceOffers] handelOffers skipped: isApplyingOffer=true",
 			);
+			metric.finish("success", { skipped: true });
 			return;
 		}
 		offerDebugLog("[useInvoiceOffers] handelOffers starting...", {
@@ -355,6 +362,9 @@ export function useInvoiceOffers() {
 				updatePosOffers([]);
 				_cachedOfferResults.value.clear();
 				_manuallySuppressedAutoOffers.value.clear();
+				metric.finish("success", {
+					offer_count_bucket: "0",
+				});
 				return;
 			}
 
@@ -465,6 +475,10 @@ export function useInvoiceOffers() {
 				offerDebugLog(
 					"[useInvoiceOffers] handelOffers: No change in offers state, skipping update.",
 				);
+				metric.finish("success", {
+					offer_count_bucket: bucketCount(effectiveOffers.length),
+					skipped: true,
+				});
 				return;
 			}
 
@@ -481,8 +495,12 @@ export function useInvoiceOffers() {
 			_lastAppliedOffersDigest.value = currentOffersDigest;
 
 			await updateInvoiceOffers(effectiveOffers, { origin: "auto" });
+			metric.finish("success", {
+				offer_count_bucket: bucketCount(effectiveOffers.length),
+			});
 		} catch (error) {
 			console.error("Failed to process offers:", error);
+			metric.fail(error);
 		}
 	};
 

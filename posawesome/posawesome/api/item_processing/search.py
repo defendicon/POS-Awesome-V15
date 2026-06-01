@@ -18,6 +18,7 @@ from posawesome.posawesome.api.utils import (
     _ensure_pos_profile,
     log_perf_event,
 )
+from posawesome.posawesome.api.performance import pos_perf_endpoint, pos_perf_query
 from posawesome.posawesome.api.item_processing.barcode import search_serial_or_batch_or_barcode_number
 from posawesome.posawesome.api.item_processing.details import get_items_details
 
@@ -411,30 +412,32 @@ def _run_item_query(
     page_start = plan.initial_page_start
 
     while True:
-        items_data = frappe.get_all(
-            "Item",
-            filters=plan.filters,
-            or_filters=plan.or_filters or None,
-            fields=plan.fields,
-            limit_start=page_start,
-            limit_page_length=plan.page_size,
-            order_by=plan.order_by,
-        )
-
-        if not items_data and plan.item_code_for_search and page_start == plan.initial_page_start:
+        with pos_perf_query("pos.items.remote_search.query", source="database"):
             items_data = frappe.get_all(
                 "Item",
                 filters=plan.filters,
-                or_filters=[
-                    ["name", "like", f"%{plan.item_code_for_search}%"],
-                    ["item_name", "like", f"%{plan.item_code_for_search}%"],
-                    ["item_code", "like", f"%{plan.item_code_for_search}%"],
-                ],
+                or_filters=plan.or_filters or None,
                 fields=plan.fields,
                 limit_start=page_start,
                 limit_page_length=plan.page_size,
                 order_by=plan.order_by,
             )
+
+        if not items_data and plan.item_code_for_search and page_start == plan.initial_page_start:
+            with pos_perf_query("pos.items.remote_search.query", source="database", fallback=1):
+                items_data = frappe.get_all(
+                    "Item",
+                    filters=plan.filters,
+                    or_filters=[
+                        ["name", "like", f"%{plan.item_code_for_search}%"],
+                        ["item_name", "like", f"%{plan.item_code_for_search}%"],
+                        ["item_code", "like", f"%{plan.item_code_for_search}%"],
+                    ],
+                    fields=plan.fields,
+                    limit_start=page_start,
+                    limit_page_length=plan.page_size,
+                    order_by=plan.order_by,
+                )
 
         if not items_data:
             break
@@ -556,6 +559,7 @@ def _prepare_item_groups(profile_name: Optional[str], item_groups) -> ItemGroupC
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.items.remote_search", source="server")
 def get_items(
     pos_profile,
     price_list=None,
@@ -659,6 +663,7 @@ def get_items(
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.items.initial_load", source="server")
 def get_items_groups():
     return frappe.db.sql(
         """select name from `tabItem Group`
@@ -668,6 +673,7 @@ def get_items_groups():
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.items.initial_load", source="server")
 def get_items_count(pos_profile, item_groups=None):
     pos_profile, _ = _ensure_pos_profile(pos_profile)
     if isinstance(item_groups, str):

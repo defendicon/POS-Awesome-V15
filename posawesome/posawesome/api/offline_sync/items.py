@@ -1,6 +1,7 @@
 import json
 
 import frappe
+from posawesome.posawesome.api.performance import pos_perf_endpoint
 
 from posawesome.posawesome.api.items import get_delta_items, get_items
 from posawesome.posawesome.api.offline_sync.common import (
@@ -83,6 +84,7 @@ def _collect_deleted_items(profile, watermark, limit):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.items.delta_sync", source="server")
 def sync_items(
     pos_profile=None,
     watermark=None,

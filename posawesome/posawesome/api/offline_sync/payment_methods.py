@@ -1,4 +1,5 @@
 import frappe
+from posawesome.posawesome.api.performance import pos_perf_endpoint
 
 from posawesome.posawesome.api.offline_sync.common import (
     _build_response,
@@ -23,6 +24,7 @@ def _should_include(modified, watermark):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.boot.payment_methods_load", source="server")
 def sync_payment_method_currencies(
     pos_profile=None,
     watermark=None,

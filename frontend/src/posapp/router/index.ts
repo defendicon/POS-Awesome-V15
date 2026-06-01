@@ -54,6 +54,15 @@ const routes = [
 		meta: { title: "Reports", layout: "default", loadingMessage: "Loading reports..." },
 	},
 	{
+		path: "/performance",
+		component: () => import("../components/performance/PerformanceDiagnostics.vue"),
+		meta: {
+			title: "Performance",
+			layout: "default",
+			loadingMessage: "Loading performance diagnostics...",
+		},
+	},
+	{
 		path: "/barcode",
 		component: () => import("../components/pos/shell/BarcodePrinting.vue"),
 		meta: {

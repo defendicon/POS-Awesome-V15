@@ -1,6 +1,7 @@
 import { ref } from "vue";
 import { useUIStore } from "../../../stores/uiStore.js";
 import { getCachedOffers, saveOffers } from "../../../../offline/index";
+import { bucketCount, startPerfMeasure } from "../../../utils/perf";
 
 declare const frappe: any;
 
@@ -19,11 +20,20 @@ export function useOffers() {
 		});
 
 	function get_offers(profileName: string, posProfile: any) {
+		const metric = startPerfMeasure("pos.pricing.rules_load", {
+			source: "server",
+		});
 		if (posProfile && posProfile.posa_local_storage) {
 			const cached = normalizeOffers(getCachedOffers());
 			if (cached.length) {
 				offers.value = cached;
 				uiStore.setOffers(cached);
+				startPerfMeasure("pos.pricing.rules_load", {
+					source: "local",
+				}).finish("success", {
+					cache_hit: true,
+					result_count_bucket: bucketCount(cached.length),
+				});
 			}
 		}
 		return frappe
@@ -32,11 +42,14 @@ export function useOffers() {
 			})
 			.then((r: any) => {
 				if (r.message) {
-					console.info("LoadOffers");
 					const normalized = normalizeOffers(r.message);
 					saveOffers(normalized);
 					offers.value = normalized;
 					uiStore.setOffers(normalized);
+					metric.finish("success", {
+						cache_hit: false,
+						result_count_bucket: bucketCount(normalized.length),
+					});
 				}
 			})
 			.catch((err: unknown) => {
@@ -45,7 +58,13 @@ export function useOffers() {
 				if (cached.length) {
 					offers.value = cached;
 					uiStore.setOffers(cached);
+					metric.finish("success", {
+						cache_hit: true,
+						result_count_bucket: bucketCount(cached.length),
+					});
+					return;
 				}
+				metric.fail(err);
 			});
 	}
 
