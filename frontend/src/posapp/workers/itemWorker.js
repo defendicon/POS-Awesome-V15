@@ -249,21 +249,24 @@ async function persist(key, value) {
 	}
 }
 
+function yieldToEventLoop() {
+	return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
 async function bulkPutItems(items, syncedAt = Date.now()) {
 	try {
 		if (!db.isOpen()) {
 			await db.open();
 		}
 		const CHUNK_SIZE = 1000;
-		await db.transaction("rw", db.table("items"), async () => {
-			for (let i = 0; i < items.length; i += CHUNK_SIZE) {
-				const chunk = items.slice(i, i + CHUNK_SIZE).map((item) => ({
-					...item,
-					synced_at: syncedAt,
-				}));
-				await db.table("items").bulkPut(chunk);
-			}
-		});
+		for (let i = 0; i < items.length; i += CHUNK_SIZE) {
+			const chunk = items.slice(i, i + CHUNK_SIZE).map((item) => ({
+				...item,
+				synced_at: syncedAt,
+			}));
+			await db.table("items").bulkPut(chunk);
+			await yieldToEventLoop();
+		}
 		clearQueryCache();
 	} catch (e) {
 		console.error("Worker bulkPut items failed", e);

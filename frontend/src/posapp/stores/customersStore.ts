@@ -229,6 +229,27 @@ export const useCustomersStore = defineStore("customers", () => {
 		customerSearchCache.clear();
 	}
 
+	function hydrateRuntimeCustomerCache(rows: CustomerSummary[]) {
+		if (!Array.isArray(rows) || rows.length === 0) {
+			return;
+		}
+		const merged = new Map<string, CustomerSummary>();
+		const existingRows = Array.isArray(memory.customer_storage)
+			? (memory.customer_storage as CustomerSummary[])
+			: [];
+		existingRows.forEach((row) => {
+			if (row?.name) {
+				merged.set(row.name, row);
+			}
+		});
+		rows.forEach((row) => {
+			if (row?.name) {
+				merged.set(row.name, row);
+			}
+		});
+		memory.customer_storage = Array.from(merged.values());
+	}
+
 	function setPosProfile(profile: unknown) {
 		posProfile.value = normalizeProfile(profile);
 		customerProfileScope.value = getCustomerProfileScope(posProfile.value);
@@ -414,8 +435,14 @@ export const useCustomersStore = defineStore("customers", () => {
 			memoryRows.length > 0 &&
 			!nextCustomerStart.value &&
 			(!totalCustomerCount.value || memoryRows.length >= totalCustomerCount.value);
+		const memoryResults = rankCustomerRows(memoryRows, normalized, limit, offset);
 		if (memoryHasCompleteCustomerSet) {
-			const memoryResults = rankCustomerRows(memoryRows, normalized, limit, offset);
+			customerSearchCache.set(cacheKey, memoryResults);
+			trimCustomerSearchCache();
+			return memoryResults;
+		}
+
+		if (normalized && memoryResults.length > 0) {
 			customerSearchCache.set(cacheKey, memoryResults);
 			trimCustomerSearchCache();
 			return memoryResults;
@@ -426,6 +453,7 @@ export const useCustomersStore = defineStore("customers", () => {
 			limit,
 			offset,
 		})) as CustomerSummary[];
+		hydrateRuntimeCustomerCache(ranked);
 		customerSearchCache.set(cacheKey, ranked);
 		trimCustomerSearchCache();
 		return ranked;
@@ -466,10 +494,6 @@ export const useCustomersStore = defineStore("customers", () => {
 
 	async function queueSearch(term: string) {
 		const normalized = normalizeCustomerSearchTerm(term);
-		if (isCustomerBackgroundLoading.value) {
-			pendingCustomerSearch.value = normalized;
-			return null;
-		}
 		return searchCustomers(normalized, false);
 	}
 
@@ -682,6 +706,16 @@ export const useCustomersStore = defineStore("customers", () => {
 		syncBootstrapCustomerReadiness(localCount);
 
 		if (localCount > 0) {
+			const cachedRows = (await searchStoredCustomers({
+				search: "",
+				limit: PAGE_SIZE,
+				offset: 0,
+			})) as CustomerSummary[];
+			if (cachedRows.length) {
+				hydrateRuntimeCustomerCache(cachedRows);
+				customers.value = cachedRows;
+				loadedCustomerCount.value = Math.max(localCount, cachedRows.length);
+			}
 			customersLoaded.value = true;
 			await searchCustomers(searchTerm.value);
 			await verifyServerCustomerCount();

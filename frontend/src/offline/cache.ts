@@ -606,6 +606,10 @@ export async function saveItemsBulk(items, scope = "") {
 	return await saveItems(items, scope);
 }
 
+function yieldToEventLoop() {
+	return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
 export async function saveItems(items, scope = "") {
 	try {
 		await checkDbHealth();
@@ -632,6 +636,7 @@ export async function saveItems(items, scope = "") {
 			if (Array.isArray(rows) && rows.length) {
 				existingRows.push(...rows);
 			}
+			await yieldToEventLoop();
 		}
 		const existingByCode = new Map(
 			existingRows.map((row: any) => [row.item_code, row]),
@@ -682,6 +687,7 @@ export async function saveItems(items, scope = "") {
 					}
 				}
 			}
+			await yieldToEventLoop();
 		}
 	} catch (e) {
 		console.error("Failed to save items", e);

@@ -7,9 +7,17 @@ import type {
 	StoredCustomer,
 } from "../src/posapp/types/models";
 
-const setCustomerStorageMock = vi.fn(async () => undefined);
-const saveStoredValueSnapshotMock = vi.fn();
-const searchStoredCustomersMock = vi.fn(async () => []);
+const {
+	offlineMemoryMock,
+	saveStoredValueSnapshotMock,
+	searchStoredCustomersMock,
+	setCustomerStorageMock,
+} = vi.hoisted(() => ({
+	offlineMemoryMock: { customer_storage: [] as any[] },
+	saveStoredValueSnapshotMock: vi.fn(),
+	searchStoredCustomersMock: vi.fn(async () => []),
+	setCustomerStorageMock: vi.fn(async () => undefined),
+}));
 
 vi.mock("../src/offline/index", () => ({
 	db: {
@@ -22,7 +30,7 @@ vi.mock("../src/offline/index", () => ({
 			toArray: vi.fn(async () => []),
 		})),
 	},
-	memory: { customer_storage: [] },
+	memory: offlineMemoryMock,
 	checkDbHealth: vi.fn(async () => undefined),
 	setCustomerStorage: (...args: any[]) => setCustomerStorageMock(...args),
 	searchStoredCustomers: (...args: any[]) => searchStoredCustomersMock(...args),
@@ -44,6 +52,7 @@ describe("customersStore profile and customer dto handling", () => {
 		saveStoredValueSnapshotMock.mockClear();
 		searchStoredCustomersMock.mockReset();
 		searchStoredCustomersMock.mockResolvedValue([]);
+		offlineMemoryMock.customer_storage = [];
 		(globalThis as any).frappe = {
 			call: vi.fn(),
 		};
@@ -121,6 +130,33 @@ describe("customersStore profile and customer dto handling", () => {
 			offset: 0,
 		});
 		expect(count).toBe(1);
+		expect(store.customers).toEqual([
+			expect.objectContaining({
+				name: "CUST-JANE",
+				customer_name: "Jane Doe",
+			}),
+		]);
+	});
+
+	it("keeps customer search responsive while background loading continues", async () => {
+		offlineMemoryMock.customer_storage = [
+			{
+				name: "CUST-JANE",
+				customer_name: "Jane Doe",
+				mobile_no: "03001234567",
+			},
+		];
+		searchStoredCustomersMock.mockImplementation(
+			() => new Promise(() => undefined),
+		);
+
+		const store = useCustomersStore();
+		store.isCustomerBackgroundLoading = true;
+
+		const count = await store.queueSearch("Jane");
+
+		expect(count).toBe(1);
+		expect(searchStoredCustomersMock).not.toHaveBeenCalled();
 		expect(store.customers).toEqual([
 			expect.objectContaining({
 				name: "CUST-JANE",
