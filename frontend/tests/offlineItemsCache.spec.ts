@@ -44,7 +44,7 @@ vi.mock("../src/offline/db", () => {
 	};
 });
 
-import { saveItems } from "../src/offline/cache";
+import { saveItems, searchStoredItems } from "../src/offline/cache";
 
 describe("offline cache item persistence", () => {
 	beforeEach(() => {
@@ -125,5 +125,48 @@ describe("offline cache item persistence", () => {
 				name_keywords: ["fallback", "item"],
 			}),
 		);
+	});
+
+	it("uses the item worker for stored item search when available", async () => {
+		const originalWorker = (globalThis as any).Worker;
+		class MockWorker {
+			onmessage: ((_event: any) => void) | null = null;
+			onerror: (() => void) | null = null;
+
+			postMessage(message: any) {
+				setTimeout(() => {
+					this.onmessage?.({
+						data: {
+							type: "search_stored_items_result",
+							id: message.id,
+							items: [
+								{
+									item_code: "ITEM-WORKER",
+									item_name: "Worker Item",
+								},
+							],
+						},
+					});
+				}, 0);
+			}
+
+			terminate() {}
+		}
+		(globalThis as any).Worker = MockWorker;
+
+		try {
+			const result = await searchStoredItems({
+				search: "worker",
+				limit: 10,
+				scope: "POS-A_WH-A",
+			});
+
+			expect(result).toEqual([
+				expect.objectContaining({ item_code: "ITEM-WORKER" }),
+			]);
+			expect(anyOf).not.toHaveBeenCalled();
+		} finally {
+			(globalThis as any).Worker = originalWorker;
+		}
 	});
 });

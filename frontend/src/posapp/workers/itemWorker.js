@@ -23,6 +23,9 @@ const BASE_SCHEMA = {
 };
 
 const SCHEMA_SIGNATURE = JSON.stringify(BASE_SCHEMA);
+const QUERY_CACHE_LIMIT = 100;
+const QUERY_CACHE_TTL_MS = 5 * 60 * 1000;
+const queryCache = new Map();
 
 (async () => {
 	let DexieLib;
@@ -261,6 +264,7 @@ async function bulkPutItems(items, syncedAt = Date.now()) {
 				await db.table("items").bulkPut(chunk);
 			}
 		});
+		clearQueryCache();
 	} catch (e) {
 		console.error("Worker bulkPut items failed", e);
 	}
@@ -387,14 +391,65 @@ function rowMatchesGroupAndScope(row, group, scope) {
 	);
 }
 
+function buildQueryCacheKey(payload = {}) {
+	return [
+		String(payload.search || "").trim().toLowerCase(),
+		String(payload.itemGroup || "").trim().toLowerCase(),
+		Number(payload.limit || 100),
+		Number(payload.offset || 0),
+		String(payload.scope || ""),
+	].join("::");
+}
+
+function getQueryCache(key) {
+	const cached = queryCache.get(key);
+	if (!cached) {
+		return null;
+	}
+	if (Date.now() - cached.timestamp > QUERY_CACHE_TTL_MS) {
+		queryCache.delete(key);
+		return null;
+	}
+
+	queryCache.delete(key);
+	queryCache.set(key, cached);
+	return cached.value;
+}
+
+function setQueryCache(key, value) {
+	if (!key || !Array.isArray(value)) {
+		return;
+	}
+	queryCache.set(key, {
+		value,
+		timestamp: Date.now(),
+	});
+	while (queryCache.size > QUERY_CACHE_LIMIT) {
+		const firstKey = queryCache.keys().next().value;
+		if (!firstKey) break;
+		queryCache.delete(firstKey);
+	}
+}
+
+function clearQueryCache() {
+	queryCache.clear();
+}
+
 async function searchStoredItems({ search = "", itemGroup = "", limit = 100, offset = 0, scope = "" } = {}) {
 	if (!db.isOpen()) {
 		await db.open();
 	}
 
+	const cacheKey = buildQueryCacheKey({ search, itemGroup, limit, offset, scope });
+	const cached = getQueryCache(cacheKey);
+	if (cached) {
+		return cached;
+	}
+
 	const table = db.table("items");
 	const normalizedSearch = String(search || "").trim();
 	const normalizedGroup = String(itemGroup || "").trim();
+	let result;
 
 	if (!normalizedSearch) {
 		let collection = table;
@@ -404,7 +459,9 @@ async function searchStoredItems({ search = "", itemGroup = "", limit = 100, off
 		if (hasScope(scope)) {
 			collection = collection.filter((row) => isMatchingScope(row, scope));
 		}
-		return await collection.offset(offset).limit(limit).toArray();
+		result = await collection.offset(offset).limit(limit).toArray();
+		setQueryCache(cacheKey, result);
+		return result;
 	}
 
 	const term = normalizedSearch.toLowerCase();
@@ -451,6 +508,7 @@ async function searchStoredItems({ search = "", itemGroup = "", limit = 100, off
 		offset,
 	);
 	if (indexedResult.length >= limit) {
+		setQueryCache(cacheKey, indexedResult);
 		return indexedResult;
 	}
 
@@ -463,7 +521,9 @@ async function searchStoredItems({ search = "", itemGroup = "", limit = 100, off
 			rowMatchesGroupAndScope(row, normalizedGroup, scope) &&
 			matchesItemSearch(row, normalizedSearch),
 	);
-	return await collection.offset(offset).limit(limit).toArray();
+	result = await collection.offset(offset).limit(limit).toArray();
+	setQueryCache(cacheKey, result);
+	return result;
 }
 
 self.onmessage = async (event) => {
