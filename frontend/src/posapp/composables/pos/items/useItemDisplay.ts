@@ -23,14 +23,35 @@ export function useItemDisplay() {
 	const formatCache = new Map<string, unknown>();
 	const ctxSource = ref<Partial<DisplayContext> | null>(null);
 
+	const normalizePrecision = (precision: unknown, fallback = 2): number => {
+		const numeric = Number(precision);
+		if (!Number.isInteger(numeric)) return fallback;
+		return Math.min(Math.max(numeric, 0), 20);
+	};
+
+	const formatNumberWithPrecision = (
+		value: unknown,
+		precision: unknown,
+	): string => {
+		const numeric = Number.parseFloat(String(value ?? 0));
+		const safeValue = Number.isFinite(numeric) ? numeric : 0;
+		const safePrecision = normalizePrecision(precision);
+		return safeValue.toLocaleString(undefined, {
+			minimumFractionDigits: safePrecision,
+			maximumFractionDigits: safePrecision,
+		});
+	};
+
 	const fallbackCtx = reactive<DisplayContext>({
 		pos_profile: null,
 		context: "pos",
 		float_precision: 2,
 		currency_precision: 2,
 		exchange_rate: 1,
-		formatCurrencyPlain: (v: unknown, _p: number) => v,
-		formatFloatPlain: (v: unknown, _p: number) => v,
+		formatCurrencyPlain: (v: unknown, p: number) =>
+			formatNumberWithPrecision(v, p),
+		formatFloatPlain: (v: unknown, p: number) =>
+			formatNumberWithPrecision(v, p),
 	});
 
 	function registerContext(context: Partial<DisplayContext>) {

@@ -122,8 +122,31 @@ const primaryPrecision = computed(() => {
 	return props.ratePrecision(primaryRate.value);
 });
 
+const profileCurrencyPrecision = computed(() => {
+	const precision = Number.parseInt(
+		String(
+			props.posProfile.currency_precision ??
+				props.posProfile.posa_decimal_precision ??
+				2,
+		),
+		10,
+	);
+	if (!Number.isInteger(precision)) {
+		return 2;
+	}
+	return Math.min(Math.max(precision, 0), 20);
+});
+
+const roundToProfilePrecision = (value) => {
+	const numeric = Number.parseFloat(String(value ?? 0));
+	if (!Number.isFinite(numeric)) {
+		return 0;
+	}
+	return Number(numeric.toFixed(profileCurrencyPrecision.value));
+};
+
 const secondaryRate = computed(() => {
-	return priceListToSelectedCurrency(
+	return roundToProfilePrecision(priceListToSelectedCurrency(
 		{
 			pos_profile: props.posProfile,
 			price_list_currency: primaryCurrency.value,
@@ -132,11 +155,11 @@ const secondaryRate = computed(() => {
 			conversion_rate: props.selectedConversionRate,
 		},
 		primaryRate.value,
-	);
+	));
 });
 
 const secondaryPrecision = computed(() => {
-	return props.ratePrecision(secondaryRate.value);
+	return profileCurrencyPrecision.value;
 });
 
 const rateInfo = computed(() => props.getItemRateInfo(props.item));

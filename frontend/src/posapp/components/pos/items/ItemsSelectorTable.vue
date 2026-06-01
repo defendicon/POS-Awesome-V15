@@ -64,7 +64,7 @@
 							formatCurrency(
 								secondaryRate(item),
 								selectedCurrency,
-								ratePrecision(secondaryRate(item)),
+								secondaryPrecision(),
 							)
 						}}
 					</div>
@@ -166,8 +166,33 @@ const priceListCurrency = (item) =>
 
 const primaryRate = (item) => item.original_rate ?? item.rate ?? 0;
 
+const profileCurrencyPrecision = () => {
+	const precision = Number.parseInt(
+		String(
+			props.posProfile.currency_precision ??
+				props.posProfile.posa_decimal_precision ??
+				2,
+		),
+		10,
+	);
+	if (!Number.isInteger(precision)) {
+		return 2;
+	}
+	return Math.min(Math.max(precision, 0), 20);
+};
+
+const roundToProfilePrecision = (value) => {
+	const numeric = Number.parseFloat(String(value ?? 0));
+	if (!Number.isFinite(numeric)) {
+		return 0;
+	}
+	return Number(numeric.toFixed(profileCurrencyPrecision()));
+};
+
+const secondaryPrecision = () => profileCurrencyPrecision();
+
 const secondaryRate = (item) =>
-	priceListToSelectedCurrency(
+	roundToProfilePrecision(priceListToSelectedCurrency(
 		{
 			pos_profile: props.posProfile,
 			price_list_currency: priceListCurrency(item),
@@ -176,7 +201,7 @@ const secondaryRate = (item) =>
 			conversion_rate: props.selectedConversionRate,
 		},
 		primaryRate(item),
-	);
+	));
 
 const tableRef = ref(null);
 
