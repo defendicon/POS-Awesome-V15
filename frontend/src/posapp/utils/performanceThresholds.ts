@@ -1,5 +1,8 @@
 export type PerformanceThresholdName =
+	| "localSnapshotManifestRead"
 	| "cachedSellReadyBoot"
+	| "offlineValidSnapshotSellReadyBoot"
+	| "snapshotAtomicCommit"
 	| "barcodeExactLookup"
 	| "localItemAutocomplete"
 	| "localCustomerAutocomplete"
@@ -10,7 +13,10 @@ export type PerformanceThresholdName =
 	| "paymentDialogOpen";
 
 export const PERFORMANCE_THRESHOLDS_MS: Record<PerformanceThresholdName, number> = {
+	localSnapshotManifestRead: 50,
 	cachedSellReadyBoot: 500,
+	offlineValidSnapshotSellReadyBoot: 500,
+	snapshotAtomicCommit: 100,
 	barcodeExactLookup: 20,
 	localItemAutocomplete: 50,
 	localCustomerAutocomplete: 75,

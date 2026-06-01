@@ -97,6 +97,7 @@ import { useUpdateStore } from "../stores/updateStore.js";
 import { useItemsStore } from "../stores/itemsStore.js";
 import { usePricingRulesStore } from "../stores/pricingRulesStore";
 import { useOfflineSyncStore } from "../stores/offlineSyncStore";
+import { useBootReadinessStore } from "../stores/bootReadinessStore";
 import { storeToRefs } from "pinia";
 import {
 	getOpeningStorage,
@@ -210,6 +211,7 @@ const syncStore = useSyncStore();
 const customersStore = useCustomersStore();
 const itemsStore = useItemsStore();
 const offlineSyncStore = useOfflineSyncStore();
+const bootReadinessStore = useBootReadinessStore();
 const toastStore = useToastStore();
 const uiStore = useUIStore();
 const updateStore = useUpdateStore();
@@ -539,6 +541,26 @@ function triggerOperatorRefreshSync(options = {}) {
 	return bootSync.triggerOperatorRefreshSync(options);
 }
 
+async function refreshBootCriticalData(options = {}) {
+	return bootReadinessStore.refreshCriticalResourcesInBackground(
+		async () => {
+			if (options.includeWarmResources) {
+				await triggerOperatorRefreshSync({ includeBootSync: true });
+			} else {
+				await scheduleBootCriticalWarmSync();
+			}
+			await refreshOfflinePricingRules({
+				force: options.forcePricing === true,
+			});
+			evaluateBootstrapSnapshot({ allowPrompt: false });
+		},
+		{
+			blockUntilReady: options.blockUntilReady === true,
+			reason: options.reason || "background",
+		},
+	);
+}
+
 async function runStartupOfflineDataWarmup(reason = "startup") {
 	const profile = getOfflineSyncProfile();
 	if (
@@ -688,6 +710,18 @@ watch(
 		evaluateBootstrapSnapshot({
 			allowPrompt: getIsManualOffline() || !navigator.onLine,
 		});
+		void bootReadinessStore.applyRegisterData({
+			pos_profile: posProfile.value,
+			pos_opening_shift: posOpeningShift.value,
+		});
+		if (!bootReadinessStore.sellReady && canRunOfflineSync()) {
+			void refreshBootCriticalData({
+				blockUntilReady: true,
+				includeWarmResources: true,
+				forcePricing: true,
+				reason: "profile_ready_minimum_bootstrap",
+			});
+		}
 	},
 );
 
@@ -794,6 +828,10 @@ watch(
 	(loaded) => {
 		if (loaded) {
 			markSourceLoaded("items");
+			void bootReadinessStore.evaluateSellReady({
+				pos_profile: posProfile.value,
+				pos_opening_shift: posOpeningShift.value,
+			});
 		}
 	},
 	{ immediate: true },
@@ -875,9 +913,12 @@ const initializeData = async () => {
 	const openingData = getValidCachedOpeningForCurrentUser(getOpeningStorage(), frappe?.session?.user);
 	if (openingData) {
 		uiStore.setRegisterData(openingData);
+		await bootReadinessStore.applyRegisterData(openingData);
 		if (navigator.onLine) {
 			await refreshTaxInclusiveSetting();
 		}
+	} else {
+		await bootReadinessStore.initialiseBoot(null);
 	}
 
 	if (queueHealthCheck()) {
@@ -905,11 +946,25 @@ const initializeData = async () => {
 	evaluateBootstrapSnapshot({
 		allowPrompt: manualOffline.value || !navigator.onLine,
 	});
-	await scheduleBootCriticalWarmSync();
-	await refreshOfflinePricingRules();
-	evaluateBootstrapSnapshot({ allowPrompt: false });
-	initialBootstrapSyncSettled.value = true;
-	void runStartupOfflineDataWarmup("initial_load");
+	if (bootReadinessStore.sellReady) {
+		initialBootstrapSyncSettled.value = true;
+		if (canRunOfflineSync()) {
+			void refreshBootCriticalData({
+				reason: "cached_boot_background_refresh",
+			});
+			void runStartupOfflineDataWarmup("initial_load");
+		}
+	} else if (canRunOfflineSync()) {
+		await refreshBootCriticalData({
+			blockUntilReady: true,
+			includeWarmResources: true,
+			forcePricing: true,
+			reason: "online_minimum_bootstrap",
+		});
+		initialBootstrapSyncSettled.value = true;
+	} else {
+		initialBootstrapSyncSettled.value = true;
+	}
 
 	markSourceLoaded("init");
 };

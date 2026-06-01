@@ -42,6 +42,79 @@
 				</section>
 			</div>
 
+			<div class="perf-grid perf-grid--stats">
+				<section class="perf-panel">
+					<span>{{ __("Sell Ready") }}</span>
+					<strong>{{ readiness.sellReady ? __("Yes") : __("No") }}</strong>
+				</section>
+				<section class="perf-panel">
+					<span>{{ __("Readiness") }}</span>
+					<strong>{{ readiness.phase }}</strong>
+				</section>
+				<section class="perf-panel">
+					<span>{{ __("Source") }}</span>
+					<strong>{{ readiness.sellReadySource || "-" }}</strong>
+				</section>
+				<section class="perf-panel">
+					<span>{{ __("Blocking") }}</span>
+					<strong>{{ readiness.blockingResource || "-" }}</strong>
+				</section>
+			</div>
+
+			<div class="perf-grid">
+				<section class="perf-panel perf-panel--wide">
+					<div class="perf-panel__title">
+						<h2>{{ __("Boot Resources") }}</h2>
+						<span>{{ readiness.remoteRefreshState }}</span>
+					</div>
+					<v-table density="compact">
+						<thead>
+							<tr>
+								<th>{{ __("Resource") }}</th>
+								<th>{{ __("Required") }}</th>
+								<th>{{ __("State") }}</th>
+								<th>{{ __("Blocking") }}</th>
+								<th>{{ __("Local Version") }}</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="resource in readinessResources" :key="resource.key">
+								<td class="metric-name">{{ resource.key }}</td>
+								<td>{{ resource.required ? __("Yes") : __("No") }}</td>
+								<td>{{ resource.state }}</td>
+								<td>{{ resource.blocking ? __("Yes") : __("No") }}</td>
+								<td class="metric-tags">{{ resource.localVersion || "-" }}</td>
+							</tr>
+						</tbody>
+					</v-table>
+				</section>
+
+				<section class="perf-panel">
+					<div class="perf-panel__title">
+						<h2>{{ __("Snapshot") }}</h2>
+						<span>{{ readiness.manifest?.validity || "-" }}</span>
+					</div>
+					<ul class="perf-list">
+						<li>
+							<span>{{ __("Generation") }}</span>
+							<strong class="metric-name">{{ readiness.manifest?.generationId || "-" }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Updated") }}</span>
+							<strong>{{ readiness.manifest?.updatedAt || "-" }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Local Ready") }}</span>
+							<strong>{{ readiness.localSellReadyAt || "-" }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Fresh Ready") }}</span>
+							<strong>{{ readiness.freshSellReadyAt || "-" }}</strong>
+						</li>
+					</ul>
+				</section>
+			</div>
+
 			<div class="perf-grid">
 				<section class="perf-panel perf-panel--wide">
 					<div class="perf-panel__title">
@@ -131,12 +204,14 @@ import {
 	memory,
 	type OfflineEntityType,
 } from "../../../offline";
+import { useBootReadinessStore } from "../../stores/bootReadinessStore";
 
 const __ = (globalThis as any).__ || ((text: string) => text);
 
 const events = ref<PerfEvent[]>(getPerfEvents());
 const summaries = ref(getPerfSummaries());
 const online = ref(typeof navigator === "undefined" ? true : navigator.onLine);
+const bootReadinessStore = useBootReadinessStore();
 
 function hasRole(role: string) {
 	const roles = (globalThis as any).frappe?.boot?.user?.roles || (globalThis as any).frappe?.boot?.roles || [];
@@ -171,6 +246,10 @@ const cacheState = computed(() => ({
 	items: memory.items_last_sync ? __("Ready") : __("Cold"),
 	customers: memory.customers_last_sync ? __("Ready") : __("Cold"),
 }));
+const readiness = computed(() => bootReadinessStore.getBootDiagnosticState());
+const readinessResources = computed(() =>
+	Object.values(readiness.value.resources || {}),
+);
 
 function refresh() {
 	events.value = getPerfEvents();

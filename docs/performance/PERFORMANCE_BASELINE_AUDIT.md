@@ -174,7 +174,7 @@ Instrumentation added:
 
 ## Duplication And Reload Risks
 
-- Sell-ready is currently inferred from route readiness, not a composed readiness contract for item cache, customer cache, currency, payment methods, and cart capability.
+- Sell-ready is now owned by `frontend/src/posapp/stores/bootReadinessStore.ts`. The previous route-ready metric in `posapp.ts` has been removed.
 - Offers can use cached data and then refresh from the server; both paths are now measured separately, but the broader app still needs a clear stale/fresh state model.
 - Local customer search scans the full synthetic customer list in the regression benchmark. This is a confirmed bottleneck candidate for indexing or worker-backed search.
 - Item and customer search result rendering can still trigger broad reactive updates; render metrics are available but need browser-run samples for exact p95 values.
@@ -212,10 +212,15 @@ Added tests:
 
 - `frontend/tests/performanceMonitor.spec.ts`
 - `frontend/tests/performanceRegressionBaselines.spec.ts`
+- `frontend/tests/localSnapshotManifest.spec.ts`
+- `frontend/tests/bootReadinessStore.spec.ts`
 
 Initial thresholds:
 
+- Local snapshot manifest read and validation p95 <= 50 ms
 - Cached sell-ready boot p95 <= 500 ms
+- Offline valid-snapshot sell-ready boot p95 <= 500 ms
+- Snapshot atomic commit p95 <= 100 ms
 - Barcode exact lookup p95 <= 20 ms
 - Local item autocomplete p95 <= 50 ms
 - Local customer autocomplete p95 <= 75 ms
@@ -232,19 +237,75 @@ Environment note: `corepack yarn test` and `corepack yarn type-check` did not fi
 Observed results:
 
 - `cmd /c corepack.cmd yarn install`: passed.
-- `cmd /c .\node_modules\.bin\vitest.cmd --run tests\performanceMonitor.spec.ts tests\performanceRegressionBaselines.spec.ts`: performance monitor tests passed; performance regression baseline intentionally failed on customer local autocomplete at p95 83.45 ms versus the 75 ms target.
+- `cmd /c .\node_modules\.bin\vitest.cmd --run tests\performanceMonitor.spec.ts tests\performanceRegressionBaselines.spec.ts`: performance monitor tests passed; performance regression baseline intentionally failed on customer local autocomplete at p95 83.45 ms versus the 75 ms target in the first baseline run.
 - `cmd /c .\node_modules\.bin\vue-tsc.cmd --noEmit`: passed after fixing monitor typing.
 - `cmd /c .\node_modules\.bin\vite.cmd build`: passed. Vite reported existing large chunk warnings for `Pos` and `vuetify` bundles.
 - `cmd /c .\node_modules\.bin\eslint.cmd .`: passed with warnings only; new and changed performance files were checked separately with no warnings.
 - `python -m py_compile ...`: passed for the new backend timing helper and instrumented POS API modules.
 - `git diff --check`: passed; Git reported only line-ending normalization warnings.
+- `cmd /c .\node_modules\.bin\vitest.cmd --run tests\localSnapshotManifest.spec.ts tests\bootReadinessStore.spec.ts tests\performanceMonitor.spec.ts`: passed 9 tests. The focused unit path validates true sell-ready gating, missing item snapshot blocking, multi-currency exchange-rate blocking, stale-but-usable policy, and metric emission.
+- `cmd /c .\node_modules\.bin\vitest.cmd --run tests\localSnapshotManifest.spec.ts tests\bootReadinessStore.spec.ts tests\performanceMonitor.spec.ts tests\performanceRegressionBaselines.spec.ts`: new boot/readiness tests passed, and the performance baseline intentionally failed on item autocomplete p95 79.58 ms versus 50 ms and customer autocomplete p95 137.76 ms versus 75 ms.
+
+## True Sell-Ready Definition
+
+`pos.boot.sell_ready` now represents the central readiness store deciding that the cashier can sell. It is no longer emitted by router readiness, page mount, or component presence.
+
+Required resources:
+
+- POS profile
+- payment methods
+- transaction currency
+- exchange-rate readiness when tender currencies differ from transaction currency
+- local item lookup data for the active profile/warehouse scope
+- cart pricing prerequisite, currently the active selling price list
+
+Tracked but non-blocking resources:
+
+- customer cache
+- pricing rules snapshot
+- offers/promotions cache
+
+Customers are intentionally non-blocking because the current app can proceed with a walk-in/current invoice customer path, while forcing full customer hydration would make large customer datasets block startup.
+
+## New Boot Sequence
+
+1. `posapp.ts` mounts the shell and emits `pos.boot.shell_visible`.
+2. `DefaultLayout.vue` opens IndexedDB, hydrates queues/sync state, and applies cached opening/register data when present.
+3. `bootReadinessStore.initialiseBoot()` reads `local_snapshot_manifest`, validates local cache health, builds a runtime manifest, and evaluates sell-ready.
+4. If the local manifest is usable, `pos.boot.sell_ready` is completed with source `local_valid_snapshot` or `degraded_cached_snapshot`.
+5. If no valid local snapshot exists and the terminal is online with an active profile, `DefaultLayout.vue` runs minimum bootstrap plus warm resources through the existing sync runtime before sell-ready can complete.
+6. Remote refresh continues in the background and reconciles by rebuilding and atomically committing the local manifest.
+
+## Snapshot Manifest Design
+
+Implemented in `frontend/src/offline/localSnapshotManifest.ts` and persisted through Dexie `settings` keys:
+
+- `local_snapshot_manifest`
+- `local_snapshot_manifest_status`
+
+The manifest contains schema version, compatibility signature, profile/company/warehouse/price list/currency identifiers, tender currencies, generation ID, timestamps, validity state, stale policy, feature flags, and a per-resource readiness matrix.
+
+The atomic commit path writes only the manifest keys and does not clear or replace pending offline invoices, payments, customers, cash movements, invoice outbox rows, or generic write queue rows.
+
+## Offline And Multi-Currency Policy
+
+Offline single-currency sale is allowed only when the local manifest has profile, payment method, currency, item lookup, and pricing prerequisites.
+
+Offline multi-currency sale additionally requires cached exchange-rate readiness when any tender currency differs from the profile currency. If exchange-rate cache is missing, the `exchange_rates` resource blocks sell-ready and diagnostics show the exact blocking resource.
+
+Pricing rules and offers are allowed to be stale/non-blocking during boot, but they are tracked in the manifest and refreshed in the background. Already committed offline transactions are not rewritten by snapshot refresh.
+
+## Diagnostics Update
+
+`PerformanceDiagnostics.vue` now shows the readiness phase, true sell-ready state, sell-ready source, blocking resource, manifest generation/validity, local/fresh ready timestamps, remote refresh state, and the boot resource readiness matrix.
 
 ## Bottleneck Table
 
 | Flow | File/component/API involved | Current measured duration | Dataset used | Root cause | Severity | Recommended optimisation task | Risk of changing it |
 | --- | --- | ---: | --- | --- | --- | --- | --- |
-| Customer local autocomplete | `frontend/src/posapp/stores/customersStore.ts`, `frontend/tests/performanceRegressionBaselines.spec.ts` | p95 83.45 ms, target 75 ms | 25,000 synthetic customers | Linear filtering over a large in-memory list during autocomplete | High | Add a normalized customer search index, precomputed lowercase fields, or worker-backed search | Medium: must preserve offline customer selection and balance behavior |
-| Sell-ready boot semantics | `frontend/src/posapp/posapp.ts`, POS route/store initialization | Not benchmarked; code inspection finding | Runtime boot path | Current metric is route-ready, not explicit ability to search, add item, access payment methods, and use currency config | Critical | Build a readiness aggregator that combines local snapshot, item cache, customer cache, payment methods, currency, and cart mutation readiness | Medium: readiness state touches boot UX and offline mode |
+| Item local autocomplete | `frontend/tests/performanceRegressionBaselines.spec.ts`, item local search path | p95 79.58 ms, target 50 ms | 25,000 synthetic items | Synthetic local autocomplete scan exceeded target on the latest validation run | High | Add indexed local search path for autocomplete and keep barcode exact lookup O(1) | Medium: must preserve item selector filtering and price-list behavior |
+| Customer local autocomplete | `frontend/src/posapp/stores/customersStore.ts`, `frontend/tests/performanceRegressionBaselines.spec.ts` | p95 137.76 ms, target 75 ms on latest validation run | 25,000 synthetic customers | Linear filtering over a large in-memory list during autocomplete | High | Add a normalized customer search index, precomputed lowercase fields, or worker-backed search | Medium: must preserve offline customer selection and balance behavior |
+| Sell-ready boot semantics | `frontend/src/posapp/stores/bootReadinessStore.ts`, `frontend/src/offline/localSnapshotManifest.ts`, `frontend/src/posapp/layouts/DefaultLayout.vue` | Unit validated; browser p95 pending | Runtime boot path | Route-ready metric is fixed; browser-run p95 still needs real Frappe app session data | Medium | Run browser perf smoke with `posa_perf=1` against real cached/cold/offline boots | Low: diagnostic/measurement only |
 | Item/customer render attribution | `ItemsSelector.vue`, customer components, diagnostics metrics | Not benchmarked in this environment | Browser runtime required | Search timing and backend timing are measured, but component rerender p95 requires browser-run sessions | Medium | Add browser smoke/perf run that enables `posa_perf=1` and records render summaries from diagnostics | Low: diagnostic-only if no behavior changes |
 | Offline sync queue visibility | `frontend/src/offline/writeQueue.ts`, `frontend/src/offline/invoiceOutbox.ts`, `SyncCoordinator.ts` | Instrumented, no failing benchmark yet | Requires queued offline invoices/payments | Multiple queue paths make aggregate sync health harder to reason about | Medium | Add a combined queue health store that reads existing queues without extra traffic | Low to medium: must avoid breaking offline replay ordering |
 | Remote item/customer SQL | `posawesome/posawesome/api/item_processing/search.py`, `posawesome/posawesome/api/customers.py` | Instrumented, no bench server available in this environment | Frappe database required | Query cost depends on database indexes, profile filters, and serialization | High | Run Frappe-backed benchmark with synthetic data and review indexes/query plans | Medium: index/query changes affect ERPNext compatibility |
@@ -253,4 +314,4 @@ Observed results:
 
 This foundation now measures the complete critical path categories requested: boot, item search, barcode lookup, cart/pricing, customer search/select, payment, multi-currency, offline queue/sync, realtime invalidation, frontend diagnostics, backend endpoints, synthetic data, and regression thresholds.
 
-The current baseline contains a real failing performance target for customer local autocomplete. That failure should remain visible until the search architecture is optimized.
+The current baseline contains real failing performance targets for item and customer local autocomplete. Those failures should remain visible until the search architecture is optimized.

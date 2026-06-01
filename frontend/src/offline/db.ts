@@ -96,6 +96,8 @@ export const KEY_TABLE_MAP: Record<string, string> = {
 	bootstrap_snapshot: "settings",
 	bootstrap_snapshot_status: "settings",
 	bootstrap_limited_mode: "settings",
+	local_snapshot_manifest: "settings",
+	local_snapshot_manifest_status: "settings",
 	schema_signature: "settings",
 	items_last_sync: "sync_state",
 	customers_last_sync: "sync_state",
@@ -115,6 +117,8 @@ const LOCAL_STORAGE_KEYS = new Set([
 	"bootstrap_snapshot",
 	"bootstrap_snapshot_status",
 	"bootstrap_limited_mode",
+	"local_snapshot_manifest",
+	"local_snapshot_manifest_status",
 	"cache_ready",
 	"stock_cache_ready",
 	"schema_signature",
@@ -166,6 +170,8 @@ export const DERIVED_OFFLINE_CACHE_KEYS = Object.freeze([
 	"bootstrap_snapshot",
 	"bootstrap_snapshot_status",
 	"bootstrap_limited_mode",
+	"local_snapshot_manifest",
+	"local_snapshot_manifest_status",
 	"schema_signature",
 ]);
 
@@ -289,6 +295,8 @@ const MEMORY_DEFAULTS: AnyRecord = {
 	bootstrap_snapshot: null,
 	bootstrap_snapshot_status: null,
 	bootstrap_limited_mode: false,
+	local_snapshot_manifest: null,
+	local_snapshot_manifest_status: null,
 	schema_signature: null,
 };
 
@@ -725,6 +733,8 @@ export async function clearAllCache() {
 	memory.bootstrap_snapshot = null;
 	memory.bootstrap_snapshot_status = null;
 	memory.bootstrap_limited_mode = false;
+	memory.local_snapshot_manifest = null;
+	memory.local_snapshot_manifest_status = null;
 }
 
 export async function forceClearAllCache() {
@@ -741,6 +751,8 @@ export async function forceClearAllCache() {
 	memory.bootstrap_snapshot = null;
 	memory.bootstrap_snapshot_status = null;
 	memory.bootstrap_limited_mode = false;
+	memory.local_snapshot_manifest = null;
+	memory.local_snapshot_manifest_status = null;
 }
 
 export async function clearDerivedOfflineCaches() {

@@ -20,6 +20,7 @@ import themePlugin from "./plugins/theme";
 import { pinia } from "./stores";
 import { useToastStore } from "./stores/toastStore";
 import { useSocketStore } from "./stores/socketStore";
+import { useBootReadinessStore } from "./stores/bootReadinessStore";
 import { createPosAppRouter } from "./router";
 import {
 	installGlobalErrorHandlers,
@@ -127,9 +128,7 @@ async function startOptionalRuntimeServices() {
 			: "/sw.js";
 		navigator.serviceWorker
 			.register(swUrl)
-			.then((registration) => {
-				console.log("SW registered successfully", registration);
-			})
+			.then(() => undefined)
 			.catch((err) => console.error("SW registration failed", err));
 	}
 }
@@ -194,12 +193,11 @@ class PosAppController {
 		installGlobalErrorHandlers(this.app);
 
 		this.app.mount(this.$el[0]);
+		const bootReadinessStore = useBootReadinessStore();
+		bootReadinessStore.startShellVisible();
 		mountMetric.finish("success");
 		clearChunkRecoveryState();
 		void this.router.isReady().finally(() => {
-			startPerfMeasure("pos.boot.sell_ready", {
-				source: "router",
-			}).finish("success");
 			scheduleChunkRecoveryStateReset();
 			scheduleAfterStableBoot(() => {
 				void finalizePendingBundleActivation();
@@ -241,7 +239,6 @@ class PosAppController {
 			this.app = null;
 			this.router = null;
 			this.routerHistory = null;
-			console.info("POS App unmounted");
 		}
 	}
 

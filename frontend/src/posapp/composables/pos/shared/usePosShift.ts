@@ -2,6 +2,7 @@ import { ref, getCurrentInstance, inject } from "vue";
 import { useToastStore } from "../../../stores/toastStore.js";
 import { useUIStore } from "../../../stores/uiStore.js";
 import { useInvoiceStore } from "../../../stores/invoiceStore";
+import { useBootReadinessStore } from "../../../stores/bootReadinessStore";
 import {
 	initPromise,
 	checkDbHealth,
@@ -85,6 +86,7 @@ export function usePosShift(openDialog?: () => void) {
 		typeof __BUILD_VERSION__ !== "undefined" ? __BUILD_VERSION__ : null;
 	const toastStore = useToastStore();
 	const uiStore = useUIStore();
+	const bootReadinessStore = useBootReadinessStore();
 
 	const pos_profile = ref<any>(null);
 	const pos_opening_shift = ref<any>(null);
@@ -103,6 +105,7 @@ export function usePosShift(openDialog?: () => void) {
 				{ buildVersion },
 			),
 		);
+		void bootReadinessStore.applyRegisterData(data);
 
 		try {
 			frappe.realtime.emit("pos_profile_registered");
@@ -120,7 +123,6 @@ export function usePosShift(openDialog?: () => void) {
 		);
 		if (cachedOpening) {
 			applyRegisterData(cachedOpening);
-			console.info("LoadPosProfile (bootstrapped from cache)");
 		}
 		return frappe
 			.call("posawesome.posawesome.api.shifts.check_opening_shift", {
@@ -146,14 +148,12 @@ export function usePosShift(openDialog?: () => void) {
 							},
 						});
 					}
-					console.info("LoadPosProfile");
 					try {
 						setOpeningStorage(r.message);
 					} catch (e) {
 						console.error("Failed to cache opening data", e);
 					}
 				} else {
-					console.info("No opening shift found, opening dialog");
 					clearOpeningStorage();
 					openDialog && openDialog();
 				}
@@ -167,7 +167,6 @@ export function usePosShift(openDialog?: () => void) {
 					);
 				if (data) {
 					applyRegisterData(data);
-					console.info("LoadPosProfile (cached)");
 					return;
 				}
 				if (!isOffline()) {
@@ -219,7 +218,6 @@ export function usePosShift(openDialog?: () => void) {
 	}
 
 	function submit_closing_pos(data: any) {
-		console.log("Submitting closing shift", data);
 		frappe
 			.call(
 				"posawesome.posawesome.doctype.pos_closing_shift.pos_closing_shift.submit_closing_shift",
@@ -228,7 +226,6 @@ export function usePosShift(openDialog?: () => void) {
 				},
 			)
 			.then((r: any) => {
-				console.log("Submit result", r);
 				if (r.message) {
 					pos_profile.value = null;
 					pos_opening_shift.value = null;
