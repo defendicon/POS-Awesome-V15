@@ -12,12 +12,14 @@ import type {
 import {
 	customerMatchesSearchTerm,
 	normalizeCustomerSearchTerm,
+	scoreCustomerSearchMatch,
 } from "./customers/customerSearch";
 import { resetCustomerLoadingCoordinator } from "../modules/customers/customerLoadingCoordinator";
 // @ts-ignore
 import {
 	db,
 	checkDbHealth,
+	memory,
 	setCustomerStorage,
 	saveStoredValueSnapshot,
 	memoryInitPromise,
@@ -30,6 +32,7 @@ import {
 } from "../../offline/index";
 
 const PAGE_SIZE = 1000;
+const MAX_CUSTOMER_SEARCH_RESULTS = 50;
 const CUSTOMER_SCOPE_STORAGE_KEY = "posa_customers_profile_scope";
 
 function getCustomerProfileScope(profile: POSProfile | null): string {
@@ -170,6 +173,7 @@ export const useCustomersStore = defineStore("customers", () => {
 	const isUpdateCustomerDialogOpen = ref(false);
 	const customerToUpdate = ref<StoredCustomer | null>(null);
 	let customerFetchPromise: Promise<void> | null = null;
+	const customerSearchCache = new Map<string, CustomerSummary[]>();
 	const customerLoadLogState = {
 		local: false,
 		server: false,
@@ -221,6 +225,10 @@ export const useCustomersStore = defineStore("customers", () => {
 		customers.value = [];
 	}
 
+	function clearCustomerSearchCache() {
+		customerSearchCache.clear();
+	}
+
 	function setPosProfile(profile: unknown) {
 		posProfile.value = normalizeProfile(profile);
 		customerProfileScope.value = getCustomerProfileScope(posProfile.value);
@@ -265,10 +273,12 @@ export const useCustomersStore = defineStore("customers", () => {
 			const updated = [...customers.value];
 			updated.splice(existingIndex, 1, summary);
 			customers.value = updated;
+			clearCustomerSearchCache();
 			return;
 		}
 
 		customers.value = [...customers.value, summary];
+		clearCustomerSearchCache();
 	}
 
 	function setCustomerInfo(info: CustomerInfo) {
@@ -340,14 +350,31 @@ export const useCustomersStore = defineStore("customers", () => {
 	async function performSearch({ append = false } = {}) {
 		await ensureDatabase();
 
-		let collection = db.table("customers");
 		const normalizedTerm = normalizeCustomerSearchTerm(searchTerm.value);
+
 		if (normalizedTerm) {
-			collection = collection.filter((customer: CustomerSummary) =>
-				customerMatchesSearchTerm(customer, normalizedTerm),
+			const offset = append ? page.value * MAX_CUSTOMER_SEARCH_RESULTS : 0;
+			const results = await searchCustomerRows(
+				normalizedTerm,
+				MAX_CUSTOMER_SEARCH_RESULTS,
+				offset,
 			);
+
+			if (append) {
+				customers.value = [...customers.value, ...results];
+			} else {
+				customers.value = results;
+			}
+
+			hasMore.value = results.length === MAX_CUSTOMER_SEARCH_RESULTS;
+			if (hasMore.value) {
+				page.value += 1;
+			}
+
+			return results.length;
 		}
 
+		let collection = db.table("customers");
 		const offset = page.value * PAGE_SIZE;
 		const results = await collection
 			.offset(offset)
@@ -366,6 +393,105 @@ export const useCustomersStore = defineStore("customers", () => {
 		}
 
 		return results.length;
+	}
+
+	async function searchCustomerRows(
+		term: string,
+		limit: number,
+		offset: number,
+	): Promise<CustomerSummary[]> {
+		const normalized = normalizeCustomerSearchTerm(term);
+		const cacheKey = `${customerProfileScope.value || "global"}:${normalized.toLowerCase()}:${limit}:${offset}`;
+		const cached = customerSearchCache.get(cacheKey);
+		if (cached) {
+			return cached;
+		}
+
+		const memoryRows = Array.isArray(memory.customer_storage)
+			? (memory.customer_storage as CustomerSummary[])
+			: [];
+		const memoryHasCompleteCustomerSet =
+			memoryRows.length > 0 &&
+			!nextCustomerStart.value &&
+			(!totalCustomerCount.value || memoryRows.length >= totalCustomerCount.value);
+		if (memoryHasCompleteCustomerSet) {
+			const memoryResults = rankCustomerRows(memoryRows, normalized, limit, offset);
+			customerSearchCache.set(cacheKey, memoryResults);
+			trimCustomerSearchCache();
+			return memoryResults;
+		}
+
+		const rowsByName = new Map<string, CustomerSummary>();
+		const table = db.table("customers");
+		const lowerTerm = normalized.toLowerCase();
+
+		async function addRows(promiseFactory: () => Promise<CustomerSummary[]>) {
+			try {
+				const rows = await promiseFactory();
+				rows.forEach((row) => {
+					if (row?.name) {
+						rowsByName.set(row.name, row);
+					}
+				});
+			} catch {
+				// Some older Dexie mocks/adapters may not support a given index query.
+			}
+		}
+
+		const indexedFields = ["name", "customer_name", "mobile_no", "email_id"] as const;
+		await Promise.all(
+			indexedFields.map((field) =>
+				addRows(async () => {
+					const where = (table as any).where?.(field);
+					if (!where?.startsWithIgnoreCase) return [];
+					return await where
+						.startsWithIgnoreCase(normalized)
+						.limit(limit + offset)
+						.toArray();
+				}),
+			),
+		);
+
+		let ranked = rankCustomerRows(Array.from(rowsByName.values()), normalized, limit, offset);
+		if (ranked.length < limit) {
+			await addRows(async () => {
+				const filtered = (table as any).filter?.((customer: CustomerSummary) =>
+					customerMatchesSearchTerm(customer, lowerTerm),
+				);
+				if (!filtered?.limit) return [];
+				return await filtered.limit(limit + offset).toArray();
+			});
+			ranked = rankCustomerRows(Array.from(rowsByName.values()), normalized, limit, offset);
+		}
+
+		customerSearchCache.set(cacheKey, ranked);
+		trimCustomerSearchCache();
+		return ranked;
+	}
+
+	function rankCustomerRows(
+		rows: CustomerSummary[],
+		term: string,
+		limit: number,
+		offset: number,
+	) {
+		return rows
+			.map((customer) => ({
+				customer,
+				score: scoreCustomerSearchMatch(customer, term),
+			}))
+			.filter((entry) => entry.score > 0)
+			.sort((a, b) => b.score - a.score || a.customer.name.localeCompare(b.customer.name))
+			.slice(offset, offset + limit)
+			.map((entry) => entry.customer);
+	}
+
+	function trimCustomerSearchCache() {
+		while (customerSearchCache.size > 100) {
+			const firstKey = customerSearchCache.keys().next().value;
+			if (!firstKey) break;
+			customerSearchCache.delete(firstKey);
+		}
 	}
 
 	async function searchCustomers(term = "", append = false) {
@@ -454,6 +580,7 @@ export const useCustomersStore = defineStore("customers", () => {
 				);
 				if (rows.length) {
 					await setCustomerStorage(rows);
+					clearCustomerSearchCache();
 					loadedCustomerCount.value += rows.length;
 					syncBootstrapCustomerReadiness(loadedCustomerCount.value);
 					if (totalCustomerCount.value) {
@@ -532,6 +659,7 @@ export const useCustomersStore = defineStore("customers", () => {
 				);
 				if (rows.length) {
 					await setCustomerStorage(rows);
+					clearCustomerSearchCache();
 					loadedCustomerCount.value += rows.length;
 					syncBootstrapCustomerReadiness(loadedCustomerCount.value);
 					if (totalCustomerCount.value) {
@@ -635,6 +763,7 @@ export const useCustomersStore = defineStore("customers", () => {
 
 			if (rows.length) {
 				await setCustomerStorage(rows);
+				clearCustomerSearchCache();
 			}
 			loadedCustomerCount.value = rows.length;
 			syncBootstrapCustomerReadiness(loadedCustomerCount.value);
@@ -697,6 +826,7 @@ export const useCustomersStore = defineStore("customers", () => {
 			customers.value = [...customers.value, customer];
 		}
 		await setCustomerStorage([customer]);
+		clearCustomerSearchCache();
 		syncBootstrapCustomerReadiness(Math.max(customers.value.length, 1));
 		setSelectedCustomer(customer.name);
 		requestCustomerRefresh();
@@ -711,6 +841,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		resetCustomerLoadingCoordinator();
 		clearLocalState();
 		await clearCustomerStorage();
+		clearCustomerSearchCache();
 		setCustomersLastSync(null);
 		syncBootstrapCustomerReadiness(0);
 
@@ -742,6 +873,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		customersLoaded.value = false;
 		nextCustomerStart.value = null;
 		resetCustomerLoadLogState();
+		clearCustomerSearchCache();
 	}
 
 	return {

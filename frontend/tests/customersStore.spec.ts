@@ -21,6 +21,7 @@ vi.mock("../src/offline/index", () => ({
 			toArray: vi.fn(async () => []),
 		})),
 	},
+	memory: { customer_storage: [] },
 	checkDbHealth: vi.fn(async () => undefined),
 	setCustomerStorage: (...args: any[]) => setCustomerStorageMock(...args),
 	saveStoredValueSnapshot: (...args: any[]) =>

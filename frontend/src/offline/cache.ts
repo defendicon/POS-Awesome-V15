@@ -260,6 +260,84 @@ export async function getStoredItems() {
 	}
 }
 
+function matchesItemSearch(item: any, search: string) {
+	const normalizedSearch = String(search || "").trim().toLowerCase();
+	if (!normalizedSearch) {
+		return true;
+	}
+	const terms = normalizedSearch.split(/\s+/).filter(Boolean);
+	const searchableValues = [
+		item?.item_name,
+		item?.item_code,
+		item?.description,
+		item?.item_barcode,
+		...(Array.isArray(item?.barcodes) ? item.barcodes : []),
+		...(Array.isArray(item?.name_keywords) ? item.name_keywords : []),
+		...(Array.isArray(item?.serials) ? item.serials : []),
+		...(Array.isArray(item?.batches) ? item.batches : []),
+	]
+		.flatMap((value) => {
+			if (Array.isArray(value)) return value;
+			if (value && typeof value === "object") {
+				return [value.barcode, value.serial_no, value.batch_no];
+			}
+			return [value];
+		})
+		.filter((value) => value !== null && value !== undefined)
+		.map((value) => String(value).toLowerCase());
+
+	return terms.every((term) =>
+		searchableValues.some((value) => value.includes(term)),
+	);
+}
+
+function scoreItemSearchMatch(item: any, search: string) {
+	const normalizedSearch = String(search || "").trim().toLowerCase();
+	if (!normalizedSearch) {
+		return 1;
+	}
+	if (!matchesItemSearch(item, normalizedSearch)) {
+		return 0;
+	}
+
+	const itemCode = String(item?.item_code || "").toLowerCase();
+	const itemName = String(item?.item_name || "").toLowerCase();
+	const barcodes = Array.isArray(item?.barcodes)
+		? item.barcodes.map((barcode: unknown) => String(barcode).toLowerCase())
+		: [];
+
+	if (barcodes.includes(normalizedSearch)) return 400;
+	if (itemCode === normalizedSearch) return 350;
+	if (itemName === normalizedSearch) return 325;
+	if (itemCode.startsWith(normalizedSearch)) return 275;
+	if (itemName.startsWith(normalizedSearch)) return 250;
+	if (itemCode.includes(normalizedSearch)) return 175;
+	if (itemName.includes(normalizedSearch)) return 150;
+	return 50;
+}
+
+function rankItemSearchRows(rows: any[], search: string, limit: number, offset: number) {
+	const deduped = new Map<string, any>();
+	rows.forEach((row) => {
+		if (row?.item_code && !deduped.has(row.item_code)) {
+			deduped.set(row.item_code, row);
+		}
+	});
+
+	return Array.from(deduped.values())
+		.map((item) => ({ item, score: scoreItemSearchMatch(item, search) }))
+		.filter((entry) => entry.score > 0)
+		.sort(
+			(a, b) =>
+				b.score - a.score ||
+				String(a.item.item_name || a.item.item_code || "").localeCompare(
+					String(b.item.item_name || b.item.item_code || ""),
+				),
+		)
+		.slice(offset, offset + limit)
+		.map((entry) => entry.item);
+}
+
 export async function searchStoredItems({
 	search = "",
 	itemGroup = "",
@@ -272,7 +350,8 @@ export async function searchStoredItems({
 		if (!db.isOpen()) await db.open();
 		const normalizedGroup =
 			typeof itemGroup === "string" ? itemGroup.trim() : "";
-		let collection = db.table("items");
+		const table = db.table("items");
+		let collection = table;
 		if (normalizedGroup && normalizedGroup.toLowerCase() !== "all") {
 			collection = collection
 				.where("item_group")
@@ -282,24 +361,84 @@ export async function searchStoredItems({
 		const normalizedSearch =
 			typeof search === "string" ? search.trim() : "";
 		if (normalizedSearch) {
+			const indexedRows: any[] = [];
 			const term = normalizedSearch.toLowerCase();
 			const terms = term.split(/\s+/).filter(Boolean);
+			const candidateLimit = Math.max(limit + offset, limit * 3);
 
-			collection = collection.filter((it) => {
-				const nameMatch =
-					it.item_name &&
-					terms.every((t) => it.item_name.toLowerCase().includes(t));
-				const codeMatch =
-					it.item_code && it.item_code.toLowerCase().includes(term);
-				const barcodeMatch = Array.isArray(it.item_barcode)
-					? it.item_barcode.some(
-							(b) =>
-								b.barcode && b.barcode.toLowerCase() === term,
-						)
-					: it.item_barcode &&
-						String(it.item_barcode).toLowerCase().includes(term);
-				return nameMatch || codeMatch || barcodeMatch;
-			});
+			async function addIndexedRows(queryFactory: () => Promise<any[]>) {
+				try {
+					const rows = await queryFactory();
+					if (Array.isArray(rows) && rows.length) {
+						indexedRows.push(...rows);
+					}
+				} catch {
+					// Indexes can be absent in old upgraded caches; fallback below preserves behavior.
+				}
+			}
+
+			if (terms.length === 1) {
+				await Promise.all([
+					addIndexedRows(async () =>
+						await table
+							.where("barcodes")
+							.equals(term)
+							.limit(candidateLimit)
+							.toArray(),
+					),
+					addIndexedRows(async () =>
+						await table
+							.where("item_code")
+							.startsWithIgnoreCase(normalizedSearch)
+							.limit(candidateLimit)
+							.toArray(),
+					),
+					addIndexedRows(async () =>
+						await table
+							.where("item_name")
+							.startsWithIgnoreCase(normalizedSearch)
+							.limit(candidateLimit)
+							.toArray(),
+					),
+					addIndexedRows(async () =>
+						await table
+							.where("name_keywords")
+							.equals(term)
+							.limit(candidateLimit)
+							.toArray(),
+					),
+				]);
+			} else if (terms.length > 1) {
+				await addIndexedRows(async () =>
+					await table
+						.where("name_keywords")
+						.anyOf(terms)
+						.limit(candidateLimit)
+						.toArray(),
+				);
+			}
+
+			const scopedIndexedRows = indexedRows.filter(
+				(row) =>
+					(!hasScope(scope) || isMatchingScope(row, scope)) &&
+					(!normalizedGroup ||
+						normalizedGroup.toLowerCase() === "all" ||
+						String(row?.item_group || "").toLowerCase() ===
+							normalizedGroup.toLowerCase()),
+			);
+			const indexedResult = rankItemSearchRows(
+				scopedIndexedRows,
+				normalizedSearch,
+				limit,
+				offset,
+			);
+			if (indexedResult.length >= limit) {
+				return indexedResult;
+			}
+
+			collection = collection.filter((it) =>
+				matchesItemSearch(it, normalizedSearch),
+			);
 		}
 
 		const res = await collection.offset(offset).limit(limit).toArray();

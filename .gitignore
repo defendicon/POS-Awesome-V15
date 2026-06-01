@@ -28,4 +28,5 @@ frontend/.env.local
 frontend/.env.*.local
 frontend/playwright/.auth/
 __reference_erpnext/
+.codex-reference/
 .claude/settings.local.json
