@@ -4,12 +4,31 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const persist = vi.fn();
 
+const customerIndexedToArray = vi.fn();
+const customerFilteredToArray = vi.fn();
+const customerListToArray = vi.fn();
+const customerIndexedLimit = vi.fn(() => ({ toArray: customerIndexedToArray }));
+const customerFilteredLimit = vi.fn(() => ({ toArray: customerFilteredToArray }));
+const customerListLimit = vi.fn(() => ({ toArray: customerListToArray }));
+const customerStartsWithIgnoreCase = vi.fn(() => ({
+	limit: customerIndexedLimit,
+}));
+
 const customersTable = {
 	get: vi.fn(),
 	bulkPut: vi.fn(),
 	bulkDelete: vi.fn(),
 	clear: vi.fn(),
 	count: vi.fn(),
+	where: vi.fn(() => ({
+		startsWithIgnoreCase: customerStartsWithIgnoreCase,
+	})),
+	filter: vi.fn(() => ({
+		limit: customerFilteredLimit,
+	})),
+	offset: vi.fn(() => ({
+		limit: customerListLimit,
+	})),
 };
 
 vi.mock("../src/offline/db", () => ({
@@ -59,6 +78,19 @@ describe("offline storage ownership", () => {
 		customersTable.bulkDelete.mockReset();
 		customersTable.clear.mockReset();
 		customersTable.count.mockReset();
+		customersTable.where.mockClear();
+		customersTable.filter.mockClear();
+		customersTable.offset.mockClear();
+		customerStartsWithIgnoreCase.mockClear();
+		customerIndexedLimit.mockClear();
+		customerFilteredLimit.mockClear();
+		customerListLimit.mockClear();
+		customerIndexedToArray.mockReset();
+		customerFilteredToArray.mockReset();
+		customerListToArray.mockReset();
+		customerIndexedToArray.mockResolvedValue([]);
+		customerFilteredToArray.mockResolvedValue([]);
+		customerListToArray.mockResolvedValue([]);
 		window.localStorage.clear();
 	});
 
@@ -196,5 +228,82 @@ describe("offline storage ownership", () => {
 			{ customerIdentifier: "row:0" },
 		);
 		warnSpy.mockRestore();
+	});
+
+	it("uses the worker for stored customer search when available", async () => {
+		const originalWorker = (globalThis as any).Worker;
+		class MockWorker {
+			onmessage: ((_event: any) => void) | null = null;
+			onerror: (() => void) | null = null;
+
+			postMessage(message: any) {
+				setTimeout(() => {
+					this.onmessage?.({
+						data: {
+							type: "search_stored_customers_result",
+							id: message.id,
+							customers: [
+								{
+									name: "CUST-WORKER",
+									customer_name: "Worker Customer",
+								},
+							],
+						},
+					});
+				}, 0);
+			}
+
+			terminate() {}
+		}
+		(globalThis as any).Worker = MockWorker;
+
+		try {
+			const { searchStoredCustomers } = await import("../src/offline/customers");
+			const result = await searchStoredCustomers({
+				search: "worker",
+				limit: 10,
+			});
+
+			expect(result).toEqual([
+				expect.objectContaining({ name: "CUST-WORKER" }),
+			]);
+			expect(customersTable.where).not.toHaveBeenCalled();
+		} finally {
+			(globalThis as any).Worker = originalWorker;
+		}
+	});
+
+	it("falls back to indexed customer search without a worker", async () => {
+		const originalWorker = (globalThis as any).Worker;
+		(globalThis as any).Worker = undefined;
+		customerIndexedToArray.mockResolvedValue([
+			{
+				name: "CUST-CONTAINS",
+				customer_name: "Retail Jane",
+				mobile_no: "03000000000",
+			},
+			{
+				name: "CUST-JANE",
+				customer_name: "Jane Doe",
+				mobile_no: "03111111111",
+			},
+		]);
+
+		try {
+			const { searchStoredCustomers } = await import("../src/offline/customers");
+			const result = await searchStoredCustomers({
+				search: "Jane",
+				limit: 2,
+			});
+
+			expect(customersTable.where).toHaveBeenCalled();
+			expect(customerStartsWithIgnoreCase).toHaveBeenCalledWith("Jane");
+			expect(result).toEqual([
+				expect.objectContaining({ name: "CUST-JANE" }),
+				expect.objectContaining({ name: "CUST-CONTAINS" }),
+			]);
+		} finally {
+			(globalThis as any).Worker = originalWorker;
+		}
 	});
 });
