@@ -9,6 +9,7 @@ import type {
 
 const setCustomerStorageMock = vi.fn(async () => undefined);
 const saveStoredValueSnapshotMock = vi.fn();
+const searchStoredCustomersMock = vi.fn(async () => []);
 
 vi.mock("../src/offline/index", () => ({
 	db: {
@@ -24,6 +25,7 @@ vi.mock("../src/offline/index", () => ({
 	memory: { customer_storage: [] },
 	checkDbHealth: vi.fn(async () => undefined),
 	setCustomerStorage: (...args: any[]) => setCustomerStorageMock(...args),
+	searchStoredCustomers: (...args: any[]) => searchStoredCustomersMock(...args),
 	saveStoredValueSnapshot: (...args: any[]) =>
 		saveStoredValueSnapshotMock(...args),
 	memoryInitPromise: Promise.resolve(),
@@ -40,6 +42,8 @@ describe("customersStore profile and customer dto handling", () => {
 		setActivePinia(createPinia());
 		setCustomerStorageMock.mockClear();
 		saveStoredValueSnapshotMock.mockClear();
+		searchStoredCustomersMock.mockReset();
+		searchStoredCustomersMock.mockResolvedValue([]);
 		(globalThis as any).frappe = {
 			call: vi.fn(),
 		};
@@ -97,5 +101,31 @@ describe("customersStore profile and customer dto handling", () => {
 			customer_name: "Quotation Customer",
 			email_id: "quote@example.com",
 		});
+	});
+
+	it("uses the offline customer search helper for selector searches", async () => {
+		searchStoredCustomersMock.mockResolvedValue([
+			{
+				name: "CUST-JANE",
+				customer_name: "Jane Doe",
+				mobile_no: "03001234567",
+			},
+		]);
+
+		const store = useCustomersStore();
+		const count = await store.searchCustomers("Jane");
+
+		expect(searchStoredCustomersMock).toHaveBeenCalledWith({
+			search: "Jane",
+			limit: 50,
+			offset: 0,
+		});
+		expect(count).toBe(1);
+		expect(store.customers).toEqual([
+			expect.objectContaining({
+				name: "CUST-JANE",
+				customer_name: "Jane Doe",
+			}),
+		]);
 	});
 });

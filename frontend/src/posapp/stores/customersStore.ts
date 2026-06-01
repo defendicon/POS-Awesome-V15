@@ -10,7 +10,6 @@ import type {
 	StoredCustomer,
 } from "../types/models";
 import {
-	customerMatchesSearchTerm,
 	normalizeCustomerSearchTerm,
 	scoreCustomerSearchMatch,
 } from "./customers/customerSearch";
@@ -21,6 +20,7 @@ import {
 	checkDbHealth,
 	memory,
 	setCustomerStorage,
+	searchStoredCustomers,
 	saveStoredValueSnapshot,
 	memoryInitPromise,
 	getCustomersLastSync,
@@ -421,49 +421,11 @@ export const useCustomersStore = defineStore("customers", () => {
 			return memoryResults;
 		}
 
-		const rowsByName = new Map<string, CustomerSummary>();
-		const table = db.table("customers");
-		const lowerTerm = normalized.toLowerCase();
-
-		async function addRows(promiseFactory: () => Promise<CustomerSummary[]>) {
-			try {
-				const rows = await promiseFactory();
-				rows.forEach((row) => {
-					if (row?.name) {
-						rowsByName.set(row.name, row);
-					}
-				});
-			} catch {
-				// Some older Dexie mocks/adapters may not support a given index query.
-			}
-		}
-
-		const indexedFields = ["name", "customer_name", "mobile_no", "email_id"] as const;
-		await Promise.all(
-			indexedFields.map((field) =>
-				addRows(async () => {
-					const where = (table as any).where?.(field);
-					if (!where?.startsWithIgnoreCase) return [];
-					return await where
-						.startsWithIgnoreCase(normalized)
-						.limit(limit + offset)
-						.toArray();
-				}),
-			),
-		);
-
-		let ranked = rankCustomerRows(Array.from(rowsByName.values()), normalized, limit, offset);
-		if (ranked.length < limit) {
-			await addRows(async () => {
-				const filtered = (table as any).filter?.((customer: CustomerSummary) =>
-					customerMatchesSearchTerm(customer, lowerTerm),
-				);
-				if (!filtered?.limit) return [];
-				return await filtered.limit(limit + offset).toArray();
-			});
-			ranked = rankCustomerRows(Array.from(rowsByName.values()), normalized, limit, offset);
-		}
-
+		const ranked = (await searchStoredCustomers({
+			search: normalized,
+			limit,
+			offset,
+		})) as CustomerSummary[];
 		customerSearchCache.set(cacheKey, ranked);
 		trimCustomerSearchCache();
 		return ranked;

@@ -380,6 +380,91 @@ function rankItemSearchRows(rows, search, limit, offset) {
 		.map((entry) => entry.item);
 }
 
+function getCustomerSearchValues(customer) {
+	if (!customer) {
+		return [];
+	}
+	return [
+		customer.customer_name,
+		customer.name,
+		customer.mobile_no,
+		customer.email_id,
+		customer.tax_id,
+	]
+		.filter((value) => value !== null && value !== undefined)
+		.map((value) => String(value).toLowerCase());
+}
+
+function matchesCustomerSearch(customer, search) {
+	const parts = String(search || "")
+		.trim()
+		.toLowerCase()
+		.split(/\s+/)
+		.filter(Boolean);
+	if (!parts.length) {
+		return true;
+	}
+	const values = getCustomerSearchValues(customer);
+	return parts.every((part) => values.some((value) => value.includes(part)));
+}
+
+function scoreCustomerSearchMatch(customer, search) {
+	const normalized = String(search || "").trim().toLowerCase();
+	if (!normalized || !customer) {
+		return normalized ? 0 : 1;
+	}
+
+	const values = getCustomerSearchValues(customer);
+	if (!values.length) {
+		return 0;
+	}
+
+	const customerName = String(customer.customer_name || "").toLowerCase();
+	const id = String(customer.name || "").toLowerCase();
+	const mobile = String(customer.mobile_no || "").toLowerCase();
+	const email = String(customer.email_id || "").toLowerCase();
+	const parts = normalized.split(/\s+/).filter(Boolean);
+
+	if (!parts.every((part) => values.some((value) => value.includes(part)))) {
+		return 0;
+	}
+
+	if (customerName === normalized) return 300;
+	if (id === normalized) return 290;
+	if (mobile === normalized) return 280;
+	if (email === normalized) return 260;
+	if (customerName.startsWith(normalized)) return 240;
+	if (mobile.startsWith(normalized)) return 220;
+	if (email.startsWith(normalized)) return 200;
+	if (id.startsWith(normalized)) return 180;
+	if (customerName.includes(normalized)) return 140;
+	if (mobile.includes(normalized)) return 120;
+	if (email.includes(normalized)) return 100;
+	if (id.includes(normalized)) return 90;
+
+	return 50;
+}
+
+function rankCustomerSearchRows(rows, search, limit, offset) {
+	const deduped = new Map();
+	rows.forEach((row) => {
+		if (row?.name && !deduped.has(row.name)) {
+			deduped.set(row.name, row);
+		}
+	});
+
+	return Array.from(deduped.values())
+		.map((customer) => ({ customer, score: scoreCustomerSearchMatch(customer, search) }))
+		.filter((entry) => entry.score > 0)
+		.sort(
+			(a, b) =>
+				b.score - a.score ||
+				String(a.customer.name || "").localeCompare(String(b.customer.name || "")),
+		)
+		.slice(offset, offset + limit)
+		.map((entry) => entry.customer);
+}
+
 function rowMatchesGroupAndScope(row, group, scope) {
 	const normalizedGroup = String(group || "").trim();
 	return (
@@ -526,6 +611,68 @@ async function searchStoredItems({ search = "", itemGroup = "", limit = 100, off
 	return result;
 }
 
+async function searchStoredCustomers({ search = "", limit = 50, offset = 0 } = {}) {
+	if (!db.isOpen()) {
+		await db.open();
+	}
+
+	const table = db.table("customers");
+	const normalizedSearch = String(search || "").trim();
+	const safeLimit = Math.max(1, Number(limit) || 50);
+	const safeOffset = Math.max(0, Number(offset) || 0);
+
+	if (!normalizedSearch) {
+		return await table.offset(safeOffset).limit(safeLimit).toArray();
+	}
+
+	const candidateLimit = Math.max(safeLimit + safeOffset, safeLimit * 3);
+	const indexedRows = [];
+
+	async function addIndexedRows(queryFactory) {
+		try {
+			const rows = await queryFactory();
+			if (Array.isArray(rows) && rows.length) {
+				indexedRows.push(...rows);
+			}
+		} catch {
+			// Missing indexes in old caches fall through to generic filtering.
+		}
+	}
+
+	await Promise.all(
+		["name", "customer_name", "mobile_no", "email_id"].map((field) =>
+			addIndexedRows(() =>
+				table
+					.where(field)
+					.startsWithIgnoreCase(normalizedSearch)
+					.limit(candidateLimit)
+					.toArray(),
+			),
+		),
+	);
+
+	const indexedResult = rankCustomerSearchRows(
+		indexedRows,
+		normalizedSearch,
+		safeLimit,
+		safeOffset,
+	);
+	if (indexedResult.length >= safeLimit) {
+		return indexedResult;
+	}
+
+	const filteredRows = await table
+		.filter((customer) => matchesCustomerSearch(customer, normalizedSearch))
+		.limit(candidateLimit)
+		.toArray();
+	return rankCustomerSearchRows(
+		[...indexedRows, ...filteredRows],
+		normalizedSearch,
+		safeLimit,
+		safeOffset,
+	);
+}
+
 self.onmessage = async (event) => {
 	// Logging every message can flood the console and increase memory usage
 	// when the worker is used for frequent persistence operations. Remove
@@ -606,6 +753,17 @@ self.onmessage = async (event) => {
 		} catch (err) {
 			self.postMessage({
 				type: "search_stored_items_error",
+				id: data.id,
+				error: err?.message || String(err),
+			});
+		}
+	} else if (data.type === "search_stored_customers") {
+		try {
+			const customers = await searchStoredCustomers(data.payload || {});
+			self.postMessage({ type: "search_stored_customers_result", id: data.id, customers });
+		} catch (err) {
+			self.postMessage({
+				type: "search_stored_customers_error",
 				id: data.id,
 				error: err?.message || String(err),
 			});

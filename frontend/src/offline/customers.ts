@@ -16,6 +16,213 @@ import {
 type AnyRecord = Record<string, any>;
 
 const CUSTOMER_ENTITY: OfflineEntityType = "customer";
+const CUSTOMER_SEARCH_WORKER_TIMEOUT_MS = 3000;
+
+type CustomerSearchRequest = {
+	search?: string;
+	limit?: number;
+	offset?: number;
+};
+
+let customerSearchWorker: Worker | null = null;
+let customerSearchRequestId = 0;
+const pendingCustomerSearchRequests = new Map<
+	number,
+	{
+		resolve: (_customers: AnyRecord[] | null) => void;
+		timeoutId: ReturnType<typeof setTimeout>;
+	}
+>();
+
+function normalizeCustomerSearchTerm(term: string | null | undefined): string {
+	return typeof term === "string" ? term.trim() : "";
+}
+
+function getCustomerSearchValues(customer: AnyRecord | null | undefined) {
+	if (!customer) {
+		return [];
+	}
+
+	return [
+		customer.customer_name,
+		customer.name,
+		customer.mobile_no,
+		customer.email_id,
+		customer.tax_id,
+	]
+		.filter((value) => value !== null && value !== undefined)
+		.map((value) => String(value).toLowerCase());
+}
+
+function customerMatchesSearchTerm(
+	customer: AnyRecord | null | undefined,
+	term: string | null | undefined,
+) {
+	const searchParts = normalizeCustomerSearchTerm(term)
+		.toLowerCase()
+		.split(/\s+/)
+		.filter(Boolean);
+
+	if (!searchParts.length) {
+		return true;
+	}
+	if (!customer) {
+		return false;
+	}
+
+	const values = getCustomerSearchValues(customer);
+	return searchParts.every((part) =>
+		values.some((value) => value.includes(part)),
+	);
+}
+
+function scoreCustomerSearchMatch(
+	customer: AnyRecord | null | undefined,
+	term: string | null | undefined,
+) {
+	const normalized = normalizeCustomerSearchTerm(term).toLowerCase();
+	if (!normalized || !customer) {
+		return normalized ? 0 : 1;
+	}
+
+	const values = getCustomerSearchValues(customer);
+	if (!values.length) {
+		return 0;
+	}
+
+	const customerName = String(customer.customer_name || "").toLowerCase();
+	const id = String(customer.name || "").toLowerCase();
+	const mobile = String(customer.mobile_no || "").toLowerCase();
+	const email = String(customer.email_id || "").toLowerCase();
+	const parts = normalized.split(/\s+/).filter(Boolean);
+
+	if (!parts.every((part) => values.some((value) => value.includes(part)))) {
+		return 0;
+	}
+
+	if (customerName === normalized) return 300;
+	if (id === normalized) return 290;
+	if (mobile === normalized) return 280;
+	if (email === normalized) return 260;
+	if (customerName.startsWith(normalized)) return 240;
+	if (mobile.startsWith(normalized)) return 220;
+	if (email.startsWith(normalized)) return 200;
+	if (id.startsWith(normalized)) return 180;
+	if (customerName.includes(normalized)) return 140;
+	if (mobile.includes(normalized)) return 120;
+	if (email.includes(normalized)) return 100;
+	if (id.includes(normalized)) return 90;
+
+	return 50;
+}
+
+function rankCustomerRows(
+	rows: AnyRecord[],
+	term: string,
+	limit: number,
+	offset: number,
+) {
+	const deduped = new Map<string, AnyRecord>();
+	rows.forEach((row) => {
+		const name = String(row?.name || "").trim();
+		if (name && !deduped.has(name)) {
+			deduped.set(name, row);
+		}
+	});
+
+	return Array.from(deduped.values())
+		.map((customer) => ({
+			customer,
+			score: scoreCustomerSearchMatch(customer, term),
+		}))
+		.filter((entry) => entry.score > 0)
+		.sort((a, b) => b.score - a.score || a.customer.name.localeCompare(b.customer.name))
+		.slice(offset, offset + limit)
+		.map((entry) => entry.customer);
+}
+
+function getCustomerSearchWorker() {
+	if (typeof Worker === "undefined") {
+		return null;
+	}
+	if (customerSearchWorker) {
+		return customerSearchWorker;
+	}
+
+	try {
+		customerSearchWorker = new Worker(
+			"/assets/posawesome/dist/js/posapp/workers/itemWorker.js",
+			{ type: "classic" },
+		);
+		customerSearchWorker.onmessage = (event) => {
+			const data = event.data || {};
+			if (
+				data.type !== "search_stored_customers_result" &&
+				data.type !== "search_stored_customers_error"
+			) {
+				return;
+			}
+
+			const id = Number(data.id);
+			const pending = pendingCustomerSearchRequests.get(id);
+			if (!pending) {
+				return;
+			}
+
+			clearTimeout(pending.timeoutId);
+			pendingCustomerSearchRequests.delete(id);
+			pending.resolve(
+				data.type === "search_stored_customers_result" &&
+					Array.isArray(data.customers)
+					? data.customers
+					: null,
+			);
+		};
+		customerSearchWorker.onerror = () => {
+			pendingCustomerSearchRequests.forEach((pending) => {
+				clearTimeout(pending.timeoutId);
+				pending.resolve(null);
+			});
+			pendingCustomerSearchRequests.clear();
+			customerSearchWorker?.terminate();
+			customerSearchWorker = null;
+		};
+		return customerSearchWorker;
+	} catch {
+		customerSearchWorker = null;
+		return null;
+	}
+}
+
+function searchStoredCustomersInWorker(
+	payload: CustomerSearchRequest,
+): Promise<AnyRecord[] | null> {
+	const worker = getCustomerSearchWorker();
+	if (!worker) {
+		return Promise.resolve(null);
+	}
+
+	return new Promise((resolve) => {
+		const id = ++customerSearchRequestId;
+		const timeoutId = setTimeout(() => {
+			pendingCustomerSearchRequests.delete(id);
+			resolve(null);
+		}, CUSTOMER_SEARCH_WORKER_TIMEOUT_MS);
+
+		pendingCustomerSearchRequests.set(id, { resolve, timeoutId });
+		try {
+			worker.postMessage({
+				type: "search_stored_customers",
+				id,
+				payload,
+			});
+		} catch {
+			clearTimeout(timeoutId);
+			pendingCustomerSearchRequests.delete(id);
+			resolve(null);
+		}
+	});
+}
 
 export async function saveOfflineCustomer(entry: AnyRecord) {
 	let cleanEntry;
@@ -124,6 +331,96 @@ export async function syncOfflineCustomers() {
 
 export function getCustomerStorage() {
 	return memory.customer_storage || [];
+}
+
+export async function searchStoredCustomers({
+	search = "",
+	limit = 50,
+	offset = 0,
+}: CustomerSearchRequest = {}) {
+	const normalized = normalizeCustomerSearchTerm(search);
+	const safeLimit = Math.max(1, Number(limit) || 50);
+	const safeOffset = Math.max(0, Number(offset) || 0);
+
+	const workerCustomers = await searchStoredCustomersInWorker({
+		search: normalized,
+		limit: safeLimit,
+		offset: safeOffset,
+	});
+	if (workerCustomers) {
+		return workerCustomers;
+	}
+
+	try {
+		await checkDbHealth();
+		if (!db.isOpen()) {
+			await db.open();
+		}
+
+		const table = db.table("customers");
+		if (!normalized) {
+			return await table.offset(safeOffset).limit(safeLimit).toArray();
+		}
+
+		const rowsByName = new Map<string, AnyRecord>();
+		const candidateLimit = Math.max(safeLimit + safeOffset, safeLimit * 3);
+
+		async function addRows(promiseFactory: () => Promise<AnyRecord[]>) {
+			try {
+				const rows = await promiseFactory();
+				rows.forEach((row) => {
+					if (row?.name) {
+						rowsByName.set(row.name, row);
+					}
+				});
+			} catch {
+				// Older Dexie adapters may not expose every indexed query helper.
+			}
+		}
+
+		const indexedFields = ["name", "customer_name", "mobile_no", "email_id"] as const;
+		await Promise.all(
+			indexedFields.map((field) =>
+				addRows(async () => {
+					const where = (table as any).where?.(field);
+					if (!where?.startsWithIgnoreCase) return [];
+					return await where
+						.startsWithIgnoreCase(normalized)
+						.limit(candidateLimit)
+						.toArray();
+				}),
+			),
+		);
+
+		let ranked = rankCustomerRows(
+			Array.from(rowsByName.values()),
+			normalized,
+			safeLimit,
+			safeOffset,
+		);
+		if (ranked.length >= safeLimit) {
+			return ranked;
+		}
+
+		await addRows(async () => {
+			const filtered = (table as any).filter?.((customer: AnyRecord) =>
+				customerMatchesSearchTerm(customer, normalized),
+			);
+			if (!filtered?.limit) return [];
+			return await filtered.limit(candidateLimit).toArray();
+		});
+
+		ranked = rankCustomerRows(
+			Array.from(rowsByName.values()),
+			normalized,
+			safeLimit,
+			safeOffset,
+		);
+		return ranked;
+	} catch (error) {
+		console.error("Failed to search stored customers", error);
+		return [];
+	}
 }
 
 function mergeCustomerStorageRows(rows: AnyRecord[]) {
