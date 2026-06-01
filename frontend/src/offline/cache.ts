@@ -196,6 +196,7 @@ const toCloneSafeValue = <T>(input: T): T | null => {
 };
 
 const DEFAULT_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const ITEM_SEARCH_WORKER_TIMEOUT_MS = 3000;
 
 const normalizeCacheKeyPart = (value: unknown): string =>
 	String(value ?? "")
@@ -258,6 +259,105 @@ export async function getStoredItems() {
 		console.error("Failed to get stored items", e);
 		return [];
 	}
+}
+
+type ItemSearchWorkerRequest = {
+	search?: string;
+	itemGroup?: string;
+	limit?: number;
+	offset?: number;
+	scope?: string;
+};
+
+let itemSearchWorker: Worker | null = null;
+let itemSearchRequestId = 0;
+const pendingItemSearchRequests = new Map<
+	number,
+	{
+		resolve: (_items: any[] | null) => void;
+		timeoutId: ReturnType<typeof setTimeout>;
+	}
+>();
+
+function getItemSearchWorker() {
+	if (typeof Worker === "undefined") {
+		return null;
+	}
+	if (itemSearchWorker) {
+		return itemSearchWorker;
+	}
+
+	try {
+		itemSearchWorker = new Worker(
+			"/assets/posawesome/dist/js/posapp/workers/itemWorker.js",
+			{ type: "classic" },
+		);
+		itemSearchWorker.onmessage = (event) => {
+			const data = event.data || {};
+			if (
+				data.type !== "search_stored_items_result" &&
+				data.type !== "search_stored_items_error"
+			) {
+				return;
+			}
+
+			const id = Number(data.id);
+			const pending = pendingItemSearchRequests.get(id);
+			if (!pending) {
+				return;
+			}
+			clearTimeout(pending.timeoutId);
+			pendingItemSearchRequests.delete(id);
+			pending.resolve(
+				data.type === "search_stored_items_result" && Array.isArray(data.items)
+					? data.items
+					: null,
+			);
+		};
+		itemSearchWorker.onerror = () => {
+			pendingItemSearchRequests.forEach((pending) => {
+				clearTimeout(pending.timeoutId);
+				pending.resolve(null);
+			});
+			pendingItemSearchRequests.clear();
+			itemSearchWorker?.terminate();
+			itemSearchWorker = null;
+		};
+		return itemSearchWorker;
+	} catch {
+		itemSearchWorker = null;
+		return null;
+	}
+}
+
+function searchStoredItemsInWorker(
+	payload: ItemSearchWorkerRequest,
+): Promise<any[] | null> {
+	const worker = getItemSearchWorker();
+	if (!worker) {
+		return Promise.resolve(null);
+	}
+
+	return new Promise((resolve) => {
+		const id = ++itemSearchRequestId;
+		const timeoutId = setTimeout(() => {
+			pendingItemSearchRequests.delete(id);
+			resolve(null);
+		}, ITEM_SEARCH_WORKER_TIMEOUT_MS);
+
+		pendingItemSearchRequests.set(id, { resolve, timeoutId });
+		try {
+			worker.postMessage({
+				type: "search_stored_items",
+				id,
+				payload,
+			});
+		} catch {
+			clearTimeout(timeoutId);
+			pendingItemSearchRequests.delete(id);
+			resolve(null);
+		}
+	});
 }
 
 function matchesItemSearch(item: any, search: string) {
@@ -345,6 +445,17 @@ export async function searchStoredItems({
 	offset = 0,
 	scope = "",
 } = {}) {
+	const workerResult = await searchStoredItemsInWorker({
+		search,
+		itemGroup,
+		limit,
+		offset,
+		scope,
+	});
+	if (workerResult) {
+		return workerResult;
+	}
+
 	try {
 		await checkDbHealth();
 		if (!db.isOpen()) await db.open();

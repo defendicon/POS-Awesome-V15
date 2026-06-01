@@ -155,6 +155,8 @@ const SCHEMA_SIGNATURE = JSON.stringify(BASE_SCHEMA);
 		});
 	db.version(10).stores(BASE_SCHEMA);
 	db.version(11).stores(BASE_SCHEMA);
+	db.version(12).stores(BASE_SCHEMA);
+	db.version(13).stores(BASE_SCHEMA);
 	try {
 		await db.open();
 	} catch (err) {
@@ -288,6 +290,182 @@ async function bulkPutPrices(priceList, items, syncedAt = Date.now()) {
 	}
 }
 
+function hasScope(scope) {
+	return String(scope || "").length > 0;
+}
+
+function isMatchingScope(row, scope) {
+	return String(row?.profile_scope || "") === String(scope || "");
+}
+
+function matchesItemSearch(item, search) {
+	const normalizedSearch = String(search || "").trim().toLowerCase();
+	if (!normalizedSearch) {
+		return true;
+	}
+	const terms = normalizedSearch.split(/\s+/).filter(Boolean);
+	const searchableValues = [
+		item?.item_name,
+		item?.item_code,
+		item?.description,
+		item?.item_barcode,
+		...(Array.isArray(item?.barcodes) ? item.barcodes : []),
+		...(Array.isArray(item?.name_keywords) ? item.name_keywords : []),
+		...(Array.isArray(item?.serials) ? item.serials : []),
+		...(Array.isArray(item?.batches) ? item.batches : []),
+	]
+		.flatMap((value) => {
+			if (Array.isArray(value)) return value;
+			if (value && typeof value === "object") {
+				return [value.barcode, value.serial_no, value.batch_no];
+			}
+			return [value];
+		})
+		.filter((value) => value !== null && value !== undefined)
+		.map((value) => String(value).toLowerCase());
+
+	return terms.every((term) =>
+		searchableValues.some((value) => value.includes(term)),
+	);
+}
+
+function scoreItemSearchMatch(item, search) {
+	const normalizedSearch = String(search || "").trim().toLowerCase();
+	if (!normalizedSearch) {
+		return 1;
+	}
+	if (!matchesItemSearch(item, normalizedSearch)) {
+		return 0;
+	}
+
+	const itemCode = String(item?.item_code || "").toLowerCase();
+	const itemName = String(item?.item_name || "").toLowerCase();
+	const barcodes = Array.isArray(item?.barcodes)
+		? item.barcodes.map((barcode) => String(barcode).toLowerCase())
+		: [];
+
+	if (barcodes.includes(normalizedSearch)) return 400;
+	if (itemCode === normalizedSearch) return 350;
+	if (itemName === normalizedSearch) return 325;
+	if (itemCode.startsWith(normalizedSearch)) return 275;
+	if (itemName.startsWith(normalizedSearch)) return 250;
+	if (itemCode.includes(normalizedSearch)) return 175;
+	if (itemName.includes(normalizedSearch)) return 150;
+	return 50;
+}
+
+function rankItemSearchRows(rows, search, limit, offset) {
+	const deduped = new Map();
+	rows.forEach((row) => {
+		if (row?.item_code && !deduped.has(row.item_code)) {
+			deduped.set(row.item_code, row);
+		}
+	});
+
+	return Array.from(deduped.values())
+		.map((item) => ({ item, score: scoreItemSearchMatch(item, search) }))
+		.filter((entry) => entry.score > 0)
+		.sort(
+			(a, b) =>
+				b.score - a.score ||
+				String(a.item.item_name || a.item.item_code || "").localeCompare(
+					String(b.item.item_name || b.item.item_code || ""),
+				),
+		)
+		.slice(offset, offset + limit)
+		.map((entry) => entry.item);
+}
+
+function rowMatchesGroupAndScope(row, group, scope) {
+	const normalizedGroup = String(group || "").trim();
+	return (
+		(!hasScope(scope) || isMatchingScope(row, scope)) &&
+		(!normalizedGroup ||
+			normalizedGroup.toLowerCase() === "all" ||
+			String(row?.item_group || "").toLowerCase() ===
+				normalizedGroup.toLowerCase())
+	);
+}
+
+async function searchStoredItems({ search = "", itemGroup = "", limit = 100, offset = 0, scope = "" } = {}) {
+	if (!db.isOpen()) {
+		await db.open();
+	}
+
+	const table = db.table("items");
+	const normalizedSearch = String(search || "").trim();
+	const normalizedGroup = String(itemGroup || "").trim();
+
+	if (!normalizedSearch) {
+		let collection = table;
+		if (normalizedGroup && normalizedGroup.toLowerCase() !== "all") {
+			collection = collection.where("item_group").equalsIgnoreCase(normalizedGroup);
+		}
+		if (hasScope(scope)) {
+			collection = collection.filter((row) => isMatchingScope(row, scope));
+		}
+		return await collection.offset(offset).limit(limit).toArray();
+	}
+
+	const term = normalizedSearch.toLowerCase();
+	const terms = term.split(/\s+/).filter(Boolean);
+	const candidateLimit = Math.max(limit + offset, limit * 3);
+	const indexedRows = [];
+
+	async function addIndexedRows(queryFactory) {
+		try {
+			const rows = await queryFactory();
+			if (Array.isArray(rows) && rows.length) {
+				indexedRows.push(...rows);
+			}
+		} catch {
+			// Missing indexes in old caches fall through to generic filtering.
+		}
+	}
+
+	if (terms.length === 1) {
+		await Promise.all([
+			addIndexedRows(() =>
+				table.where("barcodes").equals(term).limit(candidateLimit).toArray(),
+			),
+			addIndexedRows(() =>
+				table.where("item_code").startsWithIgnoreCase(normalizedSearch).limit(candidateLimit).toArray(),
+			),
+			addIndexedRows(() =>
+				table.where("item_name").startsWithIgnoreCase(normalizedSearch).limit(candidateLimit).toArray(),
+			),
+			addIndexedRows(() =>
+				table.where("name_keywords").equals(term).limit(candidateLimit).toArray(),
+			),
+		]);
+	} else if (terms.length > 1) {
+		await addIndexedRows(() =>
+			table.where("name_keywords").anyOf(terms).limit(candidateLimit).toArray(),
+		);
+	}
+
+	const indexedResult = rankItemSearchRows(
+		indexedRows.filter((row) => rowMatchesGroupAndScope(row, normalizedGroup, scope)),
+		normalizedSearch,
+		limit,
+		offset,
+	);
+	if (indexedResult.length >= limit) {
+		return indexedResult;
+	}
+
+	let collection = table;
+	if (normalizedGroup && normalizedGroup.toLowerCase() !== "all") {
+		collection = collection.where("item_group").equalsIgnoreCase(normalizedGroup);
+	}
+	collection = collection.filter(
+		(row) =>
+			rowMatchesGroupAndScope(row, normalizedGroup, scope) &&
+			matchesItemSearch(row, normalizedSearch),
+	);
+	return await collection.offset(offset).limit(limit).toArray();
+}
+
 self.onmessage = async (event) => {
 	// Logging every message can flood the console and increase memory usage
 	// when the worker is used for frequent persistence operations. Remove
@@ -361,5 +539,16 @@ self.onmessage = async (event) => {
 	} else if (data.type === "bulk_put_items") {
 		await bulkPutItems(data.items || [], data.syncedAt || Date.now());
 		self.postMessage({ type: "items_saved" });
+	} else if (data.type === "search_stored_items") {
+		try {
+			const items = await searchStoredItems(data.payload || {});
+			self.postMessage({ type: "search_stored_items_result", id: data.id, items });
+		} catch (err) {
+			self.postMessage({
+				type: "search_stored_items_error",
+				id: data.id,
+				error: err?.message || String(err),
+			});
+		}
 	}
 };
