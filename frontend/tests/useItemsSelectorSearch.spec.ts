@@ -120,6 +120,38 @@ describe("useItemsSelectorSearch", () => {
 		expect(vm.search).toBe("zinc");
 	});
 
+	it("uses indexed store search before server reload when storage is marked unavailable", async () => {
+		const searchItems = vi.fn().mockResolvedValue([
+			{ item_code: "ZINC-1", item_name: "Zinc Oxide" },
+		]);
+		const getItems = vi.fn().mockResolvedValue([]);
+		const vm = {
+			first_search: "zinc",
+			search_input: "zinc",
+			search: "",
+			search_from_scanner: false,
+			isBackgroundLoading: false,
+			storageAvailable: false,
+			pos_profile: { posa_use_limit_search: 0 },
+			displayedItems: [],
+			itemsIntegration: {
+				searchItems,
+				get_items: getItems,
+			},
+		};
+
+		const api = useItemsSelectorSearch({
+			getVM: () => vm,
+			scannerInput: createScannerInput(),
+		});
+
+		await api._performSearch();
+
+		expect(searchItems).toHaveBeenCalledWith("zinc");
+		expect(getItems).not.toHaveBeenCalled();
+		expect(vm.search).toBe("zinc");
+	});
+
 	it("prioritizes search over highlighted selection when enter is pressed in limit search mode", async () => {
 		const searchItems = vi.fn().mockResolvedValue([]);
 		const selectHighlightedItem = vi.fn();

@@ -331,24 +331,21 @@ export const useItemsSelectorSearch = ({
 					}
 				}
 			}
-		} else if (hasStorageAvailable(vm)) {
+		} else {
 			const searchItems = getSearchExecutor(vm);
 			if (searchItems) {
 				await searchItems(trimmedQuery);
-			} else {
+			} else if (hasStorageAvailable(vm)) {
 				const loadVisibleItems = getVisibleItemsLoader(vm);
 				if (loadVisibleItems) {
 					await loadVisibleItems(true);
 				}
-			}
-			triggerEnterEvent(vm);
-		} else {
-			// When local storage is disabled, always fetch items
-			// from the server so searches aren't limited to the
-			// initially loaded set.
-			const getItems = getItemsLoader(vm);
-			if (getItems) {
-				await getItems(true);
+			} else {
+				// Last resort for legacy contexts without the store-backed search executor.
+				const getItems = getItemsLoader(vm);
+				if (getItems) {
+					await getItems(true);
+				}
 			}
 			triggerEnterEvent(vm);
 
