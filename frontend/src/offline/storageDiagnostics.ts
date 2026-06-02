@@ -38,6 +38,19 @@ function buildCustomerScope(profile: PosProfileLike) {
 	return profile?.name || "";
 }
 
+function resolveDiagnosticsProfile(profile: PosProfileLike, manifest: any) {
+	if (profile?.name) {
+		return profile;
+	}
+	if (manifest?.profileName) {
+		return {
+			name: manifest.profileName,
+			warehouse: manifest.warehouse || "no_warehouse",
+		};
+	}
+	return null;
+}
+
 function manifestResourceReady(manifest: any, key: string) {
 	const resource = manifest?.resources?.[key];
 	return Boolean(
@@ -54,8 +67,10 @@ export async function getOfflineStorageDiagnostics(
 	const metric = startPerfMeasure("pos.offline.snapshot_hydrate", {
 		source: "storage_diagnostics",
 	});
-	const itemScope = buildItemScope(profile);
-	const customerScope = buildCustomerScope(profile);
+	const manifest = getLocalSnapshotManifest();
+	const resolvedProfile = resolveDiagnosticsProfile(profile, manifest);
+	const itemScope = buildItemScope(resolvedProfile);
+	const customerScope = buildCustomerScope(resolvedProfile);
 	try {
 		const [
 			rawItemsCount,
@@ -68,7 +83,6 @@ export async function getOfflineStorageDiagnostics(
 			getCustomerStorageCount(),
 			getOperationalCustomerCountByScope(customerScope),
 		]);
-		const manifest = getLocalSnapshotManifest();
 		const manifestItemMismatch =
 			manifestResourceReady(manifest, "items") &&
 			(rawItemsCount === 0 || operationalItemsCount === 0);
