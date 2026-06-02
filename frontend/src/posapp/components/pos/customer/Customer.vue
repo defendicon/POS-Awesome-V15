@@ -289,7 +289,7 @@ export default {
 
 		const searchDebounce = _.debounce((term) => {
 			customersStore.queueSearch(term || "");
-		}, 300);
+		}, 80);
 
 		const ensureCustomersForProfile = (profile) => {
 			if (!profile) {
@@ -426,13 +426,13 @@ export default {
 		};
 
 		const handleEnter = (event) => {
-			const inputText = event.target.value?.toLowerCase() || "";
-			const matched = customers.value.find((cust) => {
-				return (
-					cust.customer_name?.toLowerCase().includes(inputText) ||
-					cust.name?.toLowerCase().includes(inputText)
-				);
-			});
+			const inputText = event.target.value || "";
+			const exact = customersStore.lookupCustomerExact?.(inputText, customersStore.customerProfileScope || "");
+			const matched =
+				exact ||
+				(filteredCustomers.value && filteredCustomers.value.length
+					? filteredCustomers.value[0]
+					: customers.value[0]);
 
 			if (!matched) {
 				return;

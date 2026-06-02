@@ -62,6 +62,70 @@
 			</div>
 
 			<div class="perf-grid">
+				<section class="perf-panel">
+					<div class="perf-panel__title">
+						<h2>{{ __("Customer Engine") }}</h2>
+						<span>{{ customerDiagnostics.ready ? __("searchable") : __("warming") }}</span>
+					</div>
+					<ul class="perf-list">
+						<li>
+							<span>{{ __("Scope") }}</span>
+							<strong class="metric-tags">{{ customerDiagnostics.scope || "-" }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Generation") }}</span>
+							<strong>{{ customerDiagnostics.generation }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Customers") }}</span>
+							<strong>{{ bucket(customerDiagnostics.indexedCustomerCount) }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Mobile Index") }}</span>
+							<strong>{{ bucket(customerDiagnostics.mobileCount) }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Pending Offline") }}</span>
+							<strong>{{ bucket(customerDiagnostics.pendingOfflineCount) }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Hydrate") }}</span>
+							<strong>{{ formatDuration(customerDiagnostics.lastHydrateDurationMs) }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Build") }}</span>
+							<strong>{{ formatDuration(customerDiagnostics.lastBuildDurationMs) }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Delta") }}</span>
+							<strong>{{ customerDiagnostics.lastDeltaAppliedAt || "-" }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Full Reload Avoided") }}</span>
+							<strong>{{ customerDiagnostics.fullReloadAvoidedCount }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Blocking") }}</span>
+							<strong>{{ customerDiagnostics.lastBlockingReason || "-" }}</strong>
+						</li>
+					</ul>
+				</section>
+
+				<section class="perf-panel">
+					<div class="perf-panel__title">
+						<h2>{{ __("Customer Timings") }}</h2>
+						<span>{{ __("p50 / p95 / p99") }}</span>
+					</div>
+					<ul class="perf-list">
+						<li v-for="row in customerTimingRows" :key="row.name">
+							<span>{{ row.label }}</span>
+							<strong>{{ formatDuration(row.p50) }} / {{ formatDuration(row.p95) }} / {{ formatDuration(row.p99) }}</strong>
+						</li>
+					</ul>
+				</section>
+			</div>
+
+			<div class="perf-grid">
 				<section class="perf-panel perf-panel--wide">
 					<div class="perf-panel__title">
 						<h2>{{ __("Boot Resources") }}</h2>
@@ -266,6 +330,7 @@ import {
 } from "../../utils/perf";
 import {
 	getQueuedPayloadCount,
+	getCustomerEngineDiagnostics,
 	getInventoryDiagnostics,
 	memory,
 	type OfflineEntityType,
@@ -277,6 +342,7 @@ const __ = (globalThis as any).__ || ((text: string) => text);
 const events = ref<PerfEvent[]>(getPerfEvents());
 const summaries = ref(getPerfSummaries());
 const inventoryDiagnostics = ref(getInventoryDiagnostics());
+const customerDiagnostics = ref(getCustomerEngineDiagnostics());
 const online = ref(typeof navigator === "undefined" ? true : navigator.onLine);
 const bootReadinessStore = useBootReadinessStore();
 
@@ -339,10 +405,31 @@ const inventoryTimingRows = computed(() =>
 	}),
 );
 
+const customerTimingRows = computed(() =>
+	[
+		["pos.customers.query_exact", __("Exact")],
+		["pos.customers.query_mobile_exact", __("Mobile Exact")],
+		["pos.customers.query_autocomplete", __("Autocomplete")],
+		["pos.customers.details_load", __("Details")],
+		["pos.customers.balance_load", __("Balance")],
+		["pos.customers.delta_apply", __("Delta")],
+	].map(([name, label]) => {
+		const summary = summaryByName.value.get(name);
+		return {
+			name,
+			label,
+			p50: summary?.p50 ?? null,
+			p95: summary?.p95 ?? null,
+			p99: summary?.p99 ?? null,
+		};
+	}),
+);
+
 function refresh() {
 	events.value = getPerfEvents();
 	summaries.value = getPerfSummaries();
 	inventoryDiagnostics.value = getInventoryDiagnostics();
+	customerDiagnostics.value = getCustomerEngineDiagnostics();
 	online.value = typeof navigator === "undefined" ? true : navigator.onLine;
 }
 

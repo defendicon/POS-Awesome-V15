@@ -213,6 +213,7 @@ Added tests:
 - `frontend/tests/performanceMonitor.spec.ts`
 - `frontend/tests/performanceRegressionBaselines.spec.ts`
 - `frontend/tests/inventoryEngine.spec.ts`
+- `frontend/tests/customerEngine.spec.ts`
 - `frontend/tests/localSnapshotManifest.spec.ts`
 - `frontend/tests/bootReadinessStore.spec.ts`
 
@@ -250,6 +251,14 @@ Observed results:
 - `cmd /c .\node_modules\.bin\vitest.cmd --run tests\inventoryEngine.spec.ts tests\localSnapshotManifest.spec.ts tests\bootReadinessStore.spec.ts tests\performanceMonitor.spec.ts`: passed 14 focused tests.
 - `cmd /c .\node_modules\.bin\vitest.cmd --run tests\performanceRegressionBaselines.spec.ts`: passed in the latest run after item autocomplete was moved to the operational inventory engine. This validates the 25,000-item autocomplete and barcode thresholds in the current environment. Customer autocomplete also passed in this run, but it was not refactored by this task and remains tracked because earlier runs exceeded target.
 - `cmd /c .\node_modules\.bin\vitest.cmd --run tests\.codexInventoryMeasure.spec.ts --reporter=verbose`: temporary measurement run only, removed before commit. On 25,000 synthetic items, local inventory autocomplete measured p50 5.58 ms, p95 7.90 ms, p99 8.53 ms. Barcode exact lookup measured p50 0.003 ms, p95 0.024 ms, p99 0.172 ms.
+- `cmd /c .\node_modules\.bin\vitest.cmd --run tests\customerEngine.spec.ts tests\customersStore.spec.ts tests\customerSearch.spec.ts tests\performanceRegressionBaselines.spec.ts tests\inventoryEngine.spec.ts tests\bootReadinessStore.spec.ts`: passed 20 focused customer/inventory/boot/performance tests after the local customer engine integration.
+- `cmd /c .\node_modules\.bin\vitest.cmd --run tests\.codexCustomerMeasure.spec.ts --reporter=verbose`: temporary repeated measurement run only, removed before commit. Results are recorded in the customer bottleneck table below.
+- `cmd /c .\node_modules\.bin\vue-tsc.cmd --noEmit`: passed after the local customer engine integration.
+- `cmd /c .\node_modules\.bin\eslint.cmd <changed customer/performance files>`: passed with no warnings after customer engine cleanup.
+- `cmd /c .\node_modules\.bin\eslint.cmd .`: passed with existing repository warnings only.
+- `cmd /c .\node_modules\.bin\vite.cmd build`: passed. Vite reported existing Browserslist age and large chunk warnings.
+- `cmd /c .\node_modules\.bin\vitest.cmd --run tests\performanceMonitor.spec.ts tests\localSnapshotManifest.spec.ts tests\bootReadinessStore.spec.ts tests\syncCoordinator.spec.ts tests\syncResourceRegistry.spec.ts tests\syncState.spec.ts tests\invoiceOutbox.spec.ts tests\invoiceOfflineFallbacks.spec.ts tests\invoiceCustomerSync.spec.ts tests\invoiceStore.spec.ts tests\pricingEngine.spec.js tests\changePriceListRate.spec.ts`: passed 56 broader boot/sync/offline/invoice/pricing tests. Some existing tests emitted IndexedDB-missing stderr while assertions passed.
+- `python -m py_compile posawesome/posawesome/api/customers.py posawesome/posawesome/api/offline_sync/customers.py posawesome/posawesome/api/invoice.py posawesome/posawesome/api/invoices.py`: passed.
 
 ## Local Inventory Engine Implementation Map
 
@@ -291,6 +300,55 @@ Current full reload triggers:
 Root cause of the original item p95 failure:
 
 - The old local autocomplete measured 79.58 ms p95 on 25,000 synthetic items because it repeatedly scanned large item arrays and performed string `includes()` checks until enough matches were found. The operational engine replaces that with exact/token/prefix maps and bounded result windows.
+
+## Local Customer Engine Implementation Map
+
+Current customer data representations:
+
+- Raw cached customer rows remain in Dexie `customers`.
+- Compact operational rows now live in Dexie `operational_customers`.
+- Non-reactive in-memory maps in `frontend/src/offline/customerEngine.ts` own exact customer id/name lookup, exact mobile lookup and bounded autocomplete.
+- Vue components receive only the visible 50-row result window from `customersStore`.
+
+Current search implementation:
+
+- `customersStore.searchCustomers()` now hydrates the customer engine and calls `searchCustomersLocal()`.
+- The previous production Dexie `collection.filter(customerMatchesSearchTerm)` path is no longer used by interactive customer search.
+- `Customer.vue` enter-selection prefers exact engine lookup and then falls back to the bounded visible result list.
+
+Current lazy detail and balance implementation:
+
+- Search results only use compact identity/display fields.
+- `fetch_customer_details()` still loads full customer detail only after selection and preserves stale-response protection.
+- `fetch_customer_balance()` still loads balance only after selection and uses the existing offline balance cache.
+- Balance values, customer names, phone numbers, emails, tax ids and addresses are not emitted in telemetry.
+
+Current offline and sync implementation:
+
+- Offline-created customers are inserted into the operational customer engine with pending-sync state.
+- Offline sync reconciliation updates pending invoice customer references and reconciles the operational customer row when the server assigns a different name.
+- Customer delta sync writes raw customer rows and applies operational customer deltas for the active POS Profile scope.
+
+Root cause of the original customer p95 instability:
+
+- The old local autocomplete repeatedly normalized and scanned large customer rows on every query. The new operational engine precomputes searchable keys and uses exact/prefix maps with bounded result windows.
+
+Repeated customer benchmark evidence:
+
+| Dataset | Action | Run p95 values | Median p95 | Worst p95 | Target | Result |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| 25,000 customers | Autocomplete | 11.90, 9.10, 7.72, 7.89, 7.81 ms | 7.89 ms | 11.90 ms | 50 ms | Pass |
+| 25,000 customers | Exact lookup | 0.009, 0.002, 0.021, 0.002, 0.002 ms | 0.002 ms | 0.021 ms | 15 ms | Pass |
+| 25,000 customers | Mobile exact lookup | 0.035, 0.009, 0.002, 0.002, 0.006 ms | 0.006 ms | 0.035 ms | 20 ms | Pass |
+| 25,000 customers | Local selection lookup | 0.026, 0.023, 0.015, 0.008, 0.001 ms | 0.015 ms | 0.026 ms | 30 ms | Pass |
+| 25,000 customers | Persisted index hydrate | 1998, 1801, 1879, 1747, 1831 ms | 1831 ms | 1998 ms | 150 ms | Fail |
+| 25,000 customers | Small delta apply | 418, 349, 323, 333, 389 ms | 349 ms | 418 ms | 100 ms | Fail |
+| 100,000 customers | Autocomplete | 66.13, 74.46, 57.20, 56.12, 74.07 ms | 66.13 ms | 74.46 ms | 75 ms | Pass |
+| 100,000 customers | Exact lookup | 0.002, 0.003, 0.002, 0.006, 0.002 ms | 0.002 ms | 0.006 ms | 20 ms | Pass |
+| 100,000 customers | Mobile exact lookup | 0.002, 0.002, 0.002, 0.002, 0.002 ms | 0.002 ms | 0.002 ms | 25 ms | Pass |
+| 100,000 customers | Local selection lookup | 0.003, 0.005, 0.002, 0.002, 0.001 ms | 0.002 ms | 0.005 ms | 40 ms | Pass |
+| 100,000 customers | Persisted index hydrate | 8411, 8491, 8328, 8263, 8500 ms | 8411 ms | 8500 ms | Not specified for 100k hydrate | Tracked |
+| 100,000 customers | Small delta apply | 1379, 1431, 1399, 1374, 1362 ms | 1379 ms | 1431 ms | 125 ms | Fail |
 
 ## True Sell-Ready Definition
 
@@ -351,7 +409,9 @@ Pricing rules and offers are allowed to be stale/non-blocking during boot, but t
 | --- | --- | ---: | --- | --- | --- | --- | --- |
 | Item local autocomplete | `frontend/src/offline/inventoryEngine.ts`, `frontend/src/posapp/stores/itemsStore.ts`, `frontend/tests/performanceRegressionBaselines.spec.ts` | Previously p95 79.58 ms; latest measured p50 5.58 ms, p95 7.90 ms, p99 8.53 ms | 25,000 synthetic items | Fixed by compact operational index and token/prefix lookup | Resolved for item path | Continue browser-session validation against real Frappe data and 100,000+ item fixtures | Medium: must preserve item selector filtering and price-list behavior |
 | Barcode exact lookup | `frontend/src/offline/inventoryEngine.ts`, `frontend/src/posapp/composables/pos/items/useScanProcessor.ts`, `frontend/src/posapp/stores/itemsStore.ts` | Latest measured p50 0.003 ms, p95 0.024 ms, p99 0.172 ms | 25,000 synthetic items with barcodes | Fixed by exact barcode map before visible-row and remote fallback lookup | Resolved for item path | Continue browser-session scan validation with real barcode payloads and UOM-specific prices | Medium: must preserve barcode UOM and server fallback behavior |
-| Customer local autocomplete | `frontend/src/posapp/stores/customersStore.ts`, `frontend/tests/performanceRegressionBaselines.spec.ts` | Earlier failing baseline p95 137.76 ms, target 75 ms; latest single regression run passed but customer search was not refactored | 25,000 synthetic customers | Linear filtering over a large in-memory list during autocomplete | High | Add a normalized customer search index, precomputed lowercase fields, or worker-backed search | Medium: must preserve offline customer selection and balance behavior |
+| Customer local autocomplete | `frontend/src/offline/customerEngine.ts`, `frontend/src/posapp/stores/customersStore.ts`, `frontend/tests/performanceRegressionBaselines.spec.ts` | Previously p95 83.45-137.76 ms; latest repeated 25k worst p95 11.90 ms and 100k worst p95 74.46 ms | 25,000 and 100,000 synthetic customers | Fixed by compact operational customer index and bounded visible results | Resolved for interactive search path | Browser-session validation against real Frappe customer data | Medium: must preserve customer-specific price list, tax, loyalty and balance behavior |
+| Customer index hydrate | `frontend/src/offline/customerEngine.ts` | 25k worst 1998 ms; 100k worst 8500 ms | 25,000 and 100,000 synthetic customers | Synchronous IndexedDB read plus in-memory prefix index construction | High | Chunk/index customer hydration off the cashier-critical path and evaluate worker-backed index build | Medium: must keep search usable and boot non-blocking |
+| Customer delta apply | `frontend/src/offline/customerEngine.ts`, `frontend/src/offline/sync/adapters/customers.ts` | 25k worst 418 ms; 100k worst 1431 ms | Small one-customer delta on indexed operational table | IndexedDB multi-entry index write cost dominates even after in-memory update is incremental | High | Batch/idle operational customer commits and separate hot exact maps from heavy prefix persistence | Medium: must preserve offline reconciliation and tombstone safety |
 | Sell-ready boot semantics | `frontend/src/posapp/stores/bootReadinessStore.ts`, `frontend/src/offline/localSnapshotManifest.ts`, `frontend/src/posapp/layouts/DefaultLayout.vue` | Unit validated; browser p95 pending | Runtime boot path | Route-ready metric is fixed; browser-run p95 still needs real Frappe app session data | Medium | Run browser perf smoke with `posa_perf=1` against real cached/cold/offline boots | Low: diagnostic/measurement only |
 | Item/customer render attribution | `ItemsSelector.vue`, customer components, diagnostics metrics | Not benchmarked in this environment | Browser runtime required | Search timing and backend timing are measured, but component rerender p95 requires browser-run sessions | Medium | Add browser smoke/perf run that enables `posa_perf=1` and records render summaries from diagnostics | Low: diagnostic-only if no behavior changes |
 | Offline sync queue visibility | `frontend/src/offline/writeQueue.ts`, `frontend/src/offline/invoiceOutbox.ts`, `SyncCoordinator.ts` | Instrumented, no failing benchmark yet | Requires queued offline invoices/payments | Multiple queue paths make aggregate sync health harder to reason about | Medium | Add a combined queue health store that reads existing queues without extra traffic | Low to medium: must avoid breaking offline replay ordering |

@@ -32,6 +32,14 @@ vi.mock("../src/offline/index", () => ({
 	clearCustomerStorage: vi.fn(async () => undefined),
 	isOffline: vi.fn(() => false),
 	refreshBootstrapSnapshotFromCacheState: vi.fn(),
+	hydrateOperationalCustomerIndex: vi.fn(async () => ({ ready: true, indexedCustomerCount: 0 })),
+	searchCustomersLocal: vi.fn(() => []),
+	lookupCustomerExact: vi.fn(() => null),
+	getCustomerEngineDiagnostics: vi.fn(() => ({
+		ready: false,
+		scope: null,
+		indexedCustomerCount: 0,
+	})),
 }));
 
 describe("customersStore profile and customer dto handling", () => {
@@ -78,7 +86,7 @@ describe("customersStore profile and customer dto handling", () => {
 		]);
 		expect(store.customerInfo).toEqual(info);
 		expectTypeOf(store.customers).toEqualTypeOf<CustomerSummary[]>();
-		expect(setCustomerStorageMock).toHaveBeenCalledWith([customer]);
+		expect(setCustomerStorageMock).toHaveBeenCalledWith([customer], "Main POS");
 	});
 
 	it("adds fetched customer info to the visible selector list", () => {

@@ -5,6 +5,7 @@ import {
 } from "../../../../offline/index";
 import { useDiscounts } from "../../../composables/pos/shared/useDiscounts";
 import { resolvePosDocumentDoctype } from "../../../utils/posDocumentMode";
+import { startPerfMeasure } from "../../../utils/perf";
 
 declare const __: (_text: string, _args?: any[]) => string;
 declare const flt: (_value: unknown, _precision?: number) => number;
@@ -45,12 +46,16 @@ declare const frappe: any;
  */
 
 export async function fetch_customer_balance(context: any) {
+	const metric = startPerfMeasure("pos.customers.balance_load", {
+		source: isOffline() ? "local" : "server",
+	});
 	context.customer_balance_loading = true;
 	try {
 		if (!context.customer) {
 			context.customer_balance = 0;
 			context.customer_balance_currency = undefined;
 			context.customer_balance_loading = false;
+			metric.finish("success", { skipped: true });
 			return;
 		}
 
@@ -61,6 +66,11 @@ export async function fetch_customer_balance(context: any) {
 				context.customer_balance = cachedData.balance;
 				context.customer_balance_currency = cachedData.currency;
 				context.customer_balance_loading = false;
+				startPerfMeasure("pos.customers.balance_cache_hit", {
+					source: "local",
+					cache_hit: true,
+				}).finish("success");
+				metric.finish("success", { cache_hit: true });
 				return;
 			} else {
 				// No cached balance available in offline mode
@@ -74,6 +84,11 @@ export async function fetch_customer_balance(context: any) {
 					),
 					color: "warning",
 				});
+				startPerfMeasure("pos.customers.balance_stale_display", {
+					source: "offline",
+					cache_hit: false,
+				}).finish("success");
+				metric.finish("success", { cache_hit: false, offline: true });
 				return;
 			}
 		}
@@ -92,7 +107,9 @@ export async function fetch_customer_balance(context: any) {
 		// Cache the balanced for offline use
 		saveCustomerBalance(context.customer, balance, currency);
 		context.customer_balance_loading = false;
+		metric.finish("success", { cache_hit: false });
 	} catch (error) {
+		metric.fail(error);
 		console.error("Error fetching balance:", error);
 
 		// Try to use cached balance as fallback

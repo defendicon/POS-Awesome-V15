@@ -9,8 +9,12 @@ const BASE_SCHEMA = {
 		"++queue_id,entity_type,status,created_at,last_attempt_at,retry_count,&idempotency_key,[entity_type+status]",
 	cache: "&key",
 	items: "&item_code,item_name,item_group,*barcodes,*name_keywords,*serials,*batches",
+	operational_items:
+		"&key,scope,item_code,item_group,*barcodes,*search_tokens,modified",
 	item_prices: "&[price_list+item_code],price_list,item_code",
 	customers: "&name,customer_name,mobile_no,email_id,tax_id",
+	operational_customers:
+		"&key,scope,name,customer_name,*phone_keys,*search_tokens,email_key,tax_key,modified,pending_sync",
 	pos_profiles: "&name",
 	opening_shifts: "&name,user,pos_profile",
 	local_stock: "&key",
@@ -155,6 +159,10 @@ const SCHEMA_SIGNATURE = JSON.stringify(BASE_SCHEMA);
 		});
 	db.version(10).stores(BASE_SCHEMA);
 	db.version(11).stores(BASE_SCHEMA);
+	db.version(12).stores(BASE_SCHEMA);
+	db.version(13).stores(BASE_SCHEMA);
+	db.version(14).stores(BASE_SCHEMA);
+	db.version(15).stores(BASE_SCHEMA);
 	try {
 		await db.open();
 	} catch (err) {

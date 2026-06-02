@@ -62,6 +62,9 @@ import {
 	resetInventoryEngine,
 	saveOperationalItemsFromRaw,
 } from "./inventoryEngine";
+import {
+	resetCustomerEngine,
+} from "./customerEngine";
 import { emitBootstrapSnapshotUpdated } from "../posapp/utils/bootstrapRuntimeEvents";
 
 const normalizeScope = (scope: unknown): string => String(scope || "");
@@ -1137,6 +1140,8 @@ export async function clearCustomerStorage() {
 		await checkDbHealth();
 		if (!db.isOpen()) await db.open();
 		await db.table("customers").clear();
+		await db.table("operational_customers").clear();
+		resetCustomerEngine();
 		memory.customer_storage = [];
 	} catch (e) {
 		console.error("Failed to clear customer storage", e);

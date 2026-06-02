@@ -9,10 +9,7 @@ import type {
 	POSProfile,
 	StoredCustomer,
 } from "../types/models";
-import {
-	customerMatchesSearchTerm,
-	normalizeCustomerSearchTerm,
-} from "./customers/customerSearch";
+import { normalizeCustomerSearchTerm } from "./customers/customerSearch";
 import { resetCustomerLoadingCoordinator } from "../modules/customers/customerLoadingCoordinator";
 import { bucketCount, startPerfMeasure } from "../utils/perf";
 // @ts-ignore
@@ -28,9 +25,14 @@ import {
 	clearCustomerStorage,
 	isOffline,
 	refreshBootstrapSnapshotFromCacheState,
+	hydrateOperationalCustomerIndex,
+	searchCustomersLocal,
+	lookupCustomerExact,
+	getCustomerEngineDiagnostics,
 } from "../../offline/index";
 
 const PAGE_SIZE = 1000;
+const VISIBLE_CUSTOMER_PAGE_SIZE = 50;
 const CUSTOMER_SCOPE_STORAGE_KEY = "posa_customers_profile_scope";
 
 function getCustomerProfileScope(profile: POSProfile | null): string {
@@ -170,37 +172,9 @@ export const useCustomersStore = defineStore("customers", () => {
 	const refreshToken = ref(0);
 	const isUpdateCustomerDialogOpen = ref(false);
 	const customerToUpdate = ref<StoredCustomer | null>(null);
+	const customerEngineReady = ref(false);
+	const customerEngineDiagnostics = ref(getCustomerEngineDiagnostics());
 	let customerFetchPromise: Promise<void> | null = null;
-	const customerLoadLogState = {
-		local: false,
-		server: false,
-		final: false,
-	};
-
-	function resetCustomerLoadLogState() {
-		customerLoadLogState.local = false;
-		customerLoadLogState.server = false;
-		customerLoadLogState.final = false;
-	}
-
-	function logLocalCustomerCount(count: number) {
-		if (customerLoadLogState.local) return;
-		console.log(`Local customer count: ${count}`);
-		customerLoadLogState.local = true;
-	}
-
-	function logServerCustomerCount(count: number) {
-		if (customerLoadLogState.server) return;
-		console.log(`Server customer count: ${count}`);
-		customerLoadLogState.server = true;
-	}
-
-	function logFinalLoadedCustomerCount() {
-		if (customerLoadLogState.final) return;
-		const count = Number(loadedCustomerCount.value || customers.value.length || 0);
-		console.log(`Customers loaded: ${count}`);
-		customerLoadLogState.final = true;
-	}
 
 	const filteredCustomers = computed(() => customers.value);
 
@@ -220,6 +194,15 @@ export const useCustomersStore = defineStore("customers", () => {
 		page.value = 0;
 		hasMore.value = true;
 		customers.value = [];
+	}
+
+	async function hydrateCustomerEngine() {
+		const scope =
+			customerProfileScope.value || getCustomerProfileScope(posProfile.value);
+		customerEngineDiagnostics.value =
+			await hydrateOperationalCustomerIndex(scope);
+		customerEngineReady.value = Boolean(customerEngineDiagnostics.value.ready);
+		return customerEngineDiagnostics.value;
 	}
 
 	function setPosProfile(profile: unknown) {
@@ -279,7 +262,10 @@ export const useCustomersStore = defineStore("customers", () => {
 			getStringField(customerInfo.value, "name") ||
 			getStringField(customerInfo.value, "customer");
 		if (customerName) {
-			void setCustomerStorage([{ ...customerInfo.value, name: customerName }]);
+			void setCustomerStorage(
+				[{ ...customerInfo.value, name: customerName }],
+				customerProfileScope.value,
+			);
 		}
 		if (
 			customerName &&
@@ -336,29 +322,27 @@ export const useCustomersStore = defineStore("customers", () => {
 		loadedCustomerCount.value = 0;
 		nextCustomerStart.value = null;
 		syncBootstrapCustomerReadiness(0);
+		customerEngineReady.value = false;
+		customerEngineDiagnostics.value = getCustomerEngineDiagnostics();
 	}
 
 	async function performSearch({ append = false } = {}) {
 		const metric = startPerfMeasure("pos.customers.local_search", {
 			source: "local",
 			append,
-			customer_count_bucket: bucketCount(customers.value.length),
+			customer_count_bucket: bucketCount(
+				customerEngineDiagnostics.value.indexedCustomerCount,
+			),
 		});
-		await ensureDatabase();
+		await hydrateCustomerEngine();
 
-		let collection = db.table("customers");
-		const normalizedTerm = normalizeCustomerSearchTerm(searchTerm.value);
-		if (normalizedTerm) {
-			collection = collection.filter((customer: CustomerSummary) =>
-				customerMatchesSearchTerm(customer, normalizedTerm),
-			);
-		}
-
-		const offset = page.value * PAGE_SIZE;
-		const results = await collection
-			.offset(offset)
-			.limit(PAGE_SIZE)
-			.toArray();
+		const offset = page.value * VISIBLE_CUSTOMER_PAGE_SIZE;
+		const results = searchCustomersLocal(searchTerm.value, {
+			scope: customerProfileScope.value,
+			limit: VISIBLE_CUSTOMER_PAGE_SIZE,
+			offset,
+			includePending: true,
+		});
 
 		if (append) {
 			customers.value = [...customers.value, ...results];
@@ -366,7 +350,7 @@ export const useCustomersStore = defineStore("customers", () => {
 			customers.value = results;
 		}
 
-		hasMore.value = results.length === PAGE_SIZE;
+		hasMore.value = results.length === VISIBLE_CUSTOMER_PAGE_SIZE;
 		if (hasMore.value) {
 			page.value += 1;
 		}
@@ -399,7 +383,7 @@ export const useCustomersStore = defineStore("customers", () => {
 			return 0;
 		}
 		const count = await performSearch({ append: true });
-		if (count === PAGE_SIZE) {
+		if (count === VISIBLE_CUSTOMER_PAGE_SIZE) {
 			return count;
 		}
 		if (nextCustomerStart.value) {
@@ -475,7 +459,7 @@ export const useCustomersStore = defineStore("customers", () => {
 					limit,
 				);
 				if (rows.length) {
-					await setCustomerStorage(rows);
+					await setCustomerStorage(rows, customerProfileScope.value);
 					loadedCustomerCount.value += rows.length;
 					syncBootstrapCustomerReadiness(loadedCustomerCount.value);
 					if (totalCustomerCount.value) {
@@ -500,7 +484,7 @@ export const useCustomersStore = defineStore("customers", () => {
 					loadProgress.value = 100;
 					customersLoaded.value = true;
 					syncBootstrapCustomerReadiness(loadedCustomerCount.value);
-					logFinalLoadedCustomerCount();
+					customerEngineDiagnostics.value = getCustomerEngineDiagnostics();
 				}
 			}
 		} catch (err) {
@@ -537,7 +521,6 @@ export const useCustomersStore = defineStore("customers", () => {
 				args: { pos_profile: serializedProfile },
 			});
 			const serverCount = response.message || 0;
-			logServerCustomerCount(serverCount);
 			totalCustomerCount.value = serverCount;
 			loadedCustomerCount.value = localCount;
 			syncBootstrapCustomerReadiness(localCount);
@@ -553,7 +536,7 @@ export const useCustomersStore = defineStore("customers", () => {
 					PAGE_SIZE,
 				);
 				if (rows.length) {
-					await setCustomerStorage(rows);
+					await setCustomerStorage(rows, customerProfileScope.value);
 					loadedCustomerCount.value += rows.length;
 					syncBootstrapCustomerReadiness(loadedCustomerCount.value);
 					if (totalCustomerCount.value) {
@@ -578,7 +561,6 @@ export const useCustomersStore = defineStore("customers", () => {
 					loadProgress.value = 100;
 					customersLoaded.value = true;
 					syncBootstrapCustomerReadiness(loadedCustomerCount.value);
-					logFinalLoadedCustomerCount();
 				}
 				await searchCustomers(searchTerm.value);
 			} else if (serverCount < localCount) {
@@ -588,9 +570,7 @@ export const useCustomersStore = defineStore("customers", () => {
 				resetPagination();
 				await load_customer_names_internal();
 			} else {
-				if (customersLoaded.value || localCount > 0) {
-					logFinalLoadedCustomerCount();
-				}
+				customerEngineDiagnostics.value = getCustomerEngineDiagnostics();
 			}
 		} catch (err) {
 			console.error("Error verifying customer count:", err);
@@ -602,7 +582,6 @@ export const useCustomersStore = defineStore("customers", () => {
 			source: "local",
 		});
 		if (!posProfile.value) {
-			console.debug("Customer fetch skipped: POS Profile not ready");
 			metric.finish("success", { skipped: true });
 			return;
 		}
@@ -614,16 +593,13 @@ export const useCustomersStore = defineStore("customers", () => {
 
 		await ensureDatabase();
 		const localCount = await getCustomerStorageCount();
-		logLocalCustomerCount(localCount);
 		syncBootstrapCustomerReadiness(localCount);
 
 		if (localCount > 0) {
 			customersLoaded.value = true;
+			await hydrateCustomerEngine();
 			await searchCustomers(searchTerm.value);
 			await verifyServerCustomerCount();
-			if (!nextCustomerStart.value) {
-				logFinalLoadedCustomerCount();
-			}
 			metric.finish("success", {
 				cache_hit: true,
 				customer_result_count: bucketCount(localCount),
@@ -651,7 +627,6 @@ export const useCustomersStore = defineStore("customers", () => {
 					args: { pos_profile: serializedProfile },
 				});
 				totalCustomerCount.value = countResponse.message || 0;
-				logServerCustomerCount(totalCustomerCount.value);
 			} catch (err) {
 				console.error("Failed to fetch customer count", err);
 				totalCustomerCount.value = 0;
@@ -664,7 +639,7 @@ export const useCustomersStore = defineStore("customers", () => {
 			);
 
 			if (rows.length) {
-				await setCustomerStorage(rows);
+				await setCustomerStorage(rows, customerProfileScope.value);
 			}
 			loadedCustomerCount.value = rows.length;
 			syncBootstrapCustomerReadiness(loadedCustomerCount.value);
@@ -688,7 +663,6 @@ export const useCustomersStore = defineStore("customers", () => {
 				loadProgress.value = 100;
 				customersLoaded.value = true;
 				syncBootstrapCustomerReadiness(loadedCustomerCount.value);
-				logFinalLoadedCustomerCount();
 			}
 			customersLoaded.value = true;
 		} catch (err) {
@@ -697,6 +671,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		} finally {
 			loadingCustomers.value = false;
 			customersLoaded.value = true;
+			await hydrateCustomerEngine();
 			await searchCustomers(searchTerm.value);
 			if (!localCount) {
 				metric.finish("success", {
@@ -712,7 +687,6 @@ export const useCustomersStore = defineStore("customers", () => {
 			return customerFetchPromise;
 		}
 
-		resetCustomerLoadLogState();
 		customerFetchPromise = load_customer_names_internal().finally(() => {
 			customerFetchPromise = null;
 		});
@@ -733,7 +707,8 @@ export const useCustomersStore = defineStore("customers", () => {
 		} else {
 			customers.value = [...customers.value, customer];
 		}
-		await setCustomerStorage([customer]);
+		await setCustomerStorage([customer], customerProfileScope.value);
+		await hydrateCustomerEngine();
 		syncBootstrapCustomerReadiness(Math.max(customers.value.length, 1));
 		setSelectedCustomer(customer.name);
 		requestCustomerRefresh();
@@ -778,7 +753,8 @@ export const useCustomersStore = defineStore("customers", () => {
 		loadedCustomerCount.value = 0;
 		customersLoaded.value = false;
 		nextCustomerStart.value = null;
-		resetCustomerLoadLogState();
+		customerEngineReady.value = false;
+		customerEngineDiagnostics.value = getCustomerEngineDiagnostics();
 	}
 
 	return {
@@ -798,7 +774,10 @@ export const useCustomersStore = defineStore("customers", () => {
 		totalCustomerCount,
 		loadedCustomerCount,
 		posProfile,
+		customerProfileScope,
 		refreshToken,
+		customerEngineReady,
+		customerEngineDiagnostics,
 		isLoadComplete,
 		setPosProfile,
 		setSelectedCustomer,
@@ -808,6 +787,8 @@ export const useCustomersStore = defineStore("customers", () => {
 		loadMoreCustomers,
 		verifyServerCustomerCount,
 		get_customer_names,
+		hydrateCustomerEngine,
+		lookupCustomerExact,
 		backgroundLoadCustomers,
 		addOrUpdateCustomer,
 		requestCustomerRefresh,

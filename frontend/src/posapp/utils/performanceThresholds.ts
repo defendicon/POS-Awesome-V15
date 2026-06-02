@@ -6,6 +6,16 @@ export type PerformanceThresholdName =
 	| "barcodeExactLookup"
 	| "localItemAutocomplete"
 	| "localCustomerAutocomplete"
+	| "customerExactLookup25k"
+	| "customerMobileExactLookup25k"
+	| "customerSelectLocal25k"
+	| "customerIndexHydrate25k"
+	| "customerDeltaApply25k"
+	| "localCustomerAutocomplete100k"
+	| "customerExactLookup100k"
+	| "customerMobileExactLookup100k"
+	| "customerSelectLocal100k"
+	| "customerDeltaApply100k"
 	| "addItemToCart"
 	| "cartRecalculate20Lines"
 	| "cartRecalculate200Lines"
@@ -20,6 +30,16 @@ export const PERFORMANCE_THRESHOLDS_MS: Record<PerformanceThresholdName, number>
 	barcodeExactLookup: 20,
 	localItemAutocomplete: 50,
 	localCustomerAutocomplete: 75,
+	customerExactLookup25k: 15,
+	customerMobileExactLookup25k: 20,
+	customerSelectLocal25k: 30,
+	customerIndexHydrate25k: 150,
+	customerDeltaApply25k: 100,
+	localCustomerAutocomplete100k: 75,
+	customerExactLookup100k: 20,
+	customerMobileExactLookup100k: 25,
+	customerSelectLocal100k: 40,
+	customerDeltaApply100k: 125,
 	addItemToCart: 50,
 	cartRecalculate20Lines: 40,
 	cartRecalculate200Lines: 150,

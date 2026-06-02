@@ -4,16 +4,23 @@ import {
 	setCustomerStorage,
 	saveStoredValueSnapshot,
 } from "../../../../offline/index";
+import { startPerfMeasure } from "../../../utils/perf";
 
 declare const frappe: any;
 
 export async function fetch_customer_details(context: any) {
+	const metric = startPerfMeasure("pos.customers.details_load", {
+		source: "server",
+	});
 	try {
 		const customer =
 			typeof context.customer === "string"
 				? context.customer.trim()
 				: "";
-		if (!customer) return;
+		if (!customer) {
+			metric.finish("success", { skipped: true });
+			return;
+		}
 		const requestedCustomer = customer;
 
 		context.customer_info = {};
@@ -24,6 +31,10 @@ export async function fetch_customer_details(context: any) {
 			context.customer.trim() === requestedCustomer
 		) {
 			context.customer_info = cachedCustomer;
+			startPerfMeasure("pos.customers.details_cache_hit", {
+				source: "local",
+				cache_hit: true,
+			}).finish("success");
 		}
 
 		const r = await frappe.call({
@@ -44,7 +55,7 @@ export async function fetch_customer_details(context: any) {
 			context.customer.trim() === requestedCustomer
 		) {
 			context.customer_info = r.message;
-			await setCustomerStorage([r.message]);
+			await setCustomerStorage([r.message], context?.pos_profile?.name || "");
 			if (context?.pos_profile?.company) {
 				const totalCredit = Number(r.message?.stored_value_balance || 0);
 				saveStoredValueSnapshot(
@@ -87,8 +98,12 @@ export async function fetch_customer_details(context: any) {
 				if (context.update_items_details)
 					await context.update_items_details(context.items);
 			}
+			metric.finish("success", { cache_hit: Boolean(cachedCustomer) });
+		} else {
+			metric.finish("success", { cache_hit: Boolean(cachedCustomer), empty: true });
 		}
 	} catch (error) {
+		metric.fail(error);
 		console.error("Error fetching customer details:", error);
 	}
 }

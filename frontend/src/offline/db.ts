@@ -56,6 +56,8 @@ const BASE_SCHEMA = {
 		"&key,scope,item_code,item_group,*barcodes,*search_tokens,modified",
 	item_prices: "&[price_list+item_code],price_list,item_code",
 	customers: "&name,customer_name,mobile_no,email_id,tax_id",
+	operational_customers:
+		"&key,scope,name,customer_name,*phone_keys,*search_tokens,email_key,tax_key,modified,pending_sync",
 	pos_profiles: "&name",
 	opening_shifts: "&name,user,pos_profile",
 	local_stock: "&key",
@@ -191,6 +193,7 @@ const DERIVED_OFFLINE_TABLES_TO_CLEAR = Object.freeze([
 	"operational_items",
 	"item_prices",
 	"customers",
+	"operational_customers",
 	"cache",
 	"local_stock",
 	"coupons",
@@ -239,6 +242,7 @@ db.version(11).stores(BASE_SCHEMA);
 db.version(12).stores(BASE_SCHEMA);
 db.version(13).stores(BASE_SCHEMA);
 db.version(14).stores(BASE_SCHEMA);
+db.version(15).stores(BASE_SCHEMA);
 
 let persistWorker: Worker | null = null;
 if (typeof Worker !== "undefined") {

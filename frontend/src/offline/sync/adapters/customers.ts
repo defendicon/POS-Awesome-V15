@@ -7,6 +7,7 @@ import {
 	deleteCustomerStorageByNames,
 	setCustomerStorage,
 } from "../../customers";
+import { applyCustomerDeltas } from "../../customerEngine";
 import { getSyncResourceState } from "../syncState";
 import {
 	buildResourceSyncResult,
@@ -177,13 +178,19 @@ export async function syncCustomersResource(
 
 	const changedCustomers = extractChangedCustomers(response);
 	if (changedCustomers.length) {
-		await setCustomerStorage(changedCustomers);
+		await setCustomerStorage(changedCustomers, args.posProfile.name || "");
 	}
 
 	const deletedCustomerNames = extractDeletedCustomerNames(response);
 	if (deletedCustomerNames.length) {
-		await deleteCustomerStorageByNames(deletedCustomerNames);
+		await deleteCustomerStorageByNames(deletedCustomerNames, args.posProfile.name || "");
 	}
+	await applyCustomerDeltas({
+		scope: args.posProfile.name || "",
+		changed: changedCustomers,
+		deletedCustomerNames,
+		source: "sync",
+	});
 
 	const customersCount = await getCustomerStorageCount();
 	refreshSnapshotFromSync({

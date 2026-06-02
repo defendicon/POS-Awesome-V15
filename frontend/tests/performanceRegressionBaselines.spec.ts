@@ -1,14 +1,17 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it } from "vitest";
-import { customerMatchesSearchTerm } from "../src/posapp/stores/customers/customerSearch";
 import { PERFORMANCE_THRESHOLDS_MS, percentile } from "../src/posapp/utils/performanceThresholds";
 import {
 	db,
 	hydrateOperationalIndexFromSnapshot,
+	hydrateOperationalCustomerIndex,
 	lookupBarcodeExact,
 	resetInventoryEngine,
+	resetCustomerEngine,
 	saveOperationalItemsFromRaw,
+	saveOperationalCustomersFromRaw,
 	searchItemsLocal,
+	searchCustomersLocal,
 } from "../src/offline";
 
 function timed(samples: number, fn: () => void) {
@@ -47,7 +50,10 @@ describe("POS performance regression baselines", () => {
 		await db.open();
 		await db.table("items").clear();
 		await db.table("operational_items").clear();
+		await db.table("customers").clear();
+		await db.table("operational_customers").clear();
 		resetInventoryEngine();
+		resetCustomerEngine();
 	}, 30000);
 
 	it("tracks local item autocomplete against the engineering target", async () => {
@@ -77,14 +83,18 @@ describe("POS performance regression baselines", () => {
 		expect(p95).toBeLessThanOrEqual(PERFORMANCE_THRESHOLDS_MS.barcodeExactLookup);
 	});
 
-	it("tracks local customer autocomplete against the engineering target", () => {
+	it("tracks local customer autocomplete against the engineering target", async () => {
 		const customers = syntheticCustomers(25000);
+		const scope = "PERF_PROFILE_MAIN";
+		await saveOperationalCustomersFromRaw(customers, scope);
+		await hydrateOperationalCustomerIndex(scope);
 		const p95 = timed(10, () => {
-			customers
-				.filter((customer) => customerMatchesSearchTerm(customer, "customer 249"))
-				.slice(0, 50);
+			searchCustomersLocal("customer 249", {
+				scope,
+				limit: 50,
+			});
 		});
 
 		expect(p95).toBeLessThanOrEqual(PERFORMANCE_THRESHOLDS_MS.localCustomerAutocomplete);
-	});
+	}, 30000);
 });

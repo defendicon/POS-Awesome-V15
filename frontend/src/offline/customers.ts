@@ -1,5 +1,11 @@
 import { checkDbHealth, db, isOffline, memory, persist } from "./db";
 import {
+	deleteOperationalCustomersByNames,
+	reconcileSyncedOfflineCustomer,
+	saveOperationalCustomersFromRaw,
+	upsertOfflineCreatedCustomer,
+} from "./customerEngine";
+import {
 	claimRetryableQueueEntries,
 	clearWriteQueueEntries,
 	deleteWriteQueueEntryByIndex,
@@ -17,6 +23,19 @@ type AnyRecord = Record<string, any>;
 
 const CUSTOMER_ENTITY: OfflineEntityType = "customer";
 
+function getProfileScopeFromPayload(payload: AnyRecord | null | undefined) {
+	try {
+		const rawProfile = payload?.pos_profile_doc || payload?.pos_profile;
+		if (!rawProfile) {
+			return "";
+		}
+		const profile = typeof rawProfile === "string" ? JSON.parse(rawProfile) : rawProfile;
+		return String(profile?.name || "").trim();
+	} catch {
+		return "";
+	}
+}
+
 export async function saveOfflineCustomer(entry: AnyRecord) {
 	let cleanEntry;
 	try {
@@ -26,7 +45,22 @@ export async function saveOfflineCustomer(entry: AnyRecord) {
 		throw error;
 	}
 
-	return enqueueWriteQueueEntry(CUSTOMER_ENTITY, cleanEntry);
+	const result = await enqueueWriteQueueEntry(CUSTOMER_ENTITY, cleanEntry);
+	const args = cleanEntry?.args || {};
+	await upsertOfflineCreatedCustomer(
+		{
+			name: args.customer_name,
+			customer_name: args.customer_name,
+			mobile_no: args.mobile_no,
+			email_id: args.email_id,
+			tax_id: args.tax_id,
+			primary_address: args.address_line1,
+			customer_group: args.customer_group,
+			territory: args.territory,
+		},
+		getProfileScopeFromPayload(args),
+	);
+	return result;
 }
 
 export async function updateOfflineInvoicesCustomer(
@@ -107,6 +141,13 @@ export async function syncOfflineCustomers() {
 					queuedCustomer.args.customer_name,
 					result.message.name,
 				);
+				await reconcileSyncedOfflineCustomer(
+					queuedCustomer.args.customer_name,
+					result.message,
+					getProfileScopeFromPayload(queuedCustomer.args),
+				);
+			} else if (result?.message?.name) {
+				await saveOperationalCustomersFromRaw([result.message], getProfileScopeFromPayload(queuedCustomer.args));
 			}
 		} catch (error) {
 			console.error("Failed to create customer", error);
@@ -174,7 +215,7 @@ export async function getStoredCustomer(customerName: string) {
 	}
 }
 
-export async function setCustomerStorage(customers: AnyRecord[]) {
+export async function setCustomerStorage(customers: AnyRecord[], scope = "") {
 	try {
 		const existingByName = new Map<string, AnyRecord>();
 		const existingRows = Array.isArray(memory.customer_storage)
@@ -226,13 +267,14 @@ export async function setCustomerStorage(customers: AnyRecord[]) {
 		});
 
 		await db.table("customers").bulkPut(clean);
+		await saveOperationalCustomersFromRaw(clean, scope);
 		memory.customer_storage = mergeCustomerStorageRows(clean);
 	} catch (error) {
 		console.error("Failed to save customers to storage", error);
 	}
 }
 
-export async function deleteCustomerStorageByNames(names: string[]) {
+export async function deleteCustomerStorageByNames(names: string[], scope = "") {
 	try {
 		const normalizedNames = Array.from(
 			new Set(
@@ -245,6 +287,7 @@ export async function deleteCustomerStorageByNames(names: string[]) {
 			return;
 		}
 		await db.table("customers").bulkDelete(normalizedNames);
+		await deleteOperationalCustomersByNames(normalizedNames, scope);
 		const existingRows = Array.isArray(memory.customer_storage)
 			? memory.customer_storage
 			: [];

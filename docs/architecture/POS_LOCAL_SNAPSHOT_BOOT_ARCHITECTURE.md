@@ -166,6 +166,10 @@ The `items` boot-critical resource now means a usable operational inventory inde
 
 The readiness store calls `hydrateOperationalIndexFromSnapshot()` from `frontend/src/offline/inventoryEngine.ts`. If compact `operational_items` rows are present, the engine hydrates non-reactive exact barcode, exact item-code, token and prefix maps. If compact rows are missing but scoped raw item rows exist, the engine rebuilds compact operational rows first. If that process fails, sell-ready remains blocked on `items`.
 
+## Customer Warm Resource
+
+Customer hydration remains a warm resource rather than a general sell-ready blocker. `frontend/src/offline/customerEngine.ts` hydrates compact `operational_customers` rows for fast customer selector search, but large customer datasets do not delay item scan, cart, payment method, currency or pricing readiness. Diagnostics show whether the customer engine is cold, warming or searchable. A future mandatory-customer policy should be represented as an explicit POS Profile rule instead of accidentally making all customer hydration boot-critical.
+
 ## Metrics
 
 The implementation adds or corrects:
