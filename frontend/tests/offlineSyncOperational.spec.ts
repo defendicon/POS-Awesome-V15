@@ -29,6 +29,26 @@ const customerMocks = vi.hoisted(() => ({
 	deleteCustomerStorageByNames: vi.fn().mockResolvedValue(undefined),
 }));
 
+const inventoryEngineMocks = vi.hoisted(() => ({
+	getOperationalItemsCountByScope: vi.fn().mockResolvedValue(7),
+	hydrateOperationalIndexFromSnapshot: vi.fn().mockResolvedValue({
+		ready: true,
+		indexedItemCount: 7,
+	}),
+}));
+
+const customerEngineMocks = vi.hoisted(() => ({
+	applyCustomerDeltas: vi.fn().mockResolvedValue({
+		ready: true,
+		indexedCustomerCount: 5,
+	}),
+	getOperationalCustomerCountByScope: vi.fn().mockResolvedValue(5),
+	hydrateOperationalCustomerIndex: vi.fn().mockResolvedValue({
+		ready: true,
+		indexedCustomerCount: 5,
+	}),
+}));
+
 const stockMocks = vi.hoisted(() => ({
 	clearLocalStockCache: vi.fn(),
 	updateLocalStockCache: vi.fn(),
@@ -70,6 +90,8 @@ const syncStateMocks = vi.hoisted(() => ({
 
 vi.mock("../src/offline/cache", () => cacheMocks);
 vi.mock("../src/offline/customers", () => customerMocks);
+vi.mock("../src/offline/inventoryEngine", () => inventoryEngineMocks);
+vi.mock("../src/offline/customerEngine", () => customerEngineMocks);
 vi.mock("../src/offline/stock", () => stockMocks);
 vi.mock("../src/offline/bootstrapSnapshot", () => bootstrapSnapshotMocks);
 vi.mock("../src/offline/sync/syncState", () => syncStateMocks);
@@ -90,6 +112,20 @@ describe("operational offline sync adapters", () => {
 		syncStateMocks.getSyncResourceState.mockResolvedValue(null);
 		cacheMocks.getStoredItemsCountByScope.mockResolvedValue(7);
 		cacheMocks.getCustomerStorageCount.mockResolvedValue(5);
+		inventoryEngineMocks.getOperationalItemsCountByScope.mockResolvedValue(7);
+		inventoryEngineMocks.hydrateOperationalIndexFromSnapshot.mockResolvedValue({
+			ready: true,
+			indexedItemCount: 7,
+		});
+		customerEngineMocks.applyCustomerDeltas.mockResolvedValue({
+			ready: true,
+			indexedCustomerCount: 5,
+		});
+		customerEngineMocks.getOperationalCustomerCountByScope.mockResolvedValue(5);
+		customerEngineMocks.hydrateOperationalCustomerIndex.mockResolvedValue({
+			ready: true,
+			indexedCustomerCount: 5,
+		});
 	});
 
 	it("clears stale item scope before applying delta writes and deletes", async () => {
@@ -263,15 +299,19 @@ describe("operational offline sync adapters", () => {
 		});
 
 		expect(cacheMocks.clearCustomerStorage).toHaveBeenCalledOnce();
-		expect(customerMocks.setCustomerStorage).toHaveBeenCalledWith([
-			{
-				name: "CUST-001",
-				customer_name: "Customer One",
-			},
-		]);
-		expect(customerMocks.deleteCustomerStorageByNames).toHaveBeenCalledWith([
-			"CUST-002",
-		]);
+		expect(customerMocks.setCustomerStorage).toHaveBeenCalledWith(
+			[
+				{
+					name: "CUST-001",
+					customer_name: "Customer One",
+				},
+			],
+			"POS-1",
+		);
+		expect(customerMocks.deleteCustomerStorageByNames).toHaveBeenCalledWith(
+			["CUST-002"],
+			"POS-1",
+		);
 		expect(cacheMocks.getCustomerStorageCount).toHaveBeenCalledOnce();
 		expect(cacheMocks.setCustomersLastSync).toHaveBeenCalledWith(
 			"2026-04-09T11:00:00",
@@ -336,10 +376,13 @@ describe("operational offline sync adapters", () => {
 		});
 
 		expect(fetcher).toHaveBeenCalledTimes(2);
-		expect(customerMocks.setCustomerStorage).toHaveBeenCalledWith([
-			expect.objectContaining({ name: "CUST-001" }),
-			expect.objectContaining({ name: "CUST-002" }),
-		]);
+		expect(customerMocks.setCustomerStorage).toHaveBeenCalledWith(
+			[
+				expect.objectContaining({ name: "CUST-001" }),
+				expect.objectContaining({ name: "CUST-002" }),
+			],
+			"POS-1",
+		);
 		expect(cacheMocks.setCustomersLastSync).toHaveBeenCalledWith(
 			"2026-05-20T10:05:00",
 		);
@@ -410,13 +453,158 @@ describe("operational offline sync adapters", () => {
 
 		expect(fetcher).toHaveBeenCalledTimes(2);
 		expect(cacheMocks.clearCustomerStorage).toHaveBeenCalledOnce();
-		expect(customerMocks.setCustomerStorage).toHaveBeenCalledWith([
-			expect.objectContaining({
-				name: "CUST-LOYAL",
-				loyalty_points: 2,
-				conversion_factor: 10,
-			}),
-		]);
+		expect(customerMocks.setCustomerStorage).toHaveBeenCalledWith(
+			[
+				expect.objectContaining({
+					name: "CUST-LOYAL",
+					loyalty_points: 2,
+					conversion_factor: 10,
+				}),
+			],
+			"POS-1",
+		);
+		expect(result.status).toBe("fresh");
+	});
+
+	it("resets an item cursor when persisted sync state exists but scoped storage is empty", async () => {
+		cacheMocks.getStoredItemsCountByScope
+			.mockResolvedValueOnce(0)
+			.mockResolvedValueOnce(1);
+		inventoryEngineMocks.getOperationalItemsCountByScope
+			.mockResolvedValueOnce(0)
+			.mockResolvedValueOnce(1);
+
+		const fetcher = vi.fn(async ({ watermark }) => {
+			expect(watermark).toBeNull();
+			return {
+				schema_version: "2026-05-21",
+				next_watermark: "2026-05-21T09:00:00",
+				has_more: false,
+				changes: [
+					{
+						key: "item::ITEM-RESET",
+						modified: "2026-05-21T09:00:00",
+						data: {
+							item_code: "ITEM-RESET",
+							item_name: "Recovered Item",
+						},
+					},
+				],
+				deleted: [],
+			};
+		});
+
+		const result = await syncItemsResource({
+			posProfile: {
+				name: "POS-1",
+				company: "Test Co",
+				warehouse: "Main WH",
+				modified: "2026-05-21T09:00:00",
+			},
+			watermark: "2026-05-20T09:00:00",
+			fetcher,
+		});
+
+		expect(fetcher).toHaveBeenCalledWith(
+			expect.objectContaining({ watermark: null }),
+		);
+		expect(cacheMocks.saveItemsBulk).toHaveBeenCalledWith(
+			[expect.objectContaining({ item_code: "ITEM-RESET" })],
+			"POS-1_Main WH",
+		);
+		expect(result.watermark).toBe("2026-05-21T09:00:00");
+		expect(result.status).toBe("fresh");
+	});
+
+	it("rebuilds the operational item index from raw storage before using an existing cursor", async () => {
+		cacheMocks.getStoredItemsCountByScope
+			.mockResolvedValueOnce(5)
+			.mockResolvedValueOnce(5);
+		inventoryEngineMocks.getOperationalItemsCountByScope
+			.mockResolvedValueOnce(0)
+			.mockResolvedValueOnce(5);
+		inventoryEngineMocks.hydrateOperationalIndexFromSnapshot.mockResolvedValueOnce(
+			{
+				ready: true,
+				indexedItemCount: 5,
+			},
+		);
+
+		const fetcher = vi.fn(async ({ watermark }) => {
+			expect(watermark).toBe("2026-05-20T09:00:00");
+			return {
+				schema_version: "2026-05-21",
+				next_watermark: "2026-05-21T09:00:00",
+				has_more: false,
+				changes: [],
+				deleted: [],
+			};
+		});
+
+		const result = await syncItemsResource({
+			posProfile: {
+				name: "POS-1",
+				company: "Test Co",
+				warehouse: "Main WH",
+				modified: "2026-05-21T09:00:00",
+			},
+			watermark: "2026-05-20T09:00:00",
+			fetcher,
+		});
+
+		expect(
+			inventoryEngineMocks.hydrateOperationalIndexFromSnapshot,
+		).toHaveBeenCalledWith("POS-1_Main WH");
+		expect(result.watermark).toBe("2026-05-21T09:00:00");
+		expect(result.status).toBe("fresh");
+	});
+
+	it("resets a customer cursor when sync state exists but raw and operational customer tables are empty", async () => {
+		cacheMocks.getCustomerStorageCount
+			.mockResolvedValueOnce(0)
+			.mockResolvedValueOnce(1);
+		customerEngineMocks.getOperationalCustomerCountByScope
+			.mockResolvedValueOnce(0)
+			.mockResolvedValueOnce(1);
+
+		const fetcher = vi.fn(async ({ watermark }) => {
+			expect(watermark).toBeNull();
+			return {
+				schema_version: "2026-05-21",
+				next_watermark: "2026-05-21T10:00:00",
+				has_more: false,
+				changes: [
+					{
+						key: "customer::CUST-RESET",
+						modified: "2026-05-21T10:00:00",
+						data: {
+							name: "CUST-RESET",
+							customer_name: "Recovered Customer",
+						},
+					},
+				],
+				deleted: [],
+			};
+		});
+
+		const result = await syncCustomersResource({
+			posProfile: {
+				name: "POS-1",
+				company: "Test Co",
+				modified: "2026-05-21T10:00:00",
+			},
+			watermark: "2026-05-20T10:00:00",
+			fetcher,
+		});
+
+		expect(fetcher).toHaveBeenCalledWith(
+			expect.objectContaining({ watermark: null }),
+		);
+		expect(customerMocks.setCustomerStorage).toHaveBeenCalledWith(
+			[expect.objectContaining({ name: "CUST-RESET" })],
+			"POS-1",
+		);
+		expect(result.watermark).toBe("2026-05-21T10:00:00");
 		expect(result.status).toBe("fresh");
 	});
 

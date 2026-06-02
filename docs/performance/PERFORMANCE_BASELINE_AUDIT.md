@@ -401,7 +401,37 @@ Pricing rules and offers are allowed to be stale/non-blocking during boot, but t
 
 ## Diagnostics Update
 
-`PerformanceDiagnostics.vue` now shows the readiness phase, true sell-ready state, sell-ready source, blocking resource, manifest generation/validity, local/fresh ready timestamps, remote refresh state, and the boot resource readiness matrix.
+`PerformanceDiagnostics.vue` now shows the readiness phase, true sell-ready state, sell-ready source, blocking resource, manifest generation/validity, local/fresh ready timestamps, remote refresh state, the boot resource readiness matrix, and offline raw/operational table counts for the active POS Profile scope.
+
+## Runtime Offline Data Lifecycle Regression
+
+Regression reported after PR instrumentation:
+
+- Real POS runtime could enter a state where sync metadata/watermarks existed but IndexedDB raw/operational item and customer tables were empty.
+- Local item and customer search then returned no data even though the app believed cache resources were already synced.
+- A delta request with an existing watermark can legally return no rows, so the empty table state would not self-heal.
+
+Root cause identified in the sync adapters:
+
+- `syncItemsResource()` and `syncCustomersResource()` trusted the supplied watermark unless POS Profile scope changed.
+- They did not verify that raw Dexie rows and operational search rows existed before using the cursor.
+- Operational search tables could also be empty while raw rows existed, causing the search engine to remain unready until a full write happened.
+
+Fix implemented:
+
+- Item and customer sync adapters now perform scoped storage integrity checks before fetching.
+- If raw rows exist but operational rows are missing, the adapters rebuild the operational index from raw storage and emit `pos.offline.rebuild_operational_from_raw`.
+- If a watermark exists but raw or operational storage is empty, the adapters reset the request cursor to `null` and emit `pos.offline.initial_cursor_reset`.
+- After sync, adapters verify that non-empty server changes resulted in persisted raw and operational rows. If persistence fails, the sync fails visibly instead of silently reporting fresh state.
+- Scope mismatches emit `pos.offline.scope_mismatch_detected`.
+- Empty resources after sync emit `pos.offline.resource_empty_after_sync`.
+- DB schema open/upgrade/error and bootstrap start/complete/failure metrics are now emitted through the central performance monitor.
+- The diagnostics panel shows raw item/customer counts, operational item/customer counts, active scopes, last sync timestamps, and manifest/table mismatch state without additional API traffic.
+
+Regression test evidence:
+
+- `frontend/tests/offlineSyncOperational.spec.ts` now covers empty item table + existing watermark, raw item table + missing operational index, empty customer tables + existing watermark, customer pagination, schema full resync, stale scope clearing, and stock stale scope behavior.
+- Focused run on 2026-06-02: `vitest run tests/offlineSyncOperational.spec.ts tests/inventoryEngine.spec.ts tests/customerEngine.spec.ts tests/bootReadinessStore.spec.ts` passed 20 tests.
 
 ## Bottleneck Table
 
@@ -412,6 +442,7 @@ Pricing rules and offers are allowed to be stale/non-blocking during boot, but t
 | Customer local autocomplete | `frontend/src/offline/customerEngine.ts`, `frontend/src/posapp/stores/customersStore.ts`, `frontend/tests/performanceRegressionBaselines.spec.ts` | Previously p95 83.45-137.76 ms; latest repeated 25k worst p95 11.90 ms and 100k worst p95 74.46 ms | 25,000 and 100,000 synthetic customers | Fixed by compact operational customer index and bounded visible results | Resolved for interactive search path | Browser-session validation against real Frappe customer data | Medium: must preserve customer-specific price list, tax, loyalty and balance behavior |
 | Customer index hydrate | `frontend/src/offline/customerEngine.ts` | 25k worst 1998 ms; 100k worst 8500 ms | 25,000 and 100,000 synthetic customers | Synchronous IndexedDB read plus in-memory prefix index construction | High | Chunk/index customer hydration off the cashier-critical path and evaluate worker-backed index build | Medium: must keep search usable and boot non-blocking |
 | Customer delta apply | `frontend/src/offline/customerEngine.ts`, `frontend/src/offline/sync/adapters/customers.ts` | 25k worst 418 ms; 100k worst 1431 ms | Small one-customer delta on indexed operational table | IndexedDB multi-entry index write cost dominates even after in-memory update is incremental | High | Batch/idle operational customer commits and separate hot exact maps from heavy prefix persistence | Medium: must preserve offline reconciliation and tombstone safety |
+| Empty synced storage state | `frontend/src/offline/sync/adapters/items.ts`, `frontend/src/offline/sync/adapters/customers.ts`, `frontend/src/offline/storageDiagnostics.ts` | Reproduced by unit regression: cursor existed while raw/operational counts were zero | Simulated runtime sync state with empty scoped storage | Fixed by cursor reset, raw-to-operational rebuild, and post-write persistence assertion | Resolved for sync adapter path | Browser/Frappe session validation with real POS Profile data and IndexedDB inspection | Medium: must preserve incremental delta sync and profile scope isolation |
 | Sell-ready boot semantics | `frontend/src/posapp/stores/bootReadinessStore.ts`, `frontend/src/offline/localSnapshotManifest.ts`, `frontend/src/posapp/layouts/DefaultLayout.vue` | Unit validated; browser p95 pending | Runtime boot path | Route-ready metric is fixed; browser-run p95 still needs real Frappe app session data | Medium | Run browser perf smoke with `posa_perf=1` against real cached/cold/offline boots | Low: diagnostic/measurement only |
 | Item/customer render attribution | `ItemsSelector.vue`, customer components, diagnostics metrics | Not benchmarked in this environment | Browser runtime required | Search timing and backend timing are measured, but component rerender p95 requires browser-run sessions | Medium | Add browser smoke/perf run that enables `posa_perf=1` and records render summaries from diagnostics | Low: diagnostic-only if no behavior changes |
 | Offline sync queue visibility | `frontend/src/offline/writeQueue.ts`, `frontend/src/offline/invoiceOutbox.ts`, `SyncCoordinator.ts` | Instrumented, no failing benchmark yet | Requires queued offline invoices/payments | Multiple queue paths make aggregate sync health harder to reason about | Medium | Add a combined queue health store that reads existing queues without extra traffic | Low to medium: must avoid breaking offline replay ordering |
@@ -421,4 +452,4 @@ Pricing rules and offers are allowed to be stale/non-blocking during boot, but t
 
 This foundation now measures the complete critical path categories requested: boot, item search, barcode lookup, cart/pricing, customer search/select, payment, multi-currency, offline queue/sync, realtime invalidation, frontend diagnostics, backend endpoints, synthetic data, and regression thresholds.
 
-The current branch fixes the item-side local autocomplete failure through the local inventory engine. Customer local autocomplete is intentionally not refactored in this task and remains the next dedicated optimization area, even though the latest single regression run passed in this environment.
+The current branch includes local inventory and customer operational engines plus runtime storage-integrity guards. Remaining optimisation work is not a measurement gap: the highest-priority follow-ups are reducing customer operational index hydrate/delta costs and running browser/Frappe-backed validation against a real POS Profile with populated IndexedDB.

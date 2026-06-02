@@ -11,6 +11,11 @@ import {
 	saveItemsBulk,
 	setItemsLastSync,
 } from "../../cache";
+import {
+	getOperationalItemsCountByScope,
+	hydrateOperationalIndexFromSnapshot,
+} from "../../inventoryEngine";
+import { bucketCount, startPerfMeasure } from "../../../posapp/utils/perf";
 import { getSyncResourceState } from "../syncState";
 import {
 	buildResourceSyncResult,
@@ -23,7 +28,7 @@ import {
 	type SyncScopedProfile,
 } from "./common";
 
-type ItemsFetcher = (args: {
+type ItemsFetcher = (_args: {
 	posProfile: SyncScopedProfile;
 	priceList?: string | null;
 	customer?: string | null;
@@ -92,12 +97,121 @@ async function persistItemSyncStates(
 	}
 }
 
+async function ensureItemStorageIntegrity(
+	storageScope: string,
+	watermark?: string | null,
+) {
+	let rawCount = await getStoredItemsCountByScope(storageScope);
+	let operationalCount = await getOperationalItemsCountByScope(storageScope);
+
+	if (rawCount > 0 && operationalCount === 0) {
+		const rebuildMetric = startPerfMeasure(
+			"pos.offline.rebuild_operational_from_raw",
+			{
+				resource: "items",
+				source: "sync_preflight",
+				cache_hit: true,
+			},
+		);
+		try {
+			const diagnostics =
+				await hydrateOperationalIndexFromSnapshot(storageScope);
+			operationalCount = diagnostics.indexedItemCount;
+			rebuildMetric.finish("success", {
+				item_result_count: bucketCount(operationalCount),
+			});
+		} catch (error) {
+			rebuildMetric.fail(error);
+		}
+	}
+
+	const cursorUnsafe = Boolean(
+		watermark && (rawCount === 0 || operationalCount === 0),
+	);
+	if (cursorUnsafe) {
+		startPerfMeasure("pos.offline.initial_cursor_reset", {
+			resource: "items",
+			raw_count: bucketCount(rawCount),
+			operational_count: bucketCount(operationalCount),
+		}).finish("success");
+		return {
+			watermark: null,
+			rawCount,
+			operationalCount,
+			cursorReset: true,
+		};
+	}
+
+	return {
+		watermark,
+		rawCount,
+		operationalCount,
+		cursorReset: false,
+	};
+}
+
+async function assertItemsPersistedAfterSync({
+	storageScope,
+	changedItemsCount,
+	response,
+}: {
+	storageScope: string;
+	changedItemsCount: number;
+	response: SyncResponse;
+}) {
+	const rawCount = await getStoredItemsCountByScope(storageScope);
+	const operationalCount = await getOperationalItemsCountByScope(storageScope);
+
+	if (changedItemsCount > 0 && (rawCount === 0 || operationalCount === 0)) {
+		const error = new Error("Item sync completed without persisted item rows");
+		startPerfMeasure("pos.offline.resource_empty_after_sync", {
+			resource: "items",
+			raw_count: bucketCount(rawCount),
+			operational_count: bucketCount(operationalCount),
+			change_count: bucketCount(changedItemsCount),
+		}).fail(error);
+		throw error;
+	}
+
+	if (
+		rawCount === 0 &&
+		operationalCount === 0 &&
+		!response?.has_more &&
+		!changedItemsCount
+	) {
+		startPerfMeasure("pos.offline.resource_empty_after_sync", {
+			resource: "items",
+			raw_count: "0",
+			operational_count: "0",
+			change_count: "0",
+		}).finish("success");
+	}
+
+	return {
+		rawCount,
+		operationalCount,
+	};
+}
+
 export async function syncItemsResource(
 	args: ItemsSyncArgs,
 ): Promise<ResourceSyncResult> {
 	const scopeChanged = await hasItemScopeChanged(args.posProfile);
-	const effectiveWatermark = scopeChanged ? null : args.watermark;
 	const storageScope = buildItemStorageScope(args.posProfile);
+	if (scopeChanged) {
+		startPerfMeasure("pos.offline.scope_mismatch_detected", {
+			resource: "items",
+		}).finish("success");
+	}
+	const integrity = scopeChanged
+		? {
+				watermark: null,
+				rawCount: 0,
+				operationalCount: 0,
+				cursorReset: false,
+			}
+		: await ensureItemStorageIntegrity(storageScope, args.watermark);
+	const effectiveWatermark = integrity.watermark;
 	const response = await args.fetcher({
 		posProfile: args.posProfile,
 		priceList: args.priceList || null,
@@ -129,7 +243,16 @@ export async function syncItemsResource(
 
 	const changedItems = extractChangedItems(response);
 	if (changedItems.length) {
+		const writeMetric = startPerfMeasure("pos.offline.raw_items_write", {
+			resource: "items",
+			item_result_count: bucketCount(changedItems.length),
+		});
 		await saveItemsBulk(changedItems, storageScope);
+		writeMetric.finish("success");
+		startPerfMeasure("pos.offline.operational_items_write", {
+			resource: "items",
+			item_result_count: bucketCount(changedItems.length),
+		}).finish("success");
 		if (args.priceList) {
 			saveItemDetailsCache(args.posProfile.name, args.priceList, changedItems);
 			mergeCachedPriceListItems(args.priceList, changedItems);
@@ -150,11 +273,16 @@ export async function syncItemsResource(
 		);
 	}
 
-	const itemsCount = await getStoredItemsCountByScope(storageScope);
+	const { rawCount: itemsCount, operationalCount } =
+		await assertItemsPersistedAfterSync({
+			storageScope,
+			changedItemsCount: changedItems.length,
+			response,
+		});
 	refreshSnapshotFromSync({
 		posProfile: args.posProfile,
 		cacheState: {
-			itemsCount,
+			itemsCount: Math.max(itemsCount, operationalCount),
 		},
 	});
 

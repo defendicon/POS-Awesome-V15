@@ -242,7 +242,14 @@ db.version(11).stores(BASE_SCHEMA);
 db.version(12).stores(BASE_SCHEMA);
 db.version(13).stores(BASE_SCHEMA);
 db.version(14).stores(BASE_SCHEMA);
-db.version(15).stores(BASE_SCHEMA);
+db.version(15)
+	.stores(BASE_SCHEMA)
+	.upgrade(() => {
+		startPerfMeasure("pos.offline.db_schema_upgrade", {
+			version: 15,
+			source: "dexie",
+		}).finish("success");
+	});
 
 let persistWorker: Worker | null = null;
 if (typeof Worker !== "undefined") {
@@ -385,7 +392,11 @@ export const initPromise = new Promise<void>((resolve) => {
 			source: "local",
 		});
 		try {
+			const schemaMetric = startPerfMeasure("pos.offline.db_schema_open", {
+				source: "init",
+			});
 			await db.open();
+			schemaMetric.finish("success");
 			dbMetric.finish("success");
 			for (const key of Object.keys(memory)) {
 				const table = tableForKey(key);
@@ -423,6 +434,9 @@ export const initPromise = new Promise<void>((resolve) => {
 			});
 		} catch (e) {
 			dbMetric.fail(e);
+			startPerfMeasure("pos.offline.db_schema_error", {
+				source: "init",
+			}).fail(e);
 			hydrateMetric.fail(e);
 			console.error("Failed to initialize offline DB", e);
 		} finally {
@@ -805,13 +819,21 @@ export async function clearDerivedOfflineCaches() {
 }
 
 export async function quickDbHealthCheck() {
+	const metric = startPerfMeasure("pos.offline.db_schema_open", {
+		source: "health_check",
+	});
 	try {
 		if (!db.isOpen()) {
 			await db.open();
 		}
 		await db.table(tableForKey("health_check")).get("health_check");
+		metric.finish("success");
 		return true;
 	} catch (e) {
+		metric.fail(e);
+		startPerfMeasure("pos.offline.db_schema_error", {
+			source: "health_check",
+		}).fail(e);
 		console.warn("DB quick health check failed", e);
 		return false;
 	}

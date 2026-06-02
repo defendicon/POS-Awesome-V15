@@ -1,25 +1,26 @@
 import type { SyncTrigger } from "./types";
+import { startPerfMeasure } from "../../posapp/utils/perf";
 
-type ScheduleFrame = (callback: () => void | Promise<void>) => number;
+type ScheduleFrame = (_callback: () => void | Promise<void>) => number;
 type ScheduleInterval = (
-	callback: () => void | Promise<void>,
-	intervalMs: number,
+	_callback: () => void | Promise<void>,
+	_intervalMs: number,
 ) => number | ReturnType<typeof setInterval>;
 type ClearIntervalHandle = (
-	handle: number | ReturnType<typeof setInterval>,
+	_handle: number | ReturnType<typeof setInterval>,
 ) => void;
 type ScheduleTimeout = (
-	callback: () => void | Promise<void>,
-	delayMs: number,
+	_callback: () => void | Promise<void>,
+	_delayMs: number,
 ) => number | ReturnType<typeof setTimeout>;
 type ClearTimeoutHandle = (
-	handle: number | ReturnType<typeof setTimeout>,
+	_handle: number | ReturnType<typeof setTimeout>,
 ) => void;
 
 type OfflineSyncRuntimeOptions = {
 	canSync: () => boolean;
 	canRunTimerSync?: () => boolean;
-	runTrigger: (trigger: SyncTrigger) => Promise<void>;
+	runTrigger: (_trigger: SyncTrigger) => Promise<void>;
 	scheduleFrame?: ScheduleFrame;
 	scheduleInterval?: ScheduleInterval;
 	clearScheduledInterval?: ClearIntervalHandle;
@@ -30,7 +31,7 @@ type OfflineSyncRuntimeOptions = {
 	backgroundTimerIntervalMs?: number;
 	ineligibleTimerIntervalMs?: number;
 	isDocumentHidden?: () => boolean;
-	addVisibilityListener?: (listener: () => void) => (() => void) | void;
+	addVisibilityListener?: (_listener: () => void) => (() => void) | void;
 };
 
 function defaultScheduleFrame(callback: () => void | Promise<void>) {
@@ -123,19 +124,34 @@ export function createOfflineSyncRuntime(options: OfflineSyncRuntimeOptions) {
 			return bootPromise;
 		}
 		if (!options.canSync()) {
+			startPerfMeasure("pos.offline.bootstrap_start", {
+				trigger: "boot",
+			}).finish("success", { skipped: true });
 			return Promise.resolve(false);
 		}
 
 		bootPromise = new Promise<boolean>((resolve, reject) => {
 			scheduleFrame(async () => {
+				const metric = startPerfMeasure("pos.offline.bootstrap_start", {
+					trigger: "boot",
+				});
 				try {
 					if (!options.canSync()) {
+						metric.finish("success", { skipped: true });
 						resolve(false);
 						return;
 					}
 					await options.runTrigger("boot");
+					metric.finish("success");
+					startPerfMeasure("pos.offline.bootstrap_complete", {
+						trigger: "boot",
+					}).finish("success");
 					resolve(true);
 				} catch (error) {
+					metric.fail(error);
+					startPerfMeasure("pos.offline.bootstrap_failed", {
+						trigger: "boot",
+					}).fail(error);
 					reject(error);
 				} finally {
 					bootPromise = null;

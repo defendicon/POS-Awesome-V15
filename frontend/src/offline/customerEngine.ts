@@ -543,6 +543,29 @@ export async function hydrateOperationalCustomerIndex(scope = "") {
 	return localCustomerEngine.hydrate(scope);
 }
 
+export async function getOperationalCustomerCountByScope(scope = "") {
+	const metric = startPerfMeasure("pos.offline.db_schema_open", {
+		table: "operational_customers",
+		source: "count",
+	});
+	try {
+		await checkDbHealth();
+		if (!db.isOpen()) await db.open();
+		const count = await db
+			.table("operational_customers")
+			.where("scope")
+			.equals(normalizeScope(scope))
+			.count();
+		metric.finish("success", {
+			customer_result_count: bucketCount(count),
+		});
+		return count;
+	} catch (error) {
+		metric.fail(error);
+		return 0;
+	}
+}
+
 export async function saveOperationalCustomersFromRaw(customers: RawCustomer[], scope = "") {
 	return localCustomerEngine.upsertRawCustomers(customers, scope);
 }

@@ -7,7 +7,12 @@ import {
 	deleteCustomerStorageByNames,
 	setCustomerStorage,
 } from "../../customers";
-import { applyCustomerDeltas } from "../../customerEngine";
+import {
+	applyCustomerDeltas,
+	getOperationalCustomerCountByScope,
+	hydrateOperationalCustomerIndex,
+} from "../../customerEngine";
+import { bucketCount, startPerfMeasure } from "../../../posapp/utils/perf";
 import { getSyncResourceState } from "../syncState";
 import {
 	buildResourceSyncResult,
@@ -95,6 +100,110 @@ function mergeCustomerSyncResponses(
 	};
 }
 
+function buildCustomerStorageScope(posProfile: SyncScopedProfile) {
+	return posProfile?.name || "";
+}
+
+async function ensureCustomerStorageIntegrity(
+	storageScope: string,
+	watermark?: string | null,
+) {
+	let rawCount = await getCustomerStorageCount();
+	let operationalCount =
+		await getOperationalCustomerCountByScope(storageScope);
+
+	if (rawCount > 0 && operationalCount === 0) {
+		const rebuildMetric = startPerfMeasure(
+			"pos.offline.rebuild_operational_from_raw",
+			{
+				resource: "customers",
+				source: "sync_preflight",
+				cache_hit: true,
+			},
+		);
+		try {
+			const diagnostics =
+				await hydrateOperationalCustomerIndex(storageScope);
+			operationalCount = diagnostics.indexedCustomerCount;
+			rebuildMetric.finish("success", {
+				customer_result_count: bucketCount(operationalCount),
+			});
+		} catch (error) {
+			rebuildMetric.fail(error);
+		}
+	}
+
+	const cursorUnsafe = Boolean(
+		watermark && (rawCount === 0 || operationalCount === 0),
+	);
+	if (cursorUnsafe) {
+		startPerfMeasure("pos.offline.initial_cursor_reset", {
+			resource: "customers",
+			raw_count: bucketCount(rawCount),
+			operational_count: bucketCount(operationalCount),
+		}).finish("success");
+		return {
+			watermark: null,
+			rawCount,
+			operationalCount,
+			cursorReset: true,
+		};
+	}
+
+	return {
+		watermark,
+		rawCount,
+		operationalCount,
+		cursorReset: false,
+	};
+}
+
+async function assertCustomersPersistedAfterSync({
+	storageScope,
+	changedCustomersCount,
+	response,
+}: {
+	storageScope: string;
+	changedCustomersCount: number;
+	response: SyncResponse;
+}) {
+	const rawCount = await getCustomerStorageCount();
+	const operationalCount =
+		await getOperationalCustomerCountByScope(storageScope);
+
+	if (changedCustomersCount > 0 && (rawCount === 0 || operationalCount === 0)) {
+		const error = new Error(
+			"Customer sync completed without persisted customer rows",
+		);
+		startPerfMeasure("pos.offline.resource_empty_after_sync", {
+			resource: "customers",
+			raw_count: bucketCount(rawCount),
+			operational_count: bucketCount(operationalCount),
+			change_count: bucketCount(changedCustomersCount),
+		}).fail(error);
+		throw error;
+	}
+
+	if (
+		rawCount === 0 &&
+		operationalCount === 0 &&
+		!response?.has_more &&
+		!changedCustomersCount
+	) {
+		startPerfMeasure("pos.offline.resource_empty_after_sync", {
+			resource: "customers",
+			raw_count: "0",
+			operational_count: "0",
+			change_count: "0",
+		}).finish("success");
+	}
+
+	return {
+		rawCount,
+		operationalCount,
+	};
+}
+
 async function fetchAllCustomerPages({
 	posProfile,
 	watermark,
@@ -137,7 +246,21 @@ export async function syncCustomersResource(
 	args: CustomersSyncArgs,
 ): Promise<ResourceSyncResult> {
 	const scopeChanged = await hasCustomerScopeChanged(args.posProfile);
-	let effectiveWatermark = scopeChanged ? null : args.watermark;
+	const storageScope = buildCustomerStorageScope(args.posProfile);
+	if (scopeChanged) {
+		startPerfMeasure("pos.offline.scope_mismatch_detected", {
+			resource: "customers",
+		}).finish("success");
+	}
+	const integrity = scopeChanged
+		? {
+				watermark: null,
+				rawCount: 0,
+				operationalCount: 0,
+				cursorReset: false,
+			}
+		: await ensureCustomerStorageIntegrity(storageScope, args.watermark);
+	let effectiveWatermark = integrity.watermark;
 	let response = await fetchAllCustomerPages({
 		posProfile: args.posProfile,
 		watermark: effectiveWatermark,
@@ -178,25 +301,42 @@ export async function syncCustomersResource(
 
 	const changedCustomers = extractChangedCustomers(response);
 	if (changedCustomers.length) {
-		await setCustomerStorage(changedCustomers, args.posProfile.name || "");
+		const rawWriteMetric = startPerfMeasure(
+			"pos.offline.raw_customers_write",
+			{
+				resource: "customers",
+				customer_result_count: bucketCount(changedCustomers.length),
+			},
+		);
+		await setCustomerStorage(changedCustomers, storageScope);
+		rawWriteMetric.finish("success");
+		startPerfMeasure("pos.offline.operational_customers_write", {
+			resource: "customers",
+			customer_result_count: bucketCount(changedCustomers.length),
+		}).finish("success");
 	}
 
 	const deletedCustomerNames = extractDeletedCustomerNames(response);
 	if (deletedCustomerNames.length) {
-		await deleteCustomerStorageByNames(deletedCustomerNames, args.posProfile.name || "");
+		await deleteCustomerStorageByNames(deletedCustomerNames, storageScope);
 	}
 	await applyCustomerDeltas({
-		scope: args.posProfile.name || "",
+		scope: storageScope,
 		changed: changedCustomers,
 		deletedCustomerNames,
 		source: "sync",
 	});
 
-	const customersCount = await getCustomerStorageCount();
+	const { rawCount: customersCount, operationalCount } =
+		await assertCustomersPersistedAfterSync({
+			storageScope,
+			changedCustomersCount: changedCustomers.length,
+			response,
+		});
 	refreshSnapshotFromSync({
 		posProfile: args.posProfile,
 		cacheState: {
-			customersCount,
+			customersCount: Math.max(customersCount, operationalCount),
 		},
 	});
 

@@ -36,6 +36,7 @@ export * from "./cash_movements";
 export * from "./cache";
 export * from "./inventoryEngine";
 export * from "./customerEngine";
+export * from "./storageDiagnostics";
 export * from "./localSnapshotManifest";
 export * from "./sync/types";
 export * from "./sync/resourceRegistry";

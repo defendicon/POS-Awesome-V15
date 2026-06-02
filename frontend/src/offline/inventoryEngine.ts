@@ -767,6 +767,29 @@ export async function hydrateOperationalIndexFromSnapshot(scope = "") {
 	return localInventoryEngine.hydrate(scope);
 }
 
+export async function getOperationalItemsCountByScope(scope = "") {
+	const metric = startPerfMeasure("pos.offline.db_schema_open", {
+		table: "operational_items",
+		source: "count",
+	});
+	try {
+		await checkDbHealth();
+		if (!db.isOpen()) await db.open();
+		const count = await db
+			.table("operational_items")
+			.where("scope")
+			.equals(normalizeScope(scope))
+			.count();
+		metric.finish("success", {
+			item_result_count: bucketCount(count),
+		});
+		return count;
+	} catch (error) {
+		metric.fail(error);
+		return 0;
+	}
+}
+
 export async function saveOperationalItemsFromRaw(items: RawItem[], scope = "") {
 	return localInventoryEngine.upsertRawItems(items, scope);
 }

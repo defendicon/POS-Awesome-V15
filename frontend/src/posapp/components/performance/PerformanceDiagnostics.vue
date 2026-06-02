@@ -62,6 +62,45 @@
 			</div>
 
 			<div class="perf-grid">
+				<section class="perf-panel perf-panel--wide">
+					<div class="perf-panel__title">
+						<h2>{{ __("Offline Storage") }}</h2>
+						<span>{{ storageDiagnosticsError || (storageHealthy ? __("aligned") : __("mismatch")) }}</span>
+					</div>
+					<v-table density="compact">
+						<thead>
+							<tr>
+								<th>{{ __("Resource") }}</th>
+								<th>{{ __("Scope") }}</th>
+								<th>{{ __("Raw") }}</th>
+								<th>{{ __("Operational") }}</th>
+								<th>{{ __("Ready") }}</th>
+								<th>{{ __("Last Sync") }}</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td class="metric-name">items</td>
+								<td class="metric-tags">{{ storageDiagnostics.itemScope || "-" }}</td>
+								<td>{{ bucket(storageDiagnostics.rawItemsCount) }}</td>
+								<td>{{ bucket(storageDiagnostics.operationalItemsCount) }}</td>
+								<td>{{ storageDiagnostics.itemStorageReady ? __("Yes") : __("No") }}</td>
+								<td>{{ storageDiagnostics.lastSync.items || "-" }}</td>
+							</tr>
+							<tr>
+								<td class="metric-name">customers</td>
+								<td class="metric-tags">{{ storageDiagnostics.customerScope || "-" }}</td>
+								<td>{{ bucket(storageDiagnostics.rawCustomersCount) }}</td>
+								<td>{{ bucket(storageDiagnostics.operationalCustomersCount) }}</td>
+								<td>{{ storageDiagnostics.customerStorageReady ? __("Yes") : __("No") }}</td>
+								<td>{{ storageDiagnostics.lastSync.customers || "-" }}</td>
+							</tr>
+						</tbody>
+					</v-table>
+				</section>
+			</div>
+
+			<div class="perf-grid">
 				<section class="perf-panel">
 					<div class="perf-panel__title">
 						<h2>{{ __("Customer Engine") }}</h2>
@@ -332,8 +371,10 @@ import {
 	getQueuedPayloadCount,
 	getCustomerEngineDiagnostics,
 	getInventoryDiagnostics,
+	getOfflineStorageDiagnostics,
 	memory,
 	type OfflineEntityType,
+	type OfflineStorageDiagnostics,
 } from "../../../offline";
 import { useBootReadinessStore } from "../../stores/bootReadinessStore";
 
@@ -343,6 +384,23 @@ const events = ref<PerfEvent[]>(getPerfEvents());
 const summaries = ref(getPerfSummaries());
 const inventoryDiagnostics = ref(getInventoryDiagnostics());
 const customerDiagnostics = ref(getCustomerEngineDiagnostics());
+const storageDiagnostics = ref<OfflineStorageDiagnostics>({
+	itemScope: "",
+	customerScope: "",
+	rawItemsCount: 0,
+	operationalItemsCount: 0,
+	rawCustomersCount: 0,
+	operationalCustomersCount: 0,
+	itemStorageReady: false,
+	customerStorageReady: false,
+	manifestItemMismatch: false,
+	manifestCustomerMismatch: false,
+	lastSync: {
+		items: null,
+		customers: null,
+	},
+});
+const storageDiagnosticsError = ref("");
 const online = ref(typeof navigator === "undefined" ? true : navigator.onLine);
 const bootReadinessStore = useBootReadinessStore();
 
@@ -382,6 +440,11 @@ const cacheState = computed(() => ({
 const readiness = computed(() => bootReadinessStore.getBootDiagnosticState());
 const readinessResources = computed(() =>
 	Object.values(readiness.value.resources || {}),
+);
+const storageHealthy = computed(
+	() =>
+		!storageDiagnostics.value.manifestItemMismatch &&
+		!storageDiagnostics.value.manifestCustomerMismatch,
 );
 const summaryByName = computed(() =>
 	new Map(summaries.value.map((summary) => [summary.name, summary])),
@@ -425,17 +488,24 @@ const customerTimingRows = computed(() =>
 	}),
 );
 
-function refresh() {
+async function refresh() {
 	events.value = getPerfEvents();
 	summaries.value = getPerfSummaries();
 	inventoryDiagnostics.value = getInventoryDiagnostics();
 	customerDiagnostics.value = getCustomerEngineDiagnostics();
 	online.value = typeof navigator === "undefined" ? true : navigator.onLine;
+	try {
+		storageDiagnostics.value = await getOfflineStorageDiagnostics();
+		storageDiagnosticsError.value = "";
+	} catch (error) {
+		storageDiagnosticsError.value =
+			error instanceof Error ? error.name : __("Unavailable");
+	}
 }
 
 function reset() {
 	resetPerfEvents();
-	refresh();
+	void refresh();
 }
 
 function formatDuration(value: number | null) {
@@ -455,18 +525,21 @@ function bucket(value: number) {
 }
 
 let unsubscribe: (() => void) | null = null;
+const handleRefresh = () => {
+	void refresh();
+};
 
 onMounted(() => {
-	unsubscribe = subscribePerfEvents(refresh);
-	window.addEventListener("online", refresh);
-	window.addEventListener("offline", refresh);
-	refresh();
+	unsubscribe = subscribePerfEvents(handleRefresh);
+	window.addEventListener("online", handleRefresh);
+	window.addEventListener("offline", handleRefresh);
+	void refresh();
 });
 
 onBeforeUnmount(() => {
 	unsubscribe?.();
-	window.removeEventListener("online", refresh);
-	window.removeEventListener("offline", refresh);
+	window.removeEventListener("online", handleRefresh);
+	window.removeEventListener("offline", handleRefresh);
 });
 </script>
 
