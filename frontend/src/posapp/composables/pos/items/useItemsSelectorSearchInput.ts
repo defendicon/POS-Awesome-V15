@@ -31,6 +31,7 @@ type UseItemsSelectorSearchInputArgs = {
 	focusItemSearch: () => void;
 	setActiveView: (_view: string) => void;
 	triggerItemSearchFocus: () => void;
+	onSearchInput?: (_value: string) => void;
 };
 
 export function useItemsSelectorSearchInput({
@@ -45,6 +46,7 @@ export function useItemsSelectorSearchInput({
 	focusItemSearch,
 	setActiveView,
 	triggerItemSearchFocus,
+	onSearchInput,
 }: UseItemsSelectorSearchInputArgs) {
 	const clearSearch = () => {
 		if (clearingSearch) {
@@ -62,6 +64,7 @@ export function useItemsSelectorSearchInput({
 		searchInput.value = normalized;
 		firstSearch.value = normalized;
 		scannerInput.handleSearchInput?.(normalized);
+		onSearchInput?.(normalized);
 	};
 
 	const prepareSearchInjection = () => {

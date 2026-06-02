@@ -1052,6 +1052,7 @@ const {
 	focusItemSearch: () => itemsSelectorFocus.focusItemSearch(),
 	setActiveView: (view) => uiStore.setActiveView(view),
 	triggerItemSearchFocus: () => uiStore.triggerItemSearchFocus(),
+	onSearchInput: () => itemsSelectorSearch.search_onchange(),
 });
 cleanupSearchInput = stopSearchInputWatcher;
 const {
