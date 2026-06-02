@@ -57,6 +57,11 @@
 
 import { refreshBootstrapSnapshotFromCaches } from "./bootstrapSnapshot";
 import { memory, persist, db, checkDbHealth } from "./db";
+import {
+	deleteOperationalItemsByCodes,
+	resetInventoryEngine,
+	saveOperationalItemsFromRaw,
+} from "./inventoryEngine";
 import { emitBootstrapSnapshotUpdated } from "../posapp/utils/bootstrapRuntimeEvents";
 
 const normalizeScope = (scope: unknown): string => String(scope || "");
@@ -416,6 +421,7 @@ export async function saveItems(items, scope = "") {
 			}
 			try {
 				await db.table("items").bulkPut(scopedItems);
+				await saveOperationalItemsFromRaw(scopedItems, scope);
 			} catch (bulkError) {
 				console.warn(
 					"bulkPut failed for items chunk; retrying one-by-one",
@@ -431,6 +437,7 @@ export async function saveItems(items, scope = "") {
 						});
 					}
 				}
+				await saveOperationalItemsFromRaw(scopedItems, scope);
 			}
 		}
 	} catch (e) {
@@ -447,9 +454,13 @@ export async function clearStoredItems(scope = "") {
 				"clearStoredItems called without scope; clearing all cached items.",
 			);
 			await db.table("items").clear();
+			await db.table("operational_items").clear();
+			resetInventoryEngine();
 			return;
 		}
 		await filterByScope(db.table("items"), scope).delete();
+		await db.table("operational_items").where("scope").equals(scope).delete();
+		resetInventoryEngine(scope);
 	} catch (e) {
 		console.error("Failed to clear stored items", e);
 	}
@@ -508,6 +519,7 @@ export async function deleteStoredItemsByCodes(
 
 		if (!hasScope(scope)) {
 			await db.table("items").bulkDelete(normalizedCodes);
+			await deleteOperationalItemsByCodes(normalizedCodes, scope);
 			return;
 		}
 
@@ -523,6 +535,7 @@ export async function deleteStoredItemsByCodes(
 
 		if (matchingCodes.length) {
 			await db.table("items").bulkDelete(matchingCodes);
+			await deleteOperationalItemsByCodes(matchingCodes, scope);
 		}
 	} catch (e) {
 		console.error("Failed to delete stored items by code", e);

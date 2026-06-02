@@ -5,7 +5,13 @@ import {
 	formatStockShortageError,
 	parseBooleanSetting,
 } from "../../../utils/stock";
-import { saveItems, savePriceListItems } from "../../../../offline/index";
+import {
+	getItemRate,
+	hydrateOperationalIndexFromSnapshot,
+	lookupBarcodeExact,
+	saveItems,
+	saveOperationalItemsFromRaw,
+} from "../../../../offline/index";
 import { openItemSelectionDialog } from "../../../utils/itemSelectionDialog";
 import {
 	extractScanAssignmentFromItem,
@@ -80,7 +86,6 @@ export function useScanProcessor(context: ScanProcessorContext) {
 		items,
 		pos_profile,
 		active_price_list,
-		customer_price_list,
 		itemDetailFetcher,
 		itemAddition,
 		barcodeIndex,
@@ -100,9 +105,10 @@ export function useScanProcessor(context: ScanProcessorContext) {
 
 	const awaitingScanResult = ref(false);
 	const pendingScanCode = ref("");
-	const logScanFlow = (step: string, payload?: any) => {
-		console.debug(`[POS ScanFlow] ${step}`, payload || {});
-	};
+	const logScanFlow = (_step: string, _payload?: any) => undefined;
+
+	const getStorageScope = () =>
+		`${pos_profile.value?.name || "no_profile"}_${pos_profile.value?.warehouse || "no_warehouse"}`;
 
 	const isNegativeStockEnabled = (item: any = null) => {
 		const allowNegativeSetting = parseBooleanSetting(
@@ -199,15 +205,6 @@ export function useScanProcessor(context: ScanProcessorContext) {
 
 				// Try fetching the rate for this UOM from the active price list
 				try {
-					const res = await frappe.call({
-						method: "posawesome.posawesome.api.items.get_price_for_uom",
-						args: {
-							item_code: newItem.item_code,
-							price_list: active_price_list.value,
-							uom: matchedUom,
-						},
-					});
-
 					const uomInfo =
 						newItem.item_uoms &&
 						newItem.item_uoms.find(
@@ -229,13 +226,19 @@ export function useScanProcessor(context: ScanProcessorContext) {
 							),
 						) || 0;
 
-					if (res.message) {
-						const price = parseFloat(res.message);
-						newItem.rate = price;
-						newItem.price_list_rate = price;
+					const localUomRate = getItemRate(newItem.item_code, {
+						scope: getStorageScope(),
+						priceList: active_price_list.value,
+						currency: pos_profile.value?.currency,
+						uom: matchedUom,
+					});
+
+					if (localUomRate !== null && localUomRate !== undefined) {
+						newItem.rate = localUomRate;
+						newItem.price_list_rate = localUomRate;
 						const basePrice = conversionFactor
-							? price / conversionFactor
-							: price;
+							? localUomRate / conversionFactor
+							: localUomRate;
 						newItem.base_rate = basePrice;
 						newItem.base_price_list_rate = basePrice;
 						if (conversionFactor) {
@@ -243,16 +246,40 @@ export function useScanProcessor(context: ScanProcessorContext) {
 						}
 						newItem._manual_rate_set = true;
 						newItem.skip_force_update = true;
-					} else if (conversionFactor) {
-						const newPrice = baseUnitRate * conversionFactor;
+					} else {
+						const res = await frappe.call({
+							method: "posawesome.posawesome.api.items.get_price_for_uom",
+							args: {
+								item_code: newItem.item_code,
+								price_list: active_price_list.value,
+								uom: matchedUom,
+							},
+						});
+						if (res.message) {
+							const price = parseFloat(res.message);
+							newItem.rate = price;
+							newItem.price_list_rate = price;
+							const basePrice = conversionFactor
+								? price / conversionFactor
+								: price;
+							newItem.base_rate = basePrice;
+							newItem.base_price_list_rate = basePrice;
+							if (conversionFactor) {
+								newItem.conversion_factor = conversionFactor;
+							}
+							newItem._manual_rate_set = true;
+							newItem.skip_force_update = true;
+						} else if (conversionFactor) {
+							const newPrice = baseUnitRate * conversionFactor;
 
-						newItem.rate = newPrice;
-						newItem.price_list_rate = newPrice;
-						newItem.base_rate = baseUnitRate;
-						newItem.base_price_list_rate = baseUnitRate;
-						newItem.conversion_factor = conversionFactor;
-						newItem._manual_rate_set = true;
-						newItem.skip_force_update = true;
+							newItem.rate = newPrice;
+							newItem.price_list_rate = newPrice;
+							newItem.base_rate = baseUnitRate;
+							newItem.base_price_list_rate = baseUnitRate;
+							newItem.conversion_factor = conversionFactor;
+							newItem._manual_rate_set = true;
+							newItem.skip_force_update = true;
+						}
 					}
 				} catch (e) {
 					console.error("Failed to fetch UOM price", e);
@@ -503,10 +530,16 @@ export function useScanProcessor(context: ScanProcessorContext) {
 			}
 		}
 
-		// First try to find exact match by processed code using the pre-built index
+		await hydrateOperationalIndexFromSnapshot(getStorageScope()).catch(() => null);
+
+		// First try the authoritative operational exact index.
+		let foundItem = lookupBarcodeExact(searchCode, getStorageScope());
+
+		// Then fall back to the legacy selector index for already-visible rows.
 		const index = barcodeIndex.ensureBarcodeIndex();
-		// Use barcodeIndex composable methods if available, else local logic
-		let foundItem = barcodeIndex.lookupItemByBarcode(searchCode);
+		if (!foundItem) {
+			foundItem = barcodeIndex.lookupItemByBarcode(searchCode);
+		}
 
 		if (!foundItem && (!index || index.size === 0)) {
 			// Index not populated yet, build it and fall back to a direct scan once
@@ -654,11 +687,9 @@ export function useScanProcessor(context: ScanProcessorContext) {
 				}
 
 				const profileScope = `${pos_profile.value?.name || "no_profile"}_${pos_profile.value?.warehouse || "no_warehouse"}`;
-				await saveItems(items.value, profileScope);
-				await savePriceListItems(
-					customer_price_list.value,
-					items.value,
-				);
+				await saveItems([newItem], profileScope);
+				await saveOperationalItemsFromRaw([newItem], profileScope);
+				await hydrateOperationalIndexFromSnapshot(profileScope).catch(() => null);
 				if (eventBus && eventBus.emit)
 					eventBus.emit("set_all_items", items.value);
 

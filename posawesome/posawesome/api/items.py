@@ -44,6 +44,7 @@ from posawesome.posawesome.api.item_processing.search import (
     get_items_count,
     normalize_brand,
 )
+from posawesome.posawesome.api.performance import pos_perf_endpoint
 
 
 def _collect_delta_item_codes(pos_profile, modified_after, price_list, limit):
@@ -85,6 +86,7 @@ def _collect_delta_item_codes(pos_profile, modified_after, price_list, limit):
 
 
 @frappe.whitelist()
+@pos_perf_endpoint("pos.items.delta_sync", source="server")
 def get_delta_items(
     pos_profile,
     modified_after=None,
@@ -213,9 +215,34 @@ def get_delta_items(
 
 
 def build_item_cache(item_code):
-    """Build item cache for faster access."""
-    # Implementation for building item cache
-    pass
+    """Return a lightweight item cache payload for callers that need one item."""
+    item_code = (item_code or "").strip()
+    if not item_code:
+        return {}
+
+    try:
+        item_doc = frappe.get_cached_doc("Item", item_code)
+    except frappe.DoesNotExistError:
+        return {}
+
+    barcodes = [
+        {"barcode": row.barcode, "uom": row.uom}
+        for row in (getattr(item_doc, "barcodes", None) or [])
+        if getattr(row, "barcode", None)
+    ]
+    return {
+        "item_code": item_doc.name,
+        "item_name": item_doc.item_name,
+        "stock_uom": item_doc.stock_uom,
+        "item_group": item_doc.item_group,
+        "brand": item_doc.brand,
+        "is_stock_item": item_doc.is_stock_item,
+        "has_batch_no": item_doc.has_batch_no,
+        "has_serial_no": item_doc.has_serial_no,
+        "variant_of": item_doc.variant_of,
+        "modified": item_doc.modified,
+        "barcodes": barcodes,
+    }
 
 
 @frappe.whitelist()

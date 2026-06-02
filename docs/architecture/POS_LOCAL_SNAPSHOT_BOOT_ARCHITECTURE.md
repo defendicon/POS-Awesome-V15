@@ -160,6 +160,12 @@ If a refresh fails:
 
 The view remains gated by performance capture, developer mode, or `System Manager`.
 
+## Inventory Index Readiness
+
+The `items` boot-critical resource now means a usable operational inventory index exists for the active POS profile/warehouse scope. Raw cached item rows are not enough to mark the POS sell-ready.
+
+The readiness store calls `hydrateOperationalIndexFromSnapshot()` from `frontend/src/offline/inventoryEngine.ts`. If compact `operational_items` rows are present, the engine hydrates non-reactive exact barcode, exact item-code, token and prefix maps. If compact rows are missing but scoped raw item rows exist, the engine rebuilds compact operational rows first. If that process fails, sell-ready remains blocked on `items`.
+
 ## Metrics
 
 The implementation adds or corrects:

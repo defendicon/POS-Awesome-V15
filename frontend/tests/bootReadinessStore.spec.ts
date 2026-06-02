@@ -4,6 +4,7 @@ import { createPinia, setActivePinia } from "pinia";
 import { configurePerfMonitor, getPerfEvents, resetPerfEvents } from "../src/posapp/utils/perf";
 import { useBootReadinessStore } from "../src/posapp/stores/bootReadinessStore";
 import { db, memory } from "../src/offline/db";
+import { resetInventoryEngine } from "../src/offline/inventoryEngine";
 
 const profile = {
 	name: "Main POS",
@@ -24,6 +25,8 @@ describe("boot readiness store", () => {
 			await db.open();
 		}
 		await db.table("items").clear();
+		await db.table("operational_items").clear();
+		resetInventoryEngine();
 		await db.table("settings").clear();
 		memory.pos_opening_storage = null;
 		memory.local_snapshot_manifest = null;

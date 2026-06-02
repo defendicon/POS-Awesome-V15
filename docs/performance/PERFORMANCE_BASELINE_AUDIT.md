@@ -212,6 +212,7 @@ Added tests:
 
 - `frontend/tests/performanceMonitor.spec.ts`
 - `frontend/tests/performanceRegressionBaselines.spec.ts`
+- `frontend/tests/inventoryEngine.spec.ts`
 - `frontend/tests/localSnapshotManifest.spec.ts`
 - `frontend/tests/bootReadinessStore.spec.ts`
 
@@ -245,6 +246,51 @@ Observed results:
 - `git diff --check`: passed; Git reported only line-ending normalization warnings.
 - `cmd /c .\node_modules\.bin\vitest.cmd --run tests\localSnapshotManifest.spec.ts tests\bootReadinessStore.spec.ts tests\performanceMonitor.spec.ts`: passed 9 tests. The focused unit path validates true sell-ready gating, missing item snapshot blocking, multi-currency exchange-rate blocking, stale-but-usable policy, and metric emission.
 - `cmd /c .\node_modules\.bin\vitest.cmd --run tests\localSnapshotManifest.spec.ts tests\bootReadinessStore.spec.ts tests\performanceMonitor.spec.ts tests\performanceRegressionBaselines.spec.ts`: new boot/readiness tests passed, and the performance baseline intentionally failed on item autocomplete p95 79.58 ms versus 50 ms and customer autocomplete p95 137.76 ms versus 75 ms.
+- `cmd /c .\node_modules\.bin\vue-tsc.cmd --noEmit`: passed after the local inventory engine integration.
+- `cmd /c .\node_modules\.bin\vitest.cmd --run tests\inventoryEngine.spec.ts tests\localSnapshotManifest.spec.ts tests\bootReadinessStore.spec.ts tests\performanceMonitor.spec.ts`: passed 14 focused tests.
+- `cmd /c .\node_modules\.bin\vitest.cmd --run tests\performanceRegressionBaselines.spec.ts`: passed in the latest run after item autocomplete was moved to the operational inventory engine. This validates the 25,000-item autocomplete and barcode thresholds in the current environment. Customer autocomplete also passed in this run, but it was not refactored by this task and remains tracked because earlier runs exceeded target.
+- `cmd /c .\node_modules\.bin\vitest.cmd --run tests\.codexInventoryMeasure.spec.ts --reporter=verbose`: temporary measurement run only, removed before commit. On 25,000 synthetic items, local inventory autocomplete measured p50 5.58 ms, p95 7.90 ms, p99 8.53 ms. Barcode exact lookup measured p50 0.003 ms, p95 0.024 ms, p99 0.172 ms.
+
+## Local Inventory Engine Implementation Map
+
+Current item data representations:
+
+- Raw full cached rows remain in Dexie `items`.
+- Compact operational rows now live in Dexie `operational_items`.
+- Non-reactive in-memory maps in `frontend/src/offline/inventoryEngine.ts` own exact item-code lookup, exact barcode lookup, token/prefix autocomplete and local rate lookup.
+- Vue components receive only bounded visible result payloads from `itemsStore`.
+
+Current search/filter implementation:
+
+- `itemsStore.searchItems()` now uses `searchItemsLocal()` for local cached autocomplete.
+- `ItemsSelector.vue` still applies small display filters to the already bounded `filteredItems` window.
+- The previous broad Dexie `collection.filter()` path remains as compatibility helper but is no longer the primary production item autocomplete path.
+
+Current rate lookup implementation:
+
+- `getItemRate()` resolves local base rates from operational records.
+- UOM conversion uses cached `item_uoms` conversion factors when available.
+- Existing server UOM price lookup remains a fallback in `useScanProcessor.ts`.
+
+Current barcode lookup implementation:
+
+- `useScanProcessor.ts` and `itemsStore.addScannedItem()` now try `lookupBarcodeExact()` before legacy visible-row maps or remote lookup.
+- Remote-found barcode rows are persisted as single-item deltas instead of rewriting the full item array.
+
+Current local persistence layout:
+
+- Dexie `items`: raw cached item rows scoped by `profile_scope`.
+- Dexie `operational_items`: compact search/rate/barcode rows keyed by `scope::item_code`.
+- Dexie `settings`: snapshot manifests and readiness metadata.
+
+Current full reload triggers:
+
+- Manual item reload still clears and reloads through `itemsStore.refreshItems()`.
+- Normal modified-item sync and barcode remote-found rows now update operational records through deltas.
+
+Root cause of the original item p95 failure:
+
+- The old local autocomplete measured 79.58 ms p95 on 25,000 synthetic items because it repeatedly scanned large item arrays and performed string `includes()` checks until enough matches were found. The operational engine replaces that with exact/token/prefix maps and bounded result windows.
 
 ## True Sell-Ready Definition
 
@@ -303,8 +349,9 @@ Pricing rules and offers are allowed to be stale/non-blocking during boot, but t
 
 | Flow | File/component/API involved | Current measured duration | Dataset used | Root cause | Severity | Recommended optimisation task | Risk of changing it |
 | --- | --- | ---: | --- | --- | --- | --- | --- |
-| Item local autocomplete | `frontend/tests/performanceRegressionBaselines.spec.ts`, item local search path | p95 79.58 ms, target 50 ms | 25,000 synthetic items | Synthetic local autocomplete scan exceeded target on the latest validation run | High | Add indexed local search path for autocomplete and keep barcode exact lookup O(1) | Medium: must preserve item selector filtering and price-list behavior |
-| Customer local autocomplete | `frontend/src/posapp/stores/customersStore.ts`, `frontend/tests/performanceRegressionBaselines.spec.ts` | p95 137.76 ms, target 75 ms on latest validation run | 25,000 synthetic customers | Linear filtering over a large in-memory list during autocomplete | High | Add a normalized customer search index, precomputed lowercase fields, or worker-backed search | Medium: must preserve offline customer selection and balance behavior |
+| Item local autocomplete | `frontend/src/offline/inventoryEngine.ts`, `frontend/src/posapp/stores/itemsStore.ts`, `frontend/tests/performanceRegressionBaselines.spec.ts` | Previously p95 79.58 ms; latest measured p50 5.58 ms, p95 7.90 ms, p99 8.53 ms | 25,000 synthetic items | Fixed by compact operational index and token/prefix lookup | Resolved for item path | Continue browser-session validation against real Frappe data and 100,000+ item fixtures | Medium: must preserve item selector filtering and price-list behavior |
+| Barcode exact lookup | `frontend/src/offline/inventoryEngine.ts`, `frontend/src/posapp/composables/pos/items/useScanProcessor.ts`, `frontend/src/posapp/stores/itemsStore.ts` | Latest measured p50 0.003 ms, p95 0.024 ms, p99 0.172 ms | 25,000 synthetic items with barcodes | Fixed by exact barcode map before visible-row and remote fallback lookup | Resolved for item path | Continue browser-session scan validation with real barcode payloads and UOM-specific prices | Medium: must preserve barcode UOM and server fallback behavior |
+| Customer local autocomplete | `frontend/src/posapp/stores/customersStore.ts`, `frontend/tests/performanceRegressionBaselines.spec.ts` | Earlier failing baseline p95 137.76 ms, target 75 ms; latest single regression run passed but customer search was not refactored | 25,000 synthetic customers | Linear filtering over a large in-memory list during autocomplete | High | Add a normalized customer search index, precomputed lowercase fields, or worker-backed search | Medium: must preserve offline customer selection and balance behavior |
 | Sell-ready boot semantics | `frontend/src/posapp/stores/bootReadinessStore.ts`, `frontend/src/offline/localSnapshotManifest.ts`, `frontend/src/posapp/layouts/DefaultLayout.vue` | Unit validated; browser p95 pending | Runtime boot path | Route-ready metric is fixed; browser-run p95 still needs real Frappe app session data | Medium | Run browser perf smoke with `posa_perf=1` against real cached/cold/offline boots | Low: diagnostic/measurement only |
 | Item/customer render attribution | `ItemsSelector.vue`, customer components, diagnostics metrics | Not benchmarked in this environment | Browser runtime required | Search timing and backend timing are measured, but component rerender p95 requires browser-run sessions | Medium | Add browser smoke/perf run that enables `posa_perf=1` and records render summaries from diagnostics | Low: diagnostic-only if no behavior changes |
 | Offline sync queue visibility | `frontend/src/offline/writeQueue.ts`, `frontend/src/offline/invoiceOutbox.ts`, `SyncCoordinator.ts` | Instrumented, no failing benchmark yet | Requires queued offline invoices/payments | Multiple queue paths make aggregate sync health harder to reason about | Medium | Add a combined queue health store that reads existing queues without extra traffic | Low to medium: must avoid breaking offline replay ordering |
@@ -314,4 +361,4 @@ Pricing rules and offers are allowed to be stale/non-blocking during boot, but t
 
 This foundation now measures the complete critical path categories requested: boot, item search, barcode lookup, cart/pricing, customer search/select, payment, multi-currency, offline queue/sync, realtime invalidation, frontend diagnostics, backend endpoints, synthetic data, and regression thresholds.
 
-The current baseline contains real failing performance targets for item and customer local autocomplete. Those failures should remain visible until the search architecture is optimized.
+The current branch fixes the item-side local autocomplete failure through the local inventory engine. Customer local autocomplete is intentionally not refactored in this task and remains the next dedicated optimization area, even though the latest single regression run passed in this environment.

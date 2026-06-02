@@ -116,6 +116,70 @@
 			</div>
 
 			<div class="perf-grid">
+				<section class="perf-panel">
+					<div class="perf-panel__title">
+						<h2>{{ __("Inventory Engine") }}</h2>
+						<span>{{ inventoryDiagnostics.ready ? __("ready") : __("blocked") }}</span>
+					</div>
+					<ul class="perf-list">
+						<li>
+							<span>{{ __("Scope") }}</span>
+							<strong class="metric-tags">{{ inventoryDiagnostics.scope || "-" }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Generation") }}</span>
+							<strong>{{ inventoryDiagnostics.generation }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Items") }}</span>
+							<strong>{{ bucket(inventoryDiagnostics.indexedItemCount) }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Barcodes") }}</span>
+							<strong>{{ bucket(inventoryDiagnostics.barcodeCount) }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Rate Index") }}</span>
+							<strong>{{ inventoryDiagnostics.rateReady ? __("Ready") : __("Cold") }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Hydrate") }}</span>
+							<strong>{{ formatDuration(inventoryDiagnostics.lastHydrateDurationMs) }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Build") }}</span>
+							<strong>{{ formatDuration(inventoryDiagnostics.lastBuildDurationMs) }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Delta") }}</span>
+							<strong>{{ inventoryDiagnostics.lastDeltaAppliedAt || "-" }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Full Reload Avoided") }}</span>
+							<strong>{{ inventoryDiagnostics.fullReloadAvoidedCount }}</strong>
+						</li>
+						<li>
+							<span>{{ __("Blocking") }}</span>
+							<strong>{{ inventoryDiagnostics.lastBlockingReason || "-" }}</strong>
+						</li>
+					</ul>
+				</section>
+
+				<section class="perf-panel">
+					<div class="perf-panel__title">
+						<h2>{{ __("Inventory Timings") }}</h2>
+						<span>{{ __("p50 / p95 / p99") }}</span>
+					</div>
+					<ul class="perf-list">
+						<li v-for="row in inventoryTimingRows" :key="row.name">
+							<span>{{ row.label }}</span>
+							<strong>{{ formatDuration(row.p50) }} / {{ formatDuration(row.p95) }} / {{ formatDuration(row.p99) }}</strong>
+						</li>
+					</ul>
+				</section>
+			</div>
+
+			<div class="perf-grid">
 				<section class="perf-panel perf-panel--wide">
 					<div class="perf-panel__title">
 						<h2>{{ __("Metric Percentiles") }}</h2>
@@ -192,6 +256,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import {
+	bucketCount,
 	getPerfConfig,
 	getPerfEvents,
 	getPerfSummaries,
@@ -201,6 +266,7 @@ import {
 } from "../../utils/perf";
 import {
 	getQueuedPayloadCount,
+	getInventoryDiagnostics,
 	memory,
 	type OfflineEntityType,
 } from "../../../offline";
@@ -210,6 +276,7 @@ const __ = (globalThis as any).__ || ((text: string) => text);
 
 const events = ref<PerfEvent[]>(getPerfEvents());
 const summaries = ref(getPerfSummaries());
+const inventoryDiagnostics = ref(getInventoryDiagnostics());
 const online = ref(typeof navigator === "undefined" ? true : navigator.onLine);
 const bootReadinessStore = useBootReadinessStore();
 
@@ -250,10 +317,32 @@ const readiness = computed(() => bootReadinessStore.getBootDiagnosticState());
 const readinessResources = computed(() =>
 	Object.values(readiness.value.resources || {}),
 );
+const summaryByName = computed(() =>
+	new Map(summaries.value.map((summary) => [summary.name, summary])),
+);
+const inventoryTimingRows = computed(() =>
+	[
+		["pos.inventory.query_barcode_exact", __("Barcode")],
+		["pos.inventory.query_autocomplete", __("Autocomplete")],
+		["pos.items.add_to_cart", __("Add to Cart")],
+		["pos.inventory.rate_lookup_local", __("Rate Lookup")],
+		["pos.inventory.delta_items_apply", __("Item Delta")],
+	].map(([name, label]) => {
+		const summary = summaryByName.value.get(name);
+		return {
+			name,
+			label,
+			p50: summary?.p50 ?? null,
+			p95: summary?.p95 ?? null,
+			p99: summary?.p99 ?? null,
+		};
+	}),
+);
 
 function refresh() {
 	events.value = getPerfEvents();
 	summaries.value = getPerfSummaries();
+	inventoryDiagnostics.value = getInventoryDiagnostics();
 	online.value = typeof navigator === "undefined" ? true : navigator.onLine;
 }
 
@@ -272,6 +361,10 @@ function formatTags(tags: Record<string, unknown>) {
 		.filter(([, value]) => value !== null && value !== undefined && value !== "")
 		.map(([key, value]) => `${key}:${value}`)
 		.join("  ");
+}
+
+function bucket(value: number) {
+	return bucketCount(value);
 }
 
 let unsubscribe: (() => void) | null = null;

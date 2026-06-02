@@ -1,7 +1,15 @@
-import { describe, expect, it } from "vitest";
-import { useItemSearch } from "../src/posapp/composables/pos/items/useItemSearch";
+import "fake-indexeddb/auto";
+import { beforeEach, describe, expect, it } from "vitest";
 import { customerMatchesSearchTerm } from "../src/posapp/stores/customers/customerSearch";
 import { PERFORMANCE_THRESHOLDS_MS, percentile } from "../src/posapp/utils/performanceThresholds";
+import {
+	db,
+	hydrateOperationalIndexFromSnapshot,
+	lookupBarcodeExact,
+	resetInventoryEngine,
+	saveOperationalItemsFromRaw,
+	searchItemsLocal,
+} from "../src/offline";
 
 function timed(samples: number, fn: () => void) {
 	const durations: number[] = [];
@@ -35,24 +43,35 @@ function syntheticCustomers(count: number) {
 }
 
 describe("POS performance regression baselines", () => {
-	it("tracks local item autocomplete against the engineering target", () => {
-		const { filterAndPaginate } = useItemSearch();
+	beforeEach(async () => {
+		await db.open();
+		await db.table("items").clear();
+		await db.table("operational_items").clear();
+		resetInventoryEngine();
+	}, 30000);
+
+	it("tracks local item autocomplete against the engineering target", async () => {
 		const items = syntheticItems(25000);
+		const scope = "PERF_PROFILE_MAIN";
+		await saveOperationalItemsFromRaw(items, scope);
+		await hydrateOperationalIndexFromSnapshot(scope);
 		const p95 = timed(15, () => {
-			filterAndPaginate(items, {
-				searchTerm: "performance item 249",
+			searchItemsLocal("performance item 249", {
+				scope,
 				limit: 50,
 			});
 		});
 
 		expect(p95).toBeLessThanOrEqual(PERFORMANCE_THRESHOLDS_MS.localItemAutocomplete);
-	});
+	}, 30000);
 
-	it("tracks barcode exact lookup against the engineering target", () => {
+	it("tracks barcode exact lookup against the engineering target", async () => {
 		const items = syntheticItems(25000);
-		const barcodeIndex = new Map(items.map((item) => [item.barcode, item]));
+		const scope = "PERF_PROFILE_MAIN";
+		await saveOperationalItemsFromRaw(items, scope);
+		await hydrateOperationalIndexFromSnapshot(scope);
 		const p95 = timed(30, () => {
-			barcodeIndex.get("990024999");
+			lookupBarcodeExact("990024999", scope);
 		});
 
 		expect(p95).toBeLessThanOrEqual(PERFORMANCE_THRESHOLDS_MS.barcodeExactLookup);

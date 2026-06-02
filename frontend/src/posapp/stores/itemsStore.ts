@@ -7,7 +7,17 @@ import { defineStore } from "pinia";
 import { ref, computed, watch } from "vue";
 import type { Item, POSProfile } from "../types/models";
 import itemService from "../services/itemService";
-import { refreshBootstrapSnapshotFromCacheState } from "../../offline/index";
+import {
+	applyInventoryDeltas,
+	getInventoryDiagnostics,
+	getItemRate,
+	hydrateOperationalIndexFromSnapshot,
+	lookupBarcodeExact,
+	lookupItemCodeExact,
+	refreshBootstrapSnapshotFromCacheState,
+	saveOperationalItemsFromRaw,
+	searchItemsLocal,
+} from "../../offline/index";
 
 // Composables
 import { useItemsCache } from "../composables/pos/items/store/useItemsCache";
@@ -76,14 +86,6 @@ export const useItemsStore = defineStore("items", () => {
 		return [];
 	};
 
-	const searchStoredItemsCompat = async (args: any) => {
-		const searchFn = await getOfflineFn("searchStoredItems");
-		if (typeof searchFn !== "function") {
-			return [];
-		}
-		return await searchFn(args);
-	};
-
 	const getCachedPriceListItemsCompat = async (priceList: string) => {
 		const fn = await getOfflineFn("getCachedPriceListItems");
 		if (typeof fn !== "function") {
@@ -103,6 +105,8 @@ export const useItemsStore = defineStore("items", () => {
 	const filteredItems = ref<Item[]>([]);
 	const totalItemCount = ref(0);
 	const itemsLoaded = ref(false);
+	const inventoryEngineReady = ref(false);
+	const inventoryEngineDiagnostics = ref(getInventoryDiagnostics());
 	const searchTerm = ref("");
 	const itemGroup = ref("ALL");
 	const lastSearch = ref("");
@@ -233,6 +237,15 @@ export const useItemsStore = defineStore("items", () => {
 
 	const getStorageScope = () => getCacheScope();
 
+	const hydrateInventoryEngine = async () => {
+		const diagnostics = await hydrateOperationalIndexFromSnapshot(
+			getStorageScope(),
+		);
+		inventoryEngineDiagnostics.value = diagnostics;
+		inventoryEngineReady.value = Boolean(diagnostics.ready);
+		return diagnostics;
+	};
+
 	const setItems = (
 		newItems: Item[],
 		options: { append?: boolean; totalCount?: number } = {},
@@ -355,6 +368,9 @@ export const useItemsStore = defineStore("items", () => {
 		await loadItemGroups(posProfile.value);
 		await assessCacheHealth();
 		await loadCachedItems();
+		await hydrateInventoryEngine().catch((error) => {
+			console.warn("Failed to hydrate inventory engine", error);
+		});
 
 		if (!itemsLoaded.value || items.value.length === 0) {
 			await loadItems({ forceServer: false });
@@ -368,6 +384,7 @@ export const useItemsStore = defineStore("items", () => {
 				resetCachedPagination({ enabled: false, total: 0 });
 				setItems([], { totalCount: 0 });
 				itemsLoaded.value = false;
+				inventoryEngineReady.value = false;
 				syncBootstrapItemReadiness(0);
 				return;
 			}
@@ -383,10 +400,15 @@ export const useItemsStore = defineStore("items", () => {
 
 			if (resolvedCount === 0) {
 				itemsLoaded.value = false;
+				inventoryEngineReady.value = false;
 				resetCachedPagination();
 				syncBootstrapItemReadiness(0);
 				return;
 			}
+
+			await hydrateInventoryEngine().catch((error) => {
+				console.warn("Failed to hydrate cached inventory index", error);
+			});
 
 			const shouldPaginate = resolvedCount > LARGE_CATALOG_THRESHOLD;
 			resetCachedPagination({
@@ -407,15 +429,14 @@ export const useItemsStore = defineStore("items", () => {
 				return;
 			}
 
-			const initialItems = await searchStoredItemsCompat({
-				search: "",
+			const initialItems = searchItemsLocal("", {
 				itemGroup: itemGroup.value,
 				limit: cachedPagination.value.pageSize,
 				offset: 0,
 				scope: getStorageScope(),
 			});
 
-			const safeInitial = Array.isArray(initialItems) ? initialItems : [];
+			const safeInitial = (Array.isArray(initialItems) ? initialItems : []) as Item[];
 			setItems(safeInitial, { totalCount: resolvedCount });
 			cachedPagination.value.offset = safeInitial.length;
 			cachedPagination.value.search = "";
@@ -542,6 +563,7 @@ export const useItemsStore = defineStore("items", () => {
 								),
 							);
 						}
+						await hydrateInventoryEngine().catch(() => null);
 					}
 					performanceMetrics.value.cachedRequests++;
 					updatePerformanceMetrics(startTime);
@@ -604,6 +626,7 @@ export const useItemsStore = defineStore("items", () => {
 						Math.max(Number(storedCount || 0), fetchedItems.length),
 					);
 				}
+				await hydrateInventoryEngine().catch(() => null);
 				triggerBackgroundSync({
 					groupFilter: normalizedGroup,
 					initialBatch: fetchedItems,
@@ -751,15 +774,15 @@ export const useItemsStore = defineStore("items", () => {
 					itemGroup.value.length > 0
 						? itemGroup.value
 						: "ALL";
-				const results = await searchStoredItemsCompat({
-					search: term,
+				if (!inventoryEngineReady.value) {
+					await hydrateInventoryEngine();
+				}
+				searchResults = searchItemsLocal(term, {
 					itemGroup: normalizedGroup,
 					limit: cachedPagination.value.pageSize,
 					offset: 0,
 					scope: getStorageScope(),
-				});
-
-				searchResults = Array.isArray(results) ? results : [];
+				}) as Item[];
 				cachedPagination.value.search = term;
 				cachedPagination.value.offset = searchResults.length;
 				cachedPagination.value.total = Math.max(
@@ -837,15 +860,17 @@ export const useItemsStore = defineStore("items", () => {
 		cachedPagination.value.loading = true;
 
 		try {
-			const nextPage = await searchStoredItemsCompat({
-				search: cachedPagination.value.search || "",
+			if (!inventoryEngineReady.value) {
+				await hydrateInventoryEngine();
+			}
+			const nextPage = searchItemsLocal(cachedPagination.value.search || "", {
 				itemGroup: cachedPagination.value.group,
 				limit: cachedPagination.value.pageSize,
 				offset: cachedPagination.value.offset,
 				scope: getStorageScope(),
 			});
 
-			const safePage = Array.isArray(nextPage) ? nextPage : [];
+			const safePage = (Array.isArray(nextPage) ? nextPage : []) as Item[];
 
 			if (safePage.length === 0) {
 				cachedPagination.value.offset = cachedPagination.value.total;
@@ -887,15 +912,17 @@ export const useItemsStore = defineStore("items", () => {
 		cachedPagination.value.offset = 0;
 		cachedPagination.value.search = "";
 
-		const firstPage = await searchStoredItemsCompat({
-			search: "",
+		if (!inventoryEngineReady.value) {
+			await hydrateInventoryEngine();
+		}
+		const firstPage = searchItemsLocal("", {
 			itemGroup: normalizedGroup,
 			limit: cachedPagination.value.pageSize,
 			offset: 0,
 			scope: getStorageScope(),
 		});
 
-		const safePage = Array.isArray(firstPage) ? firstPage : [];
+		const safePage = (Array.isArray(firstPage) ? firstPage : []) as Item[];
 		setItems(safePage, { totalCount: cachedPagination.value.total });
 		cachedPagination.value.offset = safePage.length;
 	};
@@ -918,6 +945,8 @@ export const useItemsStore = defineStore("items", () => {
 
 			if (priceData && priceData.length > 0) {
 				applyPriceListToItems(priceData);
+				await saveOperationalItemsFromRaw(priceData, getStorageScope());
+				await hydrateInventoryEngine().catch(() => null);
 			} else {
 				await loadItems({
 					forceServer: true,
@@ -978,7 +1007,13 @@ export const useItemsStore = defineStore("items", () => {
 	};
 
 	const addScannedItem = async (barcode: string) => {
-		let item = getItemByBarcode(barcode);
+		if (!inventoryEngineReady.value) {
+			await hydrateInventoryEngine().catch(() => null);
+		}
+		let item = lookupBarcodeExact(barcode, getStorageScope()) as Item | null;
+		if (!item) {
+			item = getItemByBarcode(barcode) || null;
+		}
 		if (item) return item;
 
 		try {
@@ -1011,6 +1046,8 @@ export const useItemsStore = defineStore("items", () => {
 
 				items.value.push(newItem);
 				updateIndexes([newItem], posProfile.value);
+				await saveOperationalItemsFromRaw([newItem], getStorageScope());
+				await hydrateInventoryEngine().catch(() => null);
 
 				if (searchTerm.value) {
 					await searchItems(searchTerm.value);
@@ -1110,18 +1147,32 @@ export const useItemsStore = defineStore("items", () => {
 			updateIndexes(touchedItems, posProfile.value);
 		}
 
+		void applyInventoryDeltas({
+			scope: getStorageScope(),
+			changed: updates,
+			source: "modified_items",
+		})
+			.then((diagnostics) => {
+				inventoryEngineDiagnostics.value = diagnostics;
+				inventoryEngineReady.value = Boolean(diagnostics.ready);
+			})
+			.catch((error) => {
+				console.warn("Failed to apply inventory deltas", error);
+			});
+
 		clearSearchCache();
 		if (searchTerm.value) {
-			filteredItems.value = performLocalSearch(
-				searchTerm.value,
-				items.value,
-				itemGroup.value,
-			);
+			filteredItems.value = searchItemsLocal(searchTerm.value, {
+				itemGroup: itemGroup.value,
+				limit: cachedPagination.value.pageSize,
+				scope: getStorageScope(),
+			}) as Item[];
 		} else {
-			filteredItems.value = filterItemsByGroup(
-				items.value,
-				itemGroup.value,
-			);
+			filteredItems.value = searchItemsLocal("", {
+				itemGroup: itemGroup.value,
+				limit: cachedPagination.value.pageSize,
+				scope: getStorageScope(),
+			}) as Item[];
 		}
 	};
 
@@ -1153,6 +1204,8 @@ export const useItemsStore = defineStore("items", () => {
 		customerPriceList,
 		cacheHealth,
 		performanceMetrics,
+		inventoryEngineReady,
+		inventoryEngineDiagnostics,
 		cachedPagination,
 		hasMoreCachedItems,
 
@@ -1173,8 +1226,14 @@ export const useItemsStore = defineStore("items", () => {
 		appendCachedItemsPage,
 		resetCachedItemsForGroup,
 		backgroundSyncItems: triggerBackgroundSync, // mapped
-		getItemByCode,
-		getItemByBarcode,
+		getItemByCode: (itemCode: string) =>
+			(lookupItemCodeExact(itemCode, getStorageScope()) as Item | null) ||
+			getItemByCode(itemCode),
+		getItemByBarcode: (barcode: string) =>
+			(lookupBarcodeExact(barcode, getStorageScope()) as Item | null) ||
+			getItemByBarcode(barcode),
+		getItemRate: (itemCode: string, uom?: string | null) =>
+			getItemRate(itemCode, { scope: getStorageScope(), uom }),
 		addScannedItem,
 		refreshModifiedItems,
 		clearLimitSearchResults,

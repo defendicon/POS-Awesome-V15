@@ -2,9 +2,10 @@ import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import {
 	commitLocalSnapshotManifestAtomic,
+	getInventoryDiagnostics,
 	getLocalSnapshotManifest,
 	getLocalSnapshotManifestStatus,
-	getStoredItemsCountByScope,
+	hydrateOperationalIndexFromSnapshot,
 	initPromise,
 	isOffline,
 	memory,
@@ -214,7 +215,18 @@ export const useBootReadinessStore = defineStore("boot-readiness", () => {
 			source: "indexeddb",
 		});
 		const itemCount = profile?.name
-			? await getStoredItemsCountByScope(getItemScope(profile))
+			? await hydrateOperationalIndexFromSnapshot(getItemScope(profile))
+				.then((diagnostics) => diagnostics.indexedItemCount)
+				.catch(async () => {
+					const diagnostics = getInventoryDiagnostics();
+					if (
+						diagnostics.ready &&
+						diagnostics.scope === getItemScope(profile)
+					) {
+						return diagnostics.indexedItemCount;
+					}
+					return 0;
+				})
 			: 0;
 		readMetric.finish("success", {
 			cache_hit: Boolean(manifest.value),
