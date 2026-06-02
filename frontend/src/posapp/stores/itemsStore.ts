@@ -456,6 +456,17 @@ export const useItemsStore = defineStore("items", () => {
 	const triggerBackgroundSync = (options: any = {}) => {
 		if (!shouldPersistItems()) return;
 		if (backgroundSyncState.value.running) return;
+		const initialBatchSize = Array.isArray(options?.initialBatch)
+			? options.initialBatch.length
+			: 0;
+		const resolvedPageSize = resolvePageSize();
+		const largeCatalog =
+			totalItemCount.value > LARGE_CATALOG_THRESHOLD ||
+			cachedPagination.value.enabled ||
+			initialBatchSize >= resolvedPageSize;
+		const maxInMemoryItems = largeCatalog
+			? cachedPagination.value.pageSize || resolvedPageSize
+			: Number.POSITIVE_INFINITY;
 
 		syncBackgroundSyncItems(
 			options,
@@ -477,6 +488,7 @@ export const useItemsStore = defineStore("items", () => {
 			totalItemCount,
 			itemsLoaded,
 			items,
+			maxInMemoryItems,
 		).catch((error) => {
 			console.error("Failed to trigger background sync:", error);
 		});

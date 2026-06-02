@@ -10,6 +10,56 @@ const offlineMocks = vi.hoisted(() => ({
 	getStoredItemsCountByScope: vi.fn(async () => 0),
 	getAllStoredItems: vi.fn(async () => []),
 	getCachedPriceListItems: vi.fn(async () => null),
+	getInventoryDiagnostics: vi.fn(() => ({
+		ready: false,
+		scope: null,
+		generation: 0,
+		indexedItemCount: 0,
+		barcodeCount: 0,
+		rateReady: false,
+		lastHydratedAt: null,
+		lastBuiltAt: null,
+		lastDeltaAppliedAt: null,
+		lastHydrateDurationMs: null,
+		lastBuildDurationMs: null,
+		lastBlockingReason: null,
+		fullReloadAvoidedCount: 0,
+	})),
+	hydrateOperationalIndexFromSnapshot: vi.fn(async () => ({
+		ready: false,
+		scope: null,
+		generation: 0,
+		indexedItemCount: 0,
+		barcodeCount: 0,
+		rateReady: false,
+		lastHydratedAt: null,
+		lastBuiltAt: null,
+		lastDeltaAppliedAt: null,
+		lastHydrateDurationMs: null,
+		lastBuildDurationMs: null,
+		lastBlockingReason: null,
+		fullReloadAvoidedCount: 0,
+	})),
+	searchItemsLocal: vi.fn(() => []),
+	lookupBarcodeExact: vi.fn(() => null),
+	lookupItemCodeExact: vi.fn(() => null),
+	getItemRate: vi.fn(() => null),
+	saveOperationalItemsFromRaw: vi.fn(async () => ({ count: 0 })),
+	applyInventoryDeltas: vi.fn(async () => ({
+		ready: true,
+		scope: "POS-1_Main WH",
+		generation: 1,
+		indexedItemCount: 1,
+		barcodeCount: 0,
+		rateReady: true,
+		lastHydratedAt: null,
+		lastBuiltAt: null,
+		lastDeltaAppliedAt: null,
+		lastHydrateDurationMs: null,
+		lastBuildDurationMs: null,
+		lastBlockingReason: null,
+		fullReloadAvoidedCount: 1,
+	})),
 }));
 
 const itemsSyncMocks = vi.hoisted(() => ({
@@ -31,6 +81,15 @@ vi.mock("../src/offline/index", () => ({
 	getStoredItemsCountByScope: offlineMocks.getStoredItemsCountByScope,
 	getAllStoredItems: offlineMocks.getAllStoredItems,
 	getCachedPriceListItems: offlineMocks.getCachedPriceListItems,
+	getInventoryDiagnostics: offlineMocks.getInventoryDiagnostics,
+	hydrateOperationalIndexFromSnapshot:
+		offlineMocks.hydrateOperationalIndexFromSnapshot,
+	searchItemsLocal: offlineMocks.searchItemsLocal,
+	lookupBarcodeExact: offlineMocks.lookupBarcodeExact,
+	lookupItemCodeExact: offlineMocks.lookupItemCodeExact,
+	getItemRate: offlineMocks.getItemRate,
+	saveOperationalItemsFromRaw: offlineMocks.saveOperationalItemsFromRaw,
+	applyInventoryDeltas: offlineMocks.applyInventoryDeltas,
 }));
 
 vi.mock("../src/posapp/composables/pos/items/store/useItemsCache", () => ({
@@ -261,7 +320,7 @@ describe("itemsStore loadItems", () => {
 			}),
 			expect.any(AbortSignal),
 		);
-		expect(itemsSyncMocks.backgroundSyncItems).toHaveBeenCalledWith(
+		expect(itemsSyncMocks.backgroundSyncItems).toHaveBeenLastCalledWith(
 			expect.objectContaining({
 				groupFilter: "ALL",
 				reset: false,
@@ -276,6 +335,7 @@ describe("itemsStore loadItems", () => {
 			expect.anything(),
 			expect.anything(),
 			expect.anything(),
+			Number.POSITIVE_INFINITY,
 		);
 	});
 
@@ -332,6 +392,7 @@ describe("itemsStore loadItems", () => {
 			expect.anything(),
 			expect.anything(),
 			expect.anything(),
+			Number.POSITIVE_INFINITY,
 		);
 	});
 });

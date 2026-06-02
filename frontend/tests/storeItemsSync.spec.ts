@@ -235,4 +235,67 @@ describe("store useItemsSync background progress", () => {
 		expect(setItems).toHaveBeenCalledTimes(6);
 		expect(updateCachedPaginationFromStorage).toHaveBeenCalledTimes(2);
 	});
+
+	it("persists large background batches without appending beyond the memory cap", async () => {
+		const sync = useItemsSync();
+		const setItems = vi.fn((batch: any[]) => {
+			itemsRef.value = [...itemsRef.value, ...batch];
+		});
+		const itemsRef = {
+			value: [
+				{ item_code: "ITEM-1", item_name: "Item 1" },
+				{ item_code: "ITEM-2", item_name: "Item 2" },
+			],
+		};
+		const frappeCall = vi
+			.fn()
+			.mockResolvedValueOnce({
+				message: [
+					{ item_code: "ITEM-3", item_name: "Item 3" },
+					{ item_code: "ITEM-4", item_name: "Item 4" },
+				],
+			})
+			.mockResolvedValueOnce({
+				message: [
+					{ item_code: "ITEM-5", item_name: "Item 5" },
+					{ item_code: "ITEM-6", item_name: "Item 6" },
+				],
+			})
+			.mockResolvedValueOnce({ message: [] });
+		(globalThis as any).frappe = { call: frappeCall };
+
+		await sync.backgroundSyncItems(
+			{
+				initialBatch: itemsRef.value,
+			},
+			{ name: "POS-1", warehouse: "WH-1" } as any,
+			"Retail",
+			"POS-1_WH-1",
+			true,
+			() => 2,
+			setItems,
+			vi.fn(async () => {}),
+			{ value: 6 },
+			{ value: false },
+			itemsRef,
+			2,
+		);
+
+		expect(offlineMocks.saveItemsBulk).toHaveBeenCalledWith(
+			[
+				{ item_code: "ITEM-3", item_name: "Item 3" },
+				{ item_code: "ITEM-4", item_name: "Item 4" },
+			],
+			"POS-1_WH-1",
+		);
+		expect(offlineMocks.saveItemsBulk).toHaveBeenCalledWith(
+			[
+				{ item_code: "ITEM-5", item_name: "Item 5" },
+				{ item_code: "ITEM-6", item_name: "Item 6" },
+			],
+			"POS-1_WH-1",
+		);
+		expect(setItems).not.toHaveBeenCalled();
+		expect(itemsRef.value).toHaveLength(2);
+	});
 });

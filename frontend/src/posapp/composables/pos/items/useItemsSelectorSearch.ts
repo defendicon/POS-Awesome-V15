@@ -332,9 +332,14 @@ export const useItemsSelectorSearch = ({
 				}
 			}
 		} else if (hasStorageAvailable(vm)) {
-			const loadVisibleItems = getVisibleItemsLoader(vm);
-			if (loadVisibleItems) {
-				await loadVisibleItems(true);
+			const searchItems = getSearchExecutor(vm);
+			if (searchItems) {
+				await searchItems(trimmedQuery);
+			} else {
+				const loadVisibleItems = getVisibleItemsLoader(vm);
+				if (loadVisibleItems) {
+					await loadVisibleItems(true);
+				}
 			}
 			triggerEnterEvent(vm);
 		} else {

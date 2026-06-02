@@ -225,6 +225,7 @@ export function useItemsSync() {
 		totalItemCount: { value: number },
 		itemsLoaded: { value: boolean },
 		items: { value: Item[] },
+		maxInMemoryItems = Number.POSITIVE_INFINITY,
 	) => {
 		const {
 			reset = false,
@@ -332,8 +333,17 @@ export function useItemsSync() {
 					stockCacheReady = true;
 				}
 				await saveItemsBulk(batch, scope);
-				setItems(batch, { append: true });
-				appended.push(...batch);
+				const remainingMemorySlots = Math.max(
+					0,
+					maxInMemoryItems - items.value.length,
+				);
+				if (remainingMemorySlots > 0) {
+					const memoryBatch = batch.slice(0, remainingMemorySlots);
+					if (memoryBatch.length) {
+						setItems(memoryBatch, { append: true });
+						appended.push(...memoryBatch);
+					}
+				}
 				loaded += batch.length;
 				syncedCount += batch.length;
 				syncedItemsCount.value = syncedCount;
