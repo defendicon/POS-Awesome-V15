@@ -144,6 +144,7 @@ import { useNetworkLifecycle } from "../composables/runtime/useNetworkLifecycle"
 import { useUpdateChecks } from "../composables/runtime/useUpdateChecks";
 import { useCustomerReadiness } from "../composables/runtime/useCustomerReadiness";
 import { useQueueMetrics } from "../composables/runtime/useQueueMetrics";
+import { ensureItemsReady } from "../modules/items/itemLoadingCoordinator";
 import authService from "../services/authService.js";
 import { getValidCachedOpeningForCurrentUser } from "../utils/openingCache";
 import { formatBootstrapWarning, shouldShowBootstrapBanner } from "../utils/bootstrapWarnings";
@@ -219,7 +220,7 @@ const pricingRulesStore = usePricingRulesStore();
 const { posProfile, lastInvoiceId, posOpeningShift } = storeToRefs(uiStore);
 
 const { pendingInvoicesCount } = storeToRefs(syncStore);
-const { loadProgress, customersLoaded } = storeToRefs(customersStore);
+const { loadProgress, customersLoaded, selectedCustomer } = storeToRefs(customersStore);
 const {
 	itemsLoaded,
 	isBackgroundLoading: itemsBackgroundLoading,
@@ -332,6 +333,27 @@ const customerReadiness = useCustomerReadiness({
 		}
 	},
 });
+
+function ensureStartupItemsReady(profile) {
+	if (!profile?.name) {
+		return;
+	}
+
+	const customer = selectedCustomer.value || profile.customer || null;
+	const priceList = profile.selling_price_list || null;
+
+	void ensureItemsReady({
+		profile,
+		customer,
+		priceList,
+		initialize: async () => {
+			await memoryInitPromise;
+			await itemsStore.initialize(profile, customer, priceList);
+		},
+	}).catch((error) => {
+		console.error("Failed to initialize POS item catalog", error);
+	});
+}
 
 function getCurrentBootstrapProfile() {
 	return posProfile.value || frappe?.boot?.pos_profile || null;
@@ -689,6 +711,14 @@ watch(
 			allowPrompt: getIsManualOffline() || !navigator.onLine,
 		});
 	},
+);
+
+watch(
+	posProfile,
+	(profile) => {
+		ensureStartupItemsReady(profile);
+	},
+	{ deep: true, immediate: true },
 );
 
 watch(
