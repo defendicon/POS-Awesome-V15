@@ -632,7 +632,18 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	// Computed property that reconstructs the array from map + order
 	const items = computed(() => {
 		return itemOrder.value
-			.map((id) => itemsData.get(id))
+			.map((id) => {
+				const item = itemsData.get(id);
+				if (item) {
+					// Track reactive item properties so computed re-runs
+					// synchronously when calcPrices modifies them
+					item.rate;
+					item.discount_amount;
+					item.discount_percentage;
+					item.qty;
+				}
+				return item;
+			})
 			.filter(
 				(item): item is CartItem => item !== undefined && item !== null,
 			);
@@ -651,6 +662,12 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		itemOrder.value.forEach((id, index) => {
 			const item = itemsData.get(id);
 			if (item) {
+				// Track reactive item properties so computed re-runs
+				// synchronously when calcPrices modifies them
+				item.rate;
+				item.discount_amount;
+				item.discount_percentage;
+				item.qty;
 				map.set(id, { index, item });
 			}
 		});
