@@ -5,6 +5,17 @@ import { useToastStore } from "../../../stores/toastStore.js";
 
 export function useStockUtils() {
 	const toastStore = useToastStore();
+	const refreshInvoiceTotals = (context: any) => {
+		const invoiceStore = context?.invoiceStore;
+		if (!invoiceStore) return;
+		if (invoiceStore.triggerUpdateTotals) {
+			invoiceStore.triggerUpdateTotals();
+		} else if (invoiceStore.recalculateTotals) {
+			invoiceStore.recalculateTotals();
+			invoiceStore.touch?.();
+		}
+	};
+
 	// Calculate UOM conversion and update item rates
 	const calcUom = async (item: any, value: any, context: any) => {
 		if (!item || !value) return;
@@ -247,6 +258,7 @@ export function useStockUtils() {
 
 
 			if (context.calc_stock_qty) context.calc_stock_qty(item, item.qty);
+			refreshInvoiceTotals(context);
 			if (context.forceUpdate) context.forceUpdate();
 
 			console.log("[useStockUtils] calcUom DONE (specific price)", {
@@ -412,11 +424,7 @@ export function useStockUtils() {
 		if (context.calc_stock_qty) context.calc_stock_qty(item, item.qty);
 		if (context.invoiceStore) {
 			context.invoiceStore.touch();
-			if (context.invoiceStore.triggerUpdateTotals) {
-				context.invoiceStore.triggerUpdateTotals();
-			} else if (context.invoiceStore.recalculateTotals) {
-				context.invoiceStore.recalculateTotals();
-			}
+			refreshInvoiceTotals(context);
 		}
 		if (context.forceUpdate) context.forceUpdate();
 
