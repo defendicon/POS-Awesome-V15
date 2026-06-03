@@ -94,9 +94,14 @@ type ItemBatchEntry = {
 type SearchableItem = Record<string, any> & {
 	item_code?: string | null;
 	item_name?: string | null;
+	barcode?: string | null;
+	description?: string | null;
+	brand?: string | null;
+	item_group?: string | null;
 	item_barcode?: string | ItemBarcodeEntry[] | null;
 	barcodes?: unknown[];
 	name_keywords?: unknown[];
+	search_tokens?: unknown[];
 	serial_no_data?: ItemSerialEntry[] | null;
 	serials?: unknown[];
 	batch_no_data?: ItemBatchEntry[] | null;
@@ -226,6 +231,80 @@ const isFreshCacheEntry = (entry: any, ttlMs = DEFAULT_CACHE_TTL_MS) => {
 
 const cloneCachePayload = <T>(value: T): T | null => toCloneSafeValue(value);
 
+const normalizeSearchText = (value: unknown): string =>
+	String(value ?? "")
+		.normalize("NFKD")
+		.replace(/[\u0300-\u036f]/g, "")
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, " ")
+		.trim()
+		.replace(/\s+/g, " ");
+
+const normalizeExactSearchText = (value: unknown): string =>
+	String(value ?? "").trim().toLowerCase();
+
+const appendSearchValue = (values: unknown[], value: unknown) => {
+	if (Array.isArray(value)) {
+		value.forEach((entry) => appendSearchValue(values, entry));
+		return;
+	}
+	if (value && typeof value === "object") {
+		const entry = value as Record<string, unknown>;
+		appendSearchValue(values, entry.barcode);
+		appendSearchValue(values, entry.uom);
+		appendSearchValue(values, entry.serial_no);
+		appendSearchValue(values, entry.batch_no);
+		return;
+	}
+	if (value !== undefined && value !== null && String(value).trim()) {
+		values.push(value);
+	}
+};
+
+const collectStoredItemSearchValues = (item: SearchableItem) => {
+	const values: unknown[] = [
+		item.item_code,
+		item.item_name,
+		item.barcode,
+		item.description,
+		item.brand,
+		item.item_group,
+	];
+	appendSearchValue(values, item.item_barcode);
+	appendSearchValue(values, item.barcodes);
+	appendSearchValue(values, item.name_keywords);
+	appendSearchValue(values, item.search_tokens);
+	appendSearchValue(values, item.serial_no_data);
+	appendSearchValue(values, item.serials);
+	appendSearchValue(values, item.batch_no_data);
+	appendSearchValue(values, item.batches);
+	return values
+		.map((value) => normalizeSearchText(value))
+		.filter(Boolean);
+};
+
+const storedItemMatchesSearch = (
+	item: SearchableItem,
+	search: string,
+): boolean => {
+	const normalizedSearch = normalizeSearchText(search);
+	if (!normalizedSearch) {
+		return true;
+	}
+	const terms = normalizedSearch.split(/\s+/).filter(Boolean);
+	const haystack = collectStoredItemSearchValues(item).join(" ");
+	if (terms.every((term) => haystack.includes(term))) {
+		return true;
+	}
+	const exact = normalizeExactSearchText(search);
+	const exactValues: unknown[] = [item.item_code, item.barcode];
+	appendSearchValue(exactValues, item.item_barcode);
+	appendSearchValue(exactValues, item.barcodes);
+	return exactValues
+		.map((value) => normalizeExactSearchText(value))
+		.some((value) => value === exact || value.includes(exact));
+};
+
 const estimateSerializedBytes = (value: unknown) => {
 	try {
 		const serialized =
@@ -290,23 +369,8 @@ export async function searchStoredItems({
 		const normalizedSearch =
 			typeof search === "string" ? search.trim() : "";
 		if (normalizedSearch) {
-			const term = normalizedSearch.toLowerCase();
-			const terms = term.split(/\s+/).filter(Boolean);
-
 			collection = collection.filter((it) => {
-				const nameMatch =
-					it.item_name &&
-					terms.every((t) => it.item_name.toLowerCase().includes(t));
-				const codeMatch =
-					it.item_code && it.item_code.toLowerCase().includes(term);
-				const barcodeMatch = Array.isArray(it.item_barcode)
-					? it.item_barcode.some(
-							(b) =>
-								b.barcode && b.barcode.toLowerCase() === term,
-						)
-					: it.item_barcode &&
-						String(it.item_barcode).toLowerCase().includes(term);
-				return nameMatch || codeMatch || barcodeMatch;
+				return storedItemMatchesSearch(it, normalizedSearch);
 			});
 		}
 

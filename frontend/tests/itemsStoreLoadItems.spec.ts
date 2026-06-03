@@ -9,6 +9,7 @@ const offlineMocks = vi.hoisted(() => ({
 	refreshBootstrapSnapshotFromCacheState: vi.fn(),
 	getStoredItemsCountByScope: vi.fn(async () => 0),
 	getAllStoredItems: vi.fn(async () => []),
+	searchStoredItems: vi.fn(async () => []),
 	getCachedPriceListItems: vi.fn(async () => null),
 	getInventoryDiagnostics: vi.fn(() => ({
 		ready: false,
@@ -80,6 +81,7 @@ vi.mock("../src/offline/index", () => ({
 		offlineMocks.refreshBootstrapSnapshotFromCacheState,
 	getStoredItemsCountByScope: offlineMocks.getStoredItemsCountByScope,
 	getAllStoredItems: offlineMocks.getAllStoredItems,
+	searchStoredItems: offlineMocks.searchStoredItems,
 	getCachedPriceListItems: offlineMocks.getCachedPriceListItems,
 	getInventoryDiagnostics: offlineMocks.getInventoryDiagnostics,
 	hydrateOperationalIndexFromSnapshot:
@@ -227,6 +229,7 @@ describe("itemsStore loadItems", () => {
 				item_uoms: [{ uom: "Nos", conversion_factor: 1 }],
 			},
 		]);
+		offlineMocks.searchStoredItems.mockResolvedValue([]);
 	});
 
 	it("primes detail cache directly from get_items responses on first load", async () => {
@@ -394,5 +397,51 @@ describe("itemsStore loadItems", () => {
 			expect.anything(),
 			Number.POSITIVE_INFINITY,
 		);
+	});
+
+	it("falls back to the durable item cache when the operational search index misses", async () => {
+		const store = useItemsStore();
+		const profile = {
+			name: "POS-1",
+			warehouse: "Main WH",
+			selling_price_list: "Retail",
+			currency: "PKR",
+			item_groups: [],
+			posa_use_limit_search: 0,
+		} as any;
+		const zincItem = {
+			item_code: "ZINC-OXIDE-001",
+			item_name: "Zinc Oxide",
+			item_group: "All Item Groups",
+			stock_uom: "Kg",
+			rate: 250,
+			price_list_rate: 250,
+		};
+
+		await store.initialize(profile);
+		offlineMocks.searchItemsLocal.mockReturnValue([]);
+		offlineMocks.searchStoredItems.mockResolvedValueOnce([zincItem]);
+
+		const results = await store.searchItems("zinc");
+
+		expect(offlineMocks.searchItemsLocal).toHaveBeenCalledWith(
+			"zinc",
+			expect.objectContaining({
+				scope: "POS-1_Main WH",
+			}),
+		);
+		expect(offlineMocks.searchStoredItems).toHaveBeenCalledWith(
+			expect.objectContaining({
+				search: "zinc",
+				scope: "POS-1_Main WH",
+				limit: 50,
+			}),
+		);
+		expect(offlineMocks.saveOperationalItemsFromRaw).toHaveBeenCalledWith(
+			[zincItem],
+			"POS-1_Main WH",
+		);
+		expect(results).toEqual([zincItem]);
+		expect(store.filteredItems).toEqual([zincItem]);
 	});
 });

@@ -86,6 +86,15 @@ export const useItemsStore = defineStore("items", () => {
 		return [];
 	};
 
+	const searchStoredItemsCompat = async (options: Record<string, unknown>) => {
+		const searchStoredFn = await getOfflineFn("searchStoredItems");
+		if (typeof searchStoredFn === "function") {
+			return await searchStoredFn(options);
+		}
+
+		return [];
+	};
+
 	const getCachedPriceListItemsCompat = async (priceList: string) => {
 		const fn = await getOfflineFn("getCachedPriceListItems");
 		if (typeof fn !== "function") {
@@ -795,6 +804,36 @@ export const useItemsStore = defineStore("items", () => {
 					offset: 0,
 					scope: getStorageScope(),
 				}) as Item[];
+				if (searchResults.length === 0) {
+					const storedResults = await searchStoredItemsCompat({
+						search: term,
+						itemGroup: normalizedGroup,
+						limit: cachedPagination.value.pageSize,
+						offset: 0,
+						scope: getStorageScope(),
+					}).catch((error) => {
+						console.warn("Stored item search fallback failed", error);
+						return [];
+					});
+					if (Array.isArray(storedResults) && storedResults.length) {
+						searchResults = storedResults as Item[];
+						await saveOperationalItemsFromRaw(
+							searchResults,
+							getStorageScope(),
+						).catch((error) => {
+							console.warn(
+								"Failed to backfill item search index",
+								error,
+							);
+						});
+						await hydrateInventoryEngine().catch((error) => {
+							console.warn(
+								"Failed to hydrate item search index after fallback",
+								error,
+							);
+						});
+					}
+				}
 				cachedPagination.value.search = term;
 				cachedPagination.value.offset = searchResults.length;
 				cachedPagination.value.total = Math.max(
