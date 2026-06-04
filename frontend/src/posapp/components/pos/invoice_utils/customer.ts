@@ -15,6 +15,49 @@ import {
 
 declare const frappe: any;
 
+async function applyCustomerPricingContext(
+	context: any,
+	customerInfo: any,
+	options: { refreshItemDetails?: boolean } = {},
+) {
+	if (!customerInfo || typeof customerInfo !== "object") {
+		return;
+	}
+
+	const resolvedPriceList =
+		customerInfo.customer_price_list ||
+		customerInfo.customer_group_price_list ||
+		context.pos_profile?.selling_price_list ||
+		"";
+	if (
+		resolvedPriceList &&
+		context.selected_price_list !== resolvedPriceList
+	) {
+		context.selected_price_list = resolvedPriceList;
+	}
+	if (customerInfo.price_list_currency) {
+		context.price_list_currency = customerInfo.price_list_currency;
+	} else if (resolvedPriceList) {
+		context.price_list_currency =
+			context.price_list_currency || context.pos_profile.currency;
+	} else {
+		context.price_list_currency = context.pos_profile.currency;
+	}
+
+	if (context.items?.length > 0) {
+		if (context.apply_cached_price_list) {
+			context.apply_cached_price_list(resolvedPriceList);
+		}
+		if (options.refreshItemDetails && context.update_items_details) {
+			await context.update_items_details(context.items);
+		}
+	}
+
+	if (context.schedulePricingRuleApplication) {
+		context.schedulePricingRuleApplication(true);
+	}
+}
+
 export async function fetch_customer_details(context: any) {
 	try {
 		const customer =
@@ -32,6 +75,7 @@ export async function fetch_customer_details(context: any) {
 			context.customer.trim() === requestedCustomer
 		) {
 			context.customer_info = cachedCustomer;
+			await applyCustomerPricingContext(context, cachedCustomer);
 		}
 
 		const r = await frappe.call({
@@ -68,33 +112,9 @@ export async function fetch_customer_details(context: any) {
 					] : [],
 				);
 			}
-			const resolvedPriceList =
-				context.customer_info.customer_price_list ||
-				context.customer_info.customer_group_price_list ||
-				context.pos_profile?.selling_price_list ||
-				"";
-			if (
-				resolvedPriceList &&
-				context.selected_price_list !== resolvedPriceList
-			) {
-				context.selected_price_list = resolvedPriceList;
-			}
-			if (context.customer_info.price_list_currency) {
-				context.price_list_currency =
-					context.customer_info.price_list_currency;
-			} else if (resolvedPriceList) {
-				context.price_list_currency =
-					context.price_list_currency || context.pos_profile.currency;
-			} else {
-				context.price_list_currency = context.pos_profile.currency;
-			}
-
-			// If we have items with default rates (rate=0 or rate not set), re-apply price list
-			// Or if we need to enforce customer price list
-			if (context.items.length > 0) {
-				if (context.update_items_details)
-					await context.update_items_details(context.items);
-			}
+			await applyCustomerPricingContext(context, context.customer_info, {
+				refreshItemDetails: true,
+			});
 		}
 	} catch (error) {
 		console.error("Error fetching customer details:", error);

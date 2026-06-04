@@ -127,6 +127,19 @@ export const matchPriceListAndCurrency = (
 	return true;
 };
 
+export const matchUom = (
+	rule: AnyRecord,
+	uom: string | null | undefined,
+): boolean => {
+	if (rule.uom && uom && rule.uom !== uom) {
+		return false;
+	}
+	if (rule.uom && !uom) {
+		return false;
+	}
+	return true;
+};
+
 const pushUnique = (
 	bucket: AnyRecord[],
 	rule: AnyRecord | null | undefined,
@@ -570,14 +583,16 @@ export const evaluatePricingRules = ({
 		)
 		.filter((rule) =>
 			matchPriceListAndCurrency(rule, ctx?.price_list, ctx?.currency),
-		);
+		)
+		.filter((rule) => matchUom(rule, item?.uom));
 
 	// Pricing logic
 	const pricingRules = validCandidates
 		.filter((rule) => !isFreeRule(rule))
 		.filter((rule) => {
 			const minimum = Number.parseFloat(rule.min_qty || 0);
-			return effectiveQty >= minimum;
+			const maximum = Number.parseFloat(rule.max_qty || 0);
+			return effectiveQty >= minimum && (!maximum || effectiveQty <= maximum);
 		})
 		// Fix: Do not apply "Discount on Other Item" rules to the trigger item.
 		// If same_item is false (0), the rule targets another item, so we shouldn't
@@ -642,7 +657,8 @@ export const evaluatePricingRules = ({
 		.filter((rule) => {
 			const minimum =
 				Number.parseFloat(rule.min_qty || rule.recurse_for || 1) || 1;
-			return effectiveQty >= minimum;
+			const maximum = Number.parseFloat(rule.max_qty || 0);
+			return effectiveQty >= minimum && (!maximum || effectiveQty <= maximum);
 		})
 		.sort(ruleSort);
 

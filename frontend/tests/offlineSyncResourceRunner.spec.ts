@@ -25,6 +25,11 @@ const adapterMocks = vi.hoisted(() => ({
 		status: "fresh",
 		watermark: "payments-watermark",
 	})),
+	syncPricingRulesResource: vi.fn(async () => ({
+		resourceId: "pricing_rules",
+		status: "fresh",
+		watermark: "pricing-watermark",
+	})),
 	syncItemsResource: vi.fn(async () => ({
 		resourceId: "items",
 		status: "fresh",
@@ -81,22 +86,79 @@ describe("offline sync resource runner", () => {
 		expect(
 			filterSupportedOfflineSyncResources([
 				{ id: "bootstrap_config" },
+				{ id: "pricing_rules" },
 				{ id: "offers" },
 				{ id: "items" },
 				{ id: "customer_addresses" },
 			] as any),
-		).toEqual([{ id: "bootstrap_config" }, { id: "items" }]);
+		).toEqual([
+			{ id: "bootstrap_config" },
+			{ id: "pricing_rules" },
+			{ id: "items" },
+		]);
 
 		expect(
 			filterSupportedOfflineSyncStates([
 				{ resourceId: "items", status: "fresh" },
+				{ resourceId: "pricing_rules", status: "fresh" },
 				{ resourceId: "offers", status: "stale" },
 				{ resourceId: "stock", status: "fresh" },
 			] as any),
 		).toEqual([
 			{ resourceId: "items", status: "fresh" },
+			{ resourceId: "pricing_rules", status: "fresh" },
 			{ resourceId: "stock", status: "fresh" },
 		]);
+	});
+
+	it("routes pricing rules through the profile-scoped pricing snapshot fetcher", async () => {
+		const callOfflineSyncMethod = vi.fn(async () => []);
+
+		await runSupportedOfflineSyncResource({
+			resource: {
+				id: "pricing_rules",
+			} as any,
+			posProfile: {
+				name: "POS-1",
+				company: "Test Co",
+				warehouse: "Main WH",
+				currency: "USD",
+				selling_price_list: "Retail",
+			},
+			schemaVersion: "2026-04-09",
+			getPersistedState: vi.fn(async () => null),
+			callOfflineSyncMethod,
+		});
+
+		expect(adapterMocks.syncPricingRulesResource).toHaveBeenCalledWith(
+			expect.objectContaining({
+				posProfile: expect.objectContaining({
+					company: "Test Co",
+					selling_price_list: "Retail",
+					currency: "USD",
+				}),
+			}),
+		);
+		const pricingFetcher =
+			adapterMocks.syncPricingRulesResource.mock.calls[0][0].fetcher;
+		await pricingFetcher({
+			posProfile: {
+				company: "Test Co",
+				selling_price_list: "Retail",
+				currency: "USD",
+			},
+			date: "2026-04-09",
+		});
+
+		expect(callOfflineSyncMethod).toHaveBeenCalledWith(
+			"posawesome.posawesome.api.pricing_rules.get_active_pricing_rules",
+			{
+				company: "Test Co",
+				price_list: "Retail",
+				currency: "USD",
+				date: "2026-04-09",
+			},
+		);
 	});
 
 	it("routes items through the operational sync adapter with the persisted watermark", async () => {

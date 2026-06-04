@@ -66,6 +66,7 @@ const RESOURCE_LABELS: Record<SyncResourceId, string> = {
 	payment_method_currencies: "Payment Method Currencies",
 	item_groups: "Item Groups",
 	offers: "Offers",
+	pricing_rules: "Pricing Rules",
 	items: "Items",
 	item_prices: "Item Prices",
 	stock: "Stock",

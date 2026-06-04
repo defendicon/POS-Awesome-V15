@@ -4,6 +4,7 @@ import {
 	syncCustomersResource,
 	syncItemsResource,
 	syncPaymentMethodCurrenciesResource,
+	syncPricingRulesResource,
 	syncPriceListMetaResource,
 	syncStockResource,
 } from "./adapters";
@@ -20,6 +21,7 @@ const SUPPORTED_OFFLINE_SYNC_RESOURCE_IDS = new Set<SyncResourceId>([
 	"price_list_meta",
 	"currency_matrix",
 	"payment_method_currencies",
+	"pricing_rules",
 	"items",
 	"item_prices",
 	"stock",
@@ -192,6 +194,20 @@ export async function runSupportedOfflineSyncResource({
 							pos_profile: posProfile,
 							watermark,
 							schema_version: schemaVersion,
+						},
+					),
+			});
+		case "pricing_rules":
+			return syncPricingRulesResource({
+				...sharedArgs,
+				fetcher: ({ posProfile, date }) =>
+					callOfflineSyncMethod(
+						"posawesome.posawesome.api.pricing_rules.get_active_pricing_rules",
+						{
+							company: posProfile.company,
+							price_list: posProfile.selling_price_list,
+							currency: posProfile.currency,
+							date,
 						},
 					),
 			});

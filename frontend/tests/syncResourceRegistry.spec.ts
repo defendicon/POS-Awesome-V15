@@ -17,6 +17,7 @@ describe("sync resource registry", () => {
 			"payment_method_currencies",
 			"item_groups",
 			"offers",
+			"pricing_rules",
 			"items",
 			"item_prices",
 			"stock",
@@ -40,6 +41,7 @@ describe("sync resource registry", () => {
 			"payment_method_currencies",
 			"item_groups",
 			"offers",
+			"pricing_rules",
 		]);
 
 		expect(
@@ -55,6 +57,7 @@ describe("sync resource registry", () => {
 			"payment_method_currencies",
 			"item_groups",
 			"offers",
+			"pricing_rules",
 			"items",
 			"item_prices",
 			"stock",
@@ -75,6 +78,7 @@ describe("sync resource registry", () => {
 			"payment_method_currencies",
 			"item_groups",
 			"offers",
+			"pricing_rules",
 		]);
 
 		expect(
@@ -88,6 +92,7 @@ describe("sync resource registry", () => {
 			"payment_method_currencies",
 			"item_groups",
 			"offers",
+			"pricing_rules",
 			"items",
 			"item_prices",
 			"stock",

@@ -185,6 +185,49 @@ describe("pricingEngine - applyLocalPricingRules", () => {
 		expect(notApplicable.rate).toBeCloseTo(50);
 	});
 
+	it("keeps broad cached snapshots usable for customer-restricted rules", () => {
+		const customerRule = {
+			name: "CUST-ONLY",
+			price_or_discount: "Discount",
+			discount_type: "Rate",
+			rate_or_discount: 15,
+			specificity: 3,
+			priority: 5,
+			customer: "CUST-1",
+		};
+		const generalRule = {
+			name: "GENERAL",
+			price_or_discount: "Discount",
+			discount_type: "Rate",
+			rate_or_discount: 5,
+			specificity: 3,
+			priority: 1,
+		};
+		const indexes = buildIndexes({
+			items: { "ITEM-CUST": [customerRule, generalRule] },
+		});
+
+		const matching = applyLocalPricingRules({
+			item: { item_code: "ITEM-CUST" },
+			qty: 1,
+			baseRate: 100,
+			ctx: { customer: "CUST-1" },
+			indexes,
+		});
+		const otherCustomer = applyLocalPricingRules({
+			item: { item_code: "ITEM-CUST" },
+			qty: 1,
+			baseRate: 100,
+			ctx: { customer: "CUST-2" },
+			indexes,
+		});
+
+		expect(matching.rate).toBeCloseTo(85);
+		expect(matching.applied[0].name).toBe("CUST-ONLY");
+		expect(otherCustomer.rate).toBeCloseTo(95);
+		expect(otherCustomer.applied[0].name).toBe("GENERAL");
+	});
+
 	it("checks date validity", () => {
 		const today = "2024-01-15";
 		const rule = {
@@ -284,6 +327,47 @@ describe("pricingEngine - applyLocalPricingRules", () => {
 		expect(result.rate).toBeCloseTo(90);
 		expect(result.discountPerUnit).toBeCloseTo(10);
 		expect(result.applied[0].name).toBe("STOCK-THRESHOLD");
+	});
+
+	it("respects maximum quantity and UOM restrictions", () => {
+		const rule = {
+			name: "BOX-ONLY",
+			price_or_discount: "Discount",
+			discount_type: "Rate",
+			rate_or_discount: 20,
+			specificity: 3,
+			priority: 5,
+			min_qty: 2,
+			max_qty: 5,
+			uom: "Box",
+		};
+		const indexes = buildIndexes({ items: { "ITEM-UOM": [rule] } });
+
+		const valid = applyLocalPricingRules({
+			item: { item_code: "ITEM-UOM", uom: "Box" },
+			qty: 3,
+			baseRate: 100,
+			ctx: {},
+			indexes,
+		});
+		const tooMany = applyLocalPricingRules({
+			item: { item_code: "ITEM-UOM", uom: "Box" },
+			qty: 6,
+			baseRate: 100,
+			ctx: {},
+			indexes,
+		});
+		const wrongUom = applyLocalPricingRules({
+			item: { item_code: "ITEM-UOM", uom: "Nos" },
+			qty: 3,
+			baseRate: 100,
+			ctx: {},
+			indexes,
+		});
+
+		expect(valid.rate).toBeCloseTo(80);
+		expect(tooMany.rate).toBeCloseTo(100);
+		expect(wrongUom.rate).toBeCloseTo(100);
 	});
 });
 

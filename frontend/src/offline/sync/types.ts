@@ -9,6 +9,7 @@ export type SyncResourceId =
 	| "payment_method_currencies"
 	| "item_groups"
 	| "offers"
+	| "pricing_rules"
 	| "items"
 	| "item_prices"
 	| "stock"

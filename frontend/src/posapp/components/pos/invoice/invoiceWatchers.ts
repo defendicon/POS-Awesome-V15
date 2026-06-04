@@ -116,12 +116,18 @@ const invoiceWatchers: Record<string, unknown> & ThisType<InvoiceWatchersVm> = {
 		}
 		this.set_delivery_charges();
 		this.sync_invoice_customer_details();
+		if (typeof this.schedulePricingRuleApplication === "function") {
+			this.schedulePricingRuleApplication(true);
+		}
 	},
 	// Watch for customer_info change and emit to edit form
 	customer_info() {
 		const customersStore = useCustomersStore();
 		customersStore.setCustomerInfo(this.customer_info || {});
 		this.sync_invoice_customer_details(this.customer_info);
+		if (typeof this.schedulePricingRuleApplication === "function") {
+			this.schedulePricingRuleApplication(true);
+		}
 	},
 	// Watch for expanded row change and update item detail
 	expanded(data_value: Array<string | number>) {
@@ -210,6 +216,9 @@ const invoiceWatchers: Record<string, unknown> & ThisType<InvoiceWatchersVm> = {
 	posting_date: {
 		handler(this: InvoiceWatchersVm, newVal: string) {
 			this.posting_date_display = this.formatDateForDisplay(newVal);
+			if (typeof this.schedulePricingRuleApplication === "function") {
+				this.schedulePricingRuleApplication(true);
+			}
 		},
 		immediate: true,
 	},
@@ -276,6 +285,9 @@ const invoiceWatchers: Record<string, unknown> & ThisType<InvoiceWatchersVm> = {
 		if (this.available_stock_cache) {
 			this.available_stock_cache = {};
 		}
+		if (typeof this.schedulePricingRuleApplication === "function") {
+			this.schedulePricingRuleApplication(true);
+		}
 	},
 
 	// Reactively update item prices when currency changes
@@ -291,6 +303,9 @@ const invoiceWatchers: Record<string, unknown> & ThisType<InvoiceWatchersVm> = {
 		if (this.items && this.items.length) {
 			this.update_item_rates();
 		}
+		if (typeof this.schedulePricingRuleApplication === "function") {
+			this.schedulePricingRuleApplication(true);
+		}
 	},
 
 	// Reactively update item prices when exchange rate changes
@@ -305,6 +320,9 @@ const invoiceWatchers: Record<string, unknown> & ThisType<InvoiceWatchersVm> = {
 		if (this.items && this.items.length) {
 			this.update_item_rates();
 		}
+		if (typeof this.schedulePricingRuleApplication === "function") {
+			this.schedulePricingRuleApplication(true);
+		}
 	},
 
 	// Reactively update item prices when selected-to-company rate changes
@@ -318,6 +336,9 @@ const invoiceWatchers: Record<string, unknown> & ThisType<InvoiceWatchersVm> = {
 		}
 		if (this.items && this.items.length) {
 			this.update_item_rates();
+		}
+		if (typeof this.schedulePricingRuleApplication === "function") {
+			this.schedulePricingRuleApplication(true);
 		}
 	},
 };

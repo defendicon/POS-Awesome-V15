@@ -126,6 +126,7 @@ def _normalise_rule(doc: frappe._dict) -> frappe._dict:
         apply_multiple_pricing_rules=cint(doc.get("apply_multiple_pricing_rules") or 0),
         apply_on=doc.get("apply_on"),
         min_qty=flt(doc.get("min_qty") or 0),
+        max_qty=flt(doc.get("max_qty")) if doc.get("max_qty") is not None else 0,
         valid_from=str(doc.get("valid_from")) if doc.get("valid_from") else None,
         valid_upto=str(doc.get("valid_upto")) if doc.get("valid_upto") else None,
         price_or_discount=price_or_product_discount,
@@ -227,6 +228,7 @@ def get_active_pricing_rules(params: dict | None = None, **kwargs):
         "stop_further_rules",
         "for_price_list_rate",
         "uom",
+        "max_qty",
     ]
 
     for fieldname in optional_fields:

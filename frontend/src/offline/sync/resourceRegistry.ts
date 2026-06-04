@@ -116,6 +116,16 @@ const SYNC_RESOURCES: ReadonlyArray<SyncResourceDefinition> = Object.freeze([
 		fullResyncSupported: true,
 	},
 	{
+		id: "pricing_rules",
+		scope: "profile",
+		mode: "scoped",
+		priority: "boot_critical",
+		triggers: ["boot", "online_resume", "profile_change", "user_action"],
+		storageKey: "pricing_rules_snapshot",
+		watermarkType: "timestamp",
+		fullResyncSupported: true,
+	},
+	{
 		id: "items",
 		scope: "profile",
 		mode: "delta",

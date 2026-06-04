@@ -31,7 +31,9 @@
  * **`ensureActiveRules(ctx, { force? })`**
  * Idempotent — skips the server fetch if the context key matches and the snapshot
  * is not stale (unless `force: true`). Context key is the JSON-serialised
- * `RuleContext`; a mismatch triggers `invalidateIfContextChanges`.
+ * profile pricing scope. Customer, customer group, and territory are intentionally
+ * excluded from the persisted snapshot key so online preload keeps party-restricted
+ * rules available for later offline customer changes.
  */
 import { defineStore } from "pinia";
 import { computed, reactive, ref } from "vue";
@@ -95,13 +97,17 @@ const buildContextKey = (ctx: RuleContext = {}) => {
 		company: ctx.company || "",
 		price_list: ctx.price_list || "",
 		currency: ctx.currency || "",
-		customer: ctx.customer || "",
-		customer_group: ctx.customer_group || "",
-		territory: ctx.territory || "",
 		date: ctx.date ? String(ctx.date).slice(0, 10) : "",
 	};
 	return JSON.stringify(payload);
 };
+
+const buildFetchContext = (ctx: RuleContext = {}) => ({
+	company: ctx.company,
+	price_list: ctx.price_list,
+	currency: ctx.currency,
+	date: ctx.date,
+});
 
 const computeStaleTimestamp = (fromIso: string | null) => {
 	try {
@@ -196,24 +202,45 @@ export const usePricingRulesStore = defineStore("pricing-rules", () => {
 		indexes.general = general;
 	};
 
-	const hydrateFromCache = () => {
-		if (ready.value) {
-			return;
+	const loadCachedSnapshot = () => {
+		const cached = getCachedPricingRulesSnapshot();
+		if (cached) {
+			rules.value = Array.isArray(cached.snapshot) ? cached.snapshot.map(normaliseRule) : [];
+			contextKey.value = cached.context || null;
+			lastSyncedAt.value = cached.lastSync || null;
+			staleAt.value = cached.staleAt || null;
+			indexRules();
 		}
+	};
+
+	const hydrateFromCache = () => {
 		try {
-			const cached = getCachedPricingRulesSnapshot();
-			if (cached) {
-				rules.value = Array.isArray(cached.snapshot) ? cached.snapshot.map(normaliseRule) : [];
-				contextKey.value = cached.context || null;
-				lastSyncedAt.value = cached.lastSync || null;
-				staleAt.value = cached.staleAt || null;
-				indexRules();
-			}
+			loadCachedSnapshot();
 		} catch (error) {
 			console.error("Failed to hydrate pricing rules cache", error);
 		} finally {
 			ready.value = true;
 		}
+	};
+
+	const refreshFromCacheIfNewer = () => {
+		try {
+			const cached = getCachedPricingRulesSnapshot();
+			if (!cached?.lastSync || cached.lastSync === lastSyncedAt.value) {
+				return;
+			}
+			loadCachedSnapshot();
+		} catch (error) {
+			console.error("Failed to refresh pricing rules cache", error);
+		}
+	};
+
+	const ensureHydrated = () => {
+		if (!ready.value) {
+			hydrateFromCache();
+			return;
+		}
+		refreshFromCacheIfNewer();
 	};
 
 	hydrateFromCache();
@@ -242,7 +269,7 @@ export const usePricingRulesStore = defineStore("pricing-rules", () => {
 	};
 
 	const ensureActiveRules = async (ctx: RuleContext = {}, options: { force?: boolean } = {}) => {
-		hydrateFromCache();
+		ensureHydrated();
 		const desiredKey = buildContextKey(ctx);
 		const force = options.force === true;
 
@@ -263,15 +290,7 @@ export const usePricingRulesStore = defineStore("pricing-rules", () => {
 		try {
 			const response = await (frappe.call as any)({
 				method: "posawesome.posawesome.api.pricing_rules.get_active_pricing_rules",
-				args: {
-					company: ctx.company,
-					price_list: ctx.price_list,
-					currency: ctx.currency,
-					date: ctx.date,
-					customer: ctx.customer,
-					customer_group: ctx.customer_group,
-					territory: ctx.territory,
-				},
+				args: buildFetchContext(ctx),
 			});
 			const snapshot = Array.isArray(response?.message) ? response.message : [];
 			setSnapshot(snapshot, desiredKey);
@@ -286,7 +305,7 @@ export const usePricingRulesStore = defineStore("pricing-rules", () => {
 	};
 
 	const invalidateIfContextChanges = async (ctx: RuleContext = {}) => {
-		hydrateFromCache();
+		ensureHydrated();
 		const targetKey = buildContextKey(ctx);
 		if (contextKey.value !== targetKey) {
 			await ensureActiveRules(ctx, { force: false });
