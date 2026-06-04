@@ -40,6 +40,7 @@ import { computed, reactive, ref } from "vue";
 // @ts-ignore
 import {
 	isOffline,
+	memoryInitPromise,
 	savePricingRulesSnapshot,
 	getCachedPricingRulesSnapshot,
 	clearPricingRulesSnapshot,
@@ -141,6 +142,7 @@ const normaliseRule = (rule: any = {}): PricingRule => {
 export const usePricingRulesStore = defineStore("pricing-rules", () => {
 	const ready = ref(false);
 	const loading = ref(false);
+	let hydrationPromise: Promise<void> | null = null;
 	const rules = ref<PricingRule[]>([]);
 	const indexes = reactive({
 		byItem: new Map<string, PricingRule[]>(),
@@ -213,18 +215,27 @@ export const usePricingRulesStore = defineStore("pricing-rules", () => {
 		}
 	};
 
-	const hydrateFromCache = () => {
-		try {
-			loadCachedSnapshot();
-		} catch (error) {
-			console.error("Failed to hydrate pricing rules cache", error);
-		} finally {
-			ready.value = true;
+	const hydrateFromCache = async () => {
+		if (hydrationPromise) {
+			return hydrationPromise;
 		}
+		hydrationPromise = (async () => {
+			try {
+				await memoryInitPromise;
+				loadCachedSnapshot();
+			} catch (error) {
+				console.error("Failed to hydrate pricing rules cache", error);
+			} finally {
+				ready.value = true;
+				hydrationPromise = null;
+			}
+		})();
+		return hydrationPromise;
 	};
 
-	const refreshFromCacheIfNewer = () => {
+	const refreshFromCacheIfNewer = async () => {
 		try {
+			await memoryInitPromise;
 			const cached = getCachedPricingRulesSnapshot();
 			if (!cached?.lastSync || cached.lastSync === lastSyncedAt.value) {
 				return;
@@ -235,15 +246,15 @@ export const usePricingRulesStore = defineStore("pricing-rules", () => {
 		}
 	};
 
-	const ensureHydrated = () => {
+	const ensureHydrated = async () => {
 		if (!ready.value) {
-			hydrateFromCache();
+			await hydrateFromCache();
 			return;
 		}
-		refreshFromCacheIfNewer();
+		await refreshFromCacheIfNewer();
 	};
 
-	hydrateFromCache();
+	void hydrateFromCache();
 
 	const setSnapshot = (snapshot: any[], ctxKey: string) => {
 		rules.value = Array.isArray(snapshot) ? snapshot.map(normaliseRule) : [];
@@ -269,7 +280,7 @@ export const usePricingRulesStore = defineStore("pricing-rules", () => {
 	};
 
 	const ensureActiveRules = async (ctx: RuleContext = {}, options: { force?: boolean } = {}) => {
-		ensureHydrated();
+		await ensureHydrated();
 		const desiredKey = buildContextKey(ctx);
 		const force = options.force === true;
 
@@ -305,7 +316,7 @@ export const usePricingRulesStore = defineStore("pricing-rules", () => {
 	};
 
 	const invalidateIfContextChanges = async (ctx: RuleContext = {}) => {
-		ensureHydrated();
+		await ensureHydrated();
 		const targetKey = buildContextKey(ctx);
 		if (contextKey.value !== targetKey) {
 			await ensureActiveRules(ctx, { force: false });
