@@ -186,6 +186,7 @@ class TestCreateChangePaymentEntries(unittest.TestCase):
         self.assertEqual(entry.payment_type, "Pay")
         self.assertEqual(entry.paid_amount, 4)
         self.assertEqual(entry.received_amount, 4)
+        self.assertEqual(entry.reference_no, "SINV-0001")
         self.assertEqual(entry.references, [])
         self.assertEqual(len(self.reconcile_calls), 1)
         reconcile_args = self.reconcile_calls[0]["args"]
@@ -323,6 +324,7 @@ class TestCreateChangePaymentEntries(unittest.TestCase):
         self.assertEqual(entry.payment_type, "Receive")
         self.assertEqual(entry.paid_amount, 4)
         self.assertEqual(entry.received_amount, 4)
+        self.assertEqual(entry.reference_no, "SINV-0002")
         self.assertEqual(entry.references, [])
 
 

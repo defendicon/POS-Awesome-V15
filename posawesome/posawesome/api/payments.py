@@ -308,7 +308,7 @@ def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, c
                     "paid_to": _row_value(payment, "account"),
                     "company": invoice_doc.company,
                     "mode_of_payment": _row_value(payment, "mode_of_payment"),
-                    "reference_no": invoice_doc.posa_pos_opening_shift,
+                    "reference_no": invoice_doc.name or invoice_doc.posa_pos_opening_shift,
                     "reference_date": today,
                 }
             )
@@ -637,22 +637,30 @@ def repair_overpayment_change_allocations(
             "company": invoice_company,
             "posting_date": _row_value(invoice, "posting_date"),
         }
-        if _row_value(invoice, "posa_pos_opening_shift"):
-            payment_filters["reference_no"] = _row_value(invoice, "posa_pos_opening_shift")
-
+        payment_fields = [
+            "name",
+            "paid_amount",
+            "unallocated_amount",
+            "total_allocated_amount",
+            "paid_from",
+            "reference_no",
+        ]
         payment_candidates = frappe.get_all(
             "Payment Entry",
-            filters=payment_filters,
-            fields=[
-                "name",
-                "paid_amount",
-                "unallocated_amount",
-                "total_allocated_amount",
-                "paid_from",
-                "reference_no",
-            ],
+            filters={**payment_filters, "reference_no": invoice_name},
+            fields=payment_fields,
             order_by="creation asc, name asc",
         )
+        if not payment_candidates and _row_value(invoice, "posa_pos_opening_shift"):
+            payment_candidates = frappe.get_all(
+                "Payment Entry",
+                filters={
+                    **payment_filters,
+                    "reference_no": _row_value(invoice, "posa_pos_opening_shift"),
+                },
+                fields=payment_fields,
+                order_by="creation asc, name asc",
+            )
 
         change_account = _row_value(invoice, "account_for_change_amount")
         filtered_candidates = []

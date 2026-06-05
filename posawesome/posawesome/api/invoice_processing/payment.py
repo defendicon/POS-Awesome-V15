@@ -77,7 +77,7 @@ def _create_change_payment_entries(
         frappe.throw(_("Unable to determine customer receivable account for change payment entry."))
 
     posting_date = invoice_doc.get("posting_date") or nowdate()
-    reference_no = invoice_doc.get("posa_pos_opening_shift")
+    reference_no = invoice_doc.get("name") or invoice_doc.get("posa_pos_opening_shift")
     created_receive_payment_entries = receive_entries or data.get("created_receive_payment_entries") or []
 
     def _normalized_text(value):

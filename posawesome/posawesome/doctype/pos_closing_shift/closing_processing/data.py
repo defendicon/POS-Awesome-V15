@@ -50,11 +50,24 @@ def get_pos_invoices(pos_opening_shift, doctype=None, submit_printed=1):
 
 @frappe.whitelist()
 def get_payments_entries(pos_opening_shift):
+    invoice_names = []
+    for doctype in ("Sales Invoice", "POS Invoice"):
+        invoice_names.extend(
+            frappe.get_all(
+                doctype,
+                filters={
+                    "docstatus": 1,
+                    "posa_pos_opening_shift": pos_opening_shift,
+                },
+                pluck="name",
+            )
+        )
+
     return frappe.get_all(
         "Payment Entry",
         filters={
             "docstatus": 1,
-            "reference_no": pos_opening_shift,
+            "reference_no": ["in", [pos_opening_shift, *invoice_names]],
             "payment_type": ["in", ["Receive", "Pay"]],
         },
         fields=[

@@ -322,6 +322,7 @@ class TestRedeemingCustomerCredit(unittest.TestCase):
         self.assertEqual(payment_entry.doctype, "Payment Entry")
         self.assertEqual(payment_entry.paid_from, "Debtors - TC")
         self.assertEqual(payment_entry.paid_amount, 60)
+        self.assertEqual(payment_entry.reference_no, "SINV-NEW-0001")
         self.assertEqual(payment_entry.references[0]["allocated_amount"], 50)
         self.assertEqual(created_entries[0]["allocated_amount"], 50)
         self.assertEqual(created_entries[0]["unallocated_amount"], 10)
@@ -455,6 +456,93 @@ class TestRedeemingCustomerCredit(unittest.TestCase):
         self.assertEqual(result["repaired"], [])
         self.assertEqual(result["skipped"], [])
         self.assertEqual(self.reconcile_calls, [])
+
+    def test_repair_matches_invoice_reference_with_same_shift_customer_date_and_amount(self):
+        self.get_all_responses["Sales Invoice"] = [
+            types.SimpleNamespace(
+                name="ACC-SINV-2026-10001",
+                customer="CUST-0001",
+                company="Test Company",
+                posting_date="2026-04-04",
+                outstanding_amount=-100,
+                change_amount=100,
+                base_change_amount=100,
+                posa_pos_opening_shift="POS-OPEN-0001",
+                account_for_change_amount="Cash - TC",
+                is_pos=1,
+                is_return=0,
+                docstatus=1,
+            ),
+            types.SimpleNamespace(
+                name="ACC-SINV-2026-10002",
+                customer="CUST-0001",
+                company="Test Company",
+                posting_date="2026-04-04",
+                outstanding_amount=-100,
+                change_amount=100,
+                base_change_amount=100,
+                posa_pos_opening_shift="POS-OPEN-0001",
+                account_for_change_amount="Cash - TC",
+                is_pos=1,
+                is_return=0,
+                docstatus=1,
+            ),
+        ]
+        self.get_all_responses["Payment Entry"] = [
+            types.SimpleNamespace(
+                name="ACC-PAY-10001",
+                paid_amount=100,
+                unallocated_amount=100,
+                paid_from="Cash - TC",
+                reference_no="ACC-SINV-2026-10001",
+                posting_date="2026-04-04",
+                payment_type="Pay",
+                party_type="Customer",
+                party="CUST-0001",
+                company="Test Company",
+                docstatus=1,
+            ),
+            types.SimpleNamespace(
+                name="ACC-PAY-10002",
+                paid_amount=100,
+                unallocated_amount=100,
+                paid_from="Cash - TC",
+                reference_no="ACC-SINV-2026-10002",
+                posting_date="2026-04-04",
+                payment_type="Pay",
+                party_type="Customer",
+                party="CUST-0001",
+                company="Test Company",
+                docstatus=1,
+            ),
+        ]
+        for payment_name in ("ACC-PAY-10001", "ACC-PAY-10002"):
+            payment_doc = FakePaymentEntry()
+            payment_doc.name = payment_name
+            payment_doc.paid_from = "Cash - TC"
+            payment_doc.cost_center = "Main - TC"
+            self.get_doc_responses[("Payment Entry", payment_name)] = payment_doc
+
+        result = self.payments_module.repair_overpayment_change_allocations(dry_run=1)
+
+        self.assertEqual(
+            result["matched"],
+            [
+                {
+                    "invoice": "ACC-SINV-2026-10001",
+                    "payment_entry": "ACC-PAY-10001",
+                    "allocated_amount": 100.0,
+                },
+                {
+                    "invoice": "ACC-SINV-2026-10002",
+                    "payment_entry": "ACC-PAY-10002",
+                    "allocated_amount": 100.0,
+                },
+            ],
+        )
+        self.assertFalse(
+            any(row.get("reason") == "ambiguous_payment_entries" for row in result["skipped"])
+        )
 
     def test_repair_overpayment_change_allocations_reconciles_exact_match(self):
         self.get_all_responses["Sales Invoice"] = [
