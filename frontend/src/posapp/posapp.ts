@@ -235,7 +235,7 @@ export async function mountPosApp(pageRef: any) {
 	return instance;
 }
 
-frappe.PosApp.posapp = class extends PosAppController {
+frappe.PosApp!.posapp = class extends PosAppController {
 	constructor(pageRef: any) {
 		super(pageRef);
 		void this.initializeApp();

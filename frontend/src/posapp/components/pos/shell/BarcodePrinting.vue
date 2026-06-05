@@ -293,14 +293,21 @@
 											hide-details
 											class="pos-themed-input"
 											@update:modelValue="(v) => selectBarcode(item, v)"
-										></v-select>
+										>
+											<template v-slot:item="{ props, item: bcItem }">
+												<v-list-item v-bind="props" :subtitle="bcItem.raw.barcode_type || ''"></v-list-item>
+											</template>
+										</v-select>
 									</template>
-									<span v-else class="text-caption">{{ item.barcode }}</span>
-									<v-tooltip v-if="getBarcodeCheckDigitWarning(item.barcode)" location="top">
+									<span v-else class="text-caption">
+										{{ item.barcode }}
+										<v-chip v-if="getBarcodeTypeLabel(item)" size="x-small" variant="outlined" class="ml-1">{{ getBarcodeTypeLabel(item) }}</v-chip>
+									</span>
+									<v-tooltip v-if="validateBarcodeItem(item)" location="top">
 										<template v-slot:activator="{ props }">
 											<v-icon v-bind="props" color="error" size="small">mdi-alert-circle</v-icon>
 										</template>
-										<span>{{ getBarcodeCheckDigitWarning(item.barcode) }}</span>
+										<span>{{ validateBarcodeItem(item) }}</span>
 									</v-tooltip>
 								</div>
 								<div v-else class="text-error text-caption">{{ __("No Barcode") }}</div>
@@ -603,7 +610,7 @@ import { useItemsStore } from "../../../stores/itemsStore";
 import { useUIStore } from "../../../stores/uiStore";
 import { useToastStore } from "../../../stores/toastStore";
 import { useBarcodePrintQueue } from "../../../composables/pos/items/useBarcodePrintQueue";
-import { useBarcodePrintOutput, PAGE_FORMAT_PRESETS, getBarcodeCheckDigitWarning } from "../../../composables/pos/items/useBarcodePrintOutput";
+import { useBarcodePrintOutput, PAGE_FORMAT_PRESETS, getBarcodeCheckDigitWarning, validateBarcodeItem, getBarcodeTypeLabel } from "../../../composables/pos/items/useBarcodePrintOutput";
 import { useScaleBarcodeSettings } from "../../../composables/pos/items/useScaleBarcodeSettings";
 
 const itemsStore = useItemsStore();
@@ -735,9 +742,24 @@ const processBulkImport = async () => {
 					i.barcode === entry.item_code,
 			);
 			if (found) {
-				await onAddItem({ ...found, qty: entry.qty || 1 });
-				closeAddItemDialog();
 				added++;
+				const qty = entry.qty || 1;
+				addOrMergePrintableItem(
+					{
+						...found,
+						barcode:
+							found.barcode ||
+							(Array.isArray(found.item_barcode) && found.item_barcode[0]?.barcode) ||
+							"",
+						uom: found.uom || found.stock_uom || "",
+						qty,
+						_prices_by_uom: found._prices_by_uom || {},
+						item_barcode: found.item_barcode || [],
+						item_uoms: found.item_uoms || [],
+					},
+					qty,
+					"bulk-import",
+				);
 			} else {
 				try {
 					const res = await frappe.call({
@@ -751,9 +773,24 @@ const processBulkImport = async () => {
 					});
 					const details = res.message && res.message[0];
 					if (details) {
-						await onAddItem({ ...details, qty: entry.qty || 1 });
-						closeAddItemDialog();
 						added++;
+						const qty = entry.qty || 1;
+						addOrMergePrintableItem(
+							{
+								...details,
+								barcode:
+									details.barcode ||
+									(Array.isArray(details.item_barcode) && details.item_barcode[0]?.barcode) ||
+									"",
+								uom: details.uom || details.stock_uom || "",
+								qty,
+								_prices_by_uom: details._prices_by_uom || {},
+								item_barcode: details.item_barcode || [],
+								item_uoms: details.item_uoms || [],
+							},
+							qty,
+							"bulk-import",
+						);
 					} else {
 						console.warn("Item not found:", entry.item_code);
 					}

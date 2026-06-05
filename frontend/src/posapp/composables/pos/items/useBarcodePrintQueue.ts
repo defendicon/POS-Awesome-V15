@@ -287,7 +287,6 @@ export function useBarcodePrintQueue() {
 					if (res.message != null) {
 						item.price = Number(res.message);
 						if (!item._prices_by_uom) item._prices_by_uom = {};
-						item._prices_by_uom[newUom] = { price_list_rate: Number(res.message) };
 						item._prices_by_uom[""] = { price_list_rate: Number(res.message) };
 					}
 				} catch { /* keep existing price */ }
@@ -509,17 +508,19 @@ export function useBarcodePrintQueue() {
 
 	const mapBarcodeType = (type: string): string => {
 		if (!type) return "";
-		if (type === "EAN") return "EAN13";
-		if (type === "EAN-13") return "EAN13";
-		if (type === "EAN-8") return "EAN8";
-		if (type === "UPC") return "UPC";
-		if (type === "UPC-A") return "UPC";
-		if (type === "Code 128") return "CODE128";
-		if (type === "Code 39") return "CODE39";
-		if (type === "ITF-14") return "ITF14";
+		if (type === "EAN" || type === "EAN-13" || type === "ISBN-13" || type === "JAN") return "EAN13";
+		if (type === "EAN-8" || type === "ISSN") return "EAN8";
+		if (type === "UPC" || type === "UPC-A") return "UPC";
+		if (type === "ITF-14" || type === "GTIN-14") return "ITF14";
 		if (type === "ITF") return "ITF";
-		if (type === "GS1-128") return "GS1_128";
+		if (type === "GS1-128" || type === "GS1") return "GS1_128";
 		if (type === "CODABAR") return "CODABAR";
+		if (type === "Code 39" || type === "CODE-39") return "CODE39";
+		if (type === "Code 128") return "CODE128";
+		if (type === "ISBN-10") return "CODE128";
+		if (type === "PZN") return "CODE128";
+		if (type === "GTIN") return "";
+		if (type === "ISBN") return "";
 		if (type === "QR Code") return "";
 		return "";
 	};

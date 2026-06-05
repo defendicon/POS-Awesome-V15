@@ -212,6 +212,71 @@ export const PAGE_FORMAT_PRESETS: PageFormatPreset[] = [
 	{ label: "100 × 100 mm", value: "100x100mm", type: "thermal", widthMm: 100, heightMm: 100 },
 ];
 
+export function guessSymbologyFromBarcode(barcode: string): string {
+	const digits = barcode.replace(/\D/g, "");
+	if (digits.length === 13) return "EAN13";
+	if (digits.length === 12) return "UPC";
+	if (digits.length === 8) return "EAN8";
+	if (digits.length === 14) return "ITF14";
+	if (/^\d+$/.test(barcode)) return "ITF";
+	return "CODE128";
+}
+
+function getBarcodeTypeSymbology(item: any): string {
+	const bc = String(item.barcode || "").trim();
+	if (!bc) return "";
+	const rows = Array.isArray(item.item_barcode) ? item.item_barcode : [];
+	const matched = rows.find((r: any) => String(r?.barcode || "").trim() === bc);
+	const t = matched?.barcode_type || "";
+	if (t === "EAN-13" || t === "EAN" || t === "ISBN-13" || t === "JAN") return "EAN13";
+	if (t === "EAN-8" || t === "ISSN") return "EAN8";
+	if (t === "UPC-A" || t === "UPC") return "UPC";
+	if (t === "ITF-14" || t === "GTIN-14") return "ITF14";
+	if (t === "GS1-128" || t === "GS1") return "GS1_128";
+	if (t === "CODABAR") return "CODABAR";
+	if (t === "Code 39" || t === "CODE-39") return "CODE39";
+	if (t === "Code 128") return "CODE128";
+	if (t === "ISBN-10") return "CODE128";
+	if (t === "PZN") return "CODE128";
+	if (t === "GTIN") return "";
+	if (t === "ISBN") return "";
+	return "";
+}
+
+export function validateBarcodeItem(item: any): string | null {
+	const bc = String(item.barcode || "").trim();
+	if (!bc) return "No barcode";
+
+	const effectiveSym = item._symbology || getBarcodeTypeSymbology(item) || guessSymbologyFromBarcode(bc);
+	const digits = bc.replace(/\D/g, "");
+
+	if (effectiveSym === "EAN13" && digits.length !== 13)
+		return `EAN-13 needs 13 digits, got ${digits.length}`;
+	if (effectiveSym === "EAN8" && digits.length !== 8)
+		return `EAN-8 needs 8 digits, got ${digits.length}`;
+	if (effectiveSym === "UPC" && digits.length !== 12)
+		return `UPC-A needs 12 digits, got ${digits.length}`;
+	if (effectiveSym === "ITF14" && digits.length !== 14)
+		return `ITF-14 needs 14 digits, got ${digits.length}`;
+	if (effectiveSym === "ITF" && (digits.length % 2 !== 0 || !/^\d+$/.test(bc)))
+		return "ITF requires even number of digits";
+
+	const checkResult = validateBarcodeCheckDigit(bc);
+	if (!checkResult.valid && checkResult.expected !== null) {
+		return `Invalid check digit (expected ${checkResult.expected})`;
+	}
+
+	return null;
+}
+
+export function getBarcodeTypeLabel(item: any): string {
+	const bc = String(item.barcode || "").trim();
+	if (!bc) return "";
+	const rows = Array.isArray(item.item_barcode) ? item.item_barcode : [];
+	const matched = rows.find((r: any) => String(r?.barcode || "").trim() === bc);
+	return matched?.barcode_type || "";
+}
+
 export function useBarcodePrintOutput() {
 	const toastStore = useToastStore();
 	const uiStore = useUIStore();
@@ -402,16 +467,6 @@ export function useBarcodePrintOutput() {
 		return getBarcodeDimensions(sym, isRaw).compliance;
 	};
 
-  const guessSymbologyFromBarcode = (barcode: string): string => {
-    const digits = barcode.replace(/\D/g, "");
-    if (digits.length === 13) return "EAN13";
-    if (digits.length === 12) return "UPC";
-    if (digits.length === 8) return "EAN8";
-    if (digits.length === 14) return "ITF14";
-    if (/^\d+$/.test(barcode)) return "ITF";
-    return "CODE128";
-  };
-
   const validateBarcodeData = (items: any[], sym?: string): string[] => {
     const s = sym ?? symbology.value;
     if (s === "CODE128" || s === "CODE39" || s === "CODABAR") return [];
@@ -419,7 +474,8 @@ export function useBarcodePrintOutput() {
     if (s === "auto") {
       items.forEach((item: any) => {
         const bc = String(item.barcode || "").trim();
-        const effectiveSym = guessSymbologyFromBarcode(bc);
+        const itemSym = item._symbology || "auto";
+        const effectiveSym = itemSym === "auto" ? guessSymbologyFromBarcode(bc) : itemSym;
         const name = item.item_name || item.item_code;
         const digits = bc.replace(/\D/g, "");
         if (effectiveSym === "EAN13" && digits.length !== 13) {
@@ -430,8 +486,8 @@ export function useBarcodePrintOutput() {
           errors.push(`${name}: UPC-A needs 12 digits, got ${digits.length || bc.length} chars`);
         } else if (effectiveSym === "ITF14" && digits.length !== 14) {
           errors.push(`${name}: ITF-14 needs 14 digits, got ${digits.length || bc.length} chars`);
-        } else if (effectiveSym === "ITF" && !/^\d+$/.test(bc)) {
-          errors.push(`${name}: ITF requires digits only`);
+        } else if (effectiveSym === "ITF" && (digits.length % 2 !== 0 || !/^\d+$/.test(bc))) {
+          errors.push(`${name}: ITF requires even number of digits`);
         } else if ((digits.length === 13 || digits.length === 12 || digits.length === 8) && (effectiveSym === "EAN13" || effectiveSym === "UPC" || effectiveSym === "EAN8")) {
           const checkResult = validateBarcodeCheckDigit(bc);
           if (!checkResult.valid) {
@@ -453,15 +509,15 @@ export function useBarcodePrintOutput() {
         errors.push(`${item.item_name || item.item_code}: UPC-A needs 12 digits, got ${digits.length || bc.length} chars`);
       } else if (s === "ITF14" && digits.length !== 14) {
         errors.push(`${item.item_name || item.item_code}: ITF-14 needs 14 digits, got ${digits.length || bc.length} chars`);
-      } else if (s === "ITF" && !/^\d+$/.test(bc)) {
-        errors.push(`${item.item_name || item.item_code}: ITF requires digits only`);
+      } else if (s === "ITF" && (digits.length % 2 !== 0 || !/^\d+$/.test(bc))) {
+        errors.push(`${item.item_name || item.item_code}: ITF requires even number of digits`);
       }
     });
     return errors;
   };
 
 	const getItemSymbology = (item: any): string => {
-		return item._symbology || symbology.value;
+		return item._symbology || getBarcodeTypeSymbology(item) || symbology.value;
 	};
 
 	const generatePrintContent = (items: any[]): string => {
@@ -473,8 +529,9 @@ export function useBarcodePrintOutput() {
 
 		items.forEach((item) => {
 			const itemSym = getItemSymbology(item);
-			const dims = calculateBarcodeDimensions(itemSym, ctx, item.barcode?.length);
-			const jsBarcode = getSymbologyForJsBarcode(itemSym);
+			const effectiveSym = itemSym === "auto" ? guessSymbologyFromBarcode(item.barcode) : itemSym;
+			const dims = calculateBarcodeDimensions(effectiveSym, ctx, item.barcode?.length);
+			const jsBarcode = getSymbologyForJsBarcode(effectiveSym);
 			const ean128Attr = jsBarcode.ean128 ? ' jsbarcode-ean128="true"' : "";
 			const labelsCount = Math.max(1, Math.round(Number(item.qty) || 1));
 			const safeItemName = escapeHtml(item.item_name || item.item_code || "");
@@ -677,7 +734,8 @@ export function useBarcodePrintOutput() {
 		const rawData = itemsToPrint
 			.map((item: any) => {
 				const itemSym = getItemSymbology(item);
-				const enriched = { ...item, symbologyName: itemSym, printContext: rawContext };
+				const effectiveSym = itemSym === "auto" ? guessSymbologyFromBarcode(item.barcode) : itemSym;
+				const enriched = { ...item, symbologyName: effectiveSym, printContext: rawContext };
 				return isZpl ? zplGen.generateZpl(enriched) : zplGen.generateEpl(enriched);
 			})
 			.join("\n");
