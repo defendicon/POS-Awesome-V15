@@ -130,16 +130,19 @@ def add_loyalty_point(invoice_doc):
                 loyalty_program = frappe.get_value("Customer", invoice_doc.customer, "loyalty_program")
                 if not loyalty_program:
                     loyalty_program = original_offer.loyalty_program
+                expiry_duration = frappe.get_value(
+                    "Loyalty Program", loyalty_program, "expiry_duration"
+                )
                 doc = frappe.get_doc(
                     {
                         "doctype": "Loyalty Point Entry",
                         "loyalty_program": loyalty_program,
                         "loyalty_program_tier": original_offer.name,
                         "customer": invoice_doc.customer,
-                        "invoice_type": "Sales Invoice",
+                        "invoice_type": invoice_doc.doctype,
                         "invoice": invoice_doc.name,
                         "loyalty_points": original_offer.loyalty_points,
-                        "expiry_date": add_days(invoice_doc.posting_date, 10000),
+                        "expiry_date": add_days(invoice_doc.posting_date, expiry_duration),
                         "posting_date": invoice_doc.posting_date,
                         "company": invoice_doc.company,
                     }

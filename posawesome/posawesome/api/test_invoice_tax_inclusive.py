@@ -3,6 +3,7 @@ import pathlib
 import sys
 import types
 import unittest
+from datetime import date, timedelta
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
 
@@ -94,6 +95,81 @@ class TestApplyTaxInclusive(unittest.TestCase):
 
         self.assertEqual(percentage_tax.included_in_print_rate, 0)
         self.assertEqual(doc.calculate_calls, 1)
+
+
+class LoyaltyPointEntryDoc(AttrDict):
+    def insert(self, ignore_permissions=False):
+        self.ignore_permissions = ignore_permissions
+
+
+class TestAddLoyaltyPoint(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        _install_stubs()
+        cls.module = _load_module()
+
+    def setUp(self):
+        self.created_entries = []
+        original_offer = AttrDict(
+            name="LOYALTY-OFFER",
+            loyalty_points=25,
+            loyalty_program="LOYALTY-PROGRAM",
+        )
+
+        def get_doc(doctype_or_values, name=None):
+            if doctype_or_values == "POS Offer":
+                return original_offer
+
+            entry = LoyaltyPointEntryDoc(doctype_or_values)
+            self.created_entries.append(entry)
+            return entry
+
+        def get_value(doctype, name, fieldname):
+            if doctype == "Customer":
+                return "LOYALTY-PROGRAM"
+            if doctype == "Loyalty Program" and fieldname == "expiry_duration":
+                return 30
+            return None
+
+        self.module.frappe.get_doc = get_doc
+        self.module.frappe.get_value = get_value
+        self.module.add_days = lambda value, days: value + timedelta(days=days or 0)
+
+    def test_sales_invoice_uses_actual_doctype_and_program_expiry(self):
+        invoice = AttrDict(
+            doctype="Sales Invoice",
+            name="ACC-SINV-0001",
+            customer="Customer 1",
+            posting_date=date(2026, 6, 5),
+            company="Company 1",
+            posa_offers=[AttrDict(offer="Loyalty Point", offer_name="LOYALTY-OFFER")],
+        )
+
+        self.module.add_loyalty_point(invoice)
+
+        entry = self.created_entries[0]
+        self.assertEqual(entry.invoice_type, "Sales Invoice")
+        self.assertEqual(entry.invoice, invoice.name)
+        self.assertEqual(entry.expiry_date, date(2026, 7, 5))
+        self.assertTrue(entry.ignore_permissions)
+
+    def test_pos_invoice_uses_actual_doctype_and_program_expiry(self):
+        invoice = AttrDict(
+            doctype="POS Invoice",
+            name="POSINV-0001",
+            customer="Customer 1",
+            posting_date=date(2026, 6, 5),
+            company="Company 1",
+            posa_offers=[AttrDict(offer="Loyalty Point", offer_name="LOYALTY-OFFER")],
+        )
+
+        self.module.add_loyalty_point(invoice)
+
+        entry = self.created_entries[0]
+        self.assertEqual(entry.invoice_type, "POS Invoice")
+        self.assertEqual(entry.invoice, invoice.name)
+        self.assertEqual(entry.expiry_date, date(2026, 7, 5))
+        self.assertTrue(entry.ignore_permissions)
 
 
 if __name__ == "__main__":
