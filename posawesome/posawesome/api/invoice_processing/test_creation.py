@@ -93,7 +93,8 @@ def _install_framework_stubs():
 
     frappe_module._dict = _FrappeDict
     frappe_module._ = lambda text: text
-    frappe_module.throw = lambda message: (_ for _ in ()).throw(Exception(message))
+    frappe_module.PermissionError = PermissionError
+    frappe_module.throw = lambda message, exc=None: (_ for _ in ()).throw((exc or Exception)(message))
     frappe_module.whitelist = lambda *args, **kwargs: (lambda fn: fn)
     frappe_module.log_error = lambda *args, **kwargs: None
     frappe_module.get_cached_value = lambda *args, **kwargs: None
@@ -110,6 +111,8 @@ def _install_framework_stubs():
         {"args": args, "kwargs": kwargs}
     )
     frappe_module.session = types.SimpleNamespace(user="test@example.com")
+    frappe_module._roles = ["Accounts Manager"]
+    frappe_module.get_roles = lambda user=None: list(frappe_module._roles)
 
     frappe_exceptions.TimestampMismatchError = TimestampMismatchError
     enqueue_calls = []
@@ -134,6 +137,27 @@ def _install_dependency_stubs():
     sales_invoice_module = types.ModuleType("erpnext.accounts.doctype.sales_invoice.sales_invoice")
     sales_invoice_module.get_bank_cash_account = lambda *args, **kwargs: None
     sys.modules["erpnext.accounts.doctype.sales_invoice.sales_invoice"] = sales_invoice_module
+
+    accounts_utils_module = types.ModuleType("erpnext.accounts.utils")
+    accounts_utils_module.get_fiscal_year = lambda *args, **kwargs: (("2026",),)
+    sys.modules["erpnext.accounts.utils"] = accounts_utils_module
+
+    accounting_period_module = types.ModuleType(
+        "erpnext.accounts.doctype.accounting_period.accounting_period"
+    )
+    accounting_period_module.validate_accounting_period_on_doc_save = lambda *args, **kwargs: None
+    sys.modules[
+        "erpnext.accounts.doctype.accounting_period.accounting_period"
+    ] = accounting_period_module
+
+    general_ledger_module = types.ModuleType("erpnext.accounts.general_ledger")
+    general_ledger_module.check_freezing_date = lambda *args, **kwargs: None
+    general_ledger_module.validate_against_pcv = lambda *args, **kwargs: None
+    sys.modules["erpnext.accounts.general_ledger"] = general_ledger_module
+
+    invoice_hooks_module = types.ModuleType("posawesome.posawesome.api.invoice")
+    invoice_hooks_module.validate_shift = lambda *args, **kwargs: None
+    sys.modules["posawesome.posawesome.api.invoice"] = invoice_hooks_module
 
     processing_utils = types.ModuleType("posawesome.posawesome.api.invoice_processing.utils")
     processing_utils._get_return_validity_settings = lambda *_args, **_kwargs: (False, 0)
@@ -211,6 +235,7 @@ class TestUpdateInvoiceReturnPayments(unittest.TestCase):
     def setUp(self):
         self.enqueue_calls.clear()
         self.frappe._publish_realtime_calls.clear()
+        self.frappe._roles = ["Accounts Manager"]
 
     def test_return_invoice_derives_missing_base_amount_from_amount(self):
         invoice_doc = FakeDoc(
@@ -1214,8 +1239,225 @@ class TestInvoiceIdempotency(unittest.TestCase):
     def setUp(self):
         self.enqueue_calls.clear()
         self.frappe._publish_realtime_calls.clear()
+        self.frappe._roles = ["Accounts Manager"]
         self.creation.frappe.db.has_column = lambda doctype, fieldname: True
         self.creation._process_post_submit_payments = type(self).original_process_post_submit_payments
+        sys.modules["posawesome.posawesome.api.invoice"].validate_shift = lambda *args, **kwargs: None
+        sys.modules["erpnext.accounts.utils"].get_fiscal_year = lambda *args, **kwargs: (("2026",),)
+        sys.modules[
+            "erpnext.accounts.doctype.accounting_period.accounting_period"
+        ].validate_accounting_period_on_doc_save = lambda *args, **kwargs: None
+
+    def _setup_invoice_repair_case(self, request_data=None, payment_context=None):
+        ledger_doc = FakeDoc(
+            doctype="POS Invoice Submission Ledger",
+            name="ledger-repair-secure-001",
+            ledger_key="ledger-repair-secure-001",
+            client_request_id="ledger-repair-secure-001",
+            company="Test Company",
+            pos_profile="Main POS",
+            document_type="Sales Invoice",
+            invoice_name="ACC-SINV-REPAIR-SECURE-0001",
+            state="SUBMITTED",
+            request_data=json.dumps(request_data or {}),
+            payment_context=json.dumps(payment_context or {}),
+        )
+        ledger_doc.save = lambda ignore_permissions=False: ledger_doc
+        invoice_doc = FakeDoc(
+            doctype="Sales Invoice",
+            name="ACC-SINV-REPAIR-SECURE-0001",
+            docstatus=1,
+            pos_profile="Main POS",
+            company="Test Company",
+            posting_date="2026-03-21",
+            customer="CUST-0001",
+            posa_pos_opening_shift="POS-OPEN-0001",
+            is_pos=1,
+            payments=[],
+            rounded_total=100,
+            grand_total=100,
+            loyalty_amount=0,
+            write_off_amount=0,
+        )
+
+        self.creation.frappe.db.get_value = lambda doctype, *args, **kwargs: (
+            ledger_doc.name if doctype == "POS Invoice Submission Ledger" else None
+        )
+        self.creation.frappe.db.exists = (
+            lambda doctype, name: doctype == invoice_doc.doctype and name == invoice_doc.name
+        )
+        self.creation.frappe.get_doc = lambda doctype, name: (
+            ledger_doc if doctype == "POS Invoice Submission Ledger" else invoice_doc
+        )
+        return ledger_doc, invoice_doc
+
+    def test_repair_invoice_submission_rejects_unauthorized_user(self):
+        self._setup_invoice_repair_case()
+        self.frappe._roles = ["POS User"]
+
+        with self.assertRaises(self.frappe.PermissionError):
+            self.creation.repair_invoice_submission(
+                "ledger-repair-secure-001",
+                "Test Company",
+                "Main POS",
+            )
+
+    def test_repair_invoice_submission_allows_repair_roles(self):
+        for role in ("Accounts Manager", "System Manager", "POS Supervisor"):
+            with self.subTest(role=role):
+                self._setup_invoice_repair_case()
+                self.frappe._roles = [role]
+                self.creation._process_post_submit_payments = lambda *args, **kwargs: None
+
+                result = self.creation.repair_invoice_submission(
+                    "ledger-repair-secure-001",
+                    "Test Company",
+                    "Main POS",
+                )
+
+                self.assertTrue(result["repaired"])
+
+    def test_repair_invoice_submission_rejects_closed_shift(self):
+        self._setup_invoice_repair_case(
+            request_data={"paid_change": 10},
+            payment_context={"payments": [], "is_payment_entry": 0, "total_cash": 0},
+        )
+        sys.modules["posawesome.posawesome.api.invoice"].validate_shift = (
+            lambda doc: (_ for _ in ()).throw(Exception("shift closed"))
+        )
+
+        with self.assertRaisesRegex(Exception, "shift closed"):
+            self.creation.repair_invoice_submission(
+                "ledger-repair-secure-001",
+                "Test Company",
+                "Main POS",
+            )
+
+    def test_repair_invoice_submission_rejects_closed_accounting_period(self):
+        self._setup_invoice_repair_case(
+            request_data={"paid_change": 10},
+            payment_context={"payments": [], "is_payment_entry": 0, "total_cash": 0},
+        )
+        sys.modules[
+            "erpnext.accounts.doctype.accounting_period.accounting_period"
+        ].validate_accounting_period_on_doc_save = (
+            lambda doc: (_ for _ in ()).throw(Exception("accounting period closed"))
+        )
+
+        with self.assertRaisesRegex(Exception, "accounting period closed"):
+            self.creation.repair_invoice_submission(
+                "ledger-repair-secure-001",
+                "Test Company",
+                "Main POS",
+            )
+
+    def test_repair_invoice_submission_checks_journal_entry_accounting_period(self):
+        self._setup_invoice_repair_case(
+            request_data={
+                "redeemed_customer_credit": 10,
+                "customer_credit_dict": [
+                    {
+                        "type": "Invoice",
+                        "credit_origin": "ACC-SINV-CREDIT-0001",
+                        "credit_to_redeem": 10,
+                    }
+                ],
+            },
+            payment_context={"payments": [], "is_payment_entry": 0, "total_cash": 90},
+        )
+
+        def validate_accounting_period(doc):
+            if doc.doctype == "Journal Entry":
+                raise Exception("journal entry period closed")
+
+        sys.modules[
+            "erpnext.accounts.doctype.accounting_period.accounting_period"
+        ].validate_accounting_period_on_doc_save = validate_accounting_period
+
+        with self.assertRaisesRegex(Exception, "journal entry period closed"):
+            self.creation.repair_invoice_submission(
+                "ledger-repair-secure-001",
+                "Test Company",
+                "Main POS",
+            )
+
+    def test_repair_invoice_submission_rejects_inactive_fiscal_year(self):
+        self._setup_invoice_repair_case(
+            request_data={"paid_change": 10},
+            payment_context={"payments": [], "is_payment_entry": 0, "total_cash": 0},
+        )
+        sys.modules["erpnext.accounts.utils"].get_fiscal_year = (
+            lambda *args, **kwargs: (_ for _ in ()).throw(Exception("fiscal year closed"))
+        )
+
+        with self.assertRaisesRegex(Exception, "fiscal year closed"):
+            self.creation.repair_invoice_submission(
+                "ledger-repair-secure-001",
+                "Test Company",
+                "Main POS",
+            )
+
+    def test_repair_invoice_submission_rejects_stale_payment_context(self):
+        _ledger_doc, invoice_doc = self._setup_invoice_repair_case(
+            request_data={"paid_change": 10},
+            payment_context={
+                "payments": [
+                    {
+                        "mode_of_payment": "Cash",
+                        "account": "Cash - TC",
+                        "amount": 50,
+                    }
+                ],
+                "is_payment_entry": 0,
+                "total_cash": 0,
+            },
+        )
+        invoice_doc.payments = []
+
+        with self.assertRaisesRegex(Exception, "does not match the current invoice"):
+            self.creation.repair_invoice_submission(
+                "ledger-repair-secure-001",
+                "Test Company",
+                "Main POS",
+            )
+
+    def test_repair_invoice_submission_validates_before_replay(self):
+        self._setup_invoice_repair_case(
+            request_data={"paid_change": 10},
+            payment_context={"payments": [], "is_payment_entry": 0, "total_cash": 0},
+        )
+        calls = []
+        sys.modules["posawesome.posawesome.api.invoice"].validate_shift = (
+            lambda doc: calls.append("shift")
+        )
+        sys.modules["erpnext.accounts.utils"].get_fiscal_year = (
+            lambda *args, **kwargs: calls.append("fiscal_year") or (("2026",),)
+        )
+        sys.modules[
+            "erpnext.accounts.doctype.accounting_period.accounting_period"
+        ].validate_accounting_period_on_doc_save = (
+            lambda doc: calls.append(f"accounting_period:{doc.doctype}")
+        )
+        self.creation._process_post_submit_payments = (
+            lambda *args, **kwargs: calls.append("payments")
+        )
+
+        result = self.creation.repair_invoice_submission(
+            "ledger-repair-secure-001",
+            "Test Company",
+            "Main POS",
+        )
+
+        self.assertEqual(
+            calls,
+            [
+                "shift",
+                "fiscal_year",
+                "accounting_period:Payment Entry",
+                "payments",
+            ],
+        )
+        self.assertTrue(result["repaired"])
 
     def test_submit_invoice_returns_existing_submitted_doc_for_same_client_request_id(self):
         existing_doc = FakeDoc(

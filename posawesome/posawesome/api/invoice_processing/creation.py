@@ -50,6 +50,11 @@ STATE_SUBMITTED = "SUBMITTED"
 STATE_POST_SUBMIT_DONE = "POST_SUBMIT_DONE"
 STATE_FAILED = "FAILED"
 FINAL_LEDGER_STATES = {STATE_SUBMITTED, STATE_POST_SUBMIT_DONE}
+INVOICE_REPAIR_ROLES = {
+    "System Manager",
+    "Accounts Manager",
+    "POS Supervisor",
+}
 
 
 def _json_dumps(value):
@@ -68,6 +73,125 @@ def _json_loads(value):
         return json.loads(value)
     except Exception:
         return {}
+
+
+def _require_invoice_repair_permission():
+    user = getattr(getattr(frappe, "session", None), "user", None)
+    user_roles = set(frappe.get_roles(user) or [])
+    if not user_roles.intersection(INVOICE_REPAIR_ROLES):
+        frappe.throw(
+            _("You are not permitted to repair invoice submissions."),
+            frappe.PermissionError,
+        )
+
+
+def _payment_row_signature(row):
+    return (
+        str(row.get("mode_of_payment") or "").strip(),
+        str(row.get("account") or "").strip(),
+        flt(row.get("amount")),
+    )
+
+
+def _validate_invoice_repair_context(invoice_doc, ledger_doc, context, data):
+    if invoice_doc.doctype != ledger_doc.get("document_type"):
+        frappe.throw(_("Invoice type does not match the submission ledger."))
+    if invoice_doc.company != ledger_doc.get("company"):
+        frappe.throw(_("Invoice company does not match the submission ledger."))
+    if invoice_doc.pos_profile != ledger_doc.get("pos_profile"):
+        frappe.throw(_("Invoice POS Profile does not match the submission ledger."))
+
+    for fieldname, label in (
+        ("company", _("company")),
+        ("customer", _("customer")),
+        ("pos_profile", _("POS Profile")),
+    ):
+        request_value = data.get(fieldname)
+        if request_value and request_value != invoice_doc.get(fieldname):
+            frappe.throw(
+                _("Repair request {0} does not match the current invoice.").format(label)
+            )
+
+    if not _has_post_submit_payment_work(data):
+        return
+
+    from erpnext.accounts.doctype.accounting_period.accounting_period import (
+        validate_accounting_period_on_doc_save,
+    )
+    from erpnext.accounts.utils import get_fiscal_year
+    from posawesome.posawesome.api.invoice import validate_shift
+
+    validate_shift(invoice_doc)
+    accounting_documents = set()
+    customer_credit_rows = data.get("customer_credit_dict") or []
+    if flt(data.get("redeemed_customer_credit")):
+        if any(
+            row.get("type") == "Invoice" and flt(row.get("credit_to_redeem")) > 0
+            for row in customer_credit_rows
+        ):
+            accounting_documents.add(("Journal Entry", nowdate()))
+        if any(
+            row.get("type") == "Advance" and flt(row.get("credit_to_redeem")) > 0
+            for row in customer_credit_rows
+        ):
+            accounting_documents.add(("Payment Entry", nowdate()))
+    if flt(data.get("paid_change")) > 0 or flt(data.get("credit_change")) > 0:
+        accounting_documents.add(("Payment Entry", invoice_doc.posting_date))
+
+    for accounting_doctype, accounting_date in accounting_documents:
+        get_fiscal_year(accounting_date, company=invoice_doc.company)
+        validate_accounting_period_on_doc_save(
+            frappe._dict(
+                {
+                    "doctype": accounting_doctype,
+                    "company": invoice_doc.company,
+                    "posting_date": accounting_date,
+                }
+            )
+        )
+
+    stored_payments = context.get("payments") or []
+    if not isinstance(stored_payments, list):
+        frappe.throw(_("Invalid payment context in the submission ledger."))
+
+    current_payments = [
+        row
+        for row in (invoice_doc.get("payments") or [])
+        if str(row.get("mode_of_payment") or "").strip() != "Gift Card"
+    ]
+    if sorted(_payment_row_signature(row) for row in stored_payments) != sorted(
+        _payment_row_signature(row) for row in current_payments
+    ):
+        frappe.throw(_("Payment context does not match the current invoice."))
+
+    cash_account = context.get("cash_account") or {}
+    if cash_account and not isinstance(cash_account, dict):
+        frappe.throw(_("Invalid cash account context in the submission ledger."))
+    cash_account_name = cash_account.get("account") if cash_account else None
+    if cash_account_name:
+        account_company = frappe.db.get_value("Account", cash_account_name, "company")
+        if account_company != invoice_doc.company:
+            frappe.throw(_("Cash account does not belong to the invoice company."))
+
+    expected_is_payment_entry = any(
+        row.get("type") == "Advance" and flt(row.get("credit_to_redeem")) > 0
+        for row in customer_credit_rows
+    )
+    if bool(cint(context.get("is_payment_entry"))) != expected_is_payment_entry:
+        frappe.throw(_("Payment Entry context does not match the repair request."))
+
+    expected_total_cash = 0
+    if flt(data.get("redeemed_customer_credit")):
+        invoice_total = flt(invoice_doc.get("rounded_total") or invoice_doc.get("grand_total"))
+        settled_without_cash = (
+            flt(data.get("redeemed_customer_credit"))
+            + sum(flt(row.get("amount")) for row in (data.get("gift_card_redemptions") or []))
+            + flt(invoice_doc.get("loyalty_amount"))
+            + flt(invoice_doc.get("write_off_amount"))
+        )
+        expected_total_cash = max(invoice_total - settled_without_cash, 0)
+    if abs(flt(context.get("total_cash")) - expected_total_cash) > 0.01:
+        frappe.throw(_("Cash payment context does not match the current invoice."))
 
 
 def _submission_ledger_key(client_request_id, company, pos_profile, document_type):
@@ -554,7 +678,7 @@ def _sanitize_delivery_dates(payload):
             item["posa_delivery_date"] = _safe_date_string(item.get("posa_delivery_date"))
 
 
-def _apply_manual_posting_controls(payload):
+def _apply_manual_posting_controls(payload, document_type="Sales Invoice"):
     if not isinstance(payload, dict):
         return
 
@@ -562,12 +686,50 @@ def _apply_manual_posting_controls(payload):
     if posting_date:
         payload["posting_date"] = posting_date
 
-    if cint(payload.get("set_posting_time")):
+    today = _safe_date_string(nowdate())
+    if posting_date and today and posting_date != today:
+        pos_profile = payload.get("pos_profile")
+        allow_change_posting_date = (
+            frappe.get_cached_value(
+                "POS Profile",
+                pos_profile,
+                "posa_allow_change_posting_date",
+            )
+            if pos_profile
+            else 0
+        )
+        if not cint(allow_change_posting_date):
+            frappe.throw(
+                _("Changing posting date is not allowed for this POS Profile."),
+                frappe.PermissionError,
+            )
+
+        company = payload.get("company")
+        if not company:
+            frappe.throw(_("Company is required to validate the posting date."))
+
+        from erpnext.accounts.doctype.accounting_period.accounting_period import (
+            validate_accounting_period_on_doc_save,
+        )
+        from erpnext.accounts.general_ledger import check_freezing_date, validate_against_pcv
+        from erpnext.accounts.utils import get_fiscal_year
+
+        get_fiscal_year(posting_date, company=company)
+        validate_accounting_period_on_doc_save(
+            frappe._dict(
+                {
+                    "doctype": document_type,
+                    "company": company,
+                    "posting_date": posting_date,
+                }
+            )
+        )
+        check_freezing_date(posting_date)
+        validate_against_pcv(0, posting_date, company)
         payload["set_posting_time"] = 1
         return
 
-    today = _safe_date_string(nowdate())
-    if posting_date and today and posting_date != today:
+    if cint(payload.get("set_posting_time")):
         payload["set_posting_time"] = 1
 
 
@@ -794,7 +956,6 @@ def update_invoice(data):
     if not doctype_supports_client_request_id(data.get("doctype") or "Sales Invoice"):
         strip_invoice_client_request_id(data)
     _sanitize_delivery_dates(data)
-    _apply_manual_posting_controls(data)
     _strip_client_freebies_from_payload(data)
     # Determine doctype based on POS Profile setting
     pos_profile = data.get("pos_profile")
@@ -803,6 +964,7 @@ def update_invoice(data):
         "POS Profile", pos_profile, "create_pos_invoice_instead_of_sales_invoice"
     ):
         doctype = "POS Invoice"
+    _apply_manual_posting_controls(data, doctype)
 
     # Ensure the document type is set for new invoices to prevent validation errors
     data.setdefault("doctype", doctype)
@@ -1018,7 +1180,6 @@ def submit_invoice(invoice, data, submit_in_background=False):
     invoice = json.loads(invoice)
     client_request_id = extract_invoice_client_request_id(invoice, data)
     _sanitize_delivery_dates(invoice)
-    _apply_manual_posting_controls(invoice)
     submit_in_background = cint(submit_in_background)
     _strip_client_freebies_from_payload(invoice)
     pos_profile = invoice.get("pos_profile")
@@ -1027,6 +1188,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
         "POS Profile", pos_profile, "create_pos_invoice_instead_of_sales_invoice"
     ):
         doctype = "POS Invoice"
+    _apply_manual_posting_controls(invoice, doctype)
 
     if not doctype_supports_client_request_id(doctype):
         strip_invoice_client_request_id(invoice)
@@ -1377,6 +1539,8 @@ def submit_in_background_job(kwargs):
 def repair_invoice_submission(client_request_id, company, pos_profile, document_type="Sales Invoice"):
     """Reconcile an incomplete durable submission ledger row without creating a new invoice."""
 
+    _require_invoice_repair_permission()
+
     client_request_id = (client_request_id or "").strip()
     if not client_request_id:
         frappe.throw(_("client_request_id is required"))
@@ -1412,6 +1576,7 @@ def repair_invoice_submission(client_request_id, company, pos_profile, document_
     if cint(invoice_doc.get("docstatus")) == 1:
         context = _json_loads(ledger_doc.get("payment_context"))
         data = _json_loads(ledger_doc.get("request_data"))
+        _validate_invoice_repair_context(invoice_doc, ledger_doc, context, data)
         _update_submission_ledger(ledger_doc, STATE_SUBMITTED, invoice_name=invoice_doc.name)
         _process_post_submit_payments(
             invoice_doc,
