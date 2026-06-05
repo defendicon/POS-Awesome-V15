@@ -996,6 +996,18 @@ class TestManualPostingDatePreservation(unittest.TestCase):
     def setUp(self):
         self.enqueue_calls.clear()
         self.frappe._publish_realtime_calls.clear()
+        sys.modules["erpnext.accounts.utils"].get_fiscal_year = (
+            lambda *args, **kwargs: (("2026",),)
+        )
+        sys.modules[
+            "erpnext.accounts.doctype.accounting_period.accounting_period"
+        ].validate_accounting_period_on_doc_save = lambda *args, **kwargs: None
+        sys.modules["erpnext.accounts.general_ledger"].check_freezing_date = (
+            lambda *args, **kwargs: None
+        )
+        sys.modules["erpnext.accounts.general_ledger"].validate_against_pcv = (
+            lambda *args, **kwargs: None
+        )
 
     def _build_invoice_doc(self, **overrides):
         base = {
@@ -1088,6 +1100,137 @@ class TestManualPostingDatePreservation(unittest.TestCase):
         self.assertIn("SINV-0001", str(ctx.exception))
         self.assertIn("Main POS", str(ctx.exception))
 
+    def test_manual_posting_controls_leave_default_date_behavior_unchanged(self):
+        payload = {
+            "pos_profile": "Main POS",
+            "company": "Test Company",
+        }
+
+        self.creation._apply_manual_posting_controls(payload)
+
+        self.assertNotIn("posting_date", payload)
+        self.assertNotIn("set_posting_time", payload)
+
+    def test_manual_posting_controls_allow_current_date_without_profile_permission(self):
+        payload = {
+            "pos_profile": "Main POS",
+            "company": "Test Company",
+            "posting_date": "2026-03-21",
+        }
+        self.creation.frappe.get_cached_value = lambda *args, **kwargs: 0
+
+        self.creation._apply_manual_posting_controls(payload)
+
+        self.assertEqual(payload["posting_date"], "2026-03-21")
+        self.assertNotIn("set_posting_time", payload)
+
+    def test_manual_posting_controls_reject_backdate_without_profile_permission(self):
+        payload = {
+            "pos_profile": "Main POS",
+            "company": "Test Company",
+            "posting_date": "2026-03-19",
+        }
+        self.creation.frappe.get_cached_value = lambda *args, **kwargs: 0
+
+        with self.assertRaisesRegex(
+            self.frappe.PermissionError,
+            "Changing posting date is not allowed",
+        ):
+            self.creation._apply_manual_posting_controls(payload)
+
+    def test_manual_posting_controls_validate_allowed_backdate(self):
+        calls = []
+        payload = {
+            "pos_profile": "Main POS",
+            "company": "Test Company",
+            "posting_date": "2026-03-19",
+        }
+        self.creation.frappe.get_cached_value = lambda *args, **kwargs: 1
+        sys.modules["erpnext.accounts.utils"].get_fiscal_year = (
+            lambda posting_date, company=None: calls.append(
+                ("fiscal_year", posting_date, company)
+            )
+            or (("2026",),)
+        )
+        sys.modules[
+            "erpnext.accounts.doctype.accounting_period.accounting_period"
+        ].validate_accounting_period_on_doc_save = lambda doc: calls.append(
+            ("accounting_period", doc.doctype, doc.company, doc.posting_date)
+        )
+        sys.modules["erpnext.accounts.general_ledger"].check_freezing_date = (
+            lambda posting_date: calls.append(("freezing_date", posting_date))
+        )
+        sys.modules["erpnext.accounts.general_ledger"].validate_against_pcv = (
+            lambda amount, posting_date, company: calls.append(
+                ("period_closing", amount, posting_date, company)
+            )
+        )
+
+        self.creation._apply_manual_posting_controls(payload, "POS Invoice")
+
+        self.assertEqual(payload["set_posting_time"], 1)
+        self.assertEqual(
+            calls,
+            [
+                ("fiscal_year", "2026-03-19", "Test Company"),
+                ("accounting_period", "POS Invoice", "Test Company", "2026-03-19"),
+                ("freezing_date", "2026-03-19"),
+                ("period_closing", 0, "2026-03-19", "Test Company"),
+            ],
+        )
+
+    def test_manual_posting_controls_reject_closed_accounting_period(self):
+        payload = {
+            "pos_profile": "Main POS",
+            "company": "Test Company",
+            "posting_date": "2026-03-19",
+        }
+        self.creation.frappe.get_cached_value = lambda *args, **kwargs: 1
+        sys.modules[
+            "erpnext.accounts.doctype.accounting_period.accounting_period"
+        ].validate_accounting_period_on_doc_save = lambda doc: (
+            (_ for _ in ()).throw(Exception("accounting period closed"))
+        )
+
+        with self.assertRaisesRegex(Exception, "accounting period closed"):
+            self.creation._apply_manual_posting_controls(payload)
+
+    def test_manual_posting_controls_reject_frozen_posting_date(self):
+        payload = {
+            "pos_profile": "Main POS",
+            "company": "Test Company",
+            "posting_date": "2026-03-19",
+        }
+        self.creation.frappe.get_cached_value = lambda *args, **kwargs: 1
+        sys.modules["erpnext.accounts.general_ledger"].check_freezing_date = (
+            lambda posting_date: (_ for _ in ()).throw(Exception("accounts frozen"))
+        )
+
+        with self.assertRaisesRegex(Exception, "accounts frozen"):
+            self.creation._apply_manual_posting_controls(payload)
+
+    def test_update_invoice_rejects_backdated_payload_when_profile_disallows(self):
+        self.creation.frappe.get_cached_value = lambda *args, **kwargs: 0
+
+        with self.assertRaisesRegex(
+            self.frappe.PermissionError,
+            "Changing posting date is not allowed",
+        ):
+            self.creation.update_invoice(
+                json.dumps(
+                    {
+                        "doctype": "Sales Invoice",
+                        "pos_profile": "Main POS",
+                        "company": "Test Company",
+                        "currency": "USD",
+                        "customer": "CUST-0001",
+                        "posting_date": "2026-03-19",
+                        "items": [],
+                        "payments": [],
+                    }
+                )
+            )
+
     def test_update_invoice_marks_backdated_payload_for_manual_posting(self):
         captured_payloads = []
         invoice_doc = self._build_invoice_doc()
@@ -1101,7 +1244,7 @@ class TestManualPostingDatePreservation(unittest.TestCase):
             return invoice_doc
 
         self.creation.frappe.get_doc = fake_get_doc
-        self.creation.frappe.get_cached_value = lambda *args, **kwargs: 0
+        self.creation.frappe.get_cached_value = lambda *args, **kwargs: 1
         self.creation._save_draft_with_latest_timestamp = lambda doc: doc
 
         self.creation.update_invoice(
@@ -1132,6 +1275,7 @@ class TestManualPostingDatePreservation(unittest.TestCase):
         self.creation.frappe.db.exists = lambda doctype, name: name == "ACC-SINV-0001"
         self.creation.frappe.db.get_value = lambda *args, **kwargs: 0
         self.creation.frappe.get_value = lambda *args, **kwargs: 0
+        self.creation.frappe.get_cached_value = lambda *args, **kwargs: 1
         self.creation.frappe.get_doc = lambda *args: invoice_doc
         self.creation._save_draft_with_latest_timestamp = lambda doc: doc
         self.creation._apply_invoice_gift_card_settlement = lambda *args, **kwargs: None
