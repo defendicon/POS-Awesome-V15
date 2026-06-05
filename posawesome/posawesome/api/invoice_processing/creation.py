@@ -761,6 +761,31 @@ def _normalize_return_payment_rows(invoice_doc, conversion_rate=1):
     invoice_doc.base_paid_amount = flt(sum(p.base_amount for p in invoice_doc.payments or []))
 
 
+def _assert_return_payment_rows_normalized(invoice_doc):
+    if not invoice_doc.is_return:
+        return
+
+    for payment in invoice_doc.payments or []:
+        if flt(payment.amount) > 0 or flt(payment.base_amount) > 0:
+            frappe.throw(_("Return invoice payment rows must remain negative after submission."))
+
+    paid_amount = flt(
+        sum(payment.amount for payment in invoice_doc.payments or []),
+        invoice_doc.precision("paid_amount"),
+    )
+    base_paid_amount = flt(
+        sum(payment.base_amount for payment in invoice_doc.payments or []),
+        invoice_doc.precision("base_paid_amount"),
+    )
+    if paid_amount != flt(invoice_doc.paid_amount, invoice_doc.precision("paid_amount")):
+        frappe.throw(_("Return invoice paid amount does not match its payment rows after submission."))
+    if base_paid_amount != flt(
+        invoice_doc.base_paid_amount,
+        invoice_doc.precision("base_paid_amount"),
+    ):
+        frappe.throw(_("Return invoice base paid amount does not match its payment rows after submission."))
+
+
 @frappe.whitelist()
 def update_invoice(data):
     currency_cache = {}
@@ -1214,7 +1239,9 @@ def submit_invoice(invoice, data, submit_in_background=False):
         )
     else:
         with temporarily_ignore_account_permission():
+            _normalize_return_payment_rows(invoice_doc, invoice_doc.get("conversion_rate") or 1)
             invoice_doc.submit()
+        _assert_return_payment_rows_normalized(invoice_doc)
         if ledger_doc:
             _update_submission_ledger(
                 ledger_doc,
@@ -1294,10 +1321,11 @@ def submit_in_background_job(kwargs):
 
         with temporarily_ignore_account_permission():
             invoice_doc = _save_draft_with_latest_timestamp(invoice_doc)
-        _normalize_return_payment_rows(invoice_doc, invoice_doc.get("conversion_rate") or 1)
 
         with temporarily_ignore_account_permission():
+            _normalize_return_payment_rows(invoice_doc, invoice_doc.get("conversion_rate") or 1)
             invoice_doc.submit()
+        _assert_return_payment_rows_normalized(invoice_doc)
         if ledger_doc:
             _update_submission_ledger(
                 ledger_doc,

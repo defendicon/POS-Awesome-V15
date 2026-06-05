@@ -17,6 +17,23 @@ from posawesome.posawesome.api.account_permissions import temporarily_ignore_acc
 from posawesome.posawesome.api.utilities import ensure_child_doctype
 
 
+OVERPAYMENT_REPAIR_ROLES = {
+    "System Manager",
+    "Accounts Manager",
+    "POS Supervisor",
+}
+
+
+def _require_overpayment_repair_permission():
+    user = getattr(getattr(frappe, "session", None), "user", None)
+    user_roles = set(frappe.get_roles(user) or [])
+    if not user_roles.intersection(OVERPAYMENT_REPAIR_ROLES):
+        frappe.throw(
+            _("You are not permitted to run overpayment/change allocation repair."),
+            frappe.PermissionError,
+        )
+
+
 def get_posawesome_credit_redeem_remark(invoice_name):
     return _("POS Awesome credit redemption for Sales Invoice {0}").format(invoice_name)
 
@@ -555,6 +572,8 @@ def repair_overpayment_change_allocations(
 
     Ambiguous rows are reported and skipped instead of guessed.
     """
+
+    _require_overpayment_repair_permission()
 
     invoice_names = set(_coerce_text_list(invoice_names))
     invoice_doctype = doctype if doctype in {"Sales Invoice", "POS Invoice"} else "Sales Invoice"

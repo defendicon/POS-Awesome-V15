@@ -142,6 +142,12 @@ def _install_dependency_stubs():
     processing_utils._build_invoice_remarks = lambda *_args, **_kwargs: ""
     processing_utils._set_return_valid_upto = lambda *_args, **_kwargs: None
     processing_utils.get_latest_rate = lambda *_args, **_kwargs: (1, "2026-03-21")
+    processing_utils.resolve_erpnext_currency_rates = lambda *_args, **_kwargs: {
+        "conversion_rate": 1,
+        "plc_conversion_rate": 1,
+        "price_list_currency": "USD",
+        "exchange_rate_date": "2026-03-21",
+    }
     sys.modules["posawesome.posawesome.api.invoice_processing.utils"] = processing_utils
 
     stock_module = types.ModuleType("posawesome.posawesome.api.invoice_processing.stock")
@@ -230,6 +236,11 @@ class TestUpdateInvoiceReturnPayments(unittest.TestCase):
             conversion_rate=1,
             plc_conversion_rate=1,
             price_list_currency="USD",
+            total=0,
+            net_total=0,
+            grand_total=0,
+            rounded_total=0,
+            discount_amount=0,
         )
 
         self.creation.frappe.get_doc = lambda data: invoice_doc
@@ -280,6 +291,11 @@ class TestUpdateInvoiceReturnPayments(unittest.TestCase):
             conversion_rate=1,
             plc_conversion_rate=1,
             price_list_currency="USD",
+            total=0,
+            net_total=0,
+            grand_total=0,
+            rounded_total=0,
+            discount_amount=0,
         )
 
         self.creation.frappe.get_doc = lambda data: invoice_doc
@@ -313,6 +329,27 @@ class TestUpdateInvoiceReturnPayments(unittest.TestCase):
 
         self.assertEqual(amount, 12.34)
         self.assertEqual(base_amount, 24.68)
+
+    def test_return_payment_assertion_rejects_post_submit_sign_change(self):
+        invoice_doc = FakeDoc(
+            is_return=1,
+            payments=[FakeDoc(amount=125, base_amount=125)],
+            paid_amount=125,
+            base_paid_amount=125,
+        )
+
+        with self.assertRaisesRegex(Exception, "must remain negative"):
+            self.creation._assert_return_payment_rows_normalized(invoice_doc)
+
+    def test_return_payment_assertion_accepts_normalized_totals(self):
+        invoice_doc = FakeDoc(
+            is_return=1,
+            payments=[FakeDoc(amount=-125, base_amount=-250)],
+            paid_amount=-125,
+            base_paid_amount=-250,
+        )
+
+        self.creation._assert_return_payment_rows_normalized(invoice_doc)
 
 
 class TestStaleNamedInvoiceHandling(unittest.TestCase):
@@ -350,6 +387,7 @@ class TestStaleNamedInvoiceHandling(unittest.TestCase):
             "net_total": 0,
             "grand_total": 0,
             "rounded_total": 0,
+            "discount_amount": 0,
             "docstatus": 0,
         }
         base.update(overrides)
@@ -961,6 +999,7 @@ class TestManualPostingDatePreservation(unittest.TestCase):
             "net_total": 0,
             "grand_total": 0,
             "rounded_total": 0,
+            "discount_amount": 0,
             "docstatus": 0,
             "redeem_loyalty_points": 0,
             "loyalty_program": None,

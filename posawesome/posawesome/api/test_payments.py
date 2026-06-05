@@ -79,14 +79,21 @@ def _install_stubs():
     get_doc_responses = {}
     reconcile_calls = []
 
+    class FrappePermissionError(Exception):
+        pass
+
     frappe_utils.nowdate = lambda: "2026-03-26"
     frappe_utils.flt = lambda value, precision=None: round(float(value or 0), precision or 2)
 
     frappe_module._ = lambda text: text
     frappe_module._dict = lambda payload=None, **kwargs: FakeChildRow(dict(payload or {}, **kwargs))
-    frappe_module.throw = lambda message: (_ for _ in ()).throw(Exception(message))
+    frappe_module.PermissionError = FrappePermissionError
+    frappe_module.throw = lambda message, exc=None: (_ for _ in ()).throw((exc or Exception)(message))
     frappe_module.whitelist = lambda *args, **kwargs: (lambda fn: fn)
     frappe_module.flags = types.SimpleNamespace(ignore_account_permission=False)
+    frappe_module.session = types.SimpleNamespace(user="accounts@example.com")
+    frappe_module._roles = ["Accounts Manager"]
+    frappe_module.get_roles = lambda user=None: list(frappe_module._roles)
     frappe_module.get_value = lambda *args, **kwargs: "Main - CC"
     frappe_module.db = types.SimpleNamespace(
         get_value=lambda *args, **kwargs: None,
@@ -206,6 +213,26 @@ class TestRedeemingCustomerCredit(unittest.TestCase):
         self.sql_responses.clear()
         self.get_doc_responses.clear()
         self.reconcile_calls.clear()
+        self.payments_module.frappe._roles = ["Accounts Manager"]
+
+    def test_repair_overpayment_change_allocations_rejects_unauthorized_dry_run(self):
+        self.payments_module.frappe._roles = ["POS User"]
+
+        with self.assertRaises(self.payments_module.frappe.PermissionError):
+            self.payments_module.repair_overpayment_change_allocations(dry_run=1)
+
+    def test_repair_overpayment_change_allocations_rejects_unauthorized_write(self):
+        self.payments_module.frappe._roles = ["POS User"]
+
+        with self.assertRaises(self.payments_module.frappe.PermissionError):
+            self.payments_module.repair_overpayment_change_allocations(dry_run=0)
+
+    def test_repair_overpayment_change_allocations_allows_repair_roles(self):
+        for role in ("Accounts Manager", "System Manager", "POS Supervisor"):
+            with self.subTest(role=role):
+                self.payments_module.frappe._roles = [role]
+                result = self.payments_module.repair_overpayment_change_allocations(dry_run=1)
+                self.assertTrue(result["dry_run"])
 
     def test_advance_credit_overpayment_keeps_full_received_amount_and_allocates_only_due(self):
         invoice_doc = types.SimpleNamespace(
