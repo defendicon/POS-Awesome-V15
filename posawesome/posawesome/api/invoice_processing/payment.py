@@ -8,6 +8,7 @@ from frappe.utils import (
 )
 from erpnext.accounts.utils import reconcile_against_document
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
+from posawesome.posawesome.api.account_permissions import temporarily_ignore_account_permission
 from posawesome.posawesome.api.payment_processing.utils import get_party_account
 from posawesome.posawesome.api.payment_processing.utils import (
     get_bank_cash_account as get_bank_account_processing,
@@ -250,9 +251,9 @@ def _create_change_payment_entries(
             advance_payment_entry.reference_date = posting_date
 
         advance_payment_entry.flags.ignore_permissions = True
-        frappe.flags.ignore_account_permission = True
-        advance_payment_entry.save()
-        advance_payment_entry.submit()
+        with temporarily_ignore_account_permission():
+            advance_payment_entry.save()
+            advance_payment_entry.submit()
 
     if paid_change_amount > 0:
         source_receive_payment_entry = _get_matching_receive_payment_entry(paid_change_amount)
@@ -280,9 +281,9 @@ def _create_change_payment_entries(
         change_payment_entry.set_amounts()
 
         change_payment_entry.flags.ignore_permissions = True
-        frappe.flags.ignore_account_permission = True
-        change_payment_entry.save()
-        change_payment_entry.submit()
+        with temporarily_ignore_account_permission():
+            change_payment_entry.save()
+            change_payment_entry.submit()
 
         if source_receive_payment_entry:
             _reconcile_change_against_receive_payment_entry(

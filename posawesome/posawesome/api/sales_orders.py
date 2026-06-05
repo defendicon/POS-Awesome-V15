@@ -8,6 +8,7 @@ from erpnext.accounts.party import get_party_account
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from frappe.utils import getdate, nowdate
 
+from posawesome.posawesome.api.account_permissions import temporarily_ignore_account_permission
 from posawesome.posawesome.api.payment_entry import create_payment_entry
 
 
@@ -95,9 +96,9 @@ def update_sales_order(data):
         so_doc = frappe.get_doc(data)
 
     so_doc.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
     so_doc.docstatus = 0
-    so_doc.save()
+    with temporarily_ignore_account_permission():
+        so_doc.save()
     return so_doc
 
 
@@ -131,9 +132,9 @@ def _create_payment_entries(so_doc, payments):
         )
 
         pe.flags.ignore_permissions = True
-        frappe.flags.ignore_account_permission = True
-        pe.save()
-        pe.submit()
+        with temporarily_ignore_account_permission():
+            pe.save()
+            pe.submit()
 
 
 @frappe.whitelist()
@@ -150,9 +151,9 @@ def submit_sales_order(order):
     payments = order.get("payments")
 
     so_doc.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
-    so_doc.save()
-    so_doc.submit()
+    with temporarily_ignore_account_permission():
+        so_doc.save()
+        so_doc.submit()
 
     if payments:
         frappe.enqueue(

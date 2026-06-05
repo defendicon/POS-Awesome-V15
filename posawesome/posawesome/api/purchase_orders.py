@@ -8,7 +8,7 @@ from frappe import _
 from frappe.utils import cint, flt, nowdate, getdate
 from erpnext.accounts.party import get_party_account
 
-
+from posawesome.posawesome.api.account_permissions import temporarily_ignore_account_permission
 from . import utils as pos_utils
 
 
@@ -237,9 +237,9 @@ def _create_purchase_receipt(po_doc, payload, default_warehouse, transaction_dat
         frappe.throw(_("No items to receive. Please enter received quantities."))
 
     receipt.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
-    receipt.insert()
-    receipt.submit()
+    with temporarily_ignore_account_permission():
+        receipt.insert()
+        receipt.submit()
     return receipt.name
 
 
@@ -589,8 +589,9 @@ def _create_payment_entry(reference_doc, payments, company, transaction_date):
             )
 
         pe.flags.ignore_permissions = True
-        pe.insert()
-        pe.submit()
+        with temporarily_ignore_account_permission():
+            pe.insert()
+            pe.submit()
         created_payments.append(pe.name)
 
     return created_payments
@@ -709,8 +710,8 @@ def create_purchase_order(data):
         frappe.throw(_("Purchase order requires at least one item with quantity."))
 
     po_doc.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
-    po_doc.save()
+    with temporarily_ignore_account_permission():
+        po_doc.save()
 
     # Intentional partial persistence: keep the draft PO before submit/receipt/invoice/payment
     # work so the operator does not lose it if any downstream step fails.
@@ -718,7 +719,8 @@ def create_purchase_order(data):
 
     try:
         if cint(payload.get("submit", 1)):
-            po_doc.submit()
+            with temporarily_ignore_account_permission():
+                po_doc.submit()
 
         receipt_name = None
         receipt_doc = None
@@ -850,7 +852,7 @@ def _create_purchase_invoice(po_doc, payload, default_warehouse, transaction_dat
         frappe.throw(_("No items to invoice. Please ensure there are items on the Purchase Order."))
 
     invoice.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
-    invoice.insert()
-    invoice.submit()
+    with temporarily_ignore_account_permission():
+        invoice.insert()
+        invoice.submit()
     return invoice.name

@@ -3,6 +3,8 @@ import json
 import frappe
 from frappe.utils import getdate
 
+from posawesome.posawesome.api.account_permissions import temporarily_ignore_account_permission
+
 
 def _map_delivery_dates(data):
     """Ensure mandatory delivery_date fields are populated."""
@@ -125,9 +127,9 @@ def update_quotation(data):
         doc = frappe.get_doc(data)
 
     doc.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
     doc.docstatus = 0
-    doc.save()
+    with temporarily_ignore_account_permission():
+        doc.save()
     return doc
 
 
@@ -144,8 +146,8 @@ def submit_quotation(order):
         doc = frappe.get_doc(order)
 
     doc.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
-    doc.save()
-    doc.submit()
+    with temporarily_ignore_account_permission():
+        doc.save()
+        doc.submit()
 
     return {"name": doc.name, "status": doc.docstatus}

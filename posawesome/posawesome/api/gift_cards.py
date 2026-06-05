@@ -4,6 +4,7 @@ import frappe
 from erpnext.setup.utils import get_exchange_rate
 from frappe.utils import flt, nowdate
 
+from posawesome.posawesome.api.account_permissions import temporarily_ignore_account_permission
 from posawesome.posawesome.api.utilities import ensure_child_doctype
 
 from posawesome.posawesome.api.employees import (
@@ -181,11 +182,11 @@ def _create_gift_card_journal_entry(
     ensure_child_doctype(je_doc, "accounts", "Journal Entry Account")
     je_doc.flags.ignore_permissions = True
     je_doc.flags.ignore_exchange_rate = True
-    frappe.flags.ignore_account_permission = True
     je_doc.user_remark = remark
     je_doc.set_missing_values()
-    je_doc.save()
-    je_doc.submit()
+    with temporarily_ignore_account_permission():
+        je_doc.save()
+        je_doc.submit()
     return je_doc
 
 

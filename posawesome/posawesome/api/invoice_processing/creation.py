@@ -40,6 +40,8 @@ import hashlib
 from frappe.utils import money_in_words
 from frappe.utils.background_jobs import enqueue
 
+from posawesome.posawesome.api.account_permissions import temporarily_ignore_account_permission
+
 
 LEDGER_DOCTYPE = "POS Invoice Submission Ledger"
 STATE_RECEIVED = "RECEIVED"
@@ -402,7 +404,6 @@ def process_post_submit_payments_job(kwargs):
             return
 
         invoice_doc.flags.ignore_permissions = True
-        frappe.flags.ignore_account_permission = True
         _run_post_submit_payments(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
         if ledger_name:
             _update_submission_ledger_by_name(ledger_name, STATE_POST_SUBMIT_DONE)
@@ -974,9 +975,9 @@ def update_invoice(data):
     _normalize_return_payment_rows(invoice_doc, conversion_rate)
 
     invoice_doc.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
     invoice_doc.docstatus = 0
-    invoice_doc = _save_draft_with_latest_timestamp(invoice_doc)
+    with temporarily_ignore_account_permission():
+        invoice_doc = _save_draft_with_latest_timestamp(invoice_doc)
 
     # Return both the invoice doc and the updated data
     response = invoice_doc.as_dict()
@@ -1158,9 +1159,9 @@ def submit_invoice(invoice, data, submit_in_background=False):
     _apply_write_off_settings(invoice_doc, data)
 
     invoice_doc.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
     invoice_doc.posa_is_printed = 1
-    invoice_doc = _save_draft_with_latest_timestamp(invoice_doc)
+    with temporarily_ignore_account_permission():
+        invoice_doc = _save_draft_with_latest_timestamp(invoice_doc)
     _normalize_return_payment_rows(invoice_doc, invoice_doc.get("conversion_rate") or 1)
 
     if data.get("due_date"):
@@ -1212,7 +1213,8 @@ def submit_invoice(invoice, data, submit_in_background=False):
             },
         )
     else:
-        invoice_doc.submit()
+        with temporarily_ignore_account_permission():
+            invoice_doc.submit()
         if ledger_doc:
             _update_submission_ledger(
                 ledger_doc,
@@ -1275,7 +1277,6 @@ def submit_in_background_job(kwargs):
             return
 
         invoice_doc.flags.ignore_permissions = True
-        frappe.flags.ignore_account_permission = True
 
         # Re-run validations that may be impacted while queued (stock, credit limits)
         _validate_stock_on_invoice(invoice_doc)
@@ -1291,10 +1292,12 @@ def submit_in_background_job(kwargs):
         _apply_invoice_gift_card_settlement(invoice_doc, data)
         _normalize_return_payment_rows(invoice_doc, invoice_doc.get("conversion_rate") or 1)
 
-        invoice_doc = _save_draft_with_latest_timestamp(invoice_doc)
+        with temporarily_ignore_account_permission():
+            invoice_doc = _save_draft_with_latest_timestamp(invoice_doc)
         _normalize_return_payment_rows(invoice_doc, invoice_doc.get("conversion_rate") or 1)
 
-        invoice_doc.submit()
+        with temporarily_ignore_account_permission():
+            invoice_doc.submit()
         if ledger_doc:
             _update_submission_ledger(
                 ledger_doc,

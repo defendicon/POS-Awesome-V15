@@ -13,6 +13,7 @@ from erpnext.accounts.doctype.payment_request.payment_request import (
     get_dummy_message,
     get_existing_payment_request_amount,
 )
+from posawesome.posawesome.api.account_permissions import temporarily_ignore_account_permission
 from posawesome.posawesome.api.utilities import ensure_child_doctype
 
 
@@ -274,12 +275,12 @@ def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, c
                 ensure_child_doctype(jv_doc, "accounts", "Journal Entry Account")
 
                 jv_doc.flags.ignore_permissions = True
-                frappe.flags.ignore_account_permission = True
                 jv_doc.user_remark = get_posawesome_credit_redeem_remark(invoice_doc.name)
                 jv_doc.set_missing_values()
                 try:
-                    jv_doc.save()
-                    jv_doc.submit()
+                    with temporarily_ignore_account_permission():
+                        jv_doc.save()
+                        jv_doc.submit()
                 except Exception as e:
                     frappe.log_error(frappe.get_traceback(), "POSAwesome JV Error")
                     frappe.throw(_("Unable to create Journal Entry for customer credit."))
@@ -324,9 +325,9 @@ def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, c
                 ref_row.update(payment_reference)
                 ensure_child_doctype(payment_entry_doc, "references", "Payment Entry Reference")
             payment_entry_doc.flags.ignore_permissions = True
-            frappe.flags.ignore_account_permission = True
-            payment_entry_doc.save()
-            payment_entry_doc.submit()
+            with temporarily_ignore_account_permission():
+                payment_entry_doc.save()
+                payment_entry_doc.submit()
             created_receive_payment_entries.append(
                 {
                     "name": payment_entry_doc.name,

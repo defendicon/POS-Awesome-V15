@@ -3,6 +3,7 @@ import pathlib
 import sys
 import types
 import unittest
+from contextlib import contextmanager
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
 
@@ -69,6 +70,7 @@ def _install_stubs():
     accounts_party = types.ModuleType("erpnext.accounts.party")
     accounts_utils = types.ModuleType("erpnext.accounts.utils")
     payment_request_module = types.ModuleType("erpnext.accounts.doctype.payment_request.payment_request")
+    account_permissions_module = types.ModuleType("posawesome.posawesome.api.account_permissions")
     utilities_module = types.ModuleType("posawesome.posawesome.api.utilities")
 
     created_docs = []
@@ -150,6 +152,19 @@ def _install_stubs():
     accounts_party.get_party_bank_account = lambda *args, **kwargs: None
     payment_request_module.get_dummy_message = lambda *_args, **_kwargs: ""
     payment_request_module.get_existing_payment_request_amount = lambda *_args, **_kwargs: 0
+
+    @contextmanager
+    def _temporarily_ignore_account_permission():
+        previous_value = frappe_module.flags.ignore_account_permission
+        frappe_module.flags.ignore_account_permission = True
+        try:
+            yield
+        finally:
+            frappe_module.flags.ignore_account_permission = previous_value
+
+    account_permissions_module.temporarily_ignore_account_permission = (
+        _temporarily_ignore_account_permission
+    )
     utilities_module.ensure_child_doctype = lambda *_args, **_kwargs: None
 
     sys.modules["frappe"] = frappe_module
@@ -157,6 +172,7 @@ def _install_stubs():
     sys.modules["erpnext.accounts.party"] = accounts_party
     sys.modules["erpnext.accounts.utils"] = accounts_utils
     sys.modules["erpnext.accounts.doctype.payment_request.payment_request"] = payment_request_module
+    sys.modules["posawesome.posawesome.api.account_permissions"] = account_permissions_module
     sys.modules["posawesome.posawesome.api.utilities"] = utilities_module
 
     return created_docs, get_all_responses, sql_responses, get_doc_responses, reconcile_calls
