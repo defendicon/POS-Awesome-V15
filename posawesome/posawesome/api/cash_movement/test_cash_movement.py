@@ -1,8 +1,206 @@
+import pathlib
+import sys
+import types
 import unittest
+from contextlib import nullcontext
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from posawesome.posawesome.api.cash_movement import queries, service, validation
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(REPO_ROOT))
+
+
+def _install_import_stubs():
+    if "frappe" in sys.modules:
+        return
+
+    frappe_module = types.ModuleType("frappe")
+    frappe_utils = types.ModuleType("frappe.utils")
+    erpnext_setup_utils = types.ModuleType("erpnext.setup.utils")
+
+    frappe_module._ = lambda text: text
+    frappe_module._dict = lambda value=None, **kwargs: dict(value or {}, **kwargs)
+    frappe_module.whitelist = lambda *args, **kwargs: (lambda fn: fn)
+    frappe_module.flags = SimpleNamespace(ignore_account_permission=False)
+    frappe_module.session = SimpleNamespace(user="test@example.com")
+    frappe_module.db = SimpleNamespace()
+    frappe_module.get_cached_value = lambda *args, **kwargs: None
+    frappe_module.get_all = lambda *args, **kwargs: []
+    frappe_module.get_doc = lambda *args, **kwargs: None
+    frappe_module.new_doc = lambda *args, **kwargs: None
+    frappe_module.throw = lambda message: (_ for _ in ()).throw(Exception(message))
+
+    frappe_utils.nowdate = lambda: "2026-06-05"
+    frappe_utils.flt = lambda value, precision=None: round(float(value or 0), precision or 6)
+    frappe_utils.getdate = lambda value: value
+    erpnext_setup_utils.get_exchange_rate = lambda *args, **kwargs: None
+
+    sys.modules["frappe"] = frappe_module
+    sys.modules["frappe.utils"] = frappe_utils
+    sys.modules["erpnext.setup.utils"] = erpnext_setup_utils
+
+    payment_utils = types.ModuleType("posawesome.posawesome.api.payment_processing.utils")
+    payment_utils.get_bank_cash_account = lambda *args, **kwargs: None
+    sys.modules["posawesome.posawesome.api.payment_processing.utils"] = payment_utils
+
+    package_paths = {
+        "posawesome": REPO_ROOT / "posawesome",
+        "posawesome.posawesome": REPO_ROOT / "posawesome" / "posawesome",
+        "posawesome.posawesome.api": REPO_ROOT / "posawesome" / "posawesome" / "api",
+    }
+    for name, path in package_paths.items():
+        module = types.ModuleType(name)
+        module.__path__ = [str(path)]
+        sys.modules[name] = module
+
+
+_install_import_stubs()
+
+from posawesome.posawesome.api.cash_movement import posting, queries, service, validation
+
+
+class FakeJournalEntry:
+    def __init__(self):
+        self.name = "ACC-JV-TEST-0001"
+        self.accounts = []
+        self.flags = SimpleNamespace()
+
+    def append(self, fieldname, row):
+        getattr(self, fieldname).append(row)
+
+    def save(self):
+        return None
+
+    def submit(self):
+        return None
+
+
+class TestCashMovementPosting(unittest.TestCase):
+    def _create_journal_entry(self, account_currencies, exchange_rates, amount=2800):
+        journal_entry = FakeJournalEntry()
+
+        def get_cached_value(doctype, name, fieldname):
+            if doctype == "Company" and fieldname == "default_currency":
+                return "PKR"
+            if doctype == "Company" and fieldname == "cost_center":
+                return "Main - TC"
+            if doctype == "Account" and fieldname == "account_currency":
+                return account_currencies[name]
+            return None
+
+        with (
+            patch.object(posting.frappe, "get_cached_value", side_effect=get_cached_value),
+            patch.object(posting.frappe, "new_doc", return_value=journal_entry),
+            patch.object(
+                posting,
+                "get_exchange_rate",
+                side_effect=lambda source, target, date: exchange_rates.get((source, target)),
+            ),
+            patch.object(posting, "temporarily_ignore_account_permission", return_value=nullcontext()),
+        ):
+            result = posting.create_journal_entry(
+                company="Test Company",
+                posting_date="2026-06-05",
+                movement_type="Deposit",
+                amount=amount,
+                source_account="POS Cash - TC",
+                target_account="Back Office Cash - TC",
+            )
+
+        self.assertEqual(result, journal_entry.name)
+        return journal_entry
+
+    def test_same_currency_rows_include_currency_and_base_amounts(self):
+        journal_entry = self._create_journal_entry(
+            {
+                "POS Cash - TC": "PKR",
+                "Back Office Cash - TC": "PKR",
+            },
+            {},
+        )
+
+        self.assertEqual(journal_entry.multi_currency, 0)
+        debit_row, credit_row = journal_entry.accounts
+        self.assertEqual(debit_row["account_currency"], "PKR")
+        self.assertEqual(debit_row["exchange_rate"], 1)
+        self.assertEqual(debit_row["debit_in_account_currency"], 2800)
+        self.assertEqual(debit_row["debit"], 2800)
+        self.assertEqual(credit_row["account_currency"], "PKR")
+        self.assertEqual(credit_row["exchange_rate"], 1)
+        self.assertEqual(credit_row["credit_in_account_currency"], 2800)
+        self.assertEqual(credit_row["credit"], 2800)
+
+    def test_foreign_account_rows_use_dated_rates_and_balance_in_company_currency(self):
+        journal_entry = self._create_journal_entry(
+            {
+                "POS Cash - TC": "USD",
+                "Back Office Cash - TC": "EUR",
+            },
+            {
+                ("USD", "PKR"): 280,
+                ("EUR", "PKR"): 350,
+            },
+        )
+
+        self.assertEqual(journal_entry.multi_currency, 1)
+        debit_row, credit_row = journal_entry.accounts
+        self.assertEqual(debit_row["account_currency"], "EUR")
+        self.assertEqual(debit_row["exchange_rate"], 350)
+        self.assertEqual(debit_row["debit_in_account_currency"], 8)
+        self.assertEqual(debit_row["debit"], 2800)
+        self.assertEqual(credit_row["account_currency"], "USD")
+        self.assertEqual(credit_row["exchange_rate"], 280)
+        self.assertEqual(credit_row["credit_in_account_currency"], 10)
+        self.assertEqual(credit_row["credit"], 2800)
+        self.assertTrue(journal_entry.flags.ignore_exchange_rate)
+
+    def test_foreign_source_to_company_currency_target_uses_dated_rate(self):
+        journal_entry = self._create_journal_entry(
+            {
+                "POS Cash - TC": "USD",
+                "Back Office Cash - TC": "PKR",
+            },
+            {
+                ("USD", "PKR"): 280,
+            },
+        )
+
+        self.assertEqual(journal_entry.multi_currency, 1)
+        debit_row, credit_row = journal_entry.accounts
+        self.assertEqual(debit_row["debit_in_account_currency"], 2800)
+        self.assertEqual(debit_row["exchange_rate"], 1)
+        self.assertEqual(credit_row["credit_in_account_currency"], 10)
+        self.assertEqual(credit_row["exchange_rate"], 280)
+        self.assertEqual(debit_row["debit"], credit_row["credit"])
+
+    @patch.object(posting.frappe, "throw", side_effect=Exception("missing rate"))
+    @patch.object(posting, "get_exchange_rate", return_value=None)
+    @patch.object(posting.frappe, "get_cached_value")
+    def test_foreign_account_without_rate_fails_clearly(
+        self,
+        mock_get_cached_value,
+        _mock_get_exchange_rate,
+        mock_throw,
+    ):
+        mock_get_cached_value.side_effect = lambda doctype, name, fieldname: (
+            "PKR"
+            if doctype == "Company" and fieldname == "default_currency"
+            else "USD"
+            if doctype == "Account"
+            else "Main - TC"
+        )
+
+        with self.assertRaisesRegex(Exception, "missing rate"):
+            posting.create_journal_entry(
+                company="Test Company",
+                posting_date="2026-06-05",
+                movement_type="Deposit",
+                amount=2800,
+                source_account="POS Cash - TC",
+                target_account="Back Office Cash - TC",
+            )
+
+        mock_throw.assert_called_once()
 
 
 class TestCashMovementValidation(unittest.TestCase):
