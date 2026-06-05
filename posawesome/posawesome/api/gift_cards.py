@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import frappe
-from frappe.utils import nowdate
+from erpnext.setup.utils import get_exchange_rate
+from frappe.utils import flt, nowdate
 
 from posawesome.posawesome.api.utilities import ensure_child_doctype
 
@@ -101,22 +102,85 @@ def _resolve_liability_account(profile_doc):
     return liability_account
 
 
-def _create_gift_card_journal_entry(company, posting_date, remark, accounts):
+def _get_currency_rate(currency, company_currency, posting_date, transaction_currency, conversion_rate):
+    if currency == company_currency:
+        return 1.0
+    if currency == transaction_currency and conversion_rate:
+        return flt(conversion_rate)
+
+    rate = flt(get_exchange_rate(currency, company_currency, posting_date))
+    if rate <= 0:
+        frappe.throw(
+            frappe._("Unable to determine exchange rate from {0} to {1}.").format(
+                currency,
+                company_currency,
+            )
+        )
+    return rate
+
+
+def _create_gift_card_journal_entry(
+    company,
+    posting_date,
+    remark,
+    accounts,
+    transaction_currency=None,
+    conversion_rate=None,
+):
+    posting_date = posting_date or nowdate()
+    company_currency = frappe.get_cached_value("Company", company, "default_currency")
+    transaction_currency = transaction_currency or company_currency
+    transaction_rate = _get_currency_rate(
+        transaction_currency,
+        company_currency,
+        posting_date,
+        transaction_currency,
+        conversion_rate,
+    )
+    normalized_accounts = []
+    has_foreign_account = False
+
+    for row in accounts:
+        normalized_row = dict(row)
+        account_currency = frappe.get_cached_value("Account", row["account"], "account_currency")
+        account_currency = account_currency or company_currency
+        account_rate = _get_currency_rate(
+            account_currency,
+            company_currency,
+            posting_date,
+            transaction_currency,
+            transaction_rate,
+        )
+        has_foreign_account = has_foreign_account or account_currency != company_currency
+
+        for side in ("debit", "credit"):
+            account_field = f"{side}_in_account_currency"
+            transaction_amount = flt(row.get(account_field))
+            base_amount = flt(transaction_amount * transaction_rate)
+            normalized_row[account_field] = flt(base_amount / account_rate)
+            normalized_row[side] = base_amount
+
+        normalized_row["account_currency"] = account_currency
+        normalized_row["exchange_rate"] = account_rate
+        normalized_accounts.append(normalized_row)
+
     je_doc = frappe.get_doc(
         {
             "doctype": "Journal Entry",
             "voucher_type": "Journal Entry",
-            "posting_date": posting_date or nowdate(),
+            "posting_date": posting_date,
             "company": company,
+            "multi_currency": 1 if has_foreign_account else 0,
         }
     )
 
-    for row in accounts:
+    for row in normalized_accounts:
         account_row = je_doc.append("accounts", {})
         account_row.update(row)
 
     ensure_child_doctype(je_doc, "accounts", "Journal Entry Account")
     je_doc.flags.ignore_permissions = True
+    je_doc.flags.ignore_exchange_rate = True
     frappe.flags.ignore_account_permission = True
     je_doc.user_remark = remark
     je_doc.set_missing_values()
@@ -362,7 +426,15 @@ def _serialize_gift_card(gift_card_doc):
     }
 
 
-def _create_issue_or_top_up_entry(profile_doc, company, amount, reference_doctype, reference_name, cashier):
+def _create_issue_or_top_up_entry(
+    profile_doc,
+    company,
+    amount,
+    reference_doctype,
+    reference_name,
+    cashier,
+    currency=None,
+):
     if _to_float(amount) <= 0:
         return None
 
@@ -392,6 +464,7 @@ def _create_issue_or_top_up_entry(profile_doc, company, amount, reference_doctyp
                 "user_remark": cashier,
             },
         ],
+        transaction_currency=currency,
     )
 
 
@@ -429,6 +502,8 @@ def _create_redemption_entry(profile_doc, invoice_doc, amount, cashier):
                 "user_remark": cashier,
             },
         ],
+        transaction_currency=_doc_value(invoice_doc, "currency"),
+        conversion_rate=_doc_value(invoice_doc, "conversion_rate"),
     )
 
 
@@ -471,6 +546,7 @@ def issue_gift_card(
             "POS Gift Card",
             code,
             cashier,
+            currency,
         )
         _append_transaction(
             gift_card_doc,
@@ -505,6 +581,7 @@ def top_up_gift_card(pos_profile=None, cashier=None, gift_card_code=None, amount
         "POS Gift Card",
         _doc_value(gift_card_doc, "name"),
         cashier,
+        _doc_value(gift_card_doc, "currency"),
     )
     next_balance = _to_float(getattr(gift_card_doc, "current_balance", 0) + top_up_amount)
     gift_card_doc.current_balance = next_balance

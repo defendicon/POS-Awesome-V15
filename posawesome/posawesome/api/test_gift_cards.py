@@ -42,6 +42,9 @@ class FakeInvoice:
         debit_to="1310 - Debtors - TC",
         customer="CUST-0001",
         grand_total=800,
+        currency="PKR",
+        company_currency="PKR",
+        conversion_rate=1,
     ):
         self.doctype = doctype
         self.name = name
@@ -52,6 +55,9 @@ class FakeInvoice:
         self.customer = customer
         self.grand_total = grand_total
         self.rounded_total = grand_total
+        self.currency = currency
+        self.company_currency = company_currency
+        self.conversion_rate = conversion_rate
         self.gift_card_redemptions = []
         self.payments = []
         self.flags = types.SimpleNamespace(ignore_permissions=False)
@@ -72,6 +78,7 @@ class FakeJournalEntry:
         self.voucher_type = payload.get("voucher_type", "Journal Entry")
         self.posting_date = payload.get("posting_date")
         self.company = payload.get("company")
+        self.multi_currency = payload.get("multi_currency", 0)
         self.user_remark = payload.get("user_remark")
         self.accounts = []
         self.flags = types.SimpleNamespace(ignore_permissions=False)
@@ -120,6 +127,9 @@ class FakeModeOfPayment:
 def _install_stubs():
     frappe_module = types.ModuleType("frappe")
     frappe_utils_module = types.ModuleType("frappe.utils")
+    erpnext_module = types.ModuleType("erpnext")
+    erpnext_setup_module = types.ModuleType("erpnext.setup")
+    erpnext_setup_utils_module = types.ModuleType("erpnext.setup.utils")
     employees_module = types.ModuleType("posawesome.posawesome.api.employees")
     utilities_module = types.ModuleType("posawesome.posawesome.api.utilities")
 
@@ -157,10 +167,17 @@ def _install_stubs():
         "companies": {
             "Test Company": types.SimpleNamespace(
                 name="Test Company",
+                default_currency="PKR",
                 default_cash_account="1110 - Cash - TC",
                 cost_center="Main - TC",
             )
         },
+        "account_currencies": {
+            "1110 - Cash - TC": "PKR",
+            "2190 - Gift Card Liability - TC": "PKR",
+            "1310 - Debtors - TC": "PKR",
+        },
+        "exchange_rates": {},
     }
 
     frappe_module._ = lambda text: text
@@ -169,6 +186,10 @@ def _install_stubs():
     frappe_module.generate_hash = lambda: "GCODE12345"
     frappe_module.utils = types.SimpleNamespace(now_datetime=lambda: "2026-04-05 12:00:00")
     frappe_utils_module.nowdate = lambda: "2026-04-05"
+    frappe_utils_module.flt = lambda value, *args, **kwargs: float(value or 0)
+    erpnext_setup_utils_module.get_exchange_rate = lambda from_currency, to_currency, date=None: (
+        state["exchange_rates"].get((from_currency, to_currency), 1)
+    )
     frappe_module.session = types.SimpleNamespace(user="administrator@example.com")
 
     def _new_doc(doctype):
@@ -218,6 +239,11 @@ def _install_stubs():
         if doctype == "POS Profile"
         else getattr(state["companies"][name], fieldname, None)
     )
+    frappe_module.get_cached_value = lambda doctype, name, fieldname: (
+        getattr(state["companies"][name], fieldname, None)
+        if doctype == "Company"
+        else state["account_currencies"].get(name)
+    )
     frappe_module.flags = types.SimpleNamespace(ignore_account_permission=False)
     frappe_module.db = types.SimpleNamespace(
         exists=lambda doctype, name=None: bool(
@@ -244,6 +270,9 @@ def _install_stubs():
 
     sys.modules["frappe"] = frappe_module
     sys.modules["frappe.utils"] = frappe_utils_module
+    sys.modules["erpnext"] = erpnext_module
+    sys.modules["erpnext.setup"] = erpnext_setup_module
+    sys.modules["erpnext.setup.utils"] = erpnext_setup_utils_module
     sys.modules["posawesome.posawesome.api.employees"] = employees_module
     sys.modules["posawesome.posawesome.api.utilities"] = utilities_module
     return state
@@ -283,6 +312,14 @@ class TestGiftCardApi(unittest.TestCase):
         self.state["new_docs"].clear()
         self.state["journal_entries"].clear()
         self.state["mode_of_payments"].clear()
+        self.state["account_currencies"].update(
+            {
+                "1110 - Cash - TC": "PKR",
+                "2190 - Gift Card Liability - TC": "PKR",
+                "1310 - Debtors - TC": "PKR",
+            }
+        )
+        self.state["exchange_rates"].clear()
         profile_doc = self.state["pos_profiles"]["Main POS"]
         profile_doc.posa_use_gift_cards = 1
         profile_doc.posa_default_source_account = "1110 - Cash - TC"
@@ -354,6 +391,7 @@ class TestGiftCardApi(unittest.TestCase):
         self.assertEqual(len(invoice_doc.payments), 1)
         self.assertEqual(invoice_doc.payments[0]["account"], "2190 - Gift Card Liability - TC")
         self.assertEqual(invoice_doc.payments[0]["amount"], 300)
+        self.assertEqual(invoice_doc.payments[0]["base_amount"], 300)
 
     def test_apply_invoice_gift_card_redemptions_skips_validation_when_gift_cards_disabled_and_no_rows(self):
         profile_doc = self.state["pos_profiles"]["Main POS"]
@@ -487,6 +525,59 @@ class TestGiftCardApi(unittest.TestCase):
             self.state["journal_entries"][0].accounts[1]["account"],
             "2190 - Gift Card Liability - TC",
         )
+
+    def test_issue_gift_card_sets_foreign_account_currency_and_base_amounts(self):
+        self.state["account_currencies"]["2190 - Gift Card Liability - TC"] = "USD"
+        self.state["exchange_rates"][("USD", "PKR")] = 280
+
+        self.module.issue_gift_card(
+            pos_profile="Main POS",
+            cashier="supervisor@example.com",
+            company="Test Company",
+            initial_amount=10,
+            gift_card_code="GC-USD-01",
+            currency="USD",
+        )
+
+        journal_entry = self.state["journal_entries"][0]
+        source_row, liability_row = journal_entry.accounts
+        self.assertEqual(journal_entry.multi_currency, 1)
+        self.assertEqual(source_row["account_currency"], "PKR")
+        self.assertEqual(source_row["exchange_rate"], 1)
+        self.assertEqual(source_row["debit_in_account_currency"], 2800)
+        self.assertEqual(source_row["debit"], 2800)
+        self.assertEqual(liability_row["account_currency"], "USD")
+        self.assertEqual(liability_row["exchange_rate"], 280)
+        self.assertEqual(liability_row["credit_in_account_currency"], 10)
+        self.assertEqual(liability_row["credit"], 2800)
+
+    def test_redemption_entry_uses_invoice_conversion_rate(self):
+        invoice_doc = FakeInvoice(
+            currency="USD",
+            company_currency="PKR",
+            conversion_rate=275,
+        )
+        self.state["account_currencies"]["2190 - Gift Card Liability - TC"] = "USD"
+
+        self.module._create_redemption_entry(
+            self.state["pos_profiles"]["Main POS"],
+            invoice_doc,
+            20,
+            "cashier@example.com",
+        )
+
+        journal_entry = self.state["journal_entries"][0]
+        liability_row, receivable_row = journal_entry.accounts
+        self.assertEqual(journal_entry.multi_currency, 1)
+        self.assertTrue(journal_entry.flags.ignore_exchange_rate)
+        self.assertEqual(liability_row["account_currency"], "USD")
+        self.assertEqual(liability_row["exchange_rate"], 275)
+        self.assertEqual(liability_row["debit_in_account_currency"], 20)
+        self.assertEqual(liability_row["debit"], 5500)
+        self.assertEqual(receivable_row["account_currency"], "PKR")
+        self.assertEqual(receivable_row["exchange_rate"], 1)
+        self.assertEqual(receivable_row["credit_in_account_currency"], 5500)
+        self.assertEqual(receivable_row["credit"], 5500)
 
 
 if __name__ == "__main__":
