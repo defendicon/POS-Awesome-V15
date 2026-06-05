@@ -156,6 +156,13 @@ function resolvePreferredPrinter(printers: string[]) {
 	return printers[0] || "";
 }
 
+export function resolveProfilePrinterName(profilePrinterName: string | undefined, printers: string[]): string {
+	if (profilePrinterName && printers.includes(profilePrinterName)) {
+		return profilePrinterName;
+	}
+	return resolvePreferredPrinter(printers);
+}
+
 function setupSecurity() {
 	if (securityInitialized) return;
 	securityInitialized = true;

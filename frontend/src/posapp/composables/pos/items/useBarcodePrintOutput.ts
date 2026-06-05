@@ -1,10 +1,29 @@
-import { ref, computed } from "vue";
+	import { ref, computed } from "vue";
 import { useToastStore } from "../../../stores/toastStore";
 import { useUIStore } from "../../../stores/uiStore";
-import { printHtmlViaQz, sendRawToQz, qzConnected } from "../../../services/qzTray";
-import { useZplGenerator } from "./useZplGenerator";
+import { printHtmlViaQz, sendRawToQz, qzConnected, setSelectedQzPrinter } from "../../../services/qzTray";
+import { useZplGenerator, type RfidConfig } from "./useZplGenerator";
+import type { LabelObject } from "./useLabelDesigner";
+
+export interface PrinterProfile {
+	name: string;
+	printer_name: string;
+	printer_type: "ZPL" | "EPL" | "HTML";
+	dpi: number;
+	ip_address?: string;
+	port?: number;
+	default_label_width?: number;
+	default_label_height?: number;
+	is_default?: number;
+	printer_group?: string;
+	rfid_enabled?: number;
+	rfid_tag_type?: string;
+	rfid_epc_prefix?: string;
+	rfid_encoding_power?: number;
+}
 
 declare const __: (_str: string, _args?: any[]) => string;
+declare const frappe: any;
 
 export interface CheckDigitResult {
   valid: boolean;
@@ -210,6 +229,8 @@ export const PAGE_FORMAT_PRESETS: PageFormatPreset[] = [
 	{ label: "75 × 25 mm", value: "75x25mm", type: "thermal", widthMm: 75, heightMm: 25 },
 	{ label: "100 × 50 mm", value: "100x50mm", type: "thermal", widthMm: 100, heightMm: 50 },
 	{ label: "100 × 100 mm", value: "100x100mm", type: "thermal", widthMm: 100, heightMm: 100 },
+	{ label: "100 × 150 mm (4×6\")", value: "100x150mm", type: "thermal", widthMm: 100, heightMm: 150 },
+	{ label: "100 × 200 mm", value: "100x200mm", type: "thermal", widthMm: 100, heightMm: 200 },
 ];
 
 export function guessSymbologyFromBarcode(barcode: string): string {
@@ -277,6 +298,42 @@ export function getBarcodeTypeLabel(item: any): string {
 	return matched?.barcode_type || "";
 }
 
+export function resolveTemplateVars(template: string, item: any): string {
+	const now = new Date();
+	const pad = (n: number) => String(n).padStart(2, "0");
+	const formatDate = (fmt: string): string =>
+		fmt
+			.replace(/YYYY/g, String(now.getFullYear()))
+			.replace(/YY/g, String(now.getFullYear()).slice(-2))
+			.replace(/MM/g, pad(now.getMonth() + 1))
+			.replace(/DD/g, pad(now.getDate()))
+			.replace(/HH/g, pad(now.getHours()))
+			.replace(/mm/g, pad(now.getMinutes()))
+			.replace(/ss/g, pad(now.getSeconds()));
+	return template
+		.replace(/\{item_code\}/g, item.item_code || "")
+		.replace(/\{item_name\}/g, item.item_name || "")
+		.replace(/\{barcode\}/g, item.barcode || "")
+		.replace(/\{price\}/g, item.price != null ? String(item.price) : "")
+		.replace(/\{uom\}/g, item.uom || "")
+		.replace(/\{qty\}/g, item.qty != null ? String(item.qty) : "")
+		.replace(/\{batch_no\}/g, item.batch_no || "")
+		.replace(/\{serial_no\}/g, item.serial_no || "")
+		.replace(/\{warehouse\}/g, item.warehouse || "")
+		.replace(/\{warehouse_location\}/g, item.warehouseLocation || "")
+		.replace(/\{grams\}/g, item.grams != null ? String(item.grams) : "")
+		.replace(/\{date(?::([^}]+))?\}/g, (_, fmt) => formatDate(fmt || "YYYY-MM-DD"))
+		.replace(/\{time(?::([^}]+))?\}/g, (_, fmt) => formatDate(fmt || "HH:mm"));
+}
+
+export function getEpcData(item: any, rfidConfig: RfidConfig): string {
+	const value = item._epc_data || item.serial_no || item.barcode || "";
+	if (!value) return "";
+	const prefix = rfidConfig.epcPrefix || "";
+	const fullHex = prefix + value.split("").map((ch: string) => ch.charCodeAt(0).toString(16).padStart(2, "0")).join("");
+	return fullHex.toUpperCase();
+}
+
 export function useBarcodePrintOutput() {
 	const toastStore = useToastStore();
 	const uiStore = useUIStore();
@@ -292,6 +349,126 @@ export function useBarcodePrintOutput() {
 	const outputFormat = ref<"html" | "zpl" | "epl">("html");
 	const includeWarehouseLocation = ref(false);
 	const printerDpi = ref<PrinterDPI>(203);
+	const activeDesignerTemplate = ref<string | null>(null);
+	const selectedPrinterProfile = ref<PrinterProfile | null>(null);
+	const printerProfiles = ref<PrinterProfile[]>([]);
+	const rfidEnabled = ref(false);
+	const rfidEpcPrefix = ref("");
+
+	const fetchPrinterProfiles = async () => {
+		try {
+			const res = await frappe.call({
+				method: "posawesome.posawesome.api.printer_api.get_printer_profiles",
+				silent: true,
+			});
+			const list = (res.message || []) as PrinterProfile[];
+			printerProfiles.value = list;
+			const profileDefault = uiStore.posProfile?.posa_default_printer_profile;
+			if (profileDefault) {
+				const match = list.find((p) => p.name === profileDefault);
+				if (match) applyPrinterProfile(match);
+			}
+			if (!selectedPrinterProfile.value && list.length > 0) {
+				const def = list.find((p) => p.is_default) || list[0];
+				if (def) applyPrinterProfile(def);
+			}
+		} catch {
+			// silent — printer profiles are optional
+		}
+	};
+
+	const applyPrinterProfile = (profile: PrinterProfile | null) => {
+		selectedPrinterProfile.value = profile;
+		if (profile) {
+			if (profile.dpi) printerDpi.value = profile.dpi as PrinterDPI;
+			const ptype = (profile.printer_type || "ZPL").toLowerCase();
+			if (ptype === "zpl" || ptype === "epl") {
+				outputFormat.value = ptype as "zpl" | "epl";
+			} else {
+				outputFormat.value = "html";
+			}
+			if (profile.default_label_width && profile.default_label_height) {
+				const matched = PAGE_FORMAT_PRESETS.find(
+					(p) => p.widthMm === profile.default_label_width && p.heightMm === profile.default_label_height,
+				);
+				if (matched) pageFormat.value = matched.value;
+			}
+			if (profile.printer_name) {
+				setSelectedQzPrinter(profile.printer_name);
+			}
+			rfidEnabled.value = profile.rfid_enabled === 1;
+			rfidEpcPrefix.value = profile.rfid_epc_prefix || "";
+		} else {
+			rfidEnabled.value = false;
+			rfidEpcPrefix.value = "";
+		}
+	};
+
+	const getFailoverPrinters = async (group: string, excludeName: string): Promise<PrinterProfile[]> => {
+		if (!group) return [];
+		try {
+			const res = await frappe.call({
+				method: "posawesome.posawesome.api.printer_api.get_printers_for_failover",
+				args: { printer_group: group, exclude_name: excludeName },
+				silent: true,
+			});
+			return (res.message || []) as PrinterProfile[];
+		} catch {
+			return [];
+		}
+	};
+
+	const setDesignerTemplate = (json: string) => {
+		try { JSON.parse(json); } catch { return; }
+		activeDesignerTemplate.value = json;
+	};
+
+	const clearDesignerTemplate = () => {
+		activeDesignerTemplate.value = null;
+	};
+
+	const hasActiveTemplate = computed(() => !!activeDesignerTemplate.value);
+
+	const shouldLogAudit = computed(() => {
+		return uiStore.posProfile?.posa_enable_print_audit !== 0;
+	});
+
+	const logPrintEvent = async (itemsToPrint: any[], method: string, status: string, errorMsg?: string) => {
+		if (!shouldLogAudit.value) return;
+		const profile = uiStore.posProfile;
+		const entries = itemsToPrint.map((item: any) => ({
+			posting_date: undefined,
+			item_code: item.item_code || "",
+			item_name: item.item_name || "",
+			barcode: item.barcode || "",
+			barcode_type: item.barcode_type || "",
+			qty: item.qty || 1,
+			uom: item.uom || "",
+			price: item.price || 0,
+			symbology: symbology.value,
+			label_size: pageFormat.value,
+			user: undefined,
+			company: profile?.company || "",
+			pos_profile: profile?.name || "",
+			print_method: method,
+			status,
+			error_message: errorMsg || null,
+			reference_doctype: item.reference_doctype || null,
+			reference_docname: item.reference_docname || null,
+			batch_no: item.batch_no || null,
+			serial_no: item.serial_no || null,
+			warehouse: item.warehouseLocation || null,
+		}));
+		try {
+			await frappe.call({
+				method: "posawesome.posawesome.api.barcode_print_log.batch_create_print_logs",
+				args: { entries },
+				silent: true,
+			});
+		} catch {
+			// silent — audit logging must never block printing
+		}
+	};
 
 	const getPrintContext = (isRaw: boolean = false): PrintContext => {
 		const size = parseLabelSize();
@@ -376,7 +553,31 @@ export function useBarcodePrintOutput() {
 	const getBarcodeWidth = (sym?: string): number => getBarcodeDimensions(sym, false).moduleWidthPx;
 	const getBarcodeFontSize = (): number => getBarcodeDimensions(undefined, false).fontSize;
 
+	const getTemplatePrintStyles = (): string => {
+		const size = parseLabelSize();
+		if (size.type === "A4") {
+			const { cols = 3, rows = 7 } = size;
+			const availableHeight = 277;
+			const totalGapSpace = (rows - 1) * 3;
+			const rowHeight = Math.floor((availableHeight - totalGapSpace) / rows);
+			return `
+				@page { size: A4; margin: 10mm; }
+				body { font-family: sans-serif; margin: 0; padding: 0; }
+				.label-container { display: grid; grid-template-columns: repeat(${cols}, 1fr); gap: 3mm; page-break-after: always; }
+				.label { border: 1px dashed #ccc; padding: 0; width: 100%; height: ${rowHeight}mm; page-break-inside: avoid; box-sizing: border-box; overflow: hidden; }
+				img.barcode { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+			`;
+		}
+		return `
+			@page { size: ${size.width}mm ${size.height}mm; margin: 0; }
+			body { font-family: sans-serif; margin: 0; padding: 0; width: ${size.width}mm; height: ${size.height}mm; overflow: hidden; }
+			.label { width: ${size.width}mm; height: ${size.height}mm; page-break-after: always; overflow: hidden; box-sizing: border-box; }
+			img.barcode { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+		`;
+	};
+
 	const getPrintStyles = (): string => {
+		if (hasActiveTemplate.value) return getTemplatePrintStyles();
 		const size = parseLabelSize();
 		const dims = getBarcodeDimensions(undefined, false);
 		if (size.type === "A4") {
@@ -521,6 +722,9 @@ export function useBarcodePrintOutput() {
 	};
 
 	const generatePrintContent = (items: any[]): string => {
+		if (hasActiveTemplate.value && activeDesignerTemplate.value) {
+			return generateTemplatePrintContent(items, activeDesignerTemplate.value);
+		}
 		let html = "";
 		const size = parseLabelSize();
 		const ctx = getPrintContext(false);
@@ -595,6 +799,84 @@ export function useBarcodePrintOutput() {
 		return html;
 	};
 
+	const generateTemplatePrintContent = (items: any[], layoutJson: string): string => {
+		let objects: LabelObject[];
+		try { objects = JSON.parse(layoutJson); }
+		catch { return ""; }
+		if (!Array.isArray(objects) || !objects.length) return "";
+
+		const ctx = getPrintContext(false);
+		let html = "";
+		const labelsCount = items.reduce((sum: number, item: any) => sum + Math.max(1, Math.round(Number(item.qty) || 1)), 0);
+		items.forEach((item) => {
+			const copies = Math.max(1, Math.round(Number(item.qty) || 1));
+			const itemSerials: string[] = item._serialization_applied && Array.isArray(item._generated_serials) ? item._generated_serials : [];
+			for (let c = 0; c < copies; c++) {
+				const copyItem = itemSerials.length > c ? { ...item, serial_no: itemSerials[c] } : item;
+				html += '<div class="label" style="position:relative;overflow:hidden;">';
+				objects.forEach((obj) => {
+					if (obj.hidden) return;
+					const resolvedCondition = resolveTemplateVars(obj.condition || "", copyItem);
+					if (resolvedCondition === "" || resolvedCondition === "false" || resolvedCondition === "0") return;
+					const baseStyle = `position:absolute;left:${obj.x}mm;top:${obj.y}mm;width:${obj.width}mm;height:${obj.height}mm;`;
+					switch (obj.type) {
+						case "text": {
+							const content = resolveTemplateVars(obj.content || "", copyItem);
+							const fs = obj.fontBold ? "font-weight:bold;" : "";
+							const fi = obj.fontItalic ? "font-style:italic;" : "";
+							const fu = obj.fontUnderline ? "text-decoration:underline;" : "";
+							const align = obj.textAlign || "left";
+							const color = obj.color || "#000";
+							const fontSize = (obj.fontSize || 10) + "px";
+							const fontFamily = obj.fontFamily || "sans-serif";
+							html += `<div style="${baseStyle}font-family:${fontFamily};font-size:${fontSize};${fs}${fi}${fu}color:${color};text-align:${align};overflow:hidden;display:flex;align-items:center;">${escapeHtml(content)}</div>`;
+							break;
+						}
+						case "barcode": {
+							const bd = resolveTemplateVars(obj.content || copyItem.barcode || "", copyItem);
+							if (!bd) break;
+							const sym = obj.symbology || guessSymbologyFromBarcode(bd);
+							const jsb = getSymbologyForJsBarcode(sym);
+							const dims = calculateBarcodeDimensions(sym, ctx, bd.length);
+							const ean128 = jsb.ean128 ? ' jsbarcode-ean128="true"' : "";
+							html += `<div style="${baseStyle}display:flex;align-items:center;justify-content:center;overflow:hidden;"><img class="barcode" jsbarcode-format="${jsb.format}" jsbarcode-value="${escapeHtml(bd)}" jsbarcode-textmargin="0" jsbarcode-fontoptions="bold" jsbarcode-height="${dims.heightPx}" jsbarcode-width="${dims.moduleWidthPx}" jsbarcode-margin="${dims.quietZonePx}" jsbarcode-displayValue="true" jsbarcode-fontSize="${dims.fontSize}"${ean128} style="max-width:100%;max-height:100%;"></div>`;
+							break;
+						}
+						case "shape": {
+							const bg = obj.color || "#ccc";
+							const bc = obj.borderColor || "#000";
+							const bw = obj.borderWidth || 0;
+							if (obj.shapeType === "ellipse") {
+								html += `<div style="${baseStyle}background:${bg};border:${bw}px solid ${bc};border-radius:50%;"></div>`;
+							} else {
+								html += `<div style="${baseStyle}background:${bg};border:${bw}px solid ${bc};"></div>`;
+							}
+							break;
+						}
+						case "line": {
+							const lc = obj.color || "#000";
+							const th = obj.borderWidth || 1;
+							if (obj.lineDirection === "vertical") {
+								html += `<div style="position:absolute;left:${obj.x + obj.width / 2}mm;top:${obj.y}mm;width:${th}px;height:${obj.height}mm;background:${lc};"></div>`;
+							} else {
+								html += `<div style="position:absolute;left:${obj.x}mm;top:${obj.y + obj.height / 2}mm;height:${th}px;width:${obj.width}mm;background:${lc};"></div>`;
+							}
+							break;
+						}
+						case "image": {
+							if (obj.imageSrc) {
+								html += `<div style="${baseStyle}display:flex;align-items:center;justify-content:center;overflow:hidden;"><img src="${escapeHtml(obj.imageSrc)}" style="max-width:100%;max-height:100%;object-fit:contain;"></div>`;
+							}
+							break;
+						}
+					}
+				});
+				html += "</div>";
+			}
+		});
+		return html;
+	};
+
 	const getPrintWindowContent = (items: any[]) => {
 		const style = getPrintStyles();
 		const content = generatePrintContent(getPrintableItems(items, { notify: false }));
@@ -610,24 +892,24 @@ export function useBarcodePrintOutput() {
 		return printWindow;
 	};
 
-  const printLabels = (items: any[]) => {
-    if (!items.length) return;
-    const itemsToPrint = getPrintableItems(items);
-    if (!itemsToPrint.length) return;
-    const sizeWarnings = getLabelSizeWarnings();
-    const compliance = getBarcodeCompliance();
-    if (compliance === 'unfit' || compliance === 'truncated') {
-      toastStore.show({ title: __("GS1 compliance error: {0}", [sizeWarnings[0]]), color: "error" });
-      return;
-    }
-    if (sizeWarnings.length) {
-      toastStore.show({ title: __("GS1 size warning: {0}", [sizeWarnings[0]]), color: "warning" });
-    }
-    const dataErrors = validateBarcodeData(itemsToPrint);
-    if (dataErrors.length) {
-      toastStore.show({ title: __("Barcode data error: {0}", [dataErrors[0]]), color: "error" });
-      return;
-    }
+	const printLabels = (items: any[]) => {
+		if (!items.length) return;
+		const itemsToPrint = getPrintableItems(items);
+		if (!itemsToPrint.length) return;
+		const sizeWarnings = getLabelSizeWarnings();
+		const compliance = getBarcodeCompliance();
+		if (compliance === 'unfit' || compliance === 'truncated') {
+			toastStore.show({ title: __("GS1 compliance error: {0}", [sizeWarnings[0]]), color: "error" });
+			return;
+		}
+		if (sizeWarnings.length) {
+			toastStore.show({ title: __("GS1 size warning: {0}", [sizeWarnings[0]]), color: "warning" });
+		}
+		const dataErrors = validateBarcodeData(itemsToPrint);
+		if (dataErrors.length) {
+			toastStore.show({ title: __("Barcode data error: {0}", [dataErrors[0]]), color: "error" });
+			return;
+		}
 
 		const printWindow = openPrintPopup("");
 		if (!printWindow) return;
@@ -649,7 +931,7 @@ export function useBarcodePrintOutput() {
 							JsBarcode(".barcode").init();
 							setTimeout(() => {
 								window.print();
-								window.close();
+								setTimeout(() => window.close(), 3000);
 							}, 500);
 						}
 					<\/script>
@@ -657,11 +939,30 @@ export function useBarcodePrintOutput() {
 			</html>
 		`);
 		printWindow.document.close();
+
+		logPrintEvent(itemsToPrint, "Browser", "Sent");
+
+		try {
+			const mql = printWindow.matchMedia("print");
+			if (mql && typeof mql.addEventListener === "function") {
+				let printed = false;
+				const handler = (evt: MediaQueryListEvent) => {
+					if (evt.matches) printed = true;
+					else if (printed) {
+						logPrintEvent(itemsToPrint, "Browser", "Confirmed");
+						mql.removeEventListener("change", handler as any);
+					}
+				};
+				mql.addEventListener("change", handler as any);
+			}
+		} catch {
+			// matchMedia not supported — already logged as Sent
+		}
 	};
 
 	const qzThermalAvailable = computed(() => qzConnected.value);
 
-	const printLabelsThermal = async (items: any[]) => {
+	const printLabelsThermal = async (items: any[], printerName?: string) => {
 		if (!items.length) return;
 		const itemsToPrint = getPrintableItems(items);
 		if (!itemsToPrint.length) return;
@@ -699,16 +1000,44 @@ export function useBarcodePrintOutput() {
 
 		try {
 			await printHtmlViaQz(fullHtml, {
+				printerName,
 				widthMm: size.type === "thermal" ? size.width : undefined,
 				orientation: "portrait",
 			});
 			toastStore.show({ title: __("Sent to QZ Tray printer"), color: "success" });
+			logPrintEvent(itemsToPrint, "QZ HTML", "Sent");
 		} catch (e: any) {
 			toastStore.show({ title: __("QZ Tray print failed: {0}", [e?.message || e]), color: "error" });
+			logPrintEvent(itemsToPrint, "QZ HTML", "Failed", String(e?.message || e));
+			throw e;
 		}
 	};
 
-	const printLabelsRaw = async (items: any[]) => {
+	const printLabelsThermalWithFailover = async (items: any[]) => {
+		const profile = selectedPrinterProfile.value;
+		const group = profile?.printer_group;
+		const name = profile?.printer_name;
+		try {
+			await printLabelsThermal(items, name);
+		} catch {
+			if (group) {
+				const fallbacks = await getFailoverPrinters(group, profile?.name || "");
+				for (const fb of fallbacks) {
+					toastStore.show({ title: __("Trying fallback printer: {0}", [fb.printer_name]), color: "warning" });
+					try {
+						await printLabelsThermal(items, fb.printer_name);
+						return;
+					} catch {
+						continue;
+					}
+				}
+			}
+			toastStore.show({ title: __("Thermal printing failed — falling back to browser print"), color: "warning" });
+			printLabels(items);
+		}
+	};
+
+	const printLabelsRaw = async (items: any[], printerName?: string) => {
 		if (!items.length) return;
 		const itemsToPrint = getPrintableItems(items);
 		if (!itemsToPrint.length) return;
@@ -730,21 +1059,56 @@ export function useBarcodePrintOutput() {
 		const zplGen = useZplGenerator();
 		const isZpl = outputFormat.value === "zpl";
 		const rawContext = getPrintContext(true);
+		const rfidConfig: RfidConfig | undefined = rfidEnabled.value
+			? { enabled: true, tagType: selectedPrinterProfile.value?.rfid_tag_type, epcPrefix: rfidEpcPrefix.value, encodingPower: selectedPrinterProfile.value?.rfid_encoding_power }
+			: undefined;
+
+		if (rfidEnabled.value && !isZpl) {
+			toastStore.show({ title: __("RFID encoding requires ZPL output format"), color: "warning" });
+		}
 
 		const rawData = itemsToPrint
 			.map((item: any) => {
 				const itemSym = getItemSymbology(item);
 				const effectiveSym = itemSym === "auto" ? guessSymbologyFromBarcode(item.barcode) : itemSym;
-				const enriched = { ...item, symbologyName: effectiveSym, printContext: rawContext };
+				const epcData = rfidConfig ? getEpcData(item, rfidConfig) : undefined;
+				const enriched = { ...item, symbologyName: effectiveSym, printContext: rawContext, _epc_data: epcData, _rfid_config: rfidConfig };
 				return isZpl ? zplGen.generateZpl(enriched) : zplGen.generateEpl(enriched);
 			})
 			.join("\n");
 
 		try {
-			await sendRawToQz(rawData);
+			await sendRawToQz(rawData, printerName);
 			toastStore.show({ title: __("Sent to QZ Tray thermal printer"), color: "success" });
+			logPrintEvent(itemsToPrint, "QZ Raw", "Sent");
 		} catch (e: any) {
 			toastStore.show({ title: __("QZ Tray print failed: {0}", [e?.message || e]), color: "error" });
+			logPrintEvent(itemsToPrint, "QZ Raw", "Failed", String(e?.message || e));
+			throw e;
+		}
+	};
+
+	const printLabelsRawWithFailover = async (items: any[]) => {
+		const profile = selectedPrinterProfile.value;
+		const group = profile?.printer_group;
+		const name = profile?.printer_name;
+		try {
+			await printLabelsRaw(items, name);
+		} catch {
+			if (group) {
+				const fallbacks = await getFailoverPrinters(group, profile?.name || "");
+				for (const fb of fallbacks) {
+					toastStore.show({ title: __("Trying fallback printer: {0}", [fb.printer_name]), color: "warning" });
+					try {
+						await printLabelsRaw(items, fb.printer_name);
+						return;
+					} catch {
+						continue;
+					}
+				}
+			}
+			toastStore.show({ title: __("Thermal printing failed — falling back to browser print"), color: "warning" });
+			printLabels(items);
 		}
 	};
 
@@ -781,6 +1145,8 @@ export function useBarcodePrintOutput() {
 		}
 
 		const jsPdfOptions = { unit: "mm", format: pdfFormat, orientation: "portrait" };
+
+		logPrintEvent(itemsToPrint, "PDF", "Sent");
 
 		printWindow.document.write(`
 			<html>
@@ -842,6 +1208,14 @@ export function useBarcodePrintOutput() {
 		outputFormat,
 		includeWarehouseLocation,
 		printerDpi,
+		selectedPrinterProfile,
+		printerProfiles,
+		rfidEnabled,
+		rfidEpcPrefix,
+		activeDesignerTemplate,
+		hasActiveTemplate,
+		setDesignerTemplate,
+		clearDesignerTemplate,
 		parseLabelSize,
 		getPrintStyles,
 		generatePrintContent,
@@ -849,9 +1223,13 @@ export function useBarcodePrintOutput() {
 		getPrintableItems,
 		printLabels,
 		printLabelsThermal,
+		printLabelsThermalWithFailover,
 		printLabelsRaw,
+		printLabelsRawWithFailover,
 		qzThermalAvailable,
 		downloadPdf,
+		fetchPrinterProfiles,
+		applyPrinterProfile,
 		formatCurrency,
 		escapeHtml,
 		validateBarcodeCheckDigit,
@@ -863,5 +1241,6 @@ export function useBarcodePrintOutput() {
 		getLabelSizeWarnings,
 		getBarcodeCompliance,
 		getSymbologyForJsBarcode,
+		getEpcData,
 	};
 }

@@ -18,6 +18,69 @@
 					<v-card-title class="py-2 px-4 bg-primary text-white d-flex align-center">
 						<span class="text-h6">{{ __("Barcode Label Printing") }}</span>
 						<v-spacer></v-spacer>
+						<v-btn-toggle v-model="viewMode" mandatory density="compact" color="white" variant="text" divided>
+							<v-btn value="labels" size="small" class="text-none">
+								<v-icon start>mdi-format-list-bulleted</v-icon>
+								<span class="d-none d-sm-inline">{{ __("Labels") }}</span>
+							</v-btn>
+							<v-btn value="designer" size="small" class="text-none">
+								<v-icon start>mdi-drag-variant</v-icon>
+								<span class="d-none d-sm-inline">{{ __("Designer") }}</span>
+							</v-btn>
+						</v-btn-toggle>
+						<v-btn
+							icon="mdi-truck-delivery"
+							variant="text"
+							color="white"
+							@click="ssccDialog = true"
+							:title="__('Generate SSCC-18 Shipping Labels')"
+							:aria-label="__('Generate SSCC-18 shipping labels')"
+						></v-btn>
+						<v-btn
+							icon="mdi-verified"
+							variant="text"
+							color="white"
+							@click="verificationDialog = true"
+							:title="__('Barcode Verification')"
+							:aria-label="__('Verify printed barcodes')"
+						></v-btn>
+						<v-menu>
+							<template v-slot:activator="{ props }">
+								<v-btn
+									v-bind="props"
+									icon="mdi-download"
+									variant="text"
+									color="white"
+									:title="__('Export labels')"
+									:aria-label="__('Export labels')"
+								></v-btn>
+							</template>
+							<v-list density="compact">
+								<v-list-item @click="onExportPng" :disabled="!items.length">
+									<template v-slot:prepend><v-icon>mdi-image</v-icon></template>
+									<v-list-item-title>{{ __("PNG") }}</v-list-item-title>
+									<v-list-item-subtitle>{{ __("Render labels as PNG image") }}</v-list-item-subtitle>
+								</v-list-item>
+								<v-list-item @click="onExportSvg" :disabled="!items.length">
+									<template v-slot:prepend><v-icon>mdi-svg</v-icon></template>
+									<v-list-item-title>{{ __("SVG") }}</v-list-item-title>
+									<v-list-item-subtitle>{{ __("Export as SVG with embedded barcodes") }}</v-list-item-subtitle>
+								</v-list-item>
+								<v-list-item @click="onExportCsv" :disabled="!items.length">
+									<template v-slot:prepend><v-icon>mdi-file-delimited</v-icon></template>
+									<v-list-item-title>{{ __("CSV") }}</v-list-item-title>
+									<v-list-item-subtitle>{{ __("Item data as spreadsheet") }}</v-list-item-subtitle>
+								</v-list-item>
+							</v-list>
+						</v-menu>
+						<v-btn
+							icon="mdi-package-variant-closed"
+							variant="text"
+							color="white"
+							@click="importDialog = true"
+							:title="__('Import from Document')"
+							:aria-label="__('Import items from Sales Order, Delivery Note or BOM')"
+						></v-btn>
 						<v-btn
 							icon="mdi-upload"
 							variant="text"
@@ -36,7 +99,7 @@
 						></v-btn>
 					</v-card-title>
 
-					<v-card-text class="flex-grow-1 overflow-y-auto pa-4">
+					<v-card-text v-if="viewMode === 'labels'" class="flex-grow-1 overflow-y-auto pa-4">
 						<!-- Configuration -->
 						<v-row dense class="mb-2 align-center">
 							<v-col cols="12" md="2">
@@ -96,6 +159,21 @@
 									variant="outlined"
 									hide-details
 									class="pos-themed-input"
+								></v-select>
+							</v-col>
+							<v-col cols="12" md="2">
+								<v-select
+									v-model="selectedPrinterProfile"
+									:items="printerProfiles"
+									item-title="printer_name"
+									return-object
+									:label="__('Printer Profile')"
+									density="compact"
+									variant="outlined"
+									hide-details
+									class="pos-themed-input"
+									clearable
+									@update:modelValue="onPrinterProfileChange"
 								></v-select>
 							</v-col>
 							<v-col cols="12" md="1">
@@ -169,9 +247,48 @@
 
 						<v-row dense class="mb-2">
 							<v-col cols="12" md="4">
-								<v-checkbox
+						<v-checkbox
 									v-model="includePrice"
 									:label="__('Include Price')"
+									density="compact"
+									hide-details
+									color="primary"
+								></v-checkbox>
+							</v-col>
+							<v-col cols="12" md="2">
+								<v-checkbox
+									v-model="serializationEnabled"
+									:label="__('Serialization')"
+									density="compact"
+									hide-details
+									color="primary"
+								></v-checkbox>
+							</v-col>
+							<v-col cols="12" md="2">
+								<v-checkbox
+									v-model="rfidEnabled"
+									:label="__('RFID Encode')"
+									density="compact"
+									hide-details
+									color="primary"
+									:disabled="outputFormat !== 'zpl'"
+								></v-checkbox>
+							</v-col>
+							<v-col cols="12" md="2" v-if="rfidEnabled">
+								<v-text-field
+									v-model="rfidEpcPrefix"
+									:label="__('EPC Prefix (Hex)')"
+									density="compact"
+									variant="outlined"
+									hide-details
+									class="pos-themed-input"
+									placeholder="303402B4DD"
+								></v-text-field>
+							</v-col>
+							<v-col cols="12" md="2">
+								<v-checkbox
+									v-model="includeBatchSerial"
+									:label="__('Include Batch/Serial')"
 									density="compact"
 									hide-details
 									color="primary"
@@ -205,6 +322,39 @@
 							class="mb-2"
 						>
 							{{ sizeWarnings[0] }}
+						</v-alert>
+
+						<v-alert
+							v-if="hasActiveTemplate"
+							type="info"
+							density="compact"
+							variant="tonal"
+							class="mb-2"
+							closable
+							@click:close="clearDesignerTemplate"
+						>
+							<div class="d-flex align-center">
+								<v-icon start>mdi-ruler-square</v-icon>
+								<span>{{ __("Designer template active — labels render from canvas layout") }}</span>
+								<v-btn
+									variant="text"
+									size="small"
+									color="primary"
+									class="ml-2 text-none"
+									@click="viewMode = 'designer'"
+								>
+									{{ __("Edit Template") }}
+								</v-btn>
+								<v-btn
+									variant="text"
+									size="small"
+									color="error"
+									class="ml-1 text-none"
+									@click="clearDesignerTemplate"
+								>
+									{{ __("Clear") }}
+								</v-btn>
+							</div>
 						</v-alert>
 
 						<v-divider class="my-3"></v-divider>
@@ -364,9 +514,66 @@
 							</template>
 						</v-data-table>
 					</v-card-text>
+					<v-card-text v-else class="flex-grow-1 pa-0 d-flex flex-column overflow-hidden">
+						<div class="d-flex flex-grow-1" style="min-height: 0;">
+							<div class="flex-grow-1 overflow-hidden">
+								<LabelDesigner :designer="designer" @select="(id) => designer.selectObject(id)" @dblclick="() => {}" />
+							</div>
+							<div style="width: 260px; flex-shrink: 0;">
+								<LabelDesignerPanel :object="designer.selectedObject.value" @change="onDesignerObjectChange" @uploadImage="onUploadImage" />
+							</div>
+						</div>
+						<div class="d-flex justify-space-between pa-2 ga-2 border-t align-center">
+							<div class="d-flex ga-2">
+								<v-btn variant="text" @click="viewMode = 'labels'">
+									<v-icon start>mdi-arrow-left</v-icon>
+									{{ __("Back to Labels") }}
+								</v-btn>
+								<v-btn variant="outlined" prepend-icon="mdi-upload" @click="importDesignerLayout">
+									{{ __("Import Layout") }}
+								</v-btn>
+							</div>
+							<div class="d-flex ga-2">
+								<v-btn color="primary" variant="outlined" prepend-icon="mdi-content-save-outline" @click="saveTemplateDialog = true">
+									{{ __("Save Template") }}
+								</v-btn>
+								<v-btn color="primary" variant="outlined" prepend-icon="mdi-folder-open-outline" @click="templateLibraryDialog = true">
+									{{ __("Load Template") }}
+								</v-btn>
+								<v-btn color="success" variant="flat" prepend-icon="mdi-check" @click="applyDesignerTemplate">
+									<v-badge v-if="hasActiveTemplate" dot color="warning" inline></v-badge>
+									{{ hasActiveTemplate ? __("Update Template") : __("Use as Template") }}
+								</v-btn>
+								<v-btn color="primary" variant="outlined" prepend-icon="mdi-content-save" @click="exportDesignerLayout">
+									{{ __("Export") }}
+								</v-btn>
+							</div>
+						</div>
+					</v-card-text>
 				</v-card>
 			</v-col>
 		</v-row>
+
+		<!-- Save Template Dialog -->
+		<v-dialog v-model="saveTemplateDialog" max-width="450">
+			<v-card>
+				<v-card-title class="bg-primary text-white">{{ __("Save Label Template") }}</v-card-title>
+				<v-card-text class="pt-4">
+					<v-text-field v-model="saveTemplateTitle" :label="__('Template Title')" variant="outlined" density="compact" class="mb-3" autofocus></v-text-field>
+					<v-textarea v-model="saveTemplateDescription" :label="__('Description (optional)')" variant="outlined" density="compact" rows="2" class="mb-3"></v-textarea>
+				</v-card-text>
+				<v-card-actions class="justify-end pa-4 pt-0">
+					<v-btn variant="text" @click="saveTemplateDialog = false">{{ __("Cancel") }}</v-btn>
+					<v-btn color="primary" variant="elevated" :loading="saveTemplateLoading" @click="onSaveTemplate">{{ __("Save") }}</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
+		<!-- Template Library Dialog -->
+		<TemplateLibrary v-model="templateLibraryDialog" @load="loadTemplateFromLibrary" />
+
+		<!-- Barcode Verification Dialog -->
+		<VerificationDialog v-model="verificationDialog" />
 
 		<!-- Add Item Quantity Dialog -->
 		<v-dialog v-model="addItemDialog" max-width="400">
@@ -557,6 +764,114 @@
 			</v-card>
 		</v-dialog>
 
+		<ImportSourceDialog v-model="importDialog" @import="onImportFromSource" />
+
+		<!-- SSCC-18 Shipping Label Generator Dialog -->
+		<v-dialog v-model="ssccDialog" max-width="550">
+			<v-card>
+				<v-card-title class="bg-primary text-white d-flex align-center">
+					<span class="text-h6">{{ __("Generate SSCC-18 Shipping Labels") }}</span>
+					<v-spacer></v-spacer>
+					<v-btn icon="mdi-close" variant="text" color="white" @click="ssccDialog = false"></v-btn>
+				</v-card-title>
+				<v-card-text class="pt-4">
+					<v-row dense>
+						<v-col cols="12" md="6">
+							<v-text-field
+								v-model="ssccCompanyPrefix"
+								:label="__('GS1 Company Prefix')"
+								variant="outlined"
+								density="compact"
+								hide-details
+								placeholder="1234567"
+							></v-text-field>
+						</v-col>
+						<v-col cols="6" md="3">
+							<v-select
+								v-model="ssccExtensionDigit"
+								:items="['0','1','2','3','4','5','6','7','8','9']"
+								:label="__('Extension')"
+								variant="outlined"
+								density="compact"
+								hide-details
+							></v-select>
+						</v-col>
+						<v-col cols="6" md="3">
+							<v-text-field
+								v-model.number="ssccCount"
+								:label="__('Count')"
+								type="number"
+								min="1"
+								max="100"
+								variant="outlined"
+								density="compact"
+								hide-details
+							></v-text-field>
+						</v-col>
+					</v-row>
+					<v-row dense class="mt-2">
+						<v-col cols="12" md="6">
+							<v-text-field
+								v-model="ssccDocumentRef"
+								:label="__('Delivery Note / Sales Invoice (optional)')"
+								variant="outlined"
+								density="compact"
+								hide-details
+								:placeholder="__('e.g. DN-2024-001')"
+							></v-text-field>
+						</v-col>
+						<v-col cols="12" md="6">
+							<v-select
+								v-model="ssccShipToType"
+								:items="[
+									{ title: __('Ship to Customer'), value: 'customer' },
+									{ title: __('Ship from Company'), value: 'company' },
+								]"
+								:label="__('Address Source')"
+								variant="outlined"
+								density="compact"
+								hide-details
+								item-title="title"
+								item-value="value"
+							></v-select>
+						</v-col>
+					</v-row>
+					<v-row dense class="mt-2" v-if="ssccGeneratedItems.length">
+						<v-col cols="12">
+							<v-divider class="mb-2"></v-divider>
+							<div class="text-subtitle-2 mb-1">{{ __("Generated SSCC-18 Codes") }}</div>
+							<v-list density="compact" class="border rounded">
+								<v-list-item v-for="(gen, idx) in ssccGeneratedItems" :key="idx" density="compact">
+									<template v-slot:prepend>
+										<v-icon color="primary">mdi-barcode</v-icon>
+									</template>
+									<v-list-item-title class="font-family-mono">{{ gen.human_readable }}</v-list-item-title>
+									<v-list-item-subtitle>{{ gen.sscc18 }}</v-list-item-subtitle>
+									<template v-slot:append>
+										<v-icon color="success" size="small">mdi-check-circle</v-icon>
+									</template>
+								</v-list-item>
+							</v-list>
+						</v-col>
+					</v-row>
+				</v-card-text>
+				<v-card-actions class="justify-space-between pa-4 pt-0">
+					<div>
+						<v-btn v-if="ssccGeneratedItems.length" color="success" variant="elevated" prepend-icon="mdi-plus" @click="addSsccToQueue" class="mr-2">
+							{{ __("Add {0} to Queue", [String(ssccGeneratedItems.length)]) }}
+						</v-btn>
+					</div>
+					<div>
+						<v-btn variant="text" @click="ssccDialog = false" class="mr-1">{{ __("Close") }}</v-btn>
+						<v-btn color="primary" variant="elevated" :loading="ssccGenerating" @click="generateSscc">
+							<v-icon start>mdi-barcode-scan</v-icon>
+							{{ __("Generate") }}
+						</v-btn>
+					</div>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
 		<!-- Label Preview Dialog -->
 		<v-dialog v-model="previewDialog" fullscreen>
 			<v-card v-if="previewContent" class="d-flex flex-column">
@@ -603,7 +918,7 @@
 	</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, watch, onMounted, onUnmounted, ref } from "vue";
 import ItemsSelector from "../items/ItemsSelector.vue";
 import { useItemsStore } from "../../../stores/itemsStore";
@@ -612,6 +927,14 @@ import { useToastStore } from "../../../stores/toastStore";
 import { useBarcodePrintQueue } from "../../../composables/pos/items/useBarcodePrintQueue";
 import { useBarcodePrintOutput, PAGE_FORMAT_PRESETS, getBarcodeCheckDigitWarning, validateBarcodeItem, getBarcodeTypeLabel } from "../../../composables/pos/items/useBarcodePrintOutput";
 import { useScaleBarcodeSettings } from "../../../composables/pos/items/useScaleBarcodeSettings";
+import { useLabelDesigner } from "../../../composables/pos/items/useLabelDesigner";
+import { useSsccGenerator, formatSsccHuman } from "../../../composables/pos/items/useSsccGenerator";
+import LabelDesigner from "./LabelDesigner.vue";
+import LabelDesignerPanel from "./LabelDesignerPanel.vue";
+import TemplateLibrary from "./TemplateLibrary.vue";
+import VerificationDialog from "./VerificationDialog.vue";
+import ImportSourceDialog from "./ImportSourceDialog.vue";
+import { exportPng, exportSvg, exportCsv } from "../../../services/exportService";
 
 const itemsStore = useItemsStore();
 const uiStore = useUIStore();
@@ -656,6 +979,9 @@ const {
 		getAvailableSerials,
 		onSelectBatch,
 		onSelectSerial,
+		importItems,
+		serializationEngine,
+		serializationEnabled,
 		cleanup: cleanupQueue,
 	} = printQueue;
 
@@ -670,23 +996,86 @@ const {
 	symbologyOptions,
 	outputFormat,
 	printerDpi,
+	selectedPrinterProfile,
+	printerProfiles,
 	getPrintableItems,
 	printLabels,
 	printLabelsThermal,
 	printLabelsRaw,
+	printLabelsThermalWithFailover,
+	printLabelsRawWithFailover,
 	qzThermalAvailable,
 	downloadPdf,
 	getLabelSizeWarnings,
 	formatCurrency,
+	hasActiveTemplate,
+	setDesignerTemplate,
+	clearDesignerTemplate,
+	fetchPrinterProfiles,
+	applyPrinterProfile,
+	rfidEnabled,
+	rfidEpcPrefix,
+	getEpcData,
 } = printOutput;
 
 const thermalPrinting = ref(false);
+const importDialog = ref(false);
 const bulkImportDialog = ref(false);
 const bulkImportRaw = ref("");
 const bulkImportFormat = ref("csv");
 const bulkImporting = ref(false);
 const bulkImportError = ref("");
 const bulkImportSuccess = ref("");
+
+const viewMode = ref<"labels" | "designer">("labels");
+const designer = useLabelDesigner();
+
+// SSCC-18 generator state
+const ssccDialog = ref(false);
+const ssccCount = ref(1);
+const ssccDocumentRef = ref("");
+const ssccShipToType = ref<"customer" | "company">("customer");
+const ssccGeneratedItems = ref<Array<{ sscc18: string; human_readable: string; serial_ref: number }>>([]);
+const ssccGenerator = useSsccGenerator();
+const ssccCompanyPrefix = ssccGenerator.companyPrefix;
+const ssccExtensionDigit = ssccGenerator.extensionDigit;
+const ssccGenerating = ssccGenerator.generating;
+
+const generateSscc = async () => {
+	const count = Math.max(1, Math.min(100, Math.round(ssccCount.value) || 1));
+	try {
+		const items = await ssccGenerator.generateBatch(count);
+		ssccGeneratedItems.value = items;
+	} catch {
+		useToastStore().show({ title: __("Failed to generate SSCC-18 serials"), color: "error" });
+	}
+};
+
+const addSsccToQueue = () => {
+	for (const gen of ssccGeneratedItems.value) {
+		addOrMergePrintableItem(
+			{
+				item_code: gen.sscc18,
+				item_name: `SSCC-18 ${gen.human_readable}`,
+				barcode: gen.sscc18,
+				qty: 1,
+				uom: "",
+				_prices_by_uom: {},
+				item_barcode: [{ barcode: gen.sscc18, barcode_type: "SSCC-18" }],
+				item_uoms: [],
+				_symbology: "CODE128",
+			},
+			1,
+			"sscc",
+		);
+	}
+	useToastStore().show({
+		title: __("{0} SSCC-18 label(s) added to queue", [String(ssccGeneratedItems.value.length)]),
+		color: "success",
+	});
+	ssccDialog.value = false;
+	ssccGeneratedItems.value = [];
+};
 
 const onAddItems = async (selectedItems) => {
 	for (const item of selectedItems) {
@@ -705,7 +1094,7 @@ const processBulkImport = async () => {
 
 	bulkImporting.value = true;
 	try {
-		let entries = [];
+		let entries: Array<{ item_code: string; qty: number }> = [];
 
 		if (bulkImportFormat.value === "csv") {
 			const lines = raw.split("\n").filter((l) => l.trim());
@@ -803,24 +1192,200 @@ const processBulkImport = async () => {
 		bulkImportSuccess.value = __("Imported {0} items", String(added));
 		bulkImportRaw.value = "";
 	} catch (e) {
-		bulkImportError.value = String(e?.message || e);
+		bulkImportError.value = String((e as Error)?.message || e);
 	} finally {
 		bulkImporting.value = false;
 	}
+};
+
+const onPrinterProfileChange = (profile: any) => {
+	const p = profile && typeof profile === "object" ? profile : null;
+	applyPrinterProfile(p);
+};
+
+const onImportFromSource = async (importedItems: any[]) => {
+	let itemsToAdd = importedItems;
+	if (serializationEnabled.value) {
+		itemsToAdd = await serializationEngine.applySerialization(importedItems);
+	}
+	if (rfidEnabled.value && serializationEnabled.value) {
+		itemsToAdd = itemsToAdd.map((item: any) => {
+			const serial = item._generated_serials?.[0] || item.serial_no;
+			if (serial) {
+				const epcData = getEpcData({ ...item, serial_no: serial }, { enabled: true, epcPrefix: rfidEpcPrefix.value });
+				return { ...item, _epc_data: epcData };
+			}
+			return item;
+		});
+	}
+	importItems(itemsToAdd);
+	useToastStore().show({
+		title: __("Imported {0} items", [itemsToAdd.length]),
+		color: "success",
+	});
 };
 
 const thermalPrint = async () => {
 	thermalPrinting.value = true;
 	try {
 		if (outputFormat.value === "zpl" || outputFormat.value === "epl") {
-			await printLabelsRaw(items.value);
+			await printLabelsRawWithFailover(items.value);
 		} else {
-			await printLabelsThermal(items.value);
+			await printLabelsThermalWithFailover(items.value);
 		}
 	} finally {
 		thermalPrinting.value = false;
 	}
 };
+
+const onDesignerObjectChange = (id: string, updates: any) => {
+	designer.updateObject(id, updates);
+};
+
+const onUploadImage = () => {
+	const input = document.createElement("input");
+	input.type = "file";
+	input.accept = "image/*";
+	input.onchange = (e: any) => {
+		const file = e.target?.files?.[0];
+		if (!file) return;
+		const reader = new FileReader();
+		reader.onload = (ev: any) => {
+			const dataUrl = ev.target?.result;
+			if (typeof dataUrl === "string") {
+				const cx = designer.selectedObject.value
+					? designer.selectedObject.value.x + 5
+					: designer.labelSize.value.widthMm / 2 - 15;
+				const cy = designer.selectedObject.value
+					? designer.selectedObject.value.y + 5
+					: designer.labelSize.value.heightMm / 2 - 7.5;
+				designer.addImage(cx, cy, dataUrl, file.name);
+				useToastStore().show({ title: __("Image added to canvas"), color: "success" });
+			}
+		};
+		reader.readAsDataURL(file);
+	};
+	input.click();
+};
+
+const exportDesignerLayout = () => {
+	const json = designer.exportLayout();
+	const blob = new Blob([json], { type: "application/json" });
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement("a");
+	a.href = url;
+	a.download = `label-layout-${pageFormat.value}.json`;
+	a.click();
+	URL.revokeObjectURL(url);
+	useToastStore().show({ title: __("Layout exported"), color: "success" });
+};
+
+const importDesignerLayout = () => {
+	const input = document.createElement("input");
+	input.type = "file";
+	input.accept = ".json";
+	input.onchange = (e: any) => {
+		const file = e.target?.files?.[0];
+		if (!file) return;
+		const reader = new FileReader();
+		reader.onload = () => {
+			try {
+				designer.importLayout(String(reader.result));
+				useToastStore().show({ title: __("Layout imported"), color: "success" });
+			} catch (err) {
+				useToastStore().show({ title: __("Invalid layout file"), color: "error" });
+			}
+		};
+		reader.readAsText(file);
+	};
+	input.click();
+};
+
+const applyDesignerTemplate = () => {
+	const json = designer.exportLayout();
+	try { JSON.parse(json); } catch {
+		useToastStore().show({ title: __("Invalid layout — cannot apply"), color: "error" });
+		return;
+	}
+	setDesignerTemplate(json);
+	useToastStore().show({ title: __("Designer template applied"), color: "success" });
+	viewMode.value = "labels";
+};
+
+const saveTemplateDialog = ref(false);
+const saveTemplateTitle = ref("");
+const saveTemplateDescription = ref("");
+const saveTemplateLoading = ref(false);
+
+const onSaveTemplate = async () => {
+	const title = saveTemplateTitle.value.trim();
+	if (!title) {
+		useToastStore().show({ title: __("Template title is required"), color: "error" });
+		return;
+	}
+	const layoutJson = designer.exportLayout();
+	try { JSON.parse(layoutJson); } catch {
+		useToastStore().show({ title: __("Invalid layout — cannot save"), color: "error" });
+		return;
+	}
+	saveTemplateLoading.value = true;
+	try {
+		await frappe.call({
+			method: "posawesome.posawesome.api.label_templates.save_label_template",
+			args: {
+				title,
+				label_size: pageFormat.value,
+				layout_json: layoutJson,
+				description: saveTemplateDescription.value.trim(),
+			},
+			silent: true,
+		});
+		useToastStore().show({ title: __("Template saved: {0}", [title]), color: "success" });
+		saveTemplateDialog.value = false;
+		saveTemplateTitle.value = "";
+		saveTemplateDescription.value = "";
+	} catch (e: any) {
+		useToastStore().show({ title: __("Failed to save template"), color: "error" });
+	} finally {
+		saveTemplateLoading.value = false;
+	}
+};
+
+const templateLibraryDialog = ref(false);
+const verificationDialog = ref(false);
+
+const loadTemplateFromLibrary = (tpl: any) => {
+	if (tpl.layout_json) {
+		try {
+			designer.importLayout(tpl.layout_json);
+			pageFormat.value = tpl.label_size;
+			syncDesignerLabelSize();
+		} catch (err) {
+			useToastStore().show({ title: __("Failed to load template layout"), color: "error" });
+		}
+	}
+};
+
+const syncDesignerLabelSize = () => {
+	const preset = PAGE_FORMAT_PRESETS.find((p) => p.value === pageFormat.value);
+	if (preset && preset.widthMm && preset.heightMm) {
+		const w = parseFloat(String(preset.widthMm));
+		const h = parseFloat(String(preset.heightMm));
+		if (w > 0 && h > 0) designer.setLabelSize(w, h);
+	}
+};
+
+watch(viewMode, (mode) => {
+	if (mode === "designer") {
+		syncDesignerLabelSize();
+	}
+});
+
+watch(pageFormat, () => {
+	if (viewMode.value === "designer") {
+		syncDesignerLabelSize();
+	}
+});
 
 const sizeWarnings = computed(() => getLabelSizeWarnings());
 
@@ -872,6 +1437,28 @@ const pdfFromPreview = () => {
 	}
 };
 
+const onExportPng = () => {
+	const printable = getPrintableItems(items.value, { notify: false });
+	if (!printable.length) return;
+	const style = printOutput.getPrintStyles();
+	const content = printOutput.generatePrintContent(printable);
+	exportPng(content, style);
+};
+
+const onExportSvg = () => {
+	const printable = getPrintableItems(items.value, { notify: false });
+	if (!printable.length) return;
+	const style = printOutput.getPrintStyles();
+	const content = printOutput.generatePrintContent(printable);
+	exportSvg(content, style);
+};
+
+const onExportCsv = () => {
+	const printable = getPrintableItems(items.value, { notify: false });
+	if (!printable.length) return;
+	exportCsv(printable);
+};
+
 const { shouldShowScaleGramsInput } = scaleSettings;
 
 const headers = computed(() => [
@@ -882,9 +1469,9 @@ const headers = computed(() => [
 	{ title: __("Barcode"), key: "barcode", width: "20%" },
 	{ title: __("Weight (g)"), key: "grams", width: "10%" },
 	{ title: __("Location"), key: "warehouseLocation", width: "10%" },
-	{ title: __("Quantity"), key: "qty", align: "center", width: "10%" },
-	{ title: "", key: "variableData", align: "center", sortable: false, width: "5%" },
-	{ title: "", key: "actions", align: "center", sortable: false, width: "5%" },
+	{ title: __("Quantity"), key: "qty", align: "center" as const, width: "10%" },
+	{ title: "", key: "variableData", align: "center" as const, sortable: false, width: "5%" },
+	{ title: "", key: "actions", align: "center" as const, sortable: false, width: "5%" },
 ]);
 
 watch(
@@ -899,6 +1486,7 @@ watch(
 
 onMounted(() => {
 	scaleSettings.ensureScaleBarcodeSettings();
+	fetchPrinterProfiles();
 });
 
 onUnmounted(() => {

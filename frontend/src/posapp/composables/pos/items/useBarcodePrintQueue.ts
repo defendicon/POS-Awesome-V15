@@ -2,6 +2,7 @@ import { ref, nextTick } from "vue";
 import { useToastStore } from "../../../stores/toastStore";
 import { useItemsStore } from "../../../stores/itemsStore";
 import { useScaleBarcodeSettings } from "./useScaleBarcodeSettings";
+import { useSerializationEngine } from "./useSerializationEngine";
 
 declare const frappe: any;
 declare const __: (_str: string, _args?: any[]) => string;
@@ -41,6 +42,7 @@ export interface BarcodePrintItem {
 	warehouseLocation?: string;
 	batch_no_data?: BatchData[];
 	serial_no_data?: SerialData[];
+	_epc_data?: string;
 	[key: string]: any;
 }
 
@@ -173,6 +175,16 @@ export function useBarcodePrintQueue() {
 	const clearAll = () => {
 		logDebug("clearAll", { count_before: items.value.length });
 		items.value = [];
+	};
+
+	const serializationEngine = useSerializationEngine();
+	const serializationEnabled = ref(false);
+
+	const importItems = (importedItems: any[]) => {
+		if (!Array.isArray(importedItems) || !importedItems.length) return;
+		importedItems.forEach((item) => {
+			addOrMergePrintableItem(item, Number(item.qty) || 1, "import");
+		});
 	};
 
 	const incrementQty = (item: any) => {
@@ -636,6 +648,9 @@ export function useBarcodePrintQueue() {
 		addOrMergePrintableItem,
 		removeItem,
 		clearAll,
+		importItems,
+		serializationEngine,
+		serializationEnabled,
 		incrementQty,
 		decrementQty,
 		normalizeLabelQty,

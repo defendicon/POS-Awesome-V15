@@ -7,6 +7,13 @@ export interface ZplConfig {
   printDensity: number;
 }
 
+export interface RfidConfig {
+  enabled: boolean;
+  tagType?: string;
+  epcPrefix?: string;
+  encodingPower?: number;
+}
+
 export function useZplGenerator() {
   const zplConfig = ref<ZplConfig>({
     labelWidthMm: 50,
@@ -53,6 +60,38 @@ export function useZplGenerator() {
     }
   };
 
+  const buildRfidHeader = (epcHex: string, rfid?: RfidConfig): string => {
+    if (!rfid?.enabled) return "";
+    const tagTypeMap: Record<string, string> = {
+      "Generic": "0",
+      "AD-222": "1",
+      "AD-220": "2",
+      "AD-236": "3",
+      "AD-431": "4",
+      "AD-432": "5",
+      "AD-612": "6",
+      "AD-620": "7",
+      "AD-621": "8",
+      "AD-640": "9",
+    };
+    const tagType = tagTypeMap[rfid.tagType || "Generic"] || "0";
+    const power = rfid.encodingPower != null && rfid.encodingPower > 0 ? String(rfid.encodingPower) : "";
+    const epcValue = epcHex || "";
+    let cmd = `^RS${power ? "," + tagType + "," + power : "," + tagType}^FS\n`;
+    if (epcValue) {
+      cmd += `^RFE,${epcValue}^FS\n`;
+    }
+    return cmd;
+  };
+
+  const toEpcHex = (value: string): string => {
+    let hex = "";
+    for (let i = 0; i < value.length; i++) {
+      hex += value.charCodeAt(i).toString(16).padStart(2, "0");
+    }
+    return hex.toUpperCase();
+  };
+
   const getEplBarcodeType = (symbology: string): string => {
     switch (symbology) {
       case "EAN13":
@@ -83,6 +122,8 @@ export function useZplGenerator() {
     currency?: string;
     symbologyName?: string;
     printContext?: PrintContext;
+    _epc_data?: string;
+    _rfid_config?: RfidConfig;
   }): string => {
     const name = escapeZpl(item.item_name || "");
     const barcode = escapeZpl(item.barcode || "");
@@ -96,9 +137,14 @@ export function useZplGenerator() {
     const price = item.price != null ? `${item.currency || ""} ${Number(item.price).toFixed(2)}` : "";
     const uom = escapeZpl(item.uom || "");
     const bcCmd = getZplBarcodeCommand(sym, barHeightDots);
+    const rfidHeader = buildRfidHeader(item._epc_data || "", item._rfid_config);
 
     let zpl = `^XA
-^CF0,20
+`;
+    if (rfidHeader) {
+      zpl += rfidHeader;
+    }
+    zpl += `^CF0,20
 ^FO10,10^FB${width - 20},20,0,C,0^FD${name}^FS
 `;
     if (uom) {
@@ -163,5 +209,7 @@ export function useZplGenerator() {
     zplConfig,
     generateZpl,
     generateEpl,
+    buildRfidHeader,
+    toEpcHex,
   };
 }
