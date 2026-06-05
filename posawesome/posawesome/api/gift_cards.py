@@ -515,7 +515,7 @@ def issue_gift_card(
     initial_amount=0,
     gift_card_code=None,
     expiry_date=None,
-    currency="PKR",
+    currency=None,
 ):
     profile_name, cashier, _user_doc = _require_supervisor(pos_profile, cashier)
     profile_doc = _get_profile_doc(profile_name)
@@ -526,6 +526,12 @@ def issue_gift_card(
     if not company:
         frappe.throw(frappe._("Company is required."))
 
+    resolved_currency = currency or frappe.get_cached_value("Company", company, "default_currency")
+    if not resolved_currency:
+        frappe.throw(
+            frappe._("Default currency could not be determined for company {0}.").format(company)
+        )
+
     code = _normalize_code(gift_card_code)
     if frappe.db.exists("POS Gift Card", {"gift_card_code": code}):
         frappe.throw(frappe._("Gift card {0} already exists.").format(code))
@@ -533,7 +539,7 @@ def issue_gift_card(
     gift_card_doc = frappe.new_doc("POS Gift Card")
     gift_card_doc.gift_card_code = code
     gift_card_doc.company = company
-    gift_card_doc.currency = currency or "PKR"
+    gift_card_doc.currency = resolved_currency
     gift_card_doc.current_balance = amount
     gift_card_doc.status = "Active"
     gift_card_doc.expiry_date = expiry_date
@@ -546,7 +552,7 @@ def issue_gift_card(
             "POS Gift Card",
             code,
             cashier,
-            currency,
+            resolved_currency,
         )
         _append_transaction(
             gift_card_doc,

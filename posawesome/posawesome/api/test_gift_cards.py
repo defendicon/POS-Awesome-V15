@@ -320,6 +320,7 @@ class TestGiftCardApi(unittest.TestCase):
             }
         )
         self.state["exchange_rates"].clear()
+        self.state["companies"]["Test Company"].default_currency = "PKR"
         profile_doc = self.state["pos_profiles"]["Main POS"]
         profile_doc.posa_use_gift_cards = 1
         profile_doc.posa_default_source_account = "1110 - Cash - TC"
@@ -525,6 +526,52 @@ class TestGiftCardApi(unittest.TestCase):
             self.state["journal_entries"][0].accounts[1]["account"],
             "2190 - Gift Card Liability - TC",
         )
+
+    def test_issue_gift_card_defaults_to_company_currency(self):
+        self.state["companies"]["Test Company"].default_currency = "USD"
+        self.state["account_currencies"]["1110 - Cash - TC"] = "USD"
+        self.state["account_currencies"]["2190 - Gift Card Liability - TC"] = "USD"
+
+        result = self.module.issue_gift_card(
+            pos_profile="Main POS",
+            cashier="supervisor@example.com",
+            company="Test Company",
+            initial_amount=25,
+            gift_card_code="GC-DEFAULT-USD",
+        )
+
+        self.assertEqual(result["currency"], "USD")
+        journal_entry = self.state["journal_entries"][0]
+        self.assertEqual(journal_entry.accounts[0]["account_currency"], "USD")
+        self.assertEqual(journal_entry.accounts[1]["account_currency"], "USD")
+
+    def test_issue_gift_card_preserves_explicit_currency(self):
+        self.state["companies"]["Test Company"].default_currency = "USD"
+
+        result = self.module.issue_gift_card(
+            pos_profile="Main POS",
+            cashier="supervisor@example.com",
+            company="Test Company",
+            initial_amount=0,
+            gift_card_code="GC-EXPLICIT-EUR",
+            currency="EUR",
+        )
+
+        self.assertEqual(result["currency"], "EUR")
+
+    def test_issue_gift_card_requires_resolvable_company_currency(self):
+        self.state["companies"]["Test Company"].default_currency = None
+
+        with self.assertRaises(Exception) as ctx:
+            self.module.issue_gift_card(
+                pos_profile="Main POS",
+                cashier="supervisor@example.com",
+                company="Test Company",
+                initial_amount=0,
+                gift_card_code="GC-NO-CURRENCY",
+            )
+
+        self.assertIn("Default currency could not be determined", str(ctx.exception))
 
     def test_issue_gift_card_sets_foreign_account_currency_and_base_amounts(self):
         self.state["account_currencies"]["2190 - Gift Card Liability - TC"] = "USD"

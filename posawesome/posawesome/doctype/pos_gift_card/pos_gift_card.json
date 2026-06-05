@@ -37,7 +37,6 @@
    "reqd": 1
   },
   {
-   "default": "PKR",
    "fieldname": "currency",
    "fieldtype": "Link",
    "label": "Currency",
