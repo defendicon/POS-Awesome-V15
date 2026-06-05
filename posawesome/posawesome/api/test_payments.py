@@ -24,6 +24,7 @@ class FakeChildRow(dict):
 
 class FakePaymentEntry:
     def __init__(self):
+        self.accounts = []
         self.references = []
         self.flags = types.SimpleNamespace(ignore_permissions=False, submitted=True)
         self.name = "ACC-PAY-TEST-0001"
@@ -248,6 +249,66 @@ class TestRedeemingCustomerCredit(unittest.TestCase):
                 }
             ],
         )
+
+    def test_mixed_invoice_credit_and_advance_credit_do_not_duplicate_cash_allocation(self):
+        invoice_doc = types.SimpleNamespace(
+            customer="CUST-0001",
+            debit_to="Debtors - TC",
+            company="Test Company",
+            pos_profile="Main POS",
+            posa_pos_opening_shift="POS-OPEN-0001",
+            name="SINV-NEW-0001",
+        )
+        self.get_doc_responses[("Sales Invoice", "SINV-CREDIT-0001")] = types.SimpleNamespace(
+            name="SINV-CREDIT-0001",
+            debit_to="Debtors - TC",
+        )
+        data = {
+            "redeemed_customer_credit": 50,
+            "customer_credit_dict": [
+                {
+                    "type": "Invoice",
+                    "credit_origin": "SINV-CREDIT-0001",
+                    "credit_to_redeem": 30,
+                },
+                {
+                    "type": "Advance",
+                    "credit_origin": "ACC-PAY-ADV-0001",
+                    "credit_to_redeem": 20,
+                },
+            ],
+            "due_date": "2026-03-26",
+        }
+        payments = [
+            types.SimpleNamespace(
+                amount=60,
+                account="Cash - TC",
+                mode_of_payment="Cash",
+            )
+        ]
+
+        created_entries = self.payments_module.redeeming_customer_credit(
+            invoice_doc=invoice_doc,
+            data=data,
+            is_payment_entry=1,
+            total_cash=50,
+            cash_account={"account": "Cash - TC"},
+            payments=payments,
+        )
+
+        self.assertEqual(len(self.created_docs), 2)
+        journal_entry, payment_entry = self.created_docs
+        self.assertEqual(journal_entry.doctype, "Journal Entry")
+        self.assertEqual(journal_entry.accounts[0]["reference_name"], "SINV-CREDIT-0001")
+        self.assertEqual(journal_entry.accounts[0]["debit_in_account_currency"], 30)
+        self.assertEqual(journal_entry.accounts[1]["reference_name"], "SINV-NEW-0001")
+        self.assertEqual(journal_entry.accounts[1]["credit_in_account_currency"], 30)
+        self.assertEqual(payment_entry.doctype, "Payment Entry")
+        self.assertEqual(payment_entry.paid_from, "Debtors - TC")
+        self.assertEqual(payment_entry.paid_amount, 60)
+        self.assertEqual(payment_entry.references[0]["allocated_amount"], 50)
+        self.assertEqual(created_entries[0]["allocated_amount"], 50)
+        self.assertEqual(created_entries[0]["unallocated_amount"], 10)
 
     def test_get_available_credit_excludes_pay_type_payment_entries(self):
         self.get_all_responses["Sales Invoice"] = []
