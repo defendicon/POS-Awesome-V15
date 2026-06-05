@@ -46,15 +46,17 @@ class MpesaPaymentRegister(Document):
 
     def create_payment_entry(self):
         payment_entry = create_payment_entry(
-            self.company,
-            self.customer,
-            self.transamount,
-            self.currency,
-            self.mode_of_payment,
-            self.posting_date,
-            self.transid,
-            self.posting_date,
-            None,
-            self.submit_payment,
+            company=self.company,
+            amount=self.transamount,
+            currency=self.currency,
+            mode_of_payment=self.mode_of_payment,
+            customer=self.customer,
+            party=self.customer,
+            party_type="Customer",
+            payment_type="Receive",
+            reference_date=self.posting_date,
+            reference_no=self.transid,
+            posting_date=self.posting_date,
+            submit=self.submit_payment,
         )
         return payment_entry.name
