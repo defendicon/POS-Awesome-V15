@@ -1198,7 +1198,14 @@ def submit_invoice(invoice, data, submit_in_background=False):
     if replay_response:
         return replay_response
 
-    existing_by_request = find_invoice_by_client_request_id(client_request_id, preferred_doctype=doctype)
+    existing_by_request = find_invoice_by_client_request_id(
+        client_request_id,
+        company=invoice.get("company") or data.get("company"),
+        pos_profile=invoice.get("pos_profile") or data.get("pos_profile"),
+        opening_shift=invoice.get("posa_pos_opening_shift")
+        or data.get("posa_pos_opening_shift"),
+        invoice_doctype=doctype,
+    )
     if existing_by_request:
         if cint(existing_by_request.docstatus) == 1:
             if ledger_doc:
@@ -1556,9 +1563,15 @@ def repair_invoice_submission(client_request_id, company, pos_profile, document_
 
     invoice_name = ledger_doc.get("invoice_name")
     if not invoice_name:
+        invoice_payload = _json_loads(ledger_doc.get("invoice_payload"))
+        request_data = _json_loads(ledger_doc.get("request_data"))
         existing_invoice = find_invoice_by_client_request_id(
             client_request_id,
-            preferred_doctype=document_type,
+            company=company,
+            pos_profile=pos_profile,
+            opening_shift=invoice_payload.get("posa_pos_opening_shift")
+            or request_data.get("posa_pos_opening_shift"),
+            invoice_doctype=document_type,
         )
         if existing_invoice:
             invoice_name = existing_invoice.name

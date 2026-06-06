@@ -99,6 +99,7 @@ def _install_framework_stubs():
     frappe_module.log_error = lambda *args, **kwargs: None
     frappe_module.get_cached_value = lambda *args, **kwargs: None
     frappe_module.get_cached_doc = lambda *args, **kwargs: _FrappeDict()
+    frappe_module.get_all = lambda *args, **kwargs: []
     frappe_module.flags = types.SimpleNamespace(ignore_account_permission=False)
     publish_realtime_calls = []
     frappe_module.db = types.SimpleNamespace(
@@ -1383,6 +1384,7 @@ class TestInvoiceIdempotency(unittest.TestCase):
     def setUp(self):
         self.enqueue_calls.clear()
         self.frappe._publish_realtime_calls.clear()
+        self.creation.frappe.get_all = lambda *args, **kwargs: []
         self.frappe._roles = ["Accounts Manager"]
         self.creation.frappe.db.has_column = lambda doctype, fieldname: True
         self.creation._process_post_submit_payments = type(self).original_process_post_submit_payments
@@ -1460,6 +1462,36 @@ class TestInvoiceIdempotency(unittest.TestCase):
                 )
 
                 self.assertTrue(result["repaired"])
+
+    def test_repair_invoice_submission_scopes_fallback_to_ledger_context(self):
+        ledger_doc, _invoice_doc = self._setup_invoice_repair_case()
+        ledger_doc.invoice_name = None
+        ledger_doc.invoice_payload = json.dumps(
+            {"posa_pos_opening_shift": "POS-OPEN-0001"}
+        )
+        calls = []
+        original_lookup = self.creation.find_invoice_by_client_request_id
+
+        def capture_lookup(client_request_id, **kwargs):
+            calls.append((client_request_id, kwargs))
+            return None
+
+        self.creation.find_invoice_by_client_request_id = capture_lookup
+        try:
+            result = self.creation.repair_invoice_submission(
+                "ledger-repair-secure-001",
+                "Test Company",
+                "Main POS",
+            )
+        finally:
+            self.creation.find_invoice_by_client_request_id = original_lookup
+
+        self.assertFalse(result["repaired"])
+        self.assertEqual(calls[0][0], "ledger-repair-secure-001")
+        self.assertEqual(calls[0][1]["company"], "Test Company")
+        self.assertEqual(calls[0][1]["pos_profile"], "Main POS")
+        self.assertEqual(calls[0][1]["opening_shift"], "POS-OPEN-0001")
+        self.assertEqual(calls[0][1]["invoice_doctype"], "Sales Invoice")
 
     def test_repair_invoice_submission_rejects_closed_shift(self):
         self._setup_invoice_repair_case(
@@ -1612,16 +1644,19 @@ class TestInvoiceIdempotency(unittest.TestCase):
             company="Test Company",
         )
 
-        def fake_get_value(doctype, filters=None, fieldname=None, **kwargs):
+        def fake_get_all(doctype, filters=None, fields=None, **kwargs):
             if (
                 doctype == "Sales Invoice"
                 and isinstance(filters, dict)
                 and filters.get("posa_client_request_id") == "inv-fixed-001"
+                and filters.get("company") == "Test Company"
+                and filters.get("pos_profile") == "Main POS"
             ):
-                return "ACC-SINV-IDEMP-0001"
-            return 0
+                return [AttrDict(name="ACC-SINV-IDEMP-0001")]
+            return []
 
-        self.creation.frappe.db.get_value = fake_get_value
+        self.creation.frappe.get_all = fake_get_all
+        self.creation.frappe.db.get_value = lambda *args, **kwargs: 0
         self.creation.frappe.db.exists = lambda *args, **kwargs: False
         self.creation.frappe.get_doc = lambda *args: existing_doc
         self.creation.update_invoice = lambda *_args, **_kwargs: (_ for _ in ()).throw(
@@ -1647,6 +1682,93 @@ class TestInvoiceIdempotency(unittest.TestCase):
         self.assertEqual(result["name"], "ACC-SINV-IDEMP-0001")
         self.assertEqual(result["status"], 1)
         self.assertTrue(result["replayed"])
+
+    def test_invoice_retry_lookup_does_not_cross_company_scope(self):
+        calls = []
+
+        def fake_get_all(doctype, filters=None, fields=None, **kwargs):
+            calls.append((doctype, filters))
+            if filters.get("company") == "Company A":
+                return [AttrDict(name="SINV-A-0001")]
+            return []
+
+        self.creation.frappe.get_all = fake_get_all
+
+        result = self.creation.find_invoice_by_client_request_id(
+            "shared-request",
+            company="Company B",
+            pos_profile="POS B",
+            invoice_doctype="Sales Invoice",
+        )
+
+        self.assertIsNone(result)
+        self.assertEqual(calls[0][1]["company"], "Company B")
+
+    def test_invoice_retry_lookup_does_not_cross_pos_profile_scope(self):
+        calls = []
+
+        def fake_get_all(doctype, filters=None, fields=None, **kwargs):
+            calls.append((doctype, filters))
+            if filters.get("pos_profile") == "POS A":
+                return [AttrDict(name="SINV-A-0001")]
+            return []
+
+        self.creation.frappe.get_all = fake_get_all
+
+        result = self.creation.find_invoice_by_client_request_id(
+            "shared-request",
+            company="Test Company",
+            pos_profile="POS B",
+            invoice_doctype="Sales Invoice",
+        )
+
+        self.assertIsNone(result)
+        self.assertEqual(calls[0][1]["pos_profile"], "POS B")
+
+    def test_invoice_retry_lookup_rejects_multiple_scoped_matches(self):
+        self.creation.frappe.get_all = lambda *args, **kwargs: [
+            AttrDict(name="SINV-0001"),
+            AttrDict(name="SINV-0002"),
+        ]
+
+        with self.assertRaisesRegex(Exception, "Multiple invoices match"):
+            self.creation.find_invoice_by_client_request_id(
+                "duplicate-request",
+                company="Test Company",
+                pos_profile="Main POS",
+                invoice_doctype="Sales Invoice",
+            )
+
+    def test_invoice_retry_lookup_supports_pos_invoice_scope(self):
+        existing_doc = FakeDoc(
+            doctype="POS Invoice",
+            name="POSINV-0001",
+            company="Test Company",
+            pos_profile="Main POS",
+        )
+        calls = []
+
+        def fake_get_all(doctype, filters=None, fields=None, **kwargs):
+            calls.append((doctype, filters))
+            return [AttrDict(name="POSINV-0001")]
+
+        self.creation.frappe.get_all = fake_get_all
+        self.creation.frappe.get_doc = lambda doctype, name: existing_doc
+
+        result = self.creation.find_invoice_by_client_request_id(
+            "pos-request",
+            company="Test Company",
+            pos_profile="Main POS",
+            opening_shift="POS-OPEN-0001",
+            invoice_doctype="POS Invoice",
+        )
+
+        self.assertIs(result, existing_doc)
+        self.assertEqual(calls[0][0], "POS Invoice")
+        self.assertEqual(
+            calls[0][1]["posa_pos_opening_shift"],
+            "POS-OPEN-0001",
+        )
 
     def test_submit_invoice_skips_idempotency_lookup_when_custom_field_is_missing(self):
         invoice_doc = FakeDoc(

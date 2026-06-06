@@ -36,25 +36,56 @@ def set_invoice_client_request_id(invoice_doc, client_request_id):
     return invoice_doc
 
 
-def find_invoice_by_client_request_id(client_request_id, preferred_doctype=None):
+def find_invoice_by_client_request_id(
+    client_request_id,
+    company=None,
+    pos_profile=None,
+    opening_shift=None,
+    invoice_doctype=None,
+):
     if not client_request_id:
         return None
 
-    doctypes = []
-    if preferred_doctype:
-        doctypes.append(preferred_doctype)
-    doctypes.extend(doctype for doctype in ("Sales Invoice", "POS Invoice") if doctype not in doctypes)
+    if not company or not pos_profile:
+        frappe.throw(
+            frappe._("Company and POS Profile are required for invoice retry lookup.")
+        )
 
+    doctypes = [invoice_doctype] if invoice_doctype else ["Sales Invoice", "POS Invoice"]
+    matches = []
     for doctype in doctypes:
         if not doctype_supports_client_request_id(doctype):
             continue
-        existing_name = frappe.db.get_value(
+
+        filters = {
+            "posa_client_request_id": client_request_id,
+            "company": company,
+            "pos_profile": pos_profile,
+        }
+        if opening_shift:
+            filters["posa_pos_opening_shift"] = opening_shift
+
+        rows = frappe.get_all(
             doctype,
-            {"posa_client_request_id": client_request_id},
-            "name",
+            filters=filters,
+            fields=["name"],
+            limit_page_length=2,
         )
-        if existing_name:
-            return frappe.get_doc(doctype, existing_name)
+        matches.extend((doctype, row.get("name")) for row in rows)
+
+        if len(matches) > 1:
+            break
+
+    if len(matches) > 1:
+        frappe.throw(
+            frappe._(
+                "Multiple invoices match this client request ID in the current POS scope."
+            )
+        )
+
+    if matches:
+        doctype, invoice_name = matches[0]
+        return frappe.get_doc(doctype, invoice_name)
 
     return None
 
