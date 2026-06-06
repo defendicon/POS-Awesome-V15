@@ -61,6 +61,7 @@ def find_invoice_by_client_request_id(
             "posa_client_request_id": client_request_id,
             "company": company,
             "pos_profile": pos_profile,
+            "docstatus": ["!=", 2],
         }
         if opening_shift:
             filters["posa_pos_opening_shift"] = opening_shift

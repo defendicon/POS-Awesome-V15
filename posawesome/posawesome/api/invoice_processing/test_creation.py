@@ -1493,6 +1493,63 @@ class TestInvoiceIdempotency(unittest.TestCase):
         self.assertEqual(calls[0][1]["opening_shift"], "POS-OPEN-0001")
         self.assertEqual(calls[0][1]["invoice_doctype"], "Sales Invoice")
 
+    def test_repair_invoice_submission_skips_cancelled_ledger(self):
+        ledger_doc, _invoice_doc = self._setup_invoice_repair_case()
+        ledger_doc.state = "CANCELLED"
+        ledger_doc.invoice_name = None
+        self.creation._process_post_submit_payments = lambda *args, **kwargs: (
+            (_ for _ in ()).throw(AssertionError("cancelled ledger must not replay"))
+        )
+
+        result = self.creation.repair_invoice_submission(
+            "ledger-repair-secure-001",
+            "Test Company",
+            "Main POS",
+        )
+
+        self.assertFalse(result["repaired"])
+        self.assertEqual(result["ledger_state"], "CANCELLED")
+
+    def test_cancelled_submission_ledger_cannot_be_reused(self):
+        ledger_doc = FakeDoc(
+            doctype="POS Invoice Submission Ledger",
+            name="cancelled-ledger",
+            state="CANCELLED",
+        )
+        original_lookup = self.creation._get_submission_ledger_by_key
+        self.creation._get_submission_ledger_by_key = lambda ledger_key: ledger_doc
+        try:
+            with self.assertRaisesRegex(Exception, "cancelled and cannot be replayed"):
+                self.creation._get_or_create_submission_ledger(
+                    "cancelled-request",
+                    {"company": "Test Company", "pos_profile": "Main POS"},
+                    {},
+                    "Sales Invoice",
+                )
+        finally:
+            self.creation._get_submission_ledger_by_key = original_lookup
+
+    def test_late_update_does_not_resurrect_cancelled_submission_ledger(self):
+        ledger_doc = FakeDoc(
+            doctype="POS Invoice Submission Ledger",
+            name="cancelled-ledger",
+            state="CANCELLED",
+            invoice_name=None,
+        )
+        ledger_doc.save = lambda ignore_permissions=False: (
+            (_ for _ in ()).throw(AssertionError("cancelled ledger must not be saved"))
+        )
+
+        result = self.creation._update_submission_ledger(
+            ledger_doc,
+            "POST_SUBMIT_DONE",
+            invoice_name="SINV-0001",
+        )
+
+        self.assertIs(result, ledger_doc)
+        self.assertEqual(ledger_doc.state, "CANCELLED")
+        self.assertIsNone(ledger_doc.invoice_name)
+
     def test_repair_invoice_submission_rejects_closed_shift(self):
         self._setup_invoice_repair_case(
             request_data={"paid_change": 10},
@@ -1769,6 +1826,7 @@ class TestInvoiceIdempotency(unittest.TestCase):
             calls[0][1]["posa_pos_opening_shift"],
             "POS-OPEN-0001",
         )
+        self.assertEqual(calls[0][1]["docstatus"], ["!=", 2])
 
     def test_submit_invoice_skips_idempotency_lookup_when_custom_field_is_missing(self):
         invoice_doc = FakeDoc(

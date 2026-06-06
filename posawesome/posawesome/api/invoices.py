@@ -121,7 +121,7 @@ def get_draft_invoice_doc(invoice_name, doctype="Sales Invoice"):
 @frappe.whitelist()
 def delete_invoice(invoice):
     from frappe import _
-    from posawesome.posawesome.api.invoice import delete_invoice_submission_ledger_entries_for_invoice
+    from posawesome.posawesome.api.invoice import cancel_invoice_submission_ledger_entries_for_invoice
 
     doctype = "Sales Invoice"
     if frappe.db.exists("POS Invoice", invoice):
@@ -134,8 +134,8 @@ def delete_invoice(invoice):
     ):
         frappe.throw(_("This invoice {0} cannot be deleted").format(invoice))
 
+    cancel_invoice_submission_ledger_entries_for_invoice(doctype, invoice)
     frappe.delete_doc(doctype, invoice, force=1)
-    delete_invoice_submission_ledger_entries_for_invoice(doctype, invoice)
     return _("Invoice {0} Deleted").format(invoice)
 
 

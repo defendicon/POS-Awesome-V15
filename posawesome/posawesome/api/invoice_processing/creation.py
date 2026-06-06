@@ -49,6 +49,7 @@ STATE_DRAFT_CREATED = "DRAFT_CREATED"
 STATE_SUBMITTED = "SUBMITTED"
 STATE_POST_SUBMIT_DONE = "POST_SUBMIT_DONE"
 STATE_FAILED = "FAILED"
+STATE_CANCELLED = "CANCELLED"
 FINAL_LEDGER_STATES = {STATE_SUBMITTED, STATE_POST_SUBMIT_DONE}
 INVOICE_REPAIR_ROLES = {
     "System Manager",
@@ -296,6 +297,8 @@ def _update_submission_ledger_by_name(ledger_name, state, **fields):
 def _update_submission_ledger(ledger_doc, state, **fields):
     if not ledger_doc:
         return None
+    if ledger_doc.get("state") == STATE_CANCELLED and state != STATE_CANCELLED:
+        return ledger_doc
     ledger_doc.state = state
     for key, value in fields.items():
         if value is not None:
@@ -316,6 +319,8 @@ def _get_or_create_submission_ledger(client_request_id, invoice, data, document_
     )
     existing = _get_submission_ledger_by_key(ledger_key)
     if existing:
+        if existing.get("state") == STATE_CANCELLED:
+            frappe.throw(_("This invoice submission was cancelled and cannot be replayed."))
         return existing
 
     payload = {
@@ -1560,6 +1565,13 @@ def repair_invoice_submission(client_request_id, company, pos_profile, document_
     )
     if not ledger_doc:
         frappe.throw(_("No invoice submission ledger found for this request"))
+    if ledger_doc.get("state") == STATE_CANCELLED:
+        return {
+            "client_request_id": client_request_id,
+            "ledger_state": STATE_CANCELLED,
+            "repaired": False,
+            "message": _("Cancelled invoice submissions cannot be repaired or replayed."),
+        }
 
     invoice_name = ledger_doc.get("invoice_name")
     if not invoice_name:

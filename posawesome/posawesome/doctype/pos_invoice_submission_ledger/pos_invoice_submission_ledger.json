@@ -15,6 +15,10 @@
   "pos_profile",
   "document_type",
   "invoice_name",
+  "cancelled_invoice_name",
+  "cancelled_invoice_doctype",
+  "cancelled_at",
+  "cancelled_by",
   "section_break_1",
   "request_data",
   "invoice_payload",
@@ -42,7 +46,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "State",
-   "options": "RECEIVED\nDRAFT_CREATED\nSUBMITTED\nPOST_SUBMIT_DONE\nFAILED",
+   "options": "RECEIVED\nDRAFT_CREATED\nSUBMITTED\nPOST_SUBMIT_DONE\nFAILED\nCANCELLED",
    "reqd": 1
   },
   {
@@ -78,6 +82,31 @@
    "in_list_view": 1,
    "label": "Invoice",
    "options": "document_type"
+  },
+  {
+   "fieldname": "cancelled_invoice_name",
+   "fieldtype": "Data",
+   "label": "Cancelled Invoice Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cancelled_invoice_doctype",
+   "fieldtype": "Data",
+   "label": "Cancelled Invoice Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cancelled_at",
+   "fieldtype": "Datetime",
+   "label": "Cancelled At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cancelled_by",
+   "fieldtype": "Link",
+   "label": "Cancelled By",
+   "options": "User",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_1",

@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import pathlib
 import sys
 import types
@@ -10,6 +11,14 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
 HOOKS_PATH = REPO_ROOT / "posawesome" / "hooks.py"
 INVOICE_API_PATH = REPO_ROOT / "posawesome" / "posawesome" / "api" / "invoice.py"
 INVOICES_API_PATH = REPO_ROOT / "posawesome" / "posawesome" / "api" / "invoices.py"
+SUBMISSION_LEDGER_PATH = (
+    REPO_ROOT
+    / "posawesome"
+    / "posawesome"
+    / "doctype"
+    / "pos_invoice_submission_ledger"
+    / "pos_invoice_submission_ledger.json"
+)
 
 
 def _install_invoice_api_stubs():
@@ -28,6 +37,8 @@ def _install_invoice_api_stubs():
         "get_all_calls": [],
         "delete_doc_calls": [],
         "ledger_names": [],
+        "ledger_docs": {},
+        "saved_ledgers": [],
     }
 
     def get_all(*args, **kwargs):
@@ -40,7 +51,7 @@ def _install_invoice_api_stubs():
     frappe_module._ = lambda text: text
     frappe_module.get_all = get_all
     frappe_module.delete_doc = delete_doc
-    frappe_module.get_doc = lambda *args, **kwargs: None
+    frappe_module.get_doc = lambda doctype, name: state["ledger_docs"].get(name)
     frappe_module.get_value = lambda *args, **kwargs: None
     frappe_module.msgprint = lambda *args, **kwargs: None
     frappe_module.throw = lambda message: (_ for _ in ()).throw(Exception(message))
@@ -50,9 +61,11 @@ def _install_invoice_api_stubs():
         get_value=lambda *args, **kwargs: None,
         exists=lambda *args, **kwargs: False,
     )
+    frappe_module.session = SimpleNamespace(user="cancel-user@example.com")
 
     frappe_utils_module.add_days = lambda date, days: date
     frappe_utils_module.flt = lambda value, precision=None: float(value or 0)
+    frappe_utils_module.now = lambda: "2026-06-06 12:00:00"
     frappe_utils_module.get_url_to_form = lambda doctype, name: f"/app/{doctype}/{name}"
     frappe_module.utils = frappe_utils_module
 
@@ -98,10 +111,22 @@ class TestInvoiceCancelHooks(unittest.TestCase):
         self.assertIn('"POS Invoice": {', hooks)
         self.assertIn('"on_cancel": "posawesome.posawesome.api.invoice.on_cancel"', hooks)
 
-    def test_cancel_hook_deletes_matching_submission_ledger_entries(self):
+    def test_cancel_hook_detaches_and_preserves_submission_ledger_entries(self):
         state = _install_invoice_api_stubs()
         invoice_api = _load_invoice_api_module()
         state["ledger_names"] = ["ledger-1", "ledger-2"]
+        for ledger_name in state["ledger_names"]:
+            ledger_doc = SimpleNamespace(
+                name=ledger_name,
+                state="POST_SUBMIT_DONE",
+                invoice_name="SINV-0001",
+            )
+
+            def save(ignore_permissions=False, doc=ledger_doc):
+                state["saved_ledgers"].append((doc, ignore_permissions))
+
+            ledger_doc.save = save
+            state["ledger_docs"][ledger_name] = ledger_doc
         called = {"credit": False, "gift_cards": False}
 
         invoice_api.cancel_posawesome_credit_journal_entries = lambda doc: called.update(credit=True)
@@ -124,37 +149,49 @@ class TestInvoiceCancelHooks(unittest.TestCase):
                 },
             ),
         )
-        self.assertEqual(
-            state["delete_doc_calls"],
-            [
-                (
-                    ("POS Invoice Submission Ledger", "ledger-1"),
-                    {"force": True, "ignore_permissions": True},
-                ),
-                (
-                    ("POS Invoice Submission Ledger", "ledger-2"),
-                    {"force": True, "ignore_permissions": True},
-                ),
-            ],
-        )
+        self.assertEqual(state["delete_doc_calls"], [])
+        self.assertEqual(len(state["saved_ledgers"]), 2)
+        for ledger_doc, ignore_permissions in state["saved_ledgers"]:
+            self.assertTrue(ignore_permissions)
+            self.assertEqual(ledger_doc.state, "CANCELLED")
+            self.assertIsNone(ledger_doc.invoice_name)
+            self.assertEqual(ledger_doc.cancelled_invoice_name, "SINV-0001")
+            self.assertEqual(ledger_doc.cancelled_invoice_doctype, "Sales Invoice")
+            self.assertEqual(ledger_doc.cancelled_at, "2026-06-06 12:00:00")
+            self.assertEqual(ledger_doc.cancelled_by, "cancel-user@example.com")
 
-    def test_submission_ledger_cleanup_ignores_missing_invoice_identity(self):
+    def test_submission_ledger_cancellation_ignores_missing_invoice_identity(self):
         state = _install_invoice_api_stubs()
         invoice_api = _load_invoice_api_module()
 
-        invoice_api.delete_invoice_submission_ledger_entries_for_invoice(None, "SINV-0001")
-        invoice_api.delete_invoice_submission_ledger_entries_for_invoice("Sales Invoice", None)
+        invoice_api.cancel_invoice_submission_ledger_entries_for_invoice(None, "SINV-0001")
+        invoice_api.cancel_invoice_submission_ledger_entries_for_invoice("Sales Invoice", None)
 
         self.assertEqual(state["get_all_calls"], [])
         self.assertEqual(state["delete_doc_calls"], [])
 
-    def test_delete_invoice_api_cleans_submission_ledger_after_delete(self):
+    def test_delete_invoice_api_detaches_submission_ledger_before_delete(self):
         source = INVOICES_API_PATH.read_text()
 
         self.assertIn(
-            "delete_invoice_submission_ledger_entries_for_invoice(doctype, invoice)",
+            "cancel_invoice_submission_ledger_entries_for_invoice(doctype, invoice)",
             source,
         )
+        self.assertLess(
+            source.index("cancel_invoice_submission_ledger_entries_for_invoice(doctype, invoice)"),
+            source.index("frappe.delete_doc(doctype, invoice, force=1)"),
+        )
+
+    def test_submission_ledger_schema_preserves_cancellation_audit_fields(self):
+        schema = json.loads(SUBMISSION_LEDGER_PATH.read_text())
+        fields = {field["fieldname"]: field for field in schema["fields"]}
+
+        self.assertIn("CANCELLED", fields["state"]["options"].splitlines())
+        self.assertEqual(fields["invoice_name"]["fieldtype"], "Dynamic Link")
+        self.assertEqual(fields["cancelled_invoice_name"]["fieldtype"], "Data")
+        self.assertEqual(fields["cancelled_invoice_doctype"]["fieldtype"], "Data")
+        self.assertEqual(fields["cancelled_at"]["fieldtype"], "Datetime")
+        self.assertEqual(fields["cancelled_by"]["fieldtype"], "Link")
 
 
 if __name__ == "__main__":

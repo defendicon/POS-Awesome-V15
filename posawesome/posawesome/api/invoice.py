@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import add_days, flt
+from frappe.utils import add_days, flt, now
 
 from posawesome.posawesome.api.utilities import get_company_domain  # Updated import
 from posawesome.posawesome.api.payments import get_posawesome_credit_redeem_remark
@@ -38,17 +38,17 @@ def before_cancel(doc, method):
 def on_cancel(doc, method):
     cancel_posawesome_credit_journal_entries(doc)
     restore_posawesome_gift_card_redemptions(doc)
-    delete_invoice_submission_ledger_entries(doc)
+    cancel_invoice_submission_ledger_entries(doc)
 
 
-def delete_invoice_submission_ledger_entries(doc):
-    delete_invoice_submission_ledger_entries_for_invoice(
+def cancel_invoice_submission_ledger_entries(doc):
+    cancel_invoice_submission_ledger_entries_for_invoice(
         getattr(doc, "doctype", None),
         getattr(doc, "name", None),
     )
 
 
-def delete_invoice_submission_ledger_entries_for_invoice(doctype, invoice_name):
+def cancel_invoice_submission_ledger_entries_for_invoice(doctype, invoice_name):
     if not doctype or not invoice_name:
         return
 
@@ -62,12 +62,14 @@ def delete_invoice_submission_ledger_entries_for_invoice(doctype, invoice_name):
     )
 
     for ledger_name in ledger_names:
-        frappe.delete_doc(
-            SUBMISSION_LEDGER_DOCTYPE,
-            ledger_name,
-            force=True,
-            ignore_permissions=True,
-        )
+        ledger_doc = frappe.get_doc(SUBMISSION_LEDGER_DOCTYPE, ledger_name)
+        ledger_doc.state = "CANCELLED"
+        ledger_doc.cancelled_invoice_name = invoice_name
+        ledger_doc.cancelled_invoice_doctype = doctype
+        ledger_doc.cancelled_at = now()
+        ledger_doc.cancelled_by = frappe.session.user
+        ledger_doc.invoice_name = None
+        ledger_doc.save(ignore_permissions=True)
 
 
 def cancel_posawesome_credit_journal_entries(doc):
