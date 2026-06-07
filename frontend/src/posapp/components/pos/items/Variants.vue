@@ -3,9 +3,9 @@
 		<v-dialog v-model="dialogVisible" max-width="600px">
 			<v-card min-height="500px">
 				<v-card-title>
-					<span class="text-h5 text-primary">Select Item</span>
+					<span class="text-h5 text-primary">{{ __("Select Item") }}</span>
 					<v-spacer></v-spacer>
-					<v-btn color="error" theme="dark" @click="close_dialog">Close</v-btn>
+					<v-btn color="error" theme="dark" @click="close_dialog">{{ __("Close") }}</v-btn>
 				</v-card-title>
 				<v-card-text class="pa-0">
 					<v-container v-if="parentItem">

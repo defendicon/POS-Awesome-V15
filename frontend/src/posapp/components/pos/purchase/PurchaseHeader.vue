@@ -21,7 +21,7 @@
 					clearable
 				>
 					<template #append-inner>
-						<v-tooltip v-if="allowCreateSupplier" text="Add new supplier">
+						<v-tooltip v-if="allowCreateSupplier" :text="__('Add new supplier')">
 							<template #activator="{ props }">
 								<v-icon
 									v-bind="props"

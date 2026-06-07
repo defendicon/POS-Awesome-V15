@@ -99,7 +99,7 @@
 							<v-col cols="6">
 								<v-select
 									density="compact"
-									label="Gender"
+									:label="__('Gender')"
 									:items="genders"
 									v-model="gender"
 									class="pos-themed-input"

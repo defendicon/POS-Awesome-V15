@@ -153,7 +153,7 @@
 								clearable
 								type="number"
 								min="0"
-								placeholder="No limit"
+								:placeholder="__('No limit')"
 							></v-text-field>
 						</v-col>
 					</v-row>

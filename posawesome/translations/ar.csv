@@ -1816,3 +1816,17 @@ We'll let you know if an invoice fails to submit,سنخبرك في حالة فش
 Workflow,سير العمل
 Write off amount cannot exceed the POS profile maximum of {0},لا يمكن أن يتجاوز مبلغ الشطب الحد الأقصى لملف تعريف نقطة البيع وهو {0}
 Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,المبلغ المشطوب يتجاوز الحد المسموح به ({0}). الرجاء إضافة دفعة للمبلغ المتبقي.
+Select Item,اختر صنفاً
+sales persons found,مندوب مبيعات موجود
+No sales persons found,لم يتم العثور على مندوبي مبيعات
+ID,المعرف
+TAX ID,الرقم الضريبي
+Email,البريد الإلكتروني
+Primary Address,العنوان الرئيسي
+Customer Address created successfully.,تم إنشاء عنوان العميل بنجاح.
+State,المحافظة
+Barcode Printing,طباعة الباركود
+No limit,بلا حد
+Filter Invoices by POS Profile,تصفية الفواتير حسب ملف نقاط البيع
+Search by Mobile,البحث برقم الهاتف
+Add new supplier,إضافة مورد جديد

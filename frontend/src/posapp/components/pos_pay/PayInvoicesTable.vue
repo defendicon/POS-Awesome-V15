@@ -30,7 +30,7 @@
 					:items="normalizedPosProfiles"
 					item-title="label"
 					item-value="value"
-					label="Filter Invoices by POS Profile"
+					:label="__('Filter Invoices by POS Profile')"
 				></v-select>
 			</v-col>
 			<v-col> </v-col>

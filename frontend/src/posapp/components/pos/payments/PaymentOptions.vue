@@ -69,7 +69,7 @@
 						:min-date="new Date()"
 						auto-apply
 						teleport
-						placeholder="Due Date"
+						:placeholder="__('Due Date')"
 						class="sleek-field pos-themed-input"
 						@update:model-value="$emit('update:newCreditDueDate', $event)"
 					/>
