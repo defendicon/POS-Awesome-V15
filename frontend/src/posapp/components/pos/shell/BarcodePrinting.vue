@@ -34,6 +34,8 @@
 								<v-select
 									v-model="pageFormat"
 									:items="pageFormatOptions"
+									item-title="title"
+									item-value="value"
 									:label="__('Page Format')"
 									density="compact"
 									variant="outlined"
@@ -41,7 +43,7 @@
 									class="pos-themed-input"
 								></v-select>
 							</v-col>
-							<v-col cols="6" md="2">
+							<v-col v-if="pageFormat === 'A4'" cols="6" md="2">
 								<v-text-field
 									v-model.number="gridCols"
 									:label="__('Cols')"
@@ -53,7 +55,7 @@
 									min="1"
 								></v-text-field>
 							</v-col>
-							<v-col cols="6" md="2">
+							<v-col v-if="pageFormat === 'A4'" cols="6" md="2">
 								<v-text-field
 									v-model.number="gridRows"
 									:label="__('Rows')"
@@ -309,7 +311,14 @@ export default {
 			items: [],
 			nextRowId: 1,
 			pageFormat: "A4",
-			pageFormatOptions: ["A4"],
+			pageFormatOptions: [
+				{ title: "A4", value: "A4" },
+				{ title: "58 × 40 mm", value: "label_58x40", width: 58, height: 40 },
+				{ title: "58 × 30 mm", value: "label_58x30", width: 58, height: 30 },
+				{ title: "62 × 29 mm", value: "label_62x29", width: 62, height: 29 },
+				{ title: "100 × 50 mm", value: "label_100x50", width: 100, height: 50 },
+				{ title: "100 × 100 mm", value: "label_100x100", width: 100, height: 100 },
+			],
 			gridCols: 3,
 			gridRows: 7,
 			includePrice: true,
@@ -348,7 +357,10 @@ export default {
 					rows: parseInt(this.gridRows) || 7,
 				};
 			}
-			// Fallback
+			const found = this.pageFormatOptions.find((o) => o.value === this.pageFormat);
+			if (found && found.width && found.height) {
+				return { type: "label", width: found.width, height: found.height };
+			}
 			return { type: "A4", cols: 3, rows: 7 };
 		},
 		getScaleSettingsSnapshot() {
