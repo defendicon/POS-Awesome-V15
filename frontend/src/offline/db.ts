@@ -31,9 +31,10 @@
  * mutation. For large, searchable datasets (`items`, `customers`) it also issues
  * `db` table queries directly. Domain queue modules (`invoices`, `payments`, etc.)
  * and sync adapters import `db`, `memory`, and `persist` from this file.
- * `checkDbHealth` is called defensively before every IndexedDB operation
- * elsewhere in the layer; it will reopen, or delete and recreate, the database
- * on detected corruption.
+ * `checkDbHealth` is called defensively before IndexedDB operations elsewhere
+ * in the layer. Health checks are serialized and may reopen the connection, but
+ * never delete durable data automatically. Destructive clearing remains an
+ * explicit user action.
  */
 import Dexie from "dexie/dist/dexie.mjs";
 
@@ -199,17 +200,6 @@ function shouldPersistToIndexedDb(key: string) {
 
 function shouldPersistToLocalStorage(key: string) {
 	return LOCAL_STORAGE_KEYS.has(key) && !LARGE_KEYS.has(key);
-}
-
-function isCorruptionError(err: unknown) {
-	if (!err || typeof err !== "object") return false;
-	const maybe = err as { name?: string; message?: string };
-	const name = maybe.name || "";
-	const message = (maybe.message || "").toLowerCase();
-	return (
-		["VersionError", "InvalidStateError", "NotFoundError"].includes(name) ||
-		message.includes("corrupt")
-	);
 }
 
 // Start with version 1 using the full schema immediately
@@ -790,26 +780,37 @@ export async function repairDbAfterFailedHealthCheck(error?: unknown) {
 		await db.open();
 		return true;
 	} catch (reopenError) {
-		console.error("DB reopen failed", reopenError);
-		if (isCorruptionError(reopenError) || isCorruptionError(error)) {
-			try {
-				await Dexie.delete("posawesome_offline");
-				await db.open();
-				return true;
-			} catch (recreateError) {
-				console.error("DB recreate failed", recreateError);
-			}
-		}
+		console.error(
+			"DB reopen failed; preserving IndexedDB for a later retry",
+			reopenError,
+			error,
+		);
 	}
 	return false;
 }
 
-export async function checkDbHealth() {
-	const healthy = await quickDbHealthCheck();
-	if (healthy) {
-		return true;
+let dbHealthCheckPromise: Promise<boolean> | null = null;
+
+export function checkDbHealth() {
+	if (dbHealthCheckPromise) {
+		return dbHealthCheckPromise;
 	}
-	return repairDbAfterFailedHealthCheck();
+
+	const healthCheck = (async () => {
+		const healthy = await quickDbHealthCheck();
+		if (healthy) {
+			return true;
+		}
+		return repairDbAfterFailedHealthCheck();
+	})();
+
+	const trackedHealthCheck = healthCheck.finally(() => {
+		if (dbHealthCheckPromise === trackedHealthCheck) {
+			dbHealthCheckPromise = null;
+		}
+	});
+	dbHealthCheckPromise = trackedHealthCheck;
+	return dbHealthCheckPromise;
 }
 
 export function queueHealthCheck() {

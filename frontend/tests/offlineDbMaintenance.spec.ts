@@ -2,6 +2,7 @@
 
 import "fake-indexeddb/auto";
 
+import Dexie from "dexie/dist/dexie.mjs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -164,5 +165,46 @@ describe("offline IndexedDB maintenance", () => {
 		expect(openSpy).toHaveBeenCalledTimes(1);
 		isOpenSpy.mockRestore();
 		openSpy.mockRestore();
+	});
+
+	it("coalesces concurrent health checks instead of racing database repair", async () => {
+		const isOpenSpy = vi.spyOn(db, "isOpen").mockReturnValue(false);
+		let resolveOpen: ((_value: typeof db) => void) | null = null;
+		const openSpy = vi.spyOn(db, "open").mockImplementation(
+			() =>
+				new Promise((_resolve) => {
+					resolveOpen = _resolve;
+				}),
+		);
+
+		const first = checkDbHealth();
+		const second = checkDbHealth();
+
+		expect(first).toBe(second);
+		expect(openSpy).toHaveBeenCalledTimes(1);
+
+		resolveOpen?.(db);
+		await expect(first).resolves.toBe(true);
+
+		isOpenSpy.mockRestore();
+		openSpy.mockRestore();
+	});
+
+	it("never deletes IndexedDB during automatic health repair", async () => {
+		const isOpenSpy = vi.spyOn(db, "isOpen").mockReturnValue(false);
+		const transientError = Object.assign(new Error("connection closing"), {
+			name: "InvalidStateError",
+		});
+		const openSpy = vi.spyOn(db, "open").mockRejectedValue(transientError);
+		const deleteSpy = vi.spyOn(Dexie, "delete");
+
+		await expect(
+			repairDbAfterFailedHealthCheck(transientError),
+		).resolves.toBe(false);
+
+		expect(deleteSpy).not.toHaveBeenCalled();
+		isOpenSpy.mockRestore();
+		openSpy.mockRestore();
+		deleteSpy.mockRestore();
 	});
 });
