@@ -3,15 +3,16 @@ type OfflineSyncRuntimeLike = {
 	stopTimerSync: () => void;
 	scheduleBootWarmSync: () => Promise<boolean>;
 	triggerOnlineResumeSync: () => Promise<boolean>;
-	triggerOperatorRefreshSync: (options?: {
+	triggerOperatorRefreshSync: (_options?: {
 		includeBootSync?: boolean;
 	}) => Promise<boolean>;
 };
 
 type UseBootSyncOptions = {
 	offlineSyncRuntime: OfflineSyncRuntimeLike;
-	evaluateBootstrapSnapshot: (options?: { allowPrompt?: boolean }) => void;
+	evaluateBootstrapSnapshot: (_options?: { allowPrompt?: boolean }) => void;
 	getLastRunSummary?: () => unknown;
+	onRefreshStateChange?: (_active: boolean) => void;
 };
 
 export function useBootSync(options: UseBootSyncOptions) {
@@ -62,13 +63,19 @@ export function useBootSync(options: UseBootSyncOptions) {
 	}
 
 	function triggerOperatorRefreshSync(refreshOptions = {}) {
-		return options.offlineSyncRuntime
-			.triggerOperatorRefreshSync(refreshOptions)
+		options.onRefreshStateChange?.(true);
+		return Promise.resolve()
+			.then(() =>
+				options.offlineSyncRuntime.triggerOperatorRefreshSync(
+					refreshOptions,
+				),
+			)
 			.catch((error) => {
 				logFailure("Failed to run operator offline refresh", error);
 				return false;
 			})
 			.finally(() => {
+				options.onRefreshStateChange?.(false);
 				options.evaluateBootstrapSnapshot({ allowPrompt: false });
 			});
 	}

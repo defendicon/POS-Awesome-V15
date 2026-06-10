@@ -11,6 +11,7 @@
 						'status-btn-enhanced',
 						{
 							'status-btn-enhanced--checking': props.serverConnecting,
+							'status-btn-enhanced--refreshing': props.refreshActive,
 						},
 					]"
 					:color="statusColor"
@@ -18,9 +19,14 @@
 					@click="emit('toggle-panel')"
 				>
 					<span
-						v-if="props.serverConnecting"
+						v-if="props.serverConnecting && !props.refreshActive"
 						data-test="status-checking-indicator"
 						class="status-checking-indicator"
+					/>
+					<span
+						v-if="props.refreshActive"
+						data-test="status-refresh-indicator"
+						class="status-refresh-indicator"
 					/>
 					<span
 						v-if="props.bootstrapWarningActive"
@@ -58,8 +64,12 @@
 			>
 				{{ connectivityLabel }}
 			</div>
-			<div v-if="props.serverConnecting" class="status-subtitle-inline">
-				{{ __("Rechecking connection") }}
+			<div v-if="props.refreshActive || props.serverConnecting" class="status-subtitle-inline">
+				{{
+					props.refreshActive
+						? __("Refreshing offline data")
+						: __("Rechecking connection")
+				}}
 			</div>
 		</div>
 	</div>
@@ -76,6 +86,7 @@ interface Props {
 	networkOnline?: boolean;
 	serverOnline?: boolean;
 	serverConnecting?: boolean;
+	refreshActive?: boolean;
 	isIpHost?: boolean;
 	bootstrapWarningActive?: boolean;
 	bootstrapWarningTooltip?: string;
@@ -85,12 +96,13 @@ const props = withDefaults(defineProps<Props>(), {
 	networkOnline: false,
 	serverOnline: false,
 	serverConnecting: false,
+	refreshActive: false,
 	isIpHost: false,
 	bootstrapWarningActive: false,
 	bootstrapWarningTooltip: "",
 });
 const emit = defineEmits<{
-	(e: "toggle-panel"): void;
+	(_event: "toggle-panel"): void;
 }>();
 
 // @ts-ignore
@@ -115,6 +127,10 @@ const statusColor = computed(() => {
 			"Host:",
 			window.location.hostname,
 		);
+	}
+
+	if (props.refreshActive) {
+		return "blue";
 	}
 
 	// Show yellow/orange when connecting
@@ -157,6 +173,10 @@ const statusIcon = computed(() => {
 		);
 	}
 
+	if (props.refreshActive) {
+		return "mdi-refresh";
+	}
+
 	// Show loading icon when connecting
 	if (props.serverConnecting) {
 		return "mdi-wifi-sync";
@@ -189,6 +209,14 @@ const statusText = computed(() => {
 	 */
 	const hostname = window.location.hostname;
 	const hostType = props.isIpHost ? "Local/IP Host" : "Domain Host";
+
+	if (props.refreshActive) {
+		return __("Refreshing offline data in the background.");
+	}
+
+	if (props.refreshActive) {
+		return __("Refreshing...");
+	}
 
 	if (props.serverConnecting) {
 		return __(`Connecting to server... (${hostType}: ${hostname})`);
@@ -275,7 +303,12 @@ const connectivityLabel = computed(() => {
 	box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.18);
 }
 
-.status-checking-indicator {
+.status-btn-enhanced--refreshing {
+	box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.18);
+}
+
+.status-checking-indicator,
+.status-refresh-indicator {
 	position: absolute;
 	inset: 3px;
 	border: 2px solid rgba(255, 152, 0, 0.35);
@@ -283,6 +316,11 @@ const connectivityLabel = computed(() => {
 	border-radius: 999px;
 	animation: status-spin 0.9s linear infinite;
 	pointer-events: none;
+}
+
+.status-refresh-indicator {
+	border-color: rgba(33, 150, 243, 0.35);
+	border-top-color: rgba(33, 150, 243, 0.95);
 }
 
 .status-bootstrap-warning-indicator {

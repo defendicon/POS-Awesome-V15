@@ -97,6 +97,30 @@ describe("StatusIndicator", () => {
 		expect(wrapper.find('[data-test="status-checking-indicator"]').exists()).toBe(true);
 	});
 
+	it("shows a spinning offline-data refresh state before Limited", () => {
+		const wrapper = mount(StatusIndicator, {
+			props: {
+				networkOnline: true,
+				serverOnline: false,
+				serverConnecting: false,
+				refreshActive: true,
+				isIpHost: false,
+			},
+			global: {
+				components: {
+					VBtn: VBtnStub,
+					VIcon: VIconStub,
+					VTooltip: VTooltipStub,
+				},
+			},
+		});
+
+		expect(wrapper.text()).toContain("Refreshing");
+		expect(wrapper.text()).toContain("Refreshing offline data");
+		expect(wrapper.find('[data-test="status-refresh-indicator"]').exists()).toBe(true);
+		expect(wrapper.get("i").text()).toContain("mdi-refresh");
+	});
+
 	it("shows a separate bootstrap warning marker and hover warning details", () => {
 		const warningMessage =
 			"Cached offline data belongs to a different app build.";

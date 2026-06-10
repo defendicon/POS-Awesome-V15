@@ -36,6 +36,12 @@ Rules:
 - Pricing changes must check POS Profile price list and customer-specific price list priority.
 - UOM conversion must not inflate or deflate prices incorrectly.
 - Multi-currency conversion must be handled consistently.
+- An exact Item Price for the selected UOM is the final UOM list rate and must
+  not be multiplied by the UOM conversion factor again.
+- When an exact selected-UOM Item Price is unavailable, use the applicable
+  stock-UOM Item Price multiplied by the selected-UOM conversion factor.
+- Customer-specific Item Prices take priority over generic Item Prices within
+  the active customer/POS Profile price list.
 - Discount percentage and discount amount must not fight each other.
 - Cart totals, payment totals, invoice payload, and printed totals must match.
 
@@ -125,6 +131,10 @@ Rules:
 - Multi-currency sync must cover price-list, invoice, company, and payment
   account currencies, including dated Currency Exchange records.
 - Disabled, deleted, or out-of-scope pricing records must be removed locally.
+- When online startup connectivity is confirmed, complete offline-data refresh
+  must run in the background and expose a visible `Refreshing` state.
+- The POS must remain usable during startup refresh; `Limited` should be shown
+  only after refresh failure or incomplete required data is confirmed.
 
 ---
 
@@ -196,6 +206,9 @@ Rules:
 
 - UOM conversion must be applied consistently.
 - Rate must not be inflated because of wrong conversion direction.
+- An explicit alternate-UOM Item Price must be used directly.
+- Conversion-factor price calculation is a fallback only when that alternate
+  UOM has no applicable Item Price.
 - Quantity, stock, and invoice payload must use compatible UOM data.
 
 ---

@@ -93,3 +93,26 @@ Normalized repositories currently cover:
 
 The IndexedDB schema and persistence worker must always declare the same latest
 Dexie version.
+
+## UOM Price Resolution
+
+UOM rate selection is owned by the shared item-price resolver:
+
+1. Query normalized Item Price records for the active price list and item.
+2. Prefer an applicable customer-specific exact-UOM price.
+3. Otherwise use an applicable generic exact-UOM price.
+4. If no exact-UOM price exists, multiply the stock-UOM Item Price by the
+   selected UOM conversion factor.
+5. Use the existing stable stock-unit baseline only when no applicable Item
+   Price record exists.
+
+An explicit alternate-UOM Item Price is already the final rate for that UOM and
+must never be multiplied by the conversion factor again.
+
+## Startup Offline Refresh
+
+After server connectivity is confirmed, the full offline-data refresh runs in
+the background without blocking POS use. The navbar displays `Refreshing...`
+while the refresh lifecycle or any registered resource sync is active.
+`Limited` is reserved for a failed connection or incomplete required data after
+refresh evaluation, not for a refresh that is still in progress.

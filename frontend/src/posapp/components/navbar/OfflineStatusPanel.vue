@@ -168,12 +168,12 @@ const props = defineProps<{
 }>();
 
 defineEmits<{
-	(e: "update:modelValue", value: boolean): void;
-	(e: "toggle-offline"): void;
-	(e: "refresh-offline-data"): void;
-	(e: "rebuild-offline-data"): void;
-	(e: "clear-cache"): void;
-	(e: "open-diagnostics"): void;
+	(_event: "update:modelValue", _value: boolean): void;
+	(_event: "toggle-offline"): void;
+	(_event: "refresh-offline-data"): void;
+	(_event: "rebuild-offline-data"): void;
+	(_event: "clear-cache"): void;
+	(_event: "open-diagnostics"): void;
 }>();
 
 // @ts-ignore
@@ -198,6 +198,8 @@ const chipColor = computed(() => {
 	switch (connectivityTone.value) {
 		case "success":
 			return "success";
+		case "info":
+			return "info";
 		case "danger":
 			return "error";
 		default:

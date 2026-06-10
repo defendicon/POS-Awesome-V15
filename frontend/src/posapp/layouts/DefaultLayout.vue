@@ -297,6 +297,7 @@ const bootSync = useBootSync({
 	offlineSyncRuntime,
 	evaluateBootstrapSnapshot,
 	getLastRunSummary: () => syncCoordinator.getLastRunSummary(),
+	onRefreshStateChange: (active) => offlineSyncStore.setRefreshActive(active),
 });
 
 const updateChecks = useUpdateChecks({
@@ -568,7 +569,9 @@ async function runStartupOfflineDataWarmup(reason = "startup") {
 		!initialBootstrapSyncSettled.value ||
 		!profile?.name ||
 		getIsManualOffline() ||
-		!navigator.onLine
+		!navigator.onLine ||
+		!serverOnline.value ||
+		serverConnecting.value
 	) {
 		return false;
 	}

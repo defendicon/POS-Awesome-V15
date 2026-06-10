@@ -21,6 +21,7 @@
 						:network-online="networkOnline"
 						:server-online="serverOnline"
 						:server-connecting="serverConnecting"
+						:refresh-active="refreshActive"
 						:is-ip-host="isIpHost"
 						:bootstrap-warning-active="bootstrapWarningActive"
 						:bootstrap-warning-tooltip="bootstrapWarningTooltip"
@@ -195,7 +196,8 @@ export default {
 		} = storeToRefs(toastStore);
 		const { isFrozen, freezeTitle, freezeMessage } = storeToRefs(uiStore);
 		const { currentCashier, currentCashierDisplay } = storeToRefs(employeeStore);
-		const { panelOpen: offlinePanelOpen } = storeToRefs(offlineSyncStore);
+		const { panelOpen: offlinePanelOpen, refreshActive } =
+			storeToRefs(offlineSyncStore);
 
 		return {
 			isRtl,
@@ -218,6 +220,7 @@ export default {
 			currentCashier,
 			currentCashierDisplay,
 			offlinePanelOpen,
+			refreshActive,
 		};
 	},
 	components: {

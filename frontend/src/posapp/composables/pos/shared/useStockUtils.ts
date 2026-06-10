@@ -1,7 +1,9 @@
 import { isOffline } from "../../../../offline/index";
+import { itemPriceRepository } from "../../../../offline/repositories/ItemPriceRepository";
 import { toSelectedCurrency } from "../../../utils/currencyConversion.js";
 import { getPlcConversionRate } from "../../../utils/erpnextCurrency";
 import { useToastStore } from "../../../stores/toastStore.js";
+import { resolveItemPrice } from "../../../services/itemPriceResolver";
 
 export function useStockUtils() {
 	const toastStore = useToastStore();
@@ -135,14 +137,63 @@ export function useStockUtils() {
 			: null;
 		let uomRate: number | null = null;
 		const hasPriceList = priceList !== null && priceList !== undefined;
+		const activeCustomer = String(
+			context?.customer?.value ??
+				context?.customer ??
+				context?.selectedCustomer?.value ??
+				context?.selectedCustomer ??
+				"",
+		).trim();
+		const priceListCurrency = String(
+			context?.price_list_currency ||
+				context?.pos_profile?.currency ||
+				"",
+		).trim();
+		const postingDate = String(
+			context?.posting_date ||
+				context?.invoice_doc?.posting_date ||
+				new Date().toISOString().slice(0, 10),
+		).slice(0, 10);
 		const uomPriceCache: Map<string, number | null> =
 			context._uomPriceCache instanceof Map
 				? context._uomPriceCache
 				: (context._uomPriceCache = new Map());
-		const uomPriceCacheKey = `${hasPriceList ? String(priceList) : ""}::${String(item.item_code || "")}::${String(new_uom.uom || "")}`;
+		const uomPriceCacheKey = [
+			hasPriceList ? String(priceList) : "",
+			String(item.item_code || ""),
+			String(new_uom.uom || ""),
+			activeCustomer,
+			priceListCurrency,
+			postingDate,
+		].join("::");
 
 		if (uomPriceCache.has(uomPriceCacheKey)) {
 			uomRate = uomPriceCache.get(uomPriceCacheKey) ?? null;
+		}
+
+		if (uomRate === null && priceList) {
+			try {
+				const records = await itemPriceRepository.findForItem(
+					String(priceList),
+					String(item.item_code || ""),
+				);
+				const resolution = resolveItemPrice({
+					records,
+					selectedUom: String(new_uom.uom || value),
+					stockUom: String(item.stock_uom || ""),
+					conversionFactor: toNumber(item.conversion_factor) || 1,
+					customer: activeCustomer || null,
+					currency: priceListCurrency || null,
+					postingDate,
+					fallbackStockUnitRate: null,
+				});
+				if (resolution) {
+					uomRate = resolution.rate;
+					uomPriceCache.set(uomPriceCacheKey, uomRate);
+				}
+			} catch (error) {
+				console.error("Failed to resolve cached UOM price", error);
+			}
 		}
 
 		if (priceList && context.getCachedPriceListItems) {
@@ -150,7 +201,7 @@ export function useStockUtils() {
 			const match = cached.find(
 				(p) => p.item_code === item.item_code && p.uom === new_uom.uom,
 			);
-			if (match) {
+			if (uomRate === null && match) {
 				uomRate = match.price_list_rate ?? match.rate ?? 0;
 				uomPriceCache.set(uomPriceCacheKey, uomRate);
 			}
@@ -181,20 +232,11 @@ export function useStockUtils() {
 			}
 		}
 
-		console.log("[useStockUtils] calcUom progress", {
-			item: item.item_code,
-			requestedUom: value,
-			foundUom: new_uom?.uom,
-			cf: item.conversion_factor,
-			uomRate,
-			token: activeUomCalcToken
-		});
-
 		if (activeUomCalcToken !== item._uom_calc_token) {
 			return;
 		}
 
-		if (uomRate) {
+		if (uomRate !== null) {
 			item._manual_rate_set = true;
 			item._manual_rate_set_from_uom = true;
 
@@ -277,13 +319,6 @@ export function useStockUtils() {
 			refreshInvoiceTotals(context);
 			if (context.forceUpdate) context.forceUpdate();
 
-			console.log("[useStockUtils] calcUom DONE (specific price)", {
-				item: item.item_code,
-				rate: item.rate,
-				price_list_rate: item.price_list_rate,
-				base_rate: item.base_rate,
-				base_price_list_rate: item.base_price_list_rate,
-			});
 			return;
 		}
 

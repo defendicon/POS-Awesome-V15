@@ -110,18 +110,25 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 	const bootstrapWarning = ref<OfflineBootstrapWarning>(createDefaultWarning());
 	const capabilitySummaries = ref<OfflineCapabilitySummary[]>([]);
 	const resourceStates = ref<SyncResourceState[]>([]);
+	const refreshLifecycleActive = ref(false);
 
 	const syncingResourcesCount = computed(
 		() =>
 			resourceStates.value.filter((state) => state.status === "syncing").length,
 	);
+	const refreshActive = computed(
+		() => refreshLifecycleActive.value || syncingResourcesCount.value > 0,
+	);
 
 	const connectivityLabel = computed(() => {
-		if (summary.value.serverConnecting) {
-			return "Checking";
-		}
 		if (summary.value.manualOffline || !summary.value.networkOnline) {
 			return "Offline";
+		}
+		if (refreshActive.value) {
+			return "Refreshing";
+		}
+		if (summary.value.serverConnecting) {
+			return "Checking";
 		}
 		if (summary.value.serverOnline) {
 			return "Online";
@@ -130,11 +137,14 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 	});
 
 	const connectivityTone = computed(() => {
-		if (summary.value.serverConnecting) {
-			return "warning";
-		}
 		if (summary.value.manualOffline || !summary.value.networkOnline) {
 			return "danger";
+		}
+		if (refreshActive.value) {
+			return "info";
+		}
+		if (summary.value.serverConnecting) {
+			return "warning";
 		}
 		if (summary.value.serverOnline) {
 			return "success";
@@ -167,6 +177,11 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 	});
 
 	const summaryMessage = computed(() => {
+		if (refreshActive.value) {
+			return syncingResourcesCount.value
+				? `Refreshing offline data (${syncingResourcesCount.value} resource${syncingResourcesCount.value > 1 ? "s" : ""} active).`
+				: "Refreshing offline data in the background.";
+		}
 		if (bootstrapWarning.value.active && bootstrapWarning.value.title) {
 			return bootstrapWarning.value.title;
 		}
@@ -247,12 +262,17 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 			: [];
 	}
 
+	function setRefreshActive(value: boolean) {
+		refreshLifecycleActive.value = Boolean(value);
+	}
+
 	function reset() {
 		panelOpen.value = false;
 		summary.value = createDefaultSummary();
 		bootstrapWarning.value = createDefaultWarning();
 		capabilitySummaries.value = [];
 		resourceStates.value = [];
+		refreshLifecycleActive.value = false;
 	}
 
 	return {
@@ -261,7 +281,9 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		bootstrapWarning,
 		capabilitySummaries,
 		resourceStates,
+		refreshLifecycleActive,
 		syncingResourcesCount,
+		refreshActive,
 		connectivityLabel,
 		connectivityTone,
 		attentionResources,
@@ -273,6 +295,7 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		setBootstrapWarning,
 		setCapabilitySummaries,
 		setResourceStates,
+		setRefreshActive,
 		reset,
 	};
 });

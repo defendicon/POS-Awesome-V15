@@ -252,4 +252,47 @@ describe("OfflineStatusPanel", () => {
 		expect((wrapper.vm as any).clearCacheCount).toBe(1);
 		expect((wrapper.vm as any).diagnosticCount).toBe(1);
 	});
+
+	it("shows Refreshing instead of Limited while offline data is syncing", () => {
+		const store = useOfflineSyncStore();
+		store.setSummary({
+			networkOnline: true,
+			serverOnline: false,
+			serverConnecting: false,
+			manualOffline: false,
+		});
+		store.setBootstrapWarning({
+			active: true,
+			title: "Offline data is incomplete",
+			messages: ["Required data is still being prepared."],
+		});
+		store.setRefreshActive(true);
+
+		expect(store.refreshActive).toBe(true);
+		expect(store.connectivityLabel).toBe("Refreshing");
+		expect(store.connectivityTone).toBe("info");
+		expect(store.summaryMessage).toContain("Refreshing offline data");
+
+		store.setRefreshActive(false);
+		store.setResourceStates([
+			{
+				resourceId: "item_prices",
+				status: "syncing",
+				lastSyncedAt: null,
+				watermark: null,
+				lastSuccessHash: null,
+				lastError: null,
+				consecutiveFailures: 0,
+				lastAttemptAt: "2026-06-10T12:00:00.000Z",
+				nextRetryAt: null,
+				cooldownMs: null,
+				lastTrigger: "user_action",
+				scopeSignature: "profile:Main POS",
+				schemaVersion: 1,
+			},
+		]);
+
+		expect(store.refreshActive).toBe(true);
+		expect(store.connectivityLabel).toBe("Refreshing");
+	});
 });

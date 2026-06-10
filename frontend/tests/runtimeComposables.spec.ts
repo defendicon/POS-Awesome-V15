@@ -167,4 +167,33 @@ describe("runtime composable lifecycle ownership", () => {
 		expect(runtime.startTimerSync).toHaveBeenCalledTimes(1);
 		expect(runtime.stopTimerSync).toHaveBeenCalledTimes(1);
 	});
+
+	it("reports operator refresh lifecycle around successful and failed syncs", async () => {
+		const onRefreshStateChange = vi.fn();
+		const runtime = {
+			startTimerSync: vi.fn(),
+			stopTimerSync: vi.fn(),
+			scheduleBootWarmSync: vi.fn(async () => true),
+			triggerOnlineResumeSync: vi.fn(async () => true),
+			triggerOperatorRefreshSync: vi
+				.fn()
+				.mockResolvedValueOnce(true)
+				.mockRejectedValueOnce(new Error("refresh failed")),
+		};
+		const boot = useBootSync({
+			offlineSyncRuntime: runtime,
+			evaluateBootstrapSnapshot: vi.fn(),
+			onRefreshStateChange,
+		});
+
+		await expect(boot.triggerOperatorRefreshSync()).resolves.toBe(true);
+		await expect(boot.triggerOperatorRefreshSync()).resolves.toBe(false);
+
+		expect(onRefreshStateChange.mock.calls).toEqual([
+			[true],
+			[false],
+			[true],
+			[false],
+		]);
+	});
 });
