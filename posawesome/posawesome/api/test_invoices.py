@@ -67,6 +67,10 @@ def _install_frappe_stub():
     utils_module.log_perf_event = lambda *args, **kwargs: None
     sys.modules["posawesome.posawesome.api.utils"] = utils_module
 
+    erpnext_compat_module = types.ModuleType("posawesome.posawesome.api.erpnext_compat")
+    erpnext_compat_module.resolve_make_sales_invoice_from_order = lambda: erpnext_sales_order.make_sales_invoice
+    sys.modules["posawesome.posawesome.api.erpnext_compat"] = erpnext_compat_module
+
 
 def _load_invoices_module():
     module_name = "posawesome.posawesome.api.invoices"

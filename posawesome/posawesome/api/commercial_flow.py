@@ -4,6 +4,13 @@ import frappe
 from frappe import _
 from frappe.utils import cint
 
+from posawesome.posawesome.api.erpnext_compat import (
+    resolve_make_delivery_note_from_order,
+    resolve_make_sales_invoice_from_delivery,
+    resolve_make_sales_invoice_from_order,
+    resolve_make_sales_invoice_from_quotation,
+    resolve_make_sales_order_from_quotation,
+)
 from posawesome.posawesome.api.invoices import get_draft_invoices
 from posawesome.posawesome.api.quotations import search_quotations, submit_quotation
 from posawesome.posawesome.api.sales_orders import search_orders
@@ -182,24 +189,12 @@ def _prepare_mapped_doc(doc, target_doctype):
 
 
 def _get_mapping_functions():
-    from erpnext.selling.doctype.quotation.quotation import (
-        make_sales_invoice as make_invoice_from_quotation,
-        make_sales_order as make_order_from_quotation,
-    )
-    from erpnext.selling.doctype.sales_order.sales_order import (
-        make_delivery_note as make_delivery_from_order,
-        make_sales_invoice as make_invoice_from_order,
-    )
-    from erpnext.stock.doctype.delivery_note.delivery_note import (
-        make_sales_invoice as make_invoice_from_delivery,
-    )
-
     return {
-        "quote_to_order": make_order_from_quotation,
-        "quote_to_invoice": make_invoice_from_quotation,
-        "order_to_delivery_note": make_delivery_from_order,
-        "order_to_invoice": make_invoice_from_order,
-        "delivery_to_invoice": make_invoice_from_delivery,
+        "quote_to_order": lambda *a, **kw: resolve_make_sales_order_from_quotation()(*a, **kw),
+        "quote_to_invoice": lambda *a, **kw: resolve_make_sales_invoice_from_quotation()(*a, **kw),
+        "order_to_delivery_note": lambda *a, **kw: resolve_make_delivery_note_from_order()(*a, **kw),
+        "order_to_invoice": lambda *a, **kw: resolve_make_sales_invoice_from_order()(*a, **kw),
+        "delivery_to_invoice": lambda *a, **kw: resolve_make_sales_invoice_from_delivery()(*a, **kw),
     }
 
 

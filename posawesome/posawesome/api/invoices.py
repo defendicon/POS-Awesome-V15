@@ -5,7 +5,7 @@
 
 import frappe
 import time
-from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+from posawesome.posawesome.api.erpnext_compat import resolve_make_sales_invoice_from_order
 from posawesome.posawesome.api.invoice_processing.utils import (
     _get_return_validity_settings,
     _build_invoice_remarks,
@@ -171,7 +171,7 @@ def create_sales_invoice_from_order(sales_order):
     if not frappe.db.exists("Sales Order", sales_order):
         frappe.throw(f"Sales Order {sales_order} does not exist")
 
-    invoice_doc = make_sales_invoice(sales_order)
+    invoice_doc = resolve_make_sales_invoice_from_order()(sales_order)
     invoice_doc.flags.ignore_permissions = True
     invoice_doc.run_method("set_missing_values")
     invoice_doc.run_method("calculate_taxes_and_totals")

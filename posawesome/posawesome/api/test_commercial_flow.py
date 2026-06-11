@@ -34,6 +34,7 @@ def _install_stubs():
         "posawesome.posawesome.api.invoices",
         "posawesome.posawesome.api.quotations",
         "posawesome.posawesome.api.sales_orders",
+        "posawesome.posawesome.api.erpnext_compat",
         "erpnext.selling.doctype.quotation.quotation",
         "erpnext.selling.doctype.sales_order.sales_order",
         "erpnext.stock.doctype.delivery_note.delivery_note",
@@ -67,6 +68,14 @@ def _install_stubs():
     sales_orders_module = types.ModuleType("posawesome.posawesome.api.sales_orders")
     sales_orders_module.search_orders = lambda **kwargs: []
     sys.modules["posawesome.posawesome.api.sales_orders"] = sales_orders_module
+
+    erpnext_compat_module = types.ModuleType("posawesome.posawesome.api.erpnext_compat")
+    erpnext_compat_module.resolve_make_delivery_note_from_order = lambda: sales_order_mapping_module.make_delivery_note
+    erpnext_compat_module.resolve_make_sales_invoice_from_delivery = lambda: delivery_note_mapping_module.make_sales_invoice
+    erpnext_compat_module.resolve_make_sales_invoice_from_order = lambda: sales_order_mapping_module.make_sales_invoice
+    erpnext_compat_module.resolve_make_sales_invoice_from_quotation = lambda: quotation_mapping_module.make_sales_invoice
+    erpnext_compat_module.resolve_make_sales_order_from_quotation = lambda: quotation_mapping_module.make_sales_order
+    sys.modules["posawesome.posawesome.api.erpnext_compat"] = erpnext_compat_module
 
     quotation_mapping_module = types.ModuleType("erpnext.selling.doctype.quotation.quotation")
     quotation_mapping_module.make_sales_order = lambda source_name: FakeDoc(
