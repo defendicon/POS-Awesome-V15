@@ -2,9 +2,11 @@ import {
 	syncBootstrapConfigResource,
 	syncCurrencyMatrixResource,
 	syncCustomersResource,
+	syncItemPricesResource,
 	syncItemsResource,
 	syncPaymentMethodCurrenciesResource,
 	syncPriceListMetaResource,
+	syncPricingRulesResource,
 	syncStockResource,
 } from "./adapters";
 import { syncInvoiceOutboxResource } from "../invoiceOutbox";
@@ -22,6 +24,7 @@ const SUPPORTED_OFFLINE_SYNC_RESOURCE_IDS = new Set<SyncResourceId>([
 	"payment_method_currencies",
 	"items",
 	"item_prices",
+	"pricing_rules",
 	"stock",
 	"customers",
 	"invoice_outbox",
@@ -30,6 +33,7 @@ const SUPPORTED_OFFLINE_SYNC_RESOURCE_IDS = new Set<SyncResourceId>([
 type SupportedSyncProfile = SyncScopedProfile & {
 	currency?: string | null;
 	selling_price_list?: string | null;
+	posa_allow_multi_currency?: boolean;
 	payments?: any[];
 };
 
@@ -51,32 +55,6 @@ type RunSupportedOfflineSyncResourceArgs = {
 
 function getPersistedWatermark(state: SyncResourceState | null | undefined) {
 	return state?.watermark || null;
-}
-
-function buildMirroredState(
-	resourceId: SyncResourceId,
-	sourceState: SyncResourceState | null | undefined,
-) {
-	if (!sourceState) {
-		return {
-			status: "idle",
-		};
-	}
-
-	return {
-		resourceId,
-		status: sourceState.status,
-		lastSyncedAt: sourceState.lastSyncedAt,
-		watermark: sourceState.watermark,
-		lastError: sourceState.lastError,
-		consecutiveFailures: sourceState.consecutiveFailures,
-		lastAttemptAt: sourceState.lastAttemptAt,
-		nextRetryAt: sourceState.nextRetryAt,
-		cooldownMs: sourceState.cooldownMs,
-		lastTrigger: sourceState.lastTrigger,
-		scopeSignature: sourceState.scopeSignature,
-		schemaVersion: sourceState.schemaVersion,
-	};
 }
 
 export function isSupportedOfflineSyncResourceId(
@@ -117,6 +95,7 @@ export function buildOfflineSyncProfile(
 		modified: profile.modified || null,
 		currency: profile.currency || null,
 		selling_price_list: profile.selling_price_list || null,
+		posa_allow_multi_currency: !!profile.posa_allow_multi_currency,
 		payments: Array.isArray(profile.payments) ? profile.payments : [],
 	};
 }
@@ -126,7 +105,6 @@ export async function runSupportedOfflineSyncResource({
 	posProfile,
 	schemaVersion,
 	getPersistedState,
-	getRuntimeState,
 	callOfflineSyncMethod,
 }: RunSupportedOfflineSyncResourceArgs) {
 	const persistedState = await getPersistedState(resource.id);
@@ -170,6 +148,7 @@ export async function runSupportedOfflineSyncResource({
 					posProfile,
 					currencyPairs = [],
 					watermark,
+					offset,
 					schemaVersion,
 				}) =>
 					callOfflineSyncMethod(
@@ -178,6 +157,7 @@ export async function runSupportedOfflineSyncResource({
 							pos_profile: posProfile,
 							watermark,
 							currency_pairs: currencyPairs,
+							offset: offset || 0,
 							schema_version: schemaVersion,
 						},
 					),
@@ -218,10 +198,43 @@ export async function runSupportedOfflineSyncResource({
 					),
 			});
 		case "item_prices":
-			return buildMirroredState(
-				"item_prices",
-				getRuntimeState?.("items") || persistedState,
-			);
+			return syncItemPricesResource({
+				...sharedArgs,
+				fetcher: ({
+					posProfile,
+					watermark,
+					offset,
+					schemaVersion,
+				}) =>
+					callOfflineSyncMethod(
+						"posawesome.posawesome.api.offline_sync.item_prices.sync_item_prices",
+						{
+							pos_profile: posProfile,
+							watermark,
+							offset: offset || 0,
+							schema_version: schemaVersion,
+						},
+					),
+			});
+		case "pricing_rules":
+			return syncPricingRulesResource({
+				...sharedArgs,
+				fetcher: ({
+					posProfile,
+					watermark,
+					offset,
+					schemaVersion,
+				}) =>
+					callOfflineSyncMethod(
+						"posawesome.posawesome.api.offline_sync.pricing_rules.sync_pricing_rules",
+						{
+							pos_profile: posProfile,
+							watermark,
+							offset: offset || 0,
+							schema_version: schemaVersion,
+						},
+					),
+			});
 		case "stock":
 			return syncStockResource({
 				...sharedArgs,

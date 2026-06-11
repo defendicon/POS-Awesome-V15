@@ -38,9 +38,18 @@ const syncStateMocks = vi.hoisted(() => ({
 	setSyncResourceState: vi.fn().mockResolvedValue(undefined),
 }));
 
+const repositoryMocks = vi.hoisted(() => ({
+	currencyRateRepository: {
+		clear: vi.fn().mockResolvedValue(undefined),
+		upsertMany: vi.fn().mockResolvedValue(undefined),
+		deleteByNames: vi.fn().mockResolvedValue(undefined),
+	},
+}));
+
 vi.mock("../src/offline/cache", () => cacheMocks);
 vi.mock("../src/offline/bootstrapSnapshot", () => bootstrapSnapshotMocks);
 vi.mock("../src/offline/sync/syncState", () => syncStateMocks);
+vi.mock("../src/offline/repositories", () => repositoryMocks);
 
 import {
 	syncBootstrapConfigResource,
@@ -161,6 +170,17 @@ describe("boot-critical offline sync adapters", () => {
 						data: [{ name: "PKR" }, { name: "USD" }],
 					},
 					{
+						key: "currency_rate::FX-USD-PKR",
+						modified: "2026-04-09T10:06:00",
+						data: {
+							name: "FX-USD-PKR",
+							from_currency: "USD",
+							to_currency: "PKR",
+							exchange_rate: 279.5,
+							date: "2026-04-09",
+						},
+					},
+					{
 						key: "exchange_rate::USD::PKR",
 						modified: "2026-04-09T10:06:00",
 						data: {
@@ -214,6 +234,14 @@ describe("boot-critical offline sync adapters", () => {
 			date: "2026-04-09",
 			exchange_rate: 279.5,
 		});
+		expect(repositoryMocks.currencyRateRepository.clear).toHaveBeenCalledOnce();
+		expect(repositoryMocks.currencyRateRepository.upsertMany).toHaveBeenCalledWith([
+			expect.objectContaining({
+				name: "FX-USD-PKR",
+				profile_name: "POS-1",
+				company: "Test Co",
+			}),
+		]);
 		expect(cacheMocks.savePaymentMethodCurrencyCache).toHaveBeenCalledWith(
 			"Test Co",
 			{ Cash: "PKR", Card: "USD" },
@@ -230,6 +258,64 @@ describe("boot-critical offline sync adapters", () => {
 				status: "fresh",
 			}),
 		);
+	});
+
+	it("consumes every page of the currency matrix before persisting sync state", async () => {
+		const fetcher = vi
+			.fn()
+			.mockResolvedValueOnce({
+				changes: [
+					{
+						key: "currency_options",
+						data: [{ name: "PKR" }, { name: "USD" }],
+					},
+				],
+				has_more: true,
+				next_offset: 1,
+				next_watermark: null,
+			})
+			.mockResolvedValueOnce({
+				changes: [
+					{
+						key: "currency_rate::FX-USD-PKR",
+						modified: "2026-04-09T10:06:00",
+						data: {
+							name: "FX-USD-PKR",
+							from_currency: "USD",
+							to_currency: "PKR",
+							exchange_rate: 279.5,
+							date: "2026-04-09",
+						},
+					},
+					{
+						key: "exchange_rate::USD::PKR",
+						data: {
+							from_currency: "USD",
+							to_currency: "PKR",
+							exchange_rate: 279.5,
+							date: "2026-04-09",
+						},
+					},
+				],
+				has_more: false,
+				next_offset: null,
+				next_watermark: "2026-04-09T10:06:00",
+			});
+
+		const result = await syncCurrencyMatrixResource({
+			posProfile: { name: "POS-1", company: "Test Co" },
+			watermark: null,
+			fetcher,
+		});
+
+		expect(fetcher).toHaveBeenNthCalledWith(
+			2,
+			expect.objectContaining({ offset: 1, watermark: null }),
+		);
+		expect(cacheMocks.saveCurrencyOptionsCache).toHaveBeenCalledOnce();
+		expect(cacheMocks.saveExchangeRateCache).toHaveBeenCalledOnce();
+		expect(result.watermark).toBe("2026-04-09T10:06:00");
+		expect(syncStateMocks.setSyncResourceState).toHaveBeenCalledTimes(1);
 	});
 
 	it("marks bootstrap sync limited when the backend requires a full resync", async () => {

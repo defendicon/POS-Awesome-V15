@@ -37,7 +37,7 @@
 					density="compact"
 					variant="outlined"
 					color="primary"
-					label="Search by Mobile"
+					:label="__('Search by Mobile')"
 					class="pos-themed-input"
 					hide-details
 					v-model="internalSearchMobile"

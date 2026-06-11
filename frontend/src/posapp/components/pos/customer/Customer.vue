@@ -80,19 +80,19 @@
 				<template #item="{ props, item }">
 					<v-list-item v-bind="props">
 						<v-list-item-subtitle v-if="item.raw.customer_name !== item.raw.name">
-							<div>ID: {{ item.raw.name }}</div>
+							<div>{{ __("ID") }}: {{ item.raw.name }}</div>
 						</v-list-item-subtitle>
 						<v-list-item-subtitle v-if="item.raw.tax_id">
-							<div>TAX ID: {{ item.raw.tax_id }}</div>
+							<div>{{ __("TAX ID") }}: {{ item.raw.tax_id }}</div>
 						</v-list-item-subtitle>
 						<v-list-item-subtitle v-if="item.raw.email_id">
-							<div>Email: {{ item.raw.email_id }}</div>
+							<div>{{ __("Email") }}: {{ item.raw.email_id }}</div>
 						</v-list-item-subtitle>
 						<v-list-item-subtitle v-if="item.raw.mobile_no">
-							<div>Mobile No: {{ item.raw.mobile_no }}</div>
+							<div>{{ __("Mobile No") }}: {{ item.raw.mobile_no }}</div>
 						</v-list-item-subtitle>
 						<v-list-item-subtitle v-if="item.raw.primary_address">
-							<div>Primary Address: {{ item.raw.primary_address }}</div>
+							<div>{{ __("Primary Address") }}: {{ item.raw.primary_address }}</div>
 						</v-list-item-subtitle>
 					</v-list-item>
 				</template>

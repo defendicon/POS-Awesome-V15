@@ -64,6 +64,16 @@ const BASE_SCHEMA = {
 	sync_state: "&key,resourceId,status,nextRetryAt,lastAttemptAt,updated_at",
 };
 
+const SCHEMA_V14 = {
+	...BASE_SCHEMA,
+	item_price_records:
+		"&name,price_list,item_code,uom,currency,customer,modified,[price_list+item_code],[price_list+item_code+uom]",
+	pricing_rule_records:
+		"&key,rule_name,target_type,target_value,modified,[target_type+target_value]",
+	currency_rate_records:
+		"&name,profile_name,company,from_currency,to_currency,date,modified,[profile_name+company+from_currency+to_currency]",
+};
+
 export const KEY_TABLE_MAP: Record<string, string> = {
 	offline_invoices: "queue",
 	offline_customers: "queue",
@@ -180,6 +190,7 @@ const DERIVED_OFFLINE_METADATA_KEYS = Object.freeze(["cache_version"]);
 const DERIVED_OFFLINE_TABLES_TO_CLEAR = Object.freeze([
 	"items",
 	"item_prices",
+	"item_price_records",
 	"customers",
 	"cache",
 	"local_stock",
@@ -187,6 +198,8 @@ const DERIVED_OFFLINE_TABLES_TO_CLEAR = Object.freeze([
 	"item_groups",
 	"translations",
 	"pricing_rules",
+	"pricing_rule_records",
+	"currency_rate_records",
 ]);
 
 function tableForKey(key: string) {
@@ -228,6 +241,7 @@ db.version(10).stores(BASE_SCHEMA);
 db.version(11).stores(BASE_SCHEMA);
 db.version(12).stores(BASE_SCHEMA);
 db.version(13).stores(BASE_SCHEMA);
+db.version(14).stores(SCHEMA_V14);
 
 let persistWorker: Worker | null = null;
 if (typeof Worker !== "undefined") {

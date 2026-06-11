@@ -23,7 +23,7 @@ import {
 	type SyncScopedProfile,
 } from "./common";
 
-type ItemsFetcher = (args: {
+type ItemsFetcher = (_args: {
 	posProfile: SyncScopedProfile;
 	priceList?: string | null;
 	customer?: string | null;
@@ -63,33 +63,29 @@ function extractDeletedItemCodes(response: SyncResponse) {
 
 async function hasItemScopeChanged(posProfile: SyncScopedProfile) {
 	const nextScopeSignature = buildScopeSignature(posProfile);
-	for (const resourceId of ["items", "item_prices"] as const) {
-		const currentState = await getSyncResourceState(resourceId);
-		if (
-			currentState?.scopeSignature &&
-			currentState.scopeSignature !== nextScopeSignature
-		) {
-			return true;
-		}
+	const currentState = await getSyncResourceState("items");
+	if (
+		currentState?.scopeSignature &&
+		currentState.scopeSignature !== nextScopeSignature
+	) {
+		return true;
 	}
 	return false;
 }
 
-async function persistItemSyncStates(
+async function persistItemSyncState(
 	status: "fresh" | "limited",
 	args: ItemsSyncArgs,
 	response: SyncResponse,
 	watermark?: string | null,
 ) {
-	for (const resourceId of ["items", "item_prices"] as const) {
-		await persistResourceSyncState({
-			resourceId,
-			status,
-			posProfile: args.posProfile,
-			response,
-			watermark,
-		});
-	}
+	await persistResourceSyncState({
+		resourceId: "items",
+		status,
+		posProfile: args.posProfile,
+		response,
+		watermark,
+	});
 }
 
 export async function syncItemsResource(
@@ -107,7 +103,7 @@ export async function syncItemsResource(
 	});
 
 	if (response?.full_resync_required) {
-		await persistItemSyncStates(
+		await persistItemSyncState(
 			"limited",
 			args,
 			response,
@@ -163,7 +159,7 @@ export async function syncItemsResource(
 		setItemsLastSync(nextWatermark);
 	}
 
-	await persistItemSyncStates("fresh", args, response, effectiveWatermark);
+	await persistItemSyncState("fresh", args, response, effectiveWatermark);
 	return buildResourceSyncResult(
 		"items",
 		"fresh",

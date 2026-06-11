@@ -67,7 +67,7 @@
 				</v-container>
 				<v-card-actions class="mt-4">
 					<v-spacer></v-spacer>
-					<v-btn color="error mx-2" theme="dark" @click="close_dialog">Close</v-btn>
+					<v-btn color="error mx-2" theme="dark" @click="close_dialog">{{ __("Close") }}</v-btn>
 					<v-btn
 						v-if="selected.length"
 						color="success"

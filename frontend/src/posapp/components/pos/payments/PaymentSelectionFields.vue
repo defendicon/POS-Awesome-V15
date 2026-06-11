@@ -4,9 +4,9 @@
 		<v-row class="pb-0 mb-2" align="start">
 			<v-col cols="12">
 				<p v-if="salesPersons && salesPersons.length > 0" class="mt-1 mb-1 text-subtitle-2">
-					{{ salesPersons.length }} sales persons found
+					{{ salesPersons.length }} {{ $__("sales persons found") }}
 				</p>
-				<p v-else class="mt-1 mb-1 text-subtitle-2 text-red">No sales persons found</p>
+				<p v-else class="mt-1 mb-1 text-subtitle-2 text-red">{{ $__("No sales persons found") }}</p>
 				<v-select
 					density="compact"
 					clearable

@@ -115,7 +115,7 @@
 									class="pos-themed-input"
 								></v-select>
 							</v-col>
-							<v-col cols="6" md="1">
+							<v-col v-if="pageFormat === 'A4'" cols="6" md="1">
 								<v-text-field
 									v-model.number="gridCols"
 									:label="__('Cols')"
@@ -127,7 +127,7 @@
 									min="1"
 								></v-text-field>
 							</v-col>
-							<v-col cols="6" md="1">
+							<v-col v-if="pageFormat === 'A4'" cols="6" md="1">
 								<v-text-field
 									v-model.number="gridRows"
 									:label="__('Rows')"
@@ -286,15 +286,6 @@
 								></v-text-field>
 							</v-col>
 							<v-col cols="12" md="2">
-								<v-checkbox
-									v-model="includeBatchSerial"
-									:label="__('Include Batch/Serial')"
-									density="compact"
-									hide-details
-									color="primary"
-								></v-checkbox>
-							</v-col>
-							<v-col cols="12" md="4">
 								<v-checkbox
 									v-model="includeBatchSerial"
 									:label="__('Include Batch / Serial')"
@@ -925,10 +916,10 @@ import { useItemsStore } from "../../../stores/itemsStore";
 import { useUIStore } from "../../../stores/uiStore";
 import { useToastStore } from "../../../stores/toastStore";
 import { useBarcodePrintQueue } from "../../../composables/pos/items/useBarcodePrintQueue";
-import { useBarcodePrintOutput, PAGE_FORMAT_PRESETS, getBarcodeCheckDigitWarning, validateBarcodeItem, getBarcodeTypeLabel } from "../../../composables/pos/items/useBarcodePrintOutput";
+import { useBarcodePrintOutput, PAGE_FORMAT_PRESETS, validateBarcodeItem, getBarcodeTypeLabel } from "../../../composables/pos/items/useBarcodePrintOutput";
 import { useScaleBarcodeSettings } from "../../../composables/pos/items/useScaleBarcodeSettings";
 import { useLabelDesigner } from "../../../composables/pos/items/useLabelDesigner";
-import { useSsccGenerator, formatSsccHuman } from "../../../composables/pos/items/useSsccGenerator";
+import { useSsccGenerator } from "../../../composables/pos/items/useSsccGenerator";
 import LabelDesigner from "./LabelDesigner.vue";
 import LabelDesignerPanel from "./LabelDesignerPanel.vue";
 import TemplateLibrary from "./TemplateLibrary.vue";
@@ -1000,8 +991,6 @@ const {
 	printerProfiles,
 	getPrintableItems,
 	printLabels,
-	printLabelsThermal,
-	printLabelsRaw,
 	printLabelsThermalWithFailover,
 	printLabelsRawWithFailover,
 	qzThermalAvailable,

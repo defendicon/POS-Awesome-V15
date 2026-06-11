@@ -40,7 +40,7 @@
 							</v-col>
 							<v-col cols="6">
 								<v-text-field
-									label="City"
+									:label="__('City')"
 									density="compact"
 									color="primary"
 									class="pos-themed-input"
@@ -50,7 +50,7 @@
 							</v-col>
 							<v-col cols="6">
 								<v-text-field
-									label="State"
+									:label="__('State')"
 									density="compact"
 									class="pos-themed-input"
 									hide-details
@@ -104,7 +104,7 @@ export default {
 					if (!r.exc) {
 						vm.eventBus.emit("add_the_new_address", r.message);
 						vm.toastStore.show({
-							text: "Customer Address created successfully.",
+							text: __("Customer Address created successfully."),
 							color: "success",
 						});
 						vm.addressDialog = false;

@@ -10,7 +10,8 @@ import type {
 	StoredCustomer,
 } from "../types/models";
 import {
-	customerMatchesSearchTerm,
+	buildCustomerSearchParts,
+	customerMatchesSearchParts,
 	normalizeCustomerSearchTerm,
 } from "./customers/customerSearch";
 import { resetCustomerLoadingCoordinator } from "../modules/customers/customerLoadingCoordinator";
@@ -132,7 +133,8 @@ function getSerializedProfile(profile: unknown): string | null {
 			typeof typedProfile.pos_profile === "object" &&
 			typedProfile.pos_profile !== null &&
 			"name" in typedProfile.pos_profile &&
-			typeof (typedProfile.pos_profile as { name?: unknown }).name === "string"
+			typeof (typedProfile.pos_profile as { name?: unknown }).name ===
+				"string"
 		) {
 			fallbackName = (typedProfile.pos_profile as { name: string }).name;
 		}
@@ -196,7 +198,9 @@ export const useCustomersStore = defineStore("customers", () => {
 
 	function logFinalLoadedCustomerCount() {
 		if (customerLoadLogState.final) return;
-		const count = Number(loadedCustomerCount.value || customers.value.length || 0);
+		const count = Number(
+			loadedCustomerCount.value || customers.value.length || 0,
+		);
 		console.log(`Customers loaded: ${count}`);
 		customerLoadLogState.final = true;
 	}
@@ -231,7 +235,8 @@ export const useCustomersStore = defineStore("customers", () => {
 	}
 
 	function upsertCustomerSummaryFromInfo(info: CustomerInfo) {
-		const customerName = getStringField(info, "name") || getStringField(info, "customer");
+		const customerName =
+			getStringField(info, "name") || getStringField(info, "customer");
 		if (!customerName) {
 			return;
 		}
@@ -278,7 +283,9 @@ export const useCustomersStore = defineStore("customers", () => {
 			getStringField(customerInfo.value, "name") ||
 			getStringField(customerInfo.value, "customer");
 		if (customerName) {
-			void setCustomerStorage([{ ...customerInfo.value, name: customerName }]);
+			void setCustomerStorage([
+				{ ...customerInfo.value, name: customerName },
+			]);
 		}
 		if (
 			customerName &&
@@ -315,7 +322,8 @@ export const useCustomersStore = defineStore("customers", () => {
 
 	async function ensureCustomerScopeIsolation() {
 		const currentScope =
-			customerProfileScope.value || getCustomerProfileScope(posProfile.value);
+			customerProfileScope.value ||
+			getCustomerProfileScope(posProfile.value);
 		if (!currentScope) {
 			return;
 		}
@@ -343,8 +351,9 @@ export const useCustomersStore = defineStore("customers", () => {
 		let collection = db.table("customers");
 		const normalizedTerm = normalizeCustomerSearchTerm(searchTerm.value);
 		if (normalizedTerm) {
+			const searchParts = buildCustomerSearchParts(normalizedTerm);
 			collection = collection.filter((customer: CustomerSummary) =>
-				customerMatchesSearchTerm(customer, normalizedTerm),
+				customerMatchesSearchParts(customer, searchParts),
 			);
 		}
 

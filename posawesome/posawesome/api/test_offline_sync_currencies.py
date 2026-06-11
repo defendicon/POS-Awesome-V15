@@ -36,20 +36,65 @@ def _install_stubs():
             return [
                 {"name": "PKR", "enabled": 1, "modified": "2026-04-09T10:00:00"},
                 {"name": "USD", "enabled": 1, "modified": "2026-04-09T10:02:00"},
+                {"name": "GBP", "enabled": 1, "modified": "2026-04-09T10:03:00"},
                 {"name": "EUR", "enabled": 0, "modified": "2026-04-09T10:03:00"},
             ]
+        if doctype == "Price List":
+            return [
+                {"name": "Retail", "currency": "PKR"},
+                {"name": "Export", "currency": "USD"},
+            ]
         if doctype == "Currency Exchange":
-            return [{"modified": "2026-04-09T10:04:00"}]
+            filters = kwargs.get("filters") or {}
+            from_filter = filters.get("from_currency")
+            to_filter = filters.get("to_currency")
+            from_currencies = (
+                from_filter[1]
+                if isinstance(from_filter, (list, tuple)) and from_filter[0] == "in"
+                else [from_filter]
+            )
+            to_currencies = (
+                to_filter[1]
+                if isinstance(to_filter, (list, tuple)) and to_filter[0] == "in"
+                else [to_filter]
+            )
+            return [
+                AttrDict(
+                    {
+                        "name": f"FX-{from_currency}-{to_currency}",
+                        "from_currency": from_currency,
+                        "to_currency": to_currency,
+                        "exchange_rate": 279.5,
+                        "date": "2026-04-09",
+                        "modified": "2026-04-09T10:04:00",
+                    }
+                )
+                for from_currency in from_currencies
+                for to_currency in to_currencies
+                if from_currency and to_currency and from_currency != to_currency
+            ]
         return []
 
     frappe_module.get_all = fake_get_all
+    frappe_module.db = AttrDict(
+        {
+            "get_value": lambda doctype, name, fieldname: (
+                "PKR" if doctype == "Company" and fieldname == "default_currency" else None
+            )
+        }
+    )
     frappe_module.get_cached_doc = lambda doctype, name: AttrDict(
         {
             "name": name,
             "company": "Test Co",
             "currency": "PKR",
             "selling_price_list": "Retail",
+            "posa_allow_multi_currency": 1,
             "modified": "2026-04-09T10:01:00",
+            "payments": [
+                {"mode_of_payment": "Cash"},
+                {"mode_of_payment": "Card"},
+            ],
         }
     )
     sys.modules["frappe"] = frappe_module
@@ -66,13 +111,25 @@ def _install_stubs():
     invoice_utils_module.get_price_list_currency = lambda price_list: "PKR"
     sys.modules["posawesome.posawesome.api.invoice_processing.utils"] = invoice_utils_module
 
+    payment_utils_module = types.ModuleType("posawesome.posawesome.api.payment_processing.utils")
+    payment_utils_module.get_mode_of_payment_accounts = lambda company, modes: {
+        "Cash": {"account_currency": "PKR"},
+        "Card": {"account_currency": "GBP"},
+    }
+    sys.modules["posawesome.posawesome.api.payment_processing.utils"] = payment_utils_module
+
     api_utils_module = types.ModuleType("posawesome.posawesome.api.utils")
     api_utils_module.get_active_pos_profile = lambda user=None: {
         "name": "POS-TEST",
         "company": "Test Co",
         "currency": "PKR",
         "selling_price_list": "Retail",
+        "posa_allow_multi_currency": 1,
         "modified": "2026-04-09T10:01:00",
+        "payments": [
+            {"mode_of_payment": "Cash"},
+            {"mode_of_payment": "Card"},
+        ],
     }
     sys.modules["posawesome.posawesome.api.utils"] = api_utils_module
     sys.modules["posawesome.posawesome.api.offline_sync.common"] = load_offline_sync_common()
@@ -103,13 +160,18 @@ class TestOfflineSyncCurrencies(unittest.TestCase):
 
         self.assertEqual(
             [item["key"] for item in response["changes"]],
-            ["currency_options", "exchange_rate::USD::PKR"],
+            [
+                "currency_options",
+                "currency_rate::FX-USD-PKR",
+                "exchange_rate::USD::PKR",
+            ],
         )
         self.assertEqual(
             response["changes"][0]["data"],
-            [{"name": "PKR"}, {"name": "USD"}],
+            [{"name": "PKR"}, {"name": "USD"}, {"name": "GBP"}],
         )
-        self.assertEqual(response["changes"][1]["data"]["exchange_rate"], 279.5)
+        self.assertEqual(response["changes"][1]["data"]["date"], "2026-04-09")
+        self.assertEqual(response["changes"][2]["data"]["exchange_rate"], 279.5)
         self.assertEqual(
             response["deleted"],
             [{"key": "currency::EUR"}],
@@ -118,6 +180,51 @@ class TestOfflineSyncCurrencies(unittest.TestCase):
         self.assertEqual(response["schema_version"], self.module.SYNC_SCHEMA_VERSION)
         self.assertIn("next_watermark", response)
         self.assertIn("has_more", response)
+
+    def test_discovers_all_required_multi_currency_pairs_when_none_are_supplied(self):
+        response = self.module.sync_currency_scope(
+            pos_profile="POS-TEST",
+            watermark=None,
+            currency_pairs=None,
+        )
+
+        pair_keys = {
+            row["key"]
+            for row in response["changes"]
+            if row["key"].startswith("exchange_rate::")
+        }
+        self.assertEqual(
+            pair_keys,
+            {
+                "exchange_rate::PKR::USD",
+                "exchange_rate::PKR::GBP",
+                "exchange_rate::USD::PKR",
+                "exchange_rate::USD::GBP",
+                "exchange_rate::GBP::PKR",
+            },
+        )
+
+    def test_paginates_the_discovered_currency_matrix(self):
+        first = self.module.sync_currency_scope(
+            pos_profile="POS-TEST",
+            watermark=None,
+            currency_pairs=None,
+            offset=0,
+            limit=2,
+        )
+        second = self.module.sync_currency_scope(
+            pos_profile="POS-TEST",
+            watermark=None,
+            currency_pairs=None,
+            offset=2,
+            limit=10,
+        )
+
+        self.assertTrue(first["has_more"])
+        self.assertEqual(first["next_offset"], 2)
+        self.assertIsNone(first["next_watermark"])
+        self.assertFalse(second["has_more"])
+        self.assertEqual(second["next_watermark"], "2026-04-09T10:04:00")
 
     def test_sync_currency_scope_skips_unchanged_results_for_current_watermark(self):
         response = self.module.sync_currency_scope(

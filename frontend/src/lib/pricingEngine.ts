@@ -15,6 +15,14 @@ const DEFAULT_PRECISION = 6;
 
 type AnyRecord = Record<string, any>;
 
+export type PricingRuleIndexBundle = {
+	byItem?: Map<string, AnyRecord[]>;
+	byGroup?: Map<string, AnyRecord[]>;
+	byBrand?: Map<string, AnyRecord[]>;
+	general?: AnyRecord[];
+	preSorted?: boolean;
+};
+
 const parseOptionalFloat = (value: unknown): number | null => {
 	const numeric = Number.parseFloat(String(value));
 	return Number.isFinite(numeric) ? numeric : null;
@@ -154,12 +162,7 @@ const pushUnique = (
  */
 export const collectCandidates = (
 	item: AnyRecord = {},
-	indexBundle: {
-		byItem?: Map<string, AnyRecord[]>;
-		byGroup?: Map<string, AnyRecord[]>;
-		byBrand?: Map<string, AnyRecord[]>;
-		general?: AnyRecord[];
-	} = {},
+	indexBundle: PricingRuleIndexBundle = {},
 ): AnyRecord[] => {
 	const { byItem, byGroup, byBrand, general } = indexBundle;
 	const bucket: AnyRecord[] = [];
@@ -500,12 +503,7 @@ export const evaluatePricingRules = ({
 	docQty?: number | string;
 	baseRate?: number;
 	ctx?: AnyRecord;
-	indexes?: {
-		byItem?: Map<string, AnyRecord[]>;
-		byGroup?: Map<string, AnyRecord[]>;
-		byBrand?: Map<string, AnyRecord[]>;
-		general?: AnyRecord[];
-	};
+	indexes?: PricingRuleIndexBundle;
 }): {
 	pricing: {
 		rate: number;
@@ -555,46 +553,51 @@ export const evaluatePricingRules = ({
 	// Optimization: collect candidates once
 	const candidates = collectCandidates(item, indexes);
 
-	// Shared filters
-	const validCandidates = candidates
-		.filter((rule) =>
-			inDateRange(ctx?.date, rule.valid_from, rule.valid_upto),
-		)
-		.filter((rule) =>
-			matchParty(
+	const pricingRules: AnyRecord[] = [];
+	const freeRules: AnyRecord[] = [];
+
+	for (const rule of candidates) {
+		if (!inDateRange(ctx?.date, rule.valid_from, rule.valid_upto)) {
+			continue;
+		}
+		if (
+			!matchParty(
 				rule,
 				ctx?.customer,
 				ctx?.customer_group,
 				ctx?.territory,
-			),
-		)
-		.filter((rule) =>
-			matchPriceListAndCurrency(rule, ctx?.price_list, ctx?.currency),
-		);
+			)
+		) {
+			continue;
+		}
+		if (!matchPriceListAndCurrency(rule, ctx?.price_list, ctx?.currency)) {
+			continue;
+		}
 
-	// Pricing logic
-	const pricingRules = validCandidates
-		.filter((rule) => !isFreeRule(rule))
-		.filter((rule) => {
-			const minimum = Number.parseFloat(rule.min_qty || 0);
-			return effectiveQty >= minimum;
-		})
-		// Fix: Do not apply "Discount on Other Item" rules to the trigger item.
-		// If same_item is false (0), the rule targets another item, so we shouldn't
-		// apply the price discount to the current item (which matched the 'Apply On' criteria).
-		// We use loose equality check (!!rule.same_item) because it could be 1, true, or "1".
-		// The source rule data defaults same_item to 0 if unchecked.
-		.filter((rule) => {
-			// Fix: Do not apply "Discount on Other Item" rules to the trigger item.
-			// If same_item is false (0), the rule targets another item, so we shouldn't
-			// apply the price discount to the current item (which matched the 'Apply On' criteria).
-			// We use loose equality check (!!rule.same_item) because it could be 1, true, or "1".
+		if (isFreeRule(rule)) {
+			const minimum =
+				Number.parseFloat(rule.min_qty || rule.recurse_for || 1) || 1;
+			if (effectiveQty >= minimum) {
+				freeRules.push(rule);
+			}
+			continue;
+		}
 
-			// Simplified logic: Keep rule if same_item is true OR if "Apply On Other" is not set.
-			// Blank "Apply On Other" behaves as "Apply on Self" even if same_item is 0.
-			return !!rule.same_item || !rule.apply_rule_on_other;
-		})
-		.sort(ruleSort);
+		const minimum = Number.parseFloat(rule.min_qty || 0);
+		if (effectiveQty < minimum) {
+			continue;
+		}
+
+		// Blank "Apply On Other" behaves as "Apply on Self" even if same_item is 0.
+		if (!!rule.same_item || !rule.apply_rule_on_other) {
+			pricingRules.push(rule);
+		}
+	}
+
+	if (!indexes?.preSorted) {
+		pricingRules.sort(ruleSort);
+		freeRules.sort(ruleSort);
+	}
 
 	let pricing: {
 		rate: number;
@@ -636,16 +639,6 @@ export const evaluatePricingRules = ({
 		};
 	}
 
-	// Free items logic
-	const freeRules = validCandidates
-		.filter((rule) => isFreeRule(rule))
-		.filter((rule) => {
-			const minimum =
-				Number.parseFloat(rule.min_qty || rule.recurse_for || 1) || 1;
-			return effectiveQty >= minimum;
-		})
-		.sort(ruleSort);
-
 	const freebies: AnyRecord[] = [];
 
 	if (freeRules.length) {
@@ -671,12 +664,7 @@ export const applyLocalPricingRules = (params: {
 	docQty?: number | string;
 	baseRate?: number;
 	ctx?: AnyRecord;
-	indexes?: {
-		byItem?: Map<string, AnyRecord[]>;
-		byGroup?: Map<string, AnyRecord[]>;
-		byBrand?: Map<string, AnyRecord[]>;
-		general?: AnyRecord[];
-	};
+	indexes?: PricingRuleIndexBundle;
 }) => {
 	const { pricing } = evaluatePricingRules(params);
 	return pricing;

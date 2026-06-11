@@ -16,6 +16,13 @@ function extractWorkerKeyTableMapKeys(source: string): string[] {
 		.filter(Boolean);
 }
 
+function extractLatestDexieVersion(source: string): number {
+	const versions = Array.from(source.matchAll(/db\.version\((\d+)\)/g))
+		.map((entry) => Number(entry[1]))
+		.filter(Number.isFinite);
+	return Math.max(...versions);
+}
+
 describe("offline key map parity", () => {
 	it("maps bootstrap snapshot state into settings storage", () => {
 		expect(KEY_TABLE_MAP.bootstrap_snapshot).toBe("settings");
@@ -45,5 +52,25 @@ describe("offline key map parity", () => {
 		const workerKeys = extractWorkerKeyTableMapKeys(workerSource).sort();
 
 		expect(workerKeys).toEqual(dbKeys);
+	});
+
+	it("keeps the persistence worker on the latest app Dexie schema version", () => {
+		const thisFile = fileURLToPath(import.meta.url);
+		const testsDir = path.dirname(thisFile);
+		const appDbSource = readFileSync(
+			path.resolve(testsDir, "../src/offline/db.ts"),
+			"utf8",
+		);
+		const workerSource = readFileSync(
+			path.resolve(testsDir, "../src/posapp/workers/itemWorker.js"),
+			"utf8",
+		);
+
+		expect(extractLatestDexieVersion(workerSource)).toBe(
+			extractLatestDexieVersion(appDbSource),
+		);
+		expect(workerSource).toContain("item_price_records");
+		expect(workerSource).toContain("pricing_rule_records");
+		expect(workerSource).toContain("currency_rate_records");
 	});
 });

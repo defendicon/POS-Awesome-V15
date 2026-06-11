@@ -52,12 +52,16 @@ const bootstrapSnapshotMocks = vi.hoisted(() => ({
 			prerequisites: {
 				...(currentSnapshot?.prerequisites || {}),
 				items_cache_ready:
-					typeof cacheState?.itemsCount === "number" ? "ready" : "missing",
+					typeof cacheState?.itemsCount === "number"
+						? "ready"
+						: "missing",
 				customers_cache_ready:
 					typeof cacheState?.customersCount === "number"
 						? "ready"
 						: "missing",
-				stock_cache_ready: cacheState?.stockCacheReady ? "ready" : "missing",
+				stock_cache_ready: cacheState?.stockCacheReady
+					? "ready"
+					: "missing",
 			},
 		}),
 	),
@@ -93,26 +97,28 @@ describe("operational offline sync adapters", () => {
 	});
 
 	it("clears stale item scope before applying delta writes and deletes", async () => {
-		syncStateMocks.getSyncResourceState.mockImplementation(async (resourceId) => {
-			if (resourceId === "items") {
-				return {
-					resourceId,
-					status: "fresh",
-					lastSyncedAt: "2026-04-09T09:00:00",
-					watermark: "2026-04-09T09:00:00",
-					lastSuccessHash: null,
-					lastError: null,
-					consecutiveFailures: 0,
-					scopeSignature: JSON.stringify({
-						profile: "OLD-POS",
-						company: "Test Co",
-						warehouse: "OLD-WH",
-					}),
-					schemaVersion: "2026-04-09",
-				};
-			}
-			return null;
-		});
+		syncStateMocks.getSyncResourceState.mockImplementation(
+			async (resourceId) => {
+				if (resourceId === "items") {
+					return {
+						resourceId,
+						status: "fresh",
+						lastSyncedAt: "2026-04-09T09:00:00",
+						watermark: "2026-04-09T09:00:00",
+						lastSuccessHash: null,
+						lastError: null,
+						consecutiveFailures: 0,
+						scopeSignature: JSON.stringify({
+							profile: "OLD-POS",
+							company: "Test Co",
+							warehouse: "OLD-WH",
+						}),
+						schemaVersion: "2026-04-09",
+					};
+				}
+				return null;
+			},
+		);
 
 		const fetcher = vi.fn(async ({ watermark }) => {
 			expect(watermark).toBeNull();
@@ -207,10 +213,9 @@ describe("operational offline sync adapters", () => {
 				}),
 			}),
 		);
-		expect(syncStateMocks.setSyncResourceState).toHaveBeenCalledWith(
+		expect(syncStateMocks.setSyncResourceState).not.toHaveBeenCalledWith(
 			expect.objectContaining({
 				resourceId: "item_prices",
-				status: "fresh",
 			}),
 		);
 		expect(result.status).toBe("fresh");
@@ -269,9 +274,9 @@ describe("operational offline sync adapters", () => {
 				customer_name: "Customer One",
 			},
 		]);
-		expect(customerMocks.deleteCustomerStorageByNames).toHaveBeenCalledWith([
-			"CUST-002",
-		]);
+		expect(customerMocks.deleteCustomerStorageByNames).toHaveBeenCalledWith(
+			["CUST-002"],
+		);
 		expect(cacheMocks.getCustomerStorageCount).toHaveBeenCalledOnce();
 		expect(cacheMocks.setCustomersLastSync).toHaveBeenCalledWith(
 			"2026-04-09T11:00:00",
@@ -303,7 +308,10 @@ describe("operational offline sync adapters", () => {
 						{
 							key: "customer::CUST-001",
 							modified: "2026-05-20T10:00:00",
-							data: { name: "CUST-001", customer_name: "Customer One" },
+							data: {
+								name: "CUST-001",
+								customer_name: "Customer One",
+							},
 						},
 					],
 					deleted: [],
@@ -318,7 +326,10 @@ describe("operational offline sync adapters", () => {
 					{
 						key: "customer::CUST-002",
 						modified: "2026-05-20T10:05:00",
-						data: { name: "CUST-002", customer_name: "Customer Two" },
+						data: {
+							name: "CUST-002",
+							customer_name: "Customer Two",
+						},
 					},
 				],
 				deleted: [],
@@ -336,8 +347,10 @@ describe("operational offline sync adapters", () => {
 		});
 
 		expect(fetcher).toHaveBeenCalledTimes(2);
-		expect(customerMocks.setCustomerStorage).toHaveBeenCalledWith([
+		expect(customerMocks.setCustomerStorage).toHaveBeenNthCalledWith(1, [
 			expect.objectContaining({ name: "CUST-001" }),
+		]);
+		expect(customerMocks.setCustomerStorage).toHaveBeenNthCalledWith(2, [
 			expect.objectContaining({ name: "CUST-002" }),
 		]);
 		expect(cacheMocks.setCustomersLastSync).toHaveBeenCalledWith(
