@@ -32,7 +32,7 @@ import {
 
 const PAGE_SIZE = 200;
 const CUSTOMER_SYNC_CONCURRENCY = 5;
-const CUSTOMER_PROGRESS_YIELD_INTERVAL = 10;
+const CUSTOMER_PROGRESS_YIELD_INTERVAL = 50;
 const CUSTOMER_SCOPE_STORAGE_KEY = "posa_customers_profile_scope";
 
 const yieldCustomerProgress = () =>
