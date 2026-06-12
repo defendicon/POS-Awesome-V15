@@ -222,6 +222,182 @@ describe("operational offline sync adapters", () => {
 		expect(result.status).toBe("fresh");
 	});
 
+	it("streams every initial item page before marking the snapshot fresh", async () => {
+		const fetcher = vi.fn(async ({ watermark, offset, limit }) => {
+			expect(watermark).toBeNull();
+			expect(limit).toBe(1000);
+			if (!offset) {
+				return {
+					schema_version: "2026-05-20",
+					next_watermark: "2026-05-20T10:00:00",
+					has_more: true,
+					changes: [
+						{
+							key: "item::ITEM-001",
+							modified: "2026-05-20T10:00:00",
+							data: {
+								item_code: "ITEM-001",
+								item_name: "Alpha",
+								price_list_rate: 10,
+							},
+						},
+					],
+					deleted: [],
+				};
+			}
+			expect(offset).toBe(1);
+			return {
+				schema_version: "2026-05-20",
+				next_watermark: "2026-05-20T10:05:00",
+				has_more: false,
+				changes: [
+					{
+						key: "item::ITEM-002",
+						modified: "2026-05-20T10:05:00",
+						data: {
+							item_code: "ITEM-002",
+							item_name: "Beta",
+							price_list_rate: 20,
+						},
+					},
+				],
+				deleted: [],
+			};
+		});
+
+		const result = await syncItemsResource({
+			posProfile: {
+				name: "POS-1",
+				company: "Test Co",
+				warehouse: "Main WH",
+				modified: "2026-05-20T11:00:00",
+			},
+			priceList: "Retail",
+			watermark: null,
+			fetcher,
+		});
+
+		expect(fetcher).toHaveBeenCalledTimes(2);
+		expect(cacheMocks.saveItemsBulk).toHaveBeenNthCalledWith(
+			1,
+			[expect.objectContaining({ item_code: "ITEM-001" })],
+			"POS-1_Main WH",
+		);
+		expect(cacheMocks.saveItemsBulk).toHaveBeenNthCalledWith(
+			2,
+			[expect.objectContaining({ item_code: "ITEM-002" })],
+			"POS-1_Main WH",
+		);
+		expect(cacheMocks.setItemsLastSync).toHaveBeenCalledWith(
+			"2026-05-20T10:05:00",
+		);
+		expect(result.status).toBe("fresh");
+	});
+
+	it("rebuilds the full item cache when the server requests a schema resync", async () => {
+		const fetcher = vi.fn(async ({ watermark, schemaVersion }) => {
+			if (fetcher.mock.calls.length === 1) {
+				expect(watermark).toBe("2026-04-09T10:00:00");
+				expect(schemaVersion).toBe("2026-04-09");
+				return {
+					schema_version: "2026-05-20",
+					full_resync_required: true,
+					has_more: false,
+					changes: [],
+					deleted: [],
+				};
+			}
+			expect(watermark).toBeNull();
+			expect(schemaVersion).toBeNull();
+			return {
+				schema_version: "2026-05-20",
+				next_watermark: "2026-05-20T11:00:00",
+				has_more: false,
+				changes: [
+					{
+						key: "item::ITEM-NEW",
+						modified: "2026-05-20T11:00:00",
+						data: {
+							item_code: "ITEM-NEW",
+							item_name: "New Item",
+							price_list_rate: 30,
+						},
+					},
+				],
+				deleted: [],
+			};
+		});
+
+		const result = await syncItemsResource({
+			posProfile: {
+				name: "POS-1",
+				company: "Test Co",
+				warehouse: "Main WH",
+				modified: "2026-05-20T11:00:00",
+			},
+			priceList: "Retail",
+			watermark: "2026-04-09T10:00:00",
+			schemaVersion: "2026-04-09",
+			fetcher,
+		});
+
+		expect(fetcher).toHaveBeenCalledTimes(2);
+		expect(cacheMocks.clearStoredItems).toHaveBeenCalledOnce();
+		expect(cacheMocks.clearPriceListCache).toHaveBeenCalledOnce();
+		expect(cacheMocks.clearItemDetailsCache).toHaveBeenCalledOnce();
+		expect(cacheMocks.saveItemsBulk).toHaveBeenCalledWith(
+			[expect.objectContaining({ item_code: "ITEM-NEW" })],
+			"POS-1_Main WH",
+		);
+		expect(result.status).toBe("fresh");
+	});
+
+	it("keeps the prior delta watermark when the server reports more changes", async () => {
+		const fetcher = vi.fn(async () => ({
+			schema_version: "2026-05-20",
+			next_watermark: "2026-05-20T11:00:00",
+			has_more: true,
+			changes: [
+				{
+					key: "item::ITEM-CHANGED",
+					modified: "2026-05-20T11:00:00",
+					data: {
+						item_code: "ITEM-CHANGED",
+						item_name: "Changed Item",
+						price_list_rate: 40,
+					},
+				},
+			],
+			deleted: [],
+		}));
+
+		const result = await syncItemsResource({
+			posProfile: {
+				name: "POS-1",
+				company: "Test Co",
+				warehouse: "Main WH",
+				modified: "2026-05-20T11:00:00",
+			},
+			priceList: "Retail",
+			watermark: "2026-05-20T10:00:00",
+			fetcher,
+		});
+
+		expect(fetcher).toHaveBeenCalledOnce();
+		expect(cacheMocks.setItemsLastSync).toHaveBeenCalledWith(
+			"2026-05-20T10:00:00",
+		);
+		expect(syncStateMocks.setSyncResourceState).toHaveBeenCalledWith(
+			expect.objectContaining({
+				resourceId: "items",
+				status: "limited",
+				watermark: "2026-05-20T10:00:00",
+			}),
+		);
+		expect(result.status).toBe("limited");
+		expect(result.watermark).toBe("2026-05-20T10:00:00");
+	});
+
 	it("clears stale customer scope before applying delta writes and deletes", async () => {
 		syncStateMocks.getSyncResourceState.mockResolvedValue({
 			resourceId: "customers",

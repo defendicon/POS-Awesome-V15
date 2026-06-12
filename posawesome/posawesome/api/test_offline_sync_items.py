@@ -89,31 +89,39 @@ def _install_stubs():
             },
         ][:limit]
     )
-    items_module.get_items = lambda pos_profile, price_list=None, item_group="", search_value="", customer=None, start_after=None, limit=200, **kwargs: [
-        {
-            "item_code": "ITEM-001",
-            "item_name": "Alpha",
-            "modified": "2026-04-09T10:04:00",
-            "price_list_rate": 10,
-            "actual_qty": 5,
-        },
-        {
-            "item_code": "ITEM-002",
-            "item_name": "Beta",
-            "modified": "2026-04-09T10:05:00",
-            "price_list_rate": 20,
-            "actual_qty": 8,
-        },
-        {
-            "item_code": "ITEM-003",
-            "item_name": "Gamma",
-            "modified": "2026-04-09T10:06:00",
-            "price_list_rate": 30,
-            "actual_qty": 2,
-        },
-    ][
-        :limit
-    ]
+    items_module.get_items = (
+        lambda pos_profile,
+        price_list=None,
+        item_group="",
+        search_value="",
+        customer=None,
+        offset=None,
+        start_after=None,
+        limit=200,
+        **kwargs: [
+            {
+                "item_code": "ITEM-001",
+                "item_name": "Alpha",
+                "modified": "2026-04-09T10:04:00",
+                "price_list_rate": 10,
+                "actual_qty": 5,
+            },
+            {
+                "item_code": "ITEM-002",
+                "item_name": "Beta",
+                "modified": "2026-04-09T10:05:00",
+                "price_list_rate": 20,
+                "actual_qty": 8,
+            },
+            {
+                "item_code": "ITEM-003",
+                "item_name": "Gamma",
+                "modified": "2026-04-09T10:06:00",
+                "price_list_rate": 30,
+                "actual_qty": 2,
+            },
+        ][(offset or 0) : (offset or 0) + limit]
+    )
     sys.modules["posawesome.posawesome.api.items"] = items_module
     sys.modules["posawesome.posawesome.api.offline_sync.common"] = load_offline_sync_common()
 
@@ -170,6 +178,20 @@ class TestOfflineSyncItems(unittest.TestCase):
         self.assertEqual(response["schema_version"], self.module.SYNC_SCHEMA_VERSION)
         self.assertIn("next_watermark", response)
         self.assertIn("has_more", response)
+
+    def test_sync_items_accepts_an_initial_page_offset(self):
+        response = self.module.sync_items(
+            pos_profile="POS-TEST",
+            watermark=None,
+            offset=2,
+            limit=2,
+        )
+
+        self.assertEqual(
+            [item["key"] for item in response["changes"]],
+            ["item::ITEM-003"],
+        )
+        self.assertFalse(response["has_more"])
 
 
 if __name__ == "__main__":

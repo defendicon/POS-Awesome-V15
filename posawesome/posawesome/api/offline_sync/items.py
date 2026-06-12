@@ -89,6 +89,7 @@ def sync_items(
     price_list=None,
     customer=None,
     start_after=None,
+    offset=None,
     limit=200,
     schema_version=None,
 ):
@@ -123,6 +124,7 @@ def sync_items(
                 item_group="",
                 search_value="",
                 customer=customer,
+                offset=offset,
                 start_after=start_after,
                 limit=fetch_limit,
             )

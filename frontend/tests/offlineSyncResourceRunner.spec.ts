@@ -148,6 +148,8 @@ describe("offline sync resource runner", () => {
 			priceList: "Retail",
 			customer: null,
 			watermark: "2026-04-09T09:30:00",
+			offset: 1000,
+			limit: 1000,
 			schemaVersion: "2026-04-09",
 		});
 		expect(callOfflineSyncMethod).toHaveBeenCalledWith(
@@ -155,6 +157,8 @@ describe("offline sync resource runner", () => {
 			expect.objectContaining({
 				price_list: "Retail",
 				watermark: "2026-04-09T09:30:00",
+				offset: 1000,
+				limit: 1000,
 				schema_version: "2026-04-09",
 			}),
 		);

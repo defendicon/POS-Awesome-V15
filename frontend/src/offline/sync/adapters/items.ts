@@ -23,11 +23,13 @@ import {
 	type SyncScopedProfile,
 } from "./common";
 
-type ItemsFetcher = (args: {
+type ItemsFetcher = (_args: {
 	posProfile: SyncScopedProfile;
 	priceList?: string | null;
 	customer?: string | null;
 	watermark?: string | null;
+	offset?: number;
+	limit?: number;
 	schemaVersion?: string | null;
 }) => Promise<SyncResponse>;
 
@@ -39,6 +41,8 @@ type ItemsSyncArgs = {
 	schemaVersion?: string | null;
 	fetcher: ItemsFetcher;
 };
+
+const ITEM_SYNC_PAGE_SIZE = 1000;
 
 function buildItemStorageScope(posProfile: SyncScopedProfile) {
 	const profileName = posProfile?.name || "no_profile";
@@ -59,6 +63,19 @@ function extractDeletedItemCodes(response: SyncResponse) {
 			return key.startsWith("item::") ? key.slice("item::".length) : "";
 		})
 		.filter(Boolean);
+}
+
+function laterWatermark(
+	current: string | null,
+	candidate: string | null | undefined,
+) {
+	if (!candidate) {
+		return current;
+	}
+	if (!current) {
+		return candidate;
+	}
+	return candidate > current ? candidate : current;
 }
 
 async function hasItemScopeChanged(posProfile: SyncScopedProfile) {
@@ -92,46 +109,20 @@ async function persistItemSyncStates(
 	}
 }
 
-export async function syncItemsResource(
+async function applyItemSyncResponse(
 	args: ItemsSyncArgs,
-): Promise<ResourceSyncResult> {
-	const scopeChanged = await hasItemScopeChanged(args.posProfile);
-	const effectiveWatermark = scopeChanged ? null : args.watermark;
-	const storageScope = buildItemStorageScope(args.posProfile);
-	const response = await args.fetcher({
-		posProfile: args.posProfile,
-		priceList: args.priceList || null,
-		customer: args.customer || null,
-		watermark: effectiveWatermark,
-		schemaVersion: args.schemaVersion,
-	});
-
-	if (response?.full_resync_required) {
-		await persistItemSyncStates(
-			"limited",
-			args,
-			response,
-			effectiveWatermark,
-		);
-		return buildResourceSyncResult(
-			"items",
-			"limited",
-			response,
-			effectiveWatermark,
-		);
-	}
-
-	if (scopeChanged) {
-		await clearStoredItems();
-		clearPriceListCache();
-		clearItemDetailsCache();
-	}
-
+	response: SyncResponse,
+	storageScope: string,
+) {
 	const changedItems = extractChangedItems(response);
 	if (changedItems.length) {
 		await saveItemsBulk(changedItems, storageScope);
 		if (args.priceList) {
-			saveItemDetailsCache(args.posProfile.name, args.priceList, changedItems);
+			saveItemDetailsCache(
+				args.posProfile.name,
+				args.priceList,
+				changedItems,
+			);
 			mergeCachedPriceListItems(args.priceList, changedItems);
 		}
 	}
@@ -149,6 +140,121 @@ export async function syncItemsResource(
 			args.priceList || null,
 		);
 	}
+}
+
+async function fetchAndStoreItemPages({
+	args,
+	watermark,
+	schemaVersion,
+	storageScope,
+}: {
+	args: ItemsSyncArgs;
+	watermark: string | null;
+	schemaVersion?: string | null;
+	storageScope: string;
+}) {
+	let offset = 0;
+	let latestWatermark = watermark;
+	let schemaVersionSeen = schemaVersion || null;
+	let lastResponse: SyncResponse = {};
+
+	while (true) {
+		const response = await args.fetcher({
+			posProfile: args.posProfile,
+			priceList: args.priceList || null,
+			customer: args.customer || null,
+			watermark,
+			offset,
+			limit: ITEM_SYNC_PAGE_SIZE,
+			schemaVersion,
+		});
+		lastResponse = response || {};
+
+		if (response?.full_resync_required) {
+			return response;
+		}
+
+		await applyItemSyncResponse(args, response, storageScope);
+		latestWatermark = laterWatermark(
+			latestWatermark,
+			response?.next_watermark,
+		);
+		schemaVersionSeen =
+			response?.schema_version || schemaVersionSeen || null;
+
+		// Initial snapshots page by offset so duplicate item names cannot be skipped.
+		// Delta responses use a timestamp watermark and remain limited when truncated.
+		if (!response?.has_more || watermark) {
+			break;
+		}
+
+		const pageSize = extractChangedItems(response).length;
+		if (!pageSize) {
+			throw new Error("Item sync pagination offset did not advance");
+		}
+		offset += pageSize;
+	}
+
+	return {
+		...lastResponse,
+		changes: [],
+		deleted: [],
+		has_more: Boolean(lastResponse?.has_more && watermark),
+		next_watermark:
+			lastResponse?.has_more && watermark ? watermark : latestWatermark,
+		schema_version: schemaVersionSeen,
+	};
+}
+
+export async function syncItemsResource(
+	args: ItemsSyncArgs,
+): Promise<ResourceSyncResult> {
+	const scopeChanged = await hasItemScopeChanged(args.posProfile);
+	let effectiveWatermark = scopeChanged ? null : args.watermark || null;
+	const storageScope = buildItemStorageScope(args.posProfile);
+
+	if (scopeChanged) {
+		await clearStoredItems();
+		clearPriceListCache();
+		clearItemDetailsCache();
+	}
+
+	let response = await fetchAndStoreItemPages({
+		args,
+		watermark: effectiveWatermark,
+		schemaVersion: args.schemaVersion,
+		storageScope,
+	});
+
+	if (response?.full_resync_required) {
+		effectiveWatermark = null;
+		if (!scopeChanged) {
+			await clearStoredItems();
+			clearPriceListCache();
+			clearItemDetailsCache();
+		}
+		response = await fetchAndStoreItemPages({
+			args,
+			watermark: effectiveWatermark,
+			schemaVersion: null,
+			storageScope,
+		});
+	}
+
+	if (response?.full_resync_required) {
+		await persistItemSyncStates(
+			"limited",
+			args,
+			response,
+			effectiveWatermark,
+		);
+		return buildResourceSyncResult(
+			"items",
+			"limited",
+			response,
+			effectiveWatermark,
+		);
+	}
 
 	const itemsCount = await getStoredItemsCountByScope(storageScope);
 	refreshSnapshotFromSync({
@@ -163,10 +269,11 @@ export async function syncItemsResource(
 		setItemsLastSync(nextWatermark);
 	}
 
-	await persistItemSyncStates("fresh", args, response, effectiveWatermark);
+	const status = response?.has_more ? "limited" : "fresh";
+	await persistItemSyncStates(status, args, response, effectiveWatermark);
 	return buildResourceSyncResult(
 		"items",
-		"fresh",
+		status,
 		response,
 		effectiveWatermark,
 	);
