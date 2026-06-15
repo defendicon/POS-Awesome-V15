@@ -92,6 +92,18 @@
 				{{ __("Print Draft") }}
 			</v-btn>
 		</v-col>
+		<v-col cols="12" sm="6">
+			<v-btn
+				block
+				color="primary"
+				theme="dark"
+				prepend-icon="mdi-share-variant"
+				@click="$emit('share-last')"
+				class="summary-btn"
+			>
+				{{ __("Share Last Invoice") }}
+			</v-btn>
+		</v-col>
 		<v-col cols="12" sm="6" v-if="showCustomerDisplayButton">
 			<v-btn
 				block
@@ -151,6 +163,7 @@ defineEmits([
 	"open-invoice-management",
 	"open-returns",
 	"print-draft",
+	"share-last",
 	"show-payment",
 	"open-customer-display",
 ]);

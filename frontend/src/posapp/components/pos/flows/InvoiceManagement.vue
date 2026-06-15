@@ -309,6 +309,15 @@
 											@click="printInvoice(item)"
 										/>
 										<v-btn
+											icon="mdi-share-variant-outline"
+											variant="text"
+											size="small"
+											color="info"
+											:title="__('Share')"
+											:aria-label="__('Share invoice')"
+											@click="shareInvoice(item)"
+										/>
+										<v-btn
 											v-if="posProfile?.posa_allow_return == 1"
 											icon="mdi-backup-restore"
 											variant="text"
@@ -442,6 +451,15 @@
 											:title="__('Print')"
 											:aria-label="__('Print invoice')"
 											@click="printInvoice(invoice)"
+										/>
+										<v-btn
+											icon="mdi-share-variant-outline"
+											variant="text"
+											size="small"
+											color="info"
+											:title="__('Share')"
+											:aria-label="__('Share invoice')"
+											@click="shareInvoice(invoice)"
 										/>
 										<v-btn
 											v-if="posProfile?.posa_allow_return == 1"
@@ -671,6 +689,15 @@
 											:aria-label="__('Print invoice')"
 											@click="printInvoice(item)"
 										/>
+										<v-btn
+											icon="mdi-share-variant-outline"
+											variant="text"
+											size="small"
+											color="info"
+											:title="__('Share')"
+											:aria-label="__('Share invoice')"
+											@click="shareInvoice(item)"
+										/>
 									</div>
 								</template>
 							</v-data-table>
@@ -800,6 +827,15 @@
 											:title="__('Print')"
 											:aria-label="__('Print invoice')"
 											@click="printInvoice(invoice)"
+										/>
+										<v-btn
+											icon="mdi-share-variant-outline"
+											variant="text"
+											size="small"
+											color="info"
+											:title="__('Share')"
+											:aria-label="__('Share invoice')"
+											@click="shareInvoice(invoice)"
 										/>
 									</div>
 								</v-card>
@@ -1114,6 +1150,15 @@
 											:aria-label="__('Print invoice')"
 											@click="printInvoice(item)"
 										/>
+										<v-btn
+											icon="mdi-share-variant-outline"
+											variant="text"
+											size="small"
+											color="info"
+											:title="__('Share')"
+											:aria-label="__('Share invoice')"
+											@click="shareInvoice(item)"
+										/>
 									</div>
 								</template>
 							</v-data-table>
@@ -1192,6 +1237,15 @@
 											:title="__('Print')"
 											:aria-label="__('Print invoice')"
 											@click="printInvoice(invoice)"
+										/>
+										<v-btn
+											icon="mdi-share-variant-outline"
+											variant="text"
+											size="small"
+											color="info"
+											:title="__('Share')"
+											:aria-label="__('Share invoice')"
+											@click="shareInvoice(invoice)"
 										/>
 									</div>
 								</v-card>
@@ -2644,6 +2698,51 @@ export default {
 			}
 			const printWindow = window.open(url, "Print");
 			if (printWindow) watchPrintWindow(printWindow, printOptions);
+		},
+		async shareInvoice(invoice) {
+			try {
+				const profile = this.posProfile;
+				if (!invoice?.name || !profile) return;
+				const doctype = invoice.doctype || this.currentInvoiceDoctype;
+				const printFormat = profile.print_format_for_online || profile.print_format || "Standard";
+				const pdf_url = `/api/method/frappe.utils.print_format.download_pdf?doctype=${encodeURIComponent(doctype)}&name=${encodeURIComponent(invoice.name)}&format=${encodeURIComponent(printFormat)}&no_letterhead=0`;
+				const response = await fetch(pdf_url, {
+					headers: { "X-Frappe-CSRF-Token": frappe.csrf_token },
+				});
+				if (!response.ok) throw new Error(__("Failed to download invoice. Status: {0}", [response.status]));
+				const blob = await response.blob();
+				const file = new File([blob], `${invoice.name}.pdf`, { type: "application/pdf" });
+				if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+					try {
+						await navigator.share({
+							title: __("Sales Invoice"),
+							text: __("Invoice No: {0}", [invoice.name]),
+							files: [file],
+						});
+					} catch (shareError) {
+						if (shareError.name !== "AbortError") {
+							this.downloadInvoicePdf(blob, invoice.name);
+						}
+					}
+				} else {
+					this.downloadInvoicePdf(blob, invoice.name);
+				}
+			} catch (error) {
+				this.eventBus?.emit?.("show_message", {
+					title: error.message || __("Failed to share invoice"),
+					color: "error",
+				});
+			}
+		},
+		downloadInvoicePdf(blob, name) {
+			const url = window.URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `${name}.pdf`;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			window.URL.revokeObjectURL(url);
 		},
 	},
 };
