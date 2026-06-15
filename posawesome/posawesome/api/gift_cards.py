@@ -462,7 +462,7 @@ def issue_gift_card(
     # company default — never a hardcoded "PKR".
     gift_card_doc.currency = (
         currency
-        or getattr(profile_doc, "currency", None)
+        or _doc_value(profile_doc, "currency")
         or frappe.get_cached_value("Company", company, "default_currency")
     )
     gift_card_doc.current_balance = amount
