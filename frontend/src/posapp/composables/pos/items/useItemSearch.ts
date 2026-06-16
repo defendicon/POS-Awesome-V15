@@ -181,12 +181,14 @@ export function useItemSearch() {
 	 * @param {boolean} filters.hideVariants - Hide variant items
 	 * @param {boolean} filters.onlyBarcode - Show only items with barcode
 	 * @param {number} filters.limit - Max items to return
+	 * @param {boolean} filters.searchAlreadyApplied - Source items are already scoped to searchTerm
 	 * @returns {Array} - Filtered and paginated items
 	 */
 	const filterAndPaginate = (
 		items: SearchItem[],
 		{
 			searchTerm = "",
+			searchAlreadyApplied = false,
 			hideZeroRate = false,
 			hideVariants = false,
 			onlyBarcode = false,
@@ -196,7 +198,8 @@ export function useItemSearch() {
 		if (!items || !items.length) return [];
 
 		const term = (searchTerm || "").trim().toLowerCase();
-		const needsLocalSearch = term && term.length >= 3;
+		const needsLocalSearch =
+			!searchAlreadyApplied && term && term.length >= 3;
 
 		// PERF: If no filters needed, just slice and return
 		if (

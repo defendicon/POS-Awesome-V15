@@ -28,6 +28,7 @@ export function useItemsIntegration(options: IntegrationOptions = {}) {
 	const {
 		items,
 		filteredItems,
+		filteredItemsSearchTerm,
 		itemGroups,
 		isLoading,
 		isBackgroundLoading,
@@ -263,6 +264,7 @@ export function useItemsIntegration(options: IntegrationOptions = {}) {
 		// Store state (reactive)
 		items,
 		filteredItems,
+		filteredItemsSearchTerm,
 		itemGroups,
 		isLoading,
 		isBackgroundLoading,

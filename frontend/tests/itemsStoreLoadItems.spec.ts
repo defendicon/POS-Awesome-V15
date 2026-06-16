@@ -9,7 +9,16 @@ const offlineMocks = vi.hoisted(() => ({
 	refreshBootstrapSnapshotFromCacheState: vi.fn(),
 	getStoredItemsCountByScope: vi.fn(async () => 0),
 	getAllStoredItems: vi.fn(async () => []),
+	searchStoredItems: vi.fn(async () => []),
 	getCachedPriceListItems: vi.fn(async () => null),
+}));
+
+const cacheMocks = vi.hoisted(() => ({
+	getCachedItems: vi.fn(async () => null),
+	cacheItems: vi.fn(async () => {}),
+	getCachedSearchResult: vi.fn(() => null),
+	setCachedSearchResult: vi.fn(),
+	clearSearchCache: vi.fn(),
 }));
 
 const itemsSyncMocks = vi.hoisted(() => ({
@@ -30,6 +39,7 @@ vi.mock("../src/offline/index", () => ({
 		offlineMocks.refreshBootstrapSnapshotFromCacheState,
 	getStoredItemsCountByScope: offlineMocks.getStoredItemsCountByScope,
 	getAllStoredItems: offlineMocks.getAllStoredItems,
+	searchStoredItems: offlineMocks.searchStoredItems,
 	getCachedPriceListItems: offlineMocks.getCachedPriceListItems,
 }));
 
@@ -47,11 +57,11 @@ vi.mock("../src/posapp/composables/pos/items/store/useItemsCache", () => ({
 		cacheHealth: { value: { items: "healthy" } },
 		assessCacheHealth: vi.fn(async () => {}),
 		clearAllCaches: vi.fn(async () => {}),
-		clearSearchCache: vi.fn(),
-		getCachedItems: vi.fn(async () => null),
-		cacheItems: vi.fn(async () => {}),
-		getCachedSearchResult: vi.fn(() => null),
-		setCachedSearchResult: vi.fn(),
+		clearSearchCache: cacheMocks.clearSearchCache,
+		getCachedItems: cacheMocks.getCachedItems,
+		cacheItems: cacheMocks.cacheItems,
+		getCachedSearchResult: cacheMocks.getCachedSearchResult,
+		setCachedSearchResult: cacheMocks.setCachedSearchResult,
 		getCachedPriceList: vi.fn(() => null),
 		setCachedPriceList: vi.fn(),
 		generateCacheKey: vi.fn(
@@ -156,6 +166,11 @@ describe("itemsStore loadItems", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		setActivePinia(createPinia());
+		offlineMocks.getStoredItemsCountByScope.mockResolvedValue(0);
+		offlineMocks.getAllStoredItems.mockResolvedValue([]);
+		offlineMocks.searchStoredItems.mockResolvedValue([]);
+		cacheMocks.getCachedItems.mockResolvedValue(null);
+		cacheMocks.getCachedSearchResult.mockReturnValue(null);
 		itemServiceMocks.getItemsData.mockResolvedValue([
 			{
 				item_code: "ITEM-1",
@@ -333,5 +348,81 @@ describe("itemsStore loadItems", () => {
 			expect.anything(),
 			expect.anything(),
 		);
+	});
+
+	it("bypasses memory result cache when scoped offline catalog is large", async () => {
+		const store = useItemsStore();
+		const profile = {
+			name: "POS-1",
+			warehouse: "Main WH",
+			selling_price_list: "Retail",
+			currency: "PKR",
+			item_groups: [],
+			posa_use_limit_search: 0,
+		} as any;
+
+		offlineMocks.getStoredItemsCountByScope.mockResolvedValue(6000);
+		offlineMocks.searchStoredItems.mockResolvedValue([
+			{
+				item_code: "ITEM-CACHED-PAGE",
+				item_name: "Cached Page Item",
+				item_group: "ALL",
+			},
+		]);
+		cacheMocks.getCachedItems.mockResolvedValue([
+			{
+				item_code: "ITEM-FULL-CACHE",
+				item_name: "Full Cache Item",
+				item_group: "ALL",
+			},
+		]);
+
+		await store.initialize(profile);
+		itemServiceMocks.getItemsData.mockClear();
+		cacheMocks.getCachedItems.mockClear();
+
+		await store.loadItems();
+
+		expect(cacheMocks.getCachedItems).not.toHaveBeenCalled();
+		expect(itemServiceMocks.getItemsData).toHaveBeenCalledTimes(1);
+		expect(store.items.map((item) => item.item_code)).toEqual(["ITEM-1"]);
+	});
+
+	it("does not duplicate indexed search result pages in memory cache", async () => {
+		const store = useItemsStore();
+		const profile = {
+			name: "POS-1",
+			warehouse: "Main WH",
+			selling_price_list: "Retail",
+			currency: "PKR",
+			item_groups: [],
+			posa_use_limit_search: 0,
+		} as any;
+
+		offlineMocks.getStoredItemsCountByScope.mockResolvedValue(6000);
+		offlineMocks.searchStoredItems
+			.mockResolvedValueOnce([
+				{
+					item_code: "ITEM-BOOT",
+					item_name: "Boot Item",
+					item_group: "ALL",
+				},
+			])
+			.mockResolvedValueOnce([
+				{
+					item_code: "ITEM-ALPHA",
+					item_name: "Alpha Item",
+					item_group: "ALL",
+				},
+			]);
+
+		await store.initialize(profile);
+
+		const result = await store.searchItems("alpha");
+
+		expect(result.map((item) => item.item_code)).toEqual(["ITEM-ALPHA"]);
+		expect(cacheMocks.getCachedSearchResult).not.toHaveBeenCalled();
+		expect(cacheMocks.setCachedSearchResult).not.toHaveBeenCalled();
+		expect(store.filteredItemsSearchTerm).toBe("alpha");
 	});
 });

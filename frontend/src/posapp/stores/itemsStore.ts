@@ -101,6 +101,7 @@ export const useItemsStore = defineStore("items", () => {
 	// Core State
 	const items = ref<Item[]>([]);
 	const filteredItems = ref<Item[]>([]);
+	const filteredItemsSearchTerm = ref("");
 	const totalItemCount = ref(0);
 	const itemsLoaded = ref(false);
 	const searchTerm = ref("");
@@ -233,6 +234,18 @@ export const useItemsStore = defineStore("items", () => {
 
 	const getStorageScope = () => getCacheScope();
 
+	const normalizeSearchScope = (value: unknown) =>
+		typeof value === "string" ? value.trim().toLowerCase() : "";
+
+	const setFilteredItems = (nextItems: Item[], searchScope = "") => {
+		filteredItems.value = Array.isArray(nextItems) ? nextItems : [];
+		filteredItemsSearchTerm.value = normalizeSearchScope(searchScope);
+	};
+
+	const isLargeCatalogWindow = () =>
+		cachedPagination.value.enabled ||
+		totalItemCount.value > LARGE_CATALOG_THRESHOLD;
+
 	const setItems = (
 		newItems: Item[],
 		options: { append?: boolean; totalCount?: number } = {},
@@ -274,9 +287,8 @@ export const useItemsStore = defineStore("items", () => {
 		}
 
 		if (!searchTerm.value) {
-			filteredItems.value = filterItemsByGroup(
-				items.value,
-				normalizedGroup,
+			setFilteredItems(
+				filterItemsByGroup(items.value, normalizedGroup),
 			);
 		}
 	};
@@ -501,7 +513,10 @@ export const useItemsStore = defineStore("items", () => {
 				getCacheScope(),
 			);
 
-			const canReadFromCache = !forceServer && !limitSearchEnabled.value;
+			const canReadFromCache =
+				!forceServer &&
+				!limitSearchEnabled.value &&
+				!isLargeCatalogWindow();
 
 			if (canReadFromCache) {
 				const cachedResult = await getCachedItems(cacheKey);
@@ -660,9 +675,8 @@ export const useItemsStore = defineStore("items", () => {
 
 		clearSearchCache();
 		if (preserveItems) {
-			filteredItems.value = filterItemsByGroup(
-				items.value,
-				itemGroup.value,
+			setFilteredItems(
+				filterItemsByGroup(items.value, itemGroup.value),
 			);
 			return filteredItems.value;
 		}
@@ -692,9 +706,8 @@ export const useItemsStore = defineStore("items", () => {
 			}
 
 			if (!cachedPagination.value.enabled) {
-				filteredItems.value = filterItemsByGroup(
-					items.value,
-					itemGroup.value,
+				setFilteredItems(
+					filterItemsByGroup(items.value, itemGroup.value),
 				);
 			} else {
 				cachedPagination.value.search = "";
@@ -702,9 +715,8 @@ export const useItemsStore = defineStore("items", () => {
 					cachedPagination.value.offset,
 					items.value.length,
 				);
-				filteredItems.value = filterItemsByGroup(
-					items.value,
-					itemGroup.value,
+				setFilteredItems(
+					filterItemsByGroup(items.value, itemGroup.value),
 				);
 			}
 			return filteredItems.value;
@@ -722,7 +734,7 @@ export const useItemsStore = defineStore("items", () => {
 					items.value,
 					itemGroup.value,
 				);
-				filteredItems.value = serverResults;
+				setFilteredItems(serverResults, term);
 				performanceMetrics.value.searchMisses++;
 
 				return serverResults;
@@ -734,15 +746,19 @@ export const useItemsStore = defineStore("items", () => {
 		}
 
 		const cacheKey = `search_${getCacheScope()}_${activePriceList.value || "default"}_${term}_${itemGroup.value}`;
-		const cached = getCachedSearchResult(cacheKey);
+		const shouldUseIndexed = shouldUseIndexedSearch();
+		const canUseSearchResultCache =
+			!shouldUseIndexed && !isLargeCatalogWindow();
+		const cached = canUseSearchResultCache
+			? getCachedSearchResult(cacheKey)
+			: null;
 		if (cached) {
-			filteredItems.value = cached;
+			setFilteredItems(cached, term);
 			performanceMetrics.value.searchHits++;
 			return cached;
 		}
 
 		try {
-			const shouldUseIndexed = shouldUseIndexedSearch();
 			let searchResults: Item[] = [];
 
 			if (shouldUseIndexed) {
@@ -795,9 +811,11 @@ export const useItemsStore = defineStore("items", () => {
 				);
 			}
 
-			setCachedSearchResult(cacheKey, searchResults);
+			if (canUseSearchResultCache) {
+				setCachedSearchResult(cacheKey, searchResults);
+			}
 
-			filteredItems.value = searchResults;
+			setFilteredItems(searchResults, term);
 			performanceMetrics.value.searchMisses++;
 
 			if (shouldUseIndexed) {
@@ -821,7 +839,7 @@ export const useItemsStore = defineStore("items", () => {
 			if (cachedPagination.value.enabled && shouldUseIndexedSearch()) {
 				await resetCachedItemsForGroup(group);
 			} else {
-				filteredItems.value = filterItemsByGroup(items.value, group);
+				setFilteredItems(filterItemsByGroup(items.value, group));
 			}
 		}
 	};
@@ -877,7 +895,7 @@ export const useItemsStore = defineStore("items", () => {
 			!cachedPagination.value.enabled ||
 			!shouldUseIndexedSearch()
 		) {
-			filteredItems.value = filterItemsByGroup(items.value, group);
+			setFilteredItems(filterItemsByGroup(items.value, group));
 			return;
 		}
 
@@ -957,15 +975,13 @@ export const useItemsStore = defineStore("items", () => {
 		clearSearchCache();
 
 		if (searchTerm.value) {
-			filteredItems.value = performLocalSearch(
+			setFilteredItems(
+				performLocalSearch(searchTerm.value, items.value, itemGroup.value),
 				searchTerm.value,
-				items.value,
-				itemGroup.value,
 			);
 		} else {
-			filteredItems.value = filterItemsByGroup(
-				items.value,
-				itemGroup.value,
+			setFilteredItems(
+				filterItemsByGroup(items.value, itemGroup.value),
 			);
 		}
 	};
@@ -1015,9 +1031,8 @@ export const useItemsStore = defineStore("items", () => {
 				if (searchTerm.value) {
 					await searchItems(searchTerm.value);
 				} else {
-					filteredItems.value = filterItemsByGroup(
-						items.value,
-						itemGroup.value,
+					setFilteredItems(
+						filterItemsByGroup(items.value, itemGroup.value),
 					);
 				}
 
@@ -1112,15 +1127,13 @@ export const useItemsStore = defineStore("items", () => {
 
 		clearSearchCache();
 		if (searchTerm.value) {
-			filteredItems.value = performLocalSearch(
+			setFilteredItems(
+				performLocalSearch(searchTerm.value, items.value, itemGroup.value),
 				searchTerm.value,
-				items.value,
-				itemGroup.value,
 			);
 		} else {
-			filteredItems.value = filterItemsByGroup(
-				items.value,
-				itemGroup.value,
+			setFilteredItems(
+				filterItemsByGroup(items.value, itemGroup.value),
 			);
 		}
 	};
@@ -1136,6 +1149,7 @@ export const useItemsStore = defineStore("items", () => {
 		// State
 		items,
 		filteredItems,
+		filteredItemsSearchTerm,
 		itemsMap,
 		barcodeIndex,
 		itemGroups,

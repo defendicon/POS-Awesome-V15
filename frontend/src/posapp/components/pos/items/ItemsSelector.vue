@@ -447,6 +447,7 @@ const forceCustomerPriceList = computed(() =>
 const {
 	items,
 	filteredItems,
+	filteredItemsSearchTerm,
 	customer_price_list,
 	loading,
 	isBackgroundLoading,
@@ -458,8 +459,10 @@ const displayedItems = computed(() => {
 	const baseItems = Array.isArray(filteredItems.value) ? filteredItems.value : [];
 	const rawTerm = first_search.value;
 	const term = (typeof rawTerm === "string" ? rawTerm : "").trim().toLowerCase();
+	const searchAlreadyApplied = term.length >= 3 && filteredItemsSearchTerm.value === term;
 	return filterAndPaginate(baseItems, {
 		searchTerm: term,
+		searchAlreadyApplied,
 		hideZeroRate: hide_zero_rate_items.value,
 		hideVariants: pos_profile.value?.posa_hide_variants_items,
 		onlyBarcode: showOnlyBarcodeItemsRef.value,
