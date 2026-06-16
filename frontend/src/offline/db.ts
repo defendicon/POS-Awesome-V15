@@ -1196,29 +1196,72 @@ export async function checkDbHealth() {
 }
 
 export function queueHealthCheck() {
-	const threshold = 1000;
-	return (
-		memory.offline_invoices.length > threshold ||
-		memory.offline_customers.length > threshold ||
-		memory.offline_payments.length > threshold ||
-		memory.offline_cash_movements.length > threshold
+	const cutoff = legacyQueuePruneCutoff();
+	return PENDING_OFFLINE_QUEUE_KEYS.some((key) =>
+		getMemoryQueueList(key).some((entry) =>
+			shouldPruneLegacyQueueEntry(entry, cutoff),
+		),
 	);
 }
 
-export function purgeOldQueueEntries() {
-	const threshold = 1000;
-	const purge = (list: any[]) => {
-		if (list.length > threshold) {
-			// Keep the newest items
-			list.splice(0, list.length - threshold);
+const LEGACY_QUEUE_PRUNE_MAX_AGE_DAYS = 30;
+const LEGACY_QUEUE_TERMINAL_STATUSES = new Set(["acknowledged", "synced"]);
+
+function legacyQueuePruneCutoff(
+	options: { now?: number; maxAgeDays?: number } = {},
+) {
+	return (
+		(options.now || Date.now()) -
+		(options.maxAgeDays || LEGACY_QUEUE_PRUNE_MAX_AGE_DAYS) * 24 * 60 * 60 * 1000
+	);
+}
+
+function getMemoryQueueList(key: string): AnyRecord[] {
+	return Array.isArray(memory[key]) ? memory[key] : [];
+}
+
+function getLegacyQueueTimestamp(entry: AnyRecord) {
+	return (
+		entry?.acknowledged_at ||
+		entry?.synced_at ||
+		entry?.last_attempt_at ||
+		entry?.updated_at ||
+		entry?.created_at
+	);
+}
+
+function shouldPruneLegacyQueueEntry(entry: AnyRecord, cutoff: number) {
+	const status = String(entry?.status || "").toLowerCase();
+	return (
+		LEGACY_QUEUE_TERMINAL_STATUSES.has(status) &&
+		isOlderThan(getLegacyQueueTimestamp(entry), cutoff)
+	);
+}
+
+export function purgeOldQueueEntries(
+	options: { now?: number; maxAgeDays?: number } = {},
+) {
+	const cutoff = legacyQueuePruneCutoff(options);
+	let pruned = 0;
+
+	for (const key of PENDING_OFFLINE_QUEUE_KEYS) {
+		const list = getMemoryQueueList(key);
+		if (!list.length) {
+			continue;
 		}
-	};
-	purge(memory.offline_invoices);
-	purge(memory.offline_customers);
-	purge(memory.offline_payments);
-	purge(memory.offline_cash_movements);
-	persist("offline_invoices");
-	persist("offline_customers");
-	persist("offline_payments");
-	persist("offline_cash_movements");
+
+		const retained = list.filter(
+			(entry) => !shouldPruneLegacyQueueEntry(entry, cutoff),
+		);
+		const removed = list.length - retained.length;
+		if (!removed) {
+			continue;
+		}
+
+		memory[key] = retained;
+		persist(key);
+		pruned += removed;
+	}
+
+	return pruned;
 }

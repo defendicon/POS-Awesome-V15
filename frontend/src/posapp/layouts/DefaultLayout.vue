@@ -910,8 +910,10 @@ const initializeData = async () => {
 	}
 
 	if (queueHealthCheck()) {
-		alert("Offline queue is too large. Old entries will be purged.");
-		purgeOldQueueEntries();
+		const pruned = purgeOldQueueEntries();
+		if (pruned > 0) {
+			alert("Old synced offline queue entries were pruned.");
+		}
 	}
 
 	await syncStore.updatePendingCount();

@@ -7,8 +7,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	db,
 	checkDbHealth,
+	flushPersistQueue,
 	initPromise,
+	memory,
 	pruneOfflineStorage,
+	purgeOldQueueEntries,
+	queueHealthCheck,
 	quickDbHealthCheck,
 	repairDbAfterFailedHealthCheck,
 	safeBulkPut,
@@ -26,6 +30,10 @@ describe("offline IndexedDB maintenance", () => {
 		]) {
 			await db.table(table).clear();
 		}
+		memory.offline_invoices = [];
+		memory.offline_customers = [];
+		memory.offline_payments = [];
+		memory.offline_cash_movements = [];
 		vi.useRealTimers();
 		vi.spyOn(console, "warn").mockImplementation(() => {});
 		vi.spyOn(console, "error").mockImplementation(() => {});
@@ -173,6 +181,59 @@ describe("offline IndexedDB maintenance", () => {
 			.map((row) => row.key)
 			.sort();
 		expect(keyvalKeys).toEqual(["local_telemetry:fresh", "tombstone:fresh"]);
+	});
+
+	it("does not trim unsynced legacy queue entries by count", () => {
+		const oldIso = new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString();
+		memory.offline_invoices = Array.from({ length: 1505 }, (_, index) => ({
+			status: "pending",
+			created_at: oldIso,
+			invoice: { name: `PENDING-${index}` },
+		}));
+
+		expect(queueHealthCheck()).toBe(false);
+		expect(purgeOldQueueEntries({ now: Date.now(), maxAgeDays: 30 })).toBe(0);
+		expect(memory.offline_invoices).toHaveLength(1505);
+		expect(memory.offline_invoices[0]?.invoice?.name).toBe("PENDING-0");
+	});
+
+	it("prunes only old terminal legacy queue entries by age", async () => {
+		const now = Date.now();
+		const oldIso = new Date(now - 45 * 24 * 60 * 60 * 1000).toISOString();
+		const freshIso = new Date(now).toISOString();
+		memory.offline_invoices = [
+			{ status: "synced", last_attempt_at: oldIso, invoice: { name: "old-synced" } },
+			{
+				status: "acknowledged",
+				acknowledged_at: oldIso,
+				invoice: { name: "old-acknowledged" },
+			},
+			{ status: "pending", created_at: oldIso, invoice: { name: "old-pending" } },
+			{
+				status: "dead_letter",
+				last_attempt_at: oldIso,
+				invoice: { name: "old-dead-letter" },
+			},
+			{ status: "synced", last_attempt_at: freshIso, invoice: { name: "fresh-synced" } },
+			{ invoice: { name: "legacy-no-status" } },
+		];
+
+		expect(queueHealthCheck()).toBe(true);
+		expect(purgeOldQueueEntries({ now, maxAgeDays: 30 })).toBe(2);
+
+		const retainedNames = memory.offline_invoices.map((entry) => entry.invoice?.name);
+		expect(retainedNames).toEqual([
+			"old-pending",
+			"old-dead-letter",
+			"fresh-synced",
+			"legacy-no-status",
+		]);
+
+		await flushPersistQueue();
+		const persisted = await db.table("queue").get("offline_invoices");
+		expect((persisted?.value || []).map((entry: any) => entry.invoice?.name)).toEqual(
+			retainedNames,
+		);
 	});
 
 	it("keeps failed quick health checks non-destructive", async () => {
