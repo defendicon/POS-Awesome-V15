@@ -39,6 +39,10 @@ describe("offline key map parity", () => {
 		expect(KEY_TABLE_MAP.payment_method_currency_cache).toBe("cache");
 	});
 
+	it("does not route the customer read model through legacy cache keys", () => {
+		expect(KEY_TABLE_MAP.customer_storage).toBeUndefined();
+	});
+
 	it("keeps app db KEY_TABLE_MAP and worker KEY_TABLE_MAP in sync", () => {
 		const thisFile = fileURLToPath(import.meta.url);
 		const testsDir = path.dirname(thisFile);

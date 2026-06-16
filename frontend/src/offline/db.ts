@@ -90,7 +90,6 @@ export const KEY_TABLE_MAP: Record<string, string> = {
 	offline_payments: "queue",
 	offline_cash_movements: "queue",
 	item_details_cache: "cache",
-	customer_storage: "cache",
 	stored_value_snapshot_cache: "cache",
 	gift_card_snapshot_cache: "cache",
 	delivery_charges_cache: "cache",
@@ -140,7 +139,12 @@ const LOCAL_STORAGE_KEYS = new Set([
 	"tax_inclusive",
 ]);
 
+// customer_storage is a runtime-only hot cache. The canonical durable customer
+// read model is the IndexedDB `customers` table.
 const MEMORY_ONLY_KEYS = new Set(["customer_storage"]);
+const LEGACY_KEY_TABLES: Record<string, string[]> = {
+	customer_storage: ["cache"],
+};
 
 export const STARTUP_MEMORY_KEYS = Object.freeze([
 	"manual_offline",
@@ -394,6 +398,23 @@ async function deletePersistedKey(key: string) {
 				.catch((error) => {
 					console.warn(
 						`Failed to delete ${key} fallback from keyval`,
+						error,
+					);
+				}),
+		);
+	}
+
+	for (const legacyTable of LEGACY_KEY_TABLES[key] || []) {
+		if (legacyTable === primaryTable) {
+			continue;
+		}
+		tasks.push(
+			db
+				.table(legacyTable)
+				.delete(key)
+				.catch((error) => {
+					console.warn(
+						`Failed to delete ${key} legacy row from ${legacyTable}`,
 						error,
 					);
 				}),

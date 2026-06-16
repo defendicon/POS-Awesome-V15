@@ -124,6 +124,9 @@ export async function syncOfflineCustomers() {
 	return { pending: getPendingOfflineCustomerCount(), synced };
 }
 
+// Historical helper names mention "storage", but the durable customer read model
+// is db.table("customers"). memory.customer_storage is only a bounded hot cache
+// for recently selected or updated customers.
 export function getCustomerStorage() {
 	return memory.customer_storage || [];
 }

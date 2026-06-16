@@ -17,3 +17,4 @@ posawesome.patches.add_gift_card_invoice_redemption_fields
 posawesome.patches.add_gift_card_to_workspace
 posawesome.patches.add_submission_ledger_to_workspace
 posawesome.patches.add_pos_scale_indexes
+posawesome.patches.add_offline_sync_delta_indexes

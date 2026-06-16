@@ -193,7 +193,6 @@ const KEY_TABLE_MAP = {
 	offline_payments: "queue",
 	offline_cash_movements: "queue",
 	item_details_cache: "cache",
-	customer_storage: "cache",
 	stored_value_snapshot_cache: "cache",
 	gift_card_snapshot_cache: "cache",
 	delivery_charges_cache: "cache",
@@ -225,6 +224,8 @@ const KEY_TABLE_MAP = {
 	pos_last_sync_totals: "sync_state",
 };
 
+// customer_storage is only an in-process hot cache. Durable customers live in
+// the IndexedDB `customers` table, so the worker never persists this key.
 const MEMORY_ONLY_KEYS = new Set(["customer_storage"]);
 let persistBatchChain = Promise.resolve();
 

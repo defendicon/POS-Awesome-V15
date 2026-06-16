@@ -161,7 +161,7 @@ const SYNC_RESOURCES: ReadonlyArray<SyncResourceDefinition> = Object.freeze([
 		mode: "delta",
 		priority: "warm",
 		triggers: ["online_resume", "timer", "profile_change", "user_action"],
-		storageKey: "customer_storage",
+		storageKey: "customers",
 		watermarkType: "timestamp",
 		fullResyncSupported: true,
 	},

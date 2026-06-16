@@ -98,4 +98,12 @@ describe("sync resource registry", () => {
 			"invoice_outbox",
 		]);
 	});
+
+	it("uses the searchable customers table as the canonical customers store", () => {
+		const customersResource = getSyncResourceDefinitions().find(
+			(resource) => resource.id === "customers",
+		);
+
+		expect(customersResource?.storageKey).toBe("customers");
+	});
 });
