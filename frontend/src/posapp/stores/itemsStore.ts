@@ -21,8 +21,18 @@ import {
 } from "./items/loadItemsRequest";
 
 export const useItemsStore = defineStore("items", () => {
+	const SERVER_SEARCH_FALLBACK_DEBOUNCE_MS = 450;
+	const SERVER_SEARCH_MISS_CACHE_TTL_MS = 30 * 1000;
+	const SERVER_SEARCH_FALLBACK_MIN_LENGTH = 3;
 	type OfflineModule = Record<string, any>;
 	let offlineApiPromise: Promise<OfflineModule> | null = null;
+	let serverSearchFallbackTimer: ReturnType<typeof setTimeout> | null = null;
+	let resolvePendingServerSearchFallback:
+		| ((_items: Item[]) => void)
+		| null = null;
+	let serverSearchFallbackToken = 0;
+	const serverSearchMissCache = new Map<string, number>();
+	const activeServerSearchKeys = new Set<string>();
 
 	const getOfflineApi = async (): Promise<OfflineModule> => {
 		if (!offlineApiPromise) {
@@ -245,6 +255,132 @@ export const useItemsStore = defineStore("items", () => {
 	const isLargeCatalogWindow = () =>
 		cachedPagination.value.enabled ||
 		totalItemCount.value > LARGE_CATALOG_THRESHOLD;
+
+	const buildServerSearchScopeKey = (term: string, group: string) =>
+		[
+			getCacheScope(),
+			activePriceList.value || "default",
+			group || "ALL",
+			normalizeSearchScope(term),
+		].join("|");
+
+	const isServerSearchMissCached = (scopeKey: string) => {
+		const timestamp = serverSearchMissCache.get(scopeKey);
+		if (!timestamp) {
+			return false;
+		}
+		if (Date.now() - timestamp > SERVER_SEARCH_MISS_CACHE_TTL_MS) {
+			serverSearchMissCache.delete(scopeKey);
+			return false;
+		}
+		return true;
+	};
+
+	const markServerSearchMiss = (scopeKey: string) => {
+		serverSearchMissCache.set(scopeKey, Date.now());
+	};
+
+	const abortActiveServerSearches = () => {
+		for (const key of Array.from(activeServerSearchKeys)) {
+			const controller = abortControllers.value.get(key);
+			if (controller) {
+				controller.abort();
+			}
+			abortControllers.value.delete(key);
+			activeServerSearchKeys.delete(key);
+		}
+	};
+
+	const cancelPendingServerSearchFallback = (result: Item[] = []) => {
+		if (serverSearchFallbackTimer) {
+			clearTimeout(serverSearchFallbackTimer);
+			serverSearchFallbackTimer = null;
+		}
+		serverSearchFallbackToken++;
+		abortActiveServerSearches();
+		if (resolvePendingServerSearchFallback) {
+			resolvePendingServerSearchFallback(result);
+			resolvePendingServerSearchFallback = null;
+		}
+	};
+
+	const shouldTryServerSearchFallback = (term: string, group: string) => {
+		if (normalizeSearchScope(term).length < SERVER_SEARCH_FALLBACK_MIN_LENGTH) {
+			return false;
+		}
+		if (typeof navigator !== "undefined" && navigator.onLine === false) {
+			return false;
+		}
+		return !isServerSearchMissCached(buildServerSearchScopeKey(term, group));
+	};
+
+	const scheduleServerSearchFallback = async (
+		term: string,
+		group: string,
+	): Promise<Item[]> => {
+		if (!shouldTryServerSearchFallback(term, group)) {
+			return [];
+		}
+
+		cancelPendingServerSearchFallback();
+		const fallbackToken = ++serverSearchFallbackToken;
+		const normalizedTerm = normalizeSearchScope(term);
+		const normalizedGroup =
+			typeof group === "string" && group.length > 0 ? group : "ALL";
+		const scopeKey = buildServerSearchScopeKey(
+			normalizedTerm,
+			normalizedGroup,
+		);
+
+		return await new Promise<Item[]>((resolve) => {
+			resolvePendingServerSearchFallback = resolve;
+			serverSearchFallbackTimer = setTimeout(async () => {
+				serverSearchFallbackTimer = null;
+				resolvePendingServerSearchFallback = null;
+
+				if (
+					fallbackToken !== serverSearchFallbackToken ||
+					normalizeSearchScope(searchTerm.value) !== normalizedTerm
+				) {
+					resolve([]);
+					return;
+				}
+
+				try {
+					const fetched = await loadItems({
+						searchValue: term,
+						groupFilter: normalizedGroup,
+						forceServer: true,
+						limit: resolvePageSize(),
+					});
+
+					if (
+						fallbackToken !== serverSearchFallbackToken ||
+						normalizeSearchScope(searchTerm.value) !==
+							normalizedTerm
+					) {
+						resolve([]);
+						return;
+					}
+
+					const serverResults = filterItemsByGroup(
+						Array.isArray(fetched) ? fetched : [],
+						normalizedGroup,
+					);
+					if (serverResults.length === 0) {
+						markServerSearchMiss(scopeKey);
+					}
+					setFilteredItems(serverResults, normalizedTerm);
+					resolve(serverResults);
+				} catch (error: any) {
+					if (error?.name !== "AbortError") {
+						console.error("Server search fallback failed:", error);
+					}
+					resolve([]);
+				}
+			}, SERVER_SEARCH_FALLBACK_DEBOUNCE_MS);
+		});
+	};
 
 	const setItems = (
 		newItems: Item[],
@@ -512,6 +648,7 @@ export const useItemsStore = defineStore("items", () => {
 				priceList,
 				getCacheScope(),
 			);
+			const isServerSearchRequest = forceServer && !!searchValue;
 
 			const canReadFromCache =
 				!forceServer &&
@@ -565,7 +702,13 @@ export const useItemsStore = defineStore("items", () => {
 			}
 
 			const abortController = new AbortController();
+			if (isServerSearchRequest) {
+				abortActiveServerSearches();
+			}
 			abortControllers.value.set(cacheKey, abortController);
+			if (isServerSearchRequest) {
+				activeServerSearchKeys.add(cacheKey);
+			}
 
 			if (!args || !posProfile.value) {
 				console.warn("Attempted to load items without POS Profile");
@@ -650,6 +793,7 @@ export const useItemsStore = defineStore("items", () => {
 			isLoading.value = false;
 			if (cacheKey) {
 				abortControllers.value.delete(cacheKey);
+				activeServerSearchKeys.delete(cacheKey);
 			}
 		}
 	};
@@ -687,6 +831,7 @@ export const useItemsStore = defineStore("items", () => {
 	};
 
 	const searchItems = async (term: string) => {
+		const requestedSearchScope = normalizeSearchScope(term);
 		const previousTerm = searchTerm.value || "";
 		const canRefineSearch =
 			!shouldUseIndexedSearch() &&
@@ -701,6 +846,7 @@ export const useItemsStore = defineStore("items", () => {
 		lastSearch.value = term;
 
 		if (!term || term.length < 2) {
+			cancelPendingServerSearchFallback();
 			if (limitSearchEnabled.value) {
 				return clearLimitSearchResults({ preserveItems: true });
 			}
@@ -724,17 +870,10 @@ export const useItemsStore = defineStore("items", () => {
 
 		if (limitSearchEnabled.value) {
 			try {
-				await loadItems({
-					searchValue: term,
-					groupFilter: itemGroup.value,
-					forceServer: true,
-				});
-
-				const serverResults = filterItemsByGroup(
-					items.value,
+				const serverResults = await scheduleServerSearchFallback(
+					term,
 					itemGroup.value,
 				);
-				setFilteredItems(serverResults, term);
 				performanceMetrics.value.searchMisses++;
 
 				return serverResults;
@@ -762,6 +901,7 @@ export const useItemsStore = defineStore("items", () => {
 			let searchResults: Item[] = [];
 
 			if (shouldUseIndexed) {
+				cancelPendingServerSearchFallback();
 				const normalizedGroup =
 					typeof itemGroup.value === "string" &&
 					itemGroup.value.length > 0
@@ -793,16 +933,18 @@ export const useItemsStore = defineStore("items", () => {
 				);
 
 				if (searchResults.length === 0 && term.length >= 3) {
-					await loadItems({
-						searchValue: term,
-						groupFilter: itemGroup.value,
-						forceServer: true,
-					});
-					searchResults = performLocalSearch(
+					searchResults = await scheduleServerSearchFallback(
 						term,
-						items.value,
 						itemGroup.value,
 					);
+					if (
+						normalizeSearchScope(searchTerm.value) !==
+						requestedSearchScope
+					) {
+						return [];
+					}
+				} else {
+					cancelPendingServerSearchFallback(searchResults);
 				}
 
 				searchResults = filterItemsByGroup(
