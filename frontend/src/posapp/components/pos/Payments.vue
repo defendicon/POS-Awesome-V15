@@ -1083,7 +1083,13 @@ const paymentCurrencyContext = (doc = invoice_doc.value) => ({
 });
 
 const syncPreferredPaymentToCurrentTotal = (doc = invoice_doc.value) => {
-	if (!doc || !Array.isArray(doc.payments) || !doc.payments.length || is_credit_sale.value) {
+	if (
+		!doc ||
+		!Array.isArray(doc.payments) ||
+		!doc.payments.length ||
+		is_credit_sale.value ||
+		is_credit_return.value
+	) {
 		return null;
 	}
 
@@ -1194,6 +1200,20 @@ const ensurePaymentLinesInitialized = (doc = invoice_doc.value) => {
 	// For returns, always show all profile payment methods so user can split refund
 	if (doc.is_return) {
 		mergeProfilePaymentsIntoReturn(doc);
+		// Decide whether this return should default to a credit note (no cash)
+		// based on how much was actually paid on the original invoice.
+		applyReturnCreditDefault(doc);
+		if (is_credit_return.value) {
+			// Credit return: keep every payment row at 0 so it is recorded as a
+			// credit note that reduces the customer's balance (no cash refund).
+			doc.payments.forEach((payment) => {
+				payment.amount = 0;
+				if (payment.base_amount !== undefined) {
+					payment.base_amount = 0;
+				}
+			});
+			return null;
+		}
 	}
 
 	const initializedPayment = initializePaymentLinesForDialog(
@@ -1209,6 +1229,26 @@ const ensurePaymentLinesInitialized = (doc = invoice_doc.value) => {
 	syncPreferredPaymentToCurrentTotal(doc);
 
 	return initializedPayment;
+};
+
+// Default a return to "Store as Credit?" (is_credit_return) when the original
+// invoice was not fully paid. For an unpaid (credit) invoice this avoids paying
+// out cash that was never collected and instead reduces the customer's balance,
+// while the toggle is visibly ON; a fully paid invoice keeps the normal cash
+// refund. The cap comes from posa_refundable_amount (= amount paid on the
+// original) set when the return is loaded; if unknown we leave behaviour as is.
+const applyReturnCreditDefault = (doc) => {
+	if (!doc || !doc.is_return) {
+		return;
+	}
+	const refundable = doc.posa_refundable_amount;
+	if (refundable === undefined || refundable === null) {
+		return;
+	}
+	const returnTotal = Math.abs(flt(doc.rounded_total || doc.grand_total, currency_precision.value));
+	const shouldCredit = flt(refundable, currency_precision.value) < returnTotal - 0.0001;
+	is_credit_return.value = shouldCredit;
+	is_cashback.value = !shouldCredit;
 };
 
 const restorePaymentLinesAfterFailedSubmit = () => {
@@ -1942,7 +1982,8 @@ onMounted(() => {
 
 			if (doc.is_return) {
 				is_return.value = true;
-				is_credit_return.value = false;
+				// is_credit_return is decided inside ensurePaymentLinesInitialized
+				// from the original invoice's paid amount; don't override it here.
 			} else if (initializedPayment) {
 				is_credit_return.value = false;
 			}
