@@ -27,6 +27,7 @@
 				@nav-click="handleNavClick"
 				@close-shift="handleCloseShift"
 				@print-last-invoice="handlePrintLastInvoice"
+				@share-last-invoice="handleShareLastInvoice"
 				@sync-invoices="handleSyncInvoices"
 				@toggle-offline="handleToggleOffline"
 				@retry-status="handleRetryStatus"
@@ -978,6 +979,10 @@ const handleNavClick = () => {
 
 const handleCloseShift = () => {
 	get_closing_data();
+};
+
+const handleShareLastInvoice = () => {
+	eventBus?.emit("share_last_invoice");
 };
 
 const handleSyncInvoices = async () => {

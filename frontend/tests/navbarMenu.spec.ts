@@ -122,10 +122,11 @@ describe("NavbarMenu cashier pin management", () => {
 			"switch-cashier",
 			"lock-screen",
 			"print-last-invoice",
+			"share-last-invoice",
 			"sync-offline-sales",
 			"close-shift",
 		]);
-		expect((wrapper.vm as any).quickActionRows).toHaveLength(5);
+		expect((wrapper.vm as any).quickActionRows).toHaveLength(6);
 		expect((wrapper.vm as any).quickActionRows.every((row: any[]) => row.length === 1)).toBe(true);
 
 		await (wrapper.vm as any).openSettingsPanel();

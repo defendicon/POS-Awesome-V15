@@ -78,6 +78,7 @@
 					@sync-invoices="syncPendingInvoices"
 					@open-employee-switch="openEmployeeSwitch"
 					@lock-pos="lockPosScreen"
+					@share-last-invoice="$emit('share-last-invoice')"
 					@open-customer-display="$emit('open-customer-display')"
 					@clear-cache="clearCache"
 					@show-about="showAboutDialog = true"
@@ -1023,6 +1024,7 @@ export default {
 		"close-shift",
 		"sync-invoices",
 		"retry-status",
+		"share-last-invoice",
 		"open-customer-display",
 		"toggle-offline",
 		"refresh-offline-data",

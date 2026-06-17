@@ -107,7 +107,6 @@
 					@open-invoice-management="handleOpenInvoiceManagement"
 					@open-returns="handleOpenReturns"
 					@print-draft="handlePrintDraft"
-					@share-last="emit('share-last')"
 					@show-payment="handleShowPayment"
 					@open-customer-display="handleOpenCustomerDisplay"
 				/>
@@ -230,7 +229,6 @@ const emit = defineEmits([
 	"open-invoice-management",
 	"open-returns",
 	"print-draft",
-	"share-last",
 	"show-payment",
 	"open-customer-display",
 	"resume-parked-order",

@@ -258,7 +258,6 @@
 			@open-invoice-management="open_invoice_management"
 			@open-returns="open_returns"
 			@print-draft="print_draft_invoice"
-			@share-last="share_last_invoice"
 			@show-payment="handleShowPaymentRequest"
 			@open-customer-display="handleOpenCustomerDisplayRequest"
 			@resume-parked-order="resume_parked_order"
@@ -1128,6 +1127,7 @@ export default {
 			update_invoice_coupons: this.handleUpdateInvoiceCoupons,
 			set_all_items: this.handleSetAllItems,
 			load_return_invoice: this.handleLoadReturnInvoice,
+			share_last_invoice: this.share_last_invoice,
 			set_new_line: this.handleSetNewLine,
 			calc_uom: this.calc_uom,
 			recalculate_return_discount: (payload) => this.applyReturnDiscountProration(payload),
