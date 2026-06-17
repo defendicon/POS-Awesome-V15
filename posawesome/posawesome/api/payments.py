@@ -15,7 +15,8 @@ from erpnext.accounts.doctype.payment_request.payment_request import (
 )
 from posawesome.posawesome.api.utilities import ensure_child_doctype
 
-get_party_bank_account = resolve_get_party_bank_account()
+def get_party_bank_account(*args, **kwargs):
+    return resolve_get_party_bank_account()(*args, **kwargs)
 
 
 def get_posawesome_credit_redeem_remark(invoice_name):
