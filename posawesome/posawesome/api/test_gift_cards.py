@@ -122,6 +122,11 @@ def _install_stubs():
     frappe_utils_module = types.ModuleType("frappe.utils")
     employees_module = types.ModuleType("posawesome.posawesome.api.employees")
     utilities_module = types.ModuleType("posawesome.posawesome.api.utilities")
+    utilities_module.resolve_erpnext_currency_rates = lambda *_args, **_kwargs: {
+        "conversion_rate": 1.0,
+        "plc_conversion_rate": 1.0,
+        "exchange_rate_date": None,
+    }
 
     state = {
         "cards": {},
@@ -213,6 +218,7 @@ def _install_stubs():
     frappe_module.get_cached_doc = lambda doctype, name: (
         state["pos_profiles"][name] if doctype == "POS Profile" else state["companies"][name]
     )
+    frappe_module.get_cached_value = lambda *args, **kwargs: None
     frappe_module.get_value = lambda doctype, name, fieldname: (
         getattr(state["pos_profiles"][name], fieldname, None)
         if doctype == "POS Profile"

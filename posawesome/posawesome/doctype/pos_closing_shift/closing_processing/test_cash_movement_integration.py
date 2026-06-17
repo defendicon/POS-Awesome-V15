@@ -1,7 +1,7 @@
 import json
 import unittest
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from posawesome.posawesome.doctype.pos_closing_shift.closing_processing import creation, overview
 
@@ -37,7 +37,7 @@ class TestClosingShiftCashMovementIntegration(unittest.TestCase):
         mock_get_pos_invoices,
         mock_get_payments_entries,
     ):
-        mock_submit_printed_invoices.return_value = None
+        mock_submit_printed_invoices.return_value = []
         mock_get_pos_invoices.return_value = []
         mock_get_payments_entries.return_value = []
         mock_frappe.get_cached_value.return_value = "USD"
@@ -68,40 +68,47 @@ class TestClosingShiftCashMovementIntegration(unittest.TestCase):
         self.assertEqual(row.opening_amount, 50)
         self.assertEqual(row.expected_amount, 30)
 
-    @patch("posawesome.posawesome.doctype.pos_closing_shift.closing_processing.overview.get_payments_entries")
-    @patch("posawesome.posawesome.doctype.pos_closing_shift.closing_processing.overview.get_pos_invoices")
-    @patch("posawesome.posawesome.doctype.pos_closing_shift.closing_processing.overview.frappe")
-    def test_overview_includes_cash_movements_and_adjusts_cash_expected(
-        self,
-        mock_frappe,
-        mock_get_pos_invoices,
-        mock_get_payments_entries,
-    ):
-        mock_get_pos_invoices.return_value = []
-        mock_get_payments_entries.return_value = []
-        mock_frappe.get_cached_value.return_value = "USD"
-        mock_frappe.db.get_value.side_effect = lambda dt, name, field: (
-            0 if field == "create_pos_invoice_instead_of_sales_invoice" else "Cash"
-        )
-        mock_frappe.get_doc.return_value = SimpleNamespace(
-            doctype="POS Opening Shift",
-            name="POS-OPEN-1",
-            pos_profile="POS-PROFILE-1",
-            company="My Co",
-        )
-        mock_frappe.get_all.return_value = [
-            {"movement_type": "Expense", "amount": 35},
-            {"movement_type": "Deposit", "amount": 15},
-        ]
+    def test_overview_includes_cash_movements_and_adjusts_cash_expected(self):
+        orig_get_pos_invoices = overview.get_pos_invoices
+        orig_get_payments_entries = overview.get_payments_entries
+        orig_frappe_get_doc = overview.frappe.get_doc
+        orig_frappe_get_cached_value = overview.frappe.get_cached_value
+        orig_frappe_db_get_value = overview.frappe.db.get_value
+        orig_frappe_get_all = overview.frappe.get_all
 
-        result = overview.get_closing_shift_overview("POS-OPEN-1")
+        try:
+            overview.get_pos_invoices = Mock(return_value=[])
+            overview.get_payments_entries = Mock(return_value=[])
+            overview.frappe.get_doc = Mock(return_value=SimpleNamespace(
+                doctype="POS Opening Shift",
+                name="POS-OPEN-1",
+                pos_profile="POS-PROFILE-1",
+                company="My Co",
+            ))
+            overview.frappe.get_cached_value = Mock(return_value="USD")
+            overview.frappe.db.get_value = Mock(side_effect=lambda dt, name, field: (
+                0 if field == "create_pos_invoice_instead_of_sales_invoice" else "Cash"
+            ))
+            overview.frappe.get_all = Mock(return_value=[
+                {"movement_type": "Expense", "amount": 35},
+                {"movement_type": "Deposit", "amount": 15},
+            ])
 
-        self.assertEqual(result["cash_movements"]["count"], 2)
-        self.assertEqual(result["cash_movements"]["company_currency_total"], 50)
-        self.assertEqual(result["cash_expected"]["company_currency_total"], -50)
-        by_type = {row["movement_type"]: row["total"] for row in result["cash_movements"]["by_type"]}
-        self.assertEqual(by_type["Expense"], 35)
-        self.assertEqual(by_type["Deposit"], 15)
+            result = overview.get_closing_shift_overview("POS-OPEN-1")
+
+            self.assertEqual(result["cash_movements"]["count"], 2)
+            self.assertEqual(result["cash_movements"]["company_currency_total"], 50)
+            self.assertEqual(result["cash_expected"]["company_currency_total"], -50)
+            by_type = {row["movement_type"]: row["total"] for row in result["cash_movements"]["by_type"]}
+            self.assertEqual(by_type["Expense"], 35)
+            self.assertEqual(by_type["Deposit"], 15)
+        finally:
+            overview.get_pos_invoices = orig_get_pos_invoices
+            overview.get_payments_entries = orig_get_payments_entries
+            overview.frappe.get_doc = orig_frappe_get_doc
+            overview.frappe.get_cached_value = orig_frappe_get_cached_value
+            overview.frappe.db.get_value = orig_frappe_db_get_value
+            overview.frappe.get_all = orig_frappe_get_all
 
 
 if __name__ == "__main__":

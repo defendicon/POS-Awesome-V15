@@ -142,6 +142,11 @@ def _install_dependency_stubs():
     processing_utils._build_invoice_remarks = lambda *_args, **_kwargs: ""
     processing_utils._set_return_valid_upto = lambda *_args, **_kwargs: None
     processing_utils.get_latest_rate = lambda *_args, **_kwargs: (1, "2026-03-21")
+    processing_utils.resolve_erpnext_currency_rates = lambda *_args, **_kwargs: {
+        "conversion_rate": 1.0,
+        "plc_conversion_rate": 1.0,
+        "exchange_rate_date": None,
+    }
     sys.modules["posawesome.posawesome.api.invoice_processing.utils"] = processing_utils
 
     stock_module = types.ModuleType("posawesome.posawesome.api.invoice_processing.stock")
@@ -200,6 +205,11 @@ class TestUpdateInvoiceReturnPayments(unittest.TestCase):
         cls.frappe, cls.enqueue_calls = _install_framework_stubs()
         _install_dependency_stubs()
         _install_package_stubs()
+        cls._original_modules = dict(sys.modules)
+        cls.frappe, cls.enqueue_calls = _install_framework_stubs()
+        _install_dependency_stubs()
+        _install_package_stubs()
+        sys.modules.pop("posawesome.posawesome.api.idempotency", None)
         cls.creation = _load_module()
 
     def setUp(self):
@@ -225,6 +235,8 @@ class TestUpdateInvoiceReturnPayments(unittest.TestCase):
             ],
             taxes=[],
             flags=types.SimpleNamespace(ignore_pricing_rule=False, ignore_permissions=False),
+            total=0,
+            net_total=0,
             paid_amount=0,
             base_paid_amount=0,
             conversion_rate=1,
@@ -275,6 +287,8 @@ class TestUpdateInvoiceReturnPayments(unittest.TestCase):
             ],
             taxes=[],
             flags=types.SimpleNamespace(ignore_pricing_rule=False, ignore_permissions=False),
+            total=0,
+            net_total=0,
             paid_amount=0,
             base_paid_amount=0,
             conversion_rate=1,
@@ -321,6 +335,7 @@ class TestStaleNamedInvoiceHandling(unittest.TestCase):
         cls.frappe, cls.enqueue_calls = _install_framework_stubs()
         _install_dependency_stubs()
         _install_package_stubs()
+        sys.modules.pop("posawesome.posawesome.api.idempotency", None)
         cls.creation = _load_module()
 
     def setUp(self):
@@ -347,6 +362,7 @@ class TestStaleNamedInvoiceHandling(unittest.TestCase):
             "plc_conversion_rate": 1,
             "price_list_currency": "USD",
             "total": 0,
+            "discount_amount": 0,
             "net_total": 0,
             "grand_total": 0,
             "rounded_total": 0,
@@ -613,6 +629,7 @@ class TestPostSubmitPaymentProcessing(unittest.TestCase):
         cls.frappe, cls.enqueue_calls = _install_framework_stubs()
         _install_dependency_stubs()
         _install_package_stubs()
+        sys.modules.pop("posawesome.posawesome.api.idempotency", None)
         cls.creation = _load_module()
 
     def setUp(self):
@@ -928,6 +945,7 @@ class TestManualPostingDatePreservation(unittest.TestCase):
         cls.frappe, cls.enqueue_calls = _install_framework_stubs()
         _install_dependency_stubs()
         _install_package_stubs()
+        sys.modules.pop("posawesome.posawesome.api.idempotency", None)
         cls.creation = _load_module()
 
     def setUp(self):
@@ -958,6 +976,7 @@ class TestManualPostingDatePreservation(unittest.TestCase):
             "plc_conversion_rate": 1,
             "price_list_currency": "USD",
             "total": 0,
+            "discount_amount": 0,
             "net_total": 0,
             "grand_total": 0,
             "rounded_total": 0,
@@ -1169,6 +1188,7 @@ class TestInvoiceIdempotency(unittest.TestCase):
         cls.frappe, cls.enqueue_calls = _install_framework_stubs()
         _install_dependency_stubs()
         _install_package_stubs()
+        sys.modules.pop("posawesome.posawesome.api.idempotency", None)
         cls.creation = _load_module()
         cls.original_process_post_submit_payments = cls.creation._process_post_submit_payments
 

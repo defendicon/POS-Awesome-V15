@@ -149,6 +149,7 @@ class TestPosPaymentProcessing(unittest.TestCase):
     def setUpClass(cls):
         _install_framework_stubs()
         _install_package_stubs()
+        sys.modules.pop("posawesome.posawesome.api.idempotency", None)
         payment_processing_dir = REPO_ROOT / "posawesome" / "posawesome" / "api" / "payment_processing"
         _load_module(
             "posawesome.posawesome.api.payment_processing.utils",
@@ -179,6 +180,7 @@ class TestPosPaymentProcessing(unittest.TestCase):
         mock_create_payment_entry,
     ):
         fake_payment_entry = FakePaymentEntry(paid_amount=100)
+        fake_payment_entry.difference_amount = 100
         mock_create_payment_entry.return_value = fake_payment_entry
         mock_frappe._dict.side_effect = lambda value: AttrDict(value)
         mock_frappe.log_error = Mock()
