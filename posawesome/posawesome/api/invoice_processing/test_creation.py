@@ -205,6 +205,10 @@ class TestUpdateInvoiceReturnPayments(unittest.TestCase):
         cls.frappe, cls.enqueue_calls = _install_framework_stubs()
         _install_dependency_stubs()
         _install_package_stubs()
+        cls._original_modules = dict(sys.modules)
+        cls.frappe, cls.enqueue_calls = _install_framework_stubs()
+        _install_dependency_stubs()
+        _install_package_stubs()
         sys.modules.pop("posawesome.posawesome.api.idempotency", None)
         cls.creation = _load_module()
 
