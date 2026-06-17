@@ -58,7 +58,9 @@ export const config: BenchmarkConfig = scale(defaultConfig) as BenchmarkConfig;
 export function catalogThreshold(size: CatalogSize): CatalogThresholds {
 	const t = config.catalog[size];
 	if (!t) throw new Error(`No thresholds for catalog size ${size}`);
-	const envOverride = process?.env?.[`PERF_THRESHOLD_CATALOG_${size}`];
+	const envOverride = typeof process !== "undefined"
+		? process.env?.[`PERF_THRESHOLD_CATALOG_${size}`]
+		: undefined;
 	if (envOverride) {
 		try {
 			return JSON.parse(envOverride);

@@ -3,14 +3,9 @@ import { createPinia, setActivePinia } from "pinia";
 import { generateItems, type CatalogSize, CATALOG_SIZES } from "./helpers/mockDataGenerators";
 import { createMockFrappeCall } from "./helpers/mockApiFactory";
 import { measureAsync, assertUnderThreshold, BenchmarkCollector } from "./helpers/perfMeasure";
+import { catalogThreshold } from "./helpers/benchmark.config";
 
 const collector = new BenchmarkCollector();
-
-const THRESHOLDS: Record<CatalogSize, { load: number; search: number; barcode: number }> = {
-	10_000: { load: 3000, search: 100, barcode: 50 },
-	50_000: { load: 8000, search: 200, barcode: 50 },
-	100_000: { load: 15000, search: 300, barcode: 50 },
-};
 
 const TEST_TIMEOUTS: Record<CatalogSize, number> = {
 	10_000: 10000,
@@ -35,6 +30,7 @@ describe("catalog load performance", () => {
 			});
 
 			it(`loads ${(size / 1000).toFixed(0)}K items from paginated API within time budget`, async () => {
+				const thresholds = catalogThreshold(size);
 				const pageSize = 200;
 				const frappeCall = createMockFrappeCall(items, { latencyMs: 20, jitterMs: 5, pageSize });
 				(globalThis as any).frappe = { call: frappeCall };
@@ -55,7 +51,7 @@ describe("catalog load performance", () => {
 
 				collector.add(result);
 				expect(loaded.length).toBe(items.length);
-				assertUnderThreshold(`load ${size} items`, result.durationMs, THRESHOLDS[size].load);
+				assertUnderThreshold(`load ${size} items`, result.durationMs, thresholds.load);
 				if (result.memoryMB !== undefined) {
 					expect(
 						result.memoryMB,
@@ -65,6 +61,7 @@ describe("catalog load performance", () => {
 			}, TEST_TIMEOUTS[size]);
 
 			it(`searches item_code from ${(size / 1000).toFixed(0)}K catalog within time budget`, async () => {
+				const thresholds = catalogThreshold(size);
 				const midIndex = Math.floor(items.length / 2);
 				const targetCode = items[midIndex].item_code;
 
@@ -74,10 +71,11 @@ describe("catalog load performance", () => {
 				}, { iterations: 50 });
 
 				collector.add(result);
-				assertUnderThreshold(`search in ${size} items`, result.durationMs, THRESHOLDS[size].search);
+				assertUnderThreshold(`search in ${size} items`, result.durationMs, thresholds.search);
 			}, TEST_TIMEOUTS[size]);
 
 			it(`looks up barcode from ${(size / 1000).toFixed(0)}K catalog within time budget`, async () => {
+				const thresholds = catalogThreshold(size);
 				const midIndex = Math.floor(items.length / 2);
 				const targetBarcode = items[midIndex].barcode!;
 
@@ -87,12 +85,13 @@ describe("catalog load performance", () => {
 				}, { iterations: 50 });
 
 				collector.add(result);
-				assertUnderThreshold(`barcode lookup in ${size} items`, result.durationMs, THRESHOLDS[size].barcode);
+				assertUnderThreshold(`barcode lookup in ${size} items`, result.durationMs, thresholds.barcode);
 			}, TEST_TIMEOUTS[size]);
 		});
 	}
 
 	afterAll(() => {
+		delete (globalThis as any).frappe;
 		if (collector.results.length > 0) {
 			console.log("\n[catalog benchmark results]\n" + collector.summary);
 		}

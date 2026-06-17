@@ -1,3 +1,5 @@
+import { expect } from "vitest";
+
 export interface MeasureResult {
 	label: string;
 	durationMs: number;
@@ -73,10 +75,7 @@ export function assertUnderThreshold(
 	measuredMs: number,
 	thresholdMs: number,
 ): void {
-	const { expect } = globalThis as any;
-	if (typeof expect === "function") {
-		expect(measuredMs, `${label} exceeded threshold of ${thresholdMs}ms`).toBeLessThan(thresholdMs);
-	}
+	expect(measuredMs, `${label} exceeded threshold of ${thresholdMs}ms`).toBeLessThan(thresholdMs);
 }
 
 export function assertBetween(
@@ -85,17 +84,14 @@ export function assertBetween(
 	lowerMs: number,
 	upperMs: number,
 ): void {
-	const { expect } = globalThis as any;
-	if (typeof expect === "function") {
-		expect(
-			measuredMs,
-			`${label} expected between ${lowerMs}ms and ${upperMs}ms`,
-		).toBeGreaterThanOrEqual(lowerMs);
-		expect(
-			measuredMs,
-			`${label} exceeded upper bound of ${upperMs}ms`,
-		).toBeLessThan(upperMs);
-	}
+	expect(
+		measuredMs,
+		`${label} expected between ${lowerMs}ms and ${upperMs}ms`,
+	).toBeGreaterThanOrEqual(lowerMs);
+	expect(
+		measuredMs,
+		`${label} exceeded upper bound of ${upperMs}ms`,
+	).toBeLessThan(upperMs);
 }
 
 export class BenchmarkCollector {

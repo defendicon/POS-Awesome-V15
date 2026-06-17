@@ -4,6 +4,7 @@ import type { SyncResourceDefinition, SyncTrigger } from "../../src/offline/sync
 import { measureAsync, assertUnderThreshold, BenchmarkCollector } from "./helpers/perfMeasure";
 import { generateItems, generateItemCodes } from "./helpers/mockDataGenerators";
 import { sleep } from "./helpers/mockApiFactory";
+import { concurrentThreshold } from "./helpers/benchmark.config";
 
 const collector = new BenchmarkCollector();
 
@@ -32,6 +33,7 @@ describe("concurrent stations", () => {
 	describe("SyncCoordinator throughput", () => {
 		for (const stationCount of STATION_COUNTS) {
 			it(`processes ${stationCount} station-wide resources without exceeding concurrency limit`, async () => {
+				const thresholds = concurrentThreshold(stationCount);
 				const resources = Array.from({ length: stationCount }, (_, i) =>
 					makeResource(`station_${i}`, "warm", ["boot"]),
 				);
@@ -59,7 +61,7 @@ describe("concurrent stations", () => {
 				assertUnderThreshold(
 					`sync ${stationCount} resources`,
 					result.durationMs,
-					stationCount * 5,
+					thresholds.syncCoordinator,
 				);
 			});
 		}
@@ -70,6 +72,7 @@ describe("concurrent stations", () => {
 
 		for (const stationCount of STATION_COUNTS) {
 			it(`handles ${Math.min(stationCount, PAYLOAD_COUNT)} parallel submissions with dedup`, async () => {
+				const thresholds = concurrentThreshold(stationCount);
 				const seen = new Set<string>();
 				const actualExecutions: string[] = [];
 
@@ -84,7 +87,8 @@ describe("concurrent stations", () => {
 				};
 
 				const stationCountCapped = Math.min(stationCount, PAYLOAD_COUNT);
-				const keys = generateItemCodes(stationCountCapped, 1);
+				const uniqueKeys = generateItemCodes(stationCountCapped, 1);
+				const keys = [...uniqueKeys, ...uniqueKeys.slice(0, Math.min(5, stationCountCapped))];
 
 				const result = await measureAsync(
 					`${stationCountCapped} parallel submissions with idempotency check`,
@@ -101,11 +105,11 @@ describe("concurrent stations", () => {
 
 				collector.add(result);
 				expect(actualExecutions.length).toBe(stationCountCapped);
-				expect(actualExecutions).toEqual(keys);
+				expect(actualExecutions).toEqual(uniqueKeys);
 				assertUnderThreshold(
 					`${stationCountCapped} parallel submissions`,
 					result.durationMs,
-					stationCount * 10 + 200,
+					thresholds.parallelSubmissions,
 				);
 			});
 		}
@@ -123,6 +127,7 @@ describe("concurrent stations", () => {
 
 		for (const stationCount of STATION_COUNTS) {
 			it(`executes ${stationCount} parallel searches on ${(ITEM_COUNT / 1000).toFixed(0)}K catalog`, async () => {
+				const thresholds = concurrentThreshold(stationCount);
 				const targetCodes = items.slice(0, Math.min(stationCount, ITEM_COUNT)).map((i) => i.item_code);
 
 				const result = await measureAsync(
@@ -141,7 +146,7 @@ describe("concurrent stations", () => {
 				assertUnderThreshold(
 					`${stationCount} concurrent lookups`,
 					result.durationMs,
-					200,
+					thresholds.concurrentSearch,
 				);
 			});
 		}
