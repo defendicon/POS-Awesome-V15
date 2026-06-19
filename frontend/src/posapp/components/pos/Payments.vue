@@ -1198,11 +1198,12 @@ const ensurePaymentLinesInitialized = (doc = invoice_doc.value) => {
 	}
 
 	// For returns, always show all profile payment methods so user can split refund
+	// NOTE: the is_credit_return default is decided once when the return is loaded
+	// (send_invoice_doc_payment handler), NOT here — so reopening the dialog or a
+	// failed submit never overrides the cashier's manual toggle. Here we only
+	// honour the current toggle state.
 	if (doc.is_return) {
 		mergeProfilePaymentsIntoReturn(doc);
-		// Decide whether this return should default to a credit note (no cash)
-		// based on how much was actually paid on the original invoice.
-		applyReturnCreditDefault(doc);
 		if (is_credit_return.value) {
 			// Credit return: keep every payment row at 0 so it is recorded as a
 			// credit note that reduces the customer's balance (no cash refund).
@@ -1892,6 +1893,19 @@ watch(is_credit_return, (newVal) => {
 	}
 });
 
+// Keep "Cashback?" and "Store as Credit?" mutually exclusive for a return.
+// The is_credit_return watch already flips is_cashback; this mirrors the other
+// direction so toggling cashback also updates credit (you can't enable both).
+// The reciprocal set lands on a value that is already correct, so the watches
+// settle without looping.
+watch(is_cashback, (newVal) => {
+	if (!invoice_doc.value || !invoice_doc.value.is_return) return;
+	const shouldCredit = !newVal;
+	if (is_credit_return.value !== shouldCredit) {
+		is_credit_return.value = shouldCredit;
+	}
+});
+
 watch(
 	() => invoice_doc.value.customer,
 	(customer, previous) => {
@@ -1978,12 +1992,18 @@ onMounted(() => {
 			is_credit_sale.value = false;
 			is_write_off_change.value = false;
 
+			// Decide the credit-return default ONCE, when the return is first
+			// loaded, so reopening the dialog / a failed submit never overrides a
+			// manual toggle change by the cashier.
+			if (doc.is_return) {
+				applyReturnCreditDefault(doc);
+			}
+
 			const initializedPayment = ensurePaymentLinesInitialized(doc);
 
 			if (doc.is_return) {
 				is_return.value = true;
-				// is_credit_return is decided inside ensurePaymentLinesInitialized
-				// from the original invoice's paid amount; don't override it here.
+				// is_credit_return default was applied above on load; don't override.
 			} else if (initializedPayment) {
 				is_credit_return.value = false;
 			}
