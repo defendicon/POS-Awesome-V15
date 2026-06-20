@@ -220,8 +220,10 @@
 		<PaymentConfirmationDialog
 			ref="paymentConfirmationDialog"
 			v-model="confirm_payment_dialog"
-			@confirm="resolvePaymentConfirmation(true)"
-			@cancel="resolvePaymentConfirmation(false)"
+			:amount="payment_confirmation_amount"
+			:currency-symbol="currencySymbol(displayCurrency)"
+			@confirm="resolvePaymentConfirmation($event)"
+			@cancel="resolvePaymentConfirmation(null)"
 		/>
 		<PriceListRateDialog
 			v-model="price_list_rate_dialog_open"

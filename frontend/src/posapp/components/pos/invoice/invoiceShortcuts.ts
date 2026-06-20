@@ -1,3 +1,5 @@
+import { resolveReturnDefaultAmount } from "../../../utils/paymentInitialization";
+
 const isAltOnly = (event: KeyboardEvent) =>
 	event.altKey && !event.ctrlKey && !event.metaKey;
 const consumeEvent = (event: KeyboardEvent) => {
@@ -19,7 +21,9 @@ const isLetter = (event: KeyboardEvent, letter: string) => {
 	);
 };
 const showCompactPanel = (
-	eventBus: { emit: (_event: string, _payload?: unknown) => void } | undefined,
+	eventBus:
+		| { emit: (_event: string, _payload?: unknown) => void }
+		| undefined,
 	panel: "selector" | "invoice",
 ) => {
 	eventBus?.emit?.("set_compact_panel", panel);
@@ -66,6 +70,13 @@ interface InvoiceShortcutsVm {
 		};
 	};
 	items?: Array<Record<string, unknown>>;
+	invoice_doc?: {
+		rounded_total?: number;
+		grand_total?: number;
+		is_return?: number | boolean;
+		posa_refundable_amount?: number;
+	};
+	subtotal?: number;
 	paymentVisible?: boolean;
 	shortcutSubmitInFlight?: boolean;
 	cancel_dialog?: boolean;
@@ -90,7 +101,16 @@ interface InvoiceShortcutsVm {
 	remove_item?: (_item: Record<string, unknown>) => void;
 	get_draft_invoices?: () => void;
 	save_and_clear_invoice?: () => void;
-	confirmPaymentSubmission: () => Promise<boolean>;
+	get_invoice_doc?: () => {
+		rounded_total?: number;
+		grand_total?: number;
+		is_return?: number | boolean;
+		posa_refundable_amount?: number;
+	};
+	confirmPaymentSubmission: (
+		_initialAmount?: number,
+	) => Promise<number | null>;
+	getShortcutPaymentAmount: () => number;
 	focusItemTableField: (_field: ShortcutField) => void;
 }
 
@@ -316,8 +336,10 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 
 				try {
 					const shouldPrint = isPrintShortcut;
-					const shouldSubmit = await this.confirmPaymentSubmission();
-					if (!shouldSubmit) {
+					const paymentAmount = await this.confirmPaymentSubmission(
+						this.getShortcutPaymentAmount(),
+					);
+					if (paymentAmount === null) {
 						return;
 					}
 					await this.flushBackgroundUpdates?.();
@@ -327,11 +349,30 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 					await this.show_payment?.();
 					this.eventBus.emit("queue_submit_payment_shortcut", {
 						print: shouldPrint,
+						amount: paymentAmount,
 					});
 				} finally {
 					this.shortcutSubmitInFlight = false;
 				}
 			}
+		},
+
+		getShortcutPaymentAmount() {
+			const currentDoc = this.get_invoice_doc?.() || this.invoice_doc;
+			const doc = currentDoc
+				? {
+						...currentDoc,
+						posa_refundable_amount:
+							this.invoice_doc?.posa_refundable_amount ??
+							currentDoc.posa_refundable_amount,
+					}
+				: undefined;
+			const amount = Number(
+				doc?.rounded_total ?? doc?.grand_total ?? this.subtotal ?? 0,
+			);
+			return Number.isFinite(amount)
+				? Math.abs(resolveReturnDefaultAmount(doc, amount))
+				: 0;
 		},
 
 		focusItemTableField(field: ShortcutField) {

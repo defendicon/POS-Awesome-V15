@@ -307,6 +307,7 @@ import {
 } from "../../../offline/index";
 import GiftCardDialog from "./wallet/GiftCardDialog.vue";
 import {
+	applyPreferredPaymentAmount,
 	initializePaymentLinesForDialog,
 	rebalancePreferredPaymentLine,
 	resolvePreferredPaymentLine,
@@ -1681,8 +1682,16 @@ const handlePaymentShortcut = (event) => {
 	}
 };
 
-const handleSubmitPaymentShortcut = ({ print = false } = {}) => {
+const handleSubmitPaymentShortcut = ({ print = false, amount = null } = {}) => {
 	if (!paymentVisible.value || submissionInFlight.value || loading.value) return;
+	if (amount !== null) {
+		applyPreferredPaymentAmount(
+			invoice_doc.value,
+			Number(amount),
+			currency_precision.value,
+			isCashLikePayment,
+		);
+	}
 	nextTick(() => {
 		submit(null, false, print);
 	});

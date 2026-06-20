@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import * as paymentInitialization from "../src/posapp/utils/paymentInitialization";
 
 const {
+	applyPreferredPaymentAmount,
 	initializePaymentLinesForDialog,
 	resolvePreferredPaymentLine,
 } = paymentInitialization;
@@ -19,14 +20,30 @@ describe("paymentInitialization", () => {
 			rounded_total: 125,
 			conversion_rate: 1,
 			payments: [
-				{ mode_of_payment: "Card", type: "Bank", amount: 0, base_amount: 0 },
-				{ mode_of_payment: "Cash", type: "Cash", amount: 0, base_amount: 0 },
+				{
+					mode_of_payment: "Card",
+					type: "Bank",
+					amount: 0,
+					base_amount: 0,
+				},
+				{
+					mode_of_payment: "Cash",
+					type: "Cash",
+					amount: 0,
+					base_amount: 0,
+				},
 			],
 		};
 
-		const payment = initializePaymentLinesForDialog(doc, 2, isCashLikePayment);
+		const payment = initializePaymentLinesForDialog(
+			doc,
+			2,
+			isCashLikePayment,
+		);
 
-		expect(resolvePreferredPaymentLine(doc, isCashLikePayment)).toBe(doc.payments[1]);
+		expect(resolvePreferredPaymentLine(doc, isCashLikePayment)).toBe(
+			doc.payments[1],
+		);
 		expect(payment).toBe(doc.payments[1]);
 		expect(doc.payments[1].amount).toBe(125);
 		expect(doc.payments[1].base_amount).toBe(125);
@@ -38,8 +55,19 @@ describe("paymentInitialization", () => {
 			rounded_total: 200,
 			conversion_rate: 1,
 			payments: [
-				{ mode_of_payment: "Cash", type: "Cash", amount: 50, base_amount: 50, default: 1 },
-				{ mode_of_payment: "Card", type: "Bank", amount: 150, base_amount: 150 },
+				{
+					mode_of_payment: "Cash",
+					type: "Cash",
+					amount: 50,
+					base_amount: 50,
+					default: 1,
+				},
+				{
+					mode_of_payment: "Card",
+					type: "Bank",
+					amount: 150,
+					base_amount: 150,
+				},
 			],
 		};
 
@@ -54,7 +82,14 @@ describe("paymentInitialization", () => {
 			rounded_total: -80,
 			conversion_rate: 1,
 			is_return: 1,
-			payments: [{ mode_of_payment: "Cash", type: "Cash", amount: 0, base_amount: 0 }],
+			payments: [
+				{
+					mode_of_payment: "Cash",
+					type: "Cash",
+					amount: 0,
+					base_amount: 0,
+				},
+			],
 		};
 
 		initializePaymentLinesForDialog(doc, 2, isCashLikePayment);
@@ -68,13 +103,75 @@ describe("paymentInitialization", () => {
 			currency: "USD",
 			rounded_total: 80,
 			conversion_rate: 280,
-			payments: [{ mode_of_payment: "Cash", type: "Cash", amount: 0, base_amount: 0 }],
+			payments: [
+				{
+					mode_of_payment: "Cash",
+					type: "Cash",
+					amount: 0,
+					base_amount: 0,
+				},
+			],
 		};
 
 		initializePaymentLinesForDialog(doc, 2, isCashLikePayment);
 
 		expect(doc.payments[0].amount).toBe(80);
 		expect(doc.payments[0].base_amount).toBe(22400);
+	});
+
+	it("applies a shortcut amount to the POS Profile preferred payment line", () => {
+		const doc: any = {
+			currency: "USD",
+			conversion_rate: 280,
+			payments: [
+				{
+					mode_of_payment: "Card",
+					type: "Bank",
+					amount: 100,
+					base_amount: 28000,
+				},
+				{
+					mode_of_payment: "Cash",
+					type: "Cash",
+					default: 1,
+					amount: 0,
+					base_amount: 0,
+				},
+			],
+		};
+
+		const payment = applyPreferredPaymentAmount(
+			doc,
+			150,
+			2,
+			isCashLikePayment,
+		);
+
+		expect(payment).toBe(doc.payments[1]);
+		expect(doc.payments[0].amount).toBe(0);
+		expect(doc.payments[0].base_amount).toBe(0);
+		expect(doc.payments[1].amount).toBe(150);
+		expect(doc.payments[1].base_amount).toBe(42000);
+	});
+
+	it("stores shortcut amounts as negative refunds for returns", () => {
+		const doc: any = {
+			is_return: 1,
+			conversion_rate: 1,
+			payments: [
+				{
+					mode_of_payment: "Cash",
+					type: "Cash",
+					amount: 0,
+					base_amount: 0,
+				},
+			],
+		};
+
+		applyPreferredPaymentAmount(doc, 80, 2, isCashLikePayment);
+
+		expect(doc.payments[0].amount).toBe(-80);
+		expect(doc.payments[0].base_amount).toBe(-80);
 	});
 
 	it("reduces the preferred payment amount when customer credit is redeemed", () => {
@@ -134,11 +231,14 @@ describe("paymentInitialization", () => {
 			],
 		};
 
-		const payment = paymentInitialization.rebalancePreferredPaymentLine?.(doc, {
-			precision: 2,
-			isCashLikePayment,
-			giftCardAmount: 120,
-		});
+		const payment = paymentInitialization.rebalancePreferredPaymentLine?.(
+			doc,
+			{
+				precision: 2,
+				isCashLikePayment,
+				giftCardAmount: 120,
+			},
+		);
 
 		expect(payment).toBe(doc.payments[0]);
 		expect(doc.payments[0].amount).toBe(180);
@@ -162,11 +262,14 @@ describe("paymentInitialization", () => {
 			],
 		};
 
-		const payment = paymentInitialization.rebalancePreferredPaymentLine?.(doc, {
-			precision: 2,
-			isCashLikePayment,
-			giftCardAmount: 30,
-		});
+		const payment = paymentInitialization.rebalancePreferredPaymentLine?.(
+			doc,
+			{
+				precision: 2,
+				isCashLikePayment,
+				giftCardAmount: 30,
+			},
+		);
 
 		expect(payment).toBe(doc.payments[0]);
 		expect(doc.payments[0].amount).toBe(70);

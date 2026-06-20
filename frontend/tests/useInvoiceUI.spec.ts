@@ -6,23 +6,25 @@ import { useInvoiceUI } from "../src/posapp/composables/pos/invoice/useInvoiceUI
 
 describe("useInvoiceUI payment confirmation", () => {
 	it("cancels the pending confirmation when the dialog closes externally", async () => {
-		const { confirm_payment_dialog, confirmPaymentSubmission } = useInvoiceUI();
+		const { confirm_payment_dialog, confirmPaymentSubmission } =
+			useInvoiceUI();
 
-		const confirmation = confirmPaymentSubmission();
+		const confirmation = confirmPaymentSubmission(125);
 		expect(confirm_payment_dialog.value).toBe(true);
 
 		// Vuetify closes the dialog this way when the operator presses Escape.
 		confirm_payment_dialog.value = false;
 
-		await expect(confirmation).resolves.toBe(false);
+		await expect(confirmation).resolves.toBeNull();
 	});
 
 	it("preserves an explicit confirmation result", async () => {
-		const { confirmPaymentSubmission, resolvePaymentConfirmation } = useInvoiceUI();
+		const { confirmPaymentSubmission, resolvePaymentConfirmation } =
+			useInvoiceUI();
 
-		const confirmation = confirmPaymentSubmission();
-		resolvePaymentConfirmation(true);
+		const confirmation = confirmPaymentSubmission(125);
+		resolvePaymentConfirmation(150);
 
-		await expect(confirmation).resolves.toBe(true);
+		await expect(confirmation).resolves.toBe(150);
 	});
 });

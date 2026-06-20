@@ -105,7 +105,9 @@ export const initializePaymentLinesForDialog = (
 		return null;
 	}
 
-	const payments = doc.payments.filter((payment) => !!payment?.mode_of_payment);
+	const payments = doc.payments.filter(
+		(payment) => !!payment?.mode_of_payment,
+	);
 	if (!payments.length) {
 		return null;
 	}
@@ -158,6 +160,48 @@ export const initializePaymentLinesForDialog = (
 	return preferredPayment;
 };
 
+export const applyPreferredPaymentAmount = (
+	doc: PaymentInitDoc | null | undefined,
+	amount: number,
+	precision: number,
+	isCashLikePayment: (_payment: PaymentLine) => boolean,
+): PaymentLine | null => {
+	if (!doc || !Number.isFinite(Number(amount))) {
+		return null;
+	}
+
+	const preferredPayment = resolvePreferredPaymentLine(
+		doc,
+		isCashLikePayment,
+	);
+	if (!preferredPayment) {
+		return null;
+	}
+
+	const normalizedAmount = roundToPrecision(
+		Math.abs(Number(amount)),
+		precision,
+	);
+	const signedAmount = doc.is_return
+		? resolveReturnDefaultAmount(doc, normalizedAmount)
+		: normalizedAmount;
+
+	(doc.payments || []).forEach((payment) => {
+		payment.amount = payment === preferredPayment ? signedAmount : 0;
+		if (payment.base_amount !== undefined) {
+			payment.base_amount =
+				payment === preferredPayment
+					? roundToPrecision(
+							toCompanyCurrency(doc, signedAmount),
+							precision,
+						)
+					: 0;
+		}
+	});
+
+	return preferredPayment;
+};
+
 export const rebalancePreferredPaymentLine = (
 	doc: PaymentInitDoc | null | undefined,
 	options: PreferredPaymentRebalanceOptions,
@@ -166,7 +210,9 @@ export const rebalancePreferredPaymentLine = (
 		return null;
 	}
 
-	const payments = doc.payments.filter((payment) => !!payment?.mode_of_payment);
+	const payments = doc.payments.filter(
+		(payment) => !!payment?.mode_of_payment,
+	);
 	if (!payments.length) {
 		return null;
 	}
@@ -198,7 +244,10 @@ export const rebalancePreferredPaymentLine = (
 		// Never auto-refund more cash than was paid on the original invoice.
 		const refundable = doc.posa_refundable_amount;
 		if (refundable !== undefined && refundable !== null) {
-			nextAmount = Math.max(nextAmount, -Math.max(0, toNumber(refundable)));
+			nextAmount = Math.max(
+				nextAmount,
+				-Math.max(0, toNumber(refundable)),
+			);
 		}
 	} else {
 		nextAmount = Math.max(nextAmount, 0);

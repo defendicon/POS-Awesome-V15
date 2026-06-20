@@ -13,9 +13,9 @@
  *
  * **Payment confirmation dialog**
  * `confirmPaymentSubmission()` opens `confirm_payment_dialog` and returns a
- * `Promise<boolean>` that resolves when `resolvePaymentConfirmation(result)` is
+ * `Promise<number | null>` that resolves when `resolvePaymentConfirmation(result)` is
  * called by the dialog component. Closing the dialog directly (for example with
- * Escape) resolves the pending confirmation as `false`. The resolver is stored
+ * Escape) resolves the pending confirmation as `null`. The resolver is stored
  * in a closure-local variable and cleared after resolution to prevent
  * double-resolve.
  *
@@ -29,10 +29,12 @@ import { ref, watch } from "vue";
 export function useInvoiceUI() {
 	const invoiceHeight = ref<string | null>(null);
 	const confirm_payment_dialog = ref(false);
-	let payment_confirmation_resolver: ((_result: boolean) => void) | null =
-		null;
+	const payment_confirmation_amount = ref(0);
+	let payment_confirmation_resolver:
+		| ((_result: number | null) => void)
+		| null = null;
 
-	const settlePaymentConfirmation = (result: boolean) => {
+	const settlePaymentConfirmation = (result: number | null) => {
 		const resolver = payment_confirmation_resolver;
 		payment_confirmation_resolver = null;
 		resolver?.(result);
@@ -42,7 +44,7 @@ export function useInvoiceUI() {
 		confirm_payment_dialog,
 		(isOpen) => {
 			if (!isOpen) {
-				settlePaymentConfirmation(false);
+				settlePaymentConfirmation(null);
 			}
 		},
 		{ flush: "sync" },
@@ -111,7 +113,10 @@ export function useInvoiceUI() {
 		if (element) {
 			const defaultHeight = getDefaultInvoiceHeight();
 			if (!canResizeInvoicePanel()) {
-				invoiceHeight.value = clampInvoiceHeight(defaultHeight, defaultHeight);
+				invoiceHeight.value = clampInvoiceHeight(
+					defaultHeight,
+					defaultHeight,
+				);
 				return;
 			}
 			invoiceHeight.value = clampInvoiceHeight(
@@ -133,7 +138,10 @@ export function useInvoiceUI() {
 		const defaultHeight = getDefaultInvoiceHeight();
 		try {
 			if (!canResizeInvoicePanel()) {
-				invoiceHeight.value = clampInvoiceHeight(defaultHeight, defaultHeight);
+				invoiceHeight.value = clampInvoiceHeight(
+					defaultHeight,
+					defaultHeight,
+				);
 				return;
 			}
 			const saved = localStorage.getItem("posawesome_invoice_height");
@@ -141,21 +149,30 @@ export function useInvoiceUI() {
 				saved || defaultHeight,
 				defaultHeight,
 			);
-			localStorage.setItem("posawesome_invoice_height", invoiceHeight.value);
+			localStorage.setItem(
+				"posawesome_invoice_height",
+				invoiceHeight.value,
+			);
 		} catch (e) {
 			console.error("Failed to load invoice height:", e);
-			invoiceHeight.value = clampInvoiceHeight(defaultHeight, defaultHeight);
+			invoiceHeight.value = clampInvoiceHeight(
+				defaultHeight,
+				defaultHeight,
+			);
 		}
 	};
 
-	const confirmPaymentSubmission = () => {
+	const confirmPaymentSubmission = (initialAmount = 0) => {
+		payment_confirmation_amount.value = Math.abs(
+			Number(initialAmount) || 0,
+		);
 		confirm_payment_dialog.value = true;
-		return new Promise<boolean>((resolve) => {
+		return new Promise<number | null>((resolve) => {
 			payment_confirmation_resolver = resolve;
 		});
 	};
 
-	const resolvePaymentConfirmation = (result: boolean) => {
+	const resolvePaymentConfirmation = (result: number | null) => {
 		settlePaymentConfirmation(result);
 		confirm_payment_dialog.value = false;
 	};
@@ -189,6 +206,7 @@ export function useInvoiceUI() {
 		saveInvoiceHeight,
 		loadInvoiceHeight,
 		confirm_payment_dialog,
+		payment_confirmation_amount,
 		confirmPaymentSubmission,
 		resolvePaymentConfirmation,
 		showDropFeedback,
