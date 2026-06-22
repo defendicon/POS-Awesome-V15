@@ -2,6 +2,107 @@
 
 All notable changes.
 
+Release 15.31.0 — June 22, 2026
+### ✨ Features
+- add performance benchmark suite for catalog load and concurrent stations 
+- add Phase 2 performance benchmarks (TTI, k6, memory assertions) 
+- add quick payment amount to Alt+X and Alt+P dialog 
+- barcode print - UOM price conversion, per-item symbology, ZPL/EPL fixes 
+- complete barcode print overhaul (PR 6-10) 
+- show live item count during background sync 
+- share invoice PDF via the native share sheet (invoice)
+- add normalized pricing data sync foundation (offline)
+- share last payment PDF via the native share sheet (payment)
+_Total: 9 changes_
+
+### 🐞 Bug Fixes
+- add full ERPNext barcode_type mapping with inline type label display 
+- address code review — O(1) findItemByBarcodeOnly, scannerInput optional chain, 100K index threshold 
+- address PR review — use centralized thresholds, safe process checks, dedup test coverage 
+- address PR review on rate/discount reactivity 
+- address PR review on rate/discount reactivity issues 
+- apply float conversion if a valid rate is returned 
+- apply lazy load design 
+- cache icon fonts and unclipped customer loading status 
+- canonicalize customer offline storage and add sync indexes 
+- clean lint warnings and align TypeScript ESLint 
+- continue background item sync past cached count 
+- defer resolver calls with lambdas in _get_mapping_functions 
+- doubled currency symbol in POS closing dialog 
+- Guard cart item base rates against null values 
+- harden barcode scan deduplication and indexing 
+- Harden last payment sharing flow 
+- lazily resolve ERPNext party bank account API 
+- move share last invoice action to navbar menu 
+- POS direct route startup loading 
+- preserve UOM rows and smooth item customer sync 
+- prevent return outstanding dialogs from blocking POS submission 
+- preventing potential runtime crashes 
+- raise exception instead returning none after fail to retrieve existing ledger 
+- recalculate item.amount and totals when rate/discount changed 
+- refresh active sale totals after UOM price change 
+- remove redundant refreshInvoiceTotals and anti-pattern property tracking 
+- remove synchronous context.invoiceStore.touch() and added null guard 
+- reset payment shortcuts when confirmation dialog closes 
+- resolve 8 FakeDoc KeyErrors and 1 overview mock-bypass for test stability 
+- resolve ESLint errors and exclude reference trees 
+- resolve get_party_bank_account import for ERPNext v15/v16 compat 
+- resolve make_sales_invoice import failure during migration 
+- respect POS invoice sharing mode and guard share requests 
+- save original state of sys.modules 
+- sync line amount after UOM rate changes 
+- tiered barcode index with race guard for 100K+ catalog scale 
+- use debounced triggerUpdateTotals with safe fallback per review 
+- Use frappe.utils.flt instead to preserve full precision 
+- Use frappe.utils.flt instead to preserve full precision 
+- create the Journal Entry inside on_submit (atomic) (cash-movement)
+- resolve currency from profile/company, not hardcoded PKR (gift-card)
+- set currency + exchange rate on gift-card Journal Entries (gift-card)
+- narrow ledger-insert except to DuplicateEntryError (idempotency)
+- restore tax-inclusive logic killed by misplaced continue (invoice)
+- show negative subtotal/total for return invoices (invoice)
+- use real doctype + program expiry for Loyalty Point Entry (loyalty)
+- pass create_payment_entry args by keyword (were positionally scrambled) (mpesa)
+- prevent count-based legacy queue data loss (offline)
+- make migrate_pos_supervisor_to_role safe to re-run (patches)
+- run migrations one-shot, not on every bench migrate (patches)
+- use valid print format when sharing payment PDF (payments)
+- allow cashback for returns without invoice (pos)
+- auto-enable 'Store as Credit?' for a return of an unpaid invoice (returns)
+- don't cash-refund a return of an unpaid invoice (returns)
+- make credit-return default actually apply + UX fixes (returns)
+- reject a second open POS shift for same user + profile (shift)
+- invalidate item/bin/batch/serial caches on stock writes (stock)
+_Total: 57 changes_
+
+### ⚡ Performance
+- complete paginated offline item and price sync 
+- improve consistency by adding _doc_value instead getattr directly 
+- reduce customer sync progress delay 
+- scale customer sync search and pricing evaluation 
+- smooth item sync progress using server catalog count 
+- sync item batches concurrently 
+- use cached value instead query db directly 
+- batch persistence writes and remove JSON cloning (offline)
+- prune IndexedDB maintenance rows in chunks (offline)
+- remove full cache hydration from POS boot gate (offline)
+- use keyset pagination for item full sync (offline)
+- avoid duplicate item search result arrays (pos)
+- debounce cancellable item server search fallback (pos)
+_Total: 13 changes_
+
+### 🧰 Maintenance
+- declare required_apps=erpnext and pin ERPNext to v15.x (deps)
+- keep erpnext requirement without capping out v16 (deps)
+- POS multi-currency flow to match ERPNext standards 
+_Total: 3 changes_
+
+— Changelog auto-generated by semantic-release. Thanks to all contributors! 🙌
+
+# Changelog
+
+All notable changes.
+
 Release 15.30.0 — May 26, 2026
 ### ✨ Features
 - add full translation support for 82 Frappe languages (i18n)
