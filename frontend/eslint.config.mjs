@@ -2,6 +2,7 @@ import globals from "globals";
 import pluginJs from "@eslint/js";
 import pluginVue from "eslint-plugin-vue";
 import pluginVuetify from "eslint-plugin-vuetify";
+import typescriptEslint from "@typescript-eslint/eslint-plugin";
 import vueParser from "vue-eslint-parser";
 
 /** @type {import('eslint').Linter.FlatConfig[]} */
@@ -36,6 +37,7 @@ export default [
 			},
 		},
 		plugins: {
+			"@typescript-eslint": typescriptEslint,
 			vue: pluginVue,
 			vuetify: pluginVuetify,
 		},
@@ -48,7 +50,7 @@ export default [
 				{
 					argsIgnorePattern: "^_|^this$",
 					varsIgnorePattern: "^_",
-					caughtErrors: "all",
+					caughtErrors: "none",
 					caughtErrorsIgnorePattern: "^_",
 				},
 			],
@@ -69,17 +71,53 @@ export default [
 		files: ["**/*.{ts,tsx,vue}"],
 		rules: {
 			"no-undef": "off",
+			"no-unused-vars": "off",
+			"@typescript-eslint/no-unused-vars": [
+				"warn",
+				{
+					argsIgnorePattern: "^_|^this$",
+					varsIgnorePattern: "^_",
+					caughtErrors: "none",
+					caughtErrorsIgnorePattern: "^_",
+				},
+			],
+		},
+	},
+	{
+		files: ["tests/performance/k6-load-test.js"],
+		languageOptions: {
+			globals: {
+				__ENV: "readonly",
+			},
+		},
+	},
+	{
+		files: ["src/posapp/workers/**/*.js"],
+		languageOptions: {
+			globals: {
+				...globals.worker,
+				importScripts: "readonly",
+				self: "readonly",
+			},
 		},
 	},
 	{
 		files: ["src/posapp/workers/opencvWorker.js"],
 		languageOptions: {
 			globals: {
-				...globals.worker,
-				importScripts: "readonly",
 				cv: "writable",
-				self: "readonly",
 			},
+		},
+	},
+	{
+		files: [
+			"src/posapp/components/pos/shell/BarcodePrinting.vue",
+			"src/posapp/composables/pos/items/useBarcodePrintOutput.ts",
+			"src/posapp/services/exportService.ts",
+		],
+		rules: {
+			// Escaped closing script tags keep embedded receipt HTML from ending SFC scripts.
+			"no-useless-escape": "off",
 		},
 	},
 	{

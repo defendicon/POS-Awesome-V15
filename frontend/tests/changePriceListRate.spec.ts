@@ -3,9 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { change_price_list_rate } from "../src/posapp/components/pos/invoice_utils/dialogs";
 
 declare global {
-	// eslint-disable-next-line no-var
 	var __: (_text: string, _args?: any[]) => string;
-	// eslint-disable-next-line no-var
 	var frappe: any;
 }
 

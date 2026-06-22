@@ -1,6 +1,4 @@
 /* eslint-env node */
-/* global module */
-
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
 	year: "numeric",
 	month: "long",

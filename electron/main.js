@@ -37,7 +37,7 @@ function ensureUrl(rawUrl) {
 		try {
 			const parsed = new URL(value);
 			return parsed;
-		} catch (error) {
+		} catch {
 			return null;
 		}
 	};

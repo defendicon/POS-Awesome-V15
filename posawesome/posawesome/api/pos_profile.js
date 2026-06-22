@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("POS Profile", {
 	setup: function (frm) {
-		frm.set_query("posa_cash_mode_of_payment", function (doc) {
+		frm.set_query("posa_cash_mode_of_payment", function () {
 			return {
 				filters: { type: "Cash" },
 			};

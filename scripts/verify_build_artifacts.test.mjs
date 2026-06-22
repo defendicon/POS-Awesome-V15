@@ -68,9 +68,9 @@ test("verifies POS loader assets and writes sha256 checksums", async () => {
 		const checksums = await readFile(checksumPath, "utf8");
 
 		assert.equal(result.checkedFiles.length, 9);
-		assert.match(checksums, /  version\.json$/m);
-		assert.match(checksums, /  loader\.js$/m);
-		assert.match(checksums, /  materialdesignicons-webfont-ICONS\.woff2$/m);
-		assert.match(checksums, /  offline\/index-AbCd1234\.js$/m);
+		assert.match(checksums, / {2}version\.json$/m);
+		assert.match(checksums, / {2}loader\.js$/m);
+		assert.match(checksums, / {2}materialdesignicons-webfont-ICONS\.woff2$/m);
+		assert.match(checksums, / {2}offline\/index-AbCd1234\.js$/m);
 	});
 });

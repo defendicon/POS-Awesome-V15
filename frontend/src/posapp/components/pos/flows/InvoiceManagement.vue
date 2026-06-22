@@ -1427,7 +1427,6 @@
 </template>
 
 <script>
-/* global __ */
 import { inject, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";

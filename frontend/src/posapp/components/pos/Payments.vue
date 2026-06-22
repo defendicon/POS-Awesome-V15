@@ -1120,8 +1120,6 @@ const syncPreferredPaymentToCurrentTotal = (doc = invoice_doc.value) => {
 	// For returns, cap the auto-filled refund at what was paid on the original
 	// invoice (0 for an unpaid/credit invoice → recorded as a credit note).
 	const normalizedTotal = resolveReturnDefaultAmount(doc, total);
-	const conversionRate = flt(doc.conversion_rate || 1, currency_precision.value);
-
 	payments.forEach((payment) => {
 		if (payment !== preferredPayment) {
 			payment.amount = 0;

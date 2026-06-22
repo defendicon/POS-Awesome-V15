@@ -219,7 +219,7 @@ watch(activeTab, () => {
 	searchTerm.value = "";
 });
 
-watch(bomForQty, (val) => {
+watch(bomForQty, () => {
 	if (selectedDoc.value && activeTab.value === "BOM") {
 		selectDocument(selectedDoc.value);
 	}

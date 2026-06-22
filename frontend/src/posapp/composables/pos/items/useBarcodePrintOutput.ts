@@ -481,14 +481,6 @@ export function useBarcodePrintOutput() {
 		};
 	};
 
-	const logDebug = (step: string, payload: any = {}) => {
-		try {
-			console.debug("[POS BarcodePrintOutput]", step, payload);
-		} catch {
-			console.log("[POS BarcodePrintOutput]", step);
-		}
-	};
-
 	const getPreset = (): PageFormatPreset => {
 		return PAGE_FORMAT_PRESETS.find((p) => p.value === pageFormat.value) ?? PAGE_FORMAT_PRESETS[0]!;
 	};
@@ -807,7 +799,6 @@ export function useBarcodePrintOutput() {
 
 		const ctx = getPrintContext(false);
 		let html = "";
-		const labelsCount = items.reduce((sum: number, item: any) => sum + Math.max(1, Math.round(Number(item.qty) || 1)), 0);
 		items.forEach((item) => {
 			const copies = Math.max(1, Math.round(Number(item.qty) || 1));
 			const itemSerials: string[] = item._serialization_applied && Array.isArray(item._generated_serials) ? item._generated_serials : [];
@@ -883,7 +874,7 @@ export function useBarcodePrintOutput() {
 		return { style, content };
 	};
 
-	const openPrintPopup = (html: string): Window | null => {
+	const openPrintPopup = (): Window | null => {
 		const printWindow = window.open("", "_blank");
 		if (!printWindow) {
 			toastStore.show({ title: __("Popup blocked. Please allow popups."), color: "error" });
@@ -911,7 +902,7 @@ export function useBarcodePrintOutput() {
 			return;
 		}
 
-		const printWindow = openPrintPopup("");
+		const printWindow = openPrintPopup();
 		if (!printWindow) return;
 
 		const style = getPrintStyles();
@@ -1131,7 +1122,7 @@ export function useBarcodePrintOutput() {
 			return;
 		}
 
-		const printWindow = openPrintPopup("");
+		const printWindow = openPrintPopup();
 		if (!printWindow) return;
 
 		const style = getPrintStyles();

@@ -130,7 +130,6 @@ export const initializePaymentLinesForDialog = (
 
 	const total = toNumber(doc.rounded_total || doc.grand_total);
 	const normalizedTotal = resolveReturnDefaultAmount(doc, total);
-	const conversionRate = toNumber(doc.conversion_rate) || 1;
 	const existingAmounts = payments.some((payment) =>
 		hasMeaningfulAmount(payment, precision),
 	);

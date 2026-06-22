@@ -211,7 +211,6 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 
 	// Set M-Pesa payment as customer credit
 	const set_mpesa_payment = (payment: any) => {
-		const doc = unref(invoiceDoc);
 		const profile = unref(posProfile);
 		if (profile) {
 			profile.use_customer_credit = true;

@@ -1,5 +1,5 @@
 /* eslint-env worker */
-/* global importScripts, Dexie */
+/* global Dexie */
 
 let db;
 const BASE_SCHEMA = {

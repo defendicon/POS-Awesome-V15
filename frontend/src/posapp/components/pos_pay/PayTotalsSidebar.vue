@@ -649,8 +649,6 @@ const internalExchangeRate = computed({
 	set: (val) => emit("update:exchangeRate", val),
 });
 
-const internalExchangeRateValue = computed(() => flt(props.exchangeRate || 1));
-
 const internalAutoAllocatePaymentAmount = computed(() => props.autoAllocatePaymentAmount ?? true);
 
 const getPaymentMethodAccount = (mode) => {
@@ -867,10 +865,6 @@ const bankAccountOptions = computed(() => {
 	}));
 });
 
-const onBankAccountChange = (account) => {
-	emit("update:bankAccount", selectedMopName.value, account);
-};
-
 const accountDialogOpen = ref(false);
 const selectedAccountTemp = ref(null);
 
@@ -971,11 +965,6 @@ const totalNewPaymentsBase = computed(() => {
 const internalReferenceNo = computed({
 	get: () => props.referenceNo,
 	set: (val) => emit("update:referenceNo", val),
-});
-
-const internalReferenceDate = computed({
-	get: () => props.referenceDate,
-	set: (val) => emit("update:referenceDate", val),
 });
 
 const formatReferenceDateForDisplay = (value) => {
