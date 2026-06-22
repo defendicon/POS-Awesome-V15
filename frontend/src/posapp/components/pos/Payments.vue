@@ -307,9 +307,12 @@ import {
 } from "../../../offline/index";
 import GiftCardDialog from "./wallet/GiftCardDialog.vue";
 import {
+	applyPreferredPaymentAmount,
 	initializePaymentLinesForDialog,
 	rebalancePreferredPaymentLine,
 	resolvePreferredPaymentLine,
+	resolveReturnDefaultAmount,
+	shouldApplyReturnRefundCap,
 } from "../../utils/paymentInitialization";
 import { resolvePaymentPrintFormatDoctypes } from "../../utils/paymentPrintDoctype";
 import { resolvePaymentPrintFormat } from "../../utils/paymentPrintFormat";
@@ -1082,7 +1085,13 @@ const paymentCurrencyContext = (doc = invoice_doc.value) => ({
 });
 
 const syncPreferredPaymentToCurrentTotal = (doc = invoice_doc.value) => {
-	if (!doc || !Array.isArray(doc.payments) || !doc.payments.length || is_credit_sale.value) {
+	if (
+		!doc ||
+		!Array.isArray(doc.payments) ||
+		!doc.payments.length ||
+		is_credit_sale.value ||
+		is_credit_return.value
+	) {
 		return null;
 	}
 
@@ -1108,7 +1117,10 @@ const syncPreferredPaymentToCurrentTotal = (doc = invoice_doc.value) => {
 	}
 
 	const total = netInvoiceSettlementAmount.value;
-	const normalizedTotal = doc.is_return ? -Math.abs(total) : Math.abs(total);
+	// For returns, cap the auto-filled refund at what was paid on the original
+	// invoice (0 for an unpaid/credit invoice → recorded as a credit note).
+	const normalizedTotal = resolveReturnDefaultAmount(doc, total);
+	const conversionRate = flt(doc.conversion_rate || 1, currency_precision.value);
 
 	payments.forEach((payment) => {
 		if (payment !== preferredPayment) {
@@ -1188,8 +1200,23 @@ const ensurePaymentLinesInitialized = (doc = invoice_doc.value) => {
 	}
 
 	// For returns, always show all profile payment methods so user can split refund
+	// NOTE: the is_credit_return default is decided once when the return is loaded
+	// (send_invoice_doc_payment handler), NOT here — so reopening the dialog or a
+	// failed submit never overrides the cashier's manual toggle. Here we only
+	// honour the current toggle state.
 	if (doc.is_return) {
 		mergeProfilePaymentsIntoReturn(doc);
+		if (is_credit_return.value) {
+			// Credit return: keep every payment row at 0 so it is recorded as a
+			// credit note that reduces the customer's balance (no cash refund).
+			doc.payments.forEach((payment) => {
+				payment.amount = 0;
+				if (payment.base_amount !== undefined) {
+					payment.base_amount = 0;
+				}
+			});
+			return null;
+		}
 	}
 
 	const initializedPayment = initializePaymentLinesForDialog(
@@ -1205,6 +1232,28 @@ const ensurePaymentLinesInitialized = (doc = invoice_doc.value) => {
 	syncPreferredPaymentToCurrentTotal(doc);
 
 	return initializedPayment;
+};
+
+// Default a return to "Store as Credit?" (is_credit_return) when the original
+// invoice was not fully paid. For an unpaid (credit) invoice this avoids paying
+// out cash that was never collected and instead reduces the customer's balance,
+// while the toggle is visibly ON; a fully paid invoice keeps the normal cash
+// refund. The cap comes from posa_refundable_amount (= amount paid on the
+// original) set when the return is loaded; if unknown we leave behaviour as is.
+const applyReturnCreditDefault = (doc) => {
+	if (!doc || !doc.is_return) {
+		return;
+	}
+	if (!shouldApplyReturnRefundCap(doc)) {
+		is_credit_return.value = false;
+		is_cashback.value = true;
+		return;
+	}
+	const refundable = doc.posa_refundable_amount;
+	const returnTotal = Math.abs(flt(doc.rounded_total || doc.grand_total, currency_precision.value));
+	const shouldCredit = flt(refundable, currency_precision.value) < returnTotal - 0.0001;
+	is_credit_return.value = shouldCredit;
+	is_cashback.value = !shouldCredit;
 };
 
 const restorePaymentLinesAfterFailedSubmit = () => {
@@ -1636,8 +1685,16 @@ const handlePaymentShortcut = (event) => {
 	}
 };
 
-const handleSubmitPaymentShortcut = ({ print = false } = {}) => {
+const handleSubmitPaymentShortcut = ({ print = false, amount = null } = {}) => {
 	if (!paymentVisible.value || submissionInFlight.value || loading.value) return;
+	if (amount !== null) {
+		applyPreferredPaymentAmount(
+			invoice_doc.value,
+			Number(amount),
+			currency_precision.value,
+			isCashLikePayment,
+		);
+	}
 	nextTick(() => {
 		submit(null, false, print);
 	});
@@ -1848,6 +1905,19 @@ watch(is_credit_return, (newVal) => {
 	}
 });
 
+// Keep "Cashback?" and "Store as Credit?" mutually exclusive for a return.
+// The is_credit_return watch already flips is_cashback; this mirrors the other
+// direction so toggling cashback also updates credit (you can't enable both).
+// The reciprocal set lands on a value that is already correct, so the watches
+// settle without looping.
+watch(is_cashback, (newVal) => {
+	if (!invoice_doc.value || !invoice_doc.value.is_return) return;
+	const shouldCredit = !newVal;
+	if (is_credit_return.value !== shouldCredit) {
+		is_credit_return.value = shouldCredit;
+	}
+});
+
 watch(
 	() => invoice_doc.value.customer,
 	(customer, previous) => {
@@ -1934,11 +2004,18 @@ onMounted(() => {
 			is_credit_sale.value = false;
 			is_write_off_change.value = false;
 
+			// Decide the credit-return default ONCE, when the return is first
+			// loaded, so reopening the dialog / a failed submit never overrides a
+			// manual toggle change by the cashier.
+			if (doc.is_return) {
+				applyReturnCreditDefault(doc);
+			}
+
 			const initializedPayment = ensurePaymentLinesInitialized(doc);
 
 			if (doc.is_return) {
 				is_return.value = true;
-				is_credit_return.value = false;
+				// is_credit_return default was applied above on load; don't override.
 			} else if (initializedPayment) {
 				is_credit_return.value = false;
 			}

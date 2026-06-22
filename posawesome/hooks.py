@@ -10,6 +10,11 @@ app_url = "https://github.com/defendicon/POS-Awesome-V15"
 app_source_link = "https://github.com/defendicon/POS-Awesome-V15"
 source_link = "https://github.com/defendicon/POS-Awesome-V15"
 
+# POS Awesome extends ERPNext heavily (custom fields, controller overrides,
+# and many `from erpnext...` imports). Declare the hard dependency so bench
+# installs/loads ERPNext first and refuses to install without it.
+required_apps = ["erpnext"]
+
 # Includes in <head>
 # ------------------
 
@@ -67,20 +72,13 @@ doctype_js = {
 # after_install = "posawesome.install.after_install"
 # before_uninstall = "posawesome.uninstall.before_uninstall"
 after_uninstall = "posawesome.uninstall.after_uninstall"
-after_migrate = [
-    "posawesome.patches.add_pos_cash_movement_settings.execute",
-    "posawesome.patches.add_cash_movement_to_workspace.execute",
-    "posawesome.patches.add_customer_display_settings.execute",
-    "posawesome.patches.add_dashboard_settings.execute",
-    "posawesome.patches.add_dashboard_global_settings.execute",
-    "posawesome.patches.reorganize_pos_profile_sections.execute",
-    "posawesome.patches.add_gift_card_pos_profile_settings.execute",
-    "posawesome.patches.add_gift_card_invoice_redemption_fields.execute",
-    "posawesome.patches.add_gift_card_to_workspace.execute",
-    "posawesome.patches.add_submission_ledger_to_workspace.execute",
-    "posawesome.patches.migrate_pos_supervisor_to_role.execute",
-    "posawesome.patches.remove_item_barcode_posa_uom.execute",
-]
+# NOTE: these migrations are registered one-shot in patches.txt and must NOT
+# also run on every `bench migrate`. Running them via after_migrate re-rewrote
+# the POS Awesome workspace and POS Profile section ordering on every migrate,
+# destroying any user customization. The three that previously lived only here
+# (add_gift_card_pos_profile_settings, migrate_pos_supervisor_to_role,
+# remove_item_barcode_posa_uom) have been moved into patches.txt.
+after_migrate = []
 
 # Desk Notifications
 # ------------------
@@ -122,8 +120,26 @@ doc_events = {
         "after_insert": "posawesome.posawesome.api.customer.after_insert",
     },
     "Bin": {
-        "after_insert": "posawesome.posawesome.stock_realtime.publish_bin_stock_change",
-        "on_update": "posawesome.posawesome.stock_realtime.publish_bin_stock_change",
+        "after_insert": [
+            "posawesome.posawesome.stock_realtime.publish_bin_stock_change",
+            "posawesome.posawesome.api.item_fetchers.clear_stock_caches",
+        ],
+        "on_update": [
+            "posawesome.posawesome.stock_realtime.publish_bin_stock_change",
+            "posawesome.posawesome.api.item_fetchers.clear_stock_caches",
+        ],
+    },
+    "Stock Ledger Entry": {
+        "after_insert": "posawesome.posawesome.api.item_fetchers.clear_stock_caches",
+        "on_cancel": "posawesome.posawesome.api.item_fetchers.clear_stock_caches",
+    },
+    "Serial No": {
+        "after_insert": "posawesome.posawesome.api.item_fetchers.clear_stock_caches",
+        "on_update": "posawesome.posawesome.api.item_fetchers.clear_stock_caches",
+    },
+    "Batch": {
+        "after_insert": "posawesome.posawesome.api.item_fetchers.clear_stock_caches",
+        "on_update": "posawesome.posawesome.api.item_fetchers.clear_stock_caches",
     },
 }
 
@@ -321,6 +337,8 @@ fixtures = [
                     "POS Profile-posa_allow_reconcile_payments",
                     "POS Profile-column_break_uolvm",
                     "POS Profile-posa_allow_mpesa_reconcile_payments",
+                    "POS Profile-posa_enable_print_audit",
+                    "POS Profile-posa_default_printer_profile",
                     "POS Profile-posa_enable_camera_scanning",
                     "POS Profile-posa_camera_scan_type",
                     "POS Profile-posa_language",
@@ -389,3 +407,7 @@ fixtures = [
         ],
     },
 ]
+
+# Permissions for Custom DocTypes
+# --------------------------------
+permissions = []

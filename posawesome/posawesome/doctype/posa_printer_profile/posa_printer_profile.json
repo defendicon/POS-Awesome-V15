@@ -1,0 +1,187 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:printer_name",
+ "creation": "2026-06-05 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "printer_name",
+  "printer_type",
+  "dpi",
+  "column_break_1",
+  "ip_address",
+  "port",
+  "is_default",
+  "disabled",
+  "defaults_section",
+  "default_label_width",
+  "default_label_height",
+  "column_break_2",
+   "printer_group",
+   "rfid_section",
+   "rfid_enabled",
+   "rfid_tag_type",
+   "rfid_epc_prefix",
+   "rfid_encoding_power",
+   "routing_rules_section",
+   "routing_rules"
+ ],
+ "fields": [
+  {
+   "fieldname": "printer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Printer Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "ZPL",
+   "fieldname": "printer_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Printer Type",
+   "options": "ZPL\nEPL\nHTML",
+   "reqd": 1
+  },
+  {
+   "default": "203",
+   "fieldname": "dpi",
+   "fieldtype": "Int",
+   "label": "DPI",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ip_address",
+   "fieldtype": "Data",
+   "label": "IP Address"
+  },
+  {
+   "fieldname": "port",
+   "fieldtype": "Int",
+   "label": "Port"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_default",
+   "fieldtype": "Check",
+   "label": "Is Default"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "fieldname": "defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Default Label Settings"
+  },
+  {
+   "fieldname": "default_label_width",
+   "fieldtype": "Float",
+   "label": "Default Label Width (mm)"
+  },
+  {
+   "fieldname": "default_label_height",
+   "fieldtype": "Float",
+   "label": "Default Label Height (mm)"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+   {
+    "fieldname": "printer_group",
+    "fieldtype": "Data",
+    "label": "Printer Group",
+    "description": "Printers in the same group serve as failover for each other"
+   },
+   {
+    "fieldname": "rfid_section",
+    "fieldtype": "Section Break",
+    "label": "RFID Encoding"
+   },
+   {
+    "default": "0",
+    "fieldname": "rfid_enabled",
+    "fieldtype": "Check",
+    "label": "RFID Enabled",
+    "description": "Enable RFID tag encoding for ZPL printers with RFID capability"
+   },
+   {
+    "fieldname": "rfid_tag_type",
+    "fieldtype": "Select",
+    "label": "RFID Tag Type",
+    "options": "Generic\nAD-222\nAD-220\nAD-236\nAD-431\nAD-432\nAD-612\nAD-620\nAD-621\nAD-640",
+    "default": "Generic",
+    "description": "Tag form factor for RFID setup command"
+   },
+   {
+    "fieldname": "rfid_epc_prefix",
+    "fieldtype": "Data",
+    "label": "EPC Prefix (Hex)",
+    "description": "Hex prefix for EPC data, e.g. 303402B4DDD1"
+   },
+   {
+    "fieldname": "rfid_encoding_power",
+    "fieldtype": "Int",
+    "label": "Encoding Power (dBm)",
+    "default": "0",
+    "description": "0=Auto, or specific power level from 10 to 30 dBm"
+   },
+   {
+    "fieldname": "routing_rules_section",
+    "fieldtype": "Section Break",
+    "label": "Routing Rules"
+   },
+   {
+    "fieldname": "routing_rules",
+    "fieldtype": "Table",
+    "label": "Routing Rules",
+    "options": "POSA Printer Routing Rule"
+   }
+  ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-06-05 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "POSAwesome",
+ "name": "POSA Printer Profile",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "POS Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "printer_name"
+}

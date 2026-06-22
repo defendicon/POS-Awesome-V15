@@ -32,6 +32,8 @@ export type SyncResponse<T = any> = {
 	deleted?: SyncDeleteRecord[];
 	next_watermark?: string | null;
 	has_more?: boolean;
+	next_offset?: number | null;
+	scope?: Record<string, any> | null;
 	schema_version?: string | null;
 	full_resync_required?: boolean;
 };

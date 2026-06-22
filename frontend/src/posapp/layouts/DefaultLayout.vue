@@ -27,6 +27,7 @@
 				@nav-click="handleNavClick"
 				@close-shift="handleCloseShift"
 				@print-last-invoice="handlePrintLastInvoice"
+				@share-last-invoice="handleShareLastInvoice"
 				@sync-invoices="handleSyncInvoices"
 				@toggle-offline="handleToggleOffline"
 				@retry-status="handleRetryStatus"
@@ -897,7 +898,6 @@ const pollForFrappeNav = (maxAttempts = 50, interval = 100) => {
 
 const initializeData = async () => {
 	await initPromise;
-	await memoryInitPromise;
 	await ensureOfflineQueueReady();
 	await hydrateOfflineSyncResourceStates();
 	checkDbHealth().catch(() => {});
@@ -911,8 +911,10 @@ const initializeData = async () => {
 	}
 
 	if (queueHealthCheck()) {
-		alert("Offline queue is too large. Old entries will be purged.");
-		purgeOldQueueEntries();
+		const pruned = purgeOldQueueEntries();
+		if (pruned > 0) {
+			alert("Old synced offline queue entries were pruned.");
+		}
 	}
 
 	await syncStore.updatePendingCount();
@@ -977,6 +979,10 @@ const handleNavClick = () => {
 
 const handleCloseShift = () => {
 	get_closing_data();
+};
+
+const handleShareLastInvoice = () => {
+	eventBus?.emit("share_last_invoice");
 };
 
 const handleSyncInvoices = async () => {

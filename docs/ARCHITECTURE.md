@@ -73,3 +73,23 @@ Avoid:
 - Directly changing invoice totals in UI without syncing payload logic
 - Creating fixes that only work online but break offline mode
 - Creating fixes that only work in browser print but break QZ Tray print
+
+## Offline Pricing Data Layers
+
+Offline pricing data follows this ownership path:
+
+1. Backend offline-sync endpoints expose paginated, versioned master records.
+2. The sync coordinator owns scheduling, watermarks, retries, and scope changes.
+3. Sync adapters write normalized records through repository APIs.
+4. Legacy caches remain compatibility outputs for existing UI flows.
+5. Cart and invoice pricing continue using the existing flow until the
+   deterministic pricing-engine phase is verified.
+
+Normalized repositories currently cover:
+
+- Item Prices, including UOM, currency, customer, and validity
+- Pricing Rules and their item, item-group, and brand targets
+- Dated Currency Exchange records for required multi-currency pairs
+
+The IndexedDB schema and persistence worker must always declare the same latest
+Dexie version.

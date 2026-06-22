@@ -6,6 +6,7 @@ const persist = vi.fn();
 
 const customersTable = {
 	get: vi.fn(),
+	bulkGet: vi.fn(),
 	bulkPut: vi.fn(),
 	bulkDelete: vi.fn(),
 	clear: vi.fn(),
@@ -55,6 +56,8 @@ describe("offline storage ownership", () => {
 	beforeEach(() => {
 		persist.mockReset();
 		customersTable.get.mockReset();
+		customersTable.bulkGet.mockReset();
+		customersTable.bulkGet.mockResolvedValue([]);
 		customersTable.bulkPut.mockReset();
 		customersTable.bulkDelete.mockReset();
 		customersTable.clear.mockReset();
@@ -81,7 +84,9 @@ describe("offline storage ownership", () => {
 		expect(persist).toHaveBeenCalledWith("items_last_sync");
 		expect(persist).toHaveBeenCalledWith("customers_last_sync");
 		expect(window.localStorage.getItem("posa_items_last_sync")).toBeNull();
-		expect(window.localStorage.getItem("posa_customers_last_sync")).toBeNull();
+		expect(
+			window.localStorage.getItem("posa_customers_last_sync"),
+		).toBeNull();
 	});
 
 	it("treats customer_storage as runtime cache while customers table stays durable", async () => {
@@ -171,8 +176,34 @@ describe("offline storage ownership", () => {
 		);
 	});
 
+	it("keeps only a bounded hot customer cache in memory", async () => {
+		const { setCustomerStorage } = await import("../src/offline/customers");
+		const { memory } = await import("../src/offline/db");
+		const customers = Array.from({ length: 300 }, (_, index) => ({
+			name: `CUST-${String(index).padStart(3, "0")}`,
+			customer_name: `Customer ${index}`,
+		}));
+
+		memory.customer_storage = [];
+		await setCustomerStorage(customers);
+
+		expect(memory.customer_storage).toHaveLength(250);
+		expect(memory.customer_storage[0].name).toBe("CUST-050");
+		expect(memory.customer_storage.at(-1)?.name).toBe("CUST-299");
+		expect(customersTable.bulkPut).toHaveBeenCalledWith(
+			expect.arrayContaining([
+				expect.objectContaining({
+					name: "CUST-299",
+					_search_text: expect.stringContaining("customer 299"),
+				}),
+			]),
+		);
+	});
+
 	it("skips customer cache rows without a resolvable name", async () => {
-		const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+		const warnSpy = vi
+			.spyOn(console, "warn")
+			.mockImplementation(() => undefined);
 		const { setCustomerStorage } = await import("../src/offline/customers");
 
 		await setCustomerStorage([

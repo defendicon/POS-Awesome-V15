@@ -29,11 +29,15 @@ function pickAssetUrl(assets, key, fallbackPath, version) {
 }
 
 function getPrecacheUrls(version, assets = {}) {
+	const fontAssets = Array.isArray(assets.fonts)
+		? assets.fonts.filter((url) => typeof url === "string" && url.trim())
+		: [];
 	return [
 		pickAssetUrl(assets, "loader", "/assets/posawesome/dist/js/loader.js", version),
 		pickAssetUrl(assets, "css", "/assets/posawesome/dist/js/posawesome.css", version),
 		pickAssetUrl(assets, "posawesome", "/assets/posawesome/dist/js/posawesome.js", version),
 		pickAssetUrl(assets, "offlineIndex", "/assets/posawesome/dist/js/offline/index.js", version),
+		...fontAssets,
 		...STATIC_PRECACHE_URLS,
 	];
 }

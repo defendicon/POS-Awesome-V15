@@ -77,24 +77,20 @@ function getLastCustomerCursor(response: SyncResponse) {
 	return null;
 }
 
-function mergeCustomerSyncResponses(
-	responses: SyncResponse[],
-): SyncResponse {
-	const lastResponse = responses[responses.length - 1] || {};
-	return {
-		...lastResponse,
-		changes: responses.flatMap((response) => response?.changes || []),
-		deleted: responses.flatMap((response) => response?.deleted || []),
-		has_more: Boolean(lastResponse?.has_more),
-		next_watermark: resolveWatermark(
-			lastResponse,
-			responses[0]?.next_watermark || null,
-		),
-		schema_version: lastResponse?.schema_version || responses[0]?.schema_version,
-	};
+function laterWatermark(
+	current: string | null,
+	candidate: string | null | undefined,
+) {
+	if (!candidate) {
+		return current;
+	}
+	if (!current) {
+		return candidate;
+	}
+	return candidate > current ? candidate : current;
 }
 
-async function fetchAllCustomerPages({
+async function fetchAndStoreCustomerPages({
 	posProfile,
 	watermark,
 	schemaVersion,
@@ -105,8 +101,11 @@ async function fetchAllCustomerPages({
 	schemaVersion?: string | null;
 	fetcher: CustomersFetcher;
 }) {
-	const responses: SyncResponse[] = [];
 	let startAfter: string | null = null;
+	let latestWatermark: string | null = watermark || null;
+	let schemaVersionSeen: string | null = schemaVersion || null;
+	let lastResponse: SyncResponse = {};
+	const deletedNamesSeen = new Set<string>();
 
 	while (true) {
 		const response = await fetcher({
@@ -116,9 +115,40 @@ async function fetchAllCustomerPages({
 			limit: CUSTOMER_SYNC_PAGE_SIZE,
 			schemaVersion,
 		});
-		responses.push(response || {});
+		lastResponse = response || {};
 
 		if (response?.full_resync_required || !response?.has_more) {
+			if (response?.full_resync_required) {
+				return response;
+			}
+		}
+
+		const changedCustomers = extractChangedCustomers(response);
+		if (changedCustomers.length) {
+			await setCustomerStorage(changedCustomers);
+		}
+
+		const deletedCustomerNames = extractDeletedCustomerNames(
+			response,
+		).filter((name) => {
+			if (deletedNamesSeen.has(name)) {
+				return false;
+			}
+			deletedNamesSeen.add(name);
+			return true;
+		});
+		if (deletedCustomerNames.length) {
+			await deleteCustomerStorageByNames(deletedCustomerNames);
+		}
+
+		latestWatermark = laterWatermark(
+			latestWatermark,
+			response?.next_watermark,
+		);
+		schemaVersionSeen =
+			response?.schema_version || schemaVersionSeen || null;
+
+		if (!response?.has_more) {
 			break;
 		}
 
@@ -129,7 +159,14 @@ async function fetchAllCustomerPages({
 		startAfter = nextStartAfter;
 	}
 
-	return mergeCustomerSyncResponses(responses);
+	return {
+		...lastResponse,
+		changes: [],
+		deleted: [],
+		has_more: false,
+		next_watermark: latestWatermark,
+		schema_version: schemaVersionSeen,
+	};
 }
 
 export async function syncCustomersResource(
@@ -137,7 +174,12 @@ export async function syncCustomersResource(
 ): Promise<ResourceSyncResult> {
 	const scopeChanged = await hasCustomerScopeChanged(args.posProfile);
 	let effectiveWatermark = scopeChanged ? null : args.watermark;
-	let response = await fetchAllCustomerPages({
+
+	if (scopeChanged) {
+		await clearCustomerStorage();
+	}
+
+	let response = await fetchAndStoreCustomerPages({
 		posProfile: args.posProfile,
 		watermark: effectiveWatermark,
 		schemaVersion: args.schemaVersion,
@@ -146,8 +188,10 @@ export async function syncCustomersResource(
 
 	if (response?.full_resync_required) {
 		effectiveWatermark = null;
-		await clearCustomerStorage();
-		response = await fetchAllCustomerPages({
+		if (!scopeChanged) {
+			await clearCustomerStorage();
+		}
+		response = await fetchAndStoreCustomerPages({
 			posProfile: args.posProfile,
 			watermark: effectiveWatermark,
 			schemaVersion: null,
@@ -169,20 +213,6 @@ export async function syncCustomersResource(
 			response,
 			effectiveWatermark,
 		);
-	}
-
-	if (scopeChanged) {
-		await clearCustomerStorage();
-	}
-
-	const changedCustomers = extractChangedCustomers(response);
-	if (changedCustomers.length) {
-		await setCustomerStorage(changedCustomers);
-	}
-
-	const deletedCustomerNames = extractDeletedCustomerNames(response);
-	if (deletedCustomerNames.length) {
-		await deleteCustomerStorageByNames(deletedCustomerNames);
 	}
 
 	const customersCount = await getCustomerStorageCount();

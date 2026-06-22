@@ -45,6 +45,11 @@ export async function show_payment(context: any) {
 
 		if (context.ensure_auto_batch_selection) await context.ensure_auto_batch_selection();
 
+		// Capture the transient refundable cap before process_invoice()/backend
+		// reload, which return a doc stripped of non-DocType fields. It is
+		// re-attached below so the payment screen can default a credit return.
+		const carriedRefundableAmount = context.invoice_doc?.posa_refundable_amount;
+
 		let invoice_doc;
 		const paymentDoctype = resolvePosDocumentDoctype({
 			invoiceType: context.invoiceType,
@@ -144,6 +149,12 @@ export async function show_payment(context: any) {
 			await context.$nextTick();
 		}
 		await new Promise((resolve) => setTimeout(resolve, 0));
+
+		// Re-attach the refundable cap stripped by the backend save/reload so the
+		// payment screen can default an unpaid-invoice return to a credit note.
+		if (carriedRefundableAmount != null && invoice_doc) {
+			invoice_doc.posa_refundable_amount = carriedRefundableAmount;
+		}
 
 		context.eventBus.emit("show_payment", "true");
 		context.eventBus.emit("send_invoice_doc_payment", invoice_doc);

@@ -30,6 +30,16 @@ const adapterMocks = vi.hoisted(() => ({
 		status: "fresh",
 		watermark: "items-watermark",
 	})),
+	syncItemPricesResource: vi.fn(async () => ({
+		resourceId: "item_prices",
+		status: "fresh",
+		watermark: "item-prices-watermark",
+	})),
+	syncPricingRulesResource: vi.fn(async () => ({
+		resourceId: "pricing_rules",
+		status: "fresh",
+		watermark: "pricing-rules-watermark",
+	})),
 	syncCustomersResource: vi.fn(async () => ({
 		resourceId: "customers",
 		status: "fresh",
@@ -64,6 +74,7 @@ describe("offline sync resource runner", () => {
 				warehouse: "Main WH",
 				modified: "2026-04-09T10:00:00",
 				selling_price_list: "Retail",
+				posa_allow_multi_currency: 1,
 				payments: [{ mode_of_payment: "Cash" }],
 			}),
 		).toEqual({
@@ -73,6 +84,7 @@ describe("offline sync resource runner", () => {
 			modified: "2026-04-09T10:00:00",
 			currency: null,
 			selling_price_list: "Retail",
+			posa_allow_multi_currency: true,
 			payments: [{ mode_of_payment: "Cash" }],
 		});
 	});
@@ -83,9 +95,14 @@ describe("offline sync resource runner", () => {
 				{ id: "bootstrap_config" },
 				{ id: "offers" },
 				{ id: "items" },
+				{ id: "pricing_rules" },
 				{ id: "customer_addresses" },
 			] as any),
-		).toEqual([{ id: "bootstrap_config" }, { id: "items" }]);
+		).toEqual([
+			{ id: "bootstrap_config" },
+			{ id: "items" },
+			{ id: "pricing_rules" },
+		]);
 
 		expect(
 			filterSupportedOfflineSyncStates([
@@ -148,6 +165,8 @@ describe("offline sync resource runner", () => {
 			priceList: "Retail",
 			customer: null,
 			watermark: "2026-04-09T09:30:00",
+			startAfter: "ITEM-1000",
+			limit: 1000,
 			schemaVersion: "2026-04-09",
 		});
 		expect(callOfflineSyncMethod).toHaveBeenCalledWith(
@@ -155,13 +174,21 @@ describe("offline sync resource runner", () => {
 			expect.objectContaining({
 				price_list: "Retail",
 				watermark: "2026-04-09T09:30:00",
+				start_after: "ITEM-1000",
+				limit: 1000,
 				schema_version: "2026-04-09",
 			}),
 		);
 	});
 
-	it("mirrors item price state from the items resource without another network call", async () => {
-		const result = await runSupportedOfflineSyncResource({
+	it("routes Item Prices through their independent paginated endpoint", async () => {
+		const callOfflineSyncMethod = vi.fn(async () => ({
+			changes: [],
+			deleted: [],
+			has_more: false,
+		}));
+
+		await runSupportedOfflineSyncResource({
 			resource: {
 				id: "item_prices",
 			} as any,
@@ -169,28 +196,65 @@ describe("offline sync resource runner", () => {
 				name: "POS-1",
 			},
 			schemaVersion: "2026-04-09",
-			getPersistedState: vi.fn(async () => null),
-			getRuntimeState: vi.fn(() => ({
-				resourceId: "items",
-				status: "fresh",
-				lastSyncedAt: "2026-04-09T10:00:00",
-				watermark: "items-watermark",
-				lastSuccessHash: null,
-				lastError: null,
-				consecutiveFailures: 0,
-				scopeSignature: '{"profile":"POS-1"}',
-				schemaVersion: "2026-04-09",
-			})),
-			callOfflineSyncMethod: vi.fn(async () => ({})),
-		});
-
-		expect(result).toEqual(
-			expect.objectContaining({
+			getPersistedState: vi.fn(async () => ({
 				resourceId: "item_prices",
 				status: "fresh",
-				watermark: "items-watermark",
+				watermark: "old-item-price-watermark",
+			} as any)),
+			callOfflineSyncMethod,
+		});
+
+		expect(adapterMocks.syncItemPricesResource).toHaveBeenCalledWith(
+			expect.objectContaining({
+				watermark: "old-item-price-watermark",
 			}),
 		);
-		expect(adapterMocks.syncItemsResource).not.toHaveBeenCalled();
+		const fetcher =
+			adapterMocks.syncItemPricesResource.mock.calls[0][0].fetcher;
+		await fetcher({
+			posProfile: { name: "POS-1" },
+			watermark: "old-item-price-watermark",
+			offset: 200,
+			schemaVersion: "2026-04-09",
+		});
+		expect(callOfflineSyncMethod).toHaveBeenCalledWith(
+			"posawesome.posawesome.api.offline_sync.item_prices.sync_item_prices",
+			expect.objectContaining({
+				watermark: "old-item-price-watermark",
+				offset: 200,
+			}),
+		);
+	});
+
+	it("routes Pricing Rules without a customer-specific request context", async () => {
+		const callOfflineSyncMethod = vi.fn(async () => ({
+			changes: [],
+			deleted: [],
+			has_more: false,
+		}));
+
+		await runSupportedOfflineSyncResource({
+			resource: { id: "pricing_rules" } as any,
+			posProfile: { name: "POS-1", company: "Test Co" },
+			schemaVersion: "2026-04-09",
+			getPersistedState: vi.fn(async () => null),
+			callOfflineSyncMethod,
+		});
+
+		const fetcher =
+			adapterMocks.syncPricingRulesResource.mock.calls[0][0].fetcher;
+		await fetcher({
+			posProfile: { name: "POS-1", company: "Test Co" },
+			watermark: null,
+			offset: 0,
+			schemaVersion: "2026-04-09",
+		});
+		expect(callOfflineSyncMethod).toHaveBeenCalledWith(
+			"posawesome.posawesome.api.offline_sync.pricing_rules.sync_pricing_rules",
+			expect.not.objectContaining({
+				customer: expect.anything(),
+				customer_group: expect.anything(),
+			}),
+		);
 	});
 });

@@ -101,15 +101,56 @@ def _resolve_liability_account(profile_doc):
     return liability_account
 
 
+def _enrich_je_accounts_with_currency(company, accounts, posting_date):
+    """Annotate JE rows with account_currency + exchange_rate.
+
+    Without this the gift-card Journal Entry only carried *_in_account_currency
+    amounts, so for a foreign-currency liability/receivable account ERPNext
+    derived the base amount from the system exchange rate at submit time, which
+    could drift from the invoice's recorded conversion_rate and leave the GL
+    unbalanced in base currency. Callers may pass an explicit exchange_rate on a
+    row (e.g. the invoice conversion_rate for the receivable); otherwise we use
+    1 for company-currency accounts and ERPNext's get_exchange_rate elsewhere.
+    Returns 1 when any row is in a non-company currency.
+    """
+    from erpnext.setup.utils import get_exchange_rate
+
+    company_currency = frappe.get_cached_value("Company", company, "default_currency")
+    multi_currency = 0
+    for row in accounts:
+        account = row.get("account")
+        if not account:
+            continue
+        account_currency = (
+            frappe.get_cached_value("Account", account, "account_currency") or company_currency
+        )
+        row["account_currency"] = account_currency
+        if account_currency == company_currency:
+            row["exchange_rate"] = 1
+            continue
+        multi_currency = 1
+        if not row.get("exchange_rate"):
+            try:
+                row["exchange_rate"] = frappe.utils.flt(
+                    get_exchange_rate(account_currency, company_currency, posting_date)
+                ) or 1
+            except Exception:
+                row["exchange_rate"] = 1
+    return multi_currency
+
+
 def _create_gift_card_journal_entry(company, posting_date, remark, accounts):
+    posting_date = posting_date or nowdate()
     je_doc = frappe.get_doc(
         {
             "doctype": "Journal Entry",
             "voucher_type": "Journal Entry",
-            "posting_date": posting_date or nowdate(),
+            "posting_date": posting_date,
             "company": company,
         }
     )
+
+    je_doc.multi_currency = 1 if _enrich_je_accounts_with_currency(company, accounts, posting_date) else 0
 
     for row in accounts:
         account_row = je_doc.append("accounts", {})
@@ -425,6 +466,9 @@ def _create_redemption_entry(profile_doc, invoice_doc, amount, cashier):
                 "reference_type": invoice_doc.doctype,
                 "reference_name": invoice_doc.name,
                 "credit_in_account_currency": redeem_amount,
+                # Use the invoice's recorded rate for the receivable so the base
+                # amount matches the invoice instead of a drifting system rate.
+                "exchange_rate": frappe.utils.flt(_doc_value(invoice_doc, "conversion_rate")) or 1,
                 "cost_center": cost_center,
                 "user_remark": cashier,
             },
@@ -440,7 +484,7 @@ def issue_gift_card(
     initial_amount=0,
     gift_card_code=None,
     expiry_date=None,
-    currency="PKR",
+    currency=None,
 ):
     profile_name, cashier, _user_doc = _require_supervisor(pos_profile, cashier)
     profile_doc = _get_profile_doc(profile_name)
@@ -458,7 +502,13 @@ def issue_gift_card(
     gift_card_doc = frappe.new_doc("POS Gift Card")
     gift_card_doc.gift_card_code = code
     gift_card_doc.company = company
-    gift_card_doc.currency = currency or "PKR"
+    # Resolve currency from the caller, then the POS Profile, then the
+    # company default — never a hardcoded "PKR".
+    gift_card_doc.currency = (
+        currency
+        or _doc_value(profile_doc, "currency")
+        or frappe.get_cached_value("Company", company, "default_currency")
+    )
     gift_card_doc.current_balance = amount
     gift_card_doc.status = "Active"
     gift_card_doc.expiry_date = expiry_date

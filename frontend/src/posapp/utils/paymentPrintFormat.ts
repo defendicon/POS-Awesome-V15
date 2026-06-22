@@ -9,6 +9,10 @@ interface ResolvePaymentPrintFormatOptions {
 	availableFormats?: string[] | null;
 }
 
+// POS Profile print formats belong to invoice doctypes. Payment Entry receipts
+// use Frappe's standard format unless a dedicated Payment Entry setting exists.
+export const DEFAULT_PAYMENT_ENTRY_PRINT_FORMAT = "Standard";
+
 function normalizeFormatName(value: unknown) {
 	return typeof value === "string" && value.trim() ? value.trim() : "";
 }

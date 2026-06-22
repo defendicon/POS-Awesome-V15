@@ -80,14 +80,11 @@ const invoiceComputed: Record<string, unknown> & ThisType<InvoiceComputedVm> = {
 		let sum;
 
 		if (typeof storeValue === "number" && !Number.isNaN(storeValue)) {
-			sum = this.isReturnInvoice ? Math.abs(storeValue) : storeValue;
+			sum = storeValue;
 		} else {
 			sum = 0;
 			this.items.forEach((item) => {
-				// For returns, use absolute value for correct calculation
-				const qty = this.isReturnInvoice
-					? Math.abs(flt(item.qty))
-					: flt(item.qty);
+				const qty = flt(item.qty);
 				const rate = flt(item.rate);
 				sum += qty * rate;
 			});
@@ -110,20 +107,19 @@ const invoiceComputed: Record<string, unknown> & ThisType<InvoiceComputedVm> = {
 
 		if (!(typeof storeValue === "number" && !Number.isNaN(storeValue))) {
 			this.items.forEach((item) => {
-				// For returns, use absolute value for correct calculation
-				const qty = this.isReturnInvoice
-					? Math.abs(flt(item.qty))
-					: flt(item.qty);
+				const qty = flt(item.qty);
 				const rate = flt(item.rate);
 				sum += qty * rate;
 			});
-		} else if (this.isReturnInvoice) {
-			sum = Math.abs(sum);
 		}
 
 		// Always reduce total by discount magnitude.
 		const additional_discount = Math.abs(flt(this.additional_discount));
-		sum -= additional_discount;
+		if (this.isReturnInvoice) {
+			sum += additional_discount;
+		} else {
+			sum -= additional_discount;
+		}
 
 		// Add delivery charges
 		const delivery_charges = flt(this.delivery_charges_rate);

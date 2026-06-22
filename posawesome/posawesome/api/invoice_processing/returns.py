@@ -158,6 +158,7 @@ def search_invoices_for_return(
             "posting_date",
             "posting_time",
             "grand_total",
+            "outstanding_amount",
             "currency",
             "discount_amount",
             "additional_discount_percentage",
@@ -230,6 +231,11 @@ def get_invoice_for_return(invoice_name, pos_profile=None, doctype="Sales Invoic
         "customer": invoice_doc.customer,
         "customer_name": invoice_doc.customer_name,
         "grand_total": invoice_doc.grand_total,
+        # Paid/outstanding state of the ORIGINAL invoice. Used to decide how much
+        # of a return may be refunded as cash vs. applied as a credit note.
+        "outstanding_amount": flt(invoice_doc.get("outstanding_amount")),
+        "paid_amount": flt(invoice_doc.get("paid_amount")),
+        "status": invoice_doc.get("status"),
         "total": invoice_doc.total,
         "net_total": invoice_doc.net_total,
         "currency": invoice_doc.currency,

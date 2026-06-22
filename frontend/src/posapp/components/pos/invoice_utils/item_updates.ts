@@ -484,6 +484,12 @@ export function _collectManualRateOverrides(context: any, items: any[]) {
 						: null,
 				batch_no: item.batch_no || null,
 				serial_no: item.serial_no || null,
+				uom: item.uom || null,
+				conversion_factor:
+					item.conversion_factor !== undefined &&
+					item.conversion_factor !== null
+						? Number(item.conversion_factor)
+						: null,
 			};
 
 			const determineFreeLine = () => {
@@ -548,15 +554,36 @@ export function _doesManualOverrideMatchItem(
 		idx,
 		batch_no,
 		serial_no,
+		uom,
+		conversion_factor,
 		auto_free_source,
 		parent_row_id,
 		source_rule,
 		is_free_item,
 	} = override.keys;
 
-	if (name && item.name && name === item.name) return true;
-	if (posa_row_id && item.posa_row_id && posa_row_id === item.posa_row_id)
+	if (posa_row_id && item.posa_row_id) {
+		return posa_row_id === item.posa_row_id;
+	}
+
+	const itemUom = item.uom || null;
+	const uomMatches = !uom || !itemUom || uom === itemUom;
+	const itemConversionFactor = Number(item.conversion_factor);
+	const conversionMatches =
+		conversion_factor === null ||
+		conversion_factor === undefined ||
+		!Number.isFinite(itemConversionFactor) ||
+		Number(conversion_factor) === itemConversionFactor;
+
+	if (
+		name &&
+		item.name &&
+		name === item.name &&
+		uomMatches &&
+		conversionMatches
+	) {
 		return true;
+	}
 
 	const coerce = (value) => value === true || value === 1 || value === "1";
 
@@ -603,6 +630,9 @@ export function _doesManualOverrideMatchItem(
 	}
 
 	if (item_code && item.item_code === item_code) {
+		if (!uomMatches || !conversionMatches) {
+			return false;
+		}
 		if (idx !== null && idx !== undefined) {
 			const itemIdx =
 				item.idx !== undefined && item.idx !== null
@@ -718,6 +748,12 @@ export function _buildManualOverrideKeyFromItem(context: any, item: any) {
 		idx,
 		batch_no: item.batch_no || null,
 		serial_no: item.serial_no || null,
+		uom: item.uom || null,
+		conversion_factor:
+			item.conversion_factor !== undefined &&
+			item.conversion_factor !== null
+				? Number(item.conversion_factor)
+				: null,
 	};
 }
 

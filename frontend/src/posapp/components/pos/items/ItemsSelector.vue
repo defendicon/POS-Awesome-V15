@@ -135,13 +135,31 @@
 								:item-class="getItemRowClass"
 								:row-props="getItemRowProps"
 								:no-data-text="__('No items found')"
+								:multi-select="multiSelect"
+								:selected-keys="selectedKeys"
 								@row-click="click_item_row"
 								@list-scroll="onListScroll"
+								@toggle-selection="toggleItemSelection"
+								@select-all="handleSelectAll"
 							/>
 						</v-col>
 					</v-row>
 				</v-card>
 			</div>
+
+			<v-expand-transition>
+				<div v-if="multiSelect" class="multi-select-bar">
+					<v-btn
+						color="primary"
+						size="large"
+						:disabled="selectedItems.size === 0"
+						@click="emitAddSelected"
+						class="px-6"
+					>
+					{{ __('Add Selected') }} ({{ selectedItems.size }})
+					</v-btn>
+				</div>
+			</v-expand-transition>
 		</v-card>
 		<ItemActionToolbar
 			v-model="item_group"
@@ -256,9 +274,13 @@ const props = defineProps({
 		type: Boolean,
 		default: false,
 	},
+	multiSelect: {
+		type: Boolean,
+		default: false,
+	},
 });
 
-const emit = defineEmits(["add-item"]);
+const emit = defineEmits(["add-item", "add-items"]);
 
 // 1. Initialize Stores and Core Composables
 const vmInstance = getCurrentInstance();
@@ -286,6 +308,9 @@ const selected_conversion_rate = ref(1);
 const isInitialized = ref(false);
 const initTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 const initError = ref<unknown>(null);
+const selectedItems = ref(new Map<string, any>());
+const selectedKeys = computed(() => new Set(selectedItems.value.keys()));
+const selectedItemsArray = computed(() => Array.from(selectedItems.value.values()));
 let stopItemInitializationWatcher: (() => void) | null = null;
 let cleanupItemsSelectorEvents: (() => void) | null = null;
 let cleanupTypeToSearch: (() => void) | null = null;
@@ -323,6 +348,7 @@ const {
 	indexItem,
 	replaceBarcodeIndex,
 	lookupItemByBarcode,
+	resolveItemByBarcode,
 	searchItemsByCode: searchItemsByCodeFn,
 } = useBarcodeIndexing();
 
@@ -422,6 +448,7 @@ const forceCustomerPriceList = computed(() =>
 const {
 	items,
 	filteredItems,
+	filteredItemsSearchTerm,
 	customer_price_list,
 	loading,
 	isBackgroundLoading,
@@ -433,8 +460,10 @@ const displayedItems = computed(() => {
 	const baseItems = Array.isArray(filteredItems.value) ? filteredItems.value : [];
 	const rawTerm = first_search.value;
 	const term = (typeof rawTerm === "string" ? rawTerm : "").trim().toLowerCase();
+	const searchAlreadyApplied = term.length >= 3 && filteredItemsSearchTerm.value === term;
 	return filterAndPaginate(baseItems, {
 		searchTerm: term,
+		searchAlreadyApplied,
 		hideZeroRate: hide_zero_rate_items.value,
 		hideVariants: pos_profile.value?.posa_hide_variants_items,
 		onlyBarcode: showOnlyBarcodeItemsRef.value,
@@ -542,6 +571,7 @@ const itemsSelectorSearch = useItemsSelectorSearch({
 	isLimitSearchEnabled: () => usesLimitSearch.value,
 	runLimitSearch: (term) => itemsIntegration.searchItems(term),
 	clearHighlightedItem: () => itemSelection.clearHighlightedItem(),
+	resolveItemByBarcode: (code) => resolveItemByBarcode(items.value, code),
 });
 const itemsSelectorSettings = useItemsSelectorSettings({ getVM: () => settingsContext, itemSync });
 const itemsSelectorFocus = useItemsSelectorFocus({
@@ -675,6 +705,43 @@ const add_item = async (item, optionsOrQty: any = {}) => {
 	}
 };
 
+// Multi-select support
+function toggleItemSelection(item: any) {
+	if (!item) return;
+	const key = item.item_code || item.name;
+	if (!key) return;
+	const newMap = new Map(selectedItems.value);
+	if (newMap.has(key)) {
+		newMap.delete(key);
+	} else {
+		newMap.set(key, item);
+	}
+	selectedItems.value = newMap;
+}
+
+function handleSelectAll(select: boolean) {
+	const newMap = new Map(selectedItems.value);
+	displayedItems.value.forEach((item: any) => {
+		const key = item?.item_code || item?.name;
+		if (!key) return;
+		if (select) {
+			if (!newMap.has(key)) {
+				newMap.set(key, item);
+			}
+		} else {
+			newMap.delete(key);
+		}
+	});
+	selectedItems.value = newMap;
+}
+
+function emitAddSelected() {
+	const items = selectedItemsArray.value;
+	if (items.length === 0) return;
+	emit("add-items", items);
+	selectedItems.value = new Map();
+}
+
 const scanProcessor = useScanProcessor({
 	items,
 	pos_profile,
@@ -707,6 +774,7 @@ const scanProcessor = useScanProcessor({
 	ratePrecision: itemDisplay.ratePrecision,
 	customer: selectedCustomer,
 	onItemAdded: () => {
+		scannerInput.pendingScanCode.value = "";
 		clearSearch();
 		itemsSelectorFocus.focusItemSearch();
 	},
@@ -1087,8 +1155,20 @@ const verifyServerItemCount = () => {};
 const forceReloadItems = () => itemsIntegration.get_items(true);
 const cancelItemDetailsRequest = () => itemDetailFetcher.cancelItemDetailsRequest();
 
-const select_item = (e, item) => itemSelection.handleItemSelection(e, item);
-const click_item_row = (e, data) => itemSelection.handleRowClick(e, data);
+const select_item = (e: any, item: any) => {
+	if (props.multiSelect) {
+		toggleItemSelection(item);
+	} else {
+		itemSelection.handleItemSelection(e, item);
+	}
+};
+const click_item_row = (e: any, data: any) => {
+	if (props.multiSelect) {
+		toggleItemSelection(data?.item || data);
+	} else {
+		itemSelection.handleRowClick(e, data);
+	}
+};
 const onVirtualRangeUpdate = (s, e, vs, ve) => itemsLoader.onVirtualRangeUpdate(s, e, vs, ve);
 const onListScroll = (e) => handleListScroll(e);
 
@@ -1185,6 +1265,11 @@ defineExpose({
 	clearLastInvoiceRateCache,
 	scheduleLastInvoiceRateRefresh,
 	itemSync,
+	selectedItems,
+	toggleItemSelection,
+	selectedItemsArray,
+	handleSelectAll,
+	emitAddSelected,
 });
 </script>
 
@@ -1414,5 +1499,16 @@ defineExpose({
 		animation: none !important;
 		transform: none !important;
 	}
+}
+
+.multi-select-bar {
+	padding: 12px 16px;
+	display: flex;
+	justify-content: center;
+	background: var(--pos-card-bg);
+	border-top: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+	position: sticky;
+	bottom: 0;
+	z-index: 9;
 }
 </style>

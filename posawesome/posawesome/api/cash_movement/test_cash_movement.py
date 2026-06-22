@@ -57,7 +57,7 @@ class TestCashMovementService(unittest.TestCase):
     @patch("posawesome.posawesome.api.cash_movement.service.resolve_source_cash_account")
     @patch("posawesome.posawesome.api.cash_movement.service.resolve_target_account")
     @patch("posawesome.posawesome.api.cash_movement.service.validate_account_company")
-    @patch("posawesome.posawesome.api.cash_movement.service.create_journal_entry")
+    @patch("posawesome.posawesome.api.cash_movement.service.create_journal_entry", create=True)
     @patch("posawesome.posawesome.api.cash_movement.service.frappe")
     def test_create_cash_movement_returns_existing_when_client_request_replayed(
         self,

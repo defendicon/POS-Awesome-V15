@@ -19,6 +19,7 @@ describe("sync resource registry", () => {
 			"offers",
 			"items",
 			"item_prices",
+			"pricing_rules",
 			"stock",
 			"customers",
 			"invoice_outbox",
@@ -57,6 +58,7 @@ describe("sync resource registry", () => {
 			"offers",
 			"items",
 			"item_prices",
+			"pricing_rules",
 			"stock",
 			"customers",
 			"invoice_outbox",
@@ -90,9 +92,18 @@ describe("sync resource registry", () => {
 			"offers",
 			"items",
 			"item_prices",
+			"pricing_rules",
 			"stock",
 			"customers",
 			"invoice_outbox",
 		]);
+	});
+
+	it("uses the searchable customers table as the canonical customers store", () => {
+		const customersResource = getSyncResourceDefinitions().find(
+			(resource) => resource.id === "customers",
+		);
+
+		expect(customersResource?.storageKey).toBe("customers");
 	});
 });

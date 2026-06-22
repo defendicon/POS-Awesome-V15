@@ -1,0 +1,42 @@
+{
+ "doctype": "DocType",
+ "name": "POSA Printer Routing Rule",
+ "module": "POSAwesome",
+ "istable": 1,
+ "fields": [
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "printer",
+   "fieldtype": "Link",
+   "label": "Printer",
+   "options": "POSA Printer Profile",
+   "in_list_view": 1,
+   "reqd": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1
+  }
+ ]
+}

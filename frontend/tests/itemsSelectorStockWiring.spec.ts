@@ -303,6 +303,7 @@ vi.mock("../src/posapp/composables/pos/items/useBarcodeIndexing", () => ({
 		indexItem: vi.fn(),
 		replaceBarcodeIndex: vi.fn(),
 		lookupItemByBarcode: vi.fn(() => null),
+		resolveItemByBarcode: vi.fn(() => null),
 		searchItemsByCode: vi.fn(() => []),
 	}),
 }));

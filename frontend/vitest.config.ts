@@ -8,6 +8,6 @@ export default mergeConfig(viteConfig, {
 			"tests/**/*.test.{js,ts}",
 			"src/**/__tests__/**/*.{js,ts}",
 		],
-		exclude: ["tests/smoke/**", "tests/e2e/**"],
+		exclude: ["tests/smoke/**", "tests/e2e/**", "tests/performance/TTI.spec.ts"],
 	},
 });

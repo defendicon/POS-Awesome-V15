@@ -15,7 +15,14 @@ export interface GetItemsArgs {
 	include_image?: number;
 	item_groups?: string[];
 	limit?: number;
+	offset?: number;
+	start_after?: string | null;
 	modified_after?: string;
+}
+
+export interface GetItemsCountArgs {
+	pos_profile: string;
+	item_groups?: string[];
 }
 
 export interface BarcodeLookupArgs {
@@ -70,6 +77,19 @@ const itemService = {
 		signal?: AbortSignal,
 	): Promise<Item[]> {
 		return unwrapApiResult(await this.getItems(args, signal));
+	},
+
+	getItemsCount(
+		args: GetItemsCountArgs,
+	): Promise<ApiEnvelope<number>> {
+		return api.callEnvelope(
+			"posawesome.posawesome.api.items.get_items_count",
+			args,
+		);
+	},
+
+	async getItemsCountData(args: GetItemsCountArgs): Promise<number> {
+		return unwrapApiResult(await this.getItemsCount(args));
 	},
 
 	getItemsFromBarcode(

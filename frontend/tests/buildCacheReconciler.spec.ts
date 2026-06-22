@@ -199,4 +199,44 @@ describe("build cache reconciler", () => {
 
 		expect(purgeDerivedOfflineCaches).not.toHaveBeenCalled();
 	});
+
+	it("defers a new baseline until full memory hydration can inspect legacy caches", async () => {
+		const purgeDerivedOfflineCaches = vi.fn().mockResolvedValue(undefined);
+
+		await expect(
+			reconcileBuildChangeOnStartup({
+				runtimeBuildVersion: "build-2",
+				storage: window.localStorage,
+				isOnline: true,
+				readMemoryState: () => ({}),
+				deferInitialBaseline: true,
+				purgeDerivedOfflineCaches,
+			}),
+		).resolves.toMatchObject({
+			status: "noop",
+			reasons: ["initial_baseline_deferred"],
+		});
+
+		expect(
+			window.localStorage.getItem(
+				BUILD_RECONCILIATION_KEYS.currentRuntimeBuildVersion,
+			),
+		).toBeNull();
+
+		await expect(
+			reconcileBuildChangeOnStartup({
+				runtimeBuildVersion: "build-2",
+				storage: window.localStorage,
+				isOnline: true,
+				readMemoryState: () => ({
+					item_details_cache: { "ITEM-1": { rate: 10 } },
+				}),
+				purgeDerivedOfflineCaches,
+			}),
+		).resolves.toMatchObject({
+			status: "reconciled_online",
+			reasons: expect.arrayContaining(["legacy_build_metadata_missing"]),
+		});
+		expect(purgeDerivedOfflineCaches).toHaveBeenCalledTimes(1);
+	});
 });

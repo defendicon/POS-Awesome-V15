@@ -117,6 +117,14 @@ Rules:
 - Sync transformations must be backward compatible where possible.
 - Offline mode must use the same business rules as online mode wherever possible.
 - Offline cache must refresh safely when POS Profile configuration changes.
+- Offline pricing data must not depend on a record having been used online
+  previously.
+- Item Prices must preserve price list, UOM, currency, customer, and validity.
+- Pricing Rule sync must include customer/group rules before a customer is
+  selected offline.
+- Multi-currency sync must cover price-list, invoice, company, and payment
+  account currencies, including dated Currency Exchange records.
+- Disabled, deleted, or out-of-scope pricing records must be removed locally.
 
 ---
 

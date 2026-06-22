@@ -10,7 +10,8 @@ import type {
 	StoredCustomer,
 } from "../types/models";
 import {
-	customerMatchesSearchTerm,
+	buildCustomerSearchParts,
+	customerMatchesSearchParts,
 	normalizeCustomerSearchTerm,
 } from "./customers/customerSearch";
 import { resetCustomerLoadingCoordinator } from "../modules/customers/customerLoadingCoordinator";
@@ -29,8 +30,19 @@ import {
 	refreshBootstrapSnapshotFromCacheState,
 } from "../../offline/index";
 
-const PAGE_SIZE = 1000;
+const PAGE_SIZE = 200;
+const CUSTOMER_SYNC_CONCURRENCY = 5;
+const CUSTOMER_PROGRESS_YIELD_INTERVAL = 50;
 const CUSTOMER_SCOPE_STORAGE_KEY = "posa_customers_profile_scope";
+
+const yieldCustomerProgress = () =>
+	new Promise<void>((resolve) => {
+		if (typeof requestAnimationFrame === "function") {
+			requestAnimationFrame(() => resolve());
+			return;
+		}
+		setTimeout(resolve, 0);
+	});
 
 function getCustomerProfileScope(profile: POSProfile | null): string {
 	const profileName =
@@ -132,7 +144,8 @@ function getSerializedProfile(profile: unknown): string | null {
 			typeof typedProfile.pos_profile === "object" &&
 			typedProfile.pos_profile !== null &&
 			"name" in typedProfile.pos_profile &&
-			typeof (typedProfile.pos_profile as { name?: unknown }).name === "string"
+			typeof (typedProfile.pos_profile as { name?: unknown }).name ===
+				"string"
 		) {
 			fallbackName = (typedProfile.pos_profile as { name: string }).name;
 		}
@@ -157,6 +170,7 @@ export const useCustomersStore = defineStore("customers", () => {
 	const page = ref(0);
 	const hasMore = ref(true);
 	const nextCustomerStart = ref<string | null>(null);
+	const nextCustomerOffset = ref(0);
 	const loadingCustomers = ref(false);
 	const customersLoaded = ref(false);
 	const isCustomerBackgroundLoading = ref(false);
@@ -196,7 +210,9 @@ export const useCustomersStore = defineStore("customers", () => {
 
 	function logFinalLoadedCustomerCount() {
 		if (customerLoadLogState.final) return;
-		const count = Number(loadedCustomerCount.value || customers.value.length || 0);
+		const count = Number(
+			loadedCustomerCount.value || customers.value.length || 0,
+		);
 		console.log(`Customers loaded: ${count}`);
 		customerLoadLogState.final = true;
 	}
@@ -231,7 +247,8 @@ export const useCustomersStore = defineStore("customers", () => {
 	}
 
 	function upsertCustomerSummaryFromInfo(info: CustomerInfo) {
-		const customerName = getStringField(info, "name") || getStringField(info, "customer");
+		const customerName =
+			getStringField(info, "name") || getStringField(info, "customer");
 		if (!customerName) {
 			return;
 		}
@@ -278,7 +295,9 @@ export const useCustomersStore = defineStore("customers", () => {
 			getStringField(customerInfo.value, "name") ||
 			getStringField(customerInfo.value, "customer");
 		if (customerName) {
-			void setCustomerStorage([{ ...customerInfo.value, name: customerName }]);
+			void setCustomerStorage([
+				{ ...customerInfo.value, name: customerName },
+			]);
 		}
 		if (
 			customerName &&
@@ -315,7 +334,8 @@ export const useCustomersStore = defineStore("customers", () => {
 
 	async function ensureCustomerScopeIsolation() {
 		const currentScope =
-			customerProfileScope.value || getCustomerProfileScope(posProfile.value);
+			customerProfileScope.value ||
+			getCustomerProfileScope(posProfile.value);
 		if (!currentScope) {
 			return;
 		}
@@ -334,6 +354,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		totalCustomerCount.value = 0;
 		loadedCustomerCount.value = 0;
 		nextCustomerStart.value = null;
+		nextCustomerOffset.value = 0;
 		syncBootstrapCustomerReadiness(0);
 	}
 
@@ -343,8 +364,9 @@ export const useCustomersStore = defineStore("customers", () => {
 		let collection = db.table("customers");
 		const normalizedTerm = normalizeCustomerSearchTerm(searchTerm.value);
 		if (normalizedTerm) {
+			const searchParts = buildCustomerSearchParts(normalizedTerm);
 			collection = collection.filter((customer: CustomerSummary) =>
-				customerMatchesSearchTerm(customer, normalizedTerm),
+				customerMatchesSearchParts(customer, searchParts),
 			);
 		}
 
@@ -407,6 +429,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		startAfter: string | null,
 		modifiedAfter: string | null,
 		limit: number,
+		offset: number | null = null,
 	): Promise<CustomerSummary[]> {
 		const serializedProfile = getSerializedProfile(posProfile.value);
 		return new Promise((resolve, reject) => {
@@ -421,6 +444,7 @@ export const useCustomersStore = defineStore("customers", () => {
 					modified_after: modifiedAfter,
 					limit,
 					start_after: startAfter,
+					offset,
 				},
 				callback: (r: any) => resolve(r.message || []),
 				error: (err: any) => {
@@ -432,7 +456,7 @@ export const useCustomersStore = defineStore("customers", () => {
 	}
 
 	async function backgroundLoadCustomers(
-		startAfter: string | null,
+		_startAfter: string | null,
 		syncSince: string | null,
 	) {
 		if (!posProfile.value || isOffline()) {
@@ -444,42 +468,108 @@ export const useCustomersStore = defineStore("customers", () => {
 		}
 		const limit = PAGE_SIZE;
 		isCustomerBackgroundLoading.value = true;
-		try {
-			let cursor: string | null = startAfter;
-			while (cursor) {
-				const rows: CustomerSummary[] = await fetchCustomerPage(
-					cursor,
-					syncSince,
-					limit,
-				);
-				if (rows.length) {
-					await setCustomerStorage(rows);
-					loadedCustomerCount.value += rows.length;
-					syncBootstrapCustomerReadiness(loadedCustomerCount.value);
-					if (totalCustomerCount.value) {
-						const progress = Math.min(
+		const updateProgress = (count: number) => {
+			loadedCustomerCount.value = totalCustomerCount.value
+				? Math.min(totalCustomerCount.value, count)
+				: count;
+			if (totalCustomerCount.value > 0) {
+				loadProgress.value = Math.min(
+					99,
+					Math.round(
+						(loadedCustomerCount.value /
+							totalCustomerCount.value) *
 							100,
-							Math.round(
-								(loadedCustomerCount.value /
-									totalCustomerCount.value) *
-									100,
-							),
-						);
-						loadProgress.value = progress;
+					),
+				);
+			}
+		};
+		const publishProgress = async (
+			previousCount: number,
+			batchSize: number,
+		) => {
+			for (let index = 1; index <= batchSize; index += 1) {
+				updateProgress(previousCount + index);
+				if (
+					index % CUSTOMER_PROGRESS_YIELD_INTERVAL === 0 ||
+					index === batchSize
+				) {
+					await yieldCustomerProgress();
+				}
+			}
+		};
+		const fetchWave = async (waveOffset: number) =>
+			await Promise.all(
+				Array.from(
+					{ length: CUSTOMER_SYNC_CONCURRENCY },
+					(_, index) => waveOffset + index * limit,
+				).map(async (offset) => ({
+					offset,
+					rows: await fetchCustomerPage(
+						null,
+						syncSince,
+						limit,
+						offset,
+					),
+				})),
+			);
+		const prepareWave = async (
+			results: Array<{ offset: number; rows: CustomerSummary[] }>,
+		) => {
+			const pages: CustomerSummary[][] = [];
+			let reachedEnd = false;
+			for (const { rows } of results) {
+				if (rows.length > 0) {
+					pages.push(rows);
+				}
+				reachedEnd = rows.length < limit;
+				if (reachedEnd) break;
+			}
+			const rows = pages.flat();
+			if (rows.length > 0) {
+				await setCustomerStorage(rows);
+			}
+			return { rows, reachedEnd };
+		};
+		try {
+			let waveOffset = nextCustomerOffset.value;
+			let pendingPreparedWave = fetchWave(waveOffset).then(prepareWave);
+			while (true) {
+				const { rows, reachedEnd } = await pendingPreparedWave;
+				const previousCount = loadedCustomerCount.value;
+				const nextWaveOffset =
+					waveOffset + CUSTOMER_SYNC_CONCURRENCY * limit;
+				const nextPreparedWave = !reachedEnd
+					? fetchWave(nextWaveOffset).then(prepareWave)
+					: null;
+
+				if (rows.length > 0) {
+					nextCustomerStart.value =
+						rows[rows.length - 1]?.name || null;
+					nextCustomerOffset.value = nextWaveOffset;
+					await publishProgress(previousCount, rows.length);
+					syncBootstrapCustomerReadiness(
+						loadedCustomerCount.value,
+					);
+					if (customers.value.length === 0) {
+						await searchCustomers(searchTerm.value);
 					}
 				}
-				if (rows.length === limit) {
-					cursor = rows[rows.length - 1]?.name || null;
-					nextCustomerStart.value = cursor;
-				} else {
-					cursor = null;
+
+				if (reachedEnd) {
 					nextCustomerStart.value = null;
+					nextCustomerOffset.value = 0;
 					setCustomersLastSync(new Date().toISOString());
 					loadProgress.value = 100;
 					customersLoaded.value = true;
-					syncBootstrapCustomerReadiness(loadedCustomerCount.value);
+					syncBootstrapCustomerReadiness(
+						loadedCustomerCount.value,
+					);
 					logFinalLoadedCustomerCount();
+					break;
 				}
+
+				waveOffset = nextWaveOffset;
+				pendingPreparedWave = nextPreparedWave!;
 			}
 		} catch (err) {
 			console.error("Failed to background load customers", err);
@@ -550,6 +640,7 @@ export const useCustomersStore = defineStore("customers", () => {
 						? rows[rows.length - 1]?.name || null
 						: null;
 				if (startAfter) {
+					nextCustomerOffset.value = PAGE_SIZE;
 					await backgroundLoadCustomers(startAfter, syncSince);
 				} else {
 					setCustomersLastSync(new Date().toISOString());
@@ -652,6 +743,7 @@ export const useCustomersStore = defineStore("customers", () => {
 					? rows[rows.length - 1]?.name || null
 					: null;
 			if (nextCustomerStart.value) {
+				nextCustomerOffset.value = PAGE_SIZE;
 				backgroundLoadCustomers(nextCustomerStart.value, syncSince);
 			} else {
 				setCustomersLastSync(new Date().toISOString());
@@ -741,6 +833,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		loadedCustomerCount.value = 0;
 		customersLoaded.value = false;
 		nextCustomerStart.value = null;
+		nextCustomerOffset.value = 0;
 		resetCustomerLoadLogState();
 	}
 
@@ -753,6 +846,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		page,
 		hasMore,
 		nextCustomerStart,
+		nextCustomerOffset,
 		loadingCustomers,
 		customersLoaded,
 		isCustomerBackgroundLoading,

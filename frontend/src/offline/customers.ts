@@ -1,4 +1,5 @@
 import { checkDbHealth, db, isOffline, memory, persist } from "./db";
+import { buildCustomerSearchText } from "../posapp/stores/customers/customerSearch";
 import {
 	claimRetryableQueueEntries,
 	clearWriteQueueEntries,
@@ -16,6 +17,7 @@ import {
 type AnyRecord = Record<string, any>;
 
 const CUSTOMER_ENTITY: OfflineEntityType = "customer";
+const CUSTOMER_MEMORY_CACHE_LIMIT = 250;
 
 export async function saveOfflineCustomer(entry: AnyRecord) {
 	let cleanEntry;
@@ -122,6 +124,9 @@ export async function syncOfflineCustomers() {
 	return { pending: getPendingOfflineCustomerCount(), synced };
 }
 
+// Historical helper names mention "storage", but the durable customer read model
+// is db.table("customers"). memory.customer_storage is only a bounded hot cache
+// for recently selected or updated customers.
 export function getCustomerStorage() {
 	return memory.customer_storage || [];
 }
@@ -143,10 +148,12 @@ function mergeCustomerStorageRows(rows: AnyRecord[]) {
 		if (!row?.name) {
 			return;
 		}
+		merged.delete(row.name);
 		merged.set(row.name, row);
 	});
 
-	return Array.from(merged.values());
+	const mergedRows = Array.from(merged.values());
+	return mergedRows.slice(-CUSTOMER_MEMORY_CACHE_LIMIT);
 }
 
 export async function getStoredCustomer(customerName: string) {
@@ -164,7 +171,9 @@ export async function getStoredCustomer(customerName: string) {
 
 		const storedCustomer = await db.table("customers").get(customerName);
 		if (storedCustomer?.name) {
-			memory.customer_storage = mergeCustomerStorageRows([storedCustomer]);
+			memory.customer_storage = mergeCustomerStorageRows([
+				storedCustomer,
+			]);
 			return storedCustomer;
 		}
 		return null;
@@ -176,6 +185,11 @@ export async function getStoredCustomer(customerName: string) {
 
 export async function setCustomerStorage(customers: AnyRecord[]) {
 	try {
+		await checkDbHealth();
+		if (!db.isOpen()) {
+			await db.open();
+		}
+
 		const existingByName = new Map<string, AnyRecord>();
 		const existingRows = Array.isArray(memory.customer_storage)
 			? memory.customer_storage
@@ -186,46 +200,84 @@ export async function setCustomerStorage(customers: AnyRecord[]) {
 			}
 		});
 
+		const incomingNames = Array.from(
+			new Set(
+				customers
+					.map((customer) => customer?.name || customer?.customer)
+					.filter(Boolean),
+			),
+		);
+		const customerTable = db.table("customers");
+		if (
+			incomingNames.length &&
+			typeof (customerTable as any).bulkGet === "function"
+		) {
+			const durableRows = await (customerTable as any).bulkGet(
+				incomingNames,
+			);
+			for (const row of durableRows || []) {
+				if (row?.name && !existingByName.has(row.name)) {
+					existingByName.set(row.name, row);
+				}
+			}
+		}
+
 		const clean = customers.flatMap((customer, index) => {
 			const name = customer.name || customer.customer;
 			if (!name) {
 				const customerIdentifier =
-					customer.id ?? customer.customerId ?? customer.customer_id ?? `row:${index}`;
-				console.warn(
-					"Skipping customer cache row without a name",
-					{ customerIdentifier },
-				);
+					customer.id ??
+					customer.customerId ??
+					customer.customer_id ??
+					`row:${index}`;
+				console.warn("Skipping customer cache row without a name", {
+					customerIdentifier,
+				});
 				return [];
 			}
 			const existing = name ? existingByName.get(name) : null;
+			const normalized = {
+				...existing,
+				...customer,
+				name,
+				customer_name:
+					customer.customer_name ||
+					existing?.customer_name ||
+					customer.name ||
+					customer.customer,
+				mobile_no: customer.mobile_no ?? existing?.mobile_no,
+				email_id: customer.email_id ?? existing?.email_id,
+				primary_address:
+					customer.primary_address ?? existing?.primary_address,
+				tax_id: customer.tax_id ?? existing?.tax_id,
+				loyalty_program:
+					customer.loyalty_program ?? existing?.loyalty_program,
+				loyalty_points:
+					customer.loyalty_points !== undefined
+						? customer.loyalty_points
+						: existing?.loyalty_points,
+				conversion_factor:
+					customer.conversion_factor !== undefined
+						? customer.conversion_factor
+						: existing?.conversion_factor,
+				stored_value_balance:
+					customer.stored_value_balance ??
+					existing?.stored_value_balance ??
+					0,
+				stored_value_sources:
+					customer.stored_value_sources ??
+					existing?.stored_value_sources ??
+					0,
+			};
 			return [
 				{
-					...customer,
-					name,
-					customer_name:
-						customer.customer_name || customer.name || customer.customer,
-					mobile_no: customer.mobile_no,
-					email_id: customer.email_id,
-					primary_address: customer.primary_address,
-					tax_id: customer.tax_id,
-					loyalty_program: customer.loyalty_program,
-					loyalty_points:
-						customer.loyalty_points !== undefined
-							? customer.loyalty_points
-							: existing?.loyalty_points,
-					conversion_factor:
-						customer.conversion_factor !== undefined
-							? customer.conversion_factor
-							: existing?.conversion_factor,
-					stored_value_balance:
-						customer.stored_value_balance ?? existing?.stored_value_balance ?? 0,
-					stored_value_sources:
-						customer.stored_value_sources ?? existing?.stored_value_sources ?? 0,
+					...normalized,
+					_search_text: buildCustomerSearchText(normalized),
 				},
 			];
 		});
 
-		await db.table("customers").bulkPut(clean);
+		await customerTable.bulkPut(clean);
 		memory.customer_storage = mergeCustomerStorageRows(clean);
 	} catch (error) {
 		console.error("Failed to save customers to storage", error);
@@ -245,11 +297,12 @@ export async function deleteCustomerStorageByNames(names: string[]) {
 			return;
 		}
 		await db.table("customers").bulkDelete(normalizedNames);
+		const deletedNames = new Set(normalizedNames);
 		const existingRows = Array.isArray(memory.customer_storage)
 			? memory.customer_storage
 			: [];
 		memory.customer_storage = existingRows.filter(
-			(row) => !normalizedNames.includes(String(row?.name || "").trim()),
+			(row) => !deletedNames.has(String(row?.name || "").trim()),
 		);
 	} catch (error) {
 		console.error("Failed to delete customers from storage", error);
@@ -272,7 +325,8 @@ export function saveStoredValueSnapshot(
 		}
 		const cleanSources = JSON.parse(JSON.stringify(sources));
 		const availableAmount = cleanSources.reduce(
-			(sum: number, row: AnyRecord) => sum + Number(row?.total_credit || 0),
+			(sum: number, row: AnyRecord) =>
+				sum + Number(row?.total_credit || 0),
 			0,
 		);
 		const cache = memory.stored_value_snapshot_cache || {};
@@ -291,7 +345,10 @@ export function saveStoredValueSnapshot(
 	}
 }
 
-export function getCachedStoredValueSnapshot(customer: string, company: string) {
+export function getCachedStoredValueSnapshot(
+	customer: string,
+	company: string,
+) {
 	try {
 		const key = getStoredValueSnapshotKey(customer, company);
 		const cache = memory.stored_value_snapshot_cache || {};
@@ -317,9 +374,14 @@ export function clearStoredValueSnapshotCache() {
 	}
 }
 
-export function saveGiftCardSnapshot(giftCardCode: string, snapshot: AnyRecord) {
+export function saveGiftCardSnapshot(
+	giftCardCode: string,
+	snapshot: AnyRecord,
+) {
 	try {
-		const code = String(giftCardCode || "").trim().toUpperCase();
+		const code = String(giftCardCode || "")
+			.trim()
+			.toUpperCase();
 		if (!code) {
 			return;
 		}
@@ -337,7 +399,9 @@ export function saveGiftCardSnapshot(giftCardCode: string, snapshot: AnyRecord) 
 
 export function getCachedGiftCardSnapshot(giftCardCode: string) {
 	try {
-		const code = String(giftCardCode || "").trim().toUpperCase();
+		const code = String(giftCardCode || "")
+			.trim()
+			.toUpperCase();
 		const cache = memory.gift_card_snapshot_cache || {};
 		const cachedData = cache[code];
 		if (cachedData) {
@@ -361,7 +425,11 @@ export function clearGiftCardSnapshotCache() {
 	}
 }
 
-export function saveCustomerBalance(customer: string, balance: number, currency?: string) {
+export function saveCustomerBalance(
+	customer: string,
+	balance: number,
+	currency?: string,
+) {
 	try {
 		const cache = memory.customer_balance_cache;
 		cache[customer] = {
@@ -409,7 +477,10 @@ export function clearExpiredCustomerBalances() {
 
 		Object.keys(cache).forEach((customer) => {
 			const cachedData = cache[customer];
-			if (cachedData && now - cachedData.timestamp < 24 * 60 * 60 * 1000) {
+			if (
+				cachedData &&
+				now - cachedData.timestamp < 24 * 60 * 60 * 1000
+			) {
 				validCache[customer] = cachedData;
 			}
 		});

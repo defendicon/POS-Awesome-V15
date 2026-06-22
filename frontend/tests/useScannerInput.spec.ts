@@ -60,4 +60,30 @@ describe("useScannerInput", () => {
 
 		expect(onScan).not.toHaveBeenCalled();
 	});
+
+	it("coalesces the same barcode while its scan pipeline is active", async () => {
+		let finishScan: (() => void) | undefined;
+		const onScan = vi.fn(
+			() =>
+				new Promise<void>((resolve) => {
+					finishScan = resolve;
+				}),
+		);
+		const scanner = useScannerInput({ onScan });
+
+		scanner.onBarcodeScanned("123456789012");
+		scanner.onBarcodeScanned("123456789012");
+		await vi.advanceTimersByTimeAsync(32);
+		expect(onScan).toHaveBeenCalledTimes(1);
+
+		scanner.onBarcodeScanned("123456789012");
+		await vi.advanceTimersByTimeAsync(32);
+		expect(onScan).toHaveBeenCalledTimes(1);
+
+		finishScan?.();
+		await vi.advanceTimersByTimeAsync(1);
+		scanner.onBarcodeScanned("123456789012");
+		await vi.advanceTimersByTimeAsync(32);
+		expect(onScan).toHaveBeenCalledTimes(2);
+	});
 });

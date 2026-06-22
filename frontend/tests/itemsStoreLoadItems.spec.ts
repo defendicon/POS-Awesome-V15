@@ -9,7 +9,20 @@ const offlineMocks = vi.hoisted(() => ({
 	refreshBootstrapSnapshotFromCacheState: vi.fn(),
 	getStoredItemsCountByScope: vi.fn(async () => 0),
 	getAllStoredItems: vi.fn(async () => []),
+	searchStoredItems: vi.fn(async () => []),
 	getCachedPriceListItems: vi.fn(async () => null),
+}));
+
+const cacheMocks = vi.hoisted(() => ({
+	getCachedItems: vi.fn(async () => null),
+	cacheItems: vi.fn(async () => {}),
+	getCachedSearchResult: vi.fn(() => null),
+	setCachedSearchResult: vi.fn(),
+	clearSearchCache: vi.fn(),
+}));
+
+const itemsSearchMocks = vi.hoisted(() => ({
+	performLocalSearch: vi.fn((_term: string, items: any[]) => items),
 }));
 
 const itemsSyncMocks = vi.hoisted(() => ({
@@ -30,6 +43,7 @@ vi.mock("../src/offline/index", () => ({
 		offlineMocks.refreshBootstrapSnapshotFromCacheState,
 	getStoredItemsCountByScope: offlineMocks.getStoredItemsCountByScope,
 	getAllStoredItems: offlineMocks.getAllStoredItems,
+	searchStoredItems: offlineMocks.searchStoredItems,
 	getCachedPriceListItems: offlineMocks.getCachedPriceListItems,
 }));
 
@@ -47,11 +61,11 @@ vi.mock("../src/posapp/composables/pos/items/store/useItemsCache", () => ({
 		cacheHealth: { value: { items: "healthy" } },
 		assessCacheHealth: vi.fn(async () => {}),
 		clearAllCaches: vi.fn(async () => {}),
-		clearSearchCache: vi.fn(),
-		getCachedItems: vi.fn(async () => null),
-		cacheItems: vi.fn(async () => {}),
-		getCachedSearchResult: vi.fn(() => null),
-		setCachedSearchResult: vi.fn(),
+		clearSearchCache: cacheMocks.clearSearchCache,
+		getCachedItems: cacheMocks.getCachedItems,
+		cacheItems: cacheMocks.cacheItems,
+		getCachedSearchResult: cacheMocks.getCachedSearchResult,
+		setCachedSearchResult: cacheMocks.setCachedSearchResult,
 		getCachedPriceList: vi.fn(() => null),
 		setCachedPriceList: vi.fn(),
 		generateCacheKey: vi.fn(
@@ -80,7 +94,7 @@ vi.mock("../src/posapp/composables/pos/items/store/useItemsSearch", () => ({
 				itemsMap.value = new Map();
 				barcodeIndex.value = new Map();
 			},
-			performLocalSearch: (_term: string, items: any[]) => items,
+			performLocalSearch: itemsSearchMocks.performLocalSearch,
 			filterItemsByGroup: (items: any[], group: string) =>
 				group && group !== "ALL"
 					? items.filter((item) => item?.item_group === group)
@@ -156,6 +170,14 @@ describe("itemsStore loadItems", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		setActivePinia(createPinia());
+		offlineMocks.getStoredItemsCountByScope.mockResolvedValue(0);
+		offlineMocks.getAllStoredItems.mockResolvedValue([]);
+		offlineMocks.searchStoredItems.mockResolvedValue([]);
+		cacheMocks.getCachedItems.mockResolvedValue(null);
+		cacheMocks.getCachedSearchResult.mockReturnValue(null);
+		itemsSearchMocks.performLocalSearch.mockImplementation(
+			(_term: string, items: any[]) => items,
+		);
 		itemServiceMocks.getItemsData.mockResolvedValue([
 			{
 				item_code: "ITEM-1",
@@ -333,5 +355,189 @@ describe("itemsStore loadItems", () => {
 			expect.anything(),
 			expect.anything(),
 		);
+	});
+
+	it("bypasses memory result cache when scoped offline catalog is large", async () => {
+		const store = useItemsStore();
+		const profile = {
+			name: "POS-1",
+			warehouse: "Main WH",
+			selling_price_list: "Retail",
+			currency: "PKR",
+			item_groups: [],
+			posa_use_limit_search: 0,
+		} as any;
+
+		offlineMocks.getStoredItemsCountByScope.mockResolvedValue(6000);
+		offlineMocks.searchStoredItems.mockResolvedValue([
+			{
+				item_code: "ITEM-CACHED-PAGE",
+				item_name: "Cached Page Item",
+				item_group: "ALL",
+			},
+		]);
+		cacheMocks.getCachedItems.mockResolvedValue([
+			{
+				item_code: "ITEM-FULL-CACHE",
+				item_name: "Full Cache Item",
+				item_group: "ALL",
+			},
+		]);
+
+		await store.initialize(profile);
+		itemServiceMocks.getItemsData.mockClear();
+		cacheMocks.getCachedItems.mockClear();
+
+		await store.loadItems();
+
+		expect(cacheMocks.getCachedItems).not.toHaveBeenCalled();
+		expect(itemServiceMocks.getItemsData).toHaveBeenCalledTimes(1);
+		expect(store.items.map((item) => item.item_code)).toEqual(["ITEM-1"]);
+	});
+
+	it("does not duplicate indexed search result pages in memory cache", async () => {
+		const store = useItemsStore();
+		const profile = {
+			name: "POS-1",
+			warehouse: "Main WH",
+			selling_price_list: "Retail",
+			currency: "PKR",
+			item_groups: [],
+			posa_use_limit_search: 0,
+		} as any;
+
+		offlineMocks.getStoredItemsCountByScope.mockResolvedValue(6000);
+		offlineMocks.searchStoredItems
+			.mockResolvedValueOnce([
+				{
+					item_code: "ITEM-BOOT",
+					item_name: "Boot Item",
+					item_group: "ALL",
+				},
+			])
+			.mockResolvedValueOnce([
+				{
+					item_code: "ITEM-ALPHA",
+					item_name: "Alpha Item",
+					item_group: "ALL",
+				},
+			]);
+
+		await store.initialize(profile);
+
+		const result = await store.searchItems("alpha");
+
+		expect(result.map((item) => item.item_code)).toEqual(["ITEM-ALPHA"]);
+		expect(cacheMocks.getCachedSearchResult).not.toHaveBeenCalled();
+		expect(cacheMocks.setCachedSearchResult).not.toHaveBeenCalled();
+		expect(store.filteredItemsSearchTerm).toBe("alpha");
+	});
+
+	it("debounces server fallback after a local search miss", async () => {
+		vi.useFakeTimers();
+		try {
+			const store = useItemsStore();
+			const profile = {
+				name: "POS-1",
+				warehouse: "Main WH",
+				selling_price_list: "Retail",
+				currency: "PKR",
+				item_groups: [],
+				posa_use_limit_search: 1,
+			} as any;
+
+			await store.initialize(profile);
+			itemServiceMocks.getItemsData.mockClear();
+			itemsSearchMocks.performLocalSearch.mockReturnValue([]);
+
+			const searchPromise = store.searchItems("typo");
+
+			await vi.advanceTimersByTimeAsync(449);
+			expect(itemServiceMocks.getItemsData).not.toHaveBeenCalled();
+
+			await vi.advanceTimersByTimeAsync(1);
+			const result = await searchPromise;
+
+			expect(itemServiceMocks.getItemsData).toHaveBeenCalledTimes(1);
+			expect(itemServiceMocks.getItemsData).toHaveBeenCalledWith(
+				expect.objectContaining({
+					search_value: "typo",
+					limit: 50,
+				}),
+				expect.any(AbortSignal),
+			);
+			expect(result.map((item) => item.item_code)).toEqual(["ITEM-1"]);
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	it("cancels a pending server fallback when the cashier keeps typing", async () => {
+		vi.useFakeTimers();
+		try {
+			const store = useItemsStore();
+			const profile = {
+				name: "POS-1",
+				warehouse: "Main WH",
+				selling_price_list: "Retail",
+				currency: "PKR",
+				item_groups: [],
+				posa_use_limit_search: 1,
+			} as any;
+
+			await store.initialize(profile);
+			itemServiceMocks.getItemsData.mockClear();
+			itemsSearchMocks.performLocalSearch.mockReturnValue([]);
+
+			const firstSearch = store.searchItems("typo");
+			await Promise.resolve();
+			const secondSearch = store.searchItems("typox");
+
+			await expect(firstSearch).resolves.toEqual([]);
+			await vi.advanceTimersByTimeAsync(450);
+			await secondSearch;
+
+			expect(itemServiceMocks.getItemsData).toHaveBeenCalledTimes(1);
+			expect(itemServiceMocks.getItemsData).toHaveBeenCalledWith(
+				expect.objectContaining({
+					search_value: "typox",
+				}),
+				expect.any(AbortSignal),
+			);
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	it("does not repeat server fallback for the same recent zero-result search", async () => {
+		vi.useFakeTimers();
+		try {
+			const store = useItemsStore();
+			const profile = {
+				name: "POS-1",
+				warehouse: "Main WH",
+				selling_price_list: "Retail",
+				currency: "PKR",
+				item_groups: [],
+				posa_use_limit_search: 1,
+			} as any;
+
+			await store.initialize(profile);
+			itemServiceMocks.getItemsData.mockClear();
+			itemServiceMocks.getItemsData.mockResolvedValue([]);
+			itemsSearchMocks.performLocalSearch.mockReturnValue([]);
+
+			const firstSearch = store.searchItems("zzzz");
+			await vi.advanceTimersByTimeAsync(450);
+			await firstSearch;
+			expect(itemServiceMocks.getItemsData).toHaveBeenCalledTimes(1);
+
+			itemServiceMocks.getItemsData.mockClear();
+			await store.searchItems("zzzz");
+
+			expect(itemServiceMocks.getItemsData).not.toHaveBeenCalled();
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 });

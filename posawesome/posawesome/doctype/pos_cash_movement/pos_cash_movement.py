@@ -3,7 +3,10 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from posawesome.posawesome.api.cash_movement.posting import cancel_journal_entry
+from posawesome.posawesome.api.cash_movement.posting import (
+    cancel_journal_entry,
+    create_journal_entry,
+)
 
 
 class POSCashMovement(Document):
@@ -12,6 +15,27 @@ class POSCashMovement(Document):
         self._validate_company_links()
         self._validate_accounts()
         self._validate_movement_type_rules()
+
+    def on_submit(self):
+        # Create the backing Journal Entry inside the submit transaction so a
+        # failure rolls everything back together. Previously the JE was created
+        # and submitted before movement_doc.submit(), leaving an orphan JE on
+        # any submit-time failure.
+        if not self.journal_entry:
+            cost_center = frappe.get_cached_value(
+                "POS Profile", self.pos_profile, "cost_center"
+            ) or frappe.get_cached_value("Company", self.company, "cost_center")
+            journal_entry = create_journal_entry(
+                company=self.company,
+                posting_date=self.posting_date,
+                movement_type=self.movement_type,
+                amount=self.amount,
+                source_account=self.source_account,
+                target_account=self.target_account,
+                remarks=self.remarks,
+                cost_center=cost_center,
+            )
+            self.db_set("journal_entry", journal_entry, update_modified=False)
 
     def on_cancel(self):
         if self.journal_entry:

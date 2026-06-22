@@ -34,7 +34,11 @@ import {
 } from "./utils/chunkLoadRecovery";
 import { finalizePendingBundleActivation } from "./utils/bundleVersionActivation";
 import { reconcileBuildChangeOnStartup } from "./utils/buildCacheReconciler";
-import { initPromise, isOffline } from "../offline";
+import {
+	startupInitPromise,
+	isOffline,
+	registerPostHydrationTask,
+} from "../offline";
 import App from "./App.vue";
 // @ts-ignore
 import {
@@ -59,16 +63,35 @@ if (typeof frappe === "undefined") {
 }
 
 export async function initPosStorage() {
-	await initPromise;
+	await startupInitPromise;
 }
 
+function getPosBuildVersion() {
+	return typeof __BUILD_VERSION__ !== "undefined" ? __BUILD_VERSION__ : null;
+}
+
+let buildReconciliationChain: Promise<unknown> = Promise.resolve();
+
+function queueBuildReconciliation(deferInitialBaseline: boolean) {
+	const reconcile = async () =>
+		await reconcileBuildChangeOnStartup({
+			runtimeBuildVersion: getPosBuildVersion(),
+			isOnline: !isOffline(),
+			deferInitialBaseline,
+		});
+	buildReconciliationChain = buildReconciliationChain.then(
+		reconcile,
+		reconcile,
+	);
+	return buildReconciliationChain;
+}
+
+registerPostHydrationTask(async () => {
+	await queueBuildReconciliation(false);
+});
+
 export async function runPosBootSync() {
-	const buildVersion =
-		typeof __BUILD_VERSION__ !== "undefined" ? __BUILD_VERSION__ : null;
-	await reconcileBuildChangeOnStartup({
-		runtimeBuildVersion: buildVersion,
-		isOnline: !isOffline(),
-	});
+	await queueBuildReconciliation(true);
 }
 
 async function startOptionalRuntimeServices() {
@@ -235,7 +258,7 @@ export async function mountPosApp(pageRef: any) {
 	return instance;
 }
 
-frappe.PosApp.posapp = class extends PosAppController {
+frappe.PosApp!.posapp = class extends PosAppController {
 	constructor(pageRef: any) {
 		super(pageRef);
 		void this.initializeApp();

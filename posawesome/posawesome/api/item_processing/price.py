@@ -41,17 +41,21 @@ def update_price_list_rate(item_code, price_list, rate, uom=None):
 
 @frappe.whitelist()
 def get_price_for_uom(item_code, price_list, uom):
-    """Return Item Price for the given item, price list and UOM if it exists."""
-    if not (item_code and price_list and uom):
+    """Return Item Price for the given item, price list and UOM.
+
+    Tries the exact UOM first; falls back to a price without a UOM if not found.
+    """
+    if not (item_code and price_list):
         return None
 
-    price = frappe.db.get_value(
-        "Item Price",
-        {
-            "item_code": item_code,
-            "price_list": price_list,
-            "uom": uom,
-        },
-        "price_list_rate",
-    )
-    return price
+    filters = {"item_code": item_code, "price_list": price_list}
+
+    if uom:
+        filters["uom"] = uom
+        price = frappe.db.get_value("Item Price", filters, "price_list_rate")
+        if price is not None:
+            return price
+
+    filters.pop("uom", None)
+    filters["uom"] = ["in", ["", None]]
+    return frappe.db.get_value("Item Price", filters, "price_list_rate")

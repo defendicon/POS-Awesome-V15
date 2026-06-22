@@ -7,13 +7,16 @@ import json
 import frappe
 from frappe.utils import nowdate, flt
 from frappe import _
-from erpnext.accounts.party import get_party_bank_account
 from erpnext.accounts.utils import reconcile_against_document
+from posawesome.posawesome.api.erpnext_compat import resolve_get_party_bank_account
 from erpnext.accounts.doctype.payment_request.payment_request import (
     get_dummy_message,
     get_existing_payment_request_amount,
 )
 from posawesome.posawesome.api.utilities import ensure_child_doctype
+
+def get_party_bank_account(*args, **kwargs):
+    return resolve_get_party_bank_account()(*args, **kwargs)
 
 
 def get_posawesome_credit_redeem_remark(invoice_name):

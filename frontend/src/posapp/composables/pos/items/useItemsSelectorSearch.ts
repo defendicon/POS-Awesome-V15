@@ -14,6 +14,7 @@ type SearchDeps = {
 	isLimitSearchEnabled?: () => boolean;
 	runLimitSearch?: (_term: string) => Promise<unknown> | unknown;
 	clearHighlightedItem?: () => void;
+	resolveItemByBarcode?: (_code: string) => any;
 };
 
 export const useItemsSelectorSearch = ({
@@ -25,6 +26,7 @@ export const useItemsSelectorSearch = ({
 	isLimitSearchEnabled,
 	runLimitSearch,
 	clearHighlightedItem,
+	resolveItemByBarcode,
 }: SearchDeps) => {
 	const getVm = (): any => (typeof getVM === "function" ? getVM() : null);
 
@@ -290,12 +292,28 @@ export const useItemsSelectorSearch = ({
 		vm.first_search = trimmedQuery;
 		syncSearchInput(vm, trimmedQuery);
 
+		// The barcode index owns its memory threshold and large-catalog fallback.
+		if (typeof resolveItemByBarcode === "function") {
+			if (resolveItemByBarcode(trimmedQuery)) {
+				// Guard: auto-add watcher already triggered scan pipeline for this code
+				if (scannerInput?.pendingScanCode?.value === trimmedQuery) {
+					return;
+				}
+				if (typeof vm.onBarcodeScanned === "function") {
+					vm.onBarcodeScanned(trimmedQuery);
+				} else if (scannerInput?.onBarcodeScanned) {
+					scannerInput?.onBarcodeScanned(trimmedQuery);
+				}
+				return;
+			}
+		}
+
 		// If the input is a numeric string 12 characters or longer, treat it as a barcode
 		if (/^\d{12,}$/.test(trimmedQuery)) {
 			if (typeof vm.onBarcodeScanned === "function") {
 				vm.onBarcodeScanned(trimmedQuery);
-			} else if (scannerInput.onBarcodeScanned) {
-				scannerInput.onBarcodeScanned(trimmedQuery);
+			} else if (scannerInput?.onBarcodeScanned) {
+				scannerInput?.onBarcodeScanned(trimmedQuery);
 			}
 			return;
 		}

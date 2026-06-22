@@ -146,7 +146,7 @@ export default createVuetify({
 	directives,
 	locale: {
 		rtl: typeof frappe !== "undefined" && frappe.utils ? frappe.utils.is_rtl() : false,
-	},
+	} as any,
 	theme: {
 		defaultTheme: resolveInitialTheme(),
 		themes: {

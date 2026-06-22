@@ -46,6 +46,27 @@ _serial_cache: Dict[int, Callable[..., Any]] = {}
 _bom_cache: Dict[int, Callable[..., Any]] = {}
 
 
+def clear_stock_caches(doc=None, method=None):
+    """Invalidate the stock / batch / serial redis caches.
+
+    These caches are wrapped with ``redis_cache(ttl=...)`` but were never
+    invalidated, so after any stock movement other POS terminals kept seeing
+    pre-movement quantities for up to the configured TTL. Wired (via hooks) to
+    Bin / Stock Ledger Entry / Serial No / Batch writes so quantities refresh
+    as soon as stock actually changes. Each cache holds one wrapper per TTL
+    variant, so clear them all.
+    """
+    for store in (_bin_cache, _batch_cache, _serial_cache):
+        for cached_fn in list(store.values()):
+            clearer = getattr(cached_fn, "clear_cache", None)
+            if callable(clearer):
+                try:
+                    clearer()
+                except Exception:
+                    # Cache invalidation must never break the triggering write
+                    frappe.log_error(frappe.get_traceback(), "POSAwesome stock cache clear failed")
+
+
 def _fetch_item_prices(
     price_list: str,
     currency: str,
@@ -184,7 +205,7 @@ def _fetch_barcodes(item_codes: Tuple[str, ...]):
         return []
     return frappe.get_all(
         "Item Barcode",
-        fields=["parent", "barcode", "uom"],
+        fields=["parent", "barcode", "barcode_type", "uom"],
         filters={"parent": ["in", item_codes]},
     )
 
@@ -542,6 +563,15 @@ def merge_item_row(
         row["manufacturing_cost"] = bom_cost.get("rate")
         row["manufacturing_cost_source"] = bom_cost.get("source")
         row["manufacturing_bom"] = bom_cost.get("bom")
+    prices_by_uom: Dict[str, Dict[str, object]] = {}
+    for uom_key, pr in lookup_data.price_map.get(item_code, {}).items():
+        uom_name = "" if uom_key == "None" else uom_key
+        prices_by_uom[uom_name] = {
+            "price_list_rate": pr.get("price_list_rate"),
+            "currency": pr.get("currency"),
+        }
+    row["_prices_by_uom"] = prices_by_uom
+
     if not row.get("item_name") and meta.get("item_name"):
         row["item_name"] = meta.get("item_name")
     return row
@@ -683,7 +713,11 @@ class ItemDetailAggregator:
 
         barcode_map: Dict[str, List[Dict[str, object]]] = {}
         for row in barcode_rows:
-            barcode_map.setdefault(row.parent, []).append({"barcode": row.barcode, "uom": row.uom})
+            barcode_map.setdefault(row.parent, []).append({
+                "barcode": row.barcode,
+                "barcode_type": getattr(row, "barcode_type", ""),
+                "uom": row.uom,
+            })
 
         batch_map: Dict[str, List[Dict[str, object]]] = {}
         for row in batch_rows:

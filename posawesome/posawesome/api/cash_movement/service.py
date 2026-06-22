@@ -10,7 +10,6 @@ from .permissions import (
     ensure_owner_or_manager,
     is_manager,
 )
-from .posting import create_journal_entry
 from .queries import get_shift_movements, get_submitted_expenses as query_submitted_expenses
 from .validation import (
     extract_allowed_accounts,
@@ -85,18 +84,9 @@ def _create_cash_movement(payload, movement_type):
     )
     movement_doc.flags.ignore_permissions = True
     movement_doc.insert()
-
-    journal_entry = create_journal_entry(
-        company=movement_doc.company,
-        posting_date=movement_doc.posting_date,
-        movement_type=movement_doc.movement_type,
-        amount=movement_doc.amount,
-        source_account=movement_doc.source_account,
-        target_account=movement_doc.target_account,
-        remarks=movement_doc.remarks,
-        cost_center=profile_doc.get("cost_center"),
-    )
-    movement_doc.db_set("journal_entry", journal_entry, update_modified=False)
+    # The backing Journal Entry is created atomically inside the document's
+    # on_submit hook, so insert + JE + submit either all succeed or all roll
+    # back together (no orphan JE on a submit-time failure).
     movement_doc.submit()
     movement_doc.reload()
     return movement_doc.as_dict()

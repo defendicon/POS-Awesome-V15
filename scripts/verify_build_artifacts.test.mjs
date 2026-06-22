@@ -28,12 +28,16 @@ const completeBuildFiles = {
 			posawesome: "/assets/posawesome/dist/js/posawesome.js",
 			css: "/assets/posawesome/dist/js/posawesome.css",
 			offlineIndex: "/assets/posawesome/dist/js/offline/index-AbCd1234.js",
+			fonts: [
+				"/assets/posawesome/dist/js/materialdesignicons-webfont-ICONS.woff2",
+			],
 		},
 	}),
 	"posawesome/public/dist/js/loader.js": "console.log('loader');",
 	"posawesome/public/dist/js/posawesome.js": "console.log('app');",
 	"posawesome/public/dist/js/posawesome.css": "body{}",
 	"posawesome/public/dist/js/offline/index-AbCd1234.js": "console.log('offline');",
+	"posawesome/public/dist/js/materialdesignicons-webfont-ICONS.woff2": "font",
 	"posawesome/public/dist/js/posapp/workers/itemWorker.js": "self.onmessage = () => {};",
 	"posawesome/public/dist/js/libs/dexie.min.js": "window.Dexie = {};",
 	"posawesome/public/dist/js/libs/JsBarcode.all.min.js": "window.JsBarcode = {};",
@@ -63,9 +67,10 @@ test("verifies POS loader assets and writes sha256 checksums", async () => {
 		);
 		const checksums = await readFile(checksumPath, "utf8");
 
-		assert.equal(result.checkedFiles.length, 8);
+		assert.equal(result.checkedFiles.length, 9);
 		assert.match(checksums, /  version\.json$/m);
 		assert.match(checksums, /  loader\.js$/m);
+		assert.match(checksums, /  materialdesignicons-webfont-ICONS\.woff2$/m);
 		assert.match(checksums, /  offline\/index-AbCd1234\.js$/m);
 	});
 });

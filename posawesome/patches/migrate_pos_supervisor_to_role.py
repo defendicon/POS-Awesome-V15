@@ -19,10 +19,12 @@ def _ensure_role():
 
 
 def _legacy_field_exists() -> bool:
-    try:
-        return bool(frappe.db.has_column("User", LEGACY_SUPERVISOR_FIELD))
-    except Exception:
-        return bool(frappe.get_meta("User").has_field(LEGACY_SUPERVISOR_FIELD))
+    # Check the Custom Field doc, NOT the DB column: Frappe does not drop the
+    # column when a Custom Field is deleted, so `has_column` stays True after a
+    # previous migration removed the field. Querying it via get_all() would then
+    # raise FieldError (the field is gone from the User meta). Guarding on the
+    # Custom Field keeps this patch safe to re-run on already-migrated sites.
+    return bool(frappe.db.exists("Custom Field", f"User-{LEGACY_SUPERVISOR_FIELD}"))
 
 
 def _assign_role(user: str):

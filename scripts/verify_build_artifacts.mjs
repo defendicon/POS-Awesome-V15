@@ -68,8 +68,17 @@ export async function verifyBuildArtifacts({ rootDir = process.cwd() } = {}) {
 		}
 		return toDistRelativePath(assets[key]);
 	});
+	const fontRelativePaths = Array.isArray(assets.fonts)
+		? assets.fonts.map((assetUrl) => toDistRelativePath(assetUrl))
+		: [];
 
-	const checkedFiles = [...new Set([...manifestRelativePaths, ...REQUIRED_STATIC_ASSETS])];
+	const checkedFiles = [
+		...new Set([
+			...manifestRelativePaths,
+			...fontRelativePaths,
+			...REQUIRED_STATIC_ASSETS,
+		]),
+	];
 	for (const relativePath of checkedFiles) {
 		await requireFile(path.join(distDir, relativePath), relativePath);
 	}

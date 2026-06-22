@@ -29,10 +29,11 @@ type DetectBuildChangeResult = {
 
 type ReconcileBuildChangeInput = DetectBuildChangeInput & {
 	isOnline?: boolean;
+	deferInitialBaseline?: boolean;
 	readBootstrapSnapshot?: () => { build_version?: string | null } | null;
 	readMemoryState?: () => AnyRecord | null;
 	purgeDerivedOfflineCaches?: () => Promise<void> | void;
-	setBootstrapLimitedMode?: (state: boolean) => void;
+	setBootstrapLimitedMode?: (_state: boolean) => void;
 };
 
 type ReconcileBuildChangeResult = DetectBuildChangeResult & {
@@ -281,6 +282,18 @@ export async function reconcileBuildChangeOnStartup(
 	}
 
 	if (!detection.shouldReconcile) {
+		if (
+			input.deferInitialBaseline &&
+			!detection.currentRuntimeBuildVersion &&
+			!detection.lastReconciledBuildVersion
+		) {
+			return {
+				...detection,
+				reasons: [...detection.reasons, "initial_baseline_deferred"],
+				status: "noop",
+				preservedQueues,
+			};
+		}
 		writeBuildState(storage, {
 			currentRuntimeBuildVersion: detection.runtimeBuildVersion,
 			lastReconciledBuildVersion:

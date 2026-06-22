@@ -5,12 +5,18 @@ from frappe.utils import nowdate, flt
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency
 from erpnext.setup.utils import get_exchange_rate
-from erpnext.accounts.doctype.bank_account.bank_account import get_party_bank_account
+from posawesome.posawesome.api.erpnext_compat import resolve_get_party_bank_account
 from posawesome.posawesome.api.idempotency import doctype_supports_client_request_id
 from posawesome.posawesome.api.payment_processing.utils import (
     get_bank_cash_account,
     set_paid_amount_and_received_amount
 )
+
+
+def get_party_bank_account(*args, **kwargs):
+    """Call the ERPNext-version-specific bank-account helper lazily."""
+    return resolve_get_party_bank_account()(*args, **kwargs)
+
 
 def create_payment_entry(
     company,

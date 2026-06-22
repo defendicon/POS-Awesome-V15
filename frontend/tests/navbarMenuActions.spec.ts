@@ -99,10 +99,12 @@ describe("NavbarMenu action surfaces", () => {
 			"switch-cashier",
 			"lock-screen",
 			"print-last-invoice",
+			"share-last-invoice",
 			"sync-offline-sales",
 			"close-shift",
 		]);
-		expect((wrapper.vm as any).quickActions[3].label).toBe("Sync Offline Sales");
+		expect((wrapper.vm as any).quickActions[3].label).toBe("Share Last Invoice");
+		expect((wrapper.vm as any).quickActions[4].label).toBe("Sync Offline Sales");
 
 		const sections = (wrapper.vm as any).settingsSections;
 		expect(sections.map((section: any) => section.id)).toEqual([
@@ -119,5 +121,35 @@ describe("NavbarMenu action surfaces", () => {
 		expect(actionIds).not.toContain("clear-cache");
 		expect(actionIds).not.toContain("toggle-offline");
 		expect(actionIds).not.toContain("system-status");
+	});
+
+	it("emits share-last-invoice from the quick action below print last invoice", async () => {
+		const employeeStore = useEmployeeStore();
+		employeeStore.setCurrentCashier({
+			user: "cashier@example.com",
+			full_name: "Main Cashier",
+			is_supervisor: false,
+		});
+
+		const wrapper = mountMenu();
+		await flushPromises();
+
+		const actions = (wrapper.vm as any).quickActions;
+		expect(actions.map((action: any) => action.id).slice(2, 4)).toEqual([
+			"print-last-invoice",
+			"share-last-invoice",
+		]);
+
+		const shareAction = actions.find((action: any) => action.id === "share-last-invoice");
+		expect(shareAction).toEqual(expect.objectContaining({ handler: "shareLastInvoiceAction" }));
+		const context = {
+			closeMenu: vi.fn(),
+			$emit: vi.fn(),
+		};
+
+		(NavbarMenu as any).methods.handleAction.call(context, shareAction);
+
+		expect(context.closeMenu).toHaveBeenCalledTimes(1);
+		expect(context.$emit).toHaveBeenCalledWith("share-last-invoice");
 	});
 });

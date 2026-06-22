@@ -119,6 +119,43 @@ class TestItemSearchSerialization(unittest.TestCase):
         self.assertEqual(len(serialized_payloads), 1)
         self.assertIn("2026-04-23 10:30:00", serialized_payloads[0])
 
+    def test_item_code_cursor_uses_keyset_plan_without_offset(self):
+        plan = self.module._build_search_plan(
+            pos_profile={},
+            item_group="",
+            search_value="",
+            limit=1000,
+            offset=5000,
+            start_after=None,
+            start_after_item_code="ITEM-0500",
+            modified_after=None,
+            include_description=False,
+            include_image=False,
+            item_groups=None,
+        )
+
+        self.assertEqual(plan.order_by, "item_code asc")
+        self.assertIsNone(plan.limit_start)
+        self.assertEqual(plan.filters["item_code"], [">", "ITEM-0500"])
+
+    def test_empty_item_code_cursor_orders_first_page_by_item_code(self):
+        plan = self.module._build_search_plan(
+            pos_profile={},
+            item_group="",
+            search_value="",
+            limit=1000,
+            offset=None,
+            start_after=None,
+            start_after_item_code="",
+            modified_after=None,
+            include_description=False,
+            include_image=False,
+            item_groups=None,
+        )
+
+        self.assertEqual(plan.order_by, "item_code asc")
+        self.assertNotIn("item_code", plan.filters)
+
 
 if __name__ == "__main__":
     unittest.main()

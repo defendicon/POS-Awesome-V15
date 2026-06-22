@@ -89,31 +89,51 @@ def _install_stubs():
             },
         ][:limit]
     )
-    items_module.get_items = lambda pos_profile, price_list=None, item_group="", search_value="", customer=None, start_after=None, limit=200, **kwargs: [
-        {
-            "item_code": "ITEM-001",
-            "item_name": "Alpha",
-            "modified": "2026-04-09T10:04:00",
-            "price_list_rate": 10,
-            "actual_qty": 5,
-        },
-        {
-            "item_code": "ITEM-002",
-            "item_name": "Beta",
-            "modified": "2026-04-09T10:05:00",
-            "price_list_rate": 20,
-            "actual_qty": 8,
-        },
-        {
-            "item_code": "ITEM-003",
-            "item_name": "Gamma",
-            "modified": "2026-04-09T10:06:00",
-            "price_list_rate": 30,
-            "actual_qty": 2,
-        },
-    ][
-        :limit
-    ]
+    def fake_get_items(
+        pos_profile,
+        price_list=None,
+        item_group="",
+        search_value="",
+        customer=None,
+        offset=None,
+        start_after=None,
+        start_after_item_code=None,
+        limit=200,
+        **kwargs,
+    ):
+        catalog = [
+            {
+                "item_code": "ITEM-001",
+                "item_name": "Alpha",
+                "modified": "2026-04-09T10:04:00",
+                "price_list_rate": 10,
+                "actual_qty": 5,
+            },
+            {
+                "item_code": "ITEM-002",
+                "item_name": "Alpha",
+                "modified": "2026-04-09T10:05:00",
+                "price_list_rate": 20,
+                "actual_qty": 8,
+            },
+            {
+                "item_code": "ITEM-003",
+                "item_name": "Gamma",
+                "modified": "2026-04-09T10:06:00",
+                "price_list_rate": 30,
+                "actual_qty": 2,
+            },
+        ]
+        if start_after_item_code is not None:
+            rows = [
+                row
+                for row in sorted(catalog, key=lambda row: row["item_code"])
+                if not start_after_item_code or row["item_code"] > start_after_item_code
+            ]
+            return rows[:limit]
+        return catalog[(offset or 0) : (offset or 0) + limit]
+
+    items_module.get_items = fake_get_items
     sys.modules["posawesome.posawesome.api.items"] = items_module
     sys.modules["posawesome.posawesome.api.offline_sync.common"] = load_offline_sync_common()
 
@@ -170,6 +190,34 @@ class TestOfflineSyncItems(unittest.TestCase):
         self.assertEqual(response["schema_version"], self.module.SYNC_SCHEMA_VERSION)
         self.assertIn("next_watermark", response)
         self.assertIn("has_more", response)
+
+    def test_sync_items_accepts_an_initial_item_code_cursor(self):
+        response = self.module.sync_items(
+            pos_profile="POS-TEST",
+            watermark=None,
+            start_after="ITEM-002",
+            limit=2,
+        )
+
+        self.assertEqual(
+            [item["key"] for item in response["changes"]],
+            ["item::ITEM-003"],
+        )
+        self.assertFalse(response["has_more"])
+
+    def test_sync_items_keeps_offset_compatibility_for_older_clients(self):
+        response = self.module.sync_items(
+            pos_profile="POS-TEST",
+            watermark=None,
+            offset=2,
+            limit=2,
+        )
+
+        self.assertEqual(
+            [item["key"] for item in response["changes"]],
+            ["item::ITEM-003"],
+        )
+        self.assertFalse(response["has_more"])
 
 
 if __name__ == "__main__":

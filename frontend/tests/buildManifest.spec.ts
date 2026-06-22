@@ -34,6 +34,18 @@ describe("build manifest helpers", () => {
 				fileName: "style-Z9Z9.css",
 				source: "body{}",
 			},
+			"materialdesignicons-webfont-ICONS.woff2": {
+				type: "asset",
+				name: "materialdesignicons-webfont.woff2",
+				fileName: "materialdesignicons-webfont-ICONS.woff2",
+				source: "font",
+			},
+			"roboto-latin-400-normal-TEXT.woff": {
+				type: "asset",
+				name: "roboto-latin-400-normal.woff",
+				fileName: "roboto-latin-400-normal-TEXT.woff",
+				source: "font",
+			},
 		});
 
 		expect(payload).toEqual({
@@ -45,8 +57,14 @@ describe("build manifest helpers", () => {
 				css: "/assets/posawesome/dist/js/style-Z9Z9.css?v=build-2000",
 				offlineIndex:
 					"/assets/posawesome/dist/js/offline/index-AbCd1234.js",
+				fonts: [
+					"/assets/posawesome/dist/js/materialdesignicons-webfont-ICONS.woff2",
+				],
 			},
 		});
+		expect(payload.assets.fonts).not.toContain(
+			"/assets/posawesome/dist/js/roboto-latin-400-normal-TEXT.woff",
+		);
 	});
 
 	it("falls back to legacy shell paths + cache-busts when bundle lookup fails", () => {
@@ -61,5 +79,6 @@ describe("build manifest helpers", () => {
 		expect(payload.assets.css).toBe(
 			"/assets/posawesome/dist/js/posawesome.css?v=build%20with%20spaces",
 		);
+		expect(payload.assets.fonts).toEqual([]);
 	});
 });

@@ -156,6 +156,13 @@ function resolvePreferredPrinter(printers: string[]) {
 	return printers[0] || "";
 }
 
+export function resolveProfilePrinterName(profilePrinterName: string | undefined, printers: string[]): string {
+	if (profilePrinterName && printers.includes(profilePrinterName)) {
+		return profilePrinterName;
+	}
+	return resolvePreferredPrinter(printers);
+}
+
 function setupSecurity() {
 	if (securityInitialized) return;
 	securityInitialized = true;
@@ -450,6 +457,43 @@ export async function printHtmlViaQz(html: string, options: QzPrintHtmlOptions =
 	];
 
 	await qz.print(config, data);
+}
+
+export async function sendRawToQz(data: string, printerName?: string) {
+  if (!qz.websocket.isActive()) {
+    const connected = await connectQzTray();
+    if (!connected) {
+      if (qzReconnectPaused.value) {
+        throw new Error("QZ Tray is manually disconnected. Press Connect to enable it again.");
+      }
+      throw new Error("QZ Tray is not available.");
+    }
+  }
+
+  let printer = printerName || selectedQzPrinter.value || getSavedPrinterName() || getProfileDefaultPrinterName();
+  if (!printer) {
+    const printers = await findQzPrinters();
+    if (printers[0]) {
+      printer = printers[0];
+      setResolvedQzPrinter(printers[0]);
+    }
+  }
+
+  if (!printer) {
+    throw new Error("No QZ printer selected.");
+  }
+
+  const config = qz.configs.create(printer);
+  const printData = [
+    {
+      type: "raw",
+      format: "plain",
+      flavor: "command",
+      data: data,
+    },
+  ];
+
+  await qz.print(config, printData);
 }
 
 export async function printDocumentViaQz(options: QzPrintDocumentOptions) {

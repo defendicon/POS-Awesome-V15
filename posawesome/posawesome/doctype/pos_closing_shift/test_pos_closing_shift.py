@@ -213,6 +213,7 @@ class TestPOSClosingShift(unittest.TestCase):
         )
         regular_invoice = DummyInvoiceDoc("SINV-0002")
 
+        mock_frappe._dict = lambda d: SimpleNamespace(**d)
         mock_frappe.get_all.return_value = [
             SimpleNamespace(name="SINV-RET-0001"),
             SimpleNamespace(name="SINV-0002"),

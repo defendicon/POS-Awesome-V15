@@ -66,4 +66,11 @@ describe("Customer dropdown XSS regression", () => {
 			/const\s+closeCustomerMenu\s*=\s*\(\)\s*=>\s*{\s*commitPendingCustomerSelection\(\);/,
 		);
 	});
+
+	it("keeps customer loading progress outside the clipped append icon area", () => {
+		expect(customerSource).toContain("customer-load-status");
+		expect(customerSource).not.toContain("customer-load-percent");
+		expect(customerSource).toContain("? frappe._(\"Loading customers\")");
+		expect(customerSource).toContain("? __(\"Loading customers...\")");
+	});
 });

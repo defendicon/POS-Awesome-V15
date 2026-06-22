@@ -249,6 +249,15 @@ def get_active_pos_profile(user=None):
 
 
 @frappe.whitelist()
+def get_warehouses(company=None):
+    """Return non-group, non-disabled warehouses optionally scoped by company."""
+    filters = {"is_group": 0, "disabled": 0}
+    if company:
+        filters["company"] = company
+    return frappe.get_all("Warehouse", filters=filters, fields=["name", "warehouse_name"])
+
+
+@frappe.whitelist()
 def get_default_warehouse(company=None):
     """Return the default warehouse for the given company."""
     company = company or frappe.defaults.get_default("company")

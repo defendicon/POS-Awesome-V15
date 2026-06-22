@@ -21,6 +21,8 @@ type ItemSource =
 	| Ref<BarcodeIndexedItem[]>
 	| (() => BarcodeIndexedItem[] | Ref<BarcodeIndexedItem[]>);
 
+export const MAX_BARCODE_INDEX_ITEMS = 100_000;
+
 // --- Stateless Helpers (formerly utils/barcodeIndex.js) ---
 
 export const ensureBarcodeIndex = (index: unknown): BarcodeIndex => {
@@ -93,9 +95,40 @@ export const replaceBarcodeIndex = (
 	items: BarcodeIndexedItem[] = [],
 ): BarcodeIndex => {
 	const map = resetBarcodeIndex(index);
+	if (items.length > MAX_BARCODE_INDEX_ITEMS) {
+		return map;
+	}
 	items.forEach((item) => indexItemInBarcodeIndex(map, item));
 	return map;
 };
+
+export const isExactBarcodeMatch = (
+	item: BarcodeIndexedItem | null | undefined,
+	code: unknown,
+): boolean => {
+	if (!item || code === undefined || code === null) return false;
+	const normalized = String(code).trim().toLowerCase();
+	if (!normalized) return false;
+	return Boolean(
+		(item.barcode &&
+			String(item.barcode).trim().toLowerCase() === normalized) ||
+			item.item_barcode?.some(
+				(row) =>
+					row?.barcode &&
+					String(row.barcode).trim().toLowerCase() === normalized,
+			) ||
+			item.barcodes?.some(
+				(barcode) =>
+					String(barcode).trim().toLowerCase() === normalized,
+			),
+	);
+};
+
+export const findItemByExactBarcode = (
+	items: BarcodeIndexedItem[] = [],
+	code: unknown,
+): BarcodeIndexedItem | null =>
+	items.find((item) => isExactBarcodeMatch(item, code)) || null;
 
 export const lookupItemInBarcodeIndex = (
 	index: unknown,
@@ -149,6 +182,28 @@ export function useBarcodeIndexing() {
 		return lookupItemInBarcodeIndex(ensureIndex(), code);
 	};
 
+	const resolveItemByBarcode = (items: ItemSource, code: unknown) => {
+		const itemsList = unwrapItemsSource(items);
+		if (itemsList.length > MAX_BARCODE_INDEX_ITEMS) {
+			reset();
+			return findItemByExactBarcode(itemsList, code);
+		}
+
+		let indexedItem = lookupItem(code);
+		if (isExactBarcodeMatch(indexedItem, code)) {
+			return indexedItem;
+		}
+
+		const index = ensureIndex();
+		if (index.size === 0 && itemsList.length <= MAX_BARCODE_INDEX_ITEMS) {
+			replaceIndex(itemsList);
+			indexedItem = lookupItem(code);
+			return isExactBarcodeMatch(indexedItem, code) ? indexedItem : null;
+		}
+
+		return null;
+	};
+
 	// Logic extracted from ItemsSelector.vue: searchItemsByCode
 	const searchItemsByCode = (items: ItemSource, code: string) => {
 		if (!items || !code) return [];
@@ -190,6 +245,7 @@ export function useBarcodeIndexing() {
 		indexItem,
 		replaceBarcodeIndex: replaceIndex,
 		lookupItemByBarcode: lookupItem,
+		resolveItemByBarcode,
 		searchItemsByCode,
 	};
 }

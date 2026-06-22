@@ -913,6 +913,81 @@ describe("usePaymentSubmission", () => {
 		]);
 	});
 
+	it("allows cashback validation for returns without an original invoice", async () => {
+		const invoiceDoc = ref<any>({
+			name: "ACC-SINV-RETURN-WITHOUT-INVOICE",
+			doctype: "Sales Invoice",
+			is_return: 1,
+			items: [{ item_code: "ITEM-1", qty: -1 }],
+			payments: [
+				{
+					mode_of_payment: "Cash",
+					amount: -2625,
+					base_amount: -2625,
+					type: "Cash",
+				},
+			],
+			rounded_total: -2625,
+			grand_total: -2625,
+			posa_refundable_amount: 0,
+		});
+
+		const { validateSubmission } = usePaymentSubmission({
+			invoiceDoc,
+			posProfile: ref({}),
+			stockSettings: ref({}),
+			invoiceType: ref("Return"),
+			formatFloat: (value) => Number(value || 0),
+			isCashback: ref(true),
+			paidChange: ref(0),
+			creditChange: ref(0),
+			redeemedCustomerCredit: ref(0),
+			customerCreditDict: ref([]),
+			diff_payment: ref(0),
+		});
+
+		await expect(validateSubmission(false)).resolves.toBe(true);
+	});
+
+	it("rejects cashback above paid amount for returns against an original invoice", async () => {
+		const invoiceDoc = ref<any>({
+			name: "ACC-SINV-RETURN-AGAINST-INVOICE",
+			doctype: "Sales Invoice",
+			is_return: 1,
+			return_against: "ACC-SINV-0001",
+			items: [{ item_code: "ITEM-1", qty: -1 }],
+			payments: [
+				{
+					mode_of_payment: "Cash",
+					amount: -2625,
+					base_amount: -2625,
+					type: "Cash",
+				},
+			],
+			rounded_total: -2625,
+			grand_total: -2625,
+			posa_refundable_amount: 0,
+		});
+
+		const { validateSubmission } = usePaymentSubmission({
+			invoiceDoc,
+			posProfile: ref({}),
+			stockSettings: ref({}),
+			invoiceType: ref("Return"),
+			formatFloat: (value) => Number(value || 0),
+			isCashback: ref(true),
+			paidChange: ref(0),
+			creditChange: ref(0),
+			redeemedCustomerCredit: ref(0),
+			customerCreditDict: ref([]),
+			diff_payment: ref(0),
+		});
+
+		await expect(validateSubmission(false)).rejects.toThrow(
+			"Cannot refund 2625 for this return: only 0 was paid on the original invoice",
+		);
+	});
+
 	it("allows gift card submission when no gift card mode of payment is configured", async () => {
 		const invoiceService = (
 			await import("../src/posapp/services/invoiceService")

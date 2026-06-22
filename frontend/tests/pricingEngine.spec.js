@@ -129,6 +129,46 @@ describe("pricingEngine - applyLocalPricingRules", () => {
 		expect(result.applied[0].name).toBe("ITEM-RULE");
 	});
 
+	it("preserves store-preordered pricing candidates without changing precedence", () => {
+		const itemRule = {
+			name: "ITEM-FIRST",
+			price_or_discount: "Discount",
+			discount_type: "Amount",
+			rate_or_discount: 5,
+			specificity: 3,
+			priority: 5,
+		};
+		const groupRule = {
+			name: "GROUP-SECOND",
+			price_or_discount: "Discount",
+			discount_type: "Rate",
+			rate_or_discount: 10,
+			specificity: 2,
+			priority: 20,
+		};
+		const indexes = {
+			...buildIndexes({
+				items: { "ITEM-PRESORTED": [itemRule] },
+				groups: { Accessories: [groupRule] },
+			}),
+			preSorted: true,
+		};
+
+		const result = applyLocalPricingRules({
+			item: {
+				item_code: "ITEM-PRESORTED",
+				item_group: "Accessories",
+			},
+			qty: 1,
+			baseRate: 100,
+			ctx: {},
+			indexes,
+		});
+
+		expect(result.rate).toBeCloseTo(95);
+		expect(result.applied[0].name).toBe("ITEM-FIRST");
+	});
+
 	it("selects slab based on quantity", () => {
 		const rule = {
 			name: "SLAB-RULE",

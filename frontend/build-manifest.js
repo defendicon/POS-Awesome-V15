@@ -39,11 +39,26 @@ function getCssAssetFileName(bundle) {
 	return cssAssets[0].fileName;
 }
 
+function getCriticalFontAssetFileNames(bundle) {
+	return Object.values(bundle || {})
+		.filter(
+			(entry) =>
+				entry?.type === "asset" &&
+				typeof entry?.fileName === "string" &&
+				/materialdesignicons-webfont.*\.(?:woff2?|ttf|eot)$/i.test(
+					entry.fileName,
+				),
+		)
+		.map((entry) => entry.fileName)
+		.sort();
+}
+
 export function buildVersionPayload(version, bundle = {}) {
 	const loaderFile = getChunkFileName(bundle, "loader");
 	const posawesomeFile = getChunkFileName(bundle, "posawesome");
 	const offlineIndexFile = getChunkFileName(bundle, "offline/index");
 	const cssFile = getCssAssetFileName(bundle);
+	const fontFiles = getCriticalFontAssetFileNames(bundle);
 
 	return {
 		version,
@@ -60,6 +75,7 @@ export function buildVersionPayload(version, bundle = {}) {
 			offlineIndex: offlineIndexFile
 				? toPublicAssetUrl(offlineIndexFile)
 				: toPublicAssetUrl("offline/index.js"),
+			fonts: fontFiles.map(toPublicAssetUrl),
 		},
 	};
 }

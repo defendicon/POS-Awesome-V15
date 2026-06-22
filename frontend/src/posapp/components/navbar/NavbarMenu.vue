@@ -422,6 +422,16 @@ export default {
 							handler: "printLastInvoiceAction",
 						}
 					: null,
+				this.isEnabledSetting(this.posProfile?.posa_allow_print_last_invoice)
+					? {
+							id: "share-last-invoice",
+							label: __("Share Last Invoice"),
+							subtitle: __("Share previous transaction PDF"),
+							icon: "mdi-share-variant",
+							tone: "secondary",
+							handler: "shareLastInvoiceAction",
+						}
+					: null,
 				{
 					id: "sync-offline-sales",
 					label: __("Sync Offline Sales"),
@@ -630,6 +640,10 @@ export default {
 				case "printLastInvoiceAction":
 					this.closeMenu();
 					this.printLastInvoice();
+					break;
+				case "shareLastInvoiceAction":
+					this.closeMenu();
+					this.$emit("share-last-invoice");
 					break;
 				case "syncInvoices":
 					this.closeMenu();
@@ -855,6 +869,7 @@ export default {
 		"sync-invoices",
 		"open-employee-switch",
 		"lock-pos",
+		"share-last-invoice",
 		"open-customer-display",
 		"toggle-offline",
 		"clear-cache",

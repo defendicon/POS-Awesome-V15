@@ -6,7 +6,9 @@ const BASE_SCHEMA = {
 	keyval: "&key",
 	queue: "&key",
 	write_queue:
-		"++queue_id,entity_type,status,created_at,last_attempt_at,retry_count,&idempotency_key,[entity_type+status]",
+		"++queue_id,entity_type,status,resource,next_attempt_at,created_at,last_attempt_at,retry_count,&idempotency_key,[entity_type+status],[status+next_attempt_at]",
+	invoice_outbox:
+		"++outbox_id,&client_request_id,status,resource,created_at,next_retry_at,nextAttemptAt,retry_count,[status+next_retry_at],[resource+status],[status+nextAttemptAt]",
 	cache: "&key",
 	items: "&item_code,item_name,item_group,*barcodes,*name_keywords,*serials,*batches",
 	item_prices: "&[price_list+item_code],price_list,item_code",
@@ -19,12 +21,30 @@ const BASE_SCHEMA = {
 	translations: "&key",
 	pricing_rules: "&key",
 	settings: "&key",
-	sync_state: "&key",
+	sync_state: "&key,resourceId,status,nextRetryAt,lastAttemptAt,updated_at",
 };
 
-const SCHEMA_SIGNATURE = JSON.stringify(BASE_SCHEMA);
+const SCHEMA_V14 = {
+	...BASE_SCHEMA,
+	item_price_records:
+		"&name,price_list,item_code,uom,currency,customer,modified,[price_list+item_code],[price_list+item_code+uom]",
+	pricing_rule_records:
+		"&key,rule_name,target_type,target_value,modified,[target_type+target_value]",
+	currency_rate_records:
+		"&name,profile_name,company,from_currency,to_currency,date,modified,[profile_name+company+from_currency+to_currency]",
+};
 
-(async () => {
+const SCHEMA_V15 = {
+	...SCHEMA_V14,
+	write_queue:
+		"++queue_id,entity_type,status,resource,next_attempt_at,created_at,last_attempt_at,retry_count,&idempotency_key,[entity_type+status],[status+next_attempt_at],[status+last_attempt_at],[status+created_at]",
+	invoice_outbox:
+		"++outbox_id,&client_request_id,status,resource,created_at,updated_at,acknowledged_at,next_retry_at,nextAttemptAt,retry_count,[status+next_retry_at],[resource+status],[status+nextAttemptAt],[status+acknowledged_at],[status+updated_at],[status+created_at]",
+};
+
+const SCHEMA_SIGNATURE = JSON.stringify(SCHEMA_V15);
+
+const dbReady = (async () => {
 	let DexieLib;
 	try {
 		importScripts("/assets/posawesome/dist/js/libs/dexie.min.js?v=1");
@@ -155,11 +175,16 @@ const SCHEMA_SIGNATURE = JSON.stringify(BASE_SCHEMA);
 		});
 	db.version(10).stores(BASE_SCHEMA);
 	db.version(11).stores(BASE_SCHEMA);
+	db.version(12).stores(BASE_SCHEMA);
+	db.version(13).stores(BASE_SCHEMA);
+	db.version(14).stores(SCHEMA_V14);
+	db.version(15).stores(SCHEMA_V15);
 	try {
 		await db.open();
 	} catch (err) {
 		console.error("Failed to open IndexedDB in worker", err);
 	}
+	return db;
 })();
 
 const KEY_TABLE_MAP = {
@@ -168,7 +193,6 @@ const KEY_TABLE_MAP = {
 	offline_payments: "queue",
 	offline_cash_movements: "queue",
 	item_details_cache: "cache",
-	customer_storage: "cache",
 	stored_value_snapshot_cache: "cache",
 	gift_card_snapshot_cache: "cache",
 	delivery_charges_cache: "cache",
@@ -200,52 +224,64 @@ const KEY_TABLE_MAP = {
 	pos_last_sync_totals: "sync_state",
 };
 
-const LARGE_KEYS = new Set(["items", "item_details_cache", "local_stock_cache"]);
-const LOCAL_STORAGE_KEYS = new Set([
-	"manual_offline",
-	"invoice_outbox_mode",
-	"bootstrap_snapshot",
-	"bootstrap_snapshot_status",
-	"bootstrap_limited_mode",
-	"cache_ready",
-	"stock_cache_ready",
-	"schema_signature",
-	"tax_inclusive",
-]);
+// customer_storage is only an in-process hot cache. Durable customers live in
+// the IndexedDB `customers` table, so the worker never persists this key.
 const MEMORY_ONLY_KEYS = new Set(["customer_storage"]);
+let persistBatchChain = Promise.resolve();
 
 function tableForKey(key) {
 	return KEY_TABLE_MAP[key] || "keyval";
 }
 
-async function persist(key, value) {
-	if (!MEMORY_ONLY_KEYS.has(key)) {
-		try {
-			if (!db.isOpen()) {
-				await db.open();
-			}
-			const table = tableForKey(key);
-			await db.table(table).put({ key, value });
-		} catch (e) {
-			console.error("Worker persist failed", e);
-		}
+async function safeBulkPut(tableName, rows) {
+	if (!rows.length) {
+		return;
 	}
 
-	if (typeof localStorage !== "undefined") {
-		if (LOCAL_STORAGE_KEYS.has(key) && !LARGE_KEYS.has(key)) {
-			try {
-				localStorage.setItem(`posa_${key}`, JSON.stringify(value));
-			} catch (err) {
-				console.error("Worker localStorage failed", err);
+	const table = db.table(tableName);
+	try {
+		await db.transaction("rw", table, async () => {
+			await table.bulkPut(rows);
+		});
+	} catch (error) {
+		console.warn(
+			`Worker bulkPut failed for ${tableName}; retrying row-by-row`,
+			error,
+		);
+		await db.transaction("rw", table, async () => {
+			for (const row of rows) {
+				await table.put(row);
 			}
-		} else {
-			localStorage.removeItem(`posa_${key}`);
-		}
+		});
 	}
+}
+
+async function persistBatch(entries) {
+	await dbReady;
+	if (!db.isOpen()) {
+		await db.open();
+	}
+	const rowsByTable = new Map();
+	for (const entry of entries || []) {
+		if (!entry || MEMORY_ONLY_KEYS.has(entry.key)) {
+			continue;
+		}
+		const tableName = tableForKey(entry.key);
+		const rows = rowsByTable.get(tableName) || [];
+		rows.push({ key: entry.key, value: entry.value });
+		rowsByTable.set(tableName, rows);
+	}
+
+	await Promise.all(
+		Array.from(rowsByTable.entries()).map(([tableName, rows]) =>
+			safeBulkPut(tableName, rows),
+		),
+	);
 }
 
 async function bulkPutItems(items, syncedAt = Date.now()) {
 	try {
+		await dbReady;
 		if (!db.isOpen()) {
 			await db.open();
 		}
@@ -269,6 +305,7 @@ async function bulkPutPrices(priceList, items, syncedAt = Date.now()) {
 		if (!priceList) {
 			return;
 		}
+		await dbReady;
 		if (!db.isOpen()) {
 			await db.open();
 		}
@@ -355,9 +392,25 @@ self.onmessage = async (event) => {
 			console.log(err);
 			self.postMessage({ type: "error", error: err.message });
 		}
-	} else if (data.type === "persist") {
-		await persist(data.key, data.value);
-		self.postMessage({ type: "persisted", key: data.key });
+	} else if (data.type === "persist_batch") {
+		try {
+			const operation = persistBatchChain.then(() =>
+				persistBatch(data.entries),
+			);
+			persistBatchChain = operation.catch(() => undefined);
+			await operation;
+			self.postMessage({
+				type: "persisted_batch",
+				batchId: data.batchId,
+			});
+		} catch (error) {
+			console.error("Worker persist batch failed", error);
+			self.postMessage({
+				type: "persist_batch_failed",
+				batchId: data.batchId,
+				error: error?.message || String(error),
+			});
+		}
 	} else if (data.type === "bulk_put_items") {
 		await bulkPutItems(data.items || [], data.syncedAt || Date.now());
 		self.postMessage({ type: "items_saved" });

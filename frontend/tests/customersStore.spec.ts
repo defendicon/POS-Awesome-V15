@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
+import { watch } from "vue";
 import { useCustomersStore } from "../src/posapp/stores/customersStore";
 import type {
 	CustomerInfo,
@@ -96,5 +97,58 @@ describe("customersStore profile and customer dto handling", () => {
 			customer_name: "Quotation Customer",
 			email_id: "quote@example.com",
 		});
+	});
+
+	it("loads customers in five parallel 200-row pages with smooth progress", async () => {
+		const store = useCustomersStore();
+		store.setPosProfile({ name: "Main POS", company: "Test Co" });
+		const catalog = Array.from({ length: 450 }, (_, index) => ({
+			name: `CUST-${String(index + 1).padStart(4, "0")}`,
+			customer_name: `Customer ${index + 1}`,
+		}));
+		const observedCounts: number[] = [];
+		const stopWatching = watch(
+			() => store.loadedCustomerCount,
+			(value) => observedCounts.push(value),
+			{ flush: "sync" },
+		);
+
+		(globalThis as any).frappe.call = vi.fn(async (request: any) => {
+			if (
+				request.method ===
+				"posawesome.posawesome.api.customers.get_customers_count"
+			) {
+				return { message: catalog.length };
+			}
+			const { offset = 0, limit = 200 } = request.args;
+			const response = {
+				message: catalog.slice(offset, offset + limit),
+			};
+			request.callback?.(response);
+			return response;
+		});
+
+		await store.get_customer_names();
+		await vi.waitFor(() => {
+			expect(store.loadProgress).toBe(100);
+		});
+		stopWatching();
+
+		const customerCalls = (globalThis as any).frappe.call.mock.calls
+			.map(([request]: any[]) => request)
+			.filter((request: any) =>
+				request.method.endsWith("get_customer_names"),
+			);
+		expect(customerCalls.slice(0, 6).map((request: any) => request.args.offset)).toEqual([
+			null,
+			200,
+			400,
+			600,
+			800,
+			1000,
+		]);
+		expect(store.loadedCustomerCount).toBe(450);
+		expect(observedCounts).toContain(201);
+		expect(observedCounts).toContain(449);
 	});
 });

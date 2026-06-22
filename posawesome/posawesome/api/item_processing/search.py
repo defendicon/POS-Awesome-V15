@@ -86,6 +86,7 @@ def _build_search_plan(
     limit,
     offset,
     start_after,
+    start_after_item_code,
     modified_after,
     include_description: bool,
     include_image: bool,
@@ -103,7 +104,11 @@ def _build_search_plan(
     offset = _to_positive_int(offset)
 
     filters: Dict[str, Any] = {"disabled": 0, "is_sales_item": 1, "is_fixed_asset": 0}
-    if start_after:
+    use_item_code_cursor = start_after_item_code is not None
+
+    if use_item_code_cursor and cstr(start_after_item_code):
+        filters["item_code"] = [">", cstr(start_after_item_code)]
+    elif start_after:
         filters["item_name"] = [">", start_after]
     if modified_after:
         try:
@@ -174,11 +179,11 @@ def _build_search_plan(
 
     limit_page_length: Optional[int] = None
     limit_start: Optional[int] = None
-    order_by = "item_name asc"
+    order_by = "item_code asc" if use_item_code_cursor else "item_name asc"
 
     if limit is not None:
         limit_page_length = limit
-        if offset and not start_after:
+        if offset and not start_after and start_after_item_code is None:
             limit_start = offset
     elif use_limit_search and not pos_profile.get("posa_force_reload_items"):
         limit_page_length = search_limit
@@ -484,6 +489,7 @@ def _execute_item_search(
     limit,
     offset,
     start_after,
+    start_after_item_code,
     modified_after,
     include_description: bool,
     include_image: bool,
@@ -503,6 +509,7 @@ def _execute_item_search(
         limit,
         offset,
         start_after,
+        start_after_item_code,
         modified_after,
         include_description,
         include_image,
@@ -565,6 +572,7 @@ def get_items(
     limit=None,
     offset=None,
     start_after=None,
+    start_after_item_code=None,
     modified_after=None,
     include_description=False,
     include_image=False,
@@ -584,6 +592,7 @@ def get_items(
         limit,
         offset,
         start_after,
+        start_after_item_code,
         modified_after,
         item_group,
         include_description,
@@ -599,6 +608,7 @@ def get_items(
             limit,
             offset,
             start_after,
+            start_after_item_code,
             modified_after,
             include_description,
             include_image,
@@ -615,6 +625,7 @@ def get_items(
             limit,
             offset,
             start_after,
+            start_after_item_code,
             modified_after,
             item_group,
             include_description,
@@ -641,6 +652,7 @@ def get_items(
         limit,
         offset,
         start_after,
+        start_after_item_code,
         modified_after,
         include_description,
         include_image,

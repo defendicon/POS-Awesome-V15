@@ -21,6 +21,7 @@ export interface ItemStoreCache {
 		priceListData: Map<string, { data: any[]; timestamp: number }>;
 		itemDetails: Map<string, { data: any; timestamp: number }>;
 		maxSize: number;
+		maxItemsPerResult: number;
 		ttl: number;
 	};
 }
@@ -39,6 +40,7 @@ export function useItemsCache() {
 			priceListData: new Map(),
 			itemDetails: new Map(),
 			maxSize: 500,
+			maxItemsPerResult: 200,
 			ttl: 5 * 60 * 1000, // 5 minutes
 		},
 	});
@@ -142,7 +144,8 @@ export function useItemsCache() {
 		const memCache = cache.value.memory.searchResults.get(cacheKey);
 		if (
 			memCache &&
-			Date.now() - memCache.timestamp < cache.value.memory.ttl
+			Date.now() - memCache.timestamp < cache.value.memory.ttl &&
+			memCache.data.length <= cache.value.memory.maxItemsPerResult
 		) {
 			return memCache.data;
 		}
@@ -151,6 +154,14 @@ export function useItemsCache() {
 	};
 
 	const cacheItems = async (cacheKey: string, items: Item[]) => {
+		if (
+			!Array.isArray(items) ||
+			items.length > cache.value.memory.maxItemsPerResult
+		) {
+			cache.value.memory.searchResults.delete(cacheKey);
+			return;
+		}
+
 		const cacheData = {
 			data: items,
 			timestamp: Date.now(),
@@ -165,13 +176,25 @@ export function useItemsCache() {
 
 	const getCachedSearchResult = (cacheKey: string) => {
 		const cached = cache.value.memory.searchResults.get(cacheKey);
-		if (cached && Date.now() - cached.timestamp < cache.value.memory.ttl) {
+		if (
+			cached &&
+			Date.now() - cached.timestamp < cache.value.memory.ttl &&
+			cached.data.length <= cache.value.memory.maxItemsPerResult
+		) {
 			return cached.data;
 		}
 		return null;
 	};
 
 	const setCachedSearchResult = (cacheKey: string, data: Item[]) => {
+		if (
+			!Array.isArray(data) ||
+			data.length > cache.value.memory.maxItemsPerResult
+		) {
+			cache.value.memory.searchResults.delete(cacheKey);
+			return;
+		}
+
 		cache.value.memory.searchResults.set(cacheKey, {
 			data,
 			timestamp: Date.now(),

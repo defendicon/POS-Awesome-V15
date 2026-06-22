@@ -11,6 +11,7 @@ export type SyncResourceId =
 	| "offers"
 	| "items"
 	| "item_prices"
+	| "pricing_rules"
 	| "stock"
 	| "customers"
 	| "invoice_outbox"

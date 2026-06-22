@@ -130,16 +130,26 @@ def add_loyalty_point(invoice_doc):
                 loyalty_program = frappe.get_value("Customer", invoice_doc.customer, "loyalty_program")
                 if not loyalty_program:
                     loyalty_program = original_offer.loyalty_program
+                # Honour the loyalty program's configured expiry instead of a
+                # hardcoded ~27-year window; leave empty when no expiry is set.
+                expiry_duration = frappe.db.get_value(
+                    "Loyalty Program", loyalty_program, "expiry_duration"
+                )
+                expiry_date = (
+                    add_days(invoice_doc.posting_date, expiry_duration)
+                    if expiry_duration
+                    else None
+                )
                 doc = frappe.get_doc(
                     {
                         "doctype": "Loyalty Point Entry",
                         "loyalty_program": loyalty_program,
                         "loyalty_program_tier": original_offer.name,
                         "customer": invoice_doc.customer,
-                        "invoice_type": "Sales Invoice",
+                        "invoice_type": invoice_doc.doctype,
                         "invoice": invoice_doc.name,
                         "loyalty_points": original_offer.loyalty_points,
-                        "expiry_date": add_days(invoice_doc.posting_date, 10000),
+                        "expiry_date": expiry_date,
                         "posting_date": invoice_doc.posting_date,
                         "company": invoice_doc.company,
                     }
@@ -335,10 +345,11 @@ def apply_tax_inclusive(doc):
     has_changes = False
     for tax in doc.get("taxes", []):
         if tax.charge_type == "Actual":
+            # Actual (flat-amount) taxes cannot be inclusive in the print rate
             if tax.included_in_print_rate:
                 tax.included_in_print_rate = 0
                 has_changes = True
-        continue
+            continue
         if tax_inclusive and not tax.included_in_print_rate:
             tax.included_in_print_rate = 1
             has_changes = True

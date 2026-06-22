@@ -49,6 +49,11 @@ STATE_POST_SUBMIT_DONE = "POST_SUBMIT_DONE"
 STATE_FAILED = "FAILED"
 FINAL_LEDGER_STATES = {STATE_SUBMITTED, STATE_POST_SUBMIT_DONE}
 
+RETURN_OUTSTANDING_MESSAGE_MARKERS = (
+    "Updating the outstanding to this invoice.",
+    "Update Outstanding for Self",
+)
+
 
 def _json_dumps(value):
     try:
@@ -207,8 +212,14 @@ def _get_or_create_submission_ledger(client_request_id, invoice, data, document_
     try:
         ledger_doc = frappe.get_doc(payload)
         return _save_submission_ledger(ledger_doc)
-    except Exception:
-        return _get_submission_ledger_by_key(ledger_key)
+    except frappe.DuplicateEntryError:
+        # A concurrent request already created this ledger row — fall back to
+        # fetching it. Any other error (e.g. validation) must propagate so the
+        # invoice is never processed without idempotency protection.
+        ledger = _get_submission_ledger_by_key(ledger_key)
+        if not ledger:
+            frappe.throw(_("A concurrent request is already processing this invoice. Please try again."))
+        return ledger
 
 
 def _ledger_response(ledger_doc, replayed=True):
@@ -759,6 +770,92 @@ def _normalize_return_payment_rows(invoice_doc, conversion_rate=1):
     invoice_doc.paid_amount = flt(sum(p.amount for p in invoice_doc.payments or []))
     invoice_doc.base_paid_amount = flt(sum(p.base_amount for p in invoice_doc.payments or []))
 
+    _guard_return_cash_refund(invoice_doc)
+
+
+def _apply_return_outstanding_policy(invoice_doc):
+    """Match ERPNext's credit-note target before validation mutates the draft."""
+    if not invoice_doc.get("is_return") or not invoice_doc.get("return_against"):
+        return
+
+    if invoice_doc.get("is_pos") or invoice_doc.get("is_paid"):
+        return
+
+    against_voucher_outstanding = flt(
+        frappe.db.get_value(
+            invoice_doc.doctype,
+            invoice_doc.return_against,
+            "outstanding_amount",
+        )
+    )
+    return_total = abs(flt(invoice_doc.get("rounded_total")) or flt(invoice_doc.get("grand_total")))
+    invoice_doc.update_outstanding_for_self = cint(return_total > against_voucher_outstanding)
+
+
+def _is_return_outstanding_message(message):
+    if isinstance(message, dict):
+        text = message.get("message") or ""
+    else:
+        text = getattr(message, "message", "") or ""
+    return any(marker in str(text) for marker in RETURN_OUTSTANDING_MESSAGE_MARKERS)
+
+
+def _run_without_return_outstanding_prompts(invoice_doc, operation):
+    """Remove only ERPNext's expected linked-credit-note info dialogs."""
+    if not invoice_doc.get("is_return") or not invoice_doc.get("return_against"):
+        return operation()
+
+    local = getattr(frappe, "local", None)
+    message_log = getattr(local, "message_log", None)
+    start = len(message_log) if isinstance(message_log, list) else None
+
+    try:
+        return operation()
+    finally:
+        if start is not None:
+            local.message_log = message_log[:start] + [
+                message
+                for message in message_log[start:]
+                if not _is_return_outstanding_message(message)
+            ]
+
+
+def _guard_return_cash_refund(invoice_doc):
+    """Block a cash refund larger than what was actually paid on the original.
+
+    A return against an UNPAID (credit / on-account) invoice must not pay out
+    cash: the credit should reduce the customer's outstanding instead. Refunding
+    cash here both gives money for an unpaid sale and leaves the customer's
+    balance untouched, while corrupting the cash drawer. We cap the refund at
+    the amount the customer actually paid on the original invoice and reject
+    anything beyond it so the error surfaces instead of silently losing money.
+    """
+    return_against = invoice_doc.get("return_against")
+    if not return_against:
+        return
+
+    # paid_amount is negative for returns; the cash refunded is its magnitude.
+    refund = abs(flt(invoice_doc.paid_amount))
+    if refund <= 0:
+        return
+
+    original_paid = flt(
+        frappe.db.get_value(invoice_doc.doctype, return_against, "paid_amount")
+    )
+    tolerance = 1.0 / (10 ** (cint(invoice_doc.precision("paid_amount")) or 2))
+    if refund > original_paid + tolerance:
+        frappe.throw(
+            _(
+                "Cannot refund {0} for this return: only {1} was paid on the "
+                "original invoice {2}. Set the paid amount to 0 so the return is "
+                "recorded as a credit note that reduces the customer's balance."
+            ).format(
+                frappe.format_value(refund, {"fieldtype": "Currency"}),
+                frappe.format_value(original_paid, {"fieldtype": "Currency"}),
+                return_against,
+            )
+        )
+
 
 @frappe.whitelist()
 def update_invoice(data):
@@ -973,10 +1070,15 @@ def update_invoice(data):
 
     _normalize_return_payment_rows(invoice_doc, conversion_rate)
 
+    _apply_return_outstanding_policy(invoice_doc)
+
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.docstatus = 0
-    invoice_doc = _save_draft_with_latest_timestamp(invoice_doc)
+    invoice_doc = _run_without_return_outstanding_prompts(
+        invoice_doc,
+        lambda: _save_draft_with_latest_timestamp(invoice_doc),
+    )
 
     # Return both the invoice doc and the updated data
     response = invoice_doc.as_dict()
@@ -1140,6 +1242,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
 
     _apply_invoice_gift_card_settlement(invoice_doc, data)
     _normalize_return_payment_rows(invoice_doc, invoice_doc.get("conversion_rate") or 1)
+    _apply_return_outstanding_policy(invoice_doc)
 
     payments = [
         row
@@ -1160,7 +1263,10 @@ def submit_invoice(invoice, data, submit_in_background=False):
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.posa_is_printed = 1
-    invoice_doc = _save_draft_with_latest_timestamp(invoice_doc)
+    invoice_doc = _run_without_return_outstanding_prompts(
+        invoice_doc,
+        lambda: _save_draft_with_latest_timestamp(invoice_doc),
+    )
     _normalize_return_payment_rows(invoice_doc, invoice_doc.get("conversion_rate") or 1)
 
     if data.get("due_date"):
@@ -1212,7 +1318,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
             },
         )
     else:
-        invoice_doc.submit()
+        _run_without_return_outstanding_prompts(invoice_doc, invoice_doc.submit)
         if ledger_doc:
             _update_submission_ledger(
                 ledger_doc,
