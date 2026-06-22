@@ -18,6 +18,7 @@ export type PaymentInitDoc = {
 	pos_profile?: { currency?: string };
 	conversion_rate?: number;
 	is_return?: number | boolean;
+	return_against?: string | null;
 	// Max cash refundable on a return (= amount paid on the original invoice).
 	// Undefined means "no cap known" → fall back to the full return total.
 	posa_refundable_amount?: number;
@@ -49,16 +50,23 @@ const hasMeaningfulAmount = (
 	return Math.abs(toNumber(payment?.amount)) > epsilon;
 };
 
+export const shouldApplyReturnRefundCap = (
+	doc: PaymentInitDoc | null | undefined,
+): boolean =>
+	Boolean(
+		doc?.is_return &&
+			String(doc.return_against || "").trim() &&
+			doc.posa_refundable_amount !== undefined &&
+			doc.posa_refundable_amount !== null,
+	);
+
 /**
  * Default payment amount to pre-fill for a document.
  *
- * For normal invoices this is the positive grand total. For returns it is the
- * negative grand total, BUT capped at how much the customer actually paid on
- * the original invoice (`posa_refundable_amount`). For a return of an unpaid
- * (credit) invoice the cap is 0, so nothing is refunded as cash and the return
- * is recorded as a credit note that reduces the customer's outstanding balance.
- * When the cap is unknown (undefined) we fall back to the full return total to
- * preserve the previous behaviour for paid invoices.
+ * For normal invoices this is the positive grand total. For returns without an
+ * original invoice this is the negative grand total. For returns against an
+ * original invoice, it is capped at how much the customer actually paid on the
+ * original invoice (`posa_refundable_amount`).
  */
 export const resolveReturnDefaultAmount = (
 	doc: PaymentInitDoc | null | undefined,
@@ -67,10 +75,10 @@ export const resolveReturnDefaultAmount = (
 	if (!doc?.is_return) {
 		return Math.abs(total);
 	}
-	const refundable = doc.posa_refundable_amount;
-	if (refundable === undefined || refundable === null) {
+	if (!shouldApplyReturnRefundCap(doc)) {
 		return -Math.abs(total);
 	}
+	const refundable = doc.posa_refundable_amount;
 	return -Math.min(Math.abs(total), Math.max(0, toNumber(refundable)));
 };
 
@@ -242,8 +250,8 @@ export const rebalancePreferredPaymentLine = (
 	if (doc.is_return) {
 		nextAmount = -Math.abs(nextAmount);
 		// Never auto-refund more cash than was paid on the original invoice.
-		const refundable = doc.posa_refundable_amount;
-		if (refundable !== undefined && refundable !== null) {
+		if (shouldApplyReturnRefundCap(doc)) {
+			const refundable = doc.posa_refundable_amount;
 			nextAmount = Math.max(
 				nextAmount,
 				-Math.max(0, toNumber(refundable)),

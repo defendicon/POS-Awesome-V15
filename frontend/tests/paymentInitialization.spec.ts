@@ -98,6 +98,51 @@ describe("paymentInitialization", () => {
 		expect(doc.payments[0].base_amount).toBe(-80);
 	});
 
+	it("does not cap cashback for returns without an original invoice", () => {
+		const doc: any = {
+			rounded_total: -2625,
+			conversion_rate: 1,
+			is_return: 1,
+			posa_refundable_amount: 0,
+			payments: [
+				{
+					mode_of_payment: "Cash",
+					type: "Cash",
+					amount: 0,
+					base_amount: 0,
+				},
+			],
+		};
+
+		initializePaymentLinesForDialog(doc, 2, isCashLikePayment);
+
+		expect(doc.payments[0].amount).toBe(-2625);
+		expect(doc.payments[0].base_amount).toBe(-2625);
+	});
+
+	it("caps cashback for returns against an original invoice", () => {
+		const doc: any = {
+			rounded_total: -2625,
+			conversion_rate: 1,
+			is_return: 1,
+			return_against: "ACC-SINV-0001",
+			posa_refundable_amount: 1000,
+			payments: [
+				{
+					mode_of_payment: "Cash",
+					type: "Cash",
+					amount: 0,
+					base_amount: 0,
+				},
+			],
+		};
+
+		initializePaymentLinesForDialog(doc, 2, isCashLikePayment);
+
+		expect(doc.payments[0].amount).toBe(-1000);
+		expect(doc.payments[0].base_amount).toBe(-1000);
+	});
+
 	it("initializes base payment amounts with ERPNext invoice conversion rate", () => {
 		const doc: any = {
 			currency: "USD",

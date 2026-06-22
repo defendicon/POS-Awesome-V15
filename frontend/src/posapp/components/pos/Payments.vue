@@ -312,6 +312,7 @@ import {
 	rebalancePreferredPaymentLine,
 	resolvePreferredPaymentLine,
 	resolveReturnDefaultAmount,
+	shouldApplyReturnRefundCap,
 } from "../../utils/paymentInitialization";
 import { resolvePaymentPrintFormatDoctypes } from "../../utils/paymentPrintDoctype";
 import { resolvePaymentPrintFormat } from "../../utils/paymentPrintFormat";
@@ -1243,10 +1244,12 @@ const applyReturnCreditDefault = (doc) => {
 	if (!doc || !doc.is_return) {
 		return;
 	}
-	const refundable = doc.posa_refundable_amount;
-	if (refundable === undefined || refundable === null) {
+	if (!shouldApplyReturnRefundCap(doc)) {
+		is_credit_return.value = false;
+		is_cashback.value = true;
 		return;
 	}
+	const refundable = doc.posa_refundable_amount;
 	const returnTotal = Math.abs(flt(doc.rounded_total || doc.grand_total, currency_precision.value));
 	const shouldCredit = flt(refundable, currency_precision.value) < returnTotal - 0.0001;
 	is_credit_return.value = shouldCredit;

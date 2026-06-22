@@ -11,6 +11,7 @@ import stockCoordinator from "../../../utils/stockCoordinator";
 import { parseBooleanSetting } from "../../../utils/stock";
 import { resolvePosDocumentDoctype } from "../../../utils/posDocumentMode";
 import { toCompanyCurrency } from "../../../utils/erpnextCurrency";
+import { shouldApplyReturnRefundCap } from "../../../utils/paymentInitialization";
 
 declare const frappe: any;
 declare const __: (_str: string, _args?: any[]) => string;
@@ -395,7 +396,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			// invoice. Mirrors the backend guard, but blocks here so the cashier
 			// gets one clean message instead of a failed submit round-trip
 			// (which the API layer would surface as a "connection problem").
-			if (doc.posa_refundable_amount != null) {
+			if (shouldApplyReturnRefundCap(doc)) {
 				let refund = 0;
 				(doc.payments || []).forEach((p: any) => {
 					refund += Math.abs(formatFloat(p.amount, prec));
