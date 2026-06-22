@@ -614,7 +614,7 @@ export const evaluatePricingRules = ({
 		let rate = startRate;
 
 		for (const rule of pricingRules) {
-			const { newRate, discount, detail } = applyOneRule(
+			const { newRate, detail } = applyOneRule(
 				rate,
 				rule,
 				effectiveQty,

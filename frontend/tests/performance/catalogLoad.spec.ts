@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { generateItems, type CatalogSize, CATALOG_SIZES } from "./helpers/mockDataGenerators";
 import { createMockFrappeCall } from "./helpers/mockApiFactory";

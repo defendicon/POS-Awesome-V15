@@ -305,7 +305,7 @@ const lineStyle = (obj: any) => {
 	};
 };
 
-const imageFitStyle = (obj: any) => ({
+const imageFitStyle = (_obj: any) => ({
 	width: "100%",
 	height: "100%",
 	objectFit: "contain" as const,

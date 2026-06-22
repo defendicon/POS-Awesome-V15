@@ -257,7 +257,6 @@ import {
 	buildPaymentRouteLoadingMessage,
 	isPaymentRouteLocked as resolvePaymentRouteLocked,
 } from "../../../utils/paymentRouteReadiness";
-import { loadPaymentMethodCurrencyMap } from "../../../utils/paymentMethodCurrencyCache";
 import { DEFAULT_PAYMENT_ENTRY_PRINT_FORMAT } from "../../../utils/paymentPrintFormat";
 
 const getTodayDate = () => frappe?.datetime?.nowdate?.() || new Date().toISOString().slice(0, 10);
@@ -1223,6 +1222,8 @@ export default {
 			selected_payments,
 			selected_mpesa_payments,
 			payment_methods,
+			selected_payments_detail,
+			new_payments_detail,
 			total_selected_invoices,
 			total_selected_payments,
 			total_selected_mpesa_payments,

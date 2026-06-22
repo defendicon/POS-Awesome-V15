@@ -27,7 +27,6 @@ const MAX_STRING_LENGTH = 2000;
 const recentErrors = new Map<string, number>();
 
 declare global {
-	// eslint-disable-next-line no-unused-vars
 	interface Window {
 		__posaGlobalErrorHandlersInstalled?: boolean;
 	}

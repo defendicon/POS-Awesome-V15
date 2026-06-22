@@ -32,7 +32,6 @@ declare const frappe: any;
 declare const __: any;
 import type {
 	CartItem,
-	InvoiceDoc,
 	InvoiceDocRef,
 	InvoiceMetadata,
 	DeliveryCharge,

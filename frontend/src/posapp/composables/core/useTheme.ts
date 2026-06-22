@@ -1,7 +1,6 @@
 import { ref, computed } from "vue";
 
-const THEME_MODES = ["light", "dark", "automatic"] as const;
-type ThemeMode = (typeof THEME_MODES)[number];
+type ThemeMode = "light" | "dark" | "automatic";
 type ResolvedTheme = "light" | "dark";
 
 export type VuetifyInstance = {

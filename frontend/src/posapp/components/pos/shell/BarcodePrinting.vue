@@ -946,7 +946,6 @@ const {
 	clearAll,
 	incrementQty,
 	decrementQty,
-	normalizeLabelQty,
 	openQtyEdit,
 	closeQtyEdit,
 	onAddItem,

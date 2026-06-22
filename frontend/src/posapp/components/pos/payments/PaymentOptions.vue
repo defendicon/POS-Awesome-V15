@@ -242,16 +242,6 @@ const emit = defineEmits([
 
 const $frappe = inject("frappe", window.frappe);
 
-const hasPanelContent = computed(() => {
-	return (
-		props.isCreditSale ||
-		props.redeemCustomerCredit ||
-		props.isWriteOffChange ||
-		(props.invoiceDoc?.is_return && props.isCreditReturn) ||
-		(props.invoiceDoc?.is_return && props.isCashback)
-	);
-});
-
 const handleRedeemCustomerCreditUpdate = (val) => {
 	emit("update:redeemCustomerCredit", val);
 	emit("get-available-credit", val);
