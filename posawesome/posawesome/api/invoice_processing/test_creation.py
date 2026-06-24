@@ -1049,6 +1049,24 @@ class TestManualPostingDatePreservation(unittest.TestCase):
         self.enqueue_calls.clear()
         self.frappe._publish_realtime_calls.clear()
 
+    def _install_loyalty_program_module(self, conversion_factor):
+        module_name = "erpnext.accounts.doctype.loyalty_program.loyalty_program"
+        previous_module = sys.modules.get(module_name)
+
+        def restore_module():
+            if previous_module is None:
+                sys.modules.pop(module_name, None)
+            else:
+                sys.modules[module_name] = previous_module
+
+        self.addCleanup(restore_module)
+
+        loyalty_module = types.ModuleType(module_name)
+        loyalty_module.get_loyalty_program_details_with_points = lambda *args, **kwargs: AttrDict(
+            conversion_factor=conversion_factor
+        )
+        sys.modules[module_name] = loyalty_module
+
     def _build_invoice_doc(self, **overrides):
         base = {
             "doctype": "Sales Invoice",
@@ -1110,15 +1128,7 @@ class TestManualPostingDatePreservation(unittest.TestCase):
             posting_date="2026-03-21",
         )
 
-        loyalty_module = types.ModuleType(
-            "erpnext.accounts.doctype.loyalty_program.loyalty_program"
-        )
-        loyalty_module.get_loyalty_program_details_with_points = lambda *args, **kwargs: AttrDict(
-            conversion_factor=5
-        )
-        sys.modules[
-            "erpnext.accounts.doctype.loyalty_program.loyalty_program"
-        ] = loyalty_module
+        self._install_loyalty_program_module(conversion_factor=5)
 
         def fake_get_value(doctype, name, fieldname):
             if (doctype, name, fieldname) == ("Loyalty Program", "Retail Loyalty", "expense_account"):
@@ -1144,15 +1154,7 @@ class TestManualPostingDatePreservation(unittest.TestCase):
             posting_date="2026-03-21",
         )
 
-        loyalty_module = types.ModuleType(
-            "erpnext.accounts.doctype.loyalty_program.loyalty_program"
-        )
-        loyalty_module.get_loyalty_program_details_with_points = lambda *args, **kwargs: AttrDict(
-            conversion_factor=70
-        )
-        sys.modules[
-            "erpnext.accounts.doctype.loyalty_program.loyalty_program"
-        ] = loyalty_module
+        self._install_loyalty_program_module(conversion_factor=70)
 
         def fake_get_value(doctype, name, fieldname):
             if (doctype, name, fieldname) == ("Loyalty Program", "Retail Loyalty", "expense_account"):
@@ -1179,15 +1181,7 @@ class TestManualPostingDatePreservation(unittest.TestCase):
             posting_date="2026-03-21",
         )
 
-        loyalty_module = types.ModuleType(
-            "erpnext.accounts.doctype.loyalty_program.loyalty_program"
-        )
-        loyalty_module.get_loyalty_program_details_with_points = lambda *args, **kwargs: AttrDict(
-            conversion_factor=10
-        )
-        sys.modules[
-            "erpnext.accounts.doctype.loyalty_program.loyalty_program"
-        ] = loyalty_module
+        self._install_loyalty_program_module(conversion_factor=10)
 
         self.creation._apply_loyalty_redemption_settings(invoice_doc, "Main POS")
 

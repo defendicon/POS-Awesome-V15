@@ -376,15 +376,29 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 
 	const getLoyaltyRedemptionForSubmission = (doc: any) => {
 		const prec = unref(options.currencyPrecision) || 2;
-		const requestedAmount = formatFloat(unref(options.loyaltyAmount) || 0, prec);
+		const hasExplicitLoyaltyAmount = Object.prototype.hasOwnProperty.call(
+			options,
+			"loyaltyAmount",
+		);
+		const requestedAmount = formatFloat(
+			hasExplicitLoyaltyAmount ? unref(options.loyaltyAmount) : 0,
+			prec,
+		);
 		const docAmount = formatFloat(doc?.loyalty_amount || 0, prec);
-		const loyaltyAmount = requestedAmount > 0 ? requestedAmount : docAmount;
+		const loyaltyAmount = hasExplicitLoyaltyAmount
+			? requestedAmount
+			: docAmount;
 		if (loyaltyAmount <= 0) {
 			return { amount: 0, points: 0 };
 		}
 
 		const existingPoints = Math.trunc(formatFloat(doc?.loyalty_points || 0, prec));
-		if (existingPoints > 0) {
+		const explicitAmountMatchesDoc =
+			Math.abs(requestedAmount - docAmount) < 1 / 10 ** prec;
+		if (
+			existingPoints > 0 &&
+			(!hasExplicitLoyaltyAmount || explicitAmountMatchesDoc)
+		) {
 			return { amount: loyaltyAmount, points: existingPoints };
 		}
 
