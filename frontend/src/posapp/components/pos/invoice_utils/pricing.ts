@@ -131,6 +131,44 @@ export function _resolveBaseRate(context: any, item: any) {
 	return 0;
 }
 
+export function _resolvePricingAmount(context: any, item: any) {
+	if (!item) {
+		return 0;
+	}
+	const parse = (value) => {
+		const numeric = Number.parseFloat(String(value ?? 0));
+		return Number.isFinite(numeric) ? numeric : null;
+	};
+	const qty = parse(item.qty);
+	if (qty !== null) {
+		return Math.abs(qty * _resolveBaseRate(context, item));
+	}
+	const explicitAmount = [
+		item.base_amount,
+		item.amount !== undefined && context._toBaseCurrency
+			? context._toBaseCurrency(parse(item.amount) ?? 0)
+			: item.amount,
+	]
+		.map(parse)
+		.find((value) => value !== null);
+	if (explicitAmount !== undefined && explicitAmount !== null) {
+		return Math.abs(explicitAmount);
+	}
+	return 0;
+}
+
+export function _resolveCartPricingAmount(context: any) {
+	if (!Array.isArray(context?.items)) {
+		return 0;
+	}
+	return context.items.reduce((total, item) => {
+		if (!item || item.is_free_item || item.auto_free_source) {
+			return total;
+		}
+		return total + _resolvePricingAmount(context, item);
+	}, 0);
+}
+
 export function _resolvePricingQty(context: any, item: any) {
 	if (!item) {
 		return 0;
@@ -213,6 +251,7 @@ export function _applyPricingToLine(
 	ctx: any,
 	indexes: any,
 	freebiesMap: Map<string, any>,
+	cartAmount?: number,
 ) {
 	if (!item) {
 		return;
@@ -235,10 +274,13 @@ export function _applyPricingToLine(
 	}
 
 	const baseRate = _resolveBaseRate(context, item);
+	const docAmount = _resolvePricingAmount(context, item);
 	const { pricing, freebies } = evaluatePricingRules({
 		item,
 		qty,
 		docQty,
+		docAmount,
+		cartAmount,
 		baseRate,
 		ctx,
 		indexes,
@@ -368,12 +410,13 @@ export async function _applyLocalPricingRules(context: any, force = false) {
 		}
 		const indexes = store.getIndexes ? store.getIndexes() : {};
 		const freebiesMap = new Map();
+		const cartAmount = _resolveCartPricingAmount(context);
 
 		for (const item of context.items) {
 			if (!item || item.is_free_item) {
 				continue;
 			}
-			_applyPricingToLine(context, item, ctx, indexes, freebiesMap);
+			_applyPricingToLine(context, item, ctx, indexes, freebiesMap, cartAmount);
 		}
 
 		syncAutoFreeLines(context, freebiesMap);
@@ -534,6 +577,13 @@ export async function _applyServerPricingRules(context: any, ctx: any = {}) {
 				base_rate: baseRate || 0,
 				base_price_list_rate: basePriceListRate || 0,
 				base_discount_amount: baseDiscount || 0,
+				amount:
+					Number.parseFloat(item.amount ?? 0) ||
+					(Number.parseFloat(item.rate ?? 0) || 0) *
+						(Number.parseFloat(item.qty ?? 0) || 0),
+				base_amount:
+					Number.parseFloat(item.base_amount ?? 0) ||
+					(baseRate || 0) * (Number.parseFloat(item.qty ?? 0) || 0),
 				discount_percentage:
 					Number.parseFloat(item.discount_percentage || 0) || 0,
 				warehouse: item.warehouse,

@@ -39,8 +39,10 @@ freeze dialog). Does not hold domain data.
 
 ### `usePricingRulesStore`
 
-Holds the offline pricing rule snapshot and exposes `applyRules(items, context)`. Listens
-for the `apply_pricing_rules` bus event.
+Holds the offline pricing rule snapshot, hydrates it from cache, and exposes
+`ensureActiveRules()` plus pre-built indexes. Cart pricing is applied by
+`applyPricingRulesForCart()`, which listens for the `apply_pricing_rules` bus event
+and evaluates the store indexes through `pricingEngine.evaluatePricingRules()`.
 
 ### `useCustomersStore` / `useEmployeeStore`
 
@@ -211,9 +213,11 @@ compatibility.
 
 ## Pricing engine (`src/lib/pricingEngine.ts`)
 
-Self-contained offline pricing-rule evaluator. Used by `usePricingRulesStore` to apply
-Frappe pricing rules without a network call.
+Self-contained offline pricing-rule evaluator. Used by `applyPricingRulesForCart()`
+with indexes from `usePricingRulesStore` to apply Frappe pricing rules without a
+network call.
 
-Key exports: `round`, `inDateRange`, `matchParty`, `collectCandidates`, `applyBestRule`.
+Key exports: `round`, `inDateRange`, `matchParty`, `collectCandidates`,
+`evaluatePricingRules`, `applyLocalPricingRules`, `computeFreeItems`.
 
-<!-- TODO: add examples for collectCandidates / applyBestRule once the API stabilises -->
+<!-- TODO: add examples for collectCandidates / evaluatePricingRules once the API stabilises -->

@@ -88,7 +88,9 @@ User action (add item)
   → CartItemRow.vue renders
   → useInvoiceItems.setFormatedQty() on qty change
   → bus.emit('apply_pricing_rules')  (mitt event bus)
-  → usePricingRulesStore.applyRules()
+  → Invoice.applyPricingRulesForCart()
+  → pricingRulesStore.ensureActiveRules()
+  → pricingEngine.evaluatePricingRules()
   → invoiceStore totals recomputed
   → ItemsTable.vue / InvoiceTotals.vue update reactively
 ```
@@ -114,7 +116,7 @@ easily flow through Pinia:
 
 | Event | Emitter | Consumers |
 |---|---|---|
-| `apply_pricing_rules` | `useInvoiceItems` (qty change) | `usePricingRulesStore` |
+| `apply_pricing_rules` | `useInvoiceItems` (qty change) | `Invoice.vue` / `applyPricingRulesForCart()` |
 | `update_customer` | customer forms | invoice header |
 
 Prefer Pinia for all new cross-component communication; use the bus only when a composable

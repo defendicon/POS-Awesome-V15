@@ -126,6 +126,9 @@ def _normalise_rule(doc: frappe._dict) -> frappe._dict:
         apply_multiple_pricing_rules=cint(doc.get("apply_multiple_pricing_rules") or 0),
         apply_on=doc.get("apply_on"),
         min_qty=flt(doc.get("min_qty") or 0),
+        max_qty=flt(doc.get("max_qty") or 0),
+        min_amt=flt(doc.get("min_amt") or 0),
+        max_amt=flt(doc.get("max_amt") or 0),
         valid_from=str(doc.get("valid_from")) if doc.get("valid_from") else None,
         valid_upto=str(doc.get("valid_upto")) if doc.get("valid_upto") else None,
         price_or_discount=price_or_product_discount,
@@ -210,6 +213,9 @@ def get_active_pricing_rules(params: dict | None = None, **kwargs):
 
     optional_fields = [
         "margin_type",
+        "max_qty",
+        "min_amt",
+        "max_amt",
         "margin_rate_or_amount",
         "apply_discount_on_rate",
         "same_item",
@@ -352,6 +358,10 @@ def _build_pricing_args(line: frappe._dict, ctx: frappe._dict) -> frappe._dict:
         base_price_list_rate=flt(line.base_price_list_rate or 0),
         rate=flt(line.rate or 0),
         base_rate=flt(line.base_rate or 0),
+        amount=flt(line.get("amount") or flt(line.rate or 0) * qty),
+        base_amount=flt(line.get("base_amount") or flt(line.base_rate or 0) * qty),
+        net_amount=flt(line.get("amount") or flt(line.rate or 0) * qty),
+        base_net_amount=flt(line.get("base_amount") or flt(line.base_rate or 0) * qty),
         currency=ctx.get("currency"),
         price_list_currency=ctx.get("price_list_currency") or ctx.get("currency"),
         price_list=ctx.get("price_list"),
@@ -399,7 +409,6 @@ def reconcile_line_prices(cart_payload: dict | str | None = None):
         frappe.throw(_("Context is required"))
 
     lines = cart.get("lines") or []
-    free_lines = cart.get("free_lines") or []
 
     # Bulk fetch item details (item_group, brand) to ensure pricing rules work correctly
     # even if the frontend payload is incomplete.
@@ -651,20 +660,6 @@ def reconcile_line_prices(cart_payload: dict | str | None = None):
                 ),
                 "same_item": cint(data.get("same_item") or 0),
                 "uom": data.get("uom"),
-                "is_free": 1,
-            }
-        )
-
-    # Include explicitly provided free lines in response for comparison
-    for entry in free_lines:
-        line = frappe._dict(entry)
-        expected_free_lines.append(
-            {
-                "item_code": line.item_code,
-                "qty": flt(line.get("qty") or 0),
-                "pricing_rules": line.get("source_rule") or line.get("pricing_rules"),
-                "rate": flt(line.get("rate") or 0),
-                "uom": line.get("uom"),
                 "is_free": 1,
             }
         )
