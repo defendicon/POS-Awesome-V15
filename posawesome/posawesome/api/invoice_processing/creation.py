@@ -279,6 +279,31 @@ def _apply_invoice_gift_card_settlement(invoice_doc, data):
     )
 
 
+def _get_loyalty_detail_value(details, fieldname):
+    if hasattr(details, "get"):
+        return details.get(fieldname)
+    return getattr(details, fieldname, None)
+
+
+def _derive_loyalty_points_from_amount(invoice_doc, loyalty_amount):
+    from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
+        get_loyalty_program_details_with_points,
+    )
+
+    details = get_loyalty_program_details_with_points(
+        invoice_doc.customer,
+        invoice_doc.loyalty_program,
+        invoice_doc.get("posting_date"),
+        invoice_doc.company,
+        silent=True,
+        include_expired_entry=False,
+    )
+    conversion_factor = flt(_get_loyalty_detail_value(details, "conversion_factor"))
+    if conversion_factor <= 0:
+        return 0
+    return cint(flt(loyalty_amount) / conversion_factor)
+
+
 def _apply_loyalty_redemption_settings(invoice_doc, pos_profile=None):
     loyalty_amount = flt(invoice_doc.get("loyalty_amount"))
     loyalty_points = flt(invoice_doc.get("loyalty_points"))
@@ -298,6 +323,16 @@ def _apply_loyalty_redemption_settings(invoice_doc, pos_profile=None):
 
     if not invoice_doc.loyalty_program:
         frappe.throw(_("Loyalty Program is required to redeem loyalty points."))
+
+    if loyalty_points <= 0 and loyalty_amount > 0:
+        invoice_doc.loyalty_points = _derive_loyalty_points_from_amount(
+            invoice_doc,
+            loyalty_amount,
+        )
+        loyalty_points = flt(invoice_doc.get("loyalty_points"))
+
+    if loyalty_points <= 0:
+        frappe.throw(_("Loyalty Points are required to redeem loyalty amount."))
 
     if not invoice_doc.loyalty_redemption_account:
         invoice_doc.loyalty_redemption_account = frappe.db.get_value(
