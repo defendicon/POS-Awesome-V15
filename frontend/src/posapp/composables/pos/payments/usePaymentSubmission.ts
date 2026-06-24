@@ -33,6 +33,7 @@ export interface PaymentSubmissionOptions {
 	diff_payment?: ComputedRef<number>;
 	is_credit_sale?: Ref<boolean>;
 	loyaltyAmount?: Ref<number>;
+	customerInfo?: Ref<any>;
 	stores?: {
 		toastStore?: any;
 		syncStore?: any;
@@ -373,6 +374,49 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 		}
 	};
 
+	const getLoyaltyRedemptionForSubmission = (doc: any) => {
+		const prec = unref(options.currencyPrecision) || 2;
+		const hasExplicitLoyaltyAmount = Object.prototype.hasOwnProperty.call(
+			options,
+			"loyaltyAmount",
+		);
+		const requestedAmount = formatFloat(
+			hasExplicitLoyaltyAmount ? unref(options.loyaltyAmount) : 0,
+			prec,
+		);
+		const docAmount = formatFloat(doc?.loyalty_amount || 0, prec);
+		const loyaltyAmount = hasExplicitLoyaltyAmount
+			? requestedAmount
+			: docAmount;
+		if (loyaltyAmount <= 0) {
+			return { amount: 0, points: 0 };
+		}
+
+		const existingPoints = Math.trunc(formatFloat(doc?.loyalty_points || 0, prec));
+		const explicitAmountMatchesDoc =
+			Math.abs(requestedAmount - docAmount) < 1 / 10 ** prec;
+		if (
+			existingPoints > 0 &&
+			(!hasExplicitLoyaltyAmount || explicitAmountMatchesDoc)
+		) {
+			return { amount: loyaltyAmount, points: existingPoints };
+		}
+
+		const info = unref(options.customerInfo) || {};
+		const conversionFactor = Number(info.conversion_factor || 0);
+		if (conversionFactor <= 0) {
+			return { amount: 0, points: 0 };
+		}
+
+		const baseAmount = toCompanyCurrency(currencyContext(doc), loyaltyAmount);
+		const loyaltyPoints = Math.trunc(baseAmount / conversionFactor);
+		if (loyaltyPoints <= 0) {
+			return { amount: 0, points: 0 };
+		}
+
+		return { amount: loyaltyAmount, points: loyaltyPoints };
+	};
+
 	const validateSubmission = async (payment_received = false) => {
 		const doc = unref(invoiceDoc);
 		const profile = unref(posProfile);
@@ -420,8 +464,9 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			});
 		}
 		// Add loyalty and credit
-		if (options.loyaltyAmount && unref(options.loyaltyAmount))
-			current_total_payments += unref(options.loyaltyAmount)!;
+		const loyaltyRedemption = getLoyaltyRedemptionForSubmission(doc);
+		if (loyaltyRedemption.amount > 0)
+			current_total_payments += loyaltyRedemption.amount;
 		if (
 			options.redeemedCustomerCredit &&
 			unref(options.redeemedCustomerCredit)
@@ -613,9 +658,38 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 		return true;
 	};
 
+	const normalizeLoyaltyRedemptionForSubmission = (doc: any) => {
+		if (!doc) {
+			return doc;
+		}
+
+		const clearLoyaltyRedemption = () => {
+			doc.loyalty_amount = 0;
+			doc.redeem_loyalty_points = 0;
+			doc.loyalty_points = 0;
+			return doc;
+		};
+
+		const loyaltyRedemption = getLoyaltyRedemptionForSubmission(doc);
+		if (loyaltyRedemption.amount <= 0 || loyaltyRedemption.points <= 0) {
+			return clearLoyaltyRedemption();
+		}
+
+		const info = unref(options.customerInfo) || {};
+		if (!doc.loyalty_program && info.loyalty_program) {
+			doc.loyalty_program = info.loyalty_program;
+		}
+
+		doc.loyalty_amount = loyaltyRedemption.amount;
+		doc.redeem_loyalty_points = 1;
+		doc.loyalty_points = loyaltyRedemption.points;
+		return doc;
+	};
+
 	const buildSubmissionInvoiceDoc = (doc: any) => {
 		const submissionDoc = JSON.parse(JSON.stringify(doc || {}));
 		ensureInvoiceClientRequestId(submissionDoc);
+		normalizeLoyaltyRedemptionForSubmission(submissionDoc);
 		return submissionDoc;
 	};
 
@@ -798,6 +872,8 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			if (paidChange) paidChange.value = pChange;
 		}
 
+		const submissionDoc = buildSubmissionInvoiceDoc(doc);
+
 		const data = {
 			total_change: changeLimit,
 			paid_change: pChange,
@@ -829,7 +905,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				);
 			}
 			try {
-				await saveOfflineInvoice({ data, invoice: doc });
+				await saveOfflineInvoice({ data, invoice: submissionDoc });
 				stores?.syncStore?.updatePendingCount();
 				stores?.toastStore?.show({
 					title: __("Invoice saved offline"),
@@ -862,7 +938,6 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 		// Online Submission
 		try {
 			await validateStockBeforeOnlineSubmission(doc, profile, type);
-			const submissionDoc = buildSubmissionInvoiceDoc(doc);
 			const message = unwrapApiResult(
 				await invoiceService.submitInvoice(
 					data,

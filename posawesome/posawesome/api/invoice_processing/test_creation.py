@@ -1049,6 +1049,24 @@ class TestManualPostingDatePreservation(unittest.TestCase):
         self.enqueue_calls.clear()
         self.frappe._publish_realtime_calls.clear()
 
+    def _install_loyalty_program_module(self, conversion_factor):
+        module_name = "erpnext.accounts.doctype.loyalty_program.loyalty_program"
+        previous_module = sys.modules.get(module_name)
+
+        def restore_module():
+            if previous_module is None:
+                sys.modules.pop(module_name, None)
+            else:
+                sys.modules[module_name] = previous_module
+
+        self.addCleanup(restore_module)
+
+        loyalty_module = types.ModuleType(module_name)
+        loyalty_module.get_loyalty_program_details_with_points = lambda *args, **kwargs: AttrDict(
+            conversion_factor=conversion_factor
+        )
+        sys.modules[module_name] = loyalty_module
+
     def _build_invoice_doc(self, **overrides):
         base = {
             "doctype": "Sales Invoice",
@@ -1100,6 +1118,76 @@ class TestManualPostingDatePreservation(unittest.TestCase):
         self.assertEqual(invoice_doc.redeem_loyalty_points, 0)
         self.assertEqual(invoice_doc.loyalty_amount, 0)
         self.assertEqual(invoice_doc.loyalty_points, 0)
+
+    def test_loyalty_redemption_settings_derives_missing_points_from_amount(self):
+        invoice_doc = self._build_invoice_doc(
+            redeem_loyalty_points=1,
+            loyalty_program="Retail Loyalty",
+            loyalty_amount=25,
+            loyalty_points=0,
+            posting_date="2026-03-21",
+        )
+
+        self._install_loyalty_program_module(conversion_factor=5)
+
+        def fake_get_value(doctype, name, fieldname):
+            if (doctype, name, fieldname) == ("Loyalty Program", "Retail Loyalty", "expense_account"):
+                return "Loyalty Expense - TC"
+            if (doctype, name, fieldname) == ("POS Profile", "Main POS", "cost_center"):
+                return "Main Cost Center - TC"
+            return None
+
+        self.creation.frappe.db.get_value = fake_get_value
+
+        self.creation._apply_loyalty_redemption_settings(invoice_doc, "Main POS")
+
+        self.assertEqual(invoice_doc.loyalty_points, 5)
+        self.assertEqual(invoice_doc.redeem_loyalty_points, 1)
+
+    def test_loyalty_redemption_settings_derives_missing_points_from_company_currency_amount(self):
+        invoice_doc = self._build_invoice_doc(
+            redeem_loyalty_points=1,
+            loyalty_program="Retail Loyalty",
+            loyalty_amount=10,
+            loyalty_points=0,
+            conversion_rate=280,
+            posting_date="2026-03-21",
+        )
+
+        self._install_loyalty_program_module(conversion_factor=70)
+
+        def fake_get_value(doctype, name, fieldname):
+            if (doctype, name, fieldname) == ("Loyalty Program", "Retail Loyalty", "expense_account"):
+                return "Loyalty Expense - TC"
+            if (doctype, name, fieldname) == ("POS Profile", "Main POS", "cost_center"):
+                return "Main Cost Center - TC"
+            return None
+
+        self.creation.frappe.db.get_value = fake_get_value
+
+        self.creation._apply_loyalty_redemption_settings(invoice_doc, "Main POS")
+
+        self.assertEqual(invoice_doc.loyalty_points, 40)
+        self.assertEqual(invoice_doc.redeem_loyalty_points, 1)
+        self.assertEqual(invoice_doc.loyalty_amount, 10)
+
+    def test_loyalty_redemption_settings_clears_too_small_derived_redemption(self):
+        invoice_doc = self._build_invoice_doc(
+            redeem_loyalty_points=1,
+            loyalty_program="Retail Loyalty",
+            loyalty_amount=0.5,
+            loyalty_points=0,
+            conversion_rate=1,
+            posting_date="2026-03-21",
+        )
+
+        self._install_loyalty_program_module(conversion_factor=10)
+
+        self.creation._apply_loyalty_redemption_settings(invoice_doc, "Main POS")
+
+        self.assertEqual(invoice_doc.loyalty_points, 0)
+        self.assertEqual(invoice_doc.redeem_loyalty_points, 0)
+        self.assertEqual(invoice_doc.loyalty_amount, 0)
 
     def test_loyalty_redemption_settings_requires_configured_expense_account_for_positive_redemption(self):
         invoice_doc = self._build_invoice_doc(
