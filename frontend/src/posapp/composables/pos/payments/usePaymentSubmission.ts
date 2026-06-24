@@ -374,6 +374,35 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 		}
 	};
 
+	const getLoyaltyRedemptionForSubmission = (doc: any) => {
+		const prec = unref(options.currencyPrecision) || 2;
+		const requestedAmount = formatFloat(unref(options.loyaltyAmount) || 0, prec);
+		const docAmount = formatFloat(doc?.loyalty_amount || 0, prec);
+		const loyaltyAmount = requestedAmount > 0 ? requestedAmount : docAmount;
+		if (loyaltyAmount <= 0) {
+			return { amount: 0, points: 0 };
+		}
+
+		const existingPoints = Math.trunc(formatFloat(doc?.loyalty_points || 0, prec));
+		if (existingPoints > 0) {
+			return { amount: loyaltyAmount, points: existingPoints };
+		}
+
+		const info = unref(options.customerInfo) || {};
+		const conversionFactor = Number(info.conversion_factor || 0);
+		if (conversionFactor <= 0) {
+			return { amount: 0, points: 0 };
+		}
+
+		const baseAmount = toCompanyCurrency(currencyContext(doc), loyaltyAmount);
+		const loyaltyPoints = Math.trunc(baseAmount / conversionFactor);
+		if (loyaltyPoints <= 0) {
+			return { amount: 0, points: 0 };
+		}
+
+		return { amount: loyaltyAmount, points: loyaltyPoints };
+	};
+
 	const validateSubmission = async (payment_received = false) => {
 		const doc = unref(invoiceDoc);
 		const profile = unref(posProfile);
@@ -421,8 +450,9 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			});
 		}
 		// Add loyalty and credit
-		if (options.loyaltyAmount && unref(options.loyaltyAmount))
-			current_total_payments += unref(options.loyaltyAmount)!;
+		const loyaltyRedemption = getLoyaltyRedemptionForSubmission(doc);
+		if (loyaltyRedemption.amount > 0)
+			current_total_payments += loyaltyRedemption.amount;
 		if (
 			options.redeemedCustomerCredit &&
 			unref(options.redeemedCustomerCredit)
@@ -619,38 +649,26 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			return doc;
 		}
 
-		const prec = unref(options.currencyPrecision) || 2;
-		const requestedAmount = formatFloat(unref(options.loyaltyAmount) || 0, prec);
-		const docAmount = formatFloat(doc.loyalty_amount || 0, prec);
-		const loyaltyAmount = requestedAmount > 0 ? requestedAmount : docAmount;
-
-		if (loyaltyAmount <= 0) {
+		const clearLoyaltyRedemption = () => {
 			doc.loyalty_amount = 0;
 			doc.redeem_loyalty_points = 0;
 			doc.loyalty_points = 0;
 			return doc;
-		}
+		};
 
-		doc.loyalty_amount = loyaltyAmount;
-		doc.redeem_loyalty_points = 1;
+		const loyaltyRedemption = getLoyaltyRedemptionForSubmission(doc);
+		if (loyaltyRedemption.amount <= 0 || loyaltyRedemption.points <= 0) {
+			return clearLoyaltyRedemption();
+		}
 
 		const info = unref(options.customerInfo) || {};
 		if (!doc.loyalty_program && info.loyalty_program) {
 			doc.loyalty_program = info.loyalty_program;
 		}
 
-		const existingPoints = formatFloat(doc.loyalty_points || 0, prec);
-		if (existingPoints > 0) {
-			doc.loyalty_points = Math.trunc(existingPoints);
-			return doc;
-		}
-
-		const conversionFactor = Number(info.conversion_factor || 0);
-		if (conversionFactor > 0) {
-			const baseAmount = toCompanyCurrency(currencyContext(doc), loyaltyAmount);
-			doc.loyalty_points = Math.trunc(baseAmount / conversionFactor);
-		}
-
+		doc.loyalty_amount = loyaltyRedemption.amount;
+		doc.redeem_loyalty_points = 1;
+		doc.loyalty_points = loyaltyRedemption.points;
 		return doc;
 	};
 

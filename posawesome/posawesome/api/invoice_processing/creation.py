@@ -301,7 +301,8 @@ def _derive_loyalty_points_from_amount(invoice_doc, loyalty_amount):
     conversion_factor = flt(_get_loyalty_detail_value(details, "conversion_factor"))
     if conversion_factor <= 0:
         return 0
-    return cint(flt(loyalty_amount) / conversion_factor)
+    loyalty_amount_in_company_currency = flt(loyalty_amount) * (flt(invoice_doc.get("conversion_rate")) or 1)
+    return cint(loyalty_amount_in_company_currency / conversion_factor)
 
 
 def _apply_loyalty_redemption_settings(invoice_doc, pos_profile=None):
@@ -332,7 +333,10 @@ def _apply_loyalty_redemption_settings(invoice_doc, pos_profile=None):
         loyalty_points = flt(invoice_doc.get("loyalty_points"))
 
     if loyalty_points <= 0:
-        frappe.throw(_("Loyalty Points are required to redeem loyalty amount."))
+        invoice_doc.redeem_loyalty_points = 0
+        invoice_doc.loyalty_amount = 0
+        invoice_doc.loyalty_points = 0
+        return
 
     if not invoice_doc.loyalty_redemption_account:
         invoice_doc.loyalty_redemption_account = frappe.db.get_value(
