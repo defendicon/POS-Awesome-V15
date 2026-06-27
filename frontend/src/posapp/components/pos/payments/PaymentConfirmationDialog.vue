@@ -24,6 +24,29 @@
 					@focus="selectAmount"
 					@keydown.enter.prevent="onConfirm"
 				/>
+				<div
+					v-if="visibleTenderSuggestions.length"
+					class="payment-confirmation-tender"
+					data-test="payment-confirmation-tender"
+				>
+					<p class="payment-confirmation-tender__label">
+						{{ __("Tender Cash") }}
+					</p>
+					<div class="payment-confirmation-tender__buttons">
+						<v-btn
+							v-for="suggestion in visibleTenderSuggestions"
+							:key="suggestion"
+							size="small"
+							color="secondary"
+							variant="tonal"
+							class="payment-confirmation-tender__btn"
+							:data-test="`payment-confirmation-tender-${suggestion}`"
+							@click="setTenderAmount(suggestion)"
+						>
+							{{ formatTenderAmount(suggestion) }}
+						</v-btn>
+					</div>
+				</div>
 			</v-card-text>
 			<v-card-actions>
 				<v-spacer></v-spacer>
@@ -48,6 +71,7 @@ const props = defineProps<{
 	modelValue: boolean;
 	amount?: number;
 	currencySymbol?: string;
+	tenderSuggestions?: number[];
 }>();
 
 const emit = defineEmits<{
@@ -64,6 +88,13 @@ const dialog = computed({
 const amountField = ref<any>(null);
 const amountInput = ref("0");
 const amountError = ref("");
+
+const visibleTenderSuggestions = computed(() =>
+	(props.tenderSuggestions || []).filter((amount) => {
+		const value = Number(amount);
+		return Number.isFinite(value) && value > 0;
+	}),
+);
 
 const resetAmount = () => {
 	const amount = Math.abs(Number(props.amount) || 0);
@@ -89,6 +120,14 @@ const focus = () => {
 		focusInput();
 		setTimeout(focusInput, 100);
 	});
+};
+
+const formatTenderAmount = (amount: number) => `${props.currencySymbol || ""}${Number(amount)}`;
+
+const setTenderAmount = (amount: number) => {
+	amountInput.value = String(Number(amount));
+	amountError.value = "";
+	focus();
 };
 
 watch(dialog, (val) => {
@@ -120,3 +159,28 @@ const onConfirm = () => {
 	emit("confirm", amount);
 };
 </script>
+
+<style scoped>
+.payment-confirmation-tender {
+	margin-top: 12px;
+}
+
+.payment-confirmation-tender__label {
+	margin: 0 0 8px;
+	font-size: 0.8rem;
+	font-weight: 700;
+	color: rgba(var(--v-theme-on-surface), 0.72);
+}
+
+.payment-confirmation-tender__buttons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.payment-confirmation-tender__btn {
+	border-radius: 6px;
+	text-transform: none;
+	font-weight: 600;
+}
+</style>

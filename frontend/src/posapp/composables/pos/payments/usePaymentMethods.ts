@@ -2,6 +2,7 @@ import { ref, unref, type Ref, type ComputedRef } from "vue";
 // @ts-ignore
 import { getSmartTenderSuggestions } from "../../../../utils/smartTender";
 import { toCompanyCurrency } from "../../../utils/erpnextCurrency";
+import { isCashLikePaymentLine } from "../../../utils/cashTender";
 
 declare const frappe: any;
 declare const __: (_str: string, _args?: any[]) => string;
@@ -94,20 +95,7 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 	};
 
 	const isCashLikePayment = (payment: any) => {
-		if (!payment) return false;
-
-		const profile = unref(posProfile);
-		const configuredCashMOP = String(
-			profile?.posa_cash_mode_of_payment || "",
-		).toLowerCase();
-		const type = String(payment.type || "").toLowerCase();
-
-		if (type === "cash") return true;
-
-		const mode = String(payment.mode_of_payment || "").toLowerCase();
-		if (configuredCashMOP && mode === configuredCashMOP) return true;
-
-		return mode.includes("cash");
+		return isCashLikePaymentLine(payment, unref(posProfile));
 	};
 
 	const reset_cash_payments = () => {
@@ -254,10 +242,11 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 
 		payment.amount = invoiceAmount;
 		if (payment.base_amount !== undefined) {
-			const baseAmount = toCompanyCurrency(currencyContext(doc), invoiceAmount);
-			payment.base_amount = isReturn
-				? -Math.abs(baseAmount)
-				: baseAmount;
+			const baseAmount = toCompanyCurrency(
+				currencyContext(doc),
+				invoiceAmount,
+			);
+			payment.base_amount = isReturn ? -Math.abs(baseAmount) : baseAmount;
 		}
 	};
 
