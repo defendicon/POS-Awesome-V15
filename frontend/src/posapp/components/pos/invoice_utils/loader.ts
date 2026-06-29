@@ -238,6 +238,34 @@ export async function load_invoice(
 			if (!item.original_item_name) {
 				item.original_item_name = item.item_name;
 			}
+
+			// Return rows come back from the backend with a `batch_no` string but
+			// no `batch_no_data`, so the batch column renders blank until the qty
+			// is touched. Seed a single display option (with a positive qty, since
+			// getDisplayableBatchOptions filters out non-positive batches) so the
+			// selected batch shows immediately. Display-only: we deliberately do
+			// NOT call set_batch_qty here — it would refetch item details and could
+			// reset the locked return price.
+			if (
+				data.is_return &&
+				data.return_against &&
+				item.batch_no &&
+				(!Array.isArray(item.batch_no_data) ||
+					item.batch_no_data.length === 0)
+			) {
+				// The cart row's blue "Batch: …" chip is gated on has_batch_no,
+				// which the return payload omits; the item clearly has a batch.
+				if (!item.has_batch_no) item.has_batch_no = 1;
+				const displayQty = Math.abs(flt(item.qty)) || 0;
+				item.batch_no_data = [
+					{
+						batch_no: item.batch_no,
+						batch_qty: displayQty,
+						available_qty: displayQty,
+						expiry_date: item.batch_no_expiry_date || null,
+					},
+				];
+			}
 		});
 
 		const manualSnapshots = context._snapshotManualValuesFromDocItems
