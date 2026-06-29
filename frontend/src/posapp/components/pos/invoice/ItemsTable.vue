@@ -266,7 +266,8 @@ const hide_qty_decimals = computed(() => {
 
 // Watchers
 watch(() => props.displayCurrency, clearFormatCache);
-watch(() => props.pos_profile, clearFormatCache, { deep: true });
+// Drop deep:true — clear format cache only on profile reassignment.
+watch(() => props.pos_profile, clearFormatCache);
 
 // Methods
 const getSerialOptions = (item: any) => {

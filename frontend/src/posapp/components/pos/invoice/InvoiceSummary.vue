@@ -289,6 +289,7 @@ const hide_qty_decimals = computed(() => {
 });
 
 watch(
+	// Drop deep:true — only need to react to profile reassignment.
 	() => props.pos_profile,
 	() => {
 		const nextSource = getDefaultDocumentSource(props.pos_profile, draftSource.value);
@@ -296,7 +297,7 @@ watch(
 			uiStore.setDraftSource(nextSource);
 		}
 	},
-	{ deep: true, immediate: true },
+	{ immediate: true },
 );
 
 watch(

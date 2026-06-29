@@ -554,11 +554,12 @@ export default {
 			await customersStore.searchCustomers("");
 
 			watch(
+				// Drop deep:true — react to profile reassignment only.
 				() => uiStore.posProfile,
 				async (profile) => {
 					await ensureCustomersForProfile(profile);
 				},
-				{ deep: true, immediate: true },
+				{ immediate: true },
 			);
 
 			// registerBus("set_customer", (customer) => {

@@ -255,6 +255,11 @@ export default {
 
 	watch: {
 		posa_coupons: {
+			// Keep deep:true here. `updatePosCoupons` mutates
+			// `coupon.applied = 0/1` in-place (lines 207/209) — a
+			// shallow watcher would miss those mutations and leave the
+			// applied-counter badge + the `update_invoice_coupons`
+			// event subscribers out of sync.
 			deep: true,
 			handler() {
 				this.updateInvoice();
@@ -296,7 +301,7 @@ export default {
 			(profile) => {
 				if (profile) this.pos_profile = profile;
 			},
-			{ deep: true, immediate: true },
+			{ immediate: true },
 		);
 		/*
 		this.$nextTick(function () {
@@ -311,6 +316,12 @@ export default {
 		this.eventBus.on("set_pos_coupons", (data) => {
 			this.posa_coupons = data;
 		});
+	},
+	beforeUnmount() {
+		if (this.eventBus) {
+			this.eventBus.off("update_pos_coupons");
+			this.eventBus.off("set_pos_coupons");
+		}
 	},
 };
 </script>

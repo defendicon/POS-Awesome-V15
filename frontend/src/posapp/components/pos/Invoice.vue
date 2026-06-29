@@ -1058,6 +1058,17 @@ export default {
 		this.loadColumnPreferences();
 		this.loadInvoiceHeight();
 
+		// Watch the IDENTITY of `posProfile` + `offers` (the
+		// reference itself), not their deep contents. The previous
+		// `deep: true` configuration walked the entire 100-key
+		// profile object + offers array on every reactive tick —
+		// which on a busy POS with a foreign price-list +
+		// pricing rules + stock updates fired thousands of times,
+		// dominating the click-input freeze (27 s INP on the search
+		// box). Internal field mutations inside `posProfile` /
+		// `offers` are state we already own; the handler only needs
+		// to re-fire when the WHOLE object is replaced (i.e.
+		// `setPosProfile(newProfile)` / `setOffers(newOffers)`).
 		this.$watch(
 			() => this.uiStore.posProfile,
 			(profile) => {
@@ -1070,7 +1081,7 @@ export default {
 					});
 				}
 			},
-			{ deep: true, immediate: true },
+			{ immediate: true },
 		);
 
 		this.$watch(
@@ -1080,7 +1091,7 @@ export default {
 					this.handleSetOffers(offers);
 				}
 			},
-			{ deep: true, immediate: true },
+			{ immediate: true },
 		);
 
 		this.$watch(

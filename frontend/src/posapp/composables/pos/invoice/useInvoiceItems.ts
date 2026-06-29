@@ -517,7 +517,9 @@ export function useInvoiceItems(invoiceType: Ref<string>) {
 		(next) => {
 			invoiceStore.setDeliveryCharges(next);
 		},
-		{ deep: true, immediate: true },
+		// Drop deep:true — `delivery_charges` is replaced (not
+		// mutated in place) when the cart's delivery preset changes.
+		{ immediate: true },
 	);
 
 	watch(

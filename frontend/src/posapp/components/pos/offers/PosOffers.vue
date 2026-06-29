@@ -329,6 +329,11 @@ export default {
 
 	watch: {
 		pos_offers: {
+			// Keep deep:true here. `updatePosOffers` mutates
+			// `pos_offer.items = offer.items` in-place (line 224) — a
+			// shallow watcher would miss those mutations and leave
+			// downstream `update_invoice_offers` event subscribers and
+			// the coupon-sync chain out of sync.
 			deep: true,
 			handler() {
 				this.handelOffers();
@@ -350,7 +355,7 @@ export default {
 			(profile) => {
 				if (profile) this.pos_profile = profile;
 			},
-			{ deep: true, immediate: true },
+			{ immediate: true },
 		);
 		this.$watch(
 			() => this.uiStore.applicableOffers,
@@ -359,7 +364,7 @@ export default {
 					this.updatePosOffers(offers);
 				}
 			},
-			{ deep: true, immediate: true },
+			{ immediate: true },
 		);
 
 		/*
@@ -378,6 +383,16 @@ export default {
 		this.eventBus.on("set_all_items", (data) => {
 			this.allItems = data;
 		});
+	},
+	beforeUnmount() {
+		// Cleanup eventBus listeners to prevent the leak that
+		// accumulated thousands of subscribers across customer-change
+		// remount cycles.
+		if (this.eventBus) {
+			this.eventBus.off("update_pos_offers");
+			this.eventBus.off("update_discount_percentage_offer_name");
+			this.eventBus.off("set_all_items");
+		}
 	},
 };
 </script>
