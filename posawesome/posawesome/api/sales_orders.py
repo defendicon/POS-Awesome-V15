@@ -7,6 +7,7 @@ import frappe
 from frappe.utils import getdate, nowdate
 
 from posawesome.posawesome.api.payment_entry import create_payment_entry
+from posawesome.posawesome.api.tax_contracts import apply_pos_tax_inclusion_contract
 
 
 def _payment_entry_job(order_name, payments):
@@ -95,6 +96,7 @@ def update_sales_order(data):
     so_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     so_doc.docstatus = 0
+    apply_pos_tax_inclusion_contract(so_doc)
     so_doc.save()
     return so_doc
 
@@ -149,6 +151,7 @@ def submit_sales_order(order):
 
     so_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
+    apply_pos_tax_inclusion_contract(so_doc)
     so_doc.save()
     so_doc.submit()
 

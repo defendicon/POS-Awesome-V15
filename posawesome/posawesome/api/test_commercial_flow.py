@@ -34,6 +34,7 @@ def _install_stubs():
         "posawesome.posawesome.api.invoices",
         "posawesome.posawesome.api.quotations",
         "posawesome.posawesome.api.sales_orders",
+        "posawesome.posawesome.api.tax_contracts",
         "posawesome.posawesome.api.erpnext_compat",
         "erpnext.selling.doctype.quotation.quotation",
         "erpnext.selling.doctype.sales_order.sales_order",
@@ -50,11 +51,19 @@ def _install_stubs():
     frappe_module.has_permission = lambda *args, **kwargs: True
     frappe_module.get_list = lambda *args, **kwargs: []
     frappe_module.get_doc = lambda *args, **kwargs: None
+    frappe_module.get_cached_value = lambda *args, **kwargs: None
     sys.modules["frappe"] = frappe_module
 
     frappe_utils = types.ModuleType("frappe.utils")
     frappe_utils.cint = lambda value: int(value or 0)
     sys.modules["frappe.utils"] = frappe_utils
+
+    tax_contracts_name = "posawesome.posawesome.api.tax_contracts"
+    tax_contracts_path = REPO_ROOT / "posawesome" / "posawesome" / "api" / "tax_contracts.py"
+    tax_contracts_spec = importlib.util.spec_from_file_location(tax_contracts_name, tax_contracts_path)
+    tax_contracts_module = importlib.util.module_from_spec(tax_contracts_spec)
+    sys.modules[tax_contracts_name] = tax_contracts_module
+    tax_contracts_spec.loader.exec_module(tax_contracts_module)
 
     invoices_module = types.ModuleType("posawesome.posawesome.api.invoices")
     invoices_module.get_draft_invoices = lambda **kwargs: []
@@ -208,6 +217,77 @@ class TestCommercialFlowApi(unittest.TestCase):
         self.assertEqual(prepared["flow_context"]["prepared_action"], "quote_to_order")
         self.assertEqual(prepared["flow_context"]["target_doctype"], "Sales Order")
         self.assertEqual(prepared["flow_context"]["source_links"]["quotation"], "QTN-0002")
+
+    def test_prepare_order_to_invoice_preserves_vat_inclusive_tax_contract(self):
+        def fake_get_doc(doctype, name):
+            return FakeDoc(
+                doctype=doctype,
+                name=name,
+                pos_profile="VAT Inclusive POS",
+                customer="Test Customer",
+                status="To Bill",
+                docstatus=1,
+                taxes=[
+                    {
+                        "charge_type": "On Net Total",
+                        "included_in_print_rate": 1,
+                    }
+                ],
+                items=[],
+            )
+
+        mapped_invoice = FakeDoc(
+            doctype="Sales Invoice",
+            name=None,
+            customer="Test Customer",
+            pos_profile=None,
+            docstatus=0,
+            taxes=[
+                {
+                    "charge_type": "On Net Total",
+                    "included_in_print_rate": 0,
+                },
+                {
+                    "charge_type": "Actual",
+                    "included_in_print_rate": 1,
+                },
+            ],
+            items=[],
+            calculate_taxes_and_totals=lambda: None,
+        )
+
+        calculate_calls = []
+
+        def calculate_taxes_and_totals():
+            calculate_calls.append(mapped_invoice.taxes[0]["included_in_print_rate"])
+
+        mapped_invoice.calculate_taxes_and_totals = calculate_taxes_and_totals
+
+        self.frappe.get_doc = fake_get_doc
+        self.frappe.get_cached_value = (
+            lambda doctype, name, fieldname: 1
+            if (doctype, name, fieldname)
+            == ("POS Profile", "VAT Inclusive POS", "posa_tax_inclusive")
+            else None
+        )
+
+        original_mapper = self.module._get_mapping_functions
+        self.module._get_mapping_functions = lambda: {
+            "order_to_invoice": lambda source_name: mapped_invoice
+        }
+        try:
+            prepared = self.module.prepare_document_flow_action(
+                action="order_to_invoice",
+                source_doctype="Sales Order",
+                source_name="SO-0001",
+            )
+        finally:
+            self.module._get_mapping_functions = original_mapper
+
+        self.assertEqual(prepared["prepared_doc"]["pos_profile"], "VAT Inclusive POS")
+        self.assertEqual(prepared["prepared_doc"]["taxes"][0]["included_in_print_rate"], 1)
+        self.assertEqual(prepared["prepared_doc"]["taxes"][1]["included_in_print_rate"], 0)
+        self.assertEqual(calculate_calls, [1])
 
     def test_prepare_document_flow_action_normalizes_draft_quote_customer(self):
         self.frappe.get_doc = lambda doctype, name: FakeDoc(

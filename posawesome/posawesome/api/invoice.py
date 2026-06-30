@@ -9,6 +9,7 @@ from frappe.utils import add_days, flt
 
 from posawesome.posawesome.api.utilities import get_company_domain  # Updated import
 from posawesome.posawesome.api.payments import get_posawesome_credit_redeem_remark
+from posawesome.posawesome.api.tax_contracts import apply_pos_tax_inclusion_contract
 from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
     get_applicable_delivery_charges,
 )
@@ -335,29 +336,7 @@ def calc_delivery_charges(doc):
 
 def apply_tax_inclusive(doc):
     """Mark taxes as inclusive based on POS Profile setting."""
-    if not doc.pos_profile:
-        return
-    try:
-        tax_inclusive = frappe.get_cached_value("POS Profile", doc.pos_profile, "posa_tax_inclusive")
-    except Exception:
-        tax_inclusive = 0
-
-    has_changes = False
-    for tax in doc.get("taxes", []):
-        if tax.charge_type == "Actual":
-            # Actual (flat-amount) taxes cannot be inclusive in the print rate
-            if tax.included_in_print_rate:
-                tax.included_in_print_rate = 0
-                has_changes = True
-            continue
-        if tax_inclusive and not tax.included_in_print_rate:
-            tax.included_in_print_rate = 1
-            has_changes = True
-        elif not tax_inclusive and tax.included_in_print_rate:
-            tax.included_in_print_rate = 0
-            has_changes = True
-    if has_changes:
-        doc.calculate_taxes_and_totals()
+    apply_pos_tax_inclusion_contract(doc)
 
 
 def validate_shift(doc):
