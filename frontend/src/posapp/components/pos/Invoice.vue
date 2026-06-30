@@ -222,6 +222,7 @@
 			v-model="confirm_payment_dialog"
 			:amount="payment_confirmation_amount"
 			:currency-symbol="currencySymbol(displayCurrency)"
+			:tender-suggestions="payment_confirmation_tender_suggestions"
 			@confirm="resolvePaymentConfirmation($event)"
 			@cancel="resolvePaymentConfirmation(null)"
 		/>
@@ -293,6 +294,7 @@ import stockCoordinator from "../../utils/stockCoordinator";
 import { getCurrentInstance, ref } from "vue";
 import { save_and_clear_invoice as saveAndClearInvoiceAction } from "./invoice_utils/actions";
 import { fetchDraftInvoices } from "../../utils/draftInvoices";
+import { getQuickCashTenderSuggestions } from "../../utils/cashTender";
 
 // Composables
 import { useOnlineStatus } from "../../composables/core/useOnlineStatus";
@@ -522,6 +524,17 @@ export default {
 				original_discount: originalDiscount,
 				prorated_discount: prorated,
 			};
+		},
+		payment_confirmation_tender_suggestions() {
+			return getQuickCashTenderSuggestions({
+				amount: this.payment_confirmation_amount,
+				currency: this.displayCurrency || this.selected_currency || this.pos_profile?.currency,
+				posProfile: this.pos_profile,
+				payments:
+					Array.isArray(this.invoice_doc?.payments) && this.invoice_doc.payments.length
+						? this.invoice_doc.payments
+						: this.pos_profile?.payments,
+			});
 		},
 		...invoiceComputed,
 	},

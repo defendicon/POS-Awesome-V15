@@ -372,9 +372,13 @@ def _strip_client_freebies_from_payload(payload):
 
         auto_marker = row.get("auto_free_source")
         is_free = cint(row.get("is_free_item"))
-        has_name = bool(row.get("name"))
+        pricing_rule_marker = (
+            row.get("source_rule")
+            or row.get("pricing_rule")
+            or row.get("pricing_rules")
+        )
 
-        if auto_marker:
+        if auto_marker or (is_free and pricing_rule_marker):
             modified = True
             continue
 

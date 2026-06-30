@@ -398,6 +398,83 @@ describe("pricingEngine - computeFreeItems", () => {
 		expect(freebies[0].uom).toBe("Nos");
 	});
 
+	it("does not return transaction freebies below the minimum amount", () => {
+		const rule = {
+			name: "FREE-MIN-AMT",
+			is_free_item_rule: 1,
+			price_or_discount: "Product",
+			apply_on: "Transaction",
+			min_amt: 100,
+			free_qty: 1,
+			specificity: 0,
+			priority: 5,
+			free_item: "BONUS",
+		};
+		const indexes = buildIndexes({ general: [rule] });
+
+		const belowMinimum = computeFreeItems({
+			item: { item_code: "ITEM-AMT", qty: 1 },
+			qty: 1,
+			docQty: 1,
+			docAmount: 40,
+			cartAmount: 40,
+			baseRate: 40,
+			ctx: {},
+			indexes,
+		});
+		expect(belowMinimum).toHaveLength(0);
+
+		const qualified = computeFreeItems({
+			item: { item_code: "ITEM-AMT", qty: 1 },
+			qty: 1,
+			docQty: 1,
+			docAmount: 40,
+			cartAmount: 120,
+			baseRate: 40,
+			ctx: {},
+			indexes,
+		});
+		expect(qualified).toHaveLength(1);
+		expect(qualified[0].item_code).toBe("BONUS");
+	});
+
+	it("does not apply item pricing rules below the minimum line amount", () => {
+		const rule = {
+			name: "DISC-MIN-AMT",
+			price_or_discount: "Discount",
+			discount_type: "Rate",
+			rate_or_discount: 10,
+			min_amt: 100,
+			specificity: 3,
+			priority: 5,
+		};
+		const indexes = buildIndexes({ items: { "ITEM-AMT": [rule] } });
+
+		const belowMinimum = applyLocalPricingRules({
+			item: { item_code: "ITEM-AMT", qty: 1 },
+			qty: 1,
+			docQty: 1,
+			docAmount: 60,
+			baseRate: 60,
+			ctx: {},
+			indexes,
+		});
+		expect(belowMinimum.rate).toBeCloseTo(60);
+		expect(belowMinimum.applied).toHaveLength(0);
+
+		const qualified = applyLocalPricingRules({
+			item: { item_code: "ITEM-AMT", qty: 2 },
+			qty: 2,
+			docQty: 2,
+			docAmount: 120,
+			baseRate: 60,
+			ctx: {},
+			indexes,
+		});
+		expect(qualified.rate).toBeCloseTo(54);
+		expect(qualified.applied[0].name).toBe("DISC-MIN-AMT");
+	});
+
 	it("skips freebies outside date range", () => {
 		const rule = {
 			name: "FREE-DATE",

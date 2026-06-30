@@ -39,6 +39,9 @@ BASE_FIELDS = [
 
 OPTIONAL_FIELDS = [
     "margin_type",
+    "max_qty",
+    "min_amt",
+    "max_amt",
     "margin_rate_or_amount",
     "apply_discount_on_rate",
     "same_item",

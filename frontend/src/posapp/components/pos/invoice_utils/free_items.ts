@@ -44,6 +44,14 @@ export function _syncAutoFreeLines(context: any, freebiesMap: Map<string, any> =
 	const existing = new Map();
 	const legacyFreeLines: any[] = [];
 
+	const baseFreeKey = (key) => {
+		if (!key || typeof key !== "string") {
+			return "";
+		}
+		const segments = key.split("::");
+		return segments.length >= 2 ? `${segments[0]}::${segments[1]}` : key;
+	};
+
 	const resolveRuleName = (line) => {
 		if (!line) {
 			return "";
@@ -293,7 +301,19 @@ export function _syncAutoFreeLines(context: any, freebiesMap: Map<string, any> =
 	};
 
 	for (const [key, data] of freebiesMap.entries()) {
-		const match = existing.get(key);
+		let match = existing.get(key);
+		if (!match) {
+			const expectedBaseKey = baseFreeKey(key);
+			for (const [existingKey, candidate] of existing.entries()) {
+				if (baseFreeKey(existingKey) === expectedBaseKey) {
+					match = candidate;
+					existing.delete(existingKey);
+					candidate.line.auto_free_source = key;
+					existing.set(key, candidate);
+					break;
+				}
+			}
+		}
 		if (match) {
 			applyFreeLineState(match.line, data);
 			continue;

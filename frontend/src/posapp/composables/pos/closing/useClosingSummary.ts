@@ -275,6 +275,23 @@ export function useClosingSummary(
 			: [];
 	});
 
+	const customerCreditRedeemedSummary = computed(() => {
+		const ov = unref(overview);
+		return (
+			ov?.customer_credit_redeemed || {
+				count: 0,
+				company_currency_total: 0,
+				by_currency: [],
+			}
+		);
+	});
+
+	const customerCreditRedeemedByCurrency = computed(() => {
+		return Array.isArray(customerCreditRedeemedSummary.value.by_currency)
+			? customerCreditRedeemedSummary.value.by_currency
+			: [];
+	});
+
 	const cashExpectedByCurrency = computed(() => {
 		return Array.isArray(cashExpectedSummary.value.by_currency)
 			? cashExpectedSummary.value.by_currency
@@ -364,6 +381,10 @@ export function useClosingSummary(
 			loyaltyRedemptionSummary.value.company_currency_total,
 			overviewCompanyCurrency.value,
 		);
+		const customerCreditValue = formatCurrencyWithSymbol(
+			customerCreditRedeemedSummary.value.company_currency_total,
+			overviewCompanyCurrency.value,
+		);
 		const cashValue = formatCurrencyWithSymbol(
 			cashExpectedSummary.value.company_currency_total,
 			overviewCompanyCurrency.value,
@@ -408,6 +429,14 @@ export function useClosingSummary(
 				value: loyaltyValue,
 				caption: `${__("Points")}: ${formatCount(loyaltyRedemptionSummary.value.points || 0)}`,
 				icon: "mdi-star-circle-outline",
+				color: "accent-info",
+			},
+			{
+				key: "customer-credit-redeemed",
+				label: __("Customer Credit Used"),
+				value: customerCreditValue,
+				caption: `${__("Invoices")}: ${formatCount(customerCreditRedeemedSummary.value.count || 0)}`,
+				icon: "mdi-account-credit-card-outline",
 				color: "accent-info",
 			},
 			{
@@ -516,6 +545,8 @@ export function useClosingSummary(
 		cashMovementSummary,
 		loyaltyRedemptionSummary,
 		loyaltyRedemptionByCurrency,
+		customerCreditRedeemedSummary,
+		customerCreditRedeemedByCurrency,
 		primaryInsights,
 		secondaryInsights,
 		shouldShowCompanyEquivalent,

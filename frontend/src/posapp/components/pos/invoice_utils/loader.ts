@@ -10,6 +10,82 @@ declare const __: (_text: string, _args?: any[]) => string;
 declare const flt: (_value: unknown, _precision?: number) => number;
 declare const frappe: any;
 
+function resolvePricingRuleName(line: any): string {
+	const preferString = (value: any): string => {
+		if (!value) {
+			return "";
+		}
+		if (typeof value === "string") {
+			const trimmed = value.trim();
+			if (!trimmed) {
+				return "";
+			}
+			if (
+				(trimmed.startsWith("[") && trimmed.endsWith("]")) ||
+				(trimmed.startsWith("{") && trimmed.endsWith("}"))
+			) {
+				try {
+					return preferString(JSON.parse(trimmed));
+				} catch {
+					return trimmed;
+				}
+			}
+			if (trimmed.includes(",")) {
+				return (trimmed.split(",")[0] || "").trim();
+			}
+			return trimmed;
+		}
+		if (Array.isArray(value)) {
+			for (const entry of value) {
+				const resolved = preferString(entry);
+				if (resolved) {
+					return resolved;
+				}
+			}
+			return "";
+		}
+		if (typeof value === "object") {
+			return (
+				value.name ||
+				value.rule ||
+				value.pricing_rule ||
+				value.pricingRule ||
+				""
+			);
+		}
+		return "";
+	};
+
+	return preferString(
+		line?.source_rule || line?.pricing_rule || line?.pricing_rules,
+	);
+}
+
+function markPricingRuleFreeLines(items: any[] = []) {
+	items.forEach((item) => {
+		if (!item || !(item.is_free_item === 1 || item.is_free_item === true || item.is_free_item === "1")) {
+			return;
+		}
+		if (item.auto_free_source) {
+			return;
+		}
+		const ruleName = resolvePricingRuleName(item);
+		if (!ruleName) {
+			return;
+		}
+		const parentRowId =
+			item.parent_row_id ||
+			item.parent_detail_docname ||
+			item.parent_row ||
+			item.parent_docname ||
+			"";
+		item.source_rule = item.source_rule || ruleName;
+		item.auto_free_source = parentRowId
+			? `${ruleName}::${item.item_code}::${parentRowId}`
+			: `${ruleName}::${item.item_code}`;
+	});
+}
+
 /**
  * Loader Utils
  * Handles loading invoice data and fetching customer balance.
@@ -209,6 +285,7 @@ export async function load_invoice(
 	context.posa_offers = data.posa_offers || [];
 	context.items = data.items || [];
 	context.packed_items = data.packed_items || [];
+	markPricingRuleFreeLines(context.items);
 
 	if (data.is_return && data.return_against) {
 		context.items.forEach((item) => {

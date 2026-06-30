@@ -707,6 +707,105 @@
 				</div>
 			</div>
 
+			<div
+				v-if="
+					hasMonetaryRedemption(
+						customerCreditRedeemedSummary,
+						customerCreditRedeemedByCurrency,
+					)
+				"
+				class="table-section mt-4"
+			>
+				<div class="table-header mb-2">
+					<h5 class="text-subtitle-1 text-grey-darken-2 mb-1">
+						{{ __("Customer Credit Redeemed") }}
+					</h5>
+					<p class="text-body-2 text-grey">
+						{{ __("Invoice value settled from customer credit, not cash collection") }}
+					</p>
+				</div>
+
+				<div class="overview-table-wrapper">
+					<table class="overview-table">
+						<thead>
+							<tr>
+								<th>{{ __("Currency") }}</th>
+								<th class="text-end">
+									{{ __("Redeemed Amount") }}
+								</th>
+								<th class="text-end">
+									{{ __("Invoices") }}
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr
+								v-for="row in customerCreditRedeemedByCurrency"
+								:key="`customer-credit-${row.currency}`"
+							>
+								<td>{{ row.currency }}</td>
+								<td class="text-end">
+									<div class="amount-with-base">
+										<div class="amount-primary">
+											<span class="overview-amount">
+												{{
+													formatCurrencyWithSymbol(
+														row.total || 0,
+														row.currency || overviewCompanyCurrency,
+													)
+												}}
+											</span>
+											<span
+												v-if="shouldShowCompanyEquivalent(row, row.currency)"
+												class="company-equivalent"
+											>
+												({{
+													formatCurrencyWithSymbol(
+														row.company_currency_total || 0,
+														overviewCompanyCurrency,
+													)
+												}})
+											</span>
+										</div>
+										<div
+											v-if="showExchangeRates(row, row.currency)"
+											class="exchange-note"
+										>
+											{{
+												formatExchangeRates(
+													row.exchange_rates,
+													row.currency || overviewCompanyCurrency,
+													overviewCompanyCurrency,
+												)
+											}}
+										</div>
+									</div>
+								</td>
+								<td class="text-end">{{ row.invoice_count || 0 }}</td>
+							</tr>
+							<tr>
+								<td>
+									<strong>{{ __("Total") }}</strong>
+								</td>
+								<td class="text-end">
+									<strong>
+										{{
+											formatCurrencyWithSymbol(
+												customerCreditRedeemedSummary.company_currency_total || 0,
+												overviewCompanyCurrency,
+											)
+										}}
+									</strong>
+								</td>
+								<td class="text-end">
+									<strong>{{ customerCreditRedeemedSummary.count || 0 }}</strong>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+
 			<div class="table-section mt-4">
 				<div class="table-header mb-2">
 					<h5 class="text-subtitle-1 text-grey-darken-2 mb-1">
@@ -794,6 +893,8 @@ defineProps({
 	cashMovementSummary: Object,
 	loyaltyRedemptionSummary: Object,
 	loyaltyRedemptionByCurrency: Array,
+	customerCreditRedeemedSummary: Object,
+	customerCreditRedeemedByCurrency: Array,
 	paymentsByMode: Array,
 	overviewCompanyCurrency: String,
 	// Functions
@@ -806,6 +907,18 @@ defineProps({
 });
 
 const __ = window.__ || ((t) => t);
+
+const hasMonetaryRedemption = (summary, rows = []) => {
+	if (!summary) return false;
+	if (Number(summary.company_currency_total || 0) !== 0) return true;
+	if (Number(summary.count || 0) !== 0) return true;
+	return (Array.isArray(rows) ? rows : []).some(
+		(row) =>
+			Number(row?.total || 0) !== 0 ||
+			Number(row?.company_currency_total || 0) !== 0 ||
+			Number(row?.invoice_count || 0) !== 0,
+	);
+};
 
 const hasLoyaltyRedemption = (summary, rows = []) => {
 	if (!summary) return false;
