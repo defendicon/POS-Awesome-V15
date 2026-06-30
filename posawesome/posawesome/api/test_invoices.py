@@ -12,9 +12,25 @@ def _install_frappe_stub():
     frappe_module._ = lambda text: text
     frappe_module.throw = lambda message: (_ for _ in ()).throw(Exception(message))
     frappe_module.whitelist = lambda *args, **kwargs: (lambda fn: fn)
-    frappe_module.db = types.SimpleNamespace(has_column=lambda *args, **kwargs: False)
+    frappe_module.db = types.SimpleNamespace(
+        has_column=lambda *args, **kwargs: False,
+        exists=lambda *args, **kwargs: False,
+    )
     frappe_module.get_list = lambda *args, **kwargs: []
+    frappe_module.get_doc = lambda *args, **kwargs: None
+    frappe_module.get_cached_value = lambda *args, **kwargs: None
     sys.modules["frappe"] = frappe_module
+
+    frappe_utils = types.ModuleType("frappe.utils")
+    frappe_utils.cint = lambda value: int(value or 0)
+    sys.modules["frappe.utils"] = frappe_utils
+
+    tax_contracts_name = "posawesome.posawesome.api.tax_contracts"
+    tax_contracts_path = REPO_ROOT / "posawesome" / "posawesome" / "api" / "tax_contracts.py"
+    tax_contracts_spec = importlib.util.spec_from_file_location(tax_contracts_name, tax_contracts_path)
+    tax_contracts_module = importlib.util.module_from_spec(tax_contracts_spec)
+    sys.modules[tax_contracts_name] = tax_contracts_module
+    tax_contracts_spec.loader.exec_module(tax_contracts_module)
 
     erpnext_sales_order = types.ModuleType("erpnext.selling.doctype.sales_order.sales_order")
     erpnext_sales_order.make_sales_invoice = lambda *args, **kwargs: None
@@ -136,6 +152,99 @@ class TestInvoicesApi(unittest.TestCase):
                 "docstatus": 0,
             },
         )
+
+    def test_create_sales_invoice_from_order_preserves_pos_tax_inclusive_flag(self):
+        class FakeDoc:
+            def __init__(self, **kwargs):
+                self.__dict__.update(kwargs)
+                if not hasattr(self, "flags"):
+                    self.flags = types.SimpleNamespace(ignore_permissions=False)
+                self.methods_run = []
+
+            def get(self, key, default=None):
+                return getattr(self, key, default)
+
+            def run_method(self, method):
+                self.methods_run.append(method)
+                if method == "calculate_taxes_and_totals":
+                    self.calculated_with_inclusive = self.taxes[0]["included_in_print_rate"]
+
+        source_order = FakeDoc(
+            doctype="Sales Order",
+            name="SO-0001",
+            pos_profile="VAT Inclusive POS",
+            taxes=[
+                {
+                    "charge_type": "On Net Total",
+                    "included_in_print_rate": 1,
+                }
+            ],
+        )
+        mapped_invoice = FakeDoc(
+            doctype="Sales Invoice",
+            pos_profile=None,
+            taxes=[
+                {
+                    "charge_type": "On Net Total",
+                    "included_in_print_rate": 0,
+                },
+                {
+                    "charge_type": "Actual",
+                    "included_in_print_rate": 1,
+                },
+            ],
+        )
+
+        self.invoices.frappe.db.exists = lambda doctype, name: doctype == "Sales Order" and name == "SO-0001"
+        self.invoices.frappe.get_doc = lambda doctype, name: source_order
+        self.invoices.frappe.get_cached_value = (
+            lambda doctype, name, fieldname: 1
+            if (doctype, name, fieldname)
+            == ("POS Profile", "VAT Inclusive POS", "posa_tax_inclusive")
+            else None
+        )
+        self.invoices.resolve_make_sales_invoice_from_order = lambda: (lambda name: mapped_invoice)
+
+        result = self.invoices.create_sales_invoice_from_order("SO-0001")
+
+        self.assertEqual(result.pos_profile, "VAT Inclusive POS")
+        self.assertEqual(result.taxes[0]["included_in_print_rate"], 1)
+        self.assertEqual(result.taxes[1]["included_in_print_rate"], 0)
+        self.assertEqual(result.calculated_with_inclusive, 1)
+
+    def test_tax_contract_does_not_normalize_mixed_taxes_without_pos_profile(self):
+        class FakeDoc:
+            def __init__(self, **kwargs):
+                self.__dict__.update(kwargs)
+                self.calculate_calls = 0
+
+            def get(self, key, default=None):
+                return getattr(self, key, default)
+
+            def calculate_taxes_and_totals(self):
+                self.calculate_calls += 1
+
+        doc = FakeDoc(
+            doctype="Sales Invoice",
+            pos_profile=None,
+            taxes=[
+                {
+                    "charge_type": "On Net Total",
+                    "included_in_print_rate": 1,
+                },
+                {
+                    "charge_type": "On Previous Row Amount",
+                    "included_in_print_rate": 0,
+                },
+            ],
+        )
+
+        changed = self.invoices.apply_pos_tax_inclusion_contract(doc)
+
+        self.assertFalse(changed)
+        self.assertEqual(doc.taxes[0]["included_in_print_rate"], 1)
+        self.assertEqual(doc.taxes[1]["included_in_print_rate"], 0)
+        self.assertEqual(doc.calculate_calls, 0)
 
 
 if __name__ == "__main__":

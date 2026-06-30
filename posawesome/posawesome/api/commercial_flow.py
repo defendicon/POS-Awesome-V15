@@ -14,6 +14,7 @@ from posawesome.posawesome.api.erpnext_compat import (
 from posawesome.posawesome.api.invoices import get_draft_invoices
 from posawesome.posawesome.api.quotations import search_quotations, submit_quotation
 from posawesome.posawesome.api.sales_orders import search_orders
+from posawesome.posawesome.api.tax_contracts import apply_pos_tax_inclusion_contract
 
 SOURCE_DOCTYPES = {
     "invoice": "Sales Invoice",
@@ -345,6 +346,9 @@ def prepare_document_flow_action(
         target_doctype = target_invoice_doctype
         update_stock = 1
         fulfillment_mode = "direct_invoice"
+
+    if action in {"order_to_invoice", "quote_to_invoice", "delivery_to_invoice"}:
+        apply_pos_tax_inclusion_contract(mapped_doc, source_doc=source_doc)
 
     prepared_doc = _prepare_mapped_doc(mapped_doc, target_doctype)
     if update_stock is not None:

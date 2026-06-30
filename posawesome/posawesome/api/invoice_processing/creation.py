@@ -25,6 +25,7 @@ from posawesome.posawesome.api.invoice_processing.stock import (
     _auto_set_return_batches,
     _collect_stock_errors,
 )
+from posawesome.posawesome.api.tax_contracts import apply_pos_tax_inclusion_contract
 from posawesome.posawesome.api.payment_processing.utils import get_bank_cash_account as get_bank_account
 from posawesome.posawesome.api.utilities import ensure_child_doctype, set_batch_nos_for_bundels
 from posawesome.posawesome.api.payments import redeeming_customer_credit
@@ -1052,6 +1053,8 @@ def update_invoice(data):
     # Remove duplicate taxes from item and profile templates
     _merge_duplicate_taxes(invoice_doc)
 
+    apply_pos_tax_inclusion_contract(invoice_doc)
+
     if locked_items:
         for item in invoice_doc.items:
             locked = locked_items.get(item.idx)
@@ -1137,14 +1140,6 @@ def update_invoice(data):
     data["conversion_rate"] = conversion_rate
     data["plc_conversion_rate"] = plc_conversion_rate
     data["exchange_rate_date"] = exchange_rate_date
-
-    inclusive = frappe.get_cached_value("POS Profile", invoice_doc.pos_profile, "posa_tax_inclusive")
-    if invoice_doc.get("taxes"):
-        for tax in invoice_doc.taxes:
-            if tax.charge_type == "Actual":
-                tax.included_in_print_rate = 0
-            else:
-                tax.included_in_print_rate = 1 if inclusive else 0
 
     _normalize_return_payment_rows(invoice_doc, conversion_rate)
 
