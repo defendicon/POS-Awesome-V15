@@ -67,6 +67,65 @@ describe("usePaymentPrinting", () => {
 		);
 	});
 
+	it("uses the submitted name override instead of an unsaved document name", async () => {
+		const { loadPrintPage } = usePaymentPrinting({
+			invoiceDoc: ref({ doctype: "Sales Order" }),
+			posProfile: ref({
+				print_format_for_online: "Standard",
+				print_format: "Standard",
+				letter_head: 0,
+				posa_open_print_in_new_tab: false,
+				posa_silent_print: false,
+				posa_allow_sales_order: 1,
+			}),
+			invoiceType: ref("Order"),
+			printFormat: ref("Standard"),
+		});
+
+		await loadPrintPage({
+			doc: {
+				doctype: "Sales Order",
+			},
+			name: "SAL-ORD-0001",
+		});
+
+		expect(silentPrint).toHaveBeenCalledWith(
+			expect.stringContaining("doctype=Sales%20Order"),
+			expect.any(Object),
+		);
+		expect(silentPrint).toHaveBeenCalledWith(
+			expect.stringContaining("&name=SAL-ORD-0001"),
+			expect.any(Object),
+		);
+	});
+
+	it("rejects print requests without a submitted document name", async () => {
+		const { loadPrintPage } = usePaymentPrinting({
+			invoiceDoc: ref({ doctype: "Sales Order" }),
+			posProfile: ref({
+				print_format_for_online: "Standard",
+				print_format: "Standard",
+				letter_head: 0,
+				posa_open_print_in_new_tab: false,
+				posa_silent_print: false,
+				posa_allow_sales_order: 1,
+			}),
+			invoiceType: ref("Order"),
+			printFormat: ref("Standard"),
+		});
+
+		await expect(
+			loadPrintPage({
+				doc: {
+					name: undefined,
+					doctype: "Sales Order",
+				},
+			}),
+		).rejects.toThrow("Cannot print document without a submitted document name");
+
+		expect(silentPrint).not.toHaveBeenCalled();
+	});
+
 	it("prints in-page when opening print in a new tab is disabled", async () => {
 		const openSpy = vi
 			.spyOn(window, "open")

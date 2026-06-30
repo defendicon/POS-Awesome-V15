@@ -273,6 +273,77 @@ describe("usePaymentSubmission", () => {
 		expect(onScheduleBackgroundCheck).not.toHaveBeenCalled();
 	});
 
+	it("prints a newly submitted Sales Order with the server-assigned name", async () => {
+		const invoiceService = (
+			await import("../src/posapp/services/invoiceService")
+		).default;
+		(invoiceService.submitInvoice as any).mockResolvedValue({
+			name: "SAL-ORD-0001",
+			status: 1,
+		});
+
+		const invoiceDoc = ref<any>({
+			doctype: "Sales Order",
+			is_return: 0,
+			items: [{ item_code: "ITEM-1", qty: 1 }],
+			payments: [{ mode_of_payment: "Cash", amount: 100, type: "Cash" }],
+			rounded_total: 100,
+			grand_total: 100,
+			posa_delivery_date: "2026-07-01",
+		});
+		const onPrint = vi.fn();
+		const setLastInvoice = vi.fn();
+
+		const { submitInvoice } = usePaymentSubmission({
+			invoiceDoc,
+			posProfile: ref({
+				posa_allow_submissions_in_background_job: 0,
+				posa_allow_sales_order: 1,
+				create_pos_invoice_instead_of_sales_invoice: 0,
+			}),
+			stockSettings: ref({}),
+			invoiceType: ref("Order"),
+			formatFloat: (value) => Number(value || 0),
+			stores: {
+				toastStore: { show: vi.fn() },
+				uiStore: {
+					setLastInvoice,
+					setLastStockAdjustment: vi.fn(),
+				},
+				customersStore: { setSelectedCustomer: vi.fn() },
+				invoiceStore: { invoiceDoc: invoiceDoc.value },
+			},
+			isCashback: ref(false),
+			paidChange: ref(0),
+			creditChange: ref(0),
+			redeemedCustomerCredit: ref(0),
+			customerCreditDict: ref([]),
+			diff_payment: ref(0),
+		});
+
+		await submitInvoice(true, {
+			onPrint,
+			onFinishNavigation: vi.fn(),
+			onScheduleBackgroundCheck: vi.fn(),
+		});
+
+		expect(onPrint).toHaveBeenCalledWith(
+			expect.objectContaining({
+				name: "SAL-ORD-0001",
+				doctype: "Sales Order",
+				docstatus: 1,
+			}),
+			expect.objectContaining({
+				name: "SAL-ORD-0001",
+				doctype: "Sales Order",
+				waitForInvoiceProcessing: false,
+				waitForPostSubmitPayments: false,
+			}),
+		);
+		expect(invoiceDoc.value.name).toBe("SAL-ORD-0001");
+		expect(setLastInvoice).toHaveBeenCalledWith("SAL-ORD-0001");
+	});
+
 	it("shows a merged processing toast instead of a plain success toast when post-submit payments are pending", async () => {
 		const invoiceService = (
 			await import("../src/posapp/services/invoiceService")

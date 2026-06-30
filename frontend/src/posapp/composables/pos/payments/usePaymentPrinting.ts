@@ -22,6 +22,14 @@ export interface PaymentPrintingOptions {
 export function usePaymentPrinting(options: PaymentPrintingOptions) {
 	const { invoiceDoc, posProfile, invoiceType, printFormat } = options;
 
+	const resolveDocumentName = (value: any) => {
+		if (value === null || value === undefined) {
+			return "";
+		}
+		const name = String(value).trim();
+		return name && name !== "undefined" && name !== "null" ? name : "";
+	};
+
 	const resolvePrintContext = (input: { doc?: any; doctype?: string } = {}) => {
 		const doc = input.doc || unref(invoiceDoc);
 		const profile = unref(posProfile);
@@ -81,9 +89,14 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 		win.print();
 	};
 
-	const loadPrintPage = async (input: { doc?: any; doctype?: string } = {}) => {
+	const loadPrintPage = async (input: { doc?: any; doctype?: string; name?: string } = {}) => {
 		const { doc, profile, doctype, print_format, letter_head } = resolvePrintContext(input);
 		const debugPrint = isDebugPrintEnabled();
+		const docname = resolveDocumentName(input.name || doc?.name);
+
+		if (!docname) {
+			throw new Error("Cannot print document without a submitted document name");
+		}
 
 		// Keep printview auto-trigger disabled; watchPrintWindow/silentPrint owns
 		// the single browser print call so submit-and-print does not prompt twice.
@@ -92,10 +105,10 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 			"/printview?doctype=" +
 			encodeURIComponent(doctype) +
 			"&name=" +
-			doc.name +
+			encodeURIComponent(docname) +
 			"&trigger_print=0" +
 			"&format=" +
-			print_format +
+			encodeURIComponent(print_format || "Standard") +
 			"&no_letterhead=" +
 			letter_head;
 
@@ -125,10 +138,10 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 				"/printview?doctype=" +
 				encodeURIComponent(doctype) +
 				"&name=" +
-				doc.name +
+				encodeURIComponent(docname) +
 				"&trigger_print=0" +
 				"&format=" +
-				print_format;
+				encodeURIComponent(print_format || "Standard");
 
 			if (profile.letter_head) {
 				newTabUrl +=
@@ -155,7 +168,7 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 				try {
 					await printDocumentViaQz({
 						doctype,
-						name: doc.name,
+						name: docname,
 						printFormat: print_format || "Standard",
 						letterhead: profile.letter_head || null,
 						noLetterhead: letter_head,
