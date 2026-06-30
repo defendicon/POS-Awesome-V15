@@ -569,6 +569,45 @@ def _apply_write_off_settings(invoice_doc, data):
     invoice_doc.base_write_off_amount = flt(effective_write_off * conversion_rate, precision_base_write_off)
 
 
+def _has_docfield(doctype, fieldname):
+    try:
+        return bool(frappe.get_meta(doctype).has_field(fieldname))
+    except Exception:
+        return False
+
+
+def _set_if_field_exists(doc, fieldname, value):
+    if _has_docfield(doc.doctype, fieldname):
+        doc.set(fieldname, value)
+
+
+def _apply_customer_credit_print_fields(invoice_doc, data):
+    redeemed_credit = flt((data or {}).get("redeemed_customer_credit"))
+    credit_rows = (data or {}).get("customer_credit_dict") or []
+
+    available_credit = 0
+    if isinstance(credit_rows, list):
+        for row in credit_rows:
+            if hasattr(row, "get"):
+                available_credit += flt(row.get("total_credit"))
+            else:
+                available_credit += flt(getattr(row, "total_credit", 0))
+
+    remaining_credit = max(flt(available_credit - redeemed_credit), 0)
+    precision = invoice_doc.precision("grand_total") or 2
+
+    _set_if_field_exists(
+        invoice_doc,
+        "posa_redeemed_customer_credit",
+        flt(redeemed_credit, precision),
+    )
+    _set_if_field_exists(
+        invoice_doc,
+        "posa_remaining_customer_credit_balance",
+        flt(remaining_credit, precision),
+    )
+
+
 def _safe_date_string(value):
     if value in (None, ""):
         return None
@@ -1280,6 +1319,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
                 is_payment_entry = 1
 
     _apply_invoice_gift_card_settlement(invoice_doc, data)
+    _apply_customer_credit_print_fields(invoice_doc, data)
     _normalize_return_payment_rows(invoice_doc, invoice_doc.get("conversion_rate") or 1)
     _apply_return_outstanding_policy(invoice_doc)
 

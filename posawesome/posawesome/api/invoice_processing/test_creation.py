@@ -50,6 +50,9 @@ class FakeDoc:
     def get(self, key, default=None):
         return self._data.get(key, default)
 
+    def set(self, key, value):
+        self._data[key] = value
+
     def update(self, other=None, **kwargs):
         if other:
             if isinstance(other, dict):
@@ -197,6 +200,39 @@ def _load_module():
     sys.modules[module_name] = module
     spec.loader.exec_module(module)
     return module
+
+
+class TestCustomerCreditPrintFields(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.frappe, cls.enqueue_calls = _install_framework_stubs()
+        _install_dependency_stubs()
+        _install_package_stubs()
+        cls.creation = _load_module()
+
+    def setUp(self):
+        self.frappe.get_meta = lambda _doctype: types.SimpleNamespace(
+            has_field=lambda fieldname: fieldname
+            in {
+                "posa_redeemed_customer_credit",
+                "posa_remaining_customer_credit_balance",
+            }
+        )
+
+    def test_customer_credit_print_fields_store_used_and_remaining_amounts(self):
+        invoice_doc = FakeDoc(doctype="Sales Invoice", grand_total=100)
+        data = {
+            "redeemed_customer_credit": 64.5,
+            "customer_credit_dict": [
+                {"total_credit": 50, "credit_to_redeem": 50},
+                {"total_credit": 50, "credit_to_redeem": 14.5},
+            ],
+        }
+
+        self.creation._apply_customer_credit_print_fields(invoice_doc, data)
+
+        self.assertEqual(invoice_doc.get("posa_redeemed_customer_credit"), 64.5)
+        self.assertEqual(invoice_doc.get("posa_remaining_customer_credit_balance"), 35.5)
 
 
 class TestUpdateInvoiceReturnPayments(unittest.TestCase):

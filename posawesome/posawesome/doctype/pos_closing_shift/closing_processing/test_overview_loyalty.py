@@ -132,6 +132,58 @@ class TestClosingOverviewLoyalty(unittest.TestCase):
         self.assertEqual(result["loyalty_redemption"]["by_currency"][0]["points"], 2)
         self.assertEqual(result["loyalty_redemption"]["by_currency"][0]["invoice_count"], 1)
 
+    def test_customer_credit_redeemed_reports_stored_invoice_print_field(self):
+        self.module.get_pos_invoices = lambda *args, **kwargs: [
+            AttrDict(
+                {
+                    "name": "SINV-0001",
+                    "currency": "USD",
+                    "conversion_rate": 1,
+                    "grand_total": 100,
+                    "rounded_total": 100,
+                    "base_grand_total": 100,
+                    "posa_redeemed_customer_credit": 64.5,
+                    "payments": [],
+                }
+            ),
+            AttrDict(
+                {
+                    "name": "SINV-0002",
+                    "currency": "EUR",
+                    "conversion_rate": 1.2,
+                    "grand_total": 80,
+                    "rounded_total": 80,
+                    "base_grand_total": 96,
+                    "posa_redeemed_customer_credit": 10,
+                    "payments": [],
+                }
+            ),
+        ]
+
+        result = self.module.get_closing_shift_overview("POS-OPEN-1")
+
+        self.assertEqual(result["customer_credit_redeemed"]["company_currency_total"], 76.5)
+        self.assertEqual(result["customer_credit_redeemed"]["count"], 2)
+        self.assertEqual(
+            result["customer_credit_redeemed"]["by_currency"],
+            [
+                {
+                    "currency": "EUR",
+                    "total": 10,
+                    "company_currency_total": 12,
+                    "exchange_rates": [1.2],
+                    "invoice_count": 1,
+                },
+                {
+                    "currency": "USD",
+                    "total": 64.5,
+                    "company_currency_total": 64.5,
+                    "exchange_rates": [],
+                    "invoice_count": 1,
+                },
+            ],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

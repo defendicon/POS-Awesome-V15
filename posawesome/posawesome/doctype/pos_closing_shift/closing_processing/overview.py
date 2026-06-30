@@ -77,6 +77,9 @@ def get_closing_shift_overview(pos_opening_shift):
     loyalty_redeemed_points = 0
     loyalty_redeemed_invoice_count = 0
     loyalty_redeemed_totals_by_currency = {}
+    customer_credit_redeemed_company_currency_total = 0
+    customer_credit_redeemed_invoice_count = 0
+    customer_credit_redeemed_totals_by_currency = {}
     cash_movement_count = 0
     cash_movement_company_currency_total = 0
     cash_movement_totals_by_type = {}
@@ -303,6 +306,42 @@ def get_closing_shift_overview(pos_opening_shift):
                     rate = flt(conversion_rate)
                 if rate:
                     loyalty_entry["exchange_rates"].add(rate)
+
+        customer_credit_amount = flt(invoice.get("posa_redeemed_customer_credit") or 0)
+        if customer_credit_amount > 0:
+            customer_credit_base_amount = customer_credit_amount
+            if invoice_currency != company_currency:
+                customer_credit_base_amount = customer_credit_amount * flt(conversion_rate or 1)
+
+            customer_credit_redeemed_company_currency_total += customer_credit_base_amount
+            customer_credit_redeemed_invoice_count += 1
+
+            customer_credit_entry = customer_credit_redeemed_totals_by_currency.setdefault(
+                invoice_currency,
+                {
+                    "currency": invoice_currency,
+                    "total": 0,
+                    "company_currency_total": 0,
+                    "invoice_count": 0,
+                    "exchange_rates": set(),
+                },
+            )
+            customer_credit_entry["total"] += customer_credit_amount
+            customer_credit_entry["company_currency_total"] += customer_credit_base_amount
+            customer_credit_entry["invoice_count"] += 1
+
+            if invoice_currency != company_currency:
+                rate = None
+                if customer_credit_amount:
+                    rate = (
+                        abs(customer_credit_base_amount) / abs(customer_credit_amount)
+                        if customer_credit_base_amount
+                        else None
+                    )
+                if not rate and conversion_rate:
+                    rate = flt(conversion_rate)
+                if rate:
+                    customer_credit_entry["exchange_rates"].add(rate)
 
         change_amount = flt(invoice.get("change_amount") or 0)
         has_overpayment_entry = invoice.get("name") in overpayment_invoice_names
@@ -740,6 +779,14 @@ def get_closing_shift_overview(pos_opening_shift):
                 loyalty_redeemed_totals_by_currency,
                 include_count=True,
                 include_points=True,
+            ),
+        },
+        "customer_credit_redeemed": {
+            "count": customer_credit_redeemed_invoice_count,
+            "company_currency_total": flt(customer_credit_redeemed_company_currency_total),
+            "by_currency": prepare_currency_rows(
+                customer_credit_redeemed_totals_by_currency,
+                include_count=True,
             ),
         },
         "cash_expected": {

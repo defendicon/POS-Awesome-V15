@@ -19,6 +19,8 @@
 								:cash-movement-summary="cashMovementSummary"
 								:loyalty-redemption-summary="loyaltyRedemptionSummary"
 								:loyalty-redemption-by-currency="loyaltyRedemptionByCurrency"
+								:customer-credit-redeemed-summary="customerCreditRedeemedSummary"
+								:customer-credit-redeemed-by-currency="customerCreditRedeemedByCurrency"
 								:payments-by-mode="paymentsByMode"
 								:overview-company-currency="overviewCompanyCurrency"
 								:format-currency-with-symbol="formatCurrencyWithSymbol"
