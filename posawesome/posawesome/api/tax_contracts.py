@@ -47,14 +47,6 @@ def _profile_tax_inclusive(pos_profile):
         return None
 
 
-def _source_tax_inclusive(source_doc):
-    for tax in _tax_rows(source_doc):
-        charge_type = str(_get_value(tax, "charge_type", "") or "").strip()
-        if charge_type != "Actual" and _as_int(_get_value(tax, "included_in_print_rate", 0)):
-            return 1
-    return 0
-
-
 def apply_pos_tax_inclusion_contract(doc, source_doc=None, recalculate=True):
     """Apply POS Profile inclusive-tax rules to mapped POS documents.
 
@@ -70,9 +62,13 @@ def apply_pos_tax_inclusion_contract(doc, source_doc=None, recalculate=True):
     if source_pos_profile and not _get_value(doc, "pos_profile"):
         _set_value(doc, "pos_profile", source_pos_profile)
 
-    inclusive = _profile_tax_inclusive(_get_value(doc, "pos_profile") or source_pos_profile)
+    pos_profile = _get_value(doc, "pos_profile") or source_pos_profile
+    if not pos_profile:
+        return False
+
+    inclusive = _profile_tax_inclusive(pos_profile)
     if inclusive is None:
-        inclusive = _source_tax_inclusive(source_doc or doc)
+        return False
 
     changed = False
     for tax in _tax_rows(doc):

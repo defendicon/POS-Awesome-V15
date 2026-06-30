@@ -212,6 +212,40 @@ class TestInvoicesApi(unittest.TestCase):
         self.assertEqual(result.taxes[1]["included_in_print_rate"], 0)
         self.assertEqual(result.calculated_with_inclusive, 1)
 
+    def test_tax_contract_does_not_normalize_mixed_taxes_without_pos_profile(self):
+        class FakeDoc:
+            def __init__(self, **kwargs):
+                self.__dict__.update(kwargs)
+                self.calculate_calls = 0
+
+            def get(self, key, default=None):
+                return getattr(self, key, default)
+
+            def calculate_taxes_and_totals(self):
+                self.calculate_calls += 1
+
+        doc = FakeDoc(
+            doctype="Sales Invoice",
+            pos_profile=None,
+            taxes=[
+                {
+                    "charge_type": "On Net Total",
+                    "included_in_print_rate": 1,
+                },
+                {
+                    "charge_type": "On Previous Row Amount",
+                    "included_in_print_rate": 0,
+                },
+            ],
+        )
+
+        changed = self.invoices.apply_pos_tax_inclusion_contract(doc)
+
+        self.assertFalse(changed)
+        self.assertEqual(doc.taxes[0]["included_in_print_rate"], 1)
+        self.assertEqual(doc.taxes[1]["included_in_print_rate"], 0)
+        self.assertEqual(doc.calculate_calls, 0)
+
 
 if __name__ == "__main__":
     unittest.main()
