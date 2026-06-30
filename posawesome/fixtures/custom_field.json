@@ -8296,7 +8296,7 @@
 		"no_copy": 1,
 		"print_hide_if_no_value": 1,
 		"read_only": 1,
-		"insert_after": "gift_card_redemptions",
+		"insert_after": "payments",
 		"name": "Sales Invoice-posa_redeemed_customer_credit"
 	},
 	{
@@ -8320,7 +8320,7 @@
 		"no_copy": 1,
 		"print_hide_if_no_value": 1,
 		"read_only": 1,
-		"insert_after": "gift_card_redemptions",
+		"insert_after": "payments",
 		"name": "POS Invoice-posa_redeemed_customer_credit"
 	},
 	{

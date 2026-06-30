@@ -7,7 +7,7 @@ FIELDS = [
         "fieldname": "posa_redeemed_customer_credit",
         "label": "Customer Credit Used",
         "fieldtype": "Currency",
-        "insert_after": "gift_card_redemptions",
+        "insert_after": "payments",
         "read_only": 1,
         "no_copy": 1,
         "print_hide_if_no_value": 1,

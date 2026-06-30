@@ -27,6 +27,8 @@ class TestCustomerCreditInvoiceFields(unittest.TestCase):
         self.assertEqual(remaining["no_copy"], 1)
         self.assertEqual(used.get("print_hide_if_no_value"), 1)
         self.assertEqual(remaining.get("print_hide_if_no_value"), 1)
+        self.assertEqual(used["insert_after"], "payments")
+        self.assertEqual(remaining["insert_after"], "posa_redeemed_customer_credit")
 
 
 if __name__ == "__main__":
