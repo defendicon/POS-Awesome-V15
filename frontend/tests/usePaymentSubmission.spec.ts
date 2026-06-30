@@ -262,7 +262,11 @@ describe("usePaymentSubmission", () => {
 		});
 
 		expect(onPrint).toHaveBeenCalledWith(
-			invoiceDoc.value,
+			expect.objectContaining({
+				name: "ACC-SINV-0004",
+				doctype: "Sales Invoice",
+				docstatus: 1,
+			}),
 			expect.objectContaining({
 				name: "ACC-SINV-0004",
 				doctype: "Sales Invoice",
@@ -279,7 +283,6 @@ describe("usePaymentSubmission", () => {
 		).default;
 		(invoiceService.submitInvoice as any).mockResolvedValue({
 			name: "SAL-ORD-0001",
-			status: 1,
 		});
 
 		const invoiceDoc = ref<any>({
@@ -293,6 +296,9 @@ describe("usePaymentSubmission", () => {
 		});
 		const onPrint = vi.fn();
 		const setLastInvoice = vi.fn();
+		const mergeInvoiceDoc = vi.fn((patch) => {
+			Object.assign(invoiceDoc.value, patch);
+		});
 
 		const { submitInvoice } = usePaymentSubmission({
 			invoiceDoc,
@@ -311,7 +317,7 @@ describe("usePaymentSubmission", () => {
 					setLastStockAdjustment: vi.fn(),
 				},
 				customersStore: { setSelectedCustomer: vi.fn() },
-				invoiceStore: { invoiceDoc: invoiceDoc.value },
+				invoiceStore: { invoiceDoc: invoiceDoc.value, mergeInvoiceDoc },
 			},
 			isCashback: ref(false),
 			paidChange: ref(0),
@@ -340,6 +346,11 @@ describe("usePaymentSubmission", () => {
 				waitForPostSubmitPayments: false,
 			}),
 		);
+		expect(mergeInvoiceDoc).toHaveBeenCalledWith({
+			name: "SAL-ORD-0001",
+			doctype: "Sales Order",
+			docstatus: 1,
+		});
 		expect(invoiceDoc.value.name).toBe("SAL-ORD-0001");
 		expect(setLastInvoice).toHaveBeenCalledWith("SAL-ORD-0001");
 	});

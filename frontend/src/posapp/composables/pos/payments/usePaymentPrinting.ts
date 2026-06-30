@@ -92,9 +92,10 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 	const loadPrintPage = async (input: { doc?: any; doctype?: string; name?: string } = {}) => {
 		const { doc, profile, doctype, print_format, letter_head } = resolvePrintContext(input);
 		const debugPrint = isDebugPrintEnabled();
+		const offline = isOffline();
 		const docname = resolveDocumentName(input.name || doc?.name);
 
-		if (!docname) {
+		if (!docname && !offline) {
 			throw new Error("Cannot print document without a submitted document name");
 		}
 
@@ -126,7 +127,7 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 		};
 
 		if (profile.posa_open_print_in_new_tab) {
-			if (isOffline()) {
+			if (offline) {
 				openOfflineInvoicePreview(doc, {
 					debugPrint,
 					printFormatStr: print_format,
@@ -164,7 +165,7 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 		}
 
 		if (profile.posa_silent_print) {
-			if (!isOffline()) {
+			if (!offline) {
 				try {
 					await printDocumentViaQz({
 						doctype,

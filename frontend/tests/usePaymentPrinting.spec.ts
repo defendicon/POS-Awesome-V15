@@ -24,10 +24,12 @@ vi.mock("../src/offline_print_template", () => ({
 
 import { usePaymentPrinting } from "../src/posapp/composables/pos/payments/usePaymentPrinting";
 import { silentPrint, watchPrintWindow } from "../src/posapp/plugins/print";
+import { isOffline } from "../src/offline/index";
 
 describe("usePaymentPrinting", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		(isOffline as any).mockReturnValue(false);
 		vi.stubGlobal("frappe", {
 			urllib: {
 				get_base_url: () => "https://example.test",
@@ -123,6 +125,44 @@ describe("usePaymentPrinting", () => {
 			}),
 		).rejects.toThrow("Cannot print document without a submitted document name");
 
+		expect(silentPrint).not.toHaveBeenCalled();
+	});
+
+	it("allows offline preview printing without a submitted document name", async () => {
+		(isOffline as any).mockReturnValue(true);
+		const openSpy = vi.spyOn(window, "open").mockReturnValue({
+			document: {
+				write: vi.fn(),
+				close: vi.fn(),
+			},
+			focus: vi.fn(),
+			location: { href: "about:blank" },
+		} as any);
+
+		const { loadPrintPage } = usePaymentPrinting({
+			invoiceDoc: ref({ doctype: "Sales Order", items: [] }),
+			posProfile: ref({
+				print_format_for_online: "Standard",
+				print_format: "Standard",
+				letter_head: 0,
+				posa_open_print_in_new_tab: true,
+				posa_silent_print: false,
+				posa_allow_sales_order: 1,
+			}),
+			invoiceType: ref("Order"),
+			printFormat: ref("Standard"),
+		});
+
+		await expect(
+			loadPrintPage({
+				doc: {
+					doctype: "Sales Order",
+					items: [],
+				},
+			}),
+		).resolves.toBeUndefined();
+
+		expect(openSpy).toHaveBeenCalledWith("", "_blank");
 		expect(silentPrint).not.toHaveBeenCalled();
 	});
 
