@@ -52,18 +52,19 @@ def execute():
             custom_field_name = f"{doctype}-{field['fieldname']}"
             if not frappe.db.exists("Custom Field", custom_field_name):
                 create_custom_field(doctype, field)
-            else:
-                frappe.db.set_value(
-                    "Custom Field",
-                    custom_field_name,
-                    {
-                        "label": field["label"],
-                        "fieldtype": field["fieldtype"],
-                        "insert_after": field["insert_after"],
-                        "read_only": field["read_only"],
-                        "no_copy": field["no_copy"],
-                        "print_hide_if_no_value": field["print_hide_if_no_value"],
-                    },
-                    update_modified=False,
-                )
+                continue
+
+            frappe.db.set_value(
+                "Custom Field",
+                custom_field_name,
+                {
+                    "label": field["label"],
+                    "fieldtype": field["fieldtype"],
+                    "insert_after": field["insert_after"],
+                    "read_only": field["read_only"],
+                    "no_copy": field["no_copy"],
+                    "print_hide_if_no_value": field["print_hide_if_no_value"],
+                },
+                update_modified=False,
+            )
         frappe.clear_cache(doctype=doctype)

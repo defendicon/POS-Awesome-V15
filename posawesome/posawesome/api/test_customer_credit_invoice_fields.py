@@ -13,9 +13,9 @@ def _load_custom_field(name):
 
 
 class TestCustomerCreditInvoiceFields(unittest.TestCase):
-    def test_sales_invoice_customer_credit_fields_are_printable(self):
-        used = _load_custom_field("Sales Invoice-posa_redeemed_customer_credit")
-        remaining = _load_custom_field("Sales Invoice-posa_remaining_customer_credit_balance")
+    def assert_customer_credit_fields(self, doctype, expected_first_anchor):
+        used = _load_custom_field(f"{doctype}-posa_redeemed_customer_credit")
+        remaining = _load_custom_field(f"{doctype}-posa_remaining_customer_credit_balance")
 
         self.assertIsNotNone(used)
         self.assertIsNotNone(remaining)
@@ -27,8 +27,14 @@ class TestCustomerCreditInvoiceFields(unittest.TestCase):
         self.assertEqual(remaining["no_copy"], 1)
         self.assertEqual(used.get("print_hide_if_no_value"), 1)
         self.assertEqual(remaining.get("print_hide_if_no_value"), 1)
-        self.assertEqual(used["insert_after"], "payments")
+        self.assertEqual(used["insert_after"], expected_first_anchor)
         self.assertEqual(remaining["insert_after"], "posa_redeemed_customer_credit")
+
+    def test_sales_invoice_customer_credit_fields_are_in_payments_tab_after_advances(self):
+        self.assert_customer_credit_fields("Sales Invoice", "advances")
+
+    def test_pos_invoice_customer_credit_fields_are_in_payments_tab_after_payments(self):
+        self.assert_customer_credit_fields("POS Invoice", "payments")
 
 
 if __name__ == "__main__":

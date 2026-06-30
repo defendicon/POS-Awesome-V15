@@ -8296,7 +8296,7 @@
 		"no_copy": 1,
 		"print_hide_if_no_value": 1,
 		"read_only": 1,
-		"insert_after": "payments",
+		"insert_after": "advances",
 		"name": "Sales Invoice-posa_redeemed_customer_credit"
 	},
 	{
