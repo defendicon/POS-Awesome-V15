@@ -248,6 +248,132 @@ def _get_purchase_order_progress(po_doc):
     }
 
 
+def _get_receipt_summary_by_po_names(po_names):
+    if not po_names:
+        return {}
+
+    rows = frappe.db.sql(
+        """
+        select pri.purchase_order,
+               count(distinct pr.name) as receipt_count
+        from `tabPurchase Receipt Item` pri
+        inner join `tabPurchase Receipt` pr on pr.name = pri.parent
+        where pr.docstatus = 1
+          and pri.purchase_order in %s
+        group by pri.purchase_order
+        """,
+        (tuple(po_names),),
+        as_dict=True,
+    )
+    return {
+        row.get("purchase_order"): {
+            "receipt_count": cint(row.get("receipt_count")),
+        }
+        for row in rows
+    }
+
+
+def _get_invoice_summary_by_po_names(po_names):
+    if not po_names:
+        return {}
+
+    rows = frappe.db.sql(
+        """
+        select linked.purchase_order,
+               count(linked.invoice_name) as invoice_count,
+               sum(linked.outstanding_amount) as outstanding_amount,
+               max(linked.posting_date) as last_invoice_date
+        from (
+            select distinct
+                   pii.purchase_order,
+                   pi.name as invoice_name,
+                   pi.outstanding_amount,
+                   pi.posting_date
+            from `tabPurchase Invoice Item` pii
+            inner join `tabPurchase Invoice` pi on pi.name = pii.parent
+            where pi.docstatus = 1
+              and pii.purchase_order in %s
+        ) linked
+        group by linked.purchase_order
+        """,
+        (tuple(po_names),),
+        as_dict=True,
+    )
+    return {
+        row.get("purchase_order"): {
+            "invoice_count": cint(row.get("invoice_count")),
+            "outstanding_amount": flt(row.get("outstanding_amount")),
+            "last_invoice_date": row.get("last_invoice_date"),
+        }
+        for row in rows
+    }
+
+
+def _get_purchase_order_advance_paid_by_names(po_names):
+    if not po_names:
+        return {}
+
+    rows = frappe.db.sql(
+        """
+        select per.reference_name as purchase_order,
+               sum(per.allocated_amount) as advance_paid
+        from `tabPayment Entry Reference` per
+        inner join `tabPayment Entry` pe on pe.name = per.parent
+        where pe.docstatus = 1
+          and pe.payment_type = 'Pay'
+          and per.reference_doctype = 'Purchase Order'
+          and per.reference_name in %s
+        group by per.reference_name
+        """,
+        (tuple(po_names),),
+        as_dict=True,
+    )
+    return {row.get("purchase_order"): flt(row.get("advance_paid")) for row in rows}
+
+
+def _get_purchase_order_management_row(row, receipt_summary, invoice_summary, advance_paid_map):
+    progress = _get_purchase_order_progress(row)
+    po_name = row.get("name")
+    invoice_info = invoice_summary.get(po_name, {})
+    advance_paid = flt(advance_paid_map.get(po_name))
+    invoice_outstanding = flt(invoice_info.get("outstanding_amount"))
+    payable_amount = invoice_outstanding if invoice_info.get("invoice_count") else max(
+        flt(row.get("grand_total")) - advance_paid, 0
+    )
+
+    row.update(progress)
+    row.update(receipt_summary.get(po_name, {}))
+    row["invoice_count"] = cint(invoice_info.get("invoice_count"))
+    row["outstanding_amount"] = invoice_outstanding
+    row["last_invoice_date"] = invoice_info.get("last_invoice_date")
+    row["advance_paid"] = advance_paid
+    row["payable_amount"] = payable_amount
+    row["needs_receipt"] = not progress["receipt_complete"]
+    row["needs_invoice"] = not progress["invoice_complete"]
+    row["needs_payment"] = payable_amount > 0
+    return row
+
+
+def _get_payment_reference_for_purchase_order(po_doc):
+    rows = frappe.db.sql(
+        """
+        select distinct pi.name, pi.outstanding_amount, pi.posting_date
+        from `tabPurchase Invoice Item` pii
+        inner join `tabPurchase Invoice` pi on pi.name = pii.parent
+        where pi.docstatus = 1
+          and pi.outstanding_amount > 0
+          and pii.purchase_order = %s
+        order by pi.posting_date desc, pi.modified desc
+        limit 1
+        """,
+        (po_doc.name,),
+        as_dict=True,
+    )
+    if rows:
+        return frappe.get_doc("Purchase Invoice", rows[0].get("name"))
+    return po_doc
+
+
 def _create_purchase_receipt(po_doc, payload, default_warehouse, transaction_date):
     receipt_date = _normalize_date_for_backend(
         payload.get("receipt_date") or payload.get("posting_date"),
@@ -912,13 +1038,90 @@ def search_draft_purchase_orders(
     _assert_pos_write_allowed(profile, company=company)
     _ensure_allowed(profile, "posa_allow_purchase_order", _("Purchase orders"))
 
+    filters = {"docstatus": 0}
+    if company:
+        filters["company"] = company
+
+    if warehouse:
+        filters["set_warehouse"] = warehouse
+
+    resolved_supplier = _resolve_supplier(supplier) if supplier else None
+    if resolved_supplier:
+        filters["supplier"] = resolved_supplier
+
+    start_date = _normalize_date_for_backend(from_date)
+    end_date = _normalize_date_for_backend(to_date)
+    if start_date and end_date:
+        filters["transaction_date"] = ["between", [start_date, end_date]]
+    elif start_date:
+        filters["transaction_date"] = [">=", start_date]
+    elif end_date:
+        filters["transaction_date"] = ["<=", end_date]
+
+    effective_search_text = search_text
+    if supplier and not resolved_supplier and not effective_search_text:
+        effective_search_text = supplier
+
+    or_filters = None
+    if effective_search_text:
+        like_value = f"%{str(effective_search_text).strip()}%"
+        or_filters = {
+            "name": ["like", like_value],
+            "supplier": ["like", like_value],
+            "supplier_name": ["like", like_value],
+        }
+
+    try:
+        limit_page_length = max(1, min(cint(limit or 50), 200))
+    except Exception:
+        limit_page_length = 50
+
+    return frappe.get_all(
+        "Purchase Order",
+        filters=filters,
+        or_filters=or_filters,
+        fields=[
+            "name",
+            "supplier",
+            "supplier_name",
+            "company",
+            "transaction_date",
+            "schedule_date",
+            "grand_total",
+            "currency",
+            "set_warehouse",
+            "status",
+            "modified",
+            "owner",
+        ],
+        order_by="modified desc",
+        limit_page_length=limit_page_length,
+    )
+
+
+@frappe.whitelist()
+def search_purchase_management_orders(
+    pos_profile=None,
+    company=None,
+    search_text=None,
+    supplier=None,
+    warehouse=None,
+    from_date=None,
+    to_date=None,
+    status_filter=None,
+    limit=50,
+):
+    profile = _resolve_pos_profile(pos_profile)
+    company = company or profile.get("company") or frappe.defaults.get_default("company")
+    _assert_pos_write_allowed(profile, company=company)
+    _ensure_allowed(profile, "posa_allow_purchase_order", _("Purchase orders"))
+
     filters = {
-        "docstatus": ["in", [0, 1]],
+        "docstatus": 1,
         "status": ["not in", ["Closed", "Cancelled"]],
     }
     if company:
         filters["company"] = company
-
     if warehouse:
         filters["set_warehouse"] = warehouse
 
@@ -977,15 +1180,27 @@ def search_draft_purchase_orders(
         order_by="modified desc",
         limit_page_length=limit_page_length,
     )
+    po_names = [row.get("name") for row in orders if row.get("name")]
+    receipt_summary = _get_receipt_summary_by_po_names(po_names)
+    invoice_summary = _get_invoice_summary_by_po_names(po_names)
+    advance_paid_map = _get_purchase_order_advance_paid_by_names(po_names)
+
     results = []
     for row in orders:
-        progress = _get_purchase_order_progress(row)
-        if cint(row.get("docstatus")) == 0 or not (
-            progress["receipt_complete"] and progress["invoice_complete"]
+        row = _get_purchase_order_management_row(
+            row, receipt_summary, invoice_summary, advance_paid_map
+        )
+        if status_filter == "to_receive" and not row.get("needs_receipt"):
+            continue
+        if status_filter == "to_bill" and not row.get("needs_invoice"):
+            continue
+        if status_filter == "to_pay" and not row.get("needs_payment"):
+            continue
+        if status_filter == "active" and not (
+            row.get("needs_receipt") or row.get("needs_invoice") or row.get("needs_payment")
         ):
-            row.update(progress)
-            row["is_draft"] = cint(row.get("docstatus")) == 0
-            results.append(row)
+            continue
+        results.append(row)
 
     return results
 
@@ -1052,8 +1267,8 @@ def get_draft_purchase_order(purchase_order, pos_profile=None, company=None):
         frappe.throw(_("Purchase Order {0} was not found.").format(purchase_order))
 
     po_doc = frappe.get_doc("Purchase Order", purchase_order)
-    if cint(po_doc.docstatus) not in (0, 1):
-        frappe.throw(_("Only draft or submitted Purchase Orders can be loaded."))
+    if cint(po_doc.docstatus) != 0:
+        frappe.throw(_("Only draft Purchase Orders can be loaded."))
     if company and po_doc.company and po_doc.company != company:
         frappe.throw(_("Purchase Order {0} does not belong to company {1}.").format(purchase_order, company))
 
@@ -1061,6 +1276,144 @@ def get_draft_purchase_order(purchase_order, pos_profile=None, company=None):
     doc.update(_get_purchase_order_progress(po_doc))
     doc["is_draft"] = cint(po_doc.docstatus) == 0
     return _attach_purchase_item_options(doc, source_doc=po_doc)
+
+
+@frappe.whitelist()
+def get_purchase_management_order(purchase_order, pos_profile=None, company=None):
+    profile = _resolve_pos_profile(pos_profile)
+    company = company or profile.get("company") or frappe.defaults.get_default("company")
+    _assert_pos_write_allowed(profile, company=company)
+    _ensure_allowed(profile, "posa_allow_purchase_order", _("Purchase orders"))
+
+    if not purchase_order or not frappe.db.exists("Purchase Order", purchase_order):
+        frappe.throw(_("Purchase Order {0} was not found.").format(purchase_order))
+
+    po_doc = frappe.get_doc("Purchase Order", purchase_order)
+    if cint(po_doc.docstatus) != 1:
+        frappe.throw(_("Only submitted Purchase Orders can be managed."))
+    if company and po_doc.company and po_doc.company != company:
+        frappe.throw(_("Purchase Order {0} does not belong to company {1}.").format(purchase_order, company))
+
+    doc = po_doc.as_dict()
+    doc.update(_get_purchase_order_progress(po_doc))
+    _attach_purchase_item_options(doc, source_doc=po_doc)
+
+    receipt_summary = _get_receipt_summary_by_po_names([po_doc.name]).get(po_doc.name, {})
+    invoice_summary = _get_invoice_summary_by_po_names([po_doc.name]).get(po_doc.name, {})
+    advance_paid = _get_purchase_order_advance_paid_by_names([po_doc.name]).get(po_doc.name)
+    _get_purchase_order_management_row(
+        doc,
+        {po_doc.name: receipt_summary},
+        {po_doc.name: invoice_summary},
+        {po_doc.name: advance_paid},
+    )
+
+    doc["purchase_receipts"] = frappe.db.sql(
+        """
+        select distinct pr.name, pr.posting_date, pr.status, pr.grand_total
+        from `tabPurchase Receipt Item` pri
+        inner join `tabPurchase Receipt` pr on pr.name = pri.parent
+        where pr.docstatus = 1
+          and pri.purchase_order = %s
+        order by pr.posting_date desc, pr.modified desc
+        """,
+        (po_doc.name,),
+        as_dict=True,
+    )
+    doc["purchase_invoices"] = frappe.db.sql(
+        """
+        select distinct pi.name, pi.posting_date, pi.status, pi.grand_total, pi.outstanding_amount
+        from `tabPurchase Invoice Item` pii
+        inner join `tabPurchase Invoice` pi on pi.name = pii.parent
+        where pi.docstatus = 1
+          and pii.purchase_order = %s
+        order by pi.posting_date desc, pi.modified desc
+        """,
+        (po_doc.name,),
+        as_dict=True,
+    )
+    return doc
+
+
+@frappe.whitelist()
+def process_purchase_management_action(data):
+    payload = json.loads(data) if isinstance(data, str) else data
+    profile = _resolve_pos_profile(payload.get("pos_profile"))
+    company = payload.get("company") or profile.get("company") or frappe.defaults.get_default("company")
+    _assert_pos_write_allowed(profile, company=company)
+    _ensure_allowed(profile, "posa_allow_purchase_order", _("Purchase orders"))
+
+    action = str(payload.get("action") or "").strip().lower()
+    if action not in {"receipt", "invoice", "receipt_and_invoice", "payment"}:
+        frappe.throw(_("Invalid purchase management action."))
+
+    po_name = payload.get("purchase_order") or payload.get("name")
+    if not po_name or not frappe.db.exists("Purchase Order", po_name):
+        frappe.throw(_("Purchase Order {0} was not found.").format(po_name))
+
+    po_doc = frappe.get_doc("Purchase Order", po_name)
+    if cint(po_doc.docstatus) != 1:
+        frappe.throw(_("Only submitted Purchase Orders can be managed."))
+    if company and po_doc.company and po_doc.company != company:
+        frappe.throw(_("Purchase Order {0} does not belong to company {1}.").format(po_name, company))
+
+    warehouse = payload.get("warehouse") or po_doc.get("set_warehouse") or profile.get("warehouse")
+    transaction_date = _normalize_date_for_backend(payload.get("transaction_date")) or nowdate()
+
+    if action in {"receipt", "receipt_and_invoice"}:
+        _ensure_allowed(profile, "posa_allow_purchase_receipt", _("Receive stock"))
+
+    try:
+        if action == "payment":
+            payments = payload.get("payments") or []
+            if not payments:
+                frappe.throw(_("Please enter at least one payment amount."))
+            ref_doc = _get_payment_reference_for_purchase_order(po_doc)
+            if ref_doc.doctype == "Purchase Invoice":
+                payable_amount = flt(ref_doc.get("outstanding_amount"))
+            else:
+                advance_paid = flt(_get_purchase_order_advance_paid_by_names([po_doc.name]).get(po_doc.name))
+                payable_amount = max(flt(po_doc.get("grand_total")) - advance_paid, 0)
+            if payable_amount <= 0:
+                frappe.throw(_("There is no payable balance for Purchase Order {0}.").format(po_doc.name))
+
+            capped_payments = []
+            remaining_payable = payable_amount
+            for payment in payments:
+                amount = min(flt(payment.get("amount")), remaining_payable)
+                if amount <= 0:
+                    continue
+                capped_payments.append(
+                    {
+                        "mode_of_payment": payment.get("mode_of_payment"),
+                        "amount": amount,
+                    }
+                )
+                remaining_payable -= amount
+            payment_entries = _create_payment_entry(ref_doc, capped_payments, company, transaction_date)
+            return {
+                "purchase_order": po_doc.name,
+                "payment_entries": payment_entries,
+                "payment_reference_doctype": ref_doc.doctype,
+                "payment_reference": ref_doc.name,
+            }
+
+        followup_payload = dict(payload)
+        followup_payload["receive"] = 1 if action in {"receipt", "receipt_and_invoice"} else 0
+        followup_payload["create_invoice"] = 1 if action in {"invoice", "receipt_and_invoice"} else 0
+        result = _run_purchase_order_followup_flow(
+            po_doc,
+            followup_payload,
+            company,
+            warehouse,
+            transaction_date,
+            cint(followup_payload.get("receive")),
+        )
+        return result
+    except Exception:
+        frappe.db.rollback()
+        frappe.log_error(frappe.get_traceback(), "POS Awesome Purchase Management Failed")
+        raise
 
 
 @frappe.whitelist()

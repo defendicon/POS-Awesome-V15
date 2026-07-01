@@ -110,6 +110,17 @@
 								>
 									{{ __("Drafts") }}
 								</v-btn>
+								<v-btn
+									block
+									color="deep-purple"
+									theme="dark"
+									prepend-icon="mdi-folder-search-outline"
+									class="purchase-summary-btn"
+									@click="managementDialog = true"
+									:disabled="submitLoading || draftSaveLoading"
+								>
+									{{ __("Purchase Mgmt") }}
+								</v-btn>
 							</div>
 							<v-btn
 								block
@@ -147,6 +158,12 @@
 			@select="handleDraftSelected"
 		/>
 
+		<PurchaseManagementDialog
+			v-model="managementDialog"
+			:pos-profile="pos_profile"
+			:warehouse-options="warehouseOptions"
+		/>
+
 		<!-- Supplier Dialog -->
 		<SupplierDialog
 			v-model="supplierDialog"
@@ -168,6 +185,7 @@ import { usePurchaseOrder } from "../../../composables/pos/payments/usePurchaseO
 import ItemsSelector from "../items/ItemsSelector.vue";
 import PurchasePaymentDialog from "./PurchasePaymentDialog.vue";
 import PurchaseDraftDialog from "./PurchaseDraftDialog.vue";
+import PurchaseManagementDialog from "./PurchaseManagementDialog.vue";
 import SupplierDialog from "../dialogs/purchase/SupplierDialog.vue";
 import PurchaseHeader from "./PurchaseHeader.vue";
 import PurchaseItemsTable from "./PurchaseItemsTable.vue";
@@ -179,6 +197,7 @@ export default {
 		ItemsSelector,
 		PurchasePaymentDialog,
 		PurchaseDraftDialog,
+		PurchaseManagementDialog,
 		SupplierDialog,
 		PurchaseHeader,
 		PurchaseItemsTable,
@@ -225,6 +244,7 @@ export default {
 		const supplierLoading = ref(false);
 		const supplierDialog = ref(false);
 		const draftDialog = ref(false);
+		const managementDialog = ref(false);
 		const draftSaveLoading = ref(false);
 		const paymentDialog = ref(false);
 		const supplierGroups = ref([]);
@@ -643,6 +663,7 @@ export default {
 			warehouseOptions,
 			warehouseLoading,
 			draftDialog,
+			managementDialog,
 			handleSupplierSearch,
 			handleSupplierCreated,
 			openPaymentDialog,
@@ -726,7 +747,7 @@ export default {
 
 .purchase-action-bar__secondary {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
 	gap: 10px;
 }
 

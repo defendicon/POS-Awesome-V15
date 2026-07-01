@@ -130,29 +130,6 @@
 					<template #item.transaction_date="{ item }">
 						{{ formatDate(item.transaction_date) }}
 					</template>
-					<template #item.progress="{ item }">
-						<div class="purchase-drafts-tags">
-							<v-chip v-if="item.is_draft" size="x-small" color="grey" variant="tonal">
-								{{ __("Draft") }}
-							</v-chip>
-							<v-chip
-								v-if="item.has_receipt"
-								size="x-small"
-								:color="item.receipt_complete ? 'success' : 'warning'"
-								variant="tonal"
-							>
-								{{ item.receipt_complete ? __("Receipt") : __("Partial Receipt") }}
-							</v-chip>
-							<v-chip
-								v-if="item.has_invoice"
-								size="x-small"
-								:color="item.invoice_complete ? 'primary' : 'info'"
-								variant="tonal"
-							>
-								{{ item.invoice_complete ? __("Bill") : __("Partial Bill") }}
-							</v-chip>
-						</div>
-					</template>
 					<template #item.grand_total="{ item }">
 						<span class="font-weight-medium">
 							{{ currencySymbol(item.currency) }} {{ formatAmount(item.grand_total) }}
@@ -225,28 +202,6 @@
 							{{ currencySymbol(previewDoc.currency) }} {{ formatAmount(previewDoc.grand_total) }}
 						</strong>
 					</div>
-				</div>
-
-				<div v-if="previewDoc" class="purchase-preview-tags">
-					<v-chip v-if="previewDoc.is_draft" size="small" color="grey" variant="tonal">
-						{{ __("Draft") }}
-					</v-chip>
-					<v-chip
-						v-if="previewDoc.has_receipt"
-						size="small"
-						:color="previewDoc.receipt_complete ? 'success' : 'warning'"
-						variant="tonal"
-					>
-						{{ previewDoc.receipt_complete ? __("Receipt Created") : __("Partial Receipt") }}
-					</v-chip>
-					<v-chip
-						v-if="previewDoc.has_invoice"
-						size="small"
-						:color="previewDoc.invoice_complete ? 'primary' : 'info'"
-						variant="tonal"
-					>
-						{{ previewDoc.invoice_complete ? __("Bill Created") : __("Partial Bill") }}
-					</v-chip>
 				</div>
 
 				<v-data-table
@@ -342,7 +297,6 @@ const headers = [
 	{ title: __("Purchase Order"), key: "name", align: "start", sortable: true },
 	{ title: __("Supplier"), key: "supplier_name", align: "start", sortable: true },
 	{ title: __("Date"), key: "transaction_date", align: "start", sortable: true },
-	{ title: __("Progress"), key: "progress", align: "start", sortable: false },
 	{ title: __("Warehouse"), key: "set_warehouse", align: "start", sortable: true },
 	{ title: __("Amount"), key: "grand_total", align: "end", sortable: true },
 	{ title: "", key: "actions", align: "end", sortable: false },
@@ -529,18 +483,6 @@ function currencySymbol(currency) {
 	align-items: center;
 	gap: 4px;
 	min-width: 0;
-}
-
-.purchase-drafts-tags,
-.purchase-preview-tags {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	flex-wrap: wrap;
-}
-
-.purchase-preview-tags {
-	margin: -4px 0 14px;
 }
 
 .purchase-drafts-table :deep(.v-table),
