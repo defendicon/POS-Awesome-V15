@@ -631,6 +631,77 @@ def _create_payment_entry(reference_doc, payments, company, transaction_date):
     return created_payments
 
 
+def _get_purchase_order_name(payload):
+    return payload.get("purchase_order") or payload.get("purchase_order_name") or payload.get("name")
+
+
+def _get_purchase_order_doc(payload, company):
+    po_name = _get_purchase_order_name(payload)
+    if not po_name:
+        return frappe.get_doc({"doctype": "Purchase Order"})
+
+    if not frappe.db.exists("Purchase Order", po_name):
+        frappe.throw(_("Purchase Order {0} was not found.").format(po_name))
+
+    po_doc = frappe.get_doc("Purchase Order", po_name)
+    if cint(po_doc.docstatus) != 0:
+        frappe.throw(_("Only draft Purchase Orders can be updated from POS."))
+    if company and po_doc.company and po_doc.company != company:
+        frappe.throw(_("Purchase Order {0} does not belong to company {1}.").format(po_name, company))
+
+    return po_doc
+
+
+def _set_purchase_order_items(po_doc, items, warehouse, schedule_date):
+    item_codes = [row.get("item_code") for row in items if row.get("item_code")]
+    if item_codes:
+        item_meta = frappe.get_all(
+            "Item",
+            filters={"name": ["in", item_codes]},
+            fields=["name", "item_name", "stock_uom"],
+        )
+        item_map = {row.name: row for row in item_meta}
+    else:
+        item_map = {}
+
+    po_doc.set("items", [])
+
+    for row in items:
+        item_code = row.get("item_code")
+        if not item_code:
+            continue
+
+        qty = flt(row.get("qty"))
+        if qty <= 0:
+            continue
+
+        meta = item_map.get(item_code)
+        stock_uom = row.get("stock_uom") or (meta.stock_uom if meta else None)
+        item_name = row.get("item_name") or (meta.item_name if meta else item_code)
+        uom = row.get("uom") or stock_uom
+        conversion_factor = flt(row.get("conversion_factor") or 1)
+        if not conversion_factor:
+            conversion_factor = 1
+
+        po_doc.append(
+            "items",
+            {
+                "item_code": item_code,
+                "item_name": item_name,
+                "qty": qty,
+                "uom": uom,
+                "stock_uom": stock_uom,
+                "conversion_factor": conversion_factor,
+                "rate": flt(row.get("rate")),
+                "warehouse": row.get("warehouse") or warehouse,
+                "schedule_date": schedule_date,
+            },
+        )
+
+    if not po_doc.items:
+        frappe.throw(_("Purchase order requires at least one item with quantity."))
+
+
 @frappe.whitelist()
 def create_purchase_order(data):
 
@@ -640,7 +711,8 @@ def create_purchase_order(data):
     _assert_pos_write_allowed(profile, company=company)
     _ensure_allowed(profile, "posa_allow_purchase_order", _("Purchase orders"))
 
-    receive_now = cint(payload.get("receive"))
+    submit_order = cint(payload.get("submit", 1))
+    receive_now = cint(payload.get("receive")) if submit_order else 0
     if receive_now:
         _ensure_allowed(profile, "posa_allow_purchase_receipt", _("Receive stock"))
 
@@ -682,9 +754,9 @@ def create_purchase_order(data):
         if alternative_price_list:
             buying_price_list = alternative_price_list
 
-    po_doc = frappe.get_doc(
+    po_doc = _get_purchase_order_doc(payload, company)
+    po_doc.update(
         {
-            "doctype": "Purchase Order",
             "supplier": supplier,
             "company": company,
             "transaction_date": transaction_date,
@@ -697,51 +769,7 @@ def create_purchase_order(data):
     if warehouse:
         po_doc.set_warehouse = warehouse
 
-    item_codes = [row.get("item_code") for row in items if row.get("item_code")]
-    if item_codes:
-        item_meta = frappe.get_all(
-            "Item",
-            filters={"name": ["in", item_codes]},
-            fields=["name", "item_name", "stock_uom"],
-        )
-        item_map = {row.name: row for row in item_meta}
-    else:
-        item_map = {}
-
-    for row in items:
-        item_code = row.get("item_code")
-        if not item_code:
-            continue
-
-        qty = flt(row.get("qty"))
-        if qty <= 0:
-            continue
-
-        meta = item_map.get(item_code)
-        stock_uom = row.get("stock_uom") or (meta.stock_uom if meta else None)
-        item_name = row.get("item_name") or (meta.item_name if meta else item_code)
-        uom = row.get("uom") or stock_uom
-        conversion_factor = flt(row.get("conversion_factor") or 1)
-        if not conversion_factor:
-            conversion_factor = 1
-
-        po_doc.append(
-            "items",
-            {
-                "item_code": item_code,
-                "item_name": item_name,
-                "qty": qty,
-                "uom": uom,
-                "stock_uom": stock_uom,
-                "conversion_factor": conversion_factor,
-                "rate": flt(row.get("rate")),
-                "warehouse": row.get("warehouse") or warehouse,
-                "schedule_date": schedule_date,
-            },
-        )
-
-    if not po_doc.items:
-        frappe.throw(_("Purchase order requires at least one item with quantity."))
+    _set_purchase_order_items(po_doc, items, warehouse, schedule_date)
 
     po_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
@@ -751,9 +779,14 @@ def create_purchase_order(data):
     # work so the operator does not lose it if any downstream step fails.
     frappe.db.commit()
 
+    if not submit_order:
+        return {
+            "purchase_order": po_doc.name,
+            "draft": 1,
+        }
+
     try:
-        if cint(payload.get("submit", 1)):
-            po_doc.submit()
+        po_doc.submit()
 
         receipt_name = None
         receipt_doc = None
@@ -784,6 +817,142 @@ def create_purchase_order(data):
         frappe.throw(
             _("Purchase Order {0} has been saved as Draft. Error: {1}").format(po_doc.name, str(err))
         )
+
+
+@frappe.whitelist()
+def search_draft_purchase_orders(
+    pos_profile=None,
+    company=None,
+    search_text=None,
+    supplier=None,
+    warehouse=None,
+    from_date=None,
+    to_date=None,
+    limit=50,
+):
+    profile = _resolve_pos_profile(pos_profile)
+    company = company or profile.get("company") or frappe.defaults.get_default("company")
+    _assert_pos_write_allowed(profile, company=company)
+    _ensure_allowed(profile, "posa_allow_purchase_order", _("Purchase orders"))
+
+    filters = {"docstatus": 0}
+    if company:
+        filters["company"] = company
+
+    if warehouse:
+        filters["set_warehouse"] = warehouse
+
+    resolved_supplier = _resolve_supplier(supplier) if supplier else None
+    if resolved_supplier:
+        filters["supplier"] = resolved_supplier
+
+    start_date = _normalize_date_for_backend(from_date)
+    end_date = _normalize_date_for_backend(to_date)
+    if start_date and end_date:
+        filters["transaction_date"] = ["between", [start_date, end_date]]
+    elif start_date:
+        filters["transaction_date"] = [">=", start_date]
+    elif end_date:
+        filters["transaction_date"] = ["<=", end_date]
+
+    effective_search_text = search_text
+    if supplier and not resolved_supplier and not effective_search_text:
+        effective_search_text = supplier
+
+    or_filters = None
+    if effective_search_text:
+        like_value = f"%{str(effective_search_text).strip()}%"
+        or_filters = {
+            "name": ["like", like_value],
+            "supplier": ["like", like_value],
+            "supplier_name": ["like", like_value],
+        }
+
+    try:
+        limit_page_length = max(1, min(cint(limit or 50), 200))
+    except Exception:
+        limit_page_length = 50
+
+    return frappe.get_all(
+        "Purchase Order",
+        filters=filters,
+        or_filters=or_filters,
+        fields=[
+            "name",
+            "supplier",
+            "supplier_name",
+            "company",
+            "transaction_date",
+            "schedule_date",
+            "grand_total",
+            "currency",
+            "set_warehouse",
+            "status",
+            "modified",
+            "owner",
+        ],
+        order_by="modified desc",
+        limit_page_length=limit_page_length,
+    )
+
+
+def _attach_purchase_item_options(doc):
+    item_codes = [row.get("item_code") for row in doc.get("items", []) if row.get("item_code")]
+    if not item_codes:
+        return doc
+
+    item_rows = frappe.get_all(
+        "Item",
+        filters={"name": ["in", item_codes]},
+        fields=["name", "item_group", "stock_uom", "standard_rate"],
+    )
+    item_map = {row.name: row for row in item_rows}
+
+    uom_rows = frappe.get_all(
+        "UOM Conversion Detail",
+        filters={"parent": ["in", item_codes]},
+        fields=["parent", "uom", "conversion_factor"],
+    )
+    uom_map = {}
+    for row in uom_rows:
+        uom_map.setdefault(row.parent, []).append(
+            {"uom": row.uom, "conversion_factor": row.conversion_factor}
+        )
+
+    for row in doc.get("items", []):
+        item_code = row.get("item_code")
+        meta = item_map.get(item_code)
+        if meta:
+            row.setdefault("item_group", meta.item_group)
+            row.setdefault("stock_uom", meta.stock_uom)
+            row.setdefault("standard_rate", meta.standard_rate)
+
+        item_uoms = list(uom_map.get(item_code, []))
+        stock_uom = row.get("stock_uom")
+        if stock_uom and not any(uom.get("uom") == stock_uom for uom in item_uoms):
+            item_uoms.append({"uom": stock_uom, "conversion_factor": 1})
+        row["item_uoms"] = item_uoms
+
+    return doc
+
+
+@frappe.whitelist()
+def get_draft_purchase_order(purchase_order, pos_profile=None, company=None):
+    profile = _resolve_pos_profile(pos_profile)
+    company = company or profile.get("company") or frappe.defaults.get_default("company")
+    _assert_pos_write_allowed(profile, company=company)
+    _ensure_allowed(profile, "posa_allow_purchase_order", _("Purchase orders"))
+
+    if not purchase_order or not frappe.db.exists("Purchase Order", purchase_order):
+        frappe.throw(_("Purchase Order {0} was not found.").format(purchase_order))
+
+    po_doc = frappe.get_doc("Purchase Order", purchase_order)
+    if cint(po_doc.docstatus) != 0:
+        frappe.throw(_("Only draft Purchase Orders can be loaded."))
+    if company and po_doc.company and po_doc.company != company:
+        frappe.throw(_("Purchase Order {0} does not belong to company {1}.").format(purchase_order, company))
+
+    return _attach_purchase_item_options(po_doc.as_dict())
 
 
 @frappe.whitelist()

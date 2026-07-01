@@ -9,9 +9,37 @@
 			<!-- Right Column: Purchase Order Form (Cart) -->
 			<v-col cols="12" md="7" class="h-100 pa-0">
 				<v-card class="h-100 d-flex flex-column pos-themed-card" flat>
-					<v-card-title class="py-2 px-4 bg-primary text-white d-flex align-center">
+					<v-card-title class="py-2 px-4 bg-primary text-white d-flex align-center flex-wrap ga-2">
 						<span class="text-h6">{{ __("Create Purchase Order") }}</span>
+						<v-chip
+							v-if="purchaseOrderName"
+							size="small"
+							color="white"
+							variant="tonal"
+							prepend-icon="mdi-file-document-edit-outline"
+						>
+							{{ purchaseOrderName }}
+						</v-chip>
 						<v-spacer></v-spacer>
+						<v-btn
+							prepend-icon="mdi-folder-open-outline"
+							variant="text"
+							color="white"
+							@click="draftDialog = true"
+							:disabled="submitLoading || draftSaveLoading"
+						>
+							{{ __("Drafts") }}
+						</v-btn>
+						<v-btn
+							prepend-icon="mdi-content-save-outline"
+							variant="text"
+							color="white"
+							@click="saveDraft"
+							:loading="draftSaveLoading"
+							:disabled="submitLoading || draftSaveLoading || !purchaseItems.length"
+						>
+							{{ __("Save and Clear") }}
+						</v-btn>
 						<v-btn
 							icon="mdi-delete"
 							variant="text"
@@ -89,6 +117,13 @@
 			@submit="handlePaymentSubmit"
 		/>
 
+		<PurchaseDraftDialog
+			v-model="draftDialog"
+			:pos-profile="pos_profile"
+			:warehouse-options="warehouseOptions"
+			@select="handleDraftSelected"
+		/>
+
 		<!-- Supplier Dialog -->
 		<SupplierDialog
 			v-model="supplierDialog"
@@ -109,6 +144,7 @@ import { useToastStore } from "../../../stores/toastStore";
 import { usePurchaseOrder } from "../../../composables/pos/payments/usePurchaseOrder";
 import ItemsSelector from "../items/ItemsSelector.vue";
 import PurchasePaymentDialog from "./PurchasePaymentDialog.vue";
+import PurchaseDraftDialog from "./PurchaseDraftDialog.vue";
 import SupplierDialog from "../dialogs/purchase/SupplierDialog.vue";
 import PurchaseHeader from "./PurchaseHeader.vue";
 import PurchaseItemsTable from "./PurchaseItemsTable.vue";
@@ -119,6 +155,7 @@ export default {
 	components: {
 		ItemsSelector,
 		PurchasePaymentDialog,
+		PurchaseDraftDialog,
 		SupplierDialog,
 		PurchaseHeader,
 		PurchaseItemsTable,
@@ -134,6 +171,7 @@ export default {
 
 		const {
 			purchaseItems,
+			purchaseOrderName,
 			supplier,
 			warehouse,
 			transactionDate,
@@ -153,6 +191,7 @@ export default {
 			updateItemReceivedQty,
 			removeItem,
 			resetForm,
+			generateLineId,
 		} = usePurchaseOrder({
 			posProfile: pos_profile,
 			receiveNow: receiveNow,
@@ -162,6 +201,8 @@ export default {
 		const supplierOptions = ref([]);
 		const supplierLoading = ref(false);
 		const supplierDialog = ref(false);
+		const draftDialog = ref(false);
+		const draftSaveLoading = ref(false);
 		const paymentDialog = ref(false);
 		const supplierGroups = ref([]);
 		const warehouseOptions = ref([]);
@@ -237,16 +278,28 @@ export default {
 		};
 
 		const openPaymentDialog = () => {
-			if (!supplier.value) {
-				errorMessage.value = __("Supplier is required.");
-				return;
-			}
-			if (!purchaseItems.value.length) {
-				errorMessage.value = __("Please add at least one item.");
+			if (!validatePurchaseOrderForm()) {
 				return;
 			}
 			errorMessage.value = "";
 			paymentDialog.value = true;
+		};
+
+		const validatePurchaseOrderForm = () => {
+			if (!supplier.value) {
+				errorMessage.value = __("Supplier is required.");
+				return false;
+			}
+			if (!purchaseItems.value.length) {
+				errorMessage.value = __("Please add at least one item.");
+				return false;
+			}
+			if (!transactionDate.value || !scheduleDate.value) {
+				errorMessage.value = __("Supplier and dates are required.");
+				return false;
+			}
+			errorMessage.value = "";
+			return true;
 		};
 
 		const handlePaymentSubmit = ({ payments: p, print, print_format, print_invoice }) => {
@@ -281,41 +334,135 @@ export default {
 			);
 		};
 
+		const buildPurchaseOrderPayload = ({ submit = true } = {}) => {
+			const resolvedSupplier =
+				typeof supplier.value === "object" && supplier.value !== null
+					? supplier.value.name || supplier.value.supplier_name || ""
+					: supplier.value;
+
+			return {
+				purchase_order: purchaseOrderName.value,
+				supplier: resolvedSupplier,
+				company: pos_profile.value.company,
+				warehouse: warehouse.value,
+				currency: supplierCurrency.value,
+				buying_price_list: supplierPriceList.value,
+				transaction_date: normalizeDateForBackend(transactionDate.value),
+				schedule_date: normalizeDateForBackend(scheduleDate.value),
+				submit: submit ? 1 : 0,
+				receive: submit && receiveNow.value ? 1 : 0,
+				create_invoice: submit && createInvoice.value ? 1 : 0,
+				pos_profile: pos_profile.value,
+				payments: submit ? payments.value : [],
+				items: purchaseItems.value.map((item) => ({
+					item_code: item.item_code,
+					item_name: item.item_name,
+					stock_uom: item.stock_uom,
+					uom: item.uom,
+					conversion_factor: item.conversion_factor,
+					qty: item.qty,
+					rate: item.rate,
+					received_qty: submit && receiveNow.value ? item.received_qty : undefined,
+					warehouse: warehouse.value || item.warehouse,
+				})),
+			};
+		};
+
+		const saveDraft = async () => {
+			if (!validatePurchaseOrderForm()) {
+				return;
+			}
+
+			draftSaveLoading.value = true;
+			try {
+				const { message } = await frappe.call({
+					method: "posawesome.posawesome.api.purchase_orders.create_purchase_order",
+					args: { data: buildPurchaseOrderPayload({ submit: false }) },
+				});
+				if (message?.purchase_order) {
+					const savedName = message.purchase_order;
+					resetForm();
+					toastStore.show({
+						title: __("Purchase Order {0} saved and cleared", [savedName]),
+						color: "success",
+					});
+				}
+			} catch (error) {
+				errorMessage.value = extractServerError(error);
+				toastStore.show({ title: errorMessage.value, color: "error" });
+			} finally {
+				draftSaveLoading.value = false;
+			}
+		};
+
+		const formatDateForPicker = (value) => {
+			const normalized = normalizeDateForBackend(value);
+			if (!normalized) return null;
+			const [year, month, day] = normalized.split("-");
+			return `${day}-${month}-${year}`;
+		};
+
+		const handleDraftSelected = async (draft) => {
+			if (!draft) return;
+
+			purchaseOrderName.value = draft.name || null;
+			supplier.value = draft.supplier || null;
+			warehouse.value =
+				draft.set_warehouse ||
+				(draft.items || []).find((item) => item.warehouse)?.warehouse ||
+				pos_profile.value?.warehouse ||
+				null;
+			transactionDate.value = formatDateForPicker(draft.transaction_date);
+			scheduleDate.value = formatDateForPicker(draft.schedule_date || draft.transaction_date);
+			supplierCurrency.value = draft.currency || pos_profile.value?.currency || null;
+			supplierPriceList.value = draft.buying_price_list || supplierPriceList.value;
+			priceListCurrency.value = draft.currency || priceListCurrency.value;
+			receiveNow.value = false;
+			createInvoice.value = false;
+			payments.value = [];
+			errorMessage.value = "";
+
+			purchaseItems.value = (draft.items || []).map((item) => {
+				const conversionFactor = Number(item.conversion_factor || 1) || 1;
+				const rate = Number(item.rate || 0);
+				return {
+					line_id: generateLineId(),
+					item_code: item.item_code,
+					item_name: item.item_name || item.item_code,
+					stock_uom: item.stock_uom,
+					item_group: item.item_group,
+					item_uoms: item.item_uoms?.length
+						? item.item_uoms
+						: [{ uom: item.uom || item.stock_uom, conversion_factor: conversionFactor }],
+					uom: item.uom || item.stock_uom,
+					conversion_factor: conversionFactor,
+					qty: Number(item.qty || 0),
+					rate,
+					stock_uom_rate: conversionFactor ? rate / conversionFactor : rate,
+					standard_rate: Number(item.standard_rate || 0),
+					received_qty: 0,
+					receivedQtyManual: false,
+					warehouse: item.warehouse,
+				};
+			});
+
+			if (draft.supplier) {
+				const info = await fetchSupplierInfo(draft.supplier);
+				if (info?.buying_price_list) {
+					await itemsStore.updatePriceList(info.buying_price_list);
+				}
+			}
+
+			toastStore.show({ title: __("Purchase Order draft loaded"), color: "success" });
+		};
+
 		const submitPurchaseOrder = async (print = false, printFormat = null, printInvoice = false) => {
-			if (!supplier.value || !transactionDate.value || !scheduleDate.value) {
-				errorMessage.value = __("Supplier and dates are required.");
+			if (!validatePurchaseOrderForm()) {
 				return;
 			}
 			submitLoading.value = true;
 			try {
-				const resolvedSupplier =
-					typeof supplier.value === "object" && supplier.value !== null
-						? supplier.value.name || supplier.value.supplier_name || ""
-						: supplier.value;
-
-				const payload = {
-					supplier: resolvedSupplier,
-					company: pos_profile.value.company,
-					warehouse: warehouse.value,
-					currency: supplierCurrency.value,
-					transaction_date: normalizeDateForBackend(transactionDate.value),
-					schedule_date: normalizeDateForBackend(scheduleDate.value),
-					receive: receiveNow.value ? 1 : 0,
-					create_invoice: createInvoice.value ? 1 : 0,
-					pos_profile: pos_profile.value,
-					payments: payments.value,
-					items: purchaseItems.value.map((item) => ({
-						item_code: item.item_code,
-						item_name: item.item_name,
-						stock_uom: item.stock_uom,
-						uom: item.uom,
-						conversion_factor: item.conversion_factor,
-						qty: item.qty,
-						rate: item.rate,
-						received_qty: receiveNow.value ? item.received_qty : undefined,
-						warehouse: warehouse.value || item.warehouse,
-					})),
-				};
+				const payload = buildPurchaseOrderPayload({ submit: true });
 				const { message } = await frappe.call({
 					method: "posawesome.posawesome.api.purchase_orders.create_purchase_order",
 					args: { data: payload },
@@ -396,6 +543,7 @@ export default {
 			pos_profile,
 			receiveNow,
 			purchaseItems,
+			purchaseOrderName,
 			supplier,
 			warehouse,
 			transactionDate,
@@ -406,6 +554,7 @@ export default {
 			priceListCurrency,
 			totalAmount,
 			submitLoading,
+			draftSaveLoading,
 			errorMessage,
 			onAddItem,
 			fetchSupplierInfo,
@@ -422,10 +571,13 @@ export default {
 			supplierGroups,
 			warehouseOptions,
 			warehouseLoading,
+			draftDialog,
 			handleSupplierSearch,
 			handleSupplierCreated,
 			openPaymentDialog,
 			handlePaymentSubmit,
+			saveDraft,
+			handleDraftSelected,
 			toastStore,
 		};
 	},
