@@ -101,7 +101,7 @@
 </template>
 
 <script>
-import format, { formatUtils } from "../../../format";
+import format, { normalizeDateForBackend } from "../../../format";
 import { useUIStore } from "../../../stores/uiStore.js";
 import { getOpeningStorage } from "../../../../offline/index";
 import { useItemsStore } from "../../../stores/itemsStore";
@@ -288,15 +288,6 @@ export default {
 			}
 			submitLoading.value = true;
 			try {
-				const formatDateForBackend = (date) => {
-					if (!date) return null;
-					const western = formatUtils.fromArabicNumerals(String(date));
-					if (/^\d{4}-\d{2}-\d{2}$/.test(western)) return western;
-					const d = new Date(western);
-					if (isNaN(d.getTime())) return western;
-					return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-				};
-
 				const resolvedSupplier =
 					typeof supplier.value === "object" && supplier.value !== null
 						? supplier.value.name || supplier.value.supplier_name || ""
@@ -307,8 +298,8 @@ export default {
 					company: pos_profile.value.company,
 					warehouse: warehouse.value,
 					currency: supplierCurrency.value,
-					transaction_date: formatDateForBackend(transactionDate.value),
-					schedule_date: formatDateForBackend(scheduleDate.value),
+					transaction_date: normalizeDateForBackend(transactionDate.value),
+					schedule_date: normalizeDateForBackend(scheduleDate.value),
 					receive: receiveNow.value ? 1 : 0,
 					create_invoice: createInvoice.value ? 1 : 0,
 					pos_profile: pos_profile.value,

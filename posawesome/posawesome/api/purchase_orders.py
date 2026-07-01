@@ -44,6 +44,38 @@ def _ensure_allowed(profile, flag, label):
         frappe.throw(_("{0} is disabled for this POS Profile.").format(label))
 
 
+INVALID_DATE_MARKERS = {"invalid date", "nan", "none", "null", "undefined"}
+
+
+def _normalize_date_for_backend(value, fallback=None):
+    if value is None:
+        return fallback
+
+    normalized = str(value).strip()
+    if not normalized or normalized.lower() in INVALID_DATE_MARKERS:
+        return fallback
+
+    parts = normalized.replace("/", "-").split("-")
+    if len(parts) == 3 and all(part.isdigit() for part in parts):
+        if len(parts[0]) == 4:
+            year, month, day = parts
+        elif len(parts[2]) == 4:
+            day, month, year = parts
+        else:
+            year = month = day = None
+
+        if year and month and day:
+            try:
+                return str(getdate(f"{year}-{month.zfill(2)}-{day.zfill(2)}"))
+            except Exception:
+                return fallback
+
+    try:
+        return str(getdate(normalized))
+    except Exception:
+        return fallback
+
+
 def _resolve_supplier(supplier_value):
     if isinstance(supplier_value, dict):
         supplier_value = (
@@ -183,7 +215,10 @@ def _resolve_input_row(items_by_code, item_code):
 
 
 def _create_purchase_receipt(po_doc, payload, default_warehouse, transaction_date):
-    receipt_date = payload.get("receipt_date") or payload.get("posting_date") or transaction_date
+    receipt_date = _normalize_date_for_backend(
+        payload.get("receipt_date") or payload.get("posting_date"),
+        fallback=transaction_date,
+    )
     receipt = frappe.get_doc(
         {
             "doctype": "Purchase Receipt",
@@ -621,8 +656,8 @@ def create_purchase_order(data):
         frappe.throw(_("Company is required."))
 
     warehouse = payload.get("warehouse") or profile.get("warehouse") or pos_utils.get_default_warehouse(company)
-    transaction_date = payload.get("transaction_date") or nowdate()
-    schedule_date = payload.get("schedule_date") or transaction_date
+    transaction_date = _normalize_date_for_backend(payload.get("transaction_date")) or nowdate()
+    schedule_date = _normalize_date_for_backend(payload.get("schedule_date"), fallback=transaction_date)
 
     items = payload.get("items") or []
     if not items:
@@ -804,7 +839,10 @@ def search_items(search_text=None, limit=20):
 
 
 def _create_purchase_invoice(po_doc, payload, default_warehouse, transaction_date, receipt_doc=None):
-    invoice_date = payload.get("invoice_date") or payload.get("invoice_posting_date") or transaction_date
+    invoice_date = _normalize_date_for_backend(
+        payload.get("invoice_date") or payload.get("invoice_posting_date"),
+        fallback=transaction_date,
+    )
     invoice = frappe.get_doc(
         {
             "doctype": "Purchase Invoice",

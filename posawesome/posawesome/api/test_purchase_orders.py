@@ -1,3 +1,4 @@
+import datetime
 import importlib.util
 import pathlib
 import sys
@@ -97,7 +98,17 @@ def _install_stubs():
     frappe_utils.cint = int
     frappe_utils.flt = float
     frappe_utils.nowdate = lambda: "2026-04-17"
-    frappe_utils.getdate = lambda value=None: value
+    def fake_getdate(value=None):
+        if value is None:
+            return datetime.date(2026, 4, 17)
+        if isinstance(value, datetime.date):
+            return value
+        if isinstance(value, str):
+            year, month, day = value.strip().split("-")
+            return datetime.date(int(year), int(month), int(day))
+        return value
+
+    frappe_utils.getdate = fake_getdate
     sys.modules["frappe.utils"] = frappe_utils
 
     erpnext_accounts_party = types.ModuleType("erpnext.accounts.party")
@@ -178,6 +189,17 @@ class TestPurchaseOrdersApi(unittest.TestCase):
         self.assertFalse(
             any("FROM `tabPurchase Invoice Item`" in call[0] for call in self.module.frappe.db.sql_calls)
         )
+
+    def test_normalize_date_for_backend_accepts_purchase_order_display_dates(self):
+        self.assertEqual(self.module._normalize_date_for_backend("29-06-2026"), "2026-06-29")
+        self.assertEqual(self.module._normalize_date_for_backend("29/06/2026"), "2026-06-29")
+        self.assertEqual(self.module._normalize_date_for_backend("2026-6-29"), "2026-06-29")
+
+    def test_normalize_date_for_backend_uses_fallback_for_invalid_dates(self):
+        fallback = "2026-04-17"
+
+        self.assertEqual(self.module._normalize_date_for_backend("invalid date", fallback), fallback)
+        self.assertEqual(self.module._normalize_date_for_backend("2026-02-30", fallback), fallback)
 
 
 if __name__ == "__main__":
