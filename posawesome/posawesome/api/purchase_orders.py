@@ -214,6 +214,28 @@ def _resolve_input_row(items_by_code, item_code):
     return rows.pop(0)
 
 
+def _build_po_items_map(items):
+    items_by_detail = {}
+    items_by_code = {}
+    for row in items or []:
+        detail_name = row.get("po_detail") or row.get("purchase_order_item") or row.get("name")
+        if detail_name:
+            items_by_detail[str(detail_name)] = row
+
+        item_code = row.get("item_code")
+        if item_code:
+            items_by_code.setdefault(item_code, []).append(row)
+
+    return items_by_detail, items_by_code
+
+
+def _resolve_po_input_row(items_by_detail, items_by_code, po_item):
+    if po_item.name and str(po_item.name) in items_by_detail:
+        return items_by_detail.pop(str(po_item.name))
+
+    return _resolve_input_row(items_by_code, po_item.item_code)
+
+
 def _get_billed_qty_by_po_item(po_doc):
     item_names = [row.name for row in po_doc.items if row.name]
     if not item_names:
@@ -391,10 +413,15 @@ def _create_purchase_receipt(po_doc, payload, default_warehouse, transaction_dat
     if default_warehouse:
         receipt.set_warehouse = default_warehouse
 
-    items_by_code = _build_items_map(payload.get("items"))
+    payload_items = payload.get("items") or []
+    has_explicit_items = bool(payload_items)
+    items_by_detail, items_by_code = _build_po_items_map(payload_items)
 
     for po_item in po_doc.items:
-        payload_row = _resolve_input_row(items_by_code, po_item.item_code)
+        payload_row = _resolve_po_input_row(items_by_detail, items_by_code, po_item)
+        if has_explicit_items and not payload_row:
+            continue
+
         remaining_qty = max(flt(po_item.qty) - flt(po_item.get("received_qty")), 0)
         if remaining_qty <= 0:
             continue
@@ -1486,13 +1513,18 @@ def _create_purchase_invoice(po_doc, payload, default_warehouse, transaction_dat
     if default_warehouse:
         invoice.set_warehouse = default_warehouse
 
-    items_by_code = _build_items_map(payload.get("items"))
+    payload_items = payload.get("items") or []
+    has_explicit_items = bool(payload_items)
+    items_by_detail, items_by_code = _build_po_items_map(payload_items)
     billed_qty_map = _get_billed_qty_by_po_item(po_doc)
     receipt_items = (
         {item.purchase_order_item: item for item in (receipt_doc.items or [])} if receipt_doc else {}
     )
     for po_item in po_doc.items:
-        payload_row = _resolve_input_row(items_by_code, po_item.item_code)
+        payload_row = _resolve_po_input_row(items_by_detail, items_by_code, po_item)
+        if has_explicit_items and not payload_row:
+            continue
+
         remaining_bill_qty = max(flt(po_item.qty) - flt(billed_qty_map.get(po_item.name)), 0)
         if remaining_bill_qty <= 0:
             continue

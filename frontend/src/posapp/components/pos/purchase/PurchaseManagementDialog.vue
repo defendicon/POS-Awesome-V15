@@ -168,7 +168,7 @@
 								prepend-icon="mdi-truck-check-outline"
 								:disabled="item.receipt_complete"
 								:loading="actionLoading === `${item.name}:receipt`"
-								@click="runAction(item, 'receipt')"
+								@click="openActionDialog(item, 'receipt')"
 							>
 								{{ __("Receive") }}
 							</v-btn>
@@ -179,7 +179,7 @@
 								prepend-icon="mdi-file-document-check-outline"
 								:disabled="item.invoice_complete"
 								:loading="actionLoading === `${item.name}:invoice`"
-								@click="runAction(item, 'invoice')"
+								@click="openActionDialog(item, 'invoice')"
 							>
 								{{ __("Bill") }}
 							</v-btn>
@@ -249,6 +249,108 @@
 			</v-card>
 		</v-dialog>
 
+		<v-dialog v-model="actionDialog" max-width="940px" scrollable persistent>
+			<v-card class="pos-themed-card purchase-action-dialog">
+				<v-card-title class="purchase-action-dialog__title">
+					<div>
+						<div class="text-h6">{{ actionTitle }}</div>
+						<div class="text-caption text-medium-emphasis">
+							{{ actionDoc?.name }} &middot; {{ actionDoc?.supplier_name || actionDoc?.supplier }}
+						</div>
+					</div>
+					<v-btn icon="mdi-close" variant="text" :disabled="!!actionLoading" @click="closeActionDialog" />
+				</v-card-title>
+				<v-card-text class="purchase-action-dialog__body">
+					<div class="purchase-action-controls">
+						<v-text-field
+							v-model="actionDate"
+							type="date"
+							variant="outlined"
+							density="compact"
+							hide-details
+							:label="actionType === 'receipt' ? __('Receipt Date') : __('Bill Date')"
+						/>
+						<div class="purchase-action-total">
+							<span>{{ __("Selected Qty") }}</span>
+							<strong>{{ formatAmount(selectedActionQty) }}</strong>
+						</div>
+						<div class="purchase-action-total">
+							<span>{{ __("Selected Amount") }}</span>
+							<strong>
+								{{ currencySymbol(actionDoc?.currency || posProfile?.currency) }}
+								{{ formatAmount(selectedActionAmount) }}
+							</strong>
+						</div>
+						<v-btn variant="tonal" color="primary" prepend-icon="mdi-check-all" @click="setAllActionQty">
+							{{ __("All Pending") }}
+						</v-btn>
+						<v-btn variant="text" color="error" prepend-icon="mdi-close-circle-outline" @click="clearActionQty">
+							{{ __("Clear") }}
+						</v-btn>
+					</div>
+
+					<v-alert v-if="!actionRows.length" type="info" density="compact" class="mb-3">
+						{{ __("There are no pending items for this action.") }}
+					</v-alert>
+
+					<v-data-table
+						:headers="actionHeaders"
+						:items="actionRows"
+						density="compact"
+						hide-default-footer
+						:items-per-page="-1"
+						class="purchase-action-table"
+					>
+						<template #item.item_name="{ item }">
+							<div class="py-1">
+								<div class="font-weight-medium">{{ item.item_name || item.item_code }}</div>
+								<div class="text-caption text-medium-emphasis">{{ item.item_code }}</div>
+							</div>
+						</template>
+						<template #item.pending_qty="{ item }">
+							{{ formatAmount(item.pending_qty) }}
+						</template>
+						<template #item.action_qty="{ item }">
+							<v-text-field
+								:model-value="item.action_qty"
+								type="number"
+								min="0"
+								:max="item.pending_qty"
+								step="0.01"
+								variant="outlined"
+								density="compact"
+								hide-details
+								class="purchase-action-qty"
+								@update:model-value="updateActionQty(item, $event)"
+							/>
+						</template>
+						<template #item.amount="{ item }">
+							<strong>
+								{{ currencySymbol(actionDoc?.currency || posProfile?.currency) }}
+								{{ formatAmount((Number(item.action_qty) || 0) * (Number(item.rate) || 0)) }}
+							</strong>
+						</template>
+					</v-data-table>
+				</v-card-text>
+				<v-card-actions class="purchase-action-dialog__footer">
+					<v-btn variant="text" :disabled="!!actionLoading" @click="closeActionDialog">
+						{{ __("Cancel") }}
+					</v-btn>
+					<v-spacer />
+					<v-btn
+						:color="actionType === 'receipt' ? 'success' : 'primary'"
+						theme="dark"
+						:prepend-icon="actionType === 'receipt' ? 'mdi-truck-check-outline' : 'mdi-file-document-check-outline'"
+						:loading="actionLoading === `${actionOrder?.name}:${actionType}`"
+						:disabled="!canSubmitAction || !!actionLoading"
+						@click="submitAction"
+					>
+						{{ actionType === "receipt" ? __("Create Receipt") : __("Create Bill") }}
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
 		<PurchasePaymentDialog
 			v-model="paymentDialog"
 			:total-amount="Number(paymentOrder?.payable_amount || 0)"
@@ -310,6 +412,12 @@ const previewLoading = ref(false);
 const previewName = ref("");
 const paymentDialog = ref(false);
 const paymentOrder = ref(null);
+const actionDialog = ref(false);
+const actionType = ref("receipt");
+const actionOrder = ref(null);
+const actionDoc = ref(null);
+const actionDate = ref(todayDate());
+const actionRows = ref([]);
 
 const headers = [
 	{ title: __("Purchase Order"), key: "name", align: "start", sortable: true },
@@ -328,11 +436,42 @@ const previewHeaders = [
 	{ title: __("Rate"), key: "rate", align: "end", sortable: false },
 ];
 
+const actionHeaders = computed(() => [
+	{ title: __("Item"), key: "item_name", align: "start", sortable: false },
+	{ title: __("Ordered"), key: "ordered_qty", align: "center", sortable: false },
+	{
+		title: actionType.value === "receipt" ? __("Pending Receipt") : __("Pending Bill"),
+		key: "pending_qty",
+		align: "center",
+		sortable: false,
+	},
+	{
+		title: actionType.value === "receipt" ? __("Receive Qty") : __("Bill Qty"),
+		key: "action_qty",
+		align: "center",
+		sortable: false,
+	},
+	{ title: __("Amount"), key: "amount", align: "end", sortable: false },
+]);
+
 const receiveCount = computed(() => orders.value.filter((row) => row.needs_receipt).length);
 const billCount = computed(() => orders.value.filter((row) => row.needs_invoice).length);
 const payableTotal = computed(() =>
 	orders.value.reduce((sum, row) => sum + (Number(row.payable_amount) || 0), 0),
 );
+const actionTitle = computed(() =>
+	actionType.value === "receipt" ? __("Create Purchase Receipt") : __("Create Purchase Invoice"),
+);
+const selectedActionQty = computed(() =>
+	actionRows.value.reduce((sum, row) => sum + (Number(row.action_qty) || 0), 0),
+);
+const selectedActionAmount = computed(() =>
+	actionRows.value.reduce(
+		(sum, row) => sum + (Number(row.action_qty) || 0) * (Number(row.rate) || 0),
+		0,
+	),
+);
+const canSubmitAction = computed(() => !!actionDate.value && selectedActionQty.value > 0);
 
 watch(dialog, (value) => {
 	if (value) {
@@ -341,6 +480,7 @@ watch(dialog, (value) => {
 		errorMessage.value = "";
 		previewDoc.value = null;
 		paymentOrder.value = null;
+		closeActionDialog(true);
 	}
 });
 
@@ -407,11 +547,46 @@ async function previewOrder(row) {
 	}
 }
 
-async function runAction(row, action) {
+async function openActionDialog(row, action) {
 	if (!row?.name || actionLoading.value) return;
 
+	actionType.value = action;
+	actionOrder.value = row;
 	actionLoading.value = `${row.name}:${action}`;
 	try {
+		actionDoc.value = await fetchManagementDoc(row.name);
+		actionDate.value = todayDate();
+		actionRows.value = buildActionRows(actionDoc.value, action);
+		actionDialog.value = true;
+	} catch (error) {
+		console.error("Failed to prepare purchase action", error);
+		toastStore.show({ title: extractServerError(error), color: "error" });
+	} finally {
+		actionLoading.value = "";
+	}
+}
+
+async function submitAction() {
+	if (!actionOrder.value?.name || !canSubmitAction.value || actionLoading.value) return;
+
+	const row = actionOrder.value;
+	const action = actionType.value;
+	actionLoading.value = `${row.name}:${action}`;
+	try {
+		const items = actionRows.value
+			.filter((item) => Number(item.action_qty) > 0)
+			.map((item) => ({
+				item_code: item.item_code,
+				item_name: item.item_name,
+				po_detail: item.name,
+				purchase_order_item: item.name,
+				qty: Number(item.action_qty) || 0,
+				received_qty: action === "receipt" ? Number(item.action_qty) || 0 : undefined,
+				invoice_qty: action === "invoice" ? Number(item.action_qty) || 0 : undefined,
+				bill_qty: action === "invoice" ? Number(item.action_qty) || 0 : undefined,
+				warehouse: item.warehouse || row.set_warehouse,
+			}));
+
 		const { message } = await frappe.call({
 			method: "posawesome.posawesome.api.purchase_orders.process_purchase_management_action",
 			args: {
@@ -421,11 +596,16 @@ async function runAction(row, action) {
 					pos_profile: props.posProfile,
 					company: props.posProfile?.company,
 					warehouse: row.set_warehouse,
+					transaction_date: normalizeDateForBackend(actionDate.value),
+					receipt_date: action === "receipt" ? normalizeDateForBackend(actionDate.value) : undefined,
+					invoice_date: action === "invoice" ? normalizeDateForBackend(actionDate.value) : undefined,
+					items,
 				},
 			},
 		});
 		const createdDoc = message?.purchase_receipt || message?.purchase_invoice || row.name;
 		toastStore.show({ title: __("Purchase action completed: {0}", [createdDoc]), color: "success" });
+		closeActionDialog();
 		await loadOrders();
 		if (previewDialog.value && previewDoc.value?.name === row.name) {
 			previewDoc.value = await fetchManagementDoc(row.name);
@@ -436,6 +616,46 @@ async function runAction(row, action) {
 	} finally {
 		actionLoading.value = "";
 	}
+}
+
+function buildActionRows(doc, action) {
+	const pendingKey = action === "receipt" ? "pending_receipt_qty" : "pending_bill_qty";
+	return (doc?.items || [])
+		.map((item) => {
+			const pendingQty = Math.max(Number(item[pendingKey] || 0), 0);
+			return {
+				...item,
+				pending_qty: pendingQty,
+				action_qty: pendingQty,
+			};
+		})
+		.filter((item) => item.pending_qty > 0);
+}
+
+function updateActionQty(item, value) {
+	const numericValue = Math.max(Number(value) || 0, 0);
+	item.action_qty = Math.min(numericValue, Number(item.pending_qty) || 0);
+}
+
+function setAllActionQty() {
+	actionRows.value.forEach((item) => {
+		item.action_qty = Number(item.pending_qty) || 0;
+	});
+}
+
+function clearActionQty() {
+	actionRows.value.forEach((item) => {
+		item.action_qty = 0;
+	});
+}
+
+function closeActionDialog(force = false) {
+	if (actionLoading.value && !force) return;
+	actionDialog.value = false;
+	actionDoc.value = null;
+	actionOrder.value = null;
+	actionRows.value = [];
+	actionDate.value = todayDate();
 }
 
 function openPayment(row) {
@@ -491,6 +711,13 @@ function invoiceLabel(row) {
 	if (row?.invoice_complete) return __("Billed");
 	if (row?.has_invoice) return __("Partial Bill");
 	return __("Pending");
+}
+
+function todayDate() {
+	const now = new Date();
+	const month = String(now.getMonth() + 1).padStart(2, "0");
+	const day = String(now.getDate()).padStart(2, "0");
+	return `${now.getFullYear()}-${month}-${day}`;
 }
 
 function formatDate(value) {
@@ -643,6 +870,64 @@ function extractServerError(error) {
 	color: var(--pos-text-muted);
 }
 
+.purchase-action-dialog {
+	max-height: min(88vh, 780px);
+}
+
+.purchase-action-dialog__title,
+.purchase-action-dialog__footer {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	border-color: var(--pos-border);
+}
+
+.purchase-action-dialog__title {
+	justify-content: space-between;
+	border-bottom: 1px solid var(--pos-border);
+}
+
+.purchase-action-dialog__footer {
+	border-top: 1px solid var(--pos-border);
+}
+
+.purchase-action-dialog__body {
+	display: grid;
+	gap: 14px;
+}
+
+.purchase-action-controls {
+	display: grid;
+	grid-template-columns: 170px minmax(120px, 1fr) minmax(150px, 1.2fr) auto auto;
+	gap: 10px;
+	align-items: center;
+}
+
+.purchase-action-total {
+	display: grid;
+	gap: 2px;
+	min-height: 40px;
+	padding: 6px 10px;
+	border: 1px solid var(--pos-border);
+	border-radius: 8px;
+	background: var(--pos-surface);
+}
+
+.purchase-action-total span {
+	font-size: 0.72rem;
+	color: var(--pos-text-muted);
+}
+
+.purchase-action-total strong {
+	color: var(--pos-text-primary);
+	line-height: 1.1;
+}
+
+.purchase-action-qty {
+	width: 120px;
+	margin-inline: auto;
+}
+
 @media (max-width: 980px) {
 	.purchase-management-card__title {
 		align-items: flex-start;
@@ -656,6 +941,10 @@ function extractServerError(error) {
 	.purchase-management-summary,
 	.purchase-management-preview {
 		grid-template-columns: 1fr;
+	}
+
+	.purchase-action-controls {
+		grid-template-columns: 1fr 1fr;
 	}
 }
 </style>
