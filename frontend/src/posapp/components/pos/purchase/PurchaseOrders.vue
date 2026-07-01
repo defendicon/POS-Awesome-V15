@@ -84,34 +84,43 @@
 							</span>
 						</div>
 						<div class="purchase-action-bar__buttons">
+							<div class="purchase-action-bar__secondary">
+								<v-btn
+									block
+									color="accent"
+									theme="dark"
+									prepend-icon="mdi-content-save"
+									class="purchase-summary-btn"
+									@click="saveDraft"
+									:loading="draftSaveLoading"
+									:disabled="submitLoading || draftSaveLoading || !purchaseItems.length"
+								>
+									{{ __("Save & Clear") }}
+								</v-btn>
+								<v-btn
+									block
+									color="warning"
+									theme="dark"
+									prepend-icon="mdi-tray-full"
+									class="purchase-summary-btn purchase-white-text-btn"
+									@click="draftDialog = true"
+									:disabled="submitLoading || draftSaveLoading"
+								>
+									{{ __("Drafts") }}
+								</v-btn>
+							</div>
 							<v-btn
-								color="info"
-								variant="tonal"
-								prepend-icon="mdi-folder-open-outline"
-								@click="draftDialog = true"
-								:disabled="submitLoading || draftSaveLoading"
-							>
-								{{ __("Drafts") }}
-							</v-btn>
-							<v-btn
-								color="warning"
-								variant="tonal"
-								prepend-icon="mdi-content-save-outline"
-								@click="saveDraft"
-								:loading="draftSaveLoading"
-								:disabled="submitLoading || draftSaveLoading || !purchaseItems.length"
-							>
-								{{ __("Save and Clear") }}
-							</v-btn>
-							<v-btn
+								block
 								color="success"
 								theme="dark"
-								prepend-icon="mdi-cash-register"
+								size="large"
+								prepend-icon="mdi-credit-card"
+								class="purchase-summary-btn purchase-pay-btn"
 								:loading="submitLoading"
 								:disabled="submitLoading || !purchaseItems.length"
 								@click="openPaymentDialog"
 							>
-								{{ __("Pay") }}
+								{{ __("PAY") }}
 							</v-btn>
 						</div>
 					</v-card-actions>
@@ -662,15 +671,63 @@ export default {
 }
 
 .purchase-action-bar__buttons {
-	display: flex;
-	align-items: center;
-	justify-content: flex-end;
+	display: grid;
+	grid-template-columns: minmax(260px, 360px);
 	gap: 10px;
-	flex-wrap: wrap;
+	justify-content: end;
+	flex: 1 1 auto;
 }
 
-.purchase-action-bar__buttons :deep(.v-btn) {
-	min-width: 132px;
+.purchase-action-bar__secondary {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 10px;
+}
+
+.purchase-summary-btn {
+	min-height: 46px !important;
+	text-transform: none !important;
+	transition: all 0.2s ease !important;
+	position: relative;
+	overflow: hidden;
+}
+
+.purchase-summary-btn :deep(.v-btn__content) {
+	white-space: normal !important;
+	transition: all 0.2s ease;
+}
+
+.purchase-summary-btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.purchase-summary-btn:active {
+	transform: translateY(0);
+}
+
+.purchase-white-text-btn,
+.purchase-white-text-btn :deep(.v-btn__content) {
+	color: var(--pos-text-primary) !important;
+}
+
+.purchase-pay-btn {
+	min-height: 58px !important;
+	font-weight: 600 !important;
+	font-size: 1.1rem !important;
+	background: linear-gradient(135deg, #4caf50, #45a049) !important;
+	box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3) !important;
+}
+
+.purchase-pay-btn:hover {
+	background: linear-gradient(135deg, #45a049, #3d8b40) !important;
+	box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4) !important;
+	transform: translateY(-2px);
+}
+
+.purchase-summary-btn :deep(.v-btn__overlay),
+.purchase-summary-btn :deep(.v-btn__underlay) {
+	display: none !important;
 }
 
 @media (max-width: 720px) {
@@ -684,8 +741,18 @@ export default {
 		grid-template-columns: 1fr;
 	}
 
-	.purchase-action-bar__buttons :deep(.v-btn) {
-		width: 100%;
+	.purchase-action-bar__secondary {
+		grid-template-columns: 1fr;
+	}
+
+	.purchase-summary-btn {
+		min-height: 42px !important;
+		font-size: 0.85rem !important;
+	}
+
+	.purchase-pay-btn {
+		min-height: 50px !important;
+		font-size: 0.98rem !important;
 	}
 }
 </style>
