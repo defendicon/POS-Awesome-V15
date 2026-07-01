@@ -25,7 +25,7 @@
 							icon="mdi-delete"
 							variant="text"
 							color="white"
-							@click="resetForm"
+							@click="clearPurchaseForm"
 							:title="__('Clear All')"
 							:aria-label="__('Clear all purchase order items')"
 						></v-btn>
@@ -45,6 +45,8 @@
 							:warehouseOptions="warehouseOptions"
 							:warehouseLoading="warehouseLoading"
 							:allowCreateSupplier="allowCreateSupplier"
+							:receiveDisabled="receiptComplete"
+							:createInvoiceDisabled="invoiceComplete"
 							:posProfile="pos_profile"
 							@search-supplier="handleSupplierSearch"
 							@create-supplier="supplierDialog = true"
@@ -93,7 +95,7 @@
 									class="purchase-summary-btn"
 									@click="saveDraft"
 									:loading="draftSaveLoading"
-									:disabled="submitLoading || draftSaveLoading || !purchaseItems.length"
+									:disabled="saveAndClearDisabled"
 								>
 									{{ __("Save & Clear") }}
 								</v-btn>
@@ -229,8 +231,19 @@ export default {
 		const warehouseOptions = ref([]);
 		const warehouseLoading = ref(false);
 		const payments = ref([]);
+		const purchaseOrderProgress = ref({});
 		const totalQty = computed(() =>
 			purchaseItems.value.reduce((sum, item) => sum + (Number(item.qty) || 0), 0),
+		);
+		const receiptComplete = computed(() => !!purchaseOrderProgress.value?.receipt_complete);
+		const invoiceComplete = computed(() => !!purchaseOrderProgress.value?.invoice_complete);
+		const loadedSubmittedOrder = computed(() => Number(purchaseOrderProgress.value?.docstatus || 0) === 1);
+		const saveAndClearDisabled = computed(
+			() =>
+				submitLoading.value ||
+				draftSaveLoading.value ||
+				!purchaseItems.value.length ||
+				loadedSubmittedOrder.value,
 		);
 
 		const supplierSearchTimeout = ref(null);
@@ -299,6 +312,11 @@ export default {
 			supplierOptions.value.unshift(message);
 			supplier.value = message.name;
 			supplierDialog.value = false;
+		};
+
+		const clearPurchaseForm = () => {
+			resetForm();
+			purchaseOrderProgress.value = {};
 		};
 
 		const openPaymentDialog = () => {
@@ -387,6 +405,8 @@ export default {
 					qty: item.qty,
 					rate: item.rate,
 					received_qty: submit && receiveNow.value ? item.received_qty : undefined,
+					invoice_qty: submit && createInvoice.value ? item.pending_bill_qty || item.qty : undefined,
+					bill_qty: submit && createInvoice.value ? item.pending_bill_qty || item.qty : undefined,
 					warehouse: warehouse.value || item.warehouse,
 				})),
 			};
@@ -405,7 +425,7 @@ export default {
 				});
 				if (message?.purchase_order) {
 					const savedName = message.purchase_order;
-					resetForm();
+					clearPurchaseForm();
 					toastStore.show({
 						title: __("Purchase Order {0} saved and cleared", [savedName]),
 						color: "success",
@@ -430,6 +450,17 @@ export default {
 			if (!draft) return;
 
 			purchaseOrderName.value = draft.name || null;
+			purchaseOrderProgress.value = {
+				docstatus: Number(draft.docstatus || 0),
+				per_received: Number(draft.per_received || 0),
+				per_billed: Number(draft.per_billed || 0),
+				has_receipt: !!draft.has_receipt,
+				has_invoice: !!draft.has_invoice,
+				receipt_complete: !!draft.receipt_complete,
+				invoice_complete: !!draft.invoice_complete,
+				receipt_partial: !!draft.receipt_partial,
+				invoice_partial: !!draft.invoice_partial,
+			};
 			supplier.value = draft.supplier || null;
 			warehouse.value =
 				draft.set_warehouse ||
@@ -449,6 +480,12 @@ export default {
 			purchaseItems.value = (draft.items || []).map((item) => {
 				const conversionFactor = Number(item.conversion_factor || 1) || 1;
 				const rate = Number(item.rate || 0);
+				const pendingReceiptQty = Number(item.pending_receipt_qty ?? item.qty ?? 0);
+				const pendingBillQty = Number(item.pending_bill_qty ?? item.qty ?? 0);
+				const visibleQty =
+					Number(draft.docstatus || 0) === 1
+						? Math.max(pendingReceiptQty, pendingBillQty)
+						: Number(item.qty || 0);
 				return {
 					line_id: generateLineId(),
 					item_code: item.item_code,
@@ -460,13 +497,18 @@ export default {
 						: [{ uom: item.uom || item.stock_uom, conversion_factor: conversionFactor }],
 					uom: item.uom || item.stock_uom,
 					conversion_factor: conversionFactor,
-					qty: Number(item.qty || 0),
+					qty: visibleQty,
 					rate,
 					stock_uom_rate: conversionFactor ? rate / conversionFactor : rate,
 					standard_rate: Number(item.standard_rate || 0),
-					received_qty: 0,
+					received_qty: pendingReceiptQty,
 					receivedQtyManual: false,
 					warehouse: item.warehouse,
+					ordered_qty: Number(item.ordered_qty || item.qty || 0),
+					pending_receipt_qty: pendingReceiptQty,
+					billed_qty: Number(item.billed_qty || 0),
+					pending_bill_qty: pendingBillQty,
+					source_docstatus: Number(draft.docstatus || 0),
 				};
 			});
 
@@ -507,7 +549,7 @@ export default {
 						);
 						window.open(printUrl, "_blank")?.focus();
 					}
-					resetForm();
+					clearPurchaseForm();
 				}
 			} catch (error) {
 				errorMessage.value = extractServerError(error);
@@ -553,7 +595,7 @@ export default {
 				console.error("Failed price list load", e);
 			}
 
-			resetForm();
+			clearPurchaseForm();
 			await Promise.all([searchSuppliers(""), loadSupplierGroups(), loadWarehouses()]);
 		});
 
@@ -578,6 +620,9 @@ export default {
 			priceListCurrency,
 			totalAmount,
 			totalQty,
+			receiptComplete,
+			invoiceComplete,
+			saveAndClearDisabled,
 			submitLoading,
 			draftSaveLoading,
 			errorMessage,
@@ -589,6 +634,7 @@ export default {
 			updateItemReceivedQty,
 			removeItem,
 			resetForm,
+			clearPurchaseForm,
 			supplierOptions,
 			supplierLoading,
 			supplierDialog,

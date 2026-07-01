@@ -21,6 +21,11 @@ export interface PurchaseItem {
 	received_qty: number;
 	receivedQtyManual: boolean;
 	warehouse?: string;
+	ordered_qty?: number;
+	pending_receipt_qty?: number;
+	billed_qty?: number;
+	pending_bill_qty?: number;
+	source_docstatus?: number;
 	_isEditingQty?: boolean;
 	_editingQtyValue?: string;
 	_isEditingRate?: boolean;

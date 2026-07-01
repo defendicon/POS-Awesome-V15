@@ -214,6 +214,40 @@ def _resolve_input_row(items_by_code, item_code):
     return rows.pop(0)
 
 
+def _get_billed_qty_by_po_item(po_doc):
+    item_names = [row.name for row in po_doc.items if row.name]
+    if not item_names:
+        return {}
+
+    rows = frappe.db.sql(
+        """
+        select po_detail, sum(qty) as billed_qty
+        from `tabPurchase Invoice Item`
+        where docstatus = 1
+          and po_detail in %s
+        group by po_detail
+        """,
+        (tuple(item_names),),
+        as_dict=True,
+    )
+    return {row.get("po_detail"): flt(row.get("billed_qty")) for row in rows}
+
+
+def _get_purchase_order_progress(po_doc):
+    per_received = flt(po_doc.get("per_received"))
+    per_billed = flt(po_doc.get("per_billed"))
+    return {
+        "per_received": per_received,
+        "per_billed": per_billed,
+        "has_receipt": per_received > 0,
+        "has_invoice": per_billed > 0,
+        "receipt_complete": per_received >= 99.999,
+        "invoice_complete": per_billed >= 99.999,
+        "receipt_partial": 0 < per_received < 99.999,
+        "invoice_partial": 0 < per_billed < 99.999,
+    }
+
+
 def _create_purchase_receipt(po_doc, payload, default_warehouse, transaction_date):
     receipt_date = _normalize_date_for_backend(
         payload.get("receipt_date") or payload.get("posting_date"),
@@ -235,19 +269,24 @@ def _create_purchase_receipt(po_doc, payload, default_warehouse, transaction_dat
 
     for po_item in po_doc.items:
         payload_row = _resolve_input_row(items_by_code, po_item.item_code)
+        remaining_qty = max(flt(po_item.qty) - flt(po_item.get("received_qty")), 0)
+        if remaining_qty <= 0:
+            continue
+
         if (
             payload.get("receive")
             and not payload_row.get("received_qty")
             and not payload_row.get("receive_qty")
         ):
-            payload_row["receive_qty"] = po_item.qty
-            payload_row["received_qty"] = po_item.qty
+            payload_row["receive_qty"] = remaining_qty
+            payload_row["received_qty"] = remaining_qty
         received_qty = flt(
             payload_row.get("received_qty")
             or payload_row.get("receive_qty")
             or payload_row.get("qty")
-            or po_item.qty
+            or remaining_qty
         )
+        received_qty = min(received_qty, remaining_qty)
         if received_qty <= 0:
             continue
 
@@ -652,6 +691,21 @@ def _get_purchase_order_doc(payload, company):
     return po_doc
 
 
+def _get_submitted_purchase_order_doc(payload, company):
+    po_name = _get_purchase_order_name(payload)
+    if not po_name:
+        return None
+
+    if not frappe.db.exists("Purchase Order", po_name):
+        frappe.throw(_("Purchase Order {0} was not found.").format(po_name))
+
+    po_doc = frappe.get_doc("Purchase Order", po_name)
+    if company and po_doc.company and po_doc.company != company:
+        frappe.throw(_("Purchase Order {0} does not belong to company {1}.").format(po_name, company))
+
+    return po_doc if cint(po_doc.docstatus) == 1 else None
+
+
 def _set_purchase_order_items(po_doc, items, warehouse, schedule_date):
     item_codes = [row.get("item_code") for row in items if row.get("item_code")]
     if item_codes:
@@ -702,6 +756,38 @@ def _set_purchase_order_items(po_doc, items, warehouse, schedule_date):
         frappe.throw(_("Purchase order requires at least one item with quantity."))
 
 
+def _run_purchase_order_followup_flow(po_doc, payload, company, warehouse, transaction_date, receive_now):
+    progress = _get_purchase_order_progress(po_doc)
+
+    receipt_name = None
+    receipt_doc = None
+    if receive_now:
+        if progress["receipt_complete"]:
+            frappe.throw(_("Purchase Receipt is already complete for Purchase Order {0}.").format(po_doc.name))
+        receipt_name = _create_purchase_receipt(po_doc, payload, warehouse, transaction_date)
+        if receipt_name:
+            receipt_doc = frappe.get_doc("Purchase Receipt", receipt_name)
+
+    invoice_name = None
+    if cint(payload.get("create_invoice", 0)):
+        if progress["invoice_complete"]:
+            frappe.throw(_("Purchase Invoice is already complete for Purchase Order {0}.").format(po_doc.name))
+        invoice_name = _create_purchase_invoice(
+            po_doc, payload, warehouse, transaction_date, receipt_doc=receipt_doc
+        )
+
+    payments = payload.get("payments")
+    if payments:
+        ref_doc = frappe.get_doc("Purchase Invoice", invoice_name) if invoice_name else po_doc
+        _create_payment_entry(ref_doc, payments, company, transaction_date)
+
+    return {
+        "purchase_order": po_doc.name,
+        "purchase_receipt": receipt_name,
+        "purchase_invoice": invoice_name,
+    }
+
+
 @frappe.whitelist()
 def create_purchase_order(data):
 
@@ -734,6 +820,19 @@ def create_purchase_order(data):
     items = payload.get("items") or []
     if not items:
         frappe.throw(_("Purchase order requires at least one item."))
+
+    submitted_po_doc = _get_submitted_purchase_order_doc(payload, company)
+    if submitted_po_doc:
+        if not submit_order:
+            frappe.throw(_("Submitted Purchase Orders cannot be saved as draft."))
+        return _run_purchase_order_followup_flow(
+            submitted_po_doc,
+            payload,
+            company,
+            warehouse or submitted_po_doc.get("set_warehouse"),
+            transaction_date,
+            receive_now,
+        )
 
     # Get supplier currency (NEW CODE)
     supplier_doc = frappe.get_doc("Supplier", supplier)
@@ -788,29 +887,7 @@ def create_purchase_order(data):
     try:
         po_doc.submit()
 
-        receipt_name = None
-        receipt_doc = None
-        if receive_now:
-            receipt_name = _create_purchase_receipt(po_doc, payload, warehouse, transaction_date)
-            if receipt_name:
-                receipt_doc = frappe.get_doc("Purchase Receipt", receipt_name)
-        invoice_name = None
-        if cint(payload.get("create_invoice", 0)):
-            invoice_name = _create_purchase_invoice(
-                po_doc, payload, warehouse, transaction_date, receipt_doc=receipt_doc
-            )
-
-        payments = payload.get("payments")
-        if payments:
-            # Use PI if created, otherwise PO
-            ref_doc = frappe.get_doc("Purchase Invoice", invoice_name) if invoice_name else po_doc
-            _create_payment_entry(ref_doc, payments, company, transaction_date)
-
-        return {
-            "purchase_order": po_doc.name,
-            "purchase_receipt": receipt_name,
-            "purchase_invoice": invoice_name,
-        }
+        return _run_purchase_order_followup_flow(po_doc, payload, company, warehouse, transaction_date, receive_now)
     except Exception as err:
         frappe.db.rollback()
         frappe.log_error(frappe.get_traceback(), "POS Awesome PO Submit Flow Failed")
@@ -835,7 +912,10 @@ def search_draft_purchase_orders(
     _assert_pos_write_allowed(profile, company=company)
     _ensure_allowed(profile, "posa_allow_purchase_order", _("Purchase orders"))
 
-    filters = {"docstatus": 0}
+    filters = {
+        "docstatus": ["in", [0, 1]],
+        "status": ["not in", ["Closed", "Cancelled"]],
+    }
     if company:
         filters["company"] = company
 
@@ -873,7 +953,7 @@ def search_draft_purchase_orders(
     except Exception:
         limit_page_length = 50
 
-    return frappe.get_all(
+    orders = frappe.get_all(
         "Purchase Order",
         filters=filters,
         or_filters=or_filters,
@@ -888,15 +968,29 @@ def search_draft_purchase_orders(
             "currency",
             "set_warehouse",
             "status",
+            "docstatus",
+            "per_received",
+            "per_billed",
             "modified",
             "owner",
         ],
         order_by="modified desc",
         limit_page_length=limit_page_length,
     )
+    results = []
+    for row in orders:
+        progress = _get_purchase_order_progress(row)
+        if cint(row.get("docstatus")) == 0 or not (
+            progress["receipt_complete"] and progress["invoice_complete"]
+        ):
+            row.update(progress)
+            row["is_draft"] = cint(row.get("docstatus")) == 0
+            results.append(row)
+
+    return results
 
 
-def _attach_purchase_item_options(doc):
+def _attach_purchase_item_options(doc, source_doc=None):
     item_codes = [row.get("item_code") for row in doc.get("items", []) if row.get("item_code")]
     if not item_codes:
         return doc
@@ -919,6 +1013,8 @@ def _attach_purchase_item_options(doc):
             {"uom": row.uom, "conversion_factor": row.conversion_factor}
         )
 
+    billed_qty_map = _get_billed_qty_by_po_item(source_doc) if source_doc else {}
+
     for row in doc.get("items", []):
         item_code = row.get("item_code")
         meta = item_map.get(item_code)
@@ -932,6 +1028,15 @@ def _attach_purchase_item_options(doc):
         if stock_uom and not any(uom.get("uom") == stock_uom for uom in item_uoms):
             item_uoms.append({"uom": stock_uom, "conversion_factor": 1})
         row["item_uoms"] = item_uoms
+
+        ordered_qty = flt(row.get("qty"))
+        received_qty = flt(row.get("received_qty"))
+        billed_qty = flt(billed_qty_map.get(row.get("name")))
+        row["ordered_qty"] = ordered_qty
+        row["received_qty"] = received_qty
+        row["pending_receipt_qty"] = max(ordered_qty - received_qty, 0)
+        row["billed_qty"] = billed_qty
+        row["pending_bill_qty"] = max(ordered_qty - billed_qty, 0)
 
     return doc
 
@@ -947,12 +1052,15 @@ def get_draft_purchase_order(purchase_order, pos_profile=None, company=None):
         frappe.throw(_("Purchase Order {0} was not found.").format(purchase_order))
 
     po_doc = frappe.get_doc("Purchase Order", purchase_order)
-    if cint(po_doc.docstatus) != 0:
-        frappe.throw(_("Only draft Purchase Orders can be loaded."))
+    if cint(po_doc.docstatus) not in (0, 1):
+        frappe.throw(_("Only draft or submitted Purchase Orders can be loaded."))
     if company and po_doc.company and po_doc.company != company:
         frappe.throw(_("Purchase Order {0} does not belong to company {1}.").format(purchase_order, company))
 
-    return _attach_purchase_item_options(po_doc.as_dict())
+    doc = po_doc.as_dict()
+    doc.update(_get_purchase_order_progress(po_doc))
+    doc["is_draft"] = cint(po_doc.docstatus) == 0
+    return _attach_purchase_item_options(doc, source_doc=po_doc)
 
 
 @frappe.whitelist()
@@ -1026,12 +1134,17 @@ def _create_purchase_invoice(po_doc, payload, default_warehouse, transaction_dat
         invoice.set_warehouse = default_warehouse
 
     items_by_code = _build_items_map(payload.get("items"))
+    billed_qty_map = _get_billed_qty_by_po_item(po_doc)
     receipt_items = (
         {item.purchase_order_item: item for item in (receipt_doc.items or [])} if receipt_doc else {}
     )
     for po_item in po_doc.items:
         payload_row = _resolve_input_row(items_by_code, po_item.item_code)
-        qty = flt(payload_row.get("qty") or po_item.qty)
+        remaining_bill_qty = max(flt(po_item.qty) - flt(billed_qty_map.get(po_item.name)), 0)
+        if remaining_bill_qty <= 0:
+            continue
+        qty = flt(payload_row.get("invoice_qty") or payload_row.get("bill_qty") or payload_row.get("qty") or remaining_bill_qty)
+        qty = min(qty, remaining_bill_qty)
         if qty <= 0:
             continue
         invoice_item = {

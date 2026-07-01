@@ -90,7 +90,8 @@
 				density="compact"
 				hide-details
 				color="success"
-				:label="__('Receive now')"
+				:disabled="receiveDisabled"
+				:label="receiveDisabled ? __('Received') : __('Receive now')"
 				class="ma-0"
 			></v-switch>
 			<v-switch
@@ -99,7 +100,8 @@
 				density="compact"
 				hide-details
 				color="primary"
-				:label="__('Create Bill')"
+				:disabled="createInvoiceDisabled"
+				:label="createInvoiceDisabled ? __('Billed') : __('Create Bill')"
 				class="ma-0 ml-4"
 			></v-switch>
 		</div>
@@ -120,6 +122,8 @@ export default {
 		scheduleDate: String,
 		receiveNow: Boolean,
 		createInvoice: Boolean,
+		receiveDisabled: Boolean,
+		createInvoiceDisabled: Boolean,
 		posProfile: Object,
 	},
 	emits: [
