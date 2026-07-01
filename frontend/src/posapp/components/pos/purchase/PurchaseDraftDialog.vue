@@ -107,6 +107,26 @@
 					class="purchase-drafts-table"
 					hover
 				>
+					<template #item.name="{ item }">
+						<div class="purchase-drafts-order">
+							<v-tooltip :text="__('View details')">
+								<template #activator="{ props: tooltipProps }">
+									<v-btn
+										v-bind="tooltipProps"
+										icon="mdi-information-outline"
+										size="x-small"
+										variant="text"
+										color="info"
+										:loading="previewName === item.name"
+										:disabled="loadingSelected || previewLoading"
+										:aria-label="__('View purchase order details')"
+										@click.stop="previewDraft(item)"
+									/>
+								</template>
+							</v-tooltip>
+							<span class="font-weight-medium">{{ item.name }}</span>
+						</div>
+					</template>
 					<template #item.transaction_date="{ item }">
 						{{ formatDate(item.transaction_date) }}
 					</template>
@@ -141,6 +161,87 @@
 				<v-btn variant="text" @click="clearFilters">{{ __("Clear Filters") }}</v-btn>
 				<v-spacer />
 				<v-btn variant="tonal" color="error" @click="dialog = false">{{ __("Close") }}</v-btn>
+			</v-card-actions>
+		</v-card>
+	</v-dialog>
+
+	<v-dialog v-model="previewDialog" max-width="820" scrollable>
+		<v-card class="purchase-preview-card pos-themed-card">
+			<v-card-title class="purchase-preview-card__title">
+				<div>
+					<div class="text-h6">{{ previewDoc?.name || __("Purchase Order") }}</div>
+					<div class="text-caption text-medium-emphasis">
+						{{ previewDoc?.supplier_name || previewDoc?.supplier || "" }}
+					</div>
+				</div>
+				<v-btn
+					icon="mdi-close"
+					variant="text"
+					:aria-label="__('Close')"
+					@click="previewDialog = false"
+				/>
+			</v-card-title>
+
+			<v-card-text class="purchase-preview-card__body">
+				<div v-if="previewDoc" class="purchase-preview-summary">
+					<div>
+						<span>{{ __("Date") }}</span>
+						<strong>{{ formatDate(previewDoc.transaction_date) }}</strong>
+					</div>
+					<div>
+						<span>{{ __("Required By") }}</span>
+						<strong>{{ formatDate(previewDoc.schedule_date) }}</strong>
+					</div>
+					<div>
+						<span>{{ __("Warehouse") }}</span>
+						<strong>{{ previewDoc.set_warehouse || "-" }}</strong>
+					</div>
+					<div>
+						<span>{{ __("Total") }}</span>
+						<strong>
+							{{ currencySymbol(previewDoc.currency) }} {{ formatAmount(previewDoc.grand_total) }}
+						</strong>
+					</div>
+				</div>
+
+				<v-data-table
+					:headers="previewHeaders"
+					:items="previewDoc?.items || []"
+					density="compact"
+					class="purchase-preview-table"
+					hide-default-footer
+					:items-per-page="-1"
+				>
+					<template #item.item_name="{ item }">
+						<div class="py-1">
+							<div class="font-weight-medium">{{ item.item_name || item.item_code }}</div>
+							<div class="text-caption text-medium-emphasis">{{ item.item_code }}</div>
+						</div>
+					</template>
+					<template #item.rate="{ item }">
+						{{ currencySymbol(previewDoc?.currency) }} {{ formatAmount(item.rate) }}
+					</template>
+					<template #item.amount="{ item }">
+						<strong>
+							{{ currencySymbol(previewDoc?.currency) }}
+							{{ formatAmount((Number(item.qty) || 0) * (Number(item.rate) || 0)) }}
+						</strong>
+					</template>
+				</v-data-table>
+			</v-card-text>
+
+			<v-card-actions class="purchase-preview-card__footer">
+				<v-btn variant="text" @click="previewDialog = false">{{ __("Close") }}</v-btn>
+				<v-spacer />
+				<v-btn
+					color="primary"
+					prepend-icon="mdi-folder-open-outline"
+					:loading="loadingSelected"
+					:disabled="!previewDoc || loadingSelected"
+					@click="loadPreviewDraft"
+				>
+					{{ __("Load Draft") }}
+				</v-btn>
 			</v-card-actions>
 		</v-card>
 	</v-dialog>
@@ -185,7 +286,11 @@ const filters = reactive({
 const drafts = ref([]);
 const loading = ref(false);
 const loadingSelected = ref(false);
+const previewLoading = ref(false);
 const selectedName = ref("");
+const previewName = ref("");
+const previewDialog = ref(false);
+const previewDoc = ref(null);
 const errorMessage = ref("");
 
 const headers = [
@@ -197,6 +302,14 @@ const headers = [
 	{ title: "", key: "actions", align: "end", sortable: false },
 ];
 
+const previewHeaders = [
+	{ title: __("Item"), key: "item_name", align: "start", sortable: false },
+	{ title: __("UOM"), key: "uom", align: "center", sortable: false },
+	{ title: __("Qty"), key: "qty", align: "center", sortable: false },
+	{ title: __("Rate"), key: "rate", align: "end", sortable: false },
+	{ title: __("Amount"), key: "amount", align: "end", sortable: false },
+];
+
 watch(dialog, (value) => {
 	if (value) {
 		searchDrafts();
@@ -205,6 +318,18 @@ watch(dialog, (value) => {
 		selectedName.value = "";
 	}
 });
+
+async function fetchDraftDoc(name) {
+	const { message } = await frappe.call({
+		method: "posawesome.posawesome.api.purchase_orders.get_draft_purchase_order",
+		args: {
+			purchase_order: name,
+			pos_profile: props.posProfile,
+			company: props.posProfile?.company,
+		},
+	});
+	return message;
+}
 
 async function searchDrafts() {
 	if (loading.value) return;
@@ -242,15 +367,8 @@ async function selectDraft(row) {
 	selectedName.value = row.name;
 	errorMessage.value = "";
 	try {
-		const { message } = await frappe.call({
-			method: "posawesome.posawesome.api.purchase_orders.get_draft_purchase_order",
-			args: {
-				purchase_order: row.name,
-				pos_profile: props.posProfile,
-				company: props.posProfile?.company,
-			},
-		});
-		emit("select", message);
+		const draftDoc = await fetchDraftDoc(row.name);
+		emit("select", draftDoc);
 		dialog.value = false;
 	} catch (error) {
 		console.error("Failed to load draft purchase order", error);
@@ -259,6 +377,32 @@ async function selectDraft(row) {
 		loadingSelected.value = false;
 		selectedName.value = "";
 	}
+}
+
+async function previewDraft(row) {
+	if (!row?.name || previewLoading.value) return;
+
+	previewLoading.value = true;
+	previewName.value = row.name;
+	errorMessage.value = "";
+	try {
+		previewDoc.value = await fetchDraftDoc(row.name);
+		previewDialog.value = true;
+	} catch (error) {
+		console.error("Failed to preview draft purchase order", error);
+		errorMessage.value = __("Unable to show the selected draft details");
+	} finally {
+		previewLoading.value = false;
+		previewName.value = "";
+	}
+}
+
+function loadPreviewDraft() {
+	if (!previewDoc.value || loadingSelected.value) return;
+
+	emit("select", previewDoc.value);
+	previewDialog.value = false;
+	dialog.value = false;
 }
 
 function clearFilters() {
@@ -334,6 +478,13 @@ function currencySymbol(currency) {
 	overflow: hidden;
 }
 
+.purchase-drafts-order {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	min-width: 0;
+}
+
 .purchase-drafts-table :deep(.v-table),
 .purchase-drafts-table :deep(.v-table__wrapper),
 .purchase-drafts-table :deep(table),
@@ -362,5 +513,91 @@ function currencySymbol(currency) {
 	justify-content: center;
 	gap: 10px;
 	color: var(--pos-text-muted);
+}
+
+.purchase-preview-card {
+	display: flex;
+	flex-direction: column;
+	max-height: min(88vh, 780px);
+	background: var(--pos-surface-raised) !important;
+	border: 1px solid var(--pos-border);
+}
+
+.purchase-preview-card__title,
+.purchase-preview-card__footer {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	border-color: var(--pos-border);
+}
+
+.purchase-preview-card__title {
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--pos-border);
+}
+
+.purchase-preview-card__body {
+	padding: 16px 20px;
+	overflow: auto;
+}
+
+.purchase-preview-card__footer {
+	padding: 12px 20px;
+	border-top: 1px solid var(--pos-border);
+}
+
+.purchase-preview-summary {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 10px;
+	margin-bottom: 14px;
+}
+
+.purchase-preview-summary > div {
+	display: grid;
+	gap: 4px;
+	padding: 10px 12px;
+	border: 1px solid var(--pos-border);
+	border-radius: 8px;
+	background: var(--pos-surface);
+}
+
+.purchase-preview-summary span {
+	font-size: 0.75rem;
+	color: var(--pos-text-muted);
+}
+
+.purchase-preview-summary strong {
+	font-size: 0.95rem;
+	color: var(--pos-text-primary);
+}
+
+.purchase-preview-table {
+	border: 1px solid var(--pos-border);
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.purchase-preview-table :deep(.v-table),
+.purchase-preview-table :deep(.v-table__wrapper),
+.purchase-preview-table :deep(table),
+.purchase-preview-table :deep(thead),
+.purchase-preview-table :deep(tbody),
+.purchase-preview-table :deep(tr),
+.purchase-preview-table :deep(td),
+.purchase-preview-table :deep(th) {
+	background: var(--pos-surface) !important;
+	color: var(--pos-text-primary) !important;
+}
+
+.purchase-preview-table :deep(th) {
+	background: var(--pos-table-header-bg) !important;
+}
+
+@media (max-width: 720px) {
+	.purchase-preview-summary {
+		grid-template-columns: 1fr 1fr;
+	}
 }
 </style>

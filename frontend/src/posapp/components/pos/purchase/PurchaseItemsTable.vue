@@ -157,12 +157,6 @@
 			></v-btn>
 		</template>
 
-		<template v-slot:bottom>
-			<div class="d-flex justify-end pa-4 font-weight-bold text-subtitle-1 border-t">
-				<span class="mr-4">{{ __("Total:") }}</span>
-				<span>{{ formatCurrency(totalAmount) }}</span>
-			</div>
-		</template>
 	</v-data-table>
 </template>
 
@@ -172,7 +166,6 @@ export default {
 		headers: Array,
 		items: Array,
 		currencySymbol: String,
-		totalAmount: Number,
 		receiveNow: Boolean,
 		formatCurrency: Function,
 		formatNumber: Function,

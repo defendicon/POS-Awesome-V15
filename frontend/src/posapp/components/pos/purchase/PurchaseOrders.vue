@@ -22,25 +22,6 @@
 						</v-chip>
 						<v-spacer></v-spacer>
 						<v-btn
-							prepend-icon="mdi-folder-open-outline"
-							variant="text"
-							color="white"
-							@click="draftDialog = true"
-							:disabled="submitLoading || draftSaveLoading"
-						>
-							{{ __("Drafts") }}
-						</v-btn>
-						<v-btn
-							prepend-icon="mdi-content-save-outline"
-							variant="text"
-							color="white"
-							@click="saveDraft"
-							:loading="draftSaveLoading"
-							:disabled="submitLoading || draftSaveLoading || !purchaseItems.length"
-						>
-							{{ __("Save and Clear") }}
-						</v-btn>
-						<v-btn
 							icon="mdi-delete"
 							variant="text"
 							color="white"
@@ -76,7 +57,6 @@
 							:headers="itemHeaders"
 							:items="purchaseItems"
 							:currencySymbol="currencySymbol(priceListCurrency || supplierCurrency)"
-							:totalAmount="totalAmount"
 							:receiveNow="receiveNow"
 							:formatCurrency="formatCurrency"
 							:formatNumber="formatNumber"
@@ -92,16 +72,48 @@
 						</v-alert>
 					</v-card-text>
 
-					<v-card-actions class="pa-4 border-t">
-						<v-spacer></v-spacer>
-						<v-btn
-							:loading="submitLoading"
-							:disabled="submitLoading || !purchaseItems.length"
-							@click="openPaymentDialog"
-							block
-						>
-							{{ __("Pay") }}
-						</v-btn>
+					<v-card-actions class="purchase-action-bar">
+						<div class="purchase-action-bar__totals">
+							<span class="purchase-action-bar__label">{{ __("Total") }}</span>
+							<strong>
+								{{ currencySymbol(priceListCurrency || supplierCurrency) }}
+								{{ formatCurrency(totalAmount) }}
+							</strong>
+							<span class="purchase-action-bar__meta">
+								{{ purchaseItems.length }} {{ __("items") }} &middot; {{ formatNumber(totalQty) }} {{ __("qty") }}
+							</span>
+						</div>
+						<div class="purchase-action-bar__buttons">
+							<v-btn
+								color="info"
+								variant="tonal"
+								prepend-icon="mdi-folder-open-outline"
+								@click="draftDialog = true"
+								:disabled="submitLoading || draftSaveLoading"
+							>
+								{{ __("Drafts") }}
+							</v-btn>
+							<v-btn
+								color="warning"
+								variant="tonal"
+								prepend-icon="mdi-content-save-outline"
+								@click="saveDraft"
+								:loading="draftSaveLoading"
+								:disabled="submitLoading || draftSaveLoading || !purchaseItems.length"
+							>
+								{{ __("Save and Clear") }}
+							</v-btn>
+							<v-btn
+								color="success"
+								theme="dark"
+								prepend-icon="mdi-cash-register"
+								:loading="submitLoading"
+								:disabled="submitLoading || !purchaseItems.length"
+								@click="openPaymentDialog"
+							>
+								{{ __("Pay") }}
+							</v-btn>
+						</div>
 					</v-card-actions>
 				</v-card>
 			</v-col>
@@ -148,7 +160,7 @@ import PurchaseDraftDialog from "./PurchaseDraftDialog.vue";
 import SupplierDialog from "../dialogs/purchase/SupplierDialog.vue";
 import PurchaseHeader from "./PurchaseHeader.vue";
 import PurchaseItemsTable from "./PurchaseItemsTable.vue";
-import { ref, watch, onMounted, onBeforeUnmount, inject } from "vue";
+import { computed, ref, watch, onMounted, onBeforeUnmount, inject } from "vue";
 
 export default {
 	mixins: [format],
@@ -208,6 +220,9 @@ export default {
 		const warehouseOptions = ref([]);
 		const warehouseLoading = ref(false);
 		const payments = ref([]);
+		const totalQty = computed(() =>
+			purchaseItems.value.reduce((sum, item) => sum + (Number(item.qty) || 0), 0),
+		);
 
 		const supplierSearchTimeout = ref(null);
 
@@ -553,6 +568,7 @@ export default {
 			supplierPriceList,
 			priceListCurrency,
 			totalAmount,
+			totalQty,
 			submitLoading,
 			draftSaveLoading,
 			errorMessage,
@@ -615,5 +631,61 @@ export default {
 <style scoped>
 .cursor-pointer {
 	cursor: pointer;
+}
+
+.purchase-action-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 14px 16px;
+	border-top: 1px solid var(--pos-border);
+	background: color-mix(in srgb, var(--pos-surface-raised) 94%, rgb(var(--v-theme-primary)) 6%);
+}
+
+.purchase-action-bar__totals {
+	display: grid;
+	gap: 2px;
+	min-width: 210px;
+}
+
+.purchase-action-bar__label,
+.purchase-action-bar__meta {
+	font-size: 0.78rem;
+	color: var(--pos-text-muted);
+}
+
+.purchase-action-bar__totals strong {
+	font-size: 1.25rem;
+	line-height: 1.2;
+	color: var(--pos-text-primary);
+}
+
+.purchase-action-bar__buttons {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.purchase-action-bar__buttons :deep(.v-btn) {
+	min-width: 132px;
+}
+
+@media (max-width: 720px) {
+	.purchase-action-bar {
+		align-items: stretch;
+		flex-direction: column;
+	}
+
+	.purchase-action-bar__buttons {
+		display: grid;
+		grid-template-columns: 1fr;
+	}
+
+	.purchase-action-bar__buttons :deep(.v-btn) {
+		width: 100%;
+	}
 }
 </style>
