@@ -16,6 +16,7 @@ import {
 	shouldAutoOpenCustomerDisplay,
 	type CustomerDisplayLineItem,
 	type CustomerDisplaySnapshot,
+	type CustomerDisplayTotalsSummary,
 } from "../../../utils/customerDisplay";
 
 declare const frappe: any;
@@ -48,7 +49,7 @@ const toText = (value: any) => {
 const toLineItem = (item: any, index: number): CustomerDisplayLineItem => {
 	const qty = toNumber(item?.qty);
 	const rate = toNumber(item?.rate);
-	const amount = qty * rate;
+	const amount = toFiniteOrNull(item?.amount) ?? qty * rate;
 
 	return {
 		id:
@@ -75,6 +76,20 @@ const getCustomerName = (
 	toText(invoiceDoc?.customer_name) ||
 	toText(customerInfo?.customer_name) ||
 	toText(selectedCustomer);
+
+const getInvoiceTotal = (
+	invoiceDoc: any,
+	keys: string[],
+	fallback = 0,
+) => {
+	for (const key of keys) {
+		const value = toFiniteOrNull(invoiceDoc?.[key]);
+		if (value !== null) {
+			return value;
+		}
+	}
+	return fallback;
+};
 
 export function useCustomerDisplayPublisher({
 	posProfile,
@@ -106,15 +121,43 @@ export function useCustomerDisplayPublisher({
 		const gross_total = is_return ? Math.abs(item_total) : item_total;
 		const discount_magnitude = Math.abs(additional_discount);
 		const subtotal = gross_total - discount_magnitude + delivery_charges;
-		const total_amount = toFiniteOrNull(subtotal) ?? item_total;
+		const invoiceDoc = invoiceStore.invoiceDoc;
+		const tax_total = getInvoiceTotal(
+			invoiceDoc,
+			["total_taxes_and_charges", "base_total_taxes_and_charges"],
+			0,
+		);
+		const item_discount_total = Math.abs(toNumber(invoiceStore.discountTotal));
+		const invoice_discount = getInvoiceTotal(
+			invoiceDoc,
+			["discount_amount", "base_discount_amount"],
+			additional_discount,
+		);
+		const fallback_total = toFiniteOrNull(subtotal + tax_total) ?? item_total;
+		const grand_total = getInvoiceTotal(
+			invoiceDoc,
+			["rounded_total", "grand_total", "total", "net_total"],
+			fallback_total,
+		);
+		const rounded_total = toFiniteOrNull(invoiceDoc?.rounded_total);
+		const total_amount = grand_total;
+		const totals_summary: CustomerDisplayTotalsSummary = {
+			item_total,
+			item_discount_total,
+			additional_discount: invoice_discount,
+			delivery_charges,
+			tax_total,
+			grand_total,
+			rounded_total,
+		};
 		const customer_name = getCustomerName(
-			invoiceStore.invoiceDoc,
+			invoiceDoc,
 			customersStore.customerInfo,
 			customersStore.selectedCustomer,
 		);
 		const currency =
 			toText(posProfile.value?.currency) ||
-			toText(invoiceStore.invoiceDoc?.currency);
+			toText(invoiceDoc?.currency);
 
 		return {
 			channel_id: channelId,
@@ -123,6 +166,7 @@ export function useCustomerDisplayPublisher({
 			items,
 			total_qty,
 			total_amount,
+			totals_summary,
 			updated_at: new Date().toISOString(),
 		};
 	};
@@ -244,6 +288,12 @@ export function useCustomerDisplayPublisher({
 			invoiceStore.additionalDiscountPercentage,
 			invoiceStore.deliveryChargesRate,
 			invoiceStore.invoiceDoc?.is_return,
+			invoiceStore.invoiceDoc?.net_total,
+			invoiceStore.invoiceDoc?.total,
+			invoiceStore.invoiceDoc?.total_taxes_and_charges,
+			invoiceStore.invoiceDoc?.discount_amount,
+			invoiceStore.invoiceDoc?.grand_total,
+			invoiceStore.invoiceDoc?.rounded_total,
 		],
 		() => {
 			schedulePublish();

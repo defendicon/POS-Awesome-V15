@@ -45,8 +45,25 @@
 		</div>
 
 		<footer class="display-footer">
-			<div class="display-total-label">{{ __("Total") }}</div>
-			<div class="display-total-value">{{ formatCurrency(totalAmount) }}</div>
+			<div class="display-total-heading">
+				<div class="display-total-label">{{ __("Totals Summary") }}</div>
+				<div class="display-total-note">{{ __("Discounts and taxes included below") }}</div>
+			</div>
+			<div class="display-summary-list">
+				<div
+					v-for="row in summaryRows"
+					:key="row.key"
+					class="display-summary-row"
+					:class="{ 'display-summary-row--muted': row.muted }"
+				>
+					<span>{{ row.label }}</span>
+					<strong>{{ formatCurrency(row.value) }}</strong>
+				</div>
+				<div class="display-summary-row display-summary-row--grand">
+					<span>{{ __("Grand Total") }}</span>
+					<strong>{{ formatCurrency(totalAmount) }}</strong>
+				</div>
+			</div>
 		</footer>
 	</section>
 </template>
@@ -79,6 +96,15 @@ const emptySnapshot = (): CustomerDisplaySnapshot => ({
 	items: [],
 	total_qty: 0,
 	total_amount: 0,
+	totals_summary: {
+		item_total: 0,
+		item_discount_total: 0,
+		additional_discount: 0,
+		delivery_charges: 0,
+		tax_total: 0,
+		grand_total: 0,
+		rounded_total: null,
+	},
 	updated_at: "",
 });
 
@@ -123,11 +149,77 @@ onBeforeUnmount(() => {
 
 const rows = computed(() => snapshot.value.items || []);
 const itemCount = computed(() => rows.value.length);
+const totalsSummary = computed(() => {
+	const summary = snapshot.value.totals_summary;
+	const itemTotal = Number.isFinite(Number(summary?.item_total))
+		? Number(summary?.item_total)
+		: rows.value.reduce((sum, row) => sum + Number(row.amount || 0), 0);
+	const grandTotal = Number.isFinite(Number(summary?.grand_total))
+		? Number(summary?.grand_total)
+		: Number(snapshot.value.total_amount);
+
+	return {
+		item_total: itemTotal,
+		item_discount_total: Number.isFinite(Number(summary?.item_discount_total))
+			? Number(summary?.item_discount_total)
+			: 0,
+		additional_discount: Number.isFinite(Number(summary?.additional_discount))
+			? Number(summary?.additional_discount)
+			: 0,
+		delivery_charges: Number.isFinite(Number(summary?.delivery_charges))
+			? Number(summary?.delivery_charges)
+			: 0,
+		tax_total: Number.isFinite(Number(summary?.tax_total))
+			? Number(summary?.tax_total)
+			: 0,
+		grand_total: Number.isFinite(grandTotal) ? grandTotal : itemTotal,
+	};
+});
 const totalAmount = computed(() =>
-	Number.isFinite(Number(snapshot.value.total_amount))
+	Number.isFinite(Number(totalsSummary.value.grand_total))
+		? Number(totalsSummary.value.grand_total)
+		: Number.isFinite(Number(snapshot.value.total_amount))
 		? Number(snapshot.value.total_amount)
 		: rows.value.reduce((sum, row) => sum + Number(row.amount || 0), 0),
 );
+const summaryRows = computed(() => {
+	const summary = totalsSummary.value;
+	const rows = [
+		{
+			key: "item_total",
+			label: __("Items Total"),
+			value: summary.item_total,
+		},
+		{
+			key: "item_discount_total",
+			label: __("Item / Rate Discounts"),
+			value: summary.item_discount_total,
+			muted: true,
+		},
+		{
+			key: "additional_discount",
+			label: __("Additional Discount"),
+			value: summary.additional_discount,
+			muted: true,
+		},
+	];
+
+	if (Math.abs(summary.delivery_charges) > 0.000001) {
+		rows.push({
+			key: "delivery_charges",
+			label: __("Delivery Charges"),
+			value: summary.delivery_charges,
+		});
+	}
+
+	rows.push({
+		key: "tax_total",
+		label: __("Taxes"),
+		value: summary.tax_total,
+	});
+
+	return rows;
+});
 
 const customerLabel = computed(() =>
 	snapshot.value.customer_name
@@ -273,13 +365,21 @@ const formatCurrency = (value: number) => {
 }
 
 .display-footer {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
+	display: grid;
+	grid-template-columns: minmax(180px, 0.7fr) minmax(280px, 1fr);
+	align-items: stretch;
+	gap: 16px;
 	background: rgba(3, 105, 161, 0.25);
 	border: 1px solid rgba(56, 189, 248, 0.38);
 	border-radius: 14px;
 	padding: 14px 20px;
+}
+
+.display-total-heading {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	min-width: 0;
 }
 
 .display-total-label {
@@ -287,10 +387,56 @@ const formatCurrency = (value: number) => {
 	font-weight: 700;
 }
 
-.display-total-value {
+.display-total-note {
+	margin-top: 4px;
+	color: #bae6fd;
+	font-size: clamp(12px, 1vw, 15px);
+}
+
+.display-summary-list {
+	display: grid;
+	gap: 5px;
+	min-width: 0;
+}
+
+.display-summary-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	color: #e0f2fe;
+	font-size: clamp(13px, 1.1vw, 17px);
+}
+
+.display-summary-row span,
+.display-summary-row strong {
+	min-width: 0;
+}
+
+.display-summary-row strong {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.display-summary-row--muted {
+	color: #cbd5e1;
+}
+
+.display-summary-row--grand {
+	margin-top: 4px;
+	padding-top: 8px;
+	border-top: 1px solid rgba(186, 230, 253, 0.28);
+	color: #fef08a;
+}
+
+.display-summary-row--grand span {
+	font-size: clamp(16px, 1.6vw, 24px);
+	font-weight: 800;
+}
+
+.display-summary-row--grand strong {
 	font-size: clamp(26px, 3vw, 44px);
 	font-weight: 900;
-	color: #fef08a;
 }
 
 @media (max-width: 768px) {
@@ -306,6 +452,10 @@ const formatCurrency = (value: number) => {
 	.display-table th,
 	.display-table td {
 		padding: 10px 12px;
+	}
+
+	.display-footer {
+		grid-template-columns: 1fr;
 	}
 }
 </style>

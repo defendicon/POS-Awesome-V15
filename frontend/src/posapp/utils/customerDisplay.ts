@@ -21,6 +21,16 @@ export interface CustomerDisplayLineItem {
 	uom: string;
 }
 
+export interface CustomerDisplayTotalsSummary {
+	item_total: number;
+	item_discount_total: number;
+	additional_discount: number;
+	delivery_charges: number;
+	tax_total: number;
+	grand_total: number;
+	rounded_total: number | null;
+}
+
 export interface CustomerDisplaySnapshot {
 	channel_id: string;
 	currency: string;
@@ -28,6 +38,7 @@ export interface CustomerDisplaySnapshot {
 	items: CustomerDisplayLineItem[];
 	total_qty: number;
 	total_amount: number;
+	totals_summary?: CustomerDisplayTotalsSummary;
 	updated_at: string;
 }
 
