@@ -989,6 +989,7 @@ onMounted(async () => {
 		syncSelectorPriceList,
 		scheduleLastBuyingRateRefresh,
 		requestItemSearchFocus,
+		injectTypeToSearchCharacter,
 		handleCartQuantitiesUpdated: itemAvailability.handleCartQuantitiesUpdated,
 		handleRemoteStockAdjustment,
 	});
@@ -1137,6 +1138,12 @@ const {
 	triggerItemSearchFocus: () => uiStore.triggerItemSearchFocus(),
 });
 cleanupSearchInput = stopSearchInputWatcher;
+const injectTypeToSearchCharacter = (character: string) => {
+	prepareSearchInjection();
+	revealItemSearchView();
+	requestForegroundItemSearchFocus();
+	appendSearchCharacter(character);
+};
 const {
 	newItemDialog,
 	newItemDialogScannedBarcode,

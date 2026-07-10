@@ -65,6 +65,7 @@
 					@update-discount-percent="handleDiscountPercentUpdate"
 					@update-discount-amount="handleDiscountAmountUpdate"
 					@discount-percent-edit-submitted="handleDiscountEditSubmitted"
+					@type-to-item-search="handleTypeToItemSearch"
 					@open-name-dialog="openNameDialog"
 					@reset-item-name="resetItemName"
 					@toggle-offer="toggleOffer"
@@ -346,6 +347,10 @@ const handleDiscountEditSubmitted = () => {
 	window.setTimeout(() => {
 		eventBus?.emit("focus_item_search");
 	}, 0);
+};
+
+const handleTypeToItemSearch = (character: string) => {
+	eventBus?.emit("type_to_item_search", character);
 };
 
 const handleRateUpdate = (item: any, newRate: any) => {

@@ -33,6 +33,7 @@ type UseItemsSelectorEventsArgs = {
 	syncSelectorPriceList: (_priceList: unknown) => Promise<void> | void;
 	scheduleLastBuyingRateRefresh: () => void;
 	requestItemSearchFocus: () => void;
+	injectTypeToSearchCharacter?: (_character: string) => void;
 	handleCartQuantitiesUpdated: (..._args: any[]) => void;
 	handleRemoteStockAdjustment: (_payload: unknown) => void;
 };
@@ -52,6 +53,7 @@ export function registerItemsSelectorEvents({
 	syncSelectorPriceList,
 	scheduleLastBuyingRateRefresh,
 	requestItemSearchFocus,
+	injectTypeToSearchCharacter,
 	handleCartQuantitiesUpdated,
 	handleRemoteStockAdjustment,
 }: UseItemsSelectorEventsArgs): ItemsSelectorEventsCleanup {
@@ -94,10 +96,21 @@ export function registerItemsSelectorEvents({
 		}
 	};
 
+	const handleTypeToItemSearch = (payload: unknown) => {
+		if (!injectTypeToSearchCharacter) {
+			return;
+		}
+		const character = typeof payload === "string" ? payload : isObjectPayload(payload) ? payload.key : "";
+		if (typeof character === "string" && character.length > 0) {
+			injectTypeToSearchCharacter(character);
+		}
+	};
+
 	eventBus.on("update_currency", handleCurrencyUpdate);
 	eventBus.on("update_customer_price_list", handleCustomerPriceListUpdate);
 	eventBus.on("update_buying_price_list", handleBuyingPriceListUpdate);
 	eventBus.on("focus_item_search", requestItemSearchFocus);
+	eventBus.on("type_to_item_search", handleTypeToItemSearch);
 	eventBus.on("cart_quantities_updated", handleCartQuantitiesUpdated);
 	eventBus.on("remote_stock_adjustment", handleRemoteStockAdjustment);
 
@@ -106,6 +119,7 @@ export function registerItemsSelectorEvents({
 		eventBus.off?.("update_customer_price_list", handleCustomerPriceListUpdate);
 		eventBus.off?.("update_buying_price_list", handleBuyingPriceListUpdate);
 		eventBus.off?.("focus_item_search", requestItemSearchFocus);
+		eventBus.off?.("type_to_item_search", handleTypeToItemSearch);
 		eventBus.off?.("cart_quantities_updated", handleCartQuantitiesUpdated);
 		eventBus.off?.("remote_stock_adjustment", handleRemoteStockAdjustment);
 	};

@@ -110,6 +110,7 @@
 						variant="outlined"
 						class="posa-cart-table__qty-input"
 						@blur="closeQtyEdit"
+						@keydown="handleQtyInputKeydown"
 						@keydown.enter.prevent="closeQtyEdit({ focusDiscountPercent: true })"
 						@keydown.esc.prevent="cancelQtyEdit"
 						@click.stop
@@ -401,6 +402,7 @@
 
 <script setup>
 import { computed, nextTick, ref } from "vue";
+import { shouldRouteCartQtyKeyToItemSearch } from "../../../utils/cartQtySearchRouting";
 
 defineOptions({
 	name: "CartItemRow",
@@ -444,6 +446,7 @@ const emit = defineEmits([
 	"update-discount-amount",
 	"qty-edit-submitted",
 	"discount-percent-edit-submitted",
+	"type-to-item-search",
 	"toggle-offer",
 	"toggle-expand",
 	"remove-item",
@@ -570,6 +573,15 @@ function closeQtyEdit(options = {}) {
 function cancelQtyEdit() {
 	isEditingQty.value = false;
 	editingQtyValue.value = "";
+}
+
+function handleQtyInputKeydown(event) {
+	if (!shouldRouteCartQtyKeyToItemSearch(event)) return;
+	event.preventDefault();
+	event.stopPropagation();
+	const character = event.key;
+	cancelQtyEdit();
+	emit("type-to-item-search", character);
 }
 
 function handleMinusClick() {
