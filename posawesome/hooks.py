@@ -307,6 +307,7 @@ fixtures = [
                     "POS Profile-posa_allow_write_off_change",
                     "POS Profile-posa_new_line",
                     "POS Profile-posa_input_qty",
+                    "POS Profile-posa_focus_cart_qty_after_item_add",
                     "POS Profile-posa_display_item_code",
                     "POS Profile-posa_allow_zero_rated_items",
                     "POS Profile-posa_allow_print_draft_invoices",

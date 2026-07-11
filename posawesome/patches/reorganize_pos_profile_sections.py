@@ -121,6 +121,7 @@ ORDERED_CHAIN = [
     "posa_show_custom_name_marker_on_print",
     "posa_allow_zero_rated_items",
     "posa_input_qty",
+    "posa_focus_cart_qty_after_item_add",
     "posa_new_line",
     "posa_section_print_delivery",
     "posa_use_delivery_charges",

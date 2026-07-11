@@ -263,6 +263,7 @@ import { useInvoiceStore } from "../../../stores/invoiceStore";
 import { useEmployeeStore } from "../../../stores/employeeStore";
 
 import { parseBooleanSetting } from "../../../utils/stock";
+import { shouldFocusCartQtyAfterItemAdd } from "../../../utils/cartFocusSettings";
 import { createItemSearchFocusClearGuard } from "../../../utils/itemSearchFocusClearGuard";
 
 const props = defineProps({
@@ -700,7 +701,12 @@ const add_item = async (item, optionsOrQty: any = {}) => {
 				eventBus.emit("apply_pricing_rules");
 			}
 			qty.value = 1;
-			if (addedLine && eventBus && typeof eventBus.emit === "function") {
+			if (
+				addedLine &&
+				shouldFocusCartQtyAfterItemAdd(pos_profile.value) &&
+				eventBus &&
+				typeof eventBus.emit === "function"
+			) {
 				const focusedLine: any = addedLine;
 				window.setTimeout(() => {
 					eventBus.emit("focus_cart_item_qty", {
