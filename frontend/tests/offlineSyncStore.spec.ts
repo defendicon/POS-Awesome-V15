@@ -12,6 +12,7 @@ describe("offline sync store", () => {
 
 	it("summarizes scheduled offline resources as one global sync signal", () => {
 		const store = useOfflineSyncStore();
+		store.setResourceStatesHydrated(true);
 
 		store.setResourceStates([
 			{
@@ -54,7 +55,51 @@ describe("offline sync store", () => {
 		expect(store.globalSyncCoverage.syncing).toBe(1);
 		expect(store.globalSyncCoverage.attention).toBe(1);
 		expect(store.globalSyncCoverage.tone).toBe("danger");
-		expect(store.globalSyncLabel).toBe("Offline Data 1/10");
-		expect(store.globalSyncDetail).toBe("Refreshing 1 offline resource.");
+		expect(store.globalSyncLabel).toBe("Offline Data Refreshing");
+		expect(store.globalSyncDetail).toBe("1/10 ready. Refreshing 1 offline resource.");
+	});
+
+	it("does not show a misleading zero count before sync state hydration", () => {
+		const store = useOfflineSyncStore();
+
+		expect(store.globalSyncCoverage.status).toBe("checking");
+		expect(store.globalSyncCoverage.hydrated).toBe(false);
+		expect(store.globalSyncLabel).toBe("Offline Data Checking");
+		expect(store.globalSyncDetail).toBe("Checking saved offline sync status.");
+	});
+
+	it("labels failed or limited resources as needing refresh after hydration", () => {
+		const store = useOfflineSyncStore();
+		store.setResourceStatesHydrated(true);
+
+		store.setResourceStates([
+			{
+				resourceId: "bootstrap_config",
+				status: "limited",
+				lastSyncedAt: null,
+				watermark: null,
+				lastSuccessHash: null,
+				lastError: "Missing bootstrap data",
+				consecutiveFailures: 1,
+				scopeSignature: "profile:main",
+				schemaVersion: null,
+			},
+			{
+				resourceId: "pricing_rules",
+				status: "error",
+				lastSyncedAt: null,
+				watermark: null,
+				lastSuccessHash: null,
+				lastError: "Server offline",
+				consecutiveFailures: 1,
+				scopeSignature: "company:test",
+				schemaVersion: null,
+			},
+		]);
+
+		expect(store.globalSyncCoverage.status).toBe("attention");
+		expect(store.globalSyncCoverage.attention).toBe(2);
+		expect(store.globalSyncLabel).toBe("Offline Data Needs Refresh");
+		expect(store.globalSyncDetail).toBe("0/10 ready. 2 offline resources need attention.");
 	});
 });

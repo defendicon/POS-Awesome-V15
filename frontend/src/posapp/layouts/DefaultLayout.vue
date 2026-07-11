@@ -237,6 +237,7 @@ const syncCoordinator = new SyncCoordinator({
 	runResource: async (resource, trigger) => runOfflineSyncResource(resource, trigger),
 	onStateChange: (states) => {
 		offlineSyncStore.setResourceStates(filterSupportedOfflineSyncStates(states));
+		offlineSyncStore.setResourceStatesHydrated(true);
 	},
 });
 const offlineSyncRuntime = createOfflineSyncRuntime({
@@ -587,8 +588,10 @@ async function hydrateOfflineSyncResourceStates() {
 	try {
 		const states = filterSupportedOfflineSyncStates(await listSyncResourceStates());
 		syncCoordinator.hydrateResourceStates(states);
+		offlineSyncStore.setResourceStatesHydrated(true);
 	} catch (error) {
 		console.error("Failed to hydrate offline sync state", error);
+		offlineSyncStore.setResourceStatesHydrated(true);
 	}
 }
 

@@ -123,6 +123,7 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 	const bootstrapWarning = ref<OfflineBootstrapWarning>(createDefaultWarning());
 	const capabilitySummaries = ref<OfflineCapabilitySummary[]>([]);
 	const resourceStates = ref<SyncResourceState[]>([]);
+	const resourceStatesHydrated = ref(false);
 
 	const syncingResourcesCount = computed(
 		() =>
@@ -130,6 +131,20 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 	);
 
 	const globalSyncCoverage = computed(() => {
+		if (!resourceStatesHydrated.value) {
+			return {
+				total: GLOBAL_SYNC_RESOURCE_IDS.length,
+				ready: 0,
+				syncing: 0,
+				attention: 0,
+				missing: GLOBAL_SYNC_RESOURCE_IDS.length,
+				progress: 0,
+				status: "checking",
+				tone: "info",
+				hydrated: false,
+			};
+		}
+
 		const stateMap = new Map(
 			resourceStates.value.map((state) => [state.resourceId, state]),
 		);
@@ -176,29 +191,42 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 			progress,
 			status,
 			tone,
+			hydrated: true,
 		};
 	});
 
 	const globalSyncLabel = computed(() => {
 		const coverage = globalSyncCoverage.value;
+		if (coverage.status === "checking") {
+			return "Offline Data Checking";
+		}
+		if (coverage.status === "syncing") {
+			return "Offline Data Refreshing";
+		}
+		if (coverage.status === "attention") {
+			return "Offline Data Needs Refresh";
+		}
 		if (coverage.status === "ready") {
 			return "Offline Data Ready";
 		}
-		return `Offline Data ${coverage.ready}/${coverage.total}`;
+		return "Offline Data Pending";
 	});
 
 	const globalSyncDetail = computed(() => {
 		const coverage = globalSyncCoverage.value;
+		if (coverage.status === "checking") {
+			return "Checking saved offline sync status.";
+		}
 		if (coverage.syncing) {
-			return `Refreshing ${coverage.syncing} offline resource${coverage.syncing > 1 ? "s" : ""}.`;
+			return `${coverage.ready}/${coverage.total} ready. Refreshing ${coverage.syncing} offline resource${coverage.syncing > 1 ? "s" : ""}.`;
 		}
 		if (coverage.attention) {
-			return `${coverage.attention} offline resource${coverage.attention > 1 ? "s" : ""} need attention.`;
+			return `${coverage.ready}/${coverage.total} ready. ${coverage.attention} offline resource${coverage.attention > 1 ? "s" : ""} need attention.`;
 		}
 		if (coverage.status === "ready") {
 			return "All scheduled offline data is synced.";
 		}
-		return `${coverage.missing} scheduled offline resource${coverage.missing > 1 ? "s" : ""} have not synced yet.`;
+		return `${coverage.ready}/${coverage.total} ready. ${coverage.missing} scheduled offline resource${coverage.missing > 1 ? "s" : ""} have not synced yet.`;
 	});
 
 	const connectivityLabel = computed(() => {
@@ -332,12 +360,17 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 			: [];
 	}
 
+	function setResourceStatesHydrated(value: boolean) {
+		resourceStatesHydrated.value = Boolean(value);
+	}
+
 	function reset() {
 		panelOpen.value = false;
 		summary.value = createDefaultSummary();
 		bootstrapWarning.value = createDefaultWarning();
 		capabilitySummaries.value = [];
 		resourceStates.value = [];
+		resourceStatesHydrated.value = false;
 	}
 
 	return {
@@ -346,6 +379,7 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		bootstrapWarning,
 		capabilitySummaries,
 		resourceStates,
+		resourceStatesHydrated,
 		syncingResourcesCount,
 		globalSyncCoverage,
 		globalSyncLabel,
@@ -361,6 +395,7 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		setBootstrapWarning,
 		setCapabilitySummaries,
 		setResourceStates,
+		setResourceStatesHydrated,
 		reset,
 	};
 });
