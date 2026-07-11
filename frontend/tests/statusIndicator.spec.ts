@@ -1,19 +1,20 @@
 // @vitest-environment jsdom
 
+import { describe, expect, it, vi } from "vitest";
 import { defineComponent, h, ref } from "vue";
 import { mount } from "@vue/test-utils";
-import { describe, expect, it } from "vitest";
 
 import StatusIndicator from "../src/posapp/components/navbar/StatusIndicator.vue";
 
 const VBtnStub = defineComponent({
-	setup(_, { attrs, slots }) {
+	emits: ["click"],
+	setup(_, { attrs, slots, emit }) {
 		return () =>
 			h(
 				"button",
 				{
 					...attrs,
-					onClick: attrs.onClick as (() => void) | undefined,
+					onClick: () => emit("click"),
 				},
 				slots.default?.(),
 			);
@@ -22,18 +23,18 @@ const VBtnStub = defineComponent({
 
 const VIconStub = defineComponent({
 	setup(_, { slots }) {
-		return () => h("i", {}, slots.default?.());
+		return () => h("span", { class: "v-icon-stub" }, slots.default?.());
 	},
 });
 
 const VTooltipStub = defineComponent({
 	setup(_, { slots }) {
 		return () =>
-			h("div", {}, [
+			h("div", { class: "v-tooltip-stub" }, [
 				slots.activator?.({
 					props: {},
 				}),
-				h("div", { class: "tooltip-content" }, slots.default?.()),
+				h("div", { class: "v-tooltip-stub__content" }, slots.default?.()),
 			]);
 	},
 });
@@ -67,11 +68,7 @@ describe("StatusIndicator", () => {
 			},
 		});
 
-		const button = wrapper.getComponent(VBtnStub);
-		const onClick = button.vm.$attrs.onClick as (() => void) | undefined;
-		expect(typeof onClick).toBe("function");
-		onClick?.();
-		await wrapper.vm.$nextTick();
+		await wrapper.get("button").trigger("click");
 
 		expect((wrapper.vm as any).panels).toBe(1);
 	});
@@ -125,6 +122,35 @@ describe("StatusIndicator", () => {
 		expect(wrapper.text()).toContain(warningMessage);
 		expect(wrapper.get("button").attributes("aria-label")).toContain(
 			warningMessage,
+		);
+	});
+
+	it("shows global offline data sync progress in the navbar", () => {
+		vi.stubGlobal("__", (value: string) => value);
+
+		const wrapper = mount(StatusIndicator, {
+			props: {
+				networkOnline: true,
+				serverOnline: true,
+				offlineSyncLabel: "Offline Data 7/10",
+				offlineSyncDetail: "Refreshing 2 offline resources.",
+				offlineSyncTone: "info",
+				offlineSyncProgress: 70,
+			},
+			global: {
+				components: {
+					VTooltip: VTooltipStub,
+					VBtn: VBtnStub,
+					VIcon: VIconStub,
+				},
+			},
+		});
+
+		const indicator = wrapper.get('[data-test="global-sync-indicator"]');
+		expect(indicator.text()).toContain("Offline Data 7/10");
+		expect(wrapper.text()).toContain("Refreshing 2 offline resources.");
+		expect(wrapper.get(".status-sync-inline__bar").attributes("style")).toContain(
+			"width: 70%",
 		);
 	});
 });

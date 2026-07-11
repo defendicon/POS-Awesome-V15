@@ -24,6 +24,10 @@
 						:is-ip-host="isIpHost"
 						:bootstrap-warning-active="bootstrapWarningActive"
 						:bootstrap-warning-tooltip="bootstrapWarningTooltip"
+						:offline-sync-label="globalSyncLabel"
+						:offline-sync-detail="globalSyncDetail"
+						:offline-sync-tone="globalSyncCoverage.tone"
+						:offline-sync-progress="globalSyncCoverage.progress"
 						@toggle-panel="toggleOfflineStatusPanel"
 					/>
 					<OfflineStatusPanel
@@ -196,7 +200,12 @@ export default {
 		} = storeToRefs(toastStore);
 		const { isFrozen, freezeTitle, freezeMessage } = storeToRefs(uiStore);
 		const { currentCashier, currentCashierDisplay } = storeToRefs(employeeStore);
-		const { panelOpen: offlinePanelOpen } = storeToRefs(offlineSyncStore);
+		const {
+			panelOpen: offlinePanelOpen,
+			globalSyncCoverage,
+			globalSyncLabel,
+			globalSyncDetail,
+		} = storeToRefs(offlineSyncStore);
 
 		return {
 			isRtl,
@@ -219,6 +228,9 @@ export default {
 			currentCashier,
 			currentCashierDisplay,
 			offlinePanelOpen,
+			globalSyncCoverage,
+			globalSyncLabel,
+			globalSyncDetail,
 		};
 	},
 	components: {

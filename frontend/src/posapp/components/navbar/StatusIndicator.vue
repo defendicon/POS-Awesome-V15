@@ -46,6 +46,14 @@
 						{{ line }}
 					</div>
 				</div>
+				<div v-if="props.offlineSyncLabel" class="status-tooltip__sync">
+					<div class="status-tooltip__line status-tooltip__line--sync">
+						{{ props.offlineSyncLabel }}
+					</div>
+					<div v-if="props.offlineSyncDetail" class="status-tooltip__line">
+						{{ props.offlineSyncDetail }}
+					</div>
+				</div>
 			</div>
 		</v-tooltip>
 		<div class="status-info-always-visible">
@@ -60,6 +68,24 @@
 			</div>
 			<div v-if="props.serverConnecting" class="status-subtitle-inline">
 				{{ __("Rechecking connection") }}
+			</div>
+			<div
+				v-if="props.offlineSyncLabel"
+				class="status-sync-inline"
+				:class="`status-sync-inline--${props.offlineSyncTone}`"
+				data-test="global-sync-indicator"
+			>
+				<span class="status-sync-inline__dot" />
+				<span class="status-sync-inline__label">{{ props.offlineSyncLabel }}</span>
+				<span
+					class="status-sync-inline__meter"
+					:aria-label="`${props.offlineSyncLabel}: ${props.offlineSyncProgress}%`"
+				>
+					<span
+						class="status-sync-inline__bar"
+						:style="{ width: `${boundedSyncProgress}%` }"
+					/>
+				</span>
 			</div>
 		</div>
 	</div>
@@ -79,6 +105,10 @@ interface Props {
 	isIpHost?: boolean;
 	bootstrapWarningActive?: boolean;
 	bootstrapWarningTooltip?: string;
+	offlineSyncLabel?: string;
+	offlineSyncDetail?: string;
+	offlineSyncTone?: "success" | "warning" | "danger" | "info";
+	offlineSyncProgress?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -88,6 +118,10 @@ const props = withDefaults(defineProps<Props>(), {
 	isIpHost: false,
 	bootstrapWarningActive: false,
 	bootstrapWarningTooltip: "",
+	offlineSyncLabel: "",
+	offlineSyncDetail: "",
+	offlineSyncTone: "info",
+	offlineSyncProgress: 0,
 });
 const emit = defineEmits<{
 	(e: "toggle-panel"): void;
@@ -221,7 +255,18 @@ const bootstrapWarningTooltipLines = computed(() => {
 });
 
 const combinedStatusText = computed(() =>
-	[statusText.value, ...bootstrapWarningTooltipLines.value].join(" "),
+	[
+		statusText.value,
+		...bootstrapWarningTooltipLines.value,
+		props.offlineSyncLabel,
+		props.offlineSyncDetail,
+	]
+		.filter(Boolean)
+		.join(" "),
+);
+
+const boundedSyncProgress = computed(() =>
+	Math.max(0, Math.min(100, Number(props.offlineSyncProgress || 0))),
 );
 
 const connectivityLabel = computed(() => {
@@ -317,6 +362,13 @@ const connectivityLabel = computed(() => {
 	border-top: 1px solid rgba(255, 152, 0, 0.24);
 }
 
+.status-tooltip__sync {
+	display: grid;
+	gap: 4px;
+	padding-top: 4px;
+	border-top: 1px solid rgba(25, 118, 210, 0.2);
+}
+
 .status-tooltip__line {
 	white-space: normal;
 	overflow-wrap: anywhere;
@@ -329,6 +381,11 @@ const connectivityLabel = computed(() => {
 
 .status-tooltip__line--warning {
 	color: rgba(255, 152, 0, 0.98);
+}
+
+.status-tooltip__line--sync {
+	font-weight: 600;
+	color: rgba(25, 118, 210, 0.98);
 }
 
 .status-title-inline {
@@ -351,6 +408,66 @@ const connectivityLabel = computed(() => {
 	line-height: 1.15;
 	color: rgba(255, 152, 0, 0.92);
 	letter-spacing: 0.01em;
+}
+
+.status-sync-inline {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	align-items: center;
+	column-gap: 5px;
+	row-gap: 3px;
+	width: 132px;
+	margin-top: 2px;
+	font-size: 10px;
+	font-weight: 700;
+	line-height: 1.1;
+	color: #1976d2;
+}
+
+.status-sync-inline__dot {
+	width: 7px;
+	height: 7px;
+	border-radius: 999px;
+	background: currentColor;
+	box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.12);
+}
+
+.status-sync-inline__label {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.status-sync-inline__meter {
+	grid-column: 1 / -1;
+	height: 3px;
+	border-radius: 999px;
+	background: rgba(25, 118, 210, 0.14);
+	overflow: hidden;
+}
+
+.status-sync-inline__bar {
+	display: block;
+	height: 100%;
+	border-radius: inherit;
+	background: currentColor;
+	transition: width 0.25s ease;
+}
+
+.status-sync-inline--success {
+	color: #2e7d32;
+}
+
+.status-sync-inline--warning {
+	color: #ef6c00;
+}
+
+.status-sync-inline--danger {
+	color: #d32f2f;
+}
+
+.status-sync-inline--info {
+	color: #1976d2;
 }
 
 .status-section-enhanced .status-info-always-visible {

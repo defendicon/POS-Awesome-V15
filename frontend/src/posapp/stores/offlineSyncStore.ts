@@ -76,6 +76,19 @@ const RESOURCE_LABELS: Record<SyncResourceId, string> = {
 	delivery_charges: "Delivery Charges",
 };
 
+const GLOBAL_SYNC_RESOURCE_IDS: SyncResourceId[] = [
+	"bootstrap_config",
+	"price_list_meta",
+	"currency_matrix",
+	"payment_method_currencies",
+	"items",
+	"item_prices",
+	"pricing_rules",
+	"stock",
+	"customers",
+	"invoice_outbox",
+];
+
 function createDefaultSummary(): OfflineStatusSummary {
 	return {
 		networkOnline: false,
@@ -115,6 +128,78 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		() =>
 			resourceStates.value.filter((state) => state.status === "syncing").length,
 	);
+
+	const globalSyncCoverage = computed(() => {
+		const stateMap = new Map(
+			resourceStates.value.map((state) => [state.resourceId, state]),
+		);
+		const trackedStates = GLOBAL_SYNC_RESOURCE_IDS.map((resourceId) => ({
+			resourceId,
+			state: stateMap.get(resourceId),
+		}));
+		const total = trackedStates.length;
+		const ready = trackedStates.filter(
+			({ state }) => state?.status === "fresh",
+		).length;
+		const syncing = trackedStates.filter(
+			({ state }) => state?.status === "syncing",
+		).length;
+		const attention = trackedStates.filter(({ state }) =>
+			["stale", "error", "limited"].includes(state?.status || ""),
+		).length;
+		const missing = Math.max(0, total - ready - syncing - attention);
+		const progress = total ? Math.round((ready / total) * 100) : 0;
+		const hasError = trackedStates.some(
+			({ state }) => state?.status === "error",
+		);
+		const status = syncing
+			? "syncing"
+			: attention
+				? "attention"
+				: ready === total
+					? "ready"
+					: "pending";
+		const tone = hasError
+			? "danger"
+			: status === "ready"
+				? "success"
+				: status === "attention"
+					? "warning"
+					: "info";
+
+		return {
+			total,
+			ready,
+			syncing,
+			attention,
+			missing,
+			progress,
+			status,
+			tone,
+		};
+	});
+
+	const globalSyncLabel = computed(() => {
+		const coverage = globalSyncCoverage.value;
+		if (coverage.status === "ready") {
+			return "Offline Data Ready";
+		}
+		return `Offline Data ${coverage.ready}/${coverage.total}`;
+	});
+
+	const globalSyncDetail = computed(() => {
+		const coverage = globalSyncCoverage.value;
+		if (coverage.syncing) {
+			return `Refreshing ${coverage.syncing} offline resource${coverage.syncing > 1 ? "s" : ""}.`;
+		}
+		if (coverage.attention) {
+			return `${coverage.attention} offline resource${coverage.attention > 1 ? "s" : ""} need attention.`;
+		}
+		if (coverage.status === "ready") {
+			return "All scheduled offline data is synced.";
+		}
+		return `${coverage.missing} scheduled offline resource${coverage.missing > 1 ? "s" : ""} have not synced yet.`;
+	});
 
 	const connectivityLabel = computed(() => {
 		if (summary.value.serverConnecting) {
@@ -262,6 +347,9 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		capabilitySummaries,
 		resourceStates,
 		syncingResourcesCount,
+		globalSyncCoverage,
+		globalSyncLabel,
+		globalSyncDetail,
 		connectivityLabel,
 		connectivityTone,
 		attentionResources,
