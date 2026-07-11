@@ -3,29 +3,41 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 
+import type { OfflineCapabilitySummary } from "../src/posapp/stores/offlineSyncStore";
 import { useOfflineSyncStore } from "../src/posapp/stores/offlineSyncStore";
+
+function capability(
+	patch: Partial<OfflineCapabilitySummary>,
+): OfflineCapabilitySummary {
+	return {
+		id: "sell_offline",
+		label: "Sell Offline",
+		status: "ready",
+		severity: "info",
+		message: "Ready",
+		action: "",
+		warningCodes: [],
+		prerequisites: [],
+		policy: null,
+		...patch,
+	} as OfflineCapabilitySummary;
+}
 
 describe("offline sync store", () => {
 	beforeEach(() => {
 		setActivePinia(createPinia());
 	});
 
-	it("summarizes scheduled offline resources as one global sync signal", () => {
+	it("uses persisted bootstrap capabilities as the stable global readiness signal", () => {
 		const store = useOfflineSyncStore();
 		store.setResourceStatesHydrated(true);
+		store.setCapabilitySummaries([
+			capability({ id: "sell_offline", label: "Sell Offline" }),
+			capability({ id: "pricing_offline", label: "Pricing Offline" }),
+			capability({ id: "stock_confidence_offline", label: "Stock Confidence Offline" }),
+		]);
 
 		store.setResourceStates([
-			{
-				resourceId: "bootstrap_config",
-				status: "fresh",
-				lastSyncedAt: "2026-07-11T10:00:00.000Z",
-				watermark: "wm-1",
-				lastSuccessHash: null,
-				lastError: null,
-				consecutiveFailures: 0,
-				scopeSignature: "profile:main",
-				schemaVersion: "v1",
-			},
 			{
 				resourceId: "pricing_rules",
 				status: "syncing",
@@ -37,69 +49,60 @@ describe("offline sync store", () => {
 				scopeSignature: "company:test",
 				schemaVersion: null,
 			},
-			{
-				resourceId: "stock",
-				status: "error",
-				lastSyncedAt: null,
-				watermark: null,
-				lastSuccessHash: null,
-				lastError: "stock sync failed",
-				consecutiveFailures: 1,
-				scopeSignature: "profile:main",
-				schemaVersion: null,
-			},
 		]);
 
-		expect(store.globalSyncCoverage.total).toBe(10);
-		expect(store.globalSyncCoverage.ready).toBe(1);
+		expect(store.globalSyncCoverage.status).toBe("ready");
+		expect(store.globalSyncCoverage.ready).toBe(3);
 		expect(store.globalSyncCoverage.syncing).toBe(1);
-		expect(store.globalSyncCoverage.attention).toBe(1);
-		expect(store.globalSyncCoverage.tone).toBe("danger");
-		expect(store.globalSyncLabel).toBe("Offline Data Refreshing");
-		expect(store.globalSyncDetail).toBe("1/10 ready. Refreshing 1 offline resource.");
+		expect(store.globalSyncLabel).toBe("Offline Data Ready");
+		expect(store.globalSyncDetail).toBe(
+			"Offline prerequisites are ready. Refreshing 1 background resource.",
+		);
 	});
 
-	it("does not show a misleading zero count before sync state hydration", () => {
+	it("does not show a misleading zero count before prerequisite state hydration", () => {
 		const store = useOfflineSyncStore();
 
 		expect(store.globalSyncCoverage.status).toBe("checking");
 		expect(store.globalSyncCoverage.hydrated).toBe(false);
 		expect(store.globalSyncLabel).toBe("Offline Data Checking");
-		expect(store.globalSyncDetail).toBe("Checking saved offline sync status.");
+		expect(store.globalSyncDetail).toBe("Loading saved offline prerequisites.");
 	});
 
-	it("labels failed or limited resources as needing refresh after hydration", () => {
+	it("labels actionable bootstrap capability gaps as needing refresh", () => {
 		const store = useOfflineSyncStore();
 		store.setResourceStatesHydrated(true);
-
-		store.setResourceStates([
-			{
-				resourceId: "bootstrap_config",
-				status: "limited",
-				lastSyncedAt: null,
-				watermark: null,
-				lastSuccessHash: null,
-				lastError: "Missing bootstrap data",
-				consecutiveFailures: 1,
-				scopeSignature: "profile:main",
-				schemaVersion: null,
-			},
-			{
-				resourceId: "pricing_rules",
-				status: "error",
-				lastSyncedAt: null,
-				watermark: null,
-				lastSuccessHash: null,
-				lastError: "Server offline",
-				consecutiveFailures: 1,
-				scopeSignature: "company:test",
-				schemaVersion: null,
-			},
+		store.setCapabilitySummaries([
+			capability({ id: "sell_offline", label: "Sell Offline" }),
+			capability({
+				id: "pricing_offline",
+				label: "Pricing Offline",
+				status: "degraded",
+				severity: "warning",
+				message: "Offline pricing is unverified.",
+				action: "Refresh pricing data.",
+				warningCodes: ["pricing_rules_snapshot"],
+				prerequisites: ["pricing_rules_snapshot"],
+				policy: "allow_with_warning",
+			}),
+			capability({
+				id: "stock_confidence_offline",
+				label: "Stock Confidence Offline",
+				status: "override_required",
+				severity: "warning",
+				message: "Stock confidence is low.",
+				action: "Refresh stock data.",
+				warningCodes: ["stock_cache_ready"],
+				prerequisites: ["stock_cache_ready"],
+				policy: "require_manager_override",
+			}),
 		]);
 
-		expect(store.globalSyncCoverage.status).toBe("attention");
+		expect(store.globalSyncCoverage.status).toBe("needs_refresh");
 		expect(store.globalSyncCoverage.attention).toBe(2);
 		expect(store.globalSyncLabel).toBe("Offline Data Needs Refresh");
-		expect(store.globalSyncDetail).toBe("0/10 ready. 2 offline resources need attention.");
+		expect(store.globalSyncDetail).toBe(
+			"1/3 prerequisites ready. 2 prerequisites need refresh.",
+		);
 	});
 });

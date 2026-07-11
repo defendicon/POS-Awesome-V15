@@ -23,7 +23,7 @@
 				:loading-message="loadingMessage"
 				:bootstrap-warning-active="visibleBootstrapWarningActive"
 				:bootstrap-warning-tooltip="visibleBootstrapWarningTooltip"
-				:bootstrap-capabilities="visibleBootstrapCapabilitySummaries"
+				:bootstrap-capabilities="bootstrapCapabilitySummaries"
 				@nav-click="handleNavClick"
 				@close-shift="handleCloseShift"
 				@print-last-invoice="handlePrintLastInvoice"

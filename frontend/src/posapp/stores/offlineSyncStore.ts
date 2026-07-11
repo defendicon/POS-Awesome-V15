@@ -131,13 +131,14 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 	);
 
 	const globalSyncCoverage = computed(() => {
-		if (!resourceStatesHydrated.value) {
+		const capabilityTotal = capabilitySummaries.value.length;
+		if (!capabilityTotal && !resourceStatesHydrated.value) {
 			return {
-				total: GLOBAL_SYNC_RESOURCE_IDS.length,
+				total: 0,
 				ready: 0,
-				syncing: 0,
+				syncing: syncingResourcesCount.value,
 				attention: 0,
-				missing: GLOBAL_SYNC_RESOURCE_IDS.length,
+				missing: 0,
 				progress: 0,
 				status: "checking",
 				tone: "info",
@@ -145,40 +146,31 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 			};
 		}
 
-		const stateMap = new Map(
-			resourceStates.value.map((state) => [state.resourceId, state]),
+		const ready = capabilitySummaries.value.filter(
+			(summary) => summary.status === "ready",
+		).length;
+		const actionable = capabilitySummaries.value.filter(
+			(summary) =>
+				summary.status !== "ready" && summary.severity !== "info",
 		);
-		const trackedStates = GLOBAL_SYNC_RESOURCE_IDS.map((resourceId) => ({
-			resourceId,
-			state: stateMap.get(resourceId),
-		}));
-		const total = trackedStates.length;
-		const ready = trackedStates.filter(
-			({ state }) => state?.status === "fresh",
-		).length;
-		const syncing = trackedStates.filter(
-			({ state }) => state?.status === "syncing",
-		).length;
-		const attention = trackedStates.filter(({ state }) =>
-			["stale", "error", "limited"].includes(state?.status || ""),
-		).length;
-		const missing = Math.max(0, total - ready - syncing - attention);
+		const total = capabilityTotal || GLOBAL_SYNC_RESOURCE_IDS.length;
+		const attention = actionable.length;
+		const missing = Math.max(0, capabilityTotal - ready - attention);
+		const syncing = syncingResourcesCount.value;
 		const progress = total ? Math.round((ready / total) * 100) : 0;
-		const hasError = trackedStates.some(
-			({ state }) => state?.status === "error",
+		const hasError = actionable.some(
+			(summary) => summary.severity === "error",
 		);
-		const status = syncing
-			? "syncing"
-			: attention
-				? "attention"
-				: ready === total
-					? "ready"
-					: "pending";
+		const status = attention
+			? "needs_refresh"
+			: capabilityTotal
+				? "ready"
+				: "preparing";
 		const tone = hasError
 			? "danger"
 			: status === "ready"
 				? "success"
-				: status === "attention"
+				: status === "needs_refresh"
 					? "warning"
 					: "info";
 
@@ -200,33 +192,33 @@ export const useOfflineSyncStore = defineStore("offlineSync", () => {
 		if (coverage.status === "checking") {
 			return "Offline Data Checking";
 		}
-		if (coverage.status === "syncing") {
-			return "Offline Data Refreshing";
-		}
-		if (coverage.status === "attention") {
+		if (coverage.status === "needs_refresh") {
 			return "Offline Data Needs Refresh";
 		}
 		if (coverage.status === "ready") {
 			return "Offline Data Ready";
 		}
-		return "Offline Data Pending";
+		return "Offline Data Preparing";
 	});
 
 	const globalSyncDetail = computed(() => {
 		const coverage = globalSyncCoverage.value;
 		if (coverage.status === "checking") {
-			return "Checking saved offline sync status.";
+			return "Loading saved offline prerequisites.";
 		}
-		if (coverage.syncing) {
-			return `${coverage.ready}/${coverage.total} ready. Refreshing ${coverage.syncing} offline resource${coverage.syncing > 1 ? "s" : ""}.`;
-		}
-		if (coverage.attention) {
-			return `${coverage.ready}/${coverage.total} ready. ${coverage.attention} offline resource${coverage.attention > 1 ? "s" : ""} need attention.`;
+		if (coverage.status === "needs_refresh") {
+			const syncDetail = coverage.syncing
+				? ` ${coverage.syncing} background sync resource${coverage.syncing > 1 ? "s are" : " is"} running.`
+				: "";
+			return `${coverage.ready}/${coverage.total} prerequisites ready. ${coverage.attention} prerequisite${coverage.attention > 1 ? "s" : ""} need refresh.${syncDetail}`;
 		}
 		if (coverage.status === "ready") {
-			return "All scheduled offline data is synced.";
+			if (coverage.syncing) {
+				return `Offline prerequisites are ready. Refreshing ${coverage.syncing} background resource${coverage.syncing > 1 ? "s" : ""}.`;
+			}
+			return "Offline prerequisites are ready and saved on this terminal.";
 		}
-		return `${coverage.ready}/${coverage.total} ready. ${coverage.missing} scheduled offline resource${coverage.missing > 1 ? "s" : ""} have not synced yet.`;
+		return "Preparing offline prerequisites for this terminal.";
 	});
 
 	const connectivityLabel = computed(() => {
