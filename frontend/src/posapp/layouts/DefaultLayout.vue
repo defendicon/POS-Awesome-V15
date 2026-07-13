@@ -184,7 +184,6 @@ const instance = getCurrentInstance();
 const $theme = instance?.proxy?.$theme || { toggle: () => {}, isDark: false }; // Fallback
 const __ = instance?.proxy?.__ || ((value) => value);
 const BUILD_VERSION = typeof __BUILD_VERSION__ !== "undefined" ? __BUILD_VERSION__ : null;
-const OFFLINE_SYNC_SCHEMA_VERSION = "2026-07-08";
 const OFFLINE_SYNC_TIMER_INTERVAL_MS = 60_000;
 const PRODUCT_SYNC_SETTLE_TIMEOUT_MS = 120_000;
 const PRODUCT_SYNC_SETTLE_POLL_MS = 250;
@@ -577,7 +576,6 @@ async function runOfflineSyncResource(resource) {
 	return runSupportedOfflineSyncResource({
 		resource,
 		posProfile: profile,
-		schemaVersion: OFFLINE_SYNC_SCHEMA_VERSION,
 		getPersistedState: getSyncResourceState,
 		getRuntimeState: (resourceId) => syncCoordinator.getResourceState(resourceId),
 		callOfflineSyncMethod,
@@ -732,7 +730,6 @@ const bootstrapWarningUiState = computed(() =>
 );
 const visibleBootstrapWarningActive = computed(() => bootstrapWarningUiState.value.active);
 const visibleBootstrapWarningTooltip = computed(() => bootstrapWarningUiState.value.tooltip);
-const visibleBootstrapCapabilitySummaries = computed(() => bootstrapWarningUiState.value.capabilitySummaries);
 const visibleBootstrapWarningTitle = computed(() =>
 	visibleBootstrapWarningActive.value ? bootstrapWarningTitle.value : "",
 );

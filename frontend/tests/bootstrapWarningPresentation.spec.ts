@@ -11,7 +11,7 @@ describe("DefaultLayout bootstrap warning presentation", () => {
 
 		expect(source).toContain(':bootstrap-warning-active="visibleBootstrapWarningActive"');
 		expect(source).toContain(':bootstrap-warning-tooltip="visibleBootstrapWarningTooltip"');
-		expect(source).toContain(':bootstrap-capabilities="visibleBootstrapCapabilitySummaries"');
+		expect(source).toContain(':bootstrap-capabilities="bootstrapCapabilitySummaries"');
 		expect(source).toContain("shouldLiftBootstrapWarningStartupGate");
 		expect(source).toContain("initialBootstrapSyncSettled");
 		expect(source).toContain("<v-snackbar");

@@ -4,6 +4,16 @@ import "fake-indexeddb/auto";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const cacheMocks = vi.hoisted(() => ({
+	getBootstrapSnapshot: vi.fn(() => ({
+		prerequisites: {
+			items_cache_ready: "ready",
+			pricing_rules_snapshot: "ready",
+			pricing_rules_context: "ready",
+		},
+	})),
+}));
+
 const adapterMocks = vi.hoisted(() => ({
 	syncBootstrapConfigResource: vi.fn(async () => ({
 		resourceId: "bootstrap_config",
@@ -53,6 +63,7 @@ const adapterMocks = vi.hoisted(() => ({
 }));
 
 vi.mock("../src/offline/sync/adapters", () => adapterMocks);
+vi.mock("../src/offline/cache", () => cacheMocks);
 
 import {
 	buildOfflineSyncProfile,
@@ -64,6 +75,13 @@ import {
 describe("offline sync resource runner", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		cacheMocks.getBootstrapSnapshot.mockReturnValue({
+			prerequisites: {
+				items_cache_ready: "ready",
+				pricing_rules_snapshot: "ready",
+				pricing_rules_context: "ready",
+			},
+		});
 	});
 
 	it("builds a supported sync profile with warehouse and price list context", () => {
@@ -133,7 +151,6 @@ describe("offline sync resource runner", () => {
 				warehouse: "Main WH",
 				selling_price_list: "Retail",
 			},
-			schemaVersion: "2026-04-09",
 			getPersistedState: vi.fn(async () => ({
 				resourceId: "items",
 				status: "fresh",
@@ -195,12 +212,14 @@ describe("offline sync resource runner", () => {
 			posProfile: {
 				name: "POS-1",
 			},
-			schemaVersion: "2026-04-09",
-			getPersistedState: vi.fn(async () => ({
-				resourceId: "item_prices",
-				status: "fresh",
-				watermark: "old-item-price-watermark",
-			} as any)),
+			getPersistedState: vi.fn(
+				async () =>
+					({
+						resourceId: "item_prices",
+						status: "fresh",
+						watermark: "old-item-price-watermark",
+					}) as any,
+			),
 			callOfflineSyncMethod,
 		});
 
@@ -236,7 +255,6 @@ describe("offline sync resource runner", () => {
 		await runSupportedOfflineSyncResource({
 			resource: { id: "pricing_rules" } as any,
 			posProfile: { name: "POS-1", company: "Test Co" },
-			schemaVersion: "2026-04-09",
 			getPersistedState: vi.fn(async () => null),
 			callOfflineSyncMethod,
 		});
@@ -256,5 +274,101 @@ describe("offline sync resource runner", () => {
 				customer_group: expect.anything(),
 			}),
 		);
+	});
+
+	it("uses the schema persisted for each resource", async () => {
+		await runSupportedOfflineSyncResource({
+			resource: { id: "items" } as any,
+			posProfile: { name: "POS-1", warehouse: "Main WH" },
+			getPersistedState: vi.fn(
+				async () =>
+					({
+						resourceId: "items",
+						watermark: "wm-1",
+						schemaVersion: "items-schema-v2",
+					}) as any,
+			),
+			callOfflineSyncMethod: vi.fn(),
+		});
+
+		expect(adapterMocks.syncItemsResource).toHaveBeenCalledWith(
+			expect.objectContaining({
+				watermark: "wm-1",
+				schemaVersion: "items-schema-v2",
+			}),
+		);
+	});
+
+	it("drops stale cursors when a snapshot prerequisite is missing", async () => {
+		cacheMocks.getBootstrapSnapshot.mockReturnValue({
+			prerequisites: { tax_inclusive: "missing" },
+		});
+
+		await runSupportedOfflineSyncResource({
+			resource: { id: "bootstrap_config" } as any,
+			posProfile: { name: "POS-1", company: "Test Co" },
+			getPersistedState: vi.fn(
+				async () =>
+					({
+						resourceId: "bootstrap_config",
+						watermark: "stale-watermark",
+						schemaVersion: "bootstrap-v1",
+					}) as any,
+			),
+			callOfflineSyncMethod: vi.fn(),
+		});
+
+		expect(adapterMocks.syncBootstrapConfigResource).toHaveBeenCalledWith(
+			expect.objectContaining({
+				watermark: null,
+				schemaVersion: null,
+			}),
+		);
+	});
+
+	it("retries a backend schema-resync response immediately with a clean cursor", async () => {
+		adapterMocks.syncStockResource
+			.mockResolvedValueOnce({
+				resourceId: "stock",
+				status: "limited",
+				watermark: "wm-1",
+				response: { full_resync_required: true },
+			})
+			.mockResolvedValueOnce({
+				resourceId: "stock",
+				status: "fresh",
+				watermark: "wm-2",
+				response: { full_resync_required: false },
+			});
+		cacheMocks.getBootstrapSnapshot.mockReturnValue({
+			prerequisites: { stock_cache_ready: "ready" },
+		});
+
+		const result = await runSupportedOfflineSyncResource({
+			resource: { id: "stock" } as any,
+			posProfile: { name: "POS-1", warehouse: "Main WH" },
+			getPersistedState: vi.fn(
+				async () =>
+					({
+						resourceId: "stock",
+						watermark: "wm-1",
+						schemaVersion: "old-stock-schema",
+					}) as any,
+			),
+			callOfflineSyncMethod: vi.fn(),
+		});
+
+		expect(adapterMocks.syncStockResource).toHaveBeenNthCalledWith(
+			1,
+			expect.objectContaining({
+				watermark: "wm-1",
+				schemaVersion: "old-stock-schema",
+			}),
+		);
+		expect(adapterMocks.syncStockResource).toHaveBeenNthCalledWith(
+			2,
+			expect.objectContaining({ watermark: null, schemaVersion: null }),
+		);
+		expect(result.status).toBe("fresh");
 	});
 });

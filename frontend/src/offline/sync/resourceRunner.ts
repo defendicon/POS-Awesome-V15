@@ -9,6 +9,7 @@ import {
 	syncPricingRulesResource,
 	syncStockResource,
 } from "./adapters";
+import { getBootstrapSnapshot } from "../cache";
 import { syncInvoiceOutboxResource } from "../invoiceOutbox";
 import type { SyncScopedProfile } from "./adapters/common";
 import type {
@@ -45,7 +46,6 @@ type CallOfflineSyncMethod = (
 type RunSupportedOfflineSyncResourceArgs = {
 	resource: SyncResourceDefinition;
 	posProfile: SupportedSyncProfile;
-	schemaVersion: string;
 	getPersistedState: (
 		_resourceId: SyncResourceId,
 	) => Promise<SyncResourceState | null>;
@@ -55,6 +55,25 @@ type RunSupportedOfflineSyncResourceArgs = {
 
 function getPersistedWatermark(state: SyncResourceState | null | undefined) {
 	return state?.watermark || null;
+}
+
+const RESOURCE_READINESS_KEYS: Partial<Record<SyncResourceId, string[]>> = {
+	bootstrap_config: ["tax_inclusive"],
+	items: ["items_cache_ready"],
+	pricing_rules: ["pricing_rules_snapshot", "pricing_rules_context"],
+	stock: ["stock_cache_ready"],
+	customers: ["customers_cache_ready"],
+};
+
+function requiresFullRefresh(resourceId: SyncResourceId) {
+	const snapshot = getBootstrapSnapshot();
+	if (!snapshot) {
+		return true;
+	}
+
+	return (RESOURCE_READINESS_KEYS[resourceId] || []).some(
+		(key) => snapshot.prerequisites?.[key] !== "ready",
+	);
 }
 
 export function isSupportedOfflineSyncResourceId(
@@ -103,175 +122,207 @@ export function buildOfflineSyncProfile(
 export async function runSupportedOfflineSyncResource({
 	resource,
 	posProfile,
-	schemaVersion,
 	getPersistedState,
 	callOfflineSyncMethod,
 }: RunSupportedOfflineSyncResourceArgs) {
 	const persistedState = await getPersistedState(resource.id);
-	const sharedArgs = {
-		posProfile,
-		watermark: getPersistedWatermark(persistedState),
-		schemaVersion,
+	const persistedWatermark = getPersistedWatermark(persistedState);
+	const persistedSchemaVersion = persistedState?.schemaVersion || null;
+	const forceFullRefresh = requiresFullRefresh(resource.id);
+
+	const runAdapter = async (
+		watermark: string | null,
+		schemaVersion: string | null,
+	) => {
+		const sharedArgs = {
+			posProfile,
+			watermark,
+			schemaVersion,
+		};
+
+		switch (resource.id) {
+			case "bootstrap_config":
+				return syncBootstrapConfigResource({
+					...sharedArgs,
+					fetcher: ({ posProfile, watermark, schemaVersion }) =>
+						callOfflineSyncMethod(
+							"posawesome.posawesome.api.offline_sync.bootstrap.sync_bootstrap_config",
+							{
+								pos_profile: posProfile,
+								watermark,
+								schema_version: schemaVersion,
+							},
+						),
+				});
+			case "price_list_meta":
+				return syncPriceListMetaResource({
+					...sharedArgs,
+					fetcher: ({ posProfile, watermark, schemaVersion }) =>
+						callOfflineSyncMethod(
+							"posawesome.posawesome.api.offline_sync.bootstrap.sync_bootstrap_config",
+							{
+								pos_profile: posProfile,
+								watermark,
+								schema_version: schemaVersion,
+							},
+						),
+				});
+			case "currency_matrix":
+				return syncCurrencyMatrixResource({
+					...sharedArgs,
+					fetcher: ({
+						posProfile,
+						currencyPairs = [],
+						watermark,
+						offset,
+						schemaVersion,
+					}) =>
+						callOfflineSyncMethod(
+							"posawesome.posawesome.api.offline_sync.currencies.sync_currency_scope",
+							{
+								pos_profile: posProfile,
+								watermark,
+								currency_pairs: currencyPairs,
+								offset: offset || 0,
+								schema_version: schemaVersion,
+							},
+						),
+				});
+			case "payment_method_currencies":
+				return syncPaymentMethodCurrenciesResource({
+					...sharedArgs,
+					fetcher: ({ posProfile, watermark, schemaVersion }) =>
+						callOfflineSyncMethod(
+							"posawesome.posawesome.api.offline_sync.payment_methods.sync_payment_method_currencies",
+							{
+								pos_profile: posProfile,
+								watermark,
+								schema_version: schemaVersion,
+							},
+						),
+				});
+			case "items":
+				return syncItemsResource({
+					...sharedArgs,
+					priceList: posProfile.selling_price_list || null,
+					fetcher: ({
+						posProfile,
+						priceList,
+						customer,
+						watermark,
+						startAfter,
+						limit,
+						schemaVersion,
+					}) =>
+						callOfflineSyncMethod(
+							"posawesome.posawesome.api.offline_sync.items.sync_items",
+							{
+								pos_profile: posProfile,
+								price_list: priceList,
+								customer: customer || null,
+								watermark,
+								start_after: startAfter || null,
+								limit: limit || null,
+								schema_version: schemaVersion,
+							},
+						),
+				});
+			case "item_prices":
+				return syncItemPricesResource({
+					...sharedArgs,
+					fetcher: ({
+						posProfile,
+						watermark,
+						offset,
+						schemaVersion,
+					}) =>
+						callOfflineSyncMethod(
+							"posawesome.posawesome.api.offline_sync.item_prices.sync_item_prices",
+							{
+								pos_profile: posProfile,
+								watermark,
+								offset: offset || 0,
+								schema_version: schemaVersion,
+							},
+						),
+				});
+			case "pricing_rules":
+				return syncPricingRulesResource({
+					...sharedArgs,
+					fetcher: ({
+						posProfile,
+						watermark,
+						offset,
+						schemaVersion,
+					}) =>
+						callOfflineSyncMethod(
+							"posawesome.posawesome.api.offline_sync.pricing_rules.sync_pricing_rules",
+							{
+								pos_profile: posProfile,
+								watermark,
+								offset: offset || 0,
+								schema_version: schemaVersion,
+							},
+						),
+				});
+			case "stock":
+				return syncStockResource({
+					...sharedArgs,
+					fetcher: ({ posProfile, watermark, schemaVersion }) =>
+						callOfflineSyncMethod(
+							"posawesome.posawesome.api.offline_sync.stock.sync_stock",
+							{
+								pos_profile: posProfile,
+								watermark,
+								schema_version: schemaVersion,
+							},
+						),
+				});
+			case "customers":
+				return syncCustomersResource({
+					...sharedArgs,
+					fetcher: ({
+						posProfile,
+						watermark,
+						startAfter,
+						limit,
+						schemaVersion,
+					}) =>
+						callOfflineSyncMethod(
+							"posawesome.posawesome.api.offline_sync.customers.sync_customers",
+							{
+								pos_profile: posProfile,
+								watermark,
+								start_after: startAfter || null,
+								limit: limit || null,
+								schema_version: schemaVersion,
+							},
+						),
+				});
+			case "invoice_outbox":
+				return syncInvoiceOutboxResource(callOfflineSyncMethod);
+			default:
+				return {
+					status: "idle",
+				};
+		}
 	};
 
-	switch (resource.id) {
-		case "bootstrap_config":
-			return syncBootstrapConfigResource({
-				...sharedArgs,
-				fetcher: ({ posProfile, watermark, schemaVersion }) =>
-					callOfflineSyncMethod(
-						"posawesome.posawesome.api.offline_sync.bootstrap.sync_bootstrap_config",
-						{
-							pos_profile: posProfile,
-							watermark,
-							schema_version: schemaVersion,
-						},
-					),
-			});
-		case "price_list_meta":
-			return syncPriceListMetaResource({
-				...sharedArgs,
-				fetcher: ({ posProfile, watermark, schemaVersion }) =>
-					callOfflineSyncMethod(
-						"posawesome.posawesome.api.offline_sync.bootstrap.sync_bootstrap_config",
-						{
-							pos_profile: posProfile,
-							watermark,
-							schema_version: schemaVersion,
-						},
-					),
-			});
-		case "currency_matrix":
-			return syncCurrencyMatrixResource({
-				...sharedArgs,
-				fetcher: ({
-					posProfile,
-					currencyPairs = [],
-					watermark,
-					offset,
-					schemaVersion,
-				}) =>
-					callOfflineSyncMethod(
-						"posawesome.posawesome.api.offline_sync.currencies.sync_currency_scope",
-						{
-							pos_profile: posProfile,
-							watermark,
-							currency_pairs: currencyPairs,
-							offset: offset || 0,
-							schema_version: schemaVersion,
-						},
-					),
-			});
-		case "payment_method_currencies":
-			return syncPaymentMethodCurrenciesResource({
-				...sharedArgs,
-				fetcher: ({ posProfile, watermark, schemaVersion }) =>
-					callOfflineSyncMethod(
-						"posawesome.posawesome.api.offline_sync.payment_methods.sync_payment_method_currencies",
-						{
-							pos_profile: posProfile,
-							watermark,
-							schema_version: schemaVersion,
-						},
-					),
-			});
-		case "items":
-			return syncItemsResource({
-				...sharedArgs,
-				priceList: posProfile.selling_price_list || null,
-				fetcher: ({
-					posProfile,
-					priceList,
-					customer,
-					watermark,
-					startAfter,
-					limit,
-					schemaVersion,
-				}) =>
-					callOfflineSyncMethod(
-						"posawesome.posawesome.api.offline_sync.items.sync_items",
-						{
-							pos_profile: posProfile,
-							price_list: priceList,
-							customer: customer || null,
-							watermark,
-							start_after: startAfter || null,
-							limit: limit || null,
-							schema_version: schemaVersion,
-						},
-					),
-			});
-		case "item_prices":
-			return syncItemPricesResource({
-				...sharedArgs,
-				fetcher: ({
-					posProfile,
-					watermark,
-					offset,
-					schemaVersion,
-				}) =>
-					callOfflineSyncMethod(
-						"posawesome.posawesome.api.offline_sync.item_prices.sync_item_prices",
-						{
-							pos_profile: posProfile,
-							watermark,
-							offset: offset || 0,
-							schema_version: schemaVersion,
-						},
-					),
-			});
-		case "pricing_rules":
-			return syncPricingRulesResource({
-				...sharedArgs,
-				fetcher: ({
-					posProfile,
-					watermark,
-					offset,
-					schemaVersion,
-				}) =>
-					callOfflineSyncMethod(
-						"posawesome.posawesome.api.offline_sync.pricing_rules.sync_pricing_rules",
-						{
-							pos_profile: posProfile,
-							watermark,
-							offset: offset || 0,
-							schema_version: schemaVersion,
-						},
-					),
-			});
-		case "stock":
-			return syncStockResource({
-				...sharedArgs,
-				fetcher: ({ posProfile, watermark, schemaVersion }) =>
-					callOfflineSyncMethod(
-						"posawesome.posawesome.api.offline_sync.stock.sync_stock",
-						{
-							pos_profile: posProfile,
-							watermark,
-							schema_version: schemaVersion,
-						},
-					),
-			});
-		case "customers":
-			return syncCustomersResource({
-				...sharedArgs,
-				fetcher: ({ posProfile, watermark, startAfter, limit, schemaVersion }) =>
-					callOfflineSyncMethod(
-						"posawesome.posawesome.api.offline_sync.customers.sync_customers",
-						{
-							pos_profile: posProfile,
-							watermark,
-							start_after: startAfter || null,
-							limit: limit || null,
-							schema_version: schemaVersion,
-						},
-					),
-			});
-		case "invoice_outbox":
-			return syncInvoiceOutboxResource(callOfflineSyncMethod);
-		default:
-			return {
-				status: "idle",
-			};
+	const initialWatermark = forceFullRefresh ? null : persistedWatermark;
+	const initialSchemaVersion = forceFullRefresh
+		? null
+		: persistedSchemaVersion;
+	const result = await runAdapter(initialWatermark, initialSchemaVersion);
+
+	// Schema changes are a cache-migration signal. Rebuild immediately instead
+	// of leaving the resource limited until a later timer or manual refresh.
+	if (
+		result &&
+		"response" in result &&
+		result.response?.full_resync_required
+	) {
+		return runAdapter(null, null);
 	}
+
+	return result;
 }
