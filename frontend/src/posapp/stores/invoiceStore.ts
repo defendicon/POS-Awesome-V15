@@ -538,6 +538,30 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	};
 
 	/**
+	 * Moves an existing row to the top of `itemOrder` without touching `itemsData`.
+	 *
+	 * Callers that only want to re-order MUST use this instead of composing
+	 * `removeItemByRowId` + `addItem`: removal recalculates totals immediately
+	 * (dropping the row) while `addItem` only schedules a debounced update, so the
+	 * pair leaves the totals visibly wrong — zeroed, if it is the only row — for
+	 * ~50ms on every quantity change. Re-ordering in place also preserves the
+	 * stored item's object identity, since `addItem` would clone it.
+	 *
+	 * No-ops when the row is absent or already at the top.
+	 *
+	 * @param rowId - The `posa_row_id` of the item to float to the top.
+	 */
+	const moveRowToTop = (rowId: string) => {
+		if (!rowId) return;
+		const idx = itemOrder.value.indexOf(rowId);
+		if (idx > 0) {
+			itemOrder.value.splice(idx, 1);
+			itemOrder.value.unshift(rowId);
+			touch();
+		}
+	};
+
+	/**
 	 * Removes the item identified by `rowId` from both `itemsData` and `itemOrder`,
 	 * then recalculates totals immediately.
 	 *
@@ -683,6 +707,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		upsertItem,
 		updateItemWithTotals,
 		triggerUpdateTotals,
+		moveRowToTop,
 		removeItemByRowId,
 		clearItems,
 		setPackedItems,

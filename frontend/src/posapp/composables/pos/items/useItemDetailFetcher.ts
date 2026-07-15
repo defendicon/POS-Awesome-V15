@@ -195,6 +195,25 @@ export function useItemDetailFetcher() {
 		}
 	}
 
+	/**
+	 * Re-applies the cart's reservation after a refresh has written raw stock.
+	 *
+	 * `actual_qty` coming back from the cache/server is the RAW warehouse stock —
+	 * it does not account for what the current cart already holds. Writing it
+	 * straight onto the item makes the selector jump back to full stock. Because
+	 * the background sync refreshes prices on a timer (~30s), that jump happens
+	 * with no user action at all, which is what made it look inexplicable.
+	 * Record the fresh value as the new base, then re-subtract the reservation.
+	 */
+	function rebaseAndReapplyReservation(item: any, rawQty: unknown) {
+		if (!ctx.itemAvailability || !item) return;
+		const numericQty = Number(rawQty);
+		if (Number.isFinite(numericQty)) {
+			ctx.itemAvailability.captureBaseAvailability(item, numericQty);
+		}
+		ctx.itemAvailability.applyReservationToItem(item);
+	}
+
 	async function refreshPricesForVisibleItems() {
 		if (!ctx.displayedItems || ctx.displayedItems.length === 0) return;
 		if (refreshInFlight.value) return;
@@ -243,7 +262,10 @@ export function useItemDetailFetcher() {
 			});
 
 			if (cacheResult.missing.length === 0) {
-				updates.forEach(({ item, upd }) => Object.assign(item, upd));
+				updates.forEach(({ item, upd }) => {
+					Object.assign(item, upd);
+					rebaseAndReapplyReservation(item, upd.actual_qty);
+				});
 				updateLocalStockCache(cacheResult.cached);
 				return;
 			}
@@ -288,7 +310,10 @@ export function useItemDetailFetcher() {
 				}
 			});
 
-			updates.forEach(({ item, upd }) => Object.assign(item, upd));
+			updates.forEach(({ item, upd }) => {
+				Object.assign(item, upd);
+				rebaseAndReapplyReservation(item, upd.actual_qty);
+			});
 			updateLocalStockCache(details);
 			saveItemDetailsCache(
 				ctx.pos_profile?.name,
@@ -363,6 +388,7 @@ export function useItemDetailFetcher() {
 					has_batch_no: det.has_batch_no,
 					has_serial_no: det.has_serial_no,
 				});
+				rebaseAndReapplyReservation(item, det.actual_qty);
 				if (det.item_uoms && det.item_uoms.length > 0) {
 					item.item_uoms = det.item_uoms;
 					saveItemUOMs(item.item_code, det.item_uoms);
@@ -411,11 +437,7 @@ export function useItemDetailFetcher() {
 			const localQty = getLocalStock(item.item_code);
 			if (localQty !== null) {
 				item.actual_qty = localQty;
-				if (ctx.itemAvailability)
-					ctx.itemAvailability.captureBaseAvailability(
-						item,
-						localQty,
-					);
+				rebaseAndReapplyReservation(item, localQty);
 				baseRecords.set(item.item_code, localQty);
 			} else {
 				allCached = false;
@@ -623,11 +645,7 @@ export function useItemDetailFetcher() {
 					const localQty = getLocalStock(item.item_code);
 					if (localQty !== null) {
 						item.actual_qty = localQty;
-						if (ctx.itemAvailability)
-							ctx.itemAvailability.captureBaseAvailability(
-								item,
-								localQty,
-							);
+						rebaseAndReapplyReservation(item, localQty);
 						baseRecords.set(item.item_code, localQty);
 					}
 					if (!item.item_uoms || item.item_uoms.length === 0) {
