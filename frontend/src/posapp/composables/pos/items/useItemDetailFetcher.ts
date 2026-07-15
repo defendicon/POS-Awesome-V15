@@ -207,9 +207,14 @@ export function useItemDetailFetcher() {
 	 */
 	function rebaseAndReapplyReservation(item: any, rawQty: unknown) {
 		if (!ctx.itemAvailability || !item) return;
-		const numericQty = Number(rawQty);
-		if (Number.isFinite(numericQty)) {
-			ctx.itemAvailability.captureBaseAvailability(item, numericQty);
+		// Number(null) and Number("") are 0, and 0 is finite — a missing stock
+		// record would silently rebase to zero. Keep the previous base in that
+		// case; re-applying the reservation to it beats displaying a false zero.
+		if (rawQty !== null && rawQty !== undefined && rawQty !== "") {
+			const numericQty = Number(rawQty);
+			if (Number.isFinite(numericQty)) {
+				ctx.itemAvailability.captureBaseAvailability(item, numericQty);
+			}
 		}
 		ctx.itemAvailability.applyReservationToItem(item);
 	}

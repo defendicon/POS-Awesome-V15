@@ -428,21 +428,32 @@ export function useItemAddition() {
 			}
 			let index = -1;
 			let mergeTarget: any = null;
-			// Only require a strict batch match when the incoming item actually
-			// carries a batch. Batch assignment is async (item details, and with
-			// them batch_no_data, are fetched after the click so add-to-cart stays
-			// responsive), so a batch item usually arrives here with an empty
-			// batch_no. A strict key `code::uom::` (empty batch) can never match an
-			// already-batched cart row, so a duplicate line is created — and it
-			// then gets assigned the SAME batch, leaving two identical rows.
-			// With no batch yet, fall back to a batch-agnostic (flex) merge so the
-			// qty increments the existing row. Once a batch IS chosen, strict
-			// matching resumes and keeps one row per batch as intended.
+			// Strict on the way in, flexible on the way out.
+			//
+			// The incoming item keeps a strict batch match (below) so a batch item
+			// always falls through to the allocation block, which is the only thing
+			// that knows how much of each batch is left. Flex-merging here would
+			// skip it and pile every click onto whichever batch is already in the
+			// cart, overselling it once it runs out.
+			//
+			// The re-check after allocation uses this probe instead. Batch details
+			// (batch_no_data) load asynchronously so add-to-cart stays responsive,
+			// which means allocation can have nothing to work with and leaves
+			// batch_no empty. A strict key `code::uom::` (empty batch) can never
+			// match an already-batched cart row, so a duplicate line is created and
+			// then assigned the SAME batch, leaving two identical rows. When the
+			// probe still has no batch, fall back to a batch-agnostic (flex) merge
+			// so the qty increments the existing row; once allocation HAS assigned
+			// one, strict matching resumes and keeps one row per batch as intended.
 			const needsBatchMatch = (probe: any) =>
 				Boolean(probe?.has_batch_no && probe?.batch_no);
 			if (!context.new_line) {
 				// For normal additions (not returns), only merge with existing positive quantity lines
-				mergeTarget = findMergeTarget(context, item, needsBatchMatch(item));
+				mergeTarget = findMergeTarget(
+					context,
+					item,
+					Boolean(item.has_batch_no),
+				);
 				if (!canMergeWithTarget(context, mergeTarget?.item)) {
 					mergeTarget = null;
 				}
