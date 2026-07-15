@@ -230,6 +230,7 @@ import { useScannerInput } from "../../../composables/pos/items/useScannerInput"
 import { useItemAvailability } from "../../../composables/pos/items/useItemAvailability";
 import { useItemDetailFetcher } from "../../../composables/pos/items/useItemDetailFetcher";
 import { useItemAddition } from "../../../composables/pos/items/useItemAddition";
+import { useBatchSerial } from "../../../composables/pos/shared/useBatchSerial";
 import { useItemSelection } from "../../../composables/pos/items/useItemSelection";
 import { useItemSelectorLayout } from "../../../composables/pos/items/useItemSelectorLayout";
 import { useLastInvoiceRate } from "../../../composables/pos/items/useLastInvoiceRate";
@@ -289,6 +290,7 @@ const toastStore = useToastStore();
 const uiStore = useUIStore();
 const invoiceStore = useInvoiceStore();
 const employeeStore = useEmployeeStore();
+const batchSerial = useBatchSerial();
 const { selectedCustomer } = storeToRefs(customersStore);
 const {
 	posProfile: uiPosProfile,
@@ -662,7 +664,7 @@ const add_item = async (item, optionsOrQty: any = {}) => {
 			return;
 		}
 
-		const context = {
+		const context: any = {
 			pos_profile: pos_profile.value,
 			stock_settings: stock_settings.value,
 			customer: selectedCustomer.value,
@@ -677,6 +679,16 @@ const add_item = async (item, optionsOrQty: any = {}) => {
 			isReturnInvoice: isReturnInvoice.value,
 			...options,
 			new_line: typeof options?.new_line === "boolean" ? options.new_line : !!new_line.value,
+			// `shouldAutoSetBatch` refuses to auto-assign unless the context exposes
+			// a setter, and this context never did, so posa_auto_set_batch was inert
+			// for every add from the selector: no batch was assigned on click, and
+			// `shouldAllocateAcrossBatches` stayed false, which left the cross-batch
+			// split running only when qty > 1. Clicking a batch item one unit at a
+			// time therefore piled the whole quantity onto a single batch, past what
+			// that batch holds. showBatchDialog calls this setter directly too, so a
+			// return-without-invoice on a batch item used to throw here.
+			setBatchQty: (line: any, value: any, update = false) =>
+				batchSerial.setBatchQty(line, value, update, context),
 		};
 
 		const isValid = await cartValidation.validateCartItem(
