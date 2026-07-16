@@ -176,9 +176,12 @@ export function useItemMerging() {
 				);
 				return;
 			}
-			// Optimised store method would be better, but composing actions works:
-			context.invoiceStore.removeItemByRowId(rowId);
-			context.invoiceStore.addItem(target, 0); // Insert at 0
+			// Re-order in place. Do NOT compose removeItemByRowId + addItem: the
+			// removal recalculates totals immediately (without this row) while
+			// addItem only schedules a debounced recalculation, so the totals show
+			// the row missing — zero, if it is the only row — for ~50ms on every
+			// quantity change. It would also clone the item, breaking identity.
+			context.invoiceStore.moveRowToTop(rowId);
 		} else {
 			const resolvedIndex =
 				typeof currentIndex === "number" && currentIndex >= 0

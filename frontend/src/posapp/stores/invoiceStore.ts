@@ -564,6 +564,22 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	};
 
 	/**
+	 * Moves an existing row to the top of `itemOrder` in place, preserving its
+	 * object identity and totals. Used instead of remove + re-add, which would
+	 * recompute totals immediately without the row (a brief zeroed-total flash)
+	 * and clone the item.
+	 */
+	const moveRowToTop = (rowId: string) => {
+		if (!rowId) return;
+		const idx = itemOrder.value.indexOf(rowId);
+		if (idx > 0) {
+			itemOrder.value.splice(idx, 1);
+			itemOrder.value.unshift(rowId);
+			touch();
+		}
+	};
+
+	/**
 	 * Empties all cart items and resets `totalQty`, `grossTotal`, and `discountTotal` to `0`.
 	 * No-ops (without calling `touch()`) when the cart is already empty.
 	 */
@@ -683,6 +699,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		updateItemWithTotals,
 		triggerUpdateTotals,
 		removeItemByRowId,
+		moveRowToTop,
 		clearItems,
 		setPackedItems,
 		clear,
