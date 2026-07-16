@@ -471,6 +471,22 @@ const displayedItems = computed(() => {
 	});
 });
 
+// The item list is rebuilt whenever it reloads — notably when the customer
+// changes and every item is re-fetched for that customer's price list. Those
+// fresh objects carry the raw warehouse stock with no cart reservation applied,
+// and nothing else re-applies it: the coordinator only broadcasts when a
+// reservation actually *changes*, which it doesn't on a customer switch. Without
+// this the selector snaps back to full stock (e.g. 40) after picking a customer
+// even though the cart still holds those units. Re-prime the base from the new
+// objects and re-subtract the cart's reservations.
+watch(
+	filteredItems,
+	() => {
+		itemAvailability.primeStockState("items-refresh");
+	},
+	{ flush: "post" },
+);
+
 watch(
 	() => props.showOnlyBarcodeItems,
 	(value) => {
