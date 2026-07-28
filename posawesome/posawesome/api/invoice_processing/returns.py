@@ -253,7 +253,7 @@ def compute_original_refundable_cash(doctype, invoice_name):
             "docstatus": 1,
             "is_return": 1,
         },
-        fields=["sum(grand_total) as total"],
+        fields=[{"SUM": "grand_total", "as": "total"}],
     )
     returned_total = abs(flt(returned[0].get("total"))) if returned else 0.0
     refundable = (

@@ -3,6 +3,7 @@ import pathlib
 import sys
 import types
 import unittest
+from contextlib import contextmanager
 from datetime import datetime
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
@@ -93,6 +94,14 @@ def _install_frappe_stub():
     invoice_processing_creation.repair_invoice_submission = lambda *args, **kwargs: None
     invoice_processing_creation.validate_cart_items = lambda *args, **kwargs: None
     invoice_processing_creation._reapply_incoming_payment_amounts = lambda *args, **kwargs: None
+
+    @contextmanager
+    def trusted_invoice_shift_reassignment(*args, **kwargs):
+        yield
+
+    invoice_processing_creation.trusted_invoice_shift_reassignment = (
+        trusted_invoice_shift_reassignment
+    )
     sys.modules["posawesome.posawesome.api.invoice_processing.creation"] = invoice_processing_creation
 
     invoice_processing_returns = types.ModuleType("posawesome.posawesome.api.invoice_processing.returns")
