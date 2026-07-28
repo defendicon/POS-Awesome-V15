@@ -151,7 +151,12 @@
 		</v-card>
 	</v-dialog>
 
-	<v-dialog :model-value="lockDialogOpen" max-width="480" persistent>
+	<v-dialog
+		:model-value="lockDialogOpen"
+		max-width="480"
+		persistent
+		@after-enter="focusUnlockPin"
+	>
 		<v-card class="pos-themed-card employee-lock-dialog" data-test="terminal-lock-dialog">
 			<v-card-title class="employee-switch-dialog__title">
 				<div>
@@ -240,6 +245,7 @@
 						}}
 					</v-alert>
 					<v-text-field
+						ref="unlockPinField"
 						v-model="cashierPin"
 						:type="showPin ? 'text' : 'password'"
 						name="pos-terminal-unlock-pin"
@@ -255,7 +261,6 @@
 						hide-details="auto"
 						:label="__('Cashier PIN')"
 						data-test="terminal-unlock-pin"
-						autofocus
 						@click:append-inner="showPin = !showPin"
 						@keyup.enter="submitUnlock"
 					/>
@@ -280,7 +285,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useEmployeeStore } from "../../../stores/employeeStore";
 import { useUIStore } from "../../../stores/uiStore";
@@ -301,6 +306,7 @@ const cashierPin = ref("");
 const pinError = ref("");
 const isSubmitting = ref(false);
 const showPin = ref(false);
+const unlockPinField = ref(null);
 const posProfileName = computed(
 	() => uiStore.posProfile?.name || window.frappe?.boot?.pos_profile?.name || "",
 );
@@ -322,6 +328,25 @@ const resolveDefaultCashierUser = (cashier) => {
 	return current?.user || terminalEmployees.value[0]?.user || "";
 };
 
+const focusUnlockPin = async () => {
+	if (!lockDialogOpen.value || !terminalEmployees.value.length) {
+		return;
+	}
+
+	await nextTick();
+	if (!lockDialogOpen.value || !terminalEmployees.value.length) {
+		return;
+	}
+
+	const field = unlockPinField.value;
+	const input = field?.$el?.querySelector?.("input") || field?.querySelector?.("input");
+	if (input instanceof HTMLElement) {
+		input.focus({ preventScroll: true });
+		return;
+	}
+	field?.focus?.();
+};
+
 watch(
 	[currentCashier, switchDialogOpen, lockDialogOpen, terminalEmployees],
 	([cashier, switchOpen, lockOpen], previousValues = []) => {
@@ -333,6 +358,9 @@ watch(
 			cashierPin.value = "";
 			pinError.value = "";
 			showPin.value = false;
+			if (lockOpen) {
+				void focusUnlockPin();
+			}
 			return;
 		}
 		if (
@@ -347,6 +375,10 @@ watch(
 			cashierPin.value = "";
 			pinError.value = "";
 			showPin.value = false;
+			return;
+		}
+		if (lockOpen) {
+			void focusUnlockPin();
 		}
 	},
 	{ immediate: true },

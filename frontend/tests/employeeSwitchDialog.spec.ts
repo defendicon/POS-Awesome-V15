@@ -336,17 +336,20 @@ describe("EmployeeSwitchDialog", () => {
 		);
 	});
 
-	it("shows the cached cashier and focused PIN field immediately during refresh", async () => {
+	it("opens the lock dialog and focuses the PIN field whenever the terminal locks", async () => {
 		const store = useEmployeeStore();
 		const uiStore = useUIStore();
 		uiStore.setPosProfile({ name: "Main POS" } as any);
-		store.beginTerminalEmployeesLoad("Main POS");
-		store.completeTerminalEmployeesLoad("Main POS", [
+		store.setTerminalEmployees([
 			{ user: "cashier@example.com", full_name: "Main Cashier" },
 		]);
-		store.beginTerminalEmployeesLoad("Main POS");
+		store.applyTerminalState({
+			active_cashier: "cashier@example.com",
+			locked: false,
+		});
 
 		const wrapper = mount(EmployeeSwitchDialog, {
+			attachTo: document.body,
 			global: {
 				components: {
 					VDialog: VDialogStub,
@@ -363,11 +366,22 @@ describe("EmployeeSwitchDialog", () => {
 			},
 		});
 
-		expect(wrapper.find('[data-test="terminal-cashier-loading"]').exists()).toBe(false);
-		expect(wrapper.get('[data-test="terminal-unlock-cashier-cashier@example.com"]').text()).toContain(
-			"Main Cashier",
+		expect(wrapper.find('[data-test="terminal-lock-dialog"]').exists()).toBe(
+			false,
 		);
-		expect(wrapper.get('[data-test="terminal-unlock-pin"]').attributes("autofocus")).not.toBeUndefined();
+
+		store.lockTerminal();
+		await wrapper.vm.$nextTick();
+		await wrapper.vm.$nextTick();
+
+		const pinInput = wrapper.get(
+			'input[data-test="terminal-unlock-pin"]',
+		).element;
+		expect(wrapper.get('[data-test="terminal-lock-dialog"]').isVisible()).toBe(
+			true,
+		);
+		expect(document.activeElement).toBe(pinInput);
+		wrapper.unmount();
 	});
 
 	it("shows a recoverable cashier load error without exposing stale options", async () => {
