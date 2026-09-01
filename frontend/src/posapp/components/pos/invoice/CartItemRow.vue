@@ -963,6 +963,12 @@ function handleDiscountAmountPaste(event) {
 	height: 100%;
 	padding: 0;
 	margin: 0;
+	min-width: 0;
+	max-width: 100%;
+	gap: 2px;
+	overflow: hidden;
+	box-sizing: border-box;
+	white-space: nowrap;
 }
 
 .currency-display.right-aligned {
@@ -970,8 +976,13 @@ function handleDiscountAmountPaste(event) {
 }
 
 .amount-value {
+	min-width: 0;
+	max-width: 100%;
 	font-weight: 500;
 	text-align: left;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 	font-family:
 		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
 		sans-serif;
@@ -988,8 +999,9 @@ function handleDiscountAmountPaste(event) {
 
 .currency-symbol {
 	opacity: 0.7;
-	margin-right: 2px;
+	margin-right: 0;
 	font-size: 0.85em;
+	flex: 0 0 auto;
 }
 
 .negative-number {
@@ -999,12 +1011,14 @@ function handleDiscountAmountPaste(event) {
 
 /* Add minimal padding for table cells as per ItemsTable.vue styles */
 td {
-	padding: 16px 12px;
+	padding: 10px 6px;
 	vertical-align: middle;
 	height: 60px;
 	text-align: center;
 	color: var(--pos-text-primary);
 	position: relative;
+	min-width: 0;
+	box-sizing: border-box;
 }
 
 /* Keyboard focus styles */

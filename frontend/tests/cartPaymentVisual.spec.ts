@@ -74,6 +74,26 @@ describe("Cart and payment visual hierarchy", () => {
 		);
 	});
 
+	it("contains numeric editors, currency values, UOM controls, and actions inside classic cells", () => {
+		const cartStyles = source(
+			"components",
+			"pos",
+			"invoice",
+			"items-table-styles.css",
+		);
+		const row = source("components", "pos", "invoice", "CartItemRow.vue");
+
+		expect(cartStyles).toContain(
+			".posa-cart-table:not(.posa-cart-table--counter-grid) td",
+		);
+		expect(cartStyles).toContain('td[data-column-key="rate"] > div');
+		expect(cartStyles).toContain('td[data-column-key="amount"] > div');
+		expect(cartStyles).toContain("box-sizing: border-box");
+		expect(cartStyles).toContain(".uom-arrow");
+		expect(row).toContain("text-overflow: ellipsis");
+		expect(row).toContain("flex: 0 0 auto");
+	});
+
 	it("marks active tenders and uses shared semantic action colors", () => {
 		const methods = source(
 			"components",

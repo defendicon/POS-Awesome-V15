@@ -400,6 +400,34 @@
 	border-bottom: 1px solid var(--pos-border-light);
 }
 
+.posa-cart-table:not(.posa-cart-table--counter-grid) td {
+	min-width: 0;
+	padding: 10px 6px;
+	overflow: hidden;
+	box-sizing: border-box;
+}
+
+.posa-cart-table:not(.posa-cart-table--counter-grid) td[data-column-key="price_list_rate"],
+.posa-cart-table:not(.posa-cart-table--counter-grid) td[data-column-key="discount_percentage"],
+.posa-cart-table:not(.posa-cart-table--counter-grid) td[data-column-key="discount_amount"],
+.posa-cart-table:not(.posa-cart-table--counter-grid) td[data-column-key="rate"],
+.posa-cart-table:not(.posa-cart-table--counter-grid) td[data-column-key="amount"],
+.posa-cart-table:not(.posa-cart-table--counter-grid) td[data-column-key="actions"],
+.posa-cart-table:not(.posa-cart-table--counter-grid) td[data-column-key="data-table-expand"] {
+	padding-inline: 4px;
+}
+
+.posa-cart-table:not(.posa-cart-table--counter-grid) td[data-column-key="price_list_rate"] > div,
+.posa-cart-table:not(.posa-cart-table--counter-grid) td[data-column-key="discount_percentage"] > div,
+.posa-cart-table:not(.posa-cart-table--counter-grid) td[data-column-key="discount_amount"] > div,
+.posa-cart-table:not(.posa-cart-table--counter-grid) td[data-column-key="rate"] > div,
+.posa-cart-table:not(.posa-cart-table--counter-grid) td[data-column-key="amount"] > div {
+	min-width: 0;
+	max-width: 100%;
+	overflow: hidden;
+	box-sizing: border-box;
+}
+
 .posa-cart-table:not(.posa-cart-table--counter-grid) tbody tr > td:first-child {
 	box-shadow: inset 3px 0 0 transparent;
 	transition:
@@ -605,6 +633,12 @@
 	cursor: text;
 }
 
+.posa-cart-table:not(.posa-cart-table--counter-grid) .posa-cart-table__qty-input-shell {
+	width: 100%;
+	min-width: 0;
+	max-width: 112px;
+}
+
 .posa-cart-table__qty-input-shell:hover {
 	box-shadow: 0 2px 8px var(--pos-shadow-light);
 }
@@ -625,10 +659,14 @@
 	width: 100%;
 	height: 100%;
 	position: relative;
+	min-width: 0;
+	overflow: hidden;
+	box-sizing: border-box;
 }
 
 .posa-cart-table__editor-display {
-	min-width: 60px;
+	min-width: 0;
+	width: 100%;
 	max-width: 100%;
 	display: flex;
 	align-items: center;
@@ -644,6 +682,16 @@
 	transition: all 0.2s ease;
 	height: 32px;
 	font-size: 0.9rem;
+	overflow: hidden;
+	white-space: nowrap;
+	box-sizing: border-box;
+}
+
+.posa-cart-table__editor-display .amount-value {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .posa-cart-table__editor-display:hover {
@@ -734,6 +782,26 @@
 .uom-select {
 	min-width: 80px;
 	max-width: 120px;
+}
+
+.posa-cart-table:not(.posa-cart-table--counter-grid) .uom-editor {
+	gap: 2px;
+}
+
+.posa-cart-table:not(.posa-cart-table--counter-grid) .uom-editor .posa-cart-table__editor-display {
+	flex: 1 1 auto;
+}
+
+.posa-cart-table:not(.posa-cart-table--counter-grid) .uom-select {
+	width: 100%;
+	min-width: 0;
+	max-width: 100%;
+}
+
+.posa-cart-table:not(.posa-cart-table--counter-grid) .uom-arrow {
+	width: 16px !important;
+	height: 24px !important;
+	min-width: 16px !important;
 }
 
 .uom-arrow {
