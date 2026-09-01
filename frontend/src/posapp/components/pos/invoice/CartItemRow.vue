@@ -441,10 +441,7 @@
 import { computed, nextTick, ref, watch } from "vue";
 import { getCartGridCellId, getCartGridRowId } from "../../../utils/cartFieldFocus";
 import { normalizeCartEditQuantity } from "../../../utils/cartQuantity";
-import {
-	getItemLossRisk,
-	resolveSaleFloorPolicy,
-} from "../../../utils/lossPrevention";
+import { getItemLossRisk, resolveSaleFloorPolicy } from "../../../utils/lossPrevention";
 
 defineOptions({
 	name: "CartItemRow",
@@ -554,9 +551,7 @@ const memoDeps = computed(() => {
 		props.item.has_batch_no,
 		props.item.has_serial_no,
 		props.item.serial_no,
-		Array.isArray(props.item.serial_no_selected)
-			? props.item.serial_no_selected.join("|")
-			: "",
+		Array.isArray(props.item.serial_no_selected) ? props.item.serial_no_selected.join("|") : "",
 		props.item.posa_is_offer,
 		props.item.posa_offer_applied,
 		props.item.is_free_item,
@@ -594,20 +589,15 @@ const selectedSerialCount = computed(() => {
 		.filter(Boolean).length;
 });
 
-const serialSelectionComplete = computed(
-	() => selectedSerialCount.value === requiredSerialCount.value,
-);
+const serialSelectionComplete = computed(() => selectedSerialCount.value === requiredSerialCount.value);
 
 const rowDomId = computed(() => (props.rowIndex >= 0 ? getCartGridRowId(props.rowIndex) : undefined));
 
-const saleFloorPolicy = computed(() =>
-	resolveSaleFloorPolicy(props.posProfile),
-);
+const saleFloorPolicy = computed(() => resolveSaleFloorPolicy(props.posProfile));
 const lossRisk = computed(() =>
 	saleFloorPolicy.value.enabled
 		? getItemLossRisk(props.item, {
-				minimumMarginPercentage:
-					saleFloorPolicy.value.minimumMarginPercentage,
+				minimumMarginPercentage: saleFloorPolicy.value.minimumMarginPercentage,
 			})
 		: null,
 );
@@ -1096,6 +1086,8 @@ td[data-column-key="item_name"] {
 .posa-cart-item-row__item-name {
 	min-width: 0;
 	overflow-wrap: anywhere;
+	font-weight: 650;
+	line-height: 1.35;
 }
 
 .posa-cart-item-row__tracking-stack {
@@ -1111,5 +1103,39 @@ td[data-column-key="item_name"] {
 .posa-cart-item-row__tracking-chip {
 	max-width: 100%;
 	cursor: pointer;
+}
+
+.posa-cart-table__delete-btn,
+.posa-cart-table__expand-btn {
+	min-width: 36px !important;
+	min-height: 36px !important;
+	border-radius: var(--pos-radius-xs) !important;
+	box-shadow: none !important;
+	transition:
+		border-color 120ms ease,
+		background-color 120ms ease,
+		color 120ms ease !important;
+}
+
+.posa-cart-table__delete-btn {
+	border: 1px solid color-mix(in srgb, var(--pos-error) 32%, var(--pos-border)) !important;
+	background: var(--pos-error-container) !important;
+	color: var(--pos-error) !important;
+}
+
+.posa-cart-table__delete-btn:hover {
+	border-color: var(--pos-error) !important;
+	background: color-mix(in srgb, var(--pos-error-container) 82%, var(--pos-error)) !important;
+}
+
+.posa-cart-table__expand-btn {
+	border: 1px solid var(--pos-border) !important;
+	background: var(--pos-surface-muted) !important;
+	color: var(--pos-primary) !important;
+}
+
+.posa-cart-table__expand-btn:hover {
+	border-color: var(--pos-primary) !important;
+	background: var(--pos-primary-container) !important;
 }
 </style>

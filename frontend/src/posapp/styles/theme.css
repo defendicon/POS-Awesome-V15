@@ -12,6 +12,10 @@
 	--pos-control-height-compact: 38px;
 	--pos-action-pay: #16784a;
 	--pos-action-pay-hover: #105f3a;
+	--pos-action-primary: #0b5cab;
+	--pos-action-primary-hover: #084d96;
+	--pos-action-danger: #b3261e;
+	--pos-action-danger-hover: #8c1d18;
 	--pos-focus-ring: #0b7a75;
 	--pos-focus-halo: rgba(11, 122, 117, 0.2);
 	--pos-elevation-1: 0 1px 2px rgba(19, 43, 40, 0.06), 0 4px 12px rgba(19, 43, 40, 0.04);
@@ -129,6 +133,10 @@
 	--pos-focus-halo: rgba(117, 214, 208, 0.24);
 	--pos-action-pay: #16784a;
 	--pos-action-pay-hover: #105f3a;
+	--pos-action-primary: #0b5cab;
+	--pos-action-primary-hover: #084d96;
+	--pos-action-danger: #b3261e;
+	--pos-action-danger-hover: #8c1d18;
 	--pos-elevation-1: 0 1px 2px rgba(0, 0, 0, 0.25), 0 4px 14px rgba(0, 0, 0, 0.18);
 	--pos-elevation-2: 0 10px 28px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.22);
 	--pos-elevation-3: 0 20px 52px rgba(0, 0, 0, 0.44), 0 6px 16px rgba(0, 0, 0, 0.3);

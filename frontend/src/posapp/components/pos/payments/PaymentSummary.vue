@@ -1,6 +1,6 @@
 <template>
 	<v-row v-if="invoice_doc" class="payment-summary-grid" dense>
-		<v-col cols="12" sm="7">
+		<v-col cols="12" sm="7" class="payment-summary-grid__paid">
 			<v-text-field
 				variant="solo"
 				color="primary"
@@ -14,7 +14,7 @@
 				@click="$emit('show-paid-amount')"
 			></v-text-field>
 		</v-col>
-		<v-col cols="12" sm="5">
+		<v-col cols="12" sm="5" class="payment-summary-grid__difference" :data-state="settlementState">
 			<v-text-field
 				variant="solo"
 				color="primary"
@@ -140,6 +140,13 @@ const baseSettlementState = computed(() => {
 	return "balanced";
 });
 
+const settlementState = computed(() => {
+	const difference = Number(props.diffPayment || 0);
+	if (difference > 0) return "remaining";
+	if (difference < 0) return "change";
+	return "balanced";
+});
+
 const baseSettlementLabel = computed(() => {
 	if (baseSettlementState.value === "remaining") return frappe._("Base Remaining");
 	if (baseSettlementState.value === "change") return frappe._("Base Change");
@@ -161,6 +168,38 @@ const baseSettlementLabel = computed(() => {
 .payment-summary-grid :deep(.v-field) {
 	border-radius: var(--pos-radius-sm);
 	background: var(--pos-surface-raised);
+}
+
+.payment-summary-grid__paid :deep(.v-field),
+.payment-summary-grid__difference :deep(.v-field) {
+	border: 1px solid var(--pos-border);
+	box-shadow: none;
+}
+
+.payment-summary-grid__paid :deep(.v-field) {
+	border-inline-start: 4px solid var(--pos-primary);
+}
+
+.payment-summary-grid__paid :deep(input),
+.payment-summary-grid__difference :deep(input) {
+	font-size: 1.05rem;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+
+.payment-summary-grid__difference[data-state="remaining"] :deep(.v-field) {
+	border-color: color-mix(in srgb, var(--pos-error) 58%, var(--pos-border));
+	background: var(--pos-error-container);
+}
+
+.payment-summary-grid__difference[data-state="change"] :deep(.v-field) {
+	border-color: color-mix(in srgb, var(--pos-warning) 58%, var(--pos-border));
+	background: var(--pos-warning-container);
+}
+
+.payment-summary-grid__difference[data-state="balanced"] :deep(.v-field) {
+	border-color: color-mix(in srgb, var(--pos-success) 58%, var(--pos-border));
+	background: var(--pos-success-container);
 }
 
 .payment-summary-base {
