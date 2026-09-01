@@ -59,13 +59,18 @@ def _read_state(profile_name: str) -> dict[str, Any]:
     if not isinstance(state, dict) or state.get("pos_profile") != profile_name:
         return _default_state(profile_name)
 
-    return {
+    normalized = {
         "pos_profile": profile_name,
         "active_cashier": cstr(state.get("active_cashier")).strip() or None,
         "locked": bool(state.get("locked", True)),
         "verified_at": state.get("verified_at"),
         "locked_at": state.get("locked_at"),
     }
+    # Keep the TTL as an idle timeout. A fixed expiry locked busy terminals even
+    # while invoices and terminal-state checks were actively using the session.
+    # Rewriting the validated server state is compatible with Frappe v15 and
+    # refreshes its expiry without trusting any client-side cashier identity.
+    return _write_state(profile_name, normalized)
 
 
 def _write_state(profile_name: str, state: dict[str, Any]) -> dict[str, Any]:
