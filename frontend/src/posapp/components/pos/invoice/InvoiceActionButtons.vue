@@ -445,24 +445,19 @@ const showMoreActions = computed(
 /* Special styling for the PAY button */
 .pay-btn {
 	min-height: 52px !important;
-	border: 1px solid color-mix(in srgb, var(--pos-success) 78%, #000000) !important;
+	border: 1px solid var(--pos-action-pay-hover) !important;
 	font-weight: 750 !important;
 	font-size: 1.05rem !important;
 	letter-spacing: 0.02em !important;
-	background: var(--pos-success) !important;
+	background: var(--pos-action-pay) !important;
 	color: #ffffff !important;
-	box-shadow: 0 8px 18px color-mix(in srgb, var(--pos-success) 24%, transparent) !important;
+	box-shadow: 0 8px 18px color-mix(in srgb, var(--pos-action-pay) 28%, transparent) !important;
 }
 
 .pay-btn:hover {
-	background: color-mix(in srgb, var(--pos-success) 88%, #000000) !important;
-	box-shadow: 0 10px 22px color-mix(in srgb, var(--pos-success) 32%, transparent) !important;
+	background: var(--pos-action-pay-hover) !important;
+	box-shadow: 0 10px 22px color-mix(in srgb, var(--pos-action-pay) 36%, transparent) !important;
 	transform: translateY(-1px);
-}
-
-:global([data-theme="dark"]) .pay-btn,
-:global([data-theme-mode="dark"]) .pay-btn {
-	color: #10201b !important;
 }
 
 /* Responsive optimizations */

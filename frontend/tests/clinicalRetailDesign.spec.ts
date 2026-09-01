@@ -44,6 +44,7 @@ describe("Clinical-retail UI foundation", () => {
 		const theme = source("styles", "theme.css");
 
 		expect(theme).toContain("--pos-control-height: 44px");
+		expect(theme).toContain("--pos-action-pay: #16784a");
 		expect(theme).toContain("--pos-focus-ring: #0b7a75");
 		expect(theme).toContain("--pos-elevation-3:");
 		expect(theme).toContain("@media (pointer: coarse)");
@@ -61,7 +62,9 @@ describe("Clinical-retail UI foundation", () => {
 
 		expect(actions).toContain("summary-btn--utility");
 		expect(actions).toContain("summary-btn--danger");
-		expect(actions).toContain("background: var(--pos-success) !important");
+		expect(actions).toContain(
+			"background: var(--pos-action-pay) !important",
+		);
 		expect(actions).not.toContain(
 			"linear-gradient(135deg, #4caf50, #45a049)",
 		);
