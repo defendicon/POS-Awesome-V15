@@ -137,7 +137,7 @@
 				variant="flat"
 				prepend-icon="mdi-content-save"
 				@click="$emit('save-and-clear')"
-				class="summary-btn summary-btn--utility"
+				class="summary-btn summary-btn--utility summary-btn--save"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-save-clear"
 				:loading="saveLoading"
@@ -151,7 +151,7 @@
 				variant="flat"
 				prepend-icon="mdi-tray-full"
 				@click="$emit('load-drafts')"
-				class="summary-btn summary-btn--utility"
+				class="summary-btn summary-btn--utility summary-btn--drafts"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-drafts"
 				:loading="loadDraftsLoading"
@@ -165,7 +165,7 @@
 				variant="flat"
 				prepend-icon="mdi-book-search"
 				@click="$emit('select-order')"
-				class="summary-btn summary-btn--utility"
+				class="summary-btn summary-btn--utility summary-btn--order"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-select-order"
 				:loading="selectOrderLoading"
@@ -179,7 +179,7 @@
 				variant="flat"
 				prepend-icon="mdi-folder-search-outline"
 				@click="$emit('open-invoice-management')"
-				class="summary-btn summary-btn--utility"
+				class="summary-btn summary-btn--utility summary-btn--management"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-management"
 				:loading="invoiceManagementLoading"
@@ -209,7 +209,7 @@
 				variant="flat"
 				prepend-icon="mdi-backup-restore"
 				@click="$emit('open-returns')"
-				class="summary-btn summary-btn--utility"
+				class="summary-btn summary-btn--utility summary-btn--return"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-returns"
 				:loading="returnsLoading"
@@ -223,7 +223,7 @@
 				variant="flat"
 				prepend-icon="mdi-printer"
 				@click="$emit('print-draft')"
-				class="summary-btn summary-btn--utility"
+				class="summary-btn summary-btn--utility summary-btn--print"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-print-draft"
 				:loading="printLoading"
@@ -237,7 +237,7 @@
 				variant="flat"
 				prepend-icon="mdi-monitor"
 				@click="$emit('open-customer-display')"
-				class="summary-btn summary-btn--utility"
+				class="summary-btn summary-btn--utility summary-btn--display"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-customer-display"
 				:loading="customerDisplayLoading"
@@ -408,17 +408,54 @@ const showMoreActions = computed(
 }
 
 .summary-btn--utility {
-	border: 1px solid var(--pos-border) !important;
-	background: var(--pos-button-bg) !important;
-	color: var(--pos-text-primary) !important;
-	box-shadow: none !important;
+	--summary-action-bg: var(--pos-action-primary);
+	--summary-action-hover: var(--pos-action-primary-hover);
+	border: 1px solid var(--summary-action-hover) !important;
+	background: var(--summary-action-bg) !important;
+	color: #ffffff !important;
+	box-shadow: 0 4px 10px color-mix(in srgb, var(--summary-action-bg) 18%, transparent) !important;
 }
 
 .summary-btn--utility:hover {
-	border-color: var(--pos-primary) !important;
-	background: var(--pos-primary-container) !important;
-	color: var(--pos-primary-variant) !important;
-	box-shadow: var(--pos-elevation-1) !important;
+	border-color: var(--summary-action-hover) !important;
+	background: var(--summary-action-hover) !important;
+	color: #ffffff !important;
+	box-shadow: 0 7px 15px color-mix(in srgb, var(--summary-action-bg) 28%, transparent) !important;
+}
+
+.summary-btn--save {
+	--summary-action-bg: #0b5cab;
+	--summary-action-hover: #084d96;
+}
+
+.summary-btn--drafts {
+	--summary-action-bg: #985200;
+	--summary-action-hover: #7a4100;
+}
+
+.summary-btn--order {
+	--summary-action-bg: #006875;
+	--summary-action-hover: #00545f;
+}
+
+.summary-btn--management {
+	--summary-action-bg: #6941a5;
+	--summary-action-hover: #57338c;
+}
+
+.summary-btn--return {
+	--summary-action-bg: #356b5d;
+	--summary-action-hover: #28564a;
+}
+
+.summary-btn--print {
+	--summary-action-bg: #3949a3;
+	--summary-action-hover: #2e3b86;
+}
+
+.summary-btn--display {
+	--summary-action-bg: #00658b;
+	--summary-action-hover: #00516f;
 }
 
 .summary-btn--danger {

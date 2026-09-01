@@ -63,7 +63,7 @@ describe("items table final visible columns", () => {
 		).toBe(92);
 		expect(
 			responsive.find((column) => column.key === "actions")?.minWidth,
-		).toBe(56);
+		).toBe(68);
 	});
 
 	it("keeps the expand column even when the responsive layout collapses optional fields", () => {

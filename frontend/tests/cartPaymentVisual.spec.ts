@@ -32,7 +32,7 @@ describe("Cart and payment visual hierarchy", () => {
 		expect(cartStyles).toContain(".posa-cart-table--counter-grid");
 	});
 
-	it("lets classic utility actions inherit the active light or dark app theme", () => {
+	it("uses an accessible category palette for classic cashier actions", () => {
 		const actions = source(
 			"components",
 			"pos",
@@ -41,11 +41,36 @@ describe("Cart and payment visual hierarchy", () => {
 		);
 
 		expect(actions).toContain("summary-btn--utility");
+		for (const actionClass of [
+			"summary-btn--save",
+			"summary-btn--drafts",
+			"summary-btn--order",
+			"summary-btn--management",
+			"summary-btn--return",
+		]) {
+			expect(actions).toContain(actionClass);
+		}
 		expect(actions).toContain(
-			"background: var(--pos-button-bg) !important",
+			"background: var(--summary-action-bg) !important",
 		);
+		expect(actions).toContain("color: #ffffff !important");
 		expect(actions.split("<script setup>")[0]).not.toContain(
 			'theme="dark"',
+		);
+	});
+
+	it("wraps long classic cart headers without affecting Counter Grid structure", () => {
+		const cartStyles = source(
+			"components",
+			"pos",
+			"invoice",
+			"items-table-styles.css",
+		);
+
+		expect(cartStyles).toContain("white-space: normal");
+		expect(cartStyles).toContain("overflow-wrap: normal");
+		expect(cartStyles).toContain(
+			".posa-cart-table:not(.posa-cart-table--counter-grid) th",
 		);
 	});
 

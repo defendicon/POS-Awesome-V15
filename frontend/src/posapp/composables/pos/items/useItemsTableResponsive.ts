@@ -78,7 +78,7 @@ const calculateColumnWidth = (header: TableHeader, width: number) => {
 		discount_percentage: { min: 96, max: 110, ratio: 0.1 },
 		discount_amount: { min: 105, max: 118, ratio: 0.11 },
 		price_list_rate: { min: 105, max: 118, ratio: 0.11 },
-		actions: { min: 56, max: 64, ratio: 0.06 },
+		actions: { min: 68, max: 76, ratio: 0.07 },
 		posa_is_offer: { min: 70, max: 90, ratio: 0.06 },
 	};
 
@@ -101,7 +101,7 @@ const calculateMinColumnWidth = (header: TableHeader) => {
 		discount_percentage: 96,
 		discount_amount: 105,
 		price_list_rate: 105,
-		actions: 56,
+		actions: 68,
 		posa_is_offer: 70,
 	};
 	return minWidths[header.key] || 80;

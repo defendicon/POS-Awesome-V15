@@ -307,14 +307,14 @@
 	position: sticky;
 	top: 0;
 	z-index: 3;
-	white-space: nowrap;
+	white-space: normal;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	width: auto;
 	text-align: center;
 	vertical-align: middle !important;
 	line-height: 1.2 !important;
-	height: 48px;
+	height: 52px;
 	transition:
 		background-color 140ms ease,
 		color 140ms ease;
@@ -354,11 +354,17 @@
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	position: relative;
 	z-index: 1;
-	white-space: nowrap;
+	white-space: normal;
 	overflow: hidden;
-	text-overflow: ellipsis;
+	text-overflow: clip;
+	line-height: 1.25;
+	overflow-wrap: normal;
 	max-width: 100%;
 	box-sizing: border-box;
+}
+
+.posa-cart-table:not(.posa-cart-table--counter-grid) th {
+	padding-inline: 5px;
 }
 
 .posa-cart-table th:hover .v-data-table-header__content {

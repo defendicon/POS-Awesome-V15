@@ -35,6 +35,12 @@ describe("Clinical-retail UI foundation", () => {
 			"#a94f08",
 			"#b3261e",
 			"#0b67a3",
+			"#985200",
+			"#006875",
+			"#6941a5",
+			"#356b5d",
+			"#3949a3",
+			"#00658b",
 		]) {
 			expect(contrastWithWhite(color), color).toBeGreaterThanOrEqual(4.5);
 		}
@@ -52,7 +58,7 @@ describe("Clinical-retail UI foundation", () => {
 		expect(theme).toContain("@media (prefers-reduced-motion: reduce)");
 	});
 
-	it("uses restrained cashier action hierarchy outside rugged counter grid", () => {
+	it("uses an intentional colorful cashier action hierarchy outside rugged counter grid", () => {
 		const actions = source(
 			"components",
 			"pos",
@@ -61,6 +67,7 @@ describe("Clinical-retail UI foundation", () => {
 		);
 
 		expect(actions).toContain("summary-btn--utility");
+		expect(actions).toContain("summary-btn--management");
 		expect(actions).toContain("summary-btn--danger");
 		expect(actions).toContain(
 			"background: var(--pos-action-pay) !important",
