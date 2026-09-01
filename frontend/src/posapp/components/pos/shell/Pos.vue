@@ -982,7 +982,7 @@ export default {
 }
 
 .dynamic-container {
-	transition: all 0.3s ease;
+	transition: padding 160ms ease;
 	padding-bottom: calc(var(--bottom-safe-space) + var(--dynamic-xs));
 	min-width: 0;
 }
@@ -1106,7 +1106,7 @@ export default {
 }
 
 .dynamic-main-row {
-	padding: 0;
+	padding: 4px;
 	margin: 0;
 }
 
@@ -1115,9 +1115,9 @@ export default {
 }
 
 .dynamic-col {
-	padding: var(--dynamic-sm);
-	transition: padding 0.3s ease;
-	margin-top: var(--dynamic-sm);
+	padding: clamp(6px, 0.8vw, 12px);
+	transition: padding 160ms ease;
+	margin-top: 0;
 }
 
 .dynamic-col--selector,
@@ -1142,10 +1142,10 @@ export default {
 .mobile-sale-dock,
 .mobile-pos-dock {
 	padding: 10px;
-	border-radius: 24px;
-	background: color-mix(in srgb, var(--pos-card-bg) 88%, transparent);
-	backdrop-filter: blur(18px);
-	box-shadow: 0 18px 38px var(--pos-shadow);
+	border-radius: var(--pos-radius-lg);
+	background: color-mix(in srgb, var(--pos-card-bg) 94%, transparent);
+	backdrop-filter: blur(16px);
+	box-shadow: var(--pos-elevation-3);
 	border: 1px solid var(--pos-border);
 }
 

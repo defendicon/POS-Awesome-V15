@@ -138,7 +138,7 @@
 				theme="dark"
 				prepend-icon="mdi-content-save"
 				@click="$emit('save-and-clear')"
-				class="summary-btn"
+				class="summary-btn summary-btn--utility"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-save-clear"
 				:loading="saveLoading"
@@ -153,7 +153,7 @@
 				theme="dark"
 				prepend-icon="mdi-tray-full"
 				@click="$emit('load-drafts')"
-				class="white-text-btn summary-btn"
+				class="summary-btn summary-btn--utility"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-drafts"
 				:loading="loadDraftsLoading"
@@ -168,7 +168,7 @@
 				theme="dark"
 				prepend-icon="mdi-book-search"
 				@click="$emit('select-order')"
-				class="summary-btn"
+				class="summary-btn summary-btn--utility"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-select-order"
 				:loading="selectOrderLoading"
@@ -183,7 +183,7 @@
 				theme="dark"
 				prepend-icon="mdi-folder-search-outline"
 				@click="$emit('open-invoice-management')"
-				class="summary-btn"
+				class="summary-btn summary-btn--utility"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-management"
 				:loading="invoiceManagementLoading"
@@ -198,7 +198,7 @@
 				theme="dark"
 				prepend-icon="mdi-close-circle"
 				@click="$emit('cancel-sale')"
-				class="summary-btn"
+				class="summary-btn summary-btn--danger"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-cancel-sale"
 				:loading="cancelLoading"
@@ -214,7 +214,7 @@
 				theme="dark"
 				prepend-icon="mdi-backup-restore"
 				@click="$emit('open-returns')"
-				class="summary-btn"
+				class="summary-btn summary-btn--utility"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-returns"
 				:loading="returnsLoading"
@@ -229,7 +229,7 @@
 				theme="dark"
 				prepend-icon="mdi-printer"
 				@click="$emit('print-draft')"
-				class="summary-btn"
+				class="summary-btn summary-btn--utility"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-print-draft"
 				:loading="printLoading"
@@ -244,7 +244,7 @@
 				theme="dark"
 				prepend-icon="mdi-monitor"
 				@click="$emit('open-customer-display')"
-				class="summary-btn"
+				class="summary-btn summary-btn--utility"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-customer-display"
 				:loading="customerDisplayLoading"
@@ -389,10 +389,16 @@ const showMoreActions = computed(
 
 /* Enhanced button styling with better performance */
 .summary-btn {
-	transition: all 0.2s ease !important;
+	transition:
+		transform 140ms ease,
+		box-shadow 140ms ease,
+		border-color 140ms ease,
+		background-color 140ms ease !important;
 	position: relative;
 	overflow: hidden;
-	min-height: 46px !important;
+	min-height: var(--pos-control-height) !important;
+	border-radius: var(--pos-radius-sm) !important;
+	font-weight: 650 !important;
 	text-transform: none !important;
 }
 
@@ -403,25 +409,60 @@ const showMoreActions = computed(
 
 .summary-btn:hover {
 	transform: translateY(-1px);
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
 }
 
 .summary-btn:active {
 	transform: translateY(0);
 }
 
+.summary-btn--utility {
+	border: 1px solid var(--pos-border) !important;
+	background: var(--pos-button-bg) !important;
+	color: var(--pos-text-primary) !important;
+	box-shadow: none !important;
+}
+
+.summary-btn--utility:hover {
+	border-color: var(--pos-primary) !important;
+	background: var(--pos-primary-container) !important;
+	color: var(--pos-primary-variant) !important;
+	box-shadow: var(--pos-elevation-1) !important;
+}
+
+.summary-btn--danger {
+	border: 1px solid color-mix(in srgb, var(--pos-error) 46%, var(--pos-border)) !important;
+	background: var(--pos-error-container) !important;
+	color: var(--pos-error) !important;
+	box-shadow: none !important;
+}
+
+.summary-btn--danger:hover {
+	border-color: var(--pos-error) !important;
+	background: color-mix(in srgb, var(--pos-error-container) 82%, var(--pos-error)) !important;
+	box-shadow: var(--pos-elevation-1) !important;
+}
+
 /* Special styling for the PAY button */
 .pay-btn {
-	font-weight: 600 !important;
-	font-size: 1.1rem !important;
-	background: linear-gradient(135deg, #4caf50, #45a049) !important;
-	box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3) !important;
+	min-height: 52px !important;
+	border: 1px solid color-mix(in srgb, var(--pos-success) 78%, #000000) !important;
+	font-weight: 750 !important;
+	font-size: 1.05rem !important;
+	letter-spacing: 0.02em !important;
+	background: var(--pos-success) !important;
+	color: #ffffff !important;
+	box-shadow: 0 8px 18px color-mix(in srgb, var(--pos-success) 24%, transparent) !important;
 }
 
 .pay-btn:hover {
-	background: linear-gradient(135deg, #45a049, #3d8b40) !important;
-	box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4) !important;
-	transform: translateY(-2px);
+	background: color-mix(in srgb, var(--pos-success) 88%, #000000) !important;
+	box-shadow: 0 10px 22px color-mix(in srgb, var(--pos-success) 32%, transparent) !important;
+	transform: translateY(-1px);
+}
+
+:global([data-theme="dark"]) .pay-btn,
+:global([data-theme-mode="dark"]) .pay-btn {
+	color: #10201b !important;
 }
 
 /* Responsive optimizations */
@@ -429,7 +470,7 @@ const showMoreActions = computed(
 	.summary-btn {
 		font-size: 0.8rem !important;
 		padding: 4px 8px !important;
-		min-height: 42px !important;
+		min-height: var(--pos-control-height) !important;
 	}
 
 	.pay-btn {
@@ -442,12 +483,12 @@ const showMoreActions = computed(
 	.summary-btn {
 		font-size: 0.74rem !important;
 		padding: 3px 6px !important;
-		min-height: 34px !important;
+		min-height: var(--pos-control-height) !important;
 	}
 
 	.pay-btn {
 		font-size: 0.85rem !important;
-		min-height: 40px !important;
+		min-height: 50px !important;
 	}
 }
 
