@@ -55,6 +55,15 @@ describe("items table final visible columns", () => {
 		]);
 		expect(finalColumns.slice(0, -1)).toEqual(responsive);
 		expect(finalColumns.at(-1)?.key).toBe("data-table-expand");
+		expect(
+			responsive.find((column) => column.key === "item_name")?.minWidth,
+		).toBe(160);
+		expect(
+			responsive.find((column) => column.key === "qty")?.minWidth,
+		).toBe(92);
+		expect(
+			responsive.find((column) => column.key === "actions")?.minWidth,
+		).toBe(56);
 	});
 
 	it("keeps the expand column even when the responsive layout collapses optional fields", () => {

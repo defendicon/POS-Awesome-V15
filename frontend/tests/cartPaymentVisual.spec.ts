@@ -24,8 +24,29 @@ describe("Cart and payment visual hierarchy", () => {
 		expect(cartStyles).toContain(
 			"box-shadow: inset 3px 0 0 var(--pos-primary)",
 		);
-		expect(cartStyles).toContain("background: var(--pos-input-bg)");
+		expect(cartStyles).toContain(
+			".posa-cart-table:not(.posa-cart-table--counter-grid) table",
+		);
+		expect(cartStyles).toContain("table-layout: fixed !important");
+		expect(cartStyles).toContain("background: var(--pos-surface-raised)");
 		expect(cartStyles).toContain(".posa-cart-table--counter-grid");
+	});
+
+	it("lets classic utility actions inherit the active light or dark app theme", () => {
+		const actions = source(
+			"components",
+			"pos",
+			"invoice",
+			"InvoiceActionButtons.vue",
+		);
+
+		expect(actions).toContain("summary-btn--utility");
+		expect(actions).toContain(
+			"background: var(--pos-button-bg) !important",
+		);
+		expect(actions.split("<script setup>")[0]).not.toContain(
+			'theme="dark"',
+		);
 	});
 
 	it("marks active tenders and uses shared semantic action colors", () => {

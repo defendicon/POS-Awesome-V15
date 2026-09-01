@@ -134,8 +134,7 @@
 		<v-col cols="12" sm="6">
 			<v-btn
 				block
-				color="accent"
-				theme="dark"
+				variant="flat"
 				prepend-icon="mdi-content-save"
 				@click="$emit('save-and-clear')"
 				class="summary-btn summary-btn--utility"
@@ -149,8 +148,7 @@
 		<v-col cols="12" sm="6">
 			<v-btn
 				block
-				color="warning"
-				theme="dark"
+				variant="flat"
 				prepend-icon="mdi-tray-full"
 				@click="$emit('load-drafts')"
 				class="summary-btn summary-btn--utility"
@@ -164,8 +162,7 @@
 		<v-col cols="12" sm="6" v-if="pos_profile.custom_allow_select_sales_order == 1">
 			<v-btn
 				block
-				color="info"
-				theme="dark"
+				variant="flat"
 				prepend-icon="mdi-book-search"
 				@click="$emit('select-order')"
 				class="summary-btn summary-btn--utility"
@@ -179,8 +176,7 @@
 		<v-col cols="12" sm="6">
 			<v-btn
 				block
-				color="deep-purple"
-				theme="dark"
+				variant="flat"
 				prepend-icon="mdi-folder-search-outline"
 				@click="$emit('open-invoice-management')"
 				class="summary-btn summary-btn--utility"
@@ -195,7 +191,7 @@
 			<v-btn
 				block
 				color="error"
-				theme="dark"
+				variant="flat"
 				prepend-icon="mdi-close-circle"
 				@click="$emit('cancel-sale')"
 				class="summary-btn summary-btn--danger"
@@ -210,8 +206,7 @@
 		<v-col cols="12" sm="6" v-if="pos_profile.posa_allow_return == 1">
 			<v-btn
 				block
-				color="secondary"
-				theme="dark"
+				variant="flat"
 				prepend-icon="mdi-backup-restore"
 				@click="$emit('open-returns')"
 				class="summary-btn summary-btn--utility"
@@ -225,8 +220,7 @@
 		<v-col cols="12" sm="6" v-if="pos_profile.posa_allow_print_draft_invoices">
 			<v-btn
 				block
-				color="primary"
-				theme="dark"
+				variant="flat"
 				prepend-icon="mdi-printer"
 				@click="$emit('print-draft')"
 				class="summary-btn summary-btn--utility"
@@ -240,8 +234,7 @@
 		<v-col cols="12" sm="6" v-if="showCustomerDisplayButton">
 			<v-btn
 				block
-				color="indigo"
-				theme="dark"
+				variant="flat"
 				prepend-icon="mdi-monitor"
 				@click="$emit('open-customer-display')"
 				class="summary-btn summary-btn--utility"
@@ -256,7 +249,6 @@
 			<v-btn
 				block
 				color="success"
-				theme="dark"
 				size="large"
 				prepend-icon="mdi-credit-card"
 				@click="$emit('show-payment')"

@@ -238,6 +238,10 @@
 	border-spacing: 0;
 }
 
+.posa-cart-table:not(.posa-cart-table--counter-grid) table {
+	table-layout: fixed !important;
+}
+
 .posa-cart-empty-state {
 	min-height: 230px;
 	padding: 32px 24px;
@@ -296,7 +300,7 @@
 	font-size: 0.74rem;
 	text-transform: none;
 	letter-spacing: 0.045em;
-	padding: 12px;
+	padding: 10px 8px;
 	border-bottom: 1px solid var(--pos-border-light);
 	background-color: var(--pos-table-header-bg);
 	color: var(--pos-text-secondary);
@@ -381,9 +385,9 @@
 
 /* Table cells */
 .posa-cart-table td {
-	padding: 14px 12px;
+	padding: 10px 8px;
 	vertical-align: middle;
-	height: 60px;
+	height: 56px;
 	text-align: center;
 	color: var(--pos-text-primary);
 	position: relative;
@@ -626,8 +630,8 @@
 	gap: 4px;
 	padding: 4px 8px;
 	border-radius: 6px;
-	border: 1px solid var(--pos-border);
-	background: var(--pos-input-bg);
+	border: 1px solid var(--pos-outline);
+	background: var(--pos-surface-raised);
 	color: var(--pos-text-primary);
 	font-weight: 600;
 	cursor: pointer;
@@ -664,7 +668,7 @@
 .posa-cart-table__qty-input--direct .v-field {
 	min-height: 32px;
 	border-radius: 4px;
-	background: var(--pos-input-bg);
+	background: var(--pos-surface-raised);
 	color: var(--pos-text-primary);
 	box-shadow: none;
 	transition:
@@ -674,7 +678,7 @@
 }
 
 .posa-cart-table__qty-input--direct .v-field__outline {
-	color: var(--pos-border);
+	color: var(--pos-outline);
 	--v-field-border-opacity: 1;
 }
 
