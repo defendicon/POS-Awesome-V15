@@ -98,6 +98,58 @@ const extractServerErrorMessage = (context: any, error: any) => {
 	return __("Error processing invoice");
 };
 
+const isTerminalLockedMessage = (message: unknown) => {
+	const normalized = String(message || "").toLowerCase();
+	return (
+		normalized.includes("pos terminal is locked") ||
+		normalized.includes("terminal is locked. verify a cashier pin")
+	);
+};
+
+const isTerminalLockedError = (error: any, errorMessage: string) => {
+	const candidates = [
+		errorMessage,
+		error?.message,
+		error?._server_messages,
+		error?.responseJSON?.message,
+		error?.responseJSON?._server_messages,
+		error?.xhr?.responseJSON?.message,
+		error?.xhr?.responseJSON?._server_messages,
+	];
+
+	return candidates.some(isTerminalLockedMessage);
+};
+
+const retryAfterTerminalUnlock = async (
+	context: any,
+	error: any,
+	errorMessage: string,
+	retry: () => Promise<any>,
+) => {
+	if (
+		!isTerminalLockedError(error, errorMessage) ||
+		typeof context?.employeeStore?.requestTerminalUnlock !== "function"
+	) {
+		return { handled: false, result: false, retryError: null };
+	}
+
+	try {
+		const unlocked = await context.employeeStore.requestTerminalUnlock();
+		if (!unlocked) {
+			return { handled: true, result: false, retryError: null };
+		}
+
+		try {
+			return { handled: true, result: await retry(), retryError: null };
+		} catch (retryError) {
+			return { handled: true, result: false, retryError };
+		}
+	} catch (unlockError) {
+		console.error("Unable to complete terminal unlock:", unlockError);
+		return { handled: false, result: false, retryError: null };
+	}
+};
+
 export async function update_invoice(context: any, doc: any) {
 	if (isOffline()) {
 		context.invoice_doc = Object.assign({}, context.invoice_doc || {}, doc);
@@ -114,9 +166,13 @@ export async function update_invoice(context: any, doc: any) {
 	try {
 		_logPriceListDebug(context, "update_invoice_request", {
 			customer: context.customer,
-			customer_price_list: context.customer_info?.customer_price_list || null,
-			pos_profile_price_list: context.pos_profile?.selling_price_list || null,
-			effective_price_list: context.get_price_list ? context.get_price_list() : null,
+			customer_price_list:
+				context.customer_info?.customer_price_list || null,
+			pos_profile_price_list:
+				context.pos_profile?.selling_price_list || null,
+			effective_price_list: context.get_price_list
+				? context.get_price_list()
+				: null,
 			selected_price_list: context.selected_price_list || null,
 			invoice_selling_price_list: doc.selling_price_list,
 			items_before: _buildPriceListSnapshot(context, doc.items),
@@ -131,12 +187,15 @@ export async function update_invoice(context: any, doc: any) {
 		const message = response?.message;
 		if (message) {
 			_logPriceListDebug(context, "update_invoice_response", {
-				effective_price_list: context.get_price_list ? context.get_price_list() : null,
+				effective_price_list: context.get_price_list
+					? context.get_price_list()
+					: null,
 				invoice_selling_price_list: message.selling_price_list,
 				items_after: _buildPriceListSnapshot(context, message.items),
 			});
 			if (message.is_return) {
-				if (context._normalizeReturnDocTotals) context._normalizeReturnDocTotals(message);
+				if (context._normalizeReturnDocTotals)
+					context._normalizeReturnDocTotals(message);
 			}
 			context.invoice_doc = message;
 			if (message.exchange_rate_date) {
@@ -182,7 +241,8 @@ export async function update_invoice_from_order(context: any, doc: any) {
 		const message = response?.message;
 		if (message) {
 			if (message.is_return) {
-				if (context._normalizeReturnDocTotals) context._normalizeReturnDocTotals(message);
+				if (context._normalizeReturnDocTotals)
+					context._normalizeReturnDocTotals(message);
 			}
 			context.invoice_doc = message;
 			if (message.exchange_rate_date) {
@@ -218,22 +278,45 @@ export async function process_invoice(context: any) {
 		customer: context.customer,
 		customer_price_list: context.customer_info?.customer_price_list || null,
 		pos_profile_price_list: context.pos_profile?.selling_price_list || null,
-		effective_price_list: context.get_price_list ? context.get_price_list() : null,
+		effective_price_list: context.get_price_list
+			? context.get_price_list()
+			: null,
 		selected_price_list: context.selected_price_list || null,
 		invoice_selling_price_list: doc.selling_price_list,
 		items_before: _buildPriceListSnapshot(context, doc.items),
 	});
-	try {
-		const updated_doc = await update_invoice(context, doc);
-		if (updated_doc && updated_doc.posting_date) {
+	const persistInvoice = async () => {
+		const updatedDoc = await update_invoice(context, doc);
+		if (updatedDoc && updatedDoc.posting_date) {
 			context.posting_date = context.formatDateForBackend
-				? context.formatDateForBackend(updated_doc.posting_date)
-				: updated_doc.posting_date;
+				? context.formatDateForBackend(updatedDoc.posting_date)
+				: updatedDoc.posting_date;
 		}
-		return updated_doc;
+		return updatedDoc;
+	};
+	try {
+		return await persistInvoice();
 	} catch (error: any) {
 		console.error("Error in process_invoice:", error);
 		const errorMessage = extractServerErrorMessage(context, error);
+		const unlockAttempt = await retryAfterTerminalUnlock(
+			context,
+			error,
+			errorMessage,
+			persistInvoice,
+		);
+		if (unlockAttempt.handled) {
+			if (unlockAttempt.retryError) {
+				context.toastStore.show({
+					title: extractServerErrorMessage(
+						context,
+						unlockAttempt.retryError,
+					),
+					color: "error",
+				});
+			}
+			return unlockAttempt.result;
+		}
 		context.toastStore.show({
 			title: errorMessage,
 			color: "error",
@@ -243,12 +326,33 @@ export async function process_invoice(context: any) {
 }
 
 export async function process_invoice_from_order(context: any) {
-	try {
+	const persistInvoiceFromOrder = async () => {
 		const doc = await context.get_invoice_from_order_doc();
-		return await update_invoice_from_order(context, doc);
+		return update_invoice_from_order(context, doc);
+	};
+	try {
+		return await persistInvoiceFromOrder();
 	} catch (error: any) {
 		console.error("Error in process_invoice_from_order:", error);
 		const errorMessage = extractServerErrorMessage(context, error);
+		const unlockAttempt = await retryAfterTerminalUnlock(
+			context,
+			error,
+			errorMessage,
+			persistInvoiceFromOrder,
+		);
+		if (unlockAttempt.handled) {
+			if (unlockAttempt.retryError) {
+				context.toastStore.show({
+					title: extractServerErrorMessage(
+						context,
+						unlockAttempt.retryError,
+					),
+					color: "error",
+				});
+			}
+			return unlockAttempt.result;
+		}
 		context.toastStore.show({
 			title: errorMessage,
 			color: "error",
@@ -266,12 +370,16 @@ export async function reload_current_invoice_from_backend(context: any) {
 		const current = context.invoice_doc || {};
 		const name = current.name;
 		let doctype = current.doctype;
-		const effectivePriceList = context.get_price_list ? context.get_price_list() : null;
+		const effectivePriceList = context.get_price_list
+			? context.get_price_list()
+			: null;
 
 		_logPriceListDebug(context, "reload_invoice_request", {
 			customer: context.customer,
-			customer_price_list: context.customer_info?.customer_price_list || null,
-			pos_profile_price_list: context.pos_profile?.selling_price_list || null,
+			customer_price_list:
+				context.customer_info?.customer_price_list || null,
+			pos_profile_price_list:
+				context.pos_profile?.selling_price_list || null,
 			effective_price_list: effectivePriceList,
 			invoice_selling_price_list: current.selling_price_list || null,
 		});
@@ -303,7 +411,10 @@ export async function reload_current_invoice_from_backend(context: any) {
 				invoice_selling_price_list: doc.selling_price_list,
 				items_after: _buildPriceListSnapshot(context, doc.items),
 			});
-			if (manualOverrides.length && context._applyManualRateOverridesToDoc) {
+			if (
+				manualOverrides.length &&
+				context._applyManualRateOverridesToDoc
+			) {
 				context._applyManualRateOverridesToDoc(doc, manualOverrides);
 			}
 

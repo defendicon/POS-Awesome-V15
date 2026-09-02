@@ -424,38 +424,38 @@ const showMoreActions = computed(
 }
 
 .summary-btn--save {
-	--summary-action-bg: #0b5cab;
-	--summary-action-hover: #084d96;
+	--summary-action-bg: #1976d2;
+	--summary-action-hover: #125ca7;
 }
 
 .summary-btn--drafts {
-	--summary-action-bg: #985200;
-	--summary-action-hover: #7a4100;
+	--summary-action-bg: #c45100;
+	--summary-action-hover: #a84400;
 }
 
 .summary-btn--order {
-	--summary-action-bg: #006875;
-	--summary-action-hover: #00545f;
+	--summary-action-bg: #00796b;
+	--summary-action-hover: #005f54;
 }
 
 .summary-btn--management {
-	--summary-action-bg: #6941a5;
-	--summary-action-hover: #57338c;
+	--summary-action-bg: #7b1fa2;
+	--summary-action-hover: #62177f;
 }
 
 .summary-btn--return {
-	--summary-action-bg: #356b5d;
-	--summary-action-hover: #28564a;
+	--summary-action-bg: #2e7d32;
+	--summary-action-hover: #246328;
 }
 
 .summary-btn--print {
-	--summary-action-bg: #3949a3;
-	--summary-action-hover: #2e3b86;
+	--summary-action-bg: #3f51b5;
+	--summary-action-hover: #32408f;
 }
 
 .summary-btn--display {
-	--summary-action-bg: #00658b;
-	--summary-action-hover: #00516f;
+	--summary-action-bg: #0277bd;
+	--summary-action-hover: #015f98;
 }
 
 .summary-btn--danger {

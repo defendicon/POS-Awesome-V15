@@ -35,12 +35,13 @@ describe("Clinical-retail UI foundation", () => {
 			"#a94f08",
 			"#b3261e",
 			"#0b67a3",
-			"#985200",
-			"#006875",
-			"#6941a5",
-			"#356b5d",
-			"#3949a3",
-			"#00658b",
+			"#1976d2",
+			"#c45100",
+			"#00796b",
+			"#7b1fa2",
+			"#2e7d32",
+			"#3f51b5",
+			"#0277bd",
 		]) {
 			expect(contrastWithWhite(color), color).toBeGreaterThanOrEqual(4.5);
 		}
