@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+	DATA_TABLE_EXPAND_COLUMN,
 	buildFinalVisibleColumns,
 	getResponsiveVisibleHeaders,
 } from "../src/posapp/composables/pos/items/useItemsTableResponsive";
@@ -64,6 +65,24 @@ describe("items table final visible columns", () => {
 		expect(
 			responsive.find((column) => column.key === "actions")?.minWidth,
 		).toBe(68);
+	});
+
+	it("fits every selected column inside a standard desktop invoice pane", () => {
+		const paneWidth = 1020;
+		const responsive = getResponsiveVisibleHeaders(headers, paneWidth);
+		const occupiedWidth = responsive.reduce(
+			(total, column) => total + Number(column.width || 0),
+			Number(DATA_TABLE_EXPAND_COLUMN.width),
+		);
+
+		expect(responsive).toHaveLength(headers.length);
+		expect(occupiedWidth).toBeLessThanOrEqual(paneWidth);
+		expect(
+			responsive.find((column) => column.key === "item_name")?.minWidth,
+		).toBe(148);
+		expect(
+			responsive.find((column) => column.key === "actions")?.minWidth,
+		).toBe(56);
 	});
 
 	it("keeps the expand column even when the responsive layout collapses optional fields", () => {

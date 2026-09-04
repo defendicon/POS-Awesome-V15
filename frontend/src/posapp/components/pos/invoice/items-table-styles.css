@@ -367,6 +367,16 @@
 	padding-inline: 5px;
 }
 
+.posa-cart-table.dense-columns-view:not(.posa-cart-table--counter-grid) th {
+	padding-inline: 3px;
+	font-size: 0.7rem;
+	letter-spacing: 0.025em;
+}
+
+.posa-cart-table.dense-columns-view:not(.posa-cart-table--counter-grid) td {
+	padding-inline: 3px;
+}
+
 .posa-cart-table th:hover .v-data-table-header__content {
 	color: var(--pos-primary);
 	font-weight: 600;
