@@ -127,6 +127,7 @@
 		<OfflineInvoicesDialog
 			v-model="showOfflineInvoices"
 			:pos-profile="posProfile"
+			:pending-count="pendingInvoices"
 			@deleted="updateAfterDelete"
 			@sync-all="syncPendingInvoices"
 		/>

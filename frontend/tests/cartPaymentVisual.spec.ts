@@ -138,4 +138,15 @@ describe("Cart and payment visual hierarchy", () => {
 		expect(summary).toContain('data-state="remaining"');
 		expect(summary).toContain('data-state="balanced"');
 	});
+
+	it("keeps the offline invoice header close control explicit and visible", () => {
+		const dialog = source("components", "OfflineInvoices.vue");
+
+		expect(dialog).toContain(
+			'<v-icon icon="mdi-close" size="26" aria-hidden="true" />',
+		);
+		expect(dialog).toContain(".header-close-btn .v-icon");
+		expect(dialog).toContain("visibility: visible !important");
+		expect(dialog).toContain("color: #ffffff !important");
+	});
 });
