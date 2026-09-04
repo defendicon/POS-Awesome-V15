@@ -134,6 +134,39 @@ describe("pricingEngine - applyLocalPricingRules", () => {
 		expect(result.discountPerUnit).toBeCloseTo(15);
 	});
 
+	it("applies a UOM-specific rule only to its configured UOM", () => {
+		const rule = {
+			name: "DOZEN-PRICE",
+			price_or_discount: "Price",
+			discount_type: "Rate",
+			rate_or_discount_type: "Rate",
+			rate_or_discount: 960,
+			uom: "Dozen",
+			specificity: 3,
+			priority: 5,
+		};
+		const indexes = buildIndexes({ items: { "ITEM-UOM": [rule] } });
+
+		const dozen = applyLocalPricingRules({
+			item: { item_code: "ITEM-UOM", uom: "Dozen" },
+			qty: 1,
+			baseRate: 1200,
+			ctx: {},
+			indexes,
+		});
+		const unit = applyLocalPricingRules({
+			item: { item_code: "ITEM-UOM", uom: "Unit" },
+			qty: 1,
+			baseRate: 100,
+			ctx: {},
+			indexes,
+		});
+
+		expect(dozen.rate).toBe(960);
+		expect(unit.rate).toBe(100);
+		expect(unit.applied).toHaveLength(0);
+	});
+
 	it("applies margin rules", () => {
 		const rule = {
 			name: "MARGIN",

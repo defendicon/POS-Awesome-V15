@@ -1011,10 +1011,24 @@ describe("invoiceItemMethods.applyPricingRulesForCart", () => {
 			base_rate: 75,
 			_manual_rate_set: true,
 		};
+		const uomPricedItem = {
+			...rulePricedItem,
+			posa_row_id: "ROW-UOM",
+			item_code: "ITEM-UOM",
+			uom: "Dozen",
+			conversion_factor: 12,
+			stock_qty: 300,
+			rate: 960,
+			base_rate: 960,
+			price_list_rate: 960,
+			base_price_list_rate: 960,
+			_manual_rate_set: true,
+			_manual_rate_set_from_uom: true,
+		};
 		const context = {
 			...createContext(),
 			pos_profile: { ignore_pricing_rule: "1" },
-			items: [rulePricedItem, manualItem],
+			items: [rulePricedItem, manualItem, uomPricedItem],
 			_pricingRulesStore: {
 				ensureActiveRules: vi.fn(),
 				getIndexes: vi.fn(() => ({})),
@@ -1036,6 +1050,8 @@ describe("invoiceItemMethods.applyPricingRulesForCart", () => {
 		expect(rulePricedItem.discount_amount).toBeCloseTo(10);
 		expect(manualItem.rate).toBeCloseTo(75);
 		expect(manualItem.base_rate).toBeCloseTo(75);
+		expect(uomPricedItem.rate).toBeCloseTo(110);
+		expect(uomPricedItem.base_rate).toBeCloseTo(110);
 
 		delete global.frappe;
 	});
