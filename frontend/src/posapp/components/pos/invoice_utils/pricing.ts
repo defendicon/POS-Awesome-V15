@@ -284,7 +284,8 @@ export function _applyPricingToLine(
 		return;
 	}
 
-	const manualOverride = item._manual_rate_set === true;
+	const manualOverride =
+		item._manual_rate_set === true && item._manual_rate_set_from_uom !== true;
 	const allowRateUpdate =
 		!item.locked_price && !item.posa_offer_applied && !manualOverride;
 	const rawDocQty = Number.parseFloat(item.qty || 0);
@@ -1053,8 +1054,11 @@ export async function _applyServerPricingRules(context: any, ctx: any = {}) {
 				context?.invoice_doc?.return_against,
 		);
 
+		const manualOverride =
+			item._manual_rate_set === true &&
+			item._manual_rate_set_from_uom !== true;
 		let allowServerRateUpdate =
-			item._manual_rate_set !== true &&
+			!manualOverride &&
 			!priceLocked &&
 			!offerApplied &&
 			!lockReturnPricing;

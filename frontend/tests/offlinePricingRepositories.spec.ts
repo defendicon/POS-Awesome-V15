@@ -67,6 +67,60 @@ describe("offline pricing repositories", () => {
 		]);
 	});
 
+	it("resolves the active exact-UOM price with customer precedence", async () => {
+		await itemPriceRepository.upsertMany([
+			{
+				name: "IP-DOZEN-GENERAL",
+				price_list: "Retail",
+				item_code: "ITEM-002",
+				uom: "Dozen",
+				currency: "PKR",
+				customer: null,
+				selling: 1,
+				price_list_rate: 960,
+			},
+			{
+				name: "IP-DOZEN-CUSTOMER",
+				price_list: "Retail",
+				item_code: "ITEM-002",
+				uom: "Dozen",
+				currency: "PKR",
+				customer: "CUST-001",
+				selling: 1,
+				price_list_rate: 900,
+				valid_from: "2026-01-01",
+				valid_upto: "2026-12-31",
+			},
+			{
+				name: "IP-DOZEN-EXPIRED",
+				price_list: "Retail",
+				item_code: "ITEM-002",
+				uom: "Dozen",
+				currency: "PKR",
+				customer: "CUST-001",
+				selling: 1,
+				price_list_rate: 800,
+				valid_upto: "2025-12-31",
+			},
+		]);
+
+		const row = await itemPriceRepository.findApplicableForItemAndUom({
+			priceList: "Retail",
+			itemCode: "ITEM-002",
+			uom: "Dozen",
+			customer: "CUST-001",
+			currency: "PKR",
+			date: "2026-09-04",
+		});
+
+		expect(row).toEqual(
+			expect.objectContaining({
+				name: "IP-DOZEN-CUSTOMER",
+				price_list_rate: 900,
+			}),
+		);
+	});
+
 	it("deletes Item Prices by ERPNext document name", async () => {
 		await itemPriceRepository.upsertMany([
 			{

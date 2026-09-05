@@ -196,7 +196,7 @@ const onDragEnd = (event) => {
 .card-item-card {
 	background: var(--pos-surface-raised);
 	border-radius: var(--pos-radius-md);
-	border: 1px solid var(--pos-border-light);
+	border: 1px solid var(--pos-border);
 	overflow: hidden;
 	transition:
 		transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
@@ -208,7 +208,7 @@ const onDragEnd = (event) => {
 	flex-direction: column;
 	height: 100%;
 	width: 100%;
-	box-shadow: 0 10px 24px var(--pos-shadow-light);
+	box-shadow: var(--pos-elevation-1);
 	will-change: transform;
 	backface-visibility: hidden;
 	transform: translate3d(0, 0, 0);
@@ -216,18 +216,18 @@ const onDragEnd = (event) => {
 }
 
 .card-item-card:hover {
-	transform: translate3d(0, -3px, 0);
-	box-shadow: 0 16px 32px var(--pos-shadow);
-	border-color: rgba(var(--v-theme-primary), 0.35);
+	transform: translate3d(0, -2px, 0);
+	box-shadow: var(--pos-elevation-2);
+	border-color: var(--pos-primary);
 }
 
 .card-item-card.item-highlighted {
-	border-color: rgb(var(--v-theme-primary));
+	border-color: var(--pos-primary);
 	box-shadow:
-		0 0 0 3px rgba(var(--v-theme-primary), 0.35),
-		0 12px 28px rgba(var(--v-theme-primary), 0.2);
-	transform: translate3d(0, -2px, 0);
-	background: rgba(var(--v-theme-primary), 0.08);
+		0 0 0 3px var(--pos-focus-halo),
+		var(--pos-elevation-2);
+	transform: translate3d(0, -1px, 0);
+	background: var(--pos-primary-container);
 }
 
 .card-item-image-container {
@@ -235,7 +235,13 @@ const onDragEnd = (event) => {
 	height: 132px;
 	flex-shrink: 0;
 	overflow: hidden;
-	background: var(--pos-surface-muted);
+	background:
+		linear-gradient(
+			145deg,
+			color-mix(in srgb, var(--pos-primary-container) 42%, transparent),
+			transparent 64%
+		),
+		var(--pos-surface-muted);
 }
 
 .card-item-image {
@@ -272,7 +278,7 @@ const onDragEnd = (event) => {
 
 .card-item-name {
 	font-size: 0.98rem;
-	font-weight: 700;
+	font-weight: 650;
 	margin: 0;
 	line-height: 1.35;
 	color: var(--pos-text-primary);
@@ -284,13 +290,14 @@ const onDragEnd = (event) => {
 }
 
 .card-item-code {
-	font-size: 0.74rem;
+	font-size: 0.72rem;
 	color: var(--pos-text-secondary);
 	display: block;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	letter-spacing: 0.02em;
+	letter-spacing: 0.045em;
+	text-transform: uppercase;
 }
 
 .card-item-details {
@@ -313,9 +320,10 @@ const onDragEnd = (event) => {
 	align-items: baseline;
 	flex-wrap: wrap;
 	gap: var(--pos-space-1);
-	font-weight: 700;
+	font-weight: 750;
 	color: var(--pos-primary);
-	font-size: 1.05rem;
+	font-size: 1.08rem;
+	font-variant-numeric: tabular-nums;
 }
 
 .secondary-price {
@@ -333,12 +341,14 @@ const onDragEnd = (event) => {
 	gap: 6px;
 	padding: 6px 8px;
 	border-radius: var(--pos-radius-xs);
-	background: var(--pos-hover-bg);
+	border: 1px solid var(--pos-border-light);
+	background: var(--pos-surface-muted);
 	white-space: nowrap;
 }
 
 .stock-amount {
-	font-weight: 600;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
 }
 
 .stock-amount.negative-number {

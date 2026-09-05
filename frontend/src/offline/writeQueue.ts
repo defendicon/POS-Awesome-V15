@@ -540,6 +540,47 @@ export async function markWriteQueueEntrySynced(
 	);
 }
 
+export async function markWriteQueueEntrySyncedByIdempotencyKey(
+	entityType: OfflineEntityType,
+	idempotencyKey: string,
+) {
+	await ensureOfflineQueueReady();
+	const normalizedKey = String(idempotencyKey || "").trim();
+	if (!normalizedKey) {
+		return false;
+	}
+
+	const table = db.table(WRITE_QUEUE_TABLE);
+	const updated = await db.transaction("rw", table, async () => {
+		const current = (await table
+			.where("idempotency_key")
+			.equals(normalizedKey)
+			.first()) as OfflineQueueEntry | undefined;
+		if (
+			!current ||
+			current.entity_type !== entityType ||
+			!isActiveStatus(current.status)
+		) {
+			return false;
+		}
+
+		await table.put({
+			...current,
+			status: "synced",
+			last_error: null,
+			last_attempt_at: current.last_attempt_at || nowIso(),
+			next_attempt_at: null,
+		});
+		return true;
+	});
+
+	if (updated) {
+		await refreshQueueMemory(entityType);
+	}
+
+	return updated;
+}
+
 export async function markWriteQueueEntryFailed(
 	entityType: OfflineEntityType,
 	queueId: number,

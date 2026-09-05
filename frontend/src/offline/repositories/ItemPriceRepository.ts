@@ -17,6 +17,28 @@ export type OfflineItemPriceRecord = {
 	[key: string]: any;
 };
 
+export type ApplicableItemPriceQuery = {
+	priceList: string;
+	itemCode: string;
+	uom: string;
+	customer?: string | null;
+	currency?: string | null;
+	date?: string | null;
+};
+
+const normalizeText = (value: unknown): string => String(value || "").trim();
+
+const isActiveOn = (
+	row: OfflineItemPriceRecord,
+	date: string | null | undefined,
+): boolean => {
+	const target = normalizeText(date).slice(0, 10);
+	if (!target) return true;
+	const validFrom = normalizeText(row.valid_from).slice(0, 10);
+	const validUpto = normalizeText(row.valid_upto).slice(0, 10);
+	return (!validFrom || validFrom <= target) && (!validUpto || validUpto >= target);
+};
+
 class ItemPriceRepository {
 	async clear() {
 		await db.table("item_price_records").clear();
@@ -89,6 +111,49 @@ class ItemPriceRepository {
 			.where("[price_list+item_code+uom]")
 			.equals([priceList, itemCode, uom])
 			.toArray();
+	}
+
+	async findApplicableForItemAndUom(
+		query: ApplicableItemPriceQuery,
+	): Promise<OfflineItemPriceRecord | null> {
+		const customer = normalizeText(query.customer);
+		const currency = normalizeText(query.currency);
+		const rows = await this.findForItemAndUom(
+			query.priceList,
+			query.itemCode,
+			query.uom,
+		);
+
+		const applicable = rows.filter((row) => {
+			const rowCustomer = normalizeText(row.customer);
+			const rowCurrency = normalizeText(row.currency);
+			const isBuyingOnly =
+				(row.buying === 1 || row.buying === true) &&
+				row.selling !== 1 &&
+				row.selling !== true;
+			return (
+				!isBuyingOnly &&
+				(!rowCustomer || (!!customer && rowCustomer === customer)) &&
+				(!rowCurrency || !currency || rowCurrency === currency) &&
+				isActiveOn(row, query.date)
+			);
+		});
+
+		applicable.sort((left, right) => {
+			const leftCustomer = normalizeText(left.customer) === customer ? 1 : 0;
+			const rightCustomer = normalizeText(right.customer) === customer ? 1 : 0;
+			if (leftCustomer !== rightCustomer) return rightCustomer - leftCustomer;
+			const leftValidFrom = normalizeText(left.valid_from);
+			const rightValidFrom = normalizeText(right.valid_from);
+			if (leftValidFrom !== rightValidFrom) {
+				return rightValidFrom.localeCompare(leftValidFrom);
+			}
+			return normalizeText(right.modified).localeCompare(
+				normalizeText(left.modified),
+			);
+		});
+
+		return applicable[0] || null;
 	}
 }
 

@@ -6,6 +6,7 @@ import {
 	safeBulkPut,
 	startupInitPromise,
 } from "./db";
+import { markWriteQueueEntrySyncedByIdempotencyKey } from "./writeQueue";
 
 type AnyRecord = Record<string, any>;
 
@@ -321,11 +322,16 @@ export async function syncInvoiceOutboxResource(
 	}
 	if (finalRows.length) {
 		await safeBulkPut(TABLE, finalRows);
-		finalRows
-			.filter((row) => row.status === "acknowledged")
-			.forEach((row) =>
-				removeInvoiceIntentJournal(row.client_request_id),
+		const acknowledgedRows = finalRows.filter(
+			(row) => row.status === "acknowledged",
+		);
+		for (const row of acknowledgedRows) {
+			removeInvoiceIntentJournal(row.client_request_id);
+			await markWriteQueueEntrySyncedByIdempotencyKey(
+				"invoice",
+				`invoice:${row.client_request_id}`,
 			);
+		}
 	}
 
 	const pending = await getPendingInvoiceOutboxCount();

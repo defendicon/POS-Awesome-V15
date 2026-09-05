@@ -1346,7 +1346,19 @@ const adjust_frappe_sidebar_offset = () => {
 	min-height: 0;
 	overflow: auto;
 	overscroll-behavior: contain;
-	padding-top: 8px;
+	padding-top: 6px;
+	background:
+		linear-gradient(
+			90deg,
+			color-mix(in srgb, var(--pos-primary-container) 18%, transparent) 1px,
+			transparent 1px
+		),
+		linear-gradient(
+			color-mix(in srgb, var(--pos-primary-container) 14%, transparent) 1px,
+			transparent 1px
+		);
+	background-size: 32px 32px;
+	background-position: -1px -1px;
 }
 
 .bootstrap-warning-snackbar :deep(.v-snackbar__wrapper) {

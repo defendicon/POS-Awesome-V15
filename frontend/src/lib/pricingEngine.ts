@@ -140,6 +140,12 @@ export const matchPriceListAndCurrency = (
 	return true;
 };
 
+export const matchUom = (rule: AnyRecord, item: AnyRecord): boolean => {
+	const ruleUom = String(rule?.uom || "").trim();
+	if (!ruleUom) return true;
+	return ruleUom === String(item?.uom || "").trim();
+};
+
 const pushUnique = (
 	bucket: AnyRecord[],
 	rule: AnyRecord | null | undefined,
@@ -601,7 +607,10 @@ export const evaluatePricingRules = ({
 	const candidates = collectCandidates(item, indexes).filter((rule) => {
 		const isTransaction =
 			String(rule?.apply_on || "").toLowerCase() === "transaction";
-		return evaluationScope === "transaction" ? isTransaction : !isTransaction;
+		return (
+			(evaluationScope === "transaction" ? isTransaction : !isTransaction) &&
+			matchUom(rule, item)
+		);
 	});
 
 	const pricingRules: AnyRecord[] = [];
