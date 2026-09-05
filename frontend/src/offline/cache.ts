@@ -61,6 +61,7 @@ import { refreshBootstrapSnapshotFromCaches } from "./bootstrapSnapshot";
 import { memory, persist, db, checkDbHealth } from "./db";
 import { emitBootstrapSnapshotUpdated } from "../posapp/utils/bootstrapRuntimeEvents";
 import { finishStartupPhase, startStartupPhase } from "../utils/startupTrace";
+import { itemPriceRepository } from "./repositories";
 
 const normalizeScope = (scope: unknown): string => String(scope || "");
 const hasScope = (scope: unknown): boolean => normalizeScope(scope).length > 0;
@@ -1086,6 +1087,36 @@ export function getCachedPriceListItems(priceList) {
 		return null;
 	} catch (e) {
 		console.error("Failed to get cached price list items", e);
+		return null;
+	}
+}
+
+export async function getCachedItemPriceForUom({
+	priceList,
+	itemCode,
+	uom,
+	customer = null,
+	currency = null,
+	date = null,
+}: {
+	priceList: string;
+	itemCode: string;
+	uom: string;
+	customer?: string | null;
+	currency?: string | null;
+	date?: string | null;
+}) {
+	try {
+		return await itemPriceRepository.findApplicableForItemAndUom({
+			priceList,
+			itemCode,
+			uom,
+			customer,
+			currency,
+			date,
+		});
+	} catch (error) {
+		console.error("Failed to resolve cached UOM Item Price", error);
 		return null;
 	}
 }

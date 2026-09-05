@@ -24,6 +24,9 @@
 				<div :class="['payment-sections', { 'payment-sections--dialog': dialogMode }]">
 					<section class="payment-section payment-section--summary">
 						<div class="payment-section__header">
+							<span class="payment-section__icon"
+								><v-icon icon="mdi-calculator-variant-outline" size="18"
+							/></span>
 							<h3 class="payment-section__title">{{ __("Payment Summary") }}</h3>
 						</div>
 						<PaymentSummary
@@ -66,6 +69,9 @@
 						class="payment-section payment-section--methods"
 					>
 						<div class="payment-section__header">
+							<span class="payment-section__icon"
+								><v-icon icon="mdi-wallet-outline" size="18"
+							/></span>
 							<h3 class="payment-section__title">{{ __("Payment Methods") }}</h3>
 						</div>
 						<PaymentMethods
@@ -118,6 +124,9 @@
 
 					<section class="payment-section payment-section--adjustments">
 						<div class="payment-section__header">
+							<span class="payment-section__icon"
+								><v-icon icon="mdi-receipt-text-outline" size="18"
+							/></span>
 							<h3 class="payment-section__title">{{ __("Redemption and Totals") }}</h3>
 						</div>
 						<PaymentRedemption
@@ -187,6 +196,9 @@
 
 					<section class="payment-section payment-section--settlement">
 						<div class="payment-section__header">
+							<span class="payment-section__icon"
+								><v-icon icon="mdi-credit-card-check-outline" size="18"
+							/></span>
 							<h3 class="payment-section__title">{{ __("Credit and Output") }}</h3>
 						</div>
 						<PaymentOptions
@@ -241,6 +253,9 @@
 
 					<section class="payment-section payment-section--meta">
 						<div class="payment-section__header">
+							<span class="payment-section__icon"
+								><v-icon icon="mdi-account-tie-outline" size="18"
+							/></span>
 							<h3 class="payment-section__title">{{ __("Sales Person and Print") }}</h3>
 						</div>
 						<PaymentSelectionFields
@@ -669,9 +684,8 @@ const netCompanySettlementAmount = computed(() => {
 			toCompanyCurrency(paymentCurrencyContext(doc), doc.rounded_total || doc.grand_total),
 		currency_precision.value,
 	);
-	const giftCardInvoiceAmount = (Array.isArray(giftCardRedemptions.value)
-		? giftCardRedemptions.value
-		: []
+	const giftCardInvoiceAmount = (
+		Array.isArray(giftCardRedemptions.value) ? giftCardRedemptions.value : []
 	).reduce((sum, row) => sum + Number(row?.amount || 0), 0);
 	const coveredCompanyAmount =
 		Number(doc.loyalty_amount || loyalty_amount.value || 0) +
@@ -707,8 +721,7 @@ const {
 	diff_label,
 	change_due,
 	base_settlement,
-} =
-	paymentCalculations;
+} = paymentCalculations;
 
 const {
 	featureEnabled: changeCurrencyEnabled,
@@ -1993,10 +2006,7 @@ const handleSubmitPaymentShortcut = async ({ print = false, amount = null } = {}
 			if (!preferredPayment) {
 				return;
 			}
-			const normalized = await setInvoiceEquivalent(
-				preferredPayment,
-				preferredPayment.amount,
-			);
+			const normalized = await setInvoiceEquivalent(preferredPayment, preferredPayment.amount);
 			if (!normalized) {
 				showMissingPaymentRate(preferredPayment);
 				return;
@@ -2435,6 +2445,9 @@ defineExpose({
 
 .payment-card {
 	padding: var(--pos-space-2);
+	border: 1px solid var(--pos-border-light);
+	background: var(--pos-card-bg) !important;
+	box-shadow: var(--pos-elevation-2);
 }
 
 .payment-card--dialog {
@@ -2475,13 +2488,14 @@ defineExpose({
 }
 
 .payment-section {
-	background: var(--pos-surface-muted);
-	border: 1px solid var(--pos-border-light);
+	background: var(--pos-surface-raised);
+	border: 1px solid var(--pos-border);
 	border-radius: var(--pos-radius-md);
 	padding: var(--pos-space-3);
 	display: flex;
 	flex-direction: column;
 	gap: var(--pos-space-3);
+	box-shadow: var(--pos-elevation-1);
 }
 
 .payment-sections--dialog .payment-section {
@@ -2510,13 +2524,34 @@ defineExpose({
 }
 
 .payment-section--summary {
-	background: linear-gradient(180deg, rgba(var(--v-theme-primary), 0.08) 0%, var(--pos-surface-muted) 100%);
+	border-inline-start: 5px solid var(--pos-primary);
+	background:
+		linear-gradient(
+			90deg,
+			color-mix(in srgb, var(--pos-primary-container) 52%, transparent),
+			transparent 42%
+		),
+		var(--pos-surface-raised);
 }
 
 .payment-section__header {
 	display: flex;
-	flex-direction: column;
-	gap: 0;
+	flex-direction: row;
+	align-items: center;
+	gap: var(--pos-space-2);
+	min-height: 28px;
+}
+
+.payment-section__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	flex: 0 0 30px;
+	border-radius: var(--pos-radius-xs);
+	background: var(--pos-primary-container);
+	color: var(--pos-primary-variant);
 }
 
 .payment-section__subsection {
@@ -2530,7 +2565,7 @@ defineExpose({
 .payment-section__title {
 	margin: 0;
 	font-size: 1rem;
-	font-weight: 700;
+	font-weight: 650;
 	line-height: 1.2;
 	color: var(--pos-text-primary);
 }
@@ -2558,8 +2593,8 @@ defineExpose({
 	position: sticky;
 	bottom: 0;
 	z-index: 8;
-	padding-top: 8px;
-	background: linear-gradient(180deg, rgba(255, 255, 255, 0), var(--pos-surface) 30%);
+	padding: 10px 2px 2px;
+	background: linear-gradient(180deg, transparent, var(--pos-surface) 32%);
 }
 
 .payment-footer--dialog {
@@ -2637,7 +2672,7 @@ defineExpose({
 }
 
 .submit-highlight {
-	box-shadow: 0 0 0 4px rgb(var(--v-theme-primary));
+	box-shadow: 0 0 0 4px var(--pos-focus-ring);
 	transition: box-shadow 0.3s ease-in-out;
 }
 

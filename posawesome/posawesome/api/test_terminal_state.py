@@ -9,6 +9,7 @@ class FakeCache:
     def __init__(self):
         self.values = {}
         self.get_calls = []
+        self.set_calls = []
 
     def get_value(
         self,
@@ -31,6 +32,7 @@ class FakeCache:
 
     def set_value(self, key, value, **kwargs):
         self.values[key] = value
+        self.set_calls.append({"key": key, "value": value, "kwargs": kwargs})
 
 
 class FakeProfile(dict):
@@ -96,10 +98,24 @@ class TestTerminalState(unittest.TestCase):
                 self.profile,
                 "cashier@example.com",
             )
+            writes_before_reload = len(self.cache.set_calls)
             reloaded = terminal_state._read_state("Main POS")
 
         self.assertFalse(activated["locked"])
         self.assertEqual(reloaded["active_cashier"], "cashier@example.com")
+        self.assertEqual(len(self.cache.set_calls), writes_before_reload + 1)
+        self.assertEqual(
+            self.cache.set_calls[-1]["kwargs"].get("expires_in_sec"),
+            terminal_state.TERMINAL_STATE_TTL_SECONDS,
+        )
+
+    def test_missing_state_does_not_create_an_unlockable_cache_entry(self):
+        with patch.object(terminal_state, "frappe", self.fake_frappe):
+            state = terminal_state._read_state("Main POS")
+
+        self.assertTrue(state["locked"])
+        self.assertIsNone(state["active_cashier"])
+        self.assertEqual(self.cache.set_calls, [])
 
     def test_lock_persists_and_blocks_authoritative_cashier_accessor(self):
         with (

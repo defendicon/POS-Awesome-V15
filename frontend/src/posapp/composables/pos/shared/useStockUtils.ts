@@ -1,4 +1,7 @@
-import { isOffline } from "../../../../offline/index";
+import {
+	getCachedItemPriceForUom,
+	isOffline,
+} from "../../../../offline/index";
 import { toSelectedCurrency } from "../../../utils/currencyConversion.js";
 import { getPlcConversionRate } from "../../../utils/erpnextCurrency";
 import { useToastStore } from "../../../stores/toastStore.js";
@@ -135,19 +138,53 @@ export function useStockUtils() {
 			: null;
 		let uomRate: number | null = null;
 		const hasPriceList = priceList !== null && priceList !== undefined;
+		const pricingCustomer =
+			context.customer ||
+			context.invoice_doc?.customer ||
+			context.customer_info?.customer ||
+			"";
+		const pricingCurrency =
+			context.price_list_currency ||
+			context.selected_currency ||
+			context.pos_profile?.currency ||
+			"";
+		const pricingDate =
+			context.posting_date || context.invoice_doc?.posting_date || "";
 		const uomPriceCache: Map<string, number | null> =
 			context._uomPriceCache instanceof Map
 				? context._uomPriceCache
 				: (context._uomPriceCache = new Map());
-		const uomPriceCacheKey = `${hasPriceList ? String(priceList) : ""}::${String(item.item_code || "")}::${String(new_uom.uom || "")}`;
+		const uomPriceCacheKey = [
+			hasPriceList ? String(priceList) : "",
+			String(item.item_code || ""),
+			String(new_uom.uom || ""),
+			String(pricingCustomer),
+			String(pricingCurrency),
+			String(pricingDate),
+		].join("::");
 
 		if (uomPriceCache.has(uomPriceCacheKey)) {
 			uomRate = uomPriceCache.get(uomPriceCacheKey) ?? null;
 		}
 
-		if (priceList && context.getCachedPriceListItems) {
+		if (uomRate === null && priceList && isOffline()) {
+			const cachedPrice = await getCachedItemPriceForUom({
+				priceList: String(priceList),
+				itemCode: String(item.item_code || ""),
+				uom: String(new_uom.uom || ""),
+				customer: pricingCustomer || null,
+				currency: pricingCurrency || null,
+				date: pricingDate || null,
+			});
+			if (cachedPrice) {
+				uomRate = cachedPrice.price_list_rate ?? null;
+				uomPriceCache.set(uomPriceCacheKey, uomRate);
+			}
+		}
+
+		if (uomRate === null && priceList && context.getCachedPriceListItems) {
 			const cached = context.getCachedPriceListItems(priceList) || [];
-			const match = cached.find(
+			const match = Array.isArray(cached) && cached.find(
 				(p) => p.item_code === item.item_code && p.uom === new_uom.uom,
 			);
 			if (match) {
@@ -169,7 +206,7 @@ export function useStockUtils() {
 						uom: new_uom.uom,
 					},
 				});
-				if (r.message) {
+				if (r.message !== undefined && r.message !== null) {
 					uomRate = parseFloat(r.message);
 					uomPriceCache.set(uomPriceCacheKey, uomRate);
 				} else {
@@ -181,20 +218,11 @@ export function useStockUtils() {
 			}
 		}
 
-		console.log("[useStockUtils] calcUom progress", {
-			item: item.item_code,
-			requestedUom: value,
-			foundUom: new_uom?.uom,
-			cf: item.conversion_factor,
-			uomRate,
-			token: activeUomCalcToken
-		});
-
 		if (activeUomCalcToken !== item._uom_calc_token) {
 			return;
 		}
 
-		if (uomRate) {
+		if (uomRate !== null) {
 			item._manual_rate_set = true;
 			item._manual_rate_set_from_uom = true;
 
@@ -228,11 +256,22 @@ export function useStockUtils() {
 						// offer.rate is in Price List Currency, convert to Company Currency
 						const offerRate = offer.rate * conversionFactor;
 						base_rate = context.flt(
-							offerRate * item.conversion_factor,
+							Math.min(
+								offerRate * item.conversion_factor,
+								base_price,
+							),
 							context.currency_precision,
 						);
-						base_price = base_rate;
-						item.discount_percentage = 0;
+						base_discount = context.flt(
+							Math.max(base_price - base_rate, 0),
+							context.currency_precision,
+						);
+						item.discount_percentage = base_price
+							? context.flt(
+									(base_discount / base_price) * 100,
+									context.currency_precision,
+								)
+							: 0;
 					} else if (offer.discount_type === "Discount Percentage") {
 						item.discount_percentage = offer.discount_percentage;
 						// uomRate is in Price List Currency, convert to Company Currency using base_price calculated above
@@ -250,7 +289,10 @@ export function useStockUtils() {
 							offer.discount_amount * conversionFactor;
 						item.discount_percentage = 0;
 						base_discount = context.flt(
-							offerDiscount * item.conversion_factor,
+							Math.min(
+								offerDiscount * item.conversion_factor,
+								base_price,
+							),
 							context.currency_precision,
 						);
 						base_rate = context.flt(
@@ -275,15 +317,10 @@ export function useStockUtils() {
 
 			if (context.calc_stock_qty) context.calc_stock_qty(item, item.qty);
 			refreshInvoiceTotals(context);
+			if (context.schedulePricingRuleApplication && !item.posa_offer_applied) {
+				context.schedulePricingRuleApplication();
+			}
 			if (context.forceUpdate) context.forceUpdate();
-
-			console.log("[useStockUtils] calcUom DONE (specific price)", {
-				item: item.item_code,
-				rate: item.rate,
-				price_list_rate: item.price_list_rate,
-				base_rate: item.base_rate,
-				base_price_list_rate: item.base_price_list_rate,
-			});
 			return;
 		}
 
@@ -440,6 +477,9 @@ export function useStockUtils() {
 		// Update item details
 		if (context.calc_stock_qty) context.calc_stock_qty(item, item.qty);
 		refreshInvoiceTotals(context);
+		if (context.schedulePricingRuleApplication && !item.posa_offer_applied) {
+			context.schedulePricingRuleApplication();
+		}
 		if (context.forceUpdate) context.forceUpdate();
 
 	};

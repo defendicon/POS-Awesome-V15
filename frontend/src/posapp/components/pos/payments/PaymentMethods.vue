@@ -4,6 +4,8 @@
 			v-for="(payment, paymentIndex) in payments"
 			:key="payment.name"
 			class="payment-method-card"
+			:class="{ 'payment-method-card--active': Number(payment.amount || 0) !== 0 }"
+			:data-state="Number(payment.amount || 0) !== 0 ? 'active' : 'idle'"
 			:data-payment-shortcut-index="
 				showKeyboardShortcuts && paymentIndex < 9 ? paymentIndex + 1 : undefined
 			"
@@ -53,11 +55,7 @@
 			</div>
 
 			<v-row class="payments ma-0" dense>
-				<v-col
-					v-if="!isMpesaC2bPayment(payment) && multiCurrencyEnabled"
-					cols="12"
-					md="3"
-				>
+				<v-col v-if="!isMpesaC2bPayment(payment) && multiCurrencyEnabled" cols="12" md="3">
 					<v-select
 						density="compact"
 						variant="solo"
@@ -94,8 +92,8 @@
 							{{ __("Exchange rate unavailable") }}
 						</span>
 						<span v-else>
-							{{ __("Invoice equivalent") }}:
-							{{ currencySymbol(currency) }}{{ formatCurrency(payment.amount) }}
+							{{ __("Invoice equivalent") }}: {{ currencySymbol(currency)
+							}}{{ formatCurrency(payment.amount) }}
 						</span>
 					</div>
 				</v-col>
@@ -241,9 +239,7 @@ const emit = defineEmits([
 ]);
 
 const remainderLockTitle = (payment) =>
-	payment?._posa_remainder_locked
-		? __("Unlock automatic remainder")
-		: __("Lock automatic remainder");
+	payment?._posa_remainder_locked ? __("Unlock automatic remainder") : __("Lock automatic remainder");
 
 const handlePrimaryAction = (payment) => {
 	if (props.isGiftCardPayment(payment)) {
@@ -266,13 +262,44 @@ const blurTarget = (event) => {
 }
 
 .payment-method-card {
+	position: relative;
 	background: var(--pos-surface-raised);
-	border: 1px solid var(--pos-border-light);
+	border: 1px solid var(--pos-border);
 	border-radius: var(--pos-radius-md);
 	padding: var(--pos-space-3);
 	display: flex;
 	flex-direction: column;
 	gap: var(--pos-space-3);
+	overflow: hidden;
+	transition:
+		border-color 140ms ease,
+		box-shadow 140ms ease,
+		background-color 140ms ease;
+}
+
+.payment-method-card::before {
+	content: "";
+	position: absolute;
+	inset-block: 0;
+	inset-inline-start: 0;
+	width: 4px;
+	background: transparent;
+}
+
+.payment-method-card--active {
+	border-color: color-mix(in srgb, var(--pos-primary) 60%, var(--pos-border));
+	background:
+		linear-gradient(
+			90deg,
+			color-mix(in srgb, var(--pos-primary-container) 38%, transparent),
+			transparent 52%
+		),
+		var(--pos-surface-raised);
+	box-shadow: var(--pos-elevation-1);
+}
+
+.payment-method-card--active::before {
+	background: var(--pos-primary);
 }
 
 .payment-method-card__header {
@@ -285,7 +312,7 @@ const blurTarget = (event) => {
 .payment-method-card__label {
 	margin: 0 0 var(--pos-space-1);
 	font-size: 0.72rem;
-	font-weight: 700;
+	font-weight: 750;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
 	color: var(--pos-text-secondary);
@@ -295,7 +322,7 @@ const blurTarget = (event) => {
 	margin: 0;
 	font-size: 1rem;
 	line-height: 1.2;
-	font-weight: 700;
+	font-weight: 650;
 	color: var(--pos-text-primary);
 }
 
@@ -310,16 +337,18 @@ const blurTarget = (event) => {
 .payment-method-card__badge {
 	padding: 6px 10px;
 	border-radius: 999px;
-	background: #174a70;
-	color: #ffffff;
+	background: var(--pos-primary-container);
+	border: 1px solid color-mix(in srgb, var(--pos-primary) 34%, var(--pos-border));
+	color: var(--pos-primary-variant);
 	font-size: 0.78rem;
 	font-weight: 700;
 	white-space: nowrap;
 }
 
 .payment-method-card__badge--refund {
-	background: #9f1239;
-	color: #ffffff;
+	background: var(--pos-error-container);
+	border-color: color-mix(in srgb, var(--pos-error) 34%, var(--pos-border));
+	color: var(--pos-error);
 }
 
 .payment-method-card__shortcut {
@@ -352,7 +381,7 @@ const blurTarget = (event) => {
 		box-shadow 0.18s ease,
 		background-color 0.18s ease,
 		transform 0.18s ease !important;
-	background-color: #0b5cab !important;
+	background-color: var(--pos-action-primary) !important;
 	color: #ffffff !important;
 }
 
@@ -361,8 +390,9 @@ const blurTarget = (event) => {
 }
 
 .payment-method-card__badge--auto {
-	background: #0f766e;
-	color: #ffffff;
+	background: var(--pos-success-container);
+	border-color: color-mix(in srgb, var(--pos-success) 34%, var(--pos-border));
+	color: var(--pos-success);
 }
 
 .payment-currency-equivalent {
@@ -382,7 +412,7 @@ const blurTarget = (event) => {
 .payment-method-action-btn:active {
 	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18) !important;
 	transform: translateY(-1px);
-	background-color: #084d96 !important;
+	background-color: var(--pos-action-primary-hover) !important;
 }
 
 .payment-method-action-btn:active {
@@ -400,7 +430,7 @@ const blurTarget = (event) => {
 }
 
 .payment-method-action-btn--success {
-	background: #047857 !important;
+	background: var(--pos-action-pay) !important;
 	color: #ffffff !important;
 }
 
@@ -408,11 +438,11 @@ const blurTarget = (event) => {
 .payment-method-action-btn--success:focus,
 .payment-method-action-btn--success:focus-visible,
 .payment-method-action-btn--success:active {
-	background-color: #065f46 !important;
+	background-color: var(--pos-action-pay-hover) !important;
 }
 
 .payment-method-action-btn--secondary {
-	background: #047857 !important;
+	background: var(--pos-action-pay) !important;
 	color: #ffffff !important;
 }
 
@@ -420,7 +450,7 @@ const blurTarget = (event) => {
 .payment-method-action-btn--secondary:focus,
 .payment-method-action-btn--secondary:focus-visible,
 .payment-method-action-btn--secondary:active {
-	background-color: #065f46 !important;
+	background-color: var(--pos-action-pay-hover) !important;
 }
 
 .payment-denominations {
@@ -430,9 +460,19 @@ const blurTarget = (event) => {
 }
 
 .payment-denominations__btn {
+	min-width: 72px;
+	border: 1px solid var(--pos-border);
 	border-radius: var(--pos-radius-sm);
+	background: var(--pos-surface-muted) !important;
+	color: var(--pos-text-primary) !important;
 	text-transform: none;
-	font-weight: 600;
+	font-weight: 650;
+	font-variant-numeric: tabular-nums;
+}
+
+.payment-denominations__btn:hover {
+	border-color: var(--pos-primary);
+	background: var(--pos-primary-container) !important;
 }
 
 @media (max-width: 768px) {

@@ -8,6 +8,7 @@
 					size="large"
 					color="primary"
 					variant="flat"
+					prepend-icon="mdi-check-circle-outline"
 					class="payment-submit-btn payment-footer-btn"
 					data-pos-keyboard-target="payment-submit"
 					data-testid="payment-submit"
@@ -29,6 +30,7 @@
 					size="large"
 					color="success"
 					variant="flat"
+					prepend-icon="mdi-printer-check"
 					class="payment-submit-print-btn payment-footer-btn"
 					data-pos-keyboard-target="payment-submit-print"
 					data-testid="payment-submit-print"
@@ -50,7 +52,8 @@
 					block
 					size="large"
 					color="error"
-					variant="flat"
+					variant="tonal"
+					prepend-icon="mdi-close-circle-outline"
 					class="mt-2 pa-1 payment-cancel-btn payment-footer-btn"
 					data-pos-keyboard-target="payment-cancel"
 					data-testid="payment-cancel"
@@ -84,7 +87,7 @@ const __ = window.__;
 
 .compact :deep(.v-btn),
 :deep(.compact .v-btn) {
-	min-height: 42px;
+	min-height: var(--pos-control-height);
 }
 
 .payment-footer-btn {
@@ -94,7 +97,10 @@ const __ = window.__;
 		background-color 0.18s ease,
 		transform 0.18s ease !important;
 	color: #ffffff !important;
-	min-height: 48px !important;
+	min-height: 50px !important;
+	border-radius: var(--pos-radius-sm) !important;
+	font-weight: 700 !important;
+	letter-spacing: 0.01em !important;
 }
 
 .payment-footer-btn__shortcut {
@@ -112,15 +118,18 @@ const __ = window.__;
 }
 
 .payment-submit-btn {
-	background-color: #0b5cab !important;
+	background-color: var(--pos-action-primary) !important;
 }
 
 .payment-submit-print-btn {
-	background-color: #047857 !important;
+	background-color: var(--pos-action-pay) !important;
 }
 
 .payment-cancel-btn {
-	background-color: #b91c1c !important;
+	border: 1px solid color-mix(in srgb, var(--pos-error) 48%, var(--pos-border)) !important;
+	background-color: var(--pos-error-container) !important;
+	color: var(--pos-error) !important;
+	box-shadow: none !important;
 }
 
 .payment-footer-btn:hover,
@@ -135,21 +144,22 @@ const __ = window.__;
 .payment-submit-btn:focus,
 .payment-submit-btn:focus-visible,
 .payment-submit-btn:active {
-	background-color: #084d96 !important;
+	background-color: var(--pos-action-primary-hover) !important;
 }
 
 .payment-submit-print-btn:hover,
 .payment-submit-print-btn:focus,
 .payment-submit-print-btn:focus-visible,
 .payment-submit-print-btn:active {
-	background-color: #065f46 !important;
+	background-color: var(--pos-action-pay-hover) !important;
 }
 
 .payment-cancel-btn:hover,
 .payment-cancel-btn:focus,
 .payment-cancel-btn:focus-visible,
 .payment-cancel-btn:active {
-	background-color: #991b1b !important;
+	border-color: var(--pos-error) !important;
+	background-color: color-mix(in srgb, var(--pos-error-container) 82%, var(--pos-error)) !important;
 }
 
 .payment-action-col {
@@ -170,6 +180,11 @@ const __ = window.__;
 	color: #ffffff !important;
 }
 
+:deep(.payment-cancel-btn .v-btn__content),
+:deep(.payment-cancel-btn .v-icon) {
+	color: var(--pos-error) !important;
+}
+
 @media (max-width: 768px) {
 	.cards {
 		margin-top: 0 !important;
@@ -185,7 +200,7 @@ const __ = window.__;
 	}
 
 	:deep(.payment-footer-btn.v-btn) {
-		min-height: 38px !important;
+		min-height: 46px !important;
 	}
 
 	:deep(.payment-footer-btn .v-btn__content) {
@@ -200,7 +215,7 @@ const __ = window.__;
 	}
 
 	:deep(.payment-footer-btn.v-btn) {
-		min-height: 34px !important;
+		min-height: 46px !important;
 	}
 
 	:deep(.payment-footer-btn .v-btn__content) {
