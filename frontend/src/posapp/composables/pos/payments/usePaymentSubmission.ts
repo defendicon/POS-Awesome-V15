@@ -727,36 +727,8 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			throw new Error(__("Please enter payment amount"));
 		}
 
-		// 3. Validate partial payments / cash payments
+		// 3. Validate partial payments
 		if (!isCreditSale && !doc.is_return) {
-			let has_cash_payment = false;
-			let cash_amount = 0;
-			if (doc.payments) {
-				doc.payments.forEach((payment: any) => {
-					if (
-						payment.mode_of_payment.toLowerCase().includes("cash")
-					) {
-						has_cash_payment = true;
-						cash_amount = formatFloat(payment.amount, prec);
-					}
-				});
-			}
-
-			if (has_cash_payment && cash_amount > 0) {
-				if (
-					!profile.posa_allow_partial_payment &&
-					formatFloat(cash_amount + writeOffAmount, prec) <
-						invoice_total &&
-					invoice_total > 0
-				) {
-					throw new Error(
-						__(
-							"Cash payment cannot be less than invoice total when partial payment is not allowed",
-						),
-					);
-				}
-			}
-
 			if (
 				!profile.posa_allow_partial_payment &&
 				effective_total_payments < invoice_total &&
