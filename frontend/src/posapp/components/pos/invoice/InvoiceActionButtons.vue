@@ -134,11 +134,10 @@
 		<v-col cols="12" sm="6">
 			<v-btn
 				block
-				color="accent"
-				theme="dark"
+				variant="flat"
 				prepend-icon="mdi-content-save"
 				@click="$emit('save-and-clear')"
-				class="summary-btn"
+				class="summary-btn summary-btn--utility summary-btn--save"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-save-clear"
 				:loading="saveLoading"
@@ -149,11 +148,10 @@
 		<v-col cols="12" sm="6">
 			<v-btn
 				block
-				color="warning"
-				theme="dark"
+				variant="flat"
 				prepend-icon="mdi-tray-full"
 				@click="$emit('load-drafts')"
-				class="white-text-btn summary-btn"
+				class="summary-btn summary-btn--utility summary-btn--drafts"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-drafts"
 				:loading="loadDraftsLoading"
@@ -164,11 +162,10 @@
 		<v-col cols="12" sm="6" v-if="pos_profile.custom_allow_select_sales_order == 1">
 			<v-btn
 				block
-				color="info"
-				theme="dark"
+				variant="flat"
 				prepend-icon="mdi-book-search"
 				@click="$emit('select-order')"
-				class="summary-btn"
+				class="summary-btn summary-btn--utility summary-btn--order"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-select-order"
 				:loading="selectOrderLoading"
@@ -179,11 +176,10 @@
 		<v-col cols="12" sm="6">
 			<v-btn
 				block
-				color="deep-purple"
-				theme="dark"
+				variant="flat"
 				prepend-icon="mdi-folder-search-outline"
 				@click="$emit('open-invoice-management')"
-				class="summary-btn"
+				class="summary-btn summary-btn--utility summary-btn--management"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-management"
 				:loading="invoiceManagementLoading"
@@ -195,10 +191,10 @@
 			<v-btn
 				block
 				color="error"
-				theme="dark"
+				variant="flat"
 				prepend-icon="mdi-close-circle"
 				@click="$emit('cancel-sale')"
-				class="summary-btn"
+				class="summary-btn summary-btn--danger"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-cancel-sale"
 				:loading="cancelLoading"
@@ -210,11 +206,10 @@
 		<v-col cols="12" sm="6" v-if="pos_profile.posa_allow_return == 1">
 			<v-btn
 				block
-				color="secondary"
-				theme="dark"
+				variant="flat"
 				prepend-icon="mdi-backup-restore"
 				@click="$emit('open-returns')"
-				class="summary-btn"
+				class="summary-btn summary-btn--utility summary-btn--return"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-returns"
 				:loading="returnsLoading"
@@ -225,11 +220,10 @@
 		<v-col cols="12" sm="6" v-if="pos_profile.posa_allow_print_draft_invoices">
 			<v-btn
 				block
-				color="primary"
-				theme="dark"
+				variant="flat"
 				prepend-icon="mdi-printer"
 				@click="$emit('print-draft')"
-				class="summary-btn"
+				class="summary-btn summary-btn--utility summary-btn--print"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-print-draft"
 				:loading="printLoading"
@@ -240,11 +234,10 @@
 		<v-col cols="12" sm="6" v-if="showCustomerDisplayButton">
 			<v-btn
 				block
-				color="indigo"
-				theme="dark"
+				variant="flat"
 				prepend-icon="mdi-monitor"
 				@click="$emit('open-customer-display')"
-				class="summary-btn"
+				class="summary-btn summary-btn--utility summary-btn--display"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-customer-display"
 				:loading="customerDisplayLoading"
@@ -256,7 +249,6 @@
 			<v-btn
 				block
 				color="success"
-				theme="dark"
 				size="large"
 				prepend-icon="mdi-credit-card"
 				@click="$emit('show-payment')"
@@ -389,10 +381,16 @@ const showMoreActions = computed(
 
 /* Enhanced button styling with better performance */
 .summary-btn {
-	transition: all 0.2s ease !important;
+	transition:
+		transform 140ms ease,
+		box-shadow 140ms ease,
+		border-color 140ms ease,
+		background-color 140ms ease !important;
 	position: relative;
 	overflow: hidden;
-	min-height: 46px !important;
+	min-height: var(--pos-control-height) !important;
+	border-radius: var(--pos-radius-sm) !important;
+	font-weight: 650 !important;
 	text-transform: none !important;
 }
 
@@ -403,25 +401,92 @@ const showMoreActions = computed(
 
 .summary-btn:hover {
 	transform: translateY(-1px);
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
 }
 
 .summary-btn:active {
 	transform: translateY(0);
 }
 
+.summary-btn--utility {
+	--summary-action-bg: var(--pos-action-primary);
+	--summary-action-hover: var(--pos-action-primary-hover);
+	border: 1px solid var(--summary-action-hover) !important;
+	background: var(--summary-action-bg) !important;
+	color: #ffffff !important;
+	box-shadow: 0 4px 10px color-mix(in srgb, var(--summary-action-bg) 18%, transparent) !important;
+}
+
+.summary-btn--utility:hover {
+	border-color: var(--summary-action-hover) !important;
+	background: var(--summary-action-hover) !important;
+	color: #ffffff !important;
+	box-shadow: 0 7px 15px color-mix(in srgb, var(--summary-action-bg) 28%, transparent) !important;
+}
+
+.summary-btn--save {
+	--summary-action-bg: #1976d2;
+	--summary-action-hover: #125ca7;
+}
+
+.summary-btn--drafts {
+	--summary-action-bg: #c45100;
+	--summary-action-hover: #a84400;
+}
+
+.summary-btn--order {
+	--summary-action-bg: #00796b;
+	--summary-action-hover: #005f54;
+}
+
+.summary-btn--management {
+	--summary-action-bg: #7b1fa2;
+	--summary-action-hover: #62177f;
+}
+
+.summary-btn--return {
+	--summary-action-bg: #2e7d32;
+	--summary-action-hover: #246328;
+}
+
+.summary-btn--print {
+	--summary-action-bg: #3f51b5;
+	--summary-action-hover: #32408f;
+}
+
+.summary-btn--display {
+	--summary-action-bg: #0277bd;
+	--summary-action-hover: #015f98;
+}
+
+.summary-btn--danger {
+	border: 1px solid color-mix(in srgb, var(--pos-error) 46%, var(--pos-border)) !important;
+	background: var(--pos-error-container) !important;
+	color: var(--pos-error) !important;
+	box-shadow: none !important;
+}
+
+.summary-btn--danger:hover {
+	border-color: var(--pos-error) !important;
+	background: color-mix(in srgb, var(--pos-error-container) 82%, var(--pos-error)) !important;
+	box-shadow: var(--pos-elevation-1) !important;
+}
+
 /* Special styling for the PAY button */
 .pay-btn {
-	font-weight: 600 !important;
-	font-size: 1.1rem !important;
-	background: linear-gradient(135deg, #4caf50, #45a049) !important;
-	box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3) !important;
+	min-height: 52px !important;
+	border: 1px solid var(--pos-action-pay-hover) !important;
+	font-weight: 750 !important;
+	font-size: 1.05rem !important;
+	letter-spacing: 0.02em !important;
+	background: var(--pos-action-pay) !important;
+	color: #ffffff !important;
+	box-shadow: 0 8px 18px color-mix(in srgb, var(--pos-action-pay) 28%, transparent) !important;
 }
 
 .pay-btn:hover {
-	background: linear-gradient(135deg, #45a049, #3d8b40) !important;
-	box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4) !important;
-	transform: translateY(-2px);
+	background: var(--pos-action-pay-hover) !important;
+	box-shadow: 0 10px 22px color-mix(in srgb, var(--pos-action-pay) 36%, transparent) !important;
+	transform: translateY(-1px);
 }
 
 /* Responsive optimizations */
@@ -429,7 +494,7 @@ const showMoreActions = computed(
 	.summary-btn {
 		font-size: 0.8rem !important;
 		padding: 4px 8px !important;
-		min-height: 42px !important;
+		min-height: var(--pos-control-height) !important;
 	}
 
 	.pay-btn {
@@ -442,12 +507,12 @@ const showMoreActions = computed(
 	.summary-btn {
 		font-size: 0.74rem !important;
 		padding: 3px 6px !important;
-		min-height: 34px !important;
+		min-height: var(--pos-control-height) !important;
 	}
 
 	.pay-btn {
 		font-size: 0.85rem !important;
-		min-height: 40px !important;
+		min-height: 50px !important;
 	}
 }
 

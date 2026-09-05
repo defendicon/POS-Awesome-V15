@@ -792,7 +792,8 @@ defineExpose({
 	position: sticky;
 	bottom: 0;
 	z-index: 9;
-	box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.08);
+	border: 1px solid var(--pos-border-light);
+	box-shadow: var(--pos-elevation-2);
 }
 
 .sticky-summary-card--dock-safe {
@@ -804,16 +805,25 @@ defineExpose({
 }
 
 .summary-hero {
+	position: relative;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 14px;
-	padding: 14px 16px;
-	border-radius: 20px;
-	background:
-		linear-gradient(135deg, rgba(var(--v-theme-primary), 0.12), rgba(var(--v-theme-success), 0.08)),
-		var(--pos-surface-muted);
-	border: 1px solid rgba(var(--v-theme-primary), 0.12);
+	padding: 15px 16px 15px 20px;
+	border-radius: var(--pos-radius-md);
+	background: var(--pos-surface-muted);
+	border: 1px solid var(--pos-border-light);
+	overflow: hidden;
+}
+
+.summary-hero::before {
+	content: "";
+	position: absolute;
+	inset-block: 0;
+	inset-inline-start: 0;
+	width: 5px;
+	background: var(--pos-primary);
 }
 
 .summary-hero__copy {
@@ -825,15 +835,18 @@ defineExpose({
 
 .summary-hero__eyebrow {
 	font-size: 0.72rem;
-	font-weight: 700;
+	font-weight: 750;
 	text-transform: uppercase;
-	letter-spacing: 0;
+	letter-spacing: 0.08em;
 	color: var(--pos-text-secondary);
 }
 
 .summary-hero__amount {
-	font-size: clamp(1.2rem, 2vw, 1.8rem);
+	font-family: var(--pos-font-display);
+	font-size: clamp(1.35rem, 2vw, 1.9rem);
+	font-weight: 750;
 	line-height: 1.1;
+	font-variant-numeric: tabular-nums;
 	color: var(--pos-text-primary);
 }
 
@@ -855,12 +868,11 @@ defineExpose({
 }
 
 .summary-field {
-	transition: all 0.2s ease;
+	transition: box-shadow 140ms ease;
 }
 
 .summary-field:hover {
-	transform: translateY(-1px);
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	box-shadow: 0 0 0 1px var(--pos-border);
 }
 
 .summary-field--alert {

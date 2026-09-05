@@ -109,6 +109,7 @@ describe("invoice outbox sync resource", () => {
 
 		expect(callOfflineSyncMethod).toHaveBeenCalledTimes(1);
 		expect(await getPendingInvoiceOutboxCount()).toBe(0);
+		expect(getPendingOfflineInvoiceCount()).toBe(0);
 		expect(await getInvoiceOutboxRows({ includeTerminal: true })).toEqual([
 			expect.objectContaining({
 				status: "acknowledged",
