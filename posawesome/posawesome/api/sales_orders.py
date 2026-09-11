@@ -29,14 +29,23 @@ def search_orders(company, currency, order_name=None):
     orders_list = frappe.get_list(
         "Sales Order",
         filters=filters,
-        fields=["name"],
+        fields=[
+            "name",
+            "transaction_date",
+            "customer",
+            "customer_name",
+            "currency",
+            "grand_total",
+            "status",
+            "docstatus",
+            "owner",
+            "modified",
+            "modified_by",
+        ],
         limit_page_length=0,
-        order_by="customer",
+        order_by="modified desc",
     )
-    data = []
-    for order in orders_list:
-        data.append(frappe.get_doc("Sales Order", order["name"]))
-    return data
+    return orders_list
 
 
 def _map_delivery_dates(data):

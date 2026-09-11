@@ -81,7 +81,7 @@
 							<div class="invoice-tab-label">
 								<span>{{ __("History") }}</span>
 								<v-chip size="x-small" variant="flat" color="primary">{{
-									filteredHistoryInvoices.length
+									tabCountLabel("history", filteredHistoryInvoices.length)
 								}}</v-chip>
 							</div>
 						</v-tab>
@@ -89,7 +89,7 @@
 							<div class="invoice-tab-label">
 								<span>{{ __("Unpaid") }}</span>
 								<v-chip size="x-small" variant="flat" color="warning">{{
-									filteredUnpaidInvoices.length
+									tabCountLabel("partial", filteredUnpaidInvoices.length)
 								}}</v-chip>
 							</div>
 						</v-tab>
@@ -97,7 +97,7 @@
 							<div class="invoice-tab-label">
 								<span>{{ __("Drafts") }}</span>
 								<v-chip size="x-small" variant="flat" color="secondary">{{
-									filteredDraftInvoices.length
+									tabCountLabel("drafts", filteredDraftInvoices.length)
 								}}</v-chip>
 							</div>
 						</v-tab>
@@ -105,7 +105,7 @@
 							<div class="invoice-tab-label">
 								<span>{{ __("Returns") }}</span>
 								<v-chip size="x-small" variant="flat" color="error">{{
-									filteredReturnInvoices.length
+									tabCountLabel("returns", filteredReturnInvoices.length)
 								}}</v-chip>
 							</div>
 						</v-tab>
@@ -137,23 +137,16 @@
 									:items="historyStatusItems"
 									:label="__('Status')"
 								/>
-								<v-text-field
-									v-model="historyDateFrom"
-									type="date"
-									class="pos-themed-input"
-									variant="outlined"
-									density="compact"
-									hide-details
-									:label="__('From Date')"
-								/>
-								<v-text-field
-									v-model="historyDateTo"
-									type="date"
-									class="pos-themed-input"
-									variant="outlined"
-									density="compact"
-									hide-details
-									:label="__('To Date')"
+								<DateRangeFilter
+									v-model:from-date="historyDateFrom"
+									v-model:to-date="historyDateTo"
+									:placeholder="__('Filter by posting date')"
+									:aria-label="__('History date range')"
+									:preset-label="__('Quick date ranges')"
+									:today-label="__('Today')"
+									:seven-days-label="__('7 days')"
+									:thirty-days-label="__('30 days')"
+									:clear-label="__('Clear')"
 								/>
 								<v-btn
 									class="history-repair-toggle"
@@ -173,6 +166,15 @@
 									>
 										{{ historyRepairCandidateCount }}
 									</v-chip>
+								</v-btn>
+								<v-btn
+									v-if="hasHistoryFilters"
+									variant="text"
+									color="error"
+									prepend-icon="mdi-filter-remove-outline"
+									@click="resetHistoryFilters"
+								>
+									{{ __("Reset filters") }}
 								</v-btn>
 							</div>
 
@@ -551,24 +553,27 @@
 									:items="partialStatusItems"
 									:label="__('Payment Status')"
 								/>
-								<v-text-field
-									v-model="partialDateFrom"
-									type="date"
-									class="pos-themed-input"
-									variant="outlined"
-									density="compact"
-									hide-details
-									:label="__('From Date')"
+								<DateRangeFilter
+									v-model:from-date="partialDateFrom"
+									v-model:to-date="partialDateTo"
+									color="warning"
+									:placeholder="__('Filter by posting date')"
+									:aria-label="__('Unpaid invoice date range')"
+									:preset-label="__('Quick date ranges')"
+									:today-label="__('Today')"
+									:seven-days-label="__('7 days')"
+									:thirty-days-label="__('30 days')"
+									:clear-label="__('Clear')"
 								/>
-								<v-text-field
-									v-model="partialDateTo"
-									type="date"
-									class="pos-themed-input"
-									variant="outlined"
-									density="compact"
-									hide-details
-									:label="__('To Date')"
-								/>
+								<v-btn
+									v-if="hasPartialFilters"
+									variant="text"
+									color="error"
+									prepend-icon="mdi-filter-remove-outline"
+									@click="resetPartialFilters"
+								>
+									{{ __("Reset filters") }}
+								</v-btn>
 							</div>
 
 							<div class="status-strip mb-4">
@@ -963,24 +968,27 @@
 									prepend-inner-icon="mdi-magnify"
 									:label="__(currentDraftSourceOption.searchLabel)"
 								/>
-								<v-text-field
-									v-model="draftDateFrom"
-									type="date"
-									class="pos-themed-input"
-									variant="outlined"
-									density="compact"
-									hide-details
-									:label="__('From Date')"
+								<DateRangeFilter
+									v-model:from-date="draftDateFrom"
+									v-model:to-date="draftDateTo"
+									color="secondary"
+									:placeholder="__('Filter by document date')"
+									:aria-label="__('Draft document date range')"
+									:preset-label="__('Quick date ranges')"
+									:today-label="__('Today')"
+									:seven-days-label="__('7 days')"
+									:thirty-days-label="__('30 days')"
+									:clear-label="__('Clear')"
 								/>
-								<v-text-field
-									v-model="draftDateTo"
-									type="date"
-									class="pos-themed-input"
-									variant="outlined"
-									density="compact"
-									hide-details
-									:label="__('To Date')"
-								/>
+								<v-btn
+									v-if="hasDraftFilters"
+									variant="text"
+									color="error"
+									prepend-icon="mdi-filter-remove-outline"
+									@click="resetDraftFilters"
+								>
+									{{ __("Reset filters") }}
+								</v-btn>
 							</div>
 
 							<div v-if="loading && activeTab === 'drafts'" class="tab-loader">
@@ -1162,24 +1170,27 @@
 									prepend-inner-icon="mdi-magnify"
 									:label="__('Search return invoices or customers')"
 								/>
-								<v-text-field
-									v-model="returnDateFrom"
-									type="date"
-									class="pos-themed-input"
-									variant="outlined"
-									density="compact"
-									hide-details
-									:label="__('From Date')"
+								<DateRangeFilter
+									v-model:from-date="returnDateFrom"
+									v-model:to-date="returnDateTo"
+									color="error"
+									:placeholder="__('Filter by return date')"
+									:aria-label="__('Return invoice date range')"
+									:preset-label="__('Quick date ranges')"
+									:today-label="__('Today')"
+									:seven-days-label="__('7 days')"
+									:thirty-days-label="__('30 days')"
+									:clear-label="__('Clear')"
 								/>
-								<v-text-field
-									v-model="returnDateTo"
-									type="date"
-									class="pos-themed-input"
-									variant="outlined"
-									density="compact"
-									hide-details
-									:label="__('To Date')"
-								/>
+								<v-btn
+									v-if="hasReturnFilters"
+									variant="text"
+									color="error"
+									prepend-icon="mdi-filter-remove-outline"
+									@click="resetReturnFilters"
+								>
+									{{ __("Reset filters") }}
+								</v-btn>
 							</div>
 
 							<div v-if="loading && activeTab === 'returns'" class="tab-loader">
@@ -1901,6 +1912,7 @@ import {
 } from "../../../services/documentPrint";
 import { isOffline } from "../../../../offline/index";
 import { buildInvoicePdfUrl, shouldDownloadPdfForShareError } from "../../../utils/invoiceSharing";
+import DateRangeFilter from "../shared/DateRangeFilter.vue";
 import DocumentSourceSelector from "../shared/DocumentSourceSelector.vue";
 import {
 	canDeleteDocumentSourceRecord,
@@ -1921,6 +1933,7 @@ const TAB_PAGE_SIZE = 25;
 export default {
 	mixins: [format],
 	components: {
+		DateRangeFilter,
 		DocumentSourceSelector,
 	},
 	setup() {
@@ -1967,6 +1980,13 @@ export default {
 		activeTab: "history",
 		viewMode: "card",
 		loading: false,
+		loadingTab: null,
+		loadedTabs: {
+			history: false,
+			partial: false,
+			drafts: false,
+			returns: false,
+		},
 		pageSize: TAB_PAGE_SIZE,
 		tabPages: {
 			history: 1,
@@ -2094,6 +2114,29 @@ export default {
 		},
 		canDeleteActiveDraftSource() {
 			return canDeleteDocumentSourceRecord(this.currentDraftSource);
+		},
+		hasHistoryFilters() {
+			return Boolean(
+				this.historySearch ||
+					this.historyStatus !== "All" ||
+					this.historyDateFrom ||
+					this.historyDateTo ||
+					this.historyShowRepairCandidatesOnly,
+			);
+		},
+		hasPartialFilters() {
+			return Boolean(
+				this.partialSearch ||
+					this.partialStatus !== "All" ||
+					this.partialDateFrom ||
+					this.partialDateTo,
+			);
+		},
+		hasDraftFilters() {
+			return Boolean(this.draftSearch || this.draftDateFrom || this.draftDateTo);
+		},
+		hasReturnFilters() {
+			return Boolean(this.returnSearch || this.returnDateFrom || this.returnDateTo);
 		},
 		draftHeaders() {
 			return [
@@ -2320,7 +2363,7 @@ export default {
 			} else this.resetPagination();
 		},
 		activeTab() {
-			this.refreshActiveTab();
+			this.ensureActiveTabLoaded();
 		},
 		filteredHistoryInvoices() {
 			this.resetTabPage("history");
@@ -2373,6 +2416,40 @@ export default {
 		this.clearScheduledEditPreview();
 	},
 	methods: {
+		resetLoadedTabs() {
+			this.loadedTabs = {
+				history: false,
+				partial: false,
+				drafts: false,
+				returns: false,
+			};
+		},
+		tabCountLabel(tab, count) {
+			return this.loadedTabs?.[tab] ? count : "—";
+		},
+		resetHistoryFilters() {
+			this.historySearch = "";
+			this.historyStatus = "All";
+			this.historyDateFrom = "";
+			this.historyDateTo = "";
+			this.historyShowRepairCandidatesOnly = false;
+		},
+		resetPartialFilters() {
+			this.partialSearch = "";
+			this.partialStatus = "All";
+			this.partialDateFrom = "";
+			this.partialDateTo = "";
+		},
+		resetDraftFilters() {
+			this.draftSearch = "";
+			this.draftDateFrom = "";
+			this.draftDateTo = "";
+		},
+		resetReturnFilters() {
+			this.returnSearch = "";
+			this.returnDateFrom = "";
+			this.returnDateTo = "";
+		},
 		resetPagination() {
 			this.tabPages = {
 				history: 1,
@@ -2966,13 +3043,37 @@ export default {
 		},
 		async refreshAll() {
 			this.resetPagination();
-			await Promise.all([this.loadUnpaidInvoices(), this.loadHistory(), this.loadDrafts()]);
+			this.resetLoadedTabs();
+			await this.refreshActiveTab();
+		},
+		async ensureActiveTabLoaded() {
+			const tab = this.activeTab || "history";
+			if (this.loadedTabs?.[tab] || this.loadingTab) return;
+			await this.refreshActiveTab();
 		},
 		async refreshActiveTab() {
 			if (!this.invoiceManagementDialog) return;
-			if (this.activeTab === "drafts") return this.loadDrafts();
-			if (this.activeTab === "partial") return this.loadUnpaidInvoices();
-			return this.loadHistory();
+			const tab = this.activeTab || "history";
+			if (this.loadingTab) return;
+			this.loadingTab = tab;
+			try {
+				if (tab === "drafts") await this.loadDrafts();
+				else if (tab === "partial") await this.loadUnpaidInvoices();
+				else await this.loadHistory();
+
+				if (tab === "history" || tab === "returns") {
+					this.loadedTabs.history = true;
+					this.loadedTabs.returns = true;
+				} else {
+					this.loadedTabs[tab] = true;
+				}
+			} finally {
+				this.loadingTab = null;
+				const activeTab = this.activeTab || "history";
+				if (!this.loadedTabs?.[activeTab]) {
+					this.$nextTick?.(() => this.ensureActiveTabLoaded());
+				}
+			}
 		},
 		async loadUnpaidInvoices() {
 			if (!this.posProfile?.name) return void (this.unpaidInvoices = []);
@@ -3999,6 +4100,14 @@ export default {
 	gap: 12px;
 }
 
+.filter-grid {
+	align-items: center;
+}
+
+.filter-grid :deep(.date-range-filter) {
+	grid-column: span 2;
+}
+
 .summary-tile {
 	border-radius: 18px;
 	padding: 16px 18px;
@@ -4520,6 +4629,10 @@ export default {
 }
 
 @media (max-width: 640px) {
+	.filter-grid :deep(.date-range-filter) {
+		grid-column: span 1;
+	}
+
 	.meta-pair-grid {
 		grid-template-columns: 1fr;
 	}
