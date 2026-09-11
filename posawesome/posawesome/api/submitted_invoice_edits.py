@@ -195,6 +195,165 @@ def _is_closed_invoice(doc):
     return False
 
 
+def _get_profile_edit_settings(profile_names):
+    """Load edit settings once per profile for invoice-list metadata."""
+
+    profile_names = list(dict.fromkeys(name for name in profile_names if name))
+    if not profile_names:
+        return {}
+
+    fields = ["name"]
+    for fieldname in (
+        "posa_allow_submitted_invoice_edit",
+        "posa_submitted_invoice_edit_window_hours",
+    ):
+        if _meta_has_field("POS Profile", fieldname):
+            fields.append(fieldname)
+
+    rows = frappe.get_all(
+        "POS Profile",
+        filters={"name": ["in", profile_names]},
+        fields=fields,
+        limit_page_length=0,
+    )
+    settings = {
+        name: {
+            "feature_enabled": True,
+            "edit_window_hours": DEFAULT_EDIT_WINDOW_HOURS,
+        }
+        for name in profile_names
+    }
+    for row in rows or []:
+        enabled = row.get("posa_allow_submitted_invoice_edit")
+        raw_hours = row.get("posa_submitted_invoice_edit_window_hours")
+        try:
+            hours = flt(raw_hours) if raw_hours is not None else DEFAULT_EDIT_WINDOW_HOURS
+        except Exception:
+            hours = DEFAULT_EDIT_WINDOW_HOURS
+        settings[row.get("name")] = {
+            "feature_enabled": cint(enabled if enabled is not None else 1) == 1,
+            "edit_window_hours": hours if hours > 0 else DEFAULT_EDIT_WINDOW_HOURS,
+        }
+    return settings
+
+
+def _get_root_invoice_info_map(doctype, rows):
+    """Resolve amendment roots in a bounded number of batched hierarchy queries."""
+
+    invoice_nodes = {
+        row.get("name"): {
+            "name": row.get("name"),
+            "creation": row.get("creation"),
+            "amended_from": row.get("amended_from"),
+        }
+        for row in rows or []
+        if row.get("name")
+    }
+    pending = {
+        node.get("amended_from")
+        for node in invoice_nodes.values()
+        if node.get("amended_from") and node.get("amended_from") not in invoice_nodes
+    }
+    while pending:
+        parents = frappe.get_all(
+            doctype,
+            filters={"name": ["in", list(pending)]},
+            fields=["name", "creation", "amended_from"],
+            limit_page_length=0,
+        )
+        found = set()
+        next_pending = set()
+        for parent in parents or []:
+            parent_name = parent.get("name")
+            if not parent_name:
+                continue
+            found.add(parent_name)
+            invoice_nodes[parent_name] = parent
+            ancestor = parent.get("amended_from")
+            if ancestor and ancestor not in invoice_nodes:
+                next_pending.add(ancestor)
+        # A missing ancestor previously ended the per-row traversal as well.
+        if not found:
+            break
+        pending = next_pending
+
+    root_info = {}
+    for row in rows or []:
+        current = row
+        seen = set()
+        amendment_count = 0
+        while current.get("amended_from") and current.get("amended_from") not in seen:
+            seen.add(current.get("name"))
+            parent = invoice_nodes.get(current.get("amended_from"))
+            if not parent:
+                break
+            current = parent
+            amendment_count += 1
+        root_info[row.get("name")] = {
+            "original_invoice": current.get("name") or row.get("name"),
+            "original_creation": current.get("creation") or row.get("creation"),
+            "amendment_count": amendment_count,
+        }
+    return root_info
+
+
+def _get_linked_invoice_names(doctype, invoice_names, link_field, filters=None):
+    if not invoice_names:
+        return set()
+    query_filters = dict(filters or {})
+    query_filters[link_field] = ["in", invoice_names]
+    rows = frappe.get_all(
+        doctype,
+        filters=query_filters,
+        fields=[link_field],
+        limit_page_length=0,
+    )
+    return {row.get(link_field) for row in rows or [] if row.get(link_field)}
+
+
+def _build_list_metadata_context(doctype, rows):
+    invoice_names = [row.get("name") for row in rows or [] if row.get("name")]
+    active_children = _get_linked_invoice_names(
+        doctype,
+        invoice_names,
+        "amended_from",
+        {"docstatus": ["!=", 2]},
+    )
+    submitted_returns = _get_linked_invoice_names(
+        doctype,
+        invoice_names,
+        "return_against",
+        {"docstatus": 1},
+    )
+    closing_reference_field = "sales_invoice" if doctype == "Sales Invoice" else "pos_invoice"
+    closed_invoices = _get_linked_invoice_names(
+        "Sales Invoice Reference",
+        invoice_names,
+        closing_reference_field,
+        {
+            "parenttype": "POS Closing Shift",
+            "parentfield": "pos_transactions",
+            "docstatus": 1,
+        },
+    )
+    closed_invoices.update(
+        row.get("name")
+        for row in rows or []
+        if row.get("name")
+        and (
+            row.get("pos_closing_entry")
+            or (doctype == "POS Invoice" and row.get("consolidated_invoice"))
+        )
+    )
+    return {
+        "root_info": _get_root_invoice_info_map(doctype, rows),
+        "profile_settings": _get_profile_edit_settings(row.get("pos_profile") for row in rows or []),
+        "active_children": active_children,
+        "submitted_returns": submitted_returns,
+        "closed_invoices": closed_invoices,
+    }
+
+
 def _has_stored_value_settlement(doc):
     if flt(doc.get("posa_redeemed_customer_credit") or 0) > 0:
         return True
@@ -202,14 +361,28 @@ def _has_stored_value_settlement(doc):
     return bool(redemptions)
 
 
-def get_submitted_invoice_edit_metadata(doc):
-    root_info = _get_root_invoice_info(doc.doctype, doc)
-    window_hours = _get_edit_window_hours(doc.get("pos_profile"))
+def get_submitted_invoice_edit_metadata(doc, list_context=None):
+    list_context = list_context or {}
+    root_info = (list_context.get("root_info") or {}).get(doc.name)
+    if root_info is None:
+        root_info = _get_root_invoice_info(doc.doctype, doc)
+
+    profile_settings = (list_context.get("profile_settings") or {}).get(doc.get("pos_profile"))
+    window_hours = (
+        profile_settings.get("edit_window_hours")
+        if profile_settings is not None
+        else _get_edit_window_hours(doc.get("pos_profile"))
+    )
     age_hours = _hours_since(root_info.get("original_creation"))
     can_edit = True
     reason = None
 
-    if not _feature_enabled(doc.get("pos_profile")):
+    feature_enabled = (
+        profile_settings.get("feature_enabled")
+        if profile_settings is not None
+        else _feature_enabled(doc.get("pos_profile"))
+    )
+    if not feature_enabled:
         can_edit = False
         reason = _("Submitted invoice editing is disabled for this POS Profile.")
     elif cint(doc.get("docstatus")) != 1:
@@ -221,16 +394,28 @@ def get_submitted_invoice_edit_metadata(doc):
     elif doc.get("return_against"):
         can_edit = False
         reason = _("Credit notes cannot be edited. Use the return workflow.")
-    elif frappe.db.exists(doc.doctype, {"return_against": doc.name, "docstatus": 1}):
+    elif (
+        doc.name in list_context.get("submitted_returns", set())
+        if list_context
+        else frappe.db.exists(doc.doctype, {"return_against": doc.name, "docstatus": 1})
+    ):
         can_edit = False
         reason = _("This invoice already has a submitted return or credit note.")
-    elif _get_active_children(doc.doctype, doc.name):
+    elif (
+        doc.name in list_context.get("active_children", set())
+        if list_context
+        else _get_active_children(doc.doctype, doc.name)
+    ):
         can_edit = False
         reason = _("This invoice has already been amended. Edit the latest amended invoice.")
     elif age_hours > window_hours:
         can_edit = False
         reason = _("This invoice is outside the {0}-hour edit window.").format(window_hours)
-    elif _is_closed_invoice(doc):
+    elif (
+        doc.name in list_context.get("closed_invoices", set())
+        if list_context
+        else _is_closed_invoice(doc)
+    ):
         can_edit = False
         reason = _("This invoice is already linked to a submitted POS closing shift.")
     elif _has_stored_value_settlement(doc):
@@ -397,10 +582,11 @@ def list_submitted_invoices(
         order_by=order_by,
         limit_page_length=cint(limit_page_length or 0),
     )
+    list_context = _build_list_metadata_context(doctype, rows)
     for row in rows or []:
         row["doctype"] = doctype
         doc = frappe._dict(row)
-        row.update(get_submitted_invoice_edit_metadata(doc))
+        row.update(get_submitted_invoice_edit_metadata(doc, list_context=list_context))
     return rows
 
 
