@@ -1,20 +1,47 @@
 <template>
-	<div class="date-range-filter">
-		<div class="date-range-filter__picker">
-			<v-icon size="18" class="date-range-filter__icon">mdi-calendar-range-outline</v-icon>
-			<VueDatePicker
-				v-model="rangeValue"
-				range
-				:partial-range="false"
-				:enable-time-picker="false"
-				auto-apply
-				teleport
-				model-type="yyyy-MM-dd"
-				format="dd MMM yyyy"
-				:placeholder="placeholder"
-				:aria-label="ariaLabel"
-				class="date-range-filter__input"
-			/>
+	<div class="date-range-filter" role="group" :aria-label="ariaLabel">
+		<div class="date-range-filter__dates">
+			<div class="date-range-filter__field">
+				<label class="date-range-filter__label">
+					<v-icon size="16">mdi-calendar-start</v-icon>
+					{{ startLabel }}
+				</label>
+				<VueDatePicker
+					v-model="startValue"
+					:enable-time-picker="false"
+					:max-date="toDate || undefined"
+					auto-apply
+					teleport
+					model-type="yyyy-MM-dd"
+					format="dd MMM yyyy"
+					:placeholder="inputPlaceholder"
+					:aria-label="startLabel"
+					class="date-range-filter__input"
+				/>
+			</div>
+
+			<div class="date-range-filter__direction" aria-hidden="true">
+				<v-icon size="18">mdi-arrow-right</v-icon>
+			</div>
+
+			<div class="date-range-filter__field">
+				<label class="date-range-filter__label">
+					<v-icon size="16">mdi-calendar-end</v-icon>
+					{{ endLabel }}
+				</label>
+				<VueDatePicker
+					v-model="endValue"
+					:enable-time-picker="false"
+					:min-date="fromDate || undefined"
+					auto-apply
+					teleport
+					model-type="yyyy-MM-dd"
+					format="dd MMM yyyy"
+					:placeholder="inputPlaceholder"
+					:aria-label="endLabel"
+					class="date-range-filter__input"
+				/>
+			</div>
 		</div>
 
 		<div class="date-range-filter__presets" :aria-label="presetLabel">
@@ -68,8 +95,10 @@ export default {
 		fromDate: { type: String, default: "" },
 		toDate: { type: String, default: "" },
 		color: { type: String, default: "primary" },
-		placeholder: { type: String, default: "Select date range" },
 		ariaLabel: { type: String, default: "Date range" },
+		startLabel: { type: String, default: "Start date" },
+		endLabel: { type: String, default: "End date" },
+		inputPlaceholder: { type: String, default: "DD-MM-YYYY" },
 		presetLabel: { type: String, default: "Quick date ranges" },
 		todayLabel: { type: String, default: "Today" },
 		sevenDaysLabel: { type: String, default: "7 days" },
@@ -78,16 +107,20 @@ export default {
 	},
 	emits: ["update:fromDate", "update:toDate"],
 	computed: {
-		rangeValue: {
+		startValue: {
 			get() {
-				return this.fromDate || this.toDate
-					? [this.fromDate || this.toDate, this.toDate || this.fromDate]
-					: null;
+				return this.fromDate || null;
 			},
 			set(value) {
-				const range = Array.isArray(value) ? value : [];
-				this.$emit("update:fromDate", range[0] || "");
-				this.$emit("update:toDate", range[1] || "");
+				this.$emit("update:fromDate", value || "");
+			},
+		},
+		endValue: {
+			get() {
+				return this.toDate || null;
+			},
+			set(value) {
+				this.$emit("update:toDate", value || "");
 			},
 		},
 		presets() {
@@ -119,31 +152,58 @@ export default {
 <style scoped>
 .date-range-filter {
 	display: flex;
-	min-width: min(100%, 320px);
-	min-height: 40px;
-	align-items: center;
-	gap: 8px;
-	padding: 5px 8px 5px 12px;
+	min-width: min(100%, 460px);
+	align-items: stretch;
+	flex-direction: column;
+	gap: 7px;
+	padding: 8px 10px 7px;
 	border: 1px solid rgba(148, 163, 184, 0.32);
 	border-radius: 12px;
 	background: color-mix(in srgb, var(--pos-surface-raised) 94%, transparent);
 }
 
-.date-range-filter:focus-within {
-	border-color: rgb(var(--v-theme-primary));
-	box-shadow: 0 0 0 2px rgba(var(--v-theme-primary), 0.12);
-}
-
-.date-range-filter__picker {
+.date-range-filter__dates {
 	display: flex;
-	min-width: 180px;
-	flex: 1 1 220px;
 	align-items: center;
-	gap: 7px;
+	gap: 8px;
 }
 
-.date-range-filter__icon {
+.date-range-filter__field {
+	min-width: 0;
+	flex: 1 1 0;
+	padding: 5px 8px 4px;
+	border: 1px solid rgba(148, 163, 184, 0.26);
+	border-radius: 9px;
+	background: rgba(var(--v-theme-surface), 0.5);
+}
+
+.date-range-filter__field:focus-within {
+	border-color: rgb(var(--v-theme-primary));
+	box-shadow: 0 0 0 2px rgba(var(--v-theme-primary), 0.1);
+}
+
+.date-range-filter__label {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	color: var(--pos-text-secondary);
+	font-size: 0.67rem;
+	font-weight: 800;
+	letter-spacing: 0.07em;
+	line-height: 1.2;
+	text-transform: uppercase;
+}
+
+.date-range-filter__label :deep(.v-icon),
+.date-range-filter__direction {
 	color: rgb(var(--v-theme-primary));
+}
+
+.date-range-filter__direction {
+	display: grid;
+	width: 22px;
+	flex: 0 0 22px;
+	place-items: center;
 }
 
 .date-range-filter__input {
@@ -153,11 +213,9 @@ export default {
 
 .date-range-filter__presets {
 	display: flex;
-	flex: 0 0 auto;
 	align-items: center;
 	gap: 2px;
-	padding-left: 6px;
-	border-left: 1px solid rgba(148, 163, 184, 0.24);
+	min-height: 24px;
 }
 
 :deep(.dp__main) {
@@ -165,8 +223,8 @@ export default {
 }
 
 :deep(.dp__input) {
-	min-height: 28px;
-	padding: 2px 30px 2px 4px;
+	min-height: 25px;
+	padding: 2px 26px 0 0;
 	border: 0;
 	background: transparent;
 	color: var(--pos-text-primary);
@@ -185,23 +243,15 @@ export default {
 }
 
 @media (max-width: 720px) {
-	.date-range-filter {
+	.date-range-filter__dates {
 		align-items: stretch;
 		flex-direction: column;
-		padding: 8px 10px;
 	}
 
-	.date-range-filter__picker {
+	.date-range-filter__direction {
 		width: 100%;
-		flex-basis: auto;
-	}
-
-	.date-range-filter__presets {
-		justify-content: flex-start;
-		padding-top: 5px;
-		padding-left: 0;
-		border-top: 1px solid rgba(148, 163, 184, 0.24);
-		border-left: 0;
+		min-height: 14px;
+		transform: rotate(90deg);
 	}
 }
 </style>
