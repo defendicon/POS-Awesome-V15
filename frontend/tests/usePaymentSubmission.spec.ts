@@ -609,6 +609,162 @@ describe("usePaymentSubmission", () => {
 		);
 	});
 
+	it("blocks an exchange from being saved as a standalone offline invoice", async () => {
+		const offlineModule = await import("../src/offline/index");
+		const invoiceService = (
+			await import("../src/posapp/services/invoiceService")
+		).default;
+		(offlineModule.isOffline as any).mockReturnValue(true);
+
+		const invoiceDoc = ref<any>({
+			name: "ACC-SINV-EXCHANGE-OFFLINE",
+			doctype: "Sales Invoice",
+			company: "Test Company",
+			currency: "PKR",
+			customer: "CUST-0001",
+			is_return: 0,
+			items: [{ item_code: "NEW", qty: 1 }],
+			payments: [{ mode_of_payment: "Cash", amount: 50, type: "Cash" }],
+			rounded_total: 100,
+			grand_total: 100,
+			posa_exchange_credit: 50,
+		});
+		const exchangeSession = ref({
+			stage: "sale",
+			clientRequestId: "exchange-offline-1",
+			returnTotal: 50,
+			returnDoc: {
+				is_return: 1,
+				return_against: "ACC-SINV-ORIGINAL",
+				customer: "CUST-0001",
+				items: [{ item_code: "OLD", qty: -1 }],
+			},
+		});
+		const onFinishNavigation = vi.fn();
+
+		const { submitInvoice } = usePaymentSubmission({
+			invoiceDoc,
+			posProfile: ref({
+				name: "Main POS",
+				company: "Test Company",
+				currency: "PKR",
+				customer: "Default Customer",
+				posa_allow_submissions_in_background_job: 1,
+				create_pos_invoice_instead_of_sales_invoice: 0,
+			}),
+			stockSettings: ref({}),
+			invoiceType: ref("Invoice"),
+			formatFloat: (value) => Number(value || 0),
+			exchangeSession,
+			stores: {
+				toastStore: { show: vi.fn() },
+				syncStore: { updatePendingCount: vi.fn() },
+				uiStore: {
+					setLastInvoice: vi.fn(),
+					setLastStockAdjustment: vi.fn(),
+				},
+				customersStore: { setSelectedCustomer: vi.fn() },
+				invoiceStore: { invoiceDoc: invoiceDoc.value },
+			},
+			isCashback: ref(false),
+			paidChange: ref(0),
+			creditChange: ref(0),
+			redeemedCustomerCredit: ref(0),
+			customerCreditDict: ref([]),
+			diff_payment: ref(0),
+		});
+
+		await expect(
+			submitInvoice(false, { onFinishNavigation }),
+		).rejects.toThrow("Item exchanges require an online connection");
+
+		expect(offlineModule.saveOfflineInvoice).not.toHaveBeenCalled();
+		expect(invoiceService.submitExchange).not.toHaveBeenCalled();
+		expect(onFinishNavigation).not.toHaveBeenCalled();
+		(offlineModule.isOffline as any).mockReturnValue(false);
+	});
+
+	it("preserves the exchange session after a synchronous submission failure", async () => {
+		const consoleError = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => undefined);
+		const invoiceService = (
+			await import("../src/posapp/services/invoiceService")
+		).default;
+		(invoiceService.submitExchange as any).mockRejectedValueOnce(
+			new Error("Exchange validation failed"),
+		);
+
+		const invoiceDoc = ref<any>({
+			name: "ACC-SINV-EXCHANGE-FAILED",
+			doctype: "Sales Invoice",
+			company: "Test Company",
+			currency: "PKR",
+			customer: "CUST-0001",
+			is_return: 0,
+			items: [{ item_code: "NEW", qty: 1 }],
+			payments: [{ mode_of_payment: "Cash", amount: 50, type: "Cash" }],
+			rounded_total: 100,
+			grand_total: 100,
+			posa_exchange_credit: 50,
+		});
+		const exchangeSession = ref({
+			stage: "sale",
+			clientRequestId: "exchange-failed-1",
+			returnTotal: 50,
+			returnDoc: {
+				is_return: 1,
+				return_against: "ACC-SINV-ORIGINAL",
+				customer: "CUST-0001",
+				items: [{ item_code: "OLD", qty: -1 }],
+			},
+		});
+		const onFinishNavigation = vi.fn();
+		const onScheduleBackgroundCheck = vi.fn();
+
+		const { submitInvoice } = usePaymentSubmission({
+			invoiceDoc,
+			posProfile: ref({
+				name: "Main POS",
+				company: "Test Company",
+				currency: "PKR",
+				posa_allow_submissions_in_background_job: 1,
+				create_pos_invoice_instead_of_sales_invoice: 0,
+			}),
+			stockSettings: ref({}),
+			invoiceType: ref("Invoice"),
+			formatFloat: (value) => Number(value || 0),
+			exchangeSession,
+			stores: {
+				toastStore: { show: vi.fn() },
+				uiStore: {
+					setLastInvoice: vi.fn(),
+					setLastStockAdjustment: vi.fn(),
+				},
+				customersStore: { setSelectedCustomer: vi.fn() },
+				invoiceStore: { invoiceDoc: invoiceDoc.value },
+			},
+			isCashback: ref(false),
+			paidChange: ref(0),
+			creditChange: ref(0),
+			redeemedCustomerCredit: ref(0),
+			customerCreditDict: ref([]),
+			diff_payment: ref(0),
+		});
+
+		await expect(
+			submitInvoice(false, {
+				onFinishNavigation,
+				onScheduleBackgroundCheck,
+			}),
+		).rejects.toThrow("Exchange validation failed");
+
+		expect(onFinishNavigation).not.toHaveBeenCalled();
+		expect(onScheduleBackgroundCheck).not.toHaveBeenCalled();
+		expect(exchangeSession.value.clientRequestId).toBe("exchange-failed-1");
+		consoleError.mockRestore();
+	});
+
 	it("includes gift card redemptions in the submit payload", async () => {
 		const invoiceService = (
 			await import("../src/posapp/services/invoiceService")

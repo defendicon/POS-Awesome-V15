@@ -40,24 +40,38 @@ function escapeHtml(value: unknown) {
 		.replace(/'/g, "&#039;");
 }
 
-function amount(value: unknown, currency: string) {
-	return `${textValue(currency)} ${Math.abs(numberValue(value)).toFixed(2)}`.trim();
+function decimalPrecision(value: unknown, fallback = 2) {
+	const parsed = Number(value);
+	return Number.isInteger(parsed)
+		? Math.max(0, Math.min(9, parsed))
+		: fallback;
+}
+
+function amount(value: unknown, currency: string, precision = 2) {
+	return `${textValue(currency)} ${Math.abs(numberValue(value)).toFixed(precision)}`.trim();
 }
 
 function documentTotal(doc: Record<string, any>) {
 	return Math.abs(
 		numberValue(
-			doc.rounded_total ?? doc.grand_total ?? doc.base_rounded_total ?? doc.base_grand_total,
+			doc.rounded_total ??
+				doc.grand_total ??
+				doc.base_rounded_total ??
+				doc.base_grand_total,
 		),
 	);
 }
 
 function itemAmount(item: Record<string, any>) {
-	return Math.abs(numberValue(item.amount ?? item.net_amount ?? item.base_amount));
+	return Math.abs(
+		numberValue(item.amount ?? item.net_amount ?? item.base_amount),
+	);
 }
 
 function itemRate(item: Record<string, any>) {
-	return Math.abs(numberValue(item.rate ?? item.price_list_rate ?? item.base_rate));
+	return Math.abs(
+		numberValue(item.rate ?? item.price_list_rate ?? item.base_rate),
+	);
 }
 
 export function isExchangeReceiptDocument(doc: any) {
@@ -69,7 +83,10 @@ export function isExchangeReceiptDocument(doc: any) {
 	);
 }
 
-export function buildExchangeReceiptModel(doc: Record<string, any>) {
+export function buildExchangeReceiptModel(
+	doc: Record<string, any>,
+	profile?: Record<string, any> | null,
+) {
 	if (!isExchangeReceiptDocument(doc)) {
 		throw new Error(translate("Invalid item exchange receipt data."));
 	}
@@ -77,6 +94,12 @@ export function buildExchangeReceiptModel(doc: Record<string, any>) {
 	const returnDoc = doc.return_invoice_doc || {};
 	const summary = doc.exchange_summary || {};
 	const currency = textValue(doc.currency || returnDoc.currency);
+	const currencyPrecision = decimalPrecision(
+		profile?.posa_decimal_precision ??
+			summary.currency_precision ??
+			doc.currency_precision ??
+			2,
+	);
 	const difference = numberValue(
 		summary.difference_amount,
 		documentTotal(doc) - documentTotal(returnDoc),
@@ -88,25 +111,40 @@ export function buildExchangeReceiptModel(doc: Record<string, any>) {
 		returnInvoice: textValue(doc.return_invoice || returnDoc.name),
 		replacementInvoice: textValue(doc.replacement_invoice || doc.name),
 		company: textValue(doc.company || returnDoc.company),
-		customer: textValue(doc.customer_name || doc.customer || returnDoc.customer_name || returnDoc.customer),
+		customer: textValue(
+			doc.customer_name ||
+				doc.customer ||
+				returnDoc.customer_name ||
+				returnDoc.customer,
+		),
 		postingDate: textValue(doc.posting_date || returnDoc.posting_date),
 		postingTime: textValue(doc.posting_time || returnDoc.posting_time),
 		posProfile: textValue(doc.pos_profile || returnDoc.pos_profile),
 		currency,
+		currencyPrecision,
 		returnedItems: Array.isArray(returnDoc.items) ? returnDoc.items : [],
 		replacementItems: Array.isArray(doc.items) ? doc.items : [],
-		returnTotal: Math.abs(numberValue(summary.return_total, documentTotal(returnDoc))),
-		saleTotal: Math.abs(numberValue(summary.sale_total, documentTotal(doc))),
+		returnTotal: Math.abs(
+			numberValue(summary.return_total, documentTotal(returnDoc)),
+		),
+		saleTotal: Math.abs(
+			numberValue(summary.sale_total, documentTotal(doc)),
+		),
 		allocatedAmount: Math.abs(numberValue(summary.allocated_amount)),
 		differenceAmount: difference,
 		settlementType: textValue(summary.settlement_type),
 		payments: (Array.isArray(doc.payments) ? doc.payments : []).filter(
-			(row: Record<string, any>) => Math.abs(numberValue(row.amount)) > 0.0001,
+			(row: Record<string, any>) =>
+				Math.abs(numberValue(row.amount)) > 0.0001,
 		),
 	};
 }
 
-function itemRows(items: Record<string, any>[], currency: string) {
+function itemRows(
+	items: Record<string, any>[],
+	currency: string,
+	precision: number,
+) {
 	if (!items.length) {
 		return `<tr><td colspan="4" class="empty">${escapeHtml(translate("No items"))}</td></tr>`;
 	}
@@ -117,8 +155,8 @@ function itemRows(items: Record<string, any>[], currency: string) {
 			return `<tr>
 				<td>${escapeHtml(item.item_name || item.item_code || translate("Item"))}</td>
 				<td class="number">${escapeHtml(`${qty.toFixed(3).replace(/\.?0+$/, "")} ${uom}`)}</td>
-				<td class="number">${escapeHtml(amount(itemRate(item), currency))}</td>
-				<td class="number">${escapeHtml(amount(itemAmount(item), currency))}</td>
+				<td class="number">${escapeHtml(amount(itemRate(item), currency, precision))}</td>
+				<td class="number">${escapeHtml(amount(itemAmount(item), currency, precision))}</td>
 			</tr>`;
 		})
 		.join("");
@@ -128,16 +166,21 @@ function paymentRows(model: ReturnType<typeof buildExchangeReceiptModel>) {
 	if (!model.payments.length) return "";
 	const rows = model.payments
 		.map((payment: Record<string, any>) => {
-			const paymentCurrency = textValue(payment.posa_payment_currency || model.currency);
+			const paymentCurrency = textValue(
+				payment.posa_payment_currency || model.currency,
+			);
 			const paid = payment.posa_original_amount ?? payment.amount;
-			return `<div class="line"><span>${escapeHtml(payment.mode_of_payment || payment.account || translate("Payment"))}</span><strong>${escapeHtml(amount(paid, paymentCurrency))}</strong></div>`;
+			return `<div class="line"><span>${escapeHtml(payment.mode_of_payment || payment.account || translate("Payment"))}</span><strong>${escapeHtml(amount(paid, paymentCurrency, model.currencyPrecision))}</strong></div>`;
 		})
 		.join("");
 	return `<section class="payments"><h3>${escapeHtml(translate("Payment received"))}</h3>${rows}</section>`;
 }
 
-export function renderExchangeReceiptHtml(doc: Record<string, any>) {
-	const model = buildExchangeReceiptModel(doc);
+export function renderExchangeReceiptHtml(
+	doc: Record<string, any>,
+	profile?: Record<string, any> | null,
+) {
+	const model = buildExchangeReceiptModel(doc, profile);
 	const outcomeLabel =
 		model.differenceAmount > 0
 			? translate("Customer pays")
@@ -158,14 +201,14 @@ export function renderExchangeReceiptHtml(doc: Record<string, any>) {
 <p><strong>${escapeHtml(translate("POS Profile"))}:</strong> ${escapeHtml(model.posProfile)}</p>
 </section>
 <h2>${escapeHtml(translate("Returned items"))} · ${escapeHtml(model.returnInvoice)}</h2>
-<table><thead><tr><th>${escapeHtml(translate("Item"))}</th><th class="number">${escapeHtml(translate("Qty"))}</th><th class="number">${escapeHtml(translate("Rate"))}</th><th class="number">${escapeHtml(translate("Amount"))}</th></tr></thead><tbody>${itemRows(model.returnedItems, model.currency)}</tbody></table>
+<table><thead><tr><th>${escapeHtml(translate("Item"))}</th><th class="number">${escapeHtml(translate("Qty"))}</th><th class="number">${escapeHtml(translate("Rate"))}</th><th class="number">${escapeHtml(translate("Amount"))}</th></tr></thead><tbody>${itemRows(model.returnedItems, model.currency, model.currencyPrecision)}</tbody></table>
 <h2>${escapeHtml(translate("Replacement items"))} · ${escapeHtml(model.replacementInvoice)}</h2>
-<table><thead><tr><th>${escapeHtml(translate("Item"))}</th><th class="number">${escapeHtml(translate("Qty"))}</th><th class="number">${escapeHtml(translate("Rate"))}</th><th class="number">${escapeHtml(translate("Amount"))}</th></tr></thead><tbody>${itemRows(model.replacementItems, model.currency)}</tbody></table>
+<table><thead><tr><th>${escapeHtml(translate("Item"))}</th><th class="number">${escapeHtml(translate("Qty"))}</th><th class="number">${escapeHtml(translate("Rate"))}</th><th class="number">${escapeHtml(translate("Amount"))}</th></tr></thead><tbody>${itemRows(model.replacementItems, model.currency, model.currencyPrecision)}</tbody></table>
 <section class="summary">
-<div class="line"><span>${escapeHtml(translate("Replacement sale"))}</span><strong>${escapeHtml(amount(model.saleTotal, model.currency))}</strong></div>
-<div class="line"><span>${escapeHtml(translate("Return credit"))}</span><strong>− ${escapeHtml(amount(model.returnTotal, model.currency))}</strong></div>
-<div class="line"><span>${escapeHtml(translate("Allocated credit"))}</span><strong>${escapeHtml(amount(model.allocatedAmount, model.currency))}</strong></div>
-<div class="line result"><span>${escapeHtml(outcomeLabel)}</span><strong>${escapeHtml(amount(model.differenceAmount, model.currency))}</strong></div>
+<div class="line"><span>${escapeHtml(translate("Replacement sale"))}</span><strong>${escapeHtml(amount(model.saleTotal, model.currency, model.currencyPrecision))}</strong></div>
+<div class="line"><span>${escapeHtml(translate("Return credit"))}</span><strong>− ${escapeHtml(amount(model.returnTotal, model.currency, model.currencyPrecision))}</strong></div>
+<div class="line"><span>${escapeHtml(translate("Allocated credit"))}</span><strong>${escapeHtml(amount(model.allocatedAmount, model.currency, model.currencyPrecision))}</strong></div>
+<div class="line result"><span>${escapeHtml(outcomeLabel)}</span><strong>${escapeHtml(amount(model.differenceAmount, model.currency, model.currencyPrecision))}</strong></div>
 ${paymentRows(model)}</section>
 <footer class="footer">${escapeHtml(model.settlementType)} · ${escapeHtml(translate("Thank you"))}</footer>
 </main></body></html>`;
@@ -180,7 +223,10 @@ function rawLine(left: unknown, right: unknown, width: number) {
 	const leftText = textValue(left);
 	const rightText = textValue(right);
 	const available = Math.max(0, width - rightText.length - 1);
-	return `${leftText.slice(0, available).padEnd(available)} ${rightText}`.slice(0, width);
+	return `${leftText.slice(0, available).padEnd(available)} ${rightText}`.slice(
+		0,
+		width,
+	);
 }
 
 function rawWrap(value: unknown, width: number) {
@@ -210,7 +256,7 @@ export function buildEscPosExchangeReceipt(
 	doc: Record<string, any>,
 	profile?: Record<string, any> | null,
 ) {
-	const model = buildExchangeReceiptModel(doc);
+	const model = buildExchangeReceiptModel(doc, profile);
 	const width = rawWidth(profile);
 	const divider = "-".repeat(width);
 	const lines: string[] = [
@@ -222,16 +268,37 @@ export function buildEscPosExchangeReceipt(
 		rawLine(translate("Return"), model.returnInvoice, width),
 		rawLine(translate("Replacement"), model.replacementInvoice, width),
 		rawLine(translate("Customer"), model.customer, width),
-		rawLine(translate("Date"), [model.postingDate, model.postingTime].filter(Boolean).join(" "), width),
+		rawLine(
+			translate("Date"),
+			[model.postingDate, model.postingTime].filter(Boolean).join(" "),
+			width,
+		),
 	];
 
 	const addItems = (title: string, items: Record<string, any>[]) => {
 		lines.push(divider, title, divider);
 		for (const item of items) {
-			lines.push(...rawWrap(item.item_name || item.item_code || translate("Item"), width));
-			const qty = Math.abs(numberValue(item.qty)).toFixed(3).replace(/\.?0+$/, "");
-			const detail = `${qty} ${textValue(item.uom || item.stock_uom)} x ${itemRate(item).toFixed(2)}`;
-			lines.push(rawLine(`  ${detail}`, amount(itemAmount(item), model.currency), width));
+			lines.push(
+				...rawWrap(
+					item.item_name || item.item_code || translate("Item"),
+					width,
+				),
+			);
+			const qty = Math.abs(numberValue(item.qty))
+				.toFixed(3)
+				.replace(/\.?0+$/, "");
+			const detail = `${qty} ${textValue(item.uom || item.stock_uom)} x ${itemRate(item).toFixed(model.currencyPrecision)}`;
+			lines.push(
+				rawLine(
+					`  ${detail}`,
+					amount(
+						itemAmount(item),
+						model.currency,
+						model.currencyPrecision,
+					),
+					width,
+				),
+			);
 		}
 	};
 
@@ -239,9 +306,25 @@ export function buildEscPosExchangeReceipt(
 	addItems(translate("REPLACEMENT ITEMS"), model.replacementItems);
 	lines.push(
 		divider,
-		rawLine(translate("Replacement sale"), amount(model.saleTotal, model.currency), width),
-		rawLine(translate("Return credit"), `- ${amount(model.returnTotal, model.currency)}`, width),
-		rawLine(translate("Allocated credit"), amount(model.allocatedAmount, model.currency), width),
+		rawLine(
+			translate("Replacement sale"),
+			amount(model.saleTotal, model.currency, model.currencyPrecision),
+			width,
+		),
+		rawLine(
+			translate("Return credit"),
+			`- ${amount(model.returnTotal, model.currency, model.currencyPrecision)}`,
+			width,
+		),
+		rawLine(
+			translate("Allocated credit"),
+			amount(
+				model.allocatedAmount,
+				model.currency,
+				model.currencyPrecision,
+			),
+			width,
+		),
 		"=".repeat(width),
 		rawLine(
 			model.differenceAmount > 0
@@ -249,15 +332,25 @@ export function buildEscPosExchangeReceipt(
 				: model.differenceAmount < 0
 					? translate("Customer credit")
 					: translate("Even exchange"),
-			amount(model.differenceAmount, model.currency),
+			amount(
+				model.differenceAmount,
+				model.currency,
+				model.currencyPrecision,
+			),
 			width,
 		),
 	);
 	for (const payment of model.payments) {
 		lines.push(
 			rawLine(
-				payment.mode_of_payment || payment.account || translate("Payment"),
-				amount(payment.posa_original_amount ?? payment.amount, payment.posa_payment_currency || model.currency),
+				payment.mode_of_payment ||
+					payment.account ||
+					translate("Payment"),
+				amount(
+					payment.posa_original_amount ?? payment.amount,
+					payment.posa_payment_currency || model.currency,
+					model.currencyPrecision,
+				),
 				width,
 			),
 		);
@@ -268,8 +361,13 @@ export function buildEscPosExchangeReceipt(
 }
 
 function writeBrowserReceipt(html: string, preview: boolean) {
-	const target = preview ? window.open("", "_blank") : document.createElement("iframe");
-	if (!target) throw new Error(translate("Popup blocked while opening exchange receipt."));
+	const target = preview
+		? window.open("", "_blank")
+		: document.createElement("iframe");
+	if (!target)
+		throw new Error(
+			translate("Popup blocked while opening exchange receipt."),
+		);
 
 	if (preview) {
 		const win = target as Window;
@@ -298,7 +396,7 @@ export async function printExchangeReceipt(
 	doc: Record<string, any>,
 	profile?: Record<string, any> | null,
 ) {
-	const html = renderExchangeReceiptHtml(doc);
+	const html = renderExchangeReceiptHtml(doc, profile);
 	const useRaw = shouldUseRawDocumentPrinting(profile);
 	const useQz = shouldUseConfiguredQzDocumentPrinting(profile);
 

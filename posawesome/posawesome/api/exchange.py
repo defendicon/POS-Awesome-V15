@@ -30,6 +30,22 @@ def _payment_total(doc):
     return sum(flt(row.get("amount")) for row in (doc.get("payments") or []))
 
 
+def _document_precision(doc, fieldname, fallback=2):
+    try:
+        value = doc.precision(fieldname)
+    except (AttributeError, TypeError):
+        value = None
+    return max(cint(fallback if value is None else value), 0)
+
+
+def _settlement_tolerance(return_doc, sale_doc):
+    precision = max(
+        _document_precision(return_doc, "outstanding_amount"),
+        _document_precision(sale_doc, "outstanding_amount"),
+    )
+    return (0.5 / (10**precision)) + 1e-9
+
+
 def _validate_exchange_payload(return_invoice, sale_invoice, profile):
     if not cint(profile.get("posa_allow_return")):
         frappe.throw(_("Returns are not enabled in POS Profile {0}.").format(profile.name))
@@ -64,7 +80,7 @@ def _validate_exchange_payload(return_invoice, sale_invoice, profile):
         frappe.throw(_("Every return item quantity must be negative."))
     if any(flt(row.get("qty")) <= 0 for row in sale_invoice.get("items")):
         frappe.throw(_("Every replacement item quantity must be positive."))
-    if abs(_payment_total(return_invoice)) > 0.001:
+    if _payment_total(return_invoice) != 0:
         frappe.throw(_("Exchange return credit cannot contain a direct cash refund."))
 
 
@@ -111,6 +127,7 @@ def _public_result(exchange_doc, return_doc, sale_doc):
                 "difference_amount": flt(exchange_doc.difference_amount),
                 "allocated_amount": flt(exchange_doc.allocated_amount),
                 "settlement_type": exchange_doc.settlement_type,
+                "currency_precision": _document_precision(sale_doc, "grand_total"),
             },
         }
     )
@@ -210,7 +227,7 @@ def _reconcile_credit_note(return_doc, sale_doc, amount, profile):
 
 
 def _validate_final_settlement(return_doc, sale_doc, return_total, sale_total):
-    tolerance = 0.01
+    tolerance = _settlement_tolerance(return_doc, sale_doc)
     expected_return_outstanding = -max(flt(return_total) - flt(sale_total), 0)
     actual_return_outstanding = flt(return_doc.outstanding_amount)
     actual_sale_outstanding = flt(sale_doc.outstanding_amount)
@@ -321,7 +338,7 @@ def submit_item_exchange(
     sale_total = _document_total(sale_doc)
     allocation = min(abs(flt(return_doc.outstanding_amount)), max(flt(sale_doc.outstanding_amount), 0))
     expected_allocation = min(return_total, sale_total)
-    if abs(allocation - expected_allocation) > 0.01:
+    if abs(allocation - expected_allocation) > _settlement_tolerance(return_doc, sale_doc):
         frappe.throw(
             _(
                 "Exchange settlement is incomplete. The replacement invoice must collect only the net difference."

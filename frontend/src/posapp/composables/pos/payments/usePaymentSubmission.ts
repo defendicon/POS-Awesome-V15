@@ -1117,6 +1117,11 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				cChange > 0);
 
 		if (isOffline()) {
+			if (isExchangeSubmission) {
+				throw new Error(
+					__("Item exchanges require an online connection"),
+				);
+			}
 			if (hasGiftCardRedemption) {
 				throw new Error(
 					__("Gift card redemption requires an online connection"),
@@ -1304,7 +1309,10 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				});
 
 				// Background job specific logic
-				if (profile?.posa_allow_submissions_in_background_job) {
+				if (
+					!isExchangeSubmission &&
+					profile?.posa_allow_submissions_in_background_job
+				) {
 					if (onFinishNavigation) onFinishNavigation(true);
 					if (onScheduleBackgroundCheck) {
 						onScheduleBackgroundCheck({
@@ -1353,7 +1361,10 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 
 			if (stores?.uiStore) {
 				if (isExchangeSubmission) {
-					stores.uiStore.setLastInvoice(responseInvoiceName, submittedDocument);
+					stores.uiStore.setLastInvoice(
+						responseInvoiceName,
+						submittedDocument,
+					);
 				} else {
 					stores.uiStore.setLastInvoice(responseInvoiceName);
 				}
@@ -1580,7 +1591,10 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				buildSubmissionFailureToast(exc, errorMsg),
 			);
 
-			if (profile?.posa_allow_submissions_in_background_job) {
+			if (
+				!isExchangeSubmission &&
+				profile?.posa_allow_submissions_in_background_job
+			) {
 				if (onFinishNavigation) onFinishNavigation(true);
 				if (onScheduleBackgroundCheck) {
 					onScheduleBackgroundCheck({

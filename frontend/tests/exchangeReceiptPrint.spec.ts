@@ -9,10 +9,12 @@ vi.mock("../src/posapp/services/qzTray", () => ({
 
 vi.mock("../src/posapp/services/documentPrint", () => ({
 	confirmDocumentPrintFallback: vi.fn(() => false),
-	shouldUseRawDocumentPrinting: (profile: Record<string, any> | null | undefined) =>
-		profile?.posa_raw_printing === 1,
-	shouldUseConfiguredQzDocumentPrinting: (profile: Record<string, any> | null | undefined) =>
-		profile?.posa_raw_printing === 1 || profile?.posa_silent_print === 1,
+	shouldUseRawDocumentPrinting: (
+		profile: Record<string, any> | null | undefined,
+	) => profile?.posa_raw_printing === 1,
+	shouldUseConfiguredQzDocumentPrinting: (
+		profile: Record<string, any> | null | undefined,
+	) => profile?.posa_raw_printing === 1 || profile?.posa_silent_print === 1,
 }));
 
 import {
@@ -39,7 +41,14 @@ const exchangeDocument = {
 	pos_profile: "Main POS",
 	currency: "PKR",
 	items: [
-		{ item_code: "NEW", item_name: "Replacement Item", qty: 2, uom: "Nos", rate: 75, amount: 150 },
+		{
+			item_code: "NEW",
+			item_name: "Replacement Item",
+			qty: 2,
+			uom: "Nos",
+			rate: 75,
+			amount: 150,
+		},
 	],
 	payments: [{ mode_of_payment: "Cash", amount: 50 }],
 	grand_total: 150,
@@ -47,7 +56,16 @@ const exchangeDocument = {
 		name: "SINV-RETURN",
 		return_against: "SINV-ORIGINAL",
 		currency: "PKR",
-		items: [{ item_code: "OLD", item_name: "Returned Item", qty: -1, uom: "Nos", rate: 100, amount: -100 }],
+		items: [
+			{
+				item_code: "OLD",
+				item_name: "Returned Item",
+				qty: -1,
+				uom: "Nos",
+				rate: 100,
+				amount: -100,
+			},
+		],
 		grand_total: -100,
 	},
 	exchange_summary: {
@@ -67,7 +85,12 @@ describe("exchangeReceiptPrint", () => {
 
 	it("recognizes only a complete combined exchange payload", () => {
 		expect(isExchangeReceiptDocument(exchangeDocument)).toBe(true);
-		expect(isExchangeReceiptDocument({ ...exchangeDocument, return_invoice_doc: null })).toBe(false);
+		expect(
+			isExchangeReceiptDocument({
+				...exchangeDocument,
+				return_invoice_doc: null,
+			}),
+		).toBe(false);
 	});
 
 	it("uses submitted exchange summary values and absolute return quantities", () => {
@@ -77,7 +100,9 @@ describe("exchangeReceiptPrint", () => {
 		expect(model.saleTotal).toBe(150);
 		expect(model.differenceAmount).toBe(50);
 		expect(model.allocatedAmount).toBe(100);
-		expect(model.payments).toEqual([{ mode_of_payment: "Cash", amount: 50 }]);
+		expect(model.payments).toEqual([
+			{ mode_of_payment: "Cash", amount: 50 },
+		]);
 	});
 
 	it("renders both document references, item sections, payment, and net outcome", () => {
@@ -93,8 +118,47 @@ describe("exchangeReceiptPrint", () => {
 		expect(html).toContain("Cash");
 	});
 
+	it("uses the submitted document currency precision", () => {
+		const preciseDocument = {
+			...exchangeDocument,
+			items: [
+				{
+					item_code: "NEW",
+					item_name: "Replacement Item",
+					qty: 1,
+					uom: "Nos",
+					rate: 1.234,
+					amount: 1.234,
+				},
+			],
+			exchange_summary: {
+				...exchangeDocument.exchange_summary,
+				currency_precision: 3,
+				difference_amount: 0.125,
+			},
+		};
+
+		const html = renderExchangeReceiptHtml(preciseDocument);
+		const raw = buildEscPosExchangeReceipt(preciseDocument);
+
+		expect(html).toContain("PKR 0.125");
+		expect(html).toContain("PKR 1.234");
+		expect(raw).toContain("PKR 0.125");
+		expect(raw).toContain("1.234");
+	});
+
+	it("uses the POS Profile display precision when configured", () => {
+		const html = renderExchangeReceiptHtml(exchangeDocument, {
+			posa_decimal_precision: 3,
+		});
+
+		expect(html).toContain("PKR 50.000");
+	});
+
 	it("builds a single raw receipt with both sides of the exchange", () => {
-		const raw = buildEscPosExchangeReceipt(exchangeDocument, { posa_raw_print_width: 42 });
+		const raw = buildEscPosExchangeReceipt(exchangeDocument, {
+			posa_raw_print_width: 42,
+		});
 
 		expect(raw.startsWith("\x1B@")).toBe(true);
 		expect(raw).toContain("ITEM EXCHANGE RECEIPT");

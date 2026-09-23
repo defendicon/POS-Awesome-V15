@@ -143,6 +143,15 @@ class TestExchangeValidation(unittest.TestCase):
                 self.profile,
             )
 
+    def test_rejects_any_nonzero_cash_refund_inside_return_credit(self):
+        self.return_invoice["payments"] = [{"amount": -0.0001}]
+        with self.assertRaisesRegex(ValueError, "direct cash refund"):
+            self.exchange._validate_exchange_payload(
+                self.return_invoice,
+                self.sale_invoice,
+                self.profile,
+            )
+
     def test_rejects_exchange_when_returns_are_disabled(self):
         self.profile["posa_allow_return"] = 0
         with self.assertRaisesRegex(ValueError, "Returns are not enabled"):
@@ -176,6 +185,29 @@ class TestExchangeValidation(unittest.TestCase):
         sale_doc = AttrDict(outstanding_amount=100)
         with self.assertRaisesRegex(ValueError, "did not close correctly"):
             self.exchange._validate_final_settlement(return_doc, sale_doc, 1500, 1600)
+
+    def test_settlement_tolerance_uses_document_currency_precision(self):
+        class PrecisionDoc(AttrDict):
+            def precision(self, _fieldname):
+                return 3
+
+        within_rounding = PrecisionDoc(outstanding_amount=0.0004)
+        closed_return = PrecisionDoc(outstanding_amount=0)
+        self.exchange._validate_final_settlement(
+            closed_return,
+            within_rounding,
+            50,
+            50,
+        )
+
+        outside_rounding = PrecisionDoc(outstanding_amount=0.0006)
+        with self.assertRaisesRegex(ValueError, "did not close correctly"):
+            self.exchange._validate_final_settlement(
+                closed_return,
+                outside_rounding,
+                50,
+                50,
+            )
 
     def test_accepts_submitted_return_and_replacement_documents(self):
         return_doc = AttrDict(is_return=1, return_against="SINV-0001")
@@ -241,6 +273,7 @@ class TestExchangeValidation(unittest.TestCase):
         self.assertEqual(result["exchange_status"], "Completed")
         self.assertEqual(result["return_invoice"], "SINV-RETURN")
         self.assertEqual(result["replacement_invoice"], "SINV-NEW")
+        self.assertEqual(result["exchange_summary"]["currency_precision"], 2)
 
     def test_cancel_exchange_reverses_linked_documents_in_dependency_order(self):
         cancelled = []

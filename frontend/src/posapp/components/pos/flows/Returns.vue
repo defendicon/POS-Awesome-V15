@@ -314,11 +314,20 @@
 					<v-btn color="error" variant="tonal" @click="close_dialog">
 						{{ __("Close") }}
 					</v-btn>
-					<v-btn v-if="selected.length" color="success" variant="tonal" @click="submit_dialog(false)">
+					<v-btn
+						v-if="selected.length"
+						color="success"
+						variant="tonal"
+						@click="submit_dialog(false)"
+					>
 						{{ __("Return items") }}
 					</v-btn>
 					<v-btn
-						v-if="selected.length && pos_profile.posa_allow_item_exchange == 1"
+						v-if="
+							selected.length &&
+							pos_profile.posa_allow_item_exchange == 1 &&
+							!pos_profile.create_pos_invoice_instead_of_sales_invoice
+						"
 						color="primary"
 						prepend-icon="mdi-swap-horizontal-bold"
 						@click="submit_dialog(true)"
