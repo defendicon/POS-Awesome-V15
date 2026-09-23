@@ -104,4 +104,5 @@ jobs:
           ../env/bin/python -m unittest \
             posawesome.posawesome.api.test_pos_access \
             posawesome.posawesome.api.test_critical_pos_writes \
-            posawesome.posawesome.api.test_printer_security
+            posawesome.posawesome.api.test_printer_security \
+            posawesome.posawesome.api.test_printer_workspace

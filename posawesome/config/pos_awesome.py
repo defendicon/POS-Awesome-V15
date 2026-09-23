@@ -1,4 +1,5 @@
-from __future__ import unicode_literals
+from __future__ import unicode_literals  # noqa: UP010
+
 from frappe import _
 
 
@@ -17,6 +18,11 @@ def get_data():
                     "type": "doctype",
                     "description": "POS Profile",
                     "name": "POS Profile",
+                },
+                {
+                    "type": "doctype",
+                    "description": "Printer profiles and routing settings",
+                    "name": "POSA Printer Profile",
                 },
                 {
                     "type": "doctype",

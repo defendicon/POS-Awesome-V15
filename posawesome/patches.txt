@@ -43,4 +43,5 @@ posawesome.patches.set_payment_tender_amount_precision
 posawesome.patches.add_item_exchange_feature
 
 [post_model_sync]
+posawesome.patches.add_printer_profile_to_workspace
 posawesome.patches.add_item_exchange_report_to_workspace
