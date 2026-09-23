@@ -26,7 +26,11 @@ const VTextFieldStub = defineComponent({
 	},
 	setup(props) {
 		return () =>
-			h("div", { "data-label": props.label }, String(props.modelValue ?? ""));
+			h(
+				"div",
+				{ "data-label": props.label },
+				String(props.modelValue ?? ""),
+			);
 	},
 });
 
@@ -62,7 +66,9 @@ describe("PaymentSummary", () => {
 			},
 		});
 
-		expect(wrapper.find('[data-test="payment-settlement-state"]').exists()).toBe(false);
+		expect(
+			wrapper.find('[data-test="payment-settlement-state"]').exists(),
+		).toBe(false);
 	});
 
 	it("does not show the settlement state box when the invoice is fully covered", () => {
@@ -92,7 +98,9 @@ describe("PaymentSummary", () => {
 			},
 		});
 
-		expect(wrapper.find('[data-test="payment-settlement-state"]').exists()).toBe(false);
+		expect(
+			wrapper.find('[data-test="payment-settlement-state"]').exists(),
+		).toBe(false);
 	});
 
 	it("shows applied gift card details inside the payment summary", () => {
@@ -128,7 +136,9 @@ describe("PaymentSummary", () => {
 		expect(wrapper.text()).toContain("GC-0001");
 		expect(wrapper.text()).toContain("300");
 		expect(wrapper.text()).toContain("Included in settlement");
-		expect(wrapper.find('[data-test="payment-settlement-state"]').exists()).toBe(false);
+		expect(
+			wrapper.find('[data-test="payment-settlement-state"]').exists(),
+		).toBe(false);
 	});
 
 	it("shows exact base change when invoice currency rounds the difference to zero", () => {
@@ -145,19 +155,67 @@ describe("PaymentSummary", () => {
 				paid_change: 0,
 				credit_change: 0,
 				paid_change_rules: [],
-				currencySymbol: (currency: string) => (currency === "PKR" ? "Rs" : "$"),
+				currencySymbol: (currency: string) =>
+					currency === "PKR" ? "Rs" : "$",
 				formatCurrency: (value: number) => Number(value).toFixed(2),
 			},
 			global: {
-				components: { VRow: BoxStub, VCol: BoxStub, VTextField: VTextFieldStub },
+				components: {
+					VRow: BoxStub,
+					VCol: BoxStub,
+					VTextField: VTextFieldStub,
+				},
 			},
 		});
 
-		expect(wrapper.get('[data-test="payment-base-settlement"]').text()).toContain(
-			"Base Change",
+		expect(
+			wrapper.get('[data-test="payment-base-settlement"]').text(),
+		).toContain("Base Change");
+		expect(
+			wrapper.get('[data-test="payment-base-settlement"]').text(),
+		).toContain("Rs 0.05");
+	});
+
+	it("shows the exchange calculation and labels only the net amount as collected", () => {
+		const wrapper = mount(PaymentSummary, {
+			props: {
+				invoice_doc: {
+					currency: "PKR",
+					is_return: false,
+					rounded_total: 50,
+				},
+				total_payments_display: "0",
+				diff_payment_display: "0",
+				diff_label: "Remaining",
+				diffPayment: 0,
+				change_due: 0,
+				paid_change: 0,
+				credit_change: 0,
+				paid_change_rules: [],
+				currencySymbol: () => "Rs",
+				formatCurrency: (value: number) => String(value),
+				exchangeActive: true,
+				exchangeCredit: 50,
+				exchangeSettlementAmount: 0,
+				exchangeSettlementLabel: "Even exchange",
+			},
+			global: {
+				components: {
+					VRow: BoxStub,
+					VCol: BoxStub,
+					VTextField: VTextFieldStub,
+				},
+			},
+		});
+
+		const exchangeSummary = wrapper.get(
+			'[data-test="exchange-payment-summary"]',
 		);
-		expect(wrapper.get('[data-test="payment-base-settlement"]').text()).toContain(
-			"Rs 0.05",
-		);
+		expect(exchangeSummary.text()).toContain("Replacement saleRs 50");
+		expect(exchangeSummary.text()).toContain("Return creditRs 50");
+		expect(exchangeSummary.text()).toContain("Even exchangeRs 0");
+		expect(
+			wrapper.find('[data-label="Collected from customer"]').exists(),
+		).toBe(true);
 	});
 });

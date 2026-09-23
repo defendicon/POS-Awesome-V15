@@ -235,3 +235,34 @@ Rules:
 - Print and receipt logic must respect POS Profile print settings where applicable.
 - Offline cache must load and store POS Profile-dependent data safely.
 - Custom POS Profile fields must be considered when present.
+
+---
+
+## 9. Item Exchange Contract
+
+Item exchange is linked with:
+
+- Original submitted Sales Invoice
+- Return Sales Invoice
+- Replacement Sales Invoice
+- Customer and receivable account
+- Pricing, discounts, taxes, UOM, and stock validation
+- Payment difference and customer credit
+- POS Profile return and exchange settings
+- ERPNext payment reconciliation
+- Printing, reports, and exchange audit records
+
+Rules:
+
+- Return and replacement documents must be submitted together in one online request.
+- Both documents must use the same company, POS Profile, customer, and currency.
+- The customer pays only the positive difference after applying the return credit.
+- Excess return value remains customer credit unless an explicit refund flow is implemented.
+- Exchange submission must be idempotent and must not use the offline invoice outbox.
+- ERPNext/Frappe version 15 and 16 must use their supported credit-note reconciliation contract.
+- POS Invoice mode must remain disabled until an equivalent reconciliation path is verified.
+- Cancelling an exchange must reverse the reconciliation journal before cancelling the replacement and return invoices.
+- Completed exchange audit records must not be deleted until every linked submitted document has been cancelled.
+- An in-progress online exchange must survive a same-tab refresh without changing cashier, POS Profile, company, or opening shift scope.
+- A lost submit response must recover the completed exchange by client request ID instead of creating another return or replacement invoice.
+- Persisted exchange state must be cleared when the exchange finishes, is cancelled, expires, or belongs to a different cashier/POS scope.

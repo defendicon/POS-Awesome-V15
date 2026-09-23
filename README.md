@@ -119,6 +119,29 @@ The POS frontend has been migrated to TypeScript. If you add new modules, prefer
 
 ---
 
+### Item Exchange
+
+Item exchange creates a linked return Sales Invoice and replacement Sales Invoice while keeping ERPNext stock, receivable, and accounting entries separate and auditable.
+
+- Enable **Allow Return** and **Allow Item Exchange** on the POS Profile.
+- Start from a submitted Sales Invoice, select the quantities being returned, then add replacement items to the active sale.
+- The return and replacement use the same company, POS Profile, customer, and currency.
+- Return credit is allocated against the replacement invoice automatically.
+- The cashier collects only a positive difference. Excess return value remains customer credit, and equal values complete as an even exchange.
+- Submission is online-only, synchronous, and idempotent. A lost response can recover the completed exchange without creating duplicate invoices.
+- Browser, QZ HTML, and raw ESC/POS printing produce one combined exchange receipt containing both item groups, both invoice references, allocated credit, payment, and final customer credit/payment result.
+- **Print Last Invoice** reprints the combined receipt for the most recent exchange in the current POS session.
+- System Managers can cancel a completed exchange in dependency order: reconciliation journal, replacement invoice, then return invoice. The audit record cannot be deleted while linked documents remain submitted.
+- Open **POS Awesome → Item Exchange → Item Exchange Audit** for date, company, POS Profile, opening shift, customer, cashier, status, settlement, currency, invoice, reconciliation, and request-ID reporting. Standard ERPNext export is available from the report.
+
+Current guardrails:
+
+- Exchange currently supports **Sales Invoice mode**. POS Invoice mode is intentionally blocked until an equivalent reconciliation path is verified.
+- Exchange cannot be submitted through the offline invoice queue.
+- Report amount summaries are shown only when completed rows use one currency; mixed currencies are never added together.
+
+---
+
 ### Payments & Write-Offs
 
 - Write-off amount is capped by POS Profile and validated against payment coverage.
@@ -218,6 +241,7 @@ Supported raw print paths:
 - **Invoices / POS Invoices**: supported through POS Profile raw receipt printing.
 - **Sales Orders**: supported through the same POS Profile raw receipt printing flow.
 - **Payment Entries / receipts**: supported through the same POS Profile raw receipt printing flow.
+- **Item exchanges**: supported as one combined return/replacement receipt through browser, QZ HTML, or raw ESC/POS output.
 
 #### Setup
 
@@ -308,6 +332,23 @@ For deployment details, see `CASH_MOVEMENT_ROLLOUT.md`.
 
 ---
 
+### Additional Operational Controls And Audit Features
+
+The following production features are also available and are controlled by POS Profile or related POS Awesome setup records:
+
+- **Awesome Dashboard**: sales, payments, customer, product, staff, inventory, supplier, stock-movement, discount/void/return, branch, and finance insights with supervisor and company/profile scope controls.
+- **Customer Display**: a separate customer-facing display that receives the live cart, totals, payments, and completion state; it can be opened manually or automatically and retains a safe offline snapshot.
+- **Below-Cost Sale Guard**: configurable block, warning, or POS Supervisor override policy with minimum margin, missing-cost handling, mandatory override reason, approver, and invoice audit fields.
+- **Return Validity**: optional POS Settings/POS Profile return-validity days stored on submitted invoices and enforced when selecting an invoice for return.
+- **Multi-Currency Tender And Change**: payment methods can retain original tender currency, exchange rate, account currency, and invoice equivalent; physical change can be recorded in configured currencies.
+- **Barcode Printer Profiles**: ZPL, EPL, and HTML printer profiles support label dimensions, DPI, printer groups/failover, item-group or warehouse routing, optional RFID settings, and barcode print audit logs.
+- **Print Format Rules**: customer-group-specific print format selection can override the default POS Profile print format where configured.
+- **Invoice Submission Ledger**: background and duplicate-safe submissions retain request identity and processing status for operational recovery and audit.
+- **Sales Person Assignment**: restrict the selectable Sales Persons from the POS Profile and assign the selected person while completing the sale.
+- **Extended Customer Details**: customer creation and editing support birthday, referral, contact, tax, and address information used by POS customer workflows.
+
+---
+
 ### Debugging (Quick Tips)
 
 - Check browser console for errors and attached logs with issue for better debugging.
@@ -361,6 +402,7 @@ Notes:
 - **Purchase Orders**: Create supplier/vendor Purchase Orders from POS, with optional Purchase Receipt, Purchase Invoice, and supplier payment creation.
 - **Purchase Receiving**: Receive stock from POS when allowed by POS Profile.
 - **Returns**: Process returns for Cash or Customer Credit (Credit Note).
+- **Item Exchange**: Return selected items, add replacements, allocate the credit, and collect only the net difference using linked ERPNext invoices.
 - **Credit Sales**: Support for credit sales with configurable due dates.
 - **Change Posting Date**: Ability to change the transaction posting date (backdating) if allowed by profile.
 - **Additional Notes**: Fields for internal notes and authorization codes.
@@ -368,6 +410,7 @@ Notes:
 - **Submitted Invoice Correction**: Authorized users can preview and submit controlled amendments to eligible POS and Sales Invoices.
 - **Settlement Guidance**: Invoice corrections show whether the cashier must collect or refund a difference and rebalance the primary payment automatically.
 - **Cashier Audit Trail**: The verified cashier is recorded on submitted POS and Sales Invoices.
+- **Exchange Audit Trail**: Linked original, return, replacement, reconciliation, settlement, cashier, and request references are available in the Item Exchange Audit report.
 
 #### 📦 Inventory & Products
 
@@ -438,7 +481,7 @@ Notes:
 - **Cash Movement**: Profile-controlled POS expenses and cash deposits with closing-shift impact.
 - **Customer Balance**: Option to display current customer balance on the main screen.
 - **Address Management**: Manage multiple shipping addresses for customers.
-- **ERPNext v15 Support**: Fully compatible with the latest ERPNext version.
+- **ERPNext v15 and v16 Support**: Supported on both ERPNext/Frappe 15 and 16 runtimes.
 
 ### Shortcuts:
 

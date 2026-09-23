@@ -22,6 +22,24 @@
 			></v-progress-linear>
 			<div ref="paymentContainer" class="overflow-y-auto payment-scroll">
 				<div :class="['payment-sections', { 'payment-sections--dialog': dialogMode }]">
+					<v-alert
+						v-if="exchangeSession?.stage === 'sale'"
+						color="success"
+						variant="tonal"
+						density="compact"
+						icon="mdi-swap-horizontal-bold"
+						class="exchange-payment-banner"
+					>
+						<strong>{{ __("Exchange settlement") }}</strong>
+						<span>
+							{{ __("Replacement sale") }} {{ currencySymbol(invoice_doc.currency)
+							}}{{ formatCurrency(invoice_doc.rounded_total || invoice_doc.grand_total) }} •
+							{{ __("Return credit") }} {{ currencySymbol(invoice_doc.currency)
+							}}{{ formatCurrency(exchangeSession.returnTotal) }} •
+							{{ exchangeSettlementLabel }} {{ currencySymbol(invoice_doc.currency)
+							}}{{ formatCurrency(exchangeSettlementAmount) }}
+						</span>
+					</v-alert>
 					<section class="payment-section payment-section--summary">
 						<div class="payment-section__header">
 							<span class="payment-section__icon"
@@ -45,6 +63,10 @@
 							:formatCurrency="formatCurrency"
 							:gift-card-applied-amount="giftCardAppliedAmount"
 							:gift-card-code="giftCardRedemptions[0]?.gift_card_code || ''"
+							:exchange-active="exchangeSession?.stage === 'sale'"
+							:exchange-credit="Number(exchangeSession?.returnTotal || 0)"
+							:exchange-settlement-amount="exchangeSettlementAmount"
+							:exchange-settlement-label="exchangeSettlementLabel"
 							@show-paid-amount="showPaidAmount"
 							@show-diff-payment="showDiffPayment"
 							@show-paid-change="showPaidChange"
@@ -377,6 +399,7 @@ import { parseBooleanSetting } from "../../utils/stock";
 import { toCompanyCurrency } from "../../utils/erpnextCurrency";
 import { focusFirstKeyboardTarget } from "../../utils/keyboardNavigation";
 import { resolveCounterGridPaymentShortcut } from "../../utils/counterGridPaymentShortcuts";
+import { getExchangeSettlement } from "../../utils/exchangeSettlement";
 
 // Components
 import PaymentSummary from "./payments/PaymentSummary.vue";
@@ -485,6 +508,19 @@ const invoice_doc = computed({
 	get: () => invoiceStore.invoiceDoc || {},
 	set: (value) => invoiceStore.setInvoiceDoc(value),
 });
+const exchangeSession = computed(() => invoiceStore.exchangeSession);
+const exchangeSettlement = computed(() => {
+	const sale = flt(
+		invoice_doc.value?.rounded_total || invoice_doc.value?.grand_total || 0,
+		currency_precision.value,
+	);
+	return getExchangeSettlement(sale, exchangeSession.value?.returnTotal || 0, currency_precision.value);
+});
+const exchangeSettlementAmount = computed(() => exchangeSettlement.value.amount);
+const exchangeSettlementLabel = computed(() => {
+	if (exchangeSettlement.value.type === "even") return __("Even exchange");
+	return exchangeSettlement.value.type === "payment" ? __("Customer pays") : __("Customer credit");
+});
 
 const resolveBelowCostOverride = (result) => {
 	const resolver = belowCostOverrideResolver;
@@ -559,10 +595,17 @@ const isPaymentOpen = computed(() => activeView.value === "payment" || paymentDi
 const netInvoiceSettlementAmount = computed(() => {
 	if (!invoice_doc.value) return 0;
 
-	const invoiceTotal = flt(
+	const rawInvoiceTotal = flt(
 		invoice_doc.value.rounded_total || invoice_doc.value.grand_total,
 		currency_precision.value,
 	);
+	const invoiceTotal = invoice_doc.value.is_return
+		? rawInvoiceTotal
+		: Math.max(
+				rawInvoiceTotal -
+					Math.max(0, flt(invoice_doc.value.posa_exchange_credit || 0, currency_precision.value)),
+				0,
+			);
 	const coveredAmount = flt(
 		(invoice_doc.value?.loyalty_amount || loyalty_amount.value || 0) +
 			(redeemed_customer_credit.value || 0),
@@ -684,6 +727,10 @@ const netCompanySettlementAmount = computed(() => {
 			toCompanyCurrency(paymentCurrencyContext(doc), doc.rounded_total || doc.grand_total),
 		currency_precision.value,
 	);
+	const exchangeCreditCompany = toCompanyCurrency(
+		paymentCurrencyContext(doc),
+		Math.max(0, Number(doc.posa_exchange_credit || 0)),
+	);
 	const giftCardInvoiceAmount = (
 		Array.isArray(giftCardRedemptions.value) ? giftCardRedemptions.value : []
 	).reduce((sum, row) => sum + Number(row?.amount || 0), 0);
@@ -691,7 +738,7 @@ const netCompanySettlementAmount = computed(() => {
 		Number(doc.loyalty_amount || loyalty_amount.value || 0) +
 		Number(redeemed_customer_credit.value || 0) +
 		toCompanyCurrency(paymentCurrencyContext(doc), giftCardInvoiceAmount);
-	const net = flt(companyTotal - coveredCompanyAmount, currency_precision.value);
+	const net = flt(companyTotal - exchangeCreditCompany - coveredCompanyAmount, currency_precision.value);
 	return doc.is_return ? Math.min(net, 0) : Math.max(net, 0);
 });
 
@@ -878,6 +925,7 @@ const { ensureReturnPaymentsAreNegative, restoreReturnPayments, validateSubmissi
 		},
 		currencyPrecision: currency_precision,
 		requestBelowCostOverride,
+		exchangeSession,
 	});
 
 const isGiftCardPayment = (payment) => {
@@ -2381,6 +2429,7 @@ onMounted(() => {
 		eventBus.on("submit_payment_shortcut", handleSubmitPaymentShortcut);
 		eventBus.on("clear_invoice", () => {
 			invoiceStore.clear();
+			invoiceStore.clearExchange();
 			invoiceStore.resetPostingDate();
 			is_return.value = false;
 			is_credit_return.value = false;

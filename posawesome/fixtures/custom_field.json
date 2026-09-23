@@ -8986,5 +8986,17 @@
 		"print_hide": 1,
 		"insert_after": "posa_below_cost_override_reason",
 		"name": "POS Invoice-posa_below_cost_override_details"
+	},
+	{
+		"doctype": "Custom Field",
+		"dt": "POS Profile",
+		"fieldname": "posa_allow_item_exchange",
+		"fieldtype": "Check",
+		"label": "Allow Item Exchange",
+		"description": "Create a linked return and replacement Sales Invoice and collect only the net difference.",
+		"default": "0",
+		"depends_on": "eval:doc.posa_allow_return==1 && !doc.create_pos_invoice_instead_of_sales_invoice",
+		"insert_after": "posa_allow_return",
+		"name": "POS Profile-posa_allow_item_exchange"
 	}
 ]

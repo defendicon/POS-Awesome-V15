@@ -119,14 +119,14 @@
 		<v-btn
 			color="success"
 			variant="flat"
-			prepend-icon="mdi-credit-card-check-outline"
+			:prepend-icon="exchangeActive ? 'mdi-swap-horizontal-bold' : 'mdi-credit-card-check-outline'"
 			class="counter-grid-action counter-grid-action--pay"
 			data-pos-keyboard-target="pay"
 			data-testid="invoice-action-pay"
 			:loading="paymentLoading"
 			@click="$emit('show-payment')"
 		>
-			{{ __("Pay") }}
+			{{ exchangeActive ? __("Complete Exchange") : __("Pay") }}
 		</v-btn>
 	</div>
 
@@ -250,14 +250,14 @@
 				block
 				color="success"
 				size="large"
-				prepend-icon="mdi-credit-card"
+				:prepend-icon="exchangeActive ? 'mdi-swap-horizontal-bold' : 'mdi-credit-card'"
 				@click="$emit('show-payment')"
 				class="summary-btn pay-btn"
 				data-pos-keyboard-target="pay"
 				data-testid="invoice-action-pay"
 				:loading="paymentLoading"
 			>
-				{{ __("PAY") }}
+				{{ exchangeActive ? __("Complete Exchange") : __("PAY") }}
 			</v-btn>
 		</v-col>
 	</v-row>
@@ -286,6 +286,7 @@ const props = defineProps({
 	printLoading: Boolean,
 	paymentLoading: Boolean,
 	customerDisplayLoading: Boolean,
+	exchangeActive: Boolean,
 });
 
 defineEmits([

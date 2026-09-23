@@ -16,6 +16,7 @@ vi.mock("../src/offline/index", () => ({
 vi.mock("../src/posapp/services/invoiceService", () => ({
 	default: {
 		submitInvoice: vi.fn(),
+		submitExchange: vi.fn(),
 	},
 }));
 
@@ -512,6 +513,258 @@ describe("usePaymentSubmission", () => {
 		);
 	});
 
+	it("submits both exchange documents and reports an even exchange", async () => {
+		const invoiceService = (
+			await import("../src/posapp/services/invoiceService")
+		).default;
+		(invoiceService.submitExchange as any).mockResolvedValue({
+			name: "ACC-SINV-REPLACEMENT",
+			doctype: "Sales Invoice",
+			docstatus: 1,
+			return_invoice: "ACC-SINV-RETURN",
+			replacement_invoice: "ACC-SINV-REPLACEMENT",
+			return_invoice_doc: { items: [{ item_code: "OLD", qty: -1 }] },
+			exchange_summary: {
+				return_total: 50,
+				sale_total: 50,
+				difference_amount: 0,
+				settlement_type: "Even Exchange",
+			},
+		});
+
+		const invoiceDoc = ref<any>({
+			name: "ACC-SINV-DRAFT",
+			doctype: "Sales Invoice",
+			currency: "PKR",
+			customer: "CUST-0001",
+			is_return: 0,
+			items: [{ item_code: "NEW", qty: 1 }],
+			payments: [{ mode_of_payment: "Cash", amount: 0, type: "Cash" }],
+			rounded_total: 50,
+			grand_total: 50,
+			posa_exchange_credit: 50,
+		});
+		const exchangeSession = ref({
+			stage: "sale",
+			clientRequestId: "exchange-request-1",
+			returnTotal: 50,
+			returnDoc: {
+				name: "ACC-SINV-RETURN-DRAFT",
+				is_return: 1,
+				return_against: "ACC-SINV-ORIGINAL",
+				customer: "CUST-0001",
+				items: [{ item_code: "OLD", qty: -1 }],
+			},
+		});
+		const toastShow = vi.fn();
+
+		const { submitInvoice } = usePaymentSubmission({
+			invoiceDoc,
+			posProfile: ref({
+				name: "Main POS",
+				posa_allow_submissions_in_background_job: 0,
+				create_pos_invoice_instead_of_sales_invoice: 0,
+			}),
+			stockSettings: ref({}),
+			invoiceType: ref("Invoice"),
+			formatFloat: (value) => Number(value || 0),
+			exchangeSession,
+			stores: {
+				toastStore: { show: toastShow },
+				uiStore: {
+					setLastInvoice: vi.fn(),
+					setLastStockAdjustment: vi.fn(),
+				},
+				customersStore: { setSelectedCustomer: vi.fn() },
+				invoiceStore: {
+					invoiceDoc: invoiceDoc.value,
+					mergeInvoiceDoc: vi.fn(),
+				},
+			},
+			isCashback: ref(false),
+			paidChange: ref(0),
+			creditChange: ref(0),
+			redeemedCustomerCredit: ref(0),
+			customerCreditDict: ref([]),
+			diff_payment: ref(0),
+		});
+
+		await submitInvoice(false, { onFinishNavigation: vi.fn() });
+
+		expect(invoiceService.submitExchange).toHaveBeenCalledWith(
+			expect.any(Object),
+			expect.objectContaining({ posa_exchange_credit: 50 }),
+			exchangeSession.value.returnDoc,
+			expect.objectContaining({ name: "Main POS" }),
+			"exchange-request-1",
+		);
+		expect(toastShow).toHaveBeenCalledWith(
+			expect.objectContaining({
+				title: "Item exchange completed",
+				summary:
+					"Return ACC-SINV-RETURN and replacement ACC-SINV-REPLACEMENT submitted",
+				detail: "Even exchange - no payment collected",
+				color: "success",
+			}),
+		);
+	});
+
+	it("blocks an exchange from being saved as a standalone offline invoice", async () => {
+		const offlineModule = await import("../src/offline/index");
+		const invoiceService = (
+			await import("../src/posapp/services/invoiceService")
+		).default;
+		(offlineModule.isOffline as any).mockReturnValue(true);
+
+		const invoiceDoc = ref<any>({
+			name: "ACC-SINV-EXCHANGE-OFFLINE",
+			doctype: "Sales Invoice",
+			company: "Test Company",
+			currency: "PKR",
+			customer: "CUST-0001",
+			is_return: 0,
+			items: [{ item_code: "NEW", qty: 1 }],
+			payments: [{ mode_of_payment: "Cash", amount: 50, type: "Cash" }],
+			rounded_total: 100,
+			grand_total: 100,
+			posa_exchange_credit: 50,
+		});
+		const exchangeSession = ref({
+			stage: "sale",
+			clientRequestId: "exchange-offline-1",
+			returnTotal: 50,
+			returnDoc: {
+				is_return: 1,
+				return_against: "ACC-SINV-ORIGINAL",
+				customer: "CUST-0001",
+				items: [{ item_code: "OLD", qty: -1 }],
+			},
+		});
+		const onFinishNavigation = vi.fn();
+
+		const { submitInvoice } = usePaymentSubmission({
+			invoiceDoc,
+			posProfile: ref({
+				name: "Main POS",
+				company: "Test Company",
+				currency: "PKR",
+				customer: "Default Customer",
+				posa_allow_submissions_in_background_job: 1,
+				create_pos_invoice_instead_of_sales_invoice: 0,
+			}),
+			stockSettings: ref({}),
+			invoiceType: ref("Invoice"),
+			formatFloat: (value) => Number(value || 0),
+			exchangeSession,
+			stores: {
+				toastStore: { show: vi.fn() },
+				syncStore: { updatePendingCount: vi.fn() },
+				uiStore: {
+					setLastInvoice: vi.fn(),
+					setLastStockAdjustment: vi.fn(),
+				},
+				customersStore: { setSelectedCustomer: vi.fn() },
+				invoiceStore: { invoiceDoc: invoiceDoc.value },
+			},
+			isCashback: ref(false),
+			paidChange: ref(0),
+			creditChange: ref(0),
+			redeemedCustomerCredit: ref(0),
+			customerCreditDict: ref([]),
+			diff_payment: ref(0),
+		});
+
+		await expect(
+			submitInvoice(false, { onFinishNavigation }),
+		).rejects.toThrow("Item exchanges require an online connection");
+
+		expect(offlineModule.saveOfflineInvoice).not.toHaveBeenCalled();
+		expect(invoiceService.submitExchange).not.toHaveBeenCalled();
+		expect(onFinishNavigation).not.toHaveBeenCalled();
+		(offlineModule.isOffline as any).mockReturnValue(false);
+	});
+
+	it("preserves the exchange session after a synchronous submission failure", async () => {
+		const consoleError = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => undefined);
+		const invoiceService = (
+			await import("../src/posapp/services/invoiceService")
+		).default;
+		(invoiceService.submitExchange as any).mockRejectedValueOnce(
+			new Error("Exchange validation failed"),
+		);
+
+		const invoiceDoc = ref<any>({
+			name: "ACC-SINV-EXCHANGE-FAILED",
+			doctype: "Sales Invoice",
+			company: "Test Company",
+			currency: "PKR",
+			customer: "CUST-0001",
+			is_return: 0,
+			items: [{ item_code: "NEW", qty: 1 }],
+			payments: [{ mode_of_payment: "Cash", amount: 50, type: "Cash" }],
+			rounded_total: 100,
+			grand_total: 100,
+			posa_exchange_credit: 50,
+		});
+		const exchangeSession = ref({
+			stage: "sale",
+			clientRequestId: "exchange-failed-1",
+			returnTotal: 50,
+			returnDoc: {
+				is_return: 1,
+				return_against: "ACC-SINV-ORIGINAL",
+				customer: "CUST-0001",
+				items: [{ item_code: "OLD", qty: -1 }],
+			},
+		});
+		const onFinishNavigation = vi.fn();
+		const onScheduleBackgroundCheck = vi.fn();
+
+		const { submitInvoice } = usePaymentSubmission({
+			invoiceDoc,
+			posProfile: ref({
+				name: "Main POS",
+				company: "Test Company",
+				currency: "PKR",
+				posa_allow_submissions_in_background_job: 1,
+				create_pos_invoice_instead_of_sales_invoice: 0,
+			}),
+			stockSettings: ref({}),
+			invoiceType: ref("Invoice"),
+			formatFloat: (value) => Number(value || 0),
+			exchangeSession,
+			stores: {
+				toastStore: { show: vi.fn() },
+				uiStore: {
+					setLastInvoice: vi.fn(),
+					setLastStockAdjustment: vi.fn(),
+				},
+				customersStore: { setSelectedCustomer: vi.fn() },
+				invoiceStore: { invoiceDoc: invoiceDoc.value },
+			},
+			isCashback: ref(false),
+			paidChange: ref(0),
+			creditChange: ref(0),
+			redeemedCustomerCredit: ref(0),
+			customerCreditDict: ref([]),
+			diff_payment: ref(0),
+		});
+
+		await expect(
+			submitInvoice(false, {
+				onFinishNavigation,
+				onScheduleBackgroundCheck,
+			}),
+		).rejects.toThrow("Exchange validation failed");
+
+		expect(onFinishNavigation).not.toHaveBeenCalled();
+		expect(onScheduleBackgroundCheck).not.toHaveBeenCalled();
+		expect(exchangeSession.value.clientRequestId).toBe("exchange-failed-1");
+		consoleError.mockRestore();
+	});
+
 	it("includes gift card redemptions in the submit payload", async () => {
 		const invoiceService = (
 			await import("../src/posapp/services/invoiceService")
@@ -785,10 +1038,12 @@ describe("usePaymentSubmission", () => {
 			onFinishNavigation: vi.fn(),
 		});
 
-		const firstData = (invoiceService.submitInvoice as any).mock.calls[0][0];
+		const firstData = (invoiceService.submitInvoice as any).mock
+			.calls[0][0];
 		const firstSubmittedDoc = (invoiceService.submitInvoice as any).mock
 			.calls[0][1];
-		const secondData = (invoiceService.submitInvoice as any).mock.calls[1][0];
+		const secondData = (invoiceService.submitInvoice as any).mock
+			.calls[1][0];
 		const secondSubmittedDoc = (invoiceService.submitInvoice as any).mock
 			.calls[1][1];
 
@@ -813,12 +1068,15 @@ describe("usePaymentSubmission", () => {
 				client_request_id: firstSubmittedDoc.posa_client_request_id,
 			}),
 		);
-		expect(offlineModule.enqueueInvoiceOutboxEntry).toHaveBeenCalledTimes(2);
+		expect(offlineModule.enqueueInvoiceOutboxEntry).toHaveBeenCalledTimes(
+			2,
+		);
 		expect(offlineModule.enqueueInvoiceOutboxEntry).toHaveBeenNthCalledWith(
 			1,
 			expect.objectContaining({
 				invoice: expect.objectContaining({
-					posa_client_request_id: firstSubmittedDoc.posa_client_request_id,
+					posa_client_request_id:
+						firstSubmittedDoc.posa_client_request_id,
 				}),
 			}),
 		);
@@ -1779,19 +2037,17 @@ describe("usePaymentSubmission", () => {
 			await import("../src/posapp/services/invoiceService")
 		).default;
 		(invoiceService.submitInvoice as any)
-			.mockResolvedValueOnce(
-				{
-					ok: false,
-					data: null,
-					error: {
-						code: "TERMINAL_LOCKED",
-						message: "This POS terminal is locked.",
-						retryable: false,
-					},
-					requestId: "terminal-locked-1",
-					serverTime: null,
+			.mockResolvedValueOnce({
+				ok: false,
+				data: null,
+				error: {
+					code: "TERMINAL_LOCKED",
+					message: "This POS terminal is locked.",
+					retryable: false,
 				},
-			)
+				requestId: "terminal-locked-1",
+				serverTime: null,
+			})
 			.mockResolvedValueOnce({
 				name: "ACC-SINV-UNLOCKED",
 				doctype: "Sales Invoice",
@@ -1824,7 +2080,9 @@ describe("usePaymentSubmission", () => {
 			diff_payment: ref(0),
 		});
 
-		await expect(submitInvoice(false)).resolves.toMatchObject({ success: true });
+		await expect(submitInvoice(false)).resolves.toMatchObject({
+			success: true,
+		});
 		expect(requestTerminalUnlock).toHaveBeenCalledOnce();
 		expect(invoiceService.submitInvoice).toHaveBeenCalledTimes(2);
 		expect((invoiceService.submitInvoice as any).mock.calls[1][0]).toBe(
@@ -1839,19 +2097,17 @@ describe("usePaymentSubmission", () => {
 		const invoiceService = (
 			await import("../src/posapp/services/invoiceService")
 		).default;
-		(invoiceService.submitInvoice as any).mockResolvedValueOnce(
-			{
-				ok: false,
-				data: null,
-				error: {
-					code: "TERMINAL_LOCKED",
-					message: "This POS terminal is locked.",
-					retryable: false,
-				},
-				requestId: "terminal-locked-cancelled",
-				serverTime: null,
+		(invoiceService.submitInvoice as any).mockResolvedValueOnce({
+			ok: false,
+			data: null,
+			error: {
+				code: "TERMINAL_LOCKED",
+				message: "This POS terminal is locked.",
+				retryable: false,
 			},
-		);
+			requestId: "terminal-locked-cancelled",
+			serverTime: null,
+		});
 		const invoiceDoc = ref<any>({
 			name: "ACC-SINV-CANCELLED",
 			doctype: "Sales Invoice",

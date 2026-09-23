@@ -100,6 +100,30 @@ def _profile_ignore_pricing_rule(profile_doc):
     return cint(profile_doc.get("ignore_pricing_rule") or 0) if profile_doc else 0
 
 
+def _enforce_return_pricing_invariant(invoice_doc):
+    """Keep returns tied to the pricing of the invoice they reverse."""
+
+    if not cint(invoice_doc.get("is_return")):
+        return False
+
+    invoice_doc.ignore_pricing_rule = 1
+    invoice_doc.flags.ignore_pricing_rule = True
+    invoice_doc.set("pricing_rules", [])
+    return True
+
+
+def _apply_pricing_rule_policy(invoice_doc, profile_doc):
+    """Apply the POS Profile policy, except that returns must never be repriced."""
+
+    if _enforce_return_pricing_invariant(invoice_doc):
+        return 1
+
+    ignore_pricing_rule = _profile_ignore_pricing_rule(profile_doc)
+    invoice_doc.ignore_pricing_rule = ignore_pricing_rule
+    invoice_doc.flags.ignore_pricing_rule = bool(ignore_pricing_rule)
+    return ignore_pricing_rule
+
+
 def _resolve_authorized_invoice_profile(*payloads):
     """Resolve one canonical profile/company from mutually consistent request payloads."""
 
@@ -1249,6 +1273,7 @@ def _save_draft_with_latest_timestamp(invoice_doc, retries=2):
     attempts = 0
 
     while True:
+        _enforce_return_pricing_invariant(invoice_doc)
         if invoice_doc.name and not invoice_doc.is_new():
             latest_modified = frappe.db.get_value(invoice_doc.doctype, invoice_doc.name, "modified")
             if latest_modified:
@@ -1482,7 +1507,8 @@ def update_invoice(data):
     profile_doc = _resolve_authorized_invoice_profile(data)
     pos_profile = profile_doc.get("name")
     company = profile_doc.get("company")
-    ignore_pricing_rule = _profile_ignore_pricing_rule(profile_doc)
+    profile_ignore_pricing_rule = _profile_ignore_pricing_rule(profile_doc)
+    ignore_pricing_rule = 1 if cint(data.get("is_return")) else profile_ignore_pricing_rule
     # Never trust a stale/client-edited copy of this POS Profile setting.
     data["ignore_pricing_rule"] = ignore_pricing_rule
     _validate_invoice_opening_shift(profile_doc, data, required=True)
@@ -1581,14 +1607,16 @@ def update_invoice(data):
                     "is_free_item": d.get("is_free_item"),
                 }
 
-    invoice_doc.ignore_pricing_rule = ignore_pricing_rule
-    invoice_doc.flags.ignore_pricing_rule = bool(ignore_pricing_rule)
+    _apply_pricing_rule_policy(invoice_doc, profile_doc)
 
     _deduplicate_free_items(invoice_doc)
 
     # Set missing values first
     incoming_payment_rows = data.get("payments") or []
-    invoice_doc.set_missing_values()
+    invoice_doc.set_missing_values(for_validate=bool(invoice_doc.is_return))
+    # ERPNext's POS defaults may update pricing policy while filling values.
+    # Reassert the return invariant before any calculation or validation runs.
+    _apply_pricing_rule_policy(invoice_doc, profile_doc)
     _reapply_incoming_payment_amounts(invoice_doc, incoming_payment_rows)
     if effective_price_list:
         invoice_doc.selling_price_list = effective_price_list
@@ -2005,6 +2033,7 @@ def _submit_invoice_once(invoice, data, submit_in_background=False):
 
     set_invoice_client_request_id(invoice_doc, client_request_id)
     _set_authoritative_cashier(invoice_doc, authoritative_cashier)
+    _apply_pricing_rule_policy(invoice_doc, profile_doc)
     if ledger_doc:
         _update_submission_ledger(
             ledger_doc,
@@ -2295,6 +2324,8 @@ def submit_in_background_job(kwargs):
             )
             _set_authoritative_cashier(invoice_doc, cashier)
 
+        _apply_pricing_rule_policy(invoice_doc, profile_doc)
+
         if invoice_doc.docstatus == 1:
             if ledger_doc:
                 _update_submission_ledger(
@@ -2327,6 +2358,7 @@ def submit_in_background_job(kwargs):
         invoice_doc = _save_draft_with_latest_timestamp(invoice_doc)
         _normalize_return_payment_rows(invoice_doc, invoice_doc.get("conversion_rate") or 1)
 
+        _enforce_return_pricing_invariant(invoice_doc)
         invoice_doc.submit()
         if ledger_doc:
             _update_submission_ledger(

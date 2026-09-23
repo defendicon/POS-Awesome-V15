@@ -22,7 +22,8 @@ TENDER_AMOUNT_PRECISION = 9
 
 def _precision(row, fieldname, fallback=2):
     try:
-        return row.precision(fieldname)
+        value = row.precision(fieldname)
+        return fallback if value is None else value
     except Exception:
         return fallback
 

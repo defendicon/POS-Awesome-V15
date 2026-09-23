@@ -11,8 +11,18 @@ permissions:
 
 jobs:
   backend:
-    name: Python lint and Frappe tests
+    name: Frappe/ERPNext ${{ matrix.frappe_branch }} compatibility
     runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - frappe_branch: version-15
+            python_version: "3.10"
+            node_version: "20"
+          - frappe_branch: version-16
+            python_version: "3.14"
+            node_version: "24"
     services:
       mariadb:
         image: mariadb:10.6
@@ -35,8 +45,16 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: ${{ matrix.python_version }}
           cache: pip
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node_version }}
+
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install Python tooling
         run: |
@@ -53,7 +71,7 @@ jobs:
         run: python -m ruff check --select E9,F63,F7 posawesome
 
       - name: Initialize Frappe bench
-        run: bench init --frappe-branch version-15 --python python3 frappe-bench
+        run: bench init --frappe-branch "${{ matrix.frappe_branch }}" --python python frappe-bench
 
       - name: Start Frappe Redis services
         run: |
@@ -72,10 +90,14 @@ jobs:
             --mariadb-root-password frappe \
             --admin-password frappe \
             --no-mariadb-socket
-          bench get-app --branch version-15 https://github.com/frappe/erpnext
+          bench get-app --branch "${{ matrix.frappe_branch }}" https://github.com/frappe/erpnext
           bench --site example.com install-app erpnext
           bench get-app "$GITHUB_WORKSPACE"
           bench --site example.com install-app posawesome
 
       - name: POS Awesome backend unit smoke
-        run: python -m unittest discover -s posawesome/posawesome/api -p "test_offline_sync_*.py"
+        run: |
+          python -m unittest discover -s posawesome/posawesome/api -p "test_offline_sync_*.py"
+          python -m unittest posawesome.posawesome.api.test_exchange
+          cd frappe-bench/sites
+          ../env/bin/python -m unittest posawesome.posawesome.api.test_erpnext_compatibility

@@ -9,6 +9,47 @@ from posawesome.posawesome.overrides.multi_currency_payments import (
 
 
 class TestMultiCurrencyPOSPaymentsMixin(TestCase):
+    def test_precision_helper_falls_back_when_document_precision_is_missing(self):
+        class Row:
+            def __init__(self, precision):
+                self.value = precision
+
+            def precision(self, _fieldname):
+                return self.value
+
+        fake_frappe = ModuleType("frappe")
+        fake_frappe._ = lambda value: value
+        fake_utils = ModuleType("frappe.utils")
+        fake_utils.cint = lambda value: int(value or 0)
+        fake_utils.flt = lambda value, precision=None: round(
+            float(value or 0), precision if precision is not None else 6
+        )
+        fake_utils.getdate = lambda value=None: value
+        fake_utils.nowdate = lambda: "2026-09-23"
+        fake_invoice_utils = ModuleType(
+            "posawesome.posawesome.api.invoice_processing.utils"
+        )
+        fake_invoice_utils.get_latest_rate = MagicMock()
+
+        with patch.dict(
+            sys.modules,
+            {
+                "frappe": fake_frappe,
+                "frappe.utils": fake_utils,
+                "posawesome.posawesome.api.invoice_processing.utils": fake_invoice_utils,
+            },
+        ):
+            sys.modules.pop("posawesome.posawesome.api.payment_currency", None)
+            from posawesome.posawesome.api.payment_currency import (
+                _precision,
+                _tender_amount_precision,
+            )
+
+            self.assertEqual(_precision(Row(None), "posa_original_amount"), 2)
+            self.assertEqual(_precision(Row(None), "amount", fallback=4), 4)
+            self.assertEqual(_precision(Row(0), "amount"), 0)
+            self.assertEqual(_tender_amount_precision(Row(None)), 9)
+
     def test_missing_post_change_setting_uses_legacy_behavior(self):
         invoice = MagicMock()
         invoice.is_pos = 1

@@ -26,6 +26,12 @@ vi.mock("../src/posapp/services/documentPrint", () => ({
 		profile?.posa_raw_printing === 1,
 }));
 
+vi.mock("../src/posapp/services/exchangeReceiptPrint", () => ({
+	isExchangeReceiptDocument: (doc: Record<string, any> | null | undefined) =>
+		Boolean(doc?.exchange_reference && doc?.return_invoice_doc),
+	printExchangeReceipt: vi.fn(),
+}));
+
 vi.mock("../src/offline_print_template", () => ({
 	default: vi.fn(async () => "<html></html>"),
 }));
@@ -37,6 +43,7 @@ import {
 	printDocumentViaConfiguredQz,
 } from "../src/posapp/services/documentPrint";
 import { isOffline } from "../src/offline/index";
+import { printExchangeReceipt } from "../src/posapp/services/exchangeReceiptPrint";
 
 describe("usePaymentPrinting", () => {
 	beforeEach(() => {
@@ -79,6 +86,31 @@ describe("usePaymentPrinting", () => {
 			expect.stringContaining("&name=ACC-PINV-0001"),
 			expect.any(Object),
 		);
+	});
+
+	it("routes a completed exchange to the combined receipt printer", async () => {
+		const profile = {
+			print_format: "Standard",
+			posa_silent_print: false,
+		};
+		const exchange = {
+			name: "SINV-NEW",
+			exchange_reference: "POS-EXCH-00001",
+			replacement_invoice: "SINV-NEW",
+			return_invoice_doc: { name: "SINV-RETURN" },
+			exchange_summary: { difference_amount: 25 },
+		};
+		const { loadPrintPage } = usePaymentPrinting({
+			invoiceDoc: ref(exchange),
+			posProfile: ref(profile),
+			invoiceType: ref("Invoice"),
+		});
+
+		await loadPrintPage({ doc: exchange });
+
+		expect(printExchangeReceipt).toHaveBeenCalledWith(exchange, profile);
+		expect(silentPrint).not.toHaveBeenCalled();
+		expect(printDocumentViaConfiguredQz).not.toHaveBeenCalled();
 	});
 
 	it("uses the submitted name override instead of an unsaved document name", async () => {

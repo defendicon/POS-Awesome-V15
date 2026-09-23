@@ -1,3 +1,5 @@
+[pre_model_sync]
+
 posawesome.patches.add_item_price_index
 posawesome.patches.add_composite_indexes
 posawesome.patches.add_item_fulltext_index
@@ -38,3 +40,7 @@ posawesome.patches.add_below_cost_sale_policy
 posawesome.patches.add_per_payment_multi_currency_fields
 posawesome.patches.add_payment_entry_multi_currency_fields
 posawesome.patches.set_payment_tender_amount_precision
+posawesome.patches.add_item_exchange_feature
+
+[post_model_sync]
+posawesome.patches.add_item_exchange_report_to_workspace

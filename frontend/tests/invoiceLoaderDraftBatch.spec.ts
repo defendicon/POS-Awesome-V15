@@ -185,7 +185,7 @@ describe("load_invoice draft batch preservation", () => {
 					item_name: "Free Item",
 					qty: 1,
 					is_free_item: 1,
-					pricing_rules: "[\"RULE-REWARD\"]",
+					pricing_rules: '["RULE-REWARD"]',
 				},
 			],
 			packed_items: [],
@@ -194,5 +194,54 @@ describe("load_invoice draft batch preservation", () => {
 		const freeLine = context.items.find((item: any) => item.is_free_item);
 		expect(freeLine.source_rule).toBe("RULE-REWARD");
 		expect(freeLine.auto_free_source).toBe("RULE-REWARD::FREE-ITEM");
+	});
+
+	it("preserves the active exchange while reloading a replacement draft", async () => {
+		const clearInvoice = vi.fn();
+		const context: any = {
+			pos_profile: {
+				posa_use_percentage_discount: 0,
+				posa_use_delivery_charges: 0,
+			},
+			additional_discount_percentage: 0,
+			selected_delivery_charge: null,
+			delivery_charges_rate: 0,
+			additional_discount: 0,
+			discount_amount: 0,
+			clear_invoice: clearInvoice,
+			eventBus: { emit: vi.fn() },
+			invoiceType: "Invoice",
+			invoiceTypes: ["Invoice", "Order", "Quotation"],
+			invoice_doc: null,
+			posa_offers: [],
+			items: [],
+			packed_items: [],
+			makeid: () => "ROW-1",
+			set_batch_qty: vi.fn(),
+			customer: "",
+			set_delivery_charges: vi.fn().mockResolvedValue(undefined),
+			formatDateForBackend: (value: string) => value,
+			delivery_charges: [],
+			Total: 0,
+			subtotal: 0,
+			return_doc: null,
+			toastStore: { show: vi.fn() },
+		};
+
+		await load_invoice(
+			context,
+			{
+				customer: "CUST-0001",
+				posting_date: "2026-04-12",
+				items: [],
+				packed_items: [],
+			},
+			{ preserveStickies: true, preserveExchange: true },
+		);
+
+		expect(clearInvoice).toHaveBeenCalledWith({
+			preserveStickies: true,
+			preserveExchange: true,
+		});
 	});
 });

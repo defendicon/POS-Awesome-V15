@@ -137,7 +137,10 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 		const doc = unref(invoiceDoc);
 		if (!doc) return 0;
 
-		const invoiceTotal = flt(doc.rounded_total || doc.grand_total);
+		const rawInvoiceTotal = flt(doc.rounded_total || doc.grand_total);
+		const invoiceTotal = doc.is_return
+			? rawInvoiceTotal
+			: Math.max(rawInvoiceTotal - Math.max(0, flt(doc.posa_exchange_credit || 0)), 0);
 		const diff = flt(invoiceTotal - total_payments.value);
 		// For returns: negative diff means more refund needed, positive means over-refunded (cap to 0)
 		if (doc.is_return) return diff > 0 ? 0 : diff;
@@ -148,7 +151,10 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 		const doc = unref(invoiceDoc);
 		if (!doc) return 0;
 
-		const invoiceTotal = flt(doc.rounded_total || doc.grand_total);
+		const rawInvoiceTotal = flt(doc.rounded_total || doc.grand_total);
+		const invoiceTotal = doc.is_return
+			? rawInvoiceTotal
+			: Math.max(rawInvoiceTotal - Math.max(0, flt(doc.posa_exchange_credit || 0)), 0);
 		const change = flt(total_payments.value - invoiceTotal);
 		return change > 0 ? change : 0;
 	});

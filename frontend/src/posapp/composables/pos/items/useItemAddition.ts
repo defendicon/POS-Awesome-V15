@@ -1016,9 +1016,9 @@ export function useItemAddition() {
 	// Reset all invoice fields to default/empty values
 	const clearInvoice = (
 		context,
-		options: { preserveStickies?: boolean } = {},
+		options: { preserveStickies?: boolean; preserveExchange?: boolean } = {},
 	) => {
-		const { preserveStickies = false } = options;
+		const { preserveStickies = false, preserveExchange = false } = options;
 		const previousInvoiceType = context.invoiceType;
 		const wasReturn =
 			previousInvoiceType === "Return" ||
@@ -1027,6 +1027,7 @@ export function useItemAddition() {
 
 		if (context.invoiceStore) {
 			context.invoiceStore.clear({ preserveStickies });
+			if (!preserveExchange) context.invoiceStore.clearExchange?.();
 		} else {
 			context.items = [];
 			context.packed_items = [];

@@ -22,6 +22,8 @@ export type PaymentInitDoc = {
 	// Max cash refundable on a return (= amount paid on the original invoice).
 	// Undefined means "no cap known" → fall back to the full return total.
 	posa_refundable_amount?: number;
+	/** Credit supplied by the paired return invoice during an item exchange. */
+	posa_exchange_credit?: number;
 };
 
 export type PreferredPaymentRebalanceOptions = {
@@ -129,7 +131,9 @@ export const initializePaymentLinesForDialog = (
 	}
 
 	const total = toNumber(doc.rounded_total || doc.grand_total);
-	const normalizedTotal = resolveReturnDefaultAmount(doc, total);
+	const exchangeCredit = doc.is_return ? 0 : Math.max(0, toNumber(doc.posa_exchange_credit));
+	const settlementTotal = doc.is_return ? total : Math.max(total - exchangeCredit, 0);
+	const normalizedTotal = resolveReturnDefaultAmount(doc, settlementTotal);
 	const existingAmounts = payments.some((payment) =>
 		hasMeaningfulAmount(payment, precision),
 	);
@@ -233,7 +237,10 @@ export const rebalancePreferredPaymentLine = (
 	}
 
 	const precision = options.precision ?? 2;
-	const invoiceTotal = toNumber(doc.rounded_total || doc.grand_total);
+	const rawInvoiceTotal = toNumber(doc.rounded_total || doc.grand_total);
+	const invoiceTotal = doc.is_return
+		? rawInvoiceTotal
+		: Math.max(rawInvoiceTotal - Math.max(0, toNumber(doc.posa_exchange_credit)), 0);
 	const coveredAmount =
 		toNumber(options.loyaltyAmount) +
 		toNumber(options.redeemedCustomerCredit) +

@@ -164,6 +164,48 @@ describe("paymentInitialization", () => {
 		expect(doc.payments[0].base_amount).toBe(22400);
 	});
 
+	it("prefills only the exchange difference after applying return credit", () => {
+		const doc: any = {
+			rounded_total: 6200,
+			posa_exchange_credit: 5000,
+			conversion_rate: 1,
+			payments: [
+				{
+					mode_of_payment: "Cash",
+					type: "Cash",
+					amount: 0,
+					base_amount: 0,
+				},
+			],
+		};
+
+		initializePaymentLinesForDialog(doc, 2, isCashLikePayment);
+
+		expect(doc.payments[0].amount).toBe(1200);
+		expect(doc.payments[0].base_amount).toBe(1200);
+	});
+
+	it("keeps payment at zero when exchange credit exceeds the replacement sale", () => {
+		const doc: any = {
+			rounded_total: 4200,
+			posa_exchange_credit: 5000,
+			conversion_rate: 1,
+			payments: [
+				{
+					mode_of_payment: "Cash",
+					type: "Cash",
+					amount: 0,
+					base_amount: 0,
+				},
+			],
+		};
+
+		initializePaymentLinesForDialog(doc, 2, isCashLikePayment);
+
+		expect(doc.payments[0].amount).toBe(0);
+		expect(doc.payments[0].base_amount).toBe(0);
+	});
+
 	it("applies a shortcut amount to the POS Profile preferred payment line", () => {
 		const doc: any = {
 			currency: "USD",

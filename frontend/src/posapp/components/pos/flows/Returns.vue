@@ -314,8 +314,25 @@
 					<v-btn color="error" variant="tonal" @click="close_dialog">
 						{{ __("Close") }}
 					</v-btn>
-					<v-btn v-if="selected.length" color="success" @click="submit_dialog">
-						{{ __("Select") }}
+					<v-btn
+						v-if="selected.length"
+						color="success"
+						variant="tonal"
+						@click="submit_dialog(false)"
+					>
+						{{ __("Return items") }}
+					</v-btn>
+					<v-btn
+						v-if="
+							selected.length &&
+							pos_profile.posa_allow_item_exchange == 1 &&
+							!pos_profile.create_pos_invoice_instead_of_sales_invoice
+						"
+						color="primary"
+						prepend-icon="mdi-swap-horizontal-bold"
+						@click="submit_dialog(true)"
+					>
+						{{ __("Exchange items") }}
 					</v-btn>
 				</v-card-actions>
 			</v-card>
@@ -702,7 +719,7 @@ export default {
 			this.eventBus.emit("load_return_invoice", data);
 			this.invoicesDialog = false;
 		},
-		async submit_dialog() {
+		async submit_dialog(exchangeMode = false) {
 			if (this.selected.length > 0) {
 				const selectedInvoice = this.selected[0];
 				const doctype =
@@ -818,7 +835,7 @@ export default {
 				invoice_doc.pos_profile = this.pos_profile.name;
 				invoice_doc.company = this.company;
 
-				const data = { invoice_doc, return_doc };
+				const data = { invoice_doc, return_doc, exchange_mode: Boolean(exchangeMode) };
 
 				this.eventBus.emit("load_return_invoice", data);
 				this.invoicesDialog = false;

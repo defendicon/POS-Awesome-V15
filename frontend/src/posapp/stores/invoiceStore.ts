@@ -37,6 +37,13 @@ import type {
 	DeliveryCharge,
 	PartialInvoiceDoc,
 } from "../types/models";
+import {
+	clearStoredExchangeSession,
+	exchangeSessionMatchesScope,
+	readExchangeSession,
+	writeExchangeSession,
+	type ExchangeSessionScope,
+} from "../utils/exchangeSessionStorage";
 
 /**
  * Converts an arbitrary value to a finite number.
@@ -86,6 +93,7 @@ const getItemTotals = (item: any) => {
 export const useInvoiceStore = defineStore("invoice", () => {
 	const invoiceDoc = ref<PartialInvoiceDoc | null>(null);
 	const invoiceType = ref("Invoice");
+	const exchangeSession = ref<any | null>(null);
 	// Normalized state: keys array + items map
 	const itemOrder = ref<string[]>([]);
 	const itemsData = reactive(new Map<string, CartItem>());
@@ -634,6 +642,80 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		touch();
 	};
 
+	const startExchange = (payload: any = {}) => {
+		exchangeSession.value = {
+			stage: "return",
+			originalInvoice: payload.originalInvoice || null,
+			returnDraft: payload.returnDraft || null,
+			returnDoc: null,
+			saleDraft: null,
+			returnTotal: 0,
+			clientRequestId: payload.clientRequestId || null,
+			posProfile: payload.posProfile || "",
+			company: payload.company || "",
+			openingShift: payload.openingShift || "",
+			user: payload.user || "",
+		};
+		writeExchangeSession(exchangeSession.value);
+		touch();
+	};
+
+	const setExchangeReturn = (returnDoc: any) => {
+		if (!exchangeSession.value) return;
+		const total = Math.abs(
+			toNumber(returnDoc?.rounded_total || returnDoc?.grand_total || 0),
+		);
+		exchangeSession.value = {
+			...exchangeSession.value,
+			stage: "sale",
+			returnDoc: returnDoc ? JSON.parse(JSON.stringify(returnDoc)) : null,
+			returnTotal: total,
+		};
+		writeExchangeSession(exchangeSession.value);
+		touch();
+	};
+
+	const setExchangeSaleDraft = (saleDraft: any) => {
+		if (!exchangeSession.value || exchangeSession.value.stage !== "sale")
+			return;
+		exchangeSession.value = {
+			...exchangeSession.value,
+			saleDraft: saleDraft ? JSON.parse(JSON.stringify(saleDraft)) : null,
+		};
+		writeExchangeSession(exchangeSession.value);
+	};
+
+	const setExchangeReturnDraft = (returnDraft: any) => {
+		if (!exchangeSession.value || exchangeSession.value.stage !== "return")
+			return;
+		exchangeSession.value = {
+			...exchangeSession.value,
+			returnDraft: returnDraft
+				? JSON.parse(JSON.stringify(returnDraft))
+				: null,
+		};
+		writeExchangeSession(exchangeSession.value);
+	};
+
+	const restoreExchange = (scope: ExchangeSessionScope = {}) => {
+		const persisted = readExchangeSession();
+		if (!persisted) return null;
+		if (!exchangeSessionMatchesScope(persisted, scope)) {
+			clearStoredExchangeSession();
+			return null;
+		}
+		exchangeSession.value = persisted;
+		touch();
+		return persisted;
+	};
+
+	const clearExchange = () => {
+		clearStoredExchangeSession();
+		if (!exchangeSession.value) return;
+		exchangeSession.value = null;
+		touch();
+	};
+
 	/**
 	 * Ordered array of cart items, reconstructed from `itemOrder` and `itemsData`.
 	 * Items missing from the map are silently filtered out (should not occur in normal use).
@@ -670,6 +752,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	return {
 		invoiceDoc,
 		invoiceType,
+		exchangeSession,
 		deferStockValidationToPayment,
 		items,
 		itemOrder,
@@ -684,6 +767,12 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		setInvoiceDoc,
 		setInvoiceType,
 		resetInvoiceType,
+		startExchange,
+		setExchangeReturn,
+		setExchangeSaleDraft,
+		setExchangeReturnDraft,
+		restoreExchange,
+		clearExchange,
 		mergeInvoiceDoc,
 		touch,
 		setItems,
