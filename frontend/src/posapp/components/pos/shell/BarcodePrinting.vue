@@ -161,21 +161,6 @@
 									class="pos-themed-input"
 								></v-select>
 							</v-col>
-							<v-col cols="12" md="2">
-								<v-select
-									v-model="selectedPrinterProfile"
-									:items="printerProfiles"
-									item-title="printer_name"
-									return-object
-									:label="__('Printer Profile')"
-									density="compact"
-									variant="outlined"
-									hide-details
-									class="pos-themed-input"
-									clearable
-									@update:modelValue="onPrinterProfileChange"
-								></v-select>
-							</v-col>
 							<v-col cols="12" md="1">
 								<v-select
 									v-model="printerDpi"
@@ -986,12 +971,10 @@ const {
 	symbologyOptions,
 	outputFormat,
 	printerDpi,
-	selectedPrinterProfile,
-	printerProfiles,
 	getPrintableItems,
 	printLabels,
-	printLabelsThermalWithFailover,
-	printLabelsRawWithFailover,
+	printLabelsThermalWithFallback,
+	printLabelsRawWithFallback,
 	qzThermalAvailable,
 	downloadPdf,
 	getLabelSizeWarnings,
@@ -999,8 +982,6 @@ const {
 	hasActiveTemplate,
 	setDesignerTemplate,
 	clearDesignerTemplate,
-	fetchPrinterProfiles,
-	applyPrinterProfile,
 	rfidEnabled,
 	rfidEpcPrefix,
 	getEpcData,
@@ -1186,11 +1167,6 @@ const processBulkImport = async () => {
 	}
 };
 
-const onPrinterProfileChange = (profile: any) => {
-	const p = profile && typeof profile === "object" ? profile : null;
-	applyPrinterProfile(p);
-};
-
 const onImportFromSource = async (importedItems: any[]) => {
 	let itemsToAdd = importedItems;
 	if (serializationEnabled.value) {
@@ -1217,9 +1193,9 @@ const thermalPrint = async () => {
 	thermalPrinting.value = true;
 	try {
 		if (outputFormat.value === "zpl" || outputFormat.value === "epl") {
-			await printLabelsRawWithFailover(items.value);
+			await printLabelsRawWithFallback(items.value);
 		} else {
-			await printLabelsThermalWithFailover(items.value);
+			await printLabelsThermalWithFallback(items.value);
 		}
 	} finally {
 		thermalPrinting.value = false;
@@ -1474,7 +1450,6 @@ watch(
 
 onMounted(() => {
 	scaleSettings.ensureScaleBarcodeSettings();
-	fetchPrinterProfiles();
 });
 
 onUnmounted(() => {
