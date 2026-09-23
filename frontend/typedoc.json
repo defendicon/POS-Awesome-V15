@@ -8,6 +8,7 @@
     "src/posapp/utils/currencyConversion.ts",
     "src/posapp/utils/stock.ts",
     "src/posapp/utils/bootstrapWarnings.ts",
+    "src/posapp/utils/exchangeSessionStorage.ts",
     "src/posapp/utils/searchUtils.ts",
     "src/posapp/composables/pos/shared/useDiscounts.ts",
     "src/lib/pricingEngine.ts",

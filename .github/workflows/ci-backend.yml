@@ -99,4 +99,5 @@ jobs:
         run: |
           python -m unittest discover -s posawesome/posawesome/api -p "test_offline_sync_*.py"
           python -m unittest posawesome.posawesome.api.test_exchange
-          frappe-bench/env/bin/python -m unittest posawesome.posawesome.api.test_erpnext_compatibility
+          cd frappe-bench
+          env/bin/python -m unittest posawesome.posawesome.api.test_erpnext_compatibility
