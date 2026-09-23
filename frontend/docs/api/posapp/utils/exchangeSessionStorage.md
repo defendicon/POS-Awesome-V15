@@ -12,7 +12,7 @@
 
 > **clearStoredExchangeSession**(`storage?`): `void`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:101](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L101)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:101](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L101)
 
 #### Parameters
 
@@ -30,7 +30,7 @@ Defined in: [posapp/utils/exchangeSessionStorage.ts:101](https://github.com/defe
 
 > **exchangeSessionMatchesScope**(`session`, `scope`): `boolean`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:111](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L111)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:111](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L111)
 
 #### Parameters
 
@@ -52,7 +52,7 @@ Defined in: [posapp/utils/exchangeSessionStorage.ts:111](https://github.com/defe
 
 > **readExchangeSession**(`storage?`, `now?`): [`PersistedExchangeSession`](#persistedexchangesession) \| `null`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:50](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L50)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:50](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L50)
 
 #### Parameters
 
@@ -74,7 +74,7 @@ Defined in: [posapp/utils/exchangeSessionStorage.ts:50](https://github.com/defen
 
 > **writeExchangeSession**(`session`, `storage?`, `now?`): `boolean`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:80](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L80)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:80](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L80)
 
 #### Parameters
 
@@ -98,7 +98,7 @@ Defined in: [posapp/utils/exchangeSessionStorage.ts:80](https://github.com/defen
 
 ### ExchangeSessionScope
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:22](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L22)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:22](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L22)
 
 #### Properties
 
@@ -106,31 +106,31 @@ Defined in: [posapp/utils/exchangeSessionStorage.ts:22](https://github.com/defen
 
 > `optional` **company?**: `string` \| `null`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:24](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L24)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:24](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L24)
 
 ##### openingShift?
 
 > `optional` **openingShift?**: `string` \| `null`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:25](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L25)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:25](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L25)
 
 ##### posProfile?
 
 > `optional` **posProfile?**: `string` \| `null`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:23](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L23)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:23](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L23)
 
 ##### user?
 
 > `optional` **user?**: `string` \| `null`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:26](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L26)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:26](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L26)
 
 ***
 
 ### PersistedExchangeSession
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:6](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L6)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:6](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L6)
 
 #### Properties
 
@@ -138,79 +138,79 @@ Defined in: [posapp/utils/exchangeSessionStorage.ts:6](https://github.com/defend
 
 > **clientRequestId**: `string`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:9](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L9)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:9](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L9)
 
 ##### company
 
 > **company**: `string`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:11](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L11)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:11](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L11)
 
 ##### openingShift
 
 > **openingShift**: `string`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:12](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L12)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:12](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L12)
 
 ##### originalInvoice
 
 > **originalInvoice**: `any`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:14](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L14)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:14](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L14)
 
 ##### posProfile
 
 > **posProfile**: `string`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:10](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L10)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:10](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L10)
 
 ##### returnDoc
 
 > **returnDoc**: `any`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:16](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L16)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:16](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L16)
 
 ##### returnDraft
 
 > **returnDraft**: `any`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:15](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L15)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:15](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L15)
 
 ##### returnTotal
 
 > **returnTotal**: `number`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:18](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L18)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:18](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L18)
 
 ##### saleDraft
 
 > **saleDraft**: `any`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:17](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L17)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:17](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L17)
 
 ##### savedAt
 
 > **savedAt**: `number`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:19](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L19)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:19](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L19)
 
 ##### stage
 
 > **stage**: [`ExchangeStage`](#exchangestage)
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:8](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L8)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:8](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L8)
 
 ##### user
 
 > **user**: `string`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:13](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L13)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:13](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L13)
 
 ##### version
 
 > **version**: `1`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:7](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L7)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:7](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L7)
 
 ## Type Aliases
 
@@ -218,7 +218,7 @@ Defined in: [posapp/utils/exchangeSessionStorage.ts:7](https://github.com/defend
 
 > **ExchangeStage** = `"return"` \| `"sale"`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:4](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L4)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:4](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L4)
 
 ## Variables
 
@@ -226,7 +226,7 @@ Defined in: [posapp/utils/exchangeSessionStorage.ts:4](https://github.com/defend
 
 > `const` **EXCHANGE\_SESSION\_MAX\_AGE\_MS**: `number`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:2](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L2)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:2](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L2)
 
 ***
 
@@ -234,4 +234,4 @@ Defined in: [posapp/utils/exchangeSessionStorage.ts:2](https://github.com/defend
 
 > `const` **EXCHANGE\_SESSION\_STORAGE\_KEY**: `"posawesome:item-exchange:v1"` = `"posawesome:item-exchange:v1"`
 
-Defined in: [posapp/utils/exchangeSessionStorage.ts:1](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/exchangeSessionStorage.ts#L1)
+Defined in: [posapp/utils/exchangeSessionStorage.ts:1](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/exchangeSessionStorage.ts#L1)

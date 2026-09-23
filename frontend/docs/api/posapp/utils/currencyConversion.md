@@ -12,7 +12,7 @@
 
 > **getBaseCurrency**(`context`): `string` \| `undefined`
 
-Defined in: [posapp/utils/currencyConversion.ts:36](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/currencyConversion.ts#L36)
+Defined in: [posapp/utils/currencyConversion.ts:36](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/currencyConversion.ts#L36)
 
 Gets the base currency from the context.
 
@@ -32,7 +32,7 @@ Gets the base currency from the context.
 
 > **getCompanyCurrency**(`context`): `string` \| `undefined`
 
-Defined in: [posapp/utils/currencyConversion.ts:29](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/currencyConversion.ts#L29)
+Defined in: [posapp/utils/currencyConversion.ts:29](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/currencyConversion.ts#L29)
 
 Gets the company currency from the context.
 
@@ -52,7 +52,7 @@ Gets the company currency from the context.
 
 > **isCompanyCurrencySelected**(`context`): `boolean`
 
-Defined in: [posapp/utils/currencyConversion.ts:42](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/currencyConversion.ts#L42)
+Defined in: [posapp/utils/currencyConversion.ts:42](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/currencyConversion.ts#L42)
 
 Checks if the company currency is currently selected.
 
@@ -72,7 +72,7 @@ Checks if the company currency is currently selected.
 
 > **toBaseCurrency**(`context`, `amount`): `number` \| `null` \| `undefined`
 
-Defined in: [posapp/utils/currencyConversion.ts:48](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/currencyConversion.ts#L48)
+Defined in: [posapp/utils/currencyConversion.ts:48](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/currencyConversion.ts#L48)
 
 Converts an amount to the base currency.
 
@@ -96,7 +96,7 @@ Converts an amount to the base currency.
 
 > **toSelectedCurrency**(`context`, `amount`): `number` \| `null` \| `undefined`
 
-Defined in: [posapp/utils/currencyConversion.ts:61](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/currencyConversion.ts#L61)
+Defined in: [posapp/utils/currencyConversion.ts:61](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/currencyConversion.ts#L61)
 
 Converts an amount to the selected currency.
 
@@ -118,7 +118,7 @@ Converts an amount to the selected currency.
 
 ### CurrencyContext
 
-Defined in: [posapp/utils/currencyConversion.ts:12](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/currencyConversion.ts#L12)
+Defined in: [posapp/utils/currencyConversion.ts:12](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/currencyConversion.ts#L12)
 
 Interface for the context required by currency conversion functions.
 
@@ -128,7 +128,7 @@ Interface for the context required by currency conversion functions.
 
 > `optional` **company?**: `object`
 
-Defined in: [posapp/utils/currencyConversion.ts:13](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/currencyConversion.ts#L13)
+Defined in: [posapp/utils/currencyConversion.ts:13](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/currencyConversion.ts#L13)
 
 ###### default\_currency?
 
@@ -138,19 +138,19 @@ Defined in: [posapp/utils/currencyConversion.ts:13](https://github.com/defendico
 
 > `optional` **conversion\_rate?**: `number`
 
-Defined in: [posapp/utils/currencyConversion.ts:21](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/currencyConversion.ts#L21)
+Defined in: [posapp/utils/currencyConversion.ts:21](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/currencyConversion.ts#L21)
 
 ##### currency\_precision?
 
 > `optional` **currency\_precision?**: `number`
 
-Defined in: [posapp/utils/currencyConversion.ts:22](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/currencyConversion.ts#L22)
+Defined in: [posapp/utils/currencyConversion.ts:22](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/currencyConversion.ts#L22)
 
 ##### flt
 
 > **flt**: (`_value`, `_precision?`) => `number`
 
-Defined in: [posapp/utils/currencyConversion.ts:23](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/currencyConversion.ts#L23)
+Defined in: [posapp/utils/currencyConversion.ts:23](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/currencyConversion.ts#L23)
 
 ###### Parameters
 
@@ -170,7 +170,7 @@ Defined in: [posapp/utils/currencyConversion.ts:23](https://github.com/defendico
 
 > `optional` **pos\_profile?**: `object`
 
-Defined in: [posapp/utils/currencyConversion.ts:16](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/currencyConversion.ts#L16)
+Defined in: [posapp/utils/currencyConversion.ts:16](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/currencyConversion.ts#L16)
 
 ###### currency?
 
@@ -180,10 +180,10 @@ Defined in: [posapp/utils/currencyConversion.ts:16](https://github.com/defendico
 
 > `optional` **price\_list\_currency?**: `string`
 
-Defined in: [posapp/utils/currencyConversion.ts:19](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/currencyConversion.ts#L19)
+Defined in: [posapp/utils/currencyConversion.ts:19](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/currencyConversion.ts#L19)
 
 ##### selected\_currency?
 
 > `optional` **selected\_currency?**: `string`
 
-Defined in: [posapp/utils/currencyConversion.ts:20](https://github.com/defendicon/POS-Awesome-V15/blob/40121e7c2d6955baab54474738b6cd1e42f5c68e/frontend/src/posapp/utils/currencyConversion.ts#L20)
+Defined in: [posapp/utils/currencyConversion.ts:20](https://github.com/defendicon/POS-Awesome-V15/blob/b841aa1d6d7678aabf664b452c73c2f5ed8d8758/frontend/src/posapp/utils/currencyConversion.ts#L20)
