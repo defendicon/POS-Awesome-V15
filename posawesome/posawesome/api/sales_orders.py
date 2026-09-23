@@ -4,9 +4,15 @@
 import json
 
 import frappe
-from frappe.utils import getdate, nowdate
+from frappe import _
+from frappe.utils import flt, getdate, nowdate
 
 from posawesome.posawesome.api.payment_entry import create_payment_entry
+from posawesome.posawesome.api.pos_access import (
+    assert_document_in_pos_profile,
+    get_authorized_pos_profile,
+    require_pos_profile_feature,
+)
 from posawesome.posawesome.api.tax_contracts import apply_pos_tax_inclusion_contract
 
 
@@ -91,16 +97,65 @@ def _map_delivery_dates(data):
             item.setdefault("posa_delivery_date", item_delivery)
 
 
+def _authorized_sales_order_payload(value):
+    data = json.loads(value) if isinstance(value, str) else value
+    if not isinstance(data, dict):
+        frappe.throw("Invalid Sales Order payload")
+    data = dict(data)
+
+    profile = get_authorized_pos_profile(data.get("pos_profile"), company=data.get("company"))
+    require_pos_profile_feature(
+        profile,
+        ("posa_allow_sales_order", "posa_create_only_sales_order"),
+        "Sales Order creation",
+    )
+    data["doctype"] = "Sales Order"
+    data["company"] = profile.get("company")
+    data["pos_profile"] = profile.get("name")
+    _validate_sales_order_payments(data.get("payments"), profile)
+    return data, profile
+
+
+def _validate_sales_order_payments(payments, profile):
+    if payments in (None, ""):
+        return
+    if not isinstance(payments, list):
+        frappe.throw(_("Sales Order payments must be a list."))
+
+    allowed_payment_methods = {
+        row.get("mode_of_payment")
+        for row in (profile.get("payments") or [])
+        if hasattr(row, "get") and row.get("mode_of_payment")
+    }
+    for payment in payments:
+        if not hasattr(payment, "get"):
+            frappe.throw(_("Invalid Sales Order payment row."))
+        mode_of_payment = payment.get("mode_of_payment")
+        if not mode_of_payment or mode_of_payment not in allowed_payment_methods:
+            frappe.throw(
+                _("Payment method {0} is not available in this POS Profile.").format(mode_of_payment or ""),
+                frappe.PermissionError,
+            )
+        if flt(payment.get("amount")) < 0:
+            frappe.throw(_("Sales Order payment amount cannot be negative."))
+
+
+def _get_sales_order(data, profile):
+    name = data.get("name")
+    if name and frappe.db.exists("Sales Order", name):
+        doc = frappe.get_doc("Sales Order", name)
+        assert_document_in_pos_profile(doc, profile)
+        doc.update(data)
+        return doc
+    return frappe.get_doc(data)
+
+
 @frappe.whitelist()
 def update_sales_order(data):
     """Create or update a Sales Order document."""
-    data = json.loads(data)
+    data, profile = _authorized_sales_order_payload(data)
     _map_delivery_dates(data)
-    if data.get("name") and frappe.db.exists("Sales Order", data.get("name")):
-        so_doc = frappe.get_doc("Sales Order", data.get("name"))
-        so_doc.update(data)
-    else:
-        so_doc = frappe.get_doc(data)
+    so_doc = _get_sales_order(data, profile)
 
     so_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
@@ -148,13 +203,9 @@ def _create_payment_entries(so_doc, payments):
 @frappe.whitelist()
 def submit_sales_order(order):
     """Submit sales order and create payment entries."""
-    order = json.loads(order)
+    order, profile = _authorized_sales_order_payload(order)
     _map_delivery_dates(order)
-    if order.get("name") and frappe.db.exists("Sales Order", order.get("name")):
-        so_doc = frappe.get_doc("Sales Order", order.get("name"))
-        so_doc.update(order)
-    else:
-        so_doc = frappe.get_doc(order)
+    so_doc = _get_sales_order(order, profile)
 
     payments = order.get("payments")
 

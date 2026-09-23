@@ -101,3 +101,6 @@ jobs:
           python -m unittest posawesome.posawesome.api.test_exchange
           cd frappe-bench/sites
           ../env/bin/python -m unittest posawesome.posawesome.api.test_erpnext_compatibility
+          ../env/bin/python -m unittest \
+            posawesome.posawesome.api.test_pos_access \
+            posawesome.posawesome.api.test_critical_pos_writes
