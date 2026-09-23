@@ -103,4 +103,5 @@ jobs:
           ../env/bin/python -m unittest posawesome.posawesome.api.test_erpnext_compatibility
           ../env/bin/python -m unittest \
             posawesome.posawesome.api.test_pos_access \
-            posawesome.posawesome.api.test_critical_pos_writes
+            posawesome.posawesome.api.test_critical_pos_writes \
+            posawesome.posawesome.api.test_printer_security

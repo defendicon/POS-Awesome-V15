@@ -5,6 +5,7 @@ import {
 	shouldUseRawDocumentPrinting,
 } from "./documentPrint";
 import { printHtmlViaQz, sendRawToQz } from "./qzTray";
+import { sanitizePrintHtml } from "../utils/sanitizePrintHtml";
 
 const ESC = "\x1B";
 const GS = "\x1D";
@@ -188,7 +189,7 @@ export function renderExchangeReceiptHtml(
 				? translate("Customer credit")
 				: translate("Even exchange");
 
-	return `<!DOCTYPE html>
+	return sanitizePrintHtml(`<!DOCTYPE html>
 <html><head><meta charset="UTF-8"><title>${escapeHtml(translate("Item Exchange Receipt"))}</title>
 <style>
 @page{margin:8mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#17211b;margin:0;font-size:12px}.receipt{max-width:780px;margin:0 auto}.header{text-align:center;border-bottom:2px solid #168253;padding-bottom:12px}.header h1{font-size:22px;margin:4px 0}.header p,.meta p{margin:3px 0}.meta{display:grid;grid-template-columns:1fr 1fr;gap:4px 20px;margin:14px 0}h2{font-size:15px;margin:16px 0 6px;color:#116941}h3{font-size:13px;margin:0 0 7px}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #d7dfda;padding:7px 5px;text-align:left}th{background:#edf5f1}.number{text-align:right;white-space:nowrap}.empty{text-align:center;color:#69736d}.summary{margin-top:18px;border:1px solid #b9d5c7;border-radius:8px;padding:10px}.line{display:flex;justify-content:space-between;gap:20px;padding:4px 0}.result{border-top:2px solid #168253;margin-top:6px;padding-top:8px;font-size:15px;color:#0d6840}.payments{margin-top:12px;padding-top:10px;border-top:1px dashed #9ba9a1}.footer{text-align:center;margin-top:18px;padding-top:10px;border-top:1px solid #d7dfda;color:#56625b}@media print{.receipt{max-width:none}}
@@ -211,7 +212,7 @@ export function renderExchangeReceiptHtml(
 <div class="line result"><span>${escapeHtml(outcomeLabel)}</span><strong>${escapeHtml(amount(model.differenceAmount, model.currency, model.currencyPrecision))}</strong></div>
 ${paymentRows(model)}</section>
 <footer class="footer">${escapeHtml(model.settlementType)} · ${escapeHtml(translate("Thank you"))}</footer>
-</main></body></html>`;
+</main></body></html>`);
 }
 
 function rawWidth(profile?: Record<string, any> | null) {

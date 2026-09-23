@@ -4,9 +4,14 @@
 import frappe
 from frappe.model.document import Document
 
+from posawesome.posawesome.api.printer_api import validate_printer_endpoint
+
 
 class POSAPrinterProfile(Document):
     def validate(self):
+        endpoint = validate_printer_endpoint(self.ip_address, self.port)
+        if endpoint:
+            self.ip_address, self.port = endpoint
         self.validate_default_per_group()
 
     def validate_default_per_group(self):

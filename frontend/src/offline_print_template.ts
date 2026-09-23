@@ -4,6 +4,7 @@ import {
 	memoryInitPromise,
 } from "./offline/index";
 import nunjucks from "nunjucks";
+import { sanitizePrintHtml } from "./posapp/utils/sanitizePrintHtml";
 
 declare const frappe: any;
 
@@ -100,18 +101,26 @@ function defaultOfflineHTML(invoice: any, terms = "") {
             </tr>`
 		: "";
 	const paymentRows = (invoice.payments || [])
-		.filter((row: any) => Number(row?.amount || row?.posa_original_amount || 0) !== 0)
+		.filter(
+			(row: any) =>
+				Number(row?.amount || row?.posa_original_amount || 0) !== 0,
+		)
 		.map((row: any) => {
-			const paymentCurrency = row.posa_payment_currency || invoice.currency || "";
+			const paymentCurrency =
+				row.posa_payment_currency || invoice.currency || "";
 			const original = row.posa_original_amount ?? row.amount;
-			const equivalent = paymentCurrency !== invoice.currency
-				? ` <small>(${row.amount} ${invoice.currency || ""})</small>`
-				: "";
+			const equivalent =
+				paymentCurrency !== invoice.currency
+					? ` <small>(${row.amount} ${invoice.currency || ""})</small>`
+					: "";
 			return `<tr><td>${row.mode_of_payment || "Payment"} (${paymentCurrency})</td><td style="text-align:right">${original}${equivalent}</td></tr>`;
 		})
 		.join("");
 	const physicalChangeRows = (invoice.posa_change_returns || [])
-		.map((row: any) => `<tr><td>Change (${row.currency || ""})</td><td style="text-align:right">${row.original_amount}</td></tr>`)
+		.map(
+			(row: any) =>
+				`<tr><td>Change (${row.currency || ""})</td><td style="text-align:right">${row.original_amount}</td></tr>`,
+		)
 		.join("");
 
 	const termsSection = terms
@@ -209,11 +218,13 @@ export default async function renderOfflineInvoiceHTML(invoice: any) {
 		console.warn(
 			"No offline print template cached; using fallback template",
 		);
-		return defaultOfflineHTML(doc, doc.terms_and_conditions);
+		return sanitizePrintHtml(
+			defaultOfflineHTML(doc, doc.terms_and_conditions),
+		);
 	}
 
 	try {
-		const env = nunjucks.configure({ autoescape: false });
+		const env = nunjucks.configure({ autoescape: true });
 		env.addFilter("format_currency", (value: unknown, currency: string) => {
 			const number =
 				typeof value === "number" ? value : parseFloat(String(value));
@@ -244,9 +255,11 @@ export default async function renderOfflineInvoiceHTML(invoice: any) {
 				get_list: () => [],
 			},
 		};
-		return env.renderString(template, context);
+		return sanitizePrintHtml(env.renderString(template, context));
 	} catch (e) {
 		console.error("Failed to render offline invoice", e);
-		return defaultOfflineHTML(doc, doc.terms_and_conditions);
+		return sanitizePrintHtml(
+			defaultOfflineHTML(doc, doc.terms_and_conditions),
+		);
 	}
 }
