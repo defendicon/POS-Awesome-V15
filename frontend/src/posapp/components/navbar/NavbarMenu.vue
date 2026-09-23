@@ -306,8 +306,6 @@ const FALLBACK_LANGUAGES = [
 	{ code: "pt", name: "Português", native_name: "Português" },
 ];
 
-const PRINTER_PROFILE_MANAGER_ROLES = new Set(["System Manager", "POS Manager"]);
-
 import { useLastInvoicePrinting } from "../../composables/core/useLastInvoicePrinting";
 import { useUpdateStore } from "../../stores/updateStore";
 import { useEmployeeStore } from "../../stores/employeeStore";
@@ -387,17 +385,6 @@ export default {
 		},
 		isDesktop() {
 			return this.windowWidth >= 1024;
-		},
-		canManagePrinterProfiles() {
-			const frappeContext = typeof frappe !== "undefined" ? frappe : window.frappe;
-			const roles = new Set([
-				...(Array.isArray(frappeContext?.boot?.user?.roles) ? frappeContext.boot.user.roles : []),
-				...(Array.isArray(frappeContext?.user_roles) ? frappeContext.user_roles : []),
-			]);
-			return (
-				frappeContext?.session?.user === "Administrator" ||
-				[...PRINTER_PROFILE_MANAGER_ROLES].some((role) => roles.has(role))
-			);
 		},
 		panelTitle() {
 			return this.activePanel === "settings" ? __("Settings") : __("Quick Actions");
@@ -512,26 +499,14 @@ export default {
 									handler: "openCustomerDisplay",
 								}
 							: null,
-						this.isEnabledSetting(this.posProfile?.posa_silent_print)
-							? {
-									id: "qz-tray-setup",
-									label: __("QZ Tray Setup"),
-									subtitle: __("Connect printer and manage certificate"),
-									icon: "mdi-printer-wireless",
-									tone: "primary",
-									handler: "openQzTraySetup",
-								}
-							: null,
-						this.canManagePrinterProfiles
-							? {
-									id: "printer-profiles",
-									label: __("Printer Settings"),
-									subtitle: __("Manage printer profiles and routing"),
-									icon: "mdi-printer-settings",
-									tone: "primary",
-									handler: "openPrinterProfiles",
-								}
-							: null,
+						{
+							id: "qz-tray-setup",
+							label: __("QZ Tray Setup"),
+							subtitle: __("Connect printer and manage certificate"),
+							icon: "mdi-printer-wireless",
+							tone: "primary",
+							handler: "openQzTraySetup",
+						},
 					].filter(Boolean),
 				},
 				{
@@ -692,10 +667,6 @@ export default {
 					this.closeMenu();
 					this.showQzTrayDialog = true;
 					break;
-				case "openPrinterProfiles":
-					this.closeMenu();
-					this.openPrinterProfiles();
-					break;
 				case "clearCacheAction":
 					this.closeMenu();
 					this.$emit("clear-cache");
@@ -726,14 +697,6 @@ export default {
 		},
 		openDashboard() {
 			window.location.href = "/app/posapp/dashboard";
-		},
-		openPrinterProfiles() {
-			const frappeContext = typeof frappe !== "undefined" ? frappe : window.frappe;
-			if (typeof frappeContext?.set_route === "function") {
-				frappeContext.set_route("List", "POSA Printer Profile");
-				return;
-			}
-			window.location.assign("/app/posa-printer-profile");
 		},
 		initializeWesternNumerals() {
 			try {

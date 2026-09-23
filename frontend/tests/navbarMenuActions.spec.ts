@@ -137,6 +137,7 @@ describe("NavbarMenu action surfaces", () => {
 		expect(actionIds).not.toContain("toggle-offline");
 		expect(actionIds).not.toContain("system-status");
 		expect(actionIds).not.toContain("printer-profiles");
+		expect(actionIds).toContain("qz-tray-setup");
 	});
 
 	it("emits share-last-invoice from the quick action below print last invoice", async () => {
@@ -173,38 +174,34 @@ describe("NavbarMenu action surfaces", () => {
 		expect(context.$emit).toHaveBeenCalledWith("share-last-invoice");
 	});
 
-	it("shows printer settings to printer-profile managers and opens the DocType list", async () => {
+	it("keeps QZ Tray setup visible when silent printing is disabled", async () => {
 		const employeeStore = useEmployeeStore();
 		employeeStore.setCurrentCashier({
-			user: "manager@example.com",
-			full_name: "POS Manager",
+			user: "cashier@example.com",
+			full_name: "Main Cashier",
 			is_supervisor: false,
 		});
-		(window as any).frappe.session.user = "manager@example.com";
-		(window as any).frappe.user_roles = ["POS Manager"];
-		(window as any).frappe.set_route = vi.fn();
 
-		const wrapper = mountMenu();
+		const wrapper = mountMenu({
+			posProfile: { posa_silent_print: 0 },
+		});
 		await flushPromises();
 
 		const terminal = (wrapper.vm as any).settingsSections.find(
 			(section: any) => section.id === "terminal",
 		);
-		const printerAction = terminal.actions.find(
-			(action: any) => action.id === "printer-profiles",
+		const qzAction = terminal.actions.find(
+			(action: any) => action.id === "qz-tray-setup",
 		);
-		expect(printerAction).toEqual(
+		expect(qzAction).toEqual(
 			expect.objectContaining({
-				label: "Printer Settings",
-				handler: "openPrinterProfiles",
+				label: "QZ Tray Setup",
+				handler: "openQzTraySetup",
 			}),
 		);
 
-		(wrapper.vm as any).handleAction(printerAction);
+		(wrapper.vm as any).handleAction(qzAction);
 
-		expect((window as any).frappe.set_route).toHaveBeenCalledWith(
-			"List",
-			"POSA Printer Profile",
-		);
+		expect((wrapper.vm as any).showQzTrayDialog).toBe(true);
 	});
 });
