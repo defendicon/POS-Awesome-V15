@@ -1,4 +1,5 @@
 import unittest
+from inspect import unwrap
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -105,7 +106,7 @@ class TestCriticalPosWrites(unittest.TestCase):
             patch.object(price, "_get_allowed_price_lists", return_value={"Standard Selling"}),
         ):
             with self.assertRaisesRegex(PermissionError, "not available"):
-                price.update_price_list_rate(
+                unwrap(price.update_price_list_rate)(
                     "ITEM-1",
                     "Wholesale",
                     100,
@@ -144,7 +145,7 @@ class TestCriticalPosWrites(unittest.TestCase):
             patch.object(shifts, "get_authenticated_pos_user", return_value="cashier@example.com"),
             patch.object(shifts, "update_opening_shift_data"),
         ):
-            shifts.create_opening_voucher(
+            unwrap(shifts.create_opening_voucher)(
                 "POS-1",
                 "RetailMind",
                 [{"mode_of_payment": "Cash", "opening_amount": 10}],
@@ -165,7 +166,7 @@ class TestCriticalPosWrites(unittest.TestCase):
             patch.object(shifts, "get_authenticated_pos_user", return_value="cashier@example.com"),
         ):
             with self.assertRaisesRegex(PermissionError, "outside this POS Profile"):
-                shifts.create_opening_voucher(
+                unwrap(shifts.create_opening_voucher)(
                     "POS-1",
                     "RetailMind",
                     [{"mode_of_payment": "Wire Transfer", "opening_amount": 10}],
