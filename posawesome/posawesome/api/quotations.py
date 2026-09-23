@@ -3,6 +3,12 @@ import json
 import frappe
 from frappe.utils import getdate
 
+from posawesome.posawesome.api.pos_access import (
+    assert_document_in_pos_profile,
+    get_authorized_pos_profile,
+    require_pos_profile_feature,
+)
+
 
 def _map_delivery_dates(data):
     """Ensure mandatory delivery_date fields are populated."""
@@ -42,6 +48,34 @@ def _ensure_customer_fields(data):
         data.setdefault("customer_name", customer)
 
     data.setdefault("quotation_to", "Customer")
+
+
+def _authorized_quotation_payload(value):
+    data = json.loads(value) if isinstance(value, str) else value
+    if not isinstance(data, dict):
+        frappe.throw("Invalid Quotation payload")
+    data = dict(data)
+
+    profile = get_authorized_pos_profile(data.get("pos_profile"), company=data.get("company"))
+    require_pos_profile_feature(
+        profile,
+        "custom_allow_create_quotation",
+        "Quotation creation",
+    )
+    data["doctype"] = "Quotation"
+    data["company"] = profile.get("company")
+    data["pos_profile"] = profile.get("name")
+    return data, profile
+
+
+def _get_quotation(data, profile):
+    name = data.get("name")
+    if name and frappe.db.exists("Quotation", name):
+        doc = frappe.get_doc("Quotation", name)
+        assert_document_in_pos_profile(doc, profile)
+        doc.update(data)
+        return doc
+    return frappe.get_doc(data)
 
 
 def _normalize_quotation_row(row):
@@ -115,14 +149,10 @@ def search_quotations(
 @frappe.whitelist()
 def update_quotation(data):
     """Create or update a Quotation document."""
-    data = json.loads(data)
+    data, profile = _authorized_quotation_payload(data)
     _map_delivery_dates(data)
     _ensure_customer_fields(data)
-    if data.get("name") and frappe.db.exists("Quotation", data.get("name")):
-        doc = frappe.get_doc("Quotation", data.get("name"))
-        doc.update(data)
-    else:
-        doc = frappe.get_doc(data)
+    doc = _get_quotation(data, profile)
 
     doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
@@ -134,14 +164,10 @@ def update_quotation(data):
 @frappe.whitelist()
 def submit_quotation(order):
     """Submit quotation document."""
-    order = json.loads(order)
+    order, profile = _authorized_quotation_payload(order)
     _map_delivery_dates(order)
     _ensure_customer_fields(order)
-    if order.get("name") and frappe.db.exists("Quotation", order.get("name")):
-        doc = frappe.get_doc("Quotation", order.get("name"))
-        doc.update(order)
-    else:
-        doc = frappe.get_doc(order)
+    doc = _get_quotation(order, profile)
 
     doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True

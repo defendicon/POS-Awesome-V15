@@ -25,11 +25,20 @@ describe("NavbarMenu action surfaces", () => {
 				pos_profile: {},
 			},
 			call: vi.fn(async ({ method }: { method: string }) => {
-				if (method === "posawesome.posawesome.api.utilities.get_current_user_language") {
+				if (
+					method ===
+					"posawesome.posawesome.api.utilities.get_current_user_language"
+				) {
 					return {
 						message: {
 							success: true,
-							available_languages: [{ code: "en", name: "English", native_name: "English" }],
+							available_languages: [
+								{
+									code: "en",
+									name: "English",
+									native_name: "English",
+								},
+							],
 							language_code: "en",
 						},
 					};
@@ -95,7 +104,9 @@ describe("NavbarMenu action surfaces", () => {
 		const wrapper = mountMenu();
 		await flushPromises();
 
-		expect((wrapper.vm as any).quickActions.map((action: any) => action.id)).toEqual([
+		expect(
+			(wrapper.vm as any).quickActions.map((action: any) => action.id),
+		).toEqual([
 			"switch-cashier",
 			"lock-screen",
 			"print-last-invoice",
@@ -103,8 +114,12 @@ describe("NavbarMenu action surfaces", () => {
 			"sync-offline-sales",
 			"close-shift",
 		]);
-		expect((wrapper.vm as any).quickActions[3].label).toBe("Share Last Invoice");
-		expect((wrapper.vm as any).quickActions[4].label).toBe("Sync Offline Sales");
+		expect((wrapper.vm as any).quickActions[3].label).toBe(
+			"Share Last Invoice",
+		);
+		expect((wrapper.vm as any).quickActions[4].label).toBe(
+			"Sync Offline Sales",
+		);
 
 		const sections = (wrapper.vm as any).settingsSections;
 		expect(sections.map((section: any) => section.id)).toEqual([
@@ -121,6 +136,8 @@ describe("NavbarMenu action surfaces", () => {
 		expect(actionIds).not.toContain("clear-cache");
 		expect(actionIds).not.toContain("toggle-offline");
 		expect(actionIds).not.toContain("system-status");
+		expect(actionIds).not.toContain("printer-profiles");
+		expect(actionIds).toContain("qz-tray-setup");
 	});
 
 	it("emits share-last-invoice from the quick action below print last invoice", async () => {
@@ -140,8 +157,12 @@ describe("NavbarMenu action surfaces", () => {
 			"share-last-invoice",
 		]);
 
-		const shareAction = actions.find((action: any) => action.id === "share-last-invoice");
-		expect(shareAction).toEqual(expect.objectContaining({ handler: "shareLastInvoiceAction" }));
+		const shareAction = actions.find(
+			(action: any) => action.id === "share-last-invoice",
+		);
+		expect(shareAction).toEqual(
+			expect.objectContaining({ handler: "shareLastInvoiceAction" }),
+		);
 		const context = {
 			closeMenu: vi.fn(),
 			$emit: vi.fn(),
@@ -151,5 +172,36 @@ describe("NavbarMenu action surfaces", () => {
 
 		expect(context.closeMenu).toHaveBeenCalledTimes(1);
 		expect(context.$emit).toHaveBeenCalledWith("share-last-invoice");
+	});
+
+	it("keeps QZ Tray setup visible when silent printing is disabled", async () => {
+		const employeeStore = useEmployeeStore();
+		employeeStore.setCurrentCashier({
+			user: "cashier@example.com",
+			full_name: "Main Cashier",
+			is_supervisor: false,
+		});
+
+		const wrapper = mountMenu({
+			posProfile: { posa_silent_print: 0 },
+		});
+		await flushPromises();
+
+		const terminal = (wrapper.vm as any).settingsSections.find(
+			(section: any) => section.id === "terminal",
+		);
+		const qzAction = terminal.actions.find(
+			(action: any) => action.id === "qz-tray-setup",
+		);
+		expect(qzAction).toEqual(
+			expect.objectContaining({
+				label: "QZ Tray Setup",
+				handler: "openQzTraySetup",
+			}),
+		);
+
+		(wrapper.vm as any).handleAction(qzAction);
+
+		expect((wrapper.vm as any).showQzTrayDialog).toBe(true);
 	});
 });

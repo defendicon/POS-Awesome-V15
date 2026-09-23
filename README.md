@@ -341,7 +341,7 @@ The following production features are also available and are controlled by POS P
 - **Below-Cost Sale Guard**: configurable block, warning, or POS Supervisor override policy with minimum margin, missing-cost handling, mandatory override reason, approver, and invoice audit fields.
 - **Return Validity**: optional POS Settings/POS Profile return-validity days stored on submitted invoices and enforced when selecting an invoice for return.
 - **Multi-Currency Tender And Change**: payment methods can retain original tender currency, exchange rate, account currency, and invoice equivalent; physical change can be recorded in configured currencies.
-- **Barcode Printer Profiles**: ZPL, EPL, and HTML printer profiles support label dimensions, DPI, printer groups/failover, item-group or warehouse routing, optional RFID settings, and barcode print audit logs.
+- **Barcode And Label Printing**: ZPL, EPL, and HTML output uses the centrally selected QZ Tray printer, with configurable label dimensions, DPI, optional RFID encoding, browser fallback, and barcode print audit logs.
 - **Print Format Rules**: customer-group-specific print format selection can override the default POS Profile print format where configured.
 - **Invoice Submission Ledger**: background and duplicate-safe submissions retain request identity and processing status for operational recovery and audit.
 - **Sales Person Assignment**: restrict the selectable Sales Persons from the POS Profile and assign the selected person while completing the sale.

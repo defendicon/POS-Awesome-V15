@@ -9,7 +9,6 @@ from frappe.utils import cint, cstr
 
 from posawesome.posawesome.api.utils import expand_item_groups, get_active_pos_profile, get_item_groups
 
-
 POS_PROFILE_MANAGER_ROLES = frozenset(
     {
         "System Manager",
@@ -141,11 +140,41 @@ def get_authorized_pos_profile(pos_profile=None, company=None):
             {"parent": profile_name, "user": user},
         )
         if not is_assigned:
-            _permission_denied(
-                _("You are not assigned to POS Profile {0}.").format(profile_name)
-            )
+            _permission_denied(_("You are not assigned to POS Profile {0}.").format(profile_name))
 
     return profile_doc
+
+
+def require_pos_profile_feature(profile_doc, fieldnames, feature_label: str):
+    """Require a server-loaded POS Profile to enable a protected feature."""
+
+    if isinstance(fieldnames, str):
+        fieldnames = (fieldnames,)
+
+    if not any(cint(profile_doc.get(fieldname)) for fieldname in fieldnames):
+        _permission_denied(
+            _("{0} is disabled for POS Profile {1}.").format(
+                feature_label,
+                cstr(profile_doc.get("name")).strip(),
+            )
+        )
+    return profile_doc
+
+
+def assert_document_in_pos_profile(doc, profile_doc):
+    """Keep an existing POS document inside its canonical company/profile boundary."""
+
+    doc.check_permission("read")
+    profile_name = cstr(profile_doc.get("name")).strip()
+    profile_company = cstr(profile_doc.get("company")).strip()
+    document_company = cstr(doc.get("company")).strip()
+    document_profile = cstr(doc.get("pos_profile")).strip()
+
+    if document_company and document_company != profile_company:
+        _permission_denied(_("This document is not available for POS Profile {0}.").format(profile_name))
+    if document_profile and document_profile != profile_name:
+        _permission_denied(_("This document is not available for POS Profile {0}.").format(profile_name))
+    return doc
 
 
 def get_authorized_pos_item(item_code, profile_doc):

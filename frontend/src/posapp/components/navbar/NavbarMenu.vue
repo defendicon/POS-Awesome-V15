@@ -499,16 +499,14 @@ export default {
 									handler: "openCustomerDisplay",
 								}
 							: null,
-						this.isEnabledSetting(this.posProfile?.posa_silent_print)
-							? {
-									id: "qz-tray-setup",
-									label: __("QZ Tray Setup"),
-									subtitle: __("Connect printer and manage certificate"),
-									icon: "mdi-printer-wireless",
-									tone: "primary",
-									handler: "openQzTraySetup",
-								}
-							: null,
+						{
+							id: "qz-tray-setup",
+							label: __("QZ Tray Setup"),
+							subtitle: __("Connect printer and manage certificate"),
+							icon: "mdi-printer-wireless",
+							tone: "primary",
+							handler: "openQzTraySetup",
+						},
 					].filter(Boolean),
 				},
 				{
