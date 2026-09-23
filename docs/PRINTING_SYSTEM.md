@@ -2,7 +2,7 @@
 
 ## Overview
 
-The printing system extends ERPNext POS Awesome with enterprise label printing capabilities: WYSIWYG label designer, template library, GS1 SSCC-18 shipping labels, multi-format export, printer profiles with failover, data source import, serialization engine, and RFID encoding.
+The printing system extends ERPNext POS Awesome with enterprise label printing capabilities: WYSIWYG label designer, template library, GS1 SSCC-18 shipping labels, multi-format export, QZ Tray output, data source import, serialization engine, and RFID encoding.
 
 ## Architecture
 
@@ -30,18 +30,15 @@ frontend/src/posapp/
 
 posawesome/posawesome/
 ├── api/
-│   ├── printer_api.py              # Printer profile CRUD, failover, routing, test connection
 │   ├── label_data_sources.py       # SO/DN/BOM item fetching, atomic serial counter
 │   ├── sscc_api.py                 # SSCC-18 atomic serial generation
 │   ├── barcode_print_log.py        # Bulk insert, verify, stats for print audit
 │   └── label_templates.py          # Save/load/delete label templates
 ├── doctype/
-│   ├── posa_printer_profile/       # Printer profile DocType (RFID, routing, failover)
-│   ├── posa_printer_routing_rule/  # Child table: item_group/warehouse -> printer
 │   ├── barcode_label_template/     # Saved label templates
 │   └── barcode_print_log/          # Print audit log
-└── fixtures/
-    └── custom_field.json           # posa_default_printer_profile on POS Profile
+└── patches/
+    └── remove_printer_profile_feature.py # Removes the retired custom printer model
 ```
 
 ## Print Paths
@@ -69,39 +66,13 @@ There are 4 independent print paths, each with audit logging:
 - Generates EPL commands via `useZplGenerator().generateEpl()`
 - Barcode types mapped: `0` (Code128), `1` (Code39), `2` (ITF), `E` (EAN13), `E8` (EAN8), `U` (UPC), `K` (Codabar)
 
-### Print Failover Cascade
+### QZ Tray Failure Fallback
 ```
-primary thermal printer
-  → fallback printer(s) in same printer_group
-    → browser print fallback
+QZ Tray selected printer
+  → browser print fallback
 ```
 
-Each step shows a toast notification. The failover is implemented in `printLabelsThermalWithFailover()` and `printLabelsRawWithFailover()`.
-
-## Printer Profiles
-
-**DocType:** `posa_printer_profile` (POSAwesome module)
-
-Fields:
-- `printer_name` (Data, unique, autoname)
-- `printer_type` (Select: ZPL/EPL/HTML)
-- `dpi` (Int: 96/203/300/600)
-- `ip_address`, `port` (optional, for test_connection)
-- `is_default`, `disabled` (Check)
-- `default_label_width`, `default_label_height` (Float, mm)
-- `printer_group` (Data — same group = failover peers)
-- `rfid_enabled`, `rfid_tag_type`, `rfid_epc_prefix`, `rfid_encoding_power` — RFID encoding config
-- `routing_rules` (Table → POSA Printer Routing Rule: item_group, warehouse → printer)
-
-**API** (`printer_api.py`):
-- `get_printer_profiles()` — List all non-disabled profiles
-- `save_printer_profile()` — Create/update
-- `delete_printer_profile(name)` — Delete
-- `test_connection(name)` — Best-effort HTTP reachability check
-- `get_printers_for_failover(group, exclude_name)` — Same-group peers
-- `get_routed_printers(items, profile_name)` — Partition items by routing rules
-
-**POS Profile integration:** `posa_default_printer_profile` Link field on POS Profile (registered in `custom_field.json` + `hooks.py` fixtures).
+Each failure shows a toast notification before opening the existing browser print flow. The QZ printer is selected centrally in **POS Menu > Settings > Terminal > QZ Tray Setup** and is also synchronized with the standard POS Profile QZ printer setting.
 
 ## Label Designer
 
@@ -170,7 +141,7 @@ Located in `useBarcodePrintOutput.ts`:
 - Commands: `^RS` (setup) + `^RFE` (EPC write)
 - Tag types: Generic, AD-222, AD-220, AD-236, AD-431, AD-432, AD-612, AD-620, AD-621, AD-640
 - EPC data built from `rfidEpcPrefix` (hex) + serial/barcode hex encoding
-- Configured via Printer Profile fields
+- Configured directly in the barcode printing UI
 - UI: "RFID Encode" checkbox (disabled for non-ZPL) + EPC Prefix text field
 
 ## Print Audit Log
@@ -216,13 +187,11 @@ All use `html2pdf.bundle.min.js` + `JsBarcode.all.min.js` from `/assets/posaweso
 
 1. **`generateId()` polyfill** — `crypto.randomUUID()` unavailable (non-secure context); use this instead
 2. **No `window.onafterprint`** — use `matchMedia("print")` change listener
-3. **`v-select` with full objects** — use `return-object` prop when `v-model` binds `PrinterProfile` objects
-4. **DPI defaults** — Browser=96, Thermal ZPL/EPL=203, high-res=300
-5. **QZ Tray cert** — Signed via Frappe server side; `setupQzCertificate()` API creates + returns PEM
-6. **Doctype module** — Always `POSAwesome`
-7. **Fixture registration** — Custom fields registered in `hooks.py` under `fixtures`
-8. **Offline safety** — All print API calls use `silent: true`; failures never block the main flow
-9. **Audit must never block** — `logPrintEvent()` catches all errors silently
+3. **DPI defaults** — Browser=96, Thermal ZPL/EPL=203, high-res=300
+4. **QZ Tray cert** — Signed via Frappe server side; `setupQzCertificate()` API creates + returns PEM
+5. **Printer selection** — QZ Tray Setup is the single source of truth; do not add a parallel printer model
+6. **Offline safety** — Print audit API failures never block the main flow
+7. **Audit must never block** — `logPrintEvent()` catches all errors silently
 
 ## Troubleshooting
 
@@ -231,4 +200,3 @@ All use `html2pdf.bundle.min.js` + `JsBarcode.all.min.js` from `/assets/posaweso
 - **Barcode not appearing in print:** JsBarcode renders client-side; verify the script loads; check popup blockers
 - **GS1 compliance warnings:** Label too small for symbology quiet zones; switch to smaller symbology or larger label
 - **Serial numbers not incrementing:** Check Naming Series DocType exists; verify `make_autoname` permissions
-- **Printer profile not saving:** All fields required? Check `printer_name` uniqueness (autoname field)

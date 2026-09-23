@@ -189,6 +189,23 @@ class TestPosAccess(unittest.TestCase):
             with self.assertRaisesRegex(PermissionError, "not permitted to read Sales Invoice"):
                 pos_access.assert_doctype_read_permission("Sales Invoice")
 
+    def test_disabled_profile_feature_is_rejected(self):
+        with patch.object(pos_access, "frappe", self.fake_frappe):
+            with self.assertRaisesRegex(PermissionError, "disabled for POS Profile POS-1"):
+                pos_access.require_pos_profile_feature(
+                    self.profile,
+                    "posa_allow_item_quick_edit",
+                    "Item quick edit",
+                )
+
+    def test_existing_document_must_match_profile_boundary(self):
+        foreign_doc = FakeDoc(company="Other Co", pos_profile="POS-2")
+        with patch.object(pos_access, "frappe", self.fake_frappe):
+            with self.assertRaisesRegex(PermissionError, "not available for POS Profile POS-1"):
+                pos_access.assert_document_in_pos_profile(foreign_doc, self.profile)
+
+        self.assertEqual(foreign_doc.permission_checks, ["read"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -402,6 +402,8 @@ export async function change_price_list_rate(
 					price_list: priceList,
 					rate: nextRate,
 					uom: item.uom || item.stock_uom || undefined,
+					pos_profile: context.pos_profile?.name,
+					customer: context.customer || undefined,
 				},
 			});
 			item._price_list_rate_persisted = true;

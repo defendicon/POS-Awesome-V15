@@ -371,7 +371,6 @@ fixtures = [
                     "POS Profile-column_break_uolvm",
                     "POS Profile-posa_allow_mpesa_reconcile_payments",
                     "POS Profile-posa_enable_print_audit",
-                    "POS Profile-posa_default_printer_profile",
                     "POS Profile-posa_qz_printer_name",
                     "POS Profile-posa_enable_camera_scanning",
                     "POS Profile-posa_camera_scan_type",

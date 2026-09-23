@@ -1,26 +1,9 @@
 	import { ref, computed } from "vue";
 import { useToastStore } from "../../../stores/toastStore";
 import { useUIStore } from "../../../stores/uiStore";
-import { printHtmlViaQz, sendRawToQz, qzConnected, setSelectedQzPrinter } from "../../../services/qzTray";
+import { printHtmlViaQz, sendRawToQz, qzConnected } from "../../../services/qzTray";
 import { useZplGenerator, type RfidConfig } from "./useZplGenerator";
 import type { LabelObject } from "./useLabelDesigner";
-
-export interface PrinterProfile {
-	name: string;
-	printer_name: string;
-	printer_type: "ZPL" | "EPL" | "HTML";
-	dpi: number;
-	ip_address?: string;
-	port?: number;
-	default_label_width?: number;
-	default_label_height?: number;
-	is_default?: number;
-	printer_group?: string;
-	rfid_enabled?: number;
-	rfid_tag_type?: string;
-	rfid_epc_prefix?: string;
-	rfid_encoding_power?: number;
-}
 
 declare const __: (_str: string, _args?: any[]) => string;
 declare const frappe: any;
@@ -350,73 +333,8 @@ export function useBarcodePrintOutput() {
 	const includeWarehouseLocation = ref(false);
 	const printerDpi = ref<PrinterDPI>(203);
 	const activeDesignerTemplate = ref<string | null>(null);
-	const selectedPrinterProfile = ref<PrinterProfile | null>(null);
-	const printerProfiles = ref<PrinterProfile[]>([]);
 	const rfidEnabled = ref(false);
 	const rfidEpcPrefix = ref("");
-
-	const fetchPrinterProfiles = async () => {
-		try {
-			const res = await frappe.call({
-				method: "posawesome.posawesome.api.printer_api.get_printer_profiles",
-				silent: true,
-			});
-			const list = (res.message || []) as PrinterProfile[];
-			printerProfiles.value = list;
-			const profileDefault = uiStore.posProfile?.posa_default_printer_profile;
-			if (profileDefault) {
-				const match = list.find((p) => p.name === profileDefault);
-				if (match) applyPrinterProfile(match);
-			}
-			if (!selectedPrinterProfile.value && list.length > 0) {
-				const def = list.find((p) => p.is_default) || list[0];
-				if (def) applyPrinterProfile(def);
-			}
-		} catch {
-			// silent — printer profiles are optional
-		}
-	};
-
-	const applyPrinterProfile = (profile: PrinterProfile | null) => {
-		selectedPrinterProfile.value = profile;
-		if (profile) {
-			if (profile.dpi) printerDpi.value = profile.dpi as PrinterDPI;
-			const ptype = (profile.printer_type || "ZPL").toLowerCase();
-			if (ptype === "zpl" || ptype === "epl") {
-				outputFormat.value = ptype as "zpl" | "epl";
-			} else {
-				outputFormat.value = "html";
-			}
-			if (profile.default_label_width && profile.default_label_height) {
-				const matched = PAGE_FORMAT_PRESETS.find(
-					(p) => p.widthMm === profile.default_label_width && p.heightMm === profile.default_label_height,
-				);
-				if (matched) pageFormat.value = matched.value;
-			}
-			if (profile.printer_name) {
-				setSelectedQzPrinter(profile.printer_name);
-			}
-			rfidEnabled.value = profile.rfid_enabled === 1;
-			rfidEpcPrefix.value = profile.rfid_epc_prefix || "";
-		} else {
-			rfidEnabled.value = false;
-			rfidEpcPrefix.value = "";
-		}
-	};
-
-	const getFailoverPrinters = async (group: string, excludeName: string): Promise<PrinterProfile[]> => {
-		if (!group) return [];
-		try {
-			const res = await frappe.call({
-				method: "posawesome.posawesome.api.printer_api.get_printers_for_failover",
-				args: { printer_group: group, exclude_name: excludeName },
-				silent: true,
-			});
-			return (res.message || []) as PrinterProfile[];
-		} catch {
-			return [];
-		}
-	};
 
 	const setDesignerTemplate = (json: string) => {
 		try { JSON.parse(json); } catch { return; }
@@ -1004,25 +922,10 @@ export function useBarcodePrintOutput() {
 		}
 	};
 
-	const printLabelsThermalWithFailover = async (items: any[]) => {
-		const profile = selectedPrinterProfile.value;
-		const group = profile?.printer_group;
-		const name = profile?.printer_name;
+	const printLabelsThermalWithFallback = async (items: any[]) => {
 		try {
-			await printLabelsThermal(items, name);
+			await printLabelsThermal(items);
 		} catch {
-			if (group) {
-				const fallbacks = await getFailoverPrinters(group, profile?.name || "");
-				for (const fb of fallbacks) {
-					toastStore.show({ title: __("Trying fallback printer: {0}", [fb.printer_name]), color: "warning" });
-					try {
-						await printLabelsThermal(items, fb.printer_name);
-						return;
-					} catch {
-						continue;
-					}
-				}
-			}
 			toastStore.show({ title: __("Thermal printing failed — falling back to browser print"), color: "warning" });
 			printLabels(items);
 		}
@@ -1051,7 +954,7 @@ export function useBarcodePrintOutput() {
 		const isZpl = outputFormat.value === "zpl";
 		const rawContext = getPrintContext(true);
 		const rfidConfig: RfidConfig | undefined = rfidEnabled.value
-			? { enabled: true, tagType: selectedPrinterProfile.value?.rfid_tag_type, epcPrefix: rfidEpcPrefix.value, encodingPower: selectedPrinterProfile.value?.rfid_encoding_power }
+			? { enabled: true, epcPrefix: rfidEpcPrefix.value }
 			: undefined;
 
 		if (rfidEnabled.value && !isZpl) {
@@ -1079,25 +982,10 @@ export function useBarcodePrintOutput() {
 		}
 	};
 
-	const printLabelsRawWithFailover = async (items: any[]) => {
-		const profile = selectedPrinterProfile.value;
-		const group = profile?.printer_group;
-		const name = profile?.printer_name;
+	const printLabelsRawWithFallback = async (items: any[]) => {
 		try {
-			await printLabelsRaw(items, name);
+			await printLabelsRaw(items);
 		} catch {
-			if (group) {
-				const fallbacks = await getFailoverPrinters(group, profile?.name || "");
-				for (const fb of fallbacks) {
-					toastStore.show({ title: __("Trying fallback printer: {0}", [fb.printer_name]), color: "warning" });
-					try {
-						await printLabelsRaw(items, fb.printer_name);
-						return;
-					} catch {
-						continue;
-					}
-				}
-			}
 			toastStore.show({ title: __("Thermal printing failed — falling back to browser print"), color: "warning" });
 			printLabels(items);
 		}
@@ -1199,8 +1087,6 @@ export function useBarcodePrintOutput() {
 		outputFormat,
 		includeWarehouseLocation,
 		printerDpi,
-		selectedPrinterProfile,
-		printerProfiles,
 		rfidEnabled,
 		rfidEpcPrefix,
 		activeDesignerTemplate,
@@ -1214,13 +1100,11 @@ export function useBarcodePrintOutput() {
 		getPrintableItems,
 		printLabels,
 		printLabelsThermal,
-		printLabelsThermalWithFailover,
+		printLabelsThermalWithFallback,
 		printLabelsRaw,
-		printLabelsRawWithFailover,
+		printLabelsRawWithFallback,
 		qzThermalAvailable,
 		downloadPdf,
-		fetchPrinterProfiles,
-		applyPrinterProfile,
 		formatCurrency,
 		escapeHtml,
 		validateBarcodeCheckDigit,
