@@ -179,8 +179,10 @@ export const useUIStore = defineStore("ui", () => {
   }
 
   const lastInvoiceId = ref<string | null>(null);
-  function setLastInvoice(id: string | null) {
+  const lastInvoiceDocument = ref<any | null>(null);
+  function setLastInvoice(id: string | null, document: any | null = null) {
     lastInvoiceId.value = id;
+    lastInvoiceDocument.value = document;
   }
 
   const lastStockAdjustment = ref<any>(null);
@@ -319,6 +321,7 @@ export const useUIStore = defineStore("ui", () => {
     companyDoc,
     posOpeningShift,
     lastInvoiceId,
+    lastInvoiceDocument,
     offers,
     applicableOffers,
     currency,

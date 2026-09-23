@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
+import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { useInvoiceStore } from "../src/posapp/stores/invoiceStore";
 import type {
@@ -8,6 +8,14 @@ import type {
 
 describe("invoiceStore invoice type state", () => {
 	beforeEach(() => {
+		const values = new Map<string, string>();
+		vi.stubGlobal("window", {
+			sessionStorage: {
+				getItem: (key: string) => values.get(key) ?? null,
+				setItem: (key: string, value: string) => values.set(key, value),
+				removeItem: (key: string) => values.delete(key),
+			},
+		});
 		(globalThis as any).frappe = {
 			datetime: {
 				nowdate: () => "2026-03-12",
@@ -215,5 +223,82 @@ describe("invoiceStore invoice type state", () => {
 		expect(store.totalQty).toBe(3);
 		expect(store.grossTotal).toBe(25);
 		expect(store.metadata.changeVersion).toBeGreaterThan(version);
+	});
+
+	it("persists and restores an in-progress exchange in the same cashier scope", () => {
+		let store = useInvoiceStore();
+		store.startExchange({
+			clientRequestId: "exchange-request-1",
+			originalInvoice: { name: "SINV-OLD" },
+			returnDraft: { is_return: 1, customer: "CUST-0001" },
+			posProfile: "Main POS",
+			company: "Example Co",
+			openingShift: "SHIFT-0001",
+			user: "cashier@example.com",
+		});
+		store.setExchangeReturnDraft({
+			is_return: 1,
+			customer: "CUST-0001",
+			items: [{ item_code: "OLD", qty: -1 }],
+		});
+		store.setExchangeReturn({
+			is_return: 1,
+			customer: "CUST-0001",
+			rounded_total: -50,
+		});
+		store.setExchangeSaleDraft({
+			customer: "CUST-0001",
+			items: [{ item_code: "NEW", qty: 1 }],
+		});
+
+		setActivePinia(createPinia());
+		store = useInvoiceStore();
+		const restored = store.restoreExchange({
+			posProfile: "Main POS",
+			company: "Example Co",
+			openingShift: "SHIFT-0001",
+			user: "cashier@example.com",
+		});
+
+		expect(restored).toMatchObject({
+			stage: "sale",
+			clientRequestId: "exchange-request-1",
+			returnTotal: 50,
+		});
+		expect(store.exchangeSession.saleDraft.items[0].item_code).toBe("NEW");
+		expect(store.exchangeSession.returnDraft.items[0].item_code).toBe(
+			"OLD",
+		);
+
+		store.clearExchange();
+		setActivePinia(createPinia());
+		expect(
+			useInvoiceStore().restoreExchange({
+				posProfile: "Main POS",
+				user: "cashier@example.com",
+			}),
+		).toBeNull();
+	});
+
+	it("rejects persisted exchange state from another cashier", () => {
+		let store = useInvoiceStore();
+		store.startExchange({
+			clientRequestId: "exchange-request-2",
+			posProfile: "Main POS",
+			company: "Example Co",
+			openingShift: "SHIFT-0001",
+			user: "cashier@example.com",
+		});
+
+		setActivePinia(createPinia());
+		store = useInvoiceStore();
+		expect(
+			store.restoreExchange({
+				posProfile: "Main POS",
+				company: "Example Co",
+				openingShift: "SHIFT-0001",
+				user: "another@example.com",
+			}),
+		).toBeNull();
 	});
 });

@@ -13,7 +13,14 @@ declare const frappe: any;
 
 function markPricingRuleFreeLines(items: any[] = []) {
 	items.forEach((item) => {
-		if (!item || !(item.is_free_item === 1 || item.is_free_item === true || item.is_free_item === "1")) {
+		if (
+			!item ||
+			!(
+				item.is_free_item === 1 ||
+				item.is_free_item === true ||
+				item.is_free_item === "1"
+			)
+		) {
 			return;
 		}
 		if (item.auto_free_source) {
@@ -107,7 +114,10 @@ export async function fetch_customer_balance(context: any) {
 		// Online mode: fetch from server and cache the result
 		const r = await frappe.call({
 			method: "posawesome.posawesome.api.customer.get_customer_balance",
-			args: { customer: context.customer, company: context.pos_profile?.company },
+			args: {
+				customer: context.customer,
+				company: context.pos_profile?.company,
+			},
 		});
 
 		const balance = r?.message?.balance || 0;
@@ -151,6 +161,7 @@ export async function load_invoice(
 	const {
 		preserveAdditionalDiscountPercentage = false,
 		preserveStickies = false,
+		preserveExchange = false,
 	} = options || {};
 	const usePercentageDiscount = Boolean(
 		context.pos_profile?.posa_use_percentage_discount,
@@ -176,7 +187,7 @@ export async function load_invoice(
 		: null;
 
 	if (context.clear_invoice) {
-		context.clear_invoice({ preserveStickies });
+		context.clear_invoice({ preserveStickies, preserveExchange });
 	}
 
 	// Restore stickies if they aren't provided in the data

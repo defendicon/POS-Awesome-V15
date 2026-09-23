@@ -1,7 +1,21 @@
 // @vitest-environment jsdom
 
 import { describe, expect, it, vi } from "vitest";
+import { defineComponent, h } from "vue";
 import { mount } from "@vue/test-utils";
+
+const BoxStub = defineComponent({
+	setup(_, { slots }) {
+		return () => h("div", {}, slots.default?.());
+	},
+});
+
+const ButtonStub = defineComponent({
+	props: ["prependIcon"],
+	setup(_, { slots }) {
+		return () => h("button", {}, slots.default?.());
+	},
+});
 
 describe("InvoiceActionButtons", () => {
 	it("does not render share last invoice in the invoice summary actions", async () => {
@@ -90,5 +104,37 @@ describe("InvoiceActionButtons", () => {
 		expect((InvoiceActionButtons as any).emits).toEqual(
 			expect.arrayContaining(["open-offers", "open-coupons"]),
 		);
+	});
+
+	it("labels the primary action as Complete Exchange only during replacement sale", async () => {
+		vi.stubGlobal("__", (value: string) => value);
+		const { default: InvoiceActionButtons } = await import(
+			"../src/posapp/components/pos/invoice/InvoiceActionButtons.vue"
+		);
+		const mountButtons = (exchangeActive: boolean) =>
+			mount(InvoiceActionButtons, {
+				props: {
+					exchangeActive,
+					pos_profile: {
+						custom_allow_select_sales_order: 0,
+						posa_allow_return: 1,
+					},
+				},
+				global: {
+					components: {
+						VRow: BoxStub,
+						VCol: BoxStub,
+						VBtn: ButtonStub,
+					},
+				},
+			});
+
+		const exchangeButtons = mountButtons(true);
+		expect(exchangeButtons.text()).toContain("Complete Exchange");
+		expect(exchangeButtons.text()).not.toContain("PAY");
+
+		const saleButtons = mountButtons(false);
+		expect(saleButtons.text()).toContain("PAY");
+		expect(saleButtons.text()).not.toContain("Complete Exchange");
 	});
 });

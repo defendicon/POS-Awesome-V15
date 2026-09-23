@@ -1,10 +1,36 @@
 <template>
 	<v-row v-if="invoice_doc" class="payment-summary-grid" dense>
+		<v-col v-if="exchangeActive" cols="12">
+			<div class="exchange-settlement" data-test="exchange-payment-summary">
+				<div class="exchange-settlement__part">
+					<span>{{ frappe._("Replacement sale") }}</span>
+					<strong
+						>{{ currencySymbol(invoice_doc.currency) }} {{ formatCurrency(invoiceTotal) }}</strong
+					>
+				</div>
+				<span class="exchange-settlement__operator">−</span>
+				<div class="exchange-settlement__part">
+					<span>{{ frappe._("Return credit") }}</span>
+					<strong
+						>{{ currencySymbol(invoice_doc.currency) }}
+						{{ formatCurrency(exchangeCredit) }}</strong
+					>
+				</div>
+				<span class="exchange-settlement__operator">=</span>
+				<div class="exchange-settlement__part exchange-settlement__part--result">
+					<span>{{ exchangeSettlementLabel }}</span>
+					<strong
+						>{{ currencySymbol(invoice_doc.currency) }}
+						{{ formatCurrency(exchangeSettlementAmount) }}</strong
+					>
+				</div>
+			</div>
+		</v-col>
 		<v-col cols="12" sm="7" class="payment-summary-grid__paid">
 			<v-text-field
 				variant="solo"
 				color="primary"
-				:label="frappe._('Paid Amount')"
+				:label="exchangeActive ? frappe._('Collected from customer') : frappe._('Paid Amount')"
 				class="sleek-field pos-themed-input"
 				hide-details
 				:model-value="total_payments_display"
@@ -127,11 +153,28 @@ const props = defineProps({
 		type: String,
 		default: "",
 	},
+	exchangeActive: Boolean,
+	exchangeCredit: {
+		type: Number,
+		default: 0,
+	},
+	exchangeSettlementAmount: {
+		type: Number,
+		default: 0,
+	},
+	exchangeSettlementLabel: {
+		type: String,
+		default: "",
+	},
 });
 
 defineEmits(["show-paid-amount", "show-diff-payment", "show-paid-change", "update-credit-change"]);
 
 const frappe = window.frappe;
+
+const invoiceTotal = computed(() =>
+	Math.abs(Number(props.invoice_doc?.rounded_total || props.invoice_doc?.grand_total || 0)),
+);
 
 const baseSettlementState = computed(() => {
 	const difference = Number(props.baseSettlement?.difference || 0);
@@ -168,6 +211,56 @@ const baseSettlementLabel = computed(() => {
 .payment-summary-grid :deep(.v-field) {
 	border-radius: var(--pos-radius-sm);
 	background: var(--pos-surface-raised);
+}
+
+.exchange-settlement {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+	align-items: center;
+	gap: var(--pos-space-3);
+	padding: 12px 14px;
+	border: 1px solid color-mix(in srgb, var(--pos-success) 42%, var(--pos-border));
+	border-radius: var(--pos-radius-sm);
+	background: var(--pos-success-container);
+}
+
+.exchange-settlement__part {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+
+.exchange-settlement__part span {
+	font-size: 0.72rem;
+	color: var(--pos-text-secondary);
+}
+
+.exchange-settlement__part strong {
+	font-size: 0.95rem;
+	font-variant-numeric: tabular-nums;
+	color: var(--pos-text-primary);
+}
+
+.exchange-settlement__part--result strong {
+	color: var(--pos-success);
+}
+
+.exchange-settlement__operator {
+	font-size: 1.15rem;
+	font-weight: 800;
+	color: var(--pos-text-secondary);
+}
+
+@media (max-width: 599px) {
+	.exchange-settlement {
+		grid-template-columns: 1fr;
+		gap: var(--pos-space-2);
+	}
+
+	.exchange-settlement__operator {
+		display: none;
+	}
 }
 
 .payment-summary-grid__paid :deep(.v-field),

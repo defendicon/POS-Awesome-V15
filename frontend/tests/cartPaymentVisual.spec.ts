@@ -139,6 +139,31 @@ describe("Cart and payment visual hierarchy", () => {
 		expect(summary).toContain('data-state="balanced"');
 	});
 
+	it("keeps exchange guidance in the bottom summary below Active sale", () => {
+		const invoice = source("components", "pos", "Invoice.vue");
+		const summary = source(
+			"components",
+			"pos",
+			"invoice",
+			"InvoiceSummary.vue",
+		);
+		const activeSaleIndex = summary.indexOf('class="summary-hero"');
+		const exchangePanelIndex = summary.indexOf(
+			"<ExchangeStatusPanel",
+			activeSaleIndex,
+		);
+
+		expect(activeSaleIndex).toBeGreaterThan(-1);
+		expect(exchangePanelIndex).toBeGreaterThan(activeSaleIndex);
+		expect(invoice).not.toContain("<ExchangeStatusPanel");
+		expect(summary).toContain(
+			':format-amount="(value) => formatCurrency(value)"',
+		);
+		expect(summary).not.toContain(
+			':format-amount="(value) => formatCurrency(value, displayCurrency)"',
+		);
+	});
+
 	it("keeps the offline invoice header close control explicit and visible", () => {
 		const dialog = source("components", "OfflineInvoices.vue");
 

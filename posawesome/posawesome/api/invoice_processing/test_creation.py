@@ -41,7 +41,7 @@ class AttrDict(dict):
     def precision(self, _fieldname):
         return 2
 
-    def set_missing_values(self):
+    def set_missing_values(self, for_validate=False):
         return None
 
     def calculate_taxes_and_totals(self):
@@ -51,6 +51,7 @@ class AttrDict(dict):
 class FakeDoc:
     def __init__(self, **kwargs):
         object.__setattr__(self, "_data", dict(kwargs))
+        object.__setattr__(self, "_set_missing_values_calls", [])
         if "flags" not in self._data:
             self._data["flags"] = types.SimpleNamespace()
 
@@ -82,7 +83,8 @@ class FakeDoc:
     def precision(self, _fieldname):
         return 2
 
-    def set_missing_values(self):
+    def set_missing_values(self, for_validate=False):
+        self._set_missing_values_calls.append(for_validate)
         return None
 
     def calculate_taxes_and_totals(self):
@@ -280,6 +282,69 @@ class TestCustomerCreditPrintFields(unittest.TestCase):
             0,
         )
 
+    def test_return_pricing_policy_overrides_profile_and_clears_applied_rules(self):
+        invoice_doc = FakeDoc(
+            is_return=1,
+            ignore_pricing_rule=0,
+            pricing_rules=[FakeDoc(pricing_rule="GROUP-DISCOUNT")],
+            flags=types.SimpleNamespace(ignore_pricing_rule=False),
+        )
+
+        policy = self.creation._apply_pricing_rule_policy(
+            invoice_doc,
+            AttrDict(ignore_pricing_rule=0),
+        )
+
+        self.assertEqual(policy, 1)
+        self.assertEqual(invoice_doc.ignore_pricing_rule, 1)
+        self.assertTrue(invoice_doc.flags.ignore_pricing_rule)
+        self.assertEqual(invoice_doc.pricing_rules, [])
+
+    def test_normal_invoice_pricing_policy_still_comes_from_profile(self):
+        invoice_doc = FakeDoc(
+            is_return=0,
+            ignore_pricing_rule=0,
+            pricing_rules=[FakeDoc(pricing_rule="GROUP-DISCOUNT")],
+            flags=types.SimpleNamespace(ignore_pricing_rule=False),
+        )
+
+        policy = self.creation._apply_pricing_rule_policy(
+            invoice_doc,
+            AttrDict(ignore_pricing_rule="1"),
+        )
+
+        self.assertEqual(policy, 1)
+        self.assertEqual(invoice_doc.ignore_pricing_rule, 1)
+        self.assertTrue(invoice_doc.flags.ignore_pricing_rule)
+        self.assertEqual(len(invoice_doc.pricing_rules), 1)
+
+    def test_draft_save_reasserts_return_pricing_invariant(self):
+        states_seen_by_save = []
+        invoice_doc = FakeDoc(
+            name=None,
+            is_return=1,
+            ignore_pricing_rule=0,
+            pricing_rules=[FakeDoc(pricing_rule="GROUP-DISCOUNT")],
+            flags=types.SimpleNamespace(ignore_pricing_rule=False),
+        )
+        invoice_doc.is_new = lambda: True
+
+        def save():
+            states_seen_by_save.append(
+                (
+                    invoice_doc.ignore_pricing_rule,
+                    invoice_doc.flags.ignore_pricing_rule,
+                    list(invoice_doc.pricing_rules),
+                )
+            )
+
+        invoice_doc.save = save
+
+        result = self.creation._save_draft_with_latest_timestamp(invoice_doc)
+
+        self.assertIs(result, invoice_doc)
+        self.assertEqual(states_seen_by_save, [(1, True, [])])
+
     def test_customer_credit_print_fields_store_used_and_remaining_amounts(self):
         invoice_doc = FakeDoc(doctype="Sales Invoice", grand_total=100)
         data = {
@@ -360,6 +425,7 @@ class TestUpdateInvoiceReturnPayments(unittest.TestCase):
             posting_date="2026-03-21",
             is_return=1,
             return_against=None,
+            pricing_rules=[FakeDoc(pricing_rule="GROUP-DISCOUNT")],
             items=[],
             payments=[
                 FakeDoc(
@@ -404,6 +470,10 @@ class TestUpdateInvoiceReturnPayments(unittest.TestCase):
         self.assertEqual(invoice_doc.payments[0].base_amount, -125)
         self.assertEqual(result["paid_amount"], -125)
         self.assertEqual(result["base_paid_amount"], -125)
+        self.assertEqual(invoice_doc._set_missing_values_calls, [True])
+        self.assertEqual(invoice_doc.ignore_pricing_rule, 1)
+        self.assertTrue(invoice_doc.flags.ignore_pricing_rule)
+        self.assertEqual(invoice_doc.pricing_rules, [])
 
     def test_return_invoice_derives_missing_amount_from_base_amount(self):
         invoice_doc = FakeDoc(

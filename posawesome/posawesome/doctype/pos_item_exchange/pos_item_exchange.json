@@ -1,0 +1,45 @@
+{
+ "actions": [],
+ "allow_copy": 0,
+ "autoname": "POS-EXCH-.YY.-.#####",
+ "creation": "2026-09-21 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "status", "client_request_id", "section_documents", "company", "pos_profile", "pos_opening_shift", "customer", "invoice_type", "original_invoice", "return_invoice", "replacement_invoice", "section_settlement", "currency", "return_total", "sale_total", "difference_amount", "allocated_amount", "settlement_type", "reconciliation_journal"
+ ],
+ "fields": [
+  {"default": "Completed", "fieldname": "status", "fieldtype": "Select", "in_list_view": 1, "label": "Status", "options": "Completed\nCancelled", "read_only": 1, "reqd": 1},
+  {"fieldname": "client_request_id", "fieldtype": "Data", "label": "Client Request ID", "no_copy": 1, "read_only": 1, "reqd": 1, "unique": 1},
+  {"fieldname": "section_documents", "fieldtype": "Section Break", "label": "Exchange Documents"},
+  {"fieldname": "company", "fieldtype": "Link", "in_list_view": 1, "label": "Company", "options": "Company", "read_only": 1, "reqd": 1},
+  {"fieldname": "pos_profile", "fieldtype": "Link", "label": "POS Profile", "options": "POS Profile", "read_only": 1, "reqd": 1},
+  {"fieldname": "pos_opening_shift", "fieldtype": "Link", "label": "POS Opening Shift", "options": "POS Opening Shift", "read_only": 1},
+  {"fieldname": "customer", "fieldtype": "Link", "in_list_view": 1, "label": "Customer", "options": "Customer", "read_only": 1, "reqd": 1},
+  {"default": "Sales Invoice", "fieldname": "invoice_type", "fieldtype": "Select", "label": "Invoice Type", "options": "Sales Invoice", "read_only": 1, "reqd": 1},
+  {"fieldname": "original_invoice", "fieldtype": "Dynamic Link", "label": "Original Invoice", "options": "invoice_type", "read_only": 1, "reqd": 1},
+  {"fieldname": "return_invoice", "fieldtype": "Dynamic Link", "in_list_view": 1, "label": "Return Invoice", "options": "invoice_type", "read_only": 1, "reqd": 1},
+  {"fieldname": "replacement_invoice", "fieldtype": "Dynamic Link", "in_list_view": 1, "label": "Replacement Invoice", "options": "invoice_type", "read_only": 1, "reqd": 1},
+  {"fieldname": "section_settlement", "fieldtype": "Section Break", "label": "Settlement"},
+  {"fieldname": "currency", "fieldtype": "Link", "label": "Currency", "options": "Currency", "read_only": 1, "reqd": 1},
+  {"fieldname": "return_total", "fieldtype": "Currency", "label": "Return Credit", "options": "currency", "read_only": 1, "reqd": 1},
+  {"fieldname": "sale_total", "fieldtype": "Currency", "label": "Replacement Sale", "options": "currency", "read_only": 1, "reqd": 1},
+  {"fieldname": "difference_amount", "fieldtype": "Currency", "in_list_view": 1, "label": "Difference", "options": "currency", "read_only": 1},
+  {"fieldname": "allocated_amount", "fieldtype": "Currency", "label": "Allocated Credit", "options": "currency", "read_only": 1},
+  {"fieldname": "settlement_type", "fieldtype": "Select", "in_list_view": 1, "label": "Settlement Type", "options": "Customer Payment\nCustomer Credit\nEven Exchange", "read_only": 1, "reqd": 1},
+  {"fieldname": "reconciliation_journal", "fieldtype": "Link", "label": "Reconciliation Journal", "options": "Journal Entry", "read_only": 1}
+ ],
+ "modified": "2026-09-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "POSAwesome",
+ "name": "POS Item Exchange",
+ "owner": "Administrator",
+ "permissions": [
+  {"create": 1, "delete": 1, "export": 1, "print": 1, "read": 1, "report": 1, "role": "System Manager", "write": 1},
+  {"export": 1, "print": 1, "read": 1, "report": 1, "role": "Sales Manager"},
+  {"read": 1, "role": "Sales User"}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

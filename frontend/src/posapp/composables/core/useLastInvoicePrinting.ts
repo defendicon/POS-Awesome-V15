@@ -11,6 +11,10 @@ import {
 	shouldUseConfiguredQzDocumentPrinting,
 	shouldUseRawDocumentPrinting,
 } from "../../services/documentPrint";
+import {
+	isExchangeReceiptDocument,
+	printExchangeReceipt,
+} from "../../services/exchangeReceiptPrint";
 
 declare const frappe: any;
 
@@ -38,6 +42,12 @@ export function useLastInvoicePrinting() {
 
 		if (!posProfile) {
 			console.warn("No POS Profile loaded");
+			return;
+		}
+
+		const lastInvoiceDocument = uiStore.lastInvoiceDocument;
+		if (isExchangeReceiptDocument(lastInvoiceDocument)) {
+			await printExchangeReceipt(lastInvoiceDocument, posProfile);
 			return;
 		}
 

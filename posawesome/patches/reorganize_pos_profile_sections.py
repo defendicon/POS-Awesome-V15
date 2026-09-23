@@ -80,6 +80,7 @@ ORDERED_CHAIN = [
     "posa_section_sales_returns",
     "posa_allow_credit_sale",
     "posa_allow_return",
+    "posa_allow_item_exchange",
     "posa_allow_return_without_invoice",
     "posa_allow_free_batch_return",
     "posa_enable_return_validity",

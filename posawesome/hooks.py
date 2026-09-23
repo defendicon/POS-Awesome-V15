@@ -244,6 +244,7 @@ fixtures = [
                     "POS Profile-posa_minimum_margin_percentage",
                     "POS Profile-posa_missing_cost_action",
                     "POS Profile-posa_allow_return",
+                    "POS Profile-posa_allow_item_exchange",
                     "POS Profile-posa_allow_return_without_invoice",
                     "POS Profile-posa_allow_free_batch_return",
                     "POS Profile-posa_col_1",
