@@ -54,6 +54,11 @@ export function confirmDocumentPrintFallback(
 	error: unknown,
 	options: { raw?: boolean; offline?: boolean } = {},
 ) {
+	// Preflight failures happen before any print job is dispatched, so browser fallback is safe.
+	if (error instanceof Error && error.name === "QzPrinterUnavailableError") {
+		return true;
+	}
+
 	const reason = getQzPrintErrorMessage(error);
 	const title = options.offline
 		? translate("Raw/QZ printing is not available while the POS is offline.")
