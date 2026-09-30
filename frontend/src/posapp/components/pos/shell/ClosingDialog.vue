@@ -39,6 +39,7 @@
 								:headers="headers"
 								:items-per-page="itemsPerPage"
 								:company-currency-symbol="companyCurrencySymbol"
+								:company-currency="overviewCompanyCurrency"
 								:currency-symbol="currencySymbol"
 								:format-currency="formatCurrency"
 								:format-float="formatFloat"
