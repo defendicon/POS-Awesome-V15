@@ -3,6 +3,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../src/posapp/services/qzTray", () => ({
+	prepareQzPrinter: vi.fn(async (printerName?: string) => printerName),
 	sendRawToQz: vi.fn(),
 }));
 
@@ -11,7 +12,7 @@ import {
 	printRawDocumentViaQz,
 	shouldUseRawDocumentPrinting,
 } from "../src/posapp/services/rawDocumentPrint";
-import { sendRawToQz } from "../src/posapp/services/qzTray";
+import { prepareQzPrinter, sendRawToQz } from "../src/posapp/services/qzTray";
 
 describe("rawDocumentPrint", () => {
 	beforeEach(() => {
@@ -195,6 +196,23 @@ describe("rawDocumentPrint", () => {
 			expect.stringContaining("SALES ORDER"),
 			undefined,
 		);
+	});
+
+	it("checks QZ before fetching the saved document", async () => {
+		vi.mocked(prepareQzPrinter).mockRejectedValueOnce(
+			new Error("QZ Tray is not available."),
+		);
+
+		await expect(
+			printRawDocumentViaQz({
+				doctype: "Sales Invoice",
+				name: "SINV-FAST-FALLBACK",
+				profile: { posa_raw_printing: 1 },
+			}),
+		).rejects.toThrow("QZ Tray is not available");
+
+		expect((globalThis as any).frappe.call).not.toHaveBeenCalled();
+		expect(sendRawToQz).not.toHaveBeenCalled();
 	});
 
 	it("forwards the POS Profile raw printer name to QZ", async () => {

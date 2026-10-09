@@ -1,4 +1,4 @@
-import { sendRawToQz } from "./qzTray";
+import { prepareQzPrinter, sendRawToQz } from "./qzTray";
 import { parseBooleanSetting } from "../utils/stock";
 
 declare const frappe: any;
@@ -367,6 +367,11 @@ export async function printRawDocumentViaQz(options: RawDocumentPrintOptions) {
 		throw new Error(translate("Invalid raw print document details."));
 	}
 
+	// Check the local printer before making a document API request so fallback is immediate.
+	const printerName = await prepareQzPrinter(
+		options.printerName || options.profile?.posa_qz_printer_name,
+	);
+
 	const doc = await loadDocument(options);
 	if (!doc) {
 		throw new Error(translate("Unable to load document for raw printing."));
@@ -380,5 +385,5 @@ export async function printRawDocumentViaQz(options: RawDocumentPrintOptions) {
 		},
 		options,
 	);
-	await sendRawToQz(rawData, options.printerName || options.profile?.posa_qz_printer_name);
+	await sendRawToQz(rawData, printerName);
 }
