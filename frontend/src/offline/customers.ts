@@ -431,18 +431,32 @@ export function clearGiftCardSnapshotCache() {
 	}
 }
 
+function customerBalanceCacheKey(customer: string, company?: string, user?: string) {
+	return customer && company && user
+		? JSON.stringify([user, company, customer])
+		: null;
+}
+
 export function saveCustomerBalance(
 	customer: string,
-	balance: number,
+	balance: number | null,
 	currency?: string,
+	company?: string,
+	user?: string,
 ) {
 	try {
-		const cache = memory.customer_balance_cache;
-		cache[customer] = {
-			balance,
-			currency: currency || undefined,
-			timestamp: Date.now(),
-		};
+		const key = customerBalanceCacheKey(customer, company, user);
+		if (!key) return;
+		const cache = memory.customer_balance_cache || {};
+		if (typeof balance === "number" && Number.isFinite(balance)) {
+			cache[key] = {
+				balance,
+				currency: currency || undefined,
+				timestamp: Date.now(),
+			};
+		} else {
+			delete cache[key];
+		}
 		memory.customer_balance_cache = cache;
 		persist("customer_balance_cache");
 	} catch (error) {
@@ -450,11 +464,13 @@ export function saveCustomerBalance(
 	}
 }
 
-export function getCachedCustomerBalance(customer: string) {
+export function getCachedCustomerBalance(customer: string, company?: string, user?: string) {
 	try {
+		const key = customerBalanceCacheKey(customer, company, user);
+		if (!key) return null;
 		const cache = memory.customer_balance_cache || {};
-		const cachedData = cache[customer];
-		if (cachedData) {
+		const cachedData = cache[key];
+		if (typeof cachedData?.balance === "number" && Number.isFinite(cachedData.balance)) {
 			const isValid =
 				Date.now() - cachedData.timestamp < 24 * 60 * 60 * 1000;
 			return isValid ? cachedData : null;

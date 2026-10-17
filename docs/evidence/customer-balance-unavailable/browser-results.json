@@ -1,0 +1,34 @@
+{
+  "scope": "Synthetic development shell only; no production or native backend execution",
+  "base": "ac4542c92b5838b378f851a580490f6dc3b27bda",
+  "candidate_ui_source": "0c7821d2846f445d4d9ab012c427403220422391",
+  "capture_exit": 0,
+  "cases_completed": 12,
+  "cases": [
+    {"tree":"baseline","viewport":{"size":"desktop","width":1440,"height":1000},"scenario":"unavailable","visible_balance":"Customer Balance\nUGX0.00","balance_requests":1,"terminal_locked":false,"page_errors":0,"console_errors":8,"route_teardown_errors":0},
+    {"tree":"baseline","viewport":{"size":"desktop","width":1440,"height":1000},"scenario":"zero","visible_balance":"Customer Balance\nUGX0.00","balance_requests":1,"terminal_locked":false,"page_errors":0,"console_errors":8,"route_teardown_errors":0},
+    {"tree":"baseline","viewport":{"size":"mobile","width":390,"height":844},"scenario":"unavailable","visible_balance":"Customer Balance\nUGX0.00","balance_requests":1,"terminal_locked":false,"page_errors":0,"console_errors":8,"route_teardown_errors":0},
+    {"tree":"baseline","viewport":{"size":"mobile","width":390,"height":844},"scenario":"zero","visible_balance":"Customer Balance\nUGX0.00","balance_requests":1,"terminal_locked":false,"page_errors":0,"console_errors":7,"route_teardown_errors":0},
+    {"tree":"repo","viewport":{"size":"desktop","width":1440,"height":1000},"scenario":"unavailable","visible_balance":"Customer Balance\nUnavailable","balance_requests":1,"terminal_locked":false,"page_errors":0,"console_errors":7,"route_teardown_errors":0},
+    {"tree":"repo","viewport":{"size":"desktop","width":1440,"height":1000},"scenario":"zero","visible_balance":"Customer Balance\nUGX0.00","balance_requests":1,"terminal_locked":false,"page_errors":0,"console_errors":7,"route_teardown_errors":0},
+    {"tree":"repo","viewport":{"size":"desktop","width":1440,"height":1000},"scenario":"positive","visible_balance":"Customer Balance\nUGX12,500.00","balance_requests":1,"terminal_locked":false,"page_errors":0,"console_errors":7,"route_teardown_errors":1},
+    {"tree":"repo","viewport":{"size":"desktop","width":1440,"height":1000},"scenario":"negative","visible_balance":"Customer Balance\nUGX-12,500.00","balance_requests":1,"terminal_locked":false,"page_errors":0,"console_errors":7,"route_teardown_errors":0},
+    {"tree":"repo","viewport":{"size":"mobile","width":390,"height":844},"scenario":"unavailable","visible_balance":"Customer Balance\nUnavailable","balance_requests":1,"terminal_locked":false,"page_errors":0,"console_errors":7,"route_teardown_errors":0},
+    {"tree":"repo","viewport":{"size":"mobile","width":390,"height":844},"scenario":"zero","visible_balance":"Customer Balance\nUGX0.00","balance_requests":1,"terminal_locked":false,"page_errors":0,"console_errors":7,"route_teardown_errors":0},
+    {"tree":"repo","viewport":{"size":"mobile","width":390,"height":844},"scenario":"positive","visible_balance":"Customer Balance\nUGX12,500.00","balance_requests":1,"terminal_locked":false,"page_errors":0,"console_errors":7,"route_teardown_errors":0},
+    {"tree":"repo","viewport":{"size":"mobile","width":390,"height":844},"scenario":"negative","visible_balance":"Customer Balance\nUGX-12,500.00","balance_requests":1,"terminal_locked":false,"page_errors":0,"console_errors":8,"route_teardown_errors":0}
+  ],
+  "screenshots": [
+    {"file":"before-desktop.png","sha256":"514703c5fc1cf6a8d94b22072057f595b1ee4775b79392e4570d2ffd41abc9c8"},
+    {"file":"before-mobile.png","sha256":"3eaf82160f4ee446301d684893fc27fc30f37dbd8096910239f51bb5ed0824ea"},
+    {"file":"after-desktop.png","sha256":"b46702da2c40ef4ba477bc4a94f38859981e2cb250f04fdfa58e86b86e7aaf2a"},
+    {"file":"after-mobile.png","sha256":"bed738b68c4036eee01fbdcb8007714d617fb614f5597de7a832d88a9624d9d7"}
+  ],
+  "limitations": [
+    "Frappe session/API mocked; actual upstream Vue mount, stores, router, Invoice and PostingDateRow",
+    "No live ERP or completed-sale permission proof",
+    "7-8 local isolated-development console errors per case, not clean-console proof",
+    "One background service-worker update fetch reported context teardown after desktop-positive capture; no page exception",
+    "External network requests blocked; no credentials or production data"
+  ]
+}

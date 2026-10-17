@@ -70,6 +70,15 @@
 						class="balance-skeleton"
 					/>
 
+					<v-chip
+						v-else-if="!hasBalance"
+						size="small"
+						variant="tonal"
+						class="balance-chip font-weight-bold"
+					>
+						<span class="balance-amount">{{ formattedBalance }}</span>
+					</v-chip>
+
 					<v-tooltip
 						v-else-if="isNegative"
 						location="bottom"
@@ -111,7 +120,7 @@ import type { POSProfile } from "../../../types/models";
 interface Props {
 	pos_profile: POSProfile | Record<string, any>;
 	posting_date_display?: string;
-	customer_balance?: number;
+	customer_balance?: number | null;
 	customer_balance_currency?: string;
 	balance_loading?: boolean;
 	formatCurrency: (val: number | undefined, currency?: string) => string;
@@ -138,8 +147,12 @@ const showBalance = computed(() => !!props.pos_profile?.posa_show_customer_balan
 const placeholderText = computed(() => __("Posting Date"));
 const priceListLabel = computed(() => __("Price List"));
 
-const isNegative = computed(() => (props.customer_balance ?? 0) < 0);
+const hasBalance = computed(() =>
+	typeof props.customer_balance === "number" && Number.isFinite(props.customer_balance),
+);
+const isNegative = computed(() => hasBalance.value && (props.customer_balance ?? 0) < 0);
 const formattedBalance = computed(() => {
+	if (typeof props.customer_balance !== "number" || !hasBalance.value) return __("Unavailable");
 	return props.formatCurrency(props.customer_balance, props.customer_balance_currency);
 });
 

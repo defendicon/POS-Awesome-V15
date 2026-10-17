@@ -440,7 +440,7 @@ export default {
 			return_doc: "",
 			customer: "",
 			customer_info: "",
-			customer_balance: 0,
+			customer_balance: null,
 			customer_balance_currency: undefined,
 			customer_balance_loading: false,
 			total_tax: 0,

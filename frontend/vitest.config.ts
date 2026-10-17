@@ -1,7 +1,14 @@
 import { mergeConfig } from "vite";
 import viteConfig from "./vite.config.js";
 
-export default mergeConfig(viteConfig, {
+const testViteConfig = {
+	...viteConfig,
+	// The Frappe style extractor writes beside source files during transforms.
+	// Keep the existing compiler configuration, but never write build CSS in tests.
+	plugins: viteConfig.plugins.filter((plugin) => plugin.name !== "frappe-vue-style"),
+};
+
+export default mergeConfig(testViteConfig, {
 	test: {
 		include: [
 			"tests/**/*.spec.{js,ts}",
