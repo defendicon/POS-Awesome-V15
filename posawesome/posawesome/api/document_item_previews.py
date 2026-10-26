@@ -12,6 +12,18 @@ ITEM_CHILD_DOCTYPES = {
 }
 
 
+def _item_count_field():
+    version = str(getattr(frappe, "__version__", "") or "").strip()
+    try:
+        major_version = int(version.split(".", 1)[0])
+    except (TypeError, ValueError):
+        major_version = 16
+
+    if major_version >= 16:
+        return {"COUNT": "name", "as": "items_count"}
+    return "count(name) as items_count"
+
+
 def attach_document_item_previews(rows, doctype, preview_limit=4):
     """Attach a bounded, display-only item projection to document list rows."""
     if not rows:
@@ -36,7 +48,7 @@ def attach_document_item_previews(rows, doctype, preview_limit=4):
     count_rows = frappe.get_all(
         child_doctype,
         filters=filters,
-        fields=["parent", "count(name) as items_count"],
+        fields=["parent", _item_count_field()],
         group_by="parent",
     )
 

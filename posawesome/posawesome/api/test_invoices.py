@@ -31,6 +31,7 @@ def _install_frappe_stub():
             self[key] = value
 
     frappe_module = types.ModuleType("frappe")
+    frappe_module.__version__ = "16.0.0"
     frappe_module._ = lambda text: text
     frappe_module.throw = lambda message: (_ for _ in ()).throw(Exception(message))
     frappe_module.whitelist = lambda *args, **kwargs: (lambda fn: fn)
@@ -223,6 +224,21 @@ class TestInvoicesApi(unittest.TestCase):
         self.assertTrue(rows[0]["can_edit_submitted_invoice"])
         self.assertIsNone(rows[0]["edit_block_reason"])
 
+    def test_item_preview_count_field_supports_frappe_15_and_16(self):
+        preview_module = sys.modules["posawesome.posawesome.api.document_item_previews"]
+        original_version = self.invoices.frappe.__version__
+        try:
+            self.invoices.frappe.__version__ = "15.48.0"
+            self.assertEqual(preview_module._item_count_field(), "count(name) as items_count")
+
+            self.invoices.frappe.__version__ = "16.0.0"
+            self.assertEqual(
+                preview_module._item_count_field(),
+                {"COUNT": "name", "as": "items_count"},
+            )
+        finally:
+            self.invoices.frappe.__version__ = original_version
+
     def test_list_submitted_invoices_blocks_return_invoice_editing(self):
         self.invoices.frappe.get_list = lambda *args, **kwargs: [
             {
@@ -274,7 +290,14 @@ class TestInvoicesApi(unittest.TestCase):
         def fake_get_all(doctype, **kwargs):
             get_all_calls.append((doctype, kwargs))
             fields = kwargs.get("fields")
-            if doctype == "Sales Invoice Item" and "count(name) as items_count" in fields:
+            if (
+                doctype == "Sales Invoice Item"
+                and {
+                    "COUNT": "name",
+                    "as": "items_count",
+                }
+                in fields
+            ):
                 return [{"parent": "SINV-00000", "items_count": 5}]
             if doctype == "Sales Invoice Item":
                 return [
@@ -325,6 +348,10 @@ class TestInvoicesApi(unittest.TestCase):
         self.assertEqual(len(get_all_calls), 6)
         self.assertEqual(get_all_calls[0][0], "Sales Invoice Item")
         self.assertEqual(get_all_calls[1][0], "Sales Invoice Item")
+        self.assertIn(
+            {"COUNT": "name", "as": "items_count"},
+            get_all_calls[1][1]["fields"],
+        )
 
     def test_create_sales_invoice_from_order_preserves_pos_tax_inclusive_flag(self):
         class FakeDoc:
