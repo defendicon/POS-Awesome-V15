@@ -417,8 +417,10 @@
 										</div>
 									</div>
 
-									<div class="invoice-record-card__content">
-										<div class="meta-pair-grid">
+									<div
+										class="invoice-record-card__content invoice-record-card__content--receipt"
+									>
+										<div class="meta-pair-grid meta-pair-grid--receipt-facts">
 											<div class="meta-pair">
 												<div class="meta-pair__label">{{ __("Posting") }}</div>
 												<div class="meta-pair__value">
@@ -437,7 +439,10 @@
 													{{ formatCurrency(invoice.paid_amount || 0) }}
 												</div>
 											</div>
-											<div class="meta-pair">
+											<div
+												v-if="Number(invoice.change_amount || 0) !== 0"
+												class="meta-pair"
+											>
 												<div class="meta-pair__label">{{ __("Change Return") }}</div>
 												<div class="meta-pair__value meta-pair__value--warning">
 													{{ currencySymbol(invoice.currency) }}
@@ -455,12 +460,6 @@
 												>
 													{{ currencySymbol(invoice.currency) }}
 													{{ formatCurrency(invoice.outstanding_amount || 0) }}
-												</div>
-											</div>
-											<div class="meta-pair">
-												<div class="meta-pair__label">{{ __("Payment State") }}</div>
-												<div class="meta-pair__value">
-													{{ __(invoice.status || "Draft") }}
 												</div>
 											</div>
 										</div>
@@ -4288,12 +4287,27 @@ export default {
 }
 
 .invoice-record-card {
-	border-radius: 22px;
+	position: relative;
+	border-radius: 18px;
 	overflow: hidden;
-	border: 1px solid rgba(148, 163, 184, 0.18);
+	border: 1px solid rgba(100, 116, 139, 0.2);
 	background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
-	box-shadow: 0 20px 44px rgba(15, 23, 42, 0.08);
+	box-shadow:
+		0 12px 28px rgba(15, 23, 42, 0.07),
+		0 2px 6px rgba(15, 23, 42, 0.04);
 	color: var(--pos-text-primary);
+	transition:
+		border-color 160ms ease,
+		box-shadow 160ms ease,
+		transform 160ms ease;
+}
+
+.invoice-record-card:hover {
+	transform: translateY(-1px);
+	border-color: rgba(var(--v-theme-primary), 0.28);
+	box-shadow:
+		0 16px 34px rgba(15, 23, 42, 0.09),
+		0 3px 8px rgba(15, 23, 42, 0.05);
 }
 
 .invoice-record-card__hero {
@@ -4301,7 +4315,7 @@ export default {
 	align-items: flex-start;
 	justify-content: space-between;
 	gap: 16px;
-	padding: 18px 20px;
+	padding: 15px 17px 14px;
 	background: linear-gradient(135deg, rgba(239, 246, 255, 0.95), rgba(224, 231, 255, 0.88));
 	border-bottom: 1px solid rgba(148, 163, 184, 0.14);
 }
@@ -4324,14 +4338,15 @@ export default {
 }
 
 .invoice-record-card__title {
-	font-size: 1rem;
+	font-size: 0.94rem;
 	font-weight: 800;
-	line-height: 1.3;
+	line-height: 1.25;
+	letter-spacing: -0.01em;
 }
 
 .invoice-record-card__subtitle {
-	margin-top: 6px;
-	font-size: 0.88rem;
+	margin-top: 4px;
+	font-size: 0.8rem;
 	color: var(--pos-text-secondary);
 }
 
@@ -4340,7 +4355,7 @@ export default {
 }
 
 .invoice-record-card__amount-label {
-	font-size: 0.72rem;
+	font-size: 0.62rem;
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
@@ -4348,13 +4363,18 @@ export default {
 }
 
 .invoice-record-card__amount {
-	margin-top: 6px;
-	font-size: 1.1rem;
+	margin-top: 4px;
+	font-size: 1.16rem;
 	font-weight: 800;
+	font-variant-numeric: tabular-nums;
 }
 
 .invoice-record-card__content {
-	padding: 18px 20px;
+	padding: 13px 16px;
+}
+
+.invoice-record-card__content--receipt {
+	padding-bottom: 14px;
 }
 
 .invoice-record-card__actions {
@@ -4362,10 +4382,11 @@ export default {
 	align-items: center;
 	justify-content: flex-end;
 	flex-wrap: wrap;
-	gap: 8px;
-	padding: 14px 18px 18px;
+	gap: 5px;
+	min-height: 48px;
+	padding: 7px 12px;
 	border-top: 1px solid rgba(148, 163, 184, 0.12);
-	background: rgba(248, 250, 252, 0.76);
+	background: rgba(248, 250, 252, 0.58);
 }
 
 .invoice-management-card--dark .invoice-record-card {
@@ -4415,22 +4436,33 @@ export default {
 .meta-pair-grid {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 14px;
+	gap: 1px;
+	overflow: hidden;
+	border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+	border-radius: 12px;
+	background: rgba(var(--v-theme-on-surface), 0.08);
 }
 
 .meta-pair-grid--compact {
-	margin-bottom: 16px;
+	margin-bottom: 10px;
 }
 
 .meta-pair {
-	padding: 12px 14px;
-	border-radius: 16px;
-	background: rgba(255, 255, 255, 0.82);
-	border: 1px solid rgba(148, 163, 184, 0.14);
+	min-width: 0;
+	min-height: 52px;
+	padding: 8px 10px;
+	border: 0;
+	border-radius: 0;
+	background: rgba(255, 255, 255, 0.76);
+}
+
+.meta-pair-grid--receipt-facts .meta-pair:first-child:last-child,
+.meta-pair-grid--receipt-facts .meta-pair:nth-child(3):last-child {
+	grid-column: 1 / -1;
 }
 
 .meta-pair__label {
-	font-size: 0.72rem;
+	font-size: 0.61rem;
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
@@ -4438,10 +4470,11 @@ export default {
 }
 
 .meta-pair__value {
-	margin-top: 6px;
-	font-size: 0.92rem;
+	margin-top: 3px;
+	font-size: 0.8rem;
 	font-weight: 700;
-	line-height: 1.35;
+	line-height: 1.25;
+	font-variant-numeric: tabular-nums;
 }
 
 .meta-pair__value--success {
@@ -4452,8 +4485,8 @@ export default {
 }
 
 .payment-progress-block {
-	padding: 14px 16px;
-	border-radius: 16px;
+	padding: 10px 12px;
+	border-radius: 12px;
 	background: rgba(255, 255, 255, 0.84);
 	border: 1px solid rgba(148, 163, 184, 0.14);
 }
@@ -4469,8 +4502,8 @@ export default {
 	align-items: center;
 	justify-content: space-between;
 	gap: 12px;
-	margin-bottom: 10px;
-	font-size: 0.8rem;
+	margin-bottom: 7px;
+	font-size: 0.72rem;
 	font-weight: 700;
 }
 
@@ -4611,12 +4644,6 @@ export default {
 		border-radius: 0;
 	}
 
-	.invoice-record-card__hero {
-		flex-direction: column;
-	}
-	.invoice-record-card__amount-block {
-		text-align: left;
-	}
 	.invoice-management-footer {
 		padding-inline: 16px;
 		justify-content: stretch;
@@ -4638,12 +4665,6 @@ export default {
 		grid-column: span 1;
 	}
 
-	.meta-pair-grid {
-		grid-template-columns: 1fr;
-	}
-	.invoice-record-card__actions {
-		justify-content: stretch;
-	}
 	.tab-pagination {
 		justify-content: center;
 	}

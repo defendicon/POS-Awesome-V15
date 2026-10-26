@@ -104,14 +104,14 @@ export default {
 <style scoped>
 .mini-receipt {
 	position: relative;
-	margin-top: 16px;
-	padding: 14px 15px 12px;
+	margin-top: 10px;
+	padding: 11px 12px 9px;
 	border: 1px solid rgba(var(--v-theme-on-surface), 0.11);
-	border-radius: 14px;
+	border-radius: 12px;
 	background:
 		linear-gradient(90deg, rgba(var(--v-theme-primary), 0.035) 1px, transparent 1px) 0 0 / 18px 18px,
 		var(--pos-surface-raised);
-	box-shadow: inset 0 1px rgba(255, 255, 255, 0.45);
+	box-shadow: inset 0 1px rgba(255, 255, 255, 0.38);
 }
 
 .mini-receipt::before {
@@ -119,7 +119,7 @@ export default {
 	position: absolute;
 	inset: 0 auto 0 0;
 	width: 3px;
-	border-radius: 14px 0 0 14px;
+	border-radius: 12px 0 0 12px;
 	background: rgb(var(--v-theme-primary));
 	opacity: 0.72;
 }
@@ -134,7 +134,7 @@ export default {
 .mini-receipt__heading {
 	justify-content: space-between;
 	gap: 12px;
-	margin-bottom: 8px;
+	margin-bottom: 6px;
 }
 
 .mini-receipt__eyebrow {
@@ -175,8 +175,8 @@ export default {
 }
 
 .mini-receipt__line {
-	min-height: 44px;
-	padding: 7px 4px;
+	min-height: 39px;
+	padding: 6px 4px;
 	border-bottom: 1px dashed rgba(var(--v-theme-on-surface), 0.11);
 }
 
@@ -197,7 +197,7 @@ export default {
 }
 
 .mini-receipt__item strong {
-	font-size: 0.82rem;
+	font-size: 0.78rem;
 	line-height: 1.25;
 }
 
