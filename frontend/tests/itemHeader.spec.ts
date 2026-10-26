@@ -163,4 +163,39 @@ describe("ItemHeader", () => {
 		});
 		expect(wrapper.findAll('[role="combobox"]')).toHaveLength(1);
 	});
+
+	it("offers New Item from the sales item-search tools", async () => {
+		const wrapper = mount(ItemHeader, {
+			props: {
+				searchInput: "",
+				qtyInput: 1,
+				context: "pos",
+				posProfile: {
+					posa_input_qty: false,
+					posa_enable_camera_scanning: false,
+				},
+			},
+			global: {
+				mocks: {
+					frappe: { _: (value: string) => value },
+					__: (value: string) => value,
+				},
+				components: {
+					VRow: VRowStub,
+					VCol: VColStub,
+					VBtn: VBtnStub,
+					VExpandTransition: VExpandTransitionStub,
+					VProgressLinear: VProgressLinearStub,
+					VTextField: VTextFieldStub,
+				},
+			},
+		});
+
+		await wrapper.get('[aria-label="Show search tools"]').trigger("click");
+		const newItemButton = wrapper.findAll("button").find((button) => button.text().includes("New Item"));
+
+		expect(newItemButton).toBeDefined();
+		await newItemButton?.trigger("click");
+		expect(wrapper.emitted("open-new-item")).toHaveLength(1);
+	});
 });

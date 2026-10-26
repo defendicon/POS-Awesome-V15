@@ -130,7 +130,7 @@
 			<div v-if="toolsOpen" class="tools-panel">
 				<div class="tools-panel__actions">
 					<v-btn
-						v-if="context === 'purchase'"
+						v-if="context === 'purchase' || context === 'pos'"
 						density="compact"
 						variant="text"
 						color="primary"

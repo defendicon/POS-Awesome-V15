@@ -1957,8 +1957,13 @@ export default {
 		const invoiceManagementDialogMaxWidth = computed(() =>
 			responsive.windowWidth.value < 1100 ? "100vw" : "1420px",
 		);
-		const { invoiceManagementDialog, invoiceManagementTargetTab, posProfile, posOpeningShift } =
-			storeToRefs(uiStore);
+		const {
+			invoiceManagementDialog,
+			invoiceManagementTargetTab,
+			invoiceManagementCustomer,
+			posProfile,
+			posOpeningShift,
+		} = storeToRefs(uiStore);
 		const { currentCashier } = storeToRefs(employeeStore);
 		return {
 			uiStore,
@@ -1970,6 +1975,7 @@ export default {
 			eventBus,
 			invoiceManagementDialog,
 			invoiceManagementTargetTab,
+			invoiceManagementCustomer,
 			posProfile,
 			posOpeningShift,
 			currentCashier,
@@ -2357,6 +2363,7 @@ export default {
 		invoiceManagementDialog(value) {
 			if (value) {
 				this.activeTab = this.invoiceManagementTargetTab || "history";
+				this.historySearch = this.invoiceManagementCustomer || "";
 				this.draftSource = getDefaultCommercialDocumentSource(
 					this.posProfile,
 					this.uiStore.invoiceManagementDraftSource || this.draftSource,
@@ -3112,7 +3119,9 @@ export default {
 			}
 			this.loading = true;
 			try {
-				const filters = this.buildInvoiceFilters();
+				const filters = this.buildInvoiceFilters(
+					this.invoiceManagementCustomer ? { customer: this.invoiceManagementCustomer } : {},
+				);
 				const doctypes =
 					typeof this.historyInvoiceDoctypes === "function"
 						? this.historyInvoiceDoctypes()
