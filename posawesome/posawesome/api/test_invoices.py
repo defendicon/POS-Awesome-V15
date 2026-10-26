@@ -274,6 +274,21 @@ class TestInvoicesApi(unittest.TestCase):
         def fake_get_all(doctype, **kwargs):
             get_all_calls.append((doctype, kwargs))
             fields = kwargs.get("fields")
+            if doctype == "Sales Invoice Item" and "count(name) as items_count" in fields:
+                return [{"parent": "SINV-00000", "items_count": 5}]
+            if doctype == "Sales Invoice Item":
+                return [
+                    {
+                        "parent": "SINV-00000",
+                        "item_code": "ITEM-001",
+                        "item_name": "Preview Item",
+                        "qty": 2,
+                        "uom": "Nos",
+                        "rate": 50,
+                        "amount": 100,
+                        "idx": 1,
+                    }
+                ]
             if doctype == "Sales Invoice" and fields == ["amended_from"]:
                 return [{"amended_from": "SINV-00000"}]
             if doctype == "Sales Invoice" and fields == ["return_against"]:
@@ -305,7 +320,11 @@ class TestInvoicesApi(unittest.TestCase):
         self.assertIn("submitted return", rows[1]["edit_block_reason"])
         self.assertIn("closing shift", rows[2]["edit_block_reason"])
         self.assertTrue(all(row["can_edit_submitted_invoice"] for row in rows[3:]))
-        self.assertEqual(len(get_all_calls), 4)
+        self.assertEqual(rows[0]["items_count"], 5)
+        self.assertEqual(rows[0]["item_preview"][0]["item_code"], "ITEM-001")
+        self.assertEqual(len(get_all_calls), 6)
+        self.assertEqual(get_all_calls[0][0], "Sales Invoice Item")
+        self.assertEqual(get_all_calls[1][0], "Sales Invoice Item")
 
     def test_create_sales_invoice_from_order_preserves_pos_tax_inclusive_flag(self):
         class FakeDoc:

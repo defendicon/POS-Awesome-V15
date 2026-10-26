@@ -4,6 +4,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint
 
+from posawesome.posawesome.api.document_item_previews import attach_document_item_previews
 from posawesome.posawesome.api.erpnext_compat import (
     resolve_make_delivery_note_from_order,
     resolve_make_sales_invoice_from_delivery,
@@ -266,6 +267,7 @@ def list_source_documents(
 
     if source_key == "order":
         rows = search_orders(company=company, currency=currency, order_name=search)
+        attach_document_item_previews(rows, SOURCE_DOCTYPES[source_key])
         return [_serialize_source_record("order", row) for row in rows]
 
     if source_key == "quote":
@@ -276,9 +278,12 @@ def list_source_documents(
             include_draft=include_draft,
             include_submitted=include_submitted,
         )
+        attach_document_item_previews(rows, SOURCE_DOCTYPES[source_key])
         return [_serialize_source_record("quote", row) for row in rows]
 
-    return _search_delivery_notes(company=company, currency=currency, delivery_note_name=search)
+    rows = _search_delivery_notes(company=company, currency=currency, delivery_note_name=search)
+    attach_document_item_previews(rows, SOURCE_DOCTYPES[source_key])
+    return rows
 
 
 @frappe.whitelist()

@@ -45,7 +45,7 @@
 								prepend-icon="mdi-view-grid-outline"
 								@click="viewMode = 'card'"
 							>
-								{{ __("Cards") }}
+								{{ __("Receipts") }}
 							</v-btn>
 							<v-btn
 								:variant="viewMode === 'list' ? 'flat' : 'text'"
@@ -464,17 +464,13 @@
 												</div>
 											</div>
 										</div>
+										<InvoiceMiniReceipt
+											:invoice="invoice"
+											@view-all="viewInvoice(invoice)"
+										/>
 									</div>
 
 									<div class="invoice-record-card__actions">
-										<v-btn
-											icon="mdi-eye-outline"
-											size="small"
-											variant="text"
-											:title="__('View Details')"
-											:aria-label="__('View invoice details')"
-											@click="viewInvoice(invoice)"
-										/>
 										<v-btn
 											v-if="canEditSubmittedInvoice(invoice)"
 											icon="mdi-pencil-outline"
@@ -877,6 +873,10 @@
 												rounded
 											/>
 										</div>
+										<InvoiceMiniReceipt
+											:invoice="invoice"
+											@view-all="viewInvoice(invoice)"
+										/>
 									</div>
 
 									<div class="invoice-record-card__actions">
@@ -900,14 +900,6 @@
 											:title="__('Edit Invoice')"
 											:aria-label="__('Edit submitted invoice')"
 											@click="openEditInvoice(invoice)"
-										/>
-										<v-btn
-											icon="mdi-eye-outline"
-											size="small"
-											variant="text"
-											:title="__('View Details')"
-											:aria-label="__('View invoice details')"
-											@click="viewInvoice(invoice)"
 										/>
 										<v-btn
 											icon="mdi-printer-outline"
@@ -1117,6 +1109,7 @@
 												</div>
 											</div>
 										</div>
+										<InvoiceMiniReceipt :invoice="invoice" :allow-view-all="false" />
 									</div>
 
 									<div class="invoice-record-card__actions">
@@ -1316,17 +1309,13 @@
 												</div>
 											</div>
 										</div>
+										<InvoiceMiniReceipt
+											:invoice="invoice"
+											@view-all="viewInvoice(invoice)"
+										/>
 									</div>
 
 									<div class="invoice-record-card__actions">
-										<v-btn
-											icon="mdi-eye-outline"
-											size="small"
-											variant="text"
-											:title="__('View Details')"
-											:aria-label="__('View invoice details')"
-											@click="viewInvoice(invoice)"
-										/>
 										<v-btn
 											icon="mdi-printer-outline"
 											size="small"
@@ -1918,6 +1907,7 @@ import { isOffline } from "../../../../offline/index";
 import { buildInvoicePdfUrl, shouldDownloadPdfForShareError } from "../../../utils/invoiceSharing";
 import DateRangeFilter from "../shared/DateRangeFilter.vue";
 import DocumentSourceSelector from "../shared/DocumentSourceSelector.vue";
+import InvoiceMiniReceipt from "./InvoiceMiniReceipt.vue";
 import {
 	canDeleteDocumentSourceRecord,
 	commitDocumentFlowAction,
@@ -1939,6 +1929,7 @@ export default {
 	components: {
 		DateRangeFilter,
 		DocumentSourceSelector,
+		InvoiceMiniReceipt,
 	},
 	setup() {
 		const uiStore = useUIStore();
