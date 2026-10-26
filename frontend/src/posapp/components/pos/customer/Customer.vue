@@ -73,11 +73,9 @@
 							<v-icon
 								v-bind="props"
 								class="icon-button mr-1"
-								:class="{ 'disabled-icon': !selectedCustomer }"
 								role="button"
-								:tabindex="selectedCustomer ? 0 : -1"
+								tabindex="0"
 								:aria-label="__('View customer invoices')"
-								:aria-disabled="!selectedCustomer"
 								@mousedown.prevent.stop
 								@click.stop="view_customer_invoices"
 								@keyup.enter.space.prevent.stop="view_customer_invoices"
