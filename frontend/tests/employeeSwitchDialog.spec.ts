@@ -3,7 +3,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { defineComponent, h } from "vue";
-import { mount } from "@vue/test-utils";
+import { flushPromises, mount } from "@vue/test-utils";
 
 import EmployeeSwitchDialog from "../src/posapp/components/pos/employee/EmployeeSwitchDialog.vue";
 import { useEmployeeStore } from "../src/posapp/stores/employeeStore";
@@ -283,9 +283,7 @@ describe("EmployeeSwitchDialog", () => {
 		expect(wrapper.get('[data-test="cashier-pin-error"]').text()).toContain(
 			"Invalid cashier PIN.",
 		);
-		expect(wrapper.text()).toContain(
-			"Set each cashier PIN in the User form",
-		);
+		expect(wrapper.text()).not.toContain("User form");
 	});
 
 	it("shows a locked loading state, then renders and selects asynchronously loaded cashiers", async () => {
@@ -494,5 +492,116 @@ describe("EmployeeSwitchDialog", () => {
 			);
 			expect(store.isLocked).toBe(false);
 		});
+	});
+
+	const mountFirstUse = (mode = "lock", pinLength = 0) => {
+		const store = useEmployeeStore();
+		useUIStore().setPosProfile({ name: "Main POS" } as any);
+		store.setTerminalEmployees([
+			{ user: "cashier@example.com", full_name: "Main Cashier", pin_length: pinLength },
+			{ user: "backup@example.com", full_name: "Backup Cashier", pin_length: 0, is_current: true },
+		]);
+		if (mode === "switch") {
+			store.applyTerminalState({ active_cashier: "cashier@example.com", locked: false });
+			store.openEmployeeSwitch();
+		}
+		const wrapper = mount(EmployeeSwitchDialog, {
+			global: { components: {
+				VDialog: VDialogStub, VCard: BoxStub, VCardTitle: BoxStub,
+				VCardText: BoxStub, VCardActions: BoxStub, VBtn: VBtnStub,
+				VIcon: BoxStub, VAlert: BoxStub, VTextField: VTextFieldStub,
+			} },
+		});
+		return { store, wrapper };
+	};
+
+	it.each([["lock", "0578"], ["switch", "0578"], ["lock", "01234567"], ["switch", "01234567"]])("creates the signed-in cashier's first PIN from the %s dialog with %s", async (mode, pin) => {
+		const { store, wrapper } = mountFirstUse(mode);
+		expect(wrapper.text()).toContain("Create your PIN");
+		const inputs = wrapper.findAll("input");
+		expect(inputs).toHaveLength(2);
+		for (const input of inputs) {
+			expect(input.attributes("type")).toBe("password");
+			expect(input.attributes("inputmode")).toBe("numeric");
+			expect(input.attributes("autocomplete")).toBe("new-password");
+		}
+		await inputs[0].setValue(pin);
+		await inputs[1].setValue(pin);
+		expect((window as any).frappe.call).not.toHaveBeenCalled();
+		(window as any).frappe.call.mockResolvedValue({ message: {
+			user: "cashier@example.com", full_name: "Main Cashier", has_pin: true,
+			terminal_state: { active_cashier: "cashier@example.com", locked: false },
+		} });
+		await wrapper.get(".employee-switch-dialog__actions button:last-child").trigger("click");
+		await flushPromises();
+		expect((window as any).frappe.call).toHaveBeenCalledOnce();
+		expect((window as any).frappe.call).toHaveBeenCalledWith({
+			method: "posawesome.posawesome.api.employees.save_cashier_pin",
+			args: { pos_profile: "Main POS", user: "cashier@example.com", new_pin: pin },
+		});
+		expect(store.currentCashier?.user).toBe("cashier@example.com");
+		expect(store.isLocked).toBe(false);
+		expect(store.switchDialogOpen).toBe(false);
+		expect(store.terminalEmployees[0].pin_length).toBe(pin.length);
+		store.lockTerminal();
+		await wrapper.vm.$nextTick();
+		expect(wrapper.text()).not.toContain("Create your PIN");
+		expect(wrapper.findAll("input")).toHaveLength(1);
+	});
+
+	it.each(["lock", "switch"])("directs a different PIN-less cashier to a supervisor in %s mode", async (mode) => {
+		const { wrapper } = mountFirstUse(mode);
+		const selector = mode === "lock" ? "terminal-unlock-cashier" : "employee-option";
+		await wrapper.get(`[data-test="${selector}-backup@example.com"]`).trigger("click");
+		expect(wrapper.text()).toMatch(/ask a.*supervisor/i);
+		expect(wrapper.text()).not.toContain("User form");
+		expect(wrapper.text()).not.toContain("Create your PIN");
+		expect(wrapper.findAll("input")).toHaveLength(0);
+		expect(wrapper.get(".employee-switch-dialog__actions button:last-child").attributes("disabled")).toBeDefined();
+		expect((window as any).frappe.call).not.toHaveBeenCalled();
+	});
+
+	it.each(["123", "123456789", "12ab"])("does not save an invalid new PIN %s", async (pin) => {
+		const { store, wrapper } = mountFirstUse();
+		expect(wrapper.findAll("input")).toHaveLength(2);
+		await wrapper.findAll("input")[0].setValue(pin);
+		await wrapper.findAll("input")[1].setValue(pin);
+		await wrapper.get(".employee-switch-dialog__actions button:last-child").trigger("click");
+		await flushPromises();
+		expect(wrapper.text()).toContain("4 to 8 digits");
+		expect((window as any).frappe.call).not.toHaveBeenCalled();
+		expect(store.isLocked).toBe(true);
+	});
+
+	it("shows a mismatch without saving and clears both credentials when selection changes", async () => {
+		const { wrapper } = mountFirstUse();
+		expect(wrapper.findAll("input")).toHaveLength(2);
+		await wrapper.findAll("input")[0].setValue("1234");
+		await wrapper.findAll("input")[1].setValue("1235");
+		await wrapper.get(".employee-switch-dialog__actions button:last-child").trigger("click");
+		await flushPromises();
+		expect(wrapper.text()).toContain("PIN confirmation does not match");
+		expect((window as any).frappe.call).not.toHaveBeenCalled();
+		await wrapper.get('[data-test="terminal-unlock-cashier-backup@example.com"]').trigger("click");
+		await wrapper.get('[data-test="terminal-unlock-cashier-cashier@example.com"]').trigger("click");
+		expect(wrapper.findAll("input").map(input => (input.element as HTMLInputElement).value)).toEqual(["", ""]);
+		expect(wrapper.text()).not.toContain("PIN confirmation does not match");
+	});
+
+	it.each(["server-error", "unverified"])("keeps the terminal locked after %s on first PIN save", async (failure) => {
+		const { store, wrapper } = mountFirstUse();
+		expect(wrapper.findAll("input")).toHaveLength(2);
+		await wrapper.findAll("input")[0].setValue("12345678");
+		await wrapper.findAll("input")[1].setValue("12345678");
+		if (failure === "server-error") {
+			(window as any).frappe.call.mockRejectedValue(new Error("Invalid cashier PIN."));
+		} else {
+			(window as any).frappe.call.mockResolvedValue({ message: { user: "cashier@example.com", has_pin: true } });
+		}
+		await wrapper.get(".employee-switch-dialog__actions button:last-child").trigger("click");
+		await flushPromises();
+		expect(store.isLocked).toBe(true);
+		expect(store.currentCashier).toBeNull();
+		expect(wrapper.text()).toContain(failure === "server-error" ? "Invalid cashier PIN" : "server did not confirm");
 	});
 });

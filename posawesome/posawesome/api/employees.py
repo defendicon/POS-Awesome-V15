@@ -441,9 +441,12 @@ def save_cashier_pin(pos_profile=None, user=None, new_pin=None, current_pin=None
     user_doc.set("posa_pos_pin", next_pin)
     user_doc.save(ignore_permissions=True)
 
-    return {
+    result = {
         "user": user_doc.name,
         "full_name": user_doc.full_name or user_doc.name,
         "has_pin": True,
         "is_supervisor": _is_pos_supervisor(user_doc),
     }
+    if not existing_pin and user == get_authenticated_pos_user():
+        result.update(verify_terminal_employee_pin(profile_name, user, next_pin))
+    return result

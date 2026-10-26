@@ -14,5 +14,6 @@
 - [posapp/stores/offlineSyncStore](posapp/stores/offlineSyncStore.md)
 - [posapp/types/models](posapp/types/models.md)
 - [posapp/utils/currencyConversion](posapp/utils/currencyConversion.md)
+- [posapp/utils/exchangeSessionStorage](posapp/utils/exchangeSessionStorage.md)
 - [posapp/utils/searchUtils](posapp/utils/searchUtils.md)
 - [posapp/utils/stock](posapp/utils/stock.md)

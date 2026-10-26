@@ -601,7 +601,7 @@ class TestEmployeesApi(unittest.TestCase):
                 self.saved_value = None
 
             def get_password(self, fieldname):
-                return ""
+                return self.saved_value or ""
 
             def set(self, fieldname, value):
                 self.saved_field = fieldname
@@ -626,6 +626,124 @@ class TestEmployeesApi(unittest.TestCase):
         self.assertEqual(user_doc.saved_value, "5678")
         self.assertTrue(user_doc.saved)
         self.assertTrue(result["has_pin"])
+
+    def _first_pin_user(self, pin="", *, enabled=1, assigned=True):
+        from posawesome.posawesome.api import terminal_state
+        from posawesome.posawesome.api.test_terminal_state import FakeCache
+
+        user_doc = types.SimpleNamespace(
+            name="cashier@example.com",
+            full_name="Main Cashier",
+            enabled=enabled,
+            posa_is_pos_supervisor=0,
+            flags=types.SimpleNamespace(),
+            pin=pin,
+        )
+        user_doc.get_password = lambda fieldname: user_doc.pin
+        user_doc.set = lambda fieldname, value: setattr(user_doc, "pin", value)
+        user_doc.save = Mock()
+        self.employees.frappe.get_doc = lambda doctype, name: user_doc
+        self.employees.frappe.get_roles = lambda user=None: []
+        self.employees.frappe.get_all = lambda doctype, **kwargs: (
+            [{"user": user_doc.name}]
+            if doctype == "POS Profile User" and assigned else []
+        )
+        self.employees.frappe.session.sid = "synthetic-first-pin-session"
+        self.employees.frappe.cache = FakeCache()
+        self.employees.frappe.db.exists = lambda doctype, filters: (
+            doctype == "POS Profile User"
+            and filters == {"parent": "Main POS", "user": user_doc.name}
+            and assigned
+        )
+        self.employees.frappe.db.get_value = lambda *args: enabled
+        terminal_patch = patch.object(terminal_state, "frappe", self.employees.frappe)
+        terminal_patch.start()
+        self.addCleanup(terminal_patch.stop)
+        self.employees.activate_verified_cashier = terminal_state.activate_verified_cashier
+        return user_doc, terminal_state
+
+    def test_first_pin_creation_verifies_and_persists_unlocked_self_cashier(self):
+        user_doc, terminal_state = self._first_pin_user()
+
+        result = self.employees.save_cashier_pin("Main POS", user_doc.name, "0578")
+
+        self.assertEqual(user_doc.pin, "0578")
+        user_doc.save.assert_called_once_with(ignore_permissions=True)
+        self.assertIn("terminal_state", result)
+        self.assertEqual(result["terminal_state"]["active_cashier"], user_doc.name)
+        self.assertFalse(result["terminal_state"]["locked"])
+        reloaded = terminal_state._read_state("Main POS")
+        self.assertFalse(reloaded["locked"])
+        self.assertEqual(reloaded["active_cashier"], user_doc.name)
+        self.assertEqual([event for _, event in self.pin_attempt_events], [
+            "lock_acquired", "checked", "succeeded", "lock_released",
+        ])
+
+    def test_first_pin_creation_does_not_override_an_attempt_lockout(self):
+        user_doc, terminal_state = self._first_pin_user()
+        key = self.employees._cashier_pin_attempt_key(
+            user_doc.name, "Main POS", user_doc.name, "192.0.2.10"
+        )
+        self.pin_attempt_state[key] = 5
+
+        with self.assertRaisesRegex(Exception, "Invalid cashier PIN"):
+            self.employees.save_cashier_pin("Main POS", user_doc.name, "0578")
+
+        self.assertTrue(terminal_state._read_state("Main POS")["locked"])
+        self.assertEqual(self.pin_attempt_state[key], 5)
+
+    def test_existing_pin_change_does_not_activate_or_clear_lockout(self):
+        user_doc, terminal_state = self._first_pin_user(pin="1234")
+        key = self.employees._cashier_pin_attempt_key(
+            user_doc.name, "Main POS", user_doc.name, "192.0.2.10"
+        )
+        self.pin_attempt_state[key] = 5
+
+        result = self.employees.save_cashier_pin("Main POS", user_doc.name, "5678", "1234")
+
+        self.assertNotIn("terminal_state", result)
+        self.assertTrue(terminal_state._read_state("Main POS")["locked"])
+        with self.assertRaisesRegex(Exception, "Invalid cashier PIN"):
+            self.employees.verify_terminal_employee_pin("Main POS", user_doc.name, "5678")
+        self.assertEqual(self.pin_attempt_state[key], 5)
+
+    def test_stale_first_use_request_cannot_replace_an_existing_pin(self):
+        user_doc, terminal_state = self._first_pin_user(pin="1234")
+
+        with self.assertRaisesRegex(Exception, "Current PIN is incorrect"):
+            self.employees.save_cashier_pin("Main POS", user_doc.name, "5678")
+
+        self.assertEqual(user_doc.pin, "1234")
+        user_doc.save.assert_not_called()
+        self.assertTrue(terminal_state._read_state("Main POS")["locked"])
+
+    def test_first_pin_creation_preserves_validation_and_terminal_membership(self):
+        for pin in ("123", "123456789", "12ab", ""):
+            with self.subTest(pin=pin):
+                user_doc, terminal_state = self._first_pin_user()
+                with self.assertRaises(Exception):
+                    self.employees.save_cashier_pin("Main POS", user_doc.name, pin)
+                user_doc.save.assert_not_called()
+                self.assertTrue(terminal_state._read_state("Main POS")["locked"])
+        for options, error in (({"enabled": 0}, "disabled"), ({"assigned": False}, "not assigned")):
+            with self.subTest(options=options):
+                user_doc, terminal_state = self._first_pin_user(**options)
+                with self.assertRaisesRegex(Exception, error):
+                    self.employees.save_cashier_pin("Main POS", user_doc.name, "5678")
+                user_doc.save.assert_not_called()
+                self.assertTrue(terminal_state._read_state("Main POS")["locked"])
+
+    def test_supervisor_first_pin_for_another_cashier_does_not_activate_them(self):
+        user_doc, terminal_state = self._first_pin_user()
+        self.employees.frappe.session.user = "supervisor@example.com"
+        self.employees.user_can_manage_pos = lambda user: True
+
+        result = self.employees.save_cashier_pin("Main POS", user_doc.name, "5678")
+
+        self.assertTrue(result["has_pin"])
+        self.assertNotIn("terminal_state", result)
+        self.assertTrue(terminal_state._read_state("Main POS")["locked"])
+        self.assertEqual(self.pin_attempt_events, [])
 
     def test_save_cashier_pin_requires_current_pin_when_one_exists(self):
         self.employees.frappe.get_roles = lambda user=None: []

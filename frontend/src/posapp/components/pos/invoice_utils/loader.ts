@@ -1,7 +1,6 @@
 import {
 	isOffline,
 	saveCustomerBalance,
-	getCachedCustomerBalance,
 } from "../../../../offline/index";
 import { useDiscounts } from "../../../composables/pos/shared/useDiscounts";
 import { resolvePosDocumentDoctype } from "../../../utils/posDocumentMode";
@@ -77,79 +76,63 @@ function markPricingRuleFreeLines(items: any[] = []) {
  * - context.toastStore
  */
 
+const customerBalanceRequests = new WeakMap<object, number>();
+
 export async function fetch_customer_balance(context: any) {
+	const customer = context.customer;
+	const company = context.pos_profile?.company;
+	const user = frappe.session?.user;
+	const request = (customerBalanceRequests.get(context) || 0) + 1;
+	customerBalanceRequests.set(context, request);
+	const isCurrent = () =>
+		customerBalanceRequests.get(context) === request &&
+		context.customer === customer &&
+		context.pos_profile?.company === company &&
+		frappe.session?.user === user;
+
+	context.customer_balance = null;
+	context.customer_balance_currency = undefined;
 	context.customer_balance_loading = true;
 	try {
-		if (!context.customer) {
-			context.customer_balance = 0;
-			context.customer_balance_currency = undefined;
-			context.customer_balance_loading = false;
+		if (!customer) return;
+
+		// A cached balance cannot prove current availability or permission.
+		if (isOffline()) {
+			context.toastStore.show({
+				title: __("Customer balance unavailable offline"),
+				text: __("Balance will be updated when connection is restored"),
+				color: "warning",
+			});
 			return;
 		}
 
-		// Check if offline and use cached balance
-		if (isOffline()) {
-			const cachedData = getCachedCustomerBalance(context.customer);
-			if (cachedData !== null) {
-				context.customer_balance = cachedData.balance;
-				context.customer_balance_currency = cachedData.currency;
-				context.customer_balance_loading = false;
-				return;
-			} else {
-				// No cached balance available in offline mode
-				context.customer_balance = 0;
-				context.customer_balance_currency = undefined;
-				context.customer_balance_loading = false;
-				context.toastStore.show({
-					title: __("Customer balance unavailable offline"),
-					text: __(
-						"Balance will be updated when connection is restored",
-					),
-					color: "warning",
-				});
-				return;
-			}
-		}
-
-		// Online mode: fetch from server and cache the result
 		const r = await frappe.call({
 			method: "posawesome.posawesome.api.customer.get_customer_balance",
 			args: {
-				customer: context.customer,
-				company: context.pos_profile?.company,
+				customer,
+				company,
 			},
 		});
 
-		const balance = r?.message?.balance || 0;
-		const currency = r?.message?.currency || undefined;
+		if (!isCurrent()) return;
+		const value = r?.message?.balance;
+		const balance = typeof value === "number" && Number.isFinite(value) ? value : null;
+		const currency = balance !== null ? r?.message?.currency || undefined : undefined;
 		context.customer_balance = balance;
 		context.customer_balance_currency = currency;
 
-		// Cache the balanced for offline use
-		saveCustomerBalance(context.customer, balance, currency);
-		context.customer_balance_loading = false;
+		saveCustomerBalance(customer, balance, currency, company, user);
 	} catch (error) {
+		if (!isCurrent()) return;
 		console.error("Error fetching balance:", error);
-
-		// Try to use cached balance as fallback
-		const cachedData = getCachedCustomerBalance(context.customer);
-		if (cachedData !== null) {
-			context.customer_balance = cachedData.balance;
-			context.customer_balance_currency = cachedData.currency;
-			context.toastStore.show({
-				title: __("Using cached customer balance"),
-				text: __("Could not fetch latest balance from server"),
-				color: "warning",
-			});
-		} else {
-			context.toastStore.show({
-				title: __("Error fetching customer balance"),
-				color: "error",
-			});
-			context.customer_balance = 0;
-			context.customer_balance_currency = undefined;
+		context.toastStore.show({
+			title: __("Error fetching customer balance"),
+			color: "error",
+		});
+	} finally {
+		if (customerBalanceRequests.get(context) === request) {
+			context.customer_balance_loading = false;
 		}
-		context.customer_balance_loading = false;
 	}
 }
 
