@@ -3,8 +3,8 @@ import pathlib
 import sys
 import types
 import unittest
+from contextlib import contextmanager
 from unittest.mock import Mock, patch
-
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
 
@@ -438,6 +438,101 @@ class TestItemSaleControls(unittest.TestCase):
             with self.assertRaisesRegex(PermissionError, "POS supervisor"):
                 self.controls._authorize_below_cost_override("Main POS")
 
+    @contextmanager
+    def _supervisor_policy(self, action="POS Supervisor Override", extra_errors=()):
+        with (
+            patch.object(self.controls, "collect_item_sale_control_errors", return_value=[]),
+            patch.object(
+                self.controls,
+                "collect_below_buying_price_errors",
+                side_effect=lambda *args, **kwargs: [
+                    {"reason": "below_buying_price", "message": "below floor"},
+                    *extra_errors,
+                ],
+            ),
+            patch.object(
+                self.controls,
+                "resolve_sale_floor_policy",
+                return_value={"enabled": True, "action": action},
+            ),
+        ):
+            yield
+
+    def test_pending_draft_can_reach_payment_but_cannot_submit_without_approval(self):
+        for doctype in ("Sales Invoice", "POS Invoice"):
+            with self.subTest(doctype=doctype), self._supervisor_policy():
+                # Keep the same flags, as Frappe does on save followed by submit.
+                values = {"doctype": doctype, "docstatus": 0, "pos_profile": "Main POS"}
+                values.update(posa_below_cost_override_by="forged", posa_below_cost_override_details="forged")
+                invoice = types.SimpleNamespace(flags=types.SimpleNamespace(), get=values.get)
+                invoice.set = lambda key, value: values.__setitem__(key, value)
+
+                self.controls.validate_pos_invoice_item_sale_controls(invoice)
+
+                self.assertFalse(getattr(invoice.flags, "posa_item_sale_controls_validated", False))
+                self.assertIsNone(values["posa_below_cost_override_by"])
+                self.assertIsNone(values["posa_below_cost_override_details"])
+                # Submission APIs must enforce approval while docstatus is still 0.
+                with self.assertRaisesRegex(Exception, "requires a POS supervisor override"):
+                    self.controls.validate_invoice_item_sale_controls(invoice)
+                values["docstatus"] = 1
+                with self.assertRaisesRegex(Exception, "requires a POS supervisor override"):
+                    self.controls.validate_pos_invoice_item_sale_controls(invoice)
+
+    def test_pending_draft_does_not_bypass_other_sale_controls(self):
+        invoice = {"doctype": "Sales Invoice", "docstatus": 0, "pos_profile": "Main POS"}
+        with self._supervisor_policy(action="Block"):
+            with self.assertRaisesRegex(Exception, "below floor"):
+                self.controls.validate_pos_invoice_item_sale_controls(invoice)
+        with self._supervisor_policy(
+            extra_errors=[
+                {"reason": "missing_buying_price", "message": "missing buying floor"},
+            ]
+        ):
+            with self.assertRaisesRegex(Exception, "missing buying floor"):
+                self.controls.validate_pos_invoice_item_sale_controls(invoice)
+        for reason in ("locked_for_sale", "non_discountable"):
+            with (
+                self.subTest(reason=reason),
+                self._supervisor_policy(),
+                patch.object(
+                    self.controls,
+                    "collect_item_sale_control_errors",
+                    return_value=[{"reason": reason, "message": reason}],
+                ),
+            ):
+                with self.assertRaisesRegex(Exception, reason):
+                    self.controls.validate_pos_invoice_item_sale_controls(invoice)
+
+    def test_explicit_override_still_requires_reason_and_authorization_on_draft(self):
+        invoice = {
+            "doctype": "POS Invoice",
+            "docstatus": 0,
+            "pos_profile": "Main POS",
+            "posa_below_cost_override": 1,
+        }
+        with self._supervisor_policy():
+            with self.assertRaisesRegex(Exception, "reason is required"):
+                self.controls.validate_pos_invoice_item_sale_controls(invoice)
+            invoice["posa_below_cost_override_reason"] = "Approved clearance"
+            with patch.object(
+                self.controls,
+                "_authorize_below_cost_override",
+                side_effect=PermissionError("POS supervisor required"),
+            ):
+                with self.assertRaisesRegex(PermissionError, "POS supervisor"):
+                    self.controls.validate_pos_invoice_item_sale_controls(invoice)
+            with patch.object(
+                self.controls,
+                "_authorize_below_cost_override",
+                return_value="supervisor@example.com",
+            ):
+                self.controls.validate_pos_invoice_item_sale_controls(invoice)
+                self.assertEqual(invoice["posa_below_cost_override_by"], "supervisor@example.com")
+                self.assertTrue(invoice["posa_below_cost_override_details"])
+                invoice["docstatus"] = 1
+                self.controls.validate_pos_invoice_item_sale_controls(invoice)
+
     def test_pos_invoice_hook_delegates_to_sale_control_validation(self):
         validator = Mock()
         invoice = {"doctype": "Sales Invoice", "is_pos": 1, "items": []}
@@ -449,7 +544,7 @@ class TestItemSaleControls(unittest.TestCase):
         ):
             self.controls.validate_pos_invoice_item_sale_controls(invoice)
 
-        validator.assert_called_once_with(invoice)
+        validator.assert_called_once_with(invoice, require_override=False)
 
     def test_successful_validation_is_not_repeated_for_the_same_document(self):
         item_validator = Mock(return_value=[])

@@ -60,6 +60,13 @@ Rules:
 - Zero rate should not be created unless explicitly allowed.
 - Total discount must match printed and submitted invoice values.
 - Discount logic should not be duplicated across screens.
+- Under the POS Profile's `POS Supervisor Override` below-cost policy, draft
+  invoice saves may defer pending approval so PAY can open the payment screen.
+  Explicit approval on a draft still requires server authorization and a reason.
+  Submission APIs (including background submission) and document submit hooks
+  must require approval and record the server-resolved actor and floor details.
+  Draft validation must not cache success that bypasses submission checks.
+  Block, missing-cost, locked-item, and non-discountable policies still apply.
 
 ---
 

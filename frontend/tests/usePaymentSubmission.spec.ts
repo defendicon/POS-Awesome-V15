@@ -167,10 +167,34 @@ describe("usePaymentSubmission", () => {
 		});
 
 		await expect(validateSubmission(true)).resolves.toBe(true);
+		expect(requestBelowCostOverride).toHaveBeenCalledOnce();
 		expect(invoiceDoc.value.posa_below_cost_override).toBe(1);
 		expect(invoiceDoc.value.posa_below_cost_override_reason).toBe(
 			"Approved clearance",
 		);
+	});
+
+	it.each([
+		{ approved: false },
+		{ approved: true, reason: "   " },
+	])("rejects a pending below-cost draft without approval and a reason: %j", async (approval) => {
+		const invoiceDoc = ref<any>({
+			docstatus: 0,
+			items: [{ item_code: "LOW", qty: 1, rate: 9, trade_price: 10 }],
+			payments: [{ mode_of_payment: "Cash", amount: 9, type: "Cash" }],
+			grand_total: 9,
+		});
+		const { validateSubmission } = usePaymentSubmission({
+			invoiceDoc,
+			posProfile: ref({ posa_below_cost_action: "POS Supervisor Override" }),
+			stockSettings: ref({}),
+			invoiceType: ref("Invoice"),
+			formatFloat: (value) => Number(value || 0),
+			requestBelowCostOverride: vi.fn().mockResolvedValue(approval),
+		});
+
+		await expect(validateSubmission(true)).rejects.toThrow(/requires a POS supervisor override/);
+		expect(invoiceDoc.value.posa_below_cost_override).toBeUndefined();
 	});
 
 	it("defers print and schedules background wait when invoice submission is queued", async () => {

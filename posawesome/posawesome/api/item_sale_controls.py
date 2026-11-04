@@ -4,7 +4,6 @@ import frappe
 from frappe import _
 from frappe.utils import cint, cstr, flt, nowdate
 
-
 LOCKED_FIELD = "retailmind_locked_for_sale"
 NON_DISCOUNTABLE_FIELD = "retailmind_non_discountable"
 CONTROLLED_FIELD = "retailmind_controlled_item"
@@ -540,7 +539,12 @@ def _apply_below_cost_override(invoice_doc, errors):
     )
 
 
-def validate_invoice_item_sale_controls(invoice_doc):
+def validate_invoice_item_sale_controls(invoice_doc, *, require_override=True):
+    """Validate sale controls, deferring only pending approval for draft hooks.
+
+    Submission APIs use the strict default even while preparing a draft. Document
+    hooks may defer approval until submit so PAY can open the payment dialog.
+    """
     flags = getattr(invoice_doc, "flags", None)
     if flags is not None and getattr(flags, "posa_item_sale_controls_validated", False):
         return
@@ -575,6 +579,11 @@ def validate_invoice_item_sale_controls(invoice_doc):
         if cint(invoice_doc.get("posa_below_cost_override")):
             _apply_below_cost_override(invoice_doc, below_cost_errors)
             floor_errors = missing_cost_errors
+        elif not require_override:
+            # A pending draft is not an approval; never retain client audit claims.
+            _set_invoice_value(invoice_doc, "posa_below_cost_override_by", None)
+            _set_invoice_value(invoice_doc, "posa_below_cost_override_details", None)
+            floor_errors = missing_cost_errors
         else:
             below_cost_errors[0]["message"] = _(
                 "This sale is below the permitted floor and requires a POS supervisor override."
@@ -583,7 +592,9 @@ def validate_invoice_item_sale_controls(invoice_doc):
     if errors:
         frappe.throw(errors[0].get("message"))
 
-    if flags is not None:
+    # A deferred draft check must not suppress strict validation on the same
+    # document when it is subsequently submitted (including direct doc.submit()).
+    if flags is not None and require_override:
         flags.posa_item_sale_controls_validated = True
 
 
@@ -598,4 +609,6 @@ def validate_pos_invoice_item_sale_controls(invoice_doc):
     if not is_pos_document:
         return
 
-    validate_invoice_item_sale_controls(invoice_doc)
+    validate_invoice_item_sale_controls(
+        invoice_doc, require_override=cint(invoice_doc.get("docstatus")) != 0
+    )
