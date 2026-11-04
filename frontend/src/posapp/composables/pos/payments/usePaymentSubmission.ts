@@ -14,6 +14,8 @@ import {
 	ensureInvoiceSubmissionIdentity,
 } from "../../../../offline/idempotency";
 import stockCoordinator from "../../../utils/stockCoordinator";
+import { captureOfflineInvoiceTime } from "../../../../offline/invoiceTimestamp";
+import { assertOfflineCashierAccess } from "../../../utils/offlineCashier";
 import { parseBooleanSetting } from "../../../utils/stock";
 import { resolvePosDocumentDoctype } from "../../../utils/posDocumentMode";
 import { toCompanyCurrency } from "../../../utils/erpnextCurrency";
@@ -1127,6 +1129,25 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 					__("Gift card redemption requires an online connection"),
 				);
 			}
+			const cashierStore = stores?.employeeStore;
+			if (cashierStore?.isLocked || !cashierStore?.offlineCashierToken) {
+				throw new Error(
+					__(
+						"Verify a cashier PIN with offline access before saving. Load this POS Profile online first if access is unavailable.",
+					),
+				);
+			}
+			assertOfflineCashierAccess(
+				cashierStore.offlineCashierToken,
+				profile?.name,
+				cashierStore.currentCashier?.user,
+			);
+			submissionDoc._posa_offline_cashier_token =
+				cashierStore.offlineCashierToken;
+			captureOfflineInvoiceTime(submissionDoc);
+			doc.posting_date = submissionDoc.posting_date;
+			doc.posting_time = submissionDoc.posting_time;
+			doc.set_posting_time = 1;
 			try {
 				await saveOfflineInvoice({ data, invoice: submissionDoc });
 				stores?.syncStore?.updatePendingCount();
@@ -1159,6 +1180,13 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 		}
 
 		// Online Submission
+		// An offline switch has not changed the server's active cashier. Verify
+		// online before creating the next sale under that mutable server state.
+		if (stores?.employeeStore?.cashierVerifiedOffline) {
+			const unlocked = await stores.employeeStore.requestTerminalUnlock();
+			if (!unlocked)
+				return { cancelled: true, reason: "terminal_locked" };
+		}
 		try {
 			await validateStockBeforeOnlineSubmission(doc, profile, type);
 			const intent = { data, invoice: submissionDoc };

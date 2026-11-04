@@ -4,7 +4,7 @@ import pathlib
 import sys
 import types
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[4]
 _ORIGINAL_MODULES = dict(sys.modules)
@@ -1590,6 +1590,37 @@ class TestManualPostingDatePreservation(unittest.TestCase):
         self.assertEqual(invoice_doc.posting_date, "2026-03-19")
         self.assertEqual(invoice_doc.set_posting_time, 1)
         self.assertEqual(result["status"], 1)
+
+    def test_offline_submit_preserves_same_day_time_and_original_cashier(self):
+        invoice_doc = self._build_invoice_doc(name="OFFLINE-DRAFT")
+        invoice_doc.submit = lambda: setattr(invoice_doc, "docstatus", 1)
+        self.creation.frappe.db.exists = lambda doctype, name: name == "OFFLINE-DRAFT"
+        self.creation.frappe.db.get_value = lambda *args, **kwargs: 0
+        self.creation.frappe.db.has_column = lambda *args: True
+        self.creation.frappe.get_value = lambda *args, **kwargs: 0
+        self.creation.frappe.get_doc = lambda *args: invoice_doc
+        self.creation._save_draft_with_latest_timestamp = lambda doc: doc
+        self.creation._apply_invoice_gift_card_settlement = lambda *args, **kwargs: None
+        self.creation._process_post_submit_payments = lambda *args, **kwargs: None
+        self.creation.get_active_terminal_cashier = Mock(side_effect=PermissionError("locked"))
+        offline = types.ModuleType("posawesome.posawesome.api.offline_cashier")
+        offline.validate_offline_cashier = Mock(return_value="backup@example.com")
+        payload = {
+            "doctype": "Sales Invoice", "name": "OFFLINE-DRAFT", "pos_profile": "Main POS",
+            "company": "Test Company", "currency": "USD", "customer": "CUST-0001",
+            "posting_date": "2026-03-21", "posting_time": "09:12:34", "set_posting_time": 1,
+            "_posa_offline_created_at": "2026-03-21T04:12:34Z",
+            "_posa_offline_cashier_token": "signed-grant", "items": [], "payments": [],
+        }
+        with patch.dict(sys.modules, {offline.__name__: offline}):
+            result = self.creation.submit_invoice(json.dumps(payload), json.dumps({}), submit_in_background=0)
+        self.assertEqual(result["status"], 1)
+        self.assertEqual(invoice_doc.posting_time, "09:12:34")
+        self.assertEqual(invoice_doc.posting_date, "2026-03-21")
+        self.assertEqual(invoice_doc.set_posting_time, 1)
+        self.assertEqual(invoice_doc.posa_cashier, "backup@example.com")
+        self.creation.get_active_terminal_cashier.assert_not_called()
+        offline.validate_offline_cashier.assert_called_once_with("signed-grant", "Main POS", "2026-03-21T04:12:34Z")
 
     def test_submit_invoice_recalculates_existing_draft_with_non_inclusive_pos_tax(self):
         tax_row = {

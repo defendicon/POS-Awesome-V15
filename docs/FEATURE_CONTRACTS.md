@@ -132,6 +132,17 @@ Rules:
 - Multi-currency sync must cover price-list, invoice, company, and payment
   account currencies, including dated Currency Exchange records.
 - Disabled, deleted, or out-of-scope pricing records must be removed locally.
+- Offline cashier switching uses PIN-encrypted, server-signed grants scoped to
+  the authenticated terminal user and authorized POS Profile. Cached names and
+  client-supplied cashier fields are never replay authorization.
+- Offline grants allow sales for 24 hours after preparation. Sync validates the
+  sale capture instant against the grant and rechecks enabled status, profile
+  membership, and PIN version. Valid sales may replay for up to 30 days.
+- Offline switching does not grant supervisor permissions or create a new
+  Frappe login/opening shift. The next online sale requires online PIN verification.
+- Invoice posting date/time is captured before offline persistence and printing,
+  using the site timezone when available. Explicit manual posting controls are
+  preserved; retries must never replace sale time with reconnect time.
 
 ---
 

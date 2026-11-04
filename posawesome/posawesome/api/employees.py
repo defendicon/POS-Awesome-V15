@@ -308,7 +308,7 @@ def _require_pin_management_access(profile_name: str, target_user: str) -> str:
 
 
 @frappe.whitelist()
-def get_terminal_employees(pos_profile=None):
+def get_terminal_employees(pos_profile=None, include_offline_access=False):
     profile_name = _authorize_terminal_profile(pos_profile)
 
     users = _get_terminal_users(profile_name)
@@ -349,6 +349,16 @@ def get_terminal_employees(pos_profile=None):
                 or bool(row.get("posa_is_pos_supervisor", 0)),
             }
         )
+
+    if include_offline_access in (True, 1, "1", "true"):
+        from posawesome.posawesome.api.offline_cashier import create_offline_cashier_access
+
+        for employee in employees:
+            pin = _get_user_pin(_get_user_doc(employee["user"]))
+            if pin and 4 <= len(pin) <= 8:
+                employee["offline_access"] = create_offline_cashier_access(
+                    profile_name, employee["user"], pin
+                )
 
     return employees
 

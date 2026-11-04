@@ -2,6 +2,7 @@ import { isOffline, memory, persist } from "./db";
 import { syncOfflineCustomers } from "./customers";
 import { reduceCacheUsage } from "./cache";
 import { ensureOfflineInvoiceRequest } from "./idempotency";
+import { captureOfflineInvoiceTime } from "./invoiceTimestamp";
 import {
 	enqueueInvoiceOutboxEntry,
 	getInvoiceOutboxMode,
@@ -172,6 +173,7 @@ function prepareOfflineInvoiceEntry(entry: AnyRecord) {
 	) {
 		throw new Error("Cart is empty. Add items before saving.");
 	}
+	captureOfflineInvoiceTime(entry.invoice);
 
 	const validation = validateStockForOfflineInvoice(
 		entry.invoice.items,

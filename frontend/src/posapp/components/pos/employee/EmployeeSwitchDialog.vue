@@ -99,7 +99,7 @@
 					>
 						{{
 							__(
-								"Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.",
+								"Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User. Load this profile online to prepare 24 hours of offline cashier access on this device.",
 							)
 						}}
 					</v-alert>
@@ -235,7 +235,7 @@
 					>
 						{{
 							__(
-								"Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User.",
+								"Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User. Load this profile online to prepare 24 hours of offline cashier access on this device.",
 							)
 						}}
 					</v-alert>
@@ -293,6 +293,8 @@ import { computed, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useEmployeeStore } from "../../../stores/employeeStore";
 import { useUIStore } from "../../../stores/uiStore";
+import { isOffline } from "../../../../offline/index";
+import { loadOfflineCashiers, unlockOfflineCashier } from "../../../utils/offlineCashier";
 
 const employeeStore = useEmployeeStore();
 const uiStore = useUIStore();
@@ -317,8 +319,7 @@ const posProfileName = computed(
 const cashiersLoading = computed(
 	() =>
 		!terminalEmployees.value.length &&
-		(terminalEmployeesLoadStatus.value === "idle" ||
-			terminalEmployeesLoadStatus.value === "loading"),
+		(terminalEmployeesLoadStatus.value === "idle" || terminalEmployeesLoadStatus.value === "loading"),
 );
 const cashiersLoadFailed = computed(
 	() => terminalEmployeesLoadStatus.value === "error" && !terminalEmployees.value.length,
@@ -410,6 +411,15 @@ const verifySelection = async () => {
 	pinError.value = "";
 
 	try {
+		if (isOffline()) {
+			const cashier = await unlockOfflineCashier(
+				posProfileName.value,
+				selectedCashier.value.user,
+				cashierPin.value.trim(),
+			);
+			employeeStore.applyOfflineCashier(cashier);
+			return null;
+		}
 		const response = await window.frappe.call({
 			method: "posawesome.posawesome.api.employees.verify_terminal_employee_pin",
 			args: {
@@ -426,6 +436,19 @@ const verifySelection = async () => {
 		if (terminalState?.locked !== false || terminalState?.active_cashier !== verifiedCashier.user) {
 			throw new Error(__("The server did not confirm the active terminal cashier."));
 		}
+		if (loadOfflineCashiers(posProfileName.value).some((row) => row.user === verifiedCashier.user)) {
+			try {
+				verifiedCashier.offlineToken = (
+					await unlockOfflineCashier(
+						posProfileName.value,
+						verifiedCashier.user,
+						cashierPin.value.trim(),
+					)
+				).token;
+			} catch (error) {
+				console.warn("Offline cashier access is not ready", error);
+			}
+		}
 		return verifiedCashier;
 	} catch (error) {
 		pinError.value = normalizeErrorMessage(error);
@@ -441,6 +464,7 @@ const submitSwitch = async () => {
 		return;
 	}
 	employeeStore.applyVerifiedCashier(verifiedCashier);
+	employeeStore.offlineCashierToken = verifiedCashier.offlineToken || "";
 	employeeStore.closeEmployeeSwitch();
 	cashierPin.value = "";
 };
@@ -451,6 +475,7 @@ const submitUnlock = async () => {
 		return;
 	}
 	employeeStore.unlockTerminal(verifiedCashier);
+	employeeStore.offlineCashierToken = verifiedCashier.offlineToken || "";
 	cashierPin.value = "";
 };
 

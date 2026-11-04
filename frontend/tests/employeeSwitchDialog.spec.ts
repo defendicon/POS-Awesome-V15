@@ -8,6 +8,14 @@ import { mount } from "@vue/test-utils";
 import EmployeeSwitchDialog from "../src/posapp/components/pos/employee/EmployeeSwitchDialog.vue";
 import { useEmployeeStore } from "../src/posapp/stores/employeeStore";
 import { useUIStore } from "../src/posapp/stores/uiStore";
+import { isOffline } from "../src/offline/index";
+import { unlockOfflineCashier } from "../src/posapp/utils/offlineCashier";
+
+vi.mock("../src/offline/index", () => ({ isOffline: vi.fn(() => false) }));
+vi.mock("../src/posapp/utils/offlineCashier", () => ({
+	loadOfflineCashiers: vi.fn(() => []),
+	unlockOfflineCashier: vi.fn(),
+}));
 
 const BoxStub = defineComponent({
 	setup(_, { attrs, slots }) {
@@ -108,6 +116,7 @@ const VTextFieldStub = defineComponent({
 
 describe("EmployeeSwitchDialog", () => {
 	beforeEach(() => {
+		vi.mocked(isOffline).mockReturnValue(false);
 		setActivePinia(createPinia());
 		(window as any).__ = (value: string) => value;
 		(window as any).frappe = {
@@ -128,6 +137,48 @@ describe("EmployeeSwitchDialog", () => {
 				},
 			})),
 		};
+	});
+
+	it("unlocks a cached second cashier offline without calling the server", async () => {
+		vi.mocked(isOffline).mockReturnValue(true);
+		vi.mocked(unlockOfflineCashier).mockResolvedValue({
+			user: "backup@example.com",
+			full_name: "Backup Cashier",
+			token: "signed-grant",
+		});
+		const store = useEmployeeStore();
+		useUIStore().setPosProfile({ name: "Main POS" } as any);
+		store.beginTerminalEmployeesLoad("Main POS", [
+			{ user: "backup@example.com", full_name: "Backup Cashier" },
+		]);
+		const wrapper = mount(EmployeeSwitchDialog, {
+			global: {
+				components: {
+					VDialog: VDialogStub,
+					VCard: BoxStub,
+					VCardTitle: BoxStub,
+					VCardText: BoxStub,
+					VCardActions: BoxStub,
+					VBtn: VBtnStub,
+					VIcon: BoxStub,
+					VAlert: BoxStub,
+					VTextField: VTextFieldStub,
+				},
+			},
+		});
+		await wrapper
+			.get('input[data-test="terminal-unlock-pin"]')
+			.setValue("1234");
+		await wrapper
+			.findAll("button")
+			.find((button) => button.text() === "Unlock POS")!
+			.trigger("click");
+		await vi.waitFor(() => expect(store.isLocked).toBe(false));
+		expect(store.currentCashier?.user).toBe("backup@example.com");
+		expect(store.cashierVerifiedOffline).toBe(true);
+		expect(store.offlineCashierToken).toBe("signed-grant");
+		expect(window.frappe.call).not.toHaveBeenCalled();
+		wrapper.unmount();
 	});
 
 	it("marks cashier PIN input as a numeric one-time credential", async () => {
@@ -363,11 +414,21 @@ describe("EmployeeSwitchDialog", () => {
 			},
 		});
 
-		expect(wrapper.find('[data-test="terminal-cashier-loading"]').exists()).toBe(false);
-		expect(wrapper.get('[data-test="terminal-unlock-cashier-cashier@example.com"]').text()).toContain(
-			"Main Cashier",
-		);
-		expect(wrapper.get('[data-test="terminal-unlock-pin"]').attributes("autofocus")).not.toBeUndefined();
+		expect(
+			wrapper.find('[data-test="terminal-cashier-loading"]').exists(),
+		).toBe(false);
+		expect(
+			wrapper
+				.get(
+					'[data-test="terminal-unlock-cashier-cashier@example.com"]',
+				)
+				.text(),
+		).toContain("Main Cashier");
+		expect(
+			wrapper
+				.get('[data-test="terminal-unlock-pin"]')
+				.attributes("autofocus"),
+		).not.toBeUndefined();
 	});
 
 	it("shows a recoverable cashier load error without exposing stale options", async () => {

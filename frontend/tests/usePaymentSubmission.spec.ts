@@ -1502,9 +1502,33 @@ describe("usePaymentSubmission", () => {
 		);
 	});
 
+	it("requires online PIN verification after an offline cashier switch", async () => {
+		const invoiceService = (await import("../src/posapp/services/invoiceService")).default;
+		const requestTerminalUnlock = vi.fn(async () => false);
+		const { submitInvoice } = usePaymentSubmission({
+			invoiceDoc: ref({ items: [{ item_code: "ITEM-1", qty: 1 }], payments: [], grand_total: 10 }),
+			posProfile: ref({ name: "Main POS" }), stockSettings: ref({}), invoiceType: ref("Invoice"),
+			formatFloat: (value) => Number(value || 0),
+			stores: { employeeStore: { cashierVerifiedOffline: true, requestTerminalUnlock } },
+		});
+		expect(await submitInvoice(false)).toEqual({ cancelled: true, reason: "terminal_locked" });
+		expect(requestTerminalUnlock).toHaveBeenCalledOnce();
+		expect(invoiceService.submitInvoice).not.toHaveBeenCalled();
+	});
+
 	it("normalizes loyalty redemption fields before saving an offline invoice", async () => {
 		const offlineModule = await import("../src/offline/index");
 		(offlineModule.isOffline as any).mockReturnValue(true);
+		(globalThis as any).frappe.session = { user: "terminal@example.com" };
+		const cashierToken = `${Buffer.from(
+			JSON.stringify({
+				cashier: "backup@example.com",
+				pos_profile: "Main POS",
+				session_user: "terminal@example.com",
+				issued_at: Date.now() / 1000 - 60,
+				expires_at: Date.now() / 1000 + 3600,
+			}),
+		).toString("base64url")}.test-signature`;
 
 		const invoiceDoc = ref<any>({
 			name: "ACC-SINV-LOYALTY-OFFLINE",
@@ -1538,6 +1562,11 @@ describe("usePaymentSubmission", () => {
 			invoiceType: ref("Invoice"),
 			formatFloat: (value) => Number(value || 0),
 			stores: {
+				employeeStore: {
+					isLocked: false,
+					offlineCashierToken: cashierToken,
+					currentCashier: { user: "backup@example.com" },
+				},
 				toastStore: { show: vi.fn() },
 				syncStore: { updatePendingCount: vi.fn() },
 				uiStore: {
@@ -1572,6 +1601,9 @@ describe("usePaymentSubmission", () => {
 					redeem_loyalty_points: 1,
 					loyalty_points: 4,
 					loyalty_program: "Retail Loyalty",
+					_posa_offline_cashier_token: cashierToken,
+					set_posting_time: 1,
+					posting_time: expect.stringMatching(/^\d{2}:\d{2}:\d{2}$/),
 				}),
 			}),
 		);
