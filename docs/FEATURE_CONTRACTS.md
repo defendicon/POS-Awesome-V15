@@ -159,6 +159,10 @@ Rules:
 - POS Profile controls maximum offline cache age, Warn/Block behavior and
   explicit offline customer-credit redemption. Missing/stale records are never
   labelled fresh merely because a snapshot exists.
+- Sync adapter completion must carry the same profile/company/warehouse scope
+  into the coordinator's persisted state. Readiness displays and checkout share
+  that evidence; legacy null scopes require an online refresh, not an automatic
+  freshness upgrade. Recovery customer labels must never rewrite queued payloads.
 - Local stock uses signed stock-UOM quantities. Refreshing server stock retains
   this device's unresolved reservations; availability on another disconnected
   terminal cannot be guaranteed and server stock checks remain authoritative.

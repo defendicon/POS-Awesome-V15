@@ -126,7 +126,11 @@
 										</v-avatar>
 										<div>
 											<div class="font-weight-medium text-grey-darken-2">
-												{{ item.invoice.customer_name || item.invoice.customer }}
+												{{
+													item.customer_label ||
+													item.invoice.customer_name ||
+													item.invoice.customer
+												}}
 											</div>
 											<div class="text-caption text-grey">{{ __("Customer") }}</div>
 										</div>
@@ -289,11 +293,17 @@ const visibleInvoices = computed(() => {
 		.trim()
 		.toLowerCase();
 	return invoices.value.filter((row) =>
-		[row.invoice.customer, row.invoice.customer_name, row.invoice.name, row.request_id, row.status].some(
-			(value) =>
-				String(value || "")
-					.toLowerCase()
-					.includes(term),
+		[
+			row.customer_label,
+			row.invoice.customer,
+			row.invoice.customer_name,
+			row.invoice.name,
+			row.request_id,
+			row.status,
+		].some((value) =>
+			String(value || "")
+				.toLowerCase()
+				.includes(term),
 		),
 	);
 });

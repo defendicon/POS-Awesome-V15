@@ -12,6 +12,7 @@ import {
 } from "./invoiceOutbox";
 import { requireSubmittedInvoice } from "./invoiceAcknowledgement";
 import { getInvoiceStockQuantity, updateLocalStock } from "./stock";
+import { getStoredCustomer } from "./customers";
 
 type RecordData = Record<string, any>;
 export interface InvoiceRecoveryScope {
@@ -73,9 +74,32 @@ export async function getInvoiceRecoveryRows(scope: InvoiceRecoveryScope) {
 			created_at: row.created_at,
 		});
 	}
-	return [...records.values()].sort((a, b) =>
-		String(a.created_at).localeCompare(String(b.created_at)),
+	const customerNames = new Map<string, string>();
+	await Promise.all(
+		[...new Set([...records.values()].map((row) => row.invoice.customer))]
+			.filter(Boolean)
+			.map(async (customer) => {
+				const stored = await getStoredCustomer(customer);
+				if (stored?.customer_name)
+					customerNames.set(customer, stored.customer_name);
+			}),
 	);
+	return [...records.values()]
+		.map(
+			(row): RecordData => ({
+				...row,
+				// Display metadata only: never rewrite the queued invoice or customer ID.
+				customer_label:
+					(row.invoice.customer_name !== row.invoice.customer &&
+						row.invoice.customer_name) ||
+					customerNames.get(row.invoice.customer) ||
+					row.invoice.customer_name ||
+					row.invoice.customer,
+			}),
+		)
+		.sort((a, b) =>
+			String(a.created_at).localeCompare(String(b.created_at)),
+		);
 }
 
 function isLiveLease(row: RecordData, timeField: string) {

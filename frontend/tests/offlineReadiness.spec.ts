@@ -99,4 +99,20 @@ describe("POS Profile offline readiness policy", () => {
 			).warnings.length,
 		).toBeGreaterThan(0);
 	});
+	it.each([null, "profile:Main", "invalid-json"])(
+		"keeps fresh-looking legacy records unverified without valid scope: %s",
+		(scopeSignature) => {
+			const report = evaluateOfflineReadiness(
+				profile,
+				snapshot,
+				fresh.map((state) => ({ ...state, scopeSignature })),
+				"terminal",
+				now,
+			);
+			expect(report.blocked).toBe(true);
+			expect(
+				report.rows.every((row) => row.status === "unverified"),
+			).toBe(true);
+		},
+	);
 });

@@ -174,6 +174,7 @@ import { isOffline } from "../../offline/index";
 import { cacheOfflineCashiers, loadOfflineCashiers } from "../utils/offlineCashier";
 import { useRtl } from "../composables/core/useRtl";
 import { withRequestTimeout } from "../utils/requestTimeout";
+import { translate } from "../utils/translate";
 import { finishStartupPhase, startStartupPhase } from "../../utils/startupTrace";
 import { loadCachedTerminalEmployees, saveCachedTerminalEmployees } from "../utils/terminalEmployeeCache";
 
@@ -610,7 +611,10 @@ export default {
 			});
 			this.employeeStore.beginTerminalEmployeesLoad(profileName, cachedEmployees);
 			if (isOffline()) {
-				this.employeeStore.completeTerminalEmployeesLoad(profileName, loadOfflineCashiers(profileName));
+				this.employeeStore.completeTerminalEmployeesLoad(
+					profileName,
+					loadOfflineCashiers(profileName),
+				);
 				this.employeeStore.applyTerminalState(null);
 				finishStartupPhase(phase, "ok", { offline: true });
 				return;
@@ -1196,11 +1200,7 @@ export default {
 			}, 250);
 		},
 		__(text, args = []) {
-			if (window.__) {
-				const nextArgs = Array.isArray(args) ? args : [args];
-				return window.__(text, ...nextArgs);
-			}
-			return text;
+			return translate(text, args);
 		},
 	},
 	emits: [

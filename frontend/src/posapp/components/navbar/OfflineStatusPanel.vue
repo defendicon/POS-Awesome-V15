@@ -12,7 +12,7 @@
 						{{ __("Offline Status") }}
 					</div>
 					<div class="offline-status-panel__subtitle">
-						{{ summaryMessage }}
+						{{ readinessSummary }}
 					</div>
 				</div>
 				<v-chip size="small" variant="tonal" :color="chipColor" class="offline-status-panel__chip">
@@ -58,6 +58,7 @@
 					:data-test="`offline-readiness-${row.id}`"
 				>
 					<strong>{{ row.label }} — {{ row.status }}</strong>
+					<div v-if="row.status !== 'ready'">{{ row.message }}</div>
 					<div>
 						{{
 							row.lastSyncedAt
@@ -241,7 +242,10 @@ async function refreshReadiness() {
 		readinessError.value = error?.message || "Unable to verify device cache.";
 	}
 }
-watch(() => [props.modelValue, uiStore.posProfile?.name], refreshReadiness, { immediate: true });
+watch(() => [props.modelValue, uiStore.posProfile, offlineSyncStore.resourceStates], refreshReadiness, {
+	immediate: true,
+	deep: true,
+});
 const readinessTimer = setInterval(refreshReadiness, 15_000);
 onUnmounted(() => {
 	readinessVersion++;
@@ -260,6 +264,14 @@ const {
 const connectivityActionLabel = computed(() =>
 	summary.value.manualOffline ? __("Go Online") : __("Go Offline"),
 );
+
+const readinessSummary = computed(() => {
+	if (bootstrapWarning.value.active) return summaryMessage.value;
+	if (readinessError.value) return readinessError.value;
+	if (!readiness.value) return __("Checking offline cache readiness.");
+	if (readiness.value.warnings.length) return __("Offline cache needs attention");
+	return summaryMessage.value;
+});
 
 const chipColor = computed(() => {
 	switch (connectivityTone.value) {

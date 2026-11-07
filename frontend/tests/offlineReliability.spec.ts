@@ -65,11 +65,13 @@ describe("offline recovery integrity", () => {
 			"queue",
 			"invoice_outbox",
 			"keyval",
+			"customers",
 		])
 			await db.table(table).clear();
 		localStorage.clear();
 		memory.offline_invoices = [];
 		memory.offline_customers = [];
+		memory.customer_storage = [];
 		memory.local_stock_cache = {};
 		memory.pos_opening_storage = null;
 		memory.manual_offline = false;
@@ -78,6 +80,33 @@ describe("offline recovery integrity", () => {
 			session: { user: "terminal" },
 			call: vi.fn(),
 		});
+	});
+
+	it("resolves recovery customer labels from durable cache without changing invoice payloads", async () => {
+		await db
+			.table("customers")
+			.put({ name: "zzz", customer_name: "Walk-In" });
+		await saveOfflineInvoice(sale("display-1", { customer: "zzz" }));
+		const [row] = await getInvoiceRecoveryRows(scope);
+		expect(row.customer_label).toBe("Walk-In");
+		expect(row.invoice.customer).toBe("zzz");
+		expect(getOfflineInvoices()[0].invoice.customer_name).toBeUndefined();
+		await saveOfflineInvoice(sale("display-2", { customer: "uncached" }));
+		await saveOfflineInvoice(
+			sale("display-3", {
+				customer: "zzz",
+				customer_name: "Original customer title",
+			}),
+		);
+		const rows = await getInvoiceRecoveryRows(scope);
+		expect(
+			rows.find((entry) => entry.request_id === "display-2")
+				?.customer_label,
+		).toBe("uncached");
+		expect(
+			rows.find((entry) => entry.request_id === "display-3")
+				?.customer_label,
+		).toBe("Original customer title");
 	});
 
 	it("retains a server draft as pending and never guesses success after a lost response", async () => {
@@ -300,14 +329,12 @@ describe("offline recovery integrity", () => {
 
 	it("never prunes an old exhausted sale as disposable cache", async () => {
 		const row = await enqueueInvoiceOutboxEntry(sale("old-dead"));
-		await db
-			.table("invoice_outbox")
-			.put({
-				...row,
-				status: "dead_letter",
-				created_at: "2020-01-01T00:00:00Z",
-				updated_at: "2020-01-01T00:00:00Z",
-			});
+		await db.table("invoice_outbox").put({
+			...row,
+			status: "dead_letter",
+			created_at: "2020-01-01T00:00:00Z",
+			updated_at: "2020-01-01T00:00:00Z",
+		});
 		await pruneOfflineStorage();
 		expect(await getPendingInvoiceOutboxCount()).toBe(1);
 	});
@@ -315,14 +342,23 @@ describe("offline recovery integrity", () => {
 	it("captures dispatch time for recovery without changing online defaults or losing completion evidence", async () => {
 		const original = sale("online-time");
 		persistInvoiceIntentJournal(original);
-		const journal = JSON.parse(localStorage.getItem("posa_invoice_intent_online-time")!);
+		const journal = JSON.parse(
+			localStorage.getItem("posa_invoice_intent_online-time")!,
+		);
 		const queued = await enqueueInvoiceOutboxEntry(original);
 		expect(original.invoice.set_posting_time).toBeUndefined();
-		expect(queued.invoice._posa_offline_created_at).toBe(journal.invoice._posa_offline_created_at);
+		expect(queued.invoice._posa_offline_created_at).toBe(
+			journal.invoice._posa_offline_created_at,
+		);
 		expect(queued.invoice.posting_time).toBe(journal.invoice.posting_time);
-		await syncInvoiceOutboxResource(async () => ({ invoice: { name: "SINV-TIME", docstatus: 1 }, acknowledged: true }));
+		await syncInvoiceOutboxResource(async () => ({
+			invoice: { name: "SINV-TIME", docstatus: 1 },
+			acknowledged: true,
+		}));
 		expect(await getPendingInvoiceOutboxCount()).toBe(0);
-		const result = await enqueueInvoiceOutboxEntry(sale("online-time", { grand_total: 999 }));
+		const result = await enqueueInvoiceOutboxEntry(
+			sale("online-time", { grand_total: 999 }),
+		);
 		expect(result.status).toBe("acknowledged");
 		expect(result.invoice.grand_total).toBe(100);
 	});
