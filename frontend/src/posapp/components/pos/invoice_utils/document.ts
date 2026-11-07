@@ -152,6 +152,9 @@ export function get_invoice_doc(context: any) {
 	if (sourceDoc.name) {
 		doc = { ...sourceDoc };
 	}
+	// Keep a recovering/queued sale's identity even before it has a server name.
+	if (sourceDoc.posa_client_request_id) doc.posa_client_request_id = sourceDoc.posa_client_request_id;
+	if (sourceDoc.set_posting_time && sourceDoc.posting_time) doc.posting_time = sourceDoc.posting_time;
 
 	// Always set these fields first
 	doc.doctype = resolvePosDocumentDoctype({

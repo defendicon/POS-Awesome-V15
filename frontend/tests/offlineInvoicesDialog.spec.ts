@@ -4,8 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { shallowMount } from "@vue/test-utils";
 
 const offlineMocks = vi.hoisted(() => ({
-	getOfflineInvoices: vi.fn(),
-	deleteOfflineInvoice: vi.fn(async () => undefined),
+	getInvoiceRecoveryRows: vi.fn(),
+	retryInvoiceRecovery: vi.fn(),
+	reconcileRecoveryInvoice: vi.fn(),
+	deleteUnsentRecoveryInvoice: vi.fn(async () => undefined),
 	getPendingOfflineInvoiceCount: vi.fn(() => 0),
 }));
 
@@ -15,7 +17,7 @@ import OfflineInvoicesDialog from "../src/posapp/components/OfflineInvoices.vue"
 
 describe("OfflineInvoicesDialog queue refresh", () => {
 	beforeEach(() => {
-		offlineMocks.getOfflineInvoices.mockReset();
+		offlineMocks.getInvoiceRecoveryRows.mockReset();
 		vi.stubGlobal("__", (value: string) => value);
 		(window as any).get_currency_symbol = () => "Rs";
 	});
@@ -26,7 +28,7 @@ describe("OfflineInvoicesDialog queue refresh", () => {
 	});
 
 	it("reloads the visible list when the shared pending count changes after sync", async () => {
-		offlineMocks.getOfflineInvoices
+		offlineMocks.getInvoiceRecoveryRows
 			.mockReturnValueOnce([
 				{
 					invoice: {
@@ -46,9 +48,9 @@ describe("OfflineInvoicesDialog queue refresh", () => {
 		});
 
 		await wrapper.setProps({ modelValue: true });
-		expect(offlineMocks.getOfflineInvoices).toHaveBeenCalledTimes(1);
+		expect(offlineMocks.getInvoiceRecoveryRows).toHaveBeenCalledTimes(1);
 
 		await wrapper.setProps({ pendingCount: 0 });
-		expect(offlineMocks.getOfflineInvoices).toHaveBeenCalledTimes(2);
+		expect(offlineMocks.getInvoiceRecoveryRows).toHaveBeenCalledTimes(2);
 	});
 });

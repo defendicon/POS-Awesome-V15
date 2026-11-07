@@ -120,6 +120,7 @@ describe("EmployeeSwitchDialog", () => {
 		setActivePinia(createPinia());
 		(window as any).__ = (value: string) => value;
 		(window as any).frappe = {
+			datetime: { nowdate: () => "2026-11-07" },
 			session: {
 				user: "cashier@example.com",
 				user_fullname: "Main Cashier",

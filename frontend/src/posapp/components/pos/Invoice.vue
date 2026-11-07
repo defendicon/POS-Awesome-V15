@@ -5,6 +5,8 @@
 		:class="{ 'invoice-shell--counter-grid': isCounterGridPresentation }"
 		:data-testid="isCounterGridPresentation ? 'counter-grid-invoice' : 'classic-invoice'"
 	>
+		<v-alert v-if="cartRecoveryError" type="error" variant="tonal" data-test="cart-recovery-error">{{ cartRecoveryError }}</v-alert>
+		<v-alert v-else-if="cartRecoveryMessage" type="info" variant="tonal" closable @click:close="cartRecoveryMessage = ''">{{ cartRecoveryMessage }}</v-alert>
 		<!-- Cancel Sale Confirmation Dialog -->
 		<CancelSaleDialog v-model="cancel_dialog" @confirm="cancel_invoice" />
 
@@ -333,6 +335,7 @@ import invoiceService from "../../services/invoiceService";
 import { useOnlineStatus } from "../../composables/core/useOnlineStatus";
 import { useInvoiceCurrency } from "../../composables/pos/invoice/useInvoiceCurrency";
 import { useInvoiceItems } from "../../composables/pos/invoice/useInvoiceItems";
+import { startCartRecovery } from "../../composables/pos/invoice/useCartRecovery";
 import { useInvoiceOffers } from "../../composables/pos/invoice/useInvoiceOffers";
 import { useInvoiceUI } from "../../composables/pos/invoice/useInvoiceUI";
 import { useInvoicePrinting } from "../../composables/pos/invoice/useInvoicePrinting";
@@ -433,6 +436,8 @@ export default {
 	},
 	data() {
 		return {
+			cartRecoveryError: "",
+			cartRecoveryMessage: "",
 			is_sharing: false,
 			pos_profile: "",
 			pos_opening_shift: "",
@@ -1477,6 +1482,7 @@ export default {
 		this.setUpdateItemDetail(this.update_item_detail);
 		this.loadColumnPreferences();
 		this.loadInvoiceHeight();
+		this._cartRecovery = startCartRecovery(this);
 
 		this.$watch(
 			() => [this.uiStore.posProfile, this.uiStore.posOpeningShift],
@@ -1651,6 +1657,7 @@ export default {
 		registerInvoiceShortcutListener(document, this._shortcutHandlers.handleInvoiceShortcut);
 	},
 	unmounted() {
+		this._cartRecovery?.stop();
 		if (!this._shortcutHandlers) {
 			return;
 		}

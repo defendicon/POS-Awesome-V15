@@ -19,6 +19,12 @@
 				/>
 			</v-card-title>
 			<v-card-text>
+				<CashierHandoverSummary
+					:cashier="currentCashier?.user || ''"
+					:profile="uiStore.posProfile"
+					:opening="uiStore.posOpeningShift?.name || ''"
+					:active="switchDialogOpen"
+				/>
 				<div class="employee-switch-dialog__copy">
 					{{ __("Choose the cashier currently operating this terminal.") }}
 				</div>
@@ -160,6 +166,12 @@
 				</div>
 			</v-card-title>
 			<v-card-text>
+				<CashierHandoverSummary
+					:cashier="currentCashier?.user || ''"
+					:profile="uiStore.posProfile"
+					:opening="uiStore.posOpeningShift?.name || ''"
+					:active="lockDialogOpen"
+				/>
 				<div class="employee-switch-dialog__copy">
 					{{ __("Select the cashier who is taking over this terminal.") }}
 				</div>
@@ -295,9 +307,15 @@ import { useEmployeeStore } from "../../../stores/employeeStore";
 import { useUIStore } from "../../../stores/uiStore";
 import { isOffline } from "../../../../offline/index";
 import { loadOfflineCashiers, unlockOfflineCashier } from "../../../utils/offlineCashier";
+import CashierHandoverSummary from "./CashierHandoverSummary.vue";
+import { recordCashierHandover } from "../../../../offline/cashierHandover";
+import { useInvoiceStore } from "../../../stores/invoiceStore";
+import { useToastStore } from "../../../stores/toastStore";
 
 const employeeStore = useEmployeeStore();
 const uiStore = useUIStore();
+const invoiceStore = useInvoiceStore();
+const toastStore = useToastStore();
 const emit = defineEmits(["retry-load"]);
 const {
 	terminalEmployees,
@@ -368,7 +386,11 @@ const selectedCashier = computed(
 );
 
 const canSubmit = computed(
-	() => Boolean(selectedCashier.value?.user) && Boolean(cashierPin.value.trim()) && !isSubmitting.value,
+	() =>
+		Boolean(selectedCashier.value?.user) &&
+		Boolean(cashierPin.value.trim()) &&
+		!isSubmitting.value &&
+		!invoiceStore.exchangeSession,
 );
 
 const normalizeErrorMessage = (error) =>
@@ -398,6 +420,10 @@ const handleSwitchDialog = (value) => {
 };
 
 const verifySelection = async () => {
+	if (invoiceStore.exchangeSession) {
+		pinError.value = __("Complete or cancel the active exchange before changing cashier.");
+		return null;
+	}
 	if (!selectedCashier.value) {
 		pinError.value = __("Select a cashier first.");
 		return null;
@@ -411,12 +437,23 @@ const verifySelection = async () => {
 	pinError.value = "";
 
 	try {
+		if (
+			selectedUser.value !== currentCashier.value?.user &&
+			!window.dispatchEvent(new CustomEvent("posa:before-cashier-switch", { cancelable: true }))
+		) {
+			throw new Error(
+				__(
+					"The outgoing cart could not be saved. Resolve the storage error before changing cashier.",
+				),
+			);
+		}
 		if (isOffline()) {
 			const cashier = await unlockOfflineCashier(
 				posProfileName.value,
 				selectedCashier.value.user,
 				cashierPin.value.trim(),
 			);
+			if (currentCashier.value?.user && uiStore.posOpeningShift?.name) await saveHandover(cashier.user);
 			employeeStore.applyOfflineCashier(cashier);
 			return null;
 		}
@@ -436,6 +473,8 @@ const verifySelection = async () => {
 		if (terminalState?.locked !== false || terminalState?.active_cashier !== verifiedCashier.user) {
 			throw new Error(__("The server did not confirm the active terminal cashier."));
 		}
+		if (currentCashier.value?.user && uiStore.posOpeningShift?.name)
+			await saveHandover(verifiedCashier.user);
 		if (loadOfflineCashiers(posProfileName.value).some((row) => row.user === verifiedCashier.user)) {
 			try {
 				verifiedCashier.offlineToken = (
@@ -457,6 +496,27 @@ const verifySelection = async () => {
 		isSubmitting.value = false;
 	}
 };
+
+async function saveHandover(nextCashier) {
+	try {
+		await recordCashierHandover(
+			{
+				cashier: currentCashier.value?.user || "",
+				profile: posProfileName.value,
+				company: uiStore.posProfile?.company || "",
+				opening: uiStore.posOpeningShift?.name || "",
+			},
+			nextCashier,
+			uiStore.posProfile,
+		);
+	} catch (error) {
+		console.error("Unable to persist cashier handover", error);
+		toastStore.show({
+			title: __("Cashier verified, but the device handover log could not be saved."),
+			color: "warning",
+		});
+	}
+}
 
 const submitSwitch = async () => {
 	const verifiedCashier = await verifySelection();

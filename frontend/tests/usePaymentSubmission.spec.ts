@@ -9,9 +9,11 @@ vi.mock("../src/offline/index", () => ({
 	isOffline: vi.fn(() => false),
 	persistInvoiceIntentJournal: vi.fn(() => "test-request-id"),
 	removeInvoiceOutboxEntry: vi.fn(async () => 1),
+	acknowledgeInvoiceOutbox: vi.fn(async () => undefined),
 	saveOfflineInvoice: vi.fn(),
 	updateLocalStock: vi.fn(),
 }));
+vi.mock("../src/posapp/services/offlineReadiness", () => ({ readOfflineReadiness: vi.fn(async () => ({ blocked: false, warnings: [] })) }));
 
 vi.mock("../src/posapp/services/invoiceService", () => ({
 	default: {
@@ -1104,8 +1106,9 @@ describe("usePaymentSubmission", () => {
 				}),
 			}),
 		);
-		expect(offlineModule.removeInvoiceOutboxEntry).toHaveBeenCalledWith(
+		expect(offlineModule.acknowledgeInvoiceOutbox).toHaveBeenCalledWith(
 			firstSubmittedDoc.posa_client_request_id,
+			expect.objectContaining({ docstatus: 1 }),
 		);
 		consoleError.mockRestore();
 	});
@@ -1514,6 +1517,20 @@ describe("usePaymentSubmission", () => {
 		expect(await submitInvoice(false)).toEqual({ cancelled: true, reason: "terminal_locked" });
 		expect(requestTerminalUnlock).toHaveBeenCalledOnce();
 		expect(invoiceService.submitInvoice).not.toHaveBeenCalled();
+	});
+
+	it("enforces stale-cache policy and the profile's offline credit restriction", async () => {
+		const offline = await import("../src/offline/index");
+		const readiness = await import("../src/posapp/services/offlineReadiness");
+		vi.mocked(offline.isOffline).mockReturnValue(true);
+		const options: any = { invoiceDoc: ref({ doctype: "Sales Invoice", customer: "CUST", items: [{ item_code: "A", qty: 1 }], payments: [], grand_total: 100 }), posProfile: ref({ name: "Main POS" }), stockSettings: ref({}), invoiceType: ref("Invoice"), formatFloat: (value: any) => Number(value || 0), redeemedCustomerCredit: ref(50) };
+		try {
+			await expect(usePaymentSubmission(options).submitInvoice(false)).rejects.toThrow("Customer credit redemption is disabled offline");
+			options.redeemedCustomerCredit.value = 0;
+			vi.mocked(readiness.readOfflineReadiness).mockResolvedValueOnce({ blocked: true, warnings: ["Stale prices are blocked"] } as any);
+			await expect(usePaymentSubmission(options).submitInvoice(false)).rejects.toThrow("Stale prices are blocked");
+			expect(offline.saveOfflineInvoice).not.toHaveBeenCalled();
+		} finally { vi.mocked(offline.isOffline).mockReturnValue(false); }
 	});
 
 	it("normalizes loyalty redemption fields before saving an offline invoice", async () => {

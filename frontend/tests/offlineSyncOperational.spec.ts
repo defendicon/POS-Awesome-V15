@@ -724,13 +724,20 @@ describe("operational offline sync adapters", () => {
 		});
 
 		expect(stockMocks.clearLocalStockCache).toHaveBeenCalledOnce();
-		expect(stockMocks.updateLocalStockCache).toHaveBeenCalledWith([
-			{
-				item_code: "ITEM-001",
-				actual_qty: 11,
+		expect(stockMocks.updateLocalStockCache).toHaveBeenCalledWith(
+			[
+				{
+					item_code: "ITEM-001",
+					actual_qty: 11,
+					warehouse: "Main WH",
+				},
+			],
+			expect.objectContaining({
+				name: "POS-1",
+				company: "Test Co",
 				warehouse: "Main WH",
-			},
-		]);
+			}),
+		);
 		expect(stockMocks.removeLocalStockEntries).toHaveBeenCalledWith([
 			"ITEM-002",
 		]);

@@ -16,6 +16,7 @@ export type OfflineQueueStatus =
 	| "pending"
 	| "syncing"
 	| "failed"
+	| "draft"
 	| "dead_letter"
 	| "synced";
 
@@ -58,12 +59,14 @@ const ACTIVE_STATUSES = new Set<OfflineQueueStatus>([
 	"pending",
 	"syncing",
 	"failed",
+	"draft",
 	"dead_letter",
 ]);
 
 const RETRYABLE_STATUSES = new Set<OfflineQueueStatus>([
 	"pending",
 	"failed",
+	"draft",
 	"syncing",
 ]);
 
@@ -363,9 +366,9 @@ async function enqueueWriteQueueEntryInternal(
 					normalizedPayload,
 				);
 				await table.put(coalescedEntry);
-				return coalescedEntry;
+				return { ...coalescedEntry, _queue_created: false };
 			}
-			return existing;
+			return { ...existing, _queue_created: false };
 		}
 
 		const entry: OfflineQueueEntry = {
@@ -382,7 +385,7 @@ async function enqueueWriteQueueEntryInternal(
 		};
 
 		const queueId = await table.add(entry);
-		return { ...entry, queue_id: queueId };
+		return { ...entry, queue_id: queueId, _queue_created: true };
 	});
 
 	await refreshQueueMemory(entityType);
@@ -607,6 +610,37 @@ export async function markWriteQueueEntryFailed(
 				last_error: toErrorMessage(error),
 			};
 		},
+	);
+}
+
+export async function markWriteQueueInvoiceDraft(
+	entry: OfflineQueueEntry,
+	invoice: AnyRecord,
+) {
+	return updateClaimedQueueEntry(
+		"invoice",
+		Number(entry.queue_id),
+		entry.last_attempt_at,
+		(current) => ({
+			...current,
+			status:
+				Number(current.retry_count || 0) + 1 >= MAX_RETRY_COUNT
+					? "dead_letter"
+					: "draft",
+			retry_count: Number(current.retry_count || 0) + 1,
+			last_error:
+				"Saved on server as draft; submission is still pending.",
+			payload: {
+				...current.payload,
+				recovery_state: "draft",
+				server_invoice_name: invoice.name,
+				invoice: {
+					...current.payload.invoice,
+					name: invoice.name,
+					docstatus: 0,
+				},
+			},
+		}),
 	);
 }
 

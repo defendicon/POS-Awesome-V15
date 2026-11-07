@@ -49,6 +49,41 @@
 			</div>
 
 			<div class="offline-status-panel__section">
+				<div class="offline-status-panel__section-title">{{ __("Device readiness") }}</div>
+				<div v-if="readinessError" class="offline-status-panel__warning">{{ readinessError }}</div>
+				<div
+					v-for="row in readiness?.rows || []"
+					:key="row.id"
+					class="offline-status-panel__resource"
+					:data-test="`offline-readiness-${row.id}`"
+				>
+					<strong>{{ row.label }} — {{ row.status }}</strong>
+					<div>
+						{{
+							row.lastSyncedAt
+								? new Date(row.lastSyncedAt).toLocaleString()
+								: __("Never verified")
+						}}
+					</div>
+				</div>
+				<div>
+					{{
+						__(
+							"Stock is a snapshot for this device. Sales on other disconnected terminals are not included.",
+						)
+					}}
+				</div>
+				<div v-if="readiness">
+					{{ __("Stale cache policy") }}: {{ readiness.policy }} · {{ readiness.maxHours }}
+					{{ __("hours") }}
+				</div>
+				<div>{{ __("Cashiers prepared") }}: {{ preparedCashiers.length }}</div>
+				<div v-if="accessExpires">
+					{{ __("Earliest cashier access expiry") }}: {{ new Date(accessExpires).toLocaleString() }}
+				</div>
+			</div>
+
+			<div class="offline-status-panel__section">
 				<div class="offline-status-panel__section-title">
 					{{ __("Offline Capabilities") }}
 				</div>
@@ -154,10 +189,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch, onUnmounted } from "vue";
 import { storeToRefs } from "pinia";
 
 import { useOfflineSyncStore } from "../../stores/offlineSyncStore";
+import { useUIStore } from "../../stores/uiStore";
+import { readOfflineReadiness } from "../../services/offlineReadiness";
+import { loadOfflineCashiers } from "../../utils/offlineCashier";
 
 defineOptions({
 	name: "OfflineStatusPanel",
@@ -180,6 +218,35 @@ defineEmits<{
 const __ = (window as any).__ || ((text: string) => text);
 
 const offlineSyncStore = useOfflineSyncStore();
+const uiStore = useUIStore();
+const readiness = ref<Awaited<ReturnType<typeof readOfflineReadiness>> | null>(null);
+const readinessError = ref("");
+const preparedCashiers = ref<ReturnType<typeof loadOfflineCashiers>>([]);
+const accessExpires = computed(() =>
+	preparedCashiers.value.length
+		? Math.min(...preparedCashiers.value.map((row) => Number(row.offline_access?.expires_at || 0) * 1000))
+		: 0,
+);
+let readinessVersion = 0;
+async function refreshReadiness() {
+	const version = ++readinessVersion;
+	if (!props.modelValue || !uiStore.posProfile?.name) return;
+	try {
+		const result = await readOfflineReadiness(uiStore.posProfile);
+		if (version !== readinessVersion) return;
+		readiness.value = result;
+		preparedCashiers.value = loadOfflineCashiers(uiStore.posProfile.name);
+		readinessError.value = "";
+	} catch (error: any) {
+		readinessError.value = error?.message || "Unable to verify device cache.";
+	}
+}
+watch(() => [props.modelValue, uiStore.posProfile?.name], refreshReadiness, { immediate: true });
+const readinessTimer = setInterval(refreshReadiness, 15_000);
+onUnmounted(() => {
+	readinessVersion++;
+	clearInterval(readinessTimer);
+});
 const {
 	summary,
 	bootstrapWarning,
@@ -214,6 +281,8 @@ const cacheUsageLabel = computed(() => `${summary.value.cacheUsage || 0}%`);
 	top: calc(100% + 10px);
 	right: 0;
 	width: min(360px, calc(100vw - 24px));
+	max-height: calc(100vh - 100px);
+	overflow-y: auto;
 	padding: 16px;
 	display: grid;
 	gap: 14px;

@@ -143,6 +143,31 @@ Rules:
 - Invoice posting date/time is captured before offline persistence and printing,
   using the site timezone when available. Explicit manual posting controls are
   preserved; retries must never replace sale time with reconnect time.
+- Recovery acknowledges an invoice only with a named submitted document
+  (`docstatus`/numeric `status` 1). Drafts, lost responses, exhausted retries and
+  active sync leases remain pending/reviewable. Manual retry keeps the original
+  request identity; reconciliation verifies the server before local completion.
+- Pending counts include dead-letter and outbox-only records. Coordinator
+  adoption preserves legacy requests and serializes cross-tab delivery claims.
+- A local invoice may be deleted only before any send attempt; both queue copies
+  and its local stock reservation must be handled together. Uncertain sends
+  require reconciliation. Cache clearing must preserve unsynced writes and carts.
+- Cart recovery is isolated by terminal user, cashier, company, POS Profile,
+  warehouse, opening shift and browser tab. It reuses the invoice builder/loader,
+  retains request identity and never restores a queued/completed sale as a new
+  cart. Credentials and supervisor approvals are not restored from cart snapshots.
+- POS Profile controls maximum offline cache age, Warn/Block behavior and
+  explicit offline customer-credit redemption. Missing/stale records are never
+  labelled fresh merely because a snapshot exists.
+- Local stock uses signed stock-UOM quantities. Refreshing server stock retains
+  this device's unresolved reservations; availability on another disconnected
+  terminal cannot be guaranteed and server stock checks remain authoritative.
+- Cashier handover summaries/logs describe this device's offline sales for the
+  current opening shift, grouped by currency. They do not create an accounting
+  closing balance or change the opening-shift owner. An active exchange cannot
+  move to another cashier.
+- Invoice recovery supports Sales Invoice/POS Invoice only. Orders and quotations
+  must retain their own online submission workflows.
 
 ---
 

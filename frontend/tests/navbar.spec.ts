@@ -39,6 +39,7 @@ describe("Navbar supervisor access", () => {
 		window.localStorage.clear();
 		vi.stubGlobal("__", (value: string) => value);
 		vi.stubGlobal("frappe", {
+			datetime: { nowdate: () => "2026-11-07" },
 			session: {
 				user: "cashier@example.com",
 				user_fullname: "Main Cashier",
