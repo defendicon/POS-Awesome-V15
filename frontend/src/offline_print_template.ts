@@ -196,6 +196,14 @@ function defaultOfflineHTML(invoice: any, terms = "") {
 </html>`;
 }
 
+export function prepareOfflinePrintDocument(invoice: any) {
+	const doc = JSON.parse(JSON.stringify(invoice));
+	delete doc._posa_offline_cashier_token;
+	delete doc._posa_authoritative_cashier;
+	doc.paid_amount = computePaidAmount(doc);
+	return doc;
+}
+
 export default async function renderOfflineInvoiceHTML(invoice: any) {
 	if (!invoice) return "";
 
@@ -204,12 +212,32 @@ export default async function renderOfflineInvoiceHTML(invoice: any) {
 	const template = normaliseTemplate(getPrintTemplate());
 	const terms = getTermsAndConditions();
 	const doc = {
-		...invoice,
+		...prepareOfflinePrintDocument(invoice),
 		terms: invoice.terms || terms,
 		terms_and_conditions: invoice.terms_and_conditions || terms,
 	};
 
-	doc.paid_amount = computePaidAmount(doc);
+	const finishHTML = (html: string) => {
+		if (doc._posa_receipt_label) {
+			const escape = (value: unknown) =>
+				String(value ?? "").replace(
+					/[&<>"']/g,
+					(char) =>
+						({
+							"&": "&amp;",
+							"<": "&lt;",
+							">": "&gt;",
+							'"': "&quot;",
+							"'": "&#39;",
+						})[char]!,
+				);
+			const banner = `<section style="border:1px solid #555;padding:8px;margin-bottom:8px"><strong>${escape(doc._posa_receipt_label)}</strong><div>Request: ${escape(doc.posa_client_request_id)}</div></section>`;
+			html = /<body\b[^>]*>/i.test(html)
+				? html.replace(/<body\b[^>]*>/i, (body) => body + banner)
+				: banner + html;
+		}
+		return sanitizePrintHtml(html);
+	};
 	attachFormatter(doc);
 	(doc.items || []).forEach(attachFormatter);
 	(doc.taxes || []).forEach(attachFormatter);
@@ -218,9 +246,7 @@ export default async function renderOfflineInvoiceHTML(invoice: any) {
 		console.warn(
 			"No offline print template cached; using fallback template",
 		);
-		return sanitizePrintHtml(
-			defaultOfflineHTML(doc, doc.terms_and_conditions),
-		);
+		return finishHTML(defaultOfflineHTML(doc, doc.terms_and_conditions));
 	}
 
 	try {
@@ -255,11 +281,9 @@ export default async function renderOfflineInvoiceHTML(invoice: any) {
 				get_list: () => [],
 			},
 		};
-		return sanitizePrintHtml(env.renderString(template, context));
+		return finishHTML(env.renderString(template, context));
 	} catch (e) {
 		console.error("Failed to render offline invoice", e);
-		return sanitizePrintHtml(
-			defaultOfflineHTML(doc, doc.terms_and_conditions),
-		);
+		return finishHTML(defaultOfflineHTML(doc, doc.terms_and_conditions));
 	}
 }

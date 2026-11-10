@@ -1,4 +1,5 @@
 import { resolveReturnDefaultAmount } from "../../../utils/paymentInitialization";
+import { requestSafeRefresh } from "../../../services/safeRefresh";
 
 const isAltOnly = (event: KeyboardEvent) =>
 	event.altKey && !event.ctrlKey && !event.metaKey;
@@ -394,8 +395,7 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 
 			if (key === "Home") {
 				consumeEvent(event);
-				frappe.set_route("/");
-				location.reload();
+				requestSafeRefresh({ action: () => { frappe.set_route("/"); location.reload(); } });
 				return;
 			}
 

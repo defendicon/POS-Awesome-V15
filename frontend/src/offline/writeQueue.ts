@@ -36,7 +36,7 @@ export interface OfflineQueueEntry {
 
 const WRITE_QUEUE_TABLE = "write_queue";
 const MAX_RETRY_COUNT = 5;
-const SYNCING_LEASE_MS = 5 * 60 * 1000;
+export const SYNCING_LEASE_MS = 5 * 60 * 1000;
 
 const ENTITY_MEMORY_KEYS: Record<OfflineEntityType, string> = {
 	invoice: "offline_invoices",

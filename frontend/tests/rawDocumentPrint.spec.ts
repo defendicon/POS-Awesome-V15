@@ -15,6 +15,29 @@ import {
 import { prepareQzPrinter, sendRawToQz } from "../src/posapp/services/qzTray";
 
 describe("rawDocumentPrint", () => {
+	it("prints a local pending copy without fetching an invoice from the server", async () => {
+		await printRawDocumentViaQz({
+			doctype: "Sales Invoice",
+			name: "Offline id",
+			localOnly: true,
+			doc: {
+				_posa_receipt_label: "OFFLINE COPY - PENDING SERVER SYNC",
+				posa_client_request_id: "original-request",
+				posting_date: "2026-11-10",
+				posting_time: "10:20:30",
+				grand_total: 100,
+			},
+			profile: {},
+		});
+		expect(frappe.call).not.toHaveBeenCalled();
+		expect(sendRawToQz).toHaveBeenCalledWith(
+			expect.stringContaining("original-request"),
+			undefined,
+		);
+		expect(vi.mocked(sendRawToQz).mock.calls[0][0]).toContain(
+			"PENDING SERVER SYNC",
+		);
+	});
 	beforeEach(() => {
 		vi.clearAllMocks();
 		delete (globalThis as any).__;
@@ -161,8 +184,12 @@ describe("rawDocumentPrint", () => {
 	});
 
 	it("uses POS Profile raw printing toggle only when enabled", () => {
-		expect(shouldUseRawDocumentPrinting({ posa_raw_printing: 1 })).toBe(true);
-		expect(shouldUseRawDocumentPrinting({ posa_raw_printing: "0" })).toBe(false);
+		expect(shouldUseRawDocumentPrinting({ posa_raw_printing: 1 })).toBe(
+			true,
+		);
+		expect(shouldUseRawDocumentPrinting({ posa_raw_printing: "0" })).toBe(
+			false,
+		);
 		expect(shouldUseRawDocumentPrinting({})).toBe(false);
 	});
 
@@ -243,7 +270,9 @@ describe("rawDocumentPrint", () => {
 	});
 
 	it("rejects when the saved document cannot be fetched and no fallback doc is provided", async () => {
-		(globalThis as any).frappe.call.mockRejectedValue(new Error("Network down"));
+		(globalThis as any).frappe.call.mockRejectedValue(
+			new Error("Network down"),
+		);
 
 		await expect(
 			printRawDocumentViaQz({

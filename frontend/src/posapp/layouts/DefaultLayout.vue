@@ -2,6 +2,7 @@
 	<v-app class="container1 posapp pos-theme-root" :class="rtlClasses">
 		<AppLoadingOverlay :visible="globalLoading" />
 		<UpdatePrompt />
+		<SafeRefreshDialog />
 		<v-main class="main-content">
 			<ClosingDialog />
 			<Navbar
@@ -82,6 +83,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch, getCurrentInstance } from "vue";
+import SafeRefreshDialog from "../components/ui/SafeRefreshDialog.vue";
 // Note paths updated to be relative to layouts/ directory
 import Navbar from "../components/Navbar.vue";
 import ClosingDialog from "../components/pos/shell/ClosingDialog.vue";

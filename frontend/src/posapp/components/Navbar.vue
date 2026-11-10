@@ -175,6 +175,7 @@ import { cacheOfflineCashiers, loadOfflineCashiers } from "../utils/offlineCashi
 import { useRtl } from "../composables/core/useRtl";
 import { withRequestTimeout } from "../utils/requestTimeout";
 import { translate } from "../utils/translate";
+import { requestSafeRefresh } from "../services/safeRefresh";
 import { finishStartupPhase, startStartupPhase } from "../../utils/startupTrace";
 import { loadCachedTerminalEmployees, saveCachedTerminalEmployees } from "../utils/terminalEmployeeCache";
 
@@ -1045,7 +1046,7 @@ export default {
 			} finally {
 				this.clearingCache = false;
 				if (shouldReload) {
-					setTimeout(() => location.reload(), 1000);
+					setTimeout(() => requestSafeRefresh(), 1000);
 				}
 			}
 		},

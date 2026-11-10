@@ -1,6 +1,7 @@
 import { db, isOffline } from "./db";
 import {
 	ensureOfflineQueueReady,
+	SYNCING_LEASE_MS,
 	getQueueEntries,
 	refreshQueueMemory,
 	markWriteQueueEntrySyncedByIdempotencyKey,
@@ -105,7 +106,7 @@ export async function getInvoiceRecoveryRows(scope: InvoiceRecoveryScope) {
 function isLiveLease(row: RecordData, timeField: string) {
 	return (
 		row.status === "syncing" &&
-		Date.now() - Date.parse(row[timeField] || "") < 5 * 60_000
+		Date.now() - Date.parse(row[timeField] || "") < SYNCING_LEASE_MS
 	);
 }
 

@@ -12,6 +12,7 @@ import {
 } from "../src/posapp/utils/cartRecovery";
 import { startCartRecovery } from "../src/posapp/composables/pos/invoice/useCartRecovery";
 import { db, initPromise } from "../src/offline/db";
+import { flushCartForRefresh } from "../src/posapp/services/safeRefresh";
 
 const scope = {
 	user: "terminal",
@@ -153,6 +154,24 @@ describe("cashier cart crash recovery", () => {
 			),
 		).toBe(false);
 		expect(ctx.cartRecoveryError).toBe("Storage full");
+	});
+	it("flushes a recoverable cart for Safe Refresh and blocks storage failures or active exchanges", async () => {
+		const ctx = context();
+		controllers.push(startCartRecovery(ctx));
+		await nextTick();
+		ctx.items = invoice.items;
+		ctx.customer = "Alice";
+		expect(flushCartForRefresh().hasCart).toBe(true);
+		expect(readCartRecovery(scope)?.invoice.customer).toBe("Alice");
+		const write = vi
+			.spyOn(Storage.prototype, "setItem")
+			.mockImplementation(() => {
+				throw new Error("Storage full");
+			});
+		expect(() => flushCartForRefresh()).toThrow("Storage full");
+		write.mockRestore();
+		ctx.exchangeSession = { stage: "sale" };
+		expect(() => flushCartForRefresh()).toThrow("active exchange");
 	});
 	it("keeps a malformed snapshot available for review instead of silently deleting it", () => {
 		saveCartRecovery(scope, invoice);

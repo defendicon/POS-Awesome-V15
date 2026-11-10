@@ -1,6 +1,10 @@
 import { watch, nextTick } from "vue";
 import { ensureInvoiceClientRequestId } from "../../../../offline/idempotency";
 import {
+	SAFE_REFRESH_PREPARE,
+	type RefreshPreparation,
+} from "../../../services/safeRefresh";
+import {
 	cartScopeIsComplete,
 	clearCartRecovery,
 	readCartRecovery,
@@ -314,6 +318,22 @@ export function startCartRecovery(context: any) {
 	const beforeSwitch = (event: Event) => {
 		if (paused || !flush()) event.preventDefault();
 	};
+	const beforeRefresh = (event: Event) => {
+		const detail = (event as CustomEvent<RefreshPreparation>).detail;
+		detail.hasCart ||= Boolean(context.items.length);
+		if (
+			paused ||
+			context.exchangeSession ||
+			(context.items.length && !active) ||
+			!flush()
+		) {
+			detail.reasons.push(context.exchangeSession
+				? "Complete or cancel the active exchange before refreshing."
+				: context.cartRecoveryError || "Finish cart recovery before refreshing. The cart must be saved first.");
+			event.preventDefault();
+		}
+	};
+	window.addEventListener(SAFE_REFRESH_PREPARE, beforeRefresh);
 	window.addEventListener("pagehide", flush);
 	window.addEventListener("focus", refreshCandidates);
 	window.addEventListener("storage", refreshCandidates);
@@ -341,6 +361,7 @@ export function startCartRecovery(context: any) {
 			stopScope();
 			stopCart();
 			window.removeEventListener("pagehide", flush);
+			window.removeEventListener(SAFE_REFRESH_PREPARE, beforeRefresh);
 			window.removeEventListener("focus", refreshCandidates);
 			window.removeEventListener("storage", refreshCandidates);
 			window.removeEventListener(

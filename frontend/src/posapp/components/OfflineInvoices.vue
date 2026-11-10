@@ -177,6 +177,7 @@
 									</div>
 								</template>
 								<template #item.actions="{ item }">
+									<v-btn variant="text" size="small" :disabled="busy" @click="reprintInvoice(item)">{{ __("Reprint receipt") }}</v-btn>
 									<v-btn
 										variant="text"
 										size="small"
@@ -256,6 +257,7 @@
 <script setup>
 import { computed, ref, watch, onUnmounted } from "vue";
 import { formatUtils } from "../format";
+import { reprintOfflineReceipt } from "../services/offlineReceiptPrint";
 import {
 	getInvoiceRecoveryRows,
 	retryInvoiceRecovery,
@@ -416,6 +418,13 @@ async function retryInvoice(item) {
 	} finally {
 		busy.value = false;
 	}
+}
+
+async function reprintInvoice(item) {
+	busy.value = true; operationError.value = "";
+	try { await reprintOfflineReceipt(item.request_id, props.posProfile); }
+	catch (error) { operationError.value = error?.message || String(error); }
+	finally { busy.value = false; }
 }
 
 async function reconcileInvoice(item) {

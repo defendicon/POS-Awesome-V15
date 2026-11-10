@@ -1180,6 +1180,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			doc.set_posting_time = 1;
 			try {
 				await saveOfflineInvoice({ data, invoice: submissionDoc });
+				stores?.uiStore?.setLastInvoice?.(submissionDoc.posa_client_request_id, { _posa_offline_request_id: submissionDoc.posa_client_request_id });
 				stores?.syncStore?.updatePendingCount();
 				stores?.toastStore?.show({
 					title: __("Invoice saved offline"),

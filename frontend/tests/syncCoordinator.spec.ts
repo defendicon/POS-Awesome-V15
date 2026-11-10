@@ -25,6 +25,22 @@ const makeResource = (
 });
 
 describe("SyncCoordinator", () => {
+	it("reports actual in-flight execution until its trigger completes", async () => {
+		let release!: () => void;
+		const gate = new Promise<void>((resolve) => {
+			release = resolve;
+		});
+		const coordinator = new SyncCoordinator({
+			resources: [makeResource("items", "warm", ["boot"])],
+			runResource: () => gate,
+		});
+		expect(coordinator.hasActiveRuns()).toBe(false);
+		const run = coordinator.runTrigger("boot");
+		expect(coordinator.hasActiveRuns()).toBe(true);
+		release();
+		await run;
+		expect(coordinator.hasActiveRuns()).toBe(false);
+	});
 	it("dedupes concurrent runs for the same trigger", async () => {
 		const resources = [
 			makeResource("bootstrap_config", "boot_critical", ["boot"]),

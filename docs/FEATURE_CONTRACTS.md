@@ -177,6 +177,10 @@ Rules:
   move to another cashier.
 - Invoice recovery supports Sales Invoice/POS Invoice only. Orders and quotations
   must retain their own online submission workflows.
+- Safe Refresh flushes the scoped cashier cart and persistence queue, presents
+  pending-work counts, and rechecks before navigation. Active payment/recovery,
+  exchanges and sync operations block it. It never clears cache or submits work;
+  expired delivery leases remain durable and do not permanently block reload.
 
 ---
 
@@ -204,6 +208,14 @@ Rules:
 - Receipt formatting changes must not change business calculations.
 - Print output should not calculate totals differently from the invoice payload.
 - Print settings should respect POS Profile configuration where applicable.
+- Pending offline receipts can be reprinted from the durable recovery queue.
+  Copies show their request identity and pending/draft status, retain original
+  dates and amounts, and must not mutate the invoice, stock or delivery state.
+  Server-draft copies require the profile's existing draft-print permission.
+- Local raw printing must not fetch a replacement server document. Offline HTML
+  and raw QZ receipts share paid/change normalization; uncertain QZ failures
+  require explicit browser-fallback consent. Synced official receipts retain the
+  server history/print workflow, not the local pending request ID as a docname.
 
 ---
 

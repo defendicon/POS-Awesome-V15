@@ -1,4 +1,7 @@
 import { useUIStore } from "../../stores/uiStore";
+import { isOffline } from "../../../offline/db";
+import { reprintOfflineReceipt } from "../../services/offlineReceiptPrint";
+import { useToastStore } from "../../stores/toastStore";
 import {
 	appendDebugPrintParam,
 	isDebugPrintEnabled,
@@ -46,6 +49,11 @@ export function useLastInvoicePrinting() {
 		}
 
 		const lastInvoiceDocument = uiStore.lastInvoiceDocument;
+		if ((isOffline() || lastInvoiceDocument?._posa_offline_request_id) && !isExchangeReceiptDocument(lastInvoiceDocument)) {
+			try { await reprintOfflineReceipt(lastInvoiceId, posProfile); }
+			catch (error: any) { useToastStore().show({ title: error?.message || "Offline receipt is unavailable on this device.", color: "error" }); }
+			return;
+		}
 		if (isExchangeReceiptDocument(lastInvoiceDocument)) {
 			await printExchangeReceipt(lastInvoiceDocument, posProfile);
 			return;

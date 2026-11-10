@@ -7,6 +7,7 @@ import {
 } from "./db";
 import {
 	ensureOfflineQueueReady,
+	SYNCING_LEASE_MS,
 	getQueueEntries,
 	markWriteQueueEntrySyncedByIdempotencyKey,
 } from "./writeQueue";
@@ -282,7 +283,7 @@ function shouldAttempt(row: InvoiceOutboxEntry) {
 	if (TERMINAL_STATUSES.has(row.status)) return false;
 	if (row.status === "syncing") {
 		const started = Date.parse(row.updated_at);
-		return !Number.isFinite(started) || Date.now() - started >= 5 * 60_000;
+		return !Number.isFinite(started) || Date.now() - started >= SYNCING_LEASE_MS;
 	}
 	if (!row.next_retry_at) return true;
 	const nextRetryAt = Date.parse(row.next_retry_at);
