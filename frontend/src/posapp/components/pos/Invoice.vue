@@ -7,6 +7,18 @@
 	>
 		<v-alert v-if="cartRecoveryError" type="error" variant="tonal" data-test="cart-recovery-error">{{ cartRecoveryError }}</v-alert>
 		<v-alert v-else-if="cartRecoveryMessage" type="info" variant="tonal" closable @click:close="cartRecoveryMessage = ''">{{ cartRecoveryMessage }}</v-alert>
+		<SavedCartRecovery
+			:candidates="cartRecoveryCandidates"
+			:warning="cartRecoveryReviewWarning"
+			:busy="cartRecoveryBusy"
+			:has-items="items.length > 0"
+			@recover="recoverSavedCart"
+			@refresh="refreshSavedCarts"
+		/>
+		<v-overlay :model-value="cartRecoveryBusy" persistent class="align-center justify-center">
+			<v-progress-circular indeterminate color="primary" />
+			<span>{{ __("Recovering saved cart") }}</span>
+		</v-overlay>
 		<!-- Cancel Sale Confirmation Dialog -->
 		<CancelSaleDialog v-model="cancel_dialog" @confirm="cancel_invoice" />
 
@@ -336,6 +348,7 @@ import { useOnlineStatus } from "../../composables/core/useOnlineStatus";
 import { useInvoiceCurrency } from "../../composables/pos/invoice/useInvoiceCurrency";
 import { useInvoiceItems } from "../../composables/pos/invoice/useInvoiceItems";
 import { startCartRecovery } from "../../composables/pos/invoice/useCartRecovery";
+import SavedCartRecovery from "./invoice/SavedCartRecovery.vue";
 import { useInvoiceOffers } from "../../composables/pos/invoice/useInvoiceOffers";
 import { useInvoiceUI } from "../../composables/pos/invoice/useInvoiceUI";
 import { useInvoicePrinting } from "../../composables/pos/invoice/useInvoicePrinting";
@@ -438,6 +451,9 @@ export default {
 		return {
 			cartRecoveryError: "",
 			cartRecoveryMessage: "",
+			cartRecoveryCandidates: [],
+			cartRecoveryReviewWarning: "",
+			cartRecoveryBusy: false,
 			is_sharing: false,
 			pos_profile: "",
 			pos_opening_shift: "",
@@ -487,6 +503,7 @@ export default {
 	},
 
 	components: {
+		SavedCartRecovery,
 		InvoiceCustomerSection,
 		DeliveryCharges,
 		PostingDateRow,
@@ -601,6 +618,8 @@ export default {
 	},
 
 	methods: {
+		recoverSavedCart(key) { return this._cartRecovery?.recoverSavedCart(key); },
+		refreshSavedCarts() { return this._cartRecovery?.refreshCandidates(); },
 		formatDateForDisplay(date) {
 			if (!date) return "";
 			const parts = date.split("-");

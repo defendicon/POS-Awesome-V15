@@ -156,6 +156,11 @@ Rules:
   warehouse, opening shift and browser tab. It reuses the invoice builder/loader,
   retains request identity and never restores a queued/completed sale as a new
   cart. Credentials and supervisor approvals are not restored from cart snapshots.
+- After browser-session loss, adoption is explicit, requires an empty current
+  cart and the identical terminal/cashier/POS/opening scope, and uses browser
+  ownership locks to avoid taking a live tab's saved cart. The source remains
+  intact until invoice loading and destination persistence succeed. Old snapshots
+  without ownership evidence are retained for review, never guessed to be idle.
 - POS Profile controls maximum offline cache age, Warn/Block behavior and
   explicit offline customer-credit redemption. Missing/stale records are never
   labelled fresh merely because a snapshot exists.

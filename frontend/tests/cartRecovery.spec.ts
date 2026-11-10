@@ -6,6 +6,9 @@ import {
 	clearCartRecovery,
 	readCartRecovery,
 	saveCartRecovery,
+	getCartRecoveryKey,
+	listRestartCartRecoveries,
+	lockCartRecovery,
 } from "../src/posapp/utils/cartRecovery";
 import { startCartRecovery } from "../src/posapp/composables/pos/invoice/useCartRecovery";
 import { db, initPromise } from "../src/offline/db";
@@ -19,6 +22,7 @@ const scope = {
 	opening: "OPEN-1",
 };
 const invoice = {
+	doctype: "Sales Invoice",
 	company: "Co",
 	pos_profile: "Main",
 	customer: "Alice",
@@ -79,6 +83,7 @@ describe("cashier cart crash recovery", () => {
 	afterEach(() => {
 		controllers.splice(0).forEach((controller) => controller.stop());
 		vi.restoreAllMocks();
+		vi.unstubAllGlobals();
 	});
 	it("preserves customer, UOM rows and payment amounts without persisting credentials/approvals", () => {
 		saveCartRecovery(scope, {
@@ -95,7 +100,10 @@ describe("cashier cart crash recovery", () => {
 		const ctx = context();
 		const controller = startCartRecovery(ctx);
 		controllers.push(controller);
-		await vi.waitFor(() => expect(ctx.load_invoice).toHaveBeenCalledOnce());
+		await vi.waitFor(
+			() => expect(ctx.load_invoice).toHaveBeenCalledOnce(),
+			{ timeout: 5000 },
+		);
 		expect(ctx.customer).toBe("Alice");
 		expect(ctx.items[0].conversion_factor).toBe(3);
 		expect(ctx.invoice_doc.payments[0].amount).toBe(60);
@@ -118,13 +126,11 @@ describe("cashier cart crash recovery", () => {
 	});
 	it("does not resurrect a cart already queued or submitted by the durable outbox", async () => {
 		saveCartRecovery(scope, invoice);
-		await db
-			.table("invoice_outbox")
-			.add({
-				client_request_id: "cart-id",
-				status: "acknowledged",
-				created_at: new Date().toISOString(),
-			});
+		await db.table("invoice_outbox").add({
+			client_request_id: "cart-id",
+			status: "acknowledged",
+			created_at: new Date().toISOString(),
+		});
 		const ctx = context();
 		controllers.push(startCartRecovery(ctx));
 		await vi.waitFor(() => expect(readCartRecovery(scope)).toBeNull());
@@ -156,5 +162,240 @@ describe("cashier cart crash recovery", () => {
 		expect(localStorage.getItem(key)).toBe("broken");
 		clearCartRecovery(scope);
 		expect(readCartRecovery(scope)).toBeNull();
+	});
+});
+
+function enableBrowserLocks() {
+	const held = new Set<string>();
+	const nav = Object.create(navigator);
+	Object.defineProperty(nav, "locks", {
+		value: {
+			request: async (name: string, _options: any, callback: any) => {
+				if (held.has(name)) return callback(null);
+				held.add(name);
+				try {
+					return await callback({ name });
+				} finally {
+					held.delete(name);
+				}
+			},
+			query: async () => ({ held: [...held].map((name) => ({ name })) }),
+		},
+	});
+	vi.stubGlobal("navigator", nav);
+}
+
+describe("browser restart recovery ownership", () => {
+	beforeEach(async () => {
+		await initPromise;
+		await db.table("write_queue").clear();
+		await db.table("invoice_outbox").clear();
+		localStorage.clear();
+		sessionStorage.clear();
+		vi.stubGlobal("frappe", { session: { user: scope.user } });
+		enableBrowserLocks();
+	});
+	afterEach(() => {
+		controllers.splice(0).forEach((controller) => controller.stop());
+		vi.restoreAllMocks();
+		vi.unstubAllGlobals();
+	});
+
+	it("offers and transfers a closed session's cart after sessionStorage is lost", async () => {
+		const oldContext = context();
+		const old = startCartRecovery(oldContext);
+		controllers.push(old);
+		await vi.waitFor(() =>
+			expect(oldContext.cartRecoveryCandidates).toEqual([]),
+		);
+		oldContext.items = invoice.items;
+		oldContext.customer = invoice.customer;
+		oldContext.invoice_doc = invoice;
+		expect(old.flush()).toBe(true);
+		const sourceKey = getCartRecoveryKey(scope);
+		expect(readCartRecovery(scope)?.restart_recoverable).toBe(true);
+		old.stop();
+		sessionStorage.clear();
+		const ctx = context();
+		const controller = startCartRecovery(ctx);
+		controllers.push(controller);
+		await vi.waitFor(async () => {
+			await controller.refreshCandidates();
+			expect(ctx.cartRecoveryCandidates).toHaveLength(1);
+		});
+		expect(await controller.recoverSavedCart(sourceKey)).toBe(true);
+		expect(ctx.customer).toBe("Alice");
+		expect(ctx.invoice_doc.posa_client_request_id).toBe("cart-id");
+		expect(ctx.invoice_doc.items[0].conversion_factor).toBe(3);
+		expect(ctx.invoice_doc.payments[0].amount).toBe(60);
+		expect(localStorage.getItem(sourceKey)).toBeNull();
+		expect(readCartRecovery(scope)?.invoice.posa_client_request_id).toBe(
+			"cart-id",
+		);
+	});
+
+	it("does not offer a live tab's cart and grants only one simultaneous claim", async () => {
+		saveCartRecovery(scope, invoice, localStorage, sessionStorage, true);
+		const key = getCartRecoveryKey(scope);
+		const [first, second] = await Promise.all([
+			lockCartRecovery(key),
+			lockCartRecovery(key),
+		]);
+		expect(first).toBeTypeOf("function");
+		expect(second).toBeNull();
+		expect((await listRestartCartRecoveries(scope)).candidates).toEqual([]);
+		first?.();
+		await Promise.resolve();
+		await vi.waitFor(async () =>
+			expect(
+				(await listRestartCartRecoveries(scope)).candidates,
+			).toHaveLength(1),
+		);
+	});
+
+	it("does not overwrite the original cart when sessionStorage was cloned by a duplicated tab", async () => {
+		saveCartRecovery(scope, invoice, localStorage, sessionStorage, true);
+		const sourceKey = getCartRecoveryKey(scope);
+		const release = await lockCartRecovery(sourceKey);
+		const ctx = context();
+		const controller = startCartRecovery(ctx);
+		controllers.push(controller);
+		await vi.waitFor(() => expect(ctx.cartRecoveryCandidates).toEqual([]));
+		expect(getCartRecoveryKey(scope)).not.toBe(sourceKey);
+		expect(ctx.load_invoice).not.toHaveBeenCalled();
+		expect(
+			JSON.parse(localStorage.getItem(sourceKey)!).invoice.customer,
+		).toBe("Alice");
+		release?.();
+	});
+
+	it("filters other cashiers, profiles, warehouses, openings and older unsafe snapshots", async () => {
+		saveCartRecovery(scope, invoice); // Legacy ownership protocol: retain, do not adopt.
+		for (const patch of [
+			{ cashier: "other" },
+			{ profile: "other" },
+			{ warehouse: "other" },
+			{ opening: "other" },
+			{ user: "other" },
+			{ company: "other" },
+		])
+			saveCartRecovery(
+				{ ...scope, ...patch },
+				invoice,
+				localStorage,
+				sessionStorage,
+				true,
+			);
+		expect((await listRestartCartRecoveries(scope)).candidates).toEqual([]);
+	});
+
+	it.each(["pending", "acknowledged"])(
+		"rechecks the %s outbox entry before recovery even if a stale candidate was visible",
+		async (status) => {
+			saveCartRecovery(
+				scope,
+				invoice,
+				localStorage,
+				sessionStorage,
+				true,
+			);
+			const sourceKey = getCartRecoveryKey(scope);
+			sessionStorage.clear();
+			const ctx = context();
+			const controller = startCartRecovery(ctx);
+			controllers.push(controller);
+			await vi.waitFor(() =>
+				expect(ctx.cartRecoveryCandidates).toHaveLength(1),
+			);
+			await db
+				.table("invoice_outbox")
+				.add({ client_request_id: "cart-id", status });
+			expect(await controller.recoverSavedCart(sourceKey)).toBe(false);
+			expect(ctx.cartRecoveryError).toContain(
+				"already queued or submitted",
+			);
+			expect(ctx.load_invoice).not.toHaveBeenCalled();
+			expect(localStorage.getItem(sourceKey)).not.toBeNull();
+		},
+	);
+
+	it("does not replace an active sale and blocks carts from another cashier", async () => {
+		saveCartRecovery(scope, invoice, localStorage, sessionStorage, true);
+		const sourceKey = getCartRecoveryKey(scope);
+		const foreign = { ...scope, cashier: "cashier-b" };
+		saveCartRecovery(foreign, invoice, localStorage, sessionStorage, true);
+		const foreignKey = getCartRecoveryKey(foreign);
+		sessionStorage.clear();
+		const ctx = context();
+		const controller = startCartRecovery(ctx);
+		controllers.push(controller);
+		await vi.waitFor(() =>
+			expect(ctx.cartRecoveryCandidates).toHaveLength(1),
+		);
+		ctx.items = [{ item_code: "CURRENT", qty: 1 }];
+		expect(await controller.recoverSavedCart(sourceKey)).toBe(false);
+		expect(ctx.items[0].item_code).toBe("CURRENT");
+		ctx.items = [];
+		expect(await controller.recoverSavedCart(foreignKey)).toBe(false);
+		expect(ctx.cartRecoveryError).toContain("another cashier or POS scope");
+		expect(ctx.load_invoice).not.toHaveBeenCalled();
+	});
+
+	it("does not offer orders or returns as restart sales and strips credentials on read", async () => {
+		saveCartRecovery(
+			scope,
+			{ ...invoice, doctype: "Sales Order" },
+			localStorage,
+			sessionStorage,
+			true,
+		);
+		expect((await listRestartCartRecoveries(scope)).candidates).toEqual([]);
+		saveCartRecovery(
+			scope,
+			{ ...invoice, is_return: 1 },
+			localStorage,
+			sessionStorage,
+			true,
+		);
+		expect((await listRestartCartRecoveries(scope)).candidates).toEqual([]);
+		saveCartRecovery(scope, invoice, localStorage, sessionStorage, true);
+		const key = getCartRecoveryKey(scope),
+			raw = JSON.parse(localStorage.getItem(key)!);
+		raw.invoice._posa_offline_cashier_token = "old-token";
+		raw.invoice.posa_below_cost_override = 1;
+		localStorage.setItem(key, JSON.stringify(raw));
+		expect(readCartRecovery(scope)?.invoice).toEqual(invoice);
+	});
+
+	it("retains and locks the source when destination persistence fails after loading", async () => {
+		saveCartRecovery(scope, invoice, localStorage, sessionStorage, true);
+		const sourceKey = getCartRecoveryKey(scope);
+		sessionStorage.clear();
+		const ctx = context();
+		const controller = startCartRecovery(ctx);
+		controllers.push(controller);
+		await vi.waitFor(() =>
+			expect(ctx.cartRecoveryCandidates).toHaveLength(1),
+		);
+		const write = vi
+			.spyOn(Storage.prototype, "setItem")
+			.mockImplementation(() => {
+				throw new Error("Storage full");
+			});
+		expect(await controller.recoverSavedCart(sourceKey)).toBe(false);
+		expect(ctx.cartRecoveryError).toBe("Storage full");
+		expect(localStorage.getItem(sourceKey)).not.toBeNull();
+		expect(await lockCartRecovery(sourceKey)).toBeNull();
+		write.mockRestore();
+	});
+
+	it("retains malformed records and fails closed when browser ownership locks are unavailable", async () => {
+		saveCartRecovery(scope, invoice, localStorage, sessionStorage, true);
+		const key = getCartRecoveryKey(scope);
+		localStorage.setItem(key, "broken");
+		expect((await listRestartCartRecoveries(scope)).issues).toHaveLength(1);
+		expect(localStorage.getItem(key)).toBe("broken");
+		vi.stubGlobal("navigator", {});
+		expect((await listRestartCartRecoveries(scope)).candidates).toEqual([]);
 	});
 });
