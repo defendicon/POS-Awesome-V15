@@ -119,6 +119,7 @@ ORDERED_CHAIN = [
     "posa_block_sale_beyond_available_qty",
     "posa_allow_offline_sale_without_stock_verification",
     "posa_offline_cache_max_age_hours",
+    "posa_offline_cashier_access_hours",
     "posa_offline_stale_cache_action",
     "posa_allow_offline_customer_credit",
     "posa_allow_line_item_name_override",

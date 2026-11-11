@@ -135,7 +135,9 @@ Rules:
 - Offline cashier switching uses PIN-encrypted, server-signed grants scoped to
   the authenticated terminal user and authorized POS Profile. Cached names and
   client-supplied cashier fields are never replay authorization.
-- Offline grants allow sales for 24 hours after preparation. Sync validates the
+- Offline grants allow sales for the POS Profile's configured duration after
+  preparation (1–168 hours, default 24). Duration changes apply to newly issued
+  grants. Sync validates the
   sale capture instant against the grant and rechecks enabled status, profile
   membership, and PIN version. Valid sales may replay for up to 30 days.
 - Offline switching does not grant supervisor permissions or create a new

@@ -8,10 +8,18 @@ and its captured sale instant. Reconnection preserves the original cashier and
 posting date/time instead of using the terminal cashier or clock at sync time.
 
 Preparation: assign enabled users in POS Profile User, set their PINs in User,
-then open the POS Profile online on each device. Offline access lasts 24 hours
-from preparation. A previously authenticated, cached POS session and existing
+then open the POS Profile online on each device. **Offline Cashier Access Duration
+(Hours)** on POS Profile accepts 1 to 168 whole hours and defaults to 24. A
+duration change takes effect when the terminal opens that profile online again
+and receives newly issued grants. The Offline Status panel shows the actual
+expiry of cached access. A previously authenticated, cached POS session and existing
 opening shift are required. Full Frappe account login and new shift creation
 still require connectivity. Use HTTPS for browser Web Crypto support.
+
+After deploying the duration setting, run `bench --site <site> migrate` to load
+the POS Profile field and build the frontend. Save the duration on the profile,
+reload each terminal online, and check the expiry in Offline Status before
+testing an offline cashier switch.
 
 ## Files Changed
 
@@ -102,7 +110,9 @@ have no usable executable shims, so installed tools were invoked with Node.
 - Offline access requires the prepared browser/device and cached terminal session.
   Cache clearing removes prepared access. Missing/expired cache requires online
   preparation; it does not bypass PIN verification.
-- The 24-hour offline grant and 30-day replay limit are explicit security defaults.
+- The default offline grant is 24 hours. The replay limit remains 30 days after
+  capture. Replay checks the signed expiry issued with each original grant, so
+  a duration change does not invalidate already captured sales.
   A changed PIN, disabled cashier, removed assignment, changed site encryption key,
   unauthorized terminal session or invalid posting period can prevent replay.
   Failed invoices remain available for review/retry under existing queue behavior.

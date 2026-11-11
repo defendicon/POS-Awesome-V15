@@ -48,7 +48,7 @@ queues, invoice builder/loader and authorized ERPNext invoice endpoints.
 Actual cross-user/profile revision conflicts block offline checkout. The Warn
 default retains compatibility with older caches without falsely declaring them
 verified. Strict operation should use Block after a complete online preparation.
-The earlier 24-hour cashier grant remains independent of this cache-age setting.
+The cashier grant duration remains independent of this cache-age setting.
 
 Deploy backend and frontend together. Run normal site migration to import the
 new POS Profile Custom Field fixtures, then rebuild assets and reload/reprepare

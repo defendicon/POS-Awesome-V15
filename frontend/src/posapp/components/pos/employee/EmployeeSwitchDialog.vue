@@ -105,7 +105,7 @@
 					>
 						{{
 							__(
-								"Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User. Load this profile online to prepare 24 hours of offline cashier access on this device.",
+								"Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User. Load this profile online to prepare offline cashier access for the duration set in POS Profile.",
 							)
 						}}
 					</v-alert>
@@ -247,7 +247,7 @@
 					>
 						{{
 							__(
-								"Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User. Load this profile online to prepare 24 hours of offline cashier access on this device.",
+								"Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User. Load this profile online to prepare offline cashier access for the duration set in POS Profile.",
 							)
 						}}
 					</v-alert>

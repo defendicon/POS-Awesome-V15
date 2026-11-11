@@ -11,9 +11,32 @@ from datetime import datetime
 import frappe
 from frappe import _
 
-ACCESS_SECONDS = 24 * 60 * 60
+ACCESS_HOURS_FIELD = "posa_offline_cashier_access_hours"
+DEFAULT_ACCESS_HOURS = 24
+MAX_ACCESS_HOURS = 168
 REPLAY_SECONDS = 30 * 24 * 60 * 60
 PIN_ITERATIONS = 600_000
+
+
+def _access_hours(value):
+    if value is None or value == "":
+        return DEFAULT_ACCESS_HOURS
+    try:
+        hours = float(value)
+    except (TypeError, ValueError, OverflowError):
+        hours = 0
+    if not 1 <= hours <= MAX_ACCESS_HOURS or not hours.is_integer():
+        frappe.throw(
+            _("Offline Cashier Access Duration must be a whole number between 1 and {0} hours.").format(
+                MAX_ACCESS_HOURS
+            ),
+            frappe.ValidationError,
+        )
+    return int(hours)
+
+
+def validate_offline_cashier_settings(doc, method=None):
+    _access_hours(doc.get(ACCESS_HOURS_FIELD))
 
 
 def _secret():
@@ -34,6 +57,8 @@ def create_offline_cashier_access(profile_name, user, pin):
     from cryptography.hazmat.primitives.ciphers.aead import AESGCM
     from posawesome.posawesome.api.pos_access import get_authenticated_pos_user
 
+    profile = frappe.get_cached_doc("POS Profile", profile_name)
+    access_seconds = _access_hours(profile.get(ACCESS_HOURS_FIELD)) * 3600
     issued = int(time.time())
     claims = {
         "version": 1,
@@ -42,7 +67,7 @@ def create_offline_cashier_access(profile_name, user, pin):
         "cashier": user,
         "pin_version": _pin_version(user, pin),
         "issued_at": issued,
-        "expires_at": issued + ACCESS_SECONDS,
+        "expires_at": issued + access_seconds,
     }
     payload = base64.urlsafe_b64encode(json.dumps(claims, sort_keys=True).encode()).decode()
     token = f"{payload}.{_digest(payload)}"

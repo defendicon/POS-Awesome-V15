@@ -9000,6 +9000,17 @@
 		"width": null
 	},
 	{
+		"doctype": "Custom Field",
+		"dt": "POS Profile",
+		"fieldname": "posa_offline_cashier_access_hours",
+		"fieldtype": "Int",
+		"label": "Offline Cashier Access Duration (Hours)",
+		"description": "Set 1 to 168 hours. The default is 24. Changes apply the next time the terminal prepares cashier access online.",
+		"default": "24",
+		"insert_after": "posa_offline_cache_max_age_hours",
+		"name": "POS Profile-posa_offline_cashier_access_hours"
+	},
+	{
 		"allow_in_quick_entry": 0,
 		"allow_on_submit": 0,
 		"bold": 0,
@@ -9026,7 +9037,7 @@
 		"in_list_view": 0,
 		"in_preview": 0,
 		"in_standard_filter": 0,
-		"insert_after": "posa_offline_cache_max_age_hours",
+		"insert_after": "posa_offline_cashier_access_hours",
 		"is_system_generated": 0,
 		"is_virtual": 0,
 		"label": "Offline Stale Cache Action",

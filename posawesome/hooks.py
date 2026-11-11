@@ -103,6 +103,9 @@ after_migrate = []
 # Hook on document methods and events
 
 doc_events = {
+    "POS Profile": {
+        "validate": "posawesome.posawesome.api.offline_cashier.validate_offline_cashier_settings",
+    },
     "Item": {
         "after_insert": "posawesome.posawesome.api.item_processing.alternates.clear_alternate_item_caches",
         "on_update": "posawesome.posawesome.api.item_processing.alternates.clear_alternate_item_caches",
@@ -236,6 +239,7 @@ fixtures = [
                     "POS Profile-posa_allow_submissions_in_background_job",
                     "POS Profile-posa_allow_partial_payment",
                     "POS Profile-posa_offline_cache_max_age_hours",
+                    "POS Profile-posa_offline_cashier_access_hours",
                     "POS Profile-posa_offline_stale_cache_action",
                     "POS Profile-posa_allow_offline_customer_credit",
                     "POS Profile-posa_allow_credit_sale",
