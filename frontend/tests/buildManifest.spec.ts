@@ -28,6 +28,12 @@ describe("build manifest helpers", () => {
 				name: "offline/index",
 				fileName: "offline/index-AbCd1234.js",
 			},
+			"vendor-CACHED.js": {
+				type: "chunk",
+				name: "vendor",
+				fileName: "vendor-CACHED.js",
+				isEntry: false,
+			},
 			"style-Z9Z9.css": {
 				type: "asset",
 				name: "style.css",
@@ -60,6 +66,7 @@ describe("build manifest helpers", () => {
 				fonts: [
 					"/assets/posawesome/dist/js/materialdesignicons-webfont-ICONS.woff2",
 				],
+				chunks: ["/assets/posawesome/dist/js/vendor-CACHED.js"],
 			},
 		});
 		expect(payload.assets.fonts).not.toContain(

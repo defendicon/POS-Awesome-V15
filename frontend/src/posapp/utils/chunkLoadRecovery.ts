@@ -151,6 +151,9 @@ export async function recoverFromChunkLoadError(
 	if (!isDynamicImportFailure(error)) {
 		return false;
 	}
+	if (typeof navigator !== "undefined" && navigator.onLine === false) {
+		return false;
+	}
 
 	if (typeof window === "undefined" || !window.sessionStorage) {
 		return false;

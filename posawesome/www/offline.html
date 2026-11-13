@@ -29,12 +29,6 @@
 				width: 100%;
 			}
 
-			.icon {
-				font-size: 4rem;
-				color: #ff9800;
-				margin-bottom: 1rem;
-			}
-
 			h1 {
 				color: #1976d2;
 				margin-bottom: 1rem;
@@ -44,16 +38,6 @@
 				margin-bottom: 1.5rem;
 				line-height: 1.5;
 			}
-
-			.info {
-				background-color: #e3f2fd;
-				border-left: 4px solid #1976d2;
-				padding: 1rem;
-				text-align: left;
-				margin-bottom: 1.5rem;
-			}
-
-			/* Removed the retry-btn styles */
 
 			@media (prefers-color-scheme: dark) {
 				body {
@@ -66,45 +50,17 @@
 					box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 				}
 
-				.icon {
-					color: #ffb74d;
-				}
-
 				h1 {
 					color: #90caf9;
 				}
-
-				.info {
-					background-color: #1e3a5f;
-					border-left: 4px solid #90caf9;
-				}
 			}
 		</style>
-		<link rel="stylesheet" href="/assets/posawesome/dist/js/posawesome.css" />
 	</head>
 
 	<body>
 		<div class="container">
-			<div class="icon mdi mdi-wifi-off"></div>
-			<h1>You are offline</h1>
-			<p>
-				POS Awesome is currently in offline mode. You can continue working with limited functionality.
-			</p>
-
-			<div class="info">
-				<p><strong>Available in offline mode:</strong></p>
-				<ul>
-					<li>Create new invoices</li>
-					<li>Save invoices locally</li>
-					<li>View cached items and customers</li>
-				</ul>
-				<p><strong>Unavailable until reconnected:</strong></p>
-				<ul>
-					<li>Syncing with server</li>
-					<li>Fetching new data</li>
-					<li>Printing receipts</li>
-				</ul>
-			</div>
+			<h1>Offline POS startup unavailable</h1>
+			<p>Reconnect, sign in to ERPNext, and open POS Awesome to prepare this browser for offline use.</p>
 		</div>
 	</body>
 </html>

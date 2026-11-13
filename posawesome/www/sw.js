@@ -1,13 +1,20 @@
 const CACHE_PREFIX = "posawesome-cache-";
 const CACHE_COMPLETE_KEY = "/__posawesome_cache_complete__";
 const VERSION_URL = "/assets/posawesome/dist/js/version.json";
+const SHELL_URL = "/app/posapp";
+const PAGE_API = "/api/method/frappe.desk.desk_page.getpage";
+const PAGE_REQUEST = PAGE_API + "?name=posapp";
+const DOCTYPE_API = "/api/method/frappe.desk.form.load.getdoctype";
+const DOCTYPE_REQUEST = DOCTYPE_API + "?doctype=Page&with_parent=1";
+const OFFLINE_DESK_BOOT = "/assets/posawesome/js/offline-desk-boot.js";
+const ITEM_WORKER = "/assets/posawesome/dist/js/posapp/workers/itemWorker.js";
+const DEXIE = "/assets/posawesome/dist/js/libs/dexie.min.js";
 const DEFAULT_CACHE_VERSION = "default";
 const MAX_CACHE_ITEMS = 1000;
 
 const STATIC_PRECACHE_URLS = [
-	"/app/posapp",
-	"/assets/posawesome/dist/js/posapp/workers/itemWorker.js",
-	"/assets/posawesome/dist/js/libs/dexie.min.js",
+	SHELL_URL,
+	OFFLINE_DESK_BOOT,
 	"/manifest.json",
 	"/offline.html",
 ];
@@ -52,9 +59,44 @@ function getPrecacheUrls(version, assets = {}) {
 				version,
 			),
 			...fontAssets,
+			...(Array.isArray(assets.chunks) ? assets.chunks : []),
+			buildVersionedAssetUrl(ITEM_WORKER, version),
+			buildVersionedAssetUrl(DEXIE, "1"),
 			...STATIC_PRECACHE_URLS,
 		]),
 	);
+}
+
+function isPosRoute(pathname) {
+	return /^\/(?:app|desk)\/posapp(?:\/|$)/.test(pathname);
+}
+
+function deskAssetUrls(html) {
+	const urls = new Set();
+	for (const match of html.matchAll(/<(?:script|link)\b[^>]*?\s(?:src|href)=["']([^"']+)["'][^>]*>/gi)) {
+		if (/^<link\b/i.test(match[0]) && !/\brel=["'](?:stylesheet|modulepreload)["']/i.test(match[0])) continue;
+		const url = new URL(match[1].replace(/&amp;/g, "&"), self.location.origin);
+		if (url.origin === self.location.origin && url.pathname.startsWith("/assets/")) {
+			urls.add(url.pathname + url.search);
+		}
+	}
+	return [...urls];
+}
+
+function localResponse(response) {
+	// Redirected precache responses cannot be used for a normal navigation.
+	return new Response(response.body, {
+		status: response.status,
+		headers: response.headers,
+	});
+}
+
+async function clearCachedDeskShells() {
+	const keys = await caches.keys();
+	await Promise.all(keys.filter((key) => key.startsWith(CACHE_PREFIX)).map(async (key) => {
+		const cache = await caches.open(key);
+		await cache.delete(SHELL_URL);
+	}));
 }
 
 function requestUrl(value) {
@@ -81,8 +123,8 @@ function createCandidateCacheName(version) {
 let cachedCacheName = null;
 let cacheNameInFlight = null;
 let currentVersion = null;
-let currentAssets = {};
 let currentPrecacheUrls = [];
+let currentDeskRoot = null;
 
 function extractBuildVersion(payload) {
 	const version = payload?.version || payload?.buildVersion;
@@ -202,8 +244,32 @@ async function populateCandidateCache(metadata) {
 	const candidateCacheName = createCandidateCacheName(version);
 
 	try {
+		const shell = await fetch(SHELL_URL, { cache: "no-store" });
+		const shellLocation = new URL(shell.url || SHELL_URL, self.location.origin);
+		const html = await shell.clone().text();
+		if (
+			!shell.ok ||
+			shellLocation.origin !== self.location.origin ||
+			!isPosRoute(shellLocation.pathname) ||
+			!/\bfrappe\.boot\s*=/.test(html) ||
+			!/<\/body>/i.test(html)
+		) {
+			throw new Error("An authenticated ERPNext POS page is required to prepare offline startup");
+		}
+		urls.push(...deskAssetUrls(html).filter((url) => !urls.includes(url)));
+		const startupDocs = await Promise.all(
+			[[DOCTYPE_REQUEST, "DocType", "Page"], [PAGE_REQUEST, "Page", "posapp"]].map(async ([url, doctype, name]) => {
+				const response = await fetch(url, { cache: "no-store" });
+				const data = await response.json();
+				if (!response.ok || !Array.isArray(data?.docs) ||
+					!data.docs.some((doc) => doc.doctype === doctype && doc.name === name)) {
+					throw new Error(`Invalid POS startup metadata: ${url}`);
+				}
+				return data.docs;
+			}),
+		);
 		const fetched = await Promise.all(
-			urls.map(async (url) => {
+			urls.filter((url) => url !== SHELL_URL).map(async (url) => {
 				const response = await fetch(url, { cache: "no-store" });
 				if (!response?.ok) {
 					throw new Error(`Required POS asset failed to cache: ${url}`);
@@ -216,6 +282,17 @@ async function populateCandidateCache(metadata) {
 		await Promise.all(
 			fetched.map(([url, response]) => cache.put(url, response)),
 		);
+		// Frappe refuses frappe.call() while offline. Seed the model before Desk routes.
+		const docs = JSON.stringify(startupDocs.flat()).replace(/</g, "\\u003c");
+		const boot = `<script type="application/json" id="posa-offline-desk-docs">${docs}</script><script defer src="${OFFLINE_DESK_BOOT}"></script>`;
+		const headers = new Headers(shell.headers);
+		headers.delete("Content-Length");
+		headers.delete("Content-Encoding");
+		await cache.put(SHELL_URL, new Response(html.replace(/<\/body>/i, () => boot + "</body>"), { headers }));
+		await cache.put(VERSION_URL, new Response(JSON.stringify({ version, assets }), {
+			headers: { "Content-Type": "application/json" },
+		}));
+		urls.push(VERSION_URL);
 		await cache.put(
 			CACHE_COMPLETE_KEY,
 			new Response(
@@ -224,6 +301,7 @@ async function populateCandidateCache(metadata) {
 					version,
 					assets,
 					urls,
+					deskRoot: shellLocation.pathname.split("/")[1],
 					createdAt: Date.now(),
 					healthAcknowledged: false,
 				}),
@@ -238,6 +316,7 @@ async function populateCandidateCache(metadata) {
 		return {
 			cacheName: candidateCacheName,
 			metadata: { version, assets },
+			marker: { urls, deskRoot: shellLocation.pathname.split("/")[1] },
 		};
 	} catch (error) {
 		// The candidate has a unique name, so this can never delete the active cache.
@@ -249,7 +328,7 @@ async function populateCandidateCache(metadata) {
 async function prepareVersionCache(metadata, options = {}) {
 	if (!options.forceNew) {
 		const existing = await findLatestCompleteCache(metadata.version);
-		if (existing) return existing;
+		if (existing?.marker.deskRoot) return existing;
 	}
 	return populateCandidateCache(metadata);
 }
@@ -257,8 +336,8 @@ async function prepareVersionCache(metadata, options = {}) {
 function activatePreparedCache(prepared) {
 	cachedCacheName = prepared.cacheName;
 	currentVersion = prepared.metadata.version;
-	currentAssets = prepared.metadata.assets || {};
-	currentPrecacheUrls = getPrecacheUrls(currentVersion, currentAssets);
+	currentPrecacheUrls = prepared.marker.urls;
+	currentDeskRoot = prepared.marker.deskRoot;
 }
 
 async function prepareAndActivateCache(metadata, options = {}) {
@@ -272,15 +351,12 @@ async function getCacheName() {
 	if (cacheNameInFlight) return cacheNameInFlight;
 
 	cacheNameInFlight = (async () => {
-		const metadata = await resolveBuildMetadata();
-		if (metadata) return prepareAndActivateCache(metadata);
-
 		const fallback = await findLatestCompleteCache();
-		if (!fallback) {
-			throw new Error("No complete POS cache generation is available");
+		if (fallback) {
+			activatePreparedCache(fallback);
+			return fallback.cacheName;
 		}
-		activatePreparedCache(fallback);
-		return fallback.cacheName;
+		throw new Error("No complete POS cache generation is available");
 	})().finally(() => {
 		cacheNameInFlight = null;
 	});
@@ -406,8 +482,8 @@ async function forceUnregisterServiceWorker() {
 	cachedCacheName = null;
 	cacheNameInFlight = null;
 	currentVersion = null;
-	currentAssets = {};
 	currentPrecacheUrls = [];
+	currentDeskRoot = null;
 	const keys = await caches.keys();
 	await Promise.all(
 		keys
@@ -420,7 +496,9 @@ async function forceUnregisterServiceWorker() {
 self.addEventListener("message", (event) => {
 	const payload = event.data || {};
 	if (payload.type === "CHECK_VERSION") {
-		postVersionMessage((event.ports && event.ports[0]) || event.source);
+		event.waitUntil(getCacheName().then(() => {
+			postVersionMessage((event.ports && event.ports[0]) || event.source);
+		}).catch(() => {}));
 		return;
 	}
 	if (payload.type === "SKIP_WAITING") {
@@ -496,11 +574,27 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-	if (event.request.method !== "GET") return;
+	const request = event.request;
+	const url = new URL(request.url);
+	if (url.origin !== self.location.origin) return;
 
-	const url = new URL(event.request.url);
-	if (url.protocol !== "http:" && url.protocol !== "https:") return;
-	if (event.request.url.includes("socket.io")) return;
+	if (url.pathname === "/api/method/logout" || (url.pathname === "/" && url.searchParams.get("cmd") === "logout")) {
+		event.respondWith((async () => {
+			const response = await fetch(request);
+			if (response.ok) {
+				try {
+					await clearCachedDeskShells();
+					await self.registration.unregister();
+				} catch (error) {
+					console.warn("SW: failed to clear offline startup after logout", error);
+				}
+			}
+			return response;
+		})());
+		return;
+	}
+
+	if (request.method !== "GET" || url.pathname.startsWith("/socket.io")) return;
 
 	const assetDestinations = ["style", "script", "worker", "font", "image"];
 	const isAssetRequest = assetDestinations.includes(event.request.destination);
@@ -509,21 +603,34 @@ self.addEventListener("fetch", (event) => {
 	if (!isNavigation && !isAssetRequest && !isPosawesomeAsset) return;
 
 	if (isNavigation) {
+		if (!isPosRoute(url.pathname)) return;
 		event.respondWith(
 			(async () => {
 				try {
-					return await fetch(event.request);
+					const response = await fetch(request);
+					// A navigation redirect is opaque here. Let the browser handle it.
+					if (response.status === 401 || response.status === 403) {
+						await clearCachedDeskShells().catch((error) => {
+							console.warn("SW: failed to clear offline startup after access was denied", error);
+						});
+					}
+					return response;
 				} catch {
-					const cached = await matchActiveCache(event.request, {
-						ignoreSearch: true,
-					});
-					if (cached) return cached;
-					const appShell = await matchActiveCache("/app/posapp");
-					if (appShell) return appShell;
+					const appShell = await matchActiveCache(SHELL_URL);
+					if (appShell && currentDeskRoot) {
+						const [, requestedRoot] = url.pathname.split("/");
+						if (requestedRoot !== currentDeskRoot) {
+							url.pathname = url.pathname.replace(/^\/[^/]+/, `/${currentDeskRoot}`);
+							return Response.redirect(url.href);
+						}
+						return appShell;
+					}
 					const offlinePage = await matchActiveCache("/offline.html");
-					if (offlinePage) return offlinePage;
-					const recoveryPage = await caches.match("/offline.html");
-					return recoveryPage || Response.error();
+					if (offlinePage) return localResponse(offlinePage);
+					return new Response("Open POS Awesome online once to prepare this browser for offline use.", {
+						status: 503,
+						headers: { "Content-Type": "text/plain; charset=utf-8" },
+					});
 				}
 			})(),
 		);
@@ -538,6 +645,8 @@ self.addEventListener("fetch", (event) => {
 				const cacheableTypes = ["basic", "default", "cors"];
 				if (
 					response?.ok &&
+					url.pathname !== VERSION_URL &&
+					!response.redirected &&
 					response.status === 200 &&
 					cacheableTypes.includes(response.type)
 				) {
@@ -553,9 +662,15 @@ self.addEventListener("fetch", (event) => {
 				}
 				return response;
 			} catch {
+				if (url.pathname === VERSION_URL) {
+					return (await matchActiveCache(VERSION_URL)) || Response.error();
+				}
+				if (url.pathname === ITEM_WORKER && hasVersionQuery) {
+					url.searchParams.delete("posa_startup_trace");
+				}
 				const cached =
-					(await matchActiveCache(event.request)) ||
-					(await caches.match(event.request));
+					(await matchActiveCache(url.href)) ||
+					(await caches.match(url.href));
 				if (cached) return cached;
 				if (!hasVersionQuery) {
 					const fallback =
