@@ -32,6 +32,10 @@ function posawesomeBuildVersionPlugin(version) {
 
 export default defineConfig({
 	base: "/assets/posawesome/dist/js/",
+	esbuild: {
+		// Keep MDI glyphs as CSS escapes even when a cached stylesheet has no charset.
+		charset: "ascii",
+	},
 	plugins: [
 		posawesomeBuildVersionPlugin(buildVersion),
 		frappeVueStyle(),

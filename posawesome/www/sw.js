@@ -288,6 +288,8 @@ async function populateCandidateCache(metadata) {
 		const headers = new Headers(shell.headers);
 		headers.delete("Content-Length");
 		headers.delete("Content-Encoding");
+		// response.text() and the new Response encode the generated shell as UTF-8.
+		headers.set("Content-Type", "text/html; charset=utf-8");
 		await cache.put(SHELL_URL, new Response(html.replace(/<\/body>/i, () => boot + "</body>"), { headers }));
 		await cache.put(VERSION_URL, new Response(JSON.stringify({ version, assets }), {
 			headers: { "Content-Type": "application/json" },

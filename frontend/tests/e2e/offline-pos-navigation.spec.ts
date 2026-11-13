@@ -35,7 +35,9 @@ test("opens the POS in a fresh tab and reloads with the network offline", async 
 		} else if (url.pathname.startsWith("/desk/posapp")) {
 			send("text/html", `<!doctype html><head><link rel="stylesheet" href="/assets/frappe/desk.css">
 				<script>window.frappe = {}; frappe.boot = {};</script>
-				</head><body><h1>Starting POS</h1><script src="/assets/frappe/desk.js"></script></body>`);
+				</head><body><h1>Starting POS</h1><span id="icon"></span><script src="/assets/frappe/desk.js"></script></body>`);
+		} else if (url.pathname === "/assets/frappe/desk.css") {
+			send("text/css", '#icon::before { content: "\u{F0349}"; }');
 		} else if (url.pathname === "/sw.js") {
 			send("text/javascript", serviceWorker);
 		} else if (url.pathname.endsWith("/version.json")) {
@@ -87,14 +89,24 @@ test("opens the POS in a fresh tab and reloads with the network offline", async 
 		});
 		await expect.poll(() => online.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
 		await context.setOffline(true);
-		await online.close();
 		const offline = await context.newPage();
+		const expectCorrectIcon = async (page: typeof offline) => {
+			expect(await page.evaluate(() => document.characterSet)).toBe("UTF-8");
+			await expect.poll(() => page.locator("#icon").evaluate(
+				(element) => getComputedStyle(element, "::before").content,
+			)).toBe('"\u{F0349}"');
+		};
+		await online.reload();
+		await expect(online.getByRole("heading", { name: "POS ready" })).toBeVisible();
+		await expectCorrectIcon(online);
 		const response = await offline.goto(origin + "/app/posapp/pos");
 		expect(response?.fromServiceWorker()).toBe(true);
 		await expect(offline).toHaveURL(origin + "/desk/posapp/pos");
 		await expect(offline.getByRole("heading", { name: "POS ready" })).toBeVisible();
+		await expectCorrectIcon(offline);
 		await offline.reload();
 		await expect(offline.getByRole("heading", { name: "POS ready" })).toBeVisible();
+		await expectCorrectIcon(offline);
 	} finally {
 		await browser.close();
 		server.close();
