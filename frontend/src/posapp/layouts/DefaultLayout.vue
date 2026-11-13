@@ -199,6 +199,7 @@ const OFFLINE_SYNC_TIMER_INTERVAL_MS = 60_000;
 const PRODUCT_SYNC_SETTLE_TIMEOUT_MS = 120_000;
 const PRODUCT_SYNC_SETTLE_POLL_MS = 250;
 const PRODUCT_CATALOG_BOOTSTRAP_GRACE_MS = 20_000;
+const CUSTOMER_BOOTSTRAP_GRACE_MS = 20_000;
 
 // Utils
 const createFallbackLoadingScope = () =>
@@ -311,6 +312,16 @@ const eventBus = instance?.proxy?.eventBus;
 
 // Initialize loading sources immediately in setup so watchers can mark them 100%
 initLoadingSources(["init", "items", "customers"]);
+scheduleSourceRelease("customers", CUSTOMER_BOOTSTRAP_GRACE_MS, () => {
+	traceStartupEvent("ui.customer_database_progress", "timeout", {
+		progress: loadProgress.value,
+	});
+	toastStore.show({
+		title: __("Customer database is still loading"),
+		detail: __("Customer loading continues in the background."),
+		color: "warning",
+	});
+});
 scheduleSourceRelease("items", PRODUCT_CATALOG_BOOTSTRAP_GRACE_MS, () => {
 	if (itemsLoaded.value) return;
 	traceStartupEvent("ui.product_catalog_progress", "timeout", {
@@ -356,8 +367,8 @@ const networkLifecycle = useNetworkLifecycle({
 
 const customerReadiness = useCustomerReadiness({
 	profile: posProfile,
-	isOnline: () => navigator.onLine,
-	isManualOffline: getIsManualOffline,
+	isOnline: () => networkOnline.value && serverOnline.value,
+	isManualOffline: () => manualOffline.value || getIsManualOffline(),
 	setProfile: customersStore.setPosProfile,
 	load: customersStore.get_customer_names,
 	onProfileReady: () => {
@@ -941,6 +952,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
 	clearSourceRelease("items");
+	clearSourceRelease("customers");
 	updateChecks.stop();
 	if (removeBootstrapSnapshotListener) {
 		removeBootstrapSnapshotListener();
@@ -1057,9 +1069,6 @@ const initializeData = async () => {
 	const openingData = getValidCachedOpeningForCurrentUser(getOpeningStorage(), frappe?.session?.user);
 	if (openingData) {
 		uiStore.setRegisterData(openingData);
-		if (navigator.onLine) {
-			await refreshTaxInclusiveSetting();
-		}
 	}
 
 	if (queueHealthCheck()) {

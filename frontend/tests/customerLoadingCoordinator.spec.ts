@@ -10,6 +10,29 @@ describe("customer loading coordinator", () => {
 		resetCustomerLoadingCoordinator();
 	});
 
+	it("hydrates customers offline and syncs after reconnecting during hydration", async () => {
+		let finishHydration!: () => void;
+		const hydration = new Promise<void>((resolve) => {
+			finishHydration = resolve;
+		});
+		const load = vi.fn((localOnly?: boolean) =>
+			localOnly ? hydration : Promise.resolve(),
+		);
+		const args = {
+			profile: { name: "POS-1" },
+			manualOffline: false,
+			setProfile: vi.fn(),
+			load,
+		};
+
+		const offline = ensureCustomersReady({ ...args, online: false });
+		const online = ensureCustomersReady({ ...args, online: true });
+		expect(load.mock.calls).toEqual([[true]]);
+		finishHydration();
+		await Promise.all([offline, online]);
+		expect(load.mock.calls).toEqual([[true], [false]]);
+	});
+
 	it("deduplicates concurrent loads for the same profile revision", async () => {
 		const profile = { name: "POS-1", modified: "2026-04-23T10:00:00" };
 		const setProfile = vi.fn();

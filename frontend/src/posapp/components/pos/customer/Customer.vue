@@ -392,7 +392,9 @@ export default {
 		watch(
 			() => props.pos_profile,
 			(profile) => {
-				void ensureCustomersForProfile(profile);
+				void ensureCustomersForProfile(profile).catch((error) => {
+					console.warn("Unable to load the POS customer database", error);
+				});
 			},
 			{ immediate: true },
 		);

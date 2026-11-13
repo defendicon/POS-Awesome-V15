@@ -10,10 +10,10 @@ type EnsureCustomersReadyArgs = {
 	force?: boolean;
 	isReady?: () => boolean;
 	setProfile: (_profile: CustomerProfile | null) => void;
-	load: () => Promise<void>;
+	load: (localOnly?: boolean) => Promise<void>;
 };
 
-const inflightLoads = new Map<string, Promise<void>>();
+const inflightLoads = new Map<string, { promise: Promise<void>; canSync: boolean }>();
 const completedLoads = new Set<string>();
 
 function getCustomerLoadKey(profile: CustomerProfile | null | undefined) {
@@ -47,9 +47,7 @@ export async function ensureCustomersReady({
 
 	setProfile(profile as CustomerProfile);
 
-	if (!online || manualOffline) {
-		return false;
-	}
+	const canSync = online && !manualOffline;
 
 	if (force) {
 		completedLoads.delete(loadKey);
@@ -77,14 +75,17 @@ export async function ensureCustomersReady({
 
 	const inflight = inflightLoads.get(loadKey);
 	if (inflight) {
-		await inflight;
+		await inflight.promise;
+		if (canSync && !inflight.canSync) {
+			return ensureCustomersReady({ profile, online, manualOffline, force, isReady, setProfile, load });
+		}
 		return true;
 	}
 
 	let loadPromise: Promise<void>;
 	try {
-		loadPromise = Promise.resolve(load()).then(() => {
-			if (hasReadyCustomerCache()) {
+		loadPromise = Promise.resolve(load(!canSync)).then(() => {
+			if (canSync && hasReadyCustomerCache()) {
 				completedLoads.add(loadKey);
 			}
 		});
@@ -92,13 +93,13 @@ export async function ensureCustomersReady({
 		loadPromise = Promise.reject(error);
 	}
 
-	inflightLoads.set(loadKey, loadPromise);
+	inflightLoads.set(loadKey, { promise: loadPromise, canSync });
 
 	try {
 		await loadPromise;
 		return true;
 	} finally {
-		if (inflightLoads.get(loadKey) === loadPromise) {
+		if (inflightLoads.get(loadKey)?.promise === loadPromise) {
 			inflightLoads.delete(loadKey);
 		}
 	}
