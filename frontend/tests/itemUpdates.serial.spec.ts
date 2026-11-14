@@ -1,6 +1,82 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { _applyItemDetailPayload } from "../src/posapp/components/pos/invoice_utils/item_updates";
+import {
+	_applyItemDetailPayload,
+	prepareCartPriceListChange,
+} from "../src/posapp/components/pos/invoice_utils/item_updates";
+import { show_payment } from "../src/posapp/components/pos/invoice_utils/dialogs";
+
+describe("cart price list switch", () => {
+	it("reprices regular UOM rows and keeps discounted and manually priced rows", async () => {
+		const regular = {
+			item_code: "BOX", uom: "Box", stock_uom: "Nos", conversion_factor: 4,
+			qty: 2, rate: 40, _manual_rate_set: true, _manual_rate_set_from_uom: true,
+		};
+		const discounted = { item_code: "DISC", rate: 75, discount_percentage: 25 };
+		const manual = { item_code: "MANUAL", rate: 22, _manual_rate_set: true };
+		const second = { item_code: "EACH", uom: "Nos", stock_uom: "Nos", qty: 1, rate: 5 };
+		const call = vi.fn().mockResolvedValue({
+			message: [
+				{ posa_row_id: "0", _prices_by_uom: { Nos: { price_list_rate: 8 } } },
+				{ posa_row_id: "1", _prices_by_uom: { Nos: { price_list_rate: 12 } } },
+			],
+		});
+		vi.stubGlobal("frappe", { call });
+		const context = {
+			items: [regular, discounted, manual, second],
+			pos_profile: { name: "Counter", company: "Shop", currency: "USD" },
+			selected_currency: "USD",
+			posting_date: "2026-10-01",
+			currency_precision: 2,
+			flt: Number,
+			invoiceStore: { recalculateTotals: vi.fn() },
+		};
+		try {
+			const change = await prepareCartPriceListChange(context, "Wholesale", "USD");
+			expect(change.isCurrent()).toBe(true);
+			expect(regular.rate).toBe(40);
+			change.apply();
+			expect(regular).toMatchObject({ rate: 32, amount: 64, original_base_rate: 8 });
+			expect(discounted).toMatchObject({ rate: 75, discount_percentage: 25 });
+			expect(manual.rate).toBe(22);
+			expect(context.invoiceStore.recalculateTotals).toHaveBeenCalledOnce();
+
+			call.mockResolvedValueOnce({
+				message: [{ posa_row_id: "1", _prices_by_uom: { Nos: { price_list_rate: 20 } } }],
+			});
+			const incomplete = await prepareCartPriceListChange(context, "Incomplete", "USD");
+			expect(incomplete.missingItems).toEqual([regular]);
+			incomplete.apply();
+			expect(regular).toMatchObject({ rate: 0, amount: 0, _missingPriceListRate: true });
+			expect(discounted.rate).toBe(75);
+			expect(manual.rate).toBe(22);
+			expect(second.rate).toBe(20);
+		} finally {
+			vi.unstubAllGlobals();
+		}
+	});
+
+	it("warns and focuses the first missing rate before PAY can process an invoice", async () => {
+		const missing = { item_code: "BOX", uom: "Box", _missingPriceListRate: true };
+		const context = {
+			items: [{ item_code: "FREE", rate: 0 }, missing],
+			toastStore: { show: vi.fn() },
+			focusMissingPriceListItem: vi.fn(),
+			process_invoice: vi.fn(),
+		};
+		vi.stubGlobal("__", (message: string) => message);
+		try {
+			await show_payment(context);
+			expect(context.toastStore.show).toHaveBeenCalledWith(
+				expect.objectContaining({ text: "BOX (Box)", color: "warning" }),
+			);
+			expect(context.focusMissingPriceListItem).toHaveBeenCalledWith(missing);
+			expect(context.process_invoice).not.toHaveBeenCalled();
+		} finally {
+			vi.unstubAllGlobals();
+		}
+	});
+});
 
 describe("_applyItemDetailPayload serial preservation", () => {
 	it("keeps selected serial info when server payload does not include serial_no", () => {

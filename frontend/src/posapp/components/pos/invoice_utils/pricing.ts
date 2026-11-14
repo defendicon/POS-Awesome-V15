@@ -287,7 +287,7 @@ export function _applyPricingToLine(
 	const manualOverride =
 		item._manual_rate_set === true && item._manual_rate_set_from_uom !== true;
 	const allowRateUpdate =
-		!item.locked_price && !item.posa_offer_applied && !manualOverride;
+		!item._missingPriceListRate && !item.locked_price && !item.posa_offer_applied && !manualOverride;
 	const rawDocQty = Number.parseFloat(item.qty || 0);
 	const signedDocQty = Number.isFinite(rawDocQty) ? rawDocQty : 0;
 	const lineDocQty = Math.abs(signedDocQty);
@@ -761,6 +761,7 @@ export async function _applyServerPricingRules(context: any, ctx: any = {}) {
 			}),
 		},
 	});
+	if (context.get_price_list && ctx.price_list !== context.get_price_list()) return;
 
 	const message = response?.message || {};
 	const updates = Array.isArray(message.updates) ? message.updates : [];
@@ -1058,6 +1059,7 @@ export async function _applyServerPricingRules(context: any, ctx: any = {}) {
 			item._manual_rate_set === true &&
 			item._manual_rate_set_from_uom !== true;
 		let allowServerRateUpdate =
+			!item._missingPriceListRate &&
 			!manualOverride &&
 			!priceLocked &&
 			!offerApplied &&

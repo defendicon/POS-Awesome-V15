@@ -244,6 +244,8 @@ async function loadPosAssets(
 }
 
 async function performAssetRecovery() {
+	if (typeof navigator !== "undefined" && navigator.onLine === false) return;
+
 	try {
 		if (
 			typeof navigator !== "undefined" &&

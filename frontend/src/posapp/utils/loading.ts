@@ -204,7 +204,6 @@ function completeLoading(): void {
  */
 export function markSourceLoaded(name: string): void {
 	clearSourceRelease(name);
-	delete loadingState.releasedSources[name];
 	setSourceProgress(name, 100);
 }
 

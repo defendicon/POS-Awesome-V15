@@ -25,6 +25,19 @@ const CERT_READY_STORAGE_KEY = "posa_qz_cert_ready";
 const MANUAL_DISCONNECT_STORAGE_KEY = "posa_qz_manual_disconnect";
 const DEFAULT_PRINT_FORMAT = "Standard";
 const PROFILE_PRINTER_FIELD = "posa_qz_printer_name";
+export const QZ_PRINT_CONNECT_TIMEOUT_MS = 1200;
+
+interface QzConnectOptions {
+	userInitiated?: boolean;
+	timeoutMs?: number;
+}
+
+export class QzPrinterUnavailableError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = "QzPrinterUnavailableError";
+	}
+}
 
 export const qzConnected = ref(false);
 export const qzConnecting = ref(false);
@@ -39,6 +52,28 @@ let cachedCertificate: string | null = null;
 let certificateProvided = false;
 let connectPromise: Promise<boolean> | null = null;
 let certificateChecked = false;
+
+async function waitForConnection(promise: Promise<boolean>, timeoutMs?: number) {
+	if (!timeoutMs || timeoutMs <= 0) {
+		return promise;
+	}
+
+	return new Promise<boolean>((resolve) => {
+		let settled = false;
+		const timer = globalThis.setTimeout(() => {
+			if (settled) return;
+			settled = true;
+			resolve(false);
+		}, timeoutMs);
+
+		promise.then((connected) => {
+			if (settled) return;
+			settled = true;
+			globalThis.clearTimeout(timer);
+			resolve(connected);
+		});
+	});
+}
 
 function translate(text: string) {
 	const translator = (globalThis as any).__ || (globalThis as any).frappe?._;
@@ -250,7 +285,7 @@ export function setSelectedQzPrinter(name: string) {
 	savePrinterName(name);
 }
 
-export async function connectQzTray(options: { userInitiated?: boolean } = {}): Promise<boolean> {
+export async function connectQzTray(options: QzConnectOptions = {}): Promise<boolean> {
 	if (options.userInitiated) {
 		setReconnectPaused(false);
 	}
@@ -267,20 +302,19 @@ export async function connectQzTray(options: { userInitiated?: boolean } = {}): 
 	}
 
 	if (connectPromise) {
-		return connectPromise;
+		return waitForConnection(connectPromise, options.timeoutMs);
 	}
 
-	connectPromise = (async () => {
-		setupSecurity();
+	const currentConnectPromise = (async () => {
 		qzConnecting.value = true;
 
-		qz.websocket.setClosedCallbacks(() => {
-			qzConnected.value = false;
-			qzConnecting.value = false;
-			qzCertStatus.value = "unknown";
-		});
-
 		try {
+			setupSecurity();
+			qz.websocket.setClosedCallbacks(() => {
+				qzConnected.value = false;
+				qzConnecting.value = false;
+				qzCertStatus.value = "unknown";
+			});
 			await qz.websocket.connect();
 			qzConnected.value = true;
 			qz.printers.find().catch(() => undefined);
@@ -293,12 +327,15 @@ export async function connectQzTray(options: { userInitiated?: boolean } = {}): 
 			qzConnecting.value = false;
 		}
 	})();
+	connectPromise = currentConnectPromise;
+	const clearConnectPromise = () => {
+		if (connectPromise === currentConnectPromise) {
+			connectPromise = null;
+		}
+	};
+	void currentConnectPromise.then(clearConnectPromise, clearConnectPromise);
 
-	try {
-		return await connectPromise;
-	} finally {
-		connectPromise = null;
-	}
+	return waitForConnection(currentConnectPromise, options.timeoutMs);
 }
 
 export async function disconnectQzTray(options: { manual?: boolean } = {}) {
@@ -412,7 +449,7 @@ export async function printHtmlViaQz(html: string, options: QzPrintHtmlOptions =
 		throw new Error(translate("Nothing to print."));
 	}
 
-	const printer = await ensureQzPrinterReady(options.printerName);
+	const printer = await prepareQzPrinter(options.printerName);
 
 	const config = qz.configs.create(printer, {
 		size: {
@@ -439,7 +476,7 @@ export async function printHtmlViaQz(html: string, options: QzPrintHtmlOptions =
 }
 
 export async function sendRawToQz(data: string, printerName?: string) {
-	const printer = await ensureQzPrinterReady(printerName);
+	const printer = await prepareQzPrinter(printerName);
 
 	const config = qz.configs.create(printer);
 	const printData = [
@@ -454,14 +491,16 @@ export async function sendRawToQz(data: string, printerName?: string) {
 	await qz.print(config, printData);
 }
 
-async function ensureQzPrinterReady(printerName?: string) {
+export async function prepareQzPrinter(printerName?: string) {
 	if (!qz.websocket.isActive()) {
-		const connected = await connectQzTray();
+		const connected = await connectQzTray({ timeoutMs: QZ_PRINT_CONNECT_TIMEOUT_MS });
 		if (!connected) {
 			if (qzReconnectPaused.value) {
-				throw new Error(translate("QZ Tray is manually disconnected. Press Connect to enable it again."));
+				throw new QzPrinterUnavailableError(
+					translate("QZ Tray is manually disconnected. Press Connect to enable it again."),
+				);
 			}
-			throw new Error(translate("QZ Tray is not available."));
+			throw new QzPrinterUnavailableError(translate("QZ Tray is not available."));
 		}
 	}
 
@@ -479,7 +518,7 @@ async function ensureQzPrinterReady(printerName?: string) {
 	}
 
 	if (!printer) {
-		throw new Error(translate("No QZ printer selected."));
+		throw new QzPrinterUnavailableError(translate("No QZ printer selected."));
 	}
 
 	return printer;
@@ -489,6 +528,9 @@ export async function printDocumentViaQz(options: QzPrintDocumentOptions) {
 	if (!options?.doctype || !options?.name) {
 		throw new Error(translate("Invalid print document details."));
 	}
+
+	// Fail fast before requesting/rendering the document when QZ is unavailable.
+	const printerName = await prepareQzPrinter(options.printerName);
 
 	const printFormat = options.printFormat || DEFAULT_PRINT_FORMAT;
 	const noLetterhead =
@@ -512,5 +554,5 @@ export async function printDocumentViaQz(options: QzPrintDocumentOptions) {
 		throw new Error(translate("Unable to load print HTML from server."));
 	}
 
-	await printHtmlViaQz(buildPrintHtml(html, style), options);
+	await printHtmlViaQz(buildPrintHtml(html, style), { ...options, printerName });
 }

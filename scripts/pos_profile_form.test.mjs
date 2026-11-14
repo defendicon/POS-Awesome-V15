@@ -58,12 +58,33 @@ function makeForm(fields_dict) {
 test("POS Profile setup tolerates optional fields and uninitialized grids", async () => {
 	const handlers = await loadPosProfileHandlers();
 	const frm = makeForm({
+		posa_allowed_selling_price_lists: {},
 		posa_allowed_expense_accounts: {},
 		posa_allowed_source_accounts: {},
 	});
 
 	assert.doesNotThrow(() => handlers.setup(frm));
 	assert.deepEqual(frm.calls, []);
+});
+
+test("allowed selling price lists respect selling status and profile currency", async () => {
+	const handlers = await loadPosProfileHandlers();
+	const frm = makeForm({
+		posa_allowed_selling_price_lists: { grid: { get_field: () => ({}) } },
+	});
+	handlers.refresh(frm);
+	const [[field, table, query]] = frm.calls;
+	assert.equal(field, "price_list");
+	assert.equal(table, "posa_allowed_selling_price_lists");
+	assert.deepEqual({ ...query({ currency: "PKR" }).filters }, {
+		enabled: 1,
+		selling: 1,
+		currency: "PKR",
+	});
+	assert.deepEqual({ ...query({ currency: "PKR", posa_allow_multi_currency: 1 }).filters }, {
+		enabled: 1,
+		selling: 1,
+	});
 });
 
 test("POS Profile refresh installs queries after grids initialize", async () => {

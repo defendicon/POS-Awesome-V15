@@ -8,6 +8,7 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
+from posawesome.posawesome.doctype.pos_closing_shift import pos_closing_shift
 from posawesome.posawesome.doctype.pos_closing_shift.closing_processing import creation, invoices, overview
 
 
@@ -55,6 +56,76 @@ class TestPOSClosingShift(unittest.TestCase):
         doc.get.side_effect = lambda key, default=None: data.get(key, default)
         doc.check_permission = Mock()
         return doc
+
+    @patch("posawesome.posawesome.doctype.pos_closing_shift.pos_closing_shift.frappe")
+    def test_single_currency_reconciliation_preserves_legacy_closing_amount(self, mock_frappe):
+        row = AttrDict(
+            {
+                "mode_of_payment": "Cash",
+                "currency": "UGX",
+                "expected_amount": 20000,
+                "expected_amount_in_currency": 20000,
+                "closing_amount": 24200,
+                "closing_amount_in_currency": 0,
+            }
+        )
+        closing_shift = SimpleNamespace(company="My Co", payment_reconciliation=[row])
+        mock_frappe.get_cached_value.side_effect = lambda doctype, name, field: (
+            3 if doctype == "System Settings" else "UGX"
+        )
+
+        pos_closing_shift.POSClosingShift.update_payment_reconciliation(closing_shift)
+
+        self.assertEqual(row.closing_amount, 24200)
+        self.assertEqual(row.closing_amount_in_currency, 24200)
+        self.assertEqual(row.difference, 4200)
+        self.assertEqual(row.difference_in_currency, 4200)
+
+    @patch("posawesome.posawesome.doctype.pos_closing_shift.pos_closing_shift.frappe")
+    def test_single_currency_reconciliation_uses_current_dialog_amount(self, mock_frappe):
+        row = AttrDict(
+            {
+                "mode_of_payment": "Cash",
+                "currency": "UGX",
+                "expected_amount": 20000,
+                "expected_amount_in_currency": 20000,
+                "closing_amount": 0,
+                "closing_amount_in_currency": 24200,
+            }
+        )
+        closing_shift = SimpleNamespace(company="My Co", payment_reconciliation=[row])
+        mock_frappe.get_cached_value.side_effect = lambda doctype, name, field: (
+            3 if doctype == "System Settings" else "UGX"
+        )
+
+        pos_closing_shift.POSClosingShift.update_payment_reconciliation(closing_shift)
+
+        self.assertEqual(row.closing_amount, 24200)
+        self.assertEqual(row.difference, 4200)
+        self.assertEqual(row.difference_in_currency, 4200)
+
+    @patch("posawesome.posawesome.doctype.pos_closing_shift.pos_closing_shift.frappe")
+    def test_foreign_currency_reconciliation_converts_counted_amount(self, mock_frappe):
+        row = AttrDict(
+            {
+                "mode_of_payment": "Card",
+                "currency": "USD",
+                "expected_amount": 37000,
+                "expected_amount_in_currency": 10,
+                "closing_amount": 0,
+                "closing_amount_in_currency": 12,
+            }
+        )
+        closing_shift = SimpleNamespace(company="My Co", payment_reconciliation=[row])
+        mock_frappe.get_cached_value.side_effect = lambda doctype, name, field: (
+            3 if doctype == "System Settings" else "UGX"
+        )
+
+        pos_closing_shift.POSClosingShift.update_payment_reconciliation(closing_shift)
+
+        self.assertEqual(row.closing_amount, 44400)
+        self.assertEqual(row.difference, 7400)
+        self.assertEqual(row.difference_in_currency, 2)
 
     @patch("posawesome.posawesome.doctype.pos_closing_shift.closing_processing.overview.frappe")
     def test_reconciliation_checks_invoice_read_permission(self, mock_frappe):

@@ -1,4 +1,4 @@
-import { sendRawToQz } from "./qzTray";
+import { prepareQzPrinter, sendRawToQz } from "./qzTray";
 import { parseBooleanSetting } from "../utils/stock";
 
 declare const frappe: any;
@@ -10,6 +10,7 @@ export interface RawDocumentPrintOptions {
 	profile?: Record<string, any> | null;
 	printerName?: string;
 	widthChars?: number;
+	localOnly?: boolean;
 }
 
 const ESC = "\x1B";
@@ -172,6 +173,10 @@ function addHeader(lines: string[], doc: Record<string, any>, options: RawDocume
 	if (company) lines.push(center(company, width));
 	lines.push(center(docTitle(options.doctype), width));
 	lines.push(line(width, "="));
+	if (doc._posa_receipt_label) {
+		lines.push(...wrap(doc._posa_receipt_label, width));
+		lines.push(...wrap(`${translate("Request")}: ${doc.posa_client_request_id || ""}`, width));
+	}
 	lines.push(leftRight(translate("No"), options.name || doc.name, width));
 	const date = [docDate(doc), docTime(doc)].filter(Boolean).join(" ");
 	if (date) lines.push(leftRight(translate("Date"), date, width));
@@ -342,6 +347,10 @@ export function buildEscPosDocument(doc: Record<string, any>, options: RawDocume
 }
 
 async function loadDocument(options: RawDocumentPrintOptions) {
+	if (options.localOnly) {
+		if (!options.doc) throw new Error(translate("The local receipt document is missing."));
+		return options.doc;
+	}
 	if (options.name && typeof frappe !== "undefined" && frappe?.call) {
 		try {
 			const response = await frappe.call({
@@ -367,6 +376,11 @@ export async function printRawDocumentViaQz(options: RawDocumentPrintOptions) {
 		throw new Error(translate("Invalid raw print document details."));
 	}
 
+	// Check the local printer before making a document API request so fallback is immediate.
+	const printerName = await prepareQzPrinter(
+		options.printerName || options.profile?.posa_qz_printer_name,
+	);
+
 	const doc = await loadDocument(options);
 	if (!doc) {
 		throw new Error(translate("Unable to load document for raw printing."));
@@ -380,5 +394,5 @@ export async function printRawDocumentViaQz(options: RawDocumentPrintOptions) {
 		},
 		options,
 	);
-	await sendRawToQz(rawData, options.printerName || options.profile?.posa_qz_printer_name);
+	await sendRawToQz(rawData, printerName);
 }

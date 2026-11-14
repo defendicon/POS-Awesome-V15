@@ -60,6 +60,13 @@ Rules:
 - Zero rate should not be created unless explicitly allowed.
 - Total discount must match printed and submitted invoice values.
 - Discount logic should not be duplicated across screens.
+- Under the POS Profile's `POS Supervisor Override` below-cost policy, draft
+  invoice saves may defer pending approval so PAY can open the payment screen.
+  Explicit approval on a draft still requires server authorization and a reason.
+  Submission APIs (including background submission) and document submit hooks
+  must require approval and record the server-resolved actor and floor details.
+  Draft validation must not cache success that bypasses submission checks.
+  Block, missing-cost, locked-item, and non-discountable policies still apply.
 
 ---
 
@@ -125,6 +132,57 @@ Rules:
 - Multi-currency sync must cover price-list, invoice, company, and payment
   account currencies, including dated Currency Exchange records.
 - Disabled, deleted, or out-of-scope pricing records must be removed locally.
+- Offline cashier switching uses PIN-encrypted, server-signed grants scoped to
+  the authenticated terminal user and authorized POS Profile. Cached names and
+  client-supplied cashier fields are never replay authorization.
+- Offline grants allow sales for the POS Profile's configured duration after
+  preparation (1–168 hours, default 24). Duration changes apply to newly issued
+  grants. Sync validates the
+  sale capture instant against the grant and rechecks enabled status, profile
+  membership, and PIN version. Valid sales may replay for up to 30 days.
+- Offline switching does not grant supervisor permissions or create a new
+  Frappe login/opening shift. The next online sale requires online PIN verification.
+- Invoice posting date/time is captured before offline persistence and printing,
+  using the site timezone when available. Explicit manual posting controls are
+  preserved; retries must never replace sale time with reconnect time.
+- Recovery acknowledges an invoice only with a named submitted document
+  (`docstatus`/numeric `status` 1). Drafts, lost responses, exhausted retries and
+  active sync leases remain pending/reviewable. Manual retry keeps the original
+  request identity; reconciliation verifies the server before local completion.
+- Pending counts include dead-letter and outbox-only records. Coordinator
+  adoption preserves legacy requests and serializes cross-tab delivery claims.
+- A local invoice may be deleted only before any send attempt; both queue copies
+  and its local stock reservation must be handled together. Uncertain sends
+  require reconciliation. Cache clearing must preserve unsynced writes and carts.
+- Cart recovery is isolated by terminal user, cashier, company, POS Profile,
+  warehouse, opening shift and browser tab. It reuses the invoice builder/loader,
+  retains request identity and never restores a queued/completed sale as a new
+  cart. Credentials and supervisor approvals are not restored from cart snapshots.
+- After browser-session loss, adoption is explicit, requires an empty current
+  cart and the identical terminal/cashier/POS/opening scope, and uses browser
+  ownership locks to avoid taking a live tab's saved cart. The source remains
+  intact until invoice loading and destination persistence succeed. Old snapshots
+  without ownership evidence are retained for review, never guessed to be idle.
+- POS Profile controls maximum offline cache age, Warn/Block behavior and
+  explicit offline customer-credit redemption. Missing/stale records are never
+  labelled fresh merely because a snapshot exists.
+- Sync adapter completion must carry the same profile/company/warehouse scope
+  into the coordinator's persisted state. Readiness displays and checkout share
+  that evidence; legacy null scopes require an online refresh, not an automatic
+  freshness upgrade. Recovery customer labels must never rewrite queued payloads.
+- Local stock uses signed stock-UOM quantities. Refreshing server stock retains
+  this device's unresolved reservations; availability on another disconnected
+  terminal cannot be guaranteed and server stock checks remain authoritative.
+- Cashier handover summaries/logs describe this device's offline sales for the
+  current opening shift, grouped by currency. They do not create an accounting
+  closing balance or change the opening-shift owner. An active exchange cannot
+  move to another cashier.
+- Invoice recovery supports Sales Invoice/POS Invoice only. Orders and quotations
+  must retain their own online submission workflows.
+- Safe Refresh flushes the scoped cashier cart and persistence queue, presents
+  pending-work counts, and rechecks before navigation. Active payment/recovery,
+  exchanges and sync operations block it. It never clears cache or submits work;
+  expired delivery leases remain durable and do not permanently block reload.
 
 ---
 
@@ -152,6 +210,14 @@ Rules:
 - Receipt formatting changes must not change business calculations.
 - Print output should not calculate totals differently from the invoice payload.
 - Print settings should respect POS Profile configuration where applicable.
+- Pending offline receipts can be reprinted from the durable recovery queue.
+  Copies show their request identity and pending/draft status, retain original
+  dates and amounts, and must not mutate the invoice, stock or delivery state.
+  Server-draft copies require the profile's existing draft-print permission.
+- Local raw printing must not fetch a replacement server document. Offline HTML
+  and raw QZ receipts share paid/change normalization; uncertain QZ failures
+  require explicit browser-fallback consent. Synced official receipts retain the
+  server history/print workflow, not the local pending request ID as a docname.
 
 ---
 

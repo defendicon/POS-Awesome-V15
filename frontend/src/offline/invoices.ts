@@ -1,23 +1,26 @@
 import { isOffline, memory, persist } from "./db";
 import { syncOfflineCustomers } from "./customers";
-import { reduceCacheUsage } from "./cache";
 import { ensureOfflineInvoiceRequest } from "./idempotency";
+import { captureOfflineInvoiceTime } from "./invoiceTimestamp";
+import { requireSubmittedInvoice } from "./invoiceAcknowledgement";
 import {
 	enqueueInvoiceOutboxEntry,
 	getInvoiceOutboxMode,
 	syncInvoiceOutboxResource,
 	shouldWriteInvoiceOutbox,
+	acknowledgeInvoiceOutbox,
 } from "./invoiceOutbox";
-import { updateLocalStock } from "./stock";
+import { getInvoiceStockQuantity, updateLocalStock } from "./stock";
 import {
 	claimRetryableQueueEntries,
-	clearWriteQueueEntries,
-	deleteWriteQueueEntryByIndex,
 	enqueueWriteQueueEntry,
 	getQueuedPayloadCount,
 	getQueuedPayloadSnapshots,
+	ensureOfflineQueueReady,
+	getQueueEntries,
 	markWriteQueueEntryFailed,
 	markWriteQueueEntrySynced,
+	markWriteQueueInvoiceDraft,
 	type OfflineEntityType,
 } from "./writeQueue";
 
@@ -107,9 +110,7 @@ export function validateStockForOfflineInvoice(
 			return;
 		}
 
-		const requestedQty = Math.abs(
-			Number(item.stock_qty ?? item.qty ?? 0) || 0,
-		);
+		const requestedQty = Math.abs(getInvoiceStockQuantity(item));
 		const existing = requestedByItem.get(itemCode);
 		if (existing) {
 			existing.requested_qty += requestedQty;
@@ -172,6 +173,8 @@ function prepareOfflineInvoiceEntry(entry: AnyRecord) {
 	) {
 		throw new Error("Cart is empty. Add items before saving.");
 	}
+	captureOfflineInvoiceTime(entry.invoice);
+	entry.invoice.items.forEach(getInvoiceStockQuantity);
 
 	const validation = validateStockForOfflineInvoice(
 		entry.invoice.items,
@@ -212,6 +215,35 @@ function prepareOfflineInvoiceEntry(entry: AnyRecord) {
 }
 
 export async function saveOfflineInvoice(entry: AnyRecord) {
+	ensureOfflineInvoiceRequest(entry);
+	await ensureOfflineQueueReady();
+	const existing = (
+		await getQueueEntries("invoice", { includeSynced: true })
+	).find(
+		(row) =>
+			row.payload.invoice?.posa_client_request_id ===
+			entry.invoice.posa_client_request_id,
+	);
+	if (existing) {
+		for (const key of [
+			"customer",
+			"company",
+			"pos_profile",
+			"currency",
+			"items",
+			"payments",
+			"grand_total",
+		]) {
+			if (
+				JSON.stringify(existing.payload.invoice[key]) !==
+				JSON.stringify(entry.invoice[key])
+			)
+				throw new Error(
+					"This invoice is already queued with different sale data. Review the original queued invoice.",
+				);
+		}
+		return existing;
+	}
 	const cleanEntry = prepareOfflineInvoiceEntry(entry);
 	if (shouldWriteInvoiceOutbox()) {
 		await enqueueInvoiceOutboxEntry(cleanEntry);
@@ -222,6 +254,7 @@ export async function saveOfflineInvoice(entry: AnyRecord) {
 	);
 
 	if (
+		createdEntry._queue_created &&
 		entry.invoice?.items &&
 		shouldValidateOfflineInvoiceStock(entry.invoice)
 	) {
@@ -236,11 +269,38 @@ export function getOfflineInvoices() {
 }
 
 export async function clearOfflineInvoices() {
-	await clearWriteQueueEntries(INVOICE_ENTITY);
+	const rows = await getQueueEntries(INVOICE_ENTITY);
+	if (
+		rows.some(
+			(row) =>
+				row.status !== "pending" ||
+				row.retry_count ||
+				row.last_attempt_at ||
+				(row as any).manual_retry_at,
+		)
+	)
+		throw new Error(
+			"Sent or uncertain invoices must be reconciled before removing queued sales.",
+		);
+	const { deleteUnsentRecoveryInvoice } = await import("./invoiceRecovery");
+	for (const row of rows)
+		await deleteUnsentRecoveryInvoice(
+			row.payload.invoice.posa_client_request_id,
+			{
+				profile: row.payload.invoice.pos_profile,
+				company: row.payload.invoice.company,
+			},
+		);
 }
 
 export async function deleteOfflineInvoice(index: number) {
-	await deleteWriteQueueEntryByIndex(INVOICE_ENTITY, index);
+	const target = getOfflineInvoices()[index];
+	if (!target?.invoice) return;
+	const { deleteUnsentRecoveryInvoice } = await import("./invoiceRecovery");
+	await deleteUnsentRecoveryInvoice(target.invoice.posa_client_request_id, {
+		profile: target.invoice.pos_profile,
+		company: target.invoice.company,
+	});
 }
 
 export function getPendingOfflineInvoiceCount() {
@@ -325,13 +385,39 @@ export async function syncOfflineInvoices() {
 		for (const entry of claimedEntries) {
 			const queuedInvoice = entry.payload;
 			try {
-				await frappe.call({
-					method: "posawesome.posawesome.api.invoices.submit_invoice",
+				if (
+					queuedInvoice.invoice?.doctype &&
+					!["Sales Invoice", "POS Invoice"].includes(
+						queuedInvoice.invoice.doctype,
+					)
+				)
+					throw new Error(
+						"This document requires its original online workflow; it cannot be replayed as a sales invoice.",
+					);
+				const response = await frappe.call({
+					method: "posawesome.posawesome.api.offline_sync.invoices.submit_invoice_outbox_entry",
 					args: {
+						client_request_id: queuedInvoice.invoice.posa_client_request_id,
 						invoice: queuedInvoice.invoice,
 						data: queuedInvoice.data,
 					},
 				});
+				const serverInvoice =
+					response?.message?.invoice || response?.message;
+				if (
+					serverInvoice?.name &&
+					Number(serverInvoice.docstatus ?? serverInvoice.status) ===
+						0
+				) {
+					await markWriteQueueInvoiceDraft(entry, serverInvoice);
+					drafted += 1;
+					continue;
+				}
+				requireSubmittedInvoice(response);
+				await acknowledgeInvoiceOutbox(
+					queuedInvoice.invoice.posa_client_request_id,
+					response,
+				);
 				synced += 1;
 				await markWriteQueueEntrySynced(
 					INVOICE_ENTITY,
@@ -339,43 +425,22 @@ export async function syncOfflineInvoices() {
 					entry.last_attempt_at,
 				);
 			} catch (error) {
+				// A lost response can follow a committed submission. Retain the
+				// original request ID; never issue a second draft write to guess.
 				console.error(
-					"Failed to submit invoice, saving as draft",
+					"Invoice remains queued after unsuccessful submission",
 					error,
 				);
-				try {
-					await frappe.call({
-						method: "posawesome.posawesome.api.invoices.update_invoice",
-						args: { data: queuedInvoice.invoice },
-					});
-					drafted += 1;
-					await markWriteQueueEntrySynced(
-						INVOICE_ENTITY,
-						Number(entry.queue_id),
-						entry.last_attempt_at,
-					);
-				} catch (draftError) {
-					console.error(
-						"Failed to save invoice as draft",
-						draftError,
-					);
-					await markWriteQueueEntryFailed(
-						INVOICE_ENTITY,
-						Number(entry.queue_id),
-						draftError,
-						entry.last_attempt_at,
-					);
-				}
+				await markWriteQueueEntryFailed(
+					INVOICE_ENTITY,
+					Number(entry.queue_id),
+					error,
+					entry.last_attempt_at,
+				);
 			}
 		}
 
-		if (
-			synced > 0 &&
-			drafted === 0 &&
-			getPendingOfflineInvoiceCount() === 0
-		) {
-			reduceCacheUsage();
-		}
+		// Completing sync must retain the reference cache for the next outage.
 
 		const totals = {
 			pending: getPendingOfflineInvoiceCount(),

@@ -103,6 +103,9 @@ after_migrate = []
 # Hook on document methods and events
 
 doc_events = {
+    "POS Profile": {
+        "validate": "posawesome.posawesome.api.offline_cashier.validate_offline_cashier_settings",
+    },
     "Item": {
         "after_insert": "posawesome.posawesome.api.item_processing.alternates.clear_alternate_item_caches",
         "on_update": "posawesome.posawesome.api.item_processing.alternates.clear_alternate_item_caches",
@@ -223,6 +226,8 @@ fixtures = [
                     "POS Invoice-posa_pos_opening_shift",
                     "POS Profile-posa_pos_awesome_settings",
                     "POS Profile-posa_section_pricing_controls",
+                    "POS Profile-posa_enable_price_list_dropdown",
+                    "POS Profile-posa_allowed_selling_price_lists",
                     "POS Profile-posa_section_sales_returns",
                     "POS Profile-posa_section_sales_purchase",
                     "POS Profile-posa_section_inventory_controls",
@@ -235,6 +240,10 @@ fixtures = [
                     "POS Profile-posa_display_items_in_stock",
                     "POS Profile-posa_allow_submissions_in_background_job",
                     "POS Profile-posa_allow_partial_payment",
+                    "POS Profile-posa_offline_cache_max_age_hours",
+                    "POS Profile-posa_offline_cashier_access_hours",
+                    "POS Profile-posa_offline_stale_cache_action",
+                    "POS Profile-posa_allow_offline_customer_credit",
                     "POS Profile-posa_allow_credit_sale",
                     "POS Profile-posa_pos_awesome_advance_settings",
                     "Batch-posa_batch_price",

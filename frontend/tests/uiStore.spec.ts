@@ -64,4 +64,13 @@ describe("uiStore parked orders", () => {
 		expect(store.invoiceManagementTargetTab).toBe("drafts");
 		expect(store.invoiceManagementDraftSource).toBe("quote");
 	});
+
+	it("opens customer invoice history with the selected customer scope", () => {
+		const store = useUIStore();
+
+		store.openInvoiceManagement("history", "invoice", "CUST-0001");
+
+		expect(store.invoiceManagementTargetTab).toBe("history");
+		expect(store.invoiceManagementCustomer).toBe("CUST-0001");
+	});
 });

@@ -105,6 +105,56 @@ describe("qzTray service", () => {
 		expect(printersAfterReconnect).toEqual(["Receipt Printer"]);
 	});
 
+	it("fails a print connection quickly when QZ does not respond", async () => {
+		vi.useFakeTimers();
+		qzMock.connect.mockImplementationOnce(() => new Promise(() => undefined));
+
+		try {
+			const qzTray = await import("../src/posapp/services/qzTray");
+			const printPromise = qzTray.printHtmlViaQz("<p>Receipt</p>");
+			const rejection = expect(printPromise).rejects.toThrow(
+				"QZ Tray is not available",
+			);
+
+			await vi.advanceTimersByTimeAsync(qzTray.QZ_PRINT_CONNECT_TIMEOUT_MS);
+
+			await rejection;
+			expect(qzMock.print).not.toHaveBeenCalled();
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	it("checks QZ availability before requesting document print HTML", async () => {
+		qzMock.connect.mockRejectedValueOnce(new Error("QZ is stopped"));
+		const qzTray = await import("../src/posapp/services/qzTray");
+
+		await expect(
+			qzTray.printDocumentViaQz({
+				doctype: "Sales Invoice",
+				name: "SINV-0001",
+				printerName: "Receipt Printer",
+			}),
+		).rejects.toThrow("QZ Tray is not available");
+
+		expect((globalThis as any).frappe.call).not.toHaveBeenCalled();
+	});
+
+	it("allows immediate browser fallback for a QZ preflight failure", async () => {
+		const qzTray = await import("../src/posapp/services/qzTray");
+		const { confirmDocumentPrintFallback } = await import(
+			"../src/posapp/services/documentPrint"
+		);
+		const confirmSpy = vi.spyOn(window, "confirm");
+
+		expect(
+			confirmDocumentPrintFallback(
+				new qzTray.QzPrinterUnavailableError("QZ Tray is not available."),
+			),
+		).toBe(true);
+		expect(confirmSpy).not.toHaveBeenCalled();
+	});
+
 	it("uses the POS Profile default printer until this browser saves a manual override", async () => {
 		qzMock.posProfile.value = {
 			posa_qz_printer_name: "Profile Printer",

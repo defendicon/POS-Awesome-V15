@@ -9,6 +9,20 @@ from posawesome.posawesome.doctype.pos_closing_shift.closing_processing.data imp
 )
 
 
+def resolve_payment_currency(payment_row, invoice_currency, company_currency=None):
+    """Resolve the original tender currency from a payment row."""
+    for fieldname in (
+        "posa_payment_currency",
+        "currency",
+        "account_currency",
+        "payment_currency",
+    ):
+        value = payment_row.get(fieldname)
+        if value:
+            return value
+    return invoice_currency or company_currency
+
+
 @frappe.whitelist()
 def get_closing_shift_overview(pos_opening_shift):
     """Return invoice and payment totals for the provided POS Opening Shift."""
@@ -113,18 +127,6 @@ def get_closing_shift_overview(pos_opening_shift):
                 rate = flt(conversion_rate)
             if rate:
                 container[key]["exchange_rates"].add(rate)
-
-    def resolve_payment_currency(payment_row, invoice_currency):
-        for fieldname in (
-            "posa_payment_currency",
-            "currency",
-            "account_currency",
-            "payment_currency",
-        ):
-            value = payment_row.get(fieldname)
-            if value:
-                return value
-        return invoice_currency or company_currency
 
     shift_invoice_names = {invoice.get("name") for invoice in invoices}
     invoice_shift_link_field_cache = {}

@@ -1052,7 +1052,17 @@ export function useItemAddition() {
 		// Reset posting date to today
 		context.posting_date = frappe.datetime.nowdate();
 
-		// Reset price list to default
+		if (parseBooleanSetting(context.pos_profile?.posa_enable_price_list_dropdown)) {
+			context.manualPriceList = "";
+			const defaultCustomer = context.pos_profile.customer;
+			const customerInfo = context.customer_info?.name === defaultCustomer
+				? context.customer_info
+				: null;
+			context.selected_price_list =
+				customerInfo?.customer_price_list ||
+				customerInfo?.customer_group_price_list ||
+				context.pos_profile.selling_price_list;
+		}
 		if (context.update_price_list) context.update_price_list();
 
 		// Always reset to default customer after invoice

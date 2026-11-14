@@ -20,7 +20,8 @@
 		>
 			<template v-slot:item.closing_amount_in_currency="props">
 				<v-text-field
-					v-model="props.item.closing_amount_in_currency"
+					:model-value="props.item.closing_amount_in_currency"
+					@update:model-value="updateClosingAmount(props.item, $event)"
 					:rules="[closingAmountRule]"
 					:label="$frappe._('Edit')"
 					single-line
@@ -78,6 +79,7 @@ const props = defineProps({
 		default: 20,
 	},
 	companyCurrencySymbol: String,
+	companyCurrency: String,
 	currencySymbol: {
 		type: Function,
 		default: () => "",
@@ -89,6 +91,13 @@ const props = defineProps({
 
 const $frappe = inject("frappe", window.frappe);
 const __ = window.__ || ((t) => t);
+
+const updateClosingAmount = (item, value) => {
+	item.closing_amount_in_currency = value;
+	if (!item.currency || item.currency === props.companyCurrency) {
+		item.closing_amount = value;
+	}
+};
 
 const closingAmountRule = (v) => {
 	if (v === "" || v === null || v === undefined) {

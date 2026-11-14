@@ -2,6 +2,10 @@
 
 import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+vi.mock("../src/offline/db", () => ({ isOffline: vi.fn(() => false) }));
+vi.mock("../src/posapp/services/offlineReceiptPrint", () => ({
+	reprintOfflineReceipt: vi.fn(async () => undefined),
+}));
 
 vi.mock("../src/posapp/plugins/print", () => ({
 	appendDebugPrintParam: (url: string) => url,
@@ -26,8 +30,22 @@ vi.mock("../src/posapp/services/exchangeReceiptPrint", () => ({
 import { useLastInvoicePrinting } from "../src/posapp/composables/core/useLastInvoicePrinting";
 import { printExchangeReceipt } from "../src/posapp/services/exchangeReceiptPrint";
 import { useUIStore } from "../src/posapp/stores/uiStore";
+import { reprintOfflineReceipt } from "../src/posapp/services/offlineReceiptPrint";
 
 describe("useLastInvoicePrinting", () => {
+	it("keeps an offline request ID out of server print URLs after reconnect", async () => {
+		const store = useUIStore(),
+			profile = { name: "Main POS", company: "Co" } as any;
+		store.setPosProfile(profile);
+		store.setLastInvoice("client-request", {
+			_posa_offline_request_id: "client-request",
+		});
+		await useLastInvoicePrinting().printLastInvoice();
+		expect(reprintOfflineReceipt).toHaveBeenCalledWith(
+			"client-request",
+			profile,
+		);
+	});
 	beforeEach(() => {
 		setActivePinia(createPinia());
 		vi.clearAllMocks();

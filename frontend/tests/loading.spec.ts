@@ -64,4 +64,19 @@ describe("startup loading source release", () => {
 		expect(onRelease).not.toHaveBeenCalled();
 		expect(getLoadingStatus().sources.items).toBe(0);
 	});
+
+	it("unblocks startup when the customer database is the only pending source", async () => {
+		vi.useFakeTimers();
+		initLoadingSources(["init", "items", "customers"]);
+		markSourceLoaded("init");
+		markSourceLoaded("items");
+		scheduleSourceRelease("customers", 20_000);
+
+		await vi.advanceTimersByTimeAsync(300);
+		expect(getLoadingStatus().progress).toBe(67);
+		await vi.advanceTimersByTimeAsync(21_000);
+		expect(getLoadingStatus().active).toBe(false);
+		markSourceLoaded("customers");
+		expect(getLoadingStatus().releasedSources.customers).toBe(true);
+	});
 });

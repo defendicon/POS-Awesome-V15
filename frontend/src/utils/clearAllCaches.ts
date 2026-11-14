@@ -260,6 +260,19 @@ export async function clearAllCaches(options: ClearAllCachesOptions = {}) {
 	);
 
 	try {
+		const clearingPosDb =
+			!opts.skipStorage.includes("indexedDB") &&
+			(!opts.specificDatabases.length ||
+				opts.specificDatabases.includes("posawesome_offline"));
+		const clearingLocalJournals =
+			!opts.skipStorage.includes("localStorage") &&
+			!opts.specificKeys.length;
+		if (clearingPosDb || clearingLocalJournals) {
+			const { assertOfflineDataCanBeCleared } = await import(
+				"../offline/db"
+			);
+			await assertOfflineDataCanBeCleared();
+		}
 		if (opts.confirmBeforeClear && typeof window !== "undefined") {
 			const confirmMsg =
 				"Are you sure you want to clear application cache?";
@@ -298,7 +311,9 @@ if (typeof window !== "undefined") {
 	document.addEventListener("keydown", (e) => {
 		if (e.ctrlKey && e.shiftKey && e.code === "KeyR") {
 			e.preventDefault();
-			clearAllCaches().catch(() => {});
+			clearAllCaches().catch((error) =>
+				window.alert(error?.message || "Unable to clear cache."),
+			);
 		}
 	});
 
@@ -306,7 +321,9 @@ if (typeof window !== "undefined") {
 		const btn = document.getElementById("clear-cache-btn");
 		if (btn) {
 			btn.addEventListener("click", () =>
-				clearAllCaches().catch(() => {}),
+				clearAllCaches().catch((error) =>
+					window.alert(error?.message || "Unable to clear cache."),
+				),
 			);
 		}
 	});

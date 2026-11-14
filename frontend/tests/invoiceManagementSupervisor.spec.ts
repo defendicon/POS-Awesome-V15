@@ -112,6 +112,40 @@ describe("InvoiceManagement supervisor scope", () => {
 		);
 	});
 
+	it("filters customer history at the server for the selected customer", async () => {
+		const callMock = (globalThis as any).frappe.call as ReturnType<typeof vi.fn>;
+		callMock.mockResolvedValue({ message: [] });
+
+		const context = {
+			posProfile: { name: "Majid Ali", company: "Farooq Chemicals" },
+			currentCashier: { is_supervisor: false },
+			currentInvoiceDoctype: "Sales Invoice",
+			invoiceManagementCustomer: "CUST-0001",
+			isSupervisorScope: (InvoiceManagement as any).methods.isSupervisorScope,
+			resolveSupervisorProfileScope: (InvoiceManagement as any).methods.resolveSupervisorProfileScope,
+			buildInvoiceFilters: (InvoiceManagement as any).methods.buildInvoiceFilters,
+			getInvoiceListFields: (InvoiceManagement as any).methods.getInvoiceListFields,
+			submittedInvoiceListArgs: (InvoiceManagement as any).methods.submittedInvoiceListArgs,
+			historyInvoices: [],
+			loading: false,
+			toastStore: { show: vi.fn() },
+		};
+
+		await (InvoiceManagement as any).methods.loadHistory.call(context);
+
+		expect(callMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				args: expect.objectContaining({
+					filters: {
+						docstatus: 1,
+						pos_profile: "Majid Ali",
+						customer: "CUST-0001",
+					},
+				}),
+			}),
+		);
+	});
+
 	it("loads historical sales invoices alongside POS invoices when the current profile uses POS Invoice mode", async () => {
 		const callMock = (globalThis as any).frappe.call as ReturnType<typeof vi.fn>;
 		callMock

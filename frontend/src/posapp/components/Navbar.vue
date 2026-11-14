@@ -171,8 +171,11 @@ import { POS_BRAND_NAME } from "../config/branding";
 import { forceClearAllCache } from "../../offline/index";
 import { clearAllCaches } from "../../utils/clearAllCaches";
 import { isOffline } from "../../offline/index";
+import { cacheOfflineCashiers, loadOfflineCashiers } from "../utils/offlineCashier";
 import { useRtl } from "../composables/core/useRtl";
 import { withRequestTimeout } from "../utils/requestTimeout";
+import { translate } from "../utils/translate";
+import { requestSafeRefresh } from "../services/safeRefresh";
 import { finishStartupPhase, startStartupPhase } from "../../utils/startupTrace";
 import { loadCachedTerminalEmployees, saveCachedTerminalEmployees } from "../utils/terminalEmployeeCache";
 
@@ -608,12 +611,22 @@ export default {
 				timeoutMs: TERMINAL_SECURITY_REQUEST_TIMEOUT_MS,
 			});
 			this.employeeStore.beginTerminalEmployeesLoad(profileName, cachedEmployees);
+			if (isOffline()) {
+				this.employeeStore.completeTerminalEmployeesLoad(
+					profileName,
+					loadOfflineCashiers(profileName),
+				);
+				this.employeeStore.applyTerminalState(null);
+				finishStartupPhase(phase, "ok", { offline: true });
+				return;
+			}
 			const employeesRequest = withRequestTimeout(
 				Promise.resolve().then(() =>
 					frappe.call({
 						method: "posawesome.posawesome.api.employees.get_terminal_employees",
 						args: {
 							pos_profile: profileName,
+							include_offline_access: 1,
 						},
 					}),
 				),
@@ -642,6 +655,11 @@ export default {
 			if (employeesResult.status === "fulfilled" && Array.isArray(employeesResult.value?.message)) {
 				this.employeeStore.completeTerminalEmployeesLoad(profileName, employeesResult.value.message);
 				saveCachedTerminalEmployees(sessionUser, profileName, employeesResult.value.message);
+				try {
+					cacheOfflineCashiers(profileName, employeesResult.value.message);
+				} catch (error) {
+					console.warn("Unable to cache offline cashier access", error);
+				}
 			} else {
 				const error =
 					employeesResult.status === "rejected"
@@ -712,6 +730,7 @@ export default {
 		},
 		async persistTerminalLock() {
 			if (!this.posProfile?.name) return false;
+			if (isOffline()) return true;
 			if (this.terminalLockRequestInFlight) {
 				return this.terminalLockRequestInFlight;
 			}
@@ -1027,7 +1046,7 @@ export default {
 			} finally {
 				this.clearingCache = false;
 				if (shouldReload) {
-					setTimeout(() => location.reload(), 1000);
+					setTimeout(() => requestSafeRefresh(), 1000);
 				}
 			}
 		},
@@ -1182,11 +1201,7 @@ export default {
 			}, 250);
 		},
 		__(text, args = []) {
-			if (window.__) {
-				const nextArgs = Array.isArray(args) ? args : [args];
-				return window.__(text, ...nextArgs);
-			}
-			return text;
+			return translate(text, args);
 		},
 	},
 	emits: [

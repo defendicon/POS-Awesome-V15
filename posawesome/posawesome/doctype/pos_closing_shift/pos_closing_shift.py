@@ -61,17 +61,30 @@ class POSClosingShift(Document):
         # update the difference values in Payment Reconciliation child table
         # get default precision for site
         precision = frappe.get_cached_value("System Settings", None, "currency_precision") or 3
+        company_currency = frappe.get_cached_value("Company", self.company, "default_currency")
         for d in self.payment_reconciliation:
             expected_currency = flt(d.get("expected_amount_in_currency"), precision)
             has_currency_closing = d.get("closing_amount_in_currency") not in (None, "")
             closing_currency = flt(d.get("closing_amount_in_currency"), precision)
-            if d.get("currency") and has_currency_closing:
-                conversion_rate = (
-                    abs(flt(d.expected_amount, precision) / expected_currency)
-                    if expected_currency
-                    else 1
-                )
-                d.closing_amount = flt(closing_currency * conversion_rate, precision)
+            payment_currency = d.get("currency") or company_currency
+            closing_amount = flt(d.get("closing_amount"), precision)
+            if has_currency_closing:
+                if payment_currency != company_currency:
+                    conversion_rate = (
+                        abs(flt(d.expected_amount, precision) / expected_currency)
+                        if expected_currency
+                        else 1
+                    )
+                    d.closing_amount = flt(closing_currency * conversion_rate, precision)
+                elif closing_currency or not closing_amount:
+                    # The current POS dialog edits the tender-currency field. For
+                    # company-currency tenders both values have a 1:1 relationship.
+                    d.closing_amount = closing_currency
+                else:
+                    # Older/cached clients edit closing_amount and submit the new
+                    # currency field as its default zero. Preserve their counted value.
+                    closing_currency = closing_amount
+                    d.closing_amount_in_currency = closing_currency
                 d.difference_in_currency = closing_currency - expected_currency
             d.difference = +flt(d.closing_amount, precision) - flt(d.expected_amount, precision)
 

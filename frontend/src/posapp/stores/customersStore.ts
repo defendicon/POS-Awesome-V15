@@ -338,17 +338,22 @@ export const useCustomersStore = defineStore("customers", () => {
 		});
 	}
 
-	async function ensureCustomerScopeIsolation() {
+	async function ensureCustomerScopeIsolation(localOnly: boolean) {
 		const currentScope =
 			customerProfileScope.value ||
 			getCustomerProfileScope(posProfile.value);
 		if (!currentScope) {
-			return;
+			return true;
 		}
 
 		const storedScope = getStoredCustomerScope();
 		if (storedScope === currentScope) {
-			return;
+			return true;
+		}
+
+		if (localOnly) {
+			resetPagination();
+			return false;
 		}
 
 		await clearCustomerStorage();
@@ -362,6 +367,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		nextCustomerStart.value = null;
 		nextCustomerOffset.value = 0;
 		syncBootstrapCustomerReadiness(0);
+		return true;
 	}
 
 	async function fetchServerCustomerMatches(
@@ -465,6 +471,8 @@ export const useCustomersStore = defineStore("customers", () => {
 
 		try {
 			await ensureDatabase();
+			const scope = customerProfileScope.value;
+			if (scope && getStoredCustomerScope() !== scope) return 0;
 			let results: CustomerSummary[];
 			const isMobileSearch =
 				isCustomerMobileSearchTerm(requestedTerm) &&
@@ -846,12 +854,16 @@ export const useCustomersStore = defineStore("customers", () => {
 		}
 	}
 
-	async function load_customer_names_internal() {
+	async function load_customer_names_internal(localOnly = false) {
 		if (!posProfile.value) {
 			console.debug("Customer fetch skipped: POS Profile not ready");
 			return;
 		}
-		await ensureCustomerScopeIsolation();
+		const offlineLoad = localOnly || isOffline();
+		if (!(await ensureCustomerScopeIsolation(offlineLoad))) {
+			customersLoaded.value = true;
+			return;
+		}
 		const serializedProfile = getSerializedProfile(posProfile.value);
 		if (!serializedProfile) {
 			return;
@@ -865,10 +877,16 @@ export const useCustomersStore = defineStore("customers", () => {
 		if (localCount > 0) {
 			customersLoaded.value = true;
 			await searchCustomers(searchTerm.value);
-			await verifyServerCustomerCount();
+			if (!offlineLoad) await verifyServerCustomerCount();
 			if (!nextCustomerStart.value) {
 				logFinalLoadedCustomerCount();
 			}
+			return;
+		}
+
+		if (offlineLoad || isOffline()) {
+			await searchCustomers(searchTerm.value);
+			customersLoaded.value = true;
 			return;
 		}
 
@@ -942,13 +960,13 @@ export const useCustomersStore = defineStore("customers", () => {
 		}
 	}
 
-	async function get_customer_names() {
+	async function get_customer_names(localOnly = false) {
 		if (customerFetchPromise) {
 			return customerFetchPromise;
 		}
 
 		resetCustomerLoadLogState();
-		customerFetchPromise = load_customer_names_internal().finally(() => {
+		customerFetchPromise = load_customer_names_internal(localOnly).finally(() => {
 			customerFetchPromise = null;
 		});
 		return customerFetchPromise;

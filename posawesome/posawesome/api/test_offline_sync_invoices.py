@@ -110,6 +110,22 @@ class TestOfflineSyncInvoices(unittest.TestCase):
         self.assertEqual(response["client_request_id"], "outbox-fixed-001")
         self.assertEqual(response["invoice"]["name"], "ACC-SINV-OUTBOX-0001")
 
+    def test_server_draft_is_not_acknowledged_as_a_completed_sale(self):
+        original = self.module.submit_invoice
+        self.module.submit_invoice = lambda *args, **kwargs: {"name": "DRAFT-1", "docstatus": 0}
+        try:
+            response = self.module.submit_invoice_outbox_entry(
+                client_request_id="draft-request", invoice={"pos_profile": "Main POS", "company": "Test Company"}, data={}
+            )
+            self.assertFalse(response["acknowledged"])
+            self.assertEqual(response["invoice"]["docstatus"], 0)
+        finally:
+            self.module.submit_invoice = original
+
+    def test_orders_cannot_be_replayed_as_sales_invoices(self):
+        with self.assertRaisesRegex(Exception, "Only Sales Invoice and POS Invoice"):
+            self.module.submit_invoice_outbox_entry(client_request_id="order", invoice={"doctype": "Sales Order"}, data={})
+
     def test_submit_invoice_outbox_entry_normalizes_conflicting_identity_aliases(self):
         captured = {}
         original_submit_invoice = self.module.submit_invoice

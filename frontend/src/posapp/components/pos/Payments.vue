@@ -356,6 +356,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount, getCurrentInstance, nextTick } from "vue";
+import { SAFE_REFRESH_PREPARE } from "../../services/safeRefresh";
 import { storeToRefs } from "pinia";
 
 // Stores
@@ -706,6 +707,11 @@ const { loadPrintPage, printOfflineInvoice } = usePaymentPrinting({
 	invoiceType: invoiceType,
 	printFormat: print_format,
 });
+const printOfflineReceiptSafely = (doc) => {
+	void printOfflineInvoice(doc).catch((error) => {
+		toastStore.show({ title: __("Invoice saved; receipt printing failed"), detail: error?.message || String(error), color: "error" });
+	});
+};
 
 const paymentCalculations = usePaymentCalculations({
 	invoiceDoc: computed(() => invoiceStore.invoiceDoc),
@@ -832,7 +838,7 @@ const {
 							waitForInvoiceProcessing: Boolean(printOptions.waitForInvoiceProcessing),
 						});
 					} else if (isOffline()) {
-						printOfflineInvoice(doc);
+						printOfflineReceiptSafely(doc);
 					} else {
 						loadPrintPage({
 							doc,
@@ -1924,7 +1930,7 @@ const submitInvoiceWrapper = async (print, callbackOverrides = {}, options = {})
 							waitForInvoiceProcessing: Boolean(printOptions.waitForInvoiceProcessing),
 						});
 					} else if (isOffline()) {
-						printOfflineInvoice(doc);
+						printOfflineReceiptSafely(doc);
 					} else {
 						loadPrintPage({
 							doc,
@@ -2358,7 +2364,14 @@ watch(selectedCustomer, (newCustomer, oldCustomer) => {
 });
 
 // Lifecycle
+const guardRefreshDuringPayment = (event) => {
+	if (submissionInFlight.value || loading.value) {
+		event.preventDefault();
+		event.detail.reasons.push("A payment is being processed. Wait for it to finish before refreshing.");
+	}
+};
 onMounted(() => {
+	window.addEventListener(SAFE_REFRESH_PREPARE, guardRefreshDuringPayment);
 	_shortcutHandlers.value.handlePaymentShortcut = handlePaymentShortcut.bind(this);
 	document.addEventListener("keydown", _shortcutHandlers.value.handlePaymentShortcut);
 
@@ -2444,6 +2457,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+	window.removeEventListener(SAFE_REFRESH_PREPARE, guardRefreshDuringPayment);
 	resolveBelowCostOverride({ approved: false });
 	eventBus.off("send_invoice_doc_payment");
 	eventBus.off("register_pos_profile");

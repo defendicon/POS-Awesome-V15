@@ -29,6 +29,10 @@ class FakeResponse {
 		return JSON.parse(this.body || "null");
 	}
 
+	async text() {
+		return this.body;
+	}
+
 	clone() {
 		return new FakeResponse(this.body, {
 			ok: this.ok,
@@ -117,6 +121,14 @@ function createServiceWorkerHarness() {
 		if (url.includes("version.json")) {
 			return new FakeResponse(JSON.stringify(versionPayload));
 		}
+		if (url === "/app/posapp") {
+			return new FakeResponse('<body><script>frappe.boot = {};</script><script src="/assets/frappe/desk.js"></script></body>');
+		}
+		if (url.startsWith("/api/method/")) {
+			const name = url.includes("getpage") ? "posapp" : "Page";
+			const doctype = name === "posapp" ? "Page" : "DocType";
+			return new FakeResponse(JSON.stringify({ docs: [{ name, doctype }] }));
+		}
 		return new FakeResponse(url, { ok: url !== failedUrl });
 	});
 
@@ -126,6 +138,7 @@ function createServiceWorkerHarness() {
 		"fetch",
 		"Response",
 		"URL",
+		"Headers",
 		`${readServiceWorkerSource()}; return {
 			CACHE_PREFIX,
 			CACHE_COMPLETE_KEY,
@@ -140,7 +153,7 @@ function createServiceWorkerHarness() {
 			getActiveCacheName: () => cachedCacheName
 		};`,
 	);
-	const api = factory(self, caches, fetch, FakeResponse, URL);
+	const api = factory(self, caches, fetch, FakeResponse, URL, Headers);
 
 	return {
 		api,

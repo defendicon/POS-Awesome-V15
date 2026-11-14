@@ -21,6 +21,7 @@ import {
 	getInvoiceOutboxMode,
 	getPendingInvoiceOutboxCount,
 	getPendingOfflineInvoiceCount,
+	getPendingInvoiceRecoveryCount,
 	syncOfflineInvoices,
 	isOffline,
 } from "../../offline/index";
@@ -34,12 +35,8 @@ export const useSyncStore = defineStore("sync", {
 	actions: {
 		async updatePendingCount() {
 			try {
-				const legacyCount = await getPendingOfflineInvoiceCount();
-				const outboxCount =
-					getInvoiceOutboxMode() === "off"
-						? legacyCount
-						: await getPendingInvoiceOutboxCount();
-				this.pendingInvoicesCount = outboxCount;
+				this.pendingInvoicesCount =
+					await getPendingInvoiceRecoveryCount();
 			} catch (error) {
 				console.error("Failed to update pending invoices count", error);
 			}

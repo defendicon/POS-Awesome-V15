@@ -1106,7 +1106,8 @@ function statusDateRange(
 
 async function pruneInvoiceOutboxRows(cutoff: number, cutoffIso: string) {
 	let deleted = 0;
-	for (const status of ["acknowledged", "dead_letter"]) {
+	// Exhausted requests are unresolved sales, not disposable cache entries.
+	for (const status of ["acknowledged"]) {
 		deleted += await pruneCollectionInChunks(
 			"invoice_outbox",
 			(table) =>
@@ -1325,7 +1326,41 @@ export function toggleManualOffline() {
 	setManualOffline(!memory.manual_offline);
 }
 
+export async function assertOfflineDataCanBeCleared() {
+	if (
+		typeof window !== "undefined" &&
+		!window.dispatchEvent(
+			new Event("posa:before-cache-clear", { cancelable: true }),
+		)
+	)
+		throw new Error(
+			"The active cashier cart could not be saved. Cache clearing was cancelled.",
+		);
+	if (!db.isOpen()) await db.open();
+	const [writes, outbox, legacy] = await Promise.all([
+		db.table("write_queue").toArray(),
+		db.table("invoice_outbox").toArray(),
+		db.table("queue").toArray(),
+	]);
+	const pending =
+		writes.some((row) => row.status !== "synced") ||
+		outbox.some((row) => row.status !== "acknowledged") ||
+		legacy.some((row) => Array.isArray(row.value) && row.value.length);
+	const journals =
+		typeof localStorage !== "undefined" &&
+		Object.keys(localStorage).some(
+			(key) =>
+				key.startsWith("posa_invoice_intent_") ||
+				key.startsWith("posa_cart_recovery_v1:"),
+		);
+	if (pending || journals)
+		throw new Error(
+			"Cache was kept because unsynced transactions or saved cashier carts exist. Reconcile transactions and review/export recovery data before clearing.",
+		);
+}
+
 export async function clearAllCache() {
+	await assertOfflineDataCanBeCleared();
 	try {
 		if (db.isOpen()) {
 			await db.close();
@@ -1334,6 +1369,7 @@ export async function clearAllCache() {
 		await db.open();
 	} catch (e) {
 		console.error("Failed to clear IndexedDB cache", e);
+		throw e;
 	}
 
 	if (typeof localStorage !== "undefined") {
@@ -1501,22 +1537,33 @@ export async function getOfflineStorageDiagnostics() {
 
 export async function exportOfflineRecoveryData() {
 	if (!db.isOpen()) await db.open();
-	const [invoiceOutbox, writeQueue, legacyQueue] = await Promise.all([
-		db.table("invoice_outbox").toArray(),
-		db.table("write_queue").toArray(),
-		db.table("queue").toArray(),
-	]);
+	const [invoiceOutbox, writeQueue, legacyQueue, cashierHandovers] =
+		await Promise.all([
+			db.table("invoice_outbox").toArray(),
+			db.table("write_queue").toArray(),
+			db.table("queue").toArray(),
+			db
+				.table("keyval")
+				.filter((row) => row.key?.startsWith("posa_cashier_handover:"))
+				.toArray(),
+		]);
 	const invoiceIntentJournal: Record<string, unknown> = {};
+	const cashierCarts: Record<string, unknown> = {};
 	if (typeof localStorage !== "undefined") {
 		for (let index = 0; index < localStorage.length; index += 1) {
 			const key = localStorage.key(index);
-			if (!key?.startsWith("posa_invoice_intent_")) continue;
+			if (
+				!key?.startsWith("posa_invoice_intent_") &&
+				!key?.startsWith("posa_cart_recovery_v1:")
+			)
+				continue;
+			const target = key.startsWith("posa_cart_recovery_v1:")
+				? cashierCarts
+				: invoiceIntentJournal;
 			try {
-				invoiceIntentJournal[key] = JSON.parse(
-					localStorage.getItem(key) || "null",
-				);
+				target[key] = JSON.parse(localStorage.getItem(key) || "null");
 			} catch {
-				invoiceIntentJournal[key] = localStorage.getItem(key);
+				target[key] = localStorage.getItem(key);
 			}
 		}
 	}
@@ -1528,6 +1575,8 @@ export async function exportOfflineRecoveryData() {
 		writeQueue,
 		legacyQueue,
 		invoiceIntentJournal,
+		cashierCarts,
+		cashierHandovers,
 	};
 }
 

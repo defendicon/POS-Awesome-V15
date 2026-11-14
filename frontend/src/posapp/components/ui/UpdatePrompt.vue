@@ -80,6 +80,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useUpdateStore } from "../../stores/updateStore";
+import { requestSafeRefresh } from "../../services/safeRefresh";
 
 defineOptions({
 	name: "UpdatePrompt",
@@ -117,7 +118,8 @@ function handleDialogModelUpdate(nextVisible: boolean) {
 }
 
 function reloadNow() {
-	updateStore.reloadNow();
+	visible.value = false;
+	requestSafeRefresh({ action: () => updateStore.reloadNow(), update: true, onCancel: () => { visible.value = true; } });
 }
 </script>
 

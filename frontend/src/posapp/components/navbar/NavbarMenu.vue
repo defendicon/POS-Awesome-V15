@@ -308,6 +308,7 @@ const FALLBACK_LANGUAGES = [
 
 import { useLastInvoicePrinting } from "../../composables/core/useLastInvoicePrinting";
 import { useUpdateStore } from "../../stores/updateStore";
+import { requestSafeRefresh } from "../../services/safeRefresh";
 import { useEmployeeStore } from "../../stores/employeeStore";
 import { storeToRefs } from "pinia";
 import QzTrayDialog from "./QzTrayDialog.vue";
@@ -514,6 +515,7 @@ export default {
 					title: __("Tools"),
 					description: __("Updates and app info that stay out of the cashier flow."),
 					actions: [
+						{ id: "safe-refresh", label: __("Safe Refresh"), subtitle: __("Save cart and review pending work before reloading"), icon: "mdi-refresh", tone: "info", handler: "safeRefresh" },
 						{
 							id: "check-for-updates",
 							label: __("Check for Updates"),
@@ -627,6 +629,8 @@ export default {
 			}
 
 			switch (action.handler) {
+				case "safeRefresh":
+					this.closeMenu(); requestSafeRefresh(); break;
 				case "openEmployeeSwitch":
 					this.closeMenu();
 					this.$emit("open-employee-switch");
@@ -743,7 +747,7 @@ export default {
 				this.closeLanguageDialog();
 				this.$emit("clear-cache");
 				setTimeout(() => {
-					window.location.reload();
+					requestSafeRefresh();
 				}, 200);
 				return;
 			}
@@ -770,7 +774,7 @@ export default {
 					this.$emit("clear-cache");
 
 					setTimeout(() => {
-						window.location.reload();
+						requestSafeRefresh();
 					}, 2000);
 				} else {
 					const errorMsg = result?.message || "Failed to change language";

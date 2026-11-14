@@ -7,6 +7,7 @@ import {
 	isOffline,
 	persistInvoiceIntentJournal,
 	removeInvoiceOutboxEntry,
+	acknowledgeInvoiceOutbox,
 	updateLocalStock,
 } from "../../../../offline/index";
 import {
@@ -14,6 +15,9 @@ import {
 	ensureInvoiceSubmissionIdentity,
 } from "../../../../offline/idempotency";
 import stockCoordinator from "../../../utils/stockCoordinator";
+import { captureOfflineInvoiceTime } from "../../../../offline/invoiceTimestamp";
+import { assertOfflineCashierAccess } from "../../../utils/offlineCashier";
+import { readOfflineReadiness } from "../../../services/offlineReadiness";
 import { parseBooleanSetting } from "../../../utils/stock";
 import { resolvePosDocumentDoctype } from "../../../utils/posDocumentMode";
 import { toCompanyCurrency } from "../../../utils/erpnextCurrency";
@@ -1117,6 +1121,12 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				cChange > 0);
 
 		if (isOffline()) {
+			if (["Sales Order", "Quotation"].includes(submissionDoc.doctype))
+				throw new Error(
+					__(
+						"Orders and quotations require their online submission workflow.",
+					),
+				);
 			if (isExchangeSubmission) {
 				throw new Error(
 					__("Item exchanges require an online connection"),
@@ -1127,8 +1137,50 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 					__("Gift card redemption requires an online connection"),
 				);
 			}
+			const cashierStore = stores?.employeeStore;
+			if (
+				Number(data.redeemed_customer_credit || 0) > 0 &&
+				!parseBooleanSetting(
+					profile?.posa_allow_offline_customer_credit,
+				)
+			) {
+				throw new Error(
+					__(
+						"Customer credit redemption is disabled offline by this POS Profile. Reconnect to verify the current balance.",
+					),
+				);
+			}
+			const readiness = await readOfflineReadiness(profile);
+			if (readiness.blocked)
+				throw new Error(readiness.warnings.join("\n"));
+			if (readiness.warnings.length)
+				stores?.toastStore?.show({
+					title: __("Offline cache needs attention"),
+					detail: readiness.warnings.join("\n"),
+					color: "warning",
+				});
+			if (cashierStore?.isLocked || !cashierStore?.offlineCashierToken) {
+				throw new Error(
+					__(
+						"Verify a cashier PIN with offline access before saving. Load this POS Profile online first if access is unavailable.",
+					),
+				);
+			}
+			assertOfflineCashierAccess(
+				cashierStore.offlineCashierToken,
+				profile?.name,
+				cashierStore.currentCashier?.user,
+			);
+			submissionDoc._posa_offline_cashier_token =
+				cashierStore.offlineCashierToken;
+			submissionDoc.posa_cashier = cashierStore.currentCashier?.user;
+			captureOfflineInvoiceTime(submissionDoc);
+			doc.posting_date = submissionDoc.posting_date;
+			doc.posting_time = submissionDoc.posting_time;
+			doc.set_posting_time = 1;
 			try {
 				await saveOfflineInvoice({ data, invoice: submissionDoc });
+				stores?.uiStore?.setLastInvoice?.(submissionDoc.posa_client_request_id, { _posa_offline_request_id: submissionDoc.posa_client_request_id });
 				stores?.syncStore?.updatePendingCount();
 				stores?.toastStore?.show({
 					title: __("Invoice saved offline"),
@@ -1159,11 +1211,34 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 		}
 
 		// Online Submission
+		// An offline switch has not changed the server's active cashier. Verify
+		// online before creating the next sale under that mutable server state.
+		if (stores?.employeeStore?.cashierVerifiedOffline) {
+			const unlocked = await stores.employeeStore.requestTerminalUnlock();
+			if (!unlocked)
+				return { cancelled: true, reason: "terminal_locked" };
+		}
 		try {
 			await validateStockBeforeOnlineSubmission(doc, profile, type);
-			const intent = { data, invoice: submissionDoc };
-			if (!isExchangeSubmission) persistInvoiceIntentJournal(intent);
-			const outboxPersistPromise = isExchangeSubmission
+			const durableInvoice =
+				!isExchangeSubmission &&
+				["Sales Invoice", "POS Invoice"].includes(
+					submissionDoc.doctype || "Sales Invoice",
+				);
+			const intent = {
+				data,
+				invoice: {
+					...submissionDoc,
+					...(stores?.employeeStore?.offlineCashierToken
+						? {
+								_posa_offline_cashier_token:
+									stores.employeeStore.offlineCashierToken,
+							}
+						: {}),
+				},
+			};
+			if (durableInvoice) persistInvoiceIntentJournal(intent);
+			const outboxPersistPromise = !durableInvoice
 				? Promise.resolve()
 				: enqueueInvoiceOutboxEntry(intent).catch((error) => {
 						console.warn(
@@ -1226,13 +1301,26 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				r.message?.message;
 
 			const wasSubmitted =
-				docstatus === 1 ||
-				status === 1 ||
-				(docstatus === undefined && status === undefined);
-			if (wasSubmitted && !isExchangeSubmission) {
+				Number(docstatus ?? status) === 1 ||
+				(!durableInvoice &&
+					docstatus === undefined &&
+					status === undefined);
+			if (
+				!wasSubmitted &&
+				durableInvoice &&
+				!profile?.posa_allow_submissions_in_background_job
+			) {
+				throw new Error(
+					__(
+						"Submission is not confirmed. The invoice remains in recovery for reconciliation; do not create a replacement sale.",
+					),
+				);
+			}
+			if (wasSubmitted && durableInvoice) {
 				void outboxPersistPromise.then(() =>
-					removeInvoiceOutboxEntry(
+					acknowledgeInvoiceOutbox(
 						submissionDoc.posa_client_request_id,
+						r.message,
 					).catch((error) => {
 						console.warn(
 							"Submitted invoice remains in the durable outbox for idempotent reconciliation",

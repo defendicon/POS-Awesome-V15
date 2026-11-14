@@ -76,6 +76,11 @@ export function buildVersionPayload(version, bundle = {}) {
 				? toPublicAssetUrl(offlineIndexFile)
 				: toPublicAssetUrl("offline/index.js"),
 			fonts: fontFiles.map(toPublicAssetUrl),
+			chunks: Object.values(bundle)
+				.filter((entry) => entry?.type === "chunk" && entry.isEntry === false)
+				.map((entry) => entry.fileName)
+				.sort()
+				.map(toPublicAssetUrl),
 		},
 	};
 }

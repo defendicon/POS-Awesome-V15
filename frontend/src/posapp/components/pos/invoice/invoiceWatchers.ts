@@ -31,6 +31,9 @@ interface InvoiceWatchersVm {
 	posting_date?: string;
 	posting_date_display?: string;
 	selected_price_list?: string;
+	priceListSwitching?: boolean;
+	manualPriceList?: string;
+	invoice_doc?: { selling_price_list?: string } | string;
 	price_list_currency?: string;
 	available_stock_cache?: Record<string, unknown>;
 	exchange_rate?: number;
@@ -238,15 +241,21 @@ const invoiceWatchers: Record<string, unknown> & ThisType<InvoiceWatchersVm> = {
 		this.eventBus.emit("update_customer_price_list", price_list);
 		const applied =
 			effectivePriceList || this.pos_profile.selling_price_list;
-		this.apply_cached_price_list(applied);
+		const restoredList =
+			this.manualPriceList &&
+			typeof this.invoice_doc === "object" &&
+			this.invoice_doc?.selling_price_list === applied;
+		if (!this.priceListSwitching && !restoredList) {
+			this.apply_cached_price_list(applied);
+		}
 
 		// If multi-currency is enabled, sync currency with the price list currency
-		if (this.pos_profile.posa_allow_multi_currency && applied) {
+		if (this.pos_profile.posa_allow_multi_currency && applied && !this.priceListSwitching) {
 			frappe.call({
 				method: "posawesome.posawesome.api.invoices.get_price_list_currency",
 				args: { price_list: applied },
 				callback: (r: { message?: string }) => {
-					if (r.message) {
+					if (r.message && this.get_effective_price_list?.() === applied) {
 						// Store price list currency for later use
 						this.price_list_currency = r.message;
 						// Sync invoice currency with price list currency
@@ -302,7 +311,7 @@ const invoiceWatchers: Record<string, unknown> & ThisType<InvoiceWatchersVm> = {
 				conversion_rate: this.conversion_rate,
 			});
 		}
-		if (this.items && this.items.length) {
+		if (!this.priceListSwitching && this.items && this.items.length) {
 			this.update_item_rates();
 		}
 	},

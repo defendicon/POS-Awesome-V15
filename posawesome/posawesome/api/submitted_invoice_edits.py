@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, get_datetime, now_datetime
 
+from posawesome.posawesome.api.document_item_previews import attach_document_item_previews
 from posawesome.posawesome.api.idempotency import (
     doctype_supports_client_request_id,
     find_invoice_by_client_request_id,
@@ -17,7 +18,6 @@ from posawesome.posawesome.api.invoice_processing.creation import (
     trusted_invoice_shift_reassignment,
 )
 from posawesome.posawesome.api.utils import assert_pos_profile_write_allowed
-
 
 SUPPORTED_INVOICE_DOCTYPES = {"Sales Invoice", "POS Invoice"}
 DEFAULT_EDIT_WINDOW_HOURS = 24
@@ -582,6 +582,7 @@ def list_submitted_invoices(
         order_by=order_by,
         limit_page_length=cint(limit_page_length or 0),
     )
+    attach_document_item_previews(rows, doctype)
     list_context = _build_list_metadata_context(doctype, rows)
     for row in rows or []:
         row["doctype"] = doctype

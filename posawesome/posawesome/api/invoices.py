@@ -6,6 +6,7 @@
 import frappe
 import time
 from frappe.utils import cint, flt
+from posawesome.posawesome.api.document_item_previews import attach_document_item_previews
 from posawesome.posawesome.api.erpnext_compat import resolve_make_sales_invoice_from_order
 from posawesome.posawesome.api.tax_contracts import apply_pos_tax_inclusion_contract
 from posawesome.posawesome.api.invoice_processing.utils import (
@@ -105,6 +106,7 @@ def get_draft_invoices(
         limit_page_length=limit_page_length,
         order_by="modified desc",
     )
+    attach_document_item_previews(invoices_list, doctype)
     for invoice in invoices_list:
         invoice["doctype"] = doctype
     log_perf_event(

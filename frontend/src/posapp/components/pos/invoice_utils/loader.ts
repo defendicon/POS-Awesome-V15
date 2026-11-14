@@ -4,6 +4,7 @@ import {
 } from "../../../../offline/index";
 import { useDiscounts } from "../../../composables/pos/shared/useDiscounts";
 import { resolvePosDocumentDoctype } from "../../../utils/posDocumentMode";
+import { parseBooleanSetting } from "../../../utils/stock";
 import { resolvePricingRuleName } from "./pricing_rule_names";
 
 declare const __: (_text: string, _args?: any[]) => string;
@@ -226,6 +227,15 @@ export async function load_invoice(
 	}
 
 	context.invoice_doc = data;
+	if (
+		!data.is_return &&
+		data.selling_price_list &&
+		parseBooleanSetting(context.pos_profile?.posa_enable_price_list_dropdown)
+	) {
+		context.manualPriceList = data.selling_price_list;
+		context.selected_price_list = data.selling_price_list;
+		if (data.price_list_currency) context.price_list_currency = data.price_list_currency;
+	}
 	context.posa_offers = data.posa_offers || [];
 	context.items = data.items || [];
 	context.packed_items = data.packed_items || [];
