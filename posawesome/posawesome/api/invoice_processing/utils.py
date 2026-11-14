@@ -106,11 +106,12 @@ def _resolve_effective_price_list(
         frappe.db.get_value("POS Profile", pos_profile, "selling_price_list") if pos_profile else None
     )
     if allow_selection and fallback_price_list and fallback_price_list != profile_price_list:
+        configured = get_configured_selling_price_lists(profile_doc)
+        if configured and fallback_price_list not in configured:
+            frappe.throw(_("Price List {0} is not allowed for this POS Profile.").format(fallback_price_list))
         filters = get_manual_selling_price_list_filters(profile_doc)
         filters["name"] = fallback_price_list
-        if fallback_price_list not in get_configured_selling_price_lists(profile_doc) or not frappe.db.exists(
-            "Price List", filters
-        ):
+        if not frappe.db.exists("Price List", filters):
             frappe.throw(_("Price List {0} is not allowed for this POS Profile.").format(fallback_price_list))
         return fallback_price_list
 

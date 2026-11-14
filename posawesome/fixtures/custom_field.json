@@ -8540,7 +8540,7 @@
 		"fieldtype": "Table",
 		"label": "Allowed Selling Price Lists",
 		"options": "POS Allowed Selling Price List",
-		"description": "Only the enabled selling price lists added here are available for manual selection in POS.",
+		"description": "Leave empty to show all eligible selling price lists. Add rows to limit manual selection to those lists.",
 		"insert_after": "posa_enable_price_list_dropdown",
 		"name": "POS Profile-posa_allowed_selling_price_lists"
 	},
