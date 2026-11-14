@@ -336,8 +336,9 @@ import { useUIStore } from "../../stores/uiStore.js";
 import { storeToRefs } from "pinia";
 import stockCoordinator from "../../utils/stockCoordinator";
 import { parseBooleanSetting } from "../../utils/stock";
-import { getCurrentInstance, ref } from "vue";
+import { getCurrentInstance, nextTick, ref } from "vue";
 import { save_and_clear_invoice as saveAndClearInvoiceAction } from "./invoice_utils/actions";
+import { prepareCartPriceListChange } from "./invoice_utils/item_updates";
 import { fetchDraftInvoices } from "../../utils/draftInvoices";
 import { getQuickCashTenderSuggestions } from "../../utils/cashTender";
 import invoiceService from "../../services/invoiceService";
@@ -561,9 +562,8 @@ export default {
 				!this.isReturnInvoice &&
 				!this.exchangeSession &&
 				!this.paymentVisible &&
+				!this._suppressClosePayments &&
 				!this.invoice_doc?.name &&
-				!this.items.length &&
-				!this.packed_items.length &&
 				!this.cartRecoveryBusy &&
 				(!this.customer || this.customer_info?.name === this.customer) &&
 				!this.customer_info?.customer_price_list &&
@@ -1037,11 +1037,10 @@ export default {
 					this.invoiceType === "Invoice" &&
 					!this.exchangeSession &&
 					!this.paymentVisible &&
+					!this._suppressClosePayments &&
 					!this.cartRecoveryBusy &&
 					!this.customer_info?.customer_price_list &&
 					!this.customer_info?.customer_group_price_list &&
-					!this.items.length &&
-					!this.packed_items.length &&
 					!this.invoice_doc?.name;
 				const { message: currency } = await frappe.call({
 					method: "posawesome.posawesome.api.invoices.get_price_list_currency",
@@ -1049,21 +1048,28 @@ export default {
 				});
 				if (!currency) throw new Error("Selling price list currency is missing");
 				if (!stillCurrent()) return;
+				const cartChange = await prepareCartPriceListChange(this, priceList, currency);
+				const canApply = () => stillCurrent() && cartChange.isCurrent();
+				if (!canApply()) throw new Error("Cart changed while loading prices");
+				let catalogApplied = false;
 				await this.itemsStore.updatePriceList(priceList, {
 					reloadCatalog: true,
-					shouldApply: stillCurrent,
+					shouldApply: () => (catalogApplied = canApply()),
 				});
-				if (!stillCurrent()) return;
+				if (!catalogApplied && !canApply()) throw new Error("Cart changed while loading prices");
 				this.price_list_currency = currency;
 				this.manualPriceList = priceList;
 				this.selected_price_list = priceList;
-				if (parseBooleanSetting(profile.posa_allow_multi_currency)) {
-					await this.update_currency(currency);
-				}
+				cartChange.apply();
+				await nextTick();
 				this.schedulePricingRuleApplication(true);
 			} catch (error) {
 				console.error("Failed to switch selling price list", error);
-				this.toastStore.show({ title: __("Unable to change Price List"), color: "error" });
+				this.toastStore.show({
+					title: __("Unable to change Price List"),
+					text: error instanceof Error ? error.message : undefined,
+					color: "error",
+				});
 			} finally {
 				this.priceListSwitching = false;
 			}

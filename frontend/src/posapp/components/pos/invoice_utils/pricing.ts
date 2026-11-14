@@ -761,6 +761,7 @@ export async function _applyServerPricingRules(context: any, ctx: any = {}) {
 			}),
 		},
 	});
+	if (context.get_price_list && ctx.price_list !== context.get_price_list()) return;
 
 	const message = response?.message || {};
 	const updates = Array.isArray(message.updates) ? message.updates : [];

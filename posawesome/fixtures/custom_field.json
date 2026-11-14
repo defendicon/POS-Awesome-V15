@@ -8528,7 +8528,7 @@
 		"fieldname": "posa_enable_price_list_dropdown",
 		"fieldtype": "Check",
 		"label": "Enable Price List Dropdown",
-		"description": "Allow the cashier to select a selling price list before adding items. Customer and customer group price lists retain priority.",
+		"description": "Allow the cashier to switch selling price lists during a sale. Discounted rows and manual rates are preserved. Customer and customer group price lists retain priority.",
 		"default": "0",
 		"insert_after": "posa_force_price_from_customer_price_list",
 		"name": "POS Profile-posa_enable_price_list_dropdown"

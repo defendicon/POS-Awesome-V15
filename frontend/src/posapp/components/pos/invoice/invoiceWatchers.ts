@@ -311,7 +311,7 @@ const invoiceWatchers: Record<string, unknown> & ThisType<InvoiceWatchersVm> = {
 				conversion_rate: this.conversion_rate,
 			});
 		}
-		if (this.items && this.items.length) {
+		if (!this.priceListSwitching && this.items && this.items.length) {
 			this.update_item_rates();
 		}
 	},

@@ -14,6 +14,7 @@ const showCompactPanel = (context: any, panel: "selector" | "invoice") => {
 };
 
 export async function show_payment(context: any) {
+	if (context.priceListSwitching) return;
 	if (context._suppressClosePaymentsTimer) {
 		clearTimeout(context._suppressClosePaymentsTimer);
 		context._suppressClosePaymentsTimer = null;
