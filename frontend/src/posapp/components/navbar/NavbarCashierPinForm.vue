@@ -150,6 +150,7 @@
 
 <script setup>
 import { computed, reactive, ref, watch } from "vue";
+import { translate } from "../../utils/translate";
 
 defineOptions({
 	name: "NavbarCashierPinForm",
@@ -196,13 +197,7 @@ const pinMessageType = ref("info");
 
 const hasRequiredContext = computed(() => Boolean(props.posProfile?.name && props.currentCashier?.user));
 
-const __ = (text, args = []) => {
-	if (window.__) {
-		const nextArgs = Array.isArray(args) ? args : [args];
-		return window.__(text, ...nextArgs);
-	}
-	return text.replace(/\{(\d+)\}/g, (_, index) => `${args[index] ?? ""}`);
-};
+const __ = translate;
 
 watch(
 	() => [props.posProfile?.name, props.currentCashier?.user],

@@ -85,7 +85,7 @@ export async function syncStockResource(
 
 	const changedRows = extractChangedStockRows(response);
 	if (changedRows.length) {
-		updateLocalStockCache(changedRows);
+		updateLocalStockCache(changedRows, args.posProfile);
 	}
 
 	const deletedItemCodes = extractDeletedStockCodes(response);

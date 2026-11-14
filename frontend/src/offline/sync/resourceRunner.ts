@@ -10,7 +10,7 @@ import {
 	syncStockResource,
 } from "./adapters";
 import { syncInvoiceOutboxResource } from "../invoiceOutbox";
-import type { SyncScopedProfile } from "./adapters/common";
+import { buildScopeSignature, type SyncScopedProfile } from "./adapters/common";
 import type {
 	SyncResourceDefinition,
 	SyncResourceId,
@@ -288,13 +288,16 @@ export async function runSupportedOfflineSyncResource(
 		!firstResponse?.full_resync_required ||
 		args.resource.fullResyncSupported === false
 	) {
-		return firstResult;
+		return {
+			...firstResult,
+			scopeSignature: buildScopeSignature(args.posProfile),
+		};
 	}
 
 	// The first pass invalidated the incompatible local representation. Finish
 	// its clean rebuild now so resource health does not remain "limited" until
 	// a later timer tick.
-	return runSupportedOfflineSyncResourceOnce({
+	const rebuiltResult = await runSupportedOfflineSyncResourceOnce({
 		...args,
 		getPersistedState: async () =>
 			({
@@ -304,4 +307,10 @@ export async function runSupportedOfflineSyncResource(
 				schemaVersion: firstResponse.schema_version || null,
 			}) as SyncResourceState,
 	});
+	// Adapters persist their scope, but the coordinator also persists its returned
+	// state. Carry the same scope through completion instead of restoring null.
+	return {
+		...rebuiltResult,
+		scopeSignature: buildScopeSignature(args.posProfile),
+	};
 }

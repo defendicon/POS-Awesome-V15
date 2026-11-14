@@ -5,6 +5,20 @@
 		:class="{ 'invoice-shell--counter-grid': isCounterGridPresentation }"
 		:data-testid="isCounterGridPresentation ? 'counter-grid-invoice' : 'classic-invoice'"
 	>
+		<v-alert v-if="cartRecoveryError" type="error" variant="tonal" data-test="cart-recovery-error">{{ cartRecoveryError }}</v-alert>
+		<v-alert v-else-if="cartRecoveryMessage" type="info" variant="tonal" closable @click:close="cartRecoveryMessage = ''">{{ cartRecoveryMessage }}</v-alert>
+		<SavedCartRecovery
+			:candidates="cartRecoveryCandidates"
+			:warning="cartRecoveryReviewWarning"
+			:busy="cartRecoveryBusy"
+			:has-items="items.length > 0"
+			@recover="recoverSavedCart"
+			@refresh="refreshSavedCarts"
+		/>
+		<v-overlay :model-value="cartRecoveryBusy" persistent class="align-center justify-center">
+			<v-progress-circular indeterminate color="primary" />
+			<span>{{ __("Recovering saved cart") }}</span>
+		</v-overlay>
 		<!-- Cancel Sale Confirmation Dialog -->
 		<CancelSaleDialog v-model="cancel_dialog" @confirm="cancel_invoice" />
 
@@ -80,7 +94,7 @@
 
 					<div class="invoice-meta-grid">
 						<v-card
-							v-if="pos_profile.posa_allow_change_posting_date"
+							v-if="pos_profile.posa_allow_change_posting_date || showPriceListDropdown"
 							flat
 							class="invoice-section-card pos-themed-card"
 						>
@@ -98,6 +112,8 @@
 								:balance_loading="customer_balance_loading"
 								:price-list="selected_price_list"
 								:price-lists="price_lists"
+								:show-price-list="showPriceListDropdown"
+								:price-list-disabled="!canSelectPriceList || priceListSwitching"
 								:formatCurrency="formatCurrency"
 								:currencySymbol="currencySymbol"
 								@update:posting_date_display="
@@ -105,11 +121,7 @@
 										posting_date_display = val;
 									}
 								"
-								@update:priceList="
-									(val) => {
-										selected_price_list = val;
-									}
-								"
+								@update:priceList="selectPriceList"
 							/>
 						</v-card>
 
@@ -323,8 +335,10 @@ import { useToastStore } from "../../stores/toastStore.js";
 import { useUIStore } from "../../stores/uiStore.js";
 import { storeToRefs } from "pinia";
 import stockCoordinator from "../../utils/stockCoordinator";
-import { getCurrentInstance, ref } from "vue";
+import { parseBooleanSetting } from "../../utils/stock";
+import { getCurrentInstance, nextTick, ref } from "vue";
 import { save_and_clear_invoice as saveAndClearInvoiceAction } from "./invoice_utils/actions";
+import { prepareCartPriceListChange, warnMissingPriceListRates } from "./invoice_utils/item_updates";
 import { fetchDraftInvoices } from "../../utils/draftInvoices";
 import { getQuickCashTenderSuggestions } from "../../utils/cashTender";
 import invoiceService from "../../services/invoiceService";
@@ -333,6 +347,8 @@ import invoiceService from "../../services/invoiceService";
 import { useOnlineStatus } from "../../composables/core/useOnlineStatus";
 import { useInvoiceCurrency } from "../../composables/pos/invoice/useInvoiceCurrency";
 import { useInvoiceItems } from "../../composables/pos/invoice/useInvoiceItems";
+import { startCartRecovery } from "../../composables/pos/invoice/useCartRecovery";
+import SavedCartRecovery from "./invoice/SavedCartRecovery.vue";
 import { useInvoiceOffers } from "../../composables/pos/invoice/useInvoiceOffers";
 import { useInvoiceUI } from "../../composables/pos/invoice/useInvoiceUI";
 import { useInvoicePrinting } from "../../composables/pos/invoice/useInvoicePrinting";
@@ -433,6 +449,11 @@ export default {
 	},
 	data() {
 		return {
+			cartRecoveryError: "",
+			cartRecoveryMessage: "",
+			cartRecoveryCandidates: [],
+			cartRecoveryReviewWarning: "",
+			cartRecoveryBusy: false,
 			is_sharing: false,
 			pos_profile: "",
 			pos_opening_shift: "",
@@ -440,6 +461,8 @@ export default {
 			return_doc: "",
 			customer: "",
 			customer_info: "",
+			manualPriceList: "",
+			priceListSwitching: false,
 			customer_balance: null,
 			customer_balance_currency: undefined,
 			customer_balance_loading: false,
@@ -482,6 +505,7 @@ export default {
 	},
 
 	components: {
+		SavedCartRecovery,
 		InvoiceCustomerSection,
 		DeliveryCharges,
 		PostingDateRow,
@@ -525,6 +549,26 @@ export default {
 		},
 		paymentVisible() {
 			return this.activeView === "payment" || this.uiStore.paymentDialogOpen;
+		},
+		showPriceListDropdown() {
+			return parseBooleanSetting(this.pos_profile?.posa_enable_price_list_dropdown);
+		},
+		canSelectPriceList() {
+			return (
+				this.showPriceListDropdown &&
+				this.isOnline &&
+				!this.itemsStore.isLoading &&
+				this.invoiceType === "Invoice" &&
+				!this.isReturnInvoice &&
+				!this.exchangeSession &&
+				!this.paymentVisible &&
+				!this._suppressClosePayments &&
+				!this.invoice_doc?.name &&
+				!this.cartRecoveryBusy &&
+				(!this.customer || this.customer_info?.name === this.customer) &&
+				!this.customer_info?.customer_price_list &&
+				!this.customer_info?.customer_group_price_list
+			);
 		},
 		discount_amount: {
 			get() {
@@ -596,6 +640,8 @@ export default {
 	},
 
 	methods: {
+		recoverSavedCart(key) { return this._cartRecovery?.recoverSavedCart(key); },
+		refreshSavedCarts() { return this._cartRecovery?.refreshCandidates(); },
 		formatDateForDisplay(date) {
 			if (!date) return "";
 			const parts = date.split("-");
@@ -626,6 +672,13 @@ export default {
 
 		clearCounterGridEntry() {
 			return this.$refs.itemsTableRef?.clearCounterGridEntry?.();
+		},
+
+		async focusMissingPriceListItem(item) {
+			this.itemSearch = "";
+			await nextTick();
+			const index = this.items.indexOf(item);
+			if (index >= 0) await this.$refs.itemsTableRef?.focusMissingRateRow?.(index);
 		},
 
 		focusCartItemQty(payload = {}) {
@@ -972,6 +1025,65 @@ export default {
 			this.invoiceStore.setPostingDate(date);
 			this.$forceUpdate();
 		},
+		async selectPriceList(priceList) {
+			if (
+				this.priceListSwitching ||
+				!this.canSelectPriceList ||
+				priceList === this.selected_price_list ||
+				!this.price_lists.includes(priceList)
+			) {
+				return;
+			}
+			this.priceListSwitching = true;
+			try {
+				const customer = this.customer;
+				const profile = this.pos_profile;
+				const stillCurrent = () =>
+					this.customer === customer &&
+					this.pos_profile === profile &&
+					this.invoiceType === "Invoice" &&
+					!this.exchangeSession &&
+					!this.paymentVisible &&
+					!this._suppressClosePayments &&
+					!this.cartRecoveryBusy &&
+					!this.customer_info?.customer_price_list &&
+					!this.customer_info?.customer_group_price_list &&
+					!this.invoice_doc?.name;
+				const { message: currency } = await frappe.call({
+					method: "posawesome.posawesome.api.invoices.get_price_list_currency",
+					args: { price_list: priceList },
+				});
+				if (!currency) throw new Error("Selling price list currency is missing");
+				if (!stillCurrent()) return;
+				const cartChange = await prepareCartPriceListChange(this, priceList, currency);
+				const canApply = () => stillCurrent() && cartChange.isCurrent();
+				if (!canApply()) throw new Error("Cart changed while loading prices");
+				let catalogApplied = false;
+				await this.itemsStore.updatePriceList(priceList, {
+					reloadCatalog: true,
+					shouldApply: () => (catalogApplied = canApply()),
+				});
+				if (!catalogApplied && !canApply()) throw new Error("Cart changed while loading prices");
+				this.price_list_currency = currency;
+				this.manualPriceList = priceList;
+				this.selected_price_list = priceList;
+				cartChange.apply();
+				if (cartChange.missingItems.length) {
+					warnMissingPriceListRates(this, cartChange.missingItems);
+				}
+				await nextTick();
+				this.schedulePricingRuleApplication(true);
+			} catch (error) {
+				console.error("Failed to switch selling price list", error);
+				this.toastStore.show({
+					title: __("Unable to change Price List"),
+					text: error instanceof Error ? error.message : undefined,
+					color: "error",
+				});
+			} finally {
+				this.priceListSwitching = false;
+			}
+		},
 
 		update_exchange_rate() {
 			this.sync_exchange_rate();
@@ -1038,6 +1150,10 @@ export default {
 		},
 
 		handleRegisterPosProfile(data) {
+			if (this.pos_profile?.name !== data.pos_profile.name) {
+				this.manualPriceList = "";
+				this.selected_price_list = data.pos_profile.selling_price_list;
+			}
 			this.pos_profile = data.pos_profile;
 			this.company = data.company || null;
 			this.customer = data.pos_profile.customer;
@@ -1477,6 +1593,7 @@ export default {
 		this.setUpdateItemDetail(this.update_item_detail);
 		this.loadColumnPreferences();
 		this.loadInvoiceHeight();
+		this._cartRecovery = startCartRecovery(this);
 
 		this.$watch(
 			() => [this.uiStore.posProfile, this.uiStore.posOpeningShift],
@@ -1651,6 +1768,7 @@ export default {
 		registerInvoiceShortcutListener(document, this._shortcutHandlers.handleInvoiceShortcut);
 	},
 	unmounted() {
+		this._cartRecovery?.stop();
 		if (!this._shortcutHandlers) {
 			return;
 		}

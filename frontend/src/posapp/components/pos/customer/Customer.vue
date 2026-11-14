@@ -68,6 +68,22 @@
 
 				<!-- Add icon (right) -->
 				<template #append-inner>
+					<v-tooltip :text="__('View customer invoices')" content-class="posa-theme-tooltip">
+						<template #activator="{ props }">
+							<v-icon
+								v-bind="props"
+								class="icon-button mr-1"
+								role="button"
+								tabindex="0"
+								:aria-label="__('View customer invoices')"
+								@mousedown.prevent.stop
+								@click.stop="view_customer_invoices"
+								@keyup.enter.space.prevent.stop="view_customer_invoices"
+							>
+								mdi-receipt-text-clock-outline
+							</v-icon>
+						</template>
+					</v-tooltip>
 					<v-tooltip :text="__('Add new customer')" content-class="posa-theme-tooltip">
 						<template #activator="{ props }">
 							<v-icon
@@ -376,7 +392,9 @@ export default {
 		watch(
 			() => props.pos_profile,
 			(profile) => {
-				void ensureCustomersForProfile(profile);
+				void ensureCustomersForProfile(profile).catch((error) => {
+					console.warn("Unable to load the POS customer database", error);
+				});
 			},
 			{ immediate: true },
 		);
@@ -516,6 +534,15 @@ export default {
 			customersStore.openUpdateCustomerDialog(customerInfo.value || {});
 		};
 
+		const view_customer_invoices = () => {
+			const customer = selectedCustomer.value || internalCustomer.value;
+			if (!customer) {
+				toastStore.show({ title: __("Please select a customer first"), color: "warning" });
+				return;
+			}
+			uiStore.openInvoiceManagement("history", "invoice", customer);
+		};
+
 		const reload_customers = async () => {
 			if (!networkOnline.value) return;
 			await customersStore.reloadCustomers();
@@ -639,6 +666,7 @@ export default {
 			handleEnter,
 			new_customer,
 			edit_customer,
+			view_customer_invoices,
 			selectFirstCustomer,
 			openNewCustomer,
 			focusCustomerSearch,

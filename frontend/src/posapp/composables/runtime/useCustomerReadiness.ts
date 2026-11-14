@@ -12,7 +12,7 @@ type UseCustomerReadinessOptions = {
 	isOnline: () => boolean;
 	isManualOffline: () => boolean;
 	setProfile: (_profile: CustomerProfile | null) => void;
-	load: () => Promise<void>;
+	load: (localOnly?: boolean) => Promise<void>;
 	isReady?: () => boolean;
 	onProfileReady?: (_profile: CustomerProfile) => void | Promise<void>;
 	ensureCustomersReady?: typeof defaultEnsureCustomersReady;
@@ -27,8 +27,8 @@ export function useCustomerReadiness(options: UseCustomerReadinessOptions) {
 			return;
 		}
 		stopWatcher = watch(
-			options.profile,
-			(newProfile) => {
+			[options.profile, options.isOnline, options.isManualOffline],
+			([newProfile, online, manualOffline]) => {
 				if (!newProfile?.name) {
 					return;
 				}
@@ -41,11 +41,13 @@ export function useCustomerReadiness(options: UseCustomerReadinessOptions) {
 					options.ensureCustomersReady || defaultEnsureCustomersReady
 				)({
 					profile: newProfile,
-					online: options.isOnline(),
-					manualOffline: options.isManualOffline(),
+					online,
+					manualOffline,
 					setProfile: options.setProfile,
 					load: options.load,
 					isReady: options.isReady,
+				}).catch((error) => {
+					console.warn("Unable to load the POS customer database", error);
 				});
 			},
 			{ deep: true, immediate: true },

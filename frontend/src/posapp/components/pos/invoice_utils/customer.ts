@@ -12,6 +12,7 @@ import {
 	getPriceListCurrency,
 	getSelectedCurrency,
 } from "../../../utils/erpnextCurrency";
+import { parseBooleanSetting } from "../../../utils/stock";
 
 declare const frappe: any;
 
@@ -71,6 +72,10 @@ export async function fetch_customer_details(context: any) {
 			const resolvedPriceList =
 				context.customer_info.customer_price_list ||
 				context.customer_info.customer_group_price_list ||
+				(parseBooleanSetting(context.pos_profile?.posa_enable_price_list_dropdown) &&
+				!context.isReturnInvoice
+					? context.manualPriceList
+					: "") ||
 				context.pos_profile?.selling_price_list ||
 				"";
 			if (

@@ -302,6 +302,17 @@ def _resolve_authoritative_cashier(pos_profile, ledger_doc=None):
     return get_active_terminal_cashier(pos_profile)
 
 
+def _resolve_payload_cashier(payload, pos_profile, ledger_doc=None):
+    token = payload.get("_posa_offline_cashier_token")
+    if token:
+        from posawesome.posawesome.api.offline_cashier import validate_offline_cashier
+
+        return validate_offline_cashier(
+            token, pos_profile, payload.get("_posa_offline_created_at")
+        )
+    return _resolve_authoritative_cashier(pos_profile, ledger_doc)
+
+
 def _json_dumps(value):
     try:
         return json.dumps(value or {}, default=str)
@@ -1521,7 +1532,8 @@ def update_invoice(data):
 
     # Ensure the document type is set for new invoices to prevent validation errors
     data["doctype"] = doctype
-    authoritative_cashier = get_active_terminal_cashier(pos_profile)
+    authoritative_cashier = _resolve_payload_cashier(data, pos_profile)
+    data.pop("_posa_offline_cashier_token", None)
 
     return_validity_enabled, default_validity_days = _get_return_validity_settings(pos_profile)
 
@@ -1580,17 +1592,22 @@ def update_invoice(data):
             resolved_customer_name or invoice_doc.get("customer_name") or invoice_doc.customer
         )
 
+    allow_price_list_selection = cint(profile_doc.get("posa_enable_price_list_dropdown")) and not cint(
+        invoice_doc.get("is_return")
+    )
     effective_price_list = _resolve_effective_price_list(
         invoice_doc.get("customer"),
         invoice_doc.get("pos_profile") or pos_profile,
         invoice_doc.get("selling_price_list") or data.get("selling_price_list"),
+        allow_selection=bool(allow_price_list_selection),
+        profile_doc=profile_doc,
     )
     if effective_price_list:
         invoice_doc.selling_price_list = effective_price_list
 
     selected_currency = data.get("currency")
     price_list_currency = data.get("price_list_currency")
-    if not price_list_currency and invoice_doc.get("selling_price_list"):
+    if (allow_price_list_selection or not price_list_currency) and invoice_doc.get("selling_price_list"):
         price_list_currency = frappe.db.get_value("Price List", invoice_doc.selling_price_list, "currency")
 
     # Preserve provided item names for manual overrides
@@ -1921,7 +1938,7 @@ def _submit_invoice_once(invoice, data, submit_in_background=False):
             )
             invoice["name"] = ledger_invoice.name
 
-    authoritative_cashier = _resolve_authoritative_cashier(pos_profile, ledger_doc)
+    authoritative_cashier = _resolve_payload_cashier(invoice, pos_profile, ledger_doc)
     data["_posa_authoritative_cashier"] = authoritative_cashier
     allow_background_submit = frappe.get_value(
         "POS Profile",
@@ -2019,6 +2036,7 @@ def _submit_invoice_once(invoice, data, submit_in_background=False):
         )
     else:
         # Prevent TimestampMismatchError by relying on server-side timestamp
+        invoice.pop("_posa_offline_cashier_token", None)
         if "modified" in invoice:
             del invoice["modified"]
         invoice.pop("_force_invoice_doctype", None)

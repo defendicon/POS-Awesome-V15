@@ -186,6 +186,11 @@ export class SyncCoordinator {
 		this.emitStateChange();
 	}
 
+	/** Reports actual local execution, independent of persisted lease timestamps. */
+	hasActiveRuns() {
+		return this.inFlightTriggers.size > 0;
+	}
+
 	/**
 	 * Runs all resources that subscribe to `trigger`, in priority order.
 	 * If a run for the same trigger is already in flight, returns the existing Promise

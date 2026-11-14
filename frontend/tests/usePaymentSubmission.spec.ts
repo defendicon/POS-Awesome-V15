@@ -9,9 +9,11 @@ vi.mock("../src/offline/index", () => ({
 	isOffline: vi.fn(() => false),
 	persistInvoiceIntentJournal: vi.fn(() => "test-request-id"),
 	removeInvoiceOutboxEntry: vi.fn(async () => 1),
+	acknowledgeInvoiceOutbox: vi.fn(async () => undefined),
 	saveOfflineInvoice: vi.fn(),
 	updateLocalStock: vi.fn(),
 }));
+vi.mock("../src/posapp/services/offlineReadiness", () => ({ readOfflineReadiness: vi.fn(async () => ({ blocked: false, warnings: [] })) }));
 
 vi.mock("../src/posapp/services/invoiceService", () => ({
 	default: {
@@ -167,10 +169,34 @@ describe("usePaymentSubmission", () => {
 		});
 
 		await expect(validateSubmission(true)).resolves.toBe(true);
+		expect(requestBelowCostOverride).toHaveBeenCalledOnce();
 		expect(invoiceDoc.value.posa_below_cost_override).toBe(1);
 		expect(invoiceDoc.value.posa_below_cost_override_reason).toBe(
 			"Approved clearance",
 		);
+	});
+
+	it.each([
+		{ approved: false },
+		{ approved: true, reason: "   " },
+	])("rejects a pending below-cost draft without approval and a reason: %j", async (approval) => {
+		const invoiceDoc = ref<any>({
+			docstatus: 0,
+			items: [{ item_code: "LOW", qty: 1, rate: 9, trade_price: 10 }],
+			payments: [{ mode_of_payment: "Cash", amount: 9, type: "Cash" }],
+			grand_total: 9,
+		});
+		const { validateSubmission } = usePaymentSubmission({
+			invoiceDoc,
+			posProfile: ref({ posa_below_cost_action: "POS Supervisor Override" }),
+			stockSettings: ref({}),
+			invoiceType: ref("Invoice"),
+			formatFloat: (value) => Number(value || 0),
+			requestBelowCostOverride: vi.fn().mockResolvedValue(approval),
+		});
+
+		await expect(validateSubmission(true)).rejects.toThrow(/requires a POS supervisor override/);
+		expect(invoiceDoc.value.posa_below_cost_override).toBeUndefined();
 	});
 
 	it("defers print and schedules background wait when invoice submission is queued", async () => {
@@ -1080,8 +1106,9 @@ describe("usePaymentSubmission", () => {
 				}),
 			}),
 		);
-		expect(offlineModule.removeInvoiceOutboxEntry).toHaveBeenCalledWith(
+		expect(offlineModule.acknowledgeInvoiceOutbox).toHaveBeenCalledWith(
 			firstSubmittedDoc.posa_client_request_id,
+			expect.objectContaining({ docstatus: 1 }),
 		);
 		consoleError.mockRestore();
 	});
@@ -1478,9 +1505,47 @@ describe("usePaymentSubmission", () => {
 		);
 	});
 
+	it("requires online PIN verification after an offline cashier switch", async () => {
+		const invoiceService = (await import("../src/posapp/services/invoiceService")).default;
+		const requestTerminalUnlock = vi.fn(async () => false);
+		const { submitInvoice } = usePaymentSubmission({
+			invoiceDoc: ref({ items: [{ item_code: "ITEM-1", qty: 1 }], payments: [], grand_total: 10 }),
+			posProfile: ref({ name: "Main POS" }), stockSettings: ref({}), invoiceType: ref("Invoice"),
+			formatFloat: (value) => Number(value || 0),
+			stores: { employeeStore: { cashierVerifiedOffline: true, requestTerminalUnlock } },
+		});
+		expect(await submitInvoice(false)).toEqual({ cancelled: true, reason: "terminal_locked" });
+		expect(requestTerminalUnlock).toHaveBeenCalledOnce();
+		expect(invoiceService.submitInvoice).not.toHaveBeenCalled();
+	});
+
+	it("enforces stale-cache policy and the profile's offline credit restriction", async () => {
+		const offline = await import("../src/offline/index");
+		const readiness = await import("../src/posapp/services/offlineReadiness");
+		vi.mocked(offline.isOffline).mockReturnValue(true);
+		const options: any = { invoiceDoc: ref({ doctype: "Sales Invoice", customer: "CUST", items: [{ item_code: "A", qty: 1 }], payments: [], grand_total: 100 }), posProfile: ref({ name: "Main POS" }), stockSettings: ref({}), invoiceType: ref("Invoice"), formatFloat: (value: any) => Number(value || 0), redeemedCustomerCredit: ref(50) };
+		try {
+			await expect(usePaymentSubmission(options).submitInvoice(false)).rejects.toThrow("Customer credit redemption is disabled offline");
+			options.redeemedCustomerCredit.value = 0;
+			vi.mocked(readiness.readOfflineReadiness).mockResolvedValueOnce({ blocked: true, warnings: ["Stale prices are blocked"] } as any);
+			await expect(usePaymentSubmission(options).submitInvoice(false)).rejects.toThrow("Stale prices are blocked");
+			expect(offline.saveOfflineInvoice).not.toHaveBeenCalled();
+		} finally { vi.mocked(offline.isOffline).mockReturnValue(false); }
+	});
+
 	it("normalizes loyalty redemption fields before saving an offline invoice", async () => {
 		const offlineModule = await import("../src/offline/index");
 		(offlineModule.isOffline as any).mockReturnValue(true);
+		(globalThis as any).frappe.session = { user: "terminal@example.com" };
+		const cashierToken = `${Buffer.from(
+			JSON.stringify({
+				cashier: "backup@example.com",
+				pos_profile: "Main POS",
+				session_user: "terminal@example.com",
+				issued_at: Date.now() / 1000 - 60,
+				expires_at: Date.now() / 1000 + 3600,
+			}),
+		).toString("base64url")}.test-signature`;
 
 		const invoiceDoc = ref<any>({
 			name: "ACC-SINV-LOYALTY-OFFLINE",
@@ -1514,6 +1579,11 @@ describe("usePaymentSubmission", () => {
 			invoiceType: ref("Invoice"),
 			formatFloat: (value) => Number(value || 0),
 			stores: {
+				employeeStore: {
+					isLocked: false,
+					offlineCashierToken: cashierToken,
+					currentCashier: { user: "backup@example.com" },
+				},
 				toastStore: { show: vi.fn() },
 				syncStore: { updatePendingCount: vi.fn() },
 				uiStore: {
@@ -1548,6 +1618,9 @@ describe("usePaymentSubmission", () => {
 					redeem_loyalty_points: 1,
 					loyalty_points: 4,
 					loyalty_program: "Retail Loyalty",
+					_posa_offline_cashier_token: cashierToken,
+					set_posting_time: 1,
+					posting_time: expect.stringMatching(/^\d{2}:\d{2}:\d{2}$/),
 				}),
 			}),
 		);

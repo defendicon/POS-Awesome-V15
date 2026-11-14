@@ -5,6 +5,7 @@ import {
 	loadDocumentSourceRecord,
 } from "../../../utils/documentSources";
 import { resolvePosDocumentDoctype } from "../../../utils/posDocumentMode";
+import { hasMissingPriceListRate, warnMissingPriceListRates } from "./item_updates";
 
 declare const __: (_text: string, _args?: any[]) => string;
 declare const frappe: any;
@@ -14,6 +15,13 @@ const showCompactPanel = (context: any, panel: "selector" | "invoice") => {
 };
 
 export async function show_payment(context: any) {
+	if (context.priceListSwitching) return;
+	const missingItems = context.items.filter(hasMissingPriceListRate);
+	if (missingItems.length) {
+		warnMissingPriceListRates(context, missingItems);
+		context.focusMissingPriceListItem?.(missingItems[0]);
+		return;
+	}
 	if (context._suppressClosePaymentsTimer) {
 		clearTimeout(context._suppressClosePaymentsTimer);
 		context._suppressClosePaymentsTimer = null;

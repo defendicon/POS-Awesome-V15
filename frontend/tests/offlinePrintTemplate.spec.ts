@@ -8,11 +8,39 @@ vi.mock("../src/offline/index", () => ({
 	memoryInitPromise: Promise.resolve(),
 }));
 
-import renderOfflineInvoiceHTML from "../src/offline_print_template";
+import renderOfflineInvoiceHTML, {
+	prepareOfflinePrintDocument,
+} from "../src/offline_print_template";
+import { getPrintTemplate } from "../src/offline/index";
 
 describe("offline print fallback totals", () => {
 	beforeEach(() => {
+		vi.mocked(getPrintTemplate).mockReturnValue("");
 		vi.stubGlobal("frappe", { _: (text: string) => text });
+	});
+	it("marks cached-format copies and keeps their original date, totals and payload immutable", async () => {
+		vi.mocked(getPrintTemplate).mockReturnValue(
+			"<html><body>{{ doc.posting_date }} {{ doc.posting_time }} {{ doc.grand_total }}</body></html>",
+		);
+		const invoice = {
+			_posa_receipt_label: "OFFLINE COPY — PENDING SERVER SYNC",
+			posa_client_request_id: "id<script>",
+			posting_date: "2026-11-10",
+			posting_time: "10:20:30",
+			grand_total: 100,
+			payments: [{ amount: 120 }],
+			change_amount: 20,
+			_posa_offline_cashier_token: "secret",
+			items: [],
+		};
+		const copy = JSON.stringify(invoice);
+		const html = await renderOfflineInvoiceHTML(invoice);
+		expect(html).toContain("PENDING SERVER SYNC");
+		expect(html).toContain("10:20:30");
+		expect(html).not.toContain("<script>");
+		expect(html).not.toContain("secret");
+		expect(prepareOfflinePrintDocument(invoice).paid_amount).toBe(100);
+		expect(JSON.stringify(invoice)).toBe(copy);
 	});
 
 	it("prints paid amount net of change in invoice currency", async () => {

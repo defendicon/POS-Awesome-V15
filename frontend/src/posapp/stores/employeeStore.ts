@@ -42,6 +42,8 @@ const normalizeEmployee = (cashier: TerminalEmployee): TerminalEmployee => ({
 export const useEmployeeStore = defineStore("employee", () => {
 	const terminalEmployees = ref<TerminalEmployee[]>([]);
 	const currentCashier = ref<TerminalEmployee | null>(null);
+	const offlineCashierToken = ref("");
+	const cashierVerifiedOffline = ref(false);
 	const switchDialogOpen = ref(false);
 	const lockDialogOpen = ref(true);
 	const terminalStateLoaded = ref(false);
@@ -108,6 +110,7 @@ export const useEmployeeStore = defineStore("employee", () => {
 		cachedEmployees: TerminalEmployee[] = [],
 	) => {
 		finishPendingUnlock(false);
+		offlineCashierToken.value = "";
 		const nextProfileName = String(profileName || "").trim();
 		const canReuseLoadedEmployees =
 			terminalEmployeesProfile.value === nextProfileName &&
@@ -168,6 +171,8 @@ export const useEmployeeStore = defineStore("employee", () => {
 		state: AuthoritativeTerminalState | null | undefined,
 		verifiedCashier?: TerminalEmployee | null,
 	) => {
+		offlineCashierToken.value = "";
+		cashierVerifiedOffline.value = false;
 		const activeCashier = String(state?.active_cashier || "").trim();
 		const candidate =
 			verifiedCashier?.user === activeCashier
@@ -217,7 +222,13 @@ export const useEmployeeStore = defineStore("employee", () => {
 		const serverListedCashier = terminalEmployees.value.find(
 			(employee) => employee.user === currentCashier.value?.user,
 		);
-		currentCashier.value = serverListedCashier || null;
+		currentCashier.value =
+			cashierVerifiedOffline.value && serverListedCashier
+				? normalizeEmployee({
+						user: serverListedCashier.user,
+						full_name: serverListedCashier.full_name,
+					})
+				: serverListedCashier || null;
 		if (!currentCashier.value) {
 			lockDialogOpen.value = true;
 		}
@@ -235,6 +246,7 @@ export const useEmployeeStore = defineStore("employee", () => {
 	};
 
 	const lockTerminal = () => {
+		offlineCashierToken.value = "";
 		switchDialogOpen.value = false;
 		lockDialogOpen.value = true;
 	};
@@ -266,9 +278,36 @@ export const useEmployeeStore = defineStore("employee", () => {
 	) => {
 		applyVerifiedCashier(cashier);
 	};
+	const applyOfflineCashier = (cashier: {
+		user: string;
+		full_name: string;
+		token: string;
+	}) => {
+		if (
+			!cashier.token ||
+			!terminalEmployees.value.some((row) => row.user === cashier.user)
+		) {
+			throw new Error(
+				"Offline cashier is not available for this POS Profile.",
+			);
+		}
+		currentCashier.value = normalizeEmployee({
+			user: cashier.user,
+			full_name: cashier.full_name,
+		});
+		offlineCashierToken.value = cashier.token;
+		cashierVerifiedOffline.value = true;
+		lockDialogOpen.value = false;
+		switchDialogOpen.value = false;
+		terminalStateLoaded.value = true;
+		finishPendingUnlock(true);
+	};
 
 	return {
 		terminalEmployees,
+		offlineCashierToken,
+		cashierVerifiedOffline,
+		applyOfflineCashier,
 		currentCashier,
 		currentCashierDisplay,
 		switchDialogOpen,

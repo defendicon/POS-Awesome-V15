@@ -1,6 +1,13 @@
 import stockCoordinator from "../../../utils/stockCoordinator";
 import { isOffline } from "../../../../offline/index";
 import { syncReturnDiscountProration } from "./return_discount";
+import {
+	fromCompanyCurrency,
+	getCompanyCurrency,
+	getSelectedCurrency,
+} from "../../../utils/erpnextCurrency";
+import { parseBooleanSetting } from "../../../utils/stock";
+import { resolveExchangeRate } from "../../../services/exchangeRateResolver";
 
 declare const __: (_text: string, _args?: any[]) => string;
 declare const frappe: any;
@@ -28,6 +35,138 @@ function refreshInvoiceTotals(context: any) {
 	}
 }
 
+function hasProtectedPrice(item: any) {
+	if (hasMissingPriceListRate(item)) return false;
+	return (
+		(parseBooleanSetting(item._manual_rate_set) &&
+			!parseBooleanSetting(item._manual_rate_set_from_uom)) ||
+		parseBooleanSetting(item.locked_price) ||
+		parseBooleanSetting(item.posa_offer_applied) ||
+		parseBooleanSetting(item.is_free_item) ||
+		Number(item.batch_price) > 0 ||
+		[
+			"discount_percentage",
+			"discount_amount",
+			"base_discount_amount",
+			"discount_amount_per_item",
+		].some((field) => Math.abs(Number(item[field] || 0)) > 0.000001)
+	);
+}
+
+export function hasMissingPriceListRate(item: any) {
+	return Boolean(item?._missingPriceListRate);
+}
+
+export function warnMissingPriceListRates(context: any, items: any[]) {
+	context.toastStore.show({
+		title: __("Missing Price List rates"),
+		text: items.map((item) => `${item.item_code} (${item.uom || item.stock_uom || "-"})`).join(", "),
+		color: "warning",
+	});
+}
+
+export async function prepareCartPriceListChange(context: any, priceList: string, currency: string) {
+	const items = [...context.items];
+	const rows = items.filter((item) => !hasProtectedPrice(item));
+	const uoms = rows.map((item) => item.uom);
+	const factors = rows.map((item) => Number(item.conversion_factor) || 1);
+	const conversionRate = context.conversion_rate;
+	const postingDate = context.posting_date;
+	const requestRows = rows.map(({ item_code, uom }, index) => ({
+		item_code,
+		uom,
+		posa_row_id: String(index),
+	}));
+	const companyCurrency = getCompanyCurrency(context);
+	const selectedCurrency = getSelectedCurrency(context);
+	if (!companyCurrency || !selectedCurrency) throw new Error("Missing invoice currency");
+
+	const [exchange, details] = await Promise.all([
+		resolveExchangeRate({
+			profileName: context.pos_profile.name,
+			company: context.pos_profile.company,
+			fromCurrency: currency,
+			toCurrency: companyCurrency,
+			effectiveDate: postingDate || frappe.datetime.nowdate(),
+		}),
+		rows.length
+			? frappe.call({
+				method: "posawesome.posawesome.api.items.get_items_details",
+				args: {
+					pos_profile: JSON.stringify(context.pos_profile),
+					items_data: JSON.stringify(requestRows),
+					price_list: priceList,
+					customer: context.customer || null,
+				},
+			})
+			: null,
+	]);
+	if (!exchange.found || !exchange.rate) throw new Error("Missing price list exchange rate");
+	const listToCompany = exchange.rate;
+	const detailsById = new Map<string, any>(
+		(details?.message || []).map((detail) => [String(detail.posa_row_id), detail]),
+	);
+	const updates = rows.map((item, index) => {
+		const detail = detailsById.get(String(index));
+		const prices = detail?._prices_by_uom;
+		const exact = prices?.[uoms[index]];
+		const price = exact ?? prices?.[item.stock_uom ?? detail?.stock_uom] ?? prices?.[""];
+		const factor = factors[index] ?? 1;
+		const missing = price?.price_list_rate == null || !Number.isFinite(Number(price.price_list_rate));
+		const originalRate = missing ? 0 : Number(price.price_list_rate) * (exact ? 1 : factor);
+		return { item, factor, originalRate, missing };
+	});
+
+	return {
+		missingItems: updates.filter(({ missing }) => missing).map(({ item }) => item),
+		isCurrent: () =>
+			context.items.length === items.length &&
+			items.every((item, index) => context.items[index] === item) &&
+			rows.every(
+				(item, index) =>
+					item.uom === uoms[index] &&
+					(Number(item.conversion_factor) || 1) === factors[index] &&
+					!hasProtectedPrice(item),
+			) &&
+			getSelectedCurrency(context) === selectedCurrency &&
+			context.conversion_rate === conversionRate &&
+			context.posting_date === postingDate,
+		apply() {
+			// Keep cashier overrides on the existing pricing-rule and draft-save path.
+			for (const item of items) {
+				if (
+					hasProtectedPrice(item) &&
+					!parseBooleanSetting(item.is_free_item) &&
+					!parseBooleanSetting(item.posa_offer_applied)
+				) {
+					item._manual_rate_set = true;
+					item._manual_rate_set_from_uom = false;
+				}
+			}
+			for (const { item, factor, originalRate, missing } of updates) {
+				const baseRate = originalRate * listToCompany;
+				const rate = context.flt(fromCompanyCurrency(context, baseRate), context.currency_precision);
+				Object.assign(item, {
+					_missingPriceListRate: missing,
+					rate,
+					price_list_rate: rate,
+					base_rate: baseRate,
+					base_price_list_rate: baseRate,
+					original_rate: originalRate,
+					original_currency: currency,
+					original_base_rate: baseRate / factor,
+					original_base_price_list_rate: baseRate / factor,
+					price_list_currency: currency,
+				});
+				syncLineAmounts(context, item);
+			}
+			context.exchange_rate = fromCompanyCurrency(context, listToCompany);
+			refreshInvoiceTotals(context);
+			context.invoiceStore?.touch?.();
+		},
+	};
+}
+
 export async function update_items_details(context: any, items: any[]) {
 	if (!items?.length) return;
 	if (!context.pos_profile) return;
@@ -38,6 +177,7 @@ export async function update_items_details(context: any, items: any[]) {
 	const lockReturnPricing = Boolean(
 		currentDoc?.is_return && currentDoc?.return_against,
 	);
+	const priceList = context.get_price_list?.() ?? null;
 
 	try {
 		const response = await frappe.call({
@@ -45,13 +185,11 @@ export async function update_items_details(context: any, items: any[]) {
 			args: {
 				pos_profile: JSON.stringify(context.pos_profile),
 				items_data: JSON.stringify(items),
-				price_list: context.get_price_list
-					? context.get_price_list()
-					: null,
+				price_list: priceList,
 			},
 		});
 
-		if (response?.message) {
+		if (response?.message && (context.get_price_list?.() ?? null) === priceList) {
 			const detailMap = new Map();
 			response.message.forEach((detail) => {
 				if (!detail) return;
@@ -107,6 +245,7 @@ export async function update_items_details(context: any, items: any[]) {
 					const manualLocked =
 						item._manual_rate_set === true;
 					const shouldOverrideRate =
+						!hasMissingPriceListRate(item) &&
 						!lockReturnPricing &&
 						!item.locked_price &&
 						!item.posa_offer_applied &&
@@ -124,6 +263,7 @@ export async function update_items_details(context: any, items: any[]) {
 					} else if (
 						!lockReturnPricing &&
 						!item.price_list_rate &&
+						!hasMissingPriceListRate(item) &&
 						(force || price)
 					) {
 						if (context._computePriceConversion) {
@@ -208,6 +348,7 @@ export async function _performItemDetailUpdate(
 	if (item._detailInFlight) return;
 
 	item._detailInFlight = true;
+	const priceList = context.get_price_list?.() ?? null;
 
 	try {
 		const currentDoc = context.get_invoice_doc
@@ -252,7 +393,7 @@ export async function _performItemDetailUpdate(
 		});
 
 		const data = response?.message;
-		if (!data) return;
+		if (!data || (context.get_price_list?.() ?? null) !== priceList) return;
 
 		_applyItemDetailPayload(context, item, data, {
 			forceUpdate: force_update,
@@ -397,7 +538,8 @@ export function _applyItemDetailPayload(
 		if (context.set_batch_qty) context.set_batch_qty(item, null, false);
 	}
 
-	if (!item.locked_price) {
+	const manualRate = item._manual_rate_set === true && item._manual_rate_set_from_uom !== true;
+	if (!item.locked_price && !manualRate && !hasMissingPriceListRate(item)) {
 		if (forceUpdate || !item.base_rate) {
 			const plcConversionRate = context._getPlcConversionRate
 				? context._getPlcConversionRate()
@@ -437,6 +579,8 @@ export function _applyItemDetailPayload(
 	// Preserve existing discounts, but apply server percentage when no explicit discount is present.
 	if (
 		!item.locked_price &&
+		!manualRate &&
+		!hasMissingPriceListRate(item) &&
 		!hasExistingDiscount &&
 		Number.isFinite(incomingDiscountPct) &&
 		incomingDiscountPct > 0

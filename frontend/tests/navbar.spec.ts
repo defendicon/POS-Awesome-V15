@@ -25,9 +25,12 @@ vi.mock("../src/utils/clearAllCaches", () => ({
 import Navbar from "../src/posapp/components/Navbar.vue";
 import { useEmployeeStore } from "../src/posapp/stores/employeeStore";
 import { clearAllCaches } from "../src/utils/clearAllCaches";
+import { isOffline } from "../src/offline/index";
+import { cacheOfflineCashiers } from "../src/posapp/utils/offlineCashier";
 
 describe("Navbar supervisor access", () => {
 	afterEach(() => {
+		vi.mocked(isOffline).mockReturnValue(false);
 		vi.useRealTimers();
 	});
 
@@ -36,6 +39,7 @@ describe("Navbar supervisor access", () => {
 		window.localStorage.clear();
 		vi.stubGlobal("__", (value: string) => value);
 		vi.stubGlobal("frappe", {
+			datetime: { nowdate: () => "2026-11-07" },
 			session: {
 				user: "cashier@example.com",
 				user_fullname: "Main Cashier",
@@ -66,6 +70,25 @@ describe("Navbar supervisor access", () => {
 				};
 			}),
 		});
+	});
+
+	it("restores prepared cashiers after an offline reload without cashier API requests", async () => {
+		vi.mocked(isOffline).mockReturnValue(true);
+		cacheOfflineCashiers("Main POS", [{ user: "backup@example.com", full_name: "Backup Cashier", offline_access: { version: 1, iterations: 600_000, salt: "cached", iv: "cached", ciphertext: "cached", expires_at: Date.now() / 1000 + 3600 } }]);
+		const wrapper = shallowMount(Navbar, {
+			props: { posProfile: { name: "Main POS" } },
+			global: {
+				mocks: { __: (value: string) => value },
+				stubs: { NavbarAppBar: true, NavbarDrawer: true, NavbarMenu: true, NotificationBell: true, StatusIndicator: true, CacheUsageMeter: true, AboutDialog: true, EmployeeSwitchDialog: true, OfflineInvoicesDialog: true, ServerUsageGadget: true, DatabaseUsageGadget: true, VDialog: true, VCard: true, VCardTitle: true, VCardText: true, VSnackbar: true, VBtn: true, VProgressCircular: true },
+			},
+		});
+		await (wrapper.vm as any).fetchTerminalEmployees();
+		const store = useEmployeeStore();
+		expect(store.terminalEmployees.map((row) => row.user)).toEqual(["backup@example.com"]);
+		expect(store.isLocked).toBe(true);
+		expect(store.currentCashier).toBeNull();
+		expect(vi.mocked(frappe.call).mock.calls.filter(([args]) => args.method.includes("api.employees."))).toEqual([]);
+		wrapper.unmount();
 	});
 
 	it("shows the dashboard drawer item only for POS supervisors", async () => {

@@ -1659,8 +1659,36 @@ export const useItemsStore = defineStore("items", () => {
 		cachedPagination.value.offset = safePage.length;
 	};
 
-	const updatePriceList = async (newPriceList: string) => {
+	const updatePriceList = async (
+		newPriceList: string,
+		{ reloadCatalog = false, shouldApply = () => true } = {},
+	) => {
 		if (!newPriceList || newPriceList === customerPriceList.value) return;
+
+		if (reloadCatalog) {
+			cancelPendingServerSearchFallback();
+			const nextItems = await loadItems({
+				forceServer: true,
+				priceList: newPriceList,
+				limit: resolvePageSize(),
+				commitToCatalog: false,
+			});
+			if (!nextItems) throw new Error("Price list catalog reload was interrupted");
+			if (!shouldApply()) return;
+			cancelBackgroundSync();
+			clearSearchCache();
+			serverSearchResultCache.clear();
+			resetCachedPagination();
+			clearHotCatalog();
+			customerPriceList.value = newPriceList;
+			setItems(nextItems);
+			setFilteredItems(
+				performLocalSearch(searchTerm.value, nextItems, itemGroup.value),
+				searchTerm.value,
+			);
+			if (fastCounterEnabled.value) void loadHotCatalog({ force: true });
+			return;
+		}
 
 		customerPriceList.value = newPriceList;
 

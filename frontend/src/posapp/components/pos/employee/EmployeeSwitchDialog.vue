@@ -19,6 +19,12 @@
 				/>
 			</v-card-title>
 			<v-card-text>
+				<CashierHandoverSummary
+					:cashier="currentCashier?.user || ''"
+					:profile="uiStore.posProfile"
+					:opening="uiStore.posOpeningShift?.name || ''"
+					:active="switchDialogOpen"
+				/>
 				<div class="employee-switch-dialog__copy">
 					{{ __("Choose the cashier currently operating this terminal.") }}
 				</div>
@@ -176,6 +182,12 @@
 				</div>
 			</v-card-title>
 			<v-card-text>
+				<CashierHandoverSummary
+					:cashier="currentCashier?.user || ''"
+					:profile="uiStore.posProfile"
+					:opening="uiStore.posOpeningShift?.name || ''"
+					:active="lockDialogOpen"
+				/>
 				<div class="employee-switch-dialog__copy">
 					{{ __("Select the cashier who is taking over this terminal.") }}
 				</div>
@@ -325,9 +337,17 @@ import { computed, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useEmployeeStore } from "../../../stores/employeeStore";
 import { useUIStore } from "../../../stores/uiStore";
+import { isOffline } from "../../../../offline/index";
+import { loadOfflineCashiers, unlockOfflineCashier } from "../../../utils/offlineCashier";
+import CashierHandoverSummary from "./CashierHandoverSummary.vue";
+import { recordCashierHandover } from "../../../../offline/cashierHandover";
+import { useInvoiceStore } from "../../../stores/invoiceStore";
+import { useToastStore } from "../../../stores/toastStore";
 
 const employeeStore = useEmployeeStore();
 const uiStore = useUIStore();
+const invoiceStore = useInvoiceStore();
+const toastStore = useToastStore();
 const emit = defineEmits(["retry-load"]);
 const {
 	terminalEmployees,
@@ -350,8 +370,7 @@ const posProfileName = computed(
 const cashiersLoading = computed(
 	() =>
 		!terminalEmployees.value.length &&
-		(terminalEmployeesLoadStatus.value === "idle" ||
-			terminalEmployeesLoadStatus.value === "loading"),
+		(terminalEmployeesLoadStatus.value === "idle" || terminalEmployeesLoadStatus.value === "loading"),
 );
 const cashiersLoadFailed = computed(
 	() => terminalEmployeesLoadStatus.value === "error" && !terminalEmployees.value.length,
@@ -407,6 +426,7 @@ const needsSupervisor = computed(() => selectedCashier.value?.pin_length === 0 &
 const pinHelp = computed(() => {
 	if (isFirstPin.value) return __("Choose a PIN of 4 to 8 digits and confirm it to unlock this terminal.");
 	if (needsSupervisor.value) return __("This cashier has no PIN. Ask a POS supervisor for help.");
+	if (isOffline()) return __("Enter the cashier PIN prepared for offline access on this terminal.");
 	return __("Enter the selected cashier's PIN to continue.");
 });
 
@@ -415,7 +435,8 @@ const canSubmit = computed(
 		Boolean(selectedCashier.value?.user) &&
 		!needsSupervisor.value &&
 		Boolean(cashierPin.value.trim()) &&
-		!isSubmitting.value,
+		!isSubmitting.value &&
+		!invoiceStore.exchangeSession,
 );
 
 const normalizeErrorMessage = (error) =>
@@ -447,6 +468,10 @@ const handleSwitchDialog = (value) => {
 };
 
 const verifySelection = async () => {
+	if (invoiceStore.exchangeSession) {
+		pinError.value = __("Complete or cancel the active exchange before changing cashier.");
+		return null;
+	}
 	if (isSubmitting.value || needsSupervisor.value) return null;
 	if (!selectedCashier.value) {
 		pinError.value = __("Select a cashier first.");
@@ -474,6 +499,27 @@ const verifySelection = async () => {
 	const pin = cashierPin.value.trim();
 
 	try {
+		if (
+			selectedUser.value !== currentCashier.value?.user &&
+			!window.dispatchEvent(new CustomEvent("posa:before-cashier-switch", { cancelable: true }))
+		) {
+			throw new Error(
+				__(
+					"The outgoing cart could not be saved. Resolve the storage error before changing cashier.",
+				),
+			);
+		}
+		if (isOffline()) {
+			if (creatingPin) throw new Error(__("Connect to the server to create your first PIN."));
+			const cashier = await unlockOfflineCashier(
+				posProfileName.value,
+				selectedCashier.value.user,
+				cashierPin.value.trim(),
+			);
+			if (currentCashier.value?.user && uiStore.posOpeningShift?.name) await saveHandover(cashier.user);
+			employeeStore.applyOfflineCashier(cashier);
+			return null;
+		}
 		const response = await window.frappe.call({
 			method: creatingPin
 				? "posawesome.posawesome.api.employees.save_cashier_pin"
@@ -500,6 +546,21 @@ const verifySelection = async () => {
 				),
 			);
 		}
+		if (currentCashier.value?.user && uiStore.posOpeningShift?.name)
+			await saveHandover(verifiedCashier.user);
+		if (loadOfflineCashiers(posProfileName.value).some((row) => row.user === verifiedCashier.user)) {
+			try {
+				verifiedCashier.offlineToken = (
+					await unlockOfflineCashier(
+						posProfileName.value,
+						verifiedCashier.user,
+						pin,
+					)
+				).token;
+			} catch (error) {
+				console.warn("Offline cashier access is not ready", error);
+			}
+		}
 		return verifiedCashier;
 	} catch (error) {
 		pinError.value = normalizeErrorMessage(error);
@@ -509,12 +570,34 @@ const verifySelection = async () => {
 	}
 };
 
+async function saveHandover(nextCashier) {
+	try {
+		await recordCashierHandover(
+			{
+				cashier: currentCashier.value?.user || "",
+				profile: posProfileName.value,
+				company: uiStore.posProfile?.company || "",
+				opening: uiStore.posOpeningShift?.name || "",
+			},
+			nextCashier,
+			uiStore.posProfile,
+		);
+	} catch (error) {
+		console.error("Unable to persist cashier handover", error);
+		toastStore.show({
+			title: __("Cashier verified, but the device handover log could not be saved."),
+			color: "warning",
+		});
+	}
+}
+
 const submitSwitch = async () => {
 	const verifiedCashier = await verifySelection();
 	if (!verifiedCashier) {
 		return;
 	}
 	employeeStore.applyVerifiedCashier(verifiedCashier);
+	employeeStore.offlineCashierToken = verifiedCashier.offlineToken || "";
 	employeeStore.closeEmployeeSwitch();
 	cashierPin.value = "";
 };
@@ -525,6 +608,7 @@ const submitUnlock = async () => {
 		return;
 	}
 	employeeStore.unlockTerminal(verifiedCashier);
+	employeeStore.offlineCashierToken = verifiedCashier.offlineToken || "";
 	cashierPin.value = "";
 };
 

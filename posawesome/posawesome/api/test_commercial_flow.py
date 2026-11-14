@@ -36,6 +36,7 @@ def _install_stubs():
         "posawesome.posawesome.api.sales_orders",
         "posawesome.posawesome.api.tax_contracts",
         "posawesome.posawesome.api.erpnext_compat",
+        "posawesome.posawesome.api.document_item_previews",
         "erpnext.selling.doctype.quotation.quotation",
         "erpnext.selling.doctype.sales_order.sales_order",
         "erpnext.stock.doctype.delivery_note.delivery_note",
@@ -50,6 +51,7 @@ def _install_stubs():
     frappe_module.PermissionError = PermissionError
     frappe_module.has_permission = lambda *args, **kwargs: True
     frappe_module.get_list = lambda *args, **kwargs: []
+    frappe_module.get_all = lambda *args, **kwargs: []
     frappe_module.get_doc = lambda *args, **kwargs: None
     frappe_module.get_cached_value = lambda *args, **kwargs: None
     sys.modules["frappe"] = frappe_module

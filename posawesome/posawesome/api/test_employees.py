@@ -87,7 +87,20 @@ class TestEmployeesApi(unittest.TestCase):
             "posawesome.posawesome.api.employees"
         )
         _install_frappe_stub()
-        cls.employees = _load_employees_module()
+        # Keep these unit tests independent of an installed Frappe site. Every
+        # authorization/terminal helper is configured explicitly in setUp.
+        access = types.ModuleType("posawesome.posawesome.api.pos_access")
+        access.POS_SUPERVISOR_ROLE = "POS Awesome Supervisor"
+        access.get_authenticated_pos_user = lambda: ""
+        access.get_authorized_pos_profile = lambda profile: {}
+        access.user_can_manage_pos = lambda user: False
+        terminal = types.ModuleType("posawesome.posawesome.api.terminal_state")
+        terminal.activate_verified_cashier = lambda *args: {}
+        terminal.get_active_terminal_cashier = lambda *args: ""
+        terminal.get_authorized_terminal_state = lambda *args: {}
+        terminal.lock_authorized_terminal = lambda *args: {}
+        with patch.dict(sys.modules, {access.__name__: access, terminal.__name__: terminal}):
+            cls.employees = _load_employees_module()
         cls.production_create_cashier_pin_attempt_tracker = staticmethod(
             cls.employees._create_cashier_pin_attempt_tracker
         )
@@ -193,6 +206,15 @@ class TestEmployeesApi(unittest.TestCase):
         self.assertFalse(result[1]["is_current"])
         self.assertFalse(result[1]["is_supervisor"])
         self.assertEqual(result[1]["pin_length"], 6)
+        self.assertNotIn("offline_access", result[0])
+
+        offline = types.ModuleType("posawesome.posawesome.api.offline_cashier")
+        offline.create_offline_cashier_access = Mock(return_value={"ciphertext": "encrypted-grant"})
+        with patch.dict(sys.modules, {offline.__name__: offline}):
+            prepared = self.employees.get_terminal_employees("Main POS", include_offline_access="1")
+        self.assertEqual(prepared[1]["offline_access"], {"ciphertext": "encrypted-grant"})
+        self.assertEqual(offline.create_offline_cashier_access.call_count, 2)
+        offline.create_offline_cashier_access.assert_any_call("Main POS", "backup@example.com", "123456")
 
     def test_get_terminal_employees_marks_supervisor_from_user_role(self):
         self.employees.frappe.session.user = "cashier@example.com"
@@ -628,8 +650,24 @@ class TestEmployeesApi(unittest.TestCase):
         self.assertTrue(result["has_pin"])
 
     def _first_pin_user(self, pin="", *, enabled=1, assigned=True):
-        from posawesome.posawesome.api import terminal_state
-        from posawesome.posawesome.api.test_terminal_state import FakeCache
+        module_name = "posawesome.posawesome.api.terminal_state"
+        spec = importlib.util.spec_from_file_location(
+            module_name, pathlib.Path(__file__).with_name("terminal_state.py")
+        )
+        terminal_state = importlib.util.module_from_spec(spec)
+        frappe_utils = types.ModuleType("frappe.utils")
+        frappe_utils.cstr = lambda value: str(value or "")
+        frappe_utils.now_datetime = lambda: "2026-07-12 20:00:00"
+        access = types.ModuleType("posawesome.posawesome.api.pos_access")
+        access.get_authenticated_pos_user = self.employees.get_authenticated_pos_user
+        access.get_authorized_pos_profile = self.employees.get_authorized_pos_profile
+        with patch.dict(sys.modules, {
+            module_name: terminal_state,
+            frappe_utils.__name__: frappe_utils,
+            access.__name__: access,
+        }):
+            spec.loader.exec_module(terminal_state)
+            from posawesome.posawesome.api.test_terminal_state import FakeCache
 
         user_doc = types.SimpleNamespace(
             name="cashier@example.com",

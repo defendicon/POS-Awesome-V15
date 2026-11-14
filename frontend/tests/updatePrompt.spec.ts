@@ -7,6 +7,7 @@ import { mount } from "@vue/test-utils";
 
 import UpdatePrompt from "../src/posapp/components/ui/UpdatePrompt.vue";
 import { useUpdateStore } from "../src/posapp/stores/updateStore";
+import { SAFE_REFRESH_REQUEST } from "../src/posapp/services/safeRefresh";
 
 vi.mock("../src/posapp/composables/core/useRtl", () => ({
 	useRtl: () => ({
@@ -97,6 +98,41 @@ const mountPrompt = () =>
 	});
 
 describe("UpdatePrompt", () => {
+	it("defers update activation to Safe Refresh and restores the prompt on cancellation", async () => {
+		const store = useUpdateStore(),
+			reload = vi.fn();
+		store.setCurrentVersion("build-1000", 1000);
+		store.setAvailableVersion("build-2000", 2000);
+		store.setReloadAction(reload);
+		let request: any;
+		const receive = (event: Event) => {
+			event.preventDefault();
+			request = (event as CustomEvent).detail;
+		};
+		window.addEventListener(SAFE_REFRESH_REQUEST, receive);
+		const wrapper = mountPrompt();
+		try {
+			await wrapper
+				.findAll("button")
+				.find((button) => button.text() === "Reload Now")!
+				.trigger("click");
+			expect(reload).not.toHaveBeenCalled();
+			expect(store.reloading).toBe(false);
+			expect(request.update).toBe(true);
+			request.onCancel();
+			await wrapper.vm.$nextTick();
+			expect(
+				wrapper
+					.get('[data-test="update-dialog"]')
+					.attributes("data-model-value"),
+			).toBe("true");
+			request.action();
+			expect(reload).toHaveBeenCalledOnce();
+		} finally {
+			window.removeEventListener(SAFE_REFRESH_REQUEST, receive);
+			wrapper.unmount();
+		}
+	});
 	beforeEach(() => {
 		setActivePinia(createPinia());
 		(globalThis as any).__ = (value: string) => value;
@@ -128,6 +164,10 @@ describe("UpdatePrompt", () => {
 
 		expect(updateStore.dismissedVersion).toBe("build-2000");
 		expect(updateStore.shouldPrompt).toBe(false);
-		expect(wrapper.get('[data-test="update-dialog"]').attributes("data-model-value")).toBe("false");
+		expect(
+			wrapper
+				.get('[data-test="update-dialog"]')
+				.attributes("data-model-value"),
+		).toBe("false");
 	});
 });

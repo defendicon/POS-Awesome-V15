@@ -83,7 +83,12 @@ export async function initializeStockCache(
 			updatedItems.forEach((item) => {
 				if (item.actual_qty !== undefined) {
 					existingCache[item.item_code] = {
-						actual_qty: item.actual_qty,
+						actual_qty:
+							Number(item.actual_qty) -
+							getPendingStockQuantity(
+								item.item_code,
+								pos_profile,
+							),
 						last_updated: new Date().toISOString(),
 					};
 				}
@@ -118,6 +123,18 @@ export function setStockCacheReady(ready: boolean) {
 	});
 }
 
+export function getInvoiceStockQuantity(item: AnyRecord): number {
+	const quantity = Number(
+		item.stock_qty ??
+			Number(item.qty || 0) * Number(item.conversion_factor || 1),
+	);
+	if (!Number.isFinite(quantity))
+		throw new Error(
+			"Invalid stock quantity for " + (item.item_code || "item"),
+		);
+	return quantity;
+}
+
 export function updateLocalStock(items: AnyRecord[]) {
 	try {
 		const stockCache = memory.local_stock_cache || {};
@@ -129,11 +146,7 @@ export function updateLocalStock(items: AnyRecord[]) {
 			// Don't create new entries without knowing the actual stock
 			if (stockCache[key]) {
 				// Reduce quantity by sold amount
-				const soldQty = Math.abs(item.qty || 0);
-				stockCache[key].actual_qty = Math.max(
-					0,
-					stockCache[key].actual_qty - soldQty,
-				);
+				stockCache[key].actual_qty -= getInvoiceStockQuantity(item);
 				stockCache[key].last_updated = new Date().toISOString();
 			}
 			// If item doesn't exist in cache, we don't create it
@@ -150,13 +163,40 @@ export function updateLocalStock(items: AnyRecord[]) {
 export function getLocalStock(itemCode: string) {
 	try {
 		const stockCache = memory.local_stock_cache || {};
-		return stockCache[itemCode]?.actual_qty || null;
+		return stockCache[itemCode]?.actual_qty ?? null;
 	} catch {
 		return null;
 	}
 }
 
-export function updateLocalStockCache(items: AnyRecord[]) {
+export function getPendingStockQuantity(
+	itemCode: string,
+	profile: AnyRecord = memory.pos_opening_storage?.pos_profile || {},
+) {
+	if (!profile?.name || !profile.company) return 0;
+	let quantity = 0;
+	for (const entry of memory.offline_invoices || []) {
+		const invoice = entry.invoice;
+		if (
+			!invoice ||
+			entry.status === "synced" ||
+			invoice.pos_profile !== profile.name ||
+			invoice.company !== profile.company ||
+			!(invoice.doctype === "POS Invoice" || Number(invoice.update_stock))
+		)
+			continue;
+		for (const item of invoice.items || []) {
+			if (
+				item.item_code === itemCode &&
+				(!item.warehouse || item.warehouse === profile.warehouse)
+			)
+				quantity += getInvoiceStockQuantity(item);
+		}
+	}
+	return quantity;
+}
+
+export function updateLocalStockCache(items: AnyRecord[], profile?: AnyRecord) {
 	try {
 		const stockCache = memory.local_stock_cache || {};
 
@@ -165,7 +205,9 @@ export function updateLocalStockCache(items: AnyRecord[]) {
 
 			if (item.actual_qty !== undefined) {
 				stockCache[item.item_code] = {
-					actual_qty: item.actual_qty,
+					actual_qty:
+						Number(item.actual_qty) -
+						getPendingStockQuantity(item.item_code, profile),
 					last_updated: new Date().toISOString(),
 				};
 			}
@@ -236,11 +278,8 @@ export function updateLocalStockWithActualQuantities(
 				}
 
 				// Now reduce quantity by sold amount
-				const soldQty = Math.abs(invoiceItem.qty || 0);
-				stockCache[key].actual_qty = Math.max(
-					0,
-					stockCache[key].actual_qty - soldQty,
-				);
+				stockCache[key].actual_qty -=
+					getInvoiceStockQuantity(invoiceItem);
 			}
 		});
 

@@ -3,7 +3,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { defineComponent, h, ref } from "vue";
-import { mount } from "@vue/test-utils";
+import { flushPromises, mount } from "@vue/test-utils";
+import { useUIStore } from "../src/posapp/stores/uiStore";
+import { readOfflineReadiness } from "../src/posapp/services/offlineReadiness";
+vi.mock("../src/posapp/services/offlineReadiness", () => ({
+	readOfflineReadiness: vi.fn(),
+}));
 
 import OfflineStatusPanel from "../src/posapp/components/navbar/OfflineStatusPanel.vue";
 import { useOfflineSyncStore } from "../src/posapp/stores/offlineSyncStore";
@@ -23,7 +28,11 @@ const VMenuStub = defineComponent({
 					props: {},
 				}),
 				props.modelValue
-					? h("div", { class: "v-menu-stub__content" }, slots.default?.())
+					? h(
+							"div",
+							{ class: "v-menu-stub__content" },
+							slots.default?.(),
+						)
 					: null,
 			]);
 	},
@@ -55,8 +64,58 @@ const SimpleStub = defineComponent({
 
 describe("OfflineStatusPanel", () => {
 	beforeEach(() => {
+		vi.mocked(readOfflineReadiness).mockReset();
 		setActivePinia(createPinia());
 		vi.stubGlobal("__", (value: string) => value);
+	});
+
+	it("does not claim ready when scope evidence is missing and updates after sync", async () => {
+		vi.stubGlobal("frappe", { session: { user: "terminal@example.com" } });
+		useUIStore().posProfile = { name: "Main POS" } as any;
+		vi.mocked(readOfflineReadiness).mockResolvedValue({
+			rows: [
+				{
+					id: "items",
+					label: "Items",
+					status: "unverified",
+					message: "Missing scope",
+					lastSyncedAt: null,
+				},
+			],
+			warnings: ["Missing scope"],
+			blocked: false,
+			policy: "Warn",
+			maxHours: 24,
+		});
+		const wrapper = mount(OfflineStatusPanel, {
+			props: { modelValue: true },
+			global: { components: { VCard: SimpleStub, VChip: SimpleStub } },
+		});
+		await flushPromises();
+		expect(wrapper.text()).toContain("Offline cache needs attention");
+		expect(wrapper.text()).toContain("Missing scope");
+		expect(wrapper.text()).not.toContain(
+			"Offline data is ready for this terminal.",
+		);
+		vi.mocked(readOfflineReadiness).mockResolvedValue({
+			rows: [],
+			warnings: [],
+			blocked: false,
+			policy: "Warn",
+			maxHours: 24,
+		});
+		useOfflineSyncStore().setResourceStates([
+			{
+				resourceId: "items",
+				status: "fresh",
+				lastSyncedAt: new Date().toISOString(),
+			},
+		] as any);
+		await flushPromises();
+		expect(wrapper.text()).toContain(
+			"Offline data is ready for this terminal.",
+		);
+		wrapper.unmount();
 	});
 
 	it("shows warning summary, attention resources, and repair actions", () => {
@@ -68,7 +127,11 @@ describe("OfflineStatusPanel", () => {
 			manualOffline: false,
 			pendingInvoices: 2,
 			cacheUsage: 46,
-			cacheUsageDetails: { total: 4096, indexedDB: 3072, localStorage: 1024 },
+			cacheUsageDetails: {
+				total: 4096,
+				indexedDB: 3072,
+				localStorage: 1024,
+			},
 		});
 		store.setBootstrapWarning({
 			active: true,
@@ -85,8 +148,7 @@ describe("OfflineStatusPanel", () => {
 				severity: "warning",
 				message:
 					"Offline pricing is unverified. Offers, customer pricing, taxes, or discounts may differ after reconnect.",
-				action:
-					"Allow sale with warning and flag the invoice as offline pricing unverified.",
+				action: "Allow sale with warning and flag the invoice as offline pricing unverified.",
 				warningCodes: [
 					"pricing_rules_snapshot",
 					"pricing_rules_context",
@@ -106,8 +168,7 @@ describe("OfflineStatusPanel", () => {
 				severity: "warning",
 				message:
 					"Stock confidence is low and a local supervisor override is required by policy.",
-				action:
-					"Collect a local supervisor PIN or privileged approval before selling uncertain stock.",
+				action: "Collect a local supervisor PIN or privileged approval before selling uncertain stock.",
 				warningCodes: ["stock_cache_ready"],
 				prerequisites: ["stock_cache_ready"],
 				policy: "require_manager_override",
@@ -160,9 +221,9 @@ describe("OfflineStatusPanel", () => {
 			},
 		});
 
-		expect(wrapper.get('[data-test="offline-status-panel"]').text()).toContain(
-			"Pricing Offline",
-		);
+		expect(
+			wrapper.get('[data-test="offline-status-panel"]').text(),
+		).toContain("Pricing Offline");
 		expect(wrapper.text()).toContain(
 			"Offline pricing is unverified. Offers, customer pricing, taxes, or discounts may differ after reconnect.",
 		);
@@ -175,18 +236,22 @@ describe("OfflineStatusPanel", () => {
 		expect(wrapper.text()).toContain(
 			"Timed out while refreshing exchange rates.",
 		);
-		expect(wrapper.get('[data-test="offline-status-action-refresh"]').text()).toContain(
-			"Refresh Offline Data",
-		);
-		expect(wrapper.get('[data-test="offline-status-action-rebuild"]').text()).toContain(
-			"Rebuild Offline Data",
-		);
-		expect(wrapper.get('[data-test="offline-status-action-clear-cache"]').text()).toContain(
-			"Clear Cache",
-		);
-		expect(wrapper.get('[data-test="offline-status-action-diagnostics"]').text()).toContain(
-			"View Data Diagnostics",
-		);
+		expect(
+			wrapper.get('[data-test="offline-status-action-refresh"]').text(),
+		).toContain("Refresh Offline Data");
+		expect(
+			wrapper.get('[data-test="offline-status-action-rebuild"]').text(),
+		).toContain("Rebuild Offline Data");
+		expect(
+			wrapper
+				.get('[data-test="offline-status-action-clear-cache"]')
+				.text(),
+		).toContain("Clear Cache");
+		expect(
+			wrapper
+				.get('[data-test="offline-status-action-diagnostics"]')
+				.text(),
+		).toContain("View Data Diagnostics");
 	});
 
 	it("emits repair actions from the panel surface", async () => {
@@ -198,7 +263,11 @@ describe("OfflineStatusPanel", () => {
 			manualOffline: true,
 			pendingInvoices: 0,
 			cacheUsage: 12,
-			cacheUsageDetails: { total: 1024, indexedDB: 768, localStorage: 256 },
+			cacheUsageDetails: {
+				total: 1024,
+				indexedDB: 768,
+				localStorage: 256,
+			},
 		});
 
 		const Parent = defineComponent({
@@ -240,11 +309,21 @@ describe("OfflineStatusPanel", () => {
 			},
 		});
 
-		await wrapper.get('[data-test="offline-status-action-connectivity"]').trigger("click");
-		await wrapper.get('[data-test="offline-status-action-refresh"]').trigger("click");
-		await wrapper.get('[data-test="offline-status-action-rebuild"]').trigger("click");
-		await wrapper.get('[data-test="offline-status-action-clear-cache"]').trigger("click");
-		await wrapper.get('[data-test="offline-status-action-diagnostics"]').trigger("click");
+		await wrapper
+			.get('[data-test="offline-status-action-connectivity"]')
+			.trigger("click");
+		await wrapper
+			.get('[data-test="offline-status-action-refresh"]')
+			.trigger("click");
+		await wrapper
+			.get('[data-test="offline-status-action-rebuild"]')
+			.trigger("click");
+		await wrapper
+			.get('[data-test="offline-status-action-clear-cache"]')
+			.trigger("click");
+		await wrapper
+			.get('[data-test="offline-status-action-diagnostics"]')
+			.trigger("click");
 
 		expect((wrapper.vm as any).toggleCount).toBe(1);
 		expect((wrapper.vm as any).refreshCount).toBe(1);
