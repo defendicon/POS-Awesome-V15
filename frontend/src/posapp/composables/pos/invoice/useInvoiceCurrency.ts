@@ -35,6 +35,7 @@ import {
 	savePriceListMetaCache,
 } from "../../../../offline/index";
 import { resolveExchangeRate } from "../../../services/exchangeRateResolver";
+import { parseBooleanSetting } from "../../../utils/stock";
 import {
 	fromCompanyCurrency,
 	getPlcConversionRate,
@@ -382,41 +383,51 @@ export function useInvoiceCurrency() {
 	};
 
 	const fetch_price_lists = async () => {
-		if (!pos_profile.value) return [];
-		const profileName = pos_profile.value.name;
+		const profile = pos_profile.value;
+		if (!profile) return [];
+		const profileName = profile.name;
+		price_lists.value = [profile.selling_price_list].filter(Boolean);
 
-		if (pos_profile.value.posa_enable_price_list_dropdown) {
+		if (parseBooleanSetting(profile.posa_enable_price_list_dropdown)) {
 			try {
 				const r = await frappe.call({
 					method: "posawesome.posawesome.api.utilities.get_selling_price_lists",
+					args: {
+						enabled_only: 1,
+						currency: parseBooleanSetting(profile.posa_allow_multi_currency)
+							? null
+							: profile.currency,
+					},
 				});
-				if (r && r.message) {
+				if (pos_profile.value !== profile) return [];
+				if (Array.isArray(r?.message)) {
 					price_lists.value = r.message.map((pl: any) => pl.name);
 				}
 			} catch (error) {
 				console.error("Failed fetching price lists", error);
-				price_lists.value = [pos_profile.value.selling_price_list];
 			}
-		} else {
-			price_lists.value = [pos_profile.value.selling_price_list];
 		}
+		if (pos_profile.value !== profile) return [];
 
 		if (!selected_price_list.value) {
-			selected_price_list.value = pos_profile.value.selling_price_list;
+			selected_price_list.value = profile.selling_price_list;
 		}
 
+		const activeList = selected_price_list.value;
 		try {
 			const r = await frappe.call({
 				method: "posawesome.posawesome.api.invoices.get_price_list_currency",
-				args: { price_list: selected_price_list.value },
+				args: { price_list: activeList },
 			});
+			if (pos_profile.value !== profile || selected_price_list.value !== activeList) return [];
 			if (r && r.message) {
 				price_list_currency.value = r.message;
 			}
 		} catch (error) {
 			console.error("Failed fetching price list currency", error);
+			if (pos_profile.value !== profile || selected_price_list.value !== activeList) return [];
 			const cachedMeta = getCachedPriceListMeta(profileName);
-			if (cachedMeta?.price_list_currency) {
+			if (cachedMeta?.selected_price_list === activeList && cachedMeta?.price_list_currency) {
 				price_list_currency.value = cachedMeta.price_list_currency;
 			}
 		}

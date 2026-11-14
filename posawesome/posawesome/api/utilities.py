@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.utils import cstr, add_to_date, get_datetime
+from frappe.utils import cstr, cint, add_to_date, get_datetime
 from typing import List, Dict, Any
 import time
 import os
@@ -166,11 +166,16 @@ def get_company_domain(company):
 
 
 @frappe.whitelist()
-def get_selling_price_lists():
-    """Return all selling price lists"""
+def get_selling_price_lists(enabled_only=False, currency=None):
+    """List selling price lists, optionally excluding disabled entries."""
+    filters = {"selling": 1}
+    if cint(enabled_only):
+        filters["enabled"] = 1
+    if currency:
+        filters["currency"] = currency
     return frappe.get_all(
         "Price List",
-        filters={"selling": 1},
+        filters=filters,
         fields=["name"],
         order_by="name",
     )

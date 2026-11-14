@@ -1592,17 +1592,21 @@ def update_invoice(data):
             resolved_customer_name or invoice_doc.get("customer_name") or invoice_doc.customer
         )
 
+    allow_price_list_selection = cint(profile_doc.get("posa_enable_price_list_dropdown")) and not cint(
+        invoice_doc.get("is_return")
+    )
     effective_price_list = _resolve_effective_price_list(
         invoice_doc.get("customer"),
         invoice_doc.get("pos_profile") or pos_profile,
         invoice_doc.get("selling_price_list") or data.get("selling_price_list"),
+        allow_selection=bool(allow_price_list_selection),
     )
     if effective_price_list:
         invoice_doc.selling_price_list = effective_price_list
 
     selected_currency = data.get("currency")
     price_list_currency = data.get("price_list_currency")
-    if not price_list_currency and invoice_doc.get("selling_price_list"):
+    if (allow_price_list_selection or not price_list_currency) and invoice_doc.get("selling_price_list"):
         price_list_currency = frappe.db.get_value("Price List", invoice_doc.selling_price_list, "currency")
 
     # Preserve provided item names for manual overrides

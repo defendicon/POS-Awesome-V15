@@ -8525,11 +8525,22 @@
 	{
 		"doctype": "Custom Field",
 		"dt": "POS Profile",
+		"fieldname": "posa_enable_price_list_dropdown",
+		"fieldtype": "Check",
+		"label": "Enable Price List Dropdown",
+		"description": "Allow the cashier to select a selling price list before adding items. Customer and customer group price lists retain priority.",
+		"default": "0",
+		"insert_after": "posa_force_price_from_customer_price_list",
+		"name": "POS Profile-posa_enable_price_list_dropdown"
+	},
+	{
+		"doctype": "Custom Field",
+		"dt": "POS Profile",
 		"fieldname": "posa_section_sales_returns",
 		"fieldtype": "Section Break",
 		"label": "Sales and Return Controls",
 		"collapsible": 1,
-		"insert_after": "posa_force_price_from_customer_price_list",
+		"insert_after": "posa_enable_price_list_dropdown",
 		"name": "POS Profile-posa_section_sales_returns"
 	},
 	{

@@ -77,6 +77,7 @@ ORDERED_CHAIN = [
     "posa_display_discount_amount",
     "posa_allow_price_list_rate_change",
     "posa_force_price_from_customer_price_list",
+    "posa_enable_price_list_dropdown",
     "posa_section_sales_returns",
     "posa_allow_credit_sale",
     "posa_allow_return",

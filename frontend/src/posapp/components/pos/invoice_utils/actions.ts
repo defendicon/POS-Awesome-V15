@@ -64,6 +64,13 @@ export function remove_item(context: any, item: any) {
 }
 
 export async function add_item(context: any, item: any, options: any = {}) {
+	if (context.priceListSwitching) {
+		context.toastStore?.show({
+			title: __("Please wait for the Price List to finish changing"),
+			color: "warning",
+		});
+		return;
+	}
 	const { addItem } = getItemAdditionApi();
 	// Build price context for debug
 	const priceContext = {

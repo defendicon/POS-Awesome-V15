@@ -238,6 +238,32 @@ describe("itemsStore loadItems", () => {
 		]);
 	});
 
+	it("replaces the catalog with the selected list and keeps it on a failed switch", async () => {
+		const store = useItemsStore();
+		await store.initialize({
+			name: "POS-1",
+			warehouse: "Main WH",
+			selling_price_list: "Retail",
+			currency: "PKR",
+		} as any);
+		itemServiceMocks.getItemsData.mockResolvedValueOnce([
+			{ item_code: "ITEM-2", rate: 95, price_list_rate: 95 },
+		]);
+
+		await store.updatePriceList("Wholesale", { reloadCatalog: true });
+
+		expect(store.activePriceList).toBe("Wholesale");
+		expect(store.items.map((item) => item.item_code)).toEqual(["ITEM-2"]);
+		expect(store.filteredItems[0].rate).toBe(95);
+
+		itemServiceMocks.getItemsData.mockRejectedValueOnce(new Error("Unavailable"));
+		await expect(
+			store.updatePriceList("Member", { reloadCatalog: true }),
+		).rejects.toThrow("Unavailable");
+		expect(store.activePriceList).toBe("Wholesale");
+		expect(store.items[0].item_code).toBe("ITEM-2");
+	});
+
 	it("primes detail cache directly from get_items responses on first load", async () => {
 		const store = useItemsStore();
 		const profile = {

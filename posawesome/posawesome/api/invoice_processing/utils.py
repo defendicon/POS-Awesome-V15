@@ -80,6 +80,8 @@ def _resolve_effective_price_list(
     customer_name: str | None,
     pos_profile: str | None,
     fallback_price_list: str | None = None,
+    *,
+    allow_selection: bool = False,
 ) -> str | None:
     customer_price_list = None
     if customer_name:
@@ -87,12 +89,23 @@ def _resolve_effective_price_list(
     if customer_price_list:
         return customer_price_list
 
-    if pos_profile:
-        profile_price_list = frappe.db.get_value("POS Profile", pos_profile, "selling_price_list")
-        if profile_price_list:
-            return profile_price_list
+    if allow_selection:
+        customer_group = (
+            frappe.db.get_value("Customer", customer_name, "customer_group") if customer_name else None
+        )
+        if customer_group:
+            group_price_list = frappe.db.get_value("Customer Group", customer_group, "default_price_list")
+            if group_price_list:
+                return group_price_list
+    profile_price_list = (
+        frappe.db.get_value("POS Profile", pos_profile, "selling_price_list") if pos_profile else None
+    )
+    if allow_selection and fallback_price_list and fallback_price_list != profile_price_list:
+        if not frappe.db.exists("Price List", {"name": fallback_price_list, "selling": 1, "enabled": 1}):
+            frappe.throw(_("Price List {0} is not an enabled selling Price List.").format(fallback_price_list))
+        return fallback_price_list
 
-    return fallback_price_list
+    return profile_price_list or fallback_price_list
 
 
 def _build_invoice_remarks(invoice_doc):

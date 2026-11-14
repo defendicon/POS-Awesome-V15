@@ -1,6 +1,5 @@
 <template>
 	<v-sheet
-		v-if="pos_profile?.posa_allow_change_posting_date"
 		class="pos-header-bar px-4 py-3 mb-2"
 		rounded="lg"
 		elevation="1"
@@ -8,8 +7,9 @@
 		<v-row align="center" dense>
 			<!-- Posting Date -->
 			<v-col
+				v-if="pos_profile?.posa_allow_change_posting_date"
 				cols="12"
-				:sm="showPriceList ? 6 : 6"
+				sm="6"
 				:md="showPriceList ? 4 : 5"
 				:lg="showPriceList ? 4 : 5"
 				class="py-1"
@@ -38,9 +38,10 @@
 				class="py-1"
 			>
 				<v-select
-					v-model="internal_price_list"
+					:model-value="priceList"
 					:items="priceLists"
 					:label="priceListLabel"
+					:disabled="priceListDisabled || !priceLists?.length"
 					density="comfortable"
 					variant="solo"
 					color="primary"
@@ -53,7 +54,7 @@
 
 			<!-- Customer Balance -->
 			<v-col
-				v-if="showBalance"
+				v-if="pos_profile?.posa_allow_change_posting_date && showBalance"
 				cols="12"
 				:sm="showPriceList ? 12 : 6"
 				:md="showPriceList ? 4 : 7"
@@ -117,6 +118,8 @@ interface Props {
 	formatCurrency: (val: number | undefined, currency?: string) => string;
 	priceList?: string;
 	priceLists?: string[];
+	showPriceList?: boolean;
+	priceListDisabled?: boolean;
 }
 
 const props = defineProps<Props>();
@@ -129,10 +132,8 @@ const emit = defineEmits<{
 }>();
 
 const internal_posting_date_display = ref(props.posting_date_display);
-const internal_price_list = ref(props.priceList);
 const postingDatePicker = ref<any>(null);
 
-const showPriceList = computed(() => !!props.pos_profile?.posa_enable_price_list_dropdown);
 const showBalance = computed(() => !!props.pos_profile?.posa_show_customer_balance);
 
 const placeholderText = computed(() => __("Posting Date"));
@@ -145,10 +146,6 @@ const formattedBalance = computed(() => {
 
 watch(() => props.posting_date_display, (val) => {
 	internal_posting_date_display.value = val;
-});
-
-watch(() => props.priceList, (val) => {
-	internal_price_list.value = val;
 });
 
 const onUpdate = (val: any) => {

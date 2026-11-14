@@ -94,7 +94,7 @@
 
 					<div class="invoice-meta-grid">
 						<v-card
-							v-if="pos_profile.posa_allow_change_posting_date"
+							v-if="pos_profile.posa_allow_change_posting_date || showPriceListDropdown"
 							flat
 							class="invoice-section-card pos-themed-card"
 						>
@@ -112,6 +112,8 @@
 								:balance_loading="customer_balance_loading"
 								:price-list="selected_price_list"
 								:price-lists="price_lists"
+								:show-price-list="showPriceListDropdown"
+								:price-list-disabled="!canSelectPriceList || priceListSwitching"
 								:formatCurrency="formatCurrency"
 								:currencySymbol="currencySymbol"
 								@update:posting_date_display="
@@ -119,11 +121,7 @@
 										posting_date_display = val;
 									}
 								"
-								@update:priceList="
-									(val) => {
-										selected_price_list = val;
-									}
-								"
+								@update:priceList="selectPriceList"
 							/>
 						</v-card>
 
@@ -337,6 +335,7 @@ import { useToastStore } from "../../stores/toastStore.js";
 import { useUIStore } from "../../stores/uiStore.js";
 import { storeToRefs } from "pinia";
 import stockCoordinator from "../../utils/stockCoordinator";
+import { parseBooleanSetting } from "../../utils/stock";
 import { getCurrentInstance, ref } from "vue";
 import { save_and_clear_invoice as saveAndClearInvoiceAction } from "./invoice_utils/actions";
 import { fetchDraftInvoices } from "../../utils/draftInvoices";
@@ -461,6 +460,8 @@ export default {
 			return_doc: "",
 			customer: "",
 			customer_info: "",
+			manualPriceList: "",
+			priceListSwitching: false,
 			customer_balance: 0,
 			customer_balance_currency: undefined,
 			customer_balance_loading: false,
@@ -547,6 +548,27 @@ export default {
 		},
 		paymentVisible() {
 			return this.activeView === "payment" || this.uiStore.paymentDialogOpen;
+		},
+		showPriceListDropdown() {
+			return parseBooleanSetting(this.pos_profile?.posa_enable_price_list_dropdown);
+		},
+		canSelectPriceList() {
+			return (
+				this.showPriceListDropdown &&
+				this.isOnline &&
+				!this.itemsStore.isLoading &&
+				this.invoiceType === "Invoice" &&
+				!this.isReturnInvoice &&
+				!this.exchangeSession &&
+				!this.paymentVisible &&
+				!this.invoice_doc?.name &&
+				!this.items.length &&
+				!this.packed_items.length &&
+				!this.cartRecoveryBusy &&
+				(!this.customer || this.customer_info?.name === this.customer) &&
+				!this.customer_info?.customer_price_list &&
+				!this.customer_info?.customer_group_price_list
+			);
 		},
 		discount_amount: {
 			get() {
@@ -996,6 +1018,56 @@ export default {
 			this.invoiceStore.setPostingDate(date);
 			this.$forceUpdate();
 		},
+		async selectPriceList(priceList) {
+			if (
+				this.priceListSwitching ||
+				!this.canSelectPriceList ||
+				priceList === this.selected_price_list ||
+				!this.price_lists.includes(priceList)
+			) {
+				return;
+			}
+			this.priceListSwitching = true;
+			try {
+				const customer = this.customer;
+				const profile = this.pos_profile;
+				const stillCurrent = () =>
+					this.customer === customer &&
+					this.pos_profile === profile &&
+					this.invoiceType === "Invoice" &&
+					!this.exchangeSession &&
+					!this.paymentVisible &&
+					!this.cartRecoveryBusy &&
+					!this.customer_info?.customer_price_list &&
+					!this.customer_info?.customer_group_price_list &&
+					!this.items.length &&
+					!this.packed_items.length &&
+					!this.invoice_doc?.name;
+				const { message: currency } = await frappe.call({
+					method: "posawesome.posawesome.api.invoices.get_price_list_currency",
+					args: { price_list: priceList },
+				});
+				if (!currency) throw new Error("Selling price list currency is missing");
+				if (!stillCurrent()) return;
+				await this.itemsStore.updatePriceList(priceList, {
+					reloadCatalog: true,
+					shouldApply: stillCurrent,
+				});
+				if (!stillCurrent()) return;
+				this.price_list_currency = currency;
+				this.manualPriceList = priceList;
+				this.selected_price_list = priceList;
+				if (parseBooleanSetting(profile.posa_allow_multi_currency)) {
+					await this.update_currency(currency);
+				}
+				this.schedulePricingRuleApplication(true);
+			} catch (error) {
+				console.error("Failed to switch selling price list", error);
+				this.toastStore.show({ title: __("Unable to change Price List"), color: "error" });
+			} finally {
+				this.priceListSwitching = false;
+			}
+		},
 
 		update_exchange_rate() {
 			this.sync_exchange_rate();
@@ -1062,6 +1134,10 @@ export default {
 		},
 
 		handleRegisterPosProfile(data) {
+			if (this.pos_profile?.name !== data.pos_profile.name) {
+				this.manualPriceList = "";
+				this.selected_price_list = data.pos_profile.selling_price_list;
+			}
 			this.pos_profile = data.pos_profile;
 			this.company = data.company || null;
 			this.customer = data.pos_profile.customer;
