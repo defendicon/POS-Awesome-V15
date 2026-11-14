@@ -103,17 +103,15 @@
 						class="employee-switch-dialog__help"
 						data-test="cashier-pin-help"
 					>
-						{{
-							__(
-								"Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User. Load this profile online to prepare offline cashier access for the duration set in POS Profile.",
-							)
-						}}
+						<strong v-if="isFirstPin">{{ __("Create your PIN") }}</strong>
+						<div>{{ pinHelp }}</div>
 					</v-alert>
 					<v-text-field
+						v-if="!needsSupervisor"
 						v-model="cashierPin"
 						:type="showPin ? 'text' : 'password'"
 						name="pos-cashier-switch-pin"
-						autocomplete="one-time-code"
+						:autocomplete="isFirstPin ? 'new-password' : 'one-time-code'"
 						inputmode="numeric"
 						pattern="[0-9]*"
 						data-1p-ignore="true"
@@ -123,9 +121,27 @@
 						variant="outlined"
 						density="comfortable"
 						hide-details="auto"
-						:label="__('Cashier PIN')"
+						:label="isFirstPin ? __('New PIN') : __('Cashier PIN')"
 						:data-test="'cashier-pin-input'"
 						@click:append-inner="showPin = !showPin"
+						@keyup.enter="submitSwitch"
+					/>
+					<v-text-field
+						v-if="isFirstPin"
+						v-model="confirmPin"
+						:type="showPin ? 'text' : 'password'"
+						name="pos-cashier-switch-confirm-pin"
+						autocomplete="new-password"
+						inputmode="numeric"
+						pattern="[0-9]*"
+						data-1p-ignore="true"
+						data-lpignore="true"
+						data-bwignore="true"
+						variant="outlined"
+						density="comfortable"
+						hide-details="auto"
+						class="mt-3"
+						:label="__('Confirm PIN')"
 						@keyup.enter="submitSwitch"
 					/>
 				</template>
@@ -151,7 +167,7 @@
 					data-test="cashier-pin-submit"
 					@click="submitSwitch"
 				>
-					{{ __("Use Cashier") }}
+					{{ isFirstPin ? __("Create PIN and unlock") : __("Use Cashier") }}
 				</v-btn>
 			</v-card-actions>
 		</v-card>
@@ -245,17 +261,15 @@
 						density="comfortable"
 						class="employee-switch-dialog__help"
 					>
-						{{
-							__(
-								"Set each cashier PIN in the User form and keep terminal members assigned in POS Profile User. Load this profile online to prepare offline cashier access for the duration set in POS Profile.",
-							)
-						}}
+						<strong v-if="isFirstPin">{{ __("Create your PIN") }}</strong>
+						<div>{{ pinHelp }}</div>
 					</v-alert>
 					<v-text-field
+						v-if="!needsSupervisor"
 						v-model="cashierPin"
 						:type="showPin ? 'text' : 'password'"
 						name="pos-terminal-unlock-pin"
-						autocomplete="one-time-code"
+						:autocomplete="isFirstPin ? 'new-password' : 'one-time-code'"
 						inputmode="numeric"
 						pattern="[0-9]*"
 						data-1p-ignore="true"
@@ -265,10 +279,28 @@
 						variant="outlined"
 						density="comfortable"
 						hide-details="auto"
-						:label="__('Cashier PIN')"
+						:label="isFirstPin ? __('New PIN') : __('Cashier PIN')"
 						data-test="terminal-unlock-pin"
 						autofocus
 						@click:append-inner="showPin = !showPin"
+						@keyup.enter="submitUnlock"
+					/>
+					<v-text-field
+						v-if="isFirstPin"
+						v-model="confirmPin"
+						:type="showPin ? 'text' : 'password'"
+						name="pos-terminal-unlock-confirm-pin"
+						autocomplete="new-password"
+						inputmode="numeric"
+						pattern="[0-9]*"
+						data-1p-ignore="true"
+						data-lpignore="true"
+						data-bwignore="true"
+						variant="outlined"
+						density="comfortable"
+						hide-details="auto"
+						class="mt-3"
+						:label="__('Confirm PIN')"
 						@keyup.enter="submitUnlock"
 					/>
 				</template>
@@ -293,7 +325,7 @@
 					{{ __("Cancel invoice submission") }}
 				</v-btn>
 				<v-btn color="primary" :disabled="!canSubmit" :loading="isSubmitting" @click="submitUnlock">
-					{{ __("Unlock POS") }}
+					{{ isFirstPin ? __("Create PIN and unlock") : __("Unlock POS") }}
 				</v-btn>
 			</v-card-actions>
 		</v-card>
@@ -328,6 +360,7 @@ const {
 } = storeToRefs(employeeStore);
 const selectedUser = ref("");
 const cashierPin = ref("");
+const confirmPin = ref("");
 const pinError = ref("");
 const isSubmitting = ref(false);
 const showPin = ref(false);
@@ -360,6 +393,7 @@ watch(
 		if (dialogOpen && !previouslyOpen) {
 			selectedUser.value = resolveDefaultCashierUser(cashier);
 			cashierPin.value = "";
+			confirmPin.value = "";
 			pinError.value = "";
 			showPin.value = false;
 			return;
@@ -374,6 +408,7 @@ watch(
 		}
 		if (!dialogOpen) {
 			cashierPin.value = "";
+			confirmPin.value = "";
 			pinError.value = "";
 			showPin.value = false;
 		}
@@ -384,10 +419,21 @@ watch(
 const selectedCashier = computed(
 	() => terminalEmployees.value.find((employee) => employee.user === selectedUser.value) || null,
 );
+const isFirstPin = computed(
+	() => selectedCashier.value?.pin_length === 0 && selectedUser.value === window.frappe?.session?.user,
+);
+const needsSupervisor = computed(() => selectedCashier.value?.pin_length === 0 && !isFirstPin.value);
+const pinHelp = computed(() => {
+	if (isFirstPin.value) return __("Choose a PIN of 4 to 8 digits and confirm it to unlock this terminal.");
+	if (needsSupervisor.value) return __("This cashier has no PIN. Ask a POS supervisor for help.");
+	if (isOffline()) return __("Enter the cashier PIN prepared for offline access on this terminal.");
+	return __("Enter the selected cashier's PIN to continue.");
+});
 
 const canSubmit = computed(
 	() =>
 		Boolean(selectedCashier.value?.user) &&
+		!needsSupervisor.value &&
 		Boolean(cashierPin.value.trim()) &&
 		!isSubmitting.value &&
 		!invoiceStore.exchangeSession,
@@ -399,12 +445,14 @@ const normalizeErrorMessage = (error) =>
 const selectEmployee = (user) => {
 	selectedUser.value = user;
 	cashierPin.value = "";
+	confirmPin.value = "";
 	pinError.value = "";
 };
 
 const retryCashierLoad = () => {
 	selectedUser.value = "";
 	cashierPin.value = "";
+	confirmPin.value = "";
 	pinError.value = "";
 	const profileName = employeeStore.terminalEmployeesProfile || posProfileName.value;
 	if (profileName) {
@@ -424,6 +472,7 @@ const verifySelection = async () => {
 		pinError.value = __("Complete or cancel the active exchange before changing cashier.");
 		return null;
 	}
+	if (isSubmitting.value || needsSupervisor.value) return null;
 	if (!selectedCashier.value) {
 		pinError.value = __("Select a cashier first.");
 		return null;
@@ -432,9 +481,22 @@ const verifySelection = async () => {
 		pinError.value = __("Enter the cashier PIN to continue.");
 		return null;
 	}
+	if (isFirstPin.value) {
+		if (!/^[0-9]{4,8}$/.test(cashierPin.value)) {
+			pinError.value = __("PIN must be 4 to 8 digits.");
+			return null;
+		}
+		if (cashierPin.value !== confirmPin.value) {
+			pinError.value = __("PIN confirmation does not match.");
+			return null;
+		}
+	}
 
 	isSubmitting.value = true;
 	pinError.value = "";
+	const creatingPin = isFirstPin.value;
+	const cashier = selectedCashier.value;
+	const pin = cashierPin.value.trim();
 
 	try {
 		if (
@@ -448,6 +510,7 @@ const verifySelection = async () => {
 			);
 		}
 		if (isOffline()) {
+			if (creatingPin) throw new Error(__("Connect to the server to create your first PIN."));
 			const cashier = await unlockOfflineCashier(
 				posProfileName.value,
 				selectedCashier.value.user,
@@ -458,20 +521,30 @@ const verifySelection = async () => {
 			return null;
 		}
 		const response = await window.frappe.call({
-			method: "posawesome.posawesome.api.employees.verify_terminal_employee_pin",
+			method: creatingPin
+				? "posawesome.posawesome.api.employees.save_cashier_pin"
+				: "posawesome.posawesome.api.employees.verify_terminal_employee_pin",
 			args: {
 				pos_profile: posProfileName.value,
-				user: selectedCashier.value.user,
-				pin: cashierPin.value.trim(),
+				user: cashier.user,
+				...(creatingPin ? { new_pin: pin } : { pin }),
 			},
 		});
 		const verifiedCashier = {
-			...selectedCashier.value,
+			...cashier,
 			...(response?.message || {}),
 		};
 		const terminalState = verifiedCashier.terminal_state;
 		if (terminalState?.locked !== false || terminalState?.active_cashier !== verifiedCashier.user) {
 			throw new Error(__("The server did not confirm the active terminal cashier."));
+		}
+		if (creatingPin) {
+			verifiedCashier.pin_length = pin.length;
+			employeeStore.setTerminalEmployees(
+				terminalEmployees.value.map((employee) =>
+					employee.user === cashier.user ? { ...employee, pin_length: pin.length } : employee,
+				),
+			);
 		}
 		if (currentCashier.value?.user && uiStore.posOpeningShift?.name)
 			await saveHandover(verifiedCashier.user);
@@ -481,7 +554,7 @@ const verifySelection = async () => {
 					await unlockOfflineCashier(
 						posProfileName.value,
 						verifiedCashier.user,
-						cashierPin.value.trim(),
+						pin,
 					)
 				).token;
 			} catch (error) {
@@ -540,6 +613,7 @@ const submitUnlock = async () => {
 };
 
 watch(cashierPin, (value) => {
+	if (isFirstPin.value) return;
 	const normalizedPin = String(value || "")
 		.replace(/\D/g, "")
 		.slice(0, 8);

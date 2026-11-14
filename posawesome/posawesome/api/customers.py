@@ -188,7 +188,7 @@ def get_customer_group_condition(pos_profile):
 @frappe.whitelist()
 def get_customer_balance(customer, company=None):
     if not customer:
-        return {"balance": 0, "customer_name": None, "currency": None}
+        return {"balance": None, "customer_name": None, "currency": None}
 
     if not company:
         if frappe.db.exists("DocType", "POS Session"):
@@ -208,21 +208,21 @@ def get_customer_balance(customer, company=None):
         customer_name = frappe.db.get_value("Customer", customer, "customer_name")
 
         dashboard_info = get_dashboard_info("Customer", customer)
-        company_data = [d for d in dashboard_info if d.get("company") == company]
+        company_data = [d for d in (dashboard_info or []) if d.get("company") == company]
 
-        if company_data:
-            balance = flt(company_data[0].get("total_unpaid", 0))
+        if company_data and company_data[0].get("total_unpaid") is not None:
+            balance = flt(company_data[0]["total_unpaid"])
         else:
-            balance = 0
+            balance = None
 
         return {
             "balance": balance,
-            "customer_name": customer_name,
+            "customer_name": customer_name if dashboard_info is not None else None,
             "currency": company_data[0].get("currency") if company_data else None,
         }
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), _("Error fetching customer balance"))
-        return {"balance": 0, "customer_name": None, "currency": None}
+        return {"balance": None, "customer_name": None, "currency": None}
 
 
 @frappe.whitelist()

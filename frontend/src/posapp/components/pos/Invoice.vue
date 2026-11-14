@@ -463,7 +463,7 @@ export default {
 			customer_info: "",
 			manualPriceList: "",
 			priceListSwitching: false,
-			customer_balance: 0,
+			customer_balance: null,
 			customer_balance_currency: undefined,
 			customer_balance_loading: false,
 			total_tax: 0,

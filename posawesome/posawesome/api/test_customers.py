@@ -5,6 +5,7 @@ import sys
 import types
 import unittest
 from types import SimpleNamespace
+from unittest.mock import Mock
 
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
@@ -221,6 +222,79 @@ class TestCustomersApi(unittest.TestCase):
         )
 
         self.assertEqual([match["name"] for match in matches], ["CUST-TAX"])
+
+
+class TestCustomerBalance(unittest.TestCase):
+    def setUp(self):
+        self._orig_sys_modules = sys.modules.copy()
+        _install_stubs()
+        self.module = _load_module()
+        self.module.frappe.db.get_value = Mock(return_value="Test Customer")
+        self.module.frappe.log_error = Mock()
+        self.module.frappe.get_traceback = lambda: "synthetic traceback"
+        party = types.ModuleType("erpnext.accounts.party")
+        self.dashboard = Mock()
+        party.get_dashboard_info = self.dashboard
+        sys.modules["erpnext.accounts.party"] = party
+
+    def tearDown(self):
+        sys.modules.clear()
+        sys.modules.update(self._orig_sys_modules)
+
+    def test_unavailable_native_summary_does_not_disclose_customer_name(self):
+        self.dashboard.return_value = None
+
+        result = self.module.get_customer_balance("CUST-A", "Company A")
+
+        self.assertEqual(result, {
+            "balance": None, "customer_name": None, "currency": None,
+        })
+        self.dashboard.assert_called_once_with("Customer", "CUST-A")
+        self.module.frappe.log_error.assert_not_called()
+
+    def test_native_zero_positive_and_negative_balances_are_preserved(self):
+        for balance in (0, 125.5, -42.25):
+            with self.subTest(balance=balance):
+                self.dashboard.return_value = [
+                    {"company": "Other Company", "total_unpaid": 999, "currency": "EUR"},
+                    {"company": "Company A", "total_unpaid": balance, "currency": "USD"},
+                ]
+                self.assertEqual(
+                    self.module.get_customer_balance("CUST-A", "Company A"),
+                    {"balance": balance, "customer_name": "Test Customer", "currency": "USD"},
+                )
+
+    def test_missing_company_summary_is_unavailable(self):
+        for summary in ([], [{"company": "Other Company", "total_unpaid": 999}]):
+            with self.subTest(summary=summary):
+                self.dashboard.return_value = summary
+                self.assertEqual(
+                    self.module.get_customer_balance("CUST-A", "Company A"),
+                    {"balance": None, "customer_name": "Test Customer", "currency": None},
+                )
+        self.module.frappe.log_error.assert_not_called()
+
+    def test_missing_company_balance_is_not_an_explicit_zero(self):
+        self.dashboard.return_value = [{"company": "Company A", "currency": "USD"}]
+        self.assertEqual(
+            self.module.get_customer_balance("CUST-A", "Company A"),
+            {"balance": None, "customer_name": "Test Customer", "currency": "USD"},
+        )
+
+    def test_unexpected_native_failure_is_logged_and_unavailable(self):
+        self.dashboard.side_effect = RuntimeError("synthetic failure")
+        self.assertEqual(
+            self.module.get_customer_balance("CUST-A", "Company A"),
+            {"balance": None, "customer_name": None, "currency": None},
+        )
+        self.module.frappe.log_error.assert_called_once()
+
+    def test_no_customer_is_unavailable_without_querying_native_summary(self):
+        self.assertEqual(
+            self.module.get_customer_balance(None, "Company A"),
+            {"balance": None, "customer_name": None, "currency": None},
+        )
+        self.dashboard.assert_not_called()
 
 
 if __name__ == "__main__":

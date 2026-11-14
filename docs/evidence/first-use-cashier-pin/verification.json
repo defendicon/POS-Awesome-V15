@@ -1,0 +1,31 @@
+{
+  "evidence_kind": "synthetic-development-only",
+  "production_verified": false,
+  "source_base": "ac4542c92b5838b378f851a580490f6dc3b27bda",
+  "red_commit": "a6f750c098195db98ded30570623a820c8cd57b3",
+  "green_commit": "c53dc421cf22404e626e2da60b3d8d7f32d43c5c",
+  "red_replay": {
+    "frontend": {"passed": 7, "failed": 13, "files": 1},
+    "python_pin_api": {"passed": 25, "failed": 2}
+  },
+  "green_focused": {
+    "frontend": {"passed": 66, "failed": 0, "files": 11},
+    "python_pin_terminal_access": {"passed": 47, "failed": 0}
+  },
+  "screenshots": {
+    "desktop": {"width": 1440, "height": 1000},
+    "mobile": {"width": 390, "height": 844},
+    "before": ["desktop-before-stuck.png", "mobile-before-stuck.png"],
+    "after": [
+      "desktop-create-pin.png", "mobile-create-pin.png",
+      "desktop-mismatch.png", "mobile-mismatch.png",
+      "desktop-unlocked.png", "mobile-unlocked.png"
+    ]
+  },
+  "limits": [
+    "Simulated Frappe session and API, no native site or database integration",
+    "No production account, PIN, permission, runtime or deployment pin changed",
+    "Forgotten-PIN administrative reset is not implemented by this contribution",
+    "Raw call arguments are excluded from evidence"
+  ]
+}
