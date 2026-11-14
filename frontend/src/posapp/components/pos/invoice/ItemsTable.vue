@@ -961,6 +961,9 @@ const handleGridEditorSubmitted = (item: any, fromCellKey: CartGridColumnKey) =>
 const handleRateUpdate = (item: any, newRate: any) => {
 	props.setFormatedCurrency(item, "rate", null, false, { target: { value: newRate } });
 	props.calcPrices(item, newRate, { target: { id: "rate" } });
+	if (item._missingPriceListRate && item._manual_rate_set && Number(item.rate) > 0) {
+		item._missingPriceListRate = false;
+	}
 };
 
 const handleDiscountPercentUpdate = (item: any, newDiscount: any) => {
@@ -989,6 +992,16 @@ const focusItemField = (index: number, field: CartShortcutField, options?: CartF
 	deactivateKeyboardGrid();
 	rememberSelectedRow(index);
 	return focusCartItemField(tableContainer.value, index, field, options);
+};
+
+const focusMissingRateRow = async (index: number) => {
+	await ensureCartGridRowRendered(
+		tableContainer.value,
+		index,
+		virtualTable.value?.scrollToIndex,
+		waitForVirtualRowRender,
+	);
+	focusCartGridRow(tableContainer.value, index);
 };
 
 const isGridRowActive = (item: any) => {
@@ -1181,6 +1194,7 @@ onBeforeUnmount(() => {
 
 defineExpose({
 	focusItemField,
+	focusMissingRateRow,
 	enterKeyboardGrid,
 	getActiveGridItem,
 	getSelectedGridItem,

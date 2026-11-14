@@ -338,7 +338,7 @@ import stockCoordinator from "../../utils/stockCoordinator";
 import { parseBooleanSetting } from "../../utils/stock";
 import { getCurrentInstance, nextTick, ref } from "vue";
 import { save_and_clear_invoice as saveAndClearInvoiceAction } from "./invoice_utils/actions";
-import { prepareCartPriceListChange } from "./invoice_utils/item_updates";
+import { prepareCartPriceListChange, warnMissingPriceListRates } from "./invoice_utils/item_updates";
 import { fetchDraftInvoices } from "../../utils/draftInvoices";
 import { getQuickCashTenderSuggestions } from "../../utils/cashTender";
 import invoiceService from "../../services/invoiceService";
@@ -672,6 +672,13 @@ export default {
 
 		clearCounterGridEntry() {
 			return this.$refs.itemsTableRef?.clearCounterGridEntry?.();
+		},
+
+		async focusMissingPriceListItem(item) {
+			this.itemSearch = "";
+			await nextTick();
+			const index = this.items.indexOf(item);
+			if (index >= 0) await this.$refs.itemsTableRef?.focusMissingRateRow?.(index);
 		},
 
 		focusCartItemQty(payload = {}) {
@@ -1061,6 +1068,9 @@ export default {
 				this.manualPriceList = priceList;
 				this.selected_price_list = priceList;
 				cartChange.apply();
+				if (cartChange.missingItems.length) {
+					warnMissingPriceListRates(this, cartChange.missingItems);
+				}
 				await nextTick();
 				this.schedulePricingRuleApplication(true);
 			} catch (error) {

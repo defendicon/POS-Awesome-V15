@@ -36,6 +36,7 @@ function refreshInvoiceTotals(context: any) {
 }
 
 function hasProtectedPrice(item: any) {
+	if (hasMissingPriceListRate(item)) return false;
 	return (
 		(parseBooleanSetting(item._manual_rate_set) &&
 			!parseBooleanSetting(item._manual_rate_set_from_uom)) ||
@@ -50,6 +51,18 @@ function hasProtectedPrice(item: any) {
 			"discount_amount_per_item",
 		].some((field) => Math.abs(Number(item[field] || 0)) > 0.000001)
 	);
+}
+
+export function hasMissingPriceListRate(item: any) {
+	return Boolean(item?._missingPriceListRate);
+}
+
+export function warnMissingPriceListRates(context: any, items: any[]) {
+	context.toastStore.show({
+		title: __("Missing Price List rates"),
+		text: items.map((item) => `${item.item_code} (${item.uom || item.stock_uom || "-"})`).join(", "),
+		color: "warning",
+	});
 }
 
 export async function prepareCartPriceListChange(context: any, priceList: string, currency: string) {
@@ -94,18 +107,18 @@ export async function prepareCartPriceListChange(context: any, priceList: string
 		(details?.message || []).map((detail) => [String(detail.posa_row_id), detail]),
 	);
 	const updates = rows.map((item, index) => {
-		const prices = detailsById.get(String(index))?._prices_by_uom;
+		const detail = detailsById.get(String(index));
+		const prices = detail?._prices_by_uom;
 		const exact = prices?.[uoms[index]];
-		const price = exact ?? prices?.[item.stock_uom] ?? prices?.[""];
+		const price = exact ?? prices?.[item.stock_uom ?? detail?.stock_uom] ?? prices?.[""];
 		const factor = factors[index] ?? 1;
-		if (price?.price_list_rate == null || !Number.isFinite(Number(price.price_list_rate))) {
-			throw new Error(`Missing ${priceList} price for ${item.item_code} (${item.uom})`);
-		}
-		const originalRate = Number(price.price_list_rate) * (exact ? 1 : factor);
-		return { item, factor, originalRate };
+		const missing = price?.price_list_rate == null || !Number.isFinite(Number(price.price_list_rate));
+		const originalRate = missing ? 0 : Number(price.price_list_rate) * (exact ? 1 : factor);
+		return { item, factor, originalRate, missing };
 	});
 
 	return {
+		missingItems: updates.filter(({ missing }) => missing).map(({ item }) => item),
 		isCurrent: () =>
 			context.items.length === items.length &&
 			items.every((item, index) => context.items[index] === item) &&
@@ -130,10 +143,11 @@ export async function prepareCartPriceListChange(context: any, priceList: string
 					item._manual_rate_set_from_uom = false;
 				}
 			}
-			for (const { item, factor, originalRate } of updates) {
+			for (const { item, factor, originalRate, missing } of updates) {
 				const baseRate = originalRate * listToCompany;
 				const rate = context.flt(fromCompanyCurrency(context, baseRate), context.currency_precision);
 				Object.assign(item, {
+					_missingPriceListRate: missing,
 					rate,
 					price_list_rate: rate,
 					base_rate: baseRate,
@@ -231,6 +245,7 @@ export async function update_items_details(context: any, items: any[]) {
 					const manualLocked =
 						item._manual_rate_set === true;
 					const shouldOverrideRate =
+						!hasMissingPriceListRate(item) &&
 						!lockReturnPricing &&
 						!item.locked_price &&
 						!item.posa_offer_applied &&
@@ -248,6 +263,7 @@ export async function update_items_details(context: any, items: any[]) {
 					} else if (
 						!lockReturnPricing &&
 						!item.price_list_rate &&
+						!hasMissingPriceListRate(item) &&
 						(force || price)
 					) {
 						if (context._computePriceConversion) {
@@ -523,7 +539,7 @@ export function _applyItemDetailPayload(
 	}
 
 	const manualRate = item._manual_rate_set === true && item._manual_rate_set_from_uom !== true;
-	if (!item.locked_price && !manualRate) {
+	if (!item.locked_price && !manualRate && !hasMissingPriceListRate(item)) {
 		if (forceUpdate || !item.base_rate) {
 			const plcConversionRate = context._getPlcConversionRate
 				? context._getPlcConversionRate()
@@ -564,6 +580,7 @@ export function _applyItemDetailPayload(
 	if (
 		!item.locked_price &&
 		!manualRate &&
+		!hasMissingPriceListRate(item) &&
 		!hasExistingDiscount &&
 		Number.isFinite(incomingDiscountPct) &&
 		incomingDiscountPct > 0

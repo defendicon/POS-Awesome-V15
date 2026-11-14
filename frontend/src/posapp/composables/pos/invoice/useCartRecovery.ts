@@ -172,6 +172,14 @@ export function startCartRecovery(context: any) {
 		try {
 			const doc = context.get_invoice_doc();
 			if (doc?.items?.length) {
+				const missingRows = new Set(
+					context.items
+						.filter((item) => item._missingPriceListRate && item.posa_row_id)
+						.map((item) => item.posa_row_id),
+				);
+				for (const item of doc.items) {
+					if (missingRows.has(item.posa_row_id)) item._missingPriceListRate = true;
+				}
 				ensureInvoiceClientRequestId(doc);
 				if (!context.invoice_doc?.posa_client_request_id)
 					context.invoiceStore.mergeInvoiceDoc({

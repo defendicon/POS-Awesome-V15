@@ -294,6 +294,7 @@ export function useInvoiceCurrency() {
 		};
 
 		items.forEach((item: any) => {
+			if (item._missingPriceListRate) return;
 			item._skip_calc = true;
 			refreshCanonicalBaseRates(item, currencyContext);
 

@@ -16,6 +16,9 @@
 			<td v-if="column.key === 'item_name'" v-bind="getCellAttrs('item_name', 'text-start')">
 				<div class="posa-cart-item-row__item-cell">
 					<span class="posa-cart-item-row__item-name">{{ item.item_name }}</span>
+					<v-chip v-if="item._missingPriceListRate" color="error" size="x-small" class="ml-1">
+						{{ __("Missing rate") }}
+					</v-chip>
 					<v-chip v-if="item.is_bundle" color="secondary" size="x-small" class="ml-1">
 						{{ __("Bundle") }}
 					</v-chip>
@@ -532,6 +535,7 @@ const memoDeps = computed(() => {
 	return [
 		props.item.qty,
 		props.item.rate,
+		props.item._missingPriceListRate,
 		props.item.amount,
 		props.item.discount_amount,
 		props.item.discount_percentage,
@@ -607,6 +611,7 @@ const rowClasses = computed(() => ({
 	"posa-cart-item-row--keyboard-row": props.activeRow && props.keyboardMode === "row",
 	"posa-cart-item-row--keyboard-cell": props.activeRow && props.keyboardMode === "cell",
 	"posa-cart-item-row--loss-risk": Boolean(lossRisk.value),
+	"posa-cart-item-row--missing-rate": Boolean(props.item._missingPriceListRate),
 }));
 
 function isKeyboardCellActive(key) {
@@ -1080,6 +1085,20 @@ td {
 .posa-cart-item-row--loss-risk .posa-cart-item-cell--keyboard-active {
 	background: #174a70 !important;
 	color: #ffffff !important;
+}
+
+.posa-cart-item-row--missing-rate > td {
+	background: var(--pos-error-container) !important;
+}
+
+.posa-cart-item-row--missing-rate {
+	outline: 2px solid #ef4444;
+	outline-offset: -2px;
+}
+
+.posa-cart-item-row--missing-rate:focus,
+.posa-cart-item-row--missing-rate:focus-within {
+	outline-width: 4px;
 }
 
 td[data-column-key="item_name"] {
