@@ -15,6 +15,14 @@ const set_pos_profile_queries = (frm) => {
 		}
 	};
 
+	set_child_query("price_list", "posa_allowed_selling_price_lists", (doc) => ({
+		filters: {
+			enabled: 1,
+			selling: 1,
+			...(!Number(doc.posa_allow_multi_currency) && doc.currency ? { currency: doc.currency } : {}),
+		},
+	}));
+
 	set_field_query("posa_cash_mode_of_payment", function () {
 		return {
 			filters: { type: "Cash" },

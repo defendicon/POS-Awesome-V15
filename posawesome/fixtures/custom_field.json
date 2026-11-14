@@ -8536,11 +8536,22 @@
 	{
 		"doctype": "Custom Field",
 		"dt": "POS Profile",
+		"fieldname": "posa_allowed_selling_price_lists",
+		"fieldtype": "Table",
+		"label": "Allowed Selling Price Lists",
+		"options": "POS Allowed Selling Price List",
+		"description": "Only the enabled selling price lists added here are available for manual selection in POS.",
+		"insert_after": "posa_enable_price_list_dropdown",
+		"name": "POS Profile-posa_allowed_selling_price_lists"
+	},
+	{
+		"doctype": "Custom Field",
+		"dt": "POS Profile",
 		"fieldname": "posa_section_sales_returns",
 		"fieldtype": "Section Break",
 		"label": "Sales and Return Controls",
 		"collapsible": 1,
-		"insert_after": "posa_enable_price_list_dropdown",
+		"insert_after": "posa_allowed_selling_price_lists",
 		"name": "POS Profile-posa_section_sales_returns"
 	},
 	{

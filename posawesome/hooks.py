@@ -227,6 +227,7 @@ fixtures = [
                     "POS Profile-posa_pos_awesome_settings",
                     "POS Profile-posa_section_pricing_controls",
                     "POS Profile-posa_enable_price_list_dropdown",
+                    "POS Profile-posa_allowed_selling_price_lists",
                     "POS Profile-posa_section_sales_returns",
                     "POS Profile-posa_section_sales_purchase",
                     "POS Profile-posa_section_inventory_controls",

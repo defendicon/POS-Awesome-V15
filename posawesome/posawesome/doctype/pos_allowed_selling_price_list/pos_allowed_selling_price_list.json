@@ -1,0 +1,20 @@
+{
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": ["price_list"],
+ "fields": [
+  {
+   "fieldname": "price_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Price List",
+   "options": "Price List",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "module": "POSAwesome",
+ "name": "POS Allowed Selling Price List",
+ "permissions": []
+}

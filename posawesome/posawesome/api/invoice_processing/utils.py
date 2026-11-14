@@ -10,6 +10,10 @@ from frappe.utils import (
     strip_html_tags,
 )
 from erpnext.setup.utils import get_exchange_rate
+from posawesome.posawesome.api.selling_price_lists import (
+    get_configured_selling_price_lists,
+    get_manual_selling_price_list_filters,
+)
 
 
 def _get_return_validity_settings(pos_profile: str | None = None):
@@ -82,6 +86,7 @@ def _resolve_effective_price_list(
     fallback_price_list: str | None = None,
     *,
     allow_selection: bool = False,
+    profile_doc=None,
 ) -> str | None:
     customer_price_list = None
     if customer_name:
@@ -101,8 +106,12 @@ def _resolve_effective_price_list(
         frappe.db.get_value("POS Profile", pos_profile, "selling_price_list") if pos_profile else None
     )
     if allow_selection and fallback_price_list and fallback_price_list != profile_price_list:
-        if not frappe.db.exists("Price List", {"name": fallback_price_list, "selling": 1, "enabled": 1}):
-            frappe.throw(_("Price List {0} is not an enabled selling Price List.").format(fallback_price_list))
+        filters = get_manual_selling_price_list_filters(profile_doc)
+        filters["name"] = fallback_price_list
+        if fallback_price_list not in get_configured_selling_price_lists(profile_doc) or not frappe.db.exists(
+            "Price List", filters
+        ):
+            frappe.throw(_("Price List {0} is not allowed for this POS Profile.").format(fallback_price_list))
         return fallback_price_list
 
     return profile_price_list or fallback_price_list

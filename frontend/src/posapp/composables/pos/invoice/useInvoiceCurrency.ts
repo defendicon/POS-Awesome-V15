@@ -387,22 +387,17 @@ export function useInvoiceCurrency() {
 		const profile = pos_profile.value;
 		if (!profile) return [];
 		const profileName = profile.name;
-		price_lists.value = [profile.selling_price_list].filter(Boolean);
+		price_lists.value = [];
 
 		if (parseBooleanSetting(profile.posa_enable_price_list_dropdown)) {
 			try {
 				const r = await frappe.call({
-					method: "posawesome.posawesome.api.utilities.get_selling_price_lists",
-					args: {
-						enabled_only: 1,
-						currency: parseBooleanSetting(profile.posa_allow_multi_currency)
-							? null
-							: profile.currency,
-					},
+					method: "posawesome.posawesome.api.selling_price_lists.get_pos_selling_price_lists",
+					args: { pos_profile: profileName },
 				});
 				if (pos_profile.value !== profile) return [];
 				if (Array.isArray(r?.message)) {
-					price_lists.value = r.message.map((pl: any) => pl.name);
+					price_lists.value = r.message;
 				}
 			} catch (error) {
 				console.error("Failed fetching price lists", error);

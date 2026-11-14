@@ -1600,6 +1600,7 @@ def update_invoice(data):
         invoice_doc.get("pos_profile") or pos_profile,
         invoice_doc.get("selling_price_list") or data.get("selling_price_list"),
         allow_selection=bool(allow_price_list_selection),
+        profile_doc=profile_doc,
     )
     if effective_price_list:
         invoice_doc.selling_price_list = effective_price_list
