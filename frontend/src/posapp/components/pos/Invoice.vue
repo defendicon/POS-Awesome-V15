@@ -50,8 +50,13 @@
 				>
 					{{ __("Invoices saved as POS Invoices") }}
 				</v-alert>
-				<div class="invoice-sections">
-					<div class="invoice-top-grid">
+				<InvoiceCardLayout
+					class="invoice-sections"
+					:user="invoiceLayoutUser"
+					:profile="pos_profile?.name || ''"
+					:enabled="enabledInvoiceCards"
+				>
+					<template #customer>
 						<v-card flat class="invoice-section-card pos-themed-card">
 							<div class="invoice-section-heading">
 								<h3 class="invoice-section-heading__title">{{ __("Customer Details") }}</h3>
@@ -63,9 +68,9 @@
 								v-model="invoiceType"
 							/>
 						</v-card>
-
+					</template>
+					<template #delivery>
 						<v-card
-							v-if="pos_profile.posa_use_delivery_charges"
 							flat
 							class="invoice-section-card pos-themed-card"
 						>
@@ -90,11 +95,10 @@
 								"
 							/>
 						</v-card>
-					</div>
+					</template>
 
-					<div class="invoice-meta-grid">
+					<template #posting>
 						<v-card
-							v-if="pos_profile.posa_allow_change_posting_date || showPriceListDropdown"
 							flat
 							class="invoice-section-card pos-themed-card"
 						>
@@ -124,9 +128,9 @@
 								@update:priceList="selectPriceList"
 							/>
 						</v-card>
-
+					</template>
+					<template #currency>
 						<v-card
-							v-if="pos_profile.posa_allow_multi_currency"
 							flat
 							class="invoice-section-card pos-themed-card"
 						>
@@ -161,79 +165,81 @@
 								"
 							/>
 						</v-card>
-					</div>
+					</template>
 
-					<v-card flat class="invoice-section-card invoice-items-card pos-themed-card">
-						<div class="invoice-section-heading">
-							<h3 class="invoice-section-heading__title">{{ __("Invoice Items") }}</h3>
-						</div>
-						<div class="items-table-wrapper">
-							<InvoiceItemsActionToolbar
-								ref="actionToolbar"
-								:itemSearch="itemSearch"
-								:availableColumns="available_columns"
-								:selectedColumns="selected_columns"
-								@update:itemSearch="itemSearch = $event"
-								@update:selectedColumns="
-									(cols) => {
-										setSelectedColumns(cols);
-										saveColumnPreferences();
-									}
-								"
-							/>
+					<template #items>
+						<v-card flat class="invoice-section-card invoice-items-card pos-themed-card">
+							<div class="invoice-section-heading">
+								<h3 class="invoice-section-heading__title">{{ __("Invoice Items") }}</h3>
+							</div>
+							<div class="items-table-wrapper">
+								<InvoiceItemsActionToolbar
+									ref="actionToolbar"
+									:itemSearch="itemSearch"
+									:availableColumns="available_columns"
+									:selectedColumns="selected_columns"
+									@update:itemSearch="itemSearch = $event"
+									@update:selectedColumns="
+										(cols) => {
+											setSelectedColumns(cols);
+											saveColumnPreferences();
+										}
+									"
+								/>
 
-							<ItemsTable
-								ref="itemsTableRef"
-								:headers="items_headers"
-								v-model:expanded="expanded"
-								:itemsPerPage="itemsPerPage"
-								:itemSearch="itemSearch"
-								:pos_profile="pos_profile"
-								:invoiceType="invoiceType"
-								:stock_settings="stock_settings"
-								:displayCurrency="displayCurrency"
-								:formatFloat="formatFloat"
-								:formatCurrency="formatCurrency"
-								:currencySymbol="currencySymbol"
-								:isNumber="isNumber"
-								:setFormatedQty="setFormatedQty"
-								:setFormatedCurrency="setFormatedCurrency"
-								:calcPrices="calc_prices"
-								:calcUom="calc_uom"
-								:setSerialNo="set_serial_no"
-								:setBatchQty="set_batch_qty"
-								:refreshBatchSerialData="refreshBatchSerialData"
-								:validateDueDate="validate_due_date"
-								:removeItem="remove_item"
-								:subtractOne="subtract_one"
-								:addOne="add_one"
-								:toggleOffer="toggleOffer"
-								:changePriceListRate="change_price_list_rate"
-								:isNegative="isNegative"
-								:counter-grid="isCounterGridPresentation"
-								@update:expanded="handleExpandedUpdate"
-								@batch-serial-changed="handleBatchSerialChanged"
-								@reorder-items="handleItemReorder"
-								@add-item-from-drag="handleItemDrop"
-								@show-drop-feedback="
-									(isDragging) => showDropFeedback(isDragging, itemsTableRef)
-								"
-								@item-dropped="showDropFeedback(false, itemsTableRef)"
-								@view-packed="openPackedItems"
-								@edit-item="openItemQuickEditForItem"
-							/>
+								<ItemsTable
+									ref="itemsTableRef"
+									:headers="items_headers"
+									v-model:expanded="expanded"
+									:itemsPerPage="itemsPerPage"
+									:itemSearch="itemSearch"
+									:pos_profile="pos_profile"
+									:invoiceType="invoiceType"
+									:stock_settings="stock_settings"
+									:displayCurrency="displayCurrency"
+									:formatFloat="formatFloat"
+									:formatCurrency="formatCurrency"
+									:currencySymbol="currencySymbol"
+									:isNumber="isNumber"
+									:setFormatedQty="setFormatedQty"
+									:setFormatedCurrency="setFormatedCurrency"
+									:calcPrices="calc_prices"
+									:calcUom="calc_uom"
+									:setSerialNo="set_serial_no"
+									:setBatchQty="set_batch_qty"
+									:refreshBatchSerialData="refreshBatchSerialData"
+									:validateDueDate="validate_due_date"
+									:removeItem="remove_item"
+									:subtractOne="subtract_one"
+									:addOne="add_one"
+									:toggleOffer="toggleOffer"
+									:changePriceListRate="change_price_list_rate"
+									:isNegative="isNegative"
+									:counter-grid="isCounterGridPresentation"
+									@update:expanded="handleExpandedUpdate"
+									@batch-serial-changed="handleBatchSerialChanged"
+									@reorder-items="handleItemReorder"
+									@add-item-from-drag="handleItemDrop"
+									@show-drop-feedback="
+										(isDragging) => showDropFeedback(isDragging, itemsTableRef)
+									"
+									@item-dropped="showDropFeedback(false, itemsTableRef)"
+									@view-packed="openPackedItems"
+									@edit-item="openItemQuickEditForItem"
+								/>
 
-							<PackedItemsDialog
-								v-model="show_packed_dialog"
-								:items="packed_dialog_items"
-								:displayCurrency="displayCurrency"
-								:formatFloat="formatFloat"
-								:formatCurrency="formatCurrency"
-								:currencySymbol="currencySymbol"
-							/>
-						</div>
-					</v-card>
-				</div>
+								<PackedItemsDialog
+									v-model="show_packed_dialog"
+									:items="packed_dialog_items"
+									:displayCurrency="displayCurrency"
+									:formatFloat="formatFloat"
+									:formatCurrency="formatCurrency"
+									:currencySymbol="currencySymbol"
+								/>
+							</div>
+						</v-card>
+					</template>
+				</InvoiceCardLayout>
 			</div>
 		</v-card>
 
@@ -310,6 +316,7 @@
 
 <script>
 import format from "../../format";
+import InvoiceCardLayout from "./invoice/InvoiceCardLayout.vue";
 import InvoiceCustomerSection from "./invoice/InvoiceCustomerSection.vue";
 import DeliveryCharges from "./invoice/DeliveryCharges.vue";
 import PostingDateRow from "./invoice/PostingDateRow.vue";
@@ -505,6 +512,7 @@ export default {
 	},
 
 	components: {
+		InvoiceCardLayout,
 		SavedCartRecovery,
 		InvoiceCustomerSection,
 		DeliveryCharges,
@@ -520,6 +528,18 @@ export default {
 		ItemQuickEditDialog,
 	},
 	computed: {
+		invoiceLayoutUser() {
+			return this.currentCashier?.user || window.frappe?.session?.user || "";
+		},
+		enabledInvoiceCards() {
+			return [
+				"customer",
+				...(this.pos_profile?.posa_use_delivery_charges ? ["delivery"] : []),
+				...(this.pos_profile?.posa_allow_change_posting_date || this.showPriceListDropdown ? ["posting"] : []),
+				...(this.pos_profile?.posa_allow_multi_currency ? ["currency"] : []),
+				"items",
+			];
+		},
 		isCounterGridPresentation() {
 			return this.presentation === "counter-grid";
 		},
@@ -1844,13 +1864,7 @@ export default {
 
 .invoice-shell--counter-grid .invoice-sections {
 	gap: 8px;
-	overflow: hidden;
-}
-
-.invoice-shell--counter-grid .invoice-top-grid,
-.invoice-shell--counter-grid .invoice-meta-grid {
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 8px;
+	overflow: auto;
 }
 
 .invoice-shell--counter-grid .invoice-section-card {
@@ -1874,8 +1888,7 @@ export default {
 	text-transform: uppercase;
 }
 
-.invoice-shell--counter-grid .invoice-top-grid .invoice-section-heading,
-.invoice-shell--counter-grid .invoice-meta-grid .invoice-section-heading {
+.invoice-shell--counter-grid :deep([data-invoice-card]:not([data-invoice-card="items"]) .invoice-section-heading) {
 	display: none;
 }
 
@@ -2024,20 +2037,6 @@ export default {
 	align-items: stretch;
 }
 
-.invoice-top-grid {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: var(--dynamic-sm);
-	flex: 0 0 auto;
-}
-
-.invoice-meta-grid {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: var(--dynamic-sm);
-	flex: 0 0 auto;
-}
-
 .invoice-section-card {
 	background: var(--pos-card-bg) !important;
 	border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
@@ -2096,14 +2095,6 @@ export default {
 		padding: 2px 4px;
 	}
 
-	.invoice-meta-grid {
-		grid-template-columns: 1fr;
-	}
-
-	.invoice-top-grid {
-		grid-template-columns: 1fr;
-	}
-
 	.invoice-sections {
 		overflow: visible;
 	}
@@ -2142,14 +2133,6 @@ export default {
 
 	.dynamic-padding .v-col {
 		padding: 1px 2px;
-	}
-
-	.invoice-meta-grid {
-		grid-template-columns: 1fr;
-	}
-
-	.invoice-top-grid {
-		grid-template-columns: 1fr;
 	}
 
 	.items-table-wrapper {
