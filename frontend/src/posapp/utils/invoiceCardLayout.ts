@@ -9,7 +9,8 @@ export const invoiceCardDefaults = [
 export type InvoiceCardId = (typeof invoiceCardDefaults)[number]["id"];
 export type InvoiceCardPreference = {
 	id: InvoiceCardId;
-	width: "auto" | "full";
+	width: "auto" | "full" | number;
+	startRow?: boolean;
 };
 
 // Keep every supported card once, including cards currently disabled by the profile.
@@ -26,9 +27,16 @@ export function normalizeInvoiceCardLayout(
 			result.push({
 				id: card.id,
 				width:
-					entry.width === "auto" || entry.width === "full"
+					entry.width === "auto" ||
+					entry.width === "full" ||
+					(Number.isInteger(entry.width) &&
+						entry.width >= 3 &&
+						entry.width <= 12)
 						? entry.width
 						: card.width,
+				...(typeof entry.startRow === "boolean"
+					? { startRow: entry.startRow }
+					: {}),
 			});
 		}
 	}
@@ -37,6 +45,51 @@ export function normalizeInvoiceCardLayout(
 			result.push({ id: card.id, width: card.width });
 	}
 	return result;
+}
+
+export type CardDropPosition = "before" | "after" | "above" | "below";
+
+export function repositionInvoiceCard(
+	layout: InvoiceCardPreference[],
+	id: InvoiceCardId,
+	targetId: InvoiceCardId,
+	position: CardDropPosition,
+): InvoiceCardPreference[] {
+	const result = layout.map((card) => ({ ...card }));
+	const from = result.findIndex((card) => card.id === id);
+	const target = result.find((card) => card.id === targetId);
+	if (from < 0 || !target || id === targetId) return result;
+	const moved = result.splice(from, 1)[0]!;
+	const index = result.indexOf(target);
+	if (position === "above" || position === "below") {
+		moved.width = "full";
+		moved.startRow = true;
+	} else {
+		moved.width = 6;
+		target.width = 6;
+		moved.startRow = position === "before" && target.startRow === true;
+		if (position === "before") target.startRow = false;
+	}
+	result.splice(
+		index + (position === "after" || position === "below" ? 1 : 0),
+		0,
+		moved,
+	);
+	return result;
+}
+
+export function resizedCardSpan(
+	startSpan: number,
+	delta: number,
+	containerWidth: number,
+	gap: number,
+): number {
+	if (containerWidth <= 0) return startSpan;
+	const columnWidth = (containerWidth + gap) / 12;
+	return Math.max(
+		3,
+		Math.min(12, Math.round(startSpan + delta / columnWidth)),
+	);
 }
 
 export function invoiceCardLayoutKey(user: string, profile: string): string {

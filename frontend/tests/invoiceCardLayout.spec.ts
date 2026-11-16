@@ -1,11 +1,14 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { defineComponent, h, ref } from "vue";
+import { nextTick } from "vue";
 import { mount } from "@vue/test-utils";
 import InvoiceCardLayout from "../src/posapp/components/pos/invoice/InvoiceCardLayout.vue";
 import {
 	invoiceCardLayoutKey,
 	normalizeInvoiceCardLayout,
+	repositionInvoiceCard,
+	resizedCardSpan,
 } from "../src/posapp/utils/invoiceCardLayout";
 
 const Button = defineComponent({
@@ -57,6 +60,220 @@ beforeEach(() => {
 });
 
 describe("Invoice card layout", () => {
+	it("supports shared rows, separate rows and safe resize bounds", () => {
+		const original = normalizeInvoiceCardLayout(null);
+		const shared = repositionInvoiceCard(
+			original,
+			"posting",
+			"customer",
+			"before",
+		);
+		expect(shared.slice(0, 2).map((card) => [card.id, card.width])).toEqual(
+			[
+				["posting", 6],
+				["customer", 6],
+			],
+		);
+		const separate = repositionInvoiceCard(
+			shared,
+			"customer",
+			"items",
+			"below",
+		);
+		expect(separate.at(-1)).toMatchObject({
+			id: "customer",
+			width: "full",
+			startRow: true,
+		});
+		expect(original[0]?.width).toBe("auto");
+		expect(new Set(separate.map((card) => card.id)).size).toBe(5);
+		expect(normalizeInvoiceCardLayout(separate)).toEqual(separate);
+		expect(resizedCardSpan(6, 250, 990, 10)).toBe(9);
+		expect(resizedCardSpan(6, -2000, 990, 10)).toBe(3);
+		expect(resizedCardSpan(6, 2000, 990, 10)).toBe(12);
+		expect(resizedCardSpan(6, 100, 0, 10)).toBe(6);
+	});
+
+	it("drags real cards beside or below another card without resetting field state", async () => {
+		const wrapper = render();
+		await wrapper.find("input").setValue("Customer A");
+		await wrapper.find('[aria-label="Customize cards"]').trigger("click");
+		const target = wrapper.find('[data-invoice-card="posting"]').element;
+		vi.spyOn(target, "getBoundingClientRect").mockReturnValue({
+			left: 500,
+			top: 100,
+			width: 500,
+			height: 120,
+			right: 1000,
+			bottom: 220,
+		} as DOMRect);
+		Object.defineProperty(document, "elementFromPoint", {
+			configurable: true,
+			value: vi.fn(() => target),
+		});
+		wrapper
+			.find('[aria-label="Drag card: Customer Details"]')
+			.element.dispatchEvent(
+				new MouseEvent("pointerdown", {
+					bubbles: true,
+					button: 0,
+					clientX: 100,
+					clientY: 100,
+				}),
+			);
+		await nextTick();
+		window.dispatchEvent(
+			new MouseEvent("pointermove", {
+				clientX: 900,
+				clientY: 160,
+				cancelable: true,
+			}),
+		);
+		await nextTick();
+		expect(
+			wrapper.find('[data-invoice-card="posting"]').classes(),
+		).toContain("invoice-card-layout__card--drop-after");
+		window.dispatchEvent(
+			new MouseEvent("pointerup", { clientX: 900, clientY: 160 }),
+		);
+		await nextTick();
+		expect(order(wrapper)).toEqual(["posting", "customer", "items"]);
+		expect(wrapper.find("input").element.value).toBe("Customer A");
+		expect(
+			JSON.parse(
+				localStorage.getItem(
+					invoiceCardLayoutKey("cashier", "counter"),
+				)!,
+			).find((card: any) => card.id === "customer").width,
+		).toBe(6);
+		wrapper
+			.find('[aria-label="Drag card: Customer Details"]')
+			.element.dispatchEvent(
+				new MouseEvent("pointerdown", {
+					bubbles: true,
+					button: 0,
+					clientX: 100,
+					clientY: 100,
+				}),
+			);
+		await nextTick();
+		window.dispatchEvent(
+			new MouseEvent("pointermove", {
+				clientX: 750,
+				clientY: 215,
+				cancelable: true,
+			}),
+		);
+		window.dispatchEvent(
+			new MouseEvent("pointerup", { clientX: 750, clientY: 215 }),
+		);
+		await nextTick();
+		expect(
+			wrapper.find('[data-invoice-card="customer"]').classes(),
+		).toContain("invoice-card-layout__card--full");
+		wrapper.unmount();
+	});
+
+	it("previews mouse resizing, cancels with Escape and saves only on release", async () => {
+		const wrapper = render();
+		await wrapper.find('[aria-label="Customize cards"]').trigger("click");
+		vi.spyOn(
+			wrapper.find(".invoice-card-layout__cards").element,
+			"getBoundingClientRect",
+		).mockReturnValue({ width: 1000 } as DOMRect);
+		const resize = wrapper.find(
+			'[aria-label="Resize card: Customer Details"]',
+		);
+		resize.element.dispatchEvent(
+			new MouseEvent("pointerdown", {
+				bubbles: true,
+				button: 0,
+				clientX: 500,
+				clientY: 100,
+			}),
+		);
+		await nextTick();
+		window.dispatchEvent(
+			new MouseEvent("pointermove", {
+				clientX: 750,
+				clientY: 100,
+				cancelable: true,
+			}),
+		);
+		await nextTick();
+		expect(resize.attributes("aria-valuenow")).toBe("9");
+		expect(
+			wrapper
+				.find('[aria-label="Resize card: Posting and Price List"]')
+				.attributes("aria-valuenow"),
+		).toBe("6");
+		expect(
+			localStorage.getItem(invoiceCardLayoutKey("cashier", "counter")),
+		).toBeNull();
+		window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+		await nextTick();
+		expect(resize.attributes("aria-valuenow")).toBe("6");
+		resize.element.dispatchEvent(
+			new MouseEvent("pointerdown", {
+				bubbles: true,
+				button: 0,
+				clientX: 500,
+				clientY: 100,
+			}),
+		);
+		await nextTick();
+		window.dispatchEvent(
+			new MouseEvent("pointermove", {
+				clientX: 750,
+				clientY: 100,
+				cancelable: true,
+			}),
+		);
+		window.dispatchEvent(
+			new MouseEvent("pointerup", { clientX: 750, clientY: 100 }),
+		);
+		await nextTick();
+		expect(
+			JSON.parse(
+				localStorage.getItem(
+					invoiceCardLayoutKey("cashier", "counter"),
+				)!,
+			).find((card: any) => card.id === "customer").width,
+		).toBe(9);
+		wrapper.unmount();
+	});
+
+	it("offers row presets and keyboard resizing while preserving profile-disabled cards", async () => {
+		const wrapper = render();
+		await wrapper.find('[aria-label="Customize cards"]').trigger("click");
+		await wrapper
+			.findAll("button")
+			.find((button) => button.text() === "Separate rows")!
+			.trigger("click");
+		expect(
+			wrapper.findAll(".invoice-card-layout__card--full"),
+		).toHaveLength(3);
+		await wrapper
+			.findAll("button")
+			.find((button) => button.text() === "Single row")!
+			.trigger("click");
+		expect(
+			wrapper
+				.find('[aria-label="Resize card: Customer Details"]')
+				.attributes("aria-valuenow"),
+		).toBe("6");
+		await wrapper
+			.find('[aria-label="Resize card: Customer Details"]')
+			.trigger("keydown", { key: "ArrowLeft" });
+		expect(
+			wrapper
+				.find('[aria-label="Resize card: Customer Details"]')
+				.attributes("aria-valuenow"),
+		).toBe("5");
+		expect(order(wrapper)).not.toContain("delivery");
+		wrapper.unmount();
+	});
+
 	it("repairs old/invalid preferences without losing supported cards", () => {
 		const result = normalizeInvoiceCardLayout([
 			{ id: "posting", width: "bad" },

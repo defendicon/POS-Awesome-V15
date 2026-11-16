@@ -1892,6 +1892,10 @@ export default {
 	display: none;
 }
 
+.invoice-shell--counter-grid :deep(.invoice-card-layout:not(.invoice-card-layout--editing) .invoice-card-layout__card--first:not(.invoice-card-layout__card--items) > .invoice-section-card) {
+	padding-inline-end: 40px;
+}
+
 .invoice-shell--counter-grid .invoice-items-card {
 	flex: 1 1 auto;
 	min-height: 0;
