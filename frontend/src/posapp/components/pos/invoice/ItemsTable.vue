@@ -6,7 +6,8 @@
 		:class="[containerClasses, gridContainerClasses]"
 		role="region"
 		:aria-label="__('Invoice Items')"
-		@keydown.capture="handleGridKeydown"
+		@keydown.capture="handleReorderOrGridKeydown"
+		@pointerdown.capture="rowReorder.onPointerDown"
 		@dragover="onDragOverFromSelector($event)"
 		@drop="onDropFromSelector($event)"
 		@dragenter="onDragEnterFromSelector"
@@ -14,6 +15,7 @@
 	>
 		<v-data-table-virtual
 			ref="virtualTable"
+			v-model:sort-by="rowSortBy"
 			:headers="responsiveHeaders"
 			:items="displayItems"
 			show-expand
@@ -95,6 +97,7 @@
 			</template>
 		</v-data-table-virtual>
 
+		<span class="sr-only" role="status" aria-live="polite">{{ rowReorder.announcement.value }}</span>
 		<BatchSerialSelectionDialog
 			v-model="batchSerialDialog"
 			:item="batchSerialTarget"
@@ -156,6 +159,8 @@
 
 <script setup lang="ts">
 import { ref, computed, nextTick, onBeforeUnmount, onMounted, watch, getCurrentInstance } from "vue";
+import { useRowReorder } from "../../../composables/core/useRowReorder";
+import { reorderRows } from "../../../utils/rowOrder";
 import { useInvoiceStore } from "../../../stores/invoiceStore";
 import BatchSerialSelectionDialog from "./BatchSerialSelectionDialog.vue";
 import {
@@ -245,6 +250,7 @@ const emit = defineEmits<{
 	"item-dropped": [val: boolean];
 	"edit-item": [item: any];
 	"batch-serial-changed": [item: any];
+	"reorder-items": [data: { rowIds: string[] }];
 }>();
 
 const { proxy } = getCurrentInstance() as any;
@@ -293,6 +299,17 @@ const items = computed(() => invoiceStore.items);
 const displayItems = computed(() =>
 	props.counterGrid ? [...items.value, counterGridEntryItem] : items.value,
 );
+const rowSortBy = ref<any[]>([]);
+const rowReorder = useRowReorder(tableContainer, (drop) => {
+	const reordered = reorderRows(items.value, (item) => String(item.posa_row_id), drop.source, drop.target, drop.after, drop.visibleKeys);
+	if (!reordered) return;
+	rowSortBy.value = [];
+	emit("reorder-items", { rowIds: reordered.map((item) => String(item.posa_row_id)) });
+});
+function handleReorderOrGridKeydown(event: KeyboardEvent) {
+	if ((event.target as Element | null)?.closest("[data-row-reorder-key]")) { rowReorder.onKeydown(event); return; }
+	handleGridKeydown(event);
+}
 const invoice_doc = computed(() => invoiceStore.invoiceDoc || {});
 const hasItemSearch = computed(() => !!props.itemSearch?.trim());
 const emptyStateIcon = computed(() => (hasItemSearch.value ? "mdi-cart-search" : "mdi-cart-outline"));

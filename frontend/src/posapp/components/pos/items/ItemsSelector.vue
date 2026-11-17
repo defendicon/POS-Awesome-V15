@@ -1,13 +1,17 @@
 <template>
 	<div
+		ref="selectorReorderRoot"
 		class="items-selector-shell"
 		:class="{ 'items-selector-shell--counter-dialog': presentation === 'counter-grid-dialog' }"
 		:style="responsiveStyles"
 		:data-search-ready-query="counterSearchReadyQuery || undefined"
 		:data-search-pending="counterSearchPending ? 'true' : 'false'"
 		:data-alternate-mode="alternateMode ? 'true' : 'false'"
-		@keydown.capture="handleSelectorKeydownCapture"
+		@keydown.capture="handleReorderOrSelectorKeydown"
+		@pointerdown.capture="selectorRowReorder.onPointerDown"
 	>
+		<v-alert v-if="selectorRowOrder.error.value" type="warning" density="compact">{{ __(selectorRowOrder.error.value) }}</v-alert>
+		<span class="sr-only" role="status" aria-live="polite">{{ selectorRowReorder.announcement.value }}</span>
 		<ScanErrorDialog
 			v-model="scanErrorDialog"
 			:message="scanErrorMessage"
@@ -41,6 +45,8 @@
 						v-model:qty-input="debounce_qty"
 						:pos-profile="pos_profile"
 						:scanner-locked="scannerLocked"
+						:has-custom-item-order="selectorRowOrder.order.value.length > 0"
+						@reset-item-order="selectorRowOrder.reset()"
 						:enable-background-sync="enable_background_sync"
 						:last-sync-time="lastSyncTimeLabel"
 						:sync-status="syncStatus"
@@ -273,6 +279,8 @@
 </template>
 
 <script setup lang="ts">
+import { useRowReorder } from "../../../composables/core/useRowReorder";
+import { useSelectorRowOrder } from "../../../composables/pos/items/useSelectorRowOrder";
 import {
 	getCurrentInstance,
 	onMounted,
@@ -570,19 +578,32 @@ const {
 	syncedItemsCount = ref(0),
 } = itemsIntegration;
 
+const selectorReorderRoot = ref<HTMLElement | null>(null);
+const itemsTable = ref<any>(null);
+const selectorRowScope = computed(() => pos_profile.value?.name ? `posawesome:selector-row-order:v1:${JSON.stringify([currentCashier.value?.user || window.frappe?.session?.user || "", pos_profile.value.name, pos_profile.value.warehouse || "", props.context])}` : "");
+const selectorRowOrder = useSelectorRowOrder(selectorRowScope);
+const selectorRowReorder = useRowReorder(selectorReorderRoot, (drop) => {
+	selectorRowOrder.move(activeResultItems.value, drop.source, drop.target, drop.after, drop.visibleKeys);
+	itemsTable.value?.clearSort?.();
+});
+watch(selectorRowScope, () => selectorRowReorder.cancel());
+function handleReorderOrSelectorKeydown(event: KeyboardEvent) {
+	if ((event.target as Element | null)?.closest("[data-row-reorder-key]")) { selectorRowReorder.onKeydown(event); return; }
+	handleSelectorKeydownCapture(event);
+}
 const displayedItems = computed(() => {
 	const baseItems = Array.isArray(filteredItems.value) ? filteredItems.value : [];
 	const rawTerm = first_search.value;
 	const term = (typeof rawTerm === "string" ? rawTerm : "").trim().toLowerCase();
 	const searchAlreadyApplied = term.length >= 3 && filteredItemsSearchTerm.value === term;
-	return filterAndPaginate(baseItems, {
+	return selectorRowOrder.apply(filterAndPaginate(baseItems, {
 		searchTerm: term,
 		searchAlreadyApplied,
 		hideZeroRate: hide_zero_rate_items.value,
 		hideVariants: pos_profile.value?.posa_hide_variants_items,
 		onlyBarcode: showOnlyBarcodeItemsRef.value,
 		limit: enable_custom_items_per_page.value ? items_per_page.value : itemsPerPage.value,
-	});
+	}));
 });
 
 // Item reloads (notably after a customer/price-list change) replace the
@@ -630,7 +651,7 @@ const alternateDisplayItems = computed(
 		})) as any[],
 );
 const activeResultItems = computed(() =>
-	alternateMode.value ? alternateDisplayItems.value : selectableDisplayedItems.value,
+	alternateMode.value ? selectorRowOrder.apply(alternateDisplayItems.value) : selectableDisplayedItems.value,
 );
 const alternateHeaderDetail = computed(() => {
 	const requested = alternates.response.value?.requested_item;
@@ -1701,11 +1722,17 @@ const {
 	isNegative,
 	headerProps,
 	getItemRowClass,
-	getItemRowProps,
+	getItemRowProps: getBaseItemRowProps,
 } = useItemsSelectorDisplayBindings({
 	itemDisplay,
 	itemSelection,
 });
+
+const getItemRowProps = (data: any) => {
+	const base = getBaseItemRowProps(data);
+	const item = data?.item?.raw || data?.item || data?.internalItem?.raw || data;
+	return { ...base, "data-row-reorder-id": String(item?.item_code || "") };
+};
 
 const {
 	scannerLocked,

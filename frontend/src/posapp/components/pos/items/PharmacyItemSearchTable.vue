@@ -94,7 +94,7 @@
 			>
 				<template #item.item_name="{ item }">
 					<div class="pharmacy-product-cell">
-						<strong>{{ cleanPharmacyText(item.item_name) || item.item_code }}</strong>
+						<div class="d-flex align-center"><RowReorderHandle :row-key="String(item.item_code)" :label="item.item_name || item.item_code" /><strong>{{ cleanPharmacyText(item.item_name) || item.item_code }}</strong></div>
 						<span v-if="cleanPharmacyText(item.retailmind_short_name)">
 							{{ cleanPharmacyText(item.retailmind_short_name) }}
 						</span>
@@ -168,6 +168,7 @@
 </template>
 
 <script setup lang="ts">
+import RowReorderHandle from "../../ui/RowReorderHandle.vue";
 import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
 
 import {
@@ -271,6 +272,7 @@ const getPharmacyRowProps = (rowData: any) => {
 		"aria-rowindex": rowIndex >= 0 ? rowIndex + 2 : undefined,
 		"aria-selected": highlighted ? "true" : "false",
 		"data-item-code": itemCode,
+		"data-row-reorder-id": itemCode,
 		"data-pharmacy-active": highlighted ? "true" : "false",
 		class: [stripHighlightClass(baseProps.class), { "item-row-highlighted": highlighted }],
 	};
@@ -391,6 +393,7 @@ const isSearchNavigationBoundary = (event: KeyboardEvent) => {
 };
 
 const handleTableKeydown = (event: KeyboardEvent) => {
+	if ((event.target as Element | null)?.closest("[data-row-reorder-key]")) return;
 	if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End"].includes(event.key)) {
 		if (isSearchNavigationBoundary(event)) {
 			event.preventDefault();

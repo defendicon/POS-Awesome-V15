@@ -3,6 +3,7 @@
 		:id="rowDomId"
 		class="posa-cart-item-row"
 		:class="rowClasses"
+		:data-row-reorder-id="item.posa_row_id"
 		:data-cart-row-index="rowIndex"
 		:data-testid="`cart-row-${item.item_code || rowIndex}`"
 		:data-active-cell-key="activeCellKey || undefined"
@@ -15,6 +16,7 @@
 			<!-- Item Name Column -->
 			<td v-if="column.key === 'item_name'" v-bind="getCellAttrs('item_name', 'text-start')">
 				<div class="posa-cart-item-row__item-cell">
+					<RowReorderHandle :row-key="String(item.posa_row_id)" :label="item.item_name || item.item_code" />
 					<span class="posa-cart-item-row__item-name">{{ item.item_name }}</span>
 					<v-chip v-if="item._missingPriceListRate" color="error" size="x-small" class="ml-1">
 						{{ __("Missing rate") }}
@@ -442,6 +444,7 @@
 
 <script setup>
 import { computed, nextTick, ref, watch } from "vue";
+import RowReorderHandle from "../../ui/RowReorderHandle.vue";
 import { getCartGridCellId, getCartGridRowId } from "../../../utils/cartFieldFocus";
 import { normalizeCartEditQuantity } from "../../../utils/cartQuantity";
 import { getItemLossRisk, resolveSaleFloorPolicy } from "../../../utils/lossPrevention";

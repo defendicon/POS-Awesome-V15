@@ -380,6 +380,16 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		recalculateTotals(); // Immediate update on set
 	};
 
+	/** Change line order without replacing row objects, pricing, quantities or tracking data. */
+	const reorderItems = (rowIds: string[]): boolean => {
+		if (rowIds.length !== itemOrder.value.length || new Set(rowIds).size !== rowIds.length || rowIds.some((id) => !itemsData.has(id))) return false;
+		if (rowIds.every((id, index) => id === itemOrder.value[index])) return false;
+		itemOrder.value = [...rowIds];
+		rowIds.forEach((id, index) => { itemsData.get(id)!.idx = index + 1; });
+		touch();
+		return true;
+	};
+
 	/**
 	 * Adds a single item to the cart and returns its reactive map proxy.
 	 *
@@ -775,6 +785,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		clearExchange,
 		mergeInvoiceDoc,
 		touch,
+		reorderItems,
 		setItems,
 		addItem,
 		addItems,

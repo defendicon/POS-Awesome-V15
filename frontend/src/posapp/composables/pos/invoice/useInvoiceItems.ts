@@ -464,20 +464,18 @@ export function useInvoiceItems(invoiceType: Ref<string>) {
 		});
 	};
 
-	const handleItemReorder = (reorderData: {
-		fromIndex: number;
-		toIndex: number;
-	}) => {
-		const { fromIndex, toIndex } = reorderData;
-		if (fromIndex === toIndex) return;
-		const newItems = [...invoiceStore.items];
-		const [movedItem] = newItems.splice(fromIndex, 1);
-		if (movedItem) {
-			newItems.splice(toIndex, 0, movedItem);
+	const handleItemReorder = (data: { rowIds: string[] } | { fromIndex: number; toIndex: number }) => {
+		let rowIds: string[];
+		if ("rowIds" in data) rowIds = data.rowIds;
+		else {
+			const { fromIndex, toIndex } = data;
+			const count = invoiceStore.items.length;
+			if (!Number.isInteger(fromIndex) || !Number.isInteger(toIndex) || fromIndex < 0 || toIndex < 0 || fromIndex >= count || toIndex >= count) return;
+			rowIds = invoiceStore.items.map((item) => item.posa_row_id);
+			const moved = rowIds.splice(fromIndex, 1)[0]!;
+			rowIds.splice(toIndex, 0, moved);
 		}
-		newItems.forEach((it, idx) => (it.idx = idx + 1));
-		invoiceStore.setItems(newItems);
-		toastStore.show({ title: __("Item order updated"), color: "success" });
+		if (invoiceStore.reorderItems(rowIds)) toastStore.show({ title: __("Item order updated"), color: "success" });
 	};
 
 	// --- Delivery Charges ---

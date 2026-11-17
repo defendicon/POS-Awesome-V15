@@ -2,11 +2,12 @@
 	<div class="items-table-container">
 		<v-data-table-virtual
 			ref="tableRef"
+			v-model:sort-by="sortBy"
 			:headers="effectiveHeaders"
 			:items="displayedItems"
 			class="sleek-data-table overflow-y-auto"
 			:style="{ height: 'calc(100% - 80px)' }"
-			item-key="item_code"
+			item-value="item_code"
 			fixed-header
 			height="100%"
 			:header-props="headerProps"
@@ -17,6 +18,7 @@
 			@scroll.passive="handleListScroll"
 			@keydown="handleTableKeydown"
 		>
+			<template #item.row-reorder="{ item }"><RowReorderHandle :row-key="String(item.item_code)" :label="item.item_name || item.item_code" /></template>
 			<template v-if="multiSelect" v-slot:item.item-select="{ item }">
 				<v-checkbox-btn
 					:model-value="isItemSelected(item)"
@@ -122,6 +124,7 @@
 
 <script setup>
 import { ref, computed, nextTick, watch } from "vue";
+import RowReorderHandle from "../../ui/RowReorderHandle.vue";
 import ItemRateInfoMenu from "./ItemRateInfoMenu.vue";
 import { priceListToSelectedCurrency } from "../../../utils/erpnextCurrency";
 
@@ -153,8 +156,8 @@ const props = defineProps({
 const emit = defineEmits(["row-click", "list-scroll", "toggle-selection", "select-all"]);
 
 const effectiveHeaders = computed(() => {
-	if (!props.multiSelect) return props.headers;
-	return [{ key: "item-select", title: "", sortable: false, width: "48px" }, ...props.headers];
+	const drag = { key: "row-reorder", title: "", sortable: false, width: "32px" };
+	return [drag, ...(props.multiSelect ? [{ key: "item-select", title: "", sortable: false, width: "48px" }] : []), ...props.headers];
 });
 
 function isItemSelected(item) {
@@ -207,6 +210,7 @@ watch(
 );
 
 const handleTableKeydown = (event) => {
+	if (event.target?.closest?.("[data-row-reorder-key]")) return;
 	const key = event.key || "";
 	if (key !== "Enter" && key !== " ") {
 		return;
@@ -256,6 +260,8 @@ const secondaryRate = (item) =>
 	);
 
 const tableRef = ref(null);
+const sortBy = ref([]);
+const clearSort = () => { sortBy.value = []; };
 
 const getTableElement = () => {
 	const ref = tableRef.value;
@@ -283,7 +289,7 @@ const scrollToIndex = (index) => {
 	return false;
 };
 
-defineExpose({ scrollToIndex, getTableElement, tableRef });
+defineExpose({ clearSort, scrollToIndex, getTableElement, tableRef });
 </script>
 
 <style scoped>

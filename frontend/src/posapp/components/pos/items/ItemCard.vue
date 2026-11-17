@@ -4,6 +4,7 @@
 		data-pos-keyboard-target="item-card"
 		:data-testid="`pos-item-card-${item.item_code}`"
 		:data-item-code="item.item_code"
+		:data-row-reorder-id="reorderable ? item.item_code : undefined"
 		tabindex="0"
 		role="button"
 		:aria-label="`${item.item_name || item.item_code}`"
@@ -13,6 +14,7 @@
 		@dragstart="onDragStart"
 		@dragend="onDragEnd"
 	>
+		<RowReorderHandle v-if="reorderable" class="item-card-reorder-grip" :row-key="String(item.item_code)" :label="item.item_name || item.item_code" />
 		<div class="card-item-image-container">
 			<v-img
 				:src="item.image || placeholderImage"
@@ -76,12 +78,14 @@
 </template>
 
 <script setup>
+import RowReorderHandle from "../../ui/RowReorderHandle.vue";
 import { computed } from "vue";
 import placeholderImage from "../placeholder-image.png";
 import ItemRateInfoMenu from "./ItemRateInfoMenu.vue";
 import { priceListToSelectedCurrency } from "../../../utils/erpnextCurrency";
 
 const props = defineProps({
+	reorderable: { type: Boolean, default: false },
 	item: { type: Object, required: true },
 	posProfile: { type: Object, required: true },
 	context: { type: String, default: "pos" },
@@ -193,6 +197,8 @@ const onDragEnd = (event) => {
 </script>
 
 <style scoped>
+.item-card-reorder-grip { position: absolute; top: 4px; right: 4px; z-index: 2; background: var(--pos-card-bg); }
+
 .card-item-card {
 	background: var(--pos-surface-raised);
 	border-radius: var(--pos-radius-md);

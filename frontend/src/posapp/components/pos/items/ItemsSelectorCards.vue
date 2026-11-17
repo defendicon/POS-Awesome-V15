@@ -44,6 +44,7 @@
 					v-if="item"
 					:key="item.item_code"
 					:item="item"
+					reorderable
 					:pos-profile="posProfile"
 					:context="context"
 					:selected-currency="selectedCurrency"
