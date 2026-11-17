@@ -1,5 +1,7 @@
 <template>
-	<div class="items-table-container">
+	<div ref="columnRoot" class="items-table-container" @pointerdown.capture="columnOrder.onPointerDown" @keydown.capture="columnOrder.onKeydown">
+		<v-alert v-if="columnOrder.error.value" type="warning" density="compact">{{ __(columnOrder.error.value) }}</v-alert>
+		<span class="sr-only" role="status" aria-live="polite">{{ columnOrder.announcement.value }}</span>
 		<v-data-table-virtual
 			ref="tableRef"
 			v-model:sort-by="sortBy"
@@ -18,6 +20,9 @@
 			@scroll.passive="handleListScroll"
 			@keydown="handleTableKeydown"
 		>
+			<template v-for="(header, index) in columnOrder.headers.value" :key="header.key" v-slot:[`header.${header.key}`]="slotProps">
+				<ColumnOrderHeader :column="slotProps.column" :get-sort-icon="slotProps.getSortIcon" :resettable="index === 0 && columnOrder.hasOrder.value" @reset-order="columnOrder.reset" />
+			</template>
 			<template #item.row-reorder="{ item }"><RowReorderHandle :row-key="String(item.item_code)" :label="item.item_name || item.item_code" /></template>
 			<template v-if="multiSelect" v-slot:item.item-select="{ item }">
 				<v-checkbox-btn
@@ -123,6 +128,8 @@
 </template>
 
 <script setup>
+import ColumnOrderHeader from "../../ui/ColumnOrderHeader.vue";
+import { useColumnOrder, columnOrderStorageKey } from "../../../composables/core/useColumnOrder";
 import { ref, computed, nextTick, watch } from "vue";
 import RowReorderHandle from "../../ui/RowReorderHandle.vue";
 import ItemRateInfoMenu from "./ItemRateInfoMenu.vue";
@@ -134,6 +141,7 @@ const props = defineProps({
 	headerProps: { type: Object, default: () => ({}) },
 	context: { type: String, default: "pos" },
 	posProfile: { type: Object, default: () => ({}) },
+	preferenceUser: { type: String, default: "" },
 	selectedCurrency: { type: String, default: "" },
 	selectedExchangeRate: { type: Number, default: 1 },
 	selectedConversionRate: { type: Number, default: 1 },
@@ -155,9 +163,12 @@ const props = defineProps({
 
 const emit = defineEmits(["row-click", "list-scroll", "toggle-selection", "select-all"]);
 
+const __ = window.__ || ((text) => text);
+const columnRoot = ref(null);
+const columnOrder = useColumnOrder(columnRoot, computed(() => props.headers), computed(() => columnOrderStorageKey(props.posProfile, props.preferenceUser, `selector:${props.context}`)));
 const effectiveHeaders = computed(() => {
 	const drag = { key: "row-reorder", title: "", sortable: false, width: "32px" };
-	return [drag, ...(props.multiSelect ? [{ key: "item-select", title: "", sortable: false, width: "48px" }] : []), ...props.headers];
+	return [drag, ...(props.multiSelect ? [{ key: "item-select", title: "", sortable: false, width: "48px" }] : []), ...columnOrder.headers.value];
 });
 
 function isItemSelected(item) {
@@ -210,7 +221,7 @@ watch(
 );
 
 const handleTableKeydown = (event) => {
-	if (event.target?.closest?.("[data-row-reorder-key]")) return;
+	if (event.target?.closest?.("[data-row-reorder-key], [data-column-reorder-key]")) return;
 	const key = event.key || "";
 	if (key !== "Enter" && key !== " ") {
 		return;

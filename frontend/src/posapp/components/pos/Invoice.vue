@@ -193,6 +193,7 @@
 									v-model:expanded="expanded"
 									:itemsPerPage="itemsPerPage"
 									:itemSearch="itemSearch"
+									:preference-user="currentCashier?.user || ''"
 									:pos_profile="pos_profile"
 									:invoiceType="invoiceType"
 									:stock_settings="stock_settings"

@@ -1,5 +1,7 @@
 <template>
-	<div class="pharmacy-search-results" data-testid="pharmacy-item-search-results">
+	<div ref="columnRoot" @pointerdown.capture="columnOrder.onPointerDown" @keydown.capture="columnOrder.onKeydown" class="pharmacy-search-results" data-testid="pharmacy-item-search-results">
+		<v-alert v-if="columnOrder.error.value" type="warning" density="compact">{{ __(columnOrder.error.value) }}</v-alert>
+		<span class="sr-only" role="status" aria-live="polite">{{ columnOrder.announcement.value }}</span>
 		<div class="pharmacy-search-controls">
 			<div
 				v-if="mode === 'alternates'"
@@ -80,7 +82,7 @@
 				ref="tableRef"
 				:id="resultsGridId"
 				:aria-label="__('Item search results')"
-				:headers="headers"
+				:headers="columnOrder.headers.value"
 				:items="tableItems"
 				item-value="item_code"
 				fixed-header
@@ -92,6 +94,9 @@
 				@click:row="handleRowClick"
 				@scroll.passive="emit('list-scroll', $event)"
 			>
+				<template v-for="(header, index) in columnOrder.headers.value" :key="header.key" v-slot:[`header.${header.key}`]="slotProps">
+					<ColumnOrderHeader :column="slotProps.column" :get-sort-icon="slotProps.getSortIcon" :resettable="index === 0 && columnOrder.hasOrder.value" @reset-order="columnOrder.reset" />
+				</template>
 				<template #item.item_name="{ item }">
 					<div class="pharmacy-product-cell">
 						<div class="d-flex align-center"><RowReorderHandle :row-key="String(item.item_code)" :label="item.item_name || item.item_code" /><strong>{{ cleanPharmacyText(item.item_name) || item.item_code }}</strong></div>
@@ -168,6 +173,8 @@
 </template>
 
 <script setup lang="ts">
+import ColumnOrderHeader from "../../ui/ColumnOrderHeader.vue";
+import { useColumnOrder, columnOrderStorageKey } from "../../../composables/core/useColumnOrder";
 import RowReorderHandle from "../../ui/RowReorderHandle.vue";
 import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
 
@@ -189,6 +196,7 @@ const props = defineProps({
 	includeZeroStock: { type: Boolean, default: false },
 	highlightedItemCode: { type: String, default: "" },
 	posProfile: { type: Object, default: () => ({}) },
+	preferenceUser: { type: String, default: "" },
 	selectedCurrency: { type: String, default: "" },
 	currencySymbol: { type: Function, required: true },
 	formatCurrency: { type: Function, required: true },
@@ -324,6 +332,9 @@ const headers = computed(() => [
 		: []),
 ]);
 
+const columnRoot = ref<HTMLElement | null>(null);
+const columnOrder = useColumnOrder(columnRoot, headers, computed(() => columnOrderStorageKey(props.posProfile, props.preferenceUser, "selector:pharmacy")));
+
 const alternateEmptyText = computed(() => {
 	if (props.alternateReason === "missing_generic") {
 		return __("This item has no generic mapping.");
@@ -393,7 +404,7 @@ const isSearchNavigationBoundary = (event: KeyboardEvent) => {
 };
 
 const handleTableKeydown = (event: KeyboardEvent) => {
-	if ((event.target as Element | null)?.closest("[data-row-reorder-key]")) return;
+	if ((event.target as Element | null)?.closest("[data-row-reorder-key], [data-column-reorder-key]")) return;
 	if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End"].includes(event.key)) {
 		if (isSearchNavigationBoundary(event)) {
 			event.preventDefault();

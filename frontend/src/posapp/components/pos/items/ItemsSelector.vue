@@ -126,6 +126,7 @@
 								:include-zero-stock="alternateMode || pharmacyIncludeZeroStock"
 								:highlighted-item-code="itemSelection.highlightedItemCode?.value || ''"
 								:pos-profile="pos_profile"
+								:preference-user="currentCashier?.user || ''"
 								:selected-currency="selected_currency"
 								:currency-symbol="currencySymbol"
 								:format-currency="memoizedFormatCurrency"
@@ -201,6 +202,7 @@
 								:header-props="headerProps"
 								:context="context"
 								:pos-profile="pos_profile"
+								:preference-user="currentCashier?.user || ''"
 								:selected-currency="selected_currency"
 								:selected-exchange-rate="selected_exchange_rate"
 								:selected-conversion-rate="selected_conversion_rate"
@@ -588,6 +590,7 @@ const selectorRowReorder = useRowReorder(selectorReorderRoot, (drop) => {
 });
 watch(selectorRowScope, () => selectorRowReorder.cancel());
 function handleReorderOrSelectorKeydown(event: KeyboardEvent) {
+	if ((event.target as Element | null)?.closest("[data-column-reorder-key], [data-column-order-control]")) return;
 	if ((event.target as Element | null)?.closest("[data-row-reorder-key]")) { selectorRowReorder.onKeydown(event); return; }
 	handleSelectorKeydownCapture(event);
 }

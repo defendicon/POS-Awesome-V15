@@ -7,11 +7,21 @@ type RowDrop = {
 	visibleKeys: string[];
 };
 
-/** Pointer-only handles keep text selection, row clicks and selector-to-cart native drags intact. */
+/** Shared table handles: vertical rows by default, horizontal columns when requested.
+ * Text selection, sorting and selector-to-cart native drags remain separate. */
 export function useRowReorder(
 	root: Ref<HTMLElement | null>,
 	commit: (drop: RowDrop) => void,
+	options: { axis?: "horizontal" | "vertical" } = {},
 ) {
+	const horizontal = options.axis === "horizontal";
+	const itemAttribute = horizontal
+		? "data-column-reorder-id"
+		: "data-row-reorder-id";
+	const handleAttribute = horizontal
+		? "data-column-reorder-key"
+		: "data-row-reorder-key";
+	const prefix = horizontal ? "pos-column-reorder" : "pos-row-reorder";
 	const announcement = ref("");
 	let active: {
 		key: string;
@@ -28,16 +38,15 @@ export function useRowReorder(
 	let lastY = 0;
 	const rows = () =>
 		Array.from(
-			root.value?.querySelectorAll<HTMLElement>(
-				"[data-row-reorder-id]",
-			) || [],
+			root.value?.querySelectorAll<HTMLElement>(`[${itemAttribute}]`) ||
+				[],
 		);
 	const clearMarkers = () =>
 		rows().forEach((row) =>
 			row.classList.remove(
-				"pos-row-reorder-source",
-				"pos-row-reorder-before",
-				"pos-row-reorder-after",
+				`${prefix}-source`,
+				`${prefix}-before`,
+				`${prefix}-after`,
 			),
 		);
 
@@ -52,6 +61,7 @@ export function useRowReorder(
 		ghost?.remove();
 		ghost = null;
 		clearMarkers();
+		if (horizontal) root.value?.style.removeProperty("--pos-column-edge");
 		active = null;
 		target = null;
 	}
@@ -63,23 +73,29 @@ export function useRowReorder(
 		clearMarkers();
 		target = null;
 		rows()
-			.find((row) => row.dataset.rowReorderId === active!.key)
-			?.classList.add("pos-row-reorder-source");
+			.find((row) => row.getAttribute(itemAttribute) === active!.key)
+			?.classList.add(`${prefix}-source`);
 		const hit = document
 			.elementFromPoint(lastX, lastY)
-			?.closest<HTMLElement>("[data-row-reorder-id]");
+			?.closest<HTMLElement>(`[${itemAttribute}]`);
 		if (
 			!hit ||
 			!root.value.contains(hit) ||
-			hit.dataset.rowReorderId === active.key
+			hit.getAttribute(itemAttribute) === active.key
 		)
 			return;
 		const rect = hit.getBoundingClientRect();
-		const after = lastY > rect.top + rect.height / 2;
-		target = { key: hit.dataset.rowReorderId!, after };
-		hit.classList.add(
-			after ? "pos-row-reorder-after" : "pos-row-reorder-before",
-		);
+		const rtl = getComputedStyle(root.value).direction === "rtl";
+		if (horizontal)
+			root.value.style.setProperty(
+				"--pos-column-edge",
+				rtl ? "-3px" : "3px",
+			);
+		const after = horizontal
+			? lastX > rect.left + rect.width / 2 !== rtl
+			: lastY > rect.top + rect.height / 2;
+		target = { key: hit.getAttribute(itemAttribute)!, after };
+		hit.classList.add(after ? `${prefix}-after` : `${prefix}-before`);
 	}
 	function tick() {
 		if (!active) return;
@@ -91,15 +107,25 @@ export function useRowReorder(
 					: root.value;
 			while (
 				scroll &&
-				!(
-					scroll.scrollHeight > scroll.clientHeight &&
-					/auto|scroll/.test(getComputedStyle(scroll).overflowY)
-				)
+				!(horizontal
+					? scroll.scrollWidth > scroll.clientWidth &&
+						/auto|scroll/.test(getComputedStyle(scroll).overflowX)
+					: scroll.scrollHeight > scroll.clientHeight &&
+						/auto|scroll/.test(getComputedStyle(scroll).overflowY))
 			)
 				scroll = scroll.parentElement;
 			if (scroll) {
 				const rect = scroll.getBoundingClientRect();
-				if (lastX >= rect.left && lastX <= rect.right) {
+				if (horizontal && lastY >= rect.top && lastY <= rect.bottom) {
+					if (lastX > rect.right - 36 && lastX <= rect.right)
+						scroll.scrollLeft += 12;
+					else if (lastX < rect.left + 36 && lastX >= rect.left)
+						scroll.scrollLeft -= 12;
+				} else if (
+					!horizontal &&
+					lastX >= rect.left &&
+					lastX <= rect.right
+				) {
 					if (lastY > rect.bottom - 36 && lastY <= rect.bottom)
 						scroll.scrollTop += 12;
 					else if (lastY < rect.top + 36 && lastY >= rect.top)
@@ -137,7 +163,7 @@ export function useRowReorder(
 						target: target.key,
 						after: target.after,
 						visibleKeys: rows().map(
-							(row) => row.dataset.rowReorderId!,
+							(row) => row.getAttribute(itemAttribute)!,
 						),
 					}
 				: null;
@@ -145,12 +171,12 @@ export function useRowReorder(
 		cancel();
 		if (drop) {
 			commit(drop);
-			announcement.value = `${window.__ ? window.__("Row moved") : "Row moved"}: ${label}`;
+			announcement.value = `${window.__ ? window.__(horizontal ? "Column moved" : "Row moved") : horizontal ? "Column moved" : "Row moved"}: ${label}`;
 		}
 	}
 	function onPointerDown(event: PointerEvent) {
 		const handle = (event.target as Element | null)?.closest<HTMLElement>(
-			"[data-row-reorder-key]",
+			`[${handleAttribute}]`,
 		);
 		if (
 			!handle ||
@@ -163,7 +189,7 @@ export function useRowReorder(
 		event.stopPropagation();
 		handle.focus();
 		active = {
-			key: handle.dataset.rowReorderKey!,
+			key: handle.getAttribute(handleAttribute)!,
 			pointer: event.pointerId,
 			x: event.clientX,
 			y: event.clientY,
@@ -181,26 +207,36 @@ export function useRowReorder(
 	}
 	function onKeydown(event: KeyboardEvent) {
 		const handle = (event.target as Element | null)?.closest<HTMLElement>(
-			"[data-row-reorder-key]",
+			`[${handleAttribute}]`,
 		);
 		if (
 			!handle ||
 			!root.value?.contains(handle) ||
 			!event.altKey ||
-			!["ArrowUp", "ArrowDown"].includes(event.key)
+			!(
+				horizontal
+					? ["ArrowLeft", "ArrowRight"]
+					: ["ArrowUp", "ArrowDown"]
+			).includes(event.key)
 		)
 			return false;
 		event.preventDefault();
 		event.stopPropagation();
-		const keys = rows().map((row) => row.dataset.rowReorderId!);
-		const source = handle.dataset.rowReorderKey!;
-		const down = event.key === "ArrowDown";
+		const keys = rows().map((row) => row.getAttribute(itemAttribute)!);
+		const source = handle.getAttribute(handleAttribute)!;
+		const rtl =
+			root.value && getComputedStyle(root.value).direction === "rtl";
+		const down = horizontal
+			? (event.key === "ArrowRight") !== rtl
+			: event.key === "ArrowDown";
 		const target = keys[keys.indexOf(source) + (down ? 1 : -1)];
 		if (target) {
 			commit({ source, target, after: down, visibleKeys: keys });
 			announcement.value = window.__
-				? window.__("Row moved")
-				: "Row moved";
+				? window.__(horizontal ? "Column moved" : "Row moved")
+				: horizontal
+					? "Column moved"
+					: "Row moved";
 		}
 		return true;
 	}
