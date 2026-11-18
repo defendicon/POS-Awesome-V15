@@ -1,5 +1,5 @@
 <template>
-	<div ref="columnRoot" @pointerdown.capture="handleColumnPointerDown" @keydown.capture="handleColumnKeydown" @dblclick.capture="columnWidths.onDoubleClick" class="pharmacy-search-results pos-column-widths" :class="{ 'pos-column-widths--custom': columnWidths.hasWidths.value }" :style="columnWidths.tableStyle(sizedHeaders)" data-testid="pharmacy-item-search-results">
+	<div ref="columnRoot" @pointerdown.capture="handleColumnPointerDown" @keydown.capture="handleColumnKeydown" @dblclick.capture="columnWidths.onDoubleClick" class="pharmacy-search-results pos-column-widths" :class="{ 'pos-column-widths--custom': columnWidths.hasWidths.value, 'pos-customization-editing': columnOrder.editing.value }" :style="columnWidths.tableStyle(sizedHeaders)" data-testid="pharmacy-item-search-results">
 		<v-alert v-if="columnWidths.error.value" type="warning" density="compact">{{ columnWidths.error.value }}</v-alert>
 		<span class="sr-only" role="status" aria-live="polite">{{ columnWidths.announcement.value }}</span>
 		<v-alert v-if="columnOrder.error.value" type="warning" density="compact">{{ __(columnOrder.error.value) }}</v-alert>
@@ -96,8 +96,8 @@
 				@click:row="handleRowClick"
 				@scroll.passive="emit('list-scroll', $event)"
 			>
-				<template v-for="(header, index) in sizedHeaders" :key="header.key" v-slot:[`header.${header.key}`]="slotProps">
-					<ColumnOrderHeader :column="slotProps.column" :get-sort-icon="slotProps.getSortIcon" :resettable="index === 0 && columnOrder.hasOrder.value" @reset-order="columnOrder.reset" :widths-resettable="index === 0 && columnWidths.hasWidths.value" @reset-widths="columnWidths.reset" />
+				<template v-for="header in sizedHeaders" :key="header.key" v-slot:[`header.${header.key}`]="slotProps">
+					<ColumnOrderHeader :column="slotProps.column" :get-sort-icon="slotProps.getSortIcon" />
 				</template>
 				<template #item.item_name="{ item }">
 					<div class="pharmacy-product-cell">
@@ -336,9 +336,9 @@ const headers = computed(() => [
 ]);
 
 const columnRoot = ref<HTMLElement | null>(null);
-const columnOrder = useColumnOrder(columnRoot, headers, computed(() => columnOrderStorageKey(props.posProfile, props.preferenceUser, "selector:pharmacy")));
+const columnOrder = useColumnOrder(columnRoot, headers, computed(() => columnOrderStorageKey(props.posProfile, props.preferenceUser, "selector:pharmacy")), { section: "selector", label: "Counter Grid search" });
 
-const columnWidths = useColumnWidths(columnRoot, computed(() => columnOrderStorageKey(props.posProfile, props.preferenceUser, "selector:pharmacy")));
+const columnWidths = useColumnWidths(columnRoot, computed(() => columnOrderStorageKey(props.posProfile, props.preferenceUser, "selector:pharmacy")), { section: "selector", label: "Counter Grid search" });
 const sizedHeaders = computed(() => columnWidths.apply(columnOrder.headers.value));
 function handleColumnPointerDown(event: PointerEvent) { if (!columnWidths.onPointerDown(event)) columnOrder.onPointerDown(event); }
 function handleColumnKeydown(event: KeyboardEvent) { if (!columnWidths.onKeydown(event)) columnOrder.onKeydown(event); }

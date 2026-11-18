@@ -16,8 +16,10 @@ selector-to-cart drag-to-add retain their existing flows.
   search filters and result limits, so it cannot expose out-of-scope items or
   expand a limited server result. Fresh cached/API item objects retain current
   prices and stock; preferences contain item codes only. List, card and Counter
-  Grid search presentations share this order. Search tools contain Reset item
-  order; storage failures are visible and fall back to session/default order.
+  Grid search presentations share this order. Search tools open Customize table;
+  its inspector contains Reset item row order. See
+  [Workspace customization](WORKSPACE_CUSTOMIZATION.md) for Apply/Cancel behavior.
+  Storage failures are visible and fall back to session/default order.
 - Invoice order belongs to `invoiceStore.itemOrder`, keyed by `posa_row_id`.
   Reordering validates a complete permutation and updates sequential `idx`
   without replacing row objects or recalculating business values. Duplicate item

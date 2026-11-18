@@ -3,55 +3,6 @@
 		class="invoice-card-layout"
 		:class="{ 'invoice-card-layout--editing': editing, 'invoice-card-layout--interacting': interaction }"
 	>
-		<v-btn
-			v-if="editing"
-			class="invoice-card-layout__toggle"
-			icon="mdi-check"
-			size="x-small"
-			variant="flat"
-			color="primary"
-			:aria-label="__('Done')"
-			:title="__('Done')"
-			:aria-expanded="editing"
-			@click="toggleEditing"
-		/>
-		<div v-if="editing" class="invoice-card-layout__editor">
-			<div class="invoice-card-layout__intro">
-				<v-icon icon="mdi-cursor-move" size="22" />
-				<div>
-					<strong>{{ __("Make this workspace yours") }}</strong>
-					<p>
-						{{
-							__(
-								"Drag beside a card to share a row, or above / below for a new row. Pull the resize grip to change width.",
-							)
-						}}
-					</p>
-				</div>
-			</div>
-			<div class="invoice-card-layout__presets">
-				<v-btn
-					size="x-small"
-					variant="tonal"
-					prepend-icon="mdi-view-column-outline"
-					@click="applyPreset('single')"
-					>{{ __("Single row") }}</v-btn
-				>
-				<v-btn
-					size="x-small"
-					variant="tonal"
-					prepend-icon="mdi-view-agenda-outline"
-					@click="applyPreset('stack')"
-					>{{ __("Separate rows") }}</v-btn
-				>
-				<v-btn size="x-small" variant="text" prepend-icon="mdi-restore" @click="reset">{{
-					__("Reset layout")
-				}}</v-btn>
-			</div>
-			<span class="invoice-card-layout__saved">{{
-				__("Saved in this browser for this user and POS Profile")
-			}}</span>
-		</div>
 		<v-alert v-if="storageError" type="warning" density="compact" role="status">{{
 			storageError
 		}}</v-alert>
@@ -77,12 +28,11 @@
 				<v-btn
 					v-if="!editing && index === 0"
 					class="invoice-card-layout__toggle"
-					icon="mdi-view-dashboard-edit-outline"
+					icon="mdi-tune-variant"
 					size="x-small"
-					variant="tonal"
-					color="primary"
-					:aria-label="__('Customize cards')"
-					:title="__('Customize cards')"
+					variant="text"
+					:aria-label="__('Customize workspace')"
+					:title="__('Customize workspace')"
 					:aria-expanded="false"
 					@click="toggleEditing"
 				/>
@@ -91,48 +41,13 @@
 						type="button"
 						class="invoice-card-layout__drag"
 						:aria-label="__('Drag card') + ': ' + __(labelFor(card.id))"
+						:title="__('Drag to arrange card')"
 						@pointerdown="beginDrag($event, card.id)"
 						@keydown.up.prevent="move(card.id, -1)"
 						@keydown.down.prevent="move(card.id, 1)"
 					>
-						<v-icon icon="mdi-drag" size="20" /><span>{{ __(labelFor(card.id)) }}</span>
+						<v-icon icon="mdi-drag" size="18" />
 					</button>
-					<div class="invoice-card-layout__card-actions">
-						<button
-							type="button"
-							:disabled="index === 0"
-							:aria-label="__('Move up') + ': ' + __(labelFor(card.id))"
-							@click="move(card.id, -1)"
-						>
-							<v-icon icon="mdi-chevron-up" size="18" />
-						</button>
-						<button
-							type="button"
-							:disabled="index === visibleCards.length - 1"
-							:aria-label="__('Move down') + ': ' + __(labelFor(card.id))"
-							@click="move(card.id, 1)"
-						>
-							<v-icon icon="mdi-chevron-down" size="18" />
-						</button>
-						<select
-							:value="card.width"
-							:aria-label="__('Card width') + ': ' + __(labelFor(card.id))"
-							@change="setWidth(card.id, ($event.target as HTMLSelectElement).value)"
-						>
-							<option value="auto">{{ __("Auto") }}</option>
-							<option value="3">{{ __("¼ row") }}</option>
-							<option value="4">{{ __("⅓ row") }}</option>
-							<option value="6">{{ __("½ row") }}</option>
-							<option value="8">{{ __("⅔ row") }}</option>
-							<option value="full">{{ __("Full row") }}</option>
-							<option
-								v-if="typeof card.width === 'number' && ![3, 4, 6, 8].includes(card.width)"
-								:value="card.width"
-							>
-								{{ Math.round((card.width / 12) * 100) }}%
-							</option>
-						</select>
-					</div>
 				</div>
 				<slot :name="card.id" />
 				<button
@@ -176,6 +91,10 @@
 </template>
 
 <script setup lang="ts">
+import {
+	registerCustomization,
+	workspaceCustomization,
+} from "../../../composables/core/workspaceCustomization";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import {
 	invoiceCardDefaults,
@@ -190,7 +109,7 @@ import {
 
 const props = defineProps<{ user: string; profile: string; enabled: InvoiceCardId[] }>();
 const __ = (text: string) => (window.__ ? window.__(text) : text);
-const editing = ref(false);
+const editing = computed(() => workspaceCustomization.isEditing("cards"));
 const grid = ref<HTMLElement | null>(null);
 const announcement = ref("");
 type Interaction = {
@@ -235,6 +154,7 @@ watch(
 );
 
 function save() {
+	if (customization.defer()) return;
 	if (!props.user || !props.profile) return;
 	try {
 		localStorage.setItem(key.value, JSON.stringify(preferences.value));
@@ -279,7 +199,7 @@ function spanFor(card: InvoiceCardPreference): number {
 
 function toggleEditing() {
 	cancelInteraction();
-	editing.value = !editing.value;
+	workspaceCustomization.open("cards");
 }
 
 function applyPreset(preset: "single" | "stack") {
@@ -448,6 +368,25 @@ function resizeWithKey(id: InvoiceCardId, delta: number) {
 	card.width = Math.max(3, Math.min(12, spanFor(card) + delta));
 	save();
 }
+const customization = registerCustomization({
+	section: "cards",
+	kind: "cards",
+	label: "Cards",
+	scope: computed(() => (props.user && props.profile ? key.value : "")),
+	state: preferences,
+	error: storageError,
+	reset,
+	stop: cancelInteraction,
+	preset: applyPreset,
+	entries: () =>
+		visibleCards.value.map((card) => ({ key: card.id, label: labelFor(card.id), width: card.width })),
+	move: (key, delta) => move(key as InvoiceCardId, delta),
+	setWidth: (key, width) => setWidth(key as InvoiceCardId, String(width)),
+});
+watch(editing, (value) => {
+	if (!value) cancelInteraction();
+});
+
 onBeforeUnmount(cancelInteraction);
 
 function reset() {
@@ -472,51 +411,17 @@ function reset() {
 	inset-inline-end: 8px;
 	top: 8px;
 	z-index: 4;
-	border: 1px solid rgba(var(--v-theme-primary), 0.18);
-	box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+	width: 28px;
+	height: 28px;
+	border-radius: 6px !important;
+	color: var(--pos-text-secondary, #62747d);
+	border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+	box-shadow: none;
 }
 .invoice-card-layout:not(.invoice-card-layout--editing)
 	.invoice-card-layout__card--first
 	:deep(.invoice-section-heading) {
 	padding-inline-end: 48px;
-}
-.invoice-card-layout__editor {
-	padding: 14px 48px 12px 14px;
-	border: 1px solid rgba(var(--v-theme-primary), 0.25);
-	border-radius: var(--pos-radius-md, 12px);
-	background:
-		linear-gradient(120deg, rgba(var(--v-theme-primary), 0.09), rgba(var(--v-theme-primary), 0.02)),
-		var(--pos-card-bg);
-	color: var(--pos-text-primary);
-}
-.invoice-card-layout__intro {
-	display: flex;
-	gap: 10px;
-	align-items: flex-start;
-}
-.invoice-card-layout__intro > .v-icon {
-	color: rgb(var(--v-theme-primary));
-	margin-top: 2px;
-}
-.invoice-card-layout__intro strong {
-	font-size: 0.9rem;
-}
-.invoice-card-layout__intro p {
-	margin: 3px 0 10px;
-	font-size: 0.78rem;
-	line-height: 1.5;
-	opacity: 0.8;
-}
-.invoice-card-layout__presets {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 6px;
-}
-.invoice-card-layout__saved {
-	display: block;
-	margin-top: 8px;
-	font-size: 0.7rem;
-	opacity: 0.7;
 }
 .invoice-card-layout__cards {
 	display: grid;
@@ -543,56 +448,29 @@ function reset() {
 }
 .invoice-card-layout--editing .invoice-card-layout__card {
 	border-radius: var(--pos-radius-md, 12px);
-	outline: 1px solid rgba(var(--v-theme-primary), 0.3);
+	outline: 1px dashed rgba(var(--v-theme-primary), 0.4);
 	background: var(--pos-card-bg);
 }
 .invoice-card-layout__card-tools {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	flex-wrap: wrap;
-	gap: 4px;
-	padding: 5px 8px;
-	background: rgba(var(--v-theme-primary), 0.08);
-	border-radius: var(--pos-radius-md, 12px) var(--pos-radius-md, 12px) 0 0;
-	border-bottom: 1px solid rgba(var(--v-theme-primary), 0.15);
-	color: var(--pos-text-primary);
+	position: absolute;
+	top: 9px;
+	inset-inline-start: 8px;
+	z-index: 4;
 }
 .invoice-card-layout__drag {
-	display: flex;
-	align-items: center;
-	gap: 3px;
-	cursor: grab;
-	touch-action: none;
-	font-size: 0.75rem;
-	font-weight: 600;
-	padding: 3px 0;
-}
-.invoice-card-layout__card-actions {
-	display: flex;
-	align-items: center;
-	gap: 2px;
-}
-.invoice-card-layout__card-actions button {
+	width: 28px;
+	height: 28px;
 	display: grid;
 	place-items: center;
-	width: 25px;
-	height: 25px;
-	border-radius: 5px;
-}
-.invoice-card-layout__card-actions button:hover {
-	background: rgba(var(--v-theme-primary), 0.12);
-}
-.invoice-card-layout__card-actions button:disabled {
-	opacity: 0.3;
-}
-.invoice-card-layout__card-actions select {
-	border: 1px solid rgba(var(--v-theme-primary), 0.2);
-	border-radius: 5px;
-	padding: 3px 5px;
-	font-size: 0.72rem;
-	color: var(--pos-text-primary);
+	border-radius: 6px;
 	background: var(--pos-card-bg);
+	color: var(--pos-text-secondary, #62747d);
+	cursor: grab;
+	touch-action: none;
+	border: 1px solid rgba(var(--v-theme-on-surface), 0.13);
+}
+.invoice-card-layout--editing .invoice-card-layout__card :deep(.invoice-section-heading) {
+	padding-inline-start: 44px;
 }
 .invoice-card-layout__resize {
 	position: absolute;
@@ -604,8 +482,9 @@ function reset() {
 	width: 28px;
 	height: 28px;
 	border-radius: 7px 0 7px 0;
-	background: rgb(var(--v-theme-primary));
-	color: rgb(var(--v-theme-on-primary));
+	background: var(--pos-card-bg);
+	color: rgb(var(--v-theme-primary));
+	border: 1px solid rgba(var(--v-theme-primary), 0.25);
 	cursor: ew-resize;
 	touch-action: none;
 }

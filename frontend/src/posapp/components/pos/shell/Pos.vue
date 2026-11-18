@@ -4,6 +4,7 @@
 		:class="[rtlClasses, { 'pos-main-container--counter-grid': counterGridActive }]"
 		:style="[responsiveStyles, layoutStyleOverrides, rtlStyles]"
 	>
+		<WorkspaceCustomizer />
 		<Drafts></Drafts>
 		<InvoiceManagement></InvoiceManagement>
 		<SalesOrders></SalesOrders>
@@ -34,7 +35,9 @@
 			v-if="counterGridActive"
 			v-model="counterItemSearchOpen"
 			eager
-			:retain-focus="true"
+			:retain-focus="!customizationActive"
+			:persistent="customizationActive"
+			:no-click-animation="customizationActive"
 			width="calc(100vw - 32px)"
 			max-width="1500"
 			class="counter-item-search-dialog"
@@ -283,6 +286,8 @@
 </template>
 
 <script>
+import { workspaceCustomization } from "../../../composables/core/workspaceCustomization";
+import WorkspaceCustomizer from "../../ui/WorkspaceCustomizer.vue";
 import ItemsSelector from "../items/ItemsSelector.vue";
 import Invoice from "../Invoice.vue";
 import CounterGridHealthStrip from "./CounterGridHealthStrip.vue";
@@ -831,7 +836,10 @@ export default {
 			{ immediate: true },
 		);
 
+		watch(counterItemSearchOpen, (open) => { if (!open && workspaceCustomization.isEditing("selector")) workspaceCustomization.cancel(); });
+
 		return {
+			customizationActive: workspaceCustomization.active,
 			...responsive,
 			...rtl,
 			...shift,
@@ -902,6 +910,7 @@ export default {
 	},
 
 	components: {
+		WorkspaceCustomizer,
 		ItemsSelector,
 		Invoice,
 		CounterGridHealthStrip,

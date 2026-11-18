@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { defineComponent, h, ref } from "vue";
 import { nextTick } from "vue";
 import { mount } from "@vue/test-utils";
+import WorkspaceCustomizer from "../src/posapp/components/ui/WorkspaceCustomizer.vue";
+import { workspaceCustomization as workspace } from "../src/posapp/composables/core/workspaceCustomization";
 import InvoiceCardLayout from "../src/posapp/components/pos/invoice/InvoiceCardLayout.vue";
 import {
 	invoiceCardLayoutKey,
@@ -18,8 +20,25 @@ const Button = defineComponent({
 	},
 });
 
+const wrappers: any[] = [];
+const Host = defineComponent({
+	props: ["user", "profile", "enabled"],
+	setup(props, { slots }) {
+		return () =>
+			h("div", [
+				h(InvoiceCardLayout, props as any, slots),
+				h(WorkspaceCustomizer, { inline: true }),
+			]);
+	},
+});
+afterEach(() => {
+	workspace.cancel();
+	wrappers.splice(0).forEach((wrapper) => {
+		if (wrapper.exists()) wrapper.unmount();
+	});
+});
 function render(enabled = ["customer", "posting", "items"]) {
-	return mount(InvoiceCardLayout, {
+	const wrapper = mount(Host, {
 		props: { user: "cashier", profile: "counter", enabled: enabled as any },
 		global: {
 			components: {
@@ -48,6 +67,8 @@ function render(enabled = ["customer", "posting", "items"]) {
 			delivery: "Delivery controls",
 		},
 	});
+	wrappers.push(wrapper);
+	return wrapper;
 }
 const order = (wrapper: ReturnType<typeof render>) =>
 	wrapper
@@ -97,7 +118,9 @@ describe("Invoice card layout", () => {
 	it("drags real cards beside or below another card without resetting field state", async () => {
 		const wrapper = render();
 		await wrapper.find("input").setValue("Customer A");
-		await wrapper.find('[aria-label="Customize cards"]').trigger("click");
+		await wrapper
+			.find('[aria-label="Customize workspace"]')
+			.trigger("click");
 		const target = wrapper.find('[data-invoice-card="posting"]').element;
 		vi.spyOn(target, "getBoundingClientRect").mockReturnValue({
 			left: 500,
@@ -139,6 +162,10 @@ describe("Invoice card layout", () => {
 		await nextTick();
 		expect(order(wrapper)).toEqual(["posting", "customer", "items"]);
 		expect(wrapper.find("input").element.value).toBe("Customer A");
+		workspace.apply();
+		await nextTick();
+		workspace.open("cards");
+		await nextTick();
 		expect(
 			JSON.parse(
 				localStorage.getItem(
@@ -176,7 +203,9 @@ describe("Invoice card layout", () => {
 
 	it("previews mouse resizing, cancels with Escape and saves only on release", async () => {
 		const wrapper = render();
-		await wrapper.find('[aria-label="Customize cards"]').trigger("click");
+		await wrapper
+			.find('[aria-label="Customize workspace"]')
+			.trigger("click");
 		vi.spyOn(
 			wrapper.find(".invoice-card-layout__cards").element,
 			"getBoundingClientRect",
@@ -233,6 +262,8 @@ describe("Invoice card layout", () => {
 			new MouseEvent("pointerup", { clientX: 750, clientY: 100 }),
 		);
 		await nextTick();
+		workspace.apply();
+		await nextTick();
 		expect(
 			JSON.parse(
 				localStorage.getItem(
@@ -245,7 +276,9 @@ describe("Invoice card layout", () => {
 
 	it("offers row presets and keyboard resizing while preserving profile-disabled cards", async () => {
 		const wrapper = render();
-		await wrapper.find('[aria-label="Customize cards"]').trigger("click");
+		await wrapper
+			.find('[aria-label="Customize workspace"]')
+			.trigger("click");
 		await wrapper
 			.findAll("button")
 			.find((button) => button.text() === "Separate rows")!
@@ -255,7 +288,7 @@ describe("Invoice card layout", () => {
 		).toHaveLength(3);
 		await wrapper
 			.findAll("button")
-			.find((button) => button.text() === "Single row")!
+			.find((button) => button.text() === "Side by side")!
 			.trigger("click");
 		expect(
 			wrapper
@@ -307,6 +340,8 @@ describe("Invoice card layout", () => {
 		expect(
 			wrapper.find('[data-invoice-card="customer"]').classes(),
 		).toContain("invoice-card-layout__card--full");
+		workspace.apply();
+		await nextTick();
 		wrapper.unmount();
 		const restored = render();
 		expect(order(restored)).toEqual(["posting", "customer", "items"]);
@@ -337,6 +372,8 @@ describe("Invoice card layout", () => {
 		await wrapper
 			.find('[aria-label="Move up: Invoice Items"]')
 			.trigger("click");
+		workspace.apply();
+		await nextTick();
 		await wrapper.setProps({ profile: "other" });
 		expect(order(wrapper)).toEqual(["customer", "posting", "items"]);
 		await wrapper.setProps({ profile: "counter" });
@@ -344,9 +381,11 @@ describe("Invoice card layout", () => {
 		await wrapper.setProps({ user: "another-cashier" });
 		expect(order(wrapper)).toEqual(["customer", "posting", "items"]);
 		await wrapper.setProps({ user: "cashier" });
+		workspace.open("cards");
+		await nextTick();
 		await wrapper
 			.findAll("button")
-			.find((button) => button.text() === "Reset layout")!
+			.find((button) => button.text() === "Reset section")!
 			.trigger("click");
 		expect(order(wrapper)).toEqual(["customer", "posting", "items"]);
 		wrapper.unmount();
@@ -369,7 +408,9 @@ describe("Invoice card layout", () => {
 			.find('[aria-label="Move up: Posting and Price List"]')
 			.trigger("click");
 		expect(order(wrapper)[0]).toBe("posting");
-		expect(wrapper.text()).toContain("session only");
+		workspace.apply();
+		await nextTick();
+		expect(wrapper.text()).toContain("Settings could not be saved");
 		wrapper.unmount();
 	});
 });

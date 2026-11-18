@@ -306,6 +306,7 @@ const FALLBACK_LANGUAGES = [
 	{ code: "pt", name: "Português", native_name: "Português" },
 ];
 
+import { workspaceCustomization } from "../../composables/core/workspaceCustomization";
 import { useLastInvoicePrinting } from "../../composables/core/useLastInvoicePrinting";
 import { useUpdateStore } from "../../stores/updateStore";
 import { requestSafeRefresh } from "../../services/safeRefresh";
@@ -515,6 +516,7 @@ export default {
 					title: __("Tools"),
 					description: __("Updates and app info that stay out of the cashier flow."),
 					actions: [
+						{ id: "customize-workspace", label: __("Customize workspace"), subtitle: __("Cards, columns and table widths"), icon: "mdi-tune-variant", tone: "primary", handler: "customizeWorkspace", disabled: !workspaceCustomization.available.value },
 						{ id: "safe-refresh", label: __("Safe Refresh"), subtitle: __("Save cart and review pending work before reloading"), icon: "mdi-refresh", tone: "info", handler: "safeRefresh" },
 						{
 							id: "check-for-updates",
@@ -629,6 +631,7 @@ export default {
 			}
 
 			switch (action.handler) {
+				case "customizeWorkspace": this.closeMenu(); workspaceCustomization.open("cards"); break;
 				case "safeRefresh":
 					this.closeMenu(); requestSafeRefresh(); break;
 				case "openEmployeeSwitch":

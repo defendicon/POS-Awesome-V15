@@ -45,8 +45,6 @@
 						v-model:qty-input="debounce_qty"
 						:pos-profile="pos_profile"
 						:scanner-locked="scannerLocked"
-						:has-custom-item-order="selectorRowOrder.order.value.length > 0"
-						@reset-item-order="selectorRowOrder.reset()"
 						:enable-background-sync="enable_background_sync"
 						:last-sync-time="lastSyncTimeLabel"
 						:sync-status="syncStatus"

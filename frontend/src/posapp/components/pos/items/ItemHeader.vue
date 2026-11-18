@@ -129,7 +129,7 @@
 		<v-expand-transition>
 			<div v-if="toolsOpen" class="tools-panel">
 				<div class="tools-panel__actions">
-					<v-btn v-if="hasCustomItemOrder" density="compact" variant="text" prepend-icon="mdi-sort-restore" @click="emit('reset-item-order')">{{ __("Reset item order") }}</v-btn>
+					<v-btn density="compact" variant="text" prepend-icon="mdi-tune-variant" @click="workspaceCustomization.open('selector')">{{ __("Customize table") }}</v-btn>
 					<v-btn
 						v-if="context === 'purchase' || context === 'pos'"
 						density="compact"
@@ -179,6 +179,7 @@
 </template>
 
 <script setup>
+import { workspaceCustomization } from "../../../composables/core/workspaceCustomization";
 import { computed, ref } from "vue";
 
 const syncSearchCombobox = (root, state) => {
@@ -215,7 +216,6 @@ const vSearchCombobox = {
 };
 
 const props = defineProps({
-	hasCustomItemOrder: { type: Boolean, default: false },
 	searchInput: { type: String, default: "" },
 	qtyInput: { type: [String, Number], default: 1 },
 	posProfile: { type: Object, required: true },
@@ -234,7 +234,6 @@ const props = defineProps({
 });
 
 const emit = defineEmits([
-	"reset-item-order",
 	"update:searchInput",
 	"update:qtyInput",
 	"esc",

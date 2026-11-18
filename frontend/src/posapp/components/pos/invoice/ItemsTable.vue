@@ -3,7 +3,7 @@
 		ref="tableContainer"
 		class="pos-column-widths my-0 py-0 overflow-y-auto posa-items-table-container posa-responsive-table-container pos-themed-card"
 		:style="[containerStyles, columnWidths.tableStyle(finalVisibleColumns)]"
-		:class="[containerClasses, gridContainerClasses, { 'pos-column-widths--custom': columnWidths.hasWidths.value }]"
+		:class="[containerClasses, gridContainerClasses, { 'pos-column-widths--custom': columnWidths.hasWidths.value, 'pos-customization-editing': columnOrder.editing.value }]"
 		role="region"
 		:aria-label="__('Invoice Items')"
 		@keydown.capture="handleReorderOrGridKeydown"
@@ -38,8 +38,8 @@
 			:search="counterGrid ? '' : itemSearch"
 			:custom-filter="customItemFilter"
 		>
-			<template v-for="(header, index) in finalVisibleColumns.filter((column) => column.key !== 'data-table-expand')" :key="header.key" v-slot:[`header.${header.key}`]="slotProps">
-				<ColumnOrderHeader :column="slotProps.column" :get-sort-icon="slotProps.getSortIcon" :resettable="index === 0 && columnOrder.hasOrder.value" @reset-order="columnOrder.reset" :widths-resettable="index === 0 && columnWidths.hasWidths.value" @reset-widths="columnWidths.reset" />
+			<template v-for="header in finalVisibleColumns.filter((column) => column.key !== 'data-table-expand')" :key="header.key" v-slot:[`header.${header.key}`]="slotProps">
+				<ColumnOrderHeader :column="slotProps.column" :get-sort-icon="slotProps.getSortIcon" />
 			</template>
 			<template #header.data-table-expand="{ column }"><ColumnResizeHandle :column-key="column.key || 'data-table-expand'" :width="column.width" :label="__('Details')" /></template>
 			<template #no-data>
@@ -301,8 +301,8 @@ const { memoizedFormatFloat, memoizedFormatCurrency, clearFormatCache } = useFor
 	formatCurrency: props.formatCurrency,
 });
 
-const columnOrder = useColumnOrder(tableContainer, computed(() => props.headers || []), computed(() => columnOrderStorageKey(props.pos_profile, props.preferenceUser || "", "invoice")));
-const columnWidths = useColumnWidths(tableContainer, computed(() => columnOrderStorageKey(props.pos_profile, props.preferenceUser || "", "invoice")));
+const columnOrder = useColumnOrder(tableContainer, computed(() => props.headers || []), computed(() => columnOrderStorageKey(props.pos_profile, props.preferenceUser || "", "invoice")), { section: "invoice", label: "Invoice table" });
+const columnWidths = useColumnWidths(tableContainer, computed(() => columnOrderStorageKey(props.pos_profile, props.preferenceUser || "", "invoice")), { section: "invoice", label: "Invoice table" });
 function handleTablePointerDown(event: PointerEvent) {
 	if (columnWidths.onPointerDown(event)) return;
 	columnOrder.onPointerDown(event);

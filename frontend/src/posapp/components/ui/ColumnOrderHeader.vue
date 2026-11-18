@@ -21,31 +21,7 @@
 			:icon="getSortIcon(column)"
 			size="16"
 		/>
-		<button
-			v-if="widthsResettable"
-			type="button"
-			data-column-order-control
-			class="pos-column-header__reset"
-			:aria-label="__('Reset column widths')"
-			:title="__('Reset column widths')"
-			@click.stop="emit('reset-widths')"
-			@keydown.stop
-		>
-			<v-icon icon="mdi-arrow-expand-horizontal" size="14" />
-		</button>
 		<ColumnResizeHandle :column-key="column.key" :label="column.title" :width="column.width" />
-		<button
-			v-if="resettable"
-			data-column-order-control
-			type="button"
-			class="pos-column-header__reset"
-			:aria-label="__('Reset column order')"
-			:title="__('Reset column order')"
-			@click.stop="emit('reset-order')"
-			@keydown.stop
-		>
-			<v-icon icon="mdi-restore" size="14" />
-		</button>
 	</div>
 </template>
 <script setup lang="ts">
@@ -53,10 +29,7 @@ import ColumnResizeHandle from "./ColumnResizeHandle.vue";
 defineProps<{
 	column: any;
 	getSortIcon?: (column: any) => any;
-	resettable?: boolean;
-	widthsResettable?: boolean;
 }>();
-const emit = defineEmits<{ "reset-order": []; "reset-widths": [] }>();
 const __ = (text: string) => (window.__ ? window.__(text) : text);
 </script>
 <style>
@@ -64,28 +37,25 @@ const __ = (text: string) => (window.__ ? window.__(text) : text);
 	gap: 3px;
 	min-width: 0;
 }
-.pos-column-header__grip,
-.pos-column-header__reset {
-	display: inline-flex;
+.pos-column-header__grip {
+	display: none;
 	align-items: center;
 	justify-content: center;
 	width: 20px;
 	min-width: 20px;
 	height: 26px;
 	border-radius: 4px;
-	color: inherit;
-	opacity: 0.55;
-}
-.pos-column-header__grip {
+	color: var(--pos-text-secondary, #62747d);
 	cursor: grab;
 	touch-action: none;
 }
+.pos-customization-editing .pos-column-header__grip {
+	display: inline-flex;
+}
 .pos-column-header__grip:hover,
-.pos-column-header__grip:focus-visible,
-.pos-column-header__reset:hover,
-.pos-column-header__reset:focus-visible {
-	opacity: 1;
-	background: rgba(var(--v-theme-primary), 0.15);
+.pos-column-header__grip:focus-visible {
+	background: rgba(var(--v-theme-primary), 0.08);
+	color: rgb(var(--v-theme-primary));
 }
 .pos-column-reorder-source {
 	opacity: 0.45;

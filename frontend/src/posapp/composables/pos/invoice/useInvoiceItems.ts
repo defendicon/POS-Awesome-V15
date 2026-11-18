@@ -30,6 +30,7 @@
  * Three watchers keep `invoiceStore` in sync with the local delivery charge refs
  * so the customer display panel always reflects the current selection.
  */
+import { registerCustomization } from "../../core/workspaceCustomization";
 import { ref, computed, watch } from "vue";
 import type { Ref } from "vue";
 import { useInvoiceStore } from "../../../stores/invoiceStore";
@@ -140,7 +141,8 @@ export function useInvoiceItems(invoiceType: Ref<string>) {
 			if (typeof column !== "string") {
 				continue;
 			}
-			const key = column === "discount_value" ? "discount_percentage" : column;
+			const key =
+				column === "discount_value" ? "discount_percentage" : column;
 			if (optionalColumnKeys.value.has(key)) {
 				selected.add(key);
 			}
@@ -156,6 +158,20 @@ export function useInvoiceItems(invoiceType: Ref<string>) {
 		);
 	});
 
+	const defaultSelectedColumns = () =>
+		available_columns.value
+			.filter(
+				(column) =>
+					!column.required &&
+					(column.key === "price_list_rate" ||
+						(column.key === "discount_percentage" &&
+							pos_profile.value
+								?.posa_display_discount_percentage) ||
+						(column.key === "discount_amount" &&
+							pos_profile.value?.posa_display_discount_amount)),
+			)
+			.map((column) => column.key);
+
 	const loadColumnPreferences = () => {
 		try {
 			const saved = localStorage.getItem("posawesome_selected_columns");
@@ -163,25 +179,7 @@ export function useInvoiceItems(invoiceType: Ref<string>) {
 				setSelectedColumns(JSON.parse(saved));
 			} else if (pos_profile.value) {
 				// Default selection based on POS Profile
-				setSelectedColumns(
-					available_columns.value
-						.filter((col) => {
-							if (col.required) return true;
-							if (col.key === "price_list_rate") return true;
-							if (
-								col.key === "discount_percentage" &&
-								pos_profile.value?.posa_display_discount_percentage
-							)
-								return true;
-							if (
-								col.key === "discount_amount" &&
-								pos_profile.value?.posa_display_discount_amount
-							)
-								return true;
-							return false;
-						})
-						.map((col) => col.key),
-				);
+				setSelectedColumns(defaultSelectedColumns());
 			}
 		} catch (e) {
 			console.error("Failed to load column preferences:", e);
@@ -189,6 +187,7 @@ export function useInvoiceItems(invoiceType: Ref<string>) {
 	};
 
 	const saveColumnPreferences = () => {
+		if (visibilityCustomization.defer()) return;
 		try {
 			localStorage.setItem(
 				"posawesome_selected_columns",
@@ -199,8 +198,36 @@ export function useInvoiceItems(invoiceType: Ref<string>) {
 		}
 	};
 
-	// --- Quality and Stock Validation ---
+	const visibilityCustomization = registerCustomization({
+		section: "invoice",
+		kind: "visibility",
+		label: "Invoice columns",
+		scope: computed(() => "posawesome_selected_columns"),
+		state: selected_columns,
+		reset: () => {
+			setSelectedColumns(defaultSelectedColumns());
+			saveColumnPreferences();
+		},
+		entries: () =>
+			available_columns.value.map((column) => ({
+				key: column.key,
+				label: column.title,
+				required: column.required,
+				visible:
+					!!column.required ||
+					selected_columns.value.includes(column.key),
+			})),
+		setVisible: (key, visible) => {
+			setSelectedColumns(
+				visible
+					? [...selected_columns.value, key]
+					: selected_columns.value.filter((entry) => entry !== key),
+			);
+			saveColumnPreferences();
+		},
+	});
 
+	// --- Quality and Stock Validation ---
 	const resolveFloatPrecision = (precision: number | null | undefined) => {
 		if (Number.isInteger(precision) && Number(precision) >= 0) {
 			return Number(precision);
@@ -256,7 +283,10 @@ export function useInvoiceItems(invoiceType: Ref<string>) {
 		if (!item || item.is_stock_item === 0 || item.is_stock_item === false) {
 			return undefined;
 		}
-		if (item.max_qty !== undefined && Number.isFinite(Number(item.max_qty))) {
+		if (
+			item.max_qty !== undefined &&
+			Number.isFinite(Number(item.max_qty))
+		) {
 			return flt(Number(item.max_qty), null);
 		}
 
@@ -348,7 +378,10 @@ export function useInvoiceItems(invoiceType: Ref<string>) {
 				0,
 				Number(item._offer_constraints.max_qty || 0),
 			);
-			if (maxOfferQty > 0 && Math.abs(Number(parsedValue || 0)) > maxOfferQty) {
+			if (
+				maxOfferQty > 0 &&
+				Math.abs(Number(parsedValue || 0)) > maxOfferQty
+			) {
 				const limitedQty = parsedValue < 0 ? -maxOfferQty : maxOfferQty;
 				item[field_name] = limitedQty;
 				parsedValue = limitedQty;
@@ -464,18 +497,32 @@ export function useInvoiceItems(invoiceType: Ref<string>) {
 		});
 	};
 
-	const handleItemReorder = (data: { rowIds: string[] } | { fromIndex: number; toIndex: number }) => {
+	const handleItemReorder = (
+		data: { rowIds: string[] } | { fromIndex: number; toIndex: number },
+	) => {
 		let rowIds: string[];
 		if ("rowIds" in data) rowIds = data.rowIds;
 		else {
 			const { fromIndex, toIndex } = data;
 			const count = invoiceStore.items.length;
-			if (!Number.isInteger(fromIndex) || !Number.isInteger(toIndex) || fromIndex < 0 || toIndex < 0 || fromIndex >= count || toIndex >= count) return;
+			if (
+				!Number.isInteger(fromIndex) ||
+				!Number.isInteger(toIndex) ||
+				fromIndex < 0 ||
+				toIndex < 0 ||
+				fromIndex >= count ||
+				toIndex >= count
+			)
+				return;
 			rowIds = invoiceStore.items.map((item) => item.posa_row_id);
 			const moved = rowIds.splice(fromIndex, 1)[0]!;
 			rowIds.splice(toIndex, 0, moved);
 		}
-		if (invoiceStore.reorderItems(rowIds)) toastStore.show({ title: __("Item order updated"), color: "success" });
+		if (invoiceStore.reorderItems(rowIds))
+			toastStore.show({
+				title: __("Item order updated"),
+				color: "success",
+			});
 	};
 
 	// --- Delivery Charges ---

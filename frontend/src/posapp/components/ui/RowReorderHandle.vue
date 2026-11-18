@@ -30,8 +30,17 @@ const __ = (text: string) => (window.__ ? window.__(text) : text);
 	border-radius: 5px;
 	cursor: grab;
 	touch-action: none;
-	color: rgb(var(--v-theme-primary));
-	opacity: 0.6;
+	color: var(--pos-text-secondary, #62747d);
+	opacity: 0;
+}
+tr:hover .pos-row-reorder-handle,
+.card-item-card:hover .pos-row-reorder-handle {
+	opacity: 0.55;
+}
+@media (hover: none) {
+	.pos-row-reorder-handle {
+		opacity: 0.55;
+	}
 }
 .pos-row-reorder-handle:hover,
 .pos-row-reorder-handle:focus-visible {

@@ -1,4 +1,5 @@
 import { ref, watch, type Ref } from "vue";
+import { registerCustomization } from "../../core/workspaceCustomization";
 import { applyRowOrder, reorderRows } from "../../../utils/rowOrder";
 
 export function useSelectorRowOrder(scope: Ref<string>) {
@@ -32,6 +33,7 @@ export function useSelectorRowOrder(scope: Ref<string>) {
 		{ immediate: true },
 	);
 	function save() {
+		if (customization.defer()) return;
 		if (!scope.value) return;
 		try {
 			localStorage.setItem(scope.value, JSON.stringify(order.value));
@@ -70,6 +72,15 @@ export function useSelectorRowOrder(scope: Ref<string>) {
 		order.value = [];
 		save();
 	}
+	const customization = registerCustomization({
+		section: "selector",
+		label: "Item rows",
+		kind: "rows",
+		scope,
+		state: order,
+		error,
+		reset,
+	});
 	return {
 		apply: <T>(rows: T[]) => applyRowOrder(rows, order.value, keyOf),
 		move,

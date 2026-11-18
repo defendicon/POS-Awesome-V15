@@ -1,9 +1,13 @@
 # Drag-and-drop column order
 
+Header grips appear while the relevant **Customize workspace** section is open.
+The shared editor provides move buttons, Reset section and preview with
+Apply/Cancel. See [Workspace customization](WORKSPACE_CUSTOMIZATION.md).
+
 Use the grip beside a table heading to move its column left or right. The edge
 indicator previews the insertion point. Alt + Left / Right moves a focused grip;
-Escape cancels a drag. The restore icon in the first movable heading resets the
-table's column order. Clicking the heading title still uses Vuetify sorting.
+Escape cancels a drag. Reset section in the inspector restores table presentation
+defaults. Clicking the heading title still uses Vuetify sorting.
 
 ## Ownership and linked features
 

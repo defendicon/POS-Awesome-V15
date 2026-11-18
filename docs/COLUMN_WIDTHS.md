@@ -1,5 +1,9 @@
 # Adjustable table column widths
 
+Open **Customize workspace** and select the relevant table before resizing.
+The consolidated editor provides pixel inputs, Reset section and preview with
+Apply/Cancel. See [Workspace customization](WORKSPACE_CUSTOMIZATION.md).
+
 Drag the divider at a heading's trailing edge to make that column narrower or
 wider. All displayed business columns and the selector row/selection controls
 and invoice details column support resizing. Widths snap to whole pixels with
@@ -8,8 +12,8 @@ minimum sizes that keep controls usable and a maximum of 1600px.
 A focused divider supports Left / Right in 10px steps, Shift + Left / Right in
 50px steps, and Home to reset that column. Double-click also resets a single
 column. Escape, pointer cancellation and loss of window focus cancel an active
-resize. The Reset column widths icon in the first business heading resets the
-whole table without changing its column order.
+resize. Reset section in the inspector restores the table presentation defaults;
+individual divider resets retain the other columns' settings.
 
 ## Shared ownership and linked flows
 

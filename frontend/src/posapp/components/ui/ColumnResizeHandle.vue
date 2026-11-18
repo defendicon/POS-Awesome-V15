@@ -3,6 +3,7 @@
 		type="button"
 		class="pos-column-width-handle"
 		:data-column-width-key="columnKey"
+		:data-column-width-label="label || columnKey"
 		role="separator"
 		aria-orientation="vertical"
 		:aria-valuemin="minimumColumnWidth(columnKey)"
@@ -27,6 +28,7 @@ const __ = (text: string) => (window.__ ? window.__(text) : text);
 	position: relative;
 }
 .pos-column-width-handle {
+	visibility: hidden;
 	position: absolute;
 	inset-inline-end: 0;
 	top: 0;
@@ -36,6 +38,10 @@ const __ = (text: string) => (window.__ ? window.__(text) : text);
 	cursor: col-resize;
 	touch-action: none;
 	border-inline-end: 2px solid transparent;
+}
+.pos-customization-editing .pos-column-width-handle {
+	visibility: visible;
+	border-inline-end-color: rgba(var(--v-theme-primary), 0.2);
 }
 .pos-column-width-handle:hover,
 .pos-column-width-handle:focus-visible {

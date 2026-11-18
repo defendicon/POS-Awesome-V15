@@ -1,5 +1,11 @@
 import { computed, onBeforeUnmount, ref, watch, type Ref } from "vue";
 
+import {
+	registerCustomization,
+	workspaceCustomization,
+	type CustomizationSection,
+} from "./workspaceCustomization";
+
 type Header = {
 	key: string;
 	width?: string | number;
@@ -28,6 +34,7 @@ const pixels = (value: unknown): number | null => {
 export function useColumnWidths(
 	root: Ref<HTMLElement | null>,
 	orderScope: Ref<string>,
+	options: { section?: CustomizationSection; label?: string } = {},
 ) {
 	const widths = ref<Record<string, number>>({});
 	const error = ref("");
@@ -53,6 +60,7 @@ export function useColumnWidths(
 	} | null = null;
 	const __ = (text: string) => (window.__ ? window.__(text) : text);
 	function persist() {
+		if (customization.defer()) return;
 		if (!scope.value) return;
 		try {
 			localStorage.setItem(scope.value, JSON.stringify(widths.value));
@@ -266,9 +274,53 @@ export function useColumnWidths(
 		widths.value = {};
 		persist();
 	}
+	function setWidth(key: string, value: string | number) {
+		const width = Number(value);
+		if (!Number.isFinite(width) || width <= 0) return;
+		cancel();
+		widths.value = { ...measure(), [key]: clampColumnWidth(key, width) };
+		persist();
+	}
+	const customization = registerCustomization({
+		section: options.section || "selector",
+		label: options.label || "Item selector",
+		kind: "widths",
+		scope,
+		state: widths,
+		error,
+		reset,
+		stop: cancel,
+		setWidth,
+		entries: () => {
+			const current = widths.value;
+			return Array.from(
+				root.value?.querySelectorAll<HTMLElement>(
+					"[data-column-width-key]",
+				) || [],
+			).map((handle) => {
+				const key = handle.dataset.columnWidthKey!;
+				return {
+					key,
+					label: handle.dataset.columnWidthLabel || key,
+					width:
+						current[key] ??
+						Math.round(
+							handle.closest("th")?.getBoundingClientRect()
+								.width || 120,
+						),
+					min: minimumColumnWidth(key),
+				};
+			});
+		},
+	});
+	const editing = computed(() =>
+		workspaceCustomization.isEditing(options.section || "selector"),
+	);
 	onBeforeUnmount(cancel);
 	return {
 		widths,
+		editing,
+		setWidth,
 		error,
 		hasWidths,
 		announcement,

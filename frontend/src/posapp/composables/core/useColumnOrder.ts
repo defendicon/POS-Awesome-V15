@@ -1,5 +1,10 @@
 import { computed, ref, watch, type Ref } from "vue";
 import { applyRowOrder, reorderRows } from "../../utils/rowOrder";
+import {
+	registerCustomization,
+	workspaceCustomization,
+	type CustomizationSection,
+} from "./workspaceCustomization";
 import { useRowReorder } from "./useRowReorder";
 
 type Header = {
@@ -23,6 +28,7 @@ export function useColumnOrder<T extends Header>(
 	root: Ref<HTMLElement | null>,
 	available: Ref<T[]>,
 	scope: Ref<string>,
+	options: { section?: CustomizationSection; label?: string } = {},
 ) {
 	const order = ref<string[]>([]);
 	const error = ref("");
@@ -40,6 +46,7 @@ export function useColumnOrder<T extends Header>(
 	);
 	const hasOrder = computed(() => order.value.length > 0);
 	function persist() {
+		if (customization.defer()) return;
 		if (!scope.value) return;
 		try {
 			localStorage.setItem(scope.value, JSON.stringify(order.value));
@@ -50,30 +57,32 @@ export function useColumnOrder<T extends Header>(
 				"Column order could not be saved. Changes last for this session only.";
 		}
 	}
-	const drag = useRowReorder(
-		root,
-		(drop) => {
-			const moved = reorderRows(
-				ordered.value,
-				(header) => header.key,
-				drop.source,
-				drop.target,
-				drop.after,
-				drop.visibleKeys,
-			);
-			if (!moved) return;
-			const shown = new Set(moved.map((header) => header.key));
-			// Remember positions of optional columns even while they are hidden.
-			const queue = moved.map((header) => header.key);
-			const previous = order.value;
-			order.value = previous.map((key) =>
-				shown.has(key) ? queue.shift()! : key,
-			);
-			order.value.push(...queue);
-			persist();
-		},
-		{ axis: "horizontal" },
-	);
+	function moveColumn(drop: {
+		source: string;
+		target: string;
+		after: boolean;
+		visibleKeys: string[];
+	}) {
+		const moved = reorderRows(
+			ordered.value,
+			(header) => header.key,
+			drop.source,
+			drop.target,
+			drop.after,
+			drop.visibleKeys,
+		);
+		if (!moved) return;
+		const shown = new Set(moved.map((header) => header.key));
+		// Remember positions of optional columns even while they are hidden.
+		const queue = moved.map((header) => header.key);
+		const previous = order.value;
+		order.value = previous.map((key) =>
+			shown.has(key) ? queue.shift()! : key,
+		);
+		order.value.push(...queue);
+		persist();
+	}
+	const drag = useRowReorder(root, moveColumn, { axis: "horizontal" });
 	watch(
 		scope,
 		() => {
@@ -107,5 +116,36 @@ export function useColumnOrder<T extends Header>(
 		order.value = [];
 		persist();
 	}
-	return { headers, ordered, error, hasOrder, reset, ...drag };
+	const customization = registerCustomization({
+		section: options.section || "selector",
+		label: options.label || "Item selector",
+		kind: "order",
+		scope,
+		state: order,
+		error,
+		reset,
+		stop: drag.cancel,
+		entries: () =>
+			ordered.value.map((header) => ({
+				key: header.key,
+				label: header.title || header.key,
+			})),
+		move: (key, direction) => {
+			const index = ordered.value.findIndex(
+				(header) => header.key === key,
+			);
+			const target = ordered.value[index + direction];
+			if (target)
+				moveColumn({
+					source: key,
+					target: target.key,
+					after: direction > 0,
+					visibleKeys: ordered.value.map((header) => header.key),
+				});
+		},
+	});
+	const editing = computed(() =>
+		workspaceCustomization.isEditing(options.section || "selector"),
+	);
+	return { headers, ordered, error, hasOrder, reset, editing, ...drag };
 }

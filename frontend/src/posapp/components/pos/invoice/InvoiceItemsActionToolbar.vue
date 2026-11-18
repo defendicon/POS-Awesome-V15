@@ -1,5 +1,5 @@
 <template>
-	<div class="column-selector-container">
+	<div class="column-selector-container invoice-items-toolbar">
 		<v-text-field
 			ref="itemSearchField"
 			:model-value="itemSearch"
@@ -10,134 +10,70 @@
 			class="item-search-field pos-themed-input"
 			:label="__('Search items or barcode')"
 			prepend-inner-icon="mdi-magnify"
-				hide-details
-				clearable
-				autocomplete="off"
-				data-pos-arrow-enters-invoice-grid
-			></v-text-field>
+			hide-details
+			clearable
+			autocomplete="off"
+			data-pos-arrow-enters-invoice-grid
+		></v-text-field>
 		<v-btn
 			density="compact"
 			variant="text"
 			color="primary"
-			prepend-icon="mdi-cog-outline"
-			@click="toggleColumnSelection"
+			prepend-icon="mdi-tune-variant"
+			@click="workspaceCustomization.open('invoice')"
 			class="column-selector-btn"
+			:aria-label="__('Table options')"
 		>
-			{{ __("Columns") }}
+			<span class="invoice-items-toolbar__label">{{ __("Table options") }}</span>
 		</v-btn>
-		<v-dialog v-model="showColumnSelector" max-width="500px" transition="dialog-bottom-transition">
-			<v-card class="pos-themed-card">
-				<v-card-title class="text-h6 pa-4 d-flex align-center">
-					<span>{{ __("Select Columns to Display") }}</span>
-					<v-spacer></v-spacer>
-					<v-btn
-						icon="mdi-close"
-						variant="text"
-						density="compact"
-						:aria-label="__('Close column selector')"
-						@click="showColumnSelector = false"
-					></v-btn>
-				</v-card-title>
-				<v-divider></v-divider>
-				<v-card-text class="pa-4">
-					<v-row dense>
-						<v-col
-							cols="12"
-							v-for="column in availableColumns.filter((col) => !col.required)"
-							:key="column.key"
-						>
-							<v-switch
-								:model-value="isTempColumnSelected(column.key)"
-								@update:model-value="
-									(value) => setTempColumnSelection(column.key, value)
-								"
-								:label="column.title"
-								hide-details
-								density="compact"
-								color="primary"
-								class="column-switch mb-1"
-								:disabled="column.required"
-							></v-switch>
-						</v-col>
-					</v-row>
-					<div class="text-caption mt-2">
-						{{ __("Required columns cannot be hidden") }}
-					</div>
-				</v-card-text>
-				<v-card-actions class="pa-4 pt-0">
-					<v-btn color="error" variant="text" @click="cancelColumnSelection">{{
-						__("Cancel")
-					}}</v-btn>
-					<v-spacer></v-spacer>
-					<v-btn color="primary" variant="tonal" @click="updateSelectedColumns">{{
-						__("Apply")
-					}}</v-btn>
-				</v-card-actions>
-			</v-card>
-		</v-dialog>
 	</div>
 </template>
 
 <script setup>
 import { ref } from "vue";
-
-const props = defineProps({
-	itemSearch: {
-		type: String,
-		default: "",
-	},
-	availableColumns: {
-		type: Array,
-		default: () => [],
-	},
-	selectedColumns: {
-		type: Array,
-		default: () => [],
-	},
-});
-
-const emit = defineEmits(["update:itemSearch", "update:selectedColumns"]);
-
-const showColumnSelector = ref(false);
-const tempSelectedColumns = ref([]);
+import { workspaceCustomization } from "../../../composables/core/workspaceCustomization";
+defineProps({ itemSearch: { type: String, default: "" } });
+defineEmits(["update:itemSearch"]);
 const itemSearchField = ref(null);
-
-const toggleColumnSelection = () => {
-	tempSelectedColumns.value = normalizeColumns(props.selectedColumns);
-	showColumnSelector.value = true;
-};
-
-const cancelColumnSelection = () => {
-	showColumnSelector.value = false;
-};
-
-const updateSelectedColumns = () => {
-	emit("update:selectedColumns", normalizeColumns(tempSelectedColumns.value));
-	showColumnSelector.value = false;
-};
-
-const focusSearch = () => {
-	itemSearchField.value?.focus?.();
-};
-
-const normalizeColumns = (columns) =>
-	Array.isArray(columns)
-		? [...new Set(columns.filter((column) => typeof column === "string"))]
-		: [];
-
-const isTempColumnSelected = (key) => tempSelectedColumns.value.includes(key);
-
-const setTempColumnSelection = (key, selected) => {
-	const next = new Set(tempSelectedColumns.value);
-	if (selected) {
-		next.add(key);
-	} else {
-		next.delete(key);
-	}
-	tempSelectedColumns.value = [...next];
-};
-
-defineExpose({
-	focusSearch,
-});
+const focusSearch = () => itemSearchField.value?.focus?.();
+const __ = window.__ || ((text) => text);
+defineExpose({ focusSearch });
 </script>
+<style scoped>
+.invoice-items-toolbar {
+	display: flex;
+	align-items: center;
+	flex-wrap: nowrap;
+	gap: 10px;
+	padding: 12px 16px;
+}
+.invoice-items-toolbar .item-search-field {
+	flex: 1 1 0;
+	min-width: 0;
+	max-width: none;
+}
+.invoice-items-toolbar .column-selector-btn {
+	flex: 0 0 auto;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: normal;
+	text-transform: none;
+	border-radius: 7px;
+}
+@media (max-width: 600px) {
+	.invoice-items-toolbar {
+		padding: 10px;
+		gap: 6px;
+	}
+	.invoice-items-toolbar__label {
+		display: none;
+	}
+	.invoice-items-toolbar .column-selector-btn {
+		min-width: 34px;
+		padding-inline: 8px;
+	}
+	.invoice-items-toolbar :deep(.v-btn__prepend) {
+		margin-inline: 0;
+	}
+}
+</style>

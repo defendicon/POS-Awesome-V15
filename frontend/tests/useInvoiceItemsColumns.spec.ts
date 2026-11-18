@@ -2,7 +2,8 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
-import { ref } from "vue";
+import { defineComponent, h, ref } from "vue";
+import { mount } from "@vue/test-utils";
 
 vi.mock("../src/posapp/stores/toastStore", () => ({
 	useToastStore: () => ({
@@ -67,7 +68,9 @@ describe("useInvoiceItems column preferences", () => {
 			"price_list_rate",
 			"discount_percentage",
 		]);
-		expect(invoiceItems.items_headers.value.map((column) => column.key)).toEqual(
+		expect(
+			invoiceItems.items_headers.value.map((column) => column.key),
+		).toEqual(
 			expect.arrayContaining([
 				"item_name",
 				"qty",
@@ -82,5 +85,44 @@ describe("useInvoiceItems column preferences", () => {
 		expect(localStorage.getItem("posawesome_selected_columns")).toBe(
 			JSON.stringify(["uom", "price_list_rate", "discount_percentage"]),
 		);
+	});
+	it("previews visibility in the workspace editor without hiding required columns or saving on cancel", async () => {
+		const { useInvoiceItems } = await import(
+			"../src/posapp/composables/pos/invoice/useInvoiceItems"
+		);
+		const { workspaceCustomization: workspace } = await import(
+			"../src/posapp/composables/core/workspaceCustomization"
+		);
+		let invoiceItems!: ReturnType<typeof useInvoiceItems>;
+		const wrapper = mount(
+			defineComponent({
+				setup() {
+					invoiceItems = useInvoiceItems(ref("Invoice"));
+					return () => h("div");
+				},
+			}),
+		);
+		workspace.open("invoice");
+		const visibility = workspace.participants.value.find(
+			(part) => part.kind === "visibility",
+		)!;
+		visibility.setVisible?.("uom", true);
+		visibility.setVisible?.("item_name", false);
+		expect(
+			invoiceItems.items_headers.value.map((column) => column.key),
+		).toContain("uom");
+		expect(
+			invoiceItems.items_headers.value.map((column) => column.key),
+		).toContain("item_name");
+		expect(localStorage.getItem("posawesome_selected_columns")).toBeNull();
+		workspace.cancel();
+		expect(invoiceItems.selected_columns.value).toEqual([]);
+		workspace.open("invoice");
+		visibility.setVisible?.("uom", true);
+		expect(workspace.apply()).toBe(true);
+		expect(
+			JSON.parse(localStorage.getItem("posawesome_selected_columns")!),
+		).toEqual(["uom"]);
+		wrapper.unmount();
 	});
 });

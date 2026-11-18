@@ -1,5 +1,5 @@
 <template>
-	<div ref="columnRoot" class="items-table-container pos-column-widths" :class="{ 'pos-column-widths--custom': columnWidths.hasWidths.value }" :style="columnWidths.tableStyle(effectiveHeaders)" @pointerdown.capture="handleColumnPointerDown" @keydown.capture="handleColumnKeydown" @dblclick.capture="columnWidths.onDoubleClick">
+	<div ref="columnRoot" class="items-table-container pos-column-widths" :class="{ 'pos-column-widths--custom': columnWidths.hasWidths.value, 'pos-customization-editing': columnOrder.editing.value }" :style="columnWidths.tableStyle(effectiveHeaders)" @pointerdown.capture="handleColumnPointerDown" @keydown.capture="handleColumnKeydown" @dblclick.capture="columnWidths.onDoubleClick">
 		<v-alert v-if="columnWidths.error.value" type="warning" density="compact">{{ columnWidths.error.value }}</v-alert>
 		<span class="sr-only" role="status" aria-live="polite">{{ columnWidths.announcement.value }}</span>
 		<v-alert v-if="columnOrder.error.value" type="warning" density="compact">{{ __(columnOrder.error.value) }}</v-alert>
@@ -22,8 +22,8 @@
 			@scroll.passive="handleListScroll"
 			@keydown="handleTableKeydown"
 		>
-			<template v-for="(header, index) in effectiveHeaders.filter((column) => !['row-reorder', 'item-select'].includes(column.key))" :key="header.key" v-slot:[`header.${header.key}`]="slotProps">
-				<ColumnOrderHeader :column="slotProps.column" :get-sort-icon="slotProps.getSortIcon" :resettable="index === 0 && columnOrder.hasOrder.value" @reset-order="columnOrder.reset" :widths-resettable="index === 0 && columnWidths.hasWidths.value" @reset-widths="columnWidths.reset" />
+			<template v-for="header in effectiveHeaders.filter((column) => !['row-reorder', 'item-select'].includes(column.key))" :key="header.key" v-slot:[`header.${header.key}`]="slotProps">
+				<ColumnOrderHeader :column="slotProps.column" :get-sort-icon="slotProps.getSortIcon" />
 			</template>
 			<template #header.row-reorder="{ column }"><ColumnResizeHandle :column-key="column.key" :width="column.width" :label="__('Row controls')" /></template>
 			<template #item.row-reorder="{ item }"><RowReorderHandle :row-key="String(item.item_code)" :label="item.item_name || item.item_code" /></template>
@@ -171,8 +171,8 @@ const emit = defineEmits(["row-click", "list-scroll", "toggle-selection", "selec
 
 const __ = window.__ || ((text) => text);
 const columnRoot = ref(null);
-const columnOrder = useColumnOrder(columnRoot, computed(() => props.headers), computed(() => columnOrderStorageKey(props.posProfile, props.preferenceUser, `selector:${props.context}`)));
-const columnWidths = useColumnWidths(columnRoot, computed(() => columnOrderStorageKey(props.posProfile, props.preferenceUser, `selector:${props.context}`)));
+const columnOrder = useColumnOrder(columnRoot, computed(() => props.headers), computed(() => columnOrderStorageKey(props.posProfile, props.preferenceUser, `selector:${props.context}`)), { section: "selector", label: "Item selector" });
+const columnWidths = useColumnWidths(columnRoot, computed(() => columnOrderStorageKey(props.posProfile, props.preferenceUser, `selector:${props.context}`)), { section: "selector", label: "Item selector" });
 function handleColumnPointerDown(event) { if (!columnWidths.onPointerDown(event)) columnOrder.onPointerDown(event); }
 function handleColumnKeydown(event) { if (!columnWidths.onKeydown(event)) columnOrder.onKeydown(event); }
 const effectiveHeaders = computed(() => {
