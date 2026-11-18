@@ -14,13 +14,26 @@
 		>
 			<v-icon icon="mdi-drag-vertical" size="16" />
 		</button>
-		<span>{{ column.title }}</span>
+		<span :title="column.title">{{ column.title }}</span>
 		<v-icon
 			v-if="column.sortable && getSortIcon"
 			class="v-data-table-header__sort-icon"
 			:icon="getSortIcon(column)"
 			size="16"
 		/>
+		<button
+			v-if="widthsResettable"
+			type="button"
+			data-column-order-control
+			class="pos-column-header__reset"
+			:aria-label="__('Reset column widths')"
+			:title="__('Reset column widths')"
+			@click.stop="emit('reset-widths')"
+			@keydown.stop
+		>
+			<v-icon icon="mdi-arrow-expand-horizontal" size="14" />
+		</button>
+		<ColumnResizeHandle :column-key="column.key" :label="column.title" :width="column.width" />
 		<button
 			v-if="resettable"
 			data-column-order-control
@@ -36,8 +49,14 @@
 	</div>
 </template>
 <script setup lang="ts">
-defineProps<{ column: any; getSortIcon?: (column: any) => any; resettable?: boolean }>();
-const emit = defineEmits<{ "reset-order": [] }>();
+import ColumnResizeHandle from "./ColumnResizeHandle.vue";
+defineProps<{
+	column: any;
+	getSortIcon?: (column: any) => any;
+	resettable?: boolean;
+	widthsResettable?: boolean;
+}>();
+const emit = defineEmits<{ "reset-order": []; "reset-widths": [] }>();
 const __ = (text: string) => (window.__ ? window.__(text) : text);
 </script>
 <style>

@@ -1,5 +1,7 @@
 <template>
-	<div ref="columnRoot" @pointerdown.capture="columnOrder.onPointerDown" @keydown.capture="columnOrder.onKeydown" class="pharmacy-search-results" data-testid="pharmacy-item-search-results">
+	<div ref="columnRoot" @pointerdown.capture="handleColumnPointerDown" @keydown.capture="handleColumnKeydown" @dblclick.capture="columnWidths.onDoubleClick" class="pharmacy-search-results pos-column-widths" :class="{ 'pos-column-widths--custom': columnWidths.hasWidths.value }" :style="columnWidths.tableStyle(sizedHeaders)" data-testid="pharmacy-item-search-results">
+		<v-alert v-if="columnWidths.error.value" type="warning" density="compact">{{ columnWidths.error.value }}</v-alert>
+		<span class="sr-only" role="status" aria-live="polite">{{ columnWidths.announcement.value }}</span>
 		<v-alert v-if="columnOrder.error.value" type="warning" density="compact">{{ __(columnOrder.error.value) }}</v-alert>
 		<span class="sr-only" role="status" aria-live="polite">{{ columnOrder.announcement.value }}</span>
 		<div class="pharmacy-search-controls">
@@ -82,7 +84,7 @@
 				ref="tableRef"
 				:id="resultsGridId"
 				:aria-label="__('Item search results')"
-				:headers="columnOrder.headers.value"
+				:headers="sizedHeaders"
 				:items="tableItems"
 				item-value="item_code"
 				fixed-header
@@ -94,8 +96,8 @@
 				@click:row="handleRowClick"
 				@scroll.passive="emit('list-scroll', $event)"
 			>
-				<template v-for="(header, index) in columnOrder.headers.value" :key="header.key" v-slot:[`header.${header.key}`]="slotProps">
-					<ColumnOrderHeader :column="slotProps.column" :get-sort-icon="slotProps.getSortIcon" :resettable="index === 0 && columnOrder.hasOrder.value" @reset-order="columnOrder.reset" />
+				<template v-for="(header, index) in sizedHeaders" :key="header.key" v-slot:[`header.${header.key}`]="slotProps">
+					<ColumnOrderHeader :column="slotProps.column" :get-sort-icon="slotProps.getSortIcon" :resettable="index === 0 && columnOrder.hasOrder.value" @reset-order="columnOrder.reset" :widths-resettable="index === 0 && columnWidths.hasWidths.value" @reset-widths="columnWidths.reset" />
 				</template>
 				<template #item.item_name="{ item }">
 					<div class="pharmacy-product-cell">
@@ -173,6 +175,7 @@
 </template>
 
 <script setup lang="ts">
+import { useColumnWidths } from "../../../composables/core/useColumnWidths";
 import ColumnOrderHeader from "../../ui/ColumnOrderHeader.vue";
 import { useColumnOrder, columnOrderStorageKey } from "../../../composables/core/useColumnOrder";
 import RowReorderHandle from "../../ui/RowReorderHandle.vue";
@@ -335,6 +338,10 @@ const headers = computed(() => [
 const columnRoot = ref<HTMLElement | null>(null);
 const columnOrder = useColumnOrder(columnRoot, headers, computed(() => columnOrderStorageKey(props.posProfile, props.preferenceUser, "selector:pharmacy")));
 
+const columnWidths = useColumnWidths(columnRoot, computed(() => columnOrderStorageKey(props.posProfile, props.preferenceUser, "selector:pharmacy")));
+const sizedHeaders = computed(() => columnWidths.apply(columnOrder.headers.value));
+function handleColumnPointerDown(event: PointerEvent) { if (!columnWidths.onPointerDown(event)) columnOrder.onPointerDown(event); }
+function handleColumnKeydown(event: KeyboardEvent) { if (!columnWidths.onKeydown(event)) columnOrder.onKeydown(event); }
 const alternateEmptyText = computed(() => {
 	if (props.alternateReason === "missing_generic") {
 		return __("This item has no generic mapping.");
@@ -404,7 +411,7 @@ const isSearchNavigationBoundary = (event: KeyboardEvent) => {
 };
 
 const handleTableKeydown = (event: KeyboardEvent) => {
-	if ((event.target as Element | null)?.closest("[data-row-reorder-key], [data-column-reorder-key]")) return;
+	if ((event.target as Element | null)?.closest("[data-row-reorder-key], [data-column-reorder-key], [data-column-width-key]")) return;
 	if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End"].includes(event.key)) {
 		if (isSearchNavigationBoundary(event)) {
 			event.preventDefault();

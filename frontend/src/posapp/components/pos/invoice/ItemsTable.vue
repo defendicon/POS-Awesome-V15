@@ -1,24 +1,27 @@
 <template>
 	<div
 		ref="tableContainer"
-		class="my-0 py-0 overflow-y-auto posa-items-table-container posa-responsive-table-container pos-themed-card"
-		:style="containerStyles"
-		:class="[containerClasses, gridContainerClasses]"
+		class="pos-column-widths my-0 py-0 overflow-y-auto posa-items-table-container posa-responsive-table-container pos-themed-card"
+		:style="[containerStyles, columnWidths.tableStyle(finalVisibleColumns)]"
+		:class="[containerClasses, gridContainerClasses, { 'pos-column-widths--custom': columnWidths.hasWidths.value }]"
 		role="region"
 		:aria-label="__('Invoice Items')"
 		@keydown.capture="handleReorderOrGridKeydown"
 		@pointerdown.capture="handleTablePointerDown"
+		@dblclick.capture="columnWidths.onDoubleClick"
 		@dragover="onDragOverFromSelector($event)"
 		@drop="onDropFromSelector($event)"
 		@dragenter="onDragEnterFromSelector"
 		@dragleave="onDragLeaveFromSelector"
 	>
+		<v-alert v-if="columnWidths.error.value" type="warning" density="compact">{{ columnWidths.error.value }}</v-alert>
+		<span class="sr-only" role="status" aria-live="polite">{{ columnWidths.announcement.value }}</span>
 		<v-alert v-if="columnOrder.error.value" type="warning" density="compact">{{ __(columnOrder.error.value) }}</v-alert>
 		<span class="sr-only" role="status" aria-live="polite">{{ columnOrder.announcement.value }}</span>
 		<v-data-table-virtual
 			ref="virtualTable"
 			v-model:sort-by="rowSortBy"
-			:headers="responsiveHeaders"
+			:headers="finalVisibleColumns"
 			:items="displayItems"
 			show-expand
 			item-value="posa_row_id"
@@ -35,9 +38,10 @@
 			:search="counterGrid ? '' : itemSearch"
 			:custom-filter="customItemFilter"
 		>
-			<template v-for="(header, index) in responsiveHeaders" :key="header.key" v-slot:[`header.${header.key}`]="slotProps">
-				<ColumnOrderHeader :column="slotProps.column" :get-sort-icon="slotProps.getSortIcon" :resettable="index === 0 && columnOrder.hasOrder.value" @reset-order="columnOrder.reset" />
+			<template v-for="(header, index) in finalVisibleColumns.filter((column) => column.key !== 'data-table-expand')" :key="header.key" v-slot:[`header.${header.key}`]="slotProps">
+				<ColumnOrderHeader :column="slotProps.column" :get-sort-icon="slotProps.getSortIcon" :resettable="index === 0 && columnOrder.hasOrder.value" @reset-order="columnOrder.reset" :widths-resettable="index === 0 && columnWidths.hasWidths.value" @reset-widths="columnWidths.reset" />
 			</template>
+			<template #header.data-table-expand="{ column }"><ColumnResizeHandle :column-key="column.key || 'data-table-expand'" :width="column.width" :label="__('Details')" /></template>
 			<template #no-data>
 				<div class="posa-cart-empty-state">
 					<div class="posa-cart-empty-state__icon-wrap">
@@ -163,6 +167,8 @@
 </template>
 
 <script setup lang="ts">
+import ColumnResizeHandle from "../../ui/ColumnResizeHandle.vue";
+import { useColumnWidths } from "../../../composables/core/useColumnWidths";
 import ColumnOrderHeader from "../../ui/ColumnOrderHeader.vue";
 import { useColumnOrder, columnOrderStorageKey } from "../../../composables/core/useColumnOrder";
 import { ref, computed, nextTick, onBeforeUnmount, onMounted, watch, getCurrentInstance } from "vue";
@@ -296,7 +302,9 @@ const { memoizedFormatFloat, memoizedFormatCurrency, clearFormatCache } = useFor
 });
 
 const columnOrder = useColumnOrder(tableContainer, computed(() => props.headers || []), computed(() => columnOrderStorageKey(props.pos_profile, props.preferenceUser || "", "invoice")));
+const columnWidths = useColumnWidths(tableContainer, computed(() => columnOrderStorageKey(props.pos_profile, props.preferenceUser || "", "invoice")));
 function handleTablePointerDown(event: PointerEvent) {
+	if (columnWidths.onPointerDown(event)) return;
 	columnOrder.onPointerDown(event);
 	rowReorder.onPointerDown(event);
 }
@@ -320,6 +328,7 @@ const rowReorder = useRowReorder(tableContainer, (drop) => {
 	emit("reorder-items", { rowIds: reordered.map((item) => String(item.posa_row_id)) });
 });
 function handleReorderOrGridKeydown(event: KeyboardEvent) {
+	if (columnWidths.onKeydown(event)) return;
 	if ((event.target as Element | null)?.closest("[data-column-reorder-key], [data-column-order-control]")) { columnOrder.onKeydown(event); return; }
 	if ((event.target as Element | null)?.closest("[data-row-reorder-key]")) { rowReorder.onKeydown(event); return; }
 	handleGridKeydown(event);
@@ -358,7 +367,7 @@ const dynamicHeaderProps = computed(() => ({
 	class: `responsive-header container-${breakpoint.value}`,
 }));
 
-const finalVisibleColumns = computed(() => [...responsiveHeaders.value, DATA_TABLE_EXPAND_COLUMN]);
+const finalVisibleColumns = computed(() => columnWidths.apply([...responsiveHeaders.value, DATA_TABLE_EXPAND_COLUMN]));
 const navigableGridColumnKeys = computed(() => getNavigableCartColumnKeys(finalVisibleColumns.value));
 const gridContainerClasses = computed(() => ({
 	"posa-cart-grid-active": gridMode.value !== "inactive",

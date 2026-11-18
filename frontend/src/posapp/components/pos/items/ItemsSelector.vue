@@ -590,7 +590,7 @@ const selectorRowReorder = useRowReorder(selectorReorderRoot, (drop) => {
 });
 watch(selectorRowScope, () => selectorRowReorder.cancel());
 function handleReorderOrSelectorKeydown(event: KeyboardEvent) {
-	if ((event.target as Element | null)?.closest("[data-column-reorder-key], [data-column-order-control]")) return;
+	if ((event.target as Element | null)?.closest("[data-column-reorder-key], [data-column-order-control], [data-column-width-key]")) return;
 	if ((event.target as Element | null)?.closest("[data-row-reorder-key]")) { selectorRowReorder.onKeydown(event); return; }
 	handleSelectorKeydownCapture(event);
 }
