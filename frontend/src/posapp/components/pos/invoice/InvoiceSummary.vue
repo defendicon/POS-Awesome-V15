@@ -94,6 +94,7 @@
 			/>
 
 			<InvoiceActionButtons
+				:layout-user="layoutUser"
 				presentation="counter-grid"
 				:pos_profile="pos_profile"
 				:saveLoading="saveLoading"
@@ -233,6 +234,7 @@
 
 			<v-col cols="12" :md="useCompactSaleDock ? 12 : 5" class="invoice-summary-actions">
 				<InvoiceActionButtons
+					:layout-user="layoutUser"
 					:pos_profile="pos_profile"
 					:saveLoading="saveLoading"
 					:loadDraftsLoading="loadDraftsLoading"
@@ -356,6 +358,7 @@ defineOptions({
 });
 
 const props = defineProps({
+	layoutUser: { type: String, default: "" },
 	presentation: {
 		type: String,
 		default: "classic",

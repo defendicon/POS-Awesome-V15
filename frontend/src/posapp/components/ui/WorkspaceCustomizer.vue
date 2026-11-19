@@ -51,7 +51,9 @@
 							__(
 								workspace.section.value === "cards"
 									? "Arrange cards on the canvas, or use the controls below."
-									: "Drag column grips on the table, resize the dividers, or enter exact widths below.",
+									: workspace.section.value === "buttons"
+										? "Drag button grips to arrange actions. Choose single or double column below."
+										: "Drag column grips on the table, resize the dividers, or enter exact widths below.",
 							)
 						}}
 					</p>
@@ -67,13 +69,15 @@
 							</option>
 						</select>
 					</div>
-					<div v-if="cardPart" class="workspace-editor__presets">
-						<button type="button" @click="cardPart.preset?.('single')">
+					<div v-if="cardPart || buttonPart" class="workspace-editor__presets">
+						<button type="button" @click="(cardPart || buttonPart)?.preset?.('single')">
 							<v-icon icon="mdi-view-column-outline" size="18" />{{
-								__("Side by side")
+								__(buttonPart ? "Double column" : "Side by side")
 							}}</button
-						><button type="button" @click="cardPart.preset?.('stack')">
-							<v-icon icon="mdi-view-agenda-outline" size="18" />{{ __("Separate rows") }}
+						><button type="button" @click="(cardPart || buttonPart)?.preset?.('stack')">
+							<v-icon icon="mdi-view-agenda-outline" size="18" />{{
+								__(buttonPart ? "Single column" : "Separate rows")
+							}}
 						</button>
 					</div>
 					<div class="workspace-editor__list">
@@ -84,7 +88,13 @@
 						>
 							<div class="workspace-editor__item-label">
 								<v-icon
-									:icon="cardPart ? 'mdi-view-dashboard-outline' : 'mdi-table-column'"
+									:icon="
+										cardPart
+											? 'mdi-view-dashboard-outline'
+											: buttonPart
+												? 'mdi-gesture-tap-button'
+												: 'mdi-table-column'
+									"
 									size="16"
 								/><span>{{ __(entry.label) }}</span
 								><span v-if="entry.required" class="workspace-editor__badge">{{
@@ -106,7 +116,22 @@
 									"
 								/>
 								<select
-									v-if="cardPart"
+									v-if="buttonPart"
+									:value="entry.width"
+									:aria-label="__('Button layout') + ': ' + __(entry.label)"
+									@change="
+										buttonPart.setWidth?.(
+											entry.key,
+											($event.target as HTMLSelectElement).value,
+										)
+									"
+								>
+									<option value="auto">{{ __("Auto") }}</option>
+									<option value="single">{{ __("Single column") }}</option>
+									<option value="double">{{ __("Double column") }}</option>
+								</select>
+								<select
+									v-else-if="cardPart"
 									:value="entry.width"
 									:aria-label="__('Card width') + ': ' + __(entry.label)"
 									@change="
@@ -232,6 +257,7 @@ watch(workspace.active, async (value) => {
 const context = ref("");
 const tabs: Array<{ key: CustomizationSection; label: string; icon: string }> = [
 	{ key: "cards", label: "Cards", icon: "mdi-view-dashboard-outline" },
+	{ key: "buttons", label: "Buttons", icon: "mdi-gesture-tap-button" },
 	{ key: "selector", label: "Item selector", icon: "mdi-format-list-bulleted" },
 	{ key: "invoice", label: "Invoice table", icon: "mdi-table" },
 ];
@@ -239,6 +265,7 @@ const parts = computed(() =>
 	workspace.participants.value.filter((part) => part.section === workspace.section.value),
 );
 const cardPart = computed(() => parts.value.find((part) => part.kind === "cards"));
+const buttonPart = computed(() => parts.value.find((part) => part.kind === "buttons"));
 const contexts = computed(() => parts.value.filter((part) => part.kind === "order"));
 watch(
 	[contexts, workspace.active],
@@ -276,6 +303,7 @@ const widthEntries = computed(() => {
 	return new Map((widthPart.value?.entries?.() || []).map((entry) => [entry.key, entry]));
 });
 const entries = computed<CustomizationEntry[]>(() => {
+	if (buttonPart.value) return buttonPart.value.entries?.() || [];
 	if (cardPart.value) return cardPart.value.entries?.() || [];
 	const available = visibilityPart.value?.entries?.() || [];
 	const ordered = orderPart.value?.entries?.() || [];
@@ -295,7 +323,7 @@ function updateWidth(key: string, event: Event) {
 	widthPart.value?.setWidth?.(key, value);
 }
 function move(key: string, delta: number) {
-	(cardPart.value || orderPart.value)?.move?.(key, delta);
+	(cardPart.value || buttonPart.value || orderPart.value)?.move?.(key, delta);
 }
 onBeforeUnmount(() => {
 	if (workspace.active.value) workspace.cancel();
@@ -358,11 +386,12 @@ onBeforeUnmount(() => {
 }
 .workspace-editor__tabs {
 	display: flex;
+	flex-wrap: wrap;
 	padding: 6px 10px 0;
 	border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
 }
 .workspace-editor__tabs button {
-	flex: 1;
+	flex: 1 1 45%;
 	padding: 10px 4px;
 	font-size: 11px;
 	display: flex;

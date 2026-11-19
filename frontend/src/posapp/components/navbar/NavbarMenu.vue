@@ -516,7 +516,7 @@ export default {
 					title: __("Tools"),
 					description: __("Updates and app info that stay out of the cashier flow."),
 					actions: [
-						{ id: "customize-workspace", label: __("Customize workspace"), subtitle: __("Cards, columns and table widths"), icon: "mdi-tune-variant", tone: "primary", handler: "customizeWorkspace", disabled: !workspaceCustomization.available.value },
+						{ id: "customize-workspace", label: __("Customize workspace"), subtitle: __("Cards, buttons, columns and table widths"), icon: "mdi-tune-variant", tone: "primary", handler: "customizeWorkspace", disabled: !workspaceCustomization.available.value },
 						{ id: "safe-refresh", label: __("Safe Refresh"), subtitle: __("Save cart and review pending work before reloading"), icon: "mdi-refresh", tone: "info", handler: "safeRefresh" },
 						{
 							id: "check-for-updates",

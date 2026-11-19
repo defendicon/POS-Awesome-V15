@@ -9,7 +9,7 @@ import {
 	type Ref,
 } from "vue";
 
-export type CustomizationSection = "cards" | "selector" | "invoice";
+export type CustomizationSection = "cards" | "selector" | "invoice" | "buttons";
 export type CustomizationEntry = {
 	key: string;
 	label: string;
@@ -20,7 +20,7 @@ export type CustomizationEntry = {
 };
 type Preference = {
 	section: CustomizationSection;
-	kind: "cards" | "order" | "widths" | "visibility" | "rows";
+	kind: "cards" | "buttons" | "order" | "widths" | "visibility" | "rows";
 	label: string;
 	scope: Ref<string>;
 	state: Ref<any>;

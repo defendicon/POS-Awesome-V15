@@ -268,6 +268,7 @@
 		<!-- Payment Section -->
 		<InvoiceSummary
 			ref="invoiceSummary"
+			:layout-user="invoiceLayoutUser"
 			:presentation="presentation"
 			:pos_profile="pos_profile"
 			:total_qty="total_qty"
