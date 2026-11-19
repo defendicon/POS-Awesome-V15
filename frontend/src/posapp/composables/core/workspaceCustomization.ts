@@ -17,6 +17,9 @@ export type CustomizationEntry = {
 	visible?: boolean;
 	required?: boolean;
 	min?: number;
+	size?: number;
+	max?: number;
+	pixels?: number;
 };
 type Preference = {
 	section: CustomizationSection;
@@ -28,6 +31,7 @@ type Preference = {
 	entries?: () => CustomizationEntry[];
 	move?: (key: string, direction: number) => void;
 	setWidth?: (key: string, width: string | number) => void;
+	setPixels?: (key: string, width: number) => void;
 	setVisible?: (key: string, visible: boolean) => void;
 	reset: () => void;
 	stop?: () => void;

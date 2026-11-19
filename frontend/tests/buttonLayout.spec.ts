@@ -45,6 +45,47 @@ afterEach(() => {
 });
 
 describe("workspace button layout", () => {
+	it("stretches buttons continuously, cancels unfinished resizes and retains exact widths after reload", async () => {
+		create();
+		workspace.open("buttons");
+		await nextTick();
+		vi.spyOn(
+			wrapper.get(".workspace-buttons").element,
+			"getBoundingClientRect",
+		).mockReturnValue({ width: 1000 } as DOMRect);
+		const handle = wrapper.get('[aria-label="Resize button: Save"]');
+		const down = () =>
+			handle.element.dispatchEvent(
+				new MouseEvent("pointerdown", {
+					bubbles: true,
+					button: 0,
+					clientX: 500,
+				}),
+			);
+		down();
+		window.dispatchEvent(new MouseEvent("pointermove", { clientX: 501 }));
+		await nextTick();
+		expect(part().entries?.()[0]?.width).toBeCloseTo(50.1);
+		window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+		await nextTick();
+		expect(part().entries?.()[0]?.width).toBe("auto");
+		down();
+		window.dispatchEvent(new MouseEvent("pointerup", { clientX: 503 }));
+		await nextTick();
+		expect(part().entries?.()[0]?.width).toBeCloseTo(50.3);
+		expect(localStorage.length).toBe(0);
+		expect(workspace.apply()).toBe(true);
+		wrapper.unmount();
+		create();
+		expect(part().entries?.()[0]?.width).toBeCloseTo(50.3);
+		workspace.open("buttons");
+		await nextTick();
+		await wrapper
+			.get('[aria-label="Resize button: Save"]')
+			.trigger("keydown", { key: "ArrowRight" });
+		// An unmeasurable hidden surface must retain its current width.
+		expect(part().entries?.()[0]?.width).toBeCloseTo(50.3);
+	});
 	it("exposes button presets and individual widths through the workspace editor", async () => {
 		create();
 		const editor = mount(WorkspaceCustomizer, {

@@ -4,6 +4,15 @@ This file defines how major POS features are connected.
 
 Codex must check this file before changing any related feature.
 
+## Workspace Layout Contract
+
+- Layout preferences change presentation only; profile-controlled visibility and sale actions retain their existing authorization and business behavior.
+- Card widths retain the legacy 3–12 span representation but accept fractional spans. Button widths accept percentage numbers alongside legacy Auto/Single/Double presets. Never round saved continuous widths to layout columns.
+- Table columns use pixel widths through the shared column-width composable. Cards and buttons share gap-aware percentage/pixel conversion so one pointer pixel produces one rendered pixel.
+- Preview edits stay in memory until Apply. Cancel, scope changes, interrupted pointers and unmounts must stop active interactions and preserve the appropriate saved/preview snapshot.
+- Preferences remain browser-local and scoped to the existing cashier/profile/view keys. No layout preference enters invoice, offline outbox, printing or report payloads.
+- Motion must respect reduced-motion preferences and must never delay live pointer resizing. Automatic narrow-screen layouts remain responsive; explicit card widths can still be edited on narrow POS panes.
+
 ---
 
 ## 1. Pricing Contract

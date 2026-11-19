@@ -50,6 +50,7 @@ export function useColumnWidths(
 	);
 	const hasWidths = computed(() => Object.keys(widths.value).length > 0);
 	const announcement = ref("");
+	const resizing = ref(false);
 	let active: {
 		key: string;
 		pointer: number;
@@ -111,6 +112,12 @@ export function useColumnWidths(
 		window.removeEventListener("blur", cancel);
 		window.removeEventListener("keydown", onEscape);
 		root.value?.classList.remove("pos-column-widths--resizing");
+		root.value
+			?.querySelectorAll(".pos-column-width-active")
+			.forEach((header) =>
+				header.classList.remove("pos-column-width-active"),
+			);
+		resizing.value = false;
 		active = null;
 	}
 	function cancel() {
@@ -135,6 +142,8 @@ export function useColumnWidths(
 	}
 	function onEnd(event: PointerEvent) {
 		if (!active || event.pointerId !== active.pointer) return;
+		// A release can carry a final coordinate without an intermediate move.
+		onMove(event);
 		const key = active.key;
 		const changed =
 			Math.abs((widths.value[key] ?? active.start) - active.start) >= 1;
@@ -183,6 +192,8 @@ export function useColumnWidths(
 		};
 		widths.value = measured;
 		root.value?.classList.add("pos-column-widths--resizing");
+		handle.closest("th")?.classList.add("pos-column-width-active");
+		resizing.value = true;
 		window.addEventListener("pointermove", onMove, { passive: false });
 		window.addEventListener("pointerup", onEnd);
 		window.addEventListener("pointercancel", cancel);
@@ -222,7 +233,7 @@ export function useColumnWidths(
 		const delta =
 			(event.key === "ArrowRight" ? 1 : -1) *
 			(rtl ? -1 : 1) *
-			(event.shiftKey ? 50 : 10);
+			(event.shiftKey ? 10 : 1);
 		widths.value = {
 			...measured,
 			[key]: clampColumnWidth(
@@ -324,6 +335,7 @@ export function useColumnWidths(
 		error,
 		hasWidths,
 		announcement,
+		resizing,
 		apply,
 		tableStyle,
 		onPointerDown,

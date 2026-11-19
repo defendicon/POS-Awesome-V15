@@ -81,6 +81,82 @@ beforeEach(() => {
 });
 
 describe("Invoice card layout", () => {
+	it("allows fluid resizing in narrow POS panes while automatic cards start full width", async () => {
+		const wrapper = render();
+		workspace.open("cards");
+		await nextTick();
+		vi.spyOn(
+			wrapper.get(".invoice-card-layout__cards").element,
+			"getBoundingClientRect",
+		).mockReturnValue({ width: 600 } as DOMRect);
+		const handle = wrapper.get(
+			'[aria-label="Resize card: Customer Details"]',
+		);
+		handle.element.dispatchEvent(
+			new MouseEvent("pointerdown", { bubbles: true, clientX: 600 }),
+		);
+		window.dispatchEvent(new MouseEvent("pointermove", { clientX: 599 }));
+		await nextTick();
+		expect(Number(handle.attributes("aria-valuenow"))).toBeCloseTo(11.98);
+		expect(
+			wrapper.get('[data-invoice-card="customer"]').classes(),
+		).not.toContain("invoice-card-layout__card--auto");
+		window.dispatchEvent(new Event("pointercancel"));
+		await nextTick();
+		expect(Number(handle.attributes("aria-valuenow"))).toBe(12);
+	});
+	it("stretches one pixel at a time and reloads fractional sizes without snapping", async () => {
+		const wrapper = render();
+		workspace.open("cards");
+		await nextTick();
+		vi.spyOn(
+			wrapper.get(".invoice-card-layout__cards").element,
+			"getBoundingClientRect",
+		).mockReturnValue({ width: 1000 } as DOMRect);
+		const handle = wrapper.get(
+			'[aria-label="Resize card: Customer Details"]',
+		);
+		handle.element.dispatchEvent(
+			new MouseEvent("pointerdown", {
+				bubbles: true,
+				button: 0,
+				clientX: 500,
+				clientY: 100,
+			}),
+		);
+		window.dispatchEvent(
+			new MouseEvent("pointermove", { clientX: 501, clientY: 100 }),
+		);
+		await nextTick();
+		expect(Number(handle.attributes("aria-valuenow"))).toBeCloseTo(6.012);
+		window.dispatchEvent(
+			new MouseEvent("pointerup", { clientX: 502, clientY: 100 }),
+		);
+		await nextTick();
+		expect(Number(handle.attributes("aria-valuenow"))).toBeCloseTo(6.024);
+		expect(workspace.apply()).toBe(true);
+		wrapper.unmount();
+		const restored = render();
+		workspace.open("cards");
+		await nextTick();
+		expect(
+			Number(
+				restored
+					.get('[aria-label="Resize card: Customer Details"]')
+					.attributes("aria-valuenow"),
+			),
+		).toBeCloseTo(6.024);
+		await restored
+			.get('input[aria-label="Live width: Customer Details"]')
+			.setValue("62.31");
+		expect(
+			Number(
+				restored
+					.get('[aria-label="Resize card: Customer Details"]')
+					.attributes("aria-valuenow"),
+			),
+		).toBeCloseTo(7.4772);
+	});
 	it("supports shared rows, separate rows and safe resize bounds", () => {
 		const original = normalizeInvoiceCardLayout(null);
 		const shared = repositionInvoiceCard(
@@ -295,6 +371,10 @@ describe("Invoice card layout", () => {
 				.find('[aria-label="Resize card: Customer Details"]')
 				.attributes("aria-valuenow"),
 		).toBe("6");
+		vi.spyOn(
+			wrapper.find(".invoice-card-layout__cards").element,
+			"getBoundingClientRect",
+		).mockReturnValue({ width: 1200 } as DOMRect);
 		await wrapper
 			.find('[aria-label="Resize card: Customer Details"]')
 			.trigger("keydown", { key: "ArrowLeft" });
@@ -302,7 +382,7 @@ describe("Invoice card layout", () => {
 			wrapper
 				.find('[aria-label="Resize card: Customer Details"]')
 				.attributes("aria-valuenow"),
-		).toBe("5");
+		).toBe("5.99");
 		expect(order(wrapper)).not.toContain("delivery");
 		wrapper.unmount();
 	});

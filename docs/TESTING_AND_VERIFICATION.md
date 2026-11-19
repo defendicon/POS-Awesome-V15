@@ -2,6 +2,14 @@
 
 Codex must verify changes according to the affected area.
 
+## Workspace Layout Changes
+
+- Check one-pixel mouse/pointer and keyboard resizing for cards, invoice/item-selector table columns and buttons, including RTL and final pointer-up coordinates.
+- Check live sliders, exact pixel inputs, presets, drag order and preservation of form/cart state.
+- Verify fractional width save/reload, legacy presets, corrupt preferences, profile-disabled entries and cashier/profile isolation.
+- Check Apply, Cancel, interrupted resizes, Reset, storage failures, narrow panes and reduced motion.
+- Run workspace/card/button/column regression tests, TypeScript, affected-file lint, production build and the Chrome 109 CSS audit. Use browser measurements to verify real rendered widths.
+
 ---
 
 ## Pricing / Discount Changes

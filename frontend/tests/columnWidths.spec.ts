@@ -42,20 +42,18 @@ function harness() {
 								"thead",
 								h(
 									"tr",
-									api
-										.apply(available.value)
-										.map((column) =>
-											h("th", column.headerProps, [
-												h(
-													"button",
-													{
-														"data-column-width-key":
-															column.key,
-													},
-													column.title,
-												),
-											]),
-										),
+									api.apply(available.value).map((column) =>
+										h("th", column.headerProps, [
+											h(
+												"button",
+												{
+													"data-column-width-key":
+														column.key,
+												},
+												column.title,
+											),
+										]),
+									),
 								),
 							),
 						),
@@ -69,19 +67,27 @@ function harness() {
 			"getBoundingClientRect",
 		).mockReturnValue({ width: column.width } as DOMRect);
 	const start = (key = "item_name", x = 200) =>
-		wrapper
-			.find(`[data-column-width-key="${key}"]`)
-			.element.dispatchEvent(
-				new MouseEvent("pointerdown", {
-					bubbles: true,
-					button: 0,
-					clientX: x,
-				}),
-			);
+		wrapper.find(`[data-column-width-key="${key}"]`).element.dispatchEvent(
+			new MouseEvent("pointerdown", {
+				bubbles: true,
+				button: 0,
+				clientX: x,
+			}),
+		);
 	return { wrapper, api, scope, available, start };
 }
 
 describe("column widths", () => {
+	it("uses each pixel and the final release position, including the zero edge", async () => {
+		const { wrapper, api, start } = harness();
+		start("item_name", 10);
+		window.dispatchEvent(new MouseEvent("pointermove", { clientX: 11 }));
+		expect(api.widths.value.item_name).toBe(201);
+		window.dispatchEvent(new MouseEvent("pointerup", { clientX: 0 }));
+		expect(api.widths.value.item_name).toBe(190);
+		expect(api.resizing.value).toBe(false);
+		wrapper.unmount();
+	});
 	it("previews exact widths, freezes adjacent columns and persists only on release", async () => {
 		localStorage.setItem(scopeKey, '["qty","item_name"]');
 		const { wrapper, api, start } = harness();
@@ -105,7 +111,7 @@ describe("column widths", () => {
 			),
 		).toEqual({ "--pos-custom-table-width": "428px" });
 		expect(localStorage.getItem(widthsKey)).toBeNull();
-		window.dispatchEvent(new MouseEvent("pointerup"));
+		window.dispatchEvent(new MouseEvent("pointerup", { clientX: 280 }));
 		await nextTick();
 		expect(JSON.parse(localStorage.getItem(widthsKey)!)).toEqual(
 			api.widths.value,
@@ -155,7 +161,7 @@ describe("column widths", () => {
 		await wrapper
 			.find('[data-column-width-key="item_name"]')
 			.trigger("keydown", { key: "ArrowLeft" });
-		expect(api.widths.value.item_name).toBe(210);
+		expect(api.widths.value.item_name).toBe(201);
 		await wrapper
 			.find('[data-column-width-key="data-table-expand"]')
 			.trigger("keydown", { key: "ArrowRight" });
@@ -222,7 +228,7 @@ describe("column widths", () => {
 		window.dispatchEvent(
 			new MouseEvent("pointermove", { clientX: 300, cancelable: true }),
 		);
-		window.dispatchEvent(new MouseEvent("pointerup"));
+		window.dispatchEvent(new MouseEvent("pointerup", { clientX: 300 }));
 		expect(api.widths.value.item_name).toBe(300);
 		expect(api.error.value).toContain("session only");
 		wrapper.unmount();

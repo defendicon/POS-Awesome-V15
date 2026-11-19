@@ -6,6 +6,7 @@ import {
 	type CustomizationSection,
 } from "./workspaceCustomization";
 import { useRowReorder } from "./useRowReorder";
+import { useLayoutSurface } from "./useLayoutSurface";
 
 type Header = {
 	key: string;
@@ -45,6 +46,11 @@ export function useColumnOrder<T extends Header>(
 		})),
 	);
 	const hasOrder = computed(() => order.value.length > 0);
+	useLayoutSurface(
+		root,
+		() => ordered.value.map((header) => header.key),
+		"th[data-column-reorder-id]",
+	);
 	function persist() {
 		if (customization.defer()) return;
 		if (!scope.value) return;

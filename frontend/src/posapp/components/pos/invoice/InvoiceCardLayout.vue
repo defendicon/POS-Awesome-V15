@@ -7,67 +7,82 @@
 			storageError
 		}}</v-alert>
 		<div ref="grid" class="invoice-card-layout__cards">
-			<div
-				v-for="(card, index) in visibleCards"
-				:key="card.id"
-				class="invoice-card-layout__card"
-				:class="{
-					'invoice-card-layout__card--full': card.width === 'full' || card.width === 12,
-					'invoice-card-layout__card--items': card.id === 'items',
-					'invoice-card-layout__card--first': index === 0,
-					'invoice-card-layout__card--dragging':
-						interaction?.kind === 'drag' && interaction.id === card.id,
-					['invoice-card-layout__card--drop-' + dropTarget?.position]: dropTarget?.id === card.id,
-				}"
-				:style="{
-					'--invoice-card-span': spanFor(card),
-					gridColumn: card.startRow ? '1 / span var(--invoice-card-span)' : undefined,
-				}"
-				:data-invoice-card="card.id"
-			>
-				<v-btn
-					v-if="!editing && index === 0"
-					class="invoice-card-layout__toggle"
-					icon="mdi-tune-variant"
-					size="x-small"
-					variant="text"
-					:aria-label="__('Customize workspace')"
-					:title="__('Customize workspace')"
-					:aria-expanded="false"
-					@click="toggleEditing"
+			<template v-for="(card, index) in visibleCards" :key="card.id">
+				<div
+					v-if="card.startRow && index > 0"
+					class="invoice-card-layout__row-break"
+					aria-hidden="true"
 				/>
-				<div v-if="editing" class="invoice-card-layout__card-tools">
-					<button
-						type="button"
-						class="invoice-card-layout__drag"
-						:aria-label="__('Drag card') + ': ' + __(labelFor(card.id))"
-						:title="__('Drag to arrange card')"
-						@pointerdown="beginDrag($event, card.id)"
-						@keydown.up.prevent="move(card.id, -1)"
-						@keydown.down.prevent="move(card.id, 1)"
+				<div
+					class="invoice-card-layout__card"
+					:class="{
+						'invoice-card-layout__card--full': card.width === 'full' || card.width === 12,
+						'invoice-card-layout__card--items': card.id === 'items',
+						'invoice-card-layout__card--auto': card.width === 'auto',
+						'invoice-card-layout__card--first': index === 0,
+						'invoice-card-layout__card--dragging':
+							interaction?.kind === 'drag' && interaction.id === card.id,
+						['invoice-card-layout__card--drop-' + dropTarget?.position]:
+							dropTarget?.id === card.id,
+					}"
+					:style="{
+						'--invoice-card-span': spanFor(card),
+						flexBasis: layoutBasis((spanFor(card) / 12) * 100),
+					}"
+					:data-invoice-card="card.id"
+				>
+					<v-btn
+						v-if="!editing && index === 0"
+						class="invoice-card-layout__toggle"
+						icon="mdi-tune-variant"
+						size="x-small"
+						variant="text"
+						:aria-label="__('Customize workspace')"
+						:title="__('Customize workspace')"
+						:aria-expanded="false"
+						@click="toggleEditing"
+					/>
+					<div v-if="editing" class="invoice-card-layout__card-tools">
+						<button
+							type="button"
+							class="invoice-card-layout__drag"
+							:aria-label="__('Drag card') + ': ' + __(labelFor(card.id))"
+							:title="__('Drag to arrange card')"
+							@pointerdown="beginDrag($event, card.id)"
+							@keydown.up.prevent="move(card.id, -1)"
+							@keydown.down.prevent="move(card.id, 1)"
+						>
+							<v-icon icon="mdi-drag" size="18" />
+						</button>
+					</div>
+					<span
+						v-if="editing"
+						class="invoice-card-layout__size"
+						:class="{
+							'is-resizing': interaction?.kind === 'resize' && interaction.id === card.id,
+						}"
+						>{{ sizeLabel(card) }}</span
 					>
-						<v-icon icon="mdi-drag" size="18" />
+					<slot :name="card.id" />
+					<button
+						v-if="editing"
+						type="button"
+						class="invoice-card-layout__resize"
+						role="slider"
+						:aria-label="__('Resize card') + ': ' + __(labelFor(card.id))"
+						:aria-valuemin="3"
+						:aria-valuemax="12"
+						:aria-valuenow="spanFor(card)"
+						:aria-valuetext="sizeLabel(card)"
+						:title="__('Drag to resize; arrow keys also adjust width')"
+						@pointerdown="beginResize($event, card.id)"
+						@keydown.left.prevent="resizeWithKey(card.id, -1, $event)"
+						@keydown.right.prevent="resizeWithKey(card.id, 1, $event)"
+					>
+						<v-icon icon="mdi-drag-vertical" size="18" />
 					</button>
 				</div>
-				<slot :name="card.id" />
-				<button
-					v-if="editing"
-					type="button"
-					class="invoice-card-layout__resize"
-					role="slider"
-					:aria-label="__('Resize card') + ': ' + __(labelFor(card.id))"
-					:aria-valuemin="3"
-					:aria-valuemax="12"
-					:aria-valuenow="spanFor(card)"
-					:aria-valuetext="Math.round((spanFor(card) / 12) * 100) + '%'"
-					:title="__('Drag to resize; arrow keys also adjust width')"
-					@pointerdown="beginResize($event, card.id)"
-					@keydown.left.prevent="resizeWithKey(card.id, -1)"
-					@keydown.right.prevent="resizeWithKey(card.id, 1)"
-				>
-					<v-icon icon="mdi-resize-bottom-right" size="20" />
-				</button>
-			</div>
+			</template>
 			<div
 				v-if="editing"
 				class="invoice-card-layout__new-row"
@@ -96,6 +111,8 @@ import {
 	workspaceCustomization,
 } from "../../../composables/core/workspaceCustomization";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
+import { layoutBasis, layoutPixels } from "../../../utils/continuousLayout";
+import { useLayoutSurface } from "../../../composables/core/useLayoutSurface";
 import {
 	invoiceCardDefaults,
 	invoiceCardLayoutKey,
@@ -132,6 +149,18 @@ const storageError = ref("");
 const preferences = ref(normalizeInvoiceCardLayout(null));
 const key = computed(() => invoiceCardLayoutKey(props.user, props.profile));
 const visibleCards = computed(() => preferences.value.filter((card) => props.enabled.includes(card.id)));
+const surface = useLayoutSurface(
+	grid,
+	() => visibleCards.value.map((card) => card.id),
+	"[data-invoice-card]",
+);
+function sizeLabel(card: InvoiceCardPreference) {
+	const percent = (spanFor(card) / 12) * 100;
+	const pixels = layoutPixels(percent, surface.width.value, surface.gap.value);
+	return surface.width.value
+		? `${Math.round(pixels)} px · ${Number(percent.toFixed(1))}%`
+		: `${Number(percent.toFixed(1))}%`;
+}
 const labelFor = (id: InvoiceCardId) => invoiceCardDefaults.find((card) => card.id === id)!.label;
 
 watch(
@@ -184,7 +213,7 @@ function setWidth(id: InvoiceCardId, width: string) {
 	if (!card) return;
 	const numeric = Number(width);
 	if (width === "auto" || width === "full") card.width = width;
-	else if (Number.isInteger(numeric) && numeric >= 3 && numeric <= 12) card.width = numeric;
+	else if (Number.isFinite(numeric) && numeric >= 3 && numeric <= 12) card.width = numeric;
 	else return;
 	card.startRow = false;
 	save();
@@ -193,6 +222,7 @@ function setWidth(id: InvoiceCardId, width: string) {
 function spanFor(card: InvoiceCardPreference): number {
 	if (card.width === "full") return 12;
 	if (typeof card.width === "number") return card.width;
+	if (surface.width.value > 0 && surface.width.value <= 720) return 12;
 	const headerCards = visibleCards.value.filter((entry) => entry.id !== "items");
 	return headerCards.length % 2 === 1 && headerCards.at(-1)?.id === card.id ? 12 : 6;
 }
@@ -218,6 +248,7 @@ function startInteraction(event: PointerEvent, id: InvoiceCardId, kind: "drag" |
 	const card = preferences.value.find((entry) => entry.id === id);
 	if (!card) return;
 	event.preventDefault();
+	surface.measure();
 	(event.currentTarget as HTMLElement).focus();
 	interaction.value = {
 		kind,
@@ -247,7 +278,8 @@ function updateInteraction(event: PointerEvent) {
 	event.preventDefault();
 	active.x = event.clientX;
 	active.y = event.clientY;
-	active.moved ||= Math.hypot(active.x - active.startX, active.y - active.startY) > 5;
+	active.moved ||=
+		Math.hypot(active.x - active.startX, active.y - active.startY) > (active.kind === "resize" ? 0 : 5);
 	if (active.kind === "resize") {
 		const card = preferences.value.find((entry) => entry.id === active.id)!;
 		const rtl = getComputedStyle(grid.value).direction === "rtl";
@@ -340,6 +372,7 @@ function detachInteraction() {
 function finishInteraction(event: PointerEvent) {
 	const active = interaction.value;
 	if (!active || event.pointerId !== active.pointerId) return;
+	updateInteraction(event);
 	if (active.kind === "drag" && active.moved && dropTarget.value) {
 		preferences.value = repositionInvoiceCard(
 			preferences.value,
@@ -362,10 +395,17 @@ function cancelInteraction() {
 function cancelWithEscape(event: KeyboardEvent) {
 	if (event.key === "Escape") cancelInteraction();
 }
-function resizeWithKey(id: InvoiceCardId, delta: number) {
+function resizeWithKey(id: InvoiceCardId, delta: number, event: KeyboardEvent) {
 	const card = preferences.value.find((entry) => entry.id === id);
 	if (!card) return;
-	card.width = Math.max(3, Math.min(12, spanFor(card) + delta));
+	const rtl = grid.value && getComputedStyle(grid.value).direction === "rtl";
+	surface.measure();
+	card.width = resizedCardSpan(
+		spanFor(card),
+		delta * (event.shiftKey ? 10 : 1) * (rtl ? -1 : 1),
+		surface.width.value,
+		surface.gap.value,
+	);
 	save();
 }
 const customization = registerCustomization({
@@ -379,9 +419,35 @@ const customization = registerCustomization({
 	stop: cancelInteraction,
 	preset: applyPreset,
 	entries: () =>
-		visibleCards.value.map((card) => ({ key: card.id, label: labelFor(card.id), width: card.width })),
+		visibleCards.value.map((card) => ({
+			key: card.id,
+			label: labelFor(card.id),
+			width: card.width,
+			size: (spanFor(card) / 12) * 100,
+			min: 25,
+			max: 100,
+			pixels: surface.width.value
+				? layoutPixels((spanFor(card) / 12) * 100, surface.width.value, surface.gap.value)
+				: undefined,
+		})),
 	move: (key, delta) => move(key as InvoiceCardId, delta),
 	setWidth: (key, width) => setWidth(key as InvoiceCardId, String(width)),
+	setPixels: (key, pixels) => {
+		surface.measure();
+		if (!surface.width.value) return;
+		setWidth(
+			key as InvoiceCardId,
+			String(
+				Math.max(
+					3,
+					Math.min(
+						12,
+						((pixels + surface.gap.value) / (surface.width.value + surface.gap.value)) * 12,
+					),
+				),
+			),
+		);
+	},
 });
 watch(editing, (value) => {
 	if (!value) cancelInteraction();
@@ -424,15 +490,22 @@ function reset() {
 	padding-inline-end: 48px;
 }
 .invoice-card-layout__cards {
-	display: grid;
-	grid-template-columns: repeat(12, minmax(0, 1fr));
+	display: flex;
+	flex-wrap: wrap;
+	--workspace-layout-gap: var(--dynamic-sm, 10px);
 	align-items: stretch;
 	gap: var(--dynamic-sm, 10px);
 	min-width: 0;
 }
 .invoice-card-layout__card {
 	position: relative;
-	grid-column: span var(--invoice-card-span, 6);
+	flex: 0 0 auto;
+	max-width: 100%;
+	box-sizing: border-box;
+	transition:
+		box-shadow 180ms ease,
+		outline-color 180ms ease,
+		opacity 180ms ease;
 	min-width: 0;
 	display: flex;
 	flex-direction: column;
@@ -474,14 +547,15 @@ function reset() {
 }
 .invoice-card-layout__resize {
 	position: absolute;
-	inset-inline-end: 2px;
-	bottom: 2px;
+	inset-inline-end: -5px;
+	top: 42px;
+	bottom: 8px;
 	z-index: 3;
 	display: grid;
 	place-items: center;
-	width: 28px;
-	height: 28px;
-	border-radius: 7px 0 7px 0;
+	width: 12px;
+	min-height: 32px;
+	border-radius: 8px;
 	background: var(--pos-card-bg);
 	color: rgb(var(--v-theme-primary));
 	border: 1px solid rgba(var(--v-theme-primary), 0.25);
@@ -504,7 +578,7 @@ function reset() {
 	box-shadow: 0 4px 0 rgb(var(--v-theme-primary));
 }
 .invoice-card-layout__new-row {
-	grid-column: 1 / -1;
+	flex: 0 0 100%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -547,11 +621,8 @@ function reset() {
 	white-space: nowrap;
 }
 @container invoice-layout (max-width: 720px) {
-	.invoice-card-layout__card {
-		grid-column: 1 / -1 !important;
-	}
-	.invoice-card-layout__resize {
-		display: none;
+	.invoice-card-layout__card--auto {
+		flex-basis: 100% !important;
 	}
 }
 
@@ -561,6 +632,45 @@ function reset() {
 		flex: 0 0 100%;
 		max-width: 100%;
 		min-width: 0;
+	}
+}
+
+.invoice-card-layout__row-break {
+	flex: 0 0 100%;
+	height: 0;
+	margin-block: calc(var(--workspace-layout-gap) / -2);
+}
+.invoice-card-layout__size {
+	position: absolute;
+	top: 10px;
+	inset-inline-end: 10px;
+	z-index: 4;
+	padding: 3px 7px;
+	border-radius: 5px;
+	background: var(--pos-card-bg, #fff);
+	color: rgb(var(--v-theme-primary));
+	font-size: 10px;
+	font-variant-numeric: tabular-nums;
+	pointer-events: none;
+	border: 1px solid rgba(var(--v-theme-primary), 0.18);
+}
+.invoice-card-layout__size.is-resizing {
+	background: rgb(var(--v-theme-primary));
+	color: rgb(var(--v-theme-on-primary));
+	box-shadow: 0 3px 12px rgba(var(--v-theme-primary), 0.22);
+}
+.invoice-card-layout__resize:hover,
+.invoice-card-layout__resize:focus-visible {
+	background: rgb(var(--v-theme-primary));
+	color: rgb(var(--v-theme-on-primary));
+	outline: 2px solid rgba(var(--v-theme-primary), 0.2);
+}
+.invoice-card-layout--editing .invoice-card-layout__card :deep(.invoice-section-heading) {
+	padding-inline-end: 145px;
+}
+@media (prefers-reduced-motion: reduce) {
+	.invoice-card-layout__card {
+		transition: none;
 	}
 }
 </style>

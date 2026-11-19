@@ -1,3 +1,5 @@
+import { resizedLayoutPercent } from "./continuousLayout";
+
 export const invoiceCardDefaults = [
 	{ id: "customer", label: "Customer Details", width: "auto" },
 	{ id: "delivery", label: "Delivery Charges", width: "auto" },
@@ -29,7 +31,8 @@ export function normalizeInvoiceCardLayout(
 				width:
 					entry.width === "auto" ||
 					entry.width === "full" ||
-					(Number.isInteger(entry.width) &&
+					(typeof entry.width === "number" &&
+						Number.isFinite(entry.width) &&
 						entry.width >= 3 &&
 						entry.width <= 12)
 						? entry.width
@@ -84,11 +87,15 @@ export function resizedCardSpan(
 	containerWidth: number,
 	gap: number,
 ): number {
-	if (containerWidth <= 0) return startSpan;
-	const columnWidth = (containerWidth + gap) / 12;
-	return Math.max(
-		3,
-		Math.min(12, Math.round(startSpan + delta / columnWidth)),
+	return (
+		(resizedLayoutPercent(
+			(startSpan / 12) * 100,
+			delta,
+			containerWidth,
+			gap,
+		) /
+			100) *
+		12
 	);
 }
 

@@ -1,7 +1,7 @@
 export type ButtonDefinition = { key: string; label: string; full?: boolean };
 export type ButtonPreference = {
 	key: string;
-	width: "auto" | "single" | "double";
+	width: "auto" | "single" | "double" | number;
 };
 
 // Keep disabled actions in preferences so profile toggles never lose their position.
@@ -19,9 +19,14 @@ export function normalizeButtonLayout(
 				continue;
 			result.push({
 				key: entry.key,
-				width: ["single", "double"].includes(entry.width)
-					? entry.width
-					: "auto",
+				width:
+					["single", "double"].includes(entry.width) ||
+					(typeof entry.width === "number" &&
+						Number.isFinite(entry.width) &&
+						entry.width >= 10 &&
+						entry.width <= 100)
+						? entry.width
+						: "auto",
 			});
 		}
 	}
