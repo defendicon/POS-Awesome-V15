@@ -2562,8 +2562,8 @@ defineExpose({
 }
 
 .payment-sections--dialog .payment-section {
-	padding: 10px;
-	gap: 10px;
+	padding: 12px;
+	gap: 12px;
 }
 
 .payment-sections--dialog .payment-section--summary {
@@ -2587,14 +2587,8 @@ defineExpose({
 }
 
 .payment-section--summary {
-	border-inline-start: 5px solid var(--pos-primary);
-	background:
-		linear-gradient(
-			90deg,
-			color-mix(in srgb, var(--pos-primary-container) 52%, transparent),
-			transparent 42%
-		),
-		var(--pos-surface-raised);
+	border-inline-start: 4px solid var(--pos-primary);
+	background: var(--pos-surface-raised);
 }
 
 .payment-section__header {
@@ -2628,7 +2622,7 @@ defineExpose({
 .payment-section__title {
 	margin: 0;
 	font-size: 1rem;
-	font-weight: 650;
+	font-weight: 600;
 	line-height: 1.2;
 	color: var(--pos-text-primary);
 }
@@ -2657,7 +2651,7 @@ defineExpose({
 	bottom: 0;
 	z-index: 8;
 	padding: 10px 2px 2px;
-	background: linear-gradient(180deg, transparent, var(--pos-surface) 32%);
+	background: var(--pos-surface-raised);
 }
 
 .payment-footer--dialog {
@@ -2679,8 +2673,8 @@ defineExpose({
 }
 
 :deep(.payment-shell--dialog .payment-method-card) {
-	padding: 10px;
-	gap: 10px;
+	padding: 12px;
+	gap: 12px;
 }
 
 :deep(.payment-shell--dialog .payment-summary-grid),

@@ -218,7 +218,7 @@ const baseSettlementLabel = computed(() => {
 	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
 	align-items: center;
 	gap: var(--pos-space-3);
-	padding: 12px 14px;
+	padding: 12px 16px;
 	border: 1px solid color-mix(in srgb, var(--pos-success) 42%, var(--pos-border));
 	border-radius: var(--pos-radius-sm);
 	background: var(--pos-success-container);
@@ -232,7 +232,7 @@ const baseSettlementLabel = computed(() => {
 }
 
 .exchange-settlement__part span {
-	font-size: 0.72rem;
+	font-size: 0.8rem;
 	color: var(--pos-text-secondary);
 }
 
@@ -248,7 +248,7 @@ const baseSettlementLabel = computed(() => {
 
 .exchange-settlement__operator {
 	font-size: 1.15rem;
-	font-weight: 800;
+	font-weight: 600;
 	color: var(--pos-text-secondary);
 }
 
@@ -276,7 +276,7 @@ const baseSettlementLabel = computed(() => {
 .payment-summary-grid__paid :deep(input),
 .payment-summary-grid__difference :deep(input) {
 	font-size: 1.05rem;
-	font-weight: 700;
+	font-weight: 600;
 	font-variant-numeric: tabular-nums;
 }
 
@@ -300,7 +300,7 @@ const baseSettlementLabel = computed(() => {
 	align-items: center;
 	justify-content: space-between;
 	gap: var(--pos-space-3);
-	padding: 10px 14px;
+	padding: 12px 16px;
 	border: 1px solid var(--pos-border);
 	border-radius: var(--pos-radius-sm);
 	background: var(--pos-surface-raised);
@@ -323,17 +323,18 @@ const baseSettlementLabel = computed(() => {
 
 .payment-summary-base__label {
 	font-size: 0.8rem;
-	font-weight: 700;
+	font-weight: 600;
 	color: var(--pos-text-primary);
 }
 
 .payment-summary-base__meta {
-	font-size: 0.72rem;
+	font-size: 0.8rem;
 	color: var(--pos-text-secondary);
 }
 
 .payment-summary-base__amount {
 	white-space: nowrap;
+	font-variant-numeric: tabular-nums;
 	color: var(--pos-text-primary);
 }
 
@@ -342,15 +343,9 @@ const baseSettlementLabel = computed(() => {
 	align-items: center;
 	justify-content: space-between;
 	gap: var(--pos-space-3);
-	padding: 14px 16px;
+	padding: 16px;
 	border-radius: var(--pos-radius-md);
-	background:
-		linear-gradient(
-			180deg,
-			rgba(var(--v-theme-success), 0.1) 0%,
-			rgba(var(--v-theme-success), 0.04) 100%
-		),
-		var(--pos-surface-raised);
+	background: var(--pos-surface-raised);
 	border: 1px solid rgba(var(--v-theme-success), 0.18);
 }
 
@@ -360,17 +355,17 @@ const baseSettlementLabel = computed(() => {
 
 .payment-summary-pill__label {
 	margin: 0;
-	font-size: 0.72rem;
-	font-weight: 700;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
+	font-size: 0.8rem;
+	font-weight: 600;
+	letter-spacing: 0;
+	text-transform: none;
 	color: var(--pos-text-secondary);
 }
 
 .payment-summary-pill__amount {
 	margin: 4px 0 0;
 	font-size: 1.05rem;
-	font-weight: 700;
+	font-weight: 600;
 	color: var(--pos-text-primary);
 }
 
@@ -387,11 +382,11 @@ const baseSettlementLabel = computed(() => {
 .payment-summary-pill__state {
 	display: inline-flex;
 	align-items: center;
-	padding: 6px 10px;
-	border-radius: 999px;
+	padding: 4px 8px;
+	border-radius: var(--pos-radius-xs);
 	background: rgba(var(--v-theme-success), 0.12);
 	color: rgb(var(--v-theme-success));
 	font-size: 0.74rem;
-	font-weight: 700;
+	font-weight: 600;
 }
 </style>

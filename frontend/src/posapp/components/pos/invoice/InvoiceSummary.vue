@@ -881,16 +881,16 @@ defineExpose({
 
 .summary-hero__eyebrow {
 	font-size: 0.72rem;
-	font-weight: 750;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
+	font-weight: 600;
+	text-transform: none;
+	letter-spacing: 0;
 	color: var(--pos-text-secondary);
 }
 
 .summary-hero__amount {
 	font-family: var(--pos-font-display);
 	font-size: clamp(1.35rem, 2vw, 1.9rem);
-	font-weight: 750;
+	font-weight: 600;
 	line-height: 1.1;
 	font-variant-numeric: tabular-nums;
 	color: var(--pos-text-primary);

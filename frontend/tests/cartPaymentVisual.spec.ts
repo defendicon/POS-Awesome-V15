@@ -132,7 +132,7 @@ describe("Cart and payment visual hierarchy", () => {
 
 		expect(payment).toContain("payment-section__icon");
 		expect(payment).toContain(
-			"border-inline-start: 5px solid var(--pos-primary)",
+			"border-inline-start: 4px solid var(--pos-primary)",
 		);
 		expect(summary).toContain('data-state="settlementState"');
 		expect(summary).toContain('data-state="remaining"');

@@ -260,7 +260,9 @@ const connectivityLabel = computed(() => {
 .status-btn-enhanced {
 	background: var(--pos-hover-bg) !important;
 	border: 1px solid var(--pos-border);
-	transition: all 0.3s ease;
+	transition:
+		background-color 140ms ease,
+		color 140ms ease;
 	padding: 4px;
 	position: relative;
 	/* Reduced padding */

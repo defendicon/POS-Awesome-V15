@@ -288,13 +288,7 @@ const blurTarget = (event) => {
 
 .payment-method-card--active {
 	border-color: color-mix(in srgb, var(--pos-primary) 60%, var(--pos-border));
-	background:
-		linear-gradient(
-			90deg,
-			color-mix(in srgb, var(--pos-primary-container) 38%, transparent),
-			transparent 52%
-		),
-		var(--pos-surface-raised);
+	background: var(--pos-surface-muted);
 	box-shadow: var(--pos-elevation-1);
 }
 
@@ -311,10 +305,10 @@ const blurTarget = (event) => {
 
 .payment-method-card__label {
 	margin: 0 0 var(--pos-space-1);
-	font-size: 0.72rem;
-	font-weight: 750;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
+	font-size: 0.8rem;
+	font-weight: 600;
+	letter-spacing: 0;
+	text-transform: none;
 	color: var(--pos-text-secondary);
 }
 
@@ -322,7 +316,7 @@ const blurTarget = (event) => {
 	margin: 0;
 	font-size: 1rem;
 	line-height: 1.2;
-	font-weight: 650;
+	font-weight: 600;
 	color: var(--pos-text-primary);
 }
 
@@ -335,13 +329,13 @@ const blurTarget = (event) => {
 }
 
 .payment-method-card__badge {
-	padding: 6px 10px;
-	border-radius: 999px;
+	padding: 4px 8px;
+	border-radius: var(--pos-radius-xs);
 	background: var(--pos-primary-container);
 	border: 1px solid color-mix(in srgb, var(--pos-primary) 34%, var(--pos-border));
 	color: var(--pos-primary-variant);
 	font-size: 0.78rem;
-	font-weight: 700;
+	font-weight: 600;
 	white-space: nowrap;
 }
 
@@ -352,31 +346,31 @@ const blurTarget = (event) => {
 }
 
 .payment-method-card__shortcut {
-	padding: 4px 7px;
+	padding: 4px 8px;
 	border: 1px solid var(--pos-border);
 	border-bottom-width: 2px;
-	border-radius: 3px;
+	border-radius: 4px;
 	background: var(--pos-surface);
 	color: var(--pos-text-secondary);
 	font: inherit;
-	font-size: 0.68rem;
-	font-weight: 800;
+	font-size: 0.75rem;
+	font-weight: 600;
 	line-height: 1;
 	white-space: nowrap;
 }
 
 :deep(.pos-themed-input--refund input) {
 	color: rgb(var(--v-theme-error)) !important;
-	font-weight: 700;
+	font-weight: 600;
 }
 
 .payment-method-action-btn {
 	--v-theme-overlay-multiplier: 0 !important;
 	min-height: 44px;
 	border-radius: var(--pos-radius-sm);
-	font-weight: 700;
+	font-weight: 600;
 	text-transform: none;
-	letter-spacing: 0.01em;
+	letter-spacing: 0;
 	transition:
 		box-shadow 0.18s ease,
 		background-color 0.18s ease,
@@ -403,7 +397,7 @@ const blurTarget = (event) => {
 
 .payment-currency-equivalent--error {
 	color: rgb(var(--v-theme-error));
-	font-weight: 700;
+	font-weight: 600;
 }
 
 .payment-method-action-btn:hover,
@@ -411,7 +405,7 @@ const blurTarget = (event) => {
 .payment-method-action-btn:focus-visible,
 .payment-method-action-btn:active {
 	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18) !important;
-	transform: translateY(-1px);
+	transform: none;
 	background-color: var(--pos-action-primary-hover) !important;
 }
 
@@ -466,7 +460,7 @@ const blurTarget = (event) => {
 	background: var(--pos-surface-muted) !important;
 	color: var(--pos-text-primary) !important;
 	text-transform: none;
-	font-weight: 650;
+	font-weight: 600;
 	font-variant-numeric: tabular-nums;
 }
 
@@ -484,5 +478,10 @@ const blurTarget = (event) => {
 	.payment-method-actions {
 		grid-template-columns: 1fr;
 	}
+}
+
+.payment-method-action-btn:focus-visible {
+	outline: 2px solid var(--pos-focus-ring);
+	outline-offset: 2px;
 }
 </style>

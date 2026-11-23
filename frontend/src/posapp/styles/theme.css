@@ -224,13 +224,7 @@
 /* Automatic mode resolves data-theme before the app mounts; the dark token set above is authoritative. */
 
 body[data-page-route="posapp"] {
-	background:
-		radial-gradient(
-			circle at 8% 0%,
-			color-mix(in srgb, var(--pos-primary-container) 52%, transparent) 0,
-			transparent 30rem
-		),
-		var(--pos-bg-secondary) !important;
+	background: var(--pos-bg-secondary) !important;
 	color: var(--pos-text-primary);
 	font-family: var(--pos-font-sans);
 	font-size: 15px;

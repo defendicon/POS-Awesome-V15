@@ -66,7 +66,6 @@
 							class="cpu-bar-fill"
 							:style="{
 								width: (serverMemory || 0) + '%',
-								background: 'linear-gradient(90deg,#1976d2 0%,#42a5f5 100%)',
 							}"
 						></div>
 					</div>
@@ -229,15 +228,15 @@ const peakPercent = computed(() => Math.round(Math.min(peakLag.value, 100)));
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	transition: all 0.3s ease;
+	transition: color 140ms ease;
 }
 
 .cpu-meter-container:hover {
-	transform: scale(1.1);
+	color: var(--pos-primary);
 }
 
 .cpu-meter {
-	transition: all 0.3s ease;
+	transition: color 140ms ease;
 }
 
 .cpu-tooltip-content {
@@ -280,20 +279,20 @@ const peakPercent = computed(() => Math.round(Math.min(peakLag.value, 100)));
 .cpu-bar-bg {
 	width: 80px;
 	height: 8px;
-	background: #e3f2fd;
+	background: var(--pos-surface-muted);
 	border-radius: 4px;
 	overflow: hidden;
 	margin-right: 6px;
 }
 .cpu-bar-fill {
 	height: 100%;
-	background: linear-gradient(90deg, #7b1fa2 0%, #42a5f5 100%);
+	background: var(--pos-primary);
 	border-radius: 4px;
-	transition: width 0.3s;
+	transition: background-color 140ms ease;
 }
 .cpu-bar-label {
 	font-size: 11px;
-	color: #7b1fa2;
+	color: var(--pos-text-secondary);
 	font-weight: 600;
 }
 .cpu-tooltip-warning {

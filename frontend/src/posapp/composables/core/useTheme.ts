@@ -44,7 +44,9 @@ export function useTheme() {
 		return null;
 	};
 
-	const normalizeResolvedTheme = (value: string | null): ResolvedTheme | null => {
+	const normalizeResolvedTheme = (
+		value: string | null,
+	): ResolvedTheme | null => {
 		if (value === "light" || value === "dark") {
 			return value;
 		}
@@ -55,7 +57,9 @@ export function useTheme() {
 	const initializeTheme = () => {
 		const root = document.documentElement;
 		const domTheme = normalizeTheme(root.getAttribute("data-theme-mode"));
-		const domResolvedTheme = normalizeResolvedTheme(root.getAttribute("data-theme"));
+		const domResolvedTheme = normalizeResolvedTheme(
+			root.getAttribute("data-theme"),
+		);
 
 		if (domTheme) {
 			setTheme(domTheme);
@@ -102,9 +106,7 @@ export function useTheme() {
 		const root = document.documentElement;
 		root.setAttribute("data-theme", resolvedTheme);
 		root.setAttribute("data-theme-mode", newTheme);
-
-		// Update CSS custom properties for immediate effect
-		updateCSSProperties(resolvedTheme);
+		root.style.setProperty("color-scheme", resolvedTheme);
 
 		// Force immediate DOM update to prevent caching lag
 		forceStyleRefresh();
@@ -120,89 +122,6 @@ export function useTheme() {
 	const toggleTheme = () => {
 		const newTheme = isDarkMode.value ? "light" : "dark";
 		setTheme(newTheme);
-	};
-
-	// Update CSS custom properties for immediate theme changes
-	const updateCSSProperties = (themeName: ResolvedTheme) => {
-		const root = document.documentElement;
-
-		if (themeName === "dark") {
-			// Dark theme CSS custom properties
-			root.style.setProperty("--pos-bg-primary", "#121212");
-			root.style.setProperty("--pos-bg-secondary", "#1E1E1E");
-			root.style.setProperty("--pos-bg-tertiary", "#2d2d2d");
-			root.style.setProperty("--pos-surface", "#1E1E1E");
-			root.style.setProperty("--pos-surface-variant", "#373737");
-
-			root.style.setProperty("--pos-text-primary", "#ffffff");
-			root.style.setProperty("--pos-text-secondary", "#e0e0e0");
-			root.style.setProperty("--pos-text-disabled", "#9e9e9e");
-			root.style.setProperty("--pos-text-muted", "#b0b8c4");
-
-			root.style.setProperty("--pos-primary", "#00D4FF");
-			root.style.setProperty("--pos-primary-variant", "#00A0CC");
-			root.style.setProperty("--pos-secondary", "#00E5B8");
-
-			root.style.setProperty("--pos-border", "rgba(255, 255, 255, 0.12)");
-			root.style.setProperty("--pos-divider", "#373737");
-			root.style.setProperty("--pos-shadow", "rgba(0, 0, 0, 0.4)");
-
-			root.style.setProperty("--pos-card-bg", "#1E1E1E");
-			root.style.setProperty("--pos-input-bg", "#2d2d2d");
-			root.style.setProperty("--pos-tooltip-bg", "#202833");
-			root.style.setProperty(
-				"--pos-tooltip-border",
-				"rgba(148, 163, 184, 0.2)",
-			);
-			root.style.setProperty("--pos-tooltip-shadow", "rgba(0, 0, 0, 0.4)");
-			root.style.setProperty(
-				"--pos-hover-bg",
-				"rgba(255, 255, 255, 0.12)",
-			);
-			root.style.setProperty("color-scheme", "dark");
-		} else {
-			// Light theme CSS custom properties
-			root.style.setProperty("--pos-bg-primary", "#ffffff");
-			root.style.setProperty("--pos-bg-secondary", "#f8f9fa");
-			root.style.setProperty("--pos-bg-tertiary", "#e3f2fd");
-			root.style.setProperty("--pos-surface", "#ffffff");
-			root.style.setProperty("--pos-surface-variant", "#f5f5f5");
-
-			root.style.setProperty("--pos-text-primary", "#212121");
-			root.style.setProperty("--pos-text-secondary", "#666666");
-			root.style.setProperty("--pos-text-disabled", "#9e9e9e");
-			root.style.setProperty("--pos-text-muted", "#667085");
-
-			root.style.setProperty("--pos-primary", "#0097A7");
-			root.style.setProperty("--pos-primary-variant", "#00838F");
-			root.style.setProperty("--pos-secondary", "#00BCD4");
-
-			root.style.setProperty("--pos-border", "rgba(0, 0, 0, 0.12)");
-			root.style.setProperty("--pos-divider", "rgba(0, 0, 0, 0.06)");
-			root.style.setProperty("--pos-shadow", "rgba(0, 0, 0, 0.1)");
-
-			root.style.setProperty("--pos-card-bg", "#ffffff");
-			root.style.setProperty("--pos-input-bg", "#f5f5f5");
-			root.style.setProperty("--pos-tooltip-bg", "#ffffff");
-			root.style.setProperty(
-				"--pos-tooltip-border",
-				"rgba(15, 23, 42, 0.12)",
-			);
-			root.style.setProperty(
-				"--pos-tooltip-shadow",
-				"rgba(15, 23, 42, 0.14)",
-			);
-			root.style.setProperty(
-				"--pos-hover-bg",
-				"rgba(25, 118, 210, 0.04)",
-			);
-			root.style.setProperty("color-scheme", "light");
-		}
-
-		// Minimal DOM recalculation
-		requestAnimationFrame(() => {
-			root.offsetHeight;
-		});
 	};
 
 	// Minimal style refresh - remove heavy DOM manipulation
@@ -278,7 +197,7 @@ export function useTheme() {
 						themeMode.value = resolvedTheme;
 						theme.value = resolvedTheme;
 						isDarkMode.value = resolvedTheme === "dark";
-						updateCSSProperties(resolvedTheme);
+						root.style.setProperty("color-scheme", resolvedTheme);
 					}
 				}
 			});
@@ -293,18 +212,21 @@ export function useTheme() {
 	};
 
 	// Computed properties for common theme values
+	// CSS owns the palette for both initial render and subsequent theme switches.
+	// Keep this compatibility API reactive without introducing another color table.
 	const themeColors = computed(() => {
+		void theme.value;
+		const styles = getComputedStyle(document.documentElement);
+		const color = (token: string) => styles.getPropertyValue(token).trim();
 		return {
-			background: isDarkMode.value ? "#121212" : "#ffffff",
-			surface: isDarkMode.value ? "#1E1E1E" : "#ffffff",
-			surfaceVariant: isDarkMode.value ? "#2d2d2d" : "#f5f5f5",
-			primary: isDarkMode.value ? "#00D4FF" : "#0097A7",
-			textPrimary: isDarkMode.value ? "#ffffff" : "#212121",
-			textSecondary: isDarkMode.value ? "#e0e0e0" : "#666666",
-			border: isDarkMode.value
-				? "rgba(255, 255, 255, 0.12)"
-				: "rgba(0, 0, 0, 0.12)",
-			cardBackground: isDarkMode.value ? "#1E1E1E" : "#ffffff",
+			background: color("--pos-bg-primary"),
+			surface: color("--pos-surface"),
+			surfaceVariant: color("--pos-surface-variant"),
+			primary: color("--pos-primary"),
+			textPrimary: color("--pos-text-primary"),
+			textSecondary: color("--pos-text-secondary"),
+			border: color("--pos-border"),
+			cardBackground: color("--pos-card-bg"),
 		};
 	});
 
