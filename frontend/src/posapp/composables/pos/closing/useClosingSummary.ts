@@ -330,7 +330,7 @@ export function useClosingSummary(
 				label: __("Total Invoices"),
 				value: formatCount(unref(overview)?.total_invoices || 0),
 				caption: `${__("Sales processed")}: ${formatCount(salesSummary.value.sale_invoices_count || 0)}`,
-				icon: "mdi-receipt-text-multiple",
+				icon: "mdi-receipt-text",
 				color: "accent-primary",
 			},
 			{

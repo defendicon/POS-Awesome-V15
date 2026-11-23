@@ -15,6 +15,8 @@ import "@vuepic/vue-datepicker/dist/main.css";
 import "../../../posawesome/public/css/rtl.css";
 import "../style.css";
 import "./styles/theme.css";
+import "./styles/nornux.css";
+import "./styles/nornux-template.css";
 import eventBus from "./bus";
 import themePlugin from "./plugins/theme";
 import { pinia } from "./stores";

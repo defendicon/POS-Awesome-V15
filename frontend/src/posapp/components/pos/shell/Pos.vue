@@ -1,7 +1,13 @@
 <template>
 	<div
 		class="pos-main-container dynamic-container"
-		:class="[rtlClasses, { 'pos-main-container--counter-grid': counterGridActive }]"
+		:class="[
+			rtlClasses,
+			{
+				'pos-main-container--counter-grid': counterGridActive,
+				'pos-main-container--nornux': nornuxActive,
+			},
+		]"
 		:style="[responsiveStyles, layoutStyleOverrides, rtlStyles]"
 	>
 		<Drafts></Drafts>
@@ -96,7 +102,7 @@
 			v-show="!dialog"
 			dense
 			class="ma-0 dynamic-main-row"
-			:class="{ 'dynamic-main-row--phone': isPhone }"
+			:class="{ 'dynamic-main-row--phone': isPhone, 'nornux-main-row': nornuxActive }"
 		>
 			<v-col
 				v-show="(!useCompactPosSwitcher || compactPanel === 'selector') && activeView === 'items'"
@@ -107,7 +113,7 @@
 				cols="12"
 				class="pos dynamic-col dynamic-col--selector"
 			>
-				<ItemsSelector context="pos" />
+				<ItemsSelector context="pos" :presentation="nornuxActive ? 'nornux' : 'classic'" />
 			</v-col>
 			<v-col
 				v-show="(!useCompactPosSwitcher || compactPanel === 'selector') && activeView === 'offers'"
@@ -156,7 +162,7 @@
 				cols="12"
 				class="pos dynamic-col dynamic-col--invoice"
 			>
-				<Invoice ref="invoicePanel"></Invoice>
+				<Invoice ref="invoicePanel" :presentation="nornuxActive ? 'nornux' : 'classic'"></Invoice>
 			</v-col>
 		</v-row>
 		<section v-else v-show="!dialog" class="counter-grid-pos" data-testid="counter-grid-pos">
@@ -309,7 +315,7 @@ import { useInvoiceStore } from "../../../stores/invoiceStore.js";
 import { useToastStore } from "../../../stores/toastStore";
 import { storeToRefs } from "pinia";
 import { useCustomerDisplayPublisher } from "../../../composables/pos/shared/useCustomerDisplayPublisher";
-import { isCounterGridTemplate } from "../../../utils/posUiTemplate";
+import { isCounterGridTemplate, isNornuxTemplate } from "../../../utils/posUiTemplate";
 import { collectUnavailableCartItems } from "../../../utils/alternateCart";
 import { shouldRedirectPosTabToItemSearch } from "../../../utils/keyboardNavigation";
 import { shouldFocusCartQtyAfterItemAdd } from "../../../utils/cartFocusSettings";
@@ -346,6 +352,9 @@ export default {
 		const usePaymentDialog = computed(() => responsive.windowWidth.value >= 992);
 		const counterGridActive = computed(() =>
 			isCounterGridTemplate(posProfile.value, responsive.windowWidth.value),
+		);
+		const nornuxActive = computed(() =>
+			isNornuxTemplate(posProfile.value, responsive.windowWidth.value),
 		);
 		const useCompactPosSwitcher = computed(() => responsive.windowWidth.value < 1100);
 		const compactPanel = ref("selector");
@@ -854,6 +863,7 @@ export default {
 			isPhone,
 			usePaymentDialog,
 			counterGridActive,
+			nornuxActive,
 			counterItemSearchOpen,
 			counterItemSearchQuery,
 			counterAlternateSources,

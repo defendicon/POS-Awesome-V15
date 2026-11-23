@@ -1,4 +1,5 @@
 import { ref, computed } from "vue";
+import { cssVariables } from "../../config/brandPalette";
 
 type ThemeMode = "light" | "dark" | "automatic";
 type ResolvedTheme = "light" | "dark";
@@ -126,78 +127,10 @@ export function useTheme() {
 	const updateCSSProperties = (themeName: ResolvedTheme) => {
 		const root = document.documentElement;
 
-		if (themeName === "dark") {
-			// Dark theme CSS custom properties
-			root.style.setProperty("--pos-bg-primary", "#121212");
-			root.style.setProperty("--pos-bg-secondary", "#1E1E1E");
-			root.style.setProperty("--pos-bg-tertiary", "#2d2d2d");
-			root.style.setProperty("--pos-surface", "#1E1E1E");
-			root.style.setProperty("--pos-surface-variant", "#373737");
-
-			root.style.setProperty("--pos-text-primary", "#ffffff");
-			root.style.setProperty("--pos-text-secondary", "#e0e0e0");
-			root.style.setProperty("--pos-text-disabled", "#9e9e9e");
-			root.style.setProperty("--pos-text-muted", "#b0b8c4");
-
-			root.style.setProperty("--pos-primary", "#00D4FF");
-			root.style.setProperty("--pos-primary-variant", "#00A0CC");
-			root.style.setProperty("--pos-secondary", "#00E5B8");
-
-			root.style.setProperty("--pos-border", "rgba(255, 255, 255, 0.12)");
-			root.style.setProperty("--pos-divider", "#373737");
-			root.style.setProperty("--pos-shadow", "rgba(0, 0, 0, 0.4)");
-
-			root.style.setProperty("--pos-card-bg", "#1E1E1E");
-			root.style.setProperty("--pos-input-bg", "#2d2d2d");
-			root.style.setProperty("--pos-tooltip-bg", "#202833");
-			root.style.setProperty(
-				"--pos-tooltip-border",
-				"rgba(148, 163, 184, 0.2)",
-			);
-			root.style.setProperty("--pos-tooltip-shadow", "rgba(0, 0, 0, 0.4)");
-			root.style.setProperty(
-				"--pos-hover-bg",
-				"rgba(255, 255, 255, 0.12)",
-			);
-			root.style.setProperty("color-scheme", "dark");
-		} else {
-			// Light theme CSS custom properties
-			root.style.setProperty("--pos-bg-primary", "#ffffff");
-			root.style.setProperty("--pos-bg-secondary", "#f8f9fa");
-			root.style.setProperty("--pos-bg-tertiary", "#e3f2fd");
-			root.style.setProperty("--pos-surface", "#ffffff");
-			root.style.setProperty("--pos-surface-variant", "#f5f5f5");
-
-			root.style.setProperty("--pos-text-primary", "#212121");
-			root.style.setProperty("--pos-text-secondary", "#666666");
-			root.style.setProperty("--pos-text-disabled", "#9e9e9e");
-			root.style.setProperty("--pos-text-muted", "#667085");
-
-			root.style.setProperty("--pos-primary", "#0097A7");
-			root.style.setProperty("--pos-primary-variant", "#00838F");
-			root.style.setProperty("--pos-secondary", "#00BCD4");
-
-			root.style.setProperty("--pos-border", "rgba(0, 0, 0, 0.12)");
-			root.style.setProperty("--pos-divider", "rgba(0, 0, 0, 0.06)");
-			root.style.setProperty("--pos-shadow", "rgba(0, 0, 0, 0.1)");
-
-			root.style.setProperty("--pos-card-bg", "#ffffff");
-			root.style.setProperty("--pos-input-bg", "#f5f5f5");
-			root.style.setProperty("--pos-tooltip-bg", "#ffffff");
-			root.style.setProperty(
-				"--pos-tooltip-border",
-				"rgba(15, 23, 42, 0.12)",
-			);
-			root.style.setProperty(
-				"--pos-tooltip-shadow",
-				"rgba(15, 23, 42, 0.14)",
-			);
-			root.style.setProperty(
-				"--pos-hover-bg",
-				"rgba(25, 118, 210, 0.04)",
-			);
-			root.style.setProperty("color-scheme", "light");
-		}
+		const variables = cssVariables[themeName === "dark" ? "dark" : "light"];
+		Object.entries(variables).forEach(([name, value]) => {
+			root.style.setProperty(name, value);
+		});
 
 		// Minimal DOM recalculation
 		requestAnimationFrame(() => {
@@ -221,12 +154,28 @@ export function useTheme() {
 			window.frappe.ui.set_theme(themeName);
 		}
 
-		// Save to user preferences via API
+		// Save to user preferences via API — only when it actually changed.
+		// Writing the User record on every POS load races with other
+		// startup requests that touch the same row; MariaDB 11.6+ rejects
+		// such concurrent writes and Frappe shows a "Deadlock Occurred" popup.
+		const desiredTheme = themeName.charAt(0).toUpperCase() + themeName.slice(1);
+		const bootUser = (
+			(window.frappe as { boot?: { user?: { desk_theme?: string } } } | undefined)?.boot
+		)?.user;
+		const savedTheme = String(bootUser?.desk_theme || "");
+		if (savedTheme.toLowerCase() === desiredTheme.toLowerCase()) {
+			return;
+		}
+
 		if (window.frappe?.xcall) {
 			window.frappe
 				.xcall("frappe.core.doctype.user.user.switch_theme", {
-					theme:
-						themeName.charAt(0).toUpperCase() + themeName.slice(1),
+					theme: desiredTheme,
+				})
+				.then(() => {
+					if (bootUser) {
+						bootUser.desk_theme = desiredTheme;
+					}
 				})
 				.catch(() => {
 					// Ignore API errors - theme still works locally

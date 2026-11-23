@@ -62,6 +62,43 @@ describe("invoice payment dialogs", () => {
 		expect(context.eventBus.emit).toHaveBeenCalledWith("show_payment", "true");
 	});
 
+	it("ignores repeat Pay requests while the first one is still saving", async () => {
+		const context = createPaymentContext();
+		let release: () => void = () => {};
+		const gate = new Promise<void>((resolve) => {
+			release = resolve;
+		});
+		context.validate = vi.fn(async () => {
+			await gate;
+			return true;
+		});
+
+		const first = show_payment(context);
+		const second = show_payment(context);
+		const third = show_payment(context);
+		release();
+		await Promise.all([first, second, third]);
+
+		// Only one save/validation runs for overlapping Pay presses.
+		expect(context.validate).toHaveBeenCalledTimes(1);
+		expect(context.process_invoice).toHaveBeenCalledTimes(1);
+
+		// The guard is released afterwards, so a later Pay works normally.
+		await show_payment(context);
+		expect(context.process_invoice).toHaveBeenCalledTimes(2);
+	});
+
+	it("releases the Pay guard after an early return", async () => {
+		const context = createPaymentContext();
+		context.items = [];
+		await show_payment(context);
+		expect(context.toastStore.show).toHaveBeenCalled();
+
+		context.items = [{ item_code: "ITEM-001" }];
+		await show_payment(context);
+		expect(context.process_invoice).toHaveBeenCalledTimes(1);
+	});
+
 	it("completes automatic batch assignment before validating payment", async () => {
 		const context = createPaymentContext();
 		const sequence: string[] = [];

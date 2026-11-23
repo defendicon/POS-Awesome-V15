@@ -96,7 +96,8 @@ describe("NavbarAppBar", () => {
 		expect(
 			wrapper.find('[data-test="profile-chip-secondary"]').exists(),
 		).toBe(false);
-		expect(wrapper.text()).toContain(POS_BRAND_NAME);
+		// Default branding renders the Nornux wordmark image (named via alt text).
+		expect(wrapper.find(".pos-navbar-wordmark img").attributes("alt")).toBe(POS_BRAND_NAME);
 		expect(wrapper.text()).not.toContain("POSAwesome");
 		expect(wrapper.text()).toContain("Backup Cashier");
 		expect(wrapper.text()).toContain("Main POS");

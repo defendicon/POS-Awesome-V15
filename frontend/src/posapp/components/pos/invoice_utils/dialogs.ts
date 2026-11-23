@@ -14,6 +14,14 @@ const showCompactPanel = (context: any, panel: "selector" | "invoice") => {
 };
 
 export async function show_payment(context: any) {
+	// Ignore repeat Pay requests (double-click, Pay + F9, dock button) while one
+	// is still validating/saving. Parallel update_invoice calls for the same
+	// draft race on the same rows and fail with a database deadlock.
+	if (context._showPaymentInFlight) {
+		return;
+	}
+	context._showPaymentInFlight = true;
+
 	if (context._suppressClosePaymentsTimer) {
 		clearTimeout(context._suppressClosePaymentsTimer);
 		context._suppressClosePaymentsTimer = null;
@@ -166,6 +174,7 @@ export async function show_payment(context: any) {
 			message: error.message,
 		});
 	} finally {
+		context._showPaymentInFlight = false;
 		context._suppressClosePaymentsTimer = setTimeout(() => {
 			context._suppressClosePayments = false;
 			context._suppressClosePaymentsTimer = null;

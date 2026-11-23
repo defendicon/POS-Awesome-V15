@@ -130,12 +130,138 @@
 		</v-btn>
 	</div>
 
+	<div v-else-if="isNornux" class="nornux-actions" data-testid="nornux-actions">
+		<button
+			type="button"
+			class="nornux-action"
+			data-pos-keyboard-target="invoice-action"
+			data-testid="invoice-action-save-clear"
+			:disabled="saveLoading"
+			@click="$emit('save-and-clear')"
+		>
+			<v-progress-circular v-if="saveLoading" indeterminate size="18" width="2" />
+			<v-icon v-else icon="mdi-content-save-outline" size="20" />
+			<span>{{ __("Save & Clear") }}</span>
+		</button>
+		<button
+			type="button"
+			class="nornux-action"
+			data-pos-keyboard-target="invoice-action"
+			data-testid="invoice-action-drafts"
+			:disabled="loadDraftsLoading"
+			@click="$emit('load-drafts')"
+		>
+			<v-progress-circular v-if="loadDraftsLoading" indeterminate size="18" width="2" />
+			<v-icon v-else icon="mdi-tray-arrow-up" size="20" />
+			<span>{{ __("Drafts") }}</span>
+		</button>
+		<button
+			type="button"
+			class="nornux-action"
+			data-pos-keyboard-target="invoice-action"
+			data-testid="invoice-action-management"
+			:disabled="invoiceManagementLoading"
+			@click="$emit('open-invoice-management')"
+		>
+			<v-progress-circular v-if="invoiceManagementLoading" indeterminate size="18" width="2" />
+			<v-icon v-else icon="mdi-file-document-multiple-outline" size="20" />
+			<span>{{ __("Invoices") }}</span>
+		</button>
+		<button
+			v-if="pos_profile.posa_allow_return == 1"
+			type="button"
+			class="nornux-action"
+			data-pos-keyboard-target="invoice-action"
+			data-testid="invoice-action-returns"
+			:disabled="returnsLoading"
+			@click="$emit('open-returns')"
+		>
+			<v-progress-circular v-if="returnsLoading" indeterminate size="18" width="2" />
+			<v-icon v-else icon="mdi-backup-restore" size="20" />
+			<span>{{ __("Return") }}</span>
+		</button>
+		<button
+			type="button"
+			class="nornux-action nornux-action--danger"
+			:class="{
+				'nornux-action--span-2': pos_profile.posa_allow_return == 1 && !showNornuxMore,
+				'nornux-action--span-3': pos_profile.posa_allow_return != 1 && !showNornuxMore,
+				'nornux-action--span-2-alt': pos_profile.posa_allow_return != 1 && showNornuxMore,
+			}"
+			data-pos-keyboard-target="invoice-action"
+			data-testid="invoice-action-cancel-sale"
+			:disabled="cancelLoading"
+			@click="$emit('cancel-sale')"
+		>
+			<v-progress-circular v-if="cancelLoading" indeterminate size="18" width="2" />
+			<v-icon v-else icon="mdi-trash-can-outline" size="20" />
+			<span>{{ __("Cancel sale") }}</span>
+		</button>
+		<v-menu v-if="showNornuxMore" location="top end">
+			<template #activator="{ props: menuProps }">
+				<button
+					v-bind="menuProps"
+					type="button"
+					class="nornux-action"
+					data-pos-keyboard-target="invoice-action"
+					data-testid="invoice-action-more"
+				>
+					<v-icon icon="mdi-dots-horizontal" size="20" />
+					<span>{{ __("More") }}</span>
+				</button>
+			</template>
+			<v-list density="compact" min-width="220">
+				<v-list-item
+					v-if="pos_profile.custom_allow_select_sales_order == 1"
+					prepend-icon="mdi-book-search"
+					data-testid="invoice-action-select-order"
+					:disabled="selectOrderLoading"
+					@click="$emit('select-order')"
+				>
+					<v-list-item-title>{{ __("Select Sales Order") }}</v-list-item-title>
+				</v-list-item>
+				<v-list-item
+					v-if="pos_profile.posa_allow_print_draft_invoices"
+					prepend-icon="mdi-printer"
+					data-testid="invoice-action-print-draft"
+					:disabled="printLoading"
+					@click="$emit('print-draft')"
+				>
+					<v-list-item-title>{{ __("Print Draft") }}</v-list-item-title>
+				</v-list-item>
+				<v-list-item
+					v-if="showCustomerDisplayButton"
+					prepend-icon="mdi-monitor"
+					data-testid="invoice-action-customer-display"
+					:disabled="customerDisplayLoading"
+					@click="$emit('open-customer-display')"
+				>
+					<v-list-item-title>{{ __("Customer Screen") }}</v-list-item-title>
+				</v-list-item>
+			</v-list>
+		</v-menu>
+		<button
+			type="button"
+			class="nornux-pay"
+			data-pos-keyboard-target="pay"
+			data-testid="invoice-action-pay"
+			:disabled="paymentLoading"
+			@click="$emit('show-payment')"
+		>
+			<span class="nornux-pay__label">
+				<v-progress-circular v-if="paymentLoading" indeterminate size="20" width="2" />
+				{{ __("Pay") }}
+				<kbd class="nornux-key-hint nornux-key-hint--dark">F9</kbd>
+			</span>
+			<span class="nornux-pay__amount">{{ payLabel }}</span>
+		</button>
+	</div>
+
 	<v-row v-else dense>
 		<v-col cols="12" sm="6">
 			<v-btn
 				block
-				color="accent"
-				theme="dark"
+				variant="outlined"
 				prepend-icon="mdi-content-save"
 				@click="$emit('save-and-clear')"
 				class="summary-btn"
@@ -149,11 +275,10 @@
 		<v-col cols="12" sm="6">
 			<v-btn
 				block
-				color="warning"
-				theme="dark"
+				variant="outlined"
 				prepend-icon="mdi-tray-full"
 				@click="$emit('load-drafts')"
-				class="white-text-btn summary-btn"
+				class="summary-btn"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-drafts"
 				:loading="loadDraftsLoading"
@@ -164,8 +289,7 @@
 		<v-col cols="12" sm="6" v-if="pos_profile.custom_allow_select_sales_order == 1">
 			<v-btn
 				block
-				color="info"
-				theme="dark"
+				variant="outlined"
 				prepend-icon="mdi-book-search"
 				@click="$emit('select-order')"
 				class="summary-btn"
@@ -179,8 +303,7 @@
 		<v-col cols="12" sm="6">
 			<v-btn
 				block
-				color="deep-purple"
-				theme="dark"
+				variant="outlined"
 				prepend-icon="mdi-folder-search-outline"
 				@click="$emit('open-invoice-management')"
 				class="summary-btn"
@@ -195,7 +318,7 @@
 			<v-btn
 				block
 				color="error"
-				theme="dark"
+				variant="outlined"
 				prepend-icon="mdi-close-circle"
 				@click="$emit('cancel-sale')"
 				class="summary-btn"
@@ -210,8 +333,7 @@
 		<v-col cols="12" sm="6" v-if="pos_profile.posa_allow_return == 1">
 			<v-btn
 				block
-				color="secondary"
-				theme="dark"
+				variant="outlined"
 				prepend-icon="mdi-backup-restore"
 				@click="$emit('open-returns')"
 				class="summary-btn"
@@ -225,8 +347,7 @@
 		<v-col cols="12" sm="6" v-if="pos_profile.posa_allow_print_draft_invoices">
 			<v-btn
 				block
-				color="primary"
-				theme="dark"
+				variant="outlined"
 				prepend-icon="mdi-printer"
 				@click="$emit('print-draft')"
 				class="summary-btn"
@@ -240,8 +361,7 @@
 		<v-col cols="12" sm="6" v-if="showCustomerDisplayButton">
 			<v-btn
 				block
-				color="indigo"
-				theme="dark"
+				variant="outlined"
 				prepend-icon="mdi-monitor"
 				@click="$emit('open-customer-display')"
 				class="summary-btn"
@@ -255,8 +375,8 @@
 		<v-col cols="12">
 			<v-btn
 				block
-				color="success"
-				theme="dark"
+				color="secondary"
+				variant="flat"
 				size="large"
 				prepend-icon="mdi-credit-card"
 				@click="$emit('show-payment')"
@@ -294,6 +414,8 @@ const props = defineProps({
 	printLoading: Boolean,
 	paymentLoading: Boolean,
 	customerDisplayLoading: Boolean,
+	/** Amount shown on the Nornux Pay button, e.g. "AED 201.00". */
+	payLabel: { type: String, default: "" },
 });
 
 defineEmits([
@@ -312,8 +434,15 @@ defineEmits([
 
 const __ = window.__;
 const isCounterGrid = computed(() => props.presentation === "counter-grid");
+const isNornux = computed(() => props.presentation === "nornux");
 const showCustomerDisplayButton = computed(() =>
 	parseBooleanSetting(props.pos_profile?.posa_enable_customer_display),
+);
+const showNornuxMore = computed(
+	() =>
+		props.pos_profile?.custom_allow_select_sales_order == 1 ||
+		Boolean(props.pos_profile?.posa_allow_print_draft_invoices) ||
+		showCustomerDisplayButton.value,
 );
 const showMoreActions = computed(
 	() =>
@@ -401,9 +530,35 @@ const showMoreActions = computed(
 	transition: all 0.2s ease;
 }
 
+.summary-btn:not(.pay-btn) {
+	background: var(--pos-card-bg) !important;
+	border-color: var(--pos-outline) !important;
+	color: var(--pos-text-primary) !important;
+	font-weight: 600 !important;
+	box-shadow: none !important;
+}
+
+.summary-btn.text-error {
+	color: rgb(var(--v-theme-error)) !important;
+	border-color: rgba(var(--v-theme-error), 0.45) !important;
+}
+
+.summary-btn:not(.pay-btn) :deep(.v-icon) {
+	color: var(--pos-brand-orange);
+}
+
+.summary-btn.text-error :deep(.v-icon) {
+	color: inherit;
+}
+
 .summary-btn:hover {
 	transform: translateY(-1px);
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+	box-shadow: 0 4px 10px var(--pos-shadow) !important;
+}
+
+.summary-btn:not(.pay-btn):hover {
+	border-color: var(--pos-brand-orange) !important;
+	background: var(--pos-hover-bg) !important;
 }
 
 .summary-btn:active {
@@ -412,16 +567,19 @@ const showMoreActions = computed(
 
 /* Special styling for the PAY button */
 .pay-btn {
-	font-weight: 600 !important;
+	font-weight: 700 !important;
 	font-size: 1.1rem !important;
-	background: linear-gradient(135deg, #4caf50, #45a049) !important;
-	box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3) !important;
+	letter-spacing: 0.04em !important;
+	min-height: 56px !important;
+	background: var(--pos-brand-orange) !important;
+	color: var(--pos-brand-ink) !important;
+	box-shadow: 0 6px 16px rgba(247, 143, 30, 0.28) !important;
 }
 
 .pay-btn:hover {
-	background: linear-gradient(135deg, #45a049, #3d8b40) !important;
-	box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4) !important;
-	transform: translateY(-2px);
+	background: var(--pos-brand-orange-deep) !important;
+	box-shadow: 0 8px 20px rgba(247, 143, 30, 0.34) !important;
+	transform: translateY(-1px);
 }
 
 /* Responsive optimizations */

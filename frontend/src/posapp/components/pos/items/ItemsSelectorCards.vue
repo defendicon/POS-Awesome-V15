@@ -1,5 +1,5 @@
 <template>
-	<div class="items-card-container">
+	<div class="items-card-container" :class="{ 'items-card-container--nornux': variant === 'nornux' }">
 		<div v-if="isLoading" class="items-card-grid">
 			<Skeleton v-for="n in 8" :key="n" class="mb-4" height="120" />
 		</div>
@@ -58,6 +58,8 @@
 					:format-number="formatNumber"
 					:rate-precision="ratePrecision"
 					:is-negative="isNegative"
+					:variant="variant"
+					:cart-qty="cartQtyByCode ? cartQtyByCode[item.item_code] || 0 : 0"
 					:style="{
 						width: cardColumnWidth + 'px',
 						height: cardRowHeight + 'px',
@@ -104,6 +106,8 @@ const props = defineProps({
 	formatNumber: { type: Function, required: true },
 	ratePrecision: { type: Function, required: true },
 	isNegative: { type: Function, required: true },
+	variant: { type: String, default: "classic" },
+	cartQtyByCode: { type: Object, default: null },
 	noItemsTitle: { type: String, default: "" },
 	noItemsSubtitle: { type: String, default: "" },
 	clearSearchLabel: { type: String, default: "" },

@@ -4,6 +4,7 @@
 		:class="{
 			'sticky-summary-card--dock-safe': useCompactSaleDock && !isCounterGrid,
 			'counter-grid-summary-card': isCounterGrid,
+			'nornux-summary-card': isNornux,
 		}"
 	>
 		<div v-if="isCounterGrid" class="counter-grid-summary" data-testid="counter-grid-summary">
@@ -105,6 +106,112 @@
 			/>
 		</div>
 
+		<div v-else-if="isNornux" class="nornux-summary" data-testid="nornux-summary">
+			<div class="nornux-totals">
+				<div class="nornux-totals__row">
+					<span>{{ __("Subtotal") }}</span>
+					<span class="nornux-num">{{ formatCurrency(grossTotal) }}</span>
+				</div>
+				<div v-if="Number(total_items_discount_amount) > 0" class="nornux-totals__row">
+					<span>{{ __("Item discounts") }}</span>
+					<span class="nornux-num">-{{ formatCurrency(total_items_discount_amount) }}</span>
+				</div>
+				<div class="nornux-totals__row nornux-totals__row--discount">
+					<span>{{ __("Additional discount") }}</span>
+					<div class="nornux-totals__discount">
+						<v-text-field
+							v-if="!pos_profile.posa_use_percentage_discount"
+							ref="additionalDiscountField"
+							v-model="additionalDiscountDisplay"
+							name="pos-nornux-additional-discount"
+							autocomplete="transaction-amount"
+							inputmode="decimal"
+							data-1p-ignore="true"
+							data-lpignore="true"
+							data-bwignore="true"
+							@update:model-value="handleAdditionalDiscountUpdate"
+							@focus="handleAdditionalDiscountFocus"
+							@blur="handleAdditionalDiscountBlur"
+							:aria-label="__('Additional Discount')"
+							variant="plain"
+							density="compact"
+							hide-details
+							class="nornux-discount-input"
+							:disabled="
+								!pos_profile.posa_allow_user_to_edit_additional_discount ||
+								!!discount_percentage_offer_name
+							"
+						>
+							<template #append-inner>
+								<span class="nornux-discount-unit">{{ currencySymbol(pos_profile.currency) }}</span>
+							</template>
+						</v-text-field>
+						<v-text-field
+							v-else
+							ref="additionalDiscountField"
+							v-model="additionalDiscountPercentageDisplay"
+							name="pos-nornux-additional-discount-percent"
+							autocomplete="transaction-amount"
+							inputmode="decimal"
+							data-1p-ignore="true"
+							data-lpignore="true"
+							data-bwignore="true"
+							@update:model-value="handleAdditionalDiscountPercentageUpdate"
+							@change="$emit('update_discount_umount')"
+							@focus="handleAdditionalDiscountPercentageFocus"
+							@blur="handleAdditionalDiscountPercentageBlur"
+							:rules="[isNumber]"
+							:aria-label="__('Additional Discount %')"
+							variant="plain"
+							density="compact"
+							hide-details
+							class="nornux-discount-input"
+							:disabled="
+								!pos_profile.posa_allow_user_to_edit_additional_discount ||
+								!!discount_percentage_offer_name
+							"
+						>
+							<template #append-inner>
+								<span class="nornux-discount-unit">%</span>
+							</template>
+						</v-text-field>
+						<span class="nornux-num nornux-totals__discount-amount">-{{ formatCurrency(additional_discount) }}</span>
+					</div>
+				</div>
+				<div class="nornux-totals__divider" />
+				<div class="nornux-totals__due">
+					<span class="nornux-totals__due-label">{{ __("Total due") }}</span>
+					<span class="nornux-totals__due-amount">
+						<small>{{ displayCurrency }}</small>
+						<strong>{{ formatCurrency(subtotal) }}</strong>
+					</span>
+				</div>
+			</div>
+
+			<InvoiceActionButtons
+				presentation="nornux"
+				:pos_profile="pos_profile"
+				:pay-label="`${displayCurrency} ${formatCurrency(subtotal)}`"
+				:saveLoading="saveLoading"
+				:loadDraftsLoading="loadDraftsLoading"
+				:selectOrderLoading="selectOrderLoading"
+				:cancelLoading="cancelLoading"
+				:invoiceManagementLoading="invoiceManagementLoading"
+				:returnsLoading="returnsLoading"
+				:printLoading="printLoading"
+				:paymentLoading="paymentLoading"
+				:customerDisplayLoading="customerDisplayLoading"
+				@save-and-clear="handleSaveAndClear"
+				@load-drafts="handleLoadDrafts"
+				@select-order="handleSelectOrder"
+				@cancel-sale="handleCancelSale"
+				@open-invoice-management="handleOpenInvoiceManagement"
+				@open-returns="handleOpenReturns"
+				@print-draft="handlePrintDraft"
+				@show-payment="handleShowPayment"
+				@open-customer-display="handleOpenCustomerDisplay"
+			/>
+		</div>
 		<v-row v-else dense class="summary-content">
 			<v-col
 				v-if="!useCompactSaleDock || showReturnDiscountAlert"
@@ -387,6 +494,7 @@ const additionalDiscountPercentageDisplay = ref(
 	normalizeDiscountDisplay(props.additional_discount_percentage),
 );
 const isCounterGrid = computed(() => props.presentation === "counter-grid");
+const isNornux = computed(() => props.presentation === "nornux");
 const useCompactSaleDock = computed(() => responsive.windowWidth.value < 1100);
 const showDesktopDrafts = computed(() => Boolean(responsive.isDesktop.value));
 const showReturnDiscountAlert = computed(

@@ -1,6 +1,12 @@
 <template>
 	<div
-		:class="['card-item-card', { 'item-highlighted': isItemHighlighted }]"
+		:class="[
+			isNornux ? 'nornux-card' : 'card-item-card',
+			{
+				'item-highlighted': isItemHighlighted,
+				'nornux-card--in-cart': isNornux && cartQty > 0,
+			},
+		]"
 		data-pos-keyboard-target="item-card"
 		:data-testid="`pos-item-card-${item.item_code}`"
 		:data-item-code="item.item_code"
@@ -13,6 +19,26 @@
 		@dragstart="onDragStart"
 		@dragend="onDragEnd"
 	>
+		<template v-if="isNornux">
+			<div class="nornux-card__tile" :class="{ 'nornux-card__tile--image': !!item.image }">
+				<img v-if="item.image" :src="item.image" :alt="item.item_name" loading="lazy" />
+				<span v-else class="nornux-card__label">{{ tileLabel }}</span>
+				<span v-if="cartQty > 0" class="nornux-card__qty">×{{ formattedCartQty }}</span>
+			</div>
+			<div class="nornux-card__name" :title="item.item_name || item.item_code">
+				{{ item.item_name || item.item_code }}
+			</div>
+			<div class="nornux-card__meta">
+				<span class="nornux-card__price">
+					<span class="nornux-card__currency">{{ primaryCurrency }}</span>
+					<strong>{{ formatCurrency(primaryRate, primaryCurrency, primaryPrecision) }}</strong>
+				</span>
+				<span v-if="stockBadge" class="nornux-card__stock" :class="`nornux-card__stock--${stockBadge.tone}`">
+					{{ stockBadge.text }}
+				</span>
+			</div>
+		</template>
+		<template v-else>
 		<div class="card-item-image-container">
 			<v-img
 				:src="item.image || placeholderImage"
@@ -72,12 +98,14 @@
 				</div>
 			</div>
 		</div>
+		</template>
 	</div>
 </template>
 
 <script setup>
 import { computed } from "vue";
 import placeholderImage from "../placeholder-image.png";
+import { nornuxItemLabel } from "../../../utils/nornuxItemLabel";
 import ItemRateInfoMenu from "./ItemRateInfoMenu.vue";
 import { priceListToSelectedCurrency } from "../../../utils/erpnextCurrency";
 
@@ -97,6 +125,39 @@ const props = defineProps({
 	formatNumber: { type: Function, required: true },
 	ratePrecision: { type: Function, required: true },
 	isNegative: { type: Function, default: (val) => val < 0 },
+	/** "nornux" renders the Nornux product card; behaviour is unchanged. */
+	variant: { type: String, default: "classic" },
+	/** Quantity of this item already in the cart (Nornux badge only). */
+	cartQty: { type: Number, default: 0 },
+});
+
+const isNornux = computed(() => props.variant === "nornux");
+const NORNUX_LOW_STOCK = 3;
+const tileLabel = computed(() => nornuxItemLabel(props.item));
+
+const formattedCartQty = computed(() => {
+	const qty = Number(props.cartQty) || 0;
+	return Number.isInteger(qty) ? qty : props.formatNumber(qty, 2);
+});
+
+const stockBadge = computed(() => {
+	if (props.item.actual_qty === undefined || props.item.actual_qty === null) {
+		return null;
+	}
+	if (props.item.is_stock_item === 0 || props.item.is_stock_item === false) {
+		return null;
+	}
+	const qty = Number(props.item.actual_qty);
+	if (!Number.isFinite(qty)) {
+		return null;
+	}
+	if (qty <= 0) {
+		return { tone: "out", text: window.__ ? window.__("Out of stock") : "Out of stock" };
+	}
+	if (qty <= NORNUX_LOW_STOCK) {
+		return { tone: "low", text: `${formattedActualQty.value} ${window.__ ? window.__("left") : "left"}` };
+	}
+	return { tone: "ok", text: `${formattedActualQty.value} ${props.item.stock_uom || ""}`.trim() };
 });
 
 const emit = defineEmits(["click", "dragstart", "dragend"]);

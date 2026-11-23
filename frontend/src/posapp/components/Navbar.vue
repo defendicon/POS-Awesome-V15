@@ -165,7 +165,7 @@ import CacheUsageMeter from "./navbar/CacheUsageMeter.vue";
 import AboutDialog from "./navbar/AboutDialog.vue";
 import OfflineInvoices from "./OfflineInvoices.vue";
 import EmployeeSwitchDialog from "./pos/employee/EmployeeSwitchDialog.vue";
-import posLogo from "./pos/pos.png";
+import nornuxIcon from "../assets/brand/nornux-icon-144.png";
 import { POS_BRAND_NAME } from "../config/branding";
 import { forceClearAllCache } from "../../offline/index";
 import { clearAllCaches } from "../../utils/clearAllCaches";
@@ -315,7 +315,7 @@ export default {
 			],
 			items: [],
 			company: POS_BRAND_NAME,
-			companyImg: posLogo,
+			companyImg: nornuxIcon,
 			showAboutDialog: false,
 			showOfflineInvoices: false,
 			settingsPanelOpen: false,

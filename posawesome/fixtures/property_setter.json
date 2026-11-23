@@ -14,8 +14,7 @@
   "property_type": "Check",
   "row_name": null,
   "value": "1"
- }
- ,
+ },
  {
   "default_value": null,
   "doc_type": "POS Invoice",
@@ -31,8 +30,7 @@
   "property_type": "Check",
   "row_name": null,
   "value": "1"
- }
-,
+ },
  {
   "default_value": null,
   "doc_type": "Sales Invoice Reference",
@@ -43,13 +41,12 @@
   "is_system_generated": 0,
   "modified": "2024-01-01 00:00:00",
   "module": null,
- "name": "Sales Invoice Reference-sales_invoice-reqd",
- "property": "reqd",
- "property_type": "Check",
- "row_name": null,
- "value": "0"
-}
-,
+  "name": "Sales Invoice Reference-sales_invoice-reqd",
+  "property": "reqd",
+  "property_type": "Check",
+  "row_name": null,
+  "value": "0"
+ },
  {
   "default_value": null,
   "doc_type": "Sales Invoice",
@@ -65,5 +62,101 @@
   "property_type": "Text",
   "row_name": null,
   "value": "0"
+ },
+ {
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "doc_type": "Sales Invoice Reference",
+  "field_name": "posting_date",
+  "property": "fetch_from",
+  "property_type": "Small Text",
+  "value": "pos_invoice.posting_date",
+  "name": "Sales Invoice Reference-posting_date-fetch_from",
+  "module": null,
+  "is_system_generated": 0,
+  "default_value": null,
+  "row_name": null,
+  "docstatus": 0,
+  "modified": "2026-11-20 00:00:00"
+ },
+ {
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "doc_type": "Sales Invoice Reference",
+  "field_name": "customer",
+  "property": "fetch_from",
+  "property_type": "Small Text",
+  "value": "pos_invoice.customer",
+  "name": "Sales Invoice Reference-customer-fetch_from",
+  "module": null,
+  "is_system_generated": 0,
+  "default_value": null,
+  "row_name": null,
+  "docstatus": 0,
+  "modified": "2026-11-20 00:00:00"
+ },
+ {
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "doc_type": "Sales Invoice Reference",
+  "field_name": "customer",
+  "property": "in_list_view",
+  "property_type": "Check",
+  "value": "1",
+  "name": "Sales Invoice Reference-customer-in_list_view",
+  "module": null,
+  "is_system_generated": 0,
+  "default_value": null,
+  "row_name": null,
+  "docstatus": 0,
+  "modified": "2026-11-20 00:00:00"
+ },
+ {
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "doc_type": "Sales Invoice Reference",
+  "field_name": "grand_total",
+  "property": "fetch_from",
+  "property_type": "Small Text",
+  "value": "pos_invoice.grand_total",
+  "name": "Sales Invoice Reference-grand_total-fetch_from",
+  "module": null,
+  "is_system_generated": 0,
+  "default_value": null,
+  "row_name": null,
+  "docstatus": 0,
+  "modified": "2026-11-20 00:00:00"
+ },
+ {
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "doc_type": "Sales Invoice Reference",
+  "field_name": "is_return",
+  "property": "fetch_from",
+  "property_type": "Small Text",
+  "value": "",
+  "name": "Sales Invoice Reference-is_return-fetch_from",
+  "module": null,
+  "is_system_generated": 0,
+  "default_value": null,
+  "row_name": null,
+  "docstatus": 0,
+  "modified": "2026-11-20 00:00:00"
+ },
+ {
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "doc_type": "Sales Invoice Reference",
+  "field_name": "return_against",
+  "property": "fetch_from",
+  "property_type": "Small Text",
+  "value": "",
+  "name": "Sales Invoice Reference-return_against-fetch_from",
+  "module": null,
+  "is_system_generated": 0,
+  "default_value": null,
+  "row_name": null,
+  "docstatus": 0,
+  "modified": "2026-11-20 00:00:00"
  }
 ]

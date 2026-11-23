@@ -35,3 +35,4 @@ posawesome.patches.add_authoritative_cashier_fields
 posawesome.patches.restore_pos_awesome_branding
 posawesome.patches.secure_mpesa_callback_transactions
 posawesome.patches.add_below_cost_sale_policy
+posawesome.patches.restore_erpnext_sales_invoice_reference

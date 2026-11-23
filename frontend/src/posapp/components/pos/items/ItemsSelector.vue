@@ -66,6 +66,7 @@
 						@open-new-item="openNewItemDialog"
 						@toggle-settings="toggleItemSettings"
 						@reload-items="forceReloadItems"
+						:variant="isNornuxPresentation ? 'nornux' : 'classic'"
 						ref="itemHeader"
 					/>
 					<div
@@ -88,6 +89,16 @@
 							:aria-label="__('Loading alternate items')"
 						/>
 					</div>
+					<NornuxItemFilters
+						v-if="isNornuxPresentation && !alternateMode"
+						v-model="item_group"
+						v-model:items-view="items_view"
+						:items-group="items_group"
+						:group-counts="nornuxGroupCounts"
+						:total-count="nornuxTotalCount"
+						:active-price-list="active_price_list"
+						:show-price-list="pos_profile.posa_enable_price_list_dropdown !== false"
+					/>
 				</v-card>
 
 				<ItemSettingsDialog
@@ -178,6 +189,8 @@
 								:format-number="memoizedFormatNumber"
 								:rate-precision="ratePrecision"
 								:is-negative="isNegative"
+								:variant="isNornuxPresentation ? 'nornux' : 'classic'"
+								:cart-qty-by-code="isNornuxPresentation ? nornuxCartQtyByCode : undefined"
 								:no-items-title="__('No items found')"
 								:no-items-subtitle="__('Try adjusting your search or filters')"
 								:clear-search-label="__('Clear Search')"
@@ -236,8 +249,18 @@
 				</div>
 			</v-expand-transition>
 		</v-card>
+		<div v-if="isNornuxPresentation" class="nornux-items-footer" data-testid="nornux-items-footer">
+			<button type="button" class="nornux-link-btn" @click="uiStore.setActiveView('offers')">
+				<v-icon icon="mdi-tag-outline" size="18" />
+				{{ offersCount }} {{ __("Offers") }}
+			</button>
+			<button type="button" class="nornux-link-btn" @click="uiStore.setActiveView('coupons')">
+				<v-icon icon="mdi-ticket-percent-outline" size="18" />
+				{{ couponsCount }} {{ __("Coupons") }}
+			</button>
+		</div>
 		<ItemActionToolbar
-			v-if="presentation !== 'counter-grid-dialog'"
+			v-else-if="presentation !== 'counter-grid-dialog'"
 			v-model="item_group"
 			:items-group="items_group"
 			v-model:items-view="items_view"
@@ -293,6 +316,7 @@ import ItemActionToolbar from "./ItemActionToolbar.vue";
 import ItemSettingsDialog from "./ItemSettingsDialog.vue";
 import ItemHeader from "./ItemHeader.vue";
 import ItemsSelectorCards from "./ItemsSelectorCards.vue";
+import NornuxItemFilters from "./NornuxItemFilters.vue";
 import ItemsSelectorTable from "./ItemsSelectorTable.vue";
 import PharmacyItemSearchTable from "./PharmacyItemSearchTable.vue";
 import NewItemDialog from "./NewItemDialog.vue";
@@ -461,7 +485,7 @@ const {
 // 2. Local State & Settings
 const search_input = ref("");
 const first_search = ref("");
-const items_view = ref("list");
+const items_view = ref(props.presentation === "nornux" ? "card" : "list");
 const itemsPerPage = ref(50);
 const clearingSearch = ref(false);
 const isDragging = ref(false);
@@ -528,6 +552,40 @@ const usesLimitSearch = computed(() =>
 const { stockSettings: stock_settings_ref } = storeToRefs(uiStore);
 const stock_settings = computed(() => stock_settings_ref.value || {});
 const items_group = computed(() => itemsIntegration.items_group.value || []);
+
+// --- Nornux presentation (display only; selection logic is shared) ---
+const isNornuxPresentation = computed(() => props.presentation === "nornux");
+const nornuxCatalog = computed(() => {
+	const source = (itemsIntegration as any).items?.value;
+	return Array.isArray(source) ? source : [];
+});
+const nornuxGroupCounts = computed(() => {
+	const counts: Record<string, number> = {};
+	if (!isNornuxPresentation.value) return counts;
+	for (const item of nornuxCatalog.value) {
+		const group = item?.item_group;
+		if (group) counts[group] = (counts[group] || 0) + 1;
+	}
+	return counts;
+});
+const nornuxTotalCount = computed(() => nornuxCatalog.value.length);
+const nornuxCartQtyByCode = computed(() => {
+	const quantities: Record<string, number> = {};
+	if (!isNornuxPresentation.value) return quantities;
+	const lines = (invoiceStore as any).items;
+	for (const line of Array.isArray(lines) ? lines : []) {
+		const code = line?.item_code;
+		if (!code) continue;
+		quantities[code] = (quantities[code] || 0) + (Number(line.qty) || 0);
+	}
+	return quantities;
+});
+watch(
+	() => props.presentation,
+	(presentation) => {
+		if (presentation === "nornux") items_view.value = "card";
+	},
+);
 const offersCount = computed(() => uiStore.offersCount || 0);
 const couponsCount = computed(() => uiStore.couponsCount || 0);
 // selected_currency is now a local ref synced via eventBus
@@ -929,6 +987,7 @@ const {
 	scheduleCardMetricsUpdate,
 	onListScroll: handleListScroll,
 } = useItemSelectorLayout({
+	presentation: () => props.presentation,
 	resizeDebounce: 100,
 	loadVisibleItems: () => itemsLoader.loadVisibleItems(),
 });

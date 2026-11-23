@@ -75,7 +75,7 @@ const ensurePosBootController = async () => {
 frappe.pages["posapp"].on_page_load = async function (wrapper) {
 	const page = frappe.ui.make_app_page({
 		parent: wrapper,
-		title: "POS Awesome",
+		title: "Nornux POS",
 		single_column: true,
 	});
 	const pageRef = (wrapper && wrapper.page) || page;
@@ -86,7 +86,7 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 	} catch (error) {
 		console.error("Unable to start POS boot controller", error);
 		frappe.msgprint({
-			title: "POS Awesome",
+			title: "Nornux POS",
 			indicator: "red",
 			message:
 				"POS app failed to start before the boot controller could run. Reload /app/posapp and try again.",

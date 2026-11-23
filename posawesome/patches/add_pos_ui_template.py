@@ -6,7 +6,7 @@ FIELD = {
     "fieldname": "posa_ui_template",
     "label": "POS Interface",
     "fieldtype": "Select",
-    "options": "Classic\nPOS Awesome Counter Grid",
+    "options": "Classic\nPOS Awesome Counter Grid\nNornux",
     "default": "Classic",
     "description": (
         "Select the selling interface for this POS Profile. Counter Grid is "

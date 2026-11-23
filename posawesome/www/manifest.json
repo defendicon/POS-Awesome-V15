@@ -1,10 +1,10 @@
 {
-  "name": "POS Awesome",
-  "short_name": "POS Awesome",
+  "name": "Nornux POS",
+  "short_name": "Nornux POS",
   "start_url": "/app/posapp",
   "display": "standalone",
   "background_color": "#FFFFFF",
-  "theme_color": "#0097A7",
+  "theme_color": "#F78F1E",
   "icons": [
     {
       "src": "/assets/posawesome/icons/logo-512.png",

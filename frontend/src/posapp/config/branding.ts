@@ -1,6 +1,6 @@
 export const POS_APP_ID = "posawesome";
-export const POS_BRAND_NAME = "POS Awesome";
-export const POS_BRAND_SHORT_NAME = "POS";
+export const POS_BRAND_NAME = "Nornux POS";
+export const POS_BRAND_SHORT_NAME = "Nornux";
 
 export type PosBrandingProfile = {
 	posa_enable_custom_branding?: unknown;
@@ -14,6 +14,10 @@ const isEnabled = (value: unknown) =>
 
 const cleanBrandValue = (value: unknown) =>
 	typeof value === "string" ? value.trim() : "";
+
+export function isCustomBrandingEnabled(profile: PosBrandingProfile) {
+	return isEnabled(profile?.posa_enable_custom_branding);
+}
 
 export function resolvePosBranding(profile: PosBrandingProfile) {
 	if (!isEnabled(profile?.posa_enable_custom_branding)) {

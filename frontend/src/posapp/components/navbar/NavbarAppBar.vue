@@ -1,10 +1,11 @@
 <template>
 	<v-app-bar
 		flat
-		:height="isMobile ? 64 : 56"
+		:height="isMobile || isNornux ? 64 : 56"
 		:class="[
 			'pos-navbar-enhanced elevation-2 pos-themed-card pos-theme-immediate',
 			{ 'pos-navbar-enhanced--counter-grid': isCounterGrid },
+			{ 'pos-navbar-enhanced--nornux': isNornux },
 			rtlClasses,
 			isRtl ? 'rtl-app-bar' : 'ltr-app-bar',
 			isMobile ? 'mobile-navbar' : 'desktop-navbar',
@@ -21,8 +22,19 @@
 				:class="['pos-text-primary nav-icon', isRtl ? 'rtl-nav-icon' : 'ltr-nav-icon']"
 			/>
 
+			<button
+				v-if="!customBranding"
+				type="button"
+				:class="['pos-navbar-wordmark', isRtl ? 'rtl-logo' : 'ltr-logo']"
+				:aria-label="__('Go to Frappe Desk')"
+				@click="$emit('go-desk')"
+			>
+				<img :src="nornuxLogo" :alt="branding.name" class="pos-navbar-wordmark__img pos-navbar-wordmark__img--light" />
+				<img :src="nornuxLogoDark" alt="" aria-hidden="true" class="pos-navbar-wordmark__img pos-navbar-wordmark__img--dark" />
+			</button>
 			<v-img
-				:src="branding.logo || posLogo"
+				v-else-if="branding.logo"
+				:src="branding.logo"
 				:alt="branding.name"
 				:max-width="isMobile ? 24 : 32"
 				:class="['pos-navbar-logo', isRtl ? 'rtl-logo' : 'ltr-logo']"
@@ -30,6 +42,7 @@
 			/>
 
 			<v-toolbar-title
+				v-if="customBranding"
 				@click="$emit('go-desk')"
 				@keydown.enter="$emit('go-desk')"
 				:class="[
@@ -48,6 +61,18 @@
 					<span class="pos-navbar-title-light">{{ branding.name }}</span>
 				</template>
 			</v-toolbar-title>
+
+			<div v-if="isNornux && posProfile?.name" class="nornux-register" data-testid="nornux-register">
+				<span class="nornux-register__icon"><v-icon icon="mdi-storefront-outline" size="20" /></span>
+				<span class="nornux-register__copy">
+					<span class="nornux-register__name">{{ posProfile.name }}</span>
+					<span class="nornux-register__meta">
+						<template v-if="openingShiftName">{{ openingShiftName }} · </template>{{
+							openingShiftName ? __("Shift open") : __("No open shift")
+						}}
+					</span>
+				</span>
+			</div>
 		</div>
 
 		<v-spacer />
@@ -100,6 +125,11 @@
 
 			<!-- Desktop: Show all items normally -->
 			<template v-else>
+				<div v-if="isNornux" class="nornux-clock" data-testid="nornux-clock" aria-live="off">
+					<span>{{ nornuxDate }}</span>
+					<span class="nornux-clock__sep">/</span>
+					<strong>{{ nornuxTime }}</strong>
+				</div>
 				<!-- Enhanced connectivity status indicator (kept outside info menu) -->
 				<div class="gadget-wrapper status-gadget">
 					<slot name="status-indicator"></slot>
@@ -124,7 +154,10 @@
 					</template>
 				</NavbarInfoGadgets>
 
-				<div :class="['profile-section', isRtl ? 'rtl-profile-section' : 'ltr-profile-section']">
+				<div
+					v-if="!isNornux"
+					:class="['profile-section', isRtl ? 'rtl-profile-section' : 'ltr-profile-section']"
+				>
 					<v-chip
 						v-if="cashierChipLabel"
 						variant="outlined"
@@ -231,9 +264,12 @@
 
 <script>
 import { useRtl } from "../../composables/core/useRtl";
-import { resolvePosBranding } from "../../config/branding";
-import { isCounterGridTemplate } from "../../utils/posUiTemplate";
+import { isCustomBrandingEnabled, resolvePosBranding } from "../../config/branding";
+import { isCounterGridTemplate, isNornuxTemplate } from "../../utils/posUiTemplate";
+import { useUIStore } from "../../stores/uiStore";
 import posLogo from "../pos/pos.png";
+import nornuxLogo from "../../assets/brand/nornux-logo.png";
+import nornuxLogoDark from "../../assets/brand/nornux-logo-dark.png";
 import NavbarInfoGadgets from "./NavbarInfoGadgets.vue";
 
 export default {
@@ -248,11 +284,15 @@ export default {
 			rtlStyles,
 			rtlClasses,
 			posLogo,
+			nornuxLogo,
+			nornuxLogoDark,
 		};
 	},
 	data() {
 		return {
 			windowWidth: window.innerWidth,
+			nornuxNow: new Date(),
+			nornuxClockTimer: null,
 			resizeRafId: null,
 		};
 	},
@@ -260,8 +300,15 @@ export default {
 		this.updateWindowWidth();
 		window.addEventListener("resize", this.updateWindowWidth, { passive: true });
 		this.$el.addEventListener("keydown", this.handleKeyboardNavigation, { passive: false });
+		this.nornuxClockTimer = window.setInterval(() => {
+			this.nornuxNow = new Date();
+		}, 20000);
 	},
 	beforeUnmount() {
+		if (this.nornuxClockTimer) {
+			window.clearInterval(this.nornuxClockTimer);
+			this.nornuxClockTimer = null;
+		}
 		window.removeEventListener("resize", this.updateWindowWidth);
 		if (this.$el && this.$el.removeEventListener) {
 			this.$el.removeEventListener("keydown", this.handleKeyboardNavigation);
@@ -313,6 +360,9 @@ export default {
 		},
 	},
 	computed: {
+		customBranding() {
+			return isCustomBrandingEnabled(this.posProfile);
+		},
 		branding() {
 			return resolvePosBranding(this.posProfile);
 		},
@@ -367,6 +417,26 @@ export default {
 			return this.windowWidth >= 1024;
 		},
 
+		isNornux() {
+			return isNornuxTemplate(this.posProfile, this.windowWidth);
+		},
+		openingShiftName() {
+			return String(useUIStore().posOpeningShift?.name || "");
+		},
+		nornuxDate() {
+			return this.nornuxNow.toLocaleDateString(undefined, {
+				weekday: "short",
+				day: "numeric",
+				month: "short",
+			});
+		},
+		nornuxTime() {
+			return this.nornuxNow.toLocaleTimeString(undefined, {
+				hour: "2-digit",
+				minute: "2-digit",
+				hour12: false,
+			});
+		},
 		isCounterGrid() {
 			return isCounterGridTemplate(this.posProfile, this.windowWidth);
 		},

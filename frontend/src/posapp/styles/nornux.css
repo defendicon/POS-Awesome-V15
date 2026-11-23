@@ -1,0 +1,639 @@
+/**
+ * Nornux POS — brand layer.
+ *
+ * Loaded after theme.css. Keeps the visual redesign in one place so the
+ * upstream POS Awesome components stay largely untouched (easier merges).
+ * Selectors are prefixed with body[data-route^="posapp"] (Frappe v16 sets data-route to
+ * "posapp" or "posapp/<view>"; older versions use data-page-route) so they win over
+ * component-scoped styles without touching POS logic.
+ */
+
+/* ---------------------------------------------------------------- type */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]),
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-application,
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-overlay-container {
+	font-family: var(--pos-font-family);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-application [class*="text-h"],
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-application [class*="text-subtitle"],
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-application [class*="text-body"],
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-application [class*="text-caption"],
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-application [class*="text-button"],
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-overlay-container [class*="text-h"],
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-btn,
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-field,
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-label,
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-table,
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-card-title,
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-list-item-title,
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-toolbar-title {
+	font-family: var(--pos-font-family) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-btn {
+	text-transform: none;
+	letter-spacing: 0.01em;
+	font-weight: 600;
+}
+
+/* --------------------------------------------------------------- canvas */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-application,
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-main {
+	background: var(--pos-bg-primary) !important;
+}
+
+/* --------------------------------------------------------------- navbar */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-navbar-enhanced {
+	background: var(--pos-navbar-bg) !important;
+	box-shadow: none !important;
+	border-bottom: 1px solid var(--pos-border) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-navbar-wordmark {
+	display: inline-flex;
+	align-items: center;
+	flex: 0 0 auto;
+	height: 40px;
+	margin-inline: 6px 12px;
+	padding: 0 4px;
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+	border-radius: 6px;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-navbar-wordmark__img {
+	display: block;
+	height: 34px;
+	width: auto;
+	max-width: none;
+	user-select: none;
+	-webkit-user-drag: none;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .mobile-navbar .pos-navbar-wordmark__img {
+	height: 26px;
+}
+
+/* Light/dark logo swap follows the resolved theme on <html data-theme>. */
+.pos-navbar-wordmark__img--dark,
+html[data-theme="dark"] .pos-navbar-wordmark__img--light {
+	display: none !important;
+}
+
+html[data-theme="dark"] .pos-navbar-wordmark__img--dark {
+	display: block !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-navbar-wordmark:focus-visible {
+	outline: 2px solid var(--pos-brand-orange);
+	outline-offset: 3px;
+}
+
+/* ---------------------------------------------------------------- cards */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-themed-card:not(.pos-navbar-enhanced),
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-main .v-card {
+	border-radius: var(--pos-radius-md);
+	border: 1px solid var(--pos-border);
+	box-shadow: 0 1px 2px var(--pos-shadow-light) !important;
+}
+
+/* ------------------------------------------------------- active sale hero */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .summary-hero {
+	background: var(--pos-brand-ink);
+	border: 1px solid var(--pos-brand-ink);
+	border-radius: var(--pos-radius-md);
+	color: #f4f3f0;
+	box-shadow: 0 8px 24px rgba(5, 7, 8, 0.16);
+	position: relative;
+	overflow: hidden;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .summary-hero::before {
+	content: "";
+	position: absolute;
+	inset: 0 auto 0 0;
+	width: 4px;
+	background: var(--pos-brand-orange);
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .summary-hero__eyebrow {
+	color: var(--pos-brand-orange);
+	letter-spacing: 0.08em;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .summary-hero__amount {
+	color: #ffffff;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	letter-spacing: -0.01em;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .summary-hero__meta {
+	color: rgba(244, 243, 240, 0.7);
+}
+
+[data-theme="dark"] :is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .summary-hero,
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-theme--dark .summary-hero {
+	background: #1c1f23;
+	border-color: rgba(247, 143, 30, 0.35);
+}
+
+/* --------------------------------------------------------------- tables */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-table > .v-table__wrapper > table > thead > tr > th {
+	font-size: 0.72rem !important;
+	font-weight: 700 !important;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--pos-text-muted) !important;
+	background: var(--pos-table-header-bg) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-table > .v-table__wrapper > table > tbody > tr:hover > td {
+	background: var(--pos-table-row-hover) !important;
+}
+
+/* -------------------------------------------------------------- inputs */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-field--focused .v-field__outline,
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-field--focused .v-field__outline * {
+	--v-field-border-opacity: 1;
+	color: var(--pos-brand-orange) !important;
+	border-color: var(--pos-brand-orange) !important;
+}
+
+/* --------------------------------------------------------------- focus */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-btn:focus-visible {
+	outline: 2px solid var(--pos-brand-orange);
+	outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------ selection */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) ::selection {
+	background: rgba(247, 143, 30, 0.28);
+}
+
+/* ------------------------------------------------------ navbar controls */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-navbar-enhanced :is(.status-btn-enhanced, .info-gadgets-btn, .offline-invoices-btn, .notification-btn, [class*="notification"].v-btn) {
+	width: 40px !important;
+	height: 40px !important;
+	border-radius: 10px !important;
+	background: var(--pos-surface-variant) !important;
+	border: 1px solid var(--pos-border) !important;
+	box-shadow: none !important;
+	color: var(--pos-text-primary) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-navbar-enhanced :is(.status-btn-enhanced, .info-gadgets-btn, .offline-invoices-btn, [class*="notification"].v-btn):hover {
+	background: var(--pos-hover-bg) !important;
+	border-color: var(--pos-brand-orange) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-navbar-enhanced :is(.info-gadgets-btn, .offline-invoices-btn) .v-icon {
+	color: var(--pos-text-primary) !important;
+}
+
+/* status: keep semantic green/red on the icon only */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-navbar-enhanced .status-title-inline {
+	font-weight: 600;
+	font-size: 0.78rem;
+}
+
+/* profile / cashier chip */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-navbar-enhanced .profile-chip {
+	height: 40px !important;
+	border-radius: 10px !important;
+	background: var(--pos-surface-variant) !important;
+	border: 1px solid var(--pos-border) !important;
+	box-shadow: none !important;
+	color: var(--pos-text-primary) !important;
+	padding-inline: 12px !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-navbar-enhanced .profile-chip .v-chip__overlay {
+	background: var(--pos-brand-orange) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-navbar-enhanced .profile-chip :is(.v-chip__content, .profile-chip__content, .profile-chip__title, .v-icon) {
+	color: var(--pos-text-primary) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-navbar-enhanced .profile-chip .v-icon {
+	color: var(--pos-brand-orange) !important;
+}
+
+/* Menu: solid ink */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-navbar-enhanced .menu-btn-compact {
+	height: 40px !important;
+	border-radius: 10px !important;
+	background: var(--pos-brand-ink) !important;
+	color: #ffffff !important;
+	border: 0 !important;
+	box-shadow: none !important;
+	padding-inline: 16px !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-navbar-enhanced .menu-btn-compact .v-icon,
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-navbar-enhanced .menu-btn-compact .v-btn__content {
+	color: #ffffff !important;
+}
+
+html[data-theme="dark"] :is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-navbar-enhanced .menu-btn-compact {
+	background: var(--pos-brand-orange) !important;
+}
+
+html[data-theme="dark"] :is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-navbar-enhanced .menu-btn-compact :is(.v-icon, .v-btn__content) {
+	color: var(--pos-brand-ink) !important;
+}
+
+/* drawer toggle */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-navbar-enhanced .nav-icon {
+	border-radius: 10px !important;
+	background: transparent !important;
+	color: var(--pos-text-primary) !important;
+}
+
+/* ------------------------------------------------------- flat fields */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) :is(.v-field--variant-solo, .v-field--variant-solo-filled, .v-field--variant-solo-inverted) {
+	box-shadow: none !important;
+	background: var(--pos-input-bg) !important;
+	border: 1px solid var(--pos-border);
+	border-radius: 10px !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .v-field--variant-solo.v-field--focused {
+	border-color: var(--pos-brand-orange);
+	background: var(--pos-surface) !important;
+	box-shadow: 0 0 0 3px rgba(247, 143, 30, 0.16) !important;
+}
+
+/* discount field sitting on the ink sale panel */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .summary-hero .v-field {
+	background: rgba(255, 255, 255, 0.07) !important;
+	border: 1px solid rgba(255, 255, 255, 0.16) !important;
+	color: #f4f3f0 !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .summary-hero .v-field .v-field__overlay {
+	opacity: 0 !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .summary-hero .v-field--disabled {
+	opacity: 1 !important;
+	border-style: dashed !important;
+	background: transparent !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .summary-hero .v-field :is(.v-label, .v-field__input, input, .v-icon, .v-text-field__prefix, .v-field__prepend-inner) {
+	color: rgba(244, 243, 240, 0.72) !important;
+	opacity: 1 !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .summary-hero .v-field--disabled :is(.v-label, .v-icon, input) {
+	color: rgba(244, 243, 240, 0.45) !important;
+}
+
+/* ------------------------------------------------------------- payment */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .payment-method-action-btn {
+	background-color: var(--pos-brand-ink) !important;
+	color: #ffffff !important;
+	border-radius: 10px !important;
+	box-shadow: none !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .payment-method-action-btn:is(:hover, :focus-visible) {
+	background-color: var(--pos-brand-orange) !important;
+	color: var(--pos-brand-ink) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .payment-method-card__badge:not(.payment-method-card__badge--refund) {
+	background: var(--pos-brand-orange-soft) !important;
+	color: var(--pos-brand-orange-deep) !important;
+	border: 1px solid rgba(247, 143, 30, 0.35) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .payment-footer-btn {
+	border-radius: 12px !important;
+	min-height: 52px !important;
+	font-size: 1rem !important;
+	font-weight: 700 !important;
+	letter-spacing: 0.01em !important;
+	box-shadow: none !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .payment-submit-print-btn {
+	background-color: var(--pos-brand-orange) !important;
+	color: var(--pos-brand-ink) !important;
+	box-shadow: 0 6px 16px rgba(247, 143, 30, 0.28) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .payment-submit-print-btn:is(:hover, :focus-visible, :active) {
+	background-color: var(--pos-brand-orange-deep) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .payment-submit-print-btn :is(.v-btn__content, .v-icon, span) {
+	color: var(--pos-brand-ink) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .payment-submit-btn {
+	background-color: var(--pos-brand-ink) !important;
+	color: #ffffff !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .payment-submit-btn:is(:hover, :focus-visible, :active) {
+	background-color: #23272c !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .payment-cancel-btn {
+	background-color: transparent !important;
+	color: rgb(var(--v-theme-error)) !important;
+	border: 1px solid rgba(var(--v-theme-error), 0.45) !important;
+	min-height: 44px !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .payment-cancel-btn :is(.v-btn__content, .v-icon) {
+	color: rgb(var(--v-theme-error)) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .payment-cancel-btn:is(:hover, :focus-visible) {
+	background-color: rgba(var(--v-theme-error), 0.08) !important;
+}
+
+html[data-theme="dark"] :is(body[data-route^="posapp"], body[data-page-route^="posapp"]) :is(.payment-submit-btn, .payment-method-action-btn) {
+	background-color: #2a2d33 !important;
+	border: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+
+/* -------------------------------------------------------- shift dialogs */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-action-btn {
+	border-radius: 10px !important;
+	box-shadow: none !important;
+	font-weight: 700 !important;
+	text-transform: none !important;
+	letter-spacing: 0.01em !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-action-btn.submit-action-btn {
+	background: var(--pos-brand-orange) !important;
+	color: var(--pos-brand-ink) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-action-btn.submit-action-btn :is(.v-btn__content, .v-icon) {
+	color: var(--pos-brand-ink) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-action-btn.submit-action-btn:is(:hover, :focus-visible) {
+	background: var(--pos-brand-orange-deep) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-action-btn:is(.cancel-action-btn, .logout-action-btn) {
+	background: transparent !important;
+	color: var(--pos-text-primary) !important;
+	border: 1px solid var(--pos-outline) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-action-btn:is(.cancel-action-btn, .logout-action-btn) :is(.v-btn__content, .v-icon) {
+	color: var(--pos-text-primary) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .pos-action-btn:is(.cancel-action-btn, .logout-action-btn):is(:hover, :focus-visible) {
+	border-color: var(--pos-brand-orange) !important;
+	background: var(--pos-hover-bg) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .header-icon-wrapper {
+	background: var(--pos-brand-orange-soft) !important;
+	border: 1px solid rgba(247, 143, 30, 0.3) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .header-icon-wrapper .v-icon,
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .opening-dialog-header :is(.text-primary, .header-icon) {
+	color: var(--pos-brand-orange-deep) !important;
+}
+
+html[data-theme="dark"] :is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .payment-method-card__badge:not(.payment-method-card__badge--refund) {
+	background: rgba(247, 143, 30, 0.14) !important;
+	color: var(--pos-brand-orange) !important;
+}
+
+/* ------------------------------------------------ tablet / mobile docks */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .mobile-sale-dock {
+	background: var(--pos-brand-ink) !important;
+	border: 1px solid var(--pos-brand-ink) !important;
+	color: #f4f3f0 !important;
+	box-shadow: 0 10px 28px rgba(5, 7, 8, 0.22) !important;
+	border-left: 4px solid var(--pos-brand-orange) !important;
+	backdrop-filter: none !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .mobile-sale-dock__eyebrow {
+	color: var(--pos-brand-orange) !important;
+	letter-spacing: 0.08em;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .mobile-sale-dock__amount {
+	color: #ffffff !important;
+	font-variant-numeric: tabular-nums;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .mobile-sale-dock__meta {
+	color: rgba(244, 243, 240, 0.7) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .mobile-sale-dock .v-field {
+	background: rgba(255, 255, 255, 0.07) !important;
+	border: 1px solid rgba(255, 255, 255, 0.16) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .mobile-sale-dock .v-field .v-field__overlay {
+	opacity: 0 !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .mobile-sale-dock .v-field :is(.v-label, .v-field__input, input, .v-icon, .v-text-field__prefix) {
+	color: rgba(244, 243, 240, 0.72) !important;
+	opacity: 1 !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .mobile-pos-dock__item--active {
+	background: var(--pos-brand-orange-soft) !important;
+	color: var(--pos-brand-orange-deep) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .mobile-pos-dock__pill {
+	position: absolute !important;
+	top: 6px !important;
+	left: calc(50% + 6px) !important;
+	right: auto !important;
+	width: auto !important;
+	min-width: 18px !important;
+	height: 18px !important;
+	padding: 0 5px !important;
+	border-radius: 9px !important;
+	background: var(--pos-brand-orange) !important;
+	color: var(--pos-brand-ink) !important;
+	font-size: 0.68rem !important;
+	font-weight: 800 !important;
+	line-height: 18px !important;
+	text-align: center !important;
+	box-shadow: 0 0 0 2px var(--pos-card-bg) !important;
+	z-index: 1;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .mobile-pos-dock__item--pay,
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .mobile-pos-dock__item--pay.mobile-pos-dock__item--active {
+	background: var(--pos-brand-orange) !important;
+	color: var(--pos-brand-ink) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .mobile-pos-dock__item--pay .v-icon {
+	color: var(--pos-brand-ink) !important;
+}
+
+html[data-theme="dark"] :is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .mobile-sale-dock {
+	background: #1c1f23 !important;
+	border-color: rgba(247, 143, 30, 0.35) !important;
+}
+
+html[data-theme="dark"] :is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .mobile-pos-dock__item--active:not(.mobile-pos-dock__item--pay) {
+	background: rgba(247, 143, 30, 0.14) !important;
+	color: var(--pos-brand-orange) !important;
+}
+
+/* ---------------------------------------------------------------- menu */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .menu-profile-card {
+	background: var(--pos-surface-variant) !important;
+	border: 1px solid var(--pos-border) !important;
+	border-left: 3px solid var(--pos-brand-orange) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) :is(.menu-profile-card__icon, .settings-launch-card__icon, .settings-action__icon, .primary-icon) {
+	background: var(--pos-brand-ink) !important;
+	color: #ffffff !important;
+	box-shadow: none !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) :is(.menu-profile-card__icon, .settings-launch-card__icon, .settings-action__icon, .primary-icon) .v-icon {
+	color: #ffffff !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .settings-action--warning .settings-action__icon {
+	background: var(--pos-brand-orange) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .settings-action--warning .settings-action__icon .v-icon {
+	color: var(--pos-brand-ink) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .settings-action--danger .settings-action__icon {
+	background: rgb(var(--v-theme-error)) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .menu-item-compact:hover::before {
+	background: var(--pos-hover-bg) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .menu-item-compact:focus-visible {
+	outline-color: var(--pos-brand-orange) !important;
+}
+
+html[data-theme="dark"] :is(body[data-route^="posapp"], body[data-page-route^="posapp"]) :is(.menu-profile-card__icon, .settings-launch-card__icon, .settings-action__icon:not(.settings-action--danger .settings-action__icon), .primary-icon) {
+	background: #2a2d33 !important;
+}
+
+/* -------------------------------------------------------------- drawer */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) :is(.drawer-header, .drawer-header-mini) {
+	background: var(--pos-surface) !important;
+	border-bottom: 1px solid var(--pos-border);
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .drawer-company {
+	color: var(--pos-text-primary) !important;
+	font-weight: 700 !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .drawer-custom .active-item {
+	background: var(--pos-brand-orange-soft) !important;
+	border-right: 3px solid var(--pos-brand-orange) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .drawer-custom .active-item :is(.v-icon, .drawer-icon, .drawer-item-title, .v-list-item-title) {
+	color: var(--pos-brand-orange-deep) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .drawer-footer-action__icon {
+	background: var(--pos-brand-ink) !important;
+	color: #ffffff !important;
+}
+
+html[data-theme="dark"] :is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .drawer-custom .active-item {
+	background: rgba(247, 143, 30, 0.14) !important;
+}
+
+html[data-theme="dark"] :is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .drawer-custom .active-item :is(.v-icon, .drawer-icon, .drawer-item-title, .v-list-item-title) {
+	color: var(--pos-brand-orange) !important;
+}
+
+/* quick action tiles in the Menu */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) :is(.quick-action-card__icon, .secondary-icon, .info-icon, .neutral-icon) {
+	background: var(--pos-brand-ink) !important;
+	color: #ffffff !important;
+	box-shadow: none !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) :is(.quick-action-card__icon, .secondary-icon, .info-icon, .neutral-icon) .v-icon {
+	color: #ffffff !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) :is(.quick-action-card--warning .quick-action-card__icon, .warning-icon) {
+	background: var(--pos-brand-orange) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) :is(.quick-action-card--warning .quick-action-card__icon, .warning-icon) .v-icon {
+	color: var(--pos-brand-ink) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) :is(.quick-action-card--danger .quick-action-card__icon, .danger-icon) {
+	background: rgb(var(--v-theme-error)) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .quick-action-card:is(:hover, :focus-visible) {
+	border-color: var(--pos-brand-orange) !important;
+	background: var(--pos-hover-bg) !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .drawer-footer-action__icon .v-icon {
+	color: #ffffff !important;
+}
+
+html[data-theme="dark"] :is(body[data-route^="posapp"], body[data-page-route^="posapp"]) :is(.quick-action-card__icon, .secondary-icon, .info-icon, .neutral-icon, .drawer-footer-action__icon):not(.quick-action-card--warning .quick-action-card__icon):not(.quick-action-card--danger .quick-action-card__icon) {
+	background: #2a2d33 !important;
+}
+
+/* ------------------------------------------- invoice management tiles */
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .summary-tile {
+	background: var(--pos-card-bg) !important;
+	border: 1px solid var(--pos-border) !important;
+	border-top: 3px solid var(--pos-brand-ink) !important;
+	box-shadow: none !important;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .summary-tile--primary { border-top-color: var(--pos-brand-orange) !important; }
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .summary-tile--success { border-top-color: rgb(var(--v-theme-success)) !important; }
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) :is(.summary-tile--warning, .summary-tile--warning-strong) { border-top-color: rgb(var(--v-theme-warning)) !important; }
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .summary-tile--danger { border-top-color: rgb(var(--v-theme-error)) !important; }
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .summary-tile__value {
+	color: var(--pos-text-primary) !important;
+	font-variant-numeric: tabular-nums;
+}
+
+:is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .summary-tile__label {
+	color: var(--pos-text-muted) !important;
+	letter-spacing: 0.06em;
+}
+
+html[data-theme="dark"] :is(body[data-route^="posapp"], body[data-page-route^="posapp"]) .summary-tile--history {
+	border-top-color: #f4f3f0 !important;
+}

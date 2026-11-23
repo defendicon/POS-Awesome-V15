@@ -32,10 +32,24 @@
 					type="info"
 					density="compact"
 					class="invoice-status-alert mb-0"
-					v-if="pos_profile.create_pos_invoice_instead_of_sales_invoice"
+					v-if="pos_profile.create_pos_invoice_instead_of_sales_invoice && !isNornuxPresentation"
 				>
 					{{ __("Invoices saved as POS Invoices") }}
 				</v-alert>
+				<div v-if="isNornuxPresentation" class="nornux-sale-head" data-testid="nornux-sale-head">
+					<div class="nornux-sale-head__copy">
+						<span class="nornux-eyebrow">{{ isReturnInvoice ? __("Current return") : __("Current sale") }}</span>
+						<strong class="nornux-sale-head__number">{{ invoice_doc?.name || __("New sale") }}</strong>
+					</div>
+					<span class="nornux-badge nornux-badge--info">
+						<v-icon icon="mdi-information-outline" size="16" />
+						{{
+							pos_profile.create_pos_invoice_instead_of_sales_invoice
+								? __("Saved as POS Invoice")
+								: __("Saved as Sales Invoice")
+						}}
+					</span>
+				</div>
 				<div class="invoice-sections">
 					<div class="invoice-top-grid">
 						<v-card flat class="invoice-section-card pos-themed-card">
@@ -155,7 +169,20 @@
 						<div class="invoice-section-heading">
 							<h3 class="invoice-section-heading__title">{{ __("Invoice Items") }}</h3>
 						</div>
-						<div class="items-table-wrapper">
+						<div v-if="isNornuxPresentation" class="items-table-wrapper items-table-wrapper--nornux">
+							<NornuxCartList
+								:items="items"
+								:is-return-invoice="isReturnInvoice"
+								:format-currency="formatCurrency"
+								:format-float="formatFloat"
+								:add-one="add_one"
+								:subtract-one="subtract_one"
+								:remove-item="remove_item"
+								:event-bus="eventBus"
+								@edit-item="openItemQuickEditForItem"
+							/>
+						</div>
+						<div v-else class="items-table-wrapper">
 							<InvoiceItemsActionToolbar
 								ref="actionToolbar"
 								:itemSearch="itemSearch"
@@ -300,6 +327,7 @@ import MultiCurrencyRow from "./invoice/MultiCurrencyRow.vue";
 import CancelSaleDialog from "./invoice/CancelSaleDialog.vue";
 import InvoiceSummary from "./invoice/InvoiceSummary.vue";
 import ItemsTable from "./invoice/ItemsTable.vue";
+import NornuxCartList from "./invoice/NornuxCartList.vue";
 import InvoiceItemsActionToolbar from "./invoice/InvoiceItemsActionToolbar.vue";
 import PackedItemsDialog from "./invoice/PackedItemsDialog.vue";
 import PaymentConfirmationDialog from "./payments/PaymentConfirmationDialog.vue";
@@ -478,6 +506,7 @@ export default {
 		InvoiceSummary,
 		CancelSaleDialog,
 		ItemsTable,
+		NornuxCartList,
 		InvoiceItemsActionToolbar,
 		PackedItemsDialog,
 		PaymentConfirmationDialog,
@@ -487,6 +516,9 @@ export default {
 	computed: {
 		isCounterGridPresentation() {
 			return this.presentation === "counter-grid";
+		},
+		isNornuxPresentation() {
+			return this.presentation === "nornux";
 		},
 		items: {
 			get() {

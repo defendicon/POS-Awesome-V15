@@ -5,82 +5,89 @@
 
 :root {
 	/* Primary Background Colors */
-	--pos-bg-primary: #ffffff;
-	--pos-bg-secondary: #f8f9fa;
-	--pos-bg-tertiary: #e3f2fd;
+	--pos-bg-primary: #f4f3f0;
+	--pos-bg-secondary: #f4f3f0;
+	--pos-bg-tertiary: #fef1e1;
 
 	/* Surface Colors */
 	--pos-surface: #ffffff;
-	--pos-surface-variant: #f5f5f5;
-	--pos-surface-container: #fafafa;
+	--pos-surface-variant: #f1efeb;
+	--pos-surface-container: #f8f7f4;
 
 	/* Text Colors */
-	--pos-text-primary: #212121;
-	--pos-text-secondary: #666666;
-	--pos-text-disabled: #9e9e9e;
-	--pos-text-hint: #bdbdbd;
-	--pos-text-muted: #667085;
+	--pos-text-primary: #14171a;
+	--pos-text-secondary: #4b5058;
+	--pos-text-disabled: #a3a7ae;
+	--pos-text-hint: #b8bcc2;
+	--pos-text-muted: #6b7079;
 
 	/* Primary Colors - Original Light Mode */
-	--pos-primary: #0097a7;
-	--pos-primary-variant: #00838f;
-	--pos-primary-container: #e0f7fa;
+	--pos-primary: #15181c;
+	--pos-primary-variant: #050708;
+	--pos-primary-container: #ecebe7;
 	--pos-on-primary: #ffffff;
 
 	/* Secondary Colors - Original Light Mode */
-	--pos-secondary: #00bcd4;
-	--pos-secondary-variant: #0097a7;
-	--pos-secondary-container: #e0f7fa;
-	--pos-on-secondary: #ffffff;
+	--pos-secondary: #f78f1e;
+	--pos-secondary-variant: #d9740a;
+	--pos-secondary-container: #fef1e1;
+	--pos-on-secondary: #050708;
 
 	/* Accent Colors - Modern Orange (Light Mode) */
-	--pos-accent: #ff6b35;
-	--pos-accent-variant: #e55a2b;
+	--pos-accent: #f78f1e;
+	--pos-accent-variant: #d9740a;
 
 	/* Semantic Colors */
-	--pos-success: #66bb6a;
-	--pos-success-container: #e8f5e8;
-	--pos-warning: #ff9800;
-	--pos-warning-container: #fff3e0;
-	--pos-error: #e86674;
-	--pos-error-container: #fdeaea;
-	--pos-info: #2196f3;
-	--pos-info-container: #e3f2fd;
+	--pos-success: #1e9e5a;
+	--pos-success-container: #e6f5ec;
+	--pos-warning: #e39a13;
+	--pos-warning-container: #fdf3e1;
+	--pos-error: #d64545;
+	--pos-error-container: #fbeaea;
+	--pos-info: #2f6fdb;
+	--pos-info-container: #e8effb;
 
 	/* Border and Divider Colors */
-	--pos-border: rgba(0, 0, 0, 0.12);
-	--pos-border-light: rgba(0, 0, 0, 0.06);
-	--pos-divider: rgba(0, 0, 0, 0.06);
-	--pos-outline: rgba(0, 0, 0, 0.2);
+	--pos-border: rgba(14, 16, 19, 0.1);
+	--pos-border-light: rgba(14, 16, 19, 0.06);
+	--pos-divider: rgba(14, 16, 19, 0.07);
+	--pos-outline: rgba(14, 16, 19, 0.16);
 
 	/* Shadow Colors */
-	--pos-shadow: rgba(0, 0, 0, 0.1);
-	--pos-shadow-dark: rgba(0, 0, 0, 0.2);
-	--pos-shadow-light: rgba(0, 0, 0, 0.05);
+	--pos-shadow: rgba(14, 16, 19, 0.08);
+	--pos-shadow-dark: rgba(14, 16, 19, 0.16);
+	--pos-shadow-light: rgba(14, 16, 19, 0.04);
 
 	/* Interactive Colors */
-	--pos-hover-bg: rgba(25, 118, 210, 0.04);
-	--pos-pressed-bg: rgba(25, 118, 210, 0.08);
-	--pos-selected-bg: rgba(25, 118, 210, 0.12);
-	--pos-focus-bg: rgba(25, 118, 210, 0.06);
+	--pos-hover-bg: rgba(247, 143, 30, 0.08);
+	--pos-pressed-bg: rgba(247, 143, 30, 0.14);
+	--pos-selected-bg: rgba(247, 143, 30, 0.16);
+	--pos-focus-bg: rgba(247, 143, 30, 0.1);
 
 	/* Card and Component Backgrounds */
 	--pos-card-bg: #ffffff;
-	--pos-input-bg: #f5f5f5;
+	--pos-input-bg: #f6f5f2;
 	--pos-button-bg: #ffffff;
 	--pos-menu-bg: #ffffff;
 	--pos-dialog-bg: #ffffff;
 	--pos-surface-raised: #ffffff;
-	--pos-surface-muted: #f4f7fb;
+	--pos-surface-muted: #f8f7f4;
 	--pos-tooltip-bg: #ffffff;
-	--pos-tooltip-border: rgba(15, 23, 42, 0.12);
-	--pos-tooltip-shadow: rgba(15, 23, 42, 0.14);
+	--pos-tooltip-border: rgba(14, 16, 19, 0.12);
+	--pos-tooltip-shadow: rgba(14, 16, 19, 0.14);
+
+	/* Nornux brand */
+	--pos-brand-ink: #050708;
+	--pos-brand-orange: #f78f1e;
+	--pos-brand-orange-deep: #d9740a;
+	--pos-brand-orange-soft: #fef1e1;
+	--pos-font-family: var(--font-stack, "InterVariable", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif);
 
 	/* Shared Radius Scale */
 	--pos-radius-xs: 6px;
-	--pos-radius-sm: 10px;
-	--pos-radius-md: 14px;
-	--pos-radius-lg: 18px;
+	--pos-radius-sm: 8px;
+	--pos-radius-md: 12px;
+	--pos-radius-lg: 16px;
 
 	/* Shared Spacing Scale */
 	--pos-space-1: 4px;
@@ -92,10 +99,10 @@
 
 	/* Special Use Cases */
 	--pos-navbar-bg: #ffffff;
-	--pos-sidebar-bg: #f8f9fa;
+	--pos-sidebar-bg: #f8f7f4;
 	--pos-invoice-bg: #ffffff;
-	--pos-table-header-bg: #f5f5f5;
-	--pos-table-row-hover: rgba(25, 118, 210, 0.04);
+	--pos-table-header-bg: #f8f7f4;
+	--pos-table-row-hover: rgba(247, 143, 30, 0.06);
 
 	/* RTL Support Variables */
 	--pos-direction: ltr;
@@ -112,83 +119,83 @@
 [data-theme-mode="dark"],
 .v-theme--dark {
 	/* Primary Background Colors */
-	--pos-bg-primary: #121212;
-	--pos-bg-secondary: #1e1e1e;
-	--pos-bg-tertiary: #2d2d2d;
+	--pos-bg-primary: #0b0c0e;
+	--pos-bg-secondary: #0b0c0e;
+	--pos-bg-tertiary: #2a1e10;
 
 	/* Surface Colors */
-	--pos-surface: #1e1e1e;
-	--pos-surface-variant: #373737;
-	--pos-surface-container: #2d2d2d;
+	--pos-surface: #15171a;
+	--pos-surface-variant: #22252a;
+	--pos-surface-container: #1c1f23;
 
 	/* Text Colors - Enhanced Contrast for Dark Mode */
-	--pos-text-primary: #ffffff;
-	--pos-text-secondary: #e0e0e0;
-	--pos-text-disabled: #9e9e9e;
-	--pos-text-hint: #bdbdbd;
-	--pos-text-muted: #b0b8c4;
+	--pos-text-primary: #f4f3f0;
+	--pos-text-secondary: #c9ccd1;
+	--pos-text-disabled: #6e737b;
+	--pos-text-hint: #7d838b;
+	--pos-text-muted: #9aa0a8;
 
 	/* Primary Colors - High Contrast Blue-Cyan */
-	--pos-primary: #00d4ff;
-	--pos-primary-variant: #00a0cc;
-	--pos-primary-container: #003344;
-	--pos-on-primary: #000000;
+	--pos-primary: #f78f1e;
+	--pos-primary-variant: #d9740a;
+	--pos-primary-container: #3a2610;
+	--pos-on-primary: #050708;
 
 	/* Secondary Colors - High Contrast Cyan-Green */
-	--pos-secondary: #00e5b8;
-	--pos-secondary-variant: #00b894;
-	--pos-secondary-container: #004433;
-	--pos-on-secondary: #000000;
+	--pos-secondary: #ffb25e;
+	--pos-secondary-variant: #f78f1e;
+	--pos-secondary-container: #3a2610;
+	--pos-on-secondary: #050708;
 
 	/* Accent Colors - Modern Orange */
-	--pos-accent: #ff6b35;
-	--pos-accent-variant: #e55a2b;
+	--pos-accent: #f78f1e;
+	--pos-accent-variant: #d9740a;
 
 	/* Semantic Colors - High Contrast */
-	--pos-success: #4caf50;
-	--pos-success-container: #2e7d32;
-	--pos-warning: #ffc107;
-	--pos-warning-container: #f57c00;
-	--pos-error: #f44336;
-	--pos-error-container: #c62828;
-	--pos-info: #2196f3;
-	--pos-info-container: #1565c0;
+	--pos-success: #3cc47c;
+	--pos-success-container: #13311f;
+	--pos-warning: #f2b33d;
+	--pos-warning-container: #3a2c10;
+	--pos-error: #ef6a6a;
+	--pos-error-container: #3a1616;
+	--pos-info: #6a9bf0;
+	--pos-info-container: #16243d;
 
 	/* Border and Divider Colors */
-	--pos-border: rgba(255, 255, 255, 0.12);
+	--pos-border: rgba(255, 255, 255, 0.1);
 	--pos-border-light: rgba(255, 255, 255, 0.06);
-	--pos-divider: #373737;
-	--pos-outline: rgba(255, 255, 255, 0.2);
+	--pos-divider: rgba(255, 255, 255, 0.07);
+	--pos-outline: rgba(255, 255, 255, 0.18);
 
 	/* Shadow Colors */
-	--pos-shadow: rgba(0, 0, 0, 0.4);
+	--pos-shadow: rgba(0, 0, 0, 0.45);
 	--pos-shadow-dark: rgba(0, 0, 0, 0.6);
-	--pos-shadow-light: rgba(0, 0, 0, 0.2);
+	--pos-shadow-light: rgba(0, 0, 0, 0.25);
 
 	/* Interactive Colors - Better Visibility */
-	--pos-hover-bg: rgba(255, 255, 255, 0.12);
-	--pos-pressed-bg: rgba(255, 255, 255, 0.16);
-	--pos-selected-bg: rgba(255, 255, 255, 0.2);
-	--pos-focus-bg: rgba(255, 255, 255, 0.14);
+	--pos-hover-bg: rgba(247, 143, 30, 0.12);
+	--pos-pressed-bg: rgba(247, 143, 30, 0.18);
+	--pos-selected-bg: rgba(247, 143, 30, 0.2);
+	--pos-focus-bg: rgba(247, 143, 30, 0.14);
 
 	/* Card and Component Backgrounds */
-	--pos-card-bg: #1e1e1e;
-	--pos-input-bg: #2d2d2d;
-	--pos-button-bg: #2d2d2d;
-	--pos-menu-bg: #1e1e1e;
-	--pos-dialog-bg: #1e1e1e;
-	--pos-surface-raised: #242b33;
-	--pos-surface-muted: #1a2028;
-	--pos-tooltip-bg: #202833;
-	--pos-tooltip-border: rgba(148, 163, 184, 0.2);
-	--pos-tooltip-shadow: rgba(0, 0, 0, 0.4);
+	--pos-card-bg: #15171a;
+	--pos-input-bg: #1c1f23;
+	--pos-button-bg: #1c1f23;
+	--pos-menu-bg: #15171a;
+	--pos-dialog-bg: #15171a;
+	--pos-surface-raised: #1c1f23;
+	--pos-surface-muted: #181a1e;
+	--pos-tooltip-bg: #1c1f23;
+	--pos-tooltip-border: rgba(255, 255, 255, 0.14);
+	--pos-tooltip-shadow: rgba(0, 0, 0, 0.45);
 
 	/* Special Use Cases */
-	--pos-navbar-bg: #1e1e1e;
-	--pos-sidebar-bg: #121212;
-	--pos-invoice-bg: #1e1e1e;
-	--pos-table-header-bg: #2d2d2d;
-	--pos-table-row-hover: rgba(255, 255, 255, 0.04);
+	--pos-navbar-bg: #15171a;
+	--pos-sidebar-bg: #0b0c0e;
+	--pos-invoice-bg: #15171a;
+	--pos-table-header-bg: #1c1f23;
+	--pos-table-row-hover: rgba(247, 143, 30, 0.06);
 	color-scheme: dark;
 }
 
@@ -196,61 +203,61 @@
 @media (prefers-color-scheme: dark) {
 	[data-theme-mode="automatic"] {
 		/* Apply dark theme variables when system preference is dark */
-		--pos-bg-primary: #121212;
-		--pos-bg-secondary: #1e1e1e;
-		--pos-bg-tertiary: #2d2d2d;
-		--pos-surface: #1e1e1e;
-		--pos-surface-variant: #373737;
-		--pos-surface-container: #2d2d2d;
-		--pos-text-primary: #ffffff;
-		--pos-text-secondary: #b0b0b0;
-		--pos-text-disabled: #666666;
-		--pos-text-hint: #757575;
-		--pos-text-muted: #b0b8c4;
-		--pos-primary: #00d4ff;
-		--pos-primary-variant: #00a0cc;
-		--pos-primary-container: #003344;
-		--pos-on-primary: #000000;
-		--pos-secondary: #00e5b8;
-		--pos-secondary-variant: #00b894;
-		--pos-secondary-container: #004433;
-		--pos-on-secondary: #000000;
-		--pos-accent: #ff6b35;
-		--pos-accent-variant: #e55a2b;
-		--pos-success: #4caf50;
-		--pos-success-container: #2e7d32;
-		--pos-warning: #ffc107;
-		--pos-warning-container: #f57c00;
-		--pos-error: #f44336;
-		--pos-error-container: #c62828;
-		--pos-info: #2196f3;
-		--pos-info-container: #1565c0;
-		--pos-border: rgba(255, 255, 255, 0.12);
+		--pos-bg-primary: #0b0c0e;
+		--pos-bg-secondary: #0b0c0e;
+		--pos-bg-tertiary: #2a1e10;
+		--pos-surface: #15171a;
+		--pos-surface-variant: #22252a;
+		--pos-surface-container: #1c1f23;
+		--pos-text-primary: #f4f3f0;
+		--pos-text-secondary: #c9ccd1;
+		--pos-text-disabled: #6e737b;
+		--pos-text-hint: #7d838b;
+		--pos-text-muted: #9aa0a8;
+		--pos-primary: #f78f1e;
+		--pos-primary-variant: #d9740a;
+		--pos-primary-container: #3a2610;
+		--pos-on-primary: #050708;
+		--pos-secondary: #ffb25e;
+		--pos-secondary-variant: #f78f1e;
+		--pos-secondary-container: #3a2610;
+		--pos-on-secondary: #050708;
+		--pos-accent: #f78f1e;
+		--pos-accent-variant: #d9740a;
+		--pos-success: #3cc47c;
+		--pos-success-container: #13311f;
+		--pos-warning: #f2b33d;
+		--pos-warning-container: #3a2c10;
+		--pos-error: #ef6a6a;
+		--pos-error-container: #3a1616;
+		--pos-info: #6a9bf0;
+		--pos-info-container: #16243d;
+		--pos-border: rgba(255, 255, 255, 0.1);
 		--pos-border-light: rgba(255, 255, 255, 0.06);
-		--pos-divider: #373737;
-		--pos-outline: rgba(255, 255, 255, 0.2);
-		--pos-shadow: rgba(0, 0, 0, 0.4);
+		--pos-divider: rgba(255, 255, 255, 0.07);
+		--pos-outline: rgba(255, 255, 255, 0.18);
+		--pos-shadow: rgba(0, 0, 0, 0.45);
 		--pos-shadow-dark: rgba(0, 0, 0, 0.6);
-		--pos-shadow-light: rgba(0, 0, 0, 0.2);
-		--pos-hover-bg: rgba(255, 255, 255, 0.08);
-		--pos-pressed-bg: rgba(255, 255, 255, 0.12);
-		--pos-selected-bg: rgba(255, 255, 255, 0.16);
-		--pos-focus-bg: rgba(255, 255, 255, 0.1);
-		--pos-card-bg: #1e1e1e;
-		--pos-input-bg: #2d2d2d;
-		--pos-button-bg: #2d2d2d;
-		--pos-menu-bg: #1e1e1e;
-		--pos-dialog-bg: #1e1e1e;
-		--pos-surface-raised: #242b33;
-		--pos-surface-muted: #1a2028;
-		--pos-tooltip-bg: #202833;
-		--pos-tooltip-border: rgba(148, 163, 184, 0.2);
-		--pos-tooltip-shadow: rgba(0, 0, 0, 0.4);
-		--pos-navbar-bg: #1e1e1e;
-		--pos-sidebar-bg: #121212;
-		--pos-invoice-bg: #1e1e1e;
-		--pos-table-header-bg: #2d2d2d;
-		--pos-table-row-hover: rgba(255, 255, 255, 0.04);
+		--pos-shadow-light: rgba(0, 0, 0, 0.25);
+		--pos-hover-bg: rgba(247, 143, 30, 0.12);
+		--pos-pressed-bg: rgba(247, 143, 30, 0.18);
+		--pos-selected-bg: rgba(247, 143, 30, 0.2);
+		--pos-focus-bg: rgba(247, 143, 30, 0.14);
+		--pos-card-bg: #15171a;
+		--pos-input-bg: #1c1f23;
+		--pos-button-bg: #1c1f23;
+		--pos-menu-bg: #15171a;
+		--pos-dialog-bg: #15171a;
+		--pos-surface-raised: #1c1f23;
+		--pos-surface-muted: #181a1e;
+		--pos-tooltip-bg: #1c1f23;
+		--pos-tooltip-border: rgba(255, 255, 255, 0.14);
+		--pos-tooltip-shadow: rgba(0, 0, 0, 0.45);
+		--pos-navbar-bg: #15171a;
+		--pos-sidebar-bg: #0b0c0e;
+		--pos-invoice-bg: #15171a;
+		--pos-table-header-bg: #1c1f23;
+		--pos-table-row-hover: rgba(247, 143, 30, 0.06);
 		color-scheme: dark;
 	}
 }
