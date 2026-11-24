@@ -69,7 +69,7 @@
 					:user="invoiceLayoutUser"
 					:profile="pos_profile?.name || ''"
 					:enabled="enabledInvoiceCards"
-					:compact="isRetailPresentation && !retailDetailedCart"
+					:compact="isRetailPresentation"
 				>
 					<template #customer>
 						<v-card flat class="invoice-section-card pos-themed-card">
@@ -189,28 +189,9 @@
 							<div class="invoice-section-heading">
 								<h3 class="invoice-section-heading__title">{{ __("Invoice Items") }}</h3>
 							</div>
-							<v-btn v-if="isRetailPresentation && retailDetailedCart" size="small" variant="text" data-testid="retail-cart-details" @click="retailDetailedCart = false">{{ __("Compact cart") }}</v-btn>
-							<div v-if="isRetailPresentation && !retailDetailedCart" class="items-table-wrapper items-table-wrapper--retail">
-							<RetailCartList
-								:items="items"
-								:is-return-invoice="isReturnInvoice"
-								:format-currency="formatCurrency"
-								:format-float="formatFloat"
-								:add-one="add_one"
-								:subtract-one="subtract_one"
-								:remove-item="remove_item"
-								:event-bus="eventBus"
-								@edit-item="openItemQuickEditForItem"
-							>
-								<template #actions>
-									<button type="button" class="retail-cart__details" data-testid="retail-cart-details" :aria-label="__('Edit quantities, prices, UOM and batches')" @click="retailDetailedCart = true">
-										<v-icon icon="mdi-table-edit" size="16" />{{ __("Edit details") }}
-									</button>
-								</template>
-							</RetailCartList>
-						</div>
-							<div v-else class="items-table-wrapper">
+							<div class="items-table-wrapper" :class="{ 'items-table-wrapper--retail': isRetailPresentation }">
 								<InvoiceItemsActionToolbar
+									v-if="!isRetailPresentation"
 									ref="actionToolbar"
 									:itemSearch="itemSearch"
 									@update:itemSearch="itemSearch = $event"
@@ -218,6 +199,7 @@
 
 								<ItemsTable
 									ref="itemsTableRef"
+									:presentation="isRetailPresentation ? 'retail' : 'classic'"
 									:headers="items_headers"
 									v-model:expanded="expanded"
 									:itemsPerPage="itemsPerPage"
@@ -225,6 +207,7 @@
 									:preference-user="currentCashier?.user || ''"
 									:pos_profile="pos_profile"
 									:invoiceType="invoiceType"
+									:is-return-invoice="isReturnInvoice"
 									:stock_settings="stock_settings"
 									:displayCurrency="displayCurrency"
 									:formatFloat="formatFloat"
@@ -355,7 +338,6 @@ import MultiCurrencyRow from "./invoice/MultiCurrencyRow.vue";
 import CancelSaleDialog from "./invoice/CancelSaleDialog.vue";
 import InvoiceSummary from "./invoice/InvoiceSummary.vue";
 import ItemsTable from "./invoice/ItemsTable.vue";
-import RetailCartList from "./invoice/RetailCartList.vue";
 import InvoiceItemsActionToolbar from "./invoice/InvoiceItemsActionToolbar.vue";
 import PackedItemsDialog from "./invoice/PackedItemsDialog.vue";
 import PaymentConfirmationDialog from "./payments/PaymentConfirmationDialog.vue";
@@ -489,7 +471,6 @@ export default {
 	data() {
 		return {
 			cartRecoveryError: "",
-			retailDetailedCart: false,
 			cartRecoveryMessage: "",
 			cartRecoveryCandidates: [],
 			cartRecoveryReviewWarning: "",
@@ -554,7 +535,6 @@ export default {
 		InvoiceSummary,
 		CancelSaleDialog,
 		ItemsTable,
-		RetailCartList,
 		InvoiceItemsActionToolbar,
 		PackedItemsDialog,
 		PaymentConfirmationDialog,

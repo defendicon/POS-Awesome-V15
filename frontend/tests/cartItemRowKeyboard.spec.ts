@@ -79,21 +79,92 @@ const mountRow = (
 		},
 		global: {
 			components: {
+				"v-btn": defineComponent({ setup: (_, { attrs, slots }) => () => h("button", attrs, slots.default?.()) }),
+				"v-chip": defineComponent({ setup: (_, { attrs, slots }) => () => h("button", attrs, slots.default?.()) }),
 				"v-text-field": VTextFieldStub,
 				VTextField: VTextFieldStub,
 			},
 			stubs: {
-				"v-btn": true,
-				VBtn: true,
 				"v-icon": true,
 				VIcon: true,
 				"v-select": true,
 				VSelect: true,
-				"v-chip": true,
-				VChip: true,
 			},
 		},
 	});
+
+describe("Retail inline cart editors", () => {
+	it("commits quantities and step actions inside the card", async () => {
+		const add = vi.fn(), minus = vi.fn(), update = vi.fn();
+		const wrapper = mountRow({}, { presentation: "retail", onAddOne: add, onMinusClick: minus, onUpdateQty: update });
+		expect(wrapper.element.tagName).toBe("LI");
+		expect(wrapper.find("tr").exists()).toBe(false);
+		await wrapper.get('[aria-label="Increase quantity"]').trigger("click");
+		expect(add).toHaveBeenCalledOnce();
+		await wrapper.get('[aria-label="Decrease quantity"]').trigger("click");
+		expect(minus).toHaveBeenCalledOnce();
+		const input = wrapper.get("input");
+		await input.trigger("focus");
+		await input.setValue("4");
+		await input.trigger("blur");
+		expect(update.mock.calls[0]?.[1]).toBe(4);
+	});
+
+	it.each(["rate", "discount_percentage", "discount_amount"])("commits %s using the shared editor", async (key) => {
+		const update = vi.fn();
+		const wrapper = mountRow({}, {
+			onUpdateRate: update, onUpdateDiscountPercent: update, onUpdateDiscountAmount: update,
+			presentation: "retail", visibleColumns: [{ key }],
+			posProfile: { posa_allow_user_to_edit_rate: 1, posa_allow_user_to_edit_item_discount: 1 },
+		});
+		await wrapper.get('[role="button"]').trigger("click");
+		await wrapper.get("input").setValue("5");
+		await wrapper.get("input").trigger("blur");
+		expect(update.mock.calls[0]?.[1]).toBe(5);
+	});
+
+	it("reacts to profile on/off and cached string zero", async () => {
+		const update = vi.fn();
+		const wrapper = mountRow({}, {
+			onUpdateRate: update,
+			presentation: "retail", visibleColumns: [{ key: "rate" }, { key: "discount_percentage" }],
+			posProfile: { posa_allow_user_to_edit_rate: "0", posa_allow_user_to_edit_item_discount: "0" },
+		});
+		expect(wrapper.findAll('[aria-disabled="true"]')).toHaveLength(2);
+		await wrapper.get('[data-pos-keyboard-target="cart-rate"]').trigger("click");
+		expect(wrapper.find("input").exists()).toBe(false);
+		await wrapper.setProps({ posProfile: { posa_allow_user_to_edit_rate: 1, posa_allow_user_to_edit_item_discount: 1 } });
+		expect(wrapper.findAll('[aria-disabled="false"]')).toHaveLength(2);
+		await wrapper.get('[data-pos-keyboard-target="cart-rate"]').trigger("click");
+		await wrapper.get("input").setValue("99");
+		await wrapper.setProps({ posProfile: { posa_allow_user_to_edit_rate: 0 } });
+		await wrapper.get("input").trigger("blur");
+		expect(update).not.toHaveBeenCalled();
+	});
+
+	it("preserves protected returns and offer discounts", async () => {
+		const wrapper = mountRow({ is_free_item: 1, posa_offer_applied: 1 }, {
+			presentation: "retail", isReturnInvoice: true,
+			visibleColumns: [{ key: "qty" }, { key: "discount_percentage" }],
+		});
+		expect(wrapper.get("input").attributes("disabled")).toBeDefined();
+		expect(wrapper.get('[aria-label="Increase quantity"]').attributes("disabled")).toBeDefined();
+		await wrapper.get('[data-pos-keyboard-target="cart-discount-percent"]').trigger("click");
+		expect(wrapper.findAll("input")).toHaveLength(1);
+	});
+
+	it("preserves UOM and batch selection in the card", async () => {
+		const uom = vi.fn(), batch = vi.fn();
+		const wrapper = mountRow({ has_batch_no: 1, item_uoms: [{ uom: "Nos" }, { uom: "Box" }] }, {
+			onCalcUom: uom, onOpenBatchSerial: batch,
+			presentation: "retail", visibleColumns: [{ key: "item_name" }, { key: "uom" }],
+		});
+		await wrapper.get('[aria-label="Next unit of measure"]').trigger("click");
+		expect(uom.mock.calls[0]?.[1]).toBe("Box");
+		await wrapper.get(".posa-cart-item-row__tracking-chip").trigger("click");
+		expect(batch).toHaveBeenCalledOnce();
+	});
+});
 
 describe("CartItemRow keyboard editing", () => {
 	it("submits quantity on Enter even when the value matches the current quantity", async () => {

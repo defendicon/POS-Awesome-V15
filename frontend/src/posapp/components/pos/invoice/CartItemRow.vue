@@ -1,5 +1,6 @@
 <template>
-	<tr
+	<component
+		:is="presentation === 'retail' ? 'li' : 'tr'"
 		:id="rowDomId"
 		class="posa-cart-item-row"
 		:class="rowClasses"
@@ -8,15 +9,15 @@
 		:data-testid="`cart-row-${item.item_code || rowIndex}`"
 		:data-active-cell-key="activeCellKey || undefined"
 		:tabindex="activeRow && keyboardMode === 'row' ? 0 : -1"
-		role="row"
+		:role="presentation === 'retail' ? 'listitem' : 'row'"
 		:aria-selected="activeRow ? 'true' : 'false'"
 		v-memo="memoDeps"
 	>
 		<template v-for="column in visibleColumns" :key="column.key">
 			<!-- Item Name Column -->
-			<td v-if="column.key === 'item_name'" v-bind="getCellAttrs('item_name', 'text-start')">
+			<component :is="presentation === 'retail' ? 'div' : 'td'" v-if="column.key === 'item_name'" v-bind="getCellAttrs('item_name', 'text-start')">
 				<div class="posa-cart-item-row__item-cell">
-					<RowReorderHandle :row-key="String(item.posa_row_id)" :label="item.item_name || item.item_code" />
+					<RowReorderHandle v-if="presentation !== 'retail'" :row-key="String(item.posa_row_id)" :label="item.item_name || item.item_code" />
 					<span class="posa-cart-item-row__item-name">{{ item.item_name }}</span>
 					<v-chip v-if="item._missingPriceListRate" color="error" size="x-small" class="ml-1">
 						{{ __("Missing rate") }}
@@ -91,7 +92,7 @@
 						<span>{{ item.pricing_rule_badge.tooltip }}</span>
 					</v-tooltip>
 					<v-btn
-						v-if="posProfile?.posa_allow_line_item_name_override && !item.posa_is_replace"
+						v-if="parseBooleanSetting(posProfile?.posa_allow_line_item_name_override) && !item.posa_is_replace"
 						icon
 						size="x-small"
 						variant="text"
@@ -113,10 +114,10 @@
 						<v-icon size="small">mdi-undo</v-icon>
 					</v-btn>
 				</div>
-			</td>
+			</component>
 
 			<!-- Quantity Column -->
-			<td v-else-if="column.key === 'qty'" v-bind="getCellAttrs('qty', 'text-center')">
+			<component :is="presentation === 'retail' ? 'div' : 'td'" v-else-if="column.key === 'qty'" v-bind="getCellAttrs('qty', 'text-center')">
 				<div
 					class="posa-cart-table__qty-input-shell amount-value number-field-rtl"
 					:class="{
@@ -129,6 +130,7 @@
 					data-pos-keyboard-target="cart-qty"
 					@click.stop="focusQtyInput"
 				>
+					<button v-if="presentation === 'retail'" type="button" :disabled="disableInput || !!item.posa_is_replace" :aria-label="__('Decrease quantity')" @click.stop="$emit('minus-click', item)">−</button>
 					<v-text-field
 						:model-value="editingQtyValue"
 						:aria-label="__('Quantity')"
@@ -153,11 +155,12 @@
 						:spellcheck="false"
 						:disabled="disableInput"
 					></v-text-field>
+					<button v-if="presentation === 'retail'" type="button" :disabled="disableInput || !!item.posa_is_replace" :aria-label="__('Increase quantity')" @click.stop="$emit('add-one', item)">+</button>
 				</div>
-			</td>
+			</component>
 
 			<!-- UOM Column (Optional) -->
-			<td v-else-if="column.key === 'uom'" v-bind="getCellAttrs('uom', 'text-center')">
+			<component :is="presentation === 'retail' ? 'div' : 'td'" v-else-if="column.key === 'uom'" v-bind="getCellAttrs('uom', 'text-center')">
 				<div class="posa-cart-table__editor-box uom-editor" @click.stop>
 					<v-btn
 						size="x-small"
@@ -213,10 +216,10 @@
 						<v-icon size="small">mdi-chevron-right</v-icon>
 					</v-btn>
 				</div>
-			</td>
+			</component>
 
 			<!-- Price List Rate (Optional) -->
-			<td
+			<component :is="presentation === 'retail' ? 'div' : 'td'"
 				v-else-if="column.key === 'price_list_rate'"
 				v-bind="getCellAttrs('price_list_rate', 'text-end')"
 			>
@@ -229,10 +232,10 @@
 						{{ formatCurrency(item.price_list_rate) }}
 					</span>
 				</div>
-			</td>
+			</component>
 
 			<!-- Discount % (Optional) -->
-			<td
+			<component :is="presentation === 'retail' ? 'div' : 'td'"
 				v-else-if="column.key === 'discount_percentage'"
 				v-bind="getCellAttrs('discount_percentage', 'text-center')"
 			>
@@ -285,10 +288,10 @@
 						:disabled="disableDiscountEdit"
 					></v-text-field>
 				</div>
-			</td>
+			</component>
 
 			<!-- Discount Amount (Optional) -->
-			<td
+			<component :is="presentation === 'retail' ? 'div' : 'td'"
 				v-else-if="column.key === 'discount_amount'"
 				v-bind="getCellAttrs('discount_amount', 'text-center')"
 			>
@@ -333,10 +336,10 @@
 						:disabled="disableDiscountEdit"
 					></v-text-field>
 				</div>
-			</td>
+			</component>
 
 			<!-- Rate Column -->
-			<td v-else-if="column.key === 'rate'" v-bind="getCellAttrs('rate', 'text-center')">
+			<component :is="presentation === 'retail' ? 'div' : 'td'" v-else-if="column.key === 'rate'" v-bind="getCellAttrs('rate', 'text-center')">
 				<div class="posa-cart-table__editor-box">
 					<div
 						v-if="!isEditingRate"
@@ -378,10 +381,10 @@
 						:disabled="disableRateEdit"
 					></v-text-field>
 				</div>
-			</td>
+			</component>
 
 			<!-- Amount Column -->
-			<td v-else-if="column.key === 'amount'" v-bind="getCellAttrs('amount', 'text-center')">
+			<component :is="presentation === 'retail' ? 'div' : 'td'" v-else-if="column.key === 'amount'" v-bind="getCellAttrs('amount', 'text-center')">
 				<div class="currency-display right-aligned">
 					<span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
 					<span
@@ -391,10 +394,10 @@
 						{{ formatCurrency(item.qty * item.rate) }}
 					</span>
 				</div>
-			</td>
+			</component>
 
 			<!-- Offer Toggle (Optional) -->
-			<td
+			<component :is="presentation === 'retail' ? 'div' : 'td'"
 				v-else-if="column.key === 'posa_is_offer'"
 				v-bind="getCellAttrs('posa_is_offer', 'text-center')"
 			>
@@ -407,10 +410,10 @@
 				>
 					{{ item.posa_offer_applied ? __("Remove Offer") : __("Apply Offer") }}
 				</v-btn>
-			</td>
+			</component>
 
 			<!-- Actions -->
-			<td v-else-if="column.key === 'actions'" v-bind="getCellAttrs('actions', 'text-center')">
+			<component :is="presentation === 'retail' ? 'div' : 'td'" v-else-if="column.key === 'actions'" v-bind="getCellAttrs('actions', 'text-center')">
 				<v-btn
 					:disabled="!!item.posa_is_replace"
 					size="small"
@@ -421,9 +424,9 @@
 				>
 					<v-icon size="small">mdi-delete-outline</v-icon>
 				</v-btn>
-			</td>
+			</component>
 
-			<td
+			<component :is="presentation === 'retail' ? 'div' : 'td'"
 				v-else-if="column.key === 'data-table-expand'"
 				v-bind="getCellAttrs('data-table-expand', 'text-center')"
 			>
@@ -437,13 +440,14 @@
 				>
 					<v-icon size="small">mdi-chart-line</v-icon>
 				</v-btn>
-			</td>
+			</component>
 		</template>
-	</tr>
+	</component>
 </template>
 
 <script setup>
 import { computed, nextTick, ref, watch } from "vue";
+import { parseBooleanSetting } from "../../../utils/stock";
 import RowReorderHandle from "../../ui/RowReorderHandle.vue";
 import { getCartGridCellId, getCartGridRowId } from "../../../utils/cartFieldFocus";
 import { normalizeCartEditQuantity } from "../../../utils/cartQuantity";
@@ -454,6 +458,7 @@ defineOptions({
 });
 
 const props = defineProps({
+	presentation: { type: String, default: "classic" },
 	item: {
 		type: Object,
 		required: true,
@@ -569,6 +574,14 @@ const memoDeps = computed(() => {
 		props.activeRow,
 		props.activeCellKey,
 		props.visibleColumns.map((column) => column?.key).join("|"),
+		props.presentation,
+		props.isReturnInvoice,
+		props.hideQtyDecimals,
+		props.posProfile?.posa_allow_user_to_edit_rate,
+		props.posProfile?.posa_allow_user_to_edit_item_discount,
+		props.posProfile?.posa_allow_line_item_name_override,
+		props.item.posa_is_replace,
+		props.item.retailmind_non_discountable,
 		// Include edit states to ensure UI updates when switching modes
 		isEditingQty.value,
 		isEditingRate.value,
@@ -610,6 +623,7 @@ const lossRisk = computed(() =>
 );
 
 const rowClasses = computed(() => ({
+	"posa-cart-item-row--retail": props.presentation === "retail",
 	"posa-cart-item-row--keyboard-active": props.activeRow,
 	"posa-cart-item-row--keyboard-row": props.activeRow && props.keyboardMode === "row",
 	"posa-cart-item-row--keyboard-cell": props.activeRow && props.keyboardMode === "cell",
@@ -624,7 +638,8 @@ function isKeyboardCellActive(key) {
 function getCellAttrs(key, baseClass = "") {
 	return {
 		id: props.rowIndex >= 0 ? getCartGridCellId(props.rowIndex, key) : undefined,
-		role: "gridcell",
+		role: props.presentation === "retail" ? "group" : "gridcell",
+		"data-label": props.visibleColumns.find((column) => column.key === key)?.title,
 		"data-column-key": key,
 		"data-testid": `cart-cell-${props.rowIndex}-${key}`,
 		"aria-selected": isKeyboardCellActive(key) ? "true" : "false",
@@ -650,12 +665,12 @@ const canEditUom = computed(
 );
 
 const disableRateEdit = computed(
-	() => !props.posProfile?.posa_allow_user_to_edit_rate || !!props.item.posa_is_replace,
+	() => !parseBooleanSetting(props.posProfile?.posa_allow_user_to_edit_rate) || !!props.item.posa_is_replace,
 );
 
 const disableDiscountEdit = computed(
 	() =>
-		!props.posProfile?.posa_allow_user_to_edit_item_discount ||
+		!parseBooleanSetting(props.posProfile?.posa_allow_user_to_edit_item_discount) ||
 		!!props.item.posa_is_replace ||
 		!!props.item.posa_offer_applied ||
 		!!props.item.retailmind_non_discountable,
@@ -836,6 +851,10 @@ function openRateEdit() {
 }
 
 function closeRateEdit() {
+	if (disableRateEdit.value) {
+		cancelRateEdit();
+		return;
+	}
 	if (isEditingRate.value) {
 		replaceRateOnNextInput.value = false;
 		if (editingRateValue.value !== "" && editingRateValue.value != null) {
@@ -887,6 +906,10 @@ function openDiscountPercentEdit() {
 }
 
 function closeDiscountPercentEdit() {
+	if (disableDiscountEdit.value) {
+		cancelDiscountPercentEdit();
+		return;
+	}
 	if (isEditingDiscountPercent.value) {
 		replaceDiscountPercentOnNextInput.value = false;
 		if (editingDiscountPercentValue.value !== "" && editingDiscountPercentValue.value != null) {
@@ -928,6 +951,10 @@ function openDiscountAmountEdit() {
 }
 
 function closeDiscountAmountEdit() {
+	if (disableDiscountEdit.value) {
+		cancelDiscountAmountEdit();
+		return;
+	}
 	if (isEditingDiscountAmount.value) {
 		replaceDiscountAmountOnNextInput.value = false;
 		if (editingDiscountAmountValue.value !== "" && editingDiscountAmountValue.value != null) {
@@ -1044,7 +1071,7 @@ td {
 	transition: none !important;
 }
 
-.posa-cart-item-row--keyboard-active > td {
+.posa-cart-item-row--keyboard-active > :is(td, [data-column-key]) {
 	background: #174a70 !important;
 	color: #ffffff !important;
 	animation: none !important;
@@ -1074,7 +1101,7 @@ td {
 	z-index: 3;
 }
 
-.posa-cart-item-row--loss-risk > td {
+.posa-cart-item-row--loss-risk > :is(td, [data-column-key]) {
 	background: var(--pos-error-container) !important;
 	color: var(--pos-text-primary);
 }
@@ -1084,13 +1111,13 @@ td {
 	outline-offset: -3px;
 }
 
-.posa-cart-item-row--loss-risk.posa-cart-item-row--keyboard-active > td,
+.posa-cart-item-row--loss-risk.posa-cart-item-row--keyboard-active > :is(td, [data-column-key]),
 .posa-cart-item-row--loss-risk .posa-cart-item-cell--keyboard-active {
 	background: #174a70 !important;
 	color: #ffffff !important;
 }
 
-.posa-cart-item-row--missing-rate > td {
+.posa-cart-item-row--missing-rate > :is(td, [data-column-key]) {
 	background: var(--pos-error-container) !important;
 }
 
@@ -1173,5 +1200,138 @@ td[data-column-key="item_name"] {
 .posa-cart-table__expand-btn:hover {
 	border-color: var(--pos-primary) !important;
 	background: var(--pos-primary-container) !important;
+}
+
+/* Retail cards render the same editors and policies as the Classic table. */
+.posa-cart-item-row--retail {
+	display: grid;
+	grid-template-columns: repeat(12, minmax(0, 1fr));
+	grid-auto-flow: row dense;
+	align-items: center;
+	gap: 4px 6px;
+	padding: 4px 0;
+	border-bottom: 1px solid var(--pos-border);
+	color: var(--pos-text-primary);
+	font-size: 12px;
+	list-style: none;
+}
+.posa-cart-item-row--retail > [data-column-key] {
+	min-width: 0;
+	grid-column: span 3;
+}
+.posa-cart-item-row--retail > [data-column-key="rate"] { grid-column: span 4; }
+.posa-cart-item-row--retail > [data-column-key="uom"] { grid-column: span 5; }
+.posa-cart-item-row--retail > [data-column-key="discount_percentage"],
+.posa-cart-item-row--retail > [data-column-key="discount_amount"] { grid-column: span 6; }
+.posa-cart-item-row--retail.posa-cart-item-row--keyboard-active > [data-column-key]::before {
+	color: #ffffff !important;
+}
+.posa-cart-item-row--retail > [data-column-key="item_name"] {
+	grid-column: 1 / 7;
+	grid-row: 1;
+}
+.posa-cart-item-row--retail > [data-column-key="qty"] {
+	grid-column: 7 / 10;
+	grid-row: 1;
+}
+.posa-cart-item-row--retail > [data-column-key="amount"] {
+	grid-column: 10 / 12;
+	grid-row: 1;
+}
+.posa-cart-item-row--retail > [data-column-key="actions"] {
+	grid-column: 12;
+	grid-row: 1;
+}
+.posa-cart-item-row--retail
+	> [data-column-key]:not([data-column-key="item_name"]):not([data-column-key="qty"]):not(
+		[data-column-key="amount"]
+	):not([data-column-key="actions"]):not([data-column-key="data-table-expand"])::before {
+	content: attr(data-label);
+	display: inline;
+	font-size: 10px;
+	color: var(--pos-text-secondary);
+	text-align: start;
+}
+.posa-cart-item-row--retail .posa-cart-table__qty-input-shell {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+}
+.posa-cart-item-row--retail .posa-cart-table__qty-input-shell > button {
+	width: 22px;
+	flex-shrink: 0;
+	height: 28px;
+	border-radius: 6px;
+}
+.posa-cart-item-row--retail .posa-cart-table__qty-input-shell > button:hover {
+	background: var(--pos-surface-muted);
+}
+.posa-cart-item-row--retail .posa-cart-table__qty-input-shell > button:disabled {
+	opacity: 0.35;
+}
+.posa-cart-item-row--retail > [data-column-key]:not([data-column-key="item_name"]) {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+.posa-cart-item-row--retail .posa-cart-table__qty-input-shell {
+	width: 100%;
+	min-width: 0;
+	max-width: 100%;
+}
+.posa-cart-item-row--retail .posa-cart-table__editor-box {
+	display: flex;
+	align-items: center;
+	min-width: 0;
+}
+.posa-cart-item-row--retail .posa-cart-table__editor-display {
+	display: flex;
+	align-items: center;
+	gap: 3px;
+	height: 24px;
+	min-height: 24px;
+	padding: 2px 4px;
+	font-size: 12px;
+	cursor: pointer;
+}
+.posa-cart-item-row--retail .posa-cart-table__editor-display[aria-disabled="true"] {
+	cursor: default;
+}
+.posa-cart-item-row--retail .uom-arrow {
+	min-width: 18px;
+	width: 18px;
+	height: 26px;
+	padding: 0;
+}
+.posa-cart-item-row--retail .posa-cart-table__delete-btn,
+.posa-cart-item-row--retail .posa-cart-table__expand-btn {
+	min-width: 24px !important;
+	min-height: 26px !important;
+	width: 24px;
+	height: 26px;
+}
+.posa-cart-item-row--retail :deep(.v-field) {
+	--v-input-control-height: 28px;
+	--v-field-padding-top: 0px;
+	--v-field-padding-bottom: 0px;
+	font-size: 12px;
+}
+.posa-cart-item-row--retail :deep(.v-field__input) {
+	min-height: 28px !important;
+	height: 28px !important;
+	padding: 2px 4px;
+}
+.posa-cart-item-row--retail :deep(.v-field) {
+	min-height: 28px;
+}
+.posa-cart-item-row--retail :deep(.v-input) {
+	min-width: 0;
+}
+.posa-cart-item-row--retail .currency-display {
+	justify-content: flex-end;
+}
+.posa-cart-item-row--retail .posa-cart-item-row__tracking-stack {
+	flex-direction: row;
+	flex-wrap: wrap;
 }
 </style>

@@ -129,3 +129,38 @@ This follow-up changes presentation only. Classic/Counter Grid layout, pricing/U
 The browser fixture uses mocked Frappe services; the connected live site was not deployed or modified. Visible row count can vary with browser zoom, enabled delivery/currency controls, saved layouts and large notices. Physical printing and backend transactions were not rerun for this presentation-only follow-up.
 
 Suggested commit: `fix(pos): compact Retail checkout to show more cart rows`.
+
+## Follow-up: edit directly in Retail cart cards
+
+The Retail cart now keeps editing within its cards. It no longer switches to the Classic table through **Edit details**. The earlier compact-checkout measurements above describe the previous read-only cards; the current cards include real editors.
+
+### Files changed and reasons
+
+- `frontend/src/posapp/components/pos/Invoice.vue`: select the Retail presentation on the existing `ItemsTable`, remove the separate cart/table toggle, keep compact sizing, and explicitly pass return-invoice state to the shared controller.
+- `frontend/src/posapp/components/pos/invoice/ItemsTable.vue`: render card rows with the existing quantity/rate/discount/UOM handlers, batch/serial selector, item-name dialog and sales-history dialog. Retail discount visibility follows POS Profile flags even if browser column preferences were saved earlier. Existing optional price-list/offer selections remain available through the shared headers.
+- `frontend/src/posapp/components/pos/invoice/CartItemRow.vue`: render the same cell editors as compact card fields, including quantity +/- and direct input, UOM, rate, discounts, removal, batch/serial badges, name override and history. Reuse the existing edit/commit/cancel logic. Parse cached checkbox values such as `"0"` correctly, update permissions reactively, and discard pending rate/discount edits if permission is turned off before commit.
+- `frontend/tests/cartItemRowKeyboard.spec.ts`: add seven Retail cases for shared quantity/rate/discount commits, profile toggles, protected return/offer rows and UOM/batch actions. Retain the ten Classic keyboard cases.
+- `frontend/scripts/verify-retail-layout.mjs`: mount the real shared `ItemsTable` and invoice store instead of the earlier read-only list. Check inline edits and live POS Profile toggles alongside density, resizing, calendar, totals and Pay.
+- `docs/PR_3167_PORT.md`: record the implementation, linked behavior and verification.
+
+### Profile behavior and linked features
+
+- `posa_allow_user_to_edit_rate`: rate is read-only when off.
+- `posa_allow_user_to_edit_item_discount`: displayed line discounts are read-only when off. Offer-applied, non-discountable and replacement-row restrictions still apply.
+- `posa_display_discount_percentage` / `posa_display_discount_amount`: show or hide the respective Retail fields.
+- `posa_allow_line_item_name_override`: controls the item-name edit action.
+- UOM availability uses the existing item UOM list and replacement-row restriction; no new profile setting is invented. Batch/serial controls depend on the item's tracking flags and use the existing selector and return state.
+
+Item search, customer/profile price lists, warehouse/stock validation, pricing rules, UOM conversion, discounts, taxes, totals and payment continue through the shared existing handlers/store. No pricing formulas, backend/API, invoice payload, offline/cache schema, sync transformation, browser/QZ receipt or report calculation was added or replaced. Company, currency, tax, payment and print defaults still come from the loaded POS Profile.
+
+### Verification and limitations
+
+- Production build, including TypeScript and the Chrome 109 CSS audit: passed.
+- Affected-file ESLint: passed.
+- Focused regression run: **24 files / 183 tests passed**, covering Classic and Retail editors, profile columns, pricing, discounts, offers, stock quantities, batch/serial allocation, invoice store/document/outbox, payment totals, printing, shortcuts and workspace/card/button/column customization.
+- Headless Edge browser matrix uses real Vue/Vuetify components with mocked Frappe services. With 12 rows and ordinary inline fields, complete visible rows are **6 at 1920×914**, **5 at 1440×900**, and **3 at 1366×768 dark/RTL and 1100×768**. Extra discount/tracking fields and long names can increase row height. Classic fallback at 1024px is also checked.
+- Browser checks cover profile flags changing from on to cached string `"0"`, field visibility/read-only state, inline rate/discount/UOM editing, absence of a Retail table, quantity +/-/removal, recalculated totals, Pay forwarding, date selection and one-pixel Apply/Cancel resizing in LTR/RTL.
+
+No live Frappe bench/site is available locally. Real invoice submission, server authorization, offline replay against a server, and physical QZ/print verification remain test-site checks. The browser fixture stubs price calculations to verify UI delegation; the separate pricing/discount unit tests cover existing calculations. Nothing is pushed, merged or deployed.
+
+Suggested commit: `feat(pos): edit Retail cart cards inline using POS Profile settings`.

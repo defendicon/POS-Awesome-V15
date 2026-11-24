@@ -18,7 +18,59 @@
 		<span class="sr-only" role="status" aria-live="polite">{{ columnWidths.announcement.value }}</span>
 		<v-alert v-if="columnOrder.error.value" type="warning" density="compact">{{ __(columnOrder.error.value) }}</v-alert>
 		<span class="sr-only" role="status" aria-live="polite">{{ columnOrder.announcement.value }}</span>
-		<v-data-table-virtual
+		<div v-if="presentation === 'retail'" class="retail-inline-cart">
+			<header class="retail-inline-cart__header">
+				<strong>{{ __("Items") }}</strong>
+				<span>{{ items.length }} {{ __("lines") }}</span>
+			</header>
+			<p v-if="!items.length" class="retail-inline-cart__empty">{{ emptyStateSubtitle }}</p>
+			<ul class="retail-inline-cart__list">
+				<CartItemRow
+					v-for="item in items"
+					:key="item.posa_row_id"
+					presentation="retail"
+					:item="item"
+					:row-index="getItemIndex(item)"
+					:visible-columns="retailColumns"
+					:posProfile="pos_profile"
+					:isReturnInvoice="isReturnInvoice"
+					:invoiceType="invoiceType"
+					:displayCurrency="displayCurrency"
+					:formatFloat="memoizedFormatFloat"
+					:formatCurrency="memoizedFormatCurrency"
+					:currencySymbol="currencySymbol"
+					:isNumber="isNumber"
+					:isNegative="memoizedIsNegative"
+					:hideQtyDecimals="hide_qty_decimals"
+					:isRTL="isRtl"
+					:keyboard-mode="gridMode"
+					:active-row="isGridRowActive(item)"
+					:active-cell-key="activeCellKey || ''"
+					@update-qty="handleQtyUpdate"
+					@qty-edit-submitted="handleQtyEditSubmitted"
+					@minus-click="handleMinusClick"
+					@add-one="addOne"
+					@calc-uom="calcUom"
+					@update-rate="handleRateUpdate"
+					@rate-edit-submitted="(submittedItem) => handleGridEditorSubmitted(submittedItem, 'rate')"
+					@update-discount-percent="handleDiscountPercentUpdate"
+					@update-discount-amount="handleDiscountAmountUpdate"
+					@discount-percent-edit-submitted="
+						(submittedItem) => handleGridEditorSubmitted(submittedItem, 'discount_percentage')
+					"
+					@discount-amount-edit-submitted="
+						(submittedItem) => handleGridEditorSubmitted(submittedItem, 'discount_amount')
+					"
+					@open-name-dialog="openNameDialog"
+					@reset-item-name="resetItemName"
+					@toggle-offer="toggleOffer"
+					@toggle-expand="openItemHistory(item)"
+					@open-batch-serial="openBatchSerialSelector"
+					@remove-item="removeItem"
+				/>
+			</ul>
+		</div>
+		<v-data-table-virtual v-else
 			ref="virtualTable"
 			v-model:sort-by="rowSortBy"
 			:headers="finalVisibleColumns"
@@ -180,6 +232,7 @@ import {
 	createBatchAllocationLines,
 	type BatchAllocation,
 } from "../../../composables/pos/shared/batchAllocation";
+import { parseBooleanSetting } from "../../../utils/stock";
 import { loadItemSelectorSettings } from "../../../utils/itemSelectorSettings";
 import { logComponentRender } from "../../../utils/perf";
 import CartItemRow from "./CartItemRow.vue";
@@ -220,6 +273,7 @@ import "./items-table-styles.css";
 declare const __: (_str: string, _args?: any[]) => string;
 
 interface Props {
+	presentation?: "classic" | "retail";
 	headers?: any[];
 	expanded?: any[];
 	itemsPerPage?: number;
@@ -252,6 +306,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+	presentation: "classic",
 	headers: () => [],
 	expanded: () => [],
 	isReturnInvoice: false,
@@ -368,12 +423,27 @@ const dynamicHeaderProps = computed(() => ({
 }));
 
 const finalVisibleColumns = computed(() => columnWidths.apply([...responsiveHeaders.value, DATA_TABLE_EXPAND_COLUMN]));
-const navigableGridColumnKeys = computed(() => getNavigableCartColumnKeys(finalVisibleColumns.value));
+// Profile visibility remains authoritative in Retail, including when old table preferences exist.
+const retailColumns = computed(() => {
+	const columns = props.headers.filter((column) =>
+		!["discount_percentage", "discount_amount", "uom"].includes(column.key),
+	);
+	columns.push({ key: "uom", title: __("UOM") });
+	if (parseBooleanSetting(props.pos_profile?.posa_display_discount_percentage)) {
+		columns.push({ key: "discount_percentage", title: __("Discount %") });
+	}
+	if (parseBooleanSetting(props.pos_profile?.posa_display_discount_amount)) {
+		columns.push({ key: "discount_amount", title: __("Discount Amount") });
+	}
+	return [...columns, DATA_TABLE_EXPAND_COLUMN];
+});
+const navigableGridColumnKeys = computed(() => getNavigableCartColumnKeys(props.presentation === "retail" ? retailColumns.value : finalVisibleColumns.value));
 const gridContainerClasses = computed(() => ({
 	"posa-cart-grid-active": gridMode.value !== "inactive",
 	"posa-cart-grid-row-mode": gridMode.value === "row",
 	"posa-cart-grid-cell-mode": gridMode.value === "cell",
 	"posa-items-table-container--counter-grid": props.counterGrid,
+	"posa-items-table-container--retail": props.presentation === "retail",
 }));
 const virtualScrollConfig = computed(() => {
 	const itemCount = items.value?.length || 0;
@@ -1276,5 +1346,32 @@ defineExpose({
 .posa-items-table-container--counter-grid :deep(.posa-cart-item-row--keyboard-active > td) {
 	background: #174a70 !important;
 	color: #ffffff !important;
+}
+
+.posa-items-table-container--retail {
+	min-height: 0 !important;
+	min-width: 0 !important;
+	height: 100%;
+	box-shadow: none;
+}
+.retail-inline-cart {
+	padding: 0 10px;
+}
+.retail-inline-cart__header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 12px;
+	color: var(--pos-text-secondary);
+	padding: 4px 0;
+}
+.retail-inline-cart__list {
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+.retail-inline-cart__empty {
+	padding: 16px 0;
+	color: var(--pos-text-secondary);
 }
 </style>
