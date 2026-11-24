@@ -164,3 +164,38 @@ Item search, customer/profile price lists, warehouse/stock validation, pricing r
 No live Frappe bench/site is available locally. Real invoice submission, server authorization, offline replay against a server, and physical QZ/print verification remain test-site checks. The browser fixture stubs price calculations to verify UI delegation; the separate pricing/discount unit tests cover existing calculations. Nothing is pushed, merged or deployed.
 
 Suggested commit: `feat(pos): edit Retail cart cards inline using POS Profile settings`.
+
+## Follow-up: customer space and single-line Retail rows
+
+### Summary
+
+Retail now places invoice type below the customer selector. Customer edit/reload/history/add actions share one menu, leaving the input available for searching and displaying customer names. Each cart item normally occupies one 41px line with its name, quantity, amount, removal and More button. Rate, UOM, price-list rate, profile-enabled discounts, tracking and history remain within the same item and expand only when requested. This replaces the earlier always-visible multi-line editors.
+
+### Files Changed
+
+- `frontend/src/posapp/components/pos/invoice/InvoiceCustomerSection.vue`: stack compact customer/type controls at full available width and pass compact presentation to Customer. Classic placement stays unchanged.
+- `frontend/src/posapp/components/pos/customer/Customer.vue`: in compact mode, move the four existing actions into a menu and remove the redundant dropdown arrow/empty dialog margin. Keep customer clearing, search, selection, loading indicators and the existing action handlers. Prevent opening customer search when the actions button is pressed.
+- `frontend/src/posapp/components/pos/invoice/CartItemRow.vue`: single-line primary controls, ellipsis/title for long names, optional editor expansion, and tracking warnings on More. Existing shared quantity/rate/discount/UOM, protected-row, offer and batch/serial rules remain in use.
+- `frontend/src/posapp/utils/cartFieldFocus.ts`: request expansion before keyboard shortcuts focus an optional Retail field; Classic focus behavior is preserved.
+- `frontend/tests/cartItemRowKeyboard.spec.ts` and `frontend/tests/cartFieldFocus.spec.ts`: cover expand/collapse and keyboard expansion. Isolate focus-test DOM fixtures between tests.
+- `frontend/scripts/verify-retail-layout.mjs`: verify customer input width, invoice type below the input, customer actions, one-line row height even with optional profile fields enabled, and editing after expansion.
+- `docs/PR_3167_PORT.md`: record this follow-up.
+
+### Linked Features Checked
+
+Customer search/actions and customer-driven pricing continue through the same store/handlers. POS Profile controls invoice types and edit/display permissions. Cart mutations, UOM conversion, discounts, tracking, stock checks, totals and payment retain the shared controller. No company/warehouse/price-list/tax/payment defaults, backend APIs, invoice payloads, offline cache/sync schemas, printing/QZ or reporting calculations changed. Workspace fractional widths, Apply/Cancel, RTL and Classic fallback are preserved.
+
+### Commands Run
+
+- `npm run type-check`: passed.
+- `npm run build`: TypeScript, production build and Chrome 109 CSS audit.
+- Affected-file ESLint: passed.
+- Focused Vitest regression run: **20 files / 115 tests passed** (customer display/XSS/sync, cart editors/shortcuts, columns, workspace/card/button layouts, discounts, stock, batch/serial allocation, invoice document/outbox, payment totals and printing).
+- `$env:POSA_BROWSER_CHANNEL='msedge'; node scripts/verify-retail-layout.mjs`: passed across 1920×914, 1440×900, 1366×768 dark/RTL, 1100×768 and 1024×768 Classic fallback. Twelve-row fixture shows **9, 7, 5 and 4 complete Retail rows**, respectively. Normal row height is **41px**. Tests also cover customer input space, the actions menu, expanded edits/profile toggles, date selection, totals, Pay and one-pixel LTR/RTL resizing with Apply/Cancel.
+- `git diff --check`: passed.
+
+### Risks / Notes
+
+More intentionally expands an individual item while editing; ordinary rows remain single-line. Long names use ellipsis with the full name in a title. Very narrow custom card widths can still constrain controls. Browser verification uses mocked Frappe services; live customer APIs, real invoice submission, offline server replay and physical printing require a test site. Nothing was pushed, merged or deployed.
+
+Suggested commit: `fix(pos): widen customer selection and keep Retail items on one line`.

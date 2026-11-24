@@ -7,6 +7,7 @@
 				class="customer-autocomplete sleek-field pos-themed-input"
 				density="compact"
 				clearable
+				:menu-icon="compact ? '' : '$dropdown'"
 				variant="solo"
 				color="primary"
 				:label="customerFieldLabel"
@@ -29,7 +30,7 @@
 				:virtual-scroll-item-height="48"
 			>
 				<!-- Edit icon (left) -->
-				<template #prepend-inner>
+				<template v-if="!compact" #prepend-inner>
 					<v-tooltip :text="__('Edit customer')" content-class="posa-theme-tooltip">
 						<template #activator="{ props }">
 							<v-icon
@@ -68,6 +69,18 @@
 
 				<!-- Add icon (right) -->
 				<template #append-inner>
+                    <v-menu v-if="compact" location="bottom end">
+                        <template #activator="{ props }">
+                            <v-btn v-bind="props" icon="mdi-dots-vertical" size="x-small" variant="text" :aria-label="__('Customer actions')" @mousedown.prevent.stop @click.stop />
+                        </template>
+                        <v-list density="compact">
+                            <v-list-item prepend-icon="mdi-account-edit" :title="__('Edit customer')" @click="edit_customer" />
+                            <v-list-item prepend-icon="mdi-reload" :title="__('Reload customers')" :disabled="!networkOnline" @click="reload_customers" />
+                            <v-list-item prepend-icon="mdi-receipt-text-clock-outline" :title="__('View customer invoices')" @click="view_customer_invoices" />
+                            <v-list-item prepend-icon="mdi-plus" :title="__('Add new customer')" :disabled="isCustomerLookupPending" @click="new_customer" />
+                        </v-list>
+                    </v-menu>
+                    <template v-else>
 					<v-tooltip :text="__('View customer invoices')" content-class="posa-theme-tooltip">
 						<template #activator="{ props }">
 							<v-icon
@@ -102,6 +115,7 @@
 							</v-icon>
 						</template>
 					</v-tooltip>
+				</template>
 				</template>
 
 				<!-- Dropdown display -->
@@ -141,7 +155,7 @@
 			</div>
 		</div>
 		<!-- Update customer modal -->
-		<div class="mt-4">
+		<div :class="{ 'mt-4': !compact }">
 			<UpdateCustomer />
 		</div>
 	</div>
@@ -268,6 +282,7 @@ import { ensureCustomersReady } from "../../../modules/customers/customerLoading
 
 export default {
 	props: {
+		compact: Boolean,
 		pos_profile: Object,
 	},
 	components: {

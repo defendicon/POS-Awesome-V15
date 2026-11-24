@@ -94,6 +94,27 @@ const mountRow = (
 	});
 
 describe("Retail inline cart editors", () => {
+	it("keeps optional controls collapsed until requested", async () => {
+		const wrapper = mountRow({}, {
+			presentation: "retail", visibleColumns: [{ key: "qty" }, { key: "discount_percentage" }],
+		});
+		expect(wrapper.attributes("data-retail-expanded")).toBe("false");
+		expect(wrapper.get('[data-column-key="discount_percentage"]').attributes("data-retail-extra")).toBe("true");
+		await wrapper.get('[aria-label="More item options"]').trigger("click");
+		expect(wrapper.attributes("data-retail-expanded")).toBe("true");
+		await wrapper.get('[aria-label="More item options"]').trigger("click");
+		expect(wrapper.attributes("data-retail-expanded")).toBe("false");
+	});
+
+	it("opens optional fields for a keyboard focus request", async () => {
+		const wrapper = mountRow({}, { presentation: "retail", visibleColumns: [{ key: "discount_percentage" }] });
+		const target = wrapper.get('[role="button"]').element as HTMLElement;
+		wrapper.element.dispatchEvent(new CustomEvent("posa-expand-editor", {detail: {target, activate: true}}));
+		await wrapper.vm.$nextTick();
+		await wrapper.vm.$nextTick();
+		expect(wrapper.attributes("data-retail-expanded")).toBe("true");
+		expect(wrapper.find("input").exists()).toBe(true);
+	});
 	it("commits quantities and step actions inside the card", async () => {
 		const add = vi.fn(), minus = vi.fn(), update = vi.fn();
 		const wrapper = mountRow({}, { presentation: "retail", onAddOne: add, onMinusClick: minus, onUpdateQty: update });

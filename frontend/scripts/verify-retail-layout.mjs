@@ -97,12 +97,24 @@ const postingDate=ref('24-11-2026');const invoiceType=ref('Invoice');const disco
 		if (overflow.actual > overflow.expected + 1) console.log(await page.evaluate(() => [...document.querySelectorAll("body *")].filter(el=>el.getBoundingClientRect().right>innerWidth+1).map(el=>({tag:el.tagName,cls:el.className,right:el.getBoundingClientRect().right})).slice(0,15)));
 		assert.ok(overflow.actual <= overflow.expected + 1, JSON.stringify({ width, overflow }));
 		if (width >= 1100) {
+            const customerLayout = await page.evaluate(() => {
+                const input = document.querySelector('.customer-autocomplete input').getBoundingClientRect();
+                const type = document.querySelector('.invoice-customer-section--compact > :nth-child(2)').getBoundingClientRect();
+                return { inputWidth: input.width, inputBottom: input.bottom, typeTop: type.top };
+            });
+            assert.ok(customerLayout.inputWidth >= 90, JSON.stringify(customerLayout));
+            assert.ok(customerLayout.typeTop >= customerLayout.inputBottom, 'Invoice type must be below customer');
+            await page.getByRole('button', {name: 'Customer actions', exact: true}).click();
+            assert.equal(await page.getByText('Edit customer', {exact: true}).count(), 1);
+            await page.keyboard.press('Escape');
+            await page.getByText('Edit customer', {exact: true}).waitFor({state: 'hidden'});
             const density = await page.evaluate(() => {
                 const panel=document.querySelector('.invoice-main-card').getBoundingClientRect();
                 const rows=[...document.querySelectorAll('.posa-cart-item-row--retail')].map(row=>row.getBoundingClientRect());
                 return { visible:rows.filter(row=>row.top>=panel.top && row.bottom<=panel.bottom).length, panel:panel.height, summary:document.querySelector('.retail-summary').getBoundingClientRect().height, row:rows[0].height };
             });
             console.log('Cart density', width, density);
+            assert.ok(density.row <= 44, 'Normal Retail row must stay on one line');
             assert.ok(density.visible >= (width >= 1920 ? 6 : width >= 1440 ? 5 : 3), 'Too few visible cart rows: '+JSON.stringify({width,density}));
             await page.screenshot({path:path.join(output,width+'-density.png'),fullPage:true});
             if (customized) {
@@ -155,10 +167,16 @@ const postingDate=ref('24-11-2026');const invoiceType=ref('Invoice');const disco
 				posa_allow_user_to_edit_rate: 1, posa_allow_user_to_edit_item_discount: 1,
 				posa_display_discount_percentage: 1, posa_display_discount_amount: 1,
 			}));
+			assert.ok(await row.evaluate(el => el.getBoundingClientRect().height) <= 44, 'Enabled optional fields must not inflate collapsed rows');
+			await row.locator('[aria-label="More item options"]').click();
 			await row.locator('[aria-label="Edit rate"]').click();
 			await row.locator('[data-column-key="rate"] input').fill('14');
 			await row.locator('[data-column-key="rate"] input').press('Enter');
 			assert.match(await page.locator('.retail-totals__due-amount').innerText(), /37.00/);
+			if (await row.getAttribute('data-retail-expanded') !== 'true') {
+				await row.locator('[aria-label="More item options"]').click();
+			}
+			assert.equal(await row.getAttribute('data-retail-expanded'), 'true');
 			for (const [field, value] of [['discount_percentage', '10'], ['discount_amount', '2']]) {
 				await row.locator(`[data-column-key="${field}"] [role="button"]`).click();
 				await row.locator(`[data-column-key="${field}"] input`).fill(value);
@@ -171,6 +189,8 @@ const postingDate=ref('24-11-2026');const invoiceType=ref('Invoice');const disco
 				assert.equal(await row.locator('[data-column-key="rate"]').evaluate(el => getComputedStyle(el, '::before').color), 'rgb(255, 255, 255)');
 			}
 			await page.screenshot({path: path.join(output, `${width}-inline-options.png`), fullPage: true});
+			await row.locator('[aria-label="More item options"]').click();
+			assert.ok(await row.evaluate(el => el.getBoundingClientRect().height) <= 44);
 			await page.evaluate(() => window.__retailCheck.setProfile({
 				posa_allow_user_to_edit_rate: '0', posa_allow_user_to_edit_item_discount: '0',
 				posa_display_discount_percentage: '0', posa_display_discount_amount: '0',
