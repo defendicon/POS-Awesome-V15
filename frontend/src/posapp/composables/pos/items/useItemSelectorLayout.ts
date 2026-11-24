@@ -9,7 +9,17 @@ import {
 type SelectorLayoutOptions = {
 	resizeDebounce?: number;
 	loadVisibleItems?: () => void;
+	/** Returns the selector presentation ("classic", "retail", ...). */
+	presentation?: () => string;
 };
+
+/** Retail card grid: compact square-ish product cards. */
+const RETAIL_MIN_CARD_WIDTH = 150;
+const RETAIL_CARD_ROW_HEIGHT = 168;
+const RETAIL_CARD_GAP = 14;
+const RETAIL_PANE_RATIO = 0.64;
+/** Column/panel paddings and borders between the window and the card grid. */
+const RETAIL_PANE_CHROME = 64;
 
 /**
  * Manages the layout metrics and resize behavior for the ItemsSelector component.
@@ -19,7 +29,9 @@ export function useItemSelectorLayout(options: SelectorLayoutOptions = {}) {
 	const {
 		resizeDebounce = 100,
 		loadVisibleItems, // Method to load more items on scroll (pagination)
+		presentation = () => "classic",
 	} = options;
+	const isRetail = computed(() => presentation() === "retail");
 
 	// State
 	const windowWidth = ref(window.innerWidth);
@@ -28,11 +40,27 @@ export function useItemSelectorLayout(options: SelectorLayoutOptions = {}) {
 	const scrollThrottle = ref<number | null>(null);
 
 	// Computed Metrics
-	const cardColumns = computed(() => getCardColumns(windowWidth.value));
-	const cardGap = computed(() => getCardGap(windowWidth.value));
-	const cardPadding = computed(() => getCardPadding(windowWidth.value));
+	const cardPadding = computed(() =>
+		isRetail.value ? 0 : getCardPadding(windowWidth.value),
+	);
+	const cardGap = computed(() =>
+		isRetail.value ? RETAIL_CARD_GAP : getCardGap(windowWidth.value),
+	);
+	const cardColumns = computed(() => {
+		if (!isRetail.value) {
+			return getCardColumns(windowWidth.value);
+		}
+		const paneWidth = windowWidth.value * RETAIL_PANE_RATIO - RETAIL_PANE_CHROME;
+		const columns = Math.floor(
+			(paneWidth + RETAIL_CARD_GAP) / (RETAIL_MIN_CARD_WIDTH + RETAIL_CARD_GAP),
+		);
+		return Math.min(8, Math.max(2, columns));
+	});
 
 	const cardRowHeight = computed(() => {
+		if (isRetail.value) {
+			return RETAIL_CARD_ROW_HEIGHT;
+		}
 		if (windowWidth.value <= 768) {
 			return 260;
 		}
@@ -53,6 +81,9 @@ export function useItemSelectorLayout(options: SelectorLayoutOptions = {}) {
 		}
 		// Fallback estimation (e.g. 5 columns of regular grid)
 		// This is just a safe default until mounted
+		if (isRetail.value) {
+			return windowWidth.value * RETAIL_PANE_RATIO - RETAIL_PANE_CHROME;
+		}
 		return windowWidth.value * 0.4; // Approx 40% of screen for items selector usually
 	});
 
@@ -69,7 +100,7 @@ export function useItemSelectorLayout(options: SelectorLayoutOptions = {}) {
 		const paddingTotal = cardPadding.value * 2;
 		const available = Math.max(0, containerWidth - gapTotal - paddingTotal);
 		const width = Math.floor(available / columns);
-		return Math.max(180, width);
+		return Math.max(isRetail.value ? RETAIL_MIN_CARD_WIDTH - 20 : 180, width);
 	});
 
 	// Actions

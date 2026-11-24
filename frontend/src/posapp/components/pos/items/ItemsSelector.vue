@@ -70,6 +70,7 @@
 						@open-new-item="openNewItemDialog"
 						@toggle-settings="toggleItemSettings"
 						@reload-items="forceReloadItems"
+						:variant="isRetailPresentation ? 'retail' : 'classic'"
 						ref="itemHeader"
 					/>
 					<div
@@ -92,6 +93,16 @@
 							:aria-label="__('Loading alternate items')"
 						/>
 					</div>
+					<RetailItemFilters
+						v-if="isRetailPresentation && !alternateMode"
+						v-model="item_group"
+						v-model:items-view="items_view"
+						:items-group="items_group"
+						:group-counts="retailGroupCounts"
+						:total-count="retailTotalCount"
+						:active-price-list="active_price_list"
+						:show-price-list="parseBooleanSetting(pos_profile.posa_enable_price_list_dropdown)"
+					/>
 				</v-card>
 
 				<ItemSettingsDialog
@@ -183,6 +194,8 @@
 								:format-number="memoizedFormatNumber"
 								:rate-precision="ratePrecision"
 								:is-negative="isNegative"
+								:variant="isRetailPresentation ? 'retail' : 'classic'"
+								:cart-qty-by-code="isRetailPresentation ? retailCartQtyByCode : undefined"
 								:no-items-title="__('No items found')"
 								:no-items-subtitle="__('Try adjusting your search or filters')"
 								:clear-search-label="__('Clear Search')"
@@ -242,8 +255,18 @@
 				</div>
 			</v-expand-transition>
 		</v-card>
+		<div v-if="isRetailPresentation" class="retail-items-footer" data-testid="retail-items-footer">
+			<button type="button" class="retail-link-btn" @click="uiStore.setActiveView('offers')">
+				<v-icon icon="mdi-tag-outline" size="18" />
+				{{ offersCount }} {{ __("Offers") }}
+			</button>
+			<button type="button" class="retail-link-btn" @click="uiStore.setActiveView('coupons')">
+				<v-icon icon="mdi-ticket-percent-outline" size="18" />
+				{{ couponsCount }} {{ __("Coupons") }}
+			</button>
+		</div>
 		<ItemActionToolbar
-			v-if="presentation !== 'counter-grid-dialog'"
+			v-else-if="presentation !== 'counter-grid-dialog'"
 			v-model="item_group"
 			:items-group="items_group"
 			v-model:items-view="items_view"
@@ -301,6 +324,7 @@ import ItemActionToolbar from "./ItemActionToolbar.vue";
 import ItemSettingsDialog from "./ItemSettingsDialog.vue";
 import ItemHeader from "./ItemHeader.vue";
 import ItemsSelectorCards from "./ItemsSelectorCards.vue";
+import RetailItemFilters from "./RetailItemFilters.vue";
 import ItemsSelectorTable from "./ItemsSelectorTable.vue";
 import PharmacyItemSearchTable from "./PharmacyItemSearchTable.vue";
 import NewItemDialog from "./NewItemDialog.vue";
@@ -469,7 +493,7 @@ const {
 // 2. Local State & Settings
 const search_input = ref("");
 const first_search = ref("");
-const items_view = ref("list");
+const items_view = ref(props.presentation === "retail" ? "card" : "list");
 const itemsPerPage = ref(50);
 const clearingSearch = ref(false);
 const isDragging = ref(false);
@@ -536,6 +560,40 @@ const usesLimitSearch = computed(() =>
 const { stockSettings: stock_settings_ref } = storeToRefs(uiStore);
 const stock_settings = computed(() => stock_settings_ref.value || {});
 const items_group = computed(() => itemsIntegration.items_group.value || []);
+
+// --- Retail presentation (display only; selection logic is shared) ---
+const isRetailPresentation = computed(() => props.presentation === "retail");
+const retailCatalog = computed(() => {
+	const source = (itemsIntegration as any).items?.value;
+	return Array.isArray(source) ? source : [];
+});
+const retailGroupCounts = computed(() => {
+	const counts: Record<string, number> = {};
+	if (!isRetailPresentation.value) return counts;
+	for (const item of retailCatalog.value) {
+		const group = item?.item_group;
+		if (group) counts[group] = (counts[group] || 0) + 1;
+	}
+	return counts;
+});
+const retailTotalCount = computed(() => retailCatalog.value.length);
+const retailCartQtyByCode = computed(() => {
+	const quantities: Record<string, number> = {};
+	if (!isRetailPresentation.value) return quantities;
+	const lines = (invoiceStore as any).items;
+	for (const line of Array.isArray(lines) ? lines : []) {
+		const code = line?.item_code;
+		if (!code) continue;
+		quantities[code] = (quantities[code] || 0) + (Number(line.qty) || 0);
+	}
+	return quantities;
+});
+watch(
+	() => props.presentation,
+	(presentation) => {
+		if (presentation === "retail") items_view.value = "card";
+	},
+);
 const offersCount = computed(() => uiStore.offersCount || 0);
 const couponsCount = computed(() => uiStore.couponsCount || 0);
 // selected_currency is now a local ref synced via eventBus
@@ -951,6 +1009,7 @@ const {
 	scheduleCardMetricsUpdate,
 	onListScroll: handleListScroll,
 } = useItemSelectorLayout({
+	presentation: () => props.presentation,
 	resizeDebounce: 100,
 	loadVisibleItems: () => itemsLoader.loadVisibleItems(),
 });

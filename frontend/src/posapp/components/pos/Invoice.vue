@@ -46,10 +46,24 @@
 					type="info"
 					density="compact"
 					class="invoice-status-alert mb-0"
-					v-if="pos_profile.create_pos_invoice_instead_of_sales_invoice"
+					v-if="pos_profile.create_pos_invoice_instead_of_sales_invoice && !isRetailPresentation"
 				>
 					{{ __("Invoices saved as POS Invoices") }}
 				</v-alert>
+				<div v-if="isRetailPresentation" class="retail-sale-head" data-testid="retail-sale-head">
+					<div class="retail-sale-head__copy">
+						<span class="retail-eyebrow">{{ isReturnInvoice ? __("Current return") : __("Current sale") }}</span>
+						<strong class="retail-sale-head__number">{{ invoice_doc?.name || __("New sale") }}</strong>
+					</div>
+					<span class="retail-badge retail-badge--info">
+						<v-icon icon="mdi-information-outline" size="16" />
+						{{
+							pos_profile.create_pos_invoice_instead_of_sales_invoice
+								? __("Saved as POS Invoice")
+								: __("Saved as Sales Invoice")
+						}}
+					</span>
+				</div>
 				<InvoiceCardLayout
 					class="invoice-sections"
 					:user="invoiceLayoutUser"
@@ -172,7 +186,21 @@
 							<div class="invoice-section-heading">
 								<h3 class="invoice-section-heading__title">{{ __("Invoice Items") }}</h3>
 							</div>
-							<div class="items-table-wrapper">
+							<v-btn v-if="isRetailPresentation" size="small" variant="text" data-testid="retail-cart-details" @click="retailDetailedCart = !retailDetailedCart">{{ retailDetailedCart ? __("Compact cart") : __("Edit quantities, prices, UOM and batches") }}</v-btn>
+							<div v-if="isRetailPresentation && !retailDetailedCart" class="items-table-wrapper items-table-wrapper--retail">
+							<RetailCartList
+								:items="items"
+								:is-return-invoice="isReturnInvoice"
+								:format-currency="formatCurrency"
+								:format-float="formatFloat"
+								:add-one="add_one"
+								:subtract-one="subtract_one"
+								:remove-item="remove_item"
+								:event-bus="eventBus"
+								@edit-item="openItemQuickEditForItem"
+							/>
+						</div>
+							<div v-else class="items-table-wrapper">
 								<InvoiceItemsActionToolbar
 									ref="actionToolbar"
 									:itemSearch="itemSearch"
@@ -318,6 +346,7 @@ import MultiCurrencyRow from "./invoice/MultiCurrencyRow.vue";
 import CancelSaleDialog from "./invoice/CancelSaleDialog.vue";
 import InvoiceSummary from "./invoice/InvoiceSummary.vue";
 import ItemsTable from "./invoice/ItemsTable.vue";
+import RetailCartList from "./invoice/RetailCartList.vue";
 import InvoiceItemsActionToolbar from "./invoice/InvoiceItemsActionToolbar.vue";
 import PackedItemsDialog from "./invoice/PackedItemsDialog.vue";
 import PaymentConfirmationDialog from "./payments/PaymentConfirmationDialog.vue";
@@ -451,6 +480,7 @@ export default {
 	data() {
 		return {
 			cartRecoveryError: "",
+			retailDetailedCart: false,
 			cartRecoveryMessage: "",
 			cartRecoveryCandidates: [],
 			cartRecoveryReviewWarning: "",
@@ -515,6 +545,7 @@ export default {
 		InvoiceSummary,
 		CancelSaleDialog,
 		ItemsTable,
+		RetailCartList,
 		InvoiceItemsActionToolbar,
 		PackedItemsDialog,
 		PaymentConfirmationDialog,
@@ -536,6 +567,9 @@ export default {
 		},
 		isCounterGridPresentation() {
 			return this.presentation === "counter-grid";
+		},
+		isRetailPresentation() {
+			return this.presentation === "retail";
 		},
 		items: {
 			get() {

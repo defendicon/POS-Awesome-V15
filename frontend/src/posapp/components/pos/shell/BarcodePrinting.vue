@@ -37,7 +37,7 @@
 							:aria-label="__('Generate SSCC-18 shipping labels')"
 						></v-btn>
 						<v-btn
-							icon="mdi-verified"
+							icon="mdi-check-decagram"
 							variant="text"
 							color="white"
 							@click="verificationDialog = true"

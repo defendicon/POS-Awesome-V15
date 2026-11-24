@@ -1,9 +1,10 @@
 <template>
 	<CustomizableButtonLayout
-		v-if="isCounterGrid"
+		v-if="isCounterGrid || isRetail"
 		counter
-		class="counter-grid-actions"
-		data-testid="counter-grid-actions"
+		:view="isRetail ? 'retail' : 'counter-grid'"
+		:class="isRetail ? 'retail-actions' : 'counter-grid-actions'"
+		:data-testid="isRetail ? 'retail-actions' : 'counter-grid-actions'"
 		:user="layoutUser"
 		:profile="pos_profile.name || ''"
 		:defaults="buttonDefaults"
@@ -11,9 +12,9 @@
 	>
 		<template #save-clear>
 			<v-btn
-				variant="tonal"
+				:variant="isRetail ? 'outlined' : 'tonal'"
 				prepend-icon="mdi-content-save-outline"
-				class="counter-grid-action"
+				:class="isRetail ? 'retail-action' : 'counter-grid-action'"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-save-clear"
 				:loading="saveLoading"
@@ -24,9 +25,9 @@
 		</template>
 		<template #drafts>
 			<v-btn
-				variant="tonal"
+				:variant="isRetail ? 'outlined' : 'tonal'"
 				prepend-icon="mdi-tray-full"
-				class="counter-grid-action"
+				:class="isRetail ? 'retail-action' : 'counter-grid-action'"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-drafts"
 				:loading="loadDraftsLoading"
@@ -37,9 +38,9 @@
 		</template>
 		<template #management>
 			<v-btn
-				variant="tonal"
+				:variant="isRetail ? 'outlined' : 'tonal'"
 				prepend-icon="mdi-folder-search-outline"
-				class="counter-grid-action"
+				:class="isRetail ? 'retail-action' : 'counter-grid-action'"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-management"
 				:loading="invoiceManagementLoading"
@@ -50,9 +51,9 @@
 		</template>
 		<template #returns>
 			<v-btn
-				variant="tonal"
+				:variant="isRetail ? 'outlined' : 'tonal'"
 				prepend-icon="mdi-backup-restore"
-				class="counter-grid-action"
+				:class="isRetail ? 'retail-action' : 'counter-grid-action'"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-returns"
 				:loading="returnsLoading"
@@ -66,9 +67,9 @@
 				<template #activator="{ props: menuProps }">
 					<v-btn
 						v-bind="menuProps"
-						variant="tonal"
+						:variant="isRetail ? 'outlined' : 'tonal'"
 						prepend-icon="mdi-dots-horizontal"
-						class="counter-grid-action"
+						:class="isRetail ? 'retail-action' : 'counter-grid-action'"
 						data-pos-keyboard-target="invoice-action"
 						data-testid="invoice-action-more"
 					>
@@ -125,9 +126,9 @@
 		<template #cancel-sale>
 			<v-btn
 				color="error"
-				variant="tonal"
+				:variant="isRetail ? 'outlined' : 'tonal'"
 				prepend-icon="mdi-close-circle-outline"
-				class="counter-grid-action counter-grid-action--cancel"
+				:class="isRetail ? 'retail-action retail-action--danger' : 'counter-grid-action counter-grid-action--cancel'"
 				data-pos-keyboard-target="invoice-action"
 				data-testid="invoice-action-cancel-sale"
 				:loading="cancelLoading"
@@ -138,16 +139,17 @@
 		</template>
 		<template #pay>
 			<v-btn
-				color="success"
+				:color="isRetail ? 'secondary' : 'success'"
 				variant="flat"
 				:prepend-icon="exchangeActive ? 'mdi-swap-horizontal-bold' : 'mdi-credit-card-check-outline'"
-				class="counter-grid-action counter-grid-action--pay"
+				:class="isRetail ? 'retail-pay' : 'counter-grid-action counter-grid-action--pay'"
 				data-pos-keyboard-target="pay"
 				data-testid="invoice-action-pay"
 				:loading="paymentLoading"
 				@click="$emit('show-payment')"
 			>
-				{{ exchangeActive ? __("Complete Exchange") : __("Pay") }}
+				<span>{{ exchangeActive ? __("Complete Exchange") : __("Pay") }} <kbd v-if="isRetail" class="retail-key-hint">F9</kbd></span>
+				<span v-if="isRetail" class="retail-pay__amount">{{ payLabel }}</span>
 			</v-btn>
 		</template>
 	</CustomizableButtonLayout>
@@ -315,6 +317,7 @@ const props = defineProps({
 	paymentLoading: Boolean,
 	customerDisplayLoading: Boolean,
 	exchangeActive: Boolean,
+	payLabel: { type: String, default: "" },
 });
 
 defineEmits([
@@ -332,20 +335,21 @@ defineEmits([
 ]);
 
 const __ = window.__;
+const isRetail = computed(() => props.presentation === "retail");
 const isCounterGrid = computed(() => props.presentation === "counter-grid");
 const showCustomerDisplayButton = computed(() =>
 	parseBooleanSetting(props.pos_profile?.posa_enable_customer_display),
 );
 const showMoreActions = computed(
 	() =>
-		isCounterGrid.value ||
+		isCounterGrid.value || isRetail.value ||
 		props.pos_profile?.custom_allow_select_sales_order == 1 ||
 		Boolean(props.pos_profile?.posa_allow_print_draft_invoices) ||
 		showCustomerDisplayButton.value,
 );
 
 const buttonDefaults = computed(() =>
-	(isCounterGrid.value
+	(isCounterGrid.value || isRetail.value
 		? ["save-clear", "drafts", "management", "returns", "more", "cancel-sale", "pay"]
 		: [
 				"save-clear",

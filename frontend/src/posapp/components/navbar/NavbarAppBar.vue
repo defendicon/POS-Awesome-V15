@@ -1,10 +1,11 @@
 <template>
 	<v-app-bar
 		flat
-		:height="isMobile ? 64 : 56"
+		:height="isMobile || isRetail ? 64 : 56"
 		:class="[
 			'pos-navbar-enhanced elevation-2 pos-themed-card pos-theme-immediate',
 			{ 'pos-navbar-enhanced--counter-grid': isCounterGrid },
+			{ 'pos-navbar-enhanced--retail': isRetail },
 			rtlClasses,
 			isRtl ? 'rtl-app-bar' : 'ltr-app-bar',
 			isMobile ? 'mobile-navbar' : 'desktop-navbar',
@@ -48,6 +49,17 @@
 					<span class="pos-navbar-title-light">{{ branding.name }}</span>
 				</template>
 			</v-toolbar-title>
+			<div v-if="isRetail && posProfile?.name" class="retail-register" data-testid="retail-register">
+				<span class="retail-register__icon"><v-icon icon="mdi-storefront-outline" size="20" /></span>
+				<span class="retail-register__copy">
+					<span class="retail-register__name">{{ posProfile.name }}</span>
+					<span class="retail-register__meta">
+						<template v-if="openingShiftName">{{ openingShiftName }} · </template>{{
+							openingShiftName ? __("Shift open") : __("No open shift")
+						}}
+					</span>
+				</span>
+			</div>
 		</div>
 
 		<v-spacer />
@@ -100,6 +112,11 @@
 
 			<!-- Desktop: Show all items normally -->
 			<template v-else>
+				<div v-if="isRetail" class="retail-clock" data-testid="retail-clock" aria-live="off">
+					<span>{{ retailDate }}</span>
+					<span class="retail-clock__sep">/</span>
+					<strong>{{ retailTime }}</strong>
+				</div>
 				<!-- Enhanced connectivity status indicator (kept outside info menu) -->
 				<div class="gadget-wrapper status-gadget">
 					<slot name="status-indicator"></slot>
@@ -232,7 +249,8 @@
 <script>
 import { useRtl } from "../../composables/core/useRtl";
 import { resolvePosBranding } from "../../config/branding";
-import { isCounterGridTemplate } from "../../utils/posUiTemplate";
+import { isCounterGridTemplate, isRetailTemplate } from "../../utils/posUiTemplate";
+import { useUIStore } from "../../stores/uiStore";
 import posLogo from "../pos/pos.png";
 import NavbarInfoGadgets from "./NavbarInfoGadgets.vue";
 
@@ -253,6 +271,8 @@ export default {
 	data() {
 		return {
 			windowWidth: window.innerWidth,
+			retailNow: new Date(),
+			retailClockTimer: null,
 			resizeRafId: null,
 		};
 	},
@@ -262,6 +282,7 @@ export default {
 		this.$el.addEventListener("keydown", this.handleKeyboardNavigation, { passive: false });
 	},
 	beforeUnmount() {
+		if (this.retailClockTimer) window.clearInterval(this.retailClockTimer);
 		window.removeEventListener("resize", this.updateWindowWidth);
 		if (this.$el && this.$el.removeEventListener) {
 			this.$el.removeEventListener("keydown", this.handleKeyboardNavigation);
@@ -272,6 +293,15 @@ export default {
 		}
 	},
 	watch: {
+		isRetail: {
+			immediate: true,
+			handler(active) {
+				if (this.retailClockTimer) window.clearInterval(this.retailClockTimer);
+				this.retailClockTimer = active
+					? window.setInterval(() => { this.retailNow = new Date(); }, 20000)
+					: null;
+			},
+		},
 		branding: {
 			handler(value) {
 				if (typeof document !== "undefined") {
@@ -367,6 +397,26 @@ export default {
 			return this.windowWidth >= 1024;
 		},
 
+		isRetail() {
+			return isRetailTemplate(this.posProfile, this.windowWidth);
+		},
+		openingShiftName() {
+			return String(useUIStore().posOpeningShift?.name || "");
+		},
+		retailDate() {
+			return this.retailNow.toLocaleDateString(undefined, {
+				weekday: "short",
+				day: "numeric",
+				month: "short",
+			});
+		},
+		retailTime() {
+			return this.retailNow.toLocaleTimeString(undefined, {
+				hour: "2-digit",
+				minute: "2-digit",
+				hour12: false,
+			});
+		},
 		isCounterGrid() {
 			return isCounterGridTemplate(this.posProfile, this.windowWidth);
 		},

@@ -166,7 +166,7 @@
 							<span>{{ __("Loading item sales...") }}</span>
 						</div>
 						<div v-else-if="!historyRows.length" class="posa-item-history-empty">
-							<v-icon size="42" color="medium-emphasis">mdi-receipt-text-search-outline</v-icon>
+							<v-icon size="42" color="medium-emphasis">mdi-text-box-search-outline</v-icon>
 							<div class="text-subtitle-1">{{ __("No sales found for this item") }}</div>
 							<div class="text-caption text-medium-emphasis">
 								{{ __("Try changing the filters or date range.") }}

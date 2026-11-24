@@ -23,82 +23,89 @@
 	--pos-elevation-3: 0 18px 48px rgba(19, 43, 40, 0.14), 0 4px 12px rgba(19, 43, 40, 0.08);
 
 	/* Primary Background Colors */
-	--pos-bg-primary: #ffffff;
-	--pos-bg-secondary: #f3f7f6;
-	--pos-bg-tertiary: #e1eeec;
+	--pos-bg-primary: #f4f3f0;
+	--pos-bg-secondary: #f4f3f0;
+	--pos-bg-tertiary: #fef1e1;
 
 	/* Surface Colors */
 	--pos-surface: #ffffff;
-	--pos-surface-variant: #e7efed;
-	--pos-surface-container: #f8faf9;
+	--pos-surface-variant: #f1efeb;
+	--pos-surface-container: #f8f7f4;
 
 	/* Text Colors */
-	--pos-text-primary: #172321;
-	--pos-text-secondary: #52615e;
-	--pos-text-disabled: #8b9794;
-	--pos-text-hint: #73817e;
-	--pos-text-muted: #61706d;
+	--pos-text-primary: #14171a;
+	--pos-text-secondary: #4b5058;
+	--pos-text-disabled: #a3a7ae;
+	--pos-text-hint: #b8bcc2;
+	--pos-text-muted: #6b7079;
 
 	/* Primary Colors - Original Light Mode */
-	--pos-primary: #006d72;
-	--pos-primary-variant: #00575b;
-	--pos-primary-container: #d4efed;
+	--pos-primary: #15181c;
+	--pos-primary-variant: #050708;
+	--pos-primary-container: #ecebe7;
 	--pos-on-primary: #ffffff;
 
 	/* Secondary Colors - Original Light Mode */
-	--pos-secondary: #0b7a75;
-	--pos-secondary-variant: #075f5b;
-	--pos-secondary-container: #d8efeb;
-	--pos-on-secondary: #ffffff;
+	--pos-secondary: #f78f1e;
+	--pos-secondary-variant: #d9740a;
+	--pos-secondary-container: #fef1e1;
+	--pos-on-secondary: #050708;
 
 	/* Accent Colors - Modern Orange (Light Mode) */
-	--pos-accent: #c4511b;
-	--pos-accent-variant: #9f3d10;
+	--pos-accent: #f78f1e;
+	--pos-accent-variant: #d9740a;
 
 	/* Semantic Colors */
-	--pos-success: #16784a;
-	--pos-success-container: #dff3e7;
-	--pos-warning: #a94f08;
-	--pos-warning-container: #fff0d8;
-	--pos-error: #b3261e;
-	--pos-error-container: #f9dedc;
-	--pos-info: #0b67a3;
-	--pos-info-container: #dceefa;
+	--pos-success: #1e9e5a;
+	--pos-success-container: #e6f5ec;
+	--pos-warning: #e39a13;
+	--pos-warning-container: #fdf3e1;
+	--pos-error: #d64545;
+	--pos-error-container: #fbeaea;
+	--pos-info: #2f6fdb;
+	--pos-info-container: #e8effb;
 
 	/* Border and Divider Colors */
-	--pos-border: #c7d3d0;
-	--pos-border-light: #dce5e3;
-	--pos-divider: #e4ebe9;
-	--pos-outline: #95a6a2;
+	--pos-border: rgba(14, 16, 19, 0.1);
+	--pos-border-light: rgba(14, 16, 19, 0.06);
+	--pos-divider: rgba(14, 16, 19, 0.07);
+	--pos-outline: rgba(14, 16, 19, 0.16);
 
 	/* Shadow Colors */
-	--pos-shadow: rgba(0, 0, 0, 0.1);
-	--pos-shadow-dark: rgba(0, 0, 0, 0.2);
-	--pos-shadow-light: rgba(0, 0, 0, 0.05);
+	--pos-shadow: rgba(14, 16, 19, 0.08);
+	--pos-shadow-dark: rgba(14, 16, 19, 0.16);
+	--pos-shadow-light: rgba(14, 16, 19, 0.04);
 
 	/* Interactive Colors */
-	--pos-hover-bg: rgba(25, 118, 210, 0.04);
-	--pos-pressed-bg: rgba(25, 118, 210, 0.08);
-	--pos-selected-bg: rgba(25, 118, 210, 0.12);
-	--pos-focus-bg: rgba(25, 118, 210, 0.06);
+	--pos-hover-bg: rgba(247, 143, 30, 0.08);
+	--pos-pressed-bg: rgba(247, 143, 30, 0.14);
+	--pos-selected-bg: rgba(247, 143, 30, 0.16);
+	--pos-focus-bg: rgba(247, 143, 30, 0.1);
 
 	/* Card and Component Backgrounds */
 	--pos-card-bg: #ffffff;
-	--pos-input-bg: #f8faf9;
+	--pos-input-bg: #f6f5f2;
 	--pos-button-bg: #ffffff;
 	--pos-menu-bg: #ffffff;
 	--pos-dialog-bg: #ffffff;
 	--pos-surface-raised: #ffffff;
-	--pos-surface-muted: #edf3f1;
+	--pos-surface-muted: #f8f7f4;
 	--pos-tooltip-bg: #ffffff;
-	--pos-tooltip-border: rgba(15, 23, 42, 0.12);
-	--pos-tooltip-shadow: rgba(15, 23, 42, 0.14);
+	--pos-tooltip-border: rgba(14, 16, 19, 0.12);
+	--pos-tooltip-shadow: rgba(14, 16, 19, 0.14);
+
+	/* Retail brand */
+	--pos-brand-ink: #050708;
+	--pos-brand-orange: #f78f1e;
+	--pos-brand-orange-deep: #d9740a;
+	--pos-brand-orange-soft: #fef1e1;
+	--pos-font-family: var(--font-stack, "InterVariable", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif);
 
 	/* Shared Radius Scale */
 	--pos-radius-xs: 6px;
-	--pos-radius-sm: 9px;
-	--pos-radius-md: 13px;
-	--pos-radius-lg: 18px;
+	--pos-radius-sm: 8px;
+	--pos-radius-md: 12px;
+	--pos-radius-lg: 16px;
 
 	/* Shared Spacing Scale */
 	--pos-space-1: 4px;
@@ -110,10 +117,10 @@
 
 	/* Special Use Cases */
 	--pos-navbar-bg: #ffffff;
-	--pos-sidebar-bg: #edf3f1;
+	--pos-sidebar-bg: #f8f7f4;
 	--pos-invoice-bg: #ffffff;
-	--pos-table-header-bg: #e7efed;
-	--pos-table-row-hover: rgba(0, 109, 114, 0.06);
+	--pos-table-header-bg: #f8f7f4;
+	--pos-table-row-hover: rgba(247, 143, 30, 0.06);
 
 	/* RTL Support Variables */
 	--pos-direction: ltr;
@@ -141,87 +148,87 @@
 	--pos-elevation-2: 0 10px 28px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.22);
 	--pos-elevation-3: 0 20px 52px rgba(0, 0, 0, 0.44), 0 6px 16px rgba(0, 0, 0, 0.3);
 	/* Primary Background Colors */
-	--pos-bg-primary: #111918;
-	--pos-bg-secondary: #0d1413;
-	--pos-bg-tertiary: #22302e;
+	--pos-bg-primary: #0b0c0e;
+	--pos-bg-secondary: #0b0c0e;
+	--pos-bg-tertiary: #2a1e10;
 
 	/* Surface Colors */
-	--pos-surface: #17201f;
-	--pos-surface-variant: #2b3937;
-	--pos-surface-container: #202c2a;
+	--pos-surface: #15171a;
+	--pos-surface-variant: #22252a;
+	--pos-surface-container: #1c1f23;
 
 	/* Text Colors - Enhanced Contrast for Dark Mode */
-	--pos-text-primary: #eef5f3;
-	--pos-text-secondary: #bdc9c6;
-	--pos-text-disabled: #84918e;
-	--pos-text-hint: #9aa7a4;
-	--pos-text-muted: #aebbb8;
+	--pos-text-primary: #f4f3f0;
+	--pos-text-secondary: #c9ccd1;
+	--pos-text-disabled: #6e737b;
+	--pos-text-hint: #7d838b;
+	--pos-text-muted: #9aa0a8;
 
 	/* Primary Colors - High Contrast Blue-Cyan */
-	--pos-primary: #75d6d0;
-	--pos-primary-variant: #9be7e1;
-	--pos-primary-container: #164946;
-	--pos-on-primary: #000000;
+	--pos-primary: #f78f1e;
+	--pos-primary-variant: #d9740a;
+	--pos-primary-container: #3a2610;
+	--pos-on-primary: #050708;
 
 	/* Secondary Colors - High Contrast Cyan-Green */
-	--pos-secondary: #9bd0ca;
-	--pos-secondary-variant: #b7e2dd;
-	--pos-secondary-container: #294b48;
-	--pos-on-secondary: #000000;
+	--pos-secondary: #ffb25e;
+	--pos-secondary-variant: #f78f1e;
+	--pos-secondary-container: #3a2610;
+	--pos-on-secondary: #050708;
 
 	/* Accent Colors - Modern Orange */
-	--pos-accent: #ffb68f;
-	--pos-accent-variant: #ff8c56;
+	--pos-accent: #f78f1e;
+	--pos-accent-variant: #d9740a;
 
 	/* Semantic Colors - High Contrast */
-	--pos-success: #75d6a1;
-	--pos-success-container: #184f34;
-	--pos-warning: #ffbd79;
-	--pos-warning-container: #5c3816;
-	--pos-error: #ffb4ab;
-	--pos-error-container: #5c201d;
-	--pos-info: #9dccf0;
-	--pos-info-container: #173f5c;
+	--pos-success: #3cc47c;
+	--pos-success-container: #13311f;
+	--pos-warning: #f2b33d;
+	--pos-warning-container: #3a2c10;
+	--pos-error: #ef6a6a;
+	--pos-error-container: #3a1616;
+	--pos-info: #6a9bf0;
+	--pos-info-container: #16243d;
 
 	/* Border and Divider Colors */
-	--pos-border: #40514e;
-	--pos-border-light: #2d3d3a;
-	--pos-divider: #2a3836;
-	--pos-outline: #71817e;
+	--pos-border: rgba(255, 255, 255, 0.1);
+	--pos-border-light: rgba(255, 255, 255, 0.06);
+	--pos-divider: rgba(255, 255, 255, 0.07);
+	--pos-outline: rgba(255, 255, 255, 0.18);
 
 	/* Shadow Colors */
-	--pos-shadow: rgba(0, 0, 0, 0.4);
+	--pos-shadow: rgba(0, 0, 0, 0.45);
 	--pos-shadow-dark: rgba(0, 0, 0, 0.6);
-	--pos-shadow-light: rgba(0, 0, 0, 0.2);
+	--pos-shadow-light: rgba(0, 0, 0, 0.25);
 
 	/* Interactive Colors - Better Visibility */
-	--pos-hover-bg: rgba(255, 255, 255, 0.12);
-	--pos-pressed-bg: rgba(255, 255, 255, 0.16);
-	--pos-selected-bg: rgba(255, 255, 255, 0.2);
-	--pos-focus-bg: rgba(255, 255, 255, 0.14);
+	--pos-hover-bg: rgba(247, 143, 30, 0.12);
+	--pos-pressed-bg: rgba(247, 143, 30, 0.18);
+	--pos-selected-bg: rgba(247, 143, 30, 0.2);
+	--pos-focus-bg: rgba(247, 143, 30, 0.14);
 
 	/* Card and Component Backgrounds */
-	--pos-card-bg: #17201f;
-	--pos-input-bg: #202c2a;
-	--pos-button-bg: #202c2a;
-	--pos-menu-bg: #17201f;
-	--pos-dialog-bg: #17201f;
-	--pos-surface-raised: #1c2826;
-	--pos-surface-muted: #131c1b;
-	--pos-tooltip-bg: #202c2a;
-	--pos-tooltip-border: rgba(148, 163, 184, 0.2);
-	--pos-tooltip-shadow: rgba(0, 0, 0, 0.4);
+	--pos-card-bg: #15171a;
+	--pos-input-bg: #1c1f23;
+	--pos-button-bg: #1c1f23;
+	--pos-menu-bg: #15171a;
+	--pos-dialog-bg: #15171a;
+	--pos-surface-raised: #1c1f23;
+	--pos-surface-muted: #181a1e;
+	--pos-tooltip-bg: #1c1f23;
+	--pos-tooltip-border: rgba(255, 255, 255, 0.14);
+	--pos-tooltip-shadow: rgba(0, 0, 0, 0.45);
 
 	/* Special Use Cases */
-	--pos-navbar-bg: #111918;
-	--pos-sidebar-bg: #0d1413;
-	--pos-invoice-bg: #17201f;
-	--pos-table-header-bg: #263330;
-	--pos-table-row-hover: rgba(117, 214, 208, 0.08);
+	--pos-navbar-bg: #15171a;
+	--pos-sidebar-bg: #0b0c0e;
+	--pos-invoice-bg: #15171a;
+	--pos-table-header-bg: #1c1f23;
+	--pos-table-row-hover: rgba(247, 143, 30, 0.06);
 	color-scheme: dark;
 }
 
-/* Automatic mode resolves data-theme before the app mounts; the dark token set above is authoritative. */
+/* Automatic mode uses the resolved data-theme token set above. */
 
 body[data-page-route="posapp"] {
 	background: var(--pos-bg-secondary) !important;

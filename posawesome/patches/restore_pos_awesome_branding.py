@@ -115,7 +115,7 @@ def execute():
             "Custom Field",
             ui_template_field,
             "options",
-            "Classic\nPOS Awesome Counter Grid",
+            "Classic\nPOS Awesome Counter Grid\nPOS Awesome Retail",
             update_modified=False,
         )
         frappe.db.set_value(

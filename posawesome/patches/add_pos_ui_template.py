@@ -6,11 +6,12 @@ FIELD = {
     "fieldname": "posa_ui_template",
     "label": "POS Interface",
     "fieldtype": "Select",
-    "options": "Classic\nPOS Awesome Counter Grid",
+    "options": "Classic\nPOS Awesome Counter Grid\nPOS Awesome Retail",
     "default": "Classic",
     "description": (
         "Select the selling interface for this POS Profile. Counter Grid is "
-        "used only on screens at least 1024 pixels wide."
+        "used only on screens at least 1024 pixels wide. POS Awesome Retail "
+        "requires at least 1100 pixels; smaller screens use Classic."
     ),
     "insert_after": "posa_pos_awesome_settings",
 }

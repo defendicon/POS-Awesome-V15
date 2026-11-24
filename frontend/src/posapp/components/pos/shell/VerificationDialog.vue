@@ -2,7 +2,7 @@
 	<v-dialog v-model="dialog" max-width="650">
 		<v-card>
 			<v-card-title class="bg-primary text-white d-flex align-center">
-				<v-icon start class="mr-2">mdi-verified</v-icon>
+				<v-icon start class="mr-2">mdi-check-decagram</v-icon>
 				<span>{{ __("Barcode Verification") }}</span>
 				<v-spacer></v-spacer>
 				<v-btn icon="mdi-close" variant="text" color="white" @click="dialog = false"></v-btn>

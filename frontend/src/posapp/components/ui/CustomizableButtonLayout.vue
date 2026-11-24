@@ -77,6 +77,7 @@ const props = defineProps<{
 	defaults: ButtonDefinition[];
 	enabled: string[];
 	counter?: boolean;
+	view?: "classic" | "counter-grid" | "retail";
 }>();
 const __ = (text: string) => (window.__ ? window.__(text) : text);
 const grid = ref<HTMLElement | null>(null);
@@ -85,7 +86,7 @@ const announcement = ref("");
 const preferences = ref(normalizeButtonLayout(null, props.defaults));
 const scope = computed(() =>
 	props.user && props.profile
-		? `posawesome:invoice-buttons:v1:${JSON.stringify([props.user, props.profile, props.counter ? "counter-grid" : "classic"])}`
+		? `posawesome:invoice-buttons:v1:${JSON.stringify([props.user, props.profile, props.view || (props.counter ? "counter-grid" : "classic")])}`
 		: "",
 );
 const editing = computed(() => workspaceCustomization.isEditing("buttons"));
@@ -121,7 +122,7 @@ function span(entry: ButtonPreference) {
 	if (entry.width === "single") return "1 / -1";
 	if (entry.width === "double") return "span 1";
 	return props.defaults.find((item) => item.key === entry.key)?.full
-		? props.counter && !custom.value
+		? props.counter && props.view !== "retail" && !custom.value
 			? "span 2"
 			: "1 / -1"
 		: undefined;

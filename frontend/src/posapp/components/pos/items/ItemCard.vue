@@ -1,6 +1,12 @@
 <template>
 	<div
-		:class="['card-item-card', { 'item-highlighted': isItemHighlighted }]"
+		:class="[
+			isRetail ? 'retail-card' : 'card-item-card',
+			{
+				'item-highlighted': isItemHighlighted,
+				'retail-card--in-cart': isRetail && cartQty > 0,
+			},
+		]"
 		data-pos-keyboard-target="item-card"
 		:data-testid="`pos-item-card-${item.item_code}`"
 		:data-item-code="item.item_code"
@@ -15,6 +21,26 @@
 		@dragend="onDragEnd"
 	>
 		<RowReorderHandle v-if="reorderable" class="item-card-reorder-grip" :row-key="String(item.item_code)" :label="item.item_name || item.item_code" />
+		<template v-if="isRetail">
+			<div class="retail-card__tile" :class="{ 'retail-card__tile--image': !!item.image }">
+				<img v-if="item.image" :src="item.image" :alt="item.item_name" loading="lazy" />
+				<span v-else class="retail-card__label">{{ tileLabel }}</span>
+				<span v-if="cartQty > 0" class="retail-card__qty">×{{ formattedCartQty }}</span>
+			</div>
+			<div class="retail-card__name" :title="item.item_name || item.item_code">
+				{{ item.item_name || item.item_code }}
+			</div>
+			<div class="retail-card__meta">
+				<span class="retail-card__price">
+					<span class="retail-card__currency">{{ primaryCurrency }}</span>
+					<strong>{{ formatCurrency(primaryRate, primaryCurrency, primaryPrecision) }}</strong>
+				</span>
+				<span v-if="stockBadge" class="retail-card__stock" :class="`retail-card__stock--${stockBadge.tone}`">
+					{{ stockBadge.text }}
+				</span>
+			</div>
+		</template>
+		<template v-else>
 		<div class="card-item-image-container">
 			<v-img
 				:src="item.image || placeholderImage"
@@ -74,6 +100,7 @@
 				</div>
 			</div>
 		</div>
+		</template>
 	</div>
 </template>
 
@@ -81,6 +108,7 @@
 import RowReorderHandle from "../../ui/RowReorderHandle.vue";
 import { computed } from "vue";
 import placeholderImage from "../placeholder-image.png";
+import { retailItemLabel } from "../../../utils/retailItemLabel";
 import ItemRateInfoMenu from "./ItemRateInfoMenu.vue";
 import { priceListToSelectedCurrency } from "../../../utils/erpnextCurrency";
 
@@ -101,6 +129,39 @@ const props = defineProps({
 	formatNumber: { type: Function, required: true },
 	ratePrecision: { type: Function, required: true },
 	isNegative: { type: Function, default: (val) => val < 0 },
+	/** "retail" renders the Retail product card; behaviour is unchanged. */
+	variant: { type: String, default: "classic" },
+	/** Quantity of this item already in the cart (Retail badge only). */
+	cartQty: { type: Number, default: 0 },
+});
+
+const isRetail = computed(() => props.variant === "retail");
+const RETAIL_LOW_STOCK = 3;
+const tileLabel = computed(() => retailItemLabel(props.item));
+
+const formattedCartQty = computed(() => {
+	const qty = Number(props.cartQty) || 0;
+	return Number.isInteger(qty) ? qty : props.formatNumber(qty, 2);
+});
+
+const stockBadge = computed(() => {
+	if (props.item.actual_qty === undefined || props.item.actual_qty === null) {
+		return null;
+	}
+	if (props.item.is_stock_item === 0 || props.item.is_stock_item === false) {
+		return null;
+	}
+	const qty = Number(props.item.actual_qty);
+	if (!Number.isFinite(qty)) {
+		return null;
+	}
+	if (qty <= 0) {
+		return { tone: "out", text: window.__ ? window.__("Out of stock") : "Out of stock" };
+	}
+	if (qty <= RETAIL_LOW_STOCK) {
+		return { tone: "low", text: `${formattedActualQty.value} ${window.__ ? window.__("left") : "left"}` };
+	}
+	return { tone: "ok", text: `${formattedActualQty.value} ${props.item.stock_uom || ""}`.trim() };
 });
 
 const emit = defineEmits(["click", "dragstart", "dragend"]);

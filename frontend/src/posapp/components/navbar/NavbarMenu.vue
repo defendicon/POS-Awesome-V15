@@ -8,7 +8,24 @@
 		:max-height="isMobile ? '90vh' : undefined"
 	>
 		<template #activator="{ props }">
+			<button
+				v-if="isRetail"
+				v-bind="props"
+				type="button"
+				class="retail-user-chip"
+				data-testid="retail-user-chip"
+				:aria-label="__('Open actions menu')"
+				:title="__('Open actions menu')"
+			>
+				<span class="retail-user-chip__avatar">{{ cashierInitials }}</span>
+				<span class="retail-user-chip__copy">
+					<span class="retail-user-chip__name">{{ cashierDisplayName }}</span>
+					<span class="retail-user-chip__role">{{ __("Cashier") }}</span>
+				</span>
+				<v-icon icon="mdi-chevron-down" size="20" />
+			</button>
 			<v-btn
+				v-else
 				v-bind="props"
 				:variant="isMobile ? 'text' : 'elevated'"
 				:icon="isMobile"
@@ -308,6 +325,7 @@ const FALLBACK_LANGUAGES = [
 
 import { workspaceCustomization } from "../../composables/core/workspaceCustomization";
 import { useLastInvoicePrinting } from "../../composables/core/useLastInvoicePrinting";
+import { isRetailTemplate } from "../../utils/posUiTemplate";
 import { useUpdateStore } from "../../stores/updateStore";
 import { requestSafeRefresh } from "../../services/safeRefresh";
 import { useEmployeeStore } from "../../stores/employeeStore";
@@ -379,6 +397,22 @@ export default {
 			return lang?.name || this.selectedLanguage.toUpperCase();
 		},
 		// Mobile breakpoint detection
+		isRetail() {
+			return isRetailTemplate(this.posProfile, this.windowWidth);
+		},
+		cashierDisplayName() {
+			const bootName =
+				typeof frappe !== "undefined" ? frappe.session?.user_fullname || frappe.session?.user : "";
+			return this.cashierName || bootName || __("Cashier");
+		},
+		cashierInitials() {
+			const words = String(this.cashierDisplayName || "")
+				.split(/\s+/)
+				.filter(Boolean);
+			const initials =
+				words.length > 1 ? words[0][0] + words[1][0] : String(words[0] || "?").slice(0, 2);
+			return initials.toUpperCase();
+		},
 		isMobile() {
 			return this.windowWidth < 768;
 		},

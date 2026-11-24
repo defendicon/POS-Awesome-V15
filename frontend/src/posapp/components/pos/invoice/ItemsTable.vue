@@ -335,7 +335,7 @@ function handleReorderOrGridKeydown(event: KeyboardEvent) {
 }
 const invoice_doc = computed(() => invoiceStore.invoiceDoc || {});
 const hasItemSearch = computed(() => !!props.itemSearch?.trim());
-const emptyStateIcon = computed(() => (hasItemSearch.value ? "mdi-cart-search" : "mdi-cart-outline"));
+const emptyStateIcon = computed(() => (hasItemSearch.value ? "mdi-text-search" : "mdi-cart-outline"));
 const emptyStateTitle = computed(() =>
 	hasItemSearch.value ? __("No matching items in cart") : __("No items in cart"),
 );

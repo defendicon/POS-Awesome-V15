@@ -69,7 +69,8 @@ doctype_js = {
 # ------------
 
 # before_install = "posawesome.install.before_install"
-# after_install = "posawesome.install.after_install"
+after_install = "posawesome.patches.restore_erpnext_sales_invoice_reference.execute"
+before_migrate = "posawesome.patches.restore_erpnext_sales_invoice_reference.execute"
 # before_uninstall = "posawesome.uninstall.before_uninstall"
 after_uninstall = "posawesome.uninstall.after_uninstall"
 # NOTE: these migrations are registered one-shot in patches.txt and must NOT
@@ -261,6 +262,8 @@ fixtures = [
                     "POS Invoice-posa_is_printed",
                     "Sales Invoice-posa_is_printed",
                     "Sales Invoice Reference-pos_invoice",
+                    "Sales Invoice Reference-transaction_currency",
+                    "Sales Invoice Reference-transaction_amount",
                     "POS Profile-posa_local_storage",
                     "POS Profile-posa_force_server_items",
                     "POS Profile-posa_cash_mode_of_payment",
@@ -441,6 +444,14 @@ fixtures = [
                     "POS Invoice-posa_pos_opening_shift-no_copy",
                     "Sales Invoice Reference-sales_invoice-reqd",
                     "Sales Invoice-update_outstanding_for_self-default",
+                    # Keep POS Closing Shift rows identical to the former POS Awesome
+                    # copy of this doctype now that ERPNext v16 owns it.
+                    "Sales Invoice Reference-posting_date-fetch_from",
+                    "Sales Invoice Reference-customer-fetch_from",
+                    "Sales Invoice Reference-customer-in_list_view",
+                    "Sales Invoice Reference-grand_total-fetch_from",
+                    "Sales Invoice Reference-is_return-fetch_from",
+                    "Sales Invoice Reference-return_against-fetch_from",
                 ),
             ]
         ],

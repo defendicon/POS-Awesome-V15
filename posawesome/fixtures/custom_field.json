@@ -8,7 +8,7 @@
 		"columns": 0,
 		"default": "Classic",
 		"depends_on": null,
-		"description": "Select the selling interface for this POS Profile. Counter Grid is used only on screens at least 1024 pixels wide.",
+		"description": "Select the selling interface for this POS Profile. Counter Grid needs a screen at least 1024 pixels wide and POS Awesome Retail at least 1100 pixels; smaller screens use Classic.",
 		"docstatus": 0,
 		"doctype": "Custom Field",
 		"dt": "POS Profile",
@@ -32,12 +32,12 @@
 		"label": "POS Interface",
 		"length": 0,
 		"mandatory_depends_on": null,
-		"modified": "2026-07-12 00:00:00.000000",
+		"modified": "2026-11-23 12:00:00",
 		"module": null,
 		"name": "POS Profile-posa_ui_template",
 		"no_copy": 0,
 		"non_negative": 0,
-		"options": "Classic\nPOS Awesome Counter Grid",
+		"options": "Classic\nPOS Awesome Counter Grid\nPOS Awesome Retail",
 		"permlevel": 0,
 		"precision": "",
 		"print_hide": 0,
@@ -6999,7 +6999,6 @@
 		"unique": 0,
 		"width": null
 	},
-
 	{
 		"allow_in_quick_entry": 0,
 		"allow_on_submit": 0,
@@ -9139,5 +9138,33 @@
 		"translatable": 0,
 		"unique": 0,
 		"width": null
+	},
+	{
+		"doctype": "Custom Field",
+		"dt": "Sales Invoice Reference",
+		"module": null,
+		"modified": "2026-11-20 00:00:00",
+		"read_only": 1,
+		"in_list_view": 1,
+		"name": "Sales Invoice Reference-transaction_currency",
+		"fieldname": "transaction_currency",
+		"fieldtype": "Link",
+		"options": "Currency",
+		"label": "Invoice Currency",
+		"insert_after": "grand_total"
+	},
+	{
+		"doctype": "Custom Field",
+		"dt": "Sales Invoice Reference",
+		"module": null,
+		"modified": "2026-11-20 00:00:00",
+		"read_only": 1,
+		"in_list_view": 1,
+		"name": "Sales Invoice Reference-transaction_amount",
+		"fieldname": "transaction_amount",
+		"fieldtype": "Currency",
+		"options": "transaction_currency",
+		"label": "Invoice Amount",
+		"insert_after": "transaction_currency"
 	}
 ]

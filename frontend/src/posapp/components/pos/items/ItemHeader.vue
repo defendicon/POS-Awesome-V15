@@ -6,7 +6,11 @@
 				:cols="posProfile.posa_input_qty ? 8 : 12"
 				:sm="posProfile.posa_input_qty ? 9 : 12"
 			>
-				<div class="search-field-shell" @keydown.capture="handleSearchKeydownCapture">
+				<div
+					class="search-field-shell"
+					:class="{ 'search-field-shell--retail': isRetail }"
+					@keydown.capture="handleSearchKeydownCapture"
+				>
 					<v-text-field
 						density="compact"
 						clearable
@@ -15,10 +19,13 @@
 						color="primary"
 						class="pos-themed-input"
 						:label="
-							searchCombobox
-								? __('Search saleable items')
-								: frappe._('Search, scan or browse item')
+							isRetail
+								? undefined
+								: searchCombobox
+									? __('Search saleable items')
+									: frappe._('Search, scan or browse item')
 						"
+						:placeholder="isRetail ? __('Search, scan or browse items') : undefined"
 						hide-details
 						data-pos-keyboard-target="item-search"
 						data-testid="pos-item-search"
@@ -44,7 +51,10 @@
 						@focus="$emit('focus')"
 						ref="debounce_search"
 					>
-						<template v-slot:append-inner>
+						<template v-if="isRetail" v-slot:append-inner>
+							<kbd class="retail-key-hint" :title="__('Focus item search')">F2</kbd>
+						</template>
+						<template v-else v-slot:append-inner>
 							<v-btn
 								v-if="posProfile.posa_enable_camera_scanning"
 								icon="mdi-camera"
@@ -78,6 +88,33 @@
 							</v-btn>
 						</template>
 					</v-text-field>
+					<template v-if="isRetail">
+						<button
+							v-if="posProfile.posa_enable_camera_scanning"
+							type="button"
+							class="retail-square-btn"
+							:disabled="scannerLocked"
+							:aria-label="
+								scannerLocked
+									? __('Camera scanner is locked until the current error is acknowledged')
+									: __('Scan with camera')
+							"
+							:title="scannerLocked ? __('Acknowledge the error to resume scanning') : __('Scan with Camera')"
+							@click="$emit('start-camera')"
+						>
+							<v-icon icon="mdi-barcode-scan" size="22" />
+						</button>
+						<button
+							type="button"
+							class="retail-square-btn"
+							:class="{ 'retail-square-btn--active': toolsOpen }"
+							:aria-label="toolsOpen ? __('Hide search tools') : __('Show search tools')"
+							:title="toolsOpen ? __('Hide search tools') : __('Show search tools')"
+							@click.stop="toolsOpen = !toolsOpen"
+						>
+							<v-icon icon="mdi-tune-variant" size="22" />
+						</button>
+					</template>
 					<div
 						v-if="showSyncProgress"
 						class="search-sync-progress"
@@ -231,7 +268,11 @@ const props = defineProps({
 	searchExpanded: { type: Boolean, default: false },
 	searchControls: { type: String, default: "" },
 	searchActiveDescendant: { type: String, default: "" },
+	/** "retail" renders the Retail toolbar layout; behaviour is unchanged. */
+	variant: { type: String, default: "classic" },
 });
+
+const isRetail = computed(() => props.variant === "retail");
 
 const emit = defineEmits([
 	"update:searchInput",

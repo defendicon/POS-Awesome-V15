@@ -45,6 +45,21 @@ afterEach(() => {
 });
 
 describe("workspace button layout", () => {
+	it("isolates Retail preferences from Counter Grid and restores each view", async () => {
+		create();
+		await wrapper.setProps({ counter: true, view: "retail" });
+		const retailKey = 'posawesome:invoice-buttons:v1:["cashier","POS","retail"]';
+		const counterKey = 'posawesome:invoice-buttons:v1:["cashier","POS","counter-grid"]';
+		localStorage.setItem(retailKey, JSON.stringify([
+			{ key: "pay", width: 100 }, { key: "save", width: 42.35 }, { key: "return", width: "auto" },
+		]));
+		await wrapper.setProps({ view: "counter-grid" });
+		expect(order()).toEqual(["save", "pay"]);
+		await wrapper.setProps({ view: "retail" });
+		expect(order()).toEqual(["pay", "save"]);
+		expect(part().entries?.().find((entry) => entry.key === "save")?.width).toBe(42.35);
+		expect(localStorage.getItem(counterKey)).toBeNull();
+	});
 	it("stretches buttons continuously, cancels unfinished resizes and retains exact widths after reload", async () => {
 		create();
 		workspace.open("buttons");

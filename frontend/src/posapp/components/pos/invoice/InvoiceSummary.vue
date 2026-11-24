@@ -4,6 +4,7 @@
 		:class="{
 			'sticky-summary-card--dock-safe': useCompactSaleDock && !isCounterGrid,
 			'counter-grid-summary-card': isCounterGrid,
+			'retail-summary-card': isRetail,
 		}"
 	>
 		<div v-if="isCounterGrid" class="counter-grid-summary" data-testid="counter-grid-summary">
@@ -121,6 +122,141 @@
 			/>
 		</div>
 
+		<div v-else-if="isRetail" class="retail-summary" data-testid="retail-summary">
+				<v-alert
+					v-if="showReturnDiscountAlert"
+					density="compact"
+					type="info"
+					variant="tonal"
+					class="summary-field summary-field--alert"
+				>
+					{{ __("Prorated return discount") }}: {{ formatRatio(return_discount_meta.ratio) }} -
+					{{ __("Original") }}: {{ formatCurrency(return_discount_meta.original_discount) }},
+					{{ __("Applied") }}:
+					{{ formatCurrency(return_discount_meta.prorated_discount) }}
+				</v-alert>
+			<ExchangeStatusPanel
+				v-if="exchangeSession"
+				compact
+				:stage="exchangeSession.stage"
+				:return-total="exchangeReturnTotal"
+				:sale-total="exchangeSaleTotal"
+				:currency-symbol="currencySymbol(displayCurrency)"
+				:currency-precision="currencyPrecision"
+				:format-amount="(value) => formatCurrency(value)"
+				:continuing="exchangeContinuing"
+				@continue="$emit('continue-exchange')"
+				@cancel="$emit('cancel-exchange')"
+			/>
+			<div class="retail-totals">
+				<div class="retail-totals__row">
+					<span>{{ __("Subtotal") }}</span>
+					<span class="retail-num">{{ formatCurrency(grossTotal) }}</span>
+				</div>
+				<div v-if="Number(total_items_discount_amount) > 0" class="retail-totals__row">
+					<span>{{ __("Item discounts") }}</span>
+					<span class="retail-num">-{{ formatCurrency(total_items_discount_amount) }}</span>
+				</div>
+				<div class="retail-totals__row retail-totals__row--discount">
+					<span>{{ __("Additional discount") }}</span>
+					<div class="retail-totals__discount">
+						<v-text-field
+							v-if="!pos_profile.posa_use_percentage_discount"
+							ref="additionalDiscountField"
+							v-model="additionalDiscountDisplay"
+							name="pos-retail-additional-discount"
+							autocomplete="transaction-amount"
+							inputmode="decimal"
+							data-1p-ignore="true"
+							data-lpignore="true"
+							data-bwignore="true"
+							@update:model-value="handleAdditionalDiscountUpdate"
+							@focus="handleAdditionalDiscountFocus"
+							@blur="handleAdditionalDiscountBlur"
+							:aria-label="__('Additional Discount')"
+							variant="plain"
+							density="compact"
+							hide-details
+							class="retail-discount-input"
+							:disabled="
+								!pos_profile.posa_allow_user_to_edit_additional_discount ||
+								!!discount_percentage_offer_name
+							"
+						>
+							<template #append-inner>
+								<span class="retail-discount-unit">{{ currencySymbol(pos_profile.currency) }}</span>
+							</template>
+						</v-text-field>
+						<v-text-field
+							v-else
+							ref="additionalDiscountField"
+							v-model="additionalDiscountPercentageDisplay"
+							name="pos-retail-additional-discount-percent"
+							autocomplete="transaction-amount"
+							inputmode="decimal"
+							data-1p-ignore="true"
+							data-lpignore="true"
+							data-bwignore="true"
+							@update:model-value="handleAdditionalDiscountPercentageUpdate"
+							@change="$emit('update_discount_umount')"
+							@focus="handleAdditionalDiscountPercentageFocus"
+							@blur="handleAdditionalDiscountPercentageBlur"
+							:rules="[isNumber]"
+							:aria-label="__('Additional Discount %')"
+							variant="plain"
+							density="compact"
+							hide-details
+							class="retail-discount-input"
+							:disabled="
+								!pos_profile.posa_allow_user_to_edit_additional_discount ||
+								!!discount_percentage_offer_name
+							"
+						>
+							<template #append-inner>
+								<span class="retail-discount-unit">%</span>
+							</template>
+						</v-text-field>
+						<span class="retail-num retail-totals__discount-amount">-{{ formatCurrency(additional_discount) }}</span>
+					</div>
+				</div>
+				<div class="retail-totals__divider" />
+				<div class="retail-totals__due">
+					<span class="retail-totals__due-label">{{ __("Total due") }}</span>
+					<span class="retail-totals__due-amount">
+						<small>{{ displayCurrency }}</small>
+						<strong>{{ formatCurrency(subtotal) }}</strong>
+					</span>
+				</div>
+			</div>
+
+			<InvoiceActionButtons
+				presentation="retail"
+				:layout-user="layoutUser"
+				:exchange-active="exchangeSession?.stage === 'sale'"
+				:pos_profile="pos_profile"
+				:pay-label="`${displayCurrency} ${formatCurrency(subtotal)}`"
+				:saveLoading="saveLoading"
+				:loadDraftsLoading="loadDraftsLoading"
+				:selectOrderLoading="selectOrderLoading"
+				:cancelLoading="cancelLoading"
+				:invoiceManagementLoading="invoiceManagementLoading"
+				:returnsLoading="returnsLoading"
+				:printLoading="printLoading"
+				:paymentLoading="paymentLoading"
+				:customerDisplayLoading="customerDisplayLoading"
+				@save-and-clear="handleSaveAndClear"
+				@load-drafts="handleLoadDrafts"
+				@select-order="handleSelectOrder"
+				@cancel-sale="handleCancelSale"
+				@open-invoice-management="handleOpenInvoiceManagement"
+				@open-returns="handleOpenReturns"
+				@print-draft="handlePrintDraft"
+				@show-payment="handleShowPayment"
+				@open-customer-display="handleOpenCustomerDisplay"
+				@open-offers="$emit('open-offers')"
+				@open-coupons="$emit('open-coupons')"
+			/>
+		</div>
 		<v-row v-else dense class="summary-content">
 			<v-col
 				v-if="!useCompactSaleDock || showReturnDiscountAlert || exchangeSession"
@@ -427,6 +563,7 @@ const additionalDiscountPercentageDisplay = ref(
 	normalizeDiscountDisplay(props.additional_discount_percentage),
 );
 const isCounterGrid = computed(() => props.presentation === "counter-grid");
+const isRetail = computed(() => props.presentation === "retail");
 const useCompactSaleDock = computed(() => responsive.windowWidth.value < 1100);
 const exchangeReturnTotal = computed(() =>
 	Number(props.exchangeSession?.returnTotal || Math.abs(Number(props.subtotal || 0))),
