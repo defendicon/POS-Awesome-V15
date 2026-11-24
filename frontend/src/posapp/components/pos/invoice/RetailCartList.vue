@@ -2,6 +2,7 @@
 	<div class="retail-cart" data-testid="retail-cart">
 		<div class="retail-cart__head">
 			<span class="retail-eyebrow">{{ __("Items") }}</span>
+			<slot name="actions" />
 			<span class="retail-cart__count">
 				{{ items.length }} {{ __("lines") }} · {{ formatQty(totalQty) }}
 				{{ __("qty") }}

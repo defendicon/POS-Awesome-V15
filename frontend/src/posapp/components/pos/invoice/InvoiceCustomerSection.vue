@@ -1,5 +1,5 @@
 <template>
-	<v-row align="center" class="items px-3 py-2">
+	<v-row align="center" class="items px-3 py-2" :class="{ 'invoice-customer-section--compact': compact }">
 		<v-col :cols="pos_profile.posa_allow_sales_order ? 9 : 12" class="pb-0 pr-0">
 			<!-- Customer selection component -->
 			<Customer ref="customerComponent" />
@@ -27,6 +27,7 @@ import { ref } from "vue";
 import Customer from "../customer/Customer.vue";
 
 defineProps({
+	compact: Boolean,
 	pos_profile: {
 		type: Object,
 		required: true,
@@ -72,3 +73,29 @@ defineExpose({
 
 const frappe = window.frappe;
 </script>
+
+<style scoped>
+.invoice-customer-section--compact {
+	display: flex;
+	flex-wrap: nowrap;
+	gap: 6px;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+.invoice-customer-section--compact > :first-child {
+	flex: 1 1 0 !important;
+	max-width: 100% !important;
+	min-width: 0;
+	padding: 0 !important;
+}
+.invoice-customer-section--compact > :nth-child(2) {
+	flex: 0 0 108px !important;
+	max-width: 108px !important;
+	min-width: 0;
+	padding: 0 !important;
+}
+@container invoice-card (max-width: 280px) {
+	.invoice-customer-section--compact { flex-wrap: wrap; }
+	.invoice-customer-section--compact > :nth-child(2) { flex-basis: 100% !important; max-width: 100% !important; }
+}
+</style>

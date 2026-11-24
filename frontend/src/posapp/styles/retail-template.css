@@ -18,9 +18,9 @@
 	--retail-line-strong: rgba(14, 16, 19, 0.14);
 	--retail-text: #14171a;
 	--retail-muted: #6b7079;
-	--retail-radius-xl: 22px;
-	--retail-radius-lg: 16px;
-	--retail-radius-md: 12px;
+	--retail-radius-xl: 14px;
+	--retail-radius-lg: 12px;
+	--retail-radius-md: 8px;
 	--retail-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 	--retail-green: #1e9e5a;
 	--retail-green-soft: #e6f5ec;
@@ -46,9 +46,9 @@ html[data-theme="dark"]  {
 
 /* ================================================================ shared */
 html body .retail-eyebrow {
-	font-size: 0.72rem;
+	font-size: 0.65rem;
 	font-weight: 700;
-	letter-spacing: 0.12em;
+	letter-spacing: 0.04em;
 	text-transform: uppercase;
 	color: var(--retail-muted);
 }
@@ -270,7 +270,7 @@ html body .pos-main-container--retail {
 }
 
 html body .pos-main-container--retail .retail-main-row {
-	padding: 14px 10px 10px;
+	padding: 8px 6px 6px;
 	gap: 0;
 	flex-wrap: nowrap;
 }
@@ -332,17 +332,17 @@ html body .search-field-shell--retail > :not(.v-input):not(.retail-square-btn) {
 }
 
 html body .search-field-shell--retail .v-field {
-	height: 52px;
-	border-radius: 999px !important;
+	height: 40px;
+	border-radius: 10px !important;
 	background: var(--retail-tile) !important;
 	border: 1px solid var(--retail-line) !important;
 	box-shadow: none !important;
 	padding-inline: 10px 8px !important;
-	font-size: 1rem;
+	font-size: 0.8125rem;
 }
 
 html body .search-field-shell--retail .v-field input {
-	font-size: 1.02rem;
+	font-size: 0.8125rem;
 }
 
 html body .search-field-shell--retail .v-field .v-field__prepend-inner .v-icon {
@@ -353,9 +353,9 @@ html body .retail-square-btn {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 52px;
-	height: 52px;
-	border-radius: 16px;
+	width: 40px;
+	height: 40px;
+	border-radius: 8px;
 	border: 1px solid var(--retail-line-strong);
 	background: var(--retail-panel);
 	color: var(--retail-text);
@@ -380,7 +380,7 @@ html body .retail-filters {
 	align-items: center;
 	justify-content: space-between;
 	gap: 14px;
-	padding: 14px 0 14px;
+	padding: 8px 0;
 }
 
 html body .retail-filters__chips {
@@ -399,13 +399,13 @@ html body .retail-chip {
 	display: inline-flex;
 	align-items: center;
 	gap: 8px;
-	height: 40px;
-	padding: 0 16px;
+	height: 32px;
+	padding: 0 12px;
 	border-radius: 999px;
 	border: 1px solid var(--retail-line-strong);
 	background: var(--retail-panel);
 	color: var(--retail-text);
-	font-size: 0.95rem;
+	font-size: 0.8125rem;
 	font-weight: 500;
 	white-space: nowrap;
 	cursor: pointer;
@@ -452,13 +452,13 @@ html body .retail-pill {
 	display: inline-flex;
 	align-items: center;
 	gap: 8px;
-	height: 40px;
-	padding: 0 16px;
+	height: 32px;
+	padding: 0 10px;
 	border-radius: 12px;
 	border: 1px solid var(--retail-line-strong);
 	background: var(--retail-panel);
 	color: var(--retail-text);
-	font-size: 0.95rem;
+	font-size: 0.75rem;
 	white-space: nowrap;
 }
 
@@ -642,7 +642,7 @@ html body .retail-items-footer {
 	display: flex;
 	justify-content: flex-end;
 	gap: 22px;
-	padding: 12px 22px;
+	padding: 6px 12px;
 	border-top: 1px solid var(--retail-line);
 	background: var(--retail-panel);
 }
@@ -654,7 +654,7 @@ html body .retail-link-btn {
 	border: 0;
 	background: transparent;
 	color: var(--retail-text);
-	font-size: 0.95rem;
+	font-size: 0.8125rem;
 	font-weight: 500;
 	cursor: pointer;
 }
@@ -683,15 +683,16 @@ html body .pos-main-container--retail .dynamic-col--invoice .invoice-main-card {
 }
 
 html body .pos-main-container--retail .dynamic-col--invoice .dynamic-padding {
-	padding: 18px 18px 0 !important;
+	padding: 8px 10px 0 !important;
+	gap: 6px;
 }
 
 html body .retail-sale-head {
 	display: flex;
-	align-items: flex-start;
+	align-items: center;
 	justify-content: space-between;
-	gap: 12px;
-	margin-bottom: 14px;
+	gap: 6px;
+	margin-bottom: 6px;
 }
 
 html body .retail-sale-head__copy {
@@ -703,7 +704,7 @@ html body .retail-sale-head__copy {
 
 html body .retail-sale-head__number {
 	font-family: var(--retail-mono);
-	font-size: 1.35rem;
+	font-size: 1rem;
 	font-weight: 700;
 	color: var(--retail-text);
 	white-space: nowrap;
@@ -715,9 +716,9 @@ html body .retail-badge {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
-	padding: 6px 12px;
+	padding: 4px 8px;
 	border-radius: 999px;
-	font-size: 0.85rem;
+	font-size: 0.7rem;
 	font-weight: 500;
 	white-space: nowrap;
 }
@@ -748,7 +749,7 @@ html body .pos-main-container--retail .dynamic-col--invoice .invoice-section-car
 	border: 0 !important;
 	box-shadow: none !important;
 	padding: 0 !important;
-	margin: 0 0 8px !important;
+	margin: 0 !important;
 }
 
 html body .pos-main-container--retail .dynamic-col--invoice .invoice-section-heading {
@@ -776,13 +777,17 @@ html body .retail-cart__head {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 14px 2px 10px;
+	padding: 4px 0;
+	gap: 6px;
+	min-height: 28px;
+	flex-wrap: wrap;
 }
 
 html body .retail-cart__count {
 	font-family: var(--retail-mono);
-	font-size: 0.85rem;
+	font-size: 0.7rem;
 	color: var(--retail-muted);
+	margin-inline-start: auto;
 }
 
 html body .retail-cart__empty {
@@ -806,16 +811,18 @@ html body .retail-cart__list {
 	padding: 0;
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
+	gap: 0;
 }
 
 html body .retail-line {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) auto minmax(72px, auto);
 	align-items: center;
-	gap: 12px;
-	padding: 8px 4px;
-	border-radius: 14px;
+	gap: 8px;
+	padding: 4px 0;
+	border-radius: 6px;
+	min-height: 44px;
+	border-bottom: 1px solid var(--retail-line);
 }
 
 html body .retail-line:hover {
@@ -825,7 +832,7 @@ html body .retail-line:hover {
 html body .retail-line__main {
 	display: flex;
 	align-items: center;
-	gap: 12px;
+	gap: 8px;
 	min-width: 0;
 	border: 0;
 	background: transparent;
@@ -840,12 +847,12 @@ html body .retail-line__tile {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 44px;
-	height: 44px;
-	border-radius: 12px;
+	width: 30px;
+	height: 30px;
+	border-radius: 6px;
 	background: var(--retail-ink);
 	color: #ffffff;
-	font-size: 0.85rem;
+	font-size: 0.7rem;
 	font-weight: 800;
 }
 
@@ -856,7 +863,7 @@ html body .retail-line__copy {
 }
 
 html body .retail-line__name {
-	font-size: 1rem;
+	font-size: 0.8125rem;
 	font-weight: 500;
 	color: var(--retail-text);
 	white-space: nowrap;
@@ -866,13 +873,13 @@ html body .retail-line__name {
 
 html body .retail-line__rate {
 	font-family: var(--retail-mono);
-	font-size: 0.82rem;
+	font-size: 0.6875rem;
 	color: var(--retail-muted);
 }
 
 html body .retail-line__amount {
 	font-family: var(--retail-mono);
-	font-size: 1.02rem;
+	font-size: 0.8125rem;
 	font-weight: 700;
 	text-align: end;
 	color: var(--retail-text);
@@ -887,8 +894,8 @@ html body .retail-stepper {
 	display: inline-flex;
 	align-items: center;
 	gap: 2px;
-	height: 40px;
-	padding: 0 4px;
+	height: 32px;
+	padding: 0 2px;
 	border-radius: 999px;
 	border: 1px solid var(--retail-line-strong);
 	background: var(--retail-panel);
@@ -918,10 +925,11 @@ html body .retail-stepper__btn:disabled {
 }
 
 html body .retail-stepper__value {
-	min-width: 26px;
+	min-width: 22px;
 	text-align: center;
 	font-family: var(--retail-mono);
 	font-weight: 700;
+	font-size: 0.75rem;
 }
 
 /* ============================================================ summary */
@@ -935,13 +943,13 @@ html body .retail-summary-card {
 html body .retail-summary {
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
+	gap: 6px;
 }
 
 html body .retail-totals {
 	margin: 0 -1px;
-	padding: 20px 22px 18px;
-	border-radius: var(--retail-radius-xl);
+	padding: 8px 12px;
+	border-radius: 12px;
 	background: #141210;
 	color: #f4f3f0;
 	box-shadow: 0 10px 30px rgba(5, 7, 8, 0.18);
@@ -958,9 +966,9 @@ html body .retail-totals__row {
 	align-items: center;
 	justify-content: space-between;
 	gap: 12px;
-	padding: 6px 0;
+	padding: 2px 0;
 	color: rgba(244, 243, 240, 0.72);
-	font-size: 1rem;
+	font-size: 0.8125rem;
 }
 
 html body .retail-totals__row .retail-num {
@@ -970,17 +978,17 @@ html body .retail-totals__row .retail-num {
 html body .retail-totals__discount {
 	display: flex;
 	align-items: center;
-	gap: 14px;
+	gap: 8px;
 }
 
 html body .retail-discount-input {
-	width: 128px;
+	width: 96px;
 	flex: 0 0 auto;
 }
 
 html body .retail-discount-input .v-field {
-	height: 40px;
-	border-radius: 12px !important;
+	height: 30px;
+	border-radius: 6px !important;
 	border: 1px solid rgba(255, 255, 255, 0.16) !important;
 	background: rgba(255, 255, 255, 0.04) !important;
 	padding-inline: 10px 6px !important;
@@ -1009,7 +1017,8 @@ html body .retail-discount-input input {
 	color: #f4f3f0 !important;
 	padding-top: 0 !important;
 	padding-bottom: 0 !important;
-	min-height: 38px !important;
+	min-height: 28px !important;
+	font-size: 0.8125rem;
 }
 
 html body .retail-discount-input.v-input--disabled .v-field {
@@ -1020,14 +1029,14 @@ html body .retail-discount-unit {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	min-width: 26px;
-	height: 26px;
+	min-width: 20px;
+	height: 20px;
 	margin-inline-start: 6px;
-	border-radius: 8px;
+	border-radius: 4px;
 	background: rgba(247, 143, 30, 0.14);
 	color: var(--retail-orange);
 	font-weight: 700;
-	font-size: 0.85rem;
+	font-size: 0.7rem;
 }
 
 html body .retail-totals__discount-amount {
@@ -1037,7 +1046,7 @@ html body .retail-totals__discount-amount {
 
 html body .retail-totals__divider {
 	height: 1px;
-	margin: 12px 0 14px;
+	margin: 6px 0;
 	background: rgba(255, 255, 255, 0.14);
 }
 
@@ -1050,11 +1059,11 @@ html body .retail-totals__due {
 
 html body .retail-totals__due-label {
 	color: var(--retail-orange);
-	font-size: 0.85rem;
+	font-size: 0.7rem;
 	font-weight: 700;
-	letter-spacing: 0.14em;
+	letter-spacing: 0.04em;
 	text-transform: uppercase;
-	padding-bottom: 6px;
+	padding-bottom: 3px;
 }
 
 html body .retail-totals__due-amount {
@@ -1066,12 +1075,12 @@ html body .retail-totals__due-amount {
 }
 
 html body .retail-totals__due-amount small {
-	font-size: 1rem;
+	font-size: 0.75rem;
 	opacity: 0.7;
 }
 
 html body .retail-totals__due-amount strong {
-	font-size: clamp(1.9rem, 2.6vw, 2.6rem);
+	font-size: 1.6rem;
 	font-weight: 700;
 	letter-spacing: -0.02em;
 	line-height: 1;
@@ -1081,23 +1090,23 @@ html body .retail-totals__due-amount strong {
 html body .retail-actions .workspace-buttons:not(.workspace-buttons--custom) {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
-	gap: 10px;
+	gap: 6px;
 }
 
 html body .retail-action {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 10px;
-	min-height: 44px;
-	height: 48px;
+	gap: 6px;
+	min-height: 36px;
+	height: 36px;
 	width: 100%;
-	padding: 0 12px;
-	border-radius: 16px;
+	padding: 0 8px;
+	border-radius: 8px;
 	border: 1px solid var(--retail-line-strong);
 	background: var(--retail-panel);
 	color: var(--retail-text);
-	font-size: 1rem;
+	font-size: 0.75rem;
 	font-weight: 500;
 	cursor: pointer;
 	white-space: nowrap;
@@ -1148,12 +1157,12 @@ html body .retail-pay {
 	align-items: center;
 	justify-content: space-between;
 	gap: 12px;
-	min-height: 52px;
-	height: 58px;
+	min-height: 42px;
+	height: 42px;
 	width: 100%;
-	padding: 0 16px;
+	padding: 0 12px;
 	border: 0;
-	border-radius: 18px;
+	border-radius: 8px;
 	background: var(--retail-orange) !important;
 	color: var(--retail-ink) !important;
 	cursor: pointer;
@@ -1174,14 +1183,14 @@ html body .retail-pay:disabled {
 html body .retail-pay__label {
 	display: inline-flex;
 	align-items: center;
-	gap: 12px;
-	font-size: 1.3rem;
+	gap: 8px;
+	font-size: 1rem;
 	font-weight: 700;
 }
 
 html body .retail-pay__amount {
 	font-family: var(--retail-mono);
-	font-size: 1.35rem;
+	font-size: 1rem;
 	font-weight: 700;
 	white-space: nowrap;
 }
@@ -1194,7 +1203,7 @@ html body .pos-main-container--retail .dynamic-col--invoice .sticky-summary-card
 
 /* ======================================================= full-height fit */
 html body .pos-main-container.pos-main-container--retail {
-	height: calc(100vh - 64px);
+	height: calc(100dvh - 56px);
 	padding-bottom: 0 !important;
 	overflow: auto;
 }
@@ -1274,7 +1283,7 @@ html body .pos-main-container--retail .dynamic-col--invoice > * {
 	display: flex !important;
 	flex-direction: column;
 	overflow: hidden !important;
-	gap: 12px;
+	gap: 6px;
 }
 
 html body .pos-main-container--retail .dynamic-col--invoice .invoice-main-card {
@@ -1313,16 +1322,57 @@ html body .pos-navbar-enhanced--retail .pos-navbar-title { flex: 0 0 auto; }
 @media (max-width: 1350px) {
  html body .pos-navbar-enhanced--retail .retail-clock { display: none; }
  html body .pos-navbar-enhanced--retail .retail-register { max-width: 150px; }
- html body .retail-totals { padding: 12px 14px; }
+ html body .retail-totals { padding: 8px 10px; }
  html body .retail-totals__discount { gap: 6px; }
  html body .retail-discount-input { width: 96px; }
  html body .retail-line { grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px; }
  html body .retail-line__tile { display: none; }
 }
-@media (max-height: 800px) {
- html body .pos-main-container--retail .dynamic-col--invoice > .invoice-shell { overflow-y: auto !important; }
- html body .pos-main-container--retail .dynamic-col--invoice .invoice-main-card { flex-shrink: 0; min-height: 220px !important; }
-}
 @media (prefers-reduced-motion: reduce) {
  html body [class*="retail-"] { transition: none !important; animation: none !important; }
+}
+
+/* Retail density: respect saved card widths/order, while removing the full
+   table editor's minimum height from compact cart presentation only. */
+html body .invoice-shell--retail .invoice-card-layout__cards {
+ --workspace-layout-gap: 6px;
+ gap: 6px;
+ align-content: flex-start;
+}
+html body .invoice-shell--retail .invoice-card-layout--compact .invoice-items-card,
+html body .invoice-shell--retail .items-table-wrapper--retail {
+ min-height: 0 !important;
+ margin-top: 0;
+}
+html body .invoice-shell--retail .invoice-customer-section--compact .v-field {
+ --v-input-control-height: 38px;
+ border-radius: 8px;
+}
+html body .invoice-shell--retail .invoice-customer-section--compact .v-field__input {
+ min-height: 38px;
+ padding-block: 10px 2px;
+ font-size: 0.8125rem;
+}
+html body .retail-cart__details {
+ display: inline-flex;
+ align-items: center;
+ gap: 4px;
+ min-height: 28px;
+ padding: 2px 6px;
+ font-size: 0.7rem;
+ color: var(--retail-muted);
+ border-radius: 4px;
+}
+html body .retail-cart__details:hover { background: var(--retail-tile); color: var(--retail-text); }
+html body .retail-cart__details:focus-visible { outline: 2px solid var(--retail-orange); }
+html body .pos-main-container--retail .selector-results-card .v-table {
+ --v-table-row-height: 38px;
+ --v-table-header-height: 36px;
+}
+html body .pos-main-container--retail .selector-results-card .v-table td { padding-block: 4px !important; font-size: 0.8125rem; }
+/* Touch terminals keep comfortable controls without inflating mouse layouts. */
+@media (pointer: coarse) {
+ html body .retail-action, html body .retail-pay { min-height: 44px; }
+ html body .retail-stepper { height: 44px; }
+ html body .retail-stepper__btn { width: 40px; height: 40px; }
 }

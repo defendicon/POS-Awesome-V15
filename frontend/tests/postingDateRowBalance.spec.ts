@@ -19,7 +19,7 @@ const Tooltip = defineComponent({
 	},
 });
 
-const mountBalance = (balance: any, loading = false, show = true) => {
+const mountBalance = (balance: any, loading = false, show = true, extra: Record<string, unknown> = {}) => {
 	const formatCurrency = vi.fn(
 		(value, currency) => `${currency} ${Number(value || 0).toFixed(2)}`,
 	);
@@ -33,6 +33,7 @@ const mountBalance = (balance: any, loading = false, show = true) => {
 			customer_balance_currency: "USD",
 			balance_loading: loading,
 			formatCurrency,
+			...extra,
 		},
 		global: {
 			components: {
@@ -52,6 +53,14 @@ const mountBalance = (balance: any, loading = false, show = true) => {
 };
 
 describe("PostingDateRow customer balance", () => {
+	it("keeps customer balance, configured controls and profile visibility in compact presentation", async () => {
+		const { wrapper } = mountBalance(125.5, false, true, { compact: true, showPriceList: true, priceLists: ["Retail", "Wholesale"], priceList: "Retail" });
+		expect(wrapper.get(".balance-amount").text()).toBe("USD 125.50");
+		expect(wrapper.find(".pos-date-picker").exists()).toBe(true);
+		expect(wrapper.find('[label="Price List"]').exists()).toBe(true);
+		await wrapper.setProps({ pos_profile: { posa_show_customer_balance: false } });
+		expect(wrapper.find(".balance-container").exists()).toBe(false);
+	});
 	it("renders a new invoice balance as unavailable before the first request", () => {
 		// Execute the real Options API initializer without booting the full POS,
 		// its stores, workers, network connections and payment integrations.

@@ -1,7 +1,7 @@
 <template>
 	<div
 		class="invoice-card-layout"
-		:class="{ 'invoice-card-layout--editing': editing, 'invoice-card-layout--interacting': interaction }"
+		:class="{ 'invoice-card-layout--editing': editing, 'invoice-card-layout--interacting': interaction, 'invoice-card-layout--compact': compact }"
 	>
 		<v-alert v-if="storageError" type="warning" density="compact" role="status">{{
 			storageError
@@ -124,7 +124,7 @@ import {
 	resizedCardSpan,
 } from "../../../utils/invoiceCardLayout";
 
-const props = defineProps<{ user: string; profile: string; enabled: InvoiceCardId[] }>();
+const props = defineProps<{ user: string; profile: string; enabled: InvoiceCardId[]; compact?: boolean }>();
 const __ = (text: string) => (window.__ ? window.__(text) : text);
 const editing = computed(() => workspaceCustomization.isEditing("cards"));
 const grid = ref<HTMLElement | null>(null);
@@ -513,6 +513,12 @@ function reset() {
 }
 .invoice-card-layout__card--items {
 	min-height: 320px;
+}
+.invoice-card-layout--compact .invoice-card-layout__card--items {
+	min-height: 0;
+}
+.invoice-card-layout--compact:not(.invoice-card-layout--editing) .invoice-card-layout__card--first {
+	padding-inline-end: 34px;
 }
 .invoice-card-layout__card > :deep(.invoice-section-card) {
 	width: 100%;

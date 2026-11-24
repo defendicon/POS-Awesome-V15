@@ -1,6 +1,7 @@
 <template>
 	<v-sheet
 		class="pos-header-bar px-4 py-3 mb-2"
+		:class="{ 'pos-header-bar--compact': compact }"
 		rounded="lg"
 		elevation="1"
 	>
@@ -119,6 +120,7 @@ import { ref, watch, computed } from "vue";
 import type { POSProfile } from "../../../types/models";
 
 interface Props {
+	compact?: boolean;
 	pos_profile: POSProfile | Record<string, any>;
 	posting_date_display?: string;
 	customer_balance?: number | null;
@@ -182,6 +184,33 @@ defineExpose({ focusPostingDate });
 </script>
 
 <style scoped>
+.pos-header-bar--compact {
+	padding: 4px 6px !important;
+	margin-bottom: 0 !important;
+	box-shadow: none !important;
+}
+.pos-header-bar--compact > .v-row {
+	gap: 4px;
+	margin: 0;
+}
+.pos-header-bar--compact > .v-row > :is(.v-col, [class*="v-col-"]) {
+	flex: 1 1 120px !important;
+	max-width: 100% !important;
+	padding: 0 !important;
+}
+.pos-header-bar--compact .balance-container {
+	min-height: 24px;
+	justify-content: flex-start;
+}
+.pos-header-bar--compact .pos-date-picker :deep(.dp__input) {
+	min-height: 36px;
+	padding-block: 6px;
+	font-size: 0.8125rem;
+}
+.pos-header-bar--compact :deep(.v-field__input) {
+	min-height: 36px;
+	font-size: 0.8125rem;
+}
 .pos-header-bar {
 	background-color: var(--pos-card-bg, #ffffff);
 	border: 1px solid rgba(var(--v-theme-on-surface), 0.08);

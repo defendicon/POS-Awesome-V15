@@ -93,3 +93,39 @@ Product name, short name, logos, application icons, desktop identity, URLs, and 
 ## Suggested commit message
 
 `feat(pos): port PR 3167 layout and fixes without rebranding`
+
+
+## Follow-up: compact Retail checkout
+
+Reference inspected: [POSNext InvoiceCart](https://github.com/BrainWise-DEV/POSNext/blob/develop/POS/src/components/sale/InvoiceCart.vue). Its compact header/footer structure was used as a visual comparison; business logic was not imported.
+
+The reported screenshot had only one cart row visible because the old table editor's 320px minimum-height rules, wrapped customer/type controls, large summary and spacious buttons were combined with a fixed-height Retail pane. The previous browser fixture had only two items and a placeholder customer field, so it did not cover this configuration.
+
+### Files changed and reasons
+
+- `frontend/src/posapp/styles/retail-template.css`: compact sale heading, cart rows, totals, actions, product search/filter controls and list rows. Remove the old short-screen workaround that scrolled the entire invoice, and remove full-table minimum heights from compact cart wrappers. Keep coarse-pointer controls larger for touch terminals.
+- `frontend/src/posapp/components/pos/Invoice.vue`: enable compact presentation only for Retail, forward compact flags to customer/posting/card components, and move detailed-editor access into the cart heading.
+- `frontend/src/posapp/components/pos/invoice/InvoiceCardLayout.vue`: optional compact variant removes the 320px item-card minimum; reserve space for the customization button to avoid overlapping fields. Preserve fractional widths, order, scope and the existing preview/apply/cancel machinery.
+- `frontend/src/posapp/components/pos/invoice/InvoiceCustomerSection.vue`: opt-in compact customer/type row, with a narrow-card fallback and unchanged POS Profile visibility and events.
+- `frontend/src/posapp/components/pos/invoice/PostingDateRow.vue`: opt-in compact date, price-list and balance layout, preserving configured controls and currency/visibility logic.
+- `frontend/src/posapp/components/pos/invoice/RetailCartList.vue`: action slot in the existing cart heading so the detail-editor button no longer consumes a separate row.
+- `frontend/src/posapp/components/navbar/NavbarAppBar.vue`: use the existing 56px desktop navbar height for Retail as well.
+- `frontend/scripts/verify-retail-layout.mjs`: replace placeholder customer controls with real customer and posting components, reproduce legacy invoice-shell styles directly from the source, and start with 12 rows. Verify loaded fractional card preferences, real visible-row counts, calendar selection, one-pixel pointer/keyboard resizing and Apply/Cancel in LTR/RTL, cart mutations, discount changes and Pay.
+- `frontend/tests/postingDateRowBalance.spec.ts`: verify compact mode retains profile-controlled date/price-list/balance controls and customer-balance formatting.
+- `docs/PR_3167_PORT.md`: record this follow-up and its verification.
+
+### Linked features and verification
+
+This follow-up changes presentation only. Classic/Counter Grid layout, pricing/UOM/discount/tax calculation, POS Profile authorization, stock checks, payment routing, invoice payload, offline/cache/sync, printing/QZ and report calculations retain their existing implementations. Detailed editing remains accessible through **Edit details**.
+
+- `npm run type-check`: passed.
+- `npm run build`: passed, including the Chrome 109 CSS audit for all 4 existing Counter Grid states.
+- Affected-file frontend ESLint: passed.
+- Focused Vitest run: **12 files / 71 tests passed**, including card/button/workspace customization, columns, customer synchronization, balances, Retail cart/template, navbar, and Classic/Counter Grid visual contracts.
+- `$env:POSA_BROWSER_CHANNEL = 'msedge'; node scripts/verify-retail-layout.mjs`: passed. With 12 sample lines, customer/type controls and date/balance enabled, **9 complete rows** were visible at **1920×914**, **7** at **1440×900**, and **4** at **1366×768 dark/RTL** and **1100×768**. These are initial, unscrolled measurements of the actual cart panel. The 1920px and RTL cases also loaded fractional saved card widths. 1024px Classic fallback passed.
+- Browser verification also passed actual calendar selection, orange Pay color, cart +/-/removal, discount changes, Pay forwarding, one-pixel pointer and keyboard resizing, and Apply/Cancel. Reduced-motion mode was enabled; no horizontal page overflow was detected.
+- `git diff --check`: passed.
+
+The browser fixture uses mocked Frappe services; the connected live site was not deployed or modified. Visible row count can vary with browser zoom, enabled delivery/currency controls, saved layouts and large notices. Physical printing and backend transactions were not rerun for this presentation-only follow-up.
+
+Suggested commit: `fix(pos): compact Retail checkout to show more cart rows`.

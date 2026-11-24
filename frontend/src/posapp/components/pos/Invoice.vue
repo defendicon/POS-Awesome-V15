@@ -2,7 +2,7 @@
 	<!-- Main Invoice Wrapper -->
 	<div
 		class="pa-0 invoice-shell"
-		:class="{ 'invoice-shell--counter-grid': isCounterGridPresentation }"
+		:class="{ 'invoice-shell--counter-grid': isCounterGridPresentation, 'invoice-shell--retail': isRetailPresentation }"
 		:data-testid="isCounterGridPresentation ? 'counter-grid-invoice' : 'classic-invoice'"
 	>
 		<v-alert v-if="cartRecoveryError" type="error" variant="tonal" data-test="cart-recovery-error">{{ cartRecoveryError }}</v-alert>
@@ -69,6 +69,7 @@
 					:user="invoiceLayoutUser"
 					:profile="pos_profile?.name || ''"
 					:enabled="enabledInvoiceCards"
+					:compact="isRetailPresentation && !retailDetailedCart"
 				>
 					<template #customer>
 						<v-card flat class="invoice-section-card pos-themed-card">
@@ -76,6 +77,7 @@
 								<h3 class="invoice-section-heading__title">{{ __("Customer Details") }}</h3>
 							</div>
 							<InvoiceCustomerSection
+								:compact="isRetailPresentation"
 								ref="customerSection"
 								:pos_profile="pos_profile"
 								:invoiceTypes="invoiceTypes"
@@ -122,6 +124,7 @@
 								</h3>
 							</div>
 							<PostingDateRow
+								:compact="isRetailPresentation"
 								ref="postingDateComponent"
 								:pos_profile="pos_profile"
 								:posting_date_display="posting_date_display"
@@ -186,7 +189,7 @@
 							<div class="invoice-section-heading">
 								<h3 class="invoice-section-heading__title">{{ __("Invoice Items") }}</h3>
 							</div>
-							<v-btn v-if="isRetailPresentation" size="small" variant="text" data-testid="retail-cart-details" @click="retailDetailedCart = !retailDetailedCart">{{ retailDetailedCart ? __("Compact cart") : __("Edit quantities, prices, UOM and batches") }}</v-btn>
+							<v-btn v-if="isRetailPresentation && retailDetailedCart" size="small" variant="text" data-testid="retail-cart-details" @click="retailDetailedCart = false">{{ __("Compact cart") }}</v-btn>
 							<div v-if="isRetailPresentation && !retailDetailedCart" class="items-table-wrapper items-table-wrapper--retail">
 							<RetailCartList
 								:items="items"
@@ -198,7 +201,13 @@
 								:remove-item="remove_item"
 								:event-bus="eventBus"
 								@edit-item="openItemQuickEditForItem"
-							/>
+							>
+								<template #actions>
+									<button type="button" class="retail-cart__details" data-testid="retail-cart-details" :aria-label="__('Edit quantities, prices, UOM and batches')" @click="retailDetailedCart = true">
+										<v-icon icon="mdi-table-edit" size="16" />{{ __("Edit details") }}
+									</button>
+								</template>
+							</RetailCartList>
 						</div>
 							<div v-else class="items-table-wrapper">
 								<InvoiceItemsActionToolbar

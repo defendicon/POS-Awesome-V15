@@ -1,7 +1,7 @@
 <template>
 	<v-app-bar
 		flat
-		:height="isMobile || isRetail ? 64 : 56"
+		:height="isMobile ? 64 : 56"
 		:class="[
 			'pos-navbar-enhanced elevation-2 pos-themed-card pos-theme-immediate',
 			{ 'pos-navbar-enhanced--counter-grid': isCounterGrid },
