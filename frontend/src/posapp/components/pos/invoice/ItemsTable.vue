@@ -2,7 +2,7 @@
 	<div
 		ref="tableContainer"
 		class="pos-column-widths my-0 py-0 overflow-y-auto posa-items-table-container posa-responsive-table-container pos-themed-card"
-		:style="[containerStyles, columnWidths.tableStyle(finalVisibleColumns)]"
+		:style="[containerStyles, columnWidths.tableStyle(presentation === 'retail' ? retailColumns : finalVisibleColumns)]"
 		:class="[containerClasses, gridContainerClasses, { 'pos-column-widths--custom': columnWidths.hasWidths.value, 'pos-customization-editing': columnOrder.editing.value }]"
 		role="region"
 		:aria-label="__('Invoice Items')"
@@ -22,8 +22,17 @@
 			<header class="retail-inline-cart__header">
 				<strong>{{ __("Items") }}</strong>
 				<span>{{ items.length }} {{ __("lines") }}</span>
+                <v-btn size="x-small" variant="text" prepend-icon="mdi-tune-variant" :aria-label="__('Cart columns')" @click="workspaceCustomization.open('invoice')">{{ __("Columns") }}</v-btn>
 			</header>
 			<p v-if="!items.length" class="retail-inline-cart__empty">{{ emptyStateSubtitle }}</p>
+            <div class="retail-inline-cart__viewport">
+            <div class="retail-inline-cart__grid" :style="retailGridStyle">
+                <div class="retail-inline-cart__columns" role="row">
+                    <div v-for="column in retailColumns" :key="column.key" role="columnheader" :data-column-width-id="column.key" :data-column-reorder-id="column.key">
+                        <ColumnOrderHeader v-if="column.key !== 'data-table-expand'" :column="column" />
+                        <ColumnResizeHandle v-else :column-key="column.key" :width="column.width" :label="__('History')" />
+                    </div>
+                </div>
 			<ul class="retail-inline-cart__list">
 				<CartItemRow
 					v-for="item in items"
@@ -69,6 +78,8 @@
 					@remove-item="removeItem"
 				/>
 			</ul>
+            </div>
+            </div>
 		</div>
 		<v-data-table-virtual v-else
 			ref="virtualTable"
@@ -232,7 +243,8 @@ import {
 	createBatchAllocationLines,
 	type BatchAllocation,
 } from "../../../composables/pos/shared/batchAllocation";
-import { parseBooleanSetting } from "../../../utils/stock";
+import { workspaceCustomization } from "../../../composables/core/workspaceCustomization";
+import { getRetailCartLayout } from "../../../utils/retailCartColumns";
 import { loadItemSelectorSettings } from "../../../utils/itemSelectorSettings";
 import { logComponentRender } from "../../../utils/perf";
 import CartItemRow from "./CartItemRow.vue";
@@ -423,20 +435,9 @@ const dynamicHeaderProps = computed(() => ({
 }));
 
 const finalVisibleColumns = computed(() => columnWidths.apply([...responsiveHeaders.value, DATA_TABLE_EXPAND_COLUMN]));
-// Profile visibility remains authoritative in Retail, including when old table preferences exist.
-const retailColumns = computed(() => {
-	const columns = props.headers.filter((column) =>
-		!["discount_percentage", "discount_amount", "uom"].includes(column.key),
-	);
-	columns.push({ key: "uom", title: __("UOM") });
-	if (parseBooleanSetting(props.pos_profile?.posa_display_discount_percentage)) {
-		columns.push({ key: "discount_percentage", title: __("Discount %") });
-	}
-	if (parseBooleanSetting(props.pos_profile?.posa_display_discount_amount)) {
-		columns.push({ key: "discount_amount", title: __("Discount Amount") });
-	}
-	return [...columns, DATA_TABLE_EXPAND_COLUMN];
-});
+// Classic and Retail share the same selected columns, ordering and saved widths.
+const retailColumns = computed(() => columnWidths.apply([...columnOrder.headers.value, DATA_TABLE_EXPAND_COLUMN]));
+const retailGridStyle = computed(() => getRetailCartLayout(retailColumns.value));
 const navigableGridColumnKeys = computed(() => getNavigableCartColumnKeys(props.presentation === "retail" ? retailColumns.value : finalVisibleColumns.value));
 const gridContainerClasses = computed(() => ({
 	"posa-cart-grid-active": gridMode.value !== "inactive",
@@ -1358,6 +1359,7 @@ defineExpose({
 	padding: 0 10px;
 }
 .retail-inline-cart__header {
+	gap: 8px;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -1365,6 +1367,15 @@ defineExpose({
 	color: var(--pos-text-secondary);
 	padding: 4px 0;
 }
+.retail-inline-cart__header > span { margin-inline-start: auto; }
+.retail-inline-cart__viewport { overflow-x: auto; max-width: 100%; }
+.retail-inline-cart__grid { min-width: var(--retail-cart-min-width); }
+.retail-inline-cart__columns { display: grid; grid-template-columns: var(--retail-cart-columns); gap: 4px; align-items: center; min-height: 26px; border-bottom: 1px solid var(--pos-border); font-size: 10px; color: var(--pos-text-secondary); }
+.retail-inline-cart__columns > div { min-width: 0; position: relative; }
+.retail-inline-cart__columns :deep(.pos-column-header) { min-height: 24px; gap: 0; }
+.retail-inline-cart__columns :deep(.pos-column-header > span) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.retail-inline-cart__columns :deep(.pos-column-header__grip) { display: none; }
+.pos-customization-editing .retail-inline-cart__columns :deep(.pos-column-header__grip) { display: inline-flex; }
 .retail-inline-cart__list {
 	padding: 0;
 	margin: 0;

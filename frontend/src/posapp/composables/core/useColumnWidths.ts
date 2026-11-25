@@ -158,7 +158,7 @@ export function useColumnWidths(
 	function measure() {
 		const measured: Record<string, number> = { ...widths.value };
 		root.value
-			?.querySelectorAll<HTMLElement>("th[data-column-width-id]")
+			?.querySelectorAll<HTMLElement>(":is(th, [role=columnheader])[data-column-width-id]")
 			.forEach((header) => {
 				const key = header.getAttribute("data-column-width-id")!;
 				const width = header.getBoundingClientRect().width;
@@ -192,7 +192,7 @@ export function useColumnWidths(
 		};
 		widths.value = measured;
 		root.value?.classList.add("pos-column-widths--resizing");
-		handle.closest("th")?.classList.add("pos-column-width-active");
+		handle.closest("th, [role=columnheader]")?.classList.add("pos-column-width-active");
 		resizing.value = true;
 		window.addEventListener("pointermove", onMove, { passive: false });
 		window.addEventListener("pointerup", onEnd);
@@ -316,7 +316,7 @@ export function useColumnWidths(
 					width:
 						current[key] ??
 						Math.round(
-							handle.closest("th")?.getBoundingClientRect()
+							handle.closest("th, [role=columnheader]")?.getBoundingClientRect()
 								.width || 120,
 						),
 					min: minimumColumnWidth(key),

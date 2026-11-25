@@ -199,3 +199,38 @@ Customer search/actions and customer-driven pricing continue through the same st
 More intentionally expands an individual item while editing; ordinary rows remain single-line. Long names use ellipsis with the full name in a title. Very narrow custom card widths can still constrain controls. Browser verification uses mocked Frappe services; live customer APIs, real invoice submission, offline server replay and physical printing require a test site. Nothing was pushed, merged or deployed.
 
 Suggested commit: `fix(pos): widen customer selection and keep Retail items on one line`.
+
+## Follow-up: Classic column controls in the Retail cart
+
+### Summary
+
+Retail now uses the same selected columns, saved visibility, column order and widths as Classic. The cart's **Columns** button opens the existing Invoice workspace editor. Selected fields appear directly on one compact row with matching column headers. The per-item More/expand control and its hidden-field focus behavior have been removed. This supersedes the expand-on-demand behavior documented above.
+
+### Files Changed
+
+- `frontend/src/posapp/components/pos/invoice/ItemsTable.vue`: render selected shared headers and rows on one grid, expose the existing column editor, and contain horizontal scrolling inside the cart. Remove Retail-specific forced UOM/discount visibility so Classic's column preferences are authoritative. POS Profile still controls editing permissions and the initial defaults supplied by the existing column composable.
+- `frontend/src/posapp/utils/retailCartColumns.ts`: define compact presentation widths once for both headers and rows; saved widths take priority.
+- `frontend/src/posapp/components/pos/invoice/CartItemRow.vue`: remove expansion state/arrow and render the selected editors directly in the shared grid. Compact the UOM control through its selector. Fix the shared UOM menu focus lifecycle so selecting an option does not unmount the editor prematurely or call an unavailable component `blur` method.
+- `frontend/src/posapp/composables/core/useColumnWidths.ts` and `useColumnOrder.ts`: recognize semantic `columnheader` elements as well as Classic `th` elements. Existing measurement, resizing, ordering, storage and Apply/Cancel behavior remains shared.
+- `frontend/src/posapp/utils/cartFieldFocus.ts`: remove the obsolete expand request; visible selected fields use normal shared keyboard focus.
+- `frontend/tests/cartItemRowKeyboard.spec.ts` and `cartFieldFocus.spec.ts`: replace obsolete expansion checks with selected-column rendering and UOM menu selection coverage; keep Classic keyboard/focus regressions.
+- `frontend/scripts/verify-retail-layout.mjs`: mount the real column-preference composable and workspace controls; verify show/hide, Apply/Cancel, selected-column persistence and width persistence after reload, one-line rows, inline editors and one-pixel column resizing in LTR/RTL.
+- `docs/PR_3167_PORT.md`: record the final requested behavior and verification.
+
+### Linked Features Checked
+
+The source of visibility remains `useInvoiceItems` and `posawesome_selected_columns`; required fields and profile-derived defaults retain Classic behavior. Existing profile rate/discount/name permissions, return/replacement/offer restrictions, batch/serial selection, pricing/UOM/discount calculation, stock checks and totals continue through shared handlers. Column preferences change presentation only and do not enter invoice, cache/outbox, sync, print/QZ or report payloads. Customer controls, profile company/warehouse/price-list/currency/tax/payment defaults and payment routing remain unchanged.
+
+### Commands Run
+
+- `npm run type-check`: passed.
+- `npm run build`: TypeScript, production build and Chrome 109 CSS audit.
+- Affected-file ESLint and `git diff --check`: passed.
+- Focused Vitest regression run: **18 files / 106 tests passed**, covering column preferences/order/widths, Classic/Retail editors, UOM selection, shortcuts, workspace/card/button customization, discounts, stock, tracking allocation, invoice document/outbox, payment totals, printing and customer synchronization.
+- Headless Edge browser matrix: passed at 1920×914, 1440×900, 1366×768 dark/RTL, 1100×768 and 1024×768 Classic fallback. Retail rows stay **41px** high, including when optional columns are selected. Default-column fixture shows **8 / 7 / 5 / 4** complete rows, respectively. The shared editor's visibility Apply/Cancel, cached selection/width reload, profile edit locks, direct rate/discount/UOM edits, cart totals, Pay, date selection and one-pixel card/column keyboard/pointer resizing passed. No editing exceptions or horizontal page overflow occurred.
+
+### Risks / Notes
+
+Selecting many columns or retaining wide Classic column preferences may require horizontal scrolling inside the cart; rows do not wrap or expand. Widths can be adjusted/reset in the existing editor. Long names use ellipsis/title. The browser harness mocks Frappe services; real submission, server permissions, offline replay and physical printing still need a test site. No new dependency, backend/schema migration, push, merge or deployment is included.
+
+Suggested commit: `feat(pos): share Classic column controls with compact Retail cart`.

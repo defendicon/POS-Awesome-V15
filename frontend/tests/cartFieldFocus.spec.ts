@@ -82,20 +82,6 @@ const createContainer = () => {
 afterEach(() => document.body.replaceChildren());
 
 describe("focusCartItemField", () => {
-	it("requests expansion before focusing a collapsed Retail option", () => {
-		const container = createContainer();
-		const cell = container.querySelector('[data-column-key="discount_percentage"]') as HTMLElement;
-		const row = cell.closest('.posa-cart-item-row') as HTMLElement;
-		row.dataset.retailExpanded = "false";
-		cell.dataset.retailExtra = "true";
-		const expand = vi.fn();
-		row.addEventListener("posa-expand-editor", expand);
-		expect(focusCartItemField(container, 0, "discount_percentage")).toBe(true);
-		expect(expand).toHaveBeenCalledOnce();
-		const detail = (expand.mock.calls[0][0] as CustomEvent).detail;
-		expect(detail.target).toBe(cell.querySelector('.posa-cart-table__editor-display'));
-		expect(detail.activate).toBe(true);
-	});
 	it("focuses and clicks the quantity input for the requested row", () => {
 		const container = createContainer();
 		const activator = container.querySelector(

@@ -11,8 +11,6 @@
 		:tabindex="activeRow && keyboardMode === 'row' ? 0 : -1"
 		:role="presentation === 'retail' ? 'listitem' : 'row'"
 		:aria-selected="activeRow ? 'true' : 'false'"
-		:data-retail-expanded="presentation === 'retail' ? String(retailExpanded) : undefined"
-		@posa-expand-editor="expandRetailEditor"
 		v-memo="memoDeps"
 	>
 		<template v-for="column in visibleColumns" :key="column.key">
@@ -191,6 +189,8 @@
 					<v-select
 						v-else
 						ref="uomSelect"
+						:menu="isUomMenuOpen"
+						@update:menu="handleUomMenu"
 						:model-value="item.uom"
 						@update:model-value="handleUomSelect"
 						:items="item.item_uoms"
@@ -203,8 +203,8 @@
 						menu-icon=""
 						:autofocus="true"
 						:disabled="!canEditUom"
-						@blur="isEditingUom = false"
-						@keydown.esc.prevent="isEditingUom = false"
+						@blur="closeUomOnBlur"
+						@keydown.esc.prevent="handleUomMenu(false)"
 					></v-select>
 
 					<v-btn
@@ -444,9 +444,7 @@
 				</v-btn>
 			</component>
 		</template>
-        <button v-if="presentation === 'retail'" type="button" class="retail-row-options" :class="{ 'retail-row-options--warning': item.batch_no_is_expired || (item.has_batch_no && !item.batch_no) || (item.has_serial_no && !serialSelectionComplete) }" :title="item.batch_no_is_expired ? __('Expired') : (item.has_batch_no || item.has_serial_no) ? __('Batch / Serial No') : __('More item options')" :aria-label="__('More item options')" :aria-expanded="retailExpanded" @click.stop="retailExpanded = !retailExpanded">
-            <v-icon :icon="retailExpanded ? 'mdi-chevron-up' : 'mdi-dots-horizontal'" size="18" />
-        </button>
+
 	</component>
 </template>
 
@@ -524,18 +522,10 @@ const emit = defineEmits([
 
 const __ = window.__ || ((text) => text);
 
-const retailExpanded = ref(false);
-const retailMainKeys = new Set(["item_name", "qty", "amount", "actions"]);
-function expandRetailEditor(event) {
-    retailExpanded.value = true;
-    nextTick(() => {
-        event.detail?.target?.focus?.();
-        if (event.detail?.activate) event.detail.target?.click?.();
-    });
-}
 const editingQtyValue = ref("");
 const isEditingQty = ref(false);
 const isEditingUom = ref(false);
+const isUomMenuOpen = ref(false);
 const isEditingRate = ref(false);
 const editingRateValue = ref("");
 const isEditingDiscountPercent = ref(false);
@@ -589,7 +579,6 @@ const memoDeps = computed(() => {
 		props.activeCellKey,
 		props.visibleColumns.map((column) => column?.key).join("|"),
 		props.presentation,
-		retailExpanded.value,
 		props.isReturnInvoice,
 		props.hideQtyDecimals,
 		props.posProfile?.posa_allow_user_to_edit_rate,
@@ -639,7 +628,6 @@ const lossRisk = computed(() =>
 
 const rowClasses = computed(() => ({
 	"posa-cart-item-row--retail": props.presentation === "retail",
-	"posa-cart-item-row--retail-expanded": props.presentation === "retail" && retailExpanded.value,
 	"posa-cart-item-row--keyboard-active": props.activeRow,
 	"posa-cart-item-row--keyboard-row": props.activeRow && props.keyboardMode === "row",
 	"posa-cart-item-row--keyboard-cell": props.activeRow && props.keyboardMode === "cell",
@@ -657,7 +645,6 @@ function getCellAttrs(key, baseClass = "") {
 		role: props.presentation === "retail" ? "group" : "gridcell",
 		"data-label": props.visibleColumns.find((column) => column.key === key)?.title,
 		"data-column-key": key,
-		"data-retail-extra": props.presentation === "retail" && !retailMainKeys.has(key) ? "true" : undefined,
 		"data-testid": `cart-cell-${props.rowIndex}-${key}`,
 		"aria-selected": isKeyboardCellActive(key) ? "true" : "false",
 		tabindex: isKeyboardCellActive(key) ? 0 : -1,
@@ -797,10 +784,21 @@ function handleQtyPaste(event) {
 function openUomEdit() {
 	if (!canEditUom.value) return;
 	isEditingUom.value = true;
+	isUomMenuOpen.value = true;
 	nextTick(() => {
 		const target = uomSelect.value?.$el?.querySelector?.("input") || uomSelect.value;
 		target?.focus?.();
 	});
+}
+
+function handleUomMenu(open) {
+	isUomMenuOpen.value = open;
+	if (!open) isEditingUom.value = false;
+}
+
+function closeUomOnBlur() {
+	// Selecting from the menu moves focus outside the input before committing the UOM.
+	if (!isUomMenuOpen.value) isEditingUom.value = false;
 }
 
 function closeQtyEdit() {
@@ -855,8 +853,7 @@ function handleUomSelect(newUom) {
 	if (newUom && newUom !== props.item.uom) {
 		emit("calc-uom", props.item, newUom);
 	}
-	// Find the correct component instance to blur - ref is local now
-	uomSelect.value?.blur();
+	handleUomMenu(false);
 }
 
 function openRateEdit() {
@@ -1219,85 +1216,20 @@ td[data-column-key="item_name"] {
 	background: var(--pos-primary-container) !important;
 }
 
-/* Retail keeps the primary sale controls on one line; optional editors expand on demand. */
+/* Selected Retail columns share one grid row with the header. */
 .posa-cart-item-row--retail {
-	display: flex;
-	align-items: center;
-	gap: 4px;
-	padding: 6px 0;
-	border-bottom: 1px solid var(--pos-border);
-	color: var(--pos-text-primary);
-	font-size: 12px;
-	list-style: none;
+ display: grid; grid-template-columns: var(--retail-cart-columns); align-items: center;
+ gap: 4px; padding: 6px 0; min-height: 41px;
+ border-bottom: 1px solid var(--pos-border); color: var(--pos-text-primary);
+ font-size: 12px; list-style: none;
 }
-.posa-cart-item-row--retail > [data-column-key] {
-	min-width: 0;
-	flex: 0 0 auto;
-}
-.posa-cart-item-row--retail > [data-column-key="item_name"] {
-	flex: 1 1 0;
-}
-.posa-cart-item-row--retail > [data-column-key="qty"] {
-	width: 70px;
-}
-.posa-cart-item-row--retail > [data-column-key="rate"] {
-	width: 66px;
-}
-.posa-cart-item-row--retail > [data-column-key="amount"] {
-	width: 74px;
-}
-.posa-cart-item-row--retail > [data-column-key="actions"] {
-	width: 24px;
-}
-.posa-cart-item-row--retail > [data-retail-extra] {
-	display: none;
-}
-.posa-cart-item-row--retail:not(.posa-cart-item-row--retail-expanded)
-	.posa-cart-item-row__item-cell
-	> :not(.posa-cart-item-row__item-name) {
-	display: none;
-}
-.posa-cart-item-row--retail .posa-cart-item-row__item-name {
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	display: block;
-	width: 100%;
-}
-.posa-cart-item-row--retail-expanded {
-	flex-wrap: wrap;
-}
-.posa-cart-item-row--retail-expanded > [data-retail-extra] {
-	display: flex;
-	align-items: center;
-	gap: 4px;
-	flex: 1 1 calc(50% - 4px);
-	order: 2;
-}
-.posa-cart-item-row--retail-expanded > [data-retail-extra]::before {
-	content: attr(data-label);
-	font-size: 10px;
-	color: var(--pos-text-secondary);
-}
-.posa-cart-item-row--retail.posa-cart-item-row--keyboard-active > [data-column-key]::before {
-	color: #ffffff !important;
-}
-.retail-row-options {
-	width: 24px;
-	height: 28px;
-	flex: 0 0 24px;
-	border-radius: 6px;
-	order: 1;
-}
-.retail-row-options--warning {
-	color: var(--pos-error);
-}
-.retail-row-options:hover {
-	background: var(--pos-surface-muted);
-}
-.retail-row-options:focus-visible {
-	outline: 2px solid var(--pos-primary);
-}
+.posa-cart-item-row--retail > [data-column-key] { min-width: 0; overflow: hidden; }
+.posa-cart-item-row--retail .posa-cart-item-row__item-cell { flex-wrap: nowrap; gap: 2px; }
+.posa-cart-item-row--retail .posa-cart-item-row__item-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; flex: 1 1 0; }
+.posa-cart-item-row--retail .posa-cart-item-row__item-cell > .v-chip { max-width: 24px; flex-shrink: 0; }
+.posa-cart-item-row--retail .posa-cart-item-row__tracking-stack { flex: 0 0 auto; margin: 0; order: initial; }
+.posa-cart-item-row--retail .posa-cart-item-row__tracking-chip { width: 24px; padding-inline: 4px; }
+.posa-cart-item-row--retail .posa-cart-item-row__item-cell .v-btn { flex-shrink: 0; }
 .posa-cart-item-row--retail .posa-cart-table__qty-input-shell {
 	display: flex;
 	align-items: center;
@@ -1337,6 +1269,7 @@ td[data-column-key="item_name"] {
 	cursor: default;
 }
 .posa-cart-item-row--retail .uom-arrow {
+	display: none;
 	min-width: 18px;
 	width: 18px;
 	height: 26px;

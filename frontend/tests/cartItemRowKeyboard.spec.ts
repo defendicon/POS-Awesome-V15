@@ -49,6 +49,21 @@ const VTextFieldStub = defineComponent({
 	},
 });
 
+const VSelectStub = defineComponent({
+	name: "VSelect",
+	props: { menu: Boolean },
+	emits: ["update:modelValue", "update:menu", "blur"],
+	setup(props, { emit }) {
+		return () => h("div", { "data-uom-menu-open": String(props.menu) }, [
+			h("input", { onBlur: () => emit("blur") }),
+			h("button", { "data-select-uom": "Box", onClick: () => {
+				emit("update:modelValue", "Box");
+				emit("update:menu", false);
+			} }, "Box"),
+		]);
+	},
+});
+
 const mountRow = (
 	itemOverrides: Record<string, unknown> = {},
 	propsOverrides: Record<string, unknown> = {},
@@ -83,38 +98,36 @@ const mountRow = (
 				"v-chip": defineComponent({ setup: (_, { attrs, slots }) => () => h("button", attrs, slots.default?.()) }),
 				"v-text-field": VTextFieldStub,
 				VTextField: VTextFieldStub,
+				"v-select": VSelectStub,
+				VSelect: VSelectStub,
 			},
 			stubs: {
 				"v-icon": true,
 				VIcon: true,
-				"v-select": true,
-				VSelect: true,
 			},
 		},
 	});
 
 describe("Retail inline cart editors", () => {
-	it("keeps optional controls collapsed until requested", async () => {
-		const wrapper = mountRow({}, {
-			presentation: "retail", visibleColumns: [{ key: "qty" }, { key: "discount_percentage" }],
+	it("keeps UOM selection open while focus moves to the menu and commits safely", async () => {
+		const update = vi.fn();
+		const wrapper = mountRow({ item_uoms: [{uom: "Nos"}, {uom: "Box"}] }, {
+			presentation: "retail", visibleColumns: [{key:"uom"}], onCalcUom: update,
 		});
-		expect(wrapper.attributes("data-retail-expanded")).toBe("false");
-		expect(wrapper.get('[data-column-key="discount_percentage"]').attributes("data-retail-extra")).toBe("true");
-		await wrapper.get('[aria-label="More item options"]').trigger("click");
-		expect(wrapper.attributes("data-retail-expanded")).toBe("true");
-		await wrapper.get('[aria-label="More item options"]').trigger("click");
-		expect(wrapper.attributes("data-retail-expanded")).toBe("false");
+		await wrapper.get('[aria-label="Edit unit of measure"]').trigger("click");
+		await wrapper.get("input").trigger("blur");
+		expect(wrapper.get('[data-uom-menu-open]').attributes('data-uom-menu-open')).toBe("true");
+		await wrapper.get('[data-select-uom="Box"]').trigger("click");
+		expect(update.mock.calls[0]?.[1]).toBe("Box");
+		expect(wrapper.find('[data-uom-menu-open]').exists()).toBe(false);
 	});
-
-	it("opens optional fields for a keyboard focus request", async () => {
-		const wrapper = mountRow({}, { presentation: "retail", visibleColumns: [{ key: "discount_percentage" }] });
-		const target = wrapper.get('[role="button"]').element as HTMLElement;
-		wrapper.element.dispatchEvent(new CustomEvent("posa-expand-editor", {detail: {target, activate: true}}));
-		await wrapper.vm.$nextTick();
-		await wrapper.vm.$nextTick();
-		expect(wrapper.attributes("data-retail-expanded")).toBe("true");
-		expect(wrapper.find("input").exists()).toBe(true);
-	});
+	it("renders exactly the selected columns without an expansion action", async () => {
+        const wrapper = mountRow({}, { presentation: "retail", visibleColumns: [{key:"qty"}, {key:"rate"}, {key:"discount_percentage"}] });
+        expect(wrapper.find('[aria-label="More item options"]').exists()).toBe(false);
+        expect(wrapper.findAll('[data-column-key]').map(cell => cell.attributes('data-column-key'))).toEqual(['qty','rate','discount_percentage']);
+        await wrapper.setProps({ visibleColumns: [{key:"qty"}, {key:"rate"}] });
+        expect(wrapper.find('[data-column-key="discount_percentage"]').exists()).toBe(false);
+    });
 	it("commits quantities and step actions inside the card", async () => {
 		const add = vi.fn(), minus = vi.fn(), update = vi.fn();
 		const wrapper = mountRow({}, { presentation: "retail", onAddOne: add, onMinusClick: minus, onUpdateQty: update });

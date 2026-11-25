@@ -49,7 +49,7 @@ export function useColumnOrder<T extends Header>(
 	useLayoutSurface(
 		root,
 		() => ordered.value.map((header) => header.key),
-		"th[data-column-reorder-id]",
+		":is(th, [role=columnheader])[data-column-reorder-id]",
 	);
 	function persist() {
 		if (customization.defer()) return;

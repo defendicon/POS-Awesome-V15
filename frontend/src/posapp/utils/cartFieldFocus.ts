@@ -245,11 +245,6 @@ export const focusCartGridCell = (
 		return false;
 	}
 
-	const row = getCartGridRow(container, rowIndex);
-	if (row?.dataset.retailExpanded === "false" && target.closest("[data-retail-extra]")) {
-		row.dispatchEvent(new CustomEvent("posa-expand-editor", { detail: { target, activate: options.activate === true } }));
-		return true;
-	}
 	target.scrollIntoView?.({ block: "nearest", inline: "nearest" });
 	target.focus?.();
 	if (options.activate === true) {
